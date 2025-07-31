@@ -16,6 +16,6 @@
     "dist/**/*.{js,map,ts}"
   ],
   "devDependencies": {
-    "@mrpelz/boilerplate-common": "^13.0.3"
+    "@mrpelz/boilerplate-common": "^14.0.0"
   }
 }
