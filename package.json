@@ -18,6 +18,6 @@
     "packages/modifiable-date"
   ],
   "devDependencies": {
-    "@mrpelz/boilerplate-common": "^13.0.3"
+    "@mrpelz/boilerplate-common": "^13.2.0"
   }
 }
