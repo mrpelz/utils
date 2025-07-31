@@ -1,0 +1,22 @@
+include:
+  - project: "mrpelz/boilerplate"
+    ref: main
+    file:
+      - "/gitlab/.gitlab-ci.yml"
+      - "/gitlab/.monorepo.gitlab-ci.yml"
+
+publish:npm:npmjs:
+  stage: release
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+      when: on_success
+      variables:
+        VERSION_TAG: "latest"
+    - if: $CI_COMMIT_TAG
+      when: manual
+      variables:
+        VERSION_TAG: "pre-${CI_COMMIT_TAG_MESSAGE}"
+  script:
+    - npm config set "//registry.npmjs.org/:_authToken=${UTILS_PUBLISH_NPM_TOKEN}"
+    - npm pkg set --workspaces "repository.url=${UTILS_PUBLISH_NPM_GIT_URL}"
+    - npm publish --workspaces --access public --tag "${VERSION_TAG}"

@@ -1,0 +1,23 @@
+{
+  "name": "@mrpelz/utils",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://git.i.wurstsalat.cloud/mrpelz/utils.git"
+  },
+  "license": "UNLICENSED",
+  "author": "Lennart Pelz <mail@mrpelz.de>",
+  "type": "module",
+  "main": "dist/main.js",
+  "module": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "files": [
+    "dist/**/*.{js,map,ts}"
+  ],
+  "workspaces": [
+    "packages/modifiable-date"
+  ],
+  "devDependencies": {
+    "@mrpelz/boilerplate-common": "^13.0.3"
+  }
+}
