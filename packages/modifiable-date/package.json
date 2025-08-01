@@ -9,6 +9,20 @@
   "license": "UNLICENSED",
   "author": "Lennart Pelz <mail@mrpelz.de>",
   "type": "module",
+  "exports": {
+    ".": {
+      "default": "./dist/main.js",
+      "types": "./dist/main.d.ts"
+    },
+    "./epochs": {
+      "default": "./dist/epochs.js",
+      "types": "./dist/epochs.d.ts"
+    },
+    "./modifiable-date": {
+      "default": "./dist/modifiable-date.js",
+      "types": "./dist/modifiable-date.d.ts"
+    }
+  },
   "main": "dist/main.js",
   "module": "dist/main.js",
   "types": "dist/main.d.ts",
