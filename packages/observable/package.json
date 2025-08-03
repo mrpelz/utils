@@ -1,0 +1,42 @@
+{
+  "name": "@mrpelz/observable",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://git.i.wurstsalat.cloud/mrpelz/utils.git",
+    "directory": "packages/observable"
+  },
+  "license": "UNLICENSED",
+  "author": "Lennart Pelz <mail@mrpelz.de>",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./dist/main.js",
+      "types": "./dist/main.d.ts"
+    },
+    "./observable": {
+      "default": "./dist/observable.js",
+      "types": "./dist/observable.d.ts"
+    },
+    "./state": {
+      "default": "./dist/state.js",
+      "types": "./dist/state.d.ts"
+    },
+    "./timer": {
+      "default": "./dist/timer.js",
+      "types": "./dist/timer.d.ts"
+    }
+  },
+  "main": "dist/main.js",
+  "module": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "files": [
+    "dist/**/*.{js,map,ts}"
+  ],
+  "dependencies": {
+    "@mrpelz/misc-utils": "*"
+  },
+  "devDependencies": {
+    "@mrpelz/boilerplate-common": "^14.0.0"
+  }
+}

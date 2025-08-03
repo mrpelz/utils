@@ -1,0 +1,55 @@
+{
+  "name": "@mrpelz/misc-utils",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://git.i.wurstsalat.cloud/mrpelz/utils.git",
+    "directory": "packages/misc-utils"
+  },
+  "license": "UNLICENSED",
+  "author": "Lennart Pelz <mail@mrpelz.de>",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./dist/main.js",
+      "types": "./dist/main.d.ts"
+    },
+    "./data": {
+      "default": "./dist/data.js",
+      "types": "./dist/data.d.ts"
+    },
+    "./number": {
+      "default": "./dist/number.js",
+      "types": "./dist/number.d.ts"
+    },
+    "./oop": {
+      "default": "./dist/oop.js",
+      "types": "./dist/oop.d.ts"
+    },
+    "./promise": {
+      "default": "./dist/promise.js",
+      "types": "./dist/promise.d.ts"
+    },
+    "./rolling-number": {
+      "default": "./dist/rolling-number.js",
+      "types": "./dist/rolling-number.d.ts"
+    },
+    "./sleep": {
+      "default": "./dist/sleep.js",
+      "types": "./dist/sleep.d.ts"
+    },
+    "./string": {
+      "default": "./dist/string.js",
+      "types": "./dist/string.d.ts"
+    }
+  },
+  "main": "dist/main.js",
+  "module": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "files": [
+    "dist/**/*.{js,map,ts}"
+  ],
+  "devDependencies": {
+    "@mrpelz/boilerplate-common": "^14.0.0"
+  }
+}

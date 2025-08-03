@@ -1,6 +1,7 @@
 {
   "name": "@mrpelz/utils",
   "version": "0.0.0",
+  "private": "true",
   "repository": {
     "type": "git",
     "url": "https://git.i.wurstsalat.cloud/mrpelz/utils.git"
@@ -15,8 +16,15 @@
     "dist/**/*.{js,map,ts}"
   ],
   "workspaces": [
-    "packages/modifiable-date"
+    "packages/misc-utils",
+    "packages/modifiable-date",
+    "packages/observable"
   ],
+  "dependencies": {
+    "@mrpelz/misc-utils": "*",
+    "@mrpelz/modifiable-date": "*",
+    "@mrpelz/observable": "*"
+  },
   "devDependencies": {
     "@mrpelz/boilerplate-common": "^14.0.0"
   }
