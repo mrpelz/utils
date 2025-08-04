@@ -18,12 +18,14 @@
   "workspaces": [
     "packages/misc-utils",
     "packages/modifiable-date",
-    "packages/observable"
+    "packages/observable",
+    "packages/struct"
   ],
   "dependencies": {
     "@mrpelz/misc-utils": "*",
     "@mrpelz/modifiable-date": "*",
-    "@mrpelz/observable": "*"
+    "@mrpelz/observable": "*",
+    "@mrpelz/struct": "*"
   },
   "devDependencies": {
     "@mrpelz/boilerplate-common": "^14.0.0"
