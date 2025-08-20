@@ -1,3 +1,5 @@
+import { byteRange } from './number.js';
+
 export const emptyBuffer = Buffer.from([]);
 export const falseBuffer = Buffer.of(0);
 export const trueBuffer = Buffer.of(1);
@@ -34,18 +36,6 @@ export const arrayPadLeft = <T>(
   return input;
 };
 
-export const bufferChunks = (input: Buffer, chunkSize = 1): Buffer[] => {
-  if (input.length < chunkSize) throw new Error('input buffer too small');
-
-  const result: Buffer[] = [];
-
-  for (let offset = 0; offset < input.length; offset += chunkSize) {
-    result.push(input.subarray(offset, offset + chunkSize));
-  }
-
-  return result;
-};
-
 export const arrayPadRight = <T>(
   input: T[],
   length: number,
@@ -56,6 +46,18 @@ export const arrayPadRight = <T>(
   }
 
   return input;
+};
+
+export const bufferChunks = (input: Buffer, chunkSize = 1): Buffer[] => {
+  if (input.length < chunkSize) throw new Error('input buffer too small');
+
+  const result: Buffer[] = [];
+
+  for (let offset = 0; offset < input.length; offset += chunkSize) {
+    result.push(input.subarray(offset, offset + chunkSize));
+  }
+
+  return result;
 };
 
 export const concatBytes = (input: number[]): Buffer => Buffer.from(input);
@@ -151,7 +153,7 @@ export const swapByte = (input: number): number => {
 };
 
 export const writeNumber = (input: number, bytes = 1): Buffer => {
-  if (input < 0 || input >= 2 ** (bytes * 8)) {
+  if (input < 0 || input > byteRange(bytes)) {
     throw new Error('number cannot be represented');
   }
 
