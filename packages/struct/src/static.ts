@@ -1,4 +1,5 @@
-import { NUMBER_RANGES, StringEncodings } from '@mrpelz/misc-utils';
+import { NUMBER_RANGES } from '@mrpelz/misc-utils/number';
+import { StringEncodings } from '@mrpelz/misc-utils/string';
 
 export class StructMember<T = unknown, S extends number = number> {
   private _buffer?: Buffer;

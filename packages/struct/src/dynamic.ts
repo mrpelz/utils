@@ -1,4 +1,7 @@
-import { DynamicStringEncodings, StringEncodings } from '@mrpelz/misc-utils';
+import {
+  DynamicStringEncodings,
+  StringEncodings,
+} from '@mrpelz/misc-utils/string';
 
 import {
   FixedBuffer,

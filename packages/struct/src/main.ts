@@ -1,2 +1,1 @@
-export * from './dynamic.js';
-export * from './static.js';
+// eslint-disable-next-line unicorn/no-empty-file
