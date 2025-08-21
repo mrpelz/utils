@@ -13,14 +13,6 @@
     ".": {
       "default": "./dist/main.js",
       "types": "./dist/main.d.ts"
-    },
-    "./dynamic": {
-      "default": "./dist/dynamic.js",
-      "types": "./dist/dynamic.d.ts"
-    },
-    "./static": {
-      "default": "./dist/static.js",
-      "types": "./dist/static.d.ts"
     }
   },
   "main": "dist/main.js",

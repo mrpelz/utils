@@ -14,10 +14,6 @@
       "default": "./dist/main.js",
       "types": "./dist/main.d.ts"
     },
-    "./observable": {
-      "default": "./dist/observable.js",
-      "types": "./dist/observable.d.ts"
-    },
     "./state": {
       "default": "./dist/state.js",
       "types": "./dist/state.d.ts"

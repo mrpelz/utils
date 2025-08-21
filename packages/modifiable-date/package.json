@@ -13,14 +13,6 @@
     ".": {
       "default": "./dist/main.js",
       "types": "./dist/main.d.ts"
-    },
-    "./epochs": {
-      "default": "./dist/epochs.js",
-      "types": "./dist/epochs.d.ts"
-    },
-    "./modifiable-date": {
-      "default": "./dist/modifiable-date.js",
-      "types": "./dist/modifiable-date.d.ts"
     }
   },
   "main": "dist/main.js",

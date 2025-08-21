@@ -6,7 +6,7 @@ import {
   Observer,
   ObserverCallback,
   ProxyObservable,
-} from './observable.js';
+} from './main.js';
 
 export class BooleanState extends Observable<boolean> {
   flip(): boolean {

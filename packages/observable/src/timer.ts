@@ -3,7 +3,7 @@ import {
   Observable,
   ReadOnlyObservable,
   ReadOnlyProxyObservable,
-} from './observable.js';
+} from './main.js';
 import { BooleanState, NullState } from './state.js';
 
 export class Timer extends NullState {

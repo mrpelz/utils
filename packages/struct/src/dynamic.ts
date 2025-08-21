@@ -9,7 +9,7 @@ import {
   Struct,
   StructMember,
   TStructMember,
-} from './static.js';
+} from './main.js';
 
 export class DynamicStructMember<T = unknown> {
   private _buffer?: Buffer;
