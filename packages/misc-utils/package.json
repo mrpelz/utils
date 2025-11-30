@@ -11,36 +11,36 @@
   "type": "module",
   "exports": {
     ".": {
-      "default": "./dist/main.js",
-      "types": "./dist/main.d.ts"
+      "types": "./dist/main.d.ts",
+      "default": "./dist/main.js"
     },
     "./data": {
-      "default": "./dist/data.js",
-      "types": "./dist/data.d.ts"
+      "types": "./dist/data.d.ts",
+      "default": "./dist/data.js"
     },
     "./number": {
-      "default": "./dist/number.js",
-      "types": "./dist/number.d.ts"
+      "types": "./dist/number.d.ts",
+      "default": "./dist/number.js"
     },
     "./oop": {
-      "default": "./dist/oop.js",
-      "types": "./dist/oop.d.ts"
+      "types": "./dist/oop.d.ts",
+      "default": "./dist/oop.js"
     },
     "./promise": {
-      "default": "./dist/promise.js",
-      "types": "./dist/promise.d.ts"
+      "types": "./dist/promise.d.ts",
+      "default": "./dist/promise.js"
     },
     "./rolling-number": {
-      "default": "./dist/rolling-number.js",
-      "types": "./dist/rolling-number.d.ts"
+      "types": "./dist/rolling-number.d.ts",
+      "default": "./dist/rolling-number.js"
     },
     "./sleep": {
-      "default": "./dist/sleep.js",
-      "types": "./dist/sleep.d.ts"
+      "types": "./dist/sleep.d.ts",
+      "default": "./dist/sleep.js"
     },
     "./string": {
-      "default": "./dist/string.js",
-      "types": "./dist/string.d.ts"
+      "types": "./dist/string.d.ts",
+      "default": "./dist/string.js"
     }
   },
   "main": "dist/main.js",
@@ -50,6 +50,6 @@
     "dist/**/*.{js,map,ts}"
   ],
   "devDependencies": {
-    "@mrpelz/boilerplate-common": "^14.0.0"
+    "@mrpelz/boilerplate-common": "^14.0.1"
   }
 }

@@ -11,16 +11,16 @@
   "type": "module",
   "exports": {
     ".": {
-      "default": "./dist/main.js",
-      "types": "./dist/main.d.ts"
+      "types": "./dist/main.d.ts",
+      "default": "./dist/main.js"
     },
     "./state": {
-      "default": "./dist/state.js",
-      "types": "./dist/state.d.ts"
+      "types": "./dist/state.d.ts",
+      "default": "./dist/state.js"
     },
     "./timer": {
-      "default": "./dist/timer.js",
-      "types": "./dist/timer.d.ts"
+      "types": "./dist/timer.d.ts",
+      "default": "./dist/timer.js"
     }
   },
   "main": "dist/main.js",
@@ -33,6 +33,6 @@
     "@mrpelz/misc-utils": "*"
   },
   "devDependencies": {
-    "@mrpelz/boilerplate-common": "^14.0.0"
+    "@mrpelz/boilerplate-common": "^14.0.1"
   }
 }

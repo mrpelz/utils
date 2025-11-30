@@ -11,8 +11,8 @@
   "type": "module",
   "exports": {
     ".": {
-      "default": "./dist/main.js",
-      "types": "./dist/main.d.ts"
+      "types": "./dist/main.d.ts",
+      "default": "./dist/main.js"
     }
   },
   "main": "dist/main.js",
@@ -22,6 +22,6 @@
     "dist/**/*.{js,map,ts}"
   ],
   "devDependencies": {
-    "@mrpelz/boilerplate-common": "^14.0.0"
+    "@mrpelz/boilerplate-common": "^14.0.1"
   }
 }

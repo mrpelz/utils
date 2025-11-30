@@ -28,6 +28,6 @@
     "@mrpelz/struct": "*"
   },
   "devDependencies": {
-    "@mrpelz/boilerplate-common": "^14.0.0"
+    "@mrpelz/boilerplate-common": "^14.0.1"
   }
 }
