@@ -153,8 +153,6 @@ export class ProxyObservable<T, S = T> {
   private readonly _observable: AnyObservable<T>;
   private readonly _set: ProxyFn<S, T | typeof ProxyObservable.doNotSet>;
 
-  private _suspend = false;
-
   constructor(
     observable: AnyObservable<T>,
     get: ProxyFn<T, S>,
@@ -176,25 +174,21 @@ export class ProxyObservable<T, S = T> {
   set value(value: S) {
     if (!isWritableObservable(this._observable)) return;
 
-    this._suspend = true;
-
     const nextValue = this._set(value);
     if (nextValue !== ProxyObservable.doNotSet) {
       this._observable.value = nextValue;
     }
-
-    this._suspend = false;
   }
 
   observe(
     observerCallback: ObserverCallback<S>,
     forcedReport = false,
   ): Observer {
-    return this._observable.observe((value, observer, changed) => {
-      if (this._suspend) return;
-
-      observerCallback(this._get(value), observer, changed);
-    }, forcedReport);
+    return this._observable.observe(
+      (value, observer, changed) =>
+        observerCallback(this._get(value), observer, changed),
+      forcedReport,
+    );
   }
 }
 
