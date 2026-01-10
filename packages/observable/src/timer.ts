@@ -7,17 +7,15 @@ import {
 import { BooleanState, NullState } from './state.js';
 
 export class Timer extends NullState {
-  private readonly _time: number;
   private _timeout: NodeJS.Timeout | null;
   private readonly _triggerTime = new Observable<number | null>(null);
 
   readonly isEnabled: BooleanState;
   readonly runoutTime: ReadOnlyProxyObservable<number | null>;
+  readonly time: Observable<number>;
 
   constructor(time = 0, enableFromStart = true) {
     super();
-
-    this._time = time;
 
     this.isEnabled = new BooleanState(enableFromStart, (enabled) => {
       if (enabled) return;
@@ -25,11 +23,18 @@ export class Timer extends NullState {
       this.stop();
     });
 
+    this.time = new Observable(time, (_, changed) => {
+      if (!changed) return;
+      if (!this.isActive.value) return;
+
+      this.start();
+    });
+
     this.runoutTime = new ReadOnlyProxyObservable(
       this._triggerTime,
       (value) => {
         if (value === null) return null;
-        return value + this._time;
+        return value + this.time.value;
       },
     );
   }
@@ -56,12 +61,13 @@ export class Timer extends NullState {
   }
 
   start(restart = true): void {
+    if (this.time.value) return;
     if (!this.isEnabled.value) return;
     if (this._timeout && !restart) return;
 
     this.stop();
 
-    this._timeout = setTimeout(() => this._handleFire(), this._time);
+    this._timeout = setTimeout(() => this._handleFire(), this.time.value);
     this._triggerTime.value = Date.now();
   }
 
