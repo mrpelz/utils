@@ -61,7 +61,7 @@ export class Timer extends NullState {
   }
 
   start(restart = true): void {
-    if (this.time.value) return;
+    if (!this.time.value) return;
     if (!this.isEnabled.value) return;
     if (this._timeout && !restart) return;
 
