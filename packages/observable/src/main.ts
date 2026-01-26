@@ -147,16 +147,16 @@ export const isWritableObservable = <T>(
 };
 
 export class ProxyObservable<T, S = T> {
-  static readonly stopPropagation = Symbol('stop propagation');
+  static readonly doNotSet = Symbol('doNotSet');
 
   private readonly _get: ProxyFn<T, S>;
   private readonly _observable: AnyObservable<T>;
-  private readonly _set: ProxyFn<S, T>;
+  private readonly _set: ProxyFn<S, T | typeof ProxyObservable.doNotSet>;
 
   constructor(
     observable: AnyObservable<T>,
     get: ProxyFn<T, S>,
-    set: ProxyFn<S, T>,
+    set: ProxyFn<S, T | typeof ProxyObservable.doNotSet>,
   ) {
     this._observable = observable;
     this._get = get;
@@ -175,21 +175,20 @@ export class ProxyObservable<T, S = T> {
     if (!isWritableObservable(this._observable)) return;
 
     const nextValue = this._set(value);
-    if (nextValue === ProxyObservable.stopPropagation) return;
-
-    this._observable.value = nextValue;
+    if (nextValue !== ProxyObservable.doNotSet) {
+      this._observable.value = nextValue;
+    }
   }
 
   observe(
     observerCallback: ObserverCallback<S>,
     forcedReport = false,
   ): Observer {
-    return this._observable.observe((value, observer, changed) => {
-      const value_ = this._get(value);
-      if (value_ === ProxyObservable.stopPropagation) return;
-
-      observerCallback(value_, observer, changed);
-    }, forcedReport);
+    return this._observable.observe(
+      (value, observer, changed) =>
+        observerCallback(this._get(value), observer, changed),
+      forcedReport,
+    );
   }
 }
 
