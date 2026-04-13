@@ -167,9 +167,9 @@ export class EnumState<T = unknown> extends Observable<T> {
 }
 
 export class NullState<T = null> {
-  protected readonly _observers: Set<MetaObserverCallback<T | null>>;
+  protected readonly _observers: Set<MetaObserverCallback<T>>;
 
-  constructor(observerCallback?: MetaObserverCallback<T | null>) {
+  constructor(observerCallback?: MetaObserverCallback<T>) {
     this._observers = observerCallback
       ? new Set([observerCallback])
       : new Set();
@@ -187,10 +187,10 @@ export class NullState<T = null> {
     this.trigger(value);
   }
 
-  observe(observerCallback: ObserverCallback<T | null>): Observer {
+  observe(observerCallback: ObserverCallback<T>): Observer {
     let observer: Observer;
 
-    const metaObserverCallback = (value: T | null, changed: boolean) => {
+    const metaObserverCallback = (value: T, changed: boolean) => {
       observerCallback(value, observer, changed);
     };
 
@@ -203,7 +203,7 @@ export class NullState<T = null> {
     return observer;
   }
 
-  trigger(data: T | null = null): void {
+  trigger(data: T = null as T): void {
     for (const observer of this._observers) {
       observer(data, false);
     }
@@ -221,7 +221,7 @@ export class ReadOnlyNullState<T = null> {
     return this._nullState.listeners;
   }
 
-  observe(observerCallback: ObserverCallback<T | null>): Observer {
+  observe(observerCallback: ObserverCallback<T>): Observer {
     return this._nullState.observe(observerCallback);
   }
 }
