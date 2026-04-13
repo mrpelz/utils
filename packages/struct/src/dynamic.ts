@@ -112,7 +112,7 @@ export class BufferWrappedStructMember<T extends TStructMember> {
 
   constructor(public readonly member: T) {
     this.member = member;
-    this.reset();
+    this._buffer = this.member.allocate();
   }
 
   get buffer(): Buffer {

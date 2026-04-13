@@ -50,6 +50,7 @@
     "dist/**/*.{js,map,ts}"
   ],
   "devDependencies": {
-    "@mrpelz/boilerplate-common": "latest"
+    "@mrpelz/boilerplate-common": "latest",
+    "@types/node": "latest"
   }
 }

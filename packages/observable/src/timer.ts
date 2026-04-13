@@ -7,7 +7,7 @@ import {
 import { BooleanState, NullState } from './state.js';
 
 export class Timer extends NullState {
-  private _timeout: NodeJS.Timeout | null;
+  private _timeout: NodeJS.Timeout | null = null;
   private readonly _triggerTime = new Observable<number | null>(null);
 
   readonly isEnabled: BooleanState;

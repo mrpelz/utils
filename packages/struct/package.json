@@ -25,6 +25,7 @@
     "@mrpelz/misc-utils": "*"
   },
   "devDependencies": {
-    "@mrpelz/boilerplate-common": "latest"
+    "@mrpelz/boilerplate-common": "latest",
+    "@types/node": "latest"
   }
 }

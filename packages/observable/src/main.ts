@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { promiseGuard } from '@mrpelz/misc-utils/promise';
 
 export type Observer = {
@@ -15,16 +16,14 @@ export type ProxyFn<T, S> = (input: T) => S;
 export type AnyObservable<T> =
   | Observable<T>
   | ReadOnlyObservable<T>
-  | ProxyObservable<unknown, T>
-  | ReadOnlyProxyObservable<unknown, T>;
+  | ProxyObservable<any, T>
+  | ReadOnlyProxyObservable<any, T>;
 
-export type AnyWritableObservable<T> =
-  | Observable<T>
-  | ProxyObservable<unknown, T>;
+export type AnyWritableObservable<T> = Observable<T> | ProxyObservable<any, T>;
 
 export type AnyReadOnlyObservable<T> =
   | ReadOnlyObservable<T>
-  | ReadOnlyProxyObservable<unknown, T>;
+  | ReadOnlyProxyObservable<any, T>;
 
 export type ObservifyResult<T> = [ReadOnlyObservable<T | null>, () => void];
 export type ObservifyGetter<T> = () => Promise<T | null>;
@@ -234,10 +233,7 @@ export class ObservableGroup<T> extends Observable<T> {
   }
 }
 
-export const isObservable = (
-  input: unknown,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): input is AnyObservable<any> => {
+export const isObservable = (input: unknown): input is AnyObservable<any> => {
   if (input instanceof Observable) return true;
   if (input instanceof ReadOnlyObservable) return true;
   if (input instanceof ProxyObservable) return true;
@@ -248,7 +244,6 @@ export const isObservable = (
 
 export const isReadOnlyObservable = (
   input: unknown,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): input is AnyReadOnlyObservable<any> => {
   if (input instanceof ReadOnlyObservable) return true;
   if (input instanceof ReadOnlyProxyObservable) return true;

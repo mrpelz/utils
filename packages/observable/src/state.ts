@@ -187,10 +187,10 @@ export class NullState<T = null> {
     this.trigger(value);
   }
 
-  observe(observerCallback: ObserverCallback<T>): Observer {
+  observe(observerCallback: ObserverCallback<T | null>): Observer {
     let observer: Observer;
 
-    const metaObserverCallback = (value: T, changed: boolean) => {
+    const metaObserverCallback = (value: T | null, changed: boolean) => {
       observerCallback(value, observer, changed);
     };
 
@@ -221,7 +221,7 @@ export class ReadOnlyNullState<T = null> {
     return this._nullState.listeners;
   }
 
-  observe(observerCallback: ObserverCallback<T>): Observer {
+  observe(observerCallback: ObserverCallback<T | null>): Observer {
     return this._nullState.observe(observerCallback);
   }
 }
