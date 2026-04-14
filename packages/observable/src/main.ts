@@ -233,7 +233,7 @@ export class ObservableGroup<T> extends Observable<T> {
   }
 }
 
-export const isObservable = (input: unknown): input is AnyObservable<any> => {
+export const isObservable = (input: any): input is AnyObservable<any> => {
   if (input instanceof Observable) return true;
   if (input instanceof ReadOnlyObservable) return true;
   if (input instanceof ProxyObservable) return true;
@@ -243,7 +243,7 @@ export const isObservable = (input: unknown): input is AnyObservable<any> => {
 };
 
 export const isReadOnlyObservable = (
-  input: unknown,
+  input: any,
 ): input is AnyReadOnlyObservable<any> => {
   if (input instanceof ReadOnlyObservable) return true;
   if (input instanceof ReadOnlyProxyObservable) return true;

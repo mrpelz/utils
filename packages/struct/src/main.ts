@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export * from './dynamic.js';
 import { NUMBER_RANGES } from '@mrpelz/misc-utils/number';
 import { StringEncodings } from '@mrpelz/misc-utils/string';
 
-export class StructMember<T = unknown, S extends number = number> {
+export class StructMember<T = any, S extends number = number> {
   private _buffer?: Buffer;
   readonly size: S;
 
@@ -478,7 +479,7 @@ export class DoubleLE extends DoubleStructMember {
   }
 }
 
-export type TStructMember<T = unknown> =
+export type TStructMember<T = any> =
   | StructMember<T>
   | Struct<StructMembers>
   | MappedStruct<Record<string, TStructMember>>;

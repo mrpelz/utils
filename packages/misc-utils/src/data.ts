@@ -1,13 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { byteRange } from './number.js';
 
 export const emptyBuffer = Buffer.from([]);
 export const falseBuffer = Buffer.of(0);
 export const trueBuffer = Buffer.of(1);
 
-export const arrayCompare = <
-  A extends Array<unknown>,
-  B extends Array<unknown>,
->(
+export const arrayCompare = <A extends Array<any>, B extends Array<any>>(
   a: A,
   b: B,
 ): b is B => {
@@ -87,7 +85,7 @@ export const humanPayload = (input: Buffer): string => {
   ].join('\n');
 };
 
-export const jsonParseGuarded = <T>(input: unknown): T | Error => {
+export const jsonParseGuarded = <T>(input: any): T | Error => {
   if (typeof input !== 'string') return new Error('input is not a string');
 
   try {

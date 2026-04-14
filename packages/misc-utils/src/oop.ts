@@ -166,25 +166,25 @@ export type DeepClassStructureViaChildField<
     : never;
 
 export const classMethods = (
-  classDefinition: Constructor<Record<string, unknown>>,
+  classDefinition: Constructor<Record<string, any>>,
 ): string[] =>
   Object.keys(
     Object.getOwnPropertyDescriptors(classDefinition.prototype),
   ).filter((name) => name !== 'constructor' && name[0] !== '_');
 
-export const instanceMethods = (instance: Record<string, unknown>): string[] =>
+export const instanceMethods = (instance: Record<string, any>): string[] =>
   Object.getOwnPropertyNames(Object.getPrototypeOf(instance)).filter(
     (name) => name !== 'constructor' && name[0] !== '_',
   );
 
-export const isObject = (input: unknown): input is object => {
+export const isObject = (input: any): input is object => {
   if (typeof input !== 'object') return false;
   if (!input) return false;
 
   return true;
 };
 
-export const isPlainObject = (input: unknown): input is object => {
+export const isPlainObject = (input: any): input is object => {
   if (!isObject(input)) return false;
   if (input.constructor.toString().startsWith('class')) return false;
 

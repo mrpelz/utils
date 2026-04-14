@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   DynamicStringEncodings,
   StringEncodings,
@@ -11,7 +12,7 @@ import {
   TStructMember,
 } from './main.js';
 
-export class DynamicStructMember<T = unknown> {
+export class DynamicStructMember<T = any> {
   private _buffer?: Buffer;
   readonly maxSize: number;
 
@@ -124,13 +125,13 @@ export class BufferWrappedStructMember<T extends TStructMember> {
   }
 }
 
-export type TDynamicStructMember<T = unknown> =
+export type TDynamicStructMember<T = any> =
   | TStructMember<T>
   | DynamicStructMember<T>
   | DynamicStruct<DynamicStructMembers>
   | MappedDynamicStruct<Record<string, TDynamicStructMember>>;
 
-export type WrappedDynamicStructMember<T = unknown> =
+export type WrappedDynamicStructMember<T = any> =
   | BufferWrappedStructMember<TStructMember<T>>
   | DynamicStructMember<T>
   | DynamicStruct<DynamicStructMembers>

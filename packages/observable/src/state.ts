@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   AnyObservable,
   MetaObserverCallback,
@@ -96,7 +97,7 @@ export class BooleanNullableStateGroup extends BooleanStateGroup {
   }
 }
 
-export class EnumState<T = unknown> extends Observable<T> {
+export class EnumState<T = any> extends Observable<T> {
   private readonly _enum: readonly T[];
 
   constructor(anEnum: readonly T[], initialValue: T) {
@@ -228,10 +229,7 @@ export class ReadOnlyNullState<T = null> {
 
 export type AnyNullState<T> = NullState<T> | ReadOnlyNullState<T>;
 
-export const isNullState = (
-  input: unknown,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): input is AnyNullState<any> => {
+export const isNullState = (input: any): input is AnyNullState<any> => {
   if (input instanceof NullState) return true;
   if (input instanceof ReadOnlyNullState) return true;
 
