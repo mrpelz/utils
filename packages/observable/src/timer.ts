@@ -39,17 +39,17 @@ export class Timer extends NullState {
     );
   }
 
+  private _handleFire() {
+    this.stop();
+    this.trigger(null);
+  }
+
   get isActive(): AnyReadOnlyObservable<boolean> {
     return new ReadOnlyProxyObservable(this._triggerTime, Boolean);
   }
 
   get triggerTime(): AnyReadOnlyObservable<number | null> {
     return new ReadOnlyObservable(this._triggerTime);
-  }
-
-  private _handleFire() {
-    this.stop();
-    this.trigger(null);
   }
 
   disable(): void {

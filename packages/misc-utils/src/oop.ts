@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-boolean-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export type Constructor<T> = { new (...args: any[]): T };
@@ -6,13 +7,7 @@ export type EmptyObject = Record<string | symbol, any>;
 export type ObjectValues<T extends EmptyObject> = T[keyof T];
 
 export type Primitive =
-  | bigint
-  | boolean
-  | null
-  | number
-  | string
-  | symbol
-  | undefined;
+  bigint | boolean | null | number | string | symbol | undefined;
 
 // https://stackoverflow.com/questions/58434389/typescript-deep-keyof-of-a-nested-object/58436959#58436959
 export type Join<K, P> = K extends string | number
@@ -143,11 +138,10 @@ export type DeepValuesInclusive<T, E = never, D extends number = 50> = [
   : T extends E
     ? never
     : T extends object
-      ?
-          | {
-              [K in keyof T]-?: DeepValuesInclusive<T[K], E, Prev[D]>;
-            }[keyof T]
-          | T
+      ? | {
+            [K in keyof T]-?: DeepValuesInclusive<T[K], E, Prev[D]>;
+          }[keyof T]
+        | T
       : T;
 
 export type DeepClassStructureViaChildField<

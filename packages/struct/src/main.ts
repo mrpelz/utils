@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-number-is-safe-integer */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export * from './dynamic.js';
 import { NUMBER_RANGES } from '@mrpelz/misc-utils/number';
@@ -277,7 +278,7 @@ export class UInt8<T extends number = number> extends IntegerStructMember<1> {
   static readonly size = 1;
 
   protected static contraint(input: number): void {
-    super.contraint(input, NUMBER_RANGES.uint[UInt8.size]);
+    super.contraint(input, NUMBER_RANGES.uint[this.size]);
   }
 
   constructor() {
@@ -327,7 +328,7 @@ export class Int8 extends IntegerStructMember<1> {
   static readonly size = 1;
 
   protected static contraint(input: number): void {
-    super.contraint(input, NUMBER_RANGES.uint[Int8.size]);
+    super.contraint(input, NUMBER_RANGES.uint[this.size]);
   }
 
   constructor() {
@@ -383,16 +384,12 @@ class FloatStructMember extends StructMember<number> {
   protected static constraint(input: number): void {
     if (!Number.isFinite(input)) throw new Error('input is not finite');
 
-    if (input < FloatStructMember.minValue) {
-      throw new Error(
-        `input below representable value (${FloatStructMember.minValue})`,
-      );
+    if (input < this.minValue) {
+      throw new Error(`input below representable value (${this.minValue})`);
     }
 
-    if (input > FloatStructMember.maxValue) {
-      throw new Error(
-        `input above representable value (${FloatStructMember.maxValue})`,
-      );
+    if (input > this.maxValue) {
+      throw new Error(`input above representable value (${this.maxValue})`);
     }
   }
 
@@ -437,16 +434,12 @@ class DoubleStructMember extends StructMember<number> {
   protected static constraint(input: number): void {
     if (!Number.isFinite(input)) throw new Error('input is not finite');
 
-    if (input < DoubleStructMember.minValue) {
-      throw new Error(
-        `input below representable value (${DoubleStructMember.minValue})`,
-      );
+    if (input < this.minValue) {
+      throw new Error(`input below representable value (${this.minValue})`);
     }
 
-    if (input > DoubleStructMember.maxValue) {
-      throw new Error(
-        `input above representable value (${DoubleStructMember.maxValue})`,
-      );
+    if (input > this.maxValue) {
+      throw new Error(`input above representable value (${this.maxValue})`);
     }
   }
 

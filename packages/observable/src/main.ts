@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-boolean-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { promiseGuard } from '@mrpelz/misc-utils/promise';
 
@@ -22,8 +23,7 @@ export type AnyObservable<T> =
 export type AnyWritableObservable<T> = Observable<T> | ProxyObservable<any, T>;
 
 export type AnyReadOnlyObservable<T> =
-  | ReadOnlyObservable<T>
-  | ReadOnlyProxyObservable<any, T>;
+  ReadOnlyObservable<T> | ReadOnlyProxyObservable<any, T>;
 
 export type ObservifyResult<T> = [ReadOnlyObservable<T | null>, () => void];
 export type ObservifyGetter<T> = () => Promise<T | null>;

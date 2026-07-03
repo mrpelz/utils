@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-boolean-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   DynamicStringEncodings,
@@ -16,6 +17,7 @@ export class DynamicStructMember<T = any> {
   private _buffer?: Buffer;
   readonly maxSize: number;
 
+  // eslint-disable-next-line unicorn/prefer-global-number-constants
   constructor(maxSize = Number.POSITIVE_INFINITY) {
     this.maxSize = maxSize;
   }
@@ -196,7 +198,12 @@ export class DynamicStruct<T extends DynamicStructMembers> {
 
   get value(): DynamicStructMemberValues<T> {
     return this._members.map((member) =>
-      isWrappedStaticStructMember(member) ? member.member.value : member.value,
+      // eslint-disable-next-line unicorn/prefer-minimal-ternary
+      isWrappedStaticStructMember(member)
+        ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          member.member.value
+        : member.value,
     ) as DynamicStructMemberValues<T>;
   }
 
