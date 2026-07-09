@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-boolean-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { promiseGuard } from '@mrpelz/misc-utils/promise';
 

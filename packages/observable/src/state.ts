@@ -231,7 +231,7 @@ export type AnyNullState<T> = NullState<T> | ReadOnlyNullState<T>;
 
 export const isNullState = (input: any): input is AnyNullState<any> => {
   if (input instanceof NullState) return true;
-  // eslint-disable-next-line unicorn/prefer-boolean-return
+
   if (input instanceof ReadOnlyNullState) return true;
 
   return false;

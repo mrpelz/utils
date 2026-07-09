@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-number-is-safe-integer */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export * from './dynamic.js';
 import { NUMBER_RANGES } from '@mrpelz/misc-utils/number';

@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-boolean-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   DynamicStringEncodings,
@@ -17,7 +16,6 @@ export class DynamicStructMember<T = any> {
   private _buffer?: Buffer;
   readonly maxSize: number;
 
-  // eslint-disable-next-line unicorn/prefer-global-number-constants
   constructor(maxSize = Number.POSITIVE_INFINITY) {
     this.maxSize = maxSize;
   }
