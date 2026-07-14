@@ -206,7 +206,7 @@ export class NullState<T = null> {
   }
 
   set(value: T, origin?: AnyObservableOrNullState): void {
-    this.trigger(value, origin ?? this);
+    this.trigger(value, origin);
   }
 
   trigger(data: T = null as T, origin?: AnyObservableOrNullState): void {
