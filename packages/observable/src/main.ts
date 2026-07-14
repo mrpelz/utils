@@ -1,15 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { promiseGuard } from '@mrpelz/misc-utils/promise';
+import { randomUUID } from 'node:crypto';
+
+import { safeAsync } from '@mrpelz/misc-utils/async';
+
+import type { NullState } from './state.js';
 
 export type Observer = {
   remove: () => void;
 };
 
-export type MetaObserverCallback<T> = (value: T, changed: boolean) => void;
+export type MetaObserverCallback<T> = (
+  value: T,
+  changed: boolean,
+  transaction: symbol,
+  origin: AnyObservable<any> | NullState<any>,
+) => void;
 export type ObserverCallback<T> = (
   value: T,
   observer: Observer,
   changed: boolean,
+  transaction: symbol,
+  origin: AnyObservable<any> | NullState<any>,
 ) => void;
 export type ProxyFn<T, S> = (input: T) => S;
 
@@ -29,14 +40,19 @@ export type ObservifyGetter<T> = () => Promise<T | null>;
 
 export class Observable<T> {
   private readonly _observers: Map<MetaObserverCallback<T>, boolean>;
+  private _transaction: symbol;
   private _value: T;
+
+  readonly id = randomUUID();
 
   constructor(
     initialValue: T,
     observerCallback?: MetaObserverCallback<T>,
     forcedReport = true,
   ) {
+    this._transaction = Symbol(`Obseervable.${this.id}:transaction.initial`);
     this._value = initialValue;
+
     this._observers = observerCallback
       ? new Map([[observerCallback, forcedReport]])
       : new Map();
@@ -50,27 +66,19 @@ export class Observable<T> {
     return this._value;
   }
 
-  set value(value: T) {
-    const oldValue = this._value;
-    this._value = value;
-
-    const changed = this._value !== oldValue;
-
-    for (const [observer, forcedReport] of this._observers) {
-      if (!changed && !forcedReport) continue;
-
-      observer(this._value, changed);
-    }
-  }
-
   observe(
     observerCallback: ObserverCallback<T>,
     forcedReport = false,
   ): Observer {
     let observer: Observer;
 
-    const metaObserverCallback = (value: T, changed: boolean) => {
-      observerCallback(value, observer, changed);
+    const metaObserverCallback = (
+      value: T,
+      changed: boolean,
+      transaction: symbol,
+      origin: AnyObservable<any> | NullState<any>,
+    ) => {
+      observerCallback(value, observer, changed, transaction, origin);
     };
 
     this._observers.set(metaObserverCallback, forcedReport);
@@ -80,6 +88,25 @@ export class Observable<T> {
     };
 
     return observer;
+  }
+
+  set(value: T, transaction?: symbol): void {
+    if (transaction === this._transaction) return;
+
+    this._transaction =
+      transaction ??
+      Symbol(`Obseervable.${this.id}:transaction.${randomUUID()}`);
+
+    this._value = value;
+
+    const oldValue = this._value;
+    const changed = this._value !== oldValue;
+
+    for (const [observer, forcedReport] of this._observers) {
+      if (!changed && !forcedReport) continue;
+
+      observer(this._value, changed, this._transaction, this);
+    }
   }
 }
 
@@ -128,8 +155,14 @@ export class ReadOnlyProxyObservable<T, S = T> {
     forcedReport = false,
   ): Observer {
     return this._observable.observe(
-      (value, observer, changed) =>
-        observerCallback(this._get(value), observer, changed),
+      (value, observer, changed, transaction, origin) =>
+        observerCallback(
+          this._get(value),
+          observer,
+          changed,
+          transaction,
+          origin,
+        ),
       forcedReport,
     );
   }
@@ -169,24 +202,30 @@ export class ProxyObservable<T, S = T> {
     return this._get(this._observable.value);
   }
 
-  set value(value: S) {
-    if (!isWritableObservable(this._observable)) return;
-
-    const nextValue = this._set(value);
-    if (nextValue !== ProxyObservable.doNotSet) {
-      this._observable.value = nextValue;
-    }
-  }
-
   observe(
     observerCallback: ObserverCallback<S>,
     forcedReport = false,
   ): Observer {
     return this._observable.observe(
-      (value, observer, changed) =>
-        observerCallback(this._get(value), observer, changed),
+      (value, observer, changed, transaction, origin) =>
+        observerCallback(
+          this._get(value),
+          observer,
+          changed,
+          transaction,
+          origin,
+        ),
       forcedReport,
     );
+  }
+
+  set(value: S, transaction?: symbol): void {
+    if (!isWritableObservable(this._observable)) return;
+
+    const nextValue = this._set(value);
+    if (nextValue !== ProxyObservable.doNotSet) {
+      this._observable.set(nextValue, transaction);
+    }
   }
 }
 
@@ -199,7 +238,7 @@ export class ObservableGroup<T> extends Observable<T> {
     this._observables = observables ? new Set(observables) : new Set();
 
     for (const state of this._observables) {
-      state.observe(() => (super.value = this.value), true);
+      state.observe(() => super.set(this.value), true);
     }
   }
 
@@ -215,20 +254,20 @@ export class ObservableGroup<T> extends Observable<T> {
     return this._merge();
   }
 
-  set value(value: T) {
+  protected _merge(): T {
+    throw new Error(`_merge method not defined in ${this}`);
+  }
+
+  set(value: T, transaction?: symbol): void {
     for (const observable of this._observables) {
       if (!isWritableObservable(observable)) {
         continue;
       }
 
-      observable.value = value;
+      observable.set(value, transaction);
     }
 
-    super.value = value;
-  }
-
-  protected _merge(): T {
-    throw new Error(`_merge method not defined in ${this}`);
+    super.set(value, transaction);
   }
 }
 
@@ -252,9 +291,11 @@ export const isReadOnlyObservable = (
 
 export const observify = <T>(fn: ObservifyGetter<T>): ObservifyResult<T> => {
   const observable = new Observable<T | null>(null);
-  const trigger = async () => {
-    const result = await promiseGuard(fn());
-    observable.value = result;
+  const trigger = async (transaction?: symbol) => {
+    const [error, result] = await safeAsync(fn());
+    if (error) return;
+
+    observable.set(result, transaction);
   };
 
   return [new ReadOnlyObservable(observable), trigger];

@@ -53,11 +53,11 @@ export class Timer extends NullState {
   }
 
   disable(): void {
-    this.isEnabled.value = false;
+    this.isEnabled.set(false);
   }
 
   enable(): void {
-    this.isEnabled.value = true;
+    this.isEnabled.set(true);
   }
 
   start(restart = true): void {
@@ -68,7 +68,7 @@ export class Timer extends NullState {
     this.stop();
 
     this._timeout = setTimeout(() => this._handleFire(), this.time.value);
-    this._triggerTime.value = Date.now();
+    this._triggerTime.set(Date.now());
   }
 
   stop(): void {
@@ -76,6 +76,6 @@ export class Timer extends NullState {
 
     clearTimeout(this._timeout);
     this._timeout = null;
-    this._triggerTime.value = null;
+    this._triggerTime.set(null);
   }
 }
