@@ -91,9 +91,9 @@ export class Observable<T> {
   set(value: T, origin?: AnyObservableOrNullState): void {
     if (origin === this) return;
 
+    const oldValue = this._value;
     this._value = value;
 
-    const oldValue = this._value;
     const changed =
       !this._simpleCompare && isObject(this._value)
         ? !serialize(this._value).equals(serialize(oldValue))
