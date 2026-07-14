@@ -1,0 +1,81 @@
+
+:root {
+  /* ---- Neutral ramp (light) ----------------------------------------- */
+  --color-gray-50: oklch(98.5% 0 0deg);
+  --color-gray-100: oklch(97% 0 0deg);
+  --color-gray-200: oklch(92.2% 0 0deg);
+  --color-gray-300: oklch(87% 0 0deg);
+  --color-gray-400: oklch(70.8% 0 0deg);
+  --color-gray-500: oklch(55.6% 0 0deg);
+  --color-gray-600: oklch(43.9% 0 0deg);
+  --color-gray-700: oklch(37.1% 0 0deg);
+  --color-gray-800: oklch(26.9% 0 0deg);
+  --color-gray-900: oklch(14.5% 0 0deg);
+
+  /* ---- Accent & semantic hues --------------------------------------- */
+  --color-blue: oklch(48.8% 0.243 264.376deg);
+  --color-red: oklch(50.5% 0.213 27.518deg);
+  --color-green: oklch(52.7% 0.154 150.069deg);
+
+  /* ---- Semantic surface roles (all derived from the ramp) ----------- */
+
+  /* Background of controls, inputs, and popups + the text drawn on it. */
+  --surface: var(--color-gray-50);
+  --on-surface: var(--color-gray-900);
+
+  /* Borders and dividers. */
+  --border: var(--color-gray-900);
+  --border-muted: var(--color-gray-300);
+
+  /* "Ink": a filled/inverted control (checked box, pressed toggle) and the text/icon that sits on top of it. */
+  --ink: var(--color-gray-900);
+  --on-ink: var(--color-gray-50);
+
+  /* Secondary / placeholder / disabled text. */
+  --muted: var(--color-gray-600);
+  --subtle: var(--color-gray-500);
+
+  /* Hover / active wash for ghost and outlined controls. */
+  --hover-wash: var(--color-gray-100);
+  --active-wash: var(--color-gray-200);
+
+  /* ---- Elevation ----------------------------------------------------- */
+  --popup-shadow: 0.25rem 0.25rem 0 rgb(0 0 0 / 12%);
+
+  /* Same shape as `--popup-shadow`, faded to invisible — the animation
+     endpoint some popups transition `box-shadow` to/from on enter/exit. */
+  --popup-shadow-transparent: 0.25rem 0.25rem 0 rgb(0 0 0 / 0%);
+
+  /* Backdrop revealed behind an indented/pushed-back surface (Drawer's "indent effect"). Not ramp-derived: stays a fixed dark/light pair rather than inverting with the neutral ramp. */
+  --indent-background: black;
+
+  /* ---- Focus ring color ------------------------------------------------ */
+
+  /* Width/offset are dimensions and live in common.css. */
+  --focus-ring-color: var(--color-gray-900);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Flip the ramp; every ramp-derived semantic token inverts with it. */
+    --color-gray-50: oklch(14.5% 0 0deg);
+    --color-gray-100: oklch(20.5% 0 0deg);
+    --color-gray-200: oklch(26.9% 0 0deg);
+    --color-gray-300: oklch(37.1% 0 0deg);
+    --color-gray-400: oklch(43.9% 0 0deg);
+    --color-gray-500: oklch(55.6% 0 0deg);
+    --color-gray-600: oklch(70.8% 0 0deg);
+    --color-gray-700: oklch(87% 0 0deg);
+    --color-gray-800: oklch(92.2% 0 0deg);
+    --color-gray-900: oklch(98.5% 0 0deg);
+    --color-blue: oklch(62.3% 0.214 259.815deg);
+    --color-red: oklch(70.4% 0.191 22.216deg);
+    --color-green: oklch(79.2% 0.209 151.711deg);
+
+    /* Popups drop the drop-shadow in dark mode. */
+    --popup-shadow: none;
+
+    /* Indent background flips to a fixed light gray rather than the (near-white) ramp-derived surface. */
+    --indent-background: oklch(87% 0 0deg);
+  }
+}

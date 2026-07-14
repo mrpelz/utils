@@ -1,0 +1,15 @@
+@import url('./components/common.css');
+@import url('./components/theme.css');
+
+:root {
+  background-color: var(--surface);
+  color: var(--ink);
+  color-scheme: dark;
+  font-family: -apple-system, "SF UI Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: light;
+  }
+}

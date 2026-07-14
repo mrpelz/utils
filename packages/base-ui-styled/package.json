@@ -1,0 +1,33 @@
+{
+  "name": "@mrpelz/base-ui-styled",
+  "version": "7.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://git.i.wurstsalat.cloud/mrpelz/utils.git",
+    "directory": "packages/base-ui-styled"
+  },
+  "license": "UNLICENSED",
+  "author": "Lennart Pelz <mail@mrpelz.de>",
+  "type": "module",
+  "main": "dist/main.js",
+  "module": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "files": [
+    "dist/**/*.{js,map,ts}"
+  ],
+  "dependencies": {
+    "@base-ui/react": "1.6.0",
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.1",
+    "goober": "2.1.19",
+    "react": "npm:@preact/compat",
+    "react-dom": "npm:@preact/compat"
+  },
+  "devDependencies": {
+    "@mrpelz/boilerplate-preact": "16.3.0",
+    "csstype": "3.2.3",
+    "eslint-plugin-react": "7.37.5",
+    "fork-ts-checker-webpack-plugin": "9.1.0",
+    "postcss-styled-syntax": "0.7.2"
+  }
+}
