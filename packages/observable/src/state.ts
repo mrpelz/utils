@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { randomUUID } from 'node:crypto';
-
 import {
   AnyObservable,
+  AnyObservableOrNullState,
   MetaObserverCallback,
   Observable,
   ObservableGroup,
@@ -12,16 +11,16 @@ import {
 } from './main.js';
 
 export class BooleanState extends Observable<boolean> {
-  flip(transaction?: symbol): boolean {
-    this.set(!this.value, transaction);
+  flip(origin?: AnyObservableOrNullState): boolean {
+    this.set(!this.value, origin ?? this);
 
     return this.value;
   }
 }
 
 export class BooleanProxyState<T> extends ProxyObservable<T, boolean> {
-  flip(transaction?: symbol): boolean {
-    this.set(!this.value, transaction);
+  flip(origin?: AnyObservableOrNullState): boolean {
+    this.set(!this.value, origin ?? this);
 
     return this.value;
   }
@@ -73,8 +72,8 @@ export class BooleanStateGroup extends ObservableGroup<boolean> {
     );
   }
 
-  flip(transaction?: symbol): boolean {
-    this.set(!this.value, transaction);
+  flip(origin?: AnyObservableOrNullState): boolean {
+    this.set(!this.value, origin ?? this);
 
     return this.value;
   }
@@ -129,56 +128,50 @@ export class EnumState<T = any> extends Observable<T> {
     return this._indexOf(this.value);
   }
 
-  next(transaction?: symbol): this {
+  next(origin?: AnyObservableOrNullState): this {
     const currentIndex = this._indexOf(this.value);
     if (currentIndex === null) return this;
 
     const index = currentIndex === this._maxIndex ? 0 : currentIndex + 1;
 
-    return this.setIndex(index, transaction);
+    return this.setIndex(index, origin ?? this);
   }
 
-  previous(transaction?: symbol): this {
+  previous(origin?: AnyObservableOrNullState): this {
     const currentIndex = this._indexOf(this.value);
     if (currentIndex === null) return this;
 
     const index = currentIndex === 0 ? this._maxIndex : currentIndex - 1;
 
-    return this.setIndex(index, transaction);
+    return this.setIndex(index, origin ?? this);
   }
 
-  set(value: T, transaction?: symbol): void {
+  set(value: T, origin?: AnyObservableOrNullState): void {
     if (value === super.value) return;
 
     if (!this._enum.includes(value)) {
       throw new RangeError(`"${value}" is not an allowed value`);
     }
 
-    super.set(value, transaction);
+    super.set(value, origin ?? this);
   }
 
-  setIndex(index: number, transaction?: symbol): this {
+  setIndex(index: number, origin?: AnyObservableOrNullState): this {
     if (index < 0 || index > this._maxIndex) {
       throw new RangeError(`"${index}" is a not existing index`);
     }
 
     const nextValue = this._enum[index];
-    if (nextValue) this.set(nextValue, transaction);
+    if (nextValue) this.set(nextValue, origin ?? this);
 
     return this;
   }
 }
 
 export class NullState<T = null> {
-  private _transaction: symbol;
-
   protected readonly _observers: Set<MetaObserverCallback<T>>;
 
-  readonly id = randomUUID();
-
   constructor(observerCallback?: MetaObserverCallback<T>) {
-    this._transaction = Symbol(`Obseervable.${this.id}:transaction.initial`);
-
     this._observers = observerCallback
       ? new Set([observerCallback])
       : new Set();
@@ -198,10 +191,9 @@ export class NullState<T = null> {
     const metaObserverCallback = (
       value: T,
       changed: boolean,
-      transaction: symbol,
-      origin: AnyObservable<any> | NullState<any>,
+      origin: AnyObservableOrNullState,
     ) => {
-      observerCallback(value, observer, changed, transaction, origin);
+      observerCallback(value, observer, changed, origin);
     };
 
     this._observers.add(metaObserverCallback);
@@ -213,19 +205,15 @@ export class NullState<T = null> {
     return observer;
   }
 
-  set(value: T, transaction?: symbol): void {
-    this.trigger(value, transaction);
+  set(value: T, origin?: AnyObservableOrNullState): void {
+    this.trigger(value, origin ?? this);
   }
 
-  trigger(data: T = null as T, transaction?: symbol): void {
-    if (transaction === this._transaction) return;
-
-    this._transaction =
-      transaction ??
-      Symbol(`Obseervable.${this.id}:transaction.${randomUUID()}`);
+  trigger(data: T = null as T, origin?: AnyObservableOrNullState): void {
+    if (origin === this) return;
 
     for (const observer of this._observers) {
-      observer(data, false, this._transaction, this);
+      observer(data, false, origin ?? this);
     }
   }
 }
