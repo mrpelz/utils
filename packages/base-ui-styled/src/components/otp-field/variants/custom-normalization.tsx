@@ -1,5 +1,4 @@
-import { keyframes } from '@emotion/react';
-import { styled } from 'goober';
+import { keyframes, styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
 import { css } from '../../../style.js';

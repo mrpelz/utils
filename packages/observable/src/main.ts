@@ -89,10 +89,10 @@ export class Observable<T> {
   }
 
   set(value: T, origin?: AnyObservableOrNullState): void {
-    if (origin === this) return;
-
     const oldValue = this._value;
     this._value = value;
+
+    if (origin === this) return;
 
     const changed =
       !this._simpleCompare && isObject(this._value)
@@ -252,7 +252,7 @@ export class ObservableGroup<T> extends Observable<T> {
       observable.set(value, origin ?? this);
     }
 
-    super.set(value, origin ?? this);
+    super.set(value, origin);
   }
 }
 

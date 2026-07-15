@@ -2,7 +2,22 @@ import { FunctionComponent } from 'preact';
 import { useState } from 'preact/hooks';
 
 import { Button } from '../components/index.js';
-import { ComponentEntry, Story } from './utils.js';
+import { ComponentEntry, Story, usePropControl } from './utils.js';
+
+const Configured: FunctionComponent = () => {
+  const [control, props] = usePropControl({
+    focusableWhenDisabled: [undefined, false, true] as const,
+    nativeButton: [undefined, false, true] as const,
+    'styled-cursor': [undefined, 'auto', 'fff'] as const,
+  });
+
+  return (
+    <Story title="Configured">
+      <Button {...props}>Configured</Button>
+      {control}
+    </Story>
+  );
+};
 
 const Simple: FunctionComponent = () => (
   <Story title="Simple">
@@ -71,6 +86,7 @@ export const ButtonDemo: FunctionComponent = () => (
     id="button"
     name="Button"
   >
+    <Configured />
     <Simple />
     <Disabled />
     <Submit />

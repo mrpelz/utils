@@ -12,7 +12,7 @@ import {
 
 export class BooleanState extends Observable<boolean> {
   flip(origin?: AnyObservableOrNullState): boolean {
-    this.set(!this.value, origin ?? this);
+    this.set(!this.value, origin);
 
     return this.value;
   }
@@ -20,7 +20,7 @@ export class BooleanState extends Observable<boolean> {
 
 export class BooleanProxyState<T> extends ProxyObservable<T, boolean> {
   flip(origin?: AnyObservableOrNullState): boolean {
-    this.set(!this.value, origin ?? this);
+    this.set(!this.value, origin);
 
     return this.value;
   }
@@ -73,7 +73,7 @@ export class BooleanStateGroup extends ObservableGroup<boolean> {
   }
 
   flip(origin?: AnyObservableOrNullState): boolean {
-    this.set(!this.value, origin ?? this);
+    this.set(!this.value, origin);
 
     return this.value;
   }
@@ -134,7 +134,7 @@ export class EnumState<T = any> extends Observable<T> {
 
     const index = currentIndex === this._maxIndex ? 0 : currentIndex + 1;
 
-    return this.setIndex(index, origin ?? this);
+    return this.setIndex(index, origin);
   }
 
   previous(origin?: AnyObservableOrNullState): this {
@@ -143,7 +143,7 @@ export class EnumState<T = any> extends Observable<T> {
 
     const index = currentIndex === 0 ? this._maxIndex : currentIndex - 1;
 
-    return this.setIndex(index, origin ?? this);
+    return this.setIndex(index, origin);
   }
 
   set(value: T, origin?: AnyObservableOrNullState): void {
@@ -153,7 +153,7 @@ export class EnumState<T = any> extends Observable<T> {
       throw new RangeError(`"${value}" is not an allowed value`);
     }
 
-    super.set(value, origin ?? this);
+    super.set(value, origin);
   }
 
   setIndex(index: number, origin?: AnyObservableOrNullState): this {
@@ -162,7 +162,7 @@ export class EnumState<T = any> extends Observable<T> {
     }
 
     const nextValue = this._enum[index];
-    if (nextValue) this.set(nextValue, origin ?? this);
+    if (nextValue) this.set(nextValue, origin);
 
     return this;
   }

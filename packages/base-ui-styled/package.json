@@ -15,19 +15,21 @@
   "files": [
     "dist/**/*.{js,map,ts}"
   ],
-  "dependencies": {
-    "@base-ui/react": "1.6.0",
-    "@emotion/react": "11.14.0",
-    "@emotion/styled": "11.14.1",
-    "goober": "2.1.19",
+  "overrides": {
     "react": "npm:@preact/compat",
     "react-dom": "npm:@preact/compat"
+  },
+  "dependencies": {
+    "@base-ui/react": "1.6.0",
+    "@mrpelz/misc-utils": "*",
+    "goober": "2.1.19"
   },
   "devDependencies": {
     "@mrpelz/boilerplate-preact": "16.3.0",
     "csstype": "3.2.3",
     "eslint-plugin-react": "7.37.5",
     "fork-ts-checker-webpack-plugin": "9.1.0",
-    "postcss-styled-syntax": "0.7.2"
+    "postcss-styled-syntax": "0.7.2",
+    "source-map-loader": "5.0.0"
   }
 }

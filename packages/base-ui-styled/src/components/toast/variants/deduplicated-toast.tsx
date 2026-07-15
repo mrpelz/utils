@@ -1,5 +1,6 @@
-import { css, keyframes } from '@emotion/react';
+import { keyframes } from 'goober';
 
+import { css } from '../../../style.js';
 import { CommonToast } from '../common.js';
 
 const pulse = keyframes`
