@@ -5,6 +5,13 @@ include:
       - "/gitlab/.gitlab-ci.yml"
       - "/gitlab/.monorepo.gitlab-ci.yml"
 
+transform_prod:
+  script:
+    - make -s util_clear
+    # run build twice in order to build inter-dependencies
+    - make -s transform_build --ignore-errors
+    - make -s transform_build
+
 publish:npm:npmjs:
   stage: release
   rules:
