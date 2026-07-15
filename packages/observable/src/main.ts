@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { serialize } from 'node:v8';
-
 import { safeAsync } from '@mrpelz/misc-utils/async';
-import { isObject } from '@mrpelz/misc-utils/oop';
 
 import type { NullState } from './state.js';
 
@@ -48,7 +45,6 @@ export class Observable<T> {
     initialValue: T,
     observerCallback?: MetaObserverCallback<T>,
     forcedReport = true,
-    private readonly _simpleCompare = true,
   ) {
     this._value = initialValue;
 
@@ -94,10 +90,7 @@ export class Observable<T> {
 
     if (origin === this) return;
 
-    const changed =
-      !this._simpleCompare && isObject(this._value)
-        ? !serialize(this._value).equals(serialize(oldValue))
-        : this._value !== oldValue;
+    const changed = this._value !== oldValue;
 
     for (const [observer, forcedReport] of this._observers) {
       if (!changed && !forcedReport) continue;
