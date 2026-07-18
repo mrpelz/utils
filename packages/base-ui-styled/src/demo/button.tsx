@@ -31,7 +31,7 @@ export const ButtonDemo: FunctionComponent = () => {
       id="button"
       name="Button"
     >
-      <Story control={control}>
+      <Story controls={control}>
         <Button {...props} />
       </Story>
     </ComponentEntry>
