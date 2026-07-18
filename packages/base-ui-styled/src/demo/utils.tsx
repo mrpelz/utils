@@ -3,6 +3,7 @@ import { isObject, objectKeys } from '@mrpelz/misc-utils/oop';
 import { styled } from 'goober';
 import {
   ComponentChild,
+  ComponentChildren,
   CSSProperties,
   FunctionComponent,
   RenderableProps,
@@ -12,6 +13,7 @@ import {
   Dispatch,
   StateUpdater,
   useCallback,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -40,24 +42,28 @@ const VariantBlock = styled('div', forwardRef)`
 `;
 
 const VariantHeading = styled('h3', forwardRef)`
-  margin: 0 0 var(--space-2);
+  margin: var(--space-2) 0 var(--space-1);
   color: var(--muted);
   font-family: monospace;
   font-size: var(--text-sm);
   font-weight: var(--font-regular);
 `;
 
-const Stage = styled('div', forwardRef)`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: var(--space-6);
+const Container = styled('div', forwardRef)`
+  padding: var(--space-3);
   border: var(--border-width) dashed var(--border-muted);
   gap: var(--space-4);
 
   & + & {
     border-top: none;
   }
+`;
+
+const Stage = styled(Container, forwardRef)`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: var(--space-6);
 `;
 
 const Fieldset = styled('fieldset', forwardRef)`
@@ -275,17 +281,28 @@ export const isEqual = <A extends object, B extends A>(a: A, b: B): a is B => {
 
 export const usePropControl = <T extends PropMap>(
   propMap: T,
-): [ComponentChild, ControlledProps<T>] => {
+  title?: string,
+): [ComponentChild, ControlledProps<T>, FunctionComponent] => {
+  const propMapSorted = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.keys(propMap)
+          .toSorted()
+          .map((key) => [key, propMap[key]] as const),
+      ) as T,
+    [propMap],
+  );
+
   const initialState = useMemo(
     () =>
       Object.fromEntries(
-        Object.entries(propMap).map(
+        Object.entries(propMapSorted).map(
           ([key, [firstValue]]) => [key, firstValue] as const,
         ),
       ) as {
         [P in keyof T]: T[P][0];
       },
-    [propMap],
+    [propMapSorted],
   );
   const [state, setState] = useState(initialState);
 
@@ -307,9 +324,9 @@ export const usePropControl = <T extends PropMap>(
     [state],
   );
 
-  return [
+  const propsStage = (
     <Stage key={0}>
-      {Object.entries(propMap).map(([key, values]) => (
+      {Object.entries(propMapSorted).map(([key, values]) => (
         <PropSelector<T>
           key={key}
           objectKey={key as Extract<keyof T, string>}
@@ -327,8 +344,30 @@ export const usePropControl = <T extends PropMap>(
           reset all props
         </ResetButton>
       </Fieldset>
-    </Stage>,
+    </Stage>
+  );
+
+  const [mount, setMount] = useState(true);
+  useLayoutEffect(() => {
+    setMount(false);
+    queueMicrotask(() => setMount(true));
+  }, [state]);
+
+  const Remounter: FunctionComponent = mount
+    ? ({ children }) => <>{children}</>
+    : () => null;
+
+  return [
+    title ? (
+      <Container>
+        <VariantHeading>{title}</VariantHeading>
+        {propsStage}
+      </Container>
+    ) : (
+      propsStage
+    ),
     mappedState as ControlledProps<T>,
+    Remounter,
   ] as const;
 };
 
@@ -341,14 +380,14 @@ export const commonPropOptions = {
       'outline: 5px dashed red',
     ),
   ] as const,
-  render: [undefined, new MappedProp(<div />, '<div />')] as const,
+  render: [undefined, new MappedProp(<main />, '<main />')] as const,
 };
 
 export const Story: FunctionComponent<{
-  control?: ComponentChild;
+  controls?: ComponentChildren;
   id?: string;
   title?: string;
-}> = ({ control, id, title, children }) => (
+}> = ({ controls: control, id, title, children }) => (
   <VariantBlock id={id}>
     {title ? <VariantHeading>{title}</VariantHeading> : null}
     <Stage>{children}</Stage>
