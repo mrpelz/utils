@@ -9,10 +9,11 @@ export type AccordionRootProps = BaseAccordion.Root.Props & {
 
 // eslint-disable-next-line prettier/prettier
 const Root = styled<typeof BaseAccordion.Root, AccordionRootProps>(BaseAccordion.Root, forwardRef)`
+  --styled-max-width: attr(styled-max-width type(\<length\>), none);
+
   display: flex;
   width: 100%;
-  /* stylelint-disable-next-line declaration-property-value-no-unknown */
-  max-width: attr(styled-max-width type(\<length\>), none);
+  max-width: var(--styled-max-width);
   box-sizing: border-box;
   flex-direction: column;
   border: var(--border-width) solid var(--border);

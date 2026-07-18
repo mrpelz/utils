@@ -25,7 +25,7 @@ const configDownstream = {
     },
     historyApiFallback: true,
     host: '::1',
-    hot: true,
+    hot: webpackServe,
     liveReload: false,
   },
   optimization: {
@@ -33,7 +33,6 @@ const configDownstream = {
   },
   output: {
     assetModuleFilename: 'assets/[name][ext]',
-    chunkFormat: false,
     publicPath: '/',
   },
   resolve: {

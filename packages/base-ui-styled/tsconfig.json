@@ -9,7 +9,8 @@
       "react/jsx-runtime": ["../../node_modules/preact/jsx-runtime/src/index.d.ts"]
     },
     "rootDir": "src",
-    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
+    "types": ["@types/webpack-env"]
   },
   "extends": "@mrpelz/boilerplate-preact/tsconfig.json",
   "include": ["src/**/*"]
