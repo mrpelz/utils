@@ -1,6 +1,10 @@
 @import url('./components/common.css');
 @import url('./components/theme.css');
 
+* {
+  box-sizing: border-box;
+}
+
 :root {
   background-color: var(--surface);
   color: var(--ink);

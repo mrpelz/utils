@@ -1,98 +1,39 @@
 import { FunctionComponent } from 'preact';
-import { useState } from 'preact/hooks';
 
 import { Button } from '../components/index.js';
-import { ComponentEntry, Story, usePropControl } from './utils.js';
+import {
+  commonPropOptions,
+  ComponentEntry,
+  MappedProp,
+  Story,
+  usePropControl,
+} from './utils.js';
 
-const Configured: FunctionComponent = () => {
-  const [control, props] = usePropControl({
-    focusableWhenDisabled: [undefined, false, true] as const,
-    nativeButton: [undefined, false, true] as const,
-    'styled-cursor': [undefined, 'auto', 'fff'] as const,
-  });
-
-  return (
-    <Story title="Configured">
-      <Button {...props}>Configured</Button>
-      {control}
-    </Story>
-  );
+const propOptions = {
+  ...commonPropOptions,
+  children: ['Label'] as const,
+  disabled: [undefined, false, true] as const,
+  focusableWhenDisabled: [undefined, false, true] as const,
+  nativeButton: [undefined, false, true] as const,
+  'styled-cursor': [undefined, 'auto', 'pointer', 'copy'] as const,
+  onClick: [
+    // eslint-disable-next-line no-alert
+    new MappedProp(() => alert('alert!'), 'alert!'),
+    undefined,
+  ] as const,
 };
 
-const Simple: FunctionComponent = () => (
-  <Story title="Simple">
-    <Button>Simple</Button>
-  </Story>
-);
+export const ButtonDemo: FunctionComponent = () => {
+  const [control, props] = usePropControl(propOptions);
 
-const Submit: FunctionComponent = () => (
-  <Story title="Submit">
-    <Button type="submit">Submit</Button>
-  </Story>
-);
-
-const Disabled: FunctionComponent = () => (
-  <Story title="Disabled">
-    <Button disabled>Simple</Button>
-  </Story>
-);
-
-const OverrideCursorAuto: FunctionComponent = () => (
-  <Story title="Override Cursor 'auto'">
-    <Button styled-cursor="auto">Simple</Button>
-  </Story>
-);
-
-const OverrideCursorZoomIn: FunctionComponent = () => (
-  <Story title="Override Cursor 'zoom-in'">
-    <Button styled-cursor="zoom-in">Simple</Button>
-  </Story>
-);
-
-const RenderingAnotherTag: FunctionComponent = () => (
-  <Story title="Rendering as Another Tag">
-    <Button
-      nativeButton={false}
-      render={<div />}
+  return (
+    <ComponentEntry
+      id="button"
+      name="Button"
     >
-      Button that can contain complex children
-    </Button>
-  </Story>
-);
-
-const LoadingStateWithoutLoosingFocus: FunctionComponent = () => {
-  const [loading, setLoading] = useState(false);
-
-  return (
-    <Story title="Loading State Without Loosing Focus">
-      <Button
-        focusableWhenDisabled
-        disabled={loading}
-        onClick={() => {
-          setLoading(true);
-          setTimeout(() => {
-            setLoading(false);
-          }, 4000);
-        }}
-      >
-        {loading ? 'Submitting' : 'Submit'}
-      </Button>
-    </Story>
+      <Story control={control}>
+        <Button {...props} />
+      </Story>
+    </ComponentEntry>
   );
 };
-
-export const ButtonDemo: FunctionComponent = () => (
-  <ComponentEntry
-    id="button"
-    name="Button"
-  >
-    <Configured />
-    <Simple />
-    <Disabled />
-    <Submit />
-    <OverrideCursorAuto />
-    <OverrideCursorZoomIn />
-    <RenderingAnotherTag />
-    <LoadingStateWithoutLoosingFocus />
-  </ComponentEntry>
-);

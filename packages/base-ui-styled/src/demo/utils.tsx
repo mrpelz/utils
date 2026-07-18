@@ -1,16 +1,29 @@
-import { isObject } from '@mrpelz/misc-utils/oop';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { isObject, objectKeys } from '@mrpelz/misc-utils/oop';
 import { styled } from 'goober';
-import { ComponentChild, FunctionComponent, RenderableProps } from 'preact';
+import {
+  ComponentChild,
+  CSSProperties,
+  FunctionComponent,
+  RenderableProps,
+} from 'preact';
 import { forwardRef } from 'preact/compat';
-import { Dispatch, StateUpdater, useCallback, useState } from 'preact/hooks';
+import {
+  Dispatch,
+  StateUpdater,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'preact/hooks';
 
 const ComponentSection = styled('section', forwardRef)`
   margin-bottom: var(--space-12);
+  color: var(--on-surface);
 `;
 
 const ComponentHeading = styled('h2', forwardRef)`
   margin: 0 0 var(--space-1);
-  color: var(--on-surface);
   font-size: var(--text-lg);
   font-weight: var(--font-bold);
 `;
@@ -36,98 +49,234 @@ const VariantHeading = styled('h3', forwardRef)`
 
 const Stage = styled('div', forwardRef)`
   display: flex;
-  overflow: auto;
   flex-wrap: wrap;
-  align-items: center;
+  justify-content: center;
   padding: var(--space-6);
   border: var(--border-width) dashed var(--border-muted);
   gap: var(--space-4);
+
+  & + & {
+    border-top: none;
+  }
 `;
 
-class PropLiteral {
-  // render(): ComponentChild {}
+const Fieldset = styled('fieldset', forwardRef)`
+  display: grid;
+  flex: 1;
+  flex-basis: fit-content;
+  padding: var(--space-1);
+  border: var(--border-width) dashed var(--border-muted);
+  font-family: monospace;
+  grid-auto-flow: row;
+  white-space: nowrap;
+
+  & > legend:empty {
+    padding: 0;
+
+    &::before {
+      display: inline-block;
+      height: 1ch;
+      content: '';
+    }
+  }
+`;
+
+const ResetButton = styled('button', forwardRef)`
+  padding: var(--space-2);
+  border: var(--border-width) solid var(--subtle);
+  border-color: var(--subtle);
+  margin: var(--space-6);
+  background-color: var(--surface);
+  color: var(--subtle);
+  place-self: start center;
+
+  &:not([disabled]) {
+    border-color: var(--color-red);
+    color: var(--color-red);
+    cursor: pointer;
+  }
+`;
+
+const RadioGroup = styled('section', forwardRef)`
+  display: grid;
+  align-content: start;
+`;
+
+const Input = styled('input', forwardRef)`
+  width: calc(100% - var(--space-2));
+  padding: var(--space-1);
+  border: var(--border-width) solid var(--border-muted);
+  margin: var(--space-1);
+  background-color: var(--surface);
+  color: var(--on-surface);
+  font-family: monospace;
+  place-self: end;
+
+  &[active] {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+`;
+
+const Label = styled('label', forwardRef)`
+  display: flex;
+  align-items: center;
+  padding: var(--space-1);
+  cursor: pointer;
+`;
+
+export class MappedProp<T> {
+  constructor(
+    public readonly value: T,
+    public readonly label: string,
+  ) {}
 }
-export class PropLiteralString extends PropLiteral {}
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PropMap = Record<string, any[]>;
+export type RemappedPropValue<T extends any> =
+  T extends MappedProp<infer M> ? M : T;
 
-export type ControlledProps<T extends PropMap> = {
+export type RemappedProp<T extends readonly any[]> = {
+  [P in keyof T]: RemappedPropValue<T[P]>;
+}[number];
+
+export type PropMap = Record<string, readonly any[]>;
+
+export type PropMapState<T extends PropMap> = {
   [P in keyof T]: T[P][number];
 };
 
-const PropOption = <T extends PropMap>({
-  objectKey,
-  setState,
-  state,
+export type ControlledProps<T extends PropMap> = {
+  [P in keyof T]: RemappedProp<T[P]>;
+};
+
+export const useId = (): string => useMemo(() => self.crypto.randomUUID(), []);
+
+const PropSelectorOption = <T,>({
+  setValue,
   value,
+  optionValue,
 }: {
-  objectKey: string;
-  setState: Dispatch<StateUpdater<ControlledProps<T>>>;
-  state: ControlledProps<T>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value: any;
+  optionValue: any;
+  setValue: (value: T) => void;
+  value: T;
 }): ComponentChild => {
   const handleSet = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (setValue?: any) => {
-      setState((state_) => ({ ...state_, [objectKey]: setValue ?? value }));
-    },
-    [objectKey, setState, value],
+    () => setValue(optionValue),
+    [setValue, optionValue],
   );
 
-  if (isObject(value)) {
-    return null;
-  }
+  const displayValue = useMemo(() => {
+    if (optionValue === undefined) return 'undefined';
+    if (optionValue instanceof MappedProp) {
+      return `→ \`${optionValue.label}\``;
+    }
 
-  const displayValue =
-    value === undefined ? 'undefined' : JSON.stringify(value);
+    return JSON.stringify(optionValue) || optionValue.toString();
+  }, [optionValue]);
 
   return (
-    <label key={value}>
+    <Label key={optionValue}>
       <input
-        checked={state[objectKey] === value}
-        name={objectKey}
+        checked={value === optionValue}
         type="radio"
         value={displayValue}
-        onClick={() => handleSet()}
+        onClick={handleSet}
       />
       {displayValue}
-    </label>
+    </Label>
   );
 };
 
-const Prop = <T extends PropMap>({
+const PropSelector = <T extends PropMap>({
   key,
+  objectKey,
   setState,
   state,
   values,
 }: RenderableProps<{
-  setState: Dispatch<StateUpdater<ControlledProps<T>>>;
-  state: ControlledProps<T>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  values: any[];
-}>): ComponentChild => (
-  <fieldset key={key}>
-    <legend>
-      <pre>{key}</pre>
-    </legend>
-    {values.map((value) => (
-      <PropOption<T>
-        key={value}
-        objectKey={key}
-        setState={setState}
-        state={state}
-        value={value}
+  objectKey: Extract<keyof T, string>;
+  setState: Dispatch<StateUpdater<PropMapState<T>>>;
+  state: PropMapState<T>;
+  values: readonly T[keyof T][number][];
+}>): ComponentChild => {
+  const handleSet = useCallback(
+    (value: T[keyof T][number]) => {
+      setState((state_) => ({ ...state_, [objectKey]: value }));
+    },
+    [objectKey, setState],
+  );
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const applyInput = useCallback(() => {
+    const { current: currentTarget } = inputRef;
+    if (!currentTarget) return;
+
+    try {
+      currentTarget.setCustomValidity('');
+
+      if (currentTarget.value.length === 0) return;
+
+      handleSet(JSON.parse(currentTarget.value));
+    } catch {
+      currentTarget.setCustomValidity('enter valid JSON string');
+      currentTarget.reportValidity();
+    }
+  }, [handleSet]);
+
+  const value = useMemo(() => state[objectKey], [objectKey, state]);
+
+  const displayValue = useMemo(() => {
+    if (value === undefined) return 'undefined';
+    if (value === null) return 'null';
+    if (isObject(value) && (value as any) instanceof MappedProp) {
+      return '�';
+    }
+
+    return JSON.stringify(value) || (value.toString() as string);
+  }, [value]);
+
+  return (
+    <Fieldset key={key}>
+      <legend>{objectKey}</legend>
+      <RadioGroup>
+        {values.map((optionValue) => (
+          <PropSelectorOption<T[keyof T][number]>
+            key={optionValue}
+            optionValue={optionValue}
+            setValue={handleSet}
+            value={value}
+          />
+        ))}
+      </RadioGroup>
+      <Input
+        ref={inputRef}
+        name={objectKey}
+        placeholder={displayValue}
+        onFocus={applyInput}
+        onInput={applyInput}
       />
-    ))}
-  </fieldset>
-);
+    </Fieldset>
+  );
+};
+
+export const isEqual = <A extends object, B extends A>(a: A, b: B): a is B => {
+  for (const key of [objectKeys(a), objectKeys(b)].flat()) {
+    if (!(key in a)) return false;
+    if (!(key in b)) return false;
+
+    if (a[key as keyof A] !== (b[key as keyof B] as unknown as A[keyof A])) {
+      return false;
+    }
+  }
+
+  return true;
+};
 
 export const usePropControl = <T extends PropMap>(
   propMap: T,
 ): [ComponentChild, ControlledProps<T>] => {
-  const [state, setState] = useState(
+  const initialState = useMemo(
     () =>
       Object.fromEntries(
         Object.entries(propMap).map(
@@ -136,31 +285,74 @@ export const usePropControl = <T extends PropMap>(
       ) as {
         [P in keyof T]: T[P][0];
       },
+    [propMap],
+  );
+  const [state, setState] = useState(initialState);
+
+  const isModified = useMemo(
+    () => !isEqual(initialState, state),
+    [initialState, state],
+  );
+
+  const resetState = useCallback(() => setState(initialState), [initialState]);
+
+  const mappedState = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(state).map(
+          ([key, value]) =>
+            [key, value instanceof MappedProp ? value.value : value] as const,
+        ),
+      ),
+    [state],
   );
 
   return [
-    <section key={0}>
+    <Stage key={0}>
       {Object.entries(propMap).map(([key, values]) => (
-        <Prop<T>
+        <PropSelector<T>
           key={key}
+          objectKey={key as Extract<keyof T, string>}
           setState={setState}
           state={state}
           values={values}
         />
       ))}
-    </section>,
-    state,
+      <Fieldset>
+        <legend />
+        <ResetButton
+          disabled={!isModified}
+          onClick={resetState}
+        >
+          reset all props
+        </ResetButton>
+      </Fieldset>
+    </Stage>,
+    mappedState as ControlledProps<T>,
   ] as const;
 };
 
-export const Story: FunctionComponent<{ id?: string; title: string }> = ({
-  id,
-  title,
-  children,
-}) => (
+export const commonPropOptions = {
+  className: [undefined, 'some-custom--class'] as const,
+  style: [
+    undefined,
+    new MappedProp<CSSProperties>(
+      { outline: '5px dashed red' },
+      'outline: 5px dashed red',
+    ),
+  ] as const,
+  render: [undefined, new MappedProp(<div />, '<div />')] as const,
+};
+
+export const Story: FunctionComponent<{
+  control?: ComponentChild;
+  id?: string;
+  title?: string;
+}> = ({ control, id, title, children }) => (
   <VariantBlock id={id}>
-    <VariantHeading>{title}</VariantHeading>
+    {title ? <VariantHeading>{title}</VariantHeading> : null}
     <Stage>{children}</Stage>
+    {control}
   </VariantBlock>
 );
 

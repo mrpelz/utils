@@ -29,7 +29,8 @@
     "goober": "2.1.19"
   },
   "devDependencies": {
-    "@mrpelz/boilerplate-preact": "16.5.0",
+    "@mrpelz/boilerplate-preact": "16.4.0",
+    "@types/webpack-env": "1.18.8",
     "csstype": "3.2.3",
     "eslint-plugin-react": "7.37.5",
     "fork-ts-checker-webpack-plugin": "9.1.0",
