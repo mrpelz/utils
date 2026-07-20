@@ -1,13 +1,14 @@
 import { FunctionComponent } from 'preact';
+import { useMemo } from 'preact/hooks';
 
 import { Button } from '../components/index.js';
 import {
   commonPropOptions,
-  ComponentEntry,
+  Component,
   MappedProp,
-  Story,
+  useLog,
   usePropControl,
-} from './utils.js';
+} from './utils/main.js';
 
 const propOptions = {
   ...commonPropOptions,
@@ -16,24 +17,31 @@ const propOptions = {
   focusableWhenDisabled: [undefined, false, true] as const,
   nativeButton: [undefined, false, true] as const,
   'styled-cursor': [undefined, 'auto', 'pointer', 'copy'] as const,
-  onClick: [
-    // eslint-disable-next-line no-alert
-    new MappedProp(() => alert('alert!'), 'alert!'),
-    undefined,
-  ] as const,
 };
 
 export const ButtonDemo: FunctionComponent = () => {
-  const [control, props] = usePropControl(propOptions);
+  const [log, addLog] = useLog();
+  const [control, props] = usePropControl(
+    useMemo(
+      () => ({
+        ...propOptions,
+        onClick: [
+          new MappedProp(() => addLog('button has been clicked'), 'log click'),
+          undefined,
+        ] as const,
+      }),
+      [addLog],
+    ),
+  );
 
   return (
-    <ComponentEntry
-      id="button"
-      name="Button"
+    <Component
+      controls={control}
+      id="test"
+      log={log}
+      title="Test"
     >
-      <Story controls={control}>
-        <Button {...props} />
-      </Story>
-    </ComponentEntry>
+      <Button {...props} />
+    </Component>
   );
 };

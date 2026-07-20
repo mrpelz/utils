@@ -1,16 +1,16 @@
 /* eslint-disable unicorn/prefer-string-raw */
 import { Accordion as BaseAccordion, AccordionValue } from '@base-ui/react';
 import { FunctionComponent } from 'preact';
-import { useMemo } from 'react-dom';
+import { useMemo } from 'preact/hooks';
 
 import { Accordion } from '../components/index.js';
 import {
   commonPropOptions,
-  ComponentEntry,
+  Component,
   MappedProp,
-  Story,
+  useLog,
   usePropControl,
-} from './utils.js';
+} from './utils/main.js';
 
 const propOptionsRoot = {
   ...commonPropOptions,
@@ -30,18 +30,6 @@ const propOptionsRoot = {
       String.raw`['second', 'third']`,
     ),
   ] as const,
-  onValueChange: [
-    undefined,
-    new MappedProp(
-      (
-        value: AccordionValue,
-        { reason }: BaseAccordion.Root.ChangeEventDetails,
-      ) =>
-        // eslint-disable-next-line no-alert
-        alert(JSON.stringify({ value, reason }, undefined, 2)),
-      'alert',
-    ),
-  ] as const,
   hiddenUntilFound: [undefined, false, true] as const,
   multiple: [undefined, false, true] as const,
   disabled: [undefined, false, true] as const,
@@ -51,15 +39,6 @@ const propOptionsRoot = {
 
 const propOptionsItem = {
   ...commonPropOptions,
-  onOpenChange: [
-    undefined,
-    new MappedProp(
-      (open: boolean, { reason }: BaseAccordion.Item.ChangeEventDetails) =>
-        // eslint-disable-next-line no-alert
-        alert(JSON.stringify({ open, reason }, undefined, 2)),
-      'alert',
-    ),
-  ] as const,
   disabled: [undefined, false, true] as const,
 };
 
@@ -81,15 +60,44 @@ const propOptionsPanel = {
 };
 
 export const AccordionDemo: FunctionComponent = () => {
+  const [log, addLog] = useLog();
   const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
-    propOptionsRoot,
+    useMemo(
+      () => ({
+        ...propOptionsRoot,
+        onValueChange: [
+          new MappedProp(
+            (
+              value: AccordionValue,
+              { reason }: BaseAccordion.Root.ChangeEventDetails,
+            ) => addLog(`root value: ${value}/${reason}`),
+            'log change',
+          ),
+          undefined,
+        ] as const,
+      }),
+      [addLog],
+    ),
     'root',
   );
 
   const [controlItemFirst, propsItemFirst] = usePropControl(
     useMemo(
-      () => ({ ...propOptionsItem, value: ['first', undefined] as const }),
-      [],
+      () => ({
+        ...propOptionsItem,
+        onOpenChange: [
+          new MappedProp(
+            (
+              open: boolean,
+              { reason }: BaseAccordion.Item.ChangeEventDetails,
+            ) => addLog(`item first: ${open}/${reason}`),
+            'log open',
+          ),
+          undefined,
+        ] as const,
+        value: ['first', undefined] as const,
+      }),
+      [addLog],
     ),
     '1st item',
   );
@@ -111,8 +119,21 @@ export const AccordionDemo: FunctionComponent = () => {
 
   const [controlItemSecond, propsItemSecond] = usePropControl(
     useMemo(
-      () => ({ ...propOptionsItem, value: ['second', undefined] as const }),
-      [],
+      () => ({
+        ...propOptionsItem,
+        onOpenChange: [
+          new MappedProp(
+            (
+              open: boolean,
+              { reason }: BaseAccordion.Item.ChangeEventDetails,
+            ) => addLog(`item second: ${open}/${reason}`),
+            'log open',
+          ),
+          undefined,
+        ] as const,
+        value: ['second', undefined] as const,
+      }),
+      [addLog],
     ),
     '2nd item',
   );
@@ -134,8 +155,21 @@ export const AccordionDemo: FunctionComponent = () => {
 
   const [controlItemThird, propsItemThird] = usePropControl(
     useMemo(
-      () => ({ ...propOptionsItem, value: ['third', undefined] as const }),
-      [],
+      () => ({
+        ...propOptionsItem,
+        onOpenChange: [
+          new MappedProp(
+            (
+              open: boolean,
+              { reason }: BaseAccordion.Item.ChangeEventDetails,
+            ) => addLog(`item third: ${open}/${reason}`),
+            'log open',
+          ),
+          undefined,
+        ] as const,
+        value: ['third', undefined] as const,
+      }),
+      [addLog],
     ),
     '3rd item',
   );
@@ -156,73 +190,71 @@ export const AccordionDemo: FunctionComponent = () => {
   );
 
   return (
-    <ComponentEntry
+    <Component
       id="accordion"
-      name="Accordion"
+      log={log}
+      title="Accordion"
+      controls={[
+        controlRoot,
+        controlItemFirst,
+        controlHeaderFirst,
+        controlTriggerFirst,
+        controlPanelFirst,
+        controlItemSecond,
+        controlHeaderSecond,
+        controlTriggerSecond,
+        controlPanelSecond,
+        controlItemThird,
+        controlHeaderThird,
+        controlTriggerThird,
+        controlPanelThird,
+      ]}
     >
-      <Story
-        controls={[
-          controlRoot,
-          controlItemFirst,
-          controlHeaderFirst,
-          controlTriggerFirst,
-          controlPanelFirst,
-          controlItemSecond,
-          controlHeaderSecond,
-          controlTriggerSecond,
-          controlPanelSecond,
-          controlItemThird,
-          controlHeaderThird,
-          controlTriggerThird,
-          controlPanelThird,
-        ]}
-      >
-        <RemounterRoot>
-          <Accordion.Root {...propsRoot}>
-            <Accordion.Item {...propsItemFirst}>
-              <Accordion.Header {...propsHeaderFirst}>
-                <Accordion.Trigger {...propsTriggerFirst}>
-                  What is Base UI?
-                  <Accordion.Icon />
-                </Accordion.Trigger>
-              </Accordion.Header>
-              <Accordion.Panel {...propsPanelFirst}>
-                <Accordion.Content>
-                  Base UI is a library of high-quality unstyled React components
-                  for design systems and web apps.
-                </Accordion.Content>
-              </Accordion.Panel>
-            </Accordion.Item>
-            <Accordion.Item {...propsItemSecond}>
-              <Accordion.Header {...propsHeaderSecond}>
-                <Accordion.Trigger {...propsTriggerSecond}>
-                  How do I get started?
-                  <Accordion.Icon />
-                </Accordion.Trigger>
-              </Accordion.Header>
-              <Accordion.Panel {...propsPanelSecond}>
-                <Accordion.Content>
-                  Head to the “Quick start” guide in the docs. If you’ve used
-                  unstyled libraries before, you’ll feel at home.
-                </Accordion.Content>
-              </Accordion.Panel>
-            </Accordion.Item>
-            <Accordion.Item {...propsItemThird}>
-              <Accordion.Header {...propsHeaderThird}>
-                <Accordion.Trigger {...propsTriggerThird}>
-                  Can I use it for my project?
-                  <Accordion.Icon />
-                </Accordion.Trigger>
-              </Accordion.Header>
-              <Accordion.Panel {...propsPanelThird}>
-                <Accordion.Content>
-                  Of course! Base UI is free and open source.
-                </Accordion.Content>
-              </Accordion.Panel>
-            </Accordion.Item>
-          </Accordion.Root>
-        </RemounterRoot>
-      </Story>
-    </ComponentEntry>
+      <RemounterRoot>
+        <Accordion.Root {...propsRoot}>
+          <Accordion.Item {...propsItemFirst}>
+            <Accordion.Header {...propsHeaderFirst}>
+              <Accordion.Trigger {...propsTriggerFirst}>
+                What is Base UI?
+                <Accordion.Icon />
+              </Accordion.Trigger>
+            </Accordion.Header>
+            <Accordion.Panel {...propsPanelFirst}>
+              <Accordion.Content>
+                Base UI is a library of high-quality unstyled React components
+                for design systems and web apps.
+              </Accordion.Content>
+            </Accordion.Panel>
+          </Accordion.Item>
+          <Accordion.Item {...propsItemSecond}>
+            <Accordion.Header {...propsHeaderSecond}>
+              <Accordion.Trigger {...propsTriggerSecond}>
+                How do I get started?
+                <Accordion.Icon />
+              </Accordion.Trigger>
+            </Accordion.Header>
+            <Accordion.Panel {...propsPanelSecond}>
+              <Accordion.Content>
+                Head to the “Quick start” guide in the docs. If you’ve used
+                unstyled libraries before, you’ll feel at home.
+              </Accordion.Content>
+            </Accordion.Panel>
+          </Accordion.Item>
+          <Accordion.Item {...propsItemThird}>
+            <Accordion.Header {...propsHeaderThird}>
+              <Accordion.Trigger {...propsTriggerThird}>
+                Can I use it for my project?
+                <Accordion.Icon />
+              </Accordion.Trigger>
+            </Accordion.Header>
+            <Accordion.Panel {...propsPanelThird}>
+              <Accordion.Content>
+                Of course! Base UI is free and open source.
+              </Accordion.Content>
+            </Accordion.Panel>
+          </Accordion.Item>
+        </Accordion.Root>
+      </RemounterRoot>
+    </Component>
   );
 };
