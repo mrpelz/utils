@@ -44,17 +44,25 @@ const Container = styled('component')`
   position: relative;
   display: grid;
   width: 100svw;
-  height: 100svh;
+  min-height: 100svh;
   padding: var(--space-4);
   gap: var(--space-4);
   grid-auto-columns: 1fr;
-  grid-template: '. .' auto '. .' 1fr / 1fr 25rem;
+  grid-template: 'content config' 1fr / 1fr 25em;
   scroll-snap-align: start;
   scroll-snap-stop: always;
+`;
 
-  & + & {
-    border-top: var(--border-width) dashed var(--border-muted);
-  }
+const Content = styled('section')`
+  position: sticky;
+  top: 0;
+  display: grid;
+  height: 100svh;
+  padding: var(--space-4);
+  margin: calc(var(--space-4) * -1);
+  gap: var(--space-4);
+  grid-area: content;
+  grid-template: 'head' auto 'stage' 1fr / 1fr;
 `;
 
 const ComponentHeader = styled('component-header')`
@@ -66,7 +74,7 @@ const ComponentHeader = styled('component-header')`
   padding: var(--space-4);
   margin: calc(var(--space-4) * -1);
   background-color: var(--surface);
-  grid-column: 1 / 3;
+  grid-area: head;
 `;
 
 const ComponentHeading = styled('h2')`
@@ -85,6 +93,7 @@ const Stage = styled('stage')`
   position: relative;
   display: grid;
   align-items: center;
+  grid-area: stage;
 `;
 
 const StageBackground = styled('stage-background')`
@@ -107,8 +116,9 @@ const StageBackground = styled('stage-background')`
   mask-repeat: no-repeat;
 `;
 
-const StageInner = styled('stage-inner')`
+const StageInner = styled<{ center: boolean }>('stage-inner')`
   display: block;
+  margin: ${({ center }) => (center ? '0 auto' : undefined)};
 
   & > * {
     position: relative;
@@ -124,23 +134,21 @@ const StageInner = styled('stage-inner')`
 `;
 
 const Config = styled('config' as 'section')`
+  display: flex;
+  flex-direction: column;
   border: var(--border-width) dashed var(--border-muted);
   color: var(--muted);
   color-scheme: dark;
   font-family: monospace;
   font-size: var(--text-sm);
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
+  grid-area: config;
 `;
 
 const ConfigInner = styled(Config)`
   display: block;
-  overflow: visible;
   padding: var(--space-2);
-  border-right: none;
-  border-left: none;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+  border-right: none !important;
+  border-left: none !important;
 
   &[hidden] {
     display: none;
@@ -152,25 +160,24 @@ const ConfigInner = styled(Config)`
   }
 
   &:last-child {
+    flex-grow: 1;
     border-bottom: none;
   }
 `;
 
-const ConfigHeading = styled('h3')`
+const ConfigHeading = styled('summary')`
   position: sticky;
   top: 0;
   padding: var(--space-2);
   margin: calc(var(--space-2) * -1);
   margin-bottom: var(--space-1);
   background-color: var(--surface);
-  font-size: var(--text-sm);
-  font-weight: var(--font-regular);
 `;
 
 const PropContainer = styled('prop-container')`
   display: grid;
   gap: var(--space-2);
-  grid-template-columns: auto auto;
+  grid-template-columns: auto auto min-content;
   margin-block: var(--space-4);
 `;
 
@@ -217,12 +224,37 @@ const PropSelector = <T extends PropMap>({
   const inputId = useId();
   const datalistId = useId();
 
+  const [initialValue] = useState(state[objectKey]);
+
   const handleSet = useCallback(
     (value: T[keyof T][number]) => {
       setState((state_) => ({ ...state_, [objectKey]: value }));
     },
     [objectKey, setState],
   );
+
+  const resetState = useCallback(
+    () => handleSet(initialValue),
+    [handleSet, initialValue],
+  );
+
+  const value: any = useMemo(() => state[objectKey], [objectKey, state]);
+
+  const isModified = useMemo(
+    () => value !== initialValue,
+    [initialValue, value],
+  );
+  const isCustomValue = useMemo(() => !values.includes(value), [value, values]);
+
+  const displayValue = useMemo(() => {
+    if (value === undefined) return 'undefined';
+    if (value === null) return 'null';
+    if (value instanceof MappedProp) {
+      return value.label;
+    }
+
+    return JSON.stringify(value) || value.toString();
+  }, [value]);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -236,19 +268,19 @@ const PropSelector = <T extends PropMap>({
 
         if (input.value.length === 0) {
           if (force) {
-            handleSet(undefined);
+            input.value = displayValue;
             input.blur();
           }
 
           return;
         }
 
-        for (const value of values) {
-          if (!isObject(value)) continue;
-          if (!((value as any) instanceof MappedProp)) continue;
-          if (value.label !== input.value) continue;
+        for (const value_ of values) {
+          if (!isObject(value_)) continue;
+          if (!((value_ as any) instanceof MappedProp)) continue;
+          if (value_.label !== input.value) continue;
 
-          handleSet(value);
+          handleSet(value_);
           input.blur();
           return;
         }
@@ -260,25 +292,13 @@ const PropSelector = <T extends PropMap>({
         }
 
         handleSet(JSON.parse(input.value));
-        input.blur();
+        if (!isCustomValue) input.blur();
       } catch {
         input.setCustomValidity('enter valid JSON string');
       }
     },
-    [handleSet, values],
+    [displayValue, handleSet, isCustomValue, values],
   );
-
-  const value: any = useMemo(() => state[objectKey], [objectKey, state]);
-
-  const displayValue = useMemo(() => {
-    if (value === undefined) return 'undefined';
-    if (value === null) return 'null';
-    if (value instanceof MappedProp) {
-      return value.label;
-    }
-
-    return JSON.stringify(value) || value.toString();
-  }, [value]);
 
   return (
     <>
@@ -287,6 +307,7 @@ const PropSelector = <T extends PropMap>({
         htmlFor={inputId}
       >
         {objectKey}
+        {isCustomValue ? '*' : null}
       </label>
       <input
         ref={inputRef}
@@ -299,7 +320,7 @@ const PropSelector = <T extends PropMap>({
           inputRef.current?.reportValidity();
         }}
         onFocus={() => {
-          if (!inputRef.current) return;
+          if (!inputRef.current || isCustomValue) return;
           inputRef.current.value = '';
         }}
         onInput={() => {
@@ -314,6 +335,12 @@ const PropSelector = <T extends PropMap>({
           />
         ))}
       </datalist>
+      <button
+        disabled={!isModified}
+        onClick={() => resetState()}
+      >
+        ×
+      </button>
     </>
   );
 };
@@ -388,24 +415,26 @@ export const usePropControl = <T extends PropMap>(
 
   return [
     <ConfigInner key={0}>
-      <ConfigHeading>{title ?? 'Props'}</ConfigHeading>
-      <PropContainer>
-        {Object.entries(propMapSorted).map(([key, values]) => (
-          <PropSelector<T>
-            key={key}
-            objectKey={key as Extract<keyof T, string>}
-            setState={setState}
-            state={state}
-            values={values}
-          />
-        ))}
-      </PropContainer>
-      <button
-        disabled={!isModified}
-        onClick={resetState}
-      >
-        Reset
-      </button>
+      <details>
+        <ConfigHeading>{title ?? 'Props'}</ConfigHeading>
+        <PropContainer>
+          {Object.entries(propMapSorted).map(([key, values]) => (
+            <PropSelector<T>
+              key={key}
+              objectKey={key as Extract<keyof T, string>}
+              setState={setState}
+              state={state}
+              values={values}
+            />
+          ))}
+        </PropContainer>
+        <button
+          disabled={!isModified}
+          onClick={resetState}
+        >
+          Reset
+        </button>
+      </details>
     </ConfigInner>,
     mappedState as ControlledProps<T>,
     Remounter,
@@ -424,10 +453,7 @@ export const commonPropOptions = {
   render: [undefined, new MappedProp(<main />, '<main />')] as const,
 };
 
-type TStageBackgroundContext = [
-  boolean | undefined,
-  Dispatch<StateUpdater<boolean | undefined>>,
-];
+type TStageBackgroundContext = [boolean, Dispatch<StateUpdater<boolean>>];
 const StageBackgroundContext = createContext(
   undefined as unknown as TStageBackgroundContext,
 );
@@ -442,35 +468,39 @@ export const StageBackgroundProvider: FunctionComponent = ({ children }) => {
 };
 
 export const Component: FunctionComponent<{
+  center?: boolean;
   controls?: ComponentChildren;
   id: string;
   log?: ComponentChild;
   title: string;
-}> = ({ children, controls, id, log, title }) => {
+}> = ({ center = false, children, controls, id, log, title }) => {
   const [stageBackground, setStageBackground] = useContext(
     StageBackgroundContext,
   );
+  const [isCentered, setIsCentered] = useLocalStorage(`${id}.center`, center);
 
   return (
     <Container>
-      <ComponentHeader>
-        <ComponentHeading>{title}</ComponentHeading>
-        <ComponentDocsLink
-          href={`https://base-ui.com/react/components/${id}`}
-          rel="noreferrer"
-          target="_blank"
-        >
-          base-ui.com/react/components/{id}
-        </ComponentDocsLink>
-      </ComponentHeader>
-      <Stage>
-        {stageBackground ? <StageBackground /> : null}
-        <StageInner>{children}</StageInner>
-      </Stage>
+      <Content>
+        <ComponentHeader>
+          <ComponentHeading>{title}</ComponentHeading>
+          <ComponentDocsLink
+            href={`https://base-ui.com/react/components/${id}`}
+            rel="noreferrer"
+            target="_blank"
+          >
+            base-ui.com/react/components/{id}
+          </ComponentDocsLink>
+        </ComponentHeader>
+        <Stage>
+          {stageBackground ? <StageBackground /> : null}
+          <StageInner center={isCentered}>{children}</StageInner>
+        </Stage>
+      </Content>
       <Config>
         <ConfigInner>
           <ConfigHeading>Config</ConfigHeading>
-          <label>
+          <label style={{ display: 'block' }}>
             <input
               checked={stageBackground}
               name="stageBackground"
@@ -482,9 +512,21 @@ export const Component: FunctionComponent<{
             />
             Stage Background
           </label>
+          <label style={{ display: 'block' }}>
+            <input
+              checked={isCentered}
+              name={`${id}.center`}
+              type="checkbox"
+              onClick={useCallback(
+                () => setIsCentered(!isCentered),
+                [isCentered, setIsCentered],
+              )}
+            />
+            Center
+          </label>
         </ConfigInner>
-        {log}
         {controls}
+        {log}
       </Config>
     </Container>
   );
@@ -530,7 +572,7 @@ export const useLog = (): [ComponentChild, (value: string) => void] => {
         disabled
         onClick={resetLogs}
       >
-        Reset
+        Clear
       </button>
     </ConfigInner>
   );

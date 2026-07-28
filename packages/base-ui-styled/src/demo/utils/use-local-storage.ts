@@ -34,8 +34,8 @@ export const useSetLocalStorage = (key: string, value?: string): void => {
 
 export const useLocalStorage = <T>(
   key: string,
-  defaultValue?: T,
-): [T | undefined, Dispatch<StateUpdater<T | undefined>>] => {
+  defaultValue: T,
+): [T, Dispatch<StateUpdater<T>>] => {
   const persisted_ = useGetLocalStorage(key);
   const persisted = useMemo(() => {
     if (persisted_ === undefined) return undefined;
@@ -45,11 +45,12 @@ export const useLocalStorage = <T>(
     } catch {
       return undefined;
     }
-  }, [persisted_]) as T | undefined;
+  }, [persisted_]) as T;
 
-  const [value, setValue] = useState<T | undefined>(persisted ?? defaultValue);
+  const [value, setValue] = useState<T>(persisted ?? defaultValue);
 
-  useSetLocalStorage(key, useSafeJSONStringify(value));
+  const value_ = useSafeJSONStringify(value);
+  useSetLocalStorage(key, value === defaultValue ? undefined : value_);
 
   return [value, setValue];
 };
