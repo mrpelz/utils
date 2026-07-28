@@ -36,10 +36,11 @@ export const ButtonDemo: FunctionComponent = () => {
 
   return (
     <Component
+      center
       controls={control}
-      id="test"
+      id="button"
       log={log}
-      title="Test"
+      title="Button"
     >
       <Button {...props} />
     </Component>

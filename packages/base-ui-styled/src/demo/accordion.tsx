@@ -61,6 +61,24 @@ const propOptionsPanel = {
 
 export const AccordionDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
+  const [
+    controlContent,
+    { headline1, text1, headline2, text2, headline3, text3 },
+  ] = usePropControl(
+    {
+      headline1: ['What is Base UI?'] as const,
+      text1: [
+        'Base UI is a library of high-quality unstyled React components for design systems and web apps.',
+      ] as const,
+      headline2: ['How do I get started?'] as const,
+      text2: [
+        'Head to the “Quick start” guide in the docs. If you’ve used unstyled libraries before, you’ll feel at home.',
+      ] as const,
+      headline3: ['Can I use it for my project?'] as const,
+      text3: ['Of course! Base UI is free and open source.'] as const,
+    } as const,
+    '[content]',
+  );
   const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
     useMemo(
       () => ({
@@ -195,6 +213,7 @@ export const AccordionDemo: FunctionComponent = () => {
       log={log}
       title="Accordion"
       controls={[
+        controlContent,
         controlRoot,
         controlItemFirst,
         controlHeaderFirst,
@@ -215,42 +234,34 @@ export const AccordionDemo: FunctionComponent = () => {
           <Accordion.Item {...propsItemFirst}>
             <Accordion.Header {...propsHeaderFirst}>
               <Accordion.Trigger {...propsTriggerFirst}>
-                What is Base UI?
+                {headline1}
                 <Accordion.Icon />
               </Accordion.Trigger>
             </Accordion.Header>
             <Accordion.Panel {...propsPanelFirst}>
-              <Accordion.Content>
-                Base UI is a library of high-quality unstyled React components
-                for design systems and web apps.
-              </Accordion.Content>
+              <Accordion.Content>{text1}</Accordion.Content>
             </Accordion.Panel>
           </Accordion.Item>
           <Accordion.Item {...propsItemSecond}>
             <Accordion.Header {...propsHeaderSecond}>
               <Accordion.Trigger {...propsTriggerSecond}>
-                How do I get started?
+                {headline2}
                 <Accordion.Icon />
               </Accordion.Trigger>
             </Accordion.Header>
             <Accordion.Panel {...propsPanelSecond}>
-              <Accordion.Content>
-                Head to the “Quick start” guide in the docs. If you’ve used
-                unstyled libraries before, you’ll feel at home.
-              </Accordion.Content>
+              <Accordion.Content>{text2}</Accordion.Content>
             </Accordion.Panel>
           </Accordion.Item>
           <Accordion.Item {...propsItemThird}>
             <Accordion.Header {...propsHeaderThird}>
               <Accordion.Trigger {...propsTriggerThird}>
-                Can I use it for my project?
+                {headline3}
                 <Accordion.Icon />
               </Accordion.Trigger>
             </Accordion.Header>
             <Accordion.Panel {...propsPanelThird}>
-              <Accordion.Content>
-                Of course! Base UI is free and open source.
-              </Accordion.Content>
+              <Accordion.Content>{text3}</Accordion.Content>
             </Accordion.Panel>
           </Accordion.Item>
         </Accordion.Root>
