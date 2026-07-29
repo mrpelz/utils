@@ -7,6 +7,7 @@ import {
   createContext,
   CSSProperties,
   FunctionComponent,
+  KeyboardEventHandler,
   RenderableProps,
 } from 'preact';
 import { forwardRef } from 'preact/compat';
@@ -39,6 +40,8 @@ export type PropMapState<T extends PropMap> = {
 export type ControlledProps<T extends PropMap> = {
   [P in keyof T]: RemappedProp<T[P]>;
 };
+
+const BASE_URL_DOC = 'https://base-ui.com/react/components';
 
 const Container = styled('component')`
   position: relative;
@@ -172,6 +175,7 @@ const ConfigHeading = styled('summary')`
   margin: calc(var(--space-2) * -1);
   margin-bottom: var(--space-1);
   background-color: var(--surface);
+  cursor: pointer;
 `;
 
 const PropContainer = styled('prop-container')`
@@ -292,12 +296,53 @@ const PropSelector = <T extends PropMap>({
         }
 
         handleSet(JSON.parse(input.value));
-        if (!isCustomValue) input.blur();
+        if (!isCustomValue && input.selectionEnd === input.value.length) {
+          input.blur();
+        }
       } catch {
         input.setCustomValidity('enter valid JSON string');
       }
     },
     [displayValue, handleSet, isCustomValue, values],
+  );
+
+  const onBlur = useCallback(() => {
+    applyInput(true);
+    inputRef.current?.reportValidity();
+  }, [applyInput]);
+
+  const onFocus = useCallback(() => {
+    if (!inputRef.current || isCustomValue) return;
+    inputRef.current.value = '';
+  }, [isCustomValue]);
+
+  const onInput = useCallback(() => {
+    applyInput(false);
+  }, [applyInput]);
+
+  const onKeyDown = useCallback<KeyboardEventHandler<HTMLInputElement>>(
+    (event) => {
+      const { currentTarget } = event;
+
+      if (currentTarget.value.length > 0) return;
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      event.preventDefault();
+      currentTarget.value = displayValue;
+
+      const isJsonString = Boolean(displayValue.match(/^".*"$/));
+      if (isJsonString) {
+        currentTarget.setSelectionRange(1, displayValue.length - 1);
+
+        return;
+      }
+
+      currentTarget.setSelectionRange(0, displayValue.length);
+    },
+    [displayValue],
   );
 
   return (
@@ -315,17 +360,10 @@ const PropSelector = <T extends PropMap>({
         list={datalistId}
         name={objectKey}
         value={displayValue}
-        onBlur={() => {
-          applyInput(true);
-          inputRef.current?.reportValidity();
-        }}
-        onFocus={() => {
-          if (!inputRef.current || isCustomValue) return;
-          inputRef.current.value = '';
-        }}
-        onInput={() => {
-          applyInput(false);
-        }}
+        onBlur={onBlur}
+        onFocus={onFocus}
+        onInput={onInput}
+        onKeyDown={onKeyDown}
       />
       <datalist id={datalistId}>
         {values.map((optionValue) => (
@@ -485,7 +523,7 @@ export const Component: FunctionComponent<{
         <ComponentHeader>
           <ComponentHeading>{title}</ComponentHeading>
           <ComponentDocsLink
-            href={`https://base-ui.com/react/components/${id}`}
+            href={`${BASE_URL_DOC}/${id}`}
             rel="noreferrer"
             target="_blank"
           >
