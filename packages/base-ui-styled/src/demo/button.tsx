@@ -21,7 +21,7 @@ const propOptions = {
 
 export const ButtonDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
-  const [control, props] = usePropControl(
+  const [control, props, Remounter] = usePropControl(
     useMemo(
       () => ({
         ...propOptions,
@@ -42,7 +42,9 @@ export const ButtonDemo: FunctionComponent = () => {
       log={log}
       title="Button"
     >
-      <Button {...props} />
+      <Remounter>
+        <Button {...props} />
+      </Remounter>
     </Component>
   );
 };
