@@ -3,7 +3,7 @@ import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip';
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
-import { css } from '../../../style.js';
+import { css } from '../../utils.js';
 import { CommonToast, toastButtonStyles } from '../common.js';
 
 const AnchoredViewport = styled(BaseToast.Viewport, forwardRef)`

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { isObject, objectKeys } from '@mrpelz/misc-utils/oop';
-import { styled } from 'goober';
 import {
   ComponentChild,
   ComponentChildren,
@@ -10,7 +9,6 @@ import {
   KeyboardEventHandler,
   RenderableProps,
 } from 'preact';
-import { forwardRef } from 'preact/compat';
 import {
   Dispatch,
   StateUpdater,
@@ -22,6 +20,22 @@ import {
   useState,
 } from 'preact/hooks';
 
+import {
+  Button,
+  ComponentDocsLink,
+  ComponentHeader,
+  ComponentHeading,
+  Config,
+  ConfigHeading,
+  ConfigInner,
+  Container,
+  Content,
+  LogContainer,
+  PropContainer,
+  Stage,
+  StageBackground,
+  StageInner,
+} from './components.js';
 import { useLocalStorage } from './use-local-storage.js';
 
 export type RemappedPropValue<T extends any> =
@@ -43,152 +57,22 @@ export type ControlledProps<T extends PropMap> = {
 
 const BASE_URL_DOC = 'https://base-ui.com/react/components';
 
-const Container = styled('component')`
-  position: relative;
-  display: grid;
-  width: 100svw;
-  min-height: 100svh;
-  padding: var(--space-4);
-  gap: var(--space-4);
-  grid-auto-columns: 1fr;
-  grid-template: 'content config' 1fr / 1fr 25em;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-`;
+export const useId = (): string => useMemo(() => self.crypto.randomUUID(), []);
 
-const Content = styled('section')`
-  position: sticky;
-  top: 0;
-  display: grid;
-  height: 100svh;
-  padding: var(--space-4);
-  margin: calc(var(--space-4) * -1);
-  gap: var(--space-4);
-  grid-area: content;
-  grid-template: 'head' auto 'stage' 1fr / 1fr;
-`;
+export const isEqual = <A extends object, B extends A>(a: A, b: B): a is B => {
+  for (const key of [objectKeys(a), objectKeys(b)].flat()) {
+    if (!(key in a)) return false;
+    if (!(key in b)) return false;
 
-const ComponentHeader = styled('component-header')`
-  position: sticky;
-  z-index: 1;
-  top: 0;
-  display: block;
-  width: stretch;
-  padding: var(--space-4);
-  margin: calc(var(--space-4) * -1);
-  background-color: var(--surface);
-  grid-area: head;
-`;
-
-const ComponentHeading = styled('h2')`
-  margin: 0 0 var(--space-1);
-  font-size: var(--text-lg);
-  font-weight: var(--font-bold);
-`;
-
-const ComponentDocsLink = styled('a')`
-  display: inline-block;
-  color: var(--muted);
-  font-size: var(--text-sm);
-`;
-
-const Stage = styled('stage')`
-  position: relative;
-  display: grid;
-  align-items: center;
-  grid-area: stage;
-`;
-
-const StageBackground = styled('stage-background')`
-  position: absolute;
-  z-index: -1;
-  background-image: radial-gradient(
-    circle,
-    var(--muted) 0.5px,
-    transparent 0.5px
-  );
-  background-position: center center;
-  background-repeat: repeat;
-  background-size: 9px 9px;
-  inset: 0;
-  mask-image: radial-gradient(
-    ellipse at center,
-    rgb(0 0 0) 0%,
-    rgb(0 0 0 / 0%) 90%
-  );
-  mask-repeat: no-repeat;
-`;
-
-const StageInner = styled<{ center: boolean }>('stage-inner')`
-  display: block;
-  margin: ${({ center }) => (center ? '0 auto' : undefined)};
-
-  & > * {
-    position: relative;
-
-    &::after {
-      position: absolute;
-      z-index: -1;
-      background-color: var(--surface);
-      content: '';
-      inset: 0;
+    if (a[key as keyof A] !== (b[key as keyof B] as unknown as A[keyof A])) {
+      return false;
     }
   }
-`;
 
-const Config = styled('config' as 'section')`
-  display: flex;
-  flex-direction: column;
-  border: var(--border-width) dashed var(--border-muted);
-  color: var(--muted);
-  color-scheme: dark;
-  font-family: monospace;
-  font-size: var(--text-sm);
-  grid-area: config;
-`;
+  return true;
+};
 
-const ConfigInner = styled(Config)`
-  display: block;
-  padding: var(--space-2);
-  border-right: none !important;
-  border-left: none !important;
-
-  &[hidden] {
-    display: none;
-  }
-
-  & + &,
-  &:first-child {
-    border-top: none;
-  }
-
-  &:last-child {
-    flex-grow: 1;
-    border-bottom: none;
-  }
-`;
-
-const ConfigHeading = styled('summary')`
-  position: sticky;
-  top: 0;
-  padding: var(--space-2);
-  margin: calc(var(--space-2) * -1);
-  margin-bottom: var(--space-1);
-  background-color: var(--surface);
-  cursor: pointer;
-`;
-
-const PropContainer = styled('prop-container')`
-  display: grid;
-  gap: var(--space-2);
-  grid-template-columns: auto auto min-content;
-  margin-block: var(--space-4);
-`;
-
-const LogContainer = styled('log-container' as 'section', forwardRef)`
-  display: block;
-  margin-block: var(--space-4);
-`;
+export const html = String.raw;
 
 export class MappedProp<T> {
   constructor(
@@ -196,8 +80,6 @@ export class MappedProp<T> {
     public readonly label: string,
   ) {}
 }
-
-export const useId = (): string => useMemo(() => self.crypto.randomUUID(), []);
 
 const PropSelectorOption = <T,>({ value }: { value: T }): ComponentChild => {
   const displayValue = useMemo(() => {
@@ -324,25 +206,47 @@ const PropSelector = <T extends PropMap>({
     (event) => {
       const { currentTarget } = event;
 
-      if (currentTarget.value.length > 0) return;
       if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
         return;
       }
-      if (event.key !== 'Tab') return;
-
-      event.preventDefault();
-      currentTarget.value = displayValue;
 
       const isJsonString = Boolean(displayValue.match(/^".*"$/));
-      if (isJsonString) {
-        currentTarget.setSelectionRange(1, displayValue.length - 1);
 
-        return;
+      switch (event.key) {
+        case 'Tab': {
+          if (currentTarget.value.length > 0) break;
+
+          event.preventDefault();
+          currentTarget.value = displayValue;
+
+          if (isJsonString) {
+            currentTarget.setSelectionRange(1, displayValue.length - 1);
+
+            break;
+          }
+
+          currentTarget.setSelectionRange(0, displayValue.length);
+          break;
+        }
+
+        case 'Enter': {
+          if (!isJsonString) break;
+
+          const cursor = currentTarget.selectionEnd || 1;
+          const preCursorValue = currentTarget.value.slice(0, cursor);
+          const postCursorValue = currentTarget.value.slice(cursor);
+
+          currentTarget.value = String.raw`${preCursorValue}\n${postCursorValue}`;
+          currentTarget.selectionEnd = cursor + 2;
+          applyInput(false);
+
+          break;
+        }
+
+        default:
       }
-
-      currentTarget.setSelectionRange(0, displayValue.length);
     },
-    [displayValue],
+    [applyInput, displayValue],
   );
 
   return (
@@ -373,32 +277,20 @@ const PropSelector = <T extends PropMap>({
           />
         ))}
       </datalist>
-      <button
+      <Button
         disabled={!isModified}
         onClick={() => resetState()}
       >
         ×
-      </button>
+      </Button>
     </>
   );
-};
-
-export const isEqual = <A extends object, B extends A>(a: A, b: B): a is B => {
-  for (const key of [objectKeys(a), objectKeys(b)].flat()) {
-    if (!(key in a)) return false;
-    if (!(key in b)) return false;
-
-    if (a[key as keyof A] !== (b[key as keyof B] as unknown as A[keyof A])) {
-      return false;
-    }
-  }
-
-  return true;
 };
 
 export const usePropControl = <T extends PropMap>(
   propMap: T,
   title?: string,
+  open?: boolean,
 ): [ComponentChild, ControlledProps<T>, FunctionComponent] => {
   const propMapSorted = useMemo(
     () =>
@@ -453,7 +345,7 @@ export const usePropControl = <T extends PropMap>(
 
   return [
     <ConfigInner key={0}>
-      <details>
+      <details open={open ?? !title}>
         <ConfigHeading>{title ?? 'Props'}</ConfigHeading>
         <PropContainer>
           {Object.entries(propMapSorted).map(([key, values]) => (
@@ -466,108 +358,17 @@ export const usePropControl = <T extends PropMap>(
             />
           ))}
         </PropContainer>
-        <button
+        <Button
           disabled={!isModified}
           onClick={resetState}
         >
           Reset
-        </button>
+        </Button>
       </details>
     </ConfigInner>,
     mappedState as ControlledProps<T>,
     Remounter,
   ] as const;
-};
-
-export const commonPropOptions = {
-  className: [undefined, 'some-custom--class'] as const,
-  style: [
-    undefined,
-    new MappedProp<CSSProperties>(
-      { outline: '5px dashed red' },
-      'outline: 5px dashed red',
-    ),
-  ] as const,
-  render: [undefined, new MappedProp(<main />, '<main />')] as const,
-};
-
-type TStageBackgroundContext = [boolean, Dispatch<StateUpdater<boolean>>];
-const StageBackgroundContext = createContext(
-  undefined as unknown as TStageBackgroundContext,
-);
-export const StageBackgroundProvider: FunctionComponent = ({ children }) => {
-  const value = useLocalStorage('stage-background', true);
-
-  return (
-    <StageBackgroundContext.Provider value={value}>
-      {children}
-    </StageBackgroundContext.Provider>
-  );
-};
-
-export const Component: FunctionComponent<{
-  center?: boolean;
-  controls?: ComponentChildren;
-  id: string;
-  log?: ComponentChild;
-  title: string;
-}> = ({ center = false, children, controls, id, log, title }) => {
-  const [stageBackground, setStageBackground] = useContext(
-    StageBackgroundContext,
-  );
-  const [isCentered, setIsCentered] = useLocalStorage(`${id}.center`, center);
-
-  return (
-    <Container>
-      <Content>
-        <ComponentHeader>
-          <ComponentHeading>{title}</ComponentHeading>
-          <ComponentDocsLink
-            href={`${BASE_URL_DOC}/${id}`}
-            rel="noreferrer"
-            target="_blank"
-          >
-            base-ui.com/react/components/{id}
-          </ComponentDocsLink>
-        </ComponentHeader>
-        <Stage>
-          {stageBackground ? <StageBackground /> : null}
-          <StageInner center={isCentered}>{children}</StageInner>
-        </Stage>
-      </Content>
-      <Config>
-        <ConfigInner>
-          <ConfigHeading>Config</ConfigHeading>
-          <label style={{ display: 'block' }}>
-            <input
-              checked={stageBackground}
-              name="stageBackground"
-              type="checkbox"
-              onClick={useCallback(
-                () => setStageBackground(!stageBackground),
-                [setStageBackground, stageBackground],
-              )}
-            />
-            Stage Background
-          </label>
-          <label style={{ display: 'block' }}>
-            <input
-              checked={isCentered}
-              name={`${id}.center`}
-              type="checkbox"
-              onClick={useCallback(
-                () => setIsCentered(!isCentered),
-                [isCentered, setIsCentered],
-              )}
-            />
-            Center
-          </label>
-        </ConfigInner>
-        {controls}
-        {log}
-      </Config>
-    </Container>
-  );
 };
 
 export const useLog = (): [ComponentChild, (value: string) => void] => {
@@ -605,15 +406,136 @@ export const useLog = (): [ComponentChild, (value: string) => void] => {
     <ConfigInner>
       <ConfigHeading>Log</ConfigHeading>
       <LogContainer ref={logContainerRef} />
-      <button
+      <Button
         ref={buttonRef}
         disabled
         onClick={resetLogs}
       >
         Clear
-      </button>
+      </Button>
     </ConfigInner>
   );
 
   return [log, addLog] as const;
+};
+
+type TStageBackgroundContext = [boolean, Dispatch<StateUpdater<boolean>>];
+const StageBackgroundContext = createContext(
+  undefined as unknown as TStageBackgroundContext,
+);
+export const StageBackgroundProvider: FunctionComponent = ({ children }) => {
+  const value = useLocalStorage('stage-background', true);
+
+  return (
+    <StageBackgroundContext.Provider value={value}>
+      {children}
+    </StageBackgroundContext.Provider>
+  );
+};
+
+export const Component: FunctionComponent<{
+  backdrop?: boolean;
+  center?: boolean;
+  controls?: ComponentChildren;
+  id: string;
+  log?: ComponentChild;
+  title: string;
+}> = ({
+  backdrop = false,
+  center = false,
+  children,
+  controls,
+  id,
+  log,
+  title,
+}) => {
+  const [stageBackground, setStageBackground] = useContext(
+    StageBackgroundContext,
+  );
+  const [isCentered, setIsCentered] = useLocalStorage(`${id}.center`, center);
+  const [hasBackdrop, setHasBackdrop] = useLocalStorage(
+    `${id}.backdrop`,
+    backdrop,
+  );
+
+  return (
+    <Container>
+      <Content>
+        <ComponentHeader>
+          <ComponentHeading>{title}</ComponentHeading>
+          <ComponentDocsLink
+            href={`${BASE_URL_DOC}/${id}`}
+            rel="noreferrer"
+            target="_blank"
+          >
+            base-ui.com/react/components/{id}
+          </ComponentDocsLink>
+        </ComponentHeader>
+        <Stage>
+          {stageBackground ? <StageBackground /> : null}
+          <StageInner
+            center={isCentered}
+            drawBackdrop={hasBackdrop}
+          >
+            {children}
+          </StageInner>
+        </Stage>
+      </Content>
+      <Config>
+        <ConfigInner>
+          <ConfigHeading>Config</ConfigHeading>
+          <label style={{ display: 'block' }}>
+            <input
+              checked={stageBackground}
+              name="stageBackground"
+              type="checkbox"
+              onClick={useCallback(
+                () => setStageBackground(!stageBackground),
+                [setStageBackground, stageBackground],
+              )}
+            />
+            Stage Background
+          </label>
+          <label style={{ display: 'block' }}>
+            <input
+              checked={hasBackdrop}
+              name={`${id}.backdrop`}
+              type="checkbox"
+              onClick={useCallback(
+                () => setHasBackdrop(!hasBackdrop),
+                [hasBackdrop, setHasBackdrop],
+              )}
+            />
+            Backdrop
+          </label>
+          <label style={{ display: 'block' }}>
+            <input
+              checked={isCentered}
+              name={`${id}.center`}
+              type="checkbox"
+              onClick={useCallback(
+                () => setIsCentered(!isCentered),
+                [isCentered, setIsCentered],
+              )}
+            />
+            Center
+          </label>
+        </ConfigInner>
+        {controls}
+        {log}
+      </Config>
+    </Container>
+  );
+};
+
+export const commonPropOptions = {
+  className: [undefined, 'some-custom--class'] as const,
+  style: [
+    undefined,
+    new MappedProp<CSSProperties>(
+      { outline: '5px dashed red' },
+      'outline: 5px dashed red',
+    ),
+  ] as const,
+  render: [undefined, new MappedProp(<main />, '<main />')] as const,
 };

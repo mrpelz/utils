@@ -4,8 +4,8 @@ import { ScrollArea as BaseScrollArea } from '@base-ui/react/scroll-area';
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
-import { css } from '../../../style.js';
 import { ScrollArea } from '../../scroll-area/component.js';
+import { css } from '../../utils.js';
 import { CommonAutocomplete } from '../common.js';
 
 const Button = styled(BaseDialog.Trigger, forwardRef)`

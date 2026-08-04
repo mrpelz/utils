@@ -2,7 +2,7 @@ import { Menu as BaseMenu } from '@base-ui/react/menu';
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
-import { css } from '../../../style.js';
+import { css } from '../../utils.js';
 import { CommonMenubar } from '../common.js';
 
 const MenuTrigger = styled(BaseMenu.Trigger, forwardRef)`

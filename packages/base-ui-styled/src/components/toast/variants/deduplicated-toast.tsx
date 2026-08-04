@@ -1,6 +1,6 @@
 import { keyframes } from 'goober';
 
-import { css } from '../../../style.js';
+import { css } from '../../utils.js';
 import { CommonToast } from '../common.js';
 
 const pulse = keyframes`

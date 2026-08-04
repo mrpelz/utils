@@ -2,7 +2,7 @@ import { NavigationMenu as BaseNavigationMenu } from '@base-ui/react/navigation-
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
-import { css } from '../../style.js';
+import { css } from '../utils.js';
 
 const Root = styled(BaseNavigationMenu.Root, forwardRef)`
   min-width: max-content;

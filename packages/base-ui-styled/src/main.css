@@ -1,5 +1,6 @@
-@import url('./components/common.css');
-@import url('./components/theme.css');
+/* @import url('./components/common.css'); */
+
+/* @import url('./components/theme.css'); */
 
 * {
   box-sizing: border-box;
@@ -7,8 +8,8 @@
 }
 
 :root {
-  background-color: var(--surface);
-  color: var(--ink);
+  background-color: #0a0a0a;
+  color: #fafafa;
   font-family: -apple-system, "SF UI Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
   scroll-snap-type: y mandatory;
 }

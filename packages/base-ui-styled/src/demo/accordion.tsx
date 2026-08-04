@@ -10,7 +10,20 @@ import {
   MappedProp,
   useLog,
   usePropControl,
-} from './utils/main.js';
+} from '../demo-utils/main.js';
+
+const propOptionsContent = {
+  headline1: ['What is Base UI?'] as const,
+  text1: [
+    'Base UI is a library of high-quality unstyled React components for design systems and web apps.',
+  ] as const,
+  headline2: ['How do I get started?'] as const,
+  text2: [
+    'Head to the “Quick start” guide in the docs. If you’ve used unstyled libraries before, you’ll feel at home.',
+  ] as const,
+  headline3: ['Can I use it for my project?'] as const,
+  text3: ['Of course! Base UI is free and open source.'] as const,
+} as const;
 
 const propOptionsRoot = {
   ...commonPropOptions,
@@ -61,24 +74,12 @@ const propOptionsPanel = {
 
 export const AccordionDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
+
   const [
     controlContent,
     { headline1, text1, headline2, text2, headline3, text3 },
-  ] = usePropControl(
-    {
-      headline1: ['What is Base UI?'] as const,
-      text1: [
-        'Base UI is a library of high-quality unstyled React components for design systems and web apps.',
-      ] as const,
-      headline2: ['How do I get started?'] as const,
-      text2: [
-        'Head to the “Quick start” guide in the docs. If you’ve used unstyled libraries before, you’ll feel at home.',
-      ] as const,
-      headline3: ['Can I use it for my project?'] as const,
-      text3: ['Of course! Base UI is free and open source.'] as const,
-    } as const,
-    '[content]',
-  );
+  ] = usePropControl(propOptionsContent, '[content]', true);
+
   const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
     useMemo(
       () => ({
@@ -209,6 +210,7 @@ export const AccordionDemo: FunctionComponent = () => {
 
   return (
     <Component
+      backdrop
       id="accordion"
       log={log}
       title="Accordion"
