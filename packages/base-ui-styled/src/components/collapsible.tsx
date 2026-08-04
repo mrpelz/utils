@@ -3,6 +3,8 @@ import { Properties } from 'csstype';
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
+import { css, wrap } from './utils.js';
+
 export type CollapsibleRootProps = BaseCollapsible.Root.Props & {
   'styled-max-width'?: Properties['maxWidth'];
 };
@@ -113,25 +115,51 @@ const Trigger = styled(BaseCollapsible.Trigger, forwardRef)`
   }
 `;
 
-const Panel = styled(BaseCollapsible.Panel, forwardRef)`
-  display: flex;
-  overflow: hidden;
-  height: var(--collapsible-panel-height);
-  flex-direction: column;
-  justify-content: end;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  transition: height 150ms ease-out;
+export type CollapsiblePanelProps = BaseCollapsible.Panel.Props & {
+  takeExpandedWidth?: boolean;
+};
 
-  &[hidden]:not([hidden='until-found']) {
-    display: none;
-  }
+// eslint-disable-next-line prettier/prettier
+const Panel = wrap(styled<typeof BaseCollapsible.Panel, CollapsiblePanelProps>(BaseCollapsible.Panel, forwardRef)`
+    display: flex;
+    overflow: hidden;
+    height: var(--collapsible-panel-height);
+    flex-direction: column;
+    justify-content: end;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition: height 150ms ease-out;
 
-  &[data-starting-style],
-  &[data-ending-style] {
-    height: 0;
-  }
-`;
+    &[hidden]:not([hidden='until-found']) {
+      ${({ takeExpandedWidth }) =>
+        takeExpandedWidth
+          ? css`
+              height: 0;
+              content-visibility: visible;
+              visibility: hidden;
+            `
+          : css`
+              display: none;
+            `}
+    }
+
+    &[hidden='until-found'] {
+      content-visibility: visible;
+    }
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      height: 0;
+    }
+  `,
+  (props: CollapsiblePanelProps) => ({
+    ...props,
+    ...((props.takeExpandedWidth ?? true) && {
+      keepMounted: true,
+      takeExpandedWidth: true,
+    }),
+  }),
+);
 
 const Content = styled('div', forwardRef)`
   display: flex;

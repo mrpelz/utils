@@ -55,6 +55,7 @@ const propOptionsPanel = {
   ...commonPropOptions,
   hiddenUntilFound: [undefined, false, true] as const,
   keepMounted: [undefined, false, true] as const,
+  takeExpandedWidth: [undefined, false, true] as const,
 } as const;
 
 export const CollapsibleDemo: FunctionComponent = () => {
