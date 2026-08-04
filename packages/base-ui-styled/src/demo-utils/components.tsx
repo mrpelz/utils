@@ -81,6 +81,7 @@ export const StageInner = styled<{ center: boolean; drawBackdrop: boolean }>('st
 
   & > * {
     position: relative;
+    white-space: pre-line;
 
     &::after {
       position: absolute;

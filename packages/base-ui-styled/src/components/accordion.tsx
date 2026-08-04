@@ -3,27 +3,56 @@ import { Properties } from 'csstype';
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
+import { css, wrap } from './utils.js';
+
 export type AccordionRootProps = BaseAccordion.Root.Props & {
   'styled-max-width'?: Properties['maxWidth'];
+  takeExpandedWidth?: boolean;
 };
 
 // eslint-disable-next-line prettier/prettier
-const Root = styled<typeof BaseAccordion.Root, AccordionRootProps>(BaseAccordion.Root, forwardRef)`
-  --styled-max-width: attr(styled-max-width type(\<length\>), none);
+const Root = wrap(styled<typeof BaseAccordion.Root, AccordionRootProps>(BaseAccordion.Root, forwardRef)`
+    --styled-max-width: attr(styled-max-width type(\<length\>), none);
 
-  display: flex;
-  width: 100%;
-  max-width: var(--styled-max-width);
-  box-sizing: border-box;
-  flex-direction: column;
-  border: 1px solid oklch(14.5% 0 0deg);
-  color: oklch(14.5% 0 0deg);
+    display: flex;
+    width: 100%;
+    max-width: var(--styled-max-width);
+    box-sizing: border-box;
+    flex-direction: column;
+    border: 1px solid oklch(14.5% 0 0deg);
+    color: oklch(14.5% 0 0deg);
 
-  @media (prefers-color-scheme: dark) {
-    border: 1px solid white;
-    color: white;
-  }
-`;
+    @media (prefers-color-scheme: dark) {
+      border: 1px solid white;
+      color: white;
+    }
+
+    & > * {
+      & > [hidden]:not([hidden='until-found']) {
+        ${({ takeExpandedWidth }) =>
+          takeExpandedWidth
+            ? css`
+                display: block;
+                height: 0;
+                content-visibility: visible;
+                visibility: hidden;
+              `
+            : undefined}
+      }
+
+      & > [hidden='until-found'] {
+        content-visibility: visible;
+      }
+    }
+  `,
+  (props: AccordionRootProps) => ({
+    ...props,
+    ...((props.takeExpandedWidth ?? true) && {
+      keepMounted: true,
+      takeExpandedWidth: true,
+    }),
+  }),
+);
 
 const Item = styled(BaseAccordion.Item, forwardRef)`
   & + & {

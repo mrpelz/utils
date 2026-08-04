@@ -48,6 +48,7 @@ const propOptionsRoot = {
   disabled: [undefined, false, true] as const,
   keepMounted: [undefined, false, true] as const,
   'styled-max-width': [undefined, 'none', '20rem'] as const,
+  takeExpandedWidth: [undefined, false, true] as const,
 };
 
 const propOptionsItem = {
@@ -211,6 +212,7 @@ export const AccordionDemo: FunctionComponent = () => {
   return (
     <Component
       backdrop
+      center
       id="accordion"
       log={log}
       title="Accordion"

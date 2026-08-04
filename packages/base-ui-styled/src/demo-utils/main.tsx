@@ -331,17 +331,18 @@ export const usePropControl = <T extends PropMap>(
         ),
       ),
     [state],
-  );
+  ) as ControlledProps<T>;
 
   const [mount, setMount] = useState(true);
   useLayoutEffect(() => {
     setMount(false);
     queueMicrotask(() => setMount(true));
-  }, [state]);
+  }, [mappedState]);
 
-  const Remounter: FunctionComponent = mount
-    ? ({ children }) => <>{children}</>
-    : () => null;
+  const Remounter = useCallback<FunctionComponent>(
+    ({ children }) => (mount ? children : null),
+    [mount],
+  );
 
   return [
     <ConfigInner key={0}>
@@ -366,7 +367,7 @@ export const usePropControl = <T extends PropMap>(
         </Button>
       </details>
     </ConfigInner>,
-    mappedState as ControlledProps<T>,
+    mappedState,
     Remounter,
   ] as const;
 };
