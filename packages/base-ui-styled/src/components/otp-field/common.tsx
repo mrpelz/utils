@@ -2,7 +2,7 @@ import { OTPField as BaseOTPField } from '@base-ui/react/otp-field';
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
-import { css } from '../../style.js';
+import { css } from '../utils.js';
 
 const Field = styled('div', forwardRef)`
   display: flex;

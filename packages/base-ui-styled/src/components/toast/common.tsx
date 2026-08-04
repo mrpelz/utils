@@ -2,7 +2,7 @@ import { Toast as BaseToast } from '@base-ui/react/toast';
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
-import { css } from '../../style.js';
+import { css } from '../utils.js';
 
 export const toastButtonStyles = css`
   box-sizing: border-box;

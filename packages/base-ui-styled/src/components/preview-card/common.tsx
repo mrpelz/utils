@@ -2,7 +2,7 @@ import { PreviewCard as BasePreviewCard } from '@base-ui/react/preview-card';
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
-import { css } from '../../style.js';
+import { css } from '../utils.js';
 
 const Trigger = styled(BasePreviewCard.Trigger, forwardRef)`
   color: var(--on-surface);

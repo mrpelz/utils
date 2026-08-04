@@ -2,7 +2,7 @@ import { Combobox as BaseCombobox } from '@base-ui/react/combobox';
 import { keyframes, styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
-import { css } from '../../../style.js';
+import { css } from '../../utils.js';
 import { CommonCombobox, itemBaseStyles } from '../common.js';
 
 const Container = styled('div', forwardRef)`

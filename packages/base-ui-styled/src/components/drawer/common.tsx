@@ -2,7 +2,7 @@ import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
-import { css } from '../../style.js';
+import { css } from '../utils.js';
 
 export const drawerButtonStyles = css`
   display: flex;

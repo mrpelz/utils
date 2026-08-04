@@ -2,7 +2,7 @@ import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
-import { css } from '../../../style.js';
+import { css } from '../../utils.js';
 import { CommonDrawer } from '../common.js';
 
 const Backdrop = styled(BaseDrawer.Backdrop, forwardRef)`

@@ -64,3 +64,5 @@ export const wrap = <
 
   return DownstreamComponent;
 };
+
+export const css = String.raw;

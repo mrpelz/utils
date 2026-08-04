@@ -8,7 +8,7 @@ import {
   MappedProp,
   useLog,
   usePropControl,
-} from './utils/main.js';
+} from '../demo-utils/main.js';
 
 const propOptions = {
   ...commonPropOptions,

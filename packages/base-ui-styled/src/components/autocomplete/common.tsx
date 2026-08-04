@@ -2,7 +2,7 @@ import { Autocomplete as BaseAutocomplete } from '@base-ui/react/autocomplete';
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
-import { css } from '../../style.js';
+import { css } from '../utils.js';
 
 const Input = styled(BaseAutocomplete.Input, forwardRef)`
   width: var(--control-width-sm);

@@ -2,7 +2,7 @@ import { NumberField as BaseNumberField } from '@base-ui/react/number-field';
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
-import { css } from '../../style.js';
+import { css } from '../utils.js';
 
 const Root = styled(BaseNumberField.Root, forwardRef)`
   display: flex;

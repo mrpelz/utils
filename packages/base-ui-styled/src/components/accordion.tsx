@@ -16,13 +16,22 @@ const Root = styled<typeof BaseAccordion.Root, AccordionRootProps>(BaseAccordion
   max-width: var(--styled-max-width);
   box-sizing: border-box;
   flex-direction: column;
-  border: var(--border-width) solid var(--border);
-  color: var(--on-surface);
+  border: 1px solid oklch(14.5% 0 0deg);
+  color: oklch(14.5% 0 0deg);
+
+  @media (prefers-color-scheme: dark) {
+    border: 1px solid white;
+    color: white;
+  }
 `;
 
 const Item = styled(BaseAccordion.Item, forwardRef)`
   & + & {
-    border-top: var(--border-width) solid var(--border);
+    border-top: 1px solid oklch(14.5% 0 0deg);
+
+    @media (prefers-color-scheme: dark) {
+      border-top: 1px solid white;
+    }
   }
 `;
 
@@ -54,8 +63,7 @@ const Header = styled<typeof BaseAccordion.Header, AccordionHeaderProps>(BaseAcc
 `;
 
 const StyledIcon = styled('svg', forwardRef)`
-  flex-shrink: 0;
-  transition: transform var(--duration-fast) ease-out;
+  transition: transform 100ms ease-out;
 
   [data-panel-open] > & {
     transform: rotate(45deg);
@@ -90,30 +98,42 @@ const Trigger = styled(BaseAccordion.Trigger, forwardRef)`
   box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-2) var(--space-3);
+  padding: 0.5rem 0.75rem;
   border: none;
   border-radius: 0;
   margin: 0;
   background-color: transparent;
-  color: var(--on-surface);
+  color: oklch(14.5% 0 0deg);
   font-family: inherit;
-  font-size: var(--text-sm);
-  font-weight: var(--font-regular);
-  gap: var(--space-4);
-  line-height: var(--leading-sm);
+  font-size: 0.875rem;
+  font-weight: 400;
+  gap: 1rem;
+  line-height: 1.25rem;
   text-align: left;
   user-select: none;
 
+  @media (prefers-color-scheme: dark) {
+    color: white;
+  }
+
   @media (hover: hover) {
     &:hover:not([data-disabled]) {
-      background-color: var(--hover-wash);
+      background-color: oklch(97% 0 0deg);
+
+      @media (prefers-color-scheme: dark) {
+        background-color: oklch(26.9% 0 0deg);
+      }
     }
   }
 
   &:focus-visible {
     position: relative;
     z-index: 1;
-    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline: 2px solid oklch(14.5% 0 0deg);
+
+    @media (prefers-color-scheme: dark) {
+      outline-color: white;
+    }
   }
 `;
 
@@ -121,9 +141,9 @@ const Panel = styled(BaseAccordion.Panel, forwardRef)`
   overflow: hidden;
   height: var(--accordion-panel-height);
   box-sizing: border-box;
-  font-size: var(--text-sm);
-  line-height: var(--leading-sm);
-  transition: height var(--duration-medium) ease-out;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: height 150ms ease-out;
 
   &[data-starting-style],
   &[data-ending-style] {
@@ -132,7 +152,7 @@ const Panel = styled(BaseAccordion.Panel, forwardRef)`
 `;
 
 const Content = styled('div', forwardRef)`
-  padding: var(--space-2) var(--space-3);
+  padding: 0.5rem 0.75rem;
 `;
 
 export const Accordion = {
