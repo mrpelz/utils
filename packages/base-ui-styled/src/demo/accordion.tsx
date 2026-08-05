@@ -47,7 +47,7 @@ const propOptionsRoot = {
   multiple: [undefined, false, true] as const,
   disabled: [undefined, false, true] as const,
   keepMounted: [undefined, false, true] as const,
-  'styled-max-width': [undefined, 'none', '20rem'] as const,
+  maxWidth: [undefined, 'none', '20rem'] as const,
   takeExpandedWidth: [undefined, false, true] as const,
 };
 
@@ -58,8 +58,8 @@ const propOptionsItem = {
 
 const propOptionsHeader = {
   ...commonPropOptions,
-  'styled-cursor-closed': [undefined, 'auto', 'pointer', 'copy'] as const,
-  'styled-cursor-open': [undefined, 'auto', 'pointer', 'copy'] as const,
+  cursorClosed: [undefined, 'auto', 'pointer', 'copy'] as const,
+  cursorOpen: [undefined, 'auto', 'pointer', 'copy'] as const,
 };
 
 const propOptionsTrigger = {
@@ -91,7 +91,7 @@ export const AccordionDemo: FunctionComponent = () => {
               value: AccordionValue,
               { reason }: BaseAccordion.Root.ChangeEventDetails,
             ) => addLog(`root value: ${value}/${reason}`),
-            'log change',
+            '[log change]',
           ),
           undefined,
         ] as const,
@@ -99,6 +99,7 @@ export const AccordionDemo: FunctionComponent = () => {
       [addLog],
     ),
     'root',
+    true,
   );
 
   const [controlItemFirst, propsItemFirst] = usePropControl(
@@ -111,7 +112,7 @@ export const AccordionDemo: FunctionComponent = () => {
               open: boolean,
               { reason }: BaseAccordion.Item.ChangeEventDetails,
             ) => addLog(`item first: ${open}/${reason}`),
-            'log open',
+            '[log open]',
           ),
           undefined,
         ] as const,
@@ -147,7 +148,7 @@ export const AccordionDemo: FunctionComponent = () => {
               open: boolean,
               { reason }: BaseAccordion.Item.ChangeEventDetails,
             ) => addLog(`item second: ${open}/${reason}`),
-            'log open',
+            '[log open]',
           ),
           undefined,
         ] as const,
@@ -183,7 +184,7 @@ export const AccordionDemo: FunctionComponent = () => {
               open: boolean,
               { reason }: BaseAccordion.Item.ChangeEventDetails,
             ) => addLog(`item third: ${open}/${reason}`),
-            'log open',
+            '[log open]',
           ),
           undefined,
         ] as const,

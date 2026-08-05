@@ -6,13 +6,13 @@ import { forwardRef } from 'preact/compat';
 import { css, wrap } from './utils.js';
 
 export type AccordionRootProps = BaseAccordion.Root.Props & {
-  'styled-max-width'?: Properties['maxWidth'];
+  maxWidth?: Properties['maxWidth'];
   takeExpandedWidth?: boolean;
 };
 
 // eslint-disable-next-line prettier/prettier
 const Root = wrap(styled<typeof BaseAccordion.Root, AccordionRootProps>(BaseAccordion.Root, forwardRef)`
-    --styled-max-width: attr(styled-max-width type(\<length\>), none);
+    --styled-max-width: attr(maxwidth type(\<length\>), none);
 
     display: flex;
     width: 100%;
@@ -65,26 +65,26 @@ const Item = styled(BaseAccordion.Item, forwardRef)`
 `;
 
 export type AccordionHeaderProps = BaseAccordion.Header.Props & {
-  'styled-cursor-closed'?: Properties['cursor'];
-  'styled-cursor-open'?: Properties['cursor'];
+  cursorClosed?: Properties['cursor'];
+  cursorOpen?: Properties['cursor'];
 };
 
 // eslint-disable-next-line prettier/prettier
 const Header = styled<typeof BaseAccordion.Header, AccordionHeaderProps>(BaseAccordion.Header, forwardRef)`
-  margin: 0;
+  --styled-cursor-closed: attr(cursorclosed type(\<custom-ident\>));
+  --styled-cursor-open: attr(cursoropen type(\<custom-ident\>));
 
-  --styled-cursor-closed: attr(styled-cursor-closed type(\<custom-ident\>));
-  --styled-cursor-open: attr(styled-cursor-open type(\<custom-ident\>));
+  margin: 0;
 
   &:not([data-disabled]) {
     &[data-closed] {
-      & > button {
+      & > * {
         cursor: var(--styled-cursor-closed, zoom-in);
       }
     }
 
     &[data-open] {
-      & > button {
+      & > * {
         cursor: var(--styled-cursor-open, zoom-out);
       }
     }

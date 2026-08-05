@@ -6,12 +6,12 @@ import { forwardRef } from 'preact/compat';
 import { css, wrap } from './utils.js';
 
 export type CollapsibleRootProps = BaseCollapsible.Root.Props & {
-  'styled-max-width'?: Properties['maxWidth'];
+  maxWidth?: Properties['maxWidth'];
 };
 
 // eslint-disable-next-line prettier/prettier
 const Root = styled<typeof BaseCollapsible.Root, CollapsibleRootProps>(BaseCollapsible.Root, forwardRef)`
-  --styled-max-width: attr(styled-max-width type(\<length\>), none);
+  --styled-max-width: attr(maxwidth type(\<length\>), none);
 
   display: flex;
   max-width: var(--styled-max-width);
@@ -47,7 +47,16 @@ const Icon = forwardRef<SVGSVGElement, React.ComponentProps<'svg'>>(
   ),
 );
 
-const Trigger = styled(BaseCollapsible.Trigger, forwardRef)`
+export type CollapsibleTriggerProps = BaseCollapsible.Trigger.Props & {
+  cursorClosed?: Properties['cursor'];
+  cursorOpen?: Properties['cursor'];
+};
+
+// eslint-disable-next-line prettier/prettier
+export const Trigger = styled<typeof BaseCollapsible.Trigger, CollapsibleTriggerProps>(BaseCollapsible.Trigger, forwardRef)`
+  --styled-cursor-closed: attr(cursorclosed type(\<custom-ident\>));
+  --styled-cursor-open: attr(cursoropen type(\<custom-ident\>));
+
   display: flex;
   height: 2rem;
   box-sizing: border-box;
@@ -89,6 +98,16 @@ const Trigger = styled(BaseCollapsible.Trigger, forwardRef)`
 
     @media (prefers-color-scheme: dark) {
       outline-color: white;
+    }
+  }
+
+  &:not([data-disabled]) {
+    [data-closed] > & {
+      cursor: var(--styled-cursor-closed, zoom-in);
+    }
+
+    [data-open] > & {
+      cursor: var(--styled-cursor-open, zoom-out);
     }
   }
 

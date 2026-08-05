@@ -9,13 +9,13 @@ import { forwardRef } from 'preact/compat';
 import { wrap } from './utils.js';
 
 export type ButtonProps = BaseButtonProps & {
-  'styled-cursor'?: Properties['cursor'];
+  cursor?: Properties['cursor'];
 };
 
 export const Button = wrap(
   styled<typeof BaseButton, ButtonProps>(BaseButton, forwardRef)`
     --styled-cursor: attr(
-      styled-cursor type(\<custom-ident\>),
+      cursor type(\<custom-ident\>),
       ${({ onClick }) => (onClick ? 'pointer' : 'not-allowed')}
     );
 

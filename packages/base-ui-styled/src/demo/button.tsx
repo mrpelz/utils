@@ -16,7 +16,7 @@ const propOptions = {
   disabled: [undefined, false, true] as const,
   focusableWhenDisabled: [undefined, false, true] as const,
   nativeButton: [undefined, false, true] as const,
-  'styled-cursor': [undefined, 'auto', 'pointer', 'copy'] as const,
+  cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
 };
 
 export const ButtonDemo: FunctionComponent = () => {
@@ -26,7 +26,10 @@ export const ButtonDemo: FunctionComponent = () => {
       () => ({
         ...propOptions,
         onClick: [
-          new MappedProp(() => addLog('button has been clicked'), 'log click'),
+          new MappedProp(
+            () => addLog('button has been clicked'),
+            '[log click]',
+          ),
           undefined,
         ] as const,
       }),
