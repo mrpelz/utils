@@ -10,7 +10,7 @@
   "prettier.enable": false,
   "js/ts.format.enabled": false,
   "js/ts.preferences.importModuleSpecifierEnding": "js",
-  "stylelint.lintFiles.glob": "src/{app,common}/**/*.{css,jsx,tsx}",
+  "stylelint.lintFiles.glob": "src/**/*.{css,jsx,tsx}",
   "stylelint.validate": [
     "css",
     "javascriptreact",

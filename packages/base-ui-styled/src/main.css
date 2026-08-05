@@ -8,10 +8,15 @@
 }
 
 :root {
-  background-color: #0a0a0a;
-  color: #fafafa;
+  background-color: white;
+  color: black;
   font-family: -apple-system, "SF UI Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
   scroll-snap-type: y mandatory;
+
+  @media (prefers-color-scheme: dark) {
+    background-color: #0a0a0a;
+    color: #fafafa;
+  }
 }
 
 body {

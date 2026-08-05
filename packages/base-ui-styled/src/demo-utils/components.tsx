@@ -35,8 +35,12 @@ export const ComponentHeader = styled('component-header')`
   width: stretch;
   padding: 1rem;
   margin: calc(1rem * -1);
-  background-color: #0a0a0a;
+  background-color: white;
   grid-area: head;
+
+  @media (prefers-color-scheme: dark) {
+    background-color: #0a0a0a;
+  }
 `;
 
 export const ComponentHeading = styled('h2')`
@@ -68,10 +72,18 @@ export const StageBackground = styled('stage-background')`
   inset: 0;
   mask-image: radial-gradient(
     ellipse at center,
-    rgb(0 0 0) 0%,
-    rgb(0 0 0 / 0%) 90%
+    rgb(255 255 255) 0%,
+    rgb(255 255 255 / 0%) 90%
   );
   mask-repeat: no-repeat;
+
+  @media (prefers-color-scheme: dark) {
+    mask-image: radial-gradient(
+      ellipse at center,
+      rgb(0 0 0) 0%,
+      rgb(0 0 0 / 0%) 90%
+    );
+  }
 `;
 
 // eslint-disable-next-line prettier/prettier
@@ -86,9 +98,13 @@ export const StageInner = styled<{ center: boolean; drawBackdrop: boolean }>('st
     &::after {
       position: absolute;
       z-index: -1;
-      background-color: #0a0a0a;
+      background-color: white;
       ${({ drawBackdrop }) => (drawBackdrop ? String.raw`content: '';` : undefined)}
       inset: 0;
+
+      @media (prefers-color-scheme: dark) {
+        background-color: #0a0a0a;
+      }
     }
   }
 `;
@@ -97,11 +113,14 @@ export const Config = styled('config' as 'section')`
   display: flex;
   flex-direction: column;
   border: 1px dashed #404040;
-  color: #a1a1a1;
-  color-scheme: dark;
   font-family: monospace;
   font-size: 0.875rem;
   grid-area: config;
+
+  @media (prefers-color-scheme: dark) {
+    color: #a1a1a1;
+    color-scheme: dark;
+  }
 `;
 
 export const ConfigInner = styled(Config)`
@@ -130,7 +149,12 @@ export const ConfigHeading = styled('summary')`
   padding: 0.5rem;
   margin: calc(0.5rem * -1);
   margin-bottom: 0.25rem;
-  background-color: #0a0a0a;
+  background-color: white;
+
+  @media (prefers-color-scheme: dark) {
+    background-color: #0a0a0a;
+  }
+
   cursor: pointer;
 `;
 

@@ -94,6 +94,10 @@ if (config.module) {
       test: /\.css$/i,
       use: [MiniCssExtractPlugin.loader, 'css-loader'],
     },
+    {
+      test: /\.(?:png|jpe?g|gif)$/i,
+      type: 'asset/resource',
+    },
   ];
 }
 

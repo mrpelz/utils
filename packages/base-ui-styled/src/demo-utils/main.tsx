@@ -178,14 +178,11 @@ const PropSelector = <T extends PropMap>({
         }
 
         handleSet(JSON.parse(input.value));
-        if (!isCustomValue && input.selectionEnd === input.value.length) {
-          input.blur();
-        }
       } catch {
         input.setCustomValidity('enter valid JSON string');
       }
     },
-    [displayValue, handleSet, isCustomValue, values],
+    [displayValue, handleSet, values],
   );
 
   const onBlur = useCallback(() => {
@@ -260,6 +257,7 @@ const PropSelector = <T extends PropMap>({
       </label>
       <input
         ref={inputRef}
+        autoComplete="off"
         id={inputId}
         list={datalistId}
         name={objectKey}

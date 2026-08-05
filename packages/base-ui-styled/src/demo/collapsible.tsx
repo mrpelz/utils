@@ -42,13 +42,14 @@ const propOptionsRoot = {
   defaultOpen: [undefined, true, false] as const,
   open: [undefined, true, false] as const,
   disabled: [undefined, false, true] as const,
-  'styled-max-width': [undefined, 'none', '20rem'] as const,
+  maxWidth: [undefined, 'none', '20rem'] as const,
 } as const;
 
 const propOptionsTrigger = {
   ...commonPropOptions,
   nativeButton: [undefined, false, true] as const,
-  'styled-cursor': [undefined, 'auto', 'pointer', 'copy'] as const,
+  cursorClosed: [undefined, 'auto', 'pointer', 'copy'] as const,
+  cursorOpen: [undefined, 'auto', 'pointer', 'crosshair'] as const,
 } as const;
 
 const propOptionsPanel = {
@@ -77,7 +78,7 @@ export const CollapsibleDemo: FunctionComponent = () => {
               value: boolean,
               { reason }: BaseCollapsible.Root.ChangeEventDetails,
             ) => addLog(`root value: ${value}/${reason}`),
-            'log change',
+            '[log change]',
           ),
           undefined,
         ] as const,
@@ -85,6 +86,7 @@ export const CollapsibleDemo: FunctionComponent = () => {
       [addLog],
     ),
     'root',
+    true,
   );
 
   const [controlTrigger, propsTrigger] = usePropControl(
