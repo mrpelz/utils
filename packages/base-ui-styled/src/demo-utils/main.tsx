@@ -533,8 +533,8 @@ export const commonPropOptions = {
     undefined,
     new MappedProp<CSSProperties>(
       { outline: '5px dashed red' },
-      'outline: 5px dashed red',
+      '[outline: 5px dashed red]',
     ),
   ] as const,
-  render: [undefined, new MappedProp(<main />, '<main />')] as const,
+  render: [undefined, new MappedProp(<main />, '[<main />]')] as const,
 };
