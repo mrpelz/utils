@@ -2,16 +2,6 @@ import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
 import { styled } from 'goober';
 import { forwardRef } from 'preact/compat';
 
-const Label = styled('label', forwardRef)`
-  display: flex;
-  align-items: center;
-  color: var(--on-surface);
-  font-size: var(--text-sm);
-  font-weight: var(--font-regular);
-  gap: var(--space-2);
-  line-height: var(--leading-sm);
-`;
-
 const Root = styled(BaseCheckbox.Root, forwardRef)`
   display: flex;
   width: 1rem;
@@ -21,20 +11,36 @@ const Root = styled(BaseCheckbox.Root, forwardRef)`
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: var(--border-width) solid var(--border);
+  border: 1px solid oklch(14.5% 0 0deg);
+  border-radius: 0;
   margin: 0;
-  background-color: var(--surface);
-  color: var(--surface);
+  background-color: white;
+  color: white;
+
+  @media (prefers-color-scheme: dark) {
+    border: 1px solid white;
+    background-color: oklch(14.5% 0 0deg);
+    color: oklch(14.5% 0 0deg);
+  }
 
   &[data-checked],
   &[data-indeterminate] {
-    background-color: var(--ink);
-    color: var(--on-ink);
+    background-color: oklch(14.5% 0 0deg);
+    color: white;
+
+    @media (prefers-color-scheme: dark) {
+      background-color: white;
+      color: oklch(14.5% 0 0deg);
+    }
   }
 
   &:focus-visible {
-    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline: 2px solid oklch(14.5% 0 0deg);
     outline-offset: 2px;
+
+    @media (prefers-color-scheme: dark) {
+      outline-color: white;
+    }
   }
 `;
 
@@ -70,9 +76,8 @@ const Icon = forwardRef<SVGSVGElement, React.ComponentProps<'svg'>>(
   ),
 );
 
-export const CommonCheckbox = {
+export const Checkbox = {
   ...BaseCheckbox,
-  Label,
   Root,
   Indicator,
   Icon,

@@ -15,7 +15,7 @@ import avatar from './avatar.png';
 const propOptionsParts = {
   fallback: [true, false],
   img: [true, false],
-  initials: [false, true],
+  initialsOnly: [false, true],
 } as const;
 
 const propOptionsRoot = {
@@ -41,7 +41,7 @@ const propOptionsFallback = {
 export const AvatarDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
-  const [controlParts, { img, fallback, initials }] = usePropControl(
+  const [controlParts, { img, fallback, initialsOnly }] = usePropControl(
     propOptionsParts,
     '[parts]',
     true,
@@ -85,9 +85,11 @@ export const AvatarDemo: FunctionComponent = () => {
       title="Avatar"
     >
       <Avatar.Root {...propsRoot}>
-        {!initials && img ? <Avatar.Image {...propsImage} /> : null}
-        {!initials && fallback ? <Avatar.Fallback {...propsFallback} /> : null}
-        {initials ? propsFallback.children : null}
+        {!initialsOnly && img ? <Avatar.Image {...propsImage} /> : null}
+        {!initialsOnly && fallback ? (
+          <Avatar.Fallback {...propsFallback} />
+        ) : null}
+        {initialsOnly ? propsFallback.children : null}
       </Avatar.Root>
     </Component>
   );

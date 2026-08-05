@@ -7,7 +7,7 @@ export { Avatar } from './avatar.js';
 
 // Buttons & inputs
 export { Button } from './button.js';
-export { Checkbox } from './checkbox/component.js';
+export { Checkbox } from './checkbox.js';
 export { CheckboxGroup } from './checkbox-group/component.js';
 export { Input } from './input/component.js';
 export { NumberField } from './number-field/component.js';
