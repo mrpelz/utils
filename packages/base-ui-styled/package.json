@@ -20,12 +20,12 @@
     "react-dom": "npm:@preact/compat"
   },
   "dependencies": {
-    "@base-ui/react": "1.6.0",
+    "@base-ui/react": "1.7.0",
     "@mrpelz/misc-utils": "*",
     "goober": "2.1.19"
   },
   "devDependencies": {
-    "@mrpelz/boilerplate-preact": "16.3.0",
+    "@mrpelz/boilerplate-preact": "16.4.0",
     "csstype": "3.2.3",
     "eslint-plugin-react": "7.37.5",
     "fork-ts-checker-webpack-plugin": "9.1.0",
