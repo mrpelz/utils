@@ -2,7 +2,6 @@ import { setup } from 'goober';
 import { h, render } from 'preact';
 
 import { Demo } from './demo/demo.js';
-import { DemoFull } from './demo/demo-full.js';
 
 setup(h);
 

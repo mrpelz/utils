@@ -216,7 +216,10 @@ export class ObservableGroup<T> extends Observable<T> {
     this._observables = observables ? new Set(observables) : new Set();
 
     for (const state of this._observables) {
-      state.observe(() => super.set(this.value), true);
+      state.observe(
+        (_value, _observer, _changed, origin) => super.set(this.value, origin),
+        true,
+      );
     }
   }
 

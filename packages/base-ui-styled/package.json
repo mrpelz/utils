@@ -20,7 +20,7 @@
     "react-dom": "npm:@preact/compat"
   },
   "dependencies": {
-    "@base-ui/react": "1.7.0",
+    "@base-ui/react": "1.8.0",
     "@mrpelz/misc-utils": "*",
     "goober": "2.1.19"
   },

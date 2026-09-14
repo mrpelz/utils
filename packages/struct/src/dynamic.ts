@@ -196,7 +196,6 @@ export class DynamicStruct<T extends DynamicStructMembers> {
 
   get value(): DynamicStructMemberValues<T> {
     return this._members.map((member) =>
-      // eslint-disable-next-line unicorn/prefer-minimal-ternary
       isWrappedStaticStructMember(member)
         ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
