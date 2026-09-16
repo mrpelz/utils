@@ -202,7 +202,7 @@ export class ProxyObservable<T, S = T> {
 
     const nextValue = this._set(value);
     if (nextValue !== ProxyObservable.doNotSet) {
-      this._observable.set(nextValue, origin ?? this);
+      this._observable.set(nextValue, origin);
     }
   }
 }
@@ -245,7 +245,7 @@ export class ObservableGroup<T> extends Observable<T> {
         continue;
       }
 
-      observable.set(value, origin ?? this);
+      observable.set(value, origin);
     }
 
     super.set(value, origin);
@@ -276,7 +276,7 @@ export const observify = <T>(fn: ObservifyGetter<T>): ObservifyResult<T> => {
     const [error, result] = await safeAsync(fn());
     if (error) return;
 
-    observable.set(result, origin ?? observable);
+    observable.set(result, origin);
   };
 
   return [new ReadOnlyObservable(observable), trigger];
