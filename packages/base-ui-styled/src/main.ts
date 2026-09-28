@@ -1,5 +1,1 @@
-import { root } from './root.js';
-
-if (module.hot) module.hot.accept();
-
-root();
+// eslint-disable-next-line unicorn/no-empty-file
