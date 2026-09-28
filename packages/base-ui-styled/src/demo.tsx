@@ -1,18 +1,10 @@
-import { FunctionComponent } from 'preact';
+import { setup } from 'goober';
+import { h, render } from 'preact';
 
-import { AccordionDemo } from './demo/accordion.js';
-import { AvatarDemo } from './demo/avatar.js';
-import { ButtonDemo } from './demo/button.js';
-import { CheckboxDemo } from './demo/checkbox.js';
-import { CollapsibleDemo } from './demo/collapsible.js';
-import { StageBackgroundProvider } from './demo-utils/main.js';
+import { Demo } from './demo/main.js';
 
-export const Demo: FunctionComponent = () => (
-  <StageBackgroundProvider>
-    <ButtonDemo />
-    <AccordionDemo />
-    <CollapsibleDemo />
-    <AvatarDemo />
-    <CheckboxDemo />
-  </StageBackgroundProvider>
-);
+setup(h);
+
+if (module.hot) module.hot.accept();
+
+render(<Demo />, document.body);

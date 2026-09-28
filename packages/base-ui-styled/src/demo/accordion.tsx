@@ -10,7 +10,7 @@ import {
   MappedProp,
   useLog,
   usePropControl,
-} from '../demo-utils/main.js';
+} from './utils/main.js';
 
 const propOptionsContent = {
   headline1: ['What is Base UI?'] as const,

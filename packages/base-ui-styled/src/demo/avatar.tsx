@@ -3,14 +3,14 @@ import { FunctionComponent } from 'preact';
 import { useMemo } from 'preact/hooks';
 
 import { Avatar } from '../components/index.js';
+import avatar from './avatar.png';
 import {
   commonPropOptions,
   Component,
   MappedProp,
   useLog,
   usePropControl,
-} from '../demo-utils/main.js';
-import avatar from './avatar.png';
+} from './utils/main.js';
 
 const propOptionsParts = {
   fallback: [true, false],

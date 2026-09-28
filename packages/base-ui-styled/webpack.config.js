@@ -49,10 +49,7 @@ const configDownstream = {
 /** @type {import('@mrpelz/boilerplate-dom/webpack.config.js').ConfigurationExtended} */
 const config = deepmerge(configUpstream, configDownstream);
 
-config.entry = [
-  path.resolve(dirSrc, 'main.ts'),
-  path.resolve(dirSrc, 'main.css'),
-];
+config.entry = path.resolve(dirSrc, 'demo.tsx');
 
 if (config.module) {
   config.module.rules = [
