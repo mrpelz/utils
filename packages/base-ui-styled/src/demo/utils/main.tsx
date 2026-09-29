@@ -438,6 +438,7 @@ export const Component: FunctionComponent<{
   controls?: ComponentChildren;
   id: string;
   log?: ComponentChild;
+  stretch?: boolean;
   title: string;
 }> = ({
   backdrop = false,
@@ -446,12 +447,17 @@ export const Component: FunctionComponent<{
   controls,
   id,
   log,
+  stretch = false,
   title,
 }) => {
   const [stageBackground, setStageBackground] = useContext(
     StageBackgroundContext,
   );
   const [isCentered, setIsCentered] = useLocalStorage(`${id}.center`, center);
+  const [isStretched, setIsStretched] = useLocalStorage(
+    `${id}.stretch`,
+    stretch,
+  );
   const [hasBackdrop, setHasBackdrop] = useLocalStorage(
     `${id}.backdrop`,
     backdrop,
@@ -475,6 +481,7 @@ export const Component: FunctionComponent<{
           <StageInner
             center={isCentered}
             drawBackdrop={hasBackdrop}
+            stretch={isStretched}
           >
             {children}
           </StageInner>
@@ -518,6 +525,18 @@ export const Component: FunctionComponent<{
               )}
             />
             Center
+          </label>
+          <label style={{ display: 'block' }}>
+            <input
+              checked={isStretched}
+              name={`${id}.stretch`}
+              type="checkbox"
+              onClick={useCallback(
+                () => setIsStretched(!isStretched),
+                [isStretched, setIsStretched],
+              )}
+            />
+            Stretch
           </label>
         </ConfigInner>
         {controls}

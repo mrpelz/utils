@@ -1,6 +1,7 @@
-/* eslint-disable unicorn/prefer-string-raw */
 import { styled } from 'goober';
 import { forwardRef } from 'react-dom';
+
+import { css } from '../../components/utils.js';
 
 export const Container = styled('component')`
   position: relative;
@@ -87,24 +88,32 @@ export const StageBackground = styled('stage-background')`
 `;
 
 // eslint-disable-next-line prettier/prettier
-export const StageInner = styled<{ center: boolean; drawBackdrop: boolean }>('stage-inner')`
+export const StageInner = styled<{ center: boolean; drawBackdrop: boolean; stretch: boolean }>('stage-inner')`
+  position: relative;
   display: block;
-  margin: ${({ center }) => (center ? '0 auto' : undefined)};
+  width: ${({ stretch }) => (stretch ? '100%' : 'fit-content')};
+  ${({ center }) =>
+    center
+      ? css`
+          margin: 0 auto;
+        `
+      : undefined};
 
-  & > * {
-    position: relative;
-    white-space: pre-line;
+  &::before {
+    position: absolute;
+    z-index: -1;
+    display: block;
+    background-color: white;
+    ${({ drawBackdrop }) =>
+      drawBackdrop
+        ? css`
+            content: '';
+          `
+        : undefined}
+    inset: 0;
 
-    &::after {
-      position: absolute;
-      z-index: -1;
-      background-color: white;
-      ${({ drawBackdrop }) => (drawBackdrop ? String.raw`content: '';` : undefined)}
-      inset: 0;
-
-      @media (prefers-color-scheme: dark) {
-        background-color: #0a0a0a;
-      }
+    @media (prefers-color-scheme: dark) {
+      background-color: #0a0a0a;
     }
   }
 `;

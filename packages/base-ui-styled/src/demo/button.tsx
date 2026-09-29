@@ -12,11 +12,15 @@ import {
 
 const propOptions = {
   ...commonPropOptions,
-  children: ['Label'] as const,
+  children: ['Button'] as const,
   disabled: [undefined, false, true] as const,
   focusableWhenDisabled: [undefined, false, true] as const,
   nativeButton: [undefined, false, true] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
+  inline: [undefined, false, true] as const,
+  round: [undefined, false, true] as const,
+  size: [undefined, 'small', 'medium', 'large'] as const,
+  variant: [undefined, 'clear', 'fill', 'outline', 'tonal'] as const,
 };
 
 export const ButtonDemo: FunctionComponent = () => {
