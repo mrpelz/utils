@@ -1,6 +1,5 @@
 import { Switch as BaseSwitch } from '@base-ui/react/switch';
-import { FunctionComponent } from 'preact';
-import { useMemo } from 'preact/hooks';
+import { FunctionComponent, useMemo } from 'react';
 
 import { Switch } from '../components/index.js';
 import {
@@ -67,8 +66,8 @@ export const SwitchDemo: FunctionComponent = () => {
 
   return (
     <Component
-      backdrop
       center
+      baseUiId="switch"
       controls={[controlRoot, controlThumb]}
       id="switch"
       log={log}

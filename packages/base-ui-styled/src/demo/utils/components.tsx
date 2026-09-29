@@ -50,6 +50,14 @@ export const ComponentHeading = styled('h2')`
   font-weight: 700;
 `;
 
+export const ComponentId = styled('a')`
+  color: #a1a1a1;
+  font-family: monospace;
+  font-size: 0.875rem;
+  font-weight: 400;
+  margin-inline-start: 0.5rem;
+`;
+
 export const ComponentDocsLink = styled('a')`
   display: inline-block;
   color: #a1a1a1;
@@ -119,7 +127,7 @@ export const StageInner = styled<{ center: boolean; drawBackdrop: boolean; stret
 `;
 
 export const Config = styled('config' as 'section')`
-  display: flex;
+  display: ${({ hidden }) => (hidden ? 'none' : 'flex')};
   flex-direction: column;
   border: 1px dashed #404040;
   font-family: monospace;

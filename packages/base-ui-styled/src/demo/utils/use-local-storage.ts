@@ -1,10 +1,4 @@
-import {
-  Dispatch,
-  StateUpdater,
-  useEffect,
-  useMemo,
-  useState,
-} from 'preact/hooks';
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 
 import { useSafeJSONStringify } from './use-safe-json-stringify.js';
 
@@ -35,7 +29,7 @@ export const useSetLocalStorage = (key: string, value?: string): void => {
 export const useLocalStorage = <T>(
   key: string,
   defaultValue: T,
-): [T, Dispatch<StateUpdater<T>>] => {
+): [T, Dispatch<SetStateAction<T>>] => {
   const persisted_ = useGetLocalStorage(key);
   const persisted = useMemo(() => {
     if (persisted_ === undefined) return undefined;

@@ -1,4 +1,4 @@
-import { useMemo } from 'preact/hooks';
+import { useMemo } from 'react';
 
 export const useSafeJSONStringify = <T>(input: T): string | undefined =>
   useMemo(() => {

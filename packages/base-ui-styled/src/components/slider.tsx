@@ -1,9 +1,10 @@
 import { Slider as BaseSlider } from '@base-ui/react/slider';
 import { Properties } from 'csstype';
 import { styled } from 'goober';
-import { forwardRef } from 'preact/compat';
+import { forwardRef } from 'react';
 
-import { wrap } from './utils.js';
+import { glassLensGlow } from './glass.js';
+import { fontWeight, wrap } from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Sliders”, light and dark appearance), with
 // Figma colors mapped to UIKit semantic colors: track `systemFill`, fill the
@@ -22,13 +23,10 @@ import { wrap } from './utils.js';
 //   which alone scales while dragging (Base UI measures the thumb's box for
 //   positioning); only its `transform`, `background-color` and `box-shadow`
 //   transition (Konsta UI `--transition-ios-range-thumb`).
-// - Minimum control length: twice the knob width (not specified by any
+// - Minimum control length: ten times the knob width (not specified by any
 //   source).
 // - The pressed state is driven by Base UI's `data-dragging`.
 // - Vertical sliders put the minimum symbol at the bottom.
-// - Ticks span the whole track (Figma: inset 16px), matching the fill, which
-//   is derived from the value; the first and last tick (at the track's ends)
-//   are hidden.
 // - The fill is derived from the value (Base UI couples it to the thumb's
 //   center), so it spans the whole track at the maximum.
 // - The browser's default focus ring is kept.
@@ -160,32 +158,20 @@ const Thumb = styled(BaseSlider.Thumb, forwardRef)`
     height: var(--styled-slider-knob-width);
   }
 
-  &::before,
+  &::before {
+    ${glassLensGlow('var(--color-ios-primary)', '0')}
+  }
+
   &::after {
     position: absolute;
-    content: '';
-    transition-duration: 300ms;
-  }
-
-  &::before {
-    top: 50%;
-    left: 50%;
-    width: 1px;
-    height: 1px;
-    margin-top: -0.5px;
-    margin-left: -0.5px;
-    box-shadow: 0 0 40px 15px
-      color-mix(in srgb, var(--color-ios-primary) 75%, transparent);
-    opacity: 0;
-  }
-
-  &::after {
     border-radius: 100px;
     background-color: #fff;
     box-shadow:
       0 0.5px 4px rgb(0 0 0 / 12%),
       0 6px 13px rgb(0 0 0 / 12%);
+    content: '';
     inset: 0;
+    transition-duration: var(--glass-ios-lens-duration);
     transition-property: transform, background-color, box-shadow;
   }
 
@@ -197,19 +183,22 @@ const Thumb = styled(BaseSlider.Thumb, forwardRef)`
     &::after {
       background-color: transparent;
       box-shadow:
-        var(--shadow-ios-glass-thumb),
+        var(--glass-ios-lens-shadow),
         0 0.5px 4px rgb(0 0 0 / 12%),
         0 6px 13px rgb(0 0 0 / 12%);
-      transform: scale(1.4);
+      transform: scale(var(--glass-ios-lens-scale));
     }
   }
 `;
 
+// Figma: inset 16px from the track's ends, so the ticks line up with the
+// knob's center at their values; round (Figma renders the ticks as circles,
+// the CSS export has no radius).
 const StyledTicks = styled('div', forwardRef)`
   position: absolute;
   top: calc(50% - 2px + 9px);
-  right: 0;
-  left: 0;
+  right: 16px;
+  left: 16px;
   display: flex;
   height: 4px;
   align-items: center;
@@ -220,19 +209,15 @@ const StyledTicks = styled('div', forwardRef)`
     width: 4px;
     height: 4px;
     flex: none;
+    border-radius: 50%;
     background-color: var(--color-ios-quaternary-label);
-  }
-
-  & > :first-child,
-  & > :last-child {
-    visibility: hidden;
   }
 
   [data-orientation='vertical'] > & {
     width: 4px;
     height: auto;
     flex-direction: column;
-    inset: 0 auto 0 calc(50% - 2px + 9px);
+    inset: 16px auto 16px calc(50% - 2px + 9px);
   }
 `;
 
@@ -262,13 +247,14 @@ const Ticks = forwardRef<HTMLDivElement, SliderTicksProps>(
  */
 const ValueSymbol = styled('span', forwardRef)`
   display: flex;
+  min-width: 32px;
   flex: none;
   align-items: center;
   align-self: stretch;
   justify-content: center;
   color: var(--color-ios-secondary-label);
   font-size: 17px;
-  font-weight: 590;
+  ${fontWeight(590)}
   line-height: 22px;
   text-align: center;
 `;

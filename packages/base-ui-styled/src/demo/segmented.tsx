@@ -1,6 +1,5 @@
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
-import { FunctionComponent } from 'preact';
-import { useMemo } from 'preact/hooks';
+import { FunctionComponent, useMemo } from 'react';
 
 import { Segmented } from '../components/index.js';
 import {
@@ -117,9 +116,9 @@ export const SegmentedDemo: FunctionComponent = () => {
 
   return (
     <Component
-      backdrop
       center
-      id="radio"
+      baseUiId="radio"
+      id="segmented"
       log={log}
       title="Segmented"
       controls={[

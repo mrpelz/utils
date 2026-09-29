@@ -1,9 +1,10 @@
 import { setup } from 'goober';
-import { h, render } from 'preact';
+import { createElement } from 'react';
+import { render } from 'react-dom';
 
 import { Demo } from './demo/main.js';
 
-setup(h);
+setup(createElement);
 
 if (module.hot) module.hot.accept();
 

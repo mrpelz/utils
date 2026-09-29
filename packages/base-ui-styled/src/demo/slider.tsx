@@ -1,6 +1,11 @@
 import { Slider as BaseSlider } from '@base-ui/react/slider';
-import { FunctionComponent } from 'preact';
-import { useMemo } from 'preact/hooks';
+import HareFill from 'framework7-icons/react/esm/HareFill.js';
+import Speaker3Fill from 'framework7-icons/react/esm/Speaker3Fill.js';
+import SpeakerFill from 'framework7-icons/react/esm/SpeakerFill.js';
+import SunMax from 'framework7-icons/react/esm/SunMax.js';
+import SunMin from 'framework7-icons/react/esm/SunMin.js';
+import TortoiseFill from 'framework7-icons/react/esm/TortoiseFill.js';
+import { FunctionComponent, useMemo } from 'react';
 
 import { Slider } from '../components/index.js';
 import {
@@ -14,8 +19,20 @@ import {
 const propOptionsContent = {
   thumbs: [1, 2] as const,
   ticks: [0, 6, 11] as const,
-  minSymbol: [undefined, '🔈', 'A'] as const,
-  maxSymbol: [undefined, '🔊', 'A'] as const,
+  minSymbol: [
+    undefined,
+    new MappedProp(<TortoiseFill />, '[tortoise.fill]'),
+    new MappedProp(<SpeakerFill />, '[speaker.fill]'),
+    new MappedProp(<SunMin />, '[sun.min]'),
+    'A',
+  ] as const,
+  maxSymbol: [
+    undefined,
+    new MappedProp(<HareFill />, '[hare.fill]'),
+    new MappedProp(<Speaker3Fill />, '[speaker.3.fill]'),
+    new MappedProp(<SunMax />, '[sun.max]'),
+    'A',
+  ] as const,
   label: [undefined, 'Volume'] as const,
   value: [false, true] as const,
 } as const;
@@ -198,9 +215,8 @@ export const SliderDemo: FunctionComponent = () => {
 
   return (
     <Component
-      backdrop
       center
-      stretch
+      baseUiId="slider"
       id="slider"
       log={log}
       title="Slider"

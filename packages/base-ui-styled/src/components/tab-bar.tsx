@@ -1,16 +1,20 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { Properties } from 'csstype';
 import { styled } from 'goober';
-import { createContext, PointerEventHandler } from 'preact';
-import { forwardRef } from 'preact/compat';
-import { useCallback, useContext, useLayoutEffect, useRef } from 'preact/hooks';
+import { createContext, forwardRef, useContext, useLayoutEffect } from 'react';
 
-import { css } from './utils.js';
+import {
+  GlassBackground,
+  GlassContext,
+  glassContext,
+  glassLensScale,
+} from './glass.js';
+import { css, fontWeight, useForwardedRef, usePointerDrag } from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Tab Bar - iPhone”, BG Context Dim/Bright),
 // with the selected content color mapped to the app tint
 // (`--color-ios-primary`, i.e. `systemBlue`); glass materials, vibrant content
-// and selection colors are tokens in `styles.tsx`. The selection's transition
+// and selection colors are tokens in `styles.tsx`, used via `glass.tsx`. The selection's transition
 // duration comes from Framework7 `components/toolbar/toolbar-ios.less`
 // (`.tab-link-highlight`), disabled opacity from Framework7
 // `less/mixins.less` (`.disabled()`).
@@ -46,28 +50,7 @@ import { css } from './utils.js';
 //   a transition (Framework7: 300ms ease-out).
 // - The browser's default focus ring is kept.
 
-type Context = 'bright' | 'dim';
-
 type Shape = 'capsule' | 'circle';
-
-const contextVars = (context: Context) => css`
-  --styled-tabbar-blur: var(--glass-ios-${context}-blur);
-  --styled-tabbar-fill-bottom: var(--glass-ios-${context}-fill-bottom);
-  --styled-tabbar-fill-bottom-blend: var(
-    --glass-ios-${context}-fill-bottom-blend
-  );
-  --styled-tabbar-fill-middle: var(--glass-ios-${context}-fill-middle);
-  --styled-tabbar-fill-top: var(--glass-ios-${context}-fill-top);
-  --styled-tabbar-fill-top-blend: var(--glass-ios-${context}-fill-top-blend);
-  --styled-tabbar-fill-opacity: var(--glass-ios-${context}-fill-opacity);
-  --styled-tabbar-content: var(--glass-ios-${context}-content);
-  --styled-tabbar-content-blend: var(--glass-ios-${context}-content-blend);
-  --styled-tabbar-selection: var(--glass-ios-${context}-selection);
-  --styled-tabbar-selection-blend: var(--glass-ios-${context}-selection-blend);
-  --styled-tabbar-shadow: var(--glass-ios-${context}-shadow);
-  --styled-tabbar-lens: var(--glass-ios-${context}-lens);
-  --styled-tabbar-lens-shadow: var(--glass-ios-${context}-lens-shadow);
-`;
 
 const setProperties = (
   element: HTMLElement,
@@ -140,16 +123,7 @@ const StyledList = styled<typeof BaseTabs.List, TabBarListProps>(BaseTabs.List, 
   gap: 16px;
   touch-action: none;
 
-  ${({ context }) =>
-    context
-      ? contextVars(context)
-      : css`
-          ${contextVars('bright')}
-
-          @media (prefers-color-scheme: dark) {
-            ${contextVars('dim')}
-          }
-        `}
+  ${({ context }) => glassContext(context)}
 `;
 
 // Positioned by its center, so it stays under the pointer while its size
@@ -161,15 +135,16 @@ const Lens = styled('span')`
   width: var(--styled-tabbar-lens-width, 0);
   height: var(--styled-tabbar-lens-height, 0);
   border-radius: 100px;
-  background-color: var(--styled-tabbar-lens);
-  box-shadow: var(--styled-tabbar-lens-shadow);
+  background-color: var(--styled-glass-lens);
+  box-shadow: var(--styled-glass-lens-shadow);
   opacity: var(--styled-tabbar-pressed, 0);
   pointer-events: none;
-  scale: calc(1 + 0.4 * var(--styled-tabbar-pressed, 0));
+  scale: ${glassLensScale('var(--styled-tabbar-pressed, 0)')};
   transition-duration:
-    var(--styled-tabbar-lens-move-duration, 300ms),
-    var(--styled-tabbar-lens-size-duration, 300ms),
-    var(--styled-tabbar-lens-size-duration, 300ms), 300ms, 300ms;
+    var(--styled-tabbar-lens-move-duration, var(--glass-ios-lens-duration)),
+    var(--styled-tabbar-lens-size-duration, var(--glass-ios-lens-duration)),
+    var(--styled-tabbar-lens-size-duration, var(--glass-ios-lens-duration)),
+    var(--glass-ios-lens-duration), var(--glass-ios-lens-duration);
   transition-property: translate, width, height, opacity, scale;
   transition-timing-function: ease-out;
   translate: calc(var(--styled-tabbar-lens-x, 0px) - 50%)
@@ -290,10 +265,8 @@ export type TabBarListProps = BaseTabs.List.Props & {
    * Brightness of the content behind the glass.
    * @default 'bright', or 'dim' in dark mode
    */
-  context?: Context;
+  context?: GlassContext;
 };
-
-type Handler = PointerEventHandler<HTMLDivElement>;
 
 /**
  * The tab bar, containing `TabBar.Group`s. Renders the glass lens shown
@@ -312,114 +285,50 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
     },
     ref,
   ) => {
-    const pressRef = useRef<{
-      clientX?: number;
-      frame?: number;
-      pointerId: number;
-      tab?: HTMLElement;
-    } | null>(null);
+    const handlers = usePointerDrag<HTMLDivElement, { tab?: HTMLElement }>(
+      {
+        end: (list, state, cancelled) => {
+          if (cancelled) {
+            release(list);
+            return;
+          }
 
-    const end = useCallback((list: HTMLElement, pointerId: number) => {
-      const { current: pressed } = pressRef;
-      if (pressed?.pointerId !== pointerId) return undefined;
+          release(list, state.tab);
+          if (state.tab && !isActive(state.tab)) state.tab.click();
+        },
+        move: (list, state, event) => {
+          state.tab = press(list, event.clientX);
+        },
+        start: (list, event) => {
+          if (!(event.target instanceof Element)) return undefined;
+          if (!event.target.closest('[role="tab"]')) return undefined;
 
-      if (pressed.frame !== undefined) cancelAnimationFrame(pressed.frame);
-      if (pressed.clientX !== undefined) {
-        pressed.tab = press(list, pressed.clientX);
-      }
+          // Place (and size) the lens at the pointer without a transition,
+          // then let it follow without delay; only opacity and scale animate.
+          list.style.setProperty('--styled-tabbar-lens-move-duration', '0s');
+          list.style.setProperty('--styled-tabbar-lens-size-duration', '0s');
+          const tab = press(list, event.clientX);
+          list.getBoundingClientRect();
+          list.style.removeProperty('--styled-tabbar-lens-size-duration');
+          list.style.setProperty('--styled-tabbar-pressed', '1');
 
-      pressRef.current = null;
-      return pressed;
-    }, []);
-
-    const handlePointerDown = useCallback<Handler>(
-      (event) => {
-        (onPointerDown as Handler | undefined)?.(event);
-        if (event.button !== 0) return;
-        if (!(event.target instanceof Element)) return;
-        if (!event.target.closest('[role="tab"]')) return;
-
-        const list = event.currentTarget;
-        list.setPointerCapture(event.pointerId);
-
-        // Place (and size) the lens at the pointer without a transition, then
-        // let it follow without delay; only opacity and scale animate in.
-        list.style.setProperty('--styled-tabbar-lens-move-duration', '0s');
-        list.style.setProperty('--styled-tabbar-lens-size-duration', '0s');
-        const tab = press(list, event.clientX);
-        list.getBoundingClientRect();
-        list.style.removeProperty('--styled-tabbar-lens-size-duration');
-        list.style.setProperty('--styled-tabbar-pressed', '1');
-
-        pressRef.current = { pointerId: event.pointerId, tab };
+          return { tab };
+        },
       },
-      [onPointerDown],
-    );
-
-    const handlePointerMove = useCallback<Handler>(
-      (event) => {
-        (onPointerMove as Handler | undefined)?.(event);
-
-        const { current: pressed } = pressRef;
-        if (pressed?.pointerId !== event.pointerId) return;
-
-        const list = event.currentTarget;
-        pressed.clientX = event.clientX;
-
-        pressed.frame ??= requestAnimationFrame(() => {
-          pressed.frame = undefined;
-          if (pressed.clientX === undefined) return;
-
-          pressed.tab = press(list, pressed.clientX);
-          pressed.clientX = undefined;
-        });
+      {
+        onLostPointerCapture,
+        onPointerCancel,
+        onPointerDown,
+        onPointerMove,
+        onPointerUp,
       },
-      [onPointerMove],
-    );
-
-    const handlePointerUp = useCallback<Handler>(
-      (event) => {
-        (onPointerUp as Handler | undefined)?.(event);
-
-        const list = event.currentTarget;
-        const pressed = end(list, event.pointerId);
-        if (!pressed) return;
-
-        release(list, pressed.tab);
-        if (pressed.tab && !isActive(pressed.tab)) pressed.tab.click();
-      },
-      [end, onPointerUp],
-    );
-
-    const handlePointerCancel = useCallback<Handler>(
-      (event) => {
-        (onPointerCancel as Handler | undefined)?.(event);
-
-        const list = event.currentTarget;
-        if (end(list, event.pointerId)) release(list);
-      },
-      [end, onPointerCancel],
-    );
-
-    const handleLostPointerCapture = useCallback<Handler>(
-      (event) => {
-        (onLostPointerCapture as Handler | undefined)?.(event);
-
-        const list = event.currentTarget;
-        if (end(list, event.pointerId)) release(list);
-      },
-      [end, onLostPointerCapture],
     );
 
     return (
       <StyledList
         ref={ref}
         {...props}
-        onLostPointerCapture={handleLostPointerCapture}
-        onPointerCancel={handlePointerCancel}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
+        {...handlers}
       >
         {children}
         <Lens aria-hidden="true" />
@@ -427,50 +336,6 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
     );
   },
 );
-
-const glassLayer = css`
-  position: absolute;
-  border-radius: 1000px;
-  inset: -4px;
-  pointer-events: none;
-`;
-
-const GlassBlur = styled('span')`
-  ${glassLayer}
-
-  backdrop-filter: saturate(180%) blur(20px);
-  background-color: var(--styled-tabbar-blur);
-  opacity: 0.67;
-`;
-
-const GlassFillBottom = styled('span')`
-  ${glassLayer}
-
-  background-color: var(--styled-tabbar-fill-bottom);
-  mix-blend-mode: var(--styled-tabbar-fill-bottom-blend);
-  opacity: var(--styled-tabbar-fill-opacity);
-`;
-
-const GlassFillMiddle = styled('span')`
-  ${glassLayer}
-
-  background-color: var(--styled-tabbar-fill-middle);
-  opacity: var(--styled-tabbar-fill-opacity);
-`;
-
-const GlassFillTop = styled('span')`
-  ${glassLayer}
-
-  background-color: var(--styled-tabbar-fill-top);
-  mix-blend-mode: var(--styled-tabbar-fill-top-blend);
-  opacity: var(--styled-tabbar-fill-opacity);
-`;
-
-const GlassEffect = styled('span')`
-  ${glassLayer}
-
-  box-shadow: var(--styled-tabbar-shadow);
-`;
 
 // Neighboring tabs overlap (Figma: negative spacing of 10px, 7.333px with 4
 // and 5.5px with 5 tabs).
@@ -510,20 +375,7 @@ export type TabBarGroupProps = React.ComponentProps<'div'> & {
  */
 const Group = forwardRef<HTMLDivElement, TabBarGroupProps>(
   ({ children, shape, ...props }, forwardedRef) => {
-    const ref = useRef<HTMLDivElement | null>(null);
-
-    const setRef = useCallback(
-      (element: HTMLDivElement | null) => {
-        ref.current = element;
-
-        if (typeof forwardedRef === 'function') {
-          forwardedRef(element);
-        } else if (forwardedRef) {
-          forwardedRef.current = element;
-        }
-      },
-      [forwardedRef],
-    );
+    const ref = useForwardedRef(forwardedRef);
 
     useLayoutEffect(() => {
       const { current: group } = ref;
@@ -547,21 +399,17 @@ const Group = forwardRef<HTMLDivElement, TabBarGroupProps>(
         resizeObserver.disconnect();
         mutationObserver.disconnect();
       };
-    }, []);
+    }, [ref]);
 
     const context = { shape };
 
     return (
       <GroupContext.Provider value={context}>
         <StyledGroup
-          ref={setRef}
+          ref={ref}
           {...props}
         >
-          <GlassBlur aria-hidden="true" />
-          <GlassFillBottom aria-hidden="true" />
-          <GlassFillMiddle aria-hidden="true" />
-          <GlassFillTop aria-hidden="true" />
-          <GlassEffect aria-hidden="true" />
+          <GlassBackground />
           {children}
         </StyledGroup>
       </GroupContext.Provider>
@@ -589,16 +437,16 @@ const Indicator = styled(BaseTabs.Indicator, forwardRef)`
   &::before {
     position: absolute;
     border-radius: inherit;
-    background-color: var(--styled-tabbar-selection);
+    background-color: var(--styled-glass-selection);
     content: '';
     inset: 0;
-    mix-blend-mode: var(--styled-tabbar-selection-blend);
+    mix-blend-mode: var(--styled-glass-selection-blend);
     opacity: calc(
       var(--styled-tabbar-selection-opacity, 0) *
         (1 - var(--styled-tabbar-pressed, 0))
     );
-    transform: scale(calc(1 + 0.4 * var(--styled-tabbar-pressed, 0)));
-    transition-duration: 300ms;
+    transform: scale(${glassLensScale('var(--styled-tabbar-pressed, 0)')});
+    transition-duration: var(--glass-ios-lens-duration);
   }
 `;
 
@@ -630,7 +478,7 @@ const StyledTab = styled<typeof BaseTabs.Tab, TabBarTabProps>(BaseTabs.Tab, forw
   margin: 0;
   appearance: none;
   background-color: transparent;
-  color: var(--styled-tabbar-content);
+  color: var(--styled-glass-content);
   font-family: inherit;
   gap: 1px;
   margin-inline-end: calc(var(--styled-tabbar-overlap) * -1);
@@ -684,12 +532,12 @@ const Icon = styled('span', forwardRef)`
   justify-content: center;
   font-feature-settings: 'ss16';
   font-size: 17px;
-  font-weight: 400;
+  ${fontWeight(400)}
   line-height: 28px;
-  mix-blend-mode: var(--styled-tabbar-content-blend);
+  mix-blend-mode: var(--styled-glass-content-blend);
 
   [data-active] > & {
-    font-weight: 590;
+    ${fontWeight(590)}
     mix-blend-mode: normal;
   }
 `;
@@ -699,15 +547,15 @@ const Label = styled('span', forwardRef)`
   min-width: 0;
   align-self: stretch;
   font-size: 10px;
-  font-weight: 510;
+  ${fontWeight(510)}
   line-height: 12px;
-  mix-blend-mode: var(--styled-tabbar-content-blend);
+  mix-blend-mode: var(--styled-glass-content-blend);
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
 
   [data-active] > & {
-    font-weight: 700;
+    ${fontWeight(700)}
     mix-blend-mode: normal;
   }
 `;

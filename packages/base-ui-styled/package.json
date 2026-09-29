@@ -34,7 +34,8 @@
     "csstype": "3.2.3",
     "eslint-plugin-react": "7.37.5",
     "fork-ts-checker-webpack-plugin": "9.1.0",
-    "postcss-styled-syntax": "0.7.3",
+    "framework7-icons": "5.0.5",
+    "postcss-styled-syntax": "0.7.2",
     "source-map-loader": "5.0.0"
   }
 }
