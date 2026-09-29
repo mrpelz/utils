@@ -1,6 +1,9 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
-import { FunctionComponent } from 'preact';
-import { useMemo } from 'preact/hooks';
+import HouseFill from 'framework7-icons/react/esm/HouseFill.js';
+import Plus from 'framework7-icons/react/esm/Plus.js';
+import Search from 'framework7-icons/react/esm/Search.js';
+import StarFill from 'framework7-icons/react/esm/StarFill.js';
+import { FunctionComponent, useMemo } from 'react';
 
 import { TabBar } from '../components/index.js';
 import {
@@ -16,14 +19,22 @@ const secondaryValues = ['secondary-1', 'secondary-2', 'secondary-3'] as const;
 
 const propOptionsContent = {
   tabs: [3, 1, 2, 4, 5] as const,
-  icon: ['★', undefined] as const,
+  icon: [
+    new MappedProp(<StarFill />, '[star.fill]'),
+    new MappedProp(<HouseFill />, '[house.fill]'),
+    undefined,
+  ] as const,
   label: ['Label', undefined, 'Long tab label'] as const,
   panels: [false, true] as const,
 } as const;
 
 const propOptionsSecondaryContent = {
   tabs: [1, 2, 3] as const,
-  icon: ['⌕', '＋', undefined] as const,
+  icon: [
+    new MappedProp(<Search />, '[search]'),
+    new MappedProp(<Plus />, '[plus]'),
+    undefined,
+  ] as const,
   label: [undefined, 'Search'] as const,
 } as const;
 
@@ -64,9 +75,10 @@ const propOptionsSecondaryGroup = {
 };
 
 const TabBarDemoBase: FunctionComponent<{
+  id: string;
   secondary: boolean;
   title: string;
-}> = ({ secondary, title }) => {
+}> = ({ id, secondary, title }) => {
   const [log, addLog] = useLog();
 
   const [controlContent, content] = usePropControl(
@@ -205,10 +217,9 @@ const TabBarDemoBase: FunctionComponent<{
 
   return (
     <Component
-      backdrop
       center
-      stretch
-      id="tabs"
+      baseUiId="tabs"
+      id={id}
       log={log}
       title={title}
       controls={[
@@ -298,6 +309,7 @@ const TabBarDemoBase: FunctionComponent<{
 
 export const TabBarDemo: FunctionComponent = () => (
   <TabBarDemoBase
+    id="tab-bar"
     secondary={false}
     title="Tab Bar"
   />
@@ -306,6 +318,7 @@ export const TabBarDemo: FunctionComponent = () => (
 export const TabBarSecondaryDemo: FunctionComponent = () => (
   <TabBarDemoBase
     secondary
+    id="tab-bar-secondary"
     title="Tab Bar (Secondary Group)"
   />
 );

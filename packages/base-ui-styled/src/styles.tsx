@@ -1,54 +1,28 @@
 import { createGlobalStyles as createGlobalStyle } from 'goober/global';
-import { FunctionComponent } from 'preact';
+import { FunctionComponent } from 'react';
 
 import { css } from './components/utils.js';
 
 export const styles = css`
   :root {
-    /* Base brand color (overridable) */
-    --color-brand-primary: #007aff;
+    /*
+     * Grayscale antialiasing, as on iOS (Framework7 components/app/app.less;
+     * Figma renders text the same way)
+     */
+    -webkit-font-smoothing: antialiased;
 
     /*
-     * iOS primary (app tint), defaults to systemBlue
-     * tint/shade: HSL lightness +/- 8%, Konsta UI color-utils/ios-colors.js
+     * App tint (UIKit tintColor), systemBlue unless overridden
+     *
+     * tint/shade: HSL lightness +/- 8% (Konsta UI color-utils/ios-colors.js)
      */
-    --color-ios-primary: var(--k-color-primary, var(--color-ios-system-blue));
+    --color-ios-primary: var(--color-ios-system-blue);
     --color-ios-primary-tint: hsl(
       from var(--color-ios-primary) h s calc(l + 8)
     );
     --color-ios-primary-shade: hsl(
       from var(--color-ios-primary) h s calc(l - 8)
     );
-
-    /* iOS surfaces */
-    --color-ios-light-surface: #efeff4;
-    --color-ios-light-surface-1: #fff;
-    --color-ios-light-surface-2: #f7f7f8;
-    --color-ios-dark-surface: #000;
-    --color-ios-dark-surface-1: #1c1c1d;
-    --color-ios-dark-surface-2: #121212;
-
-    /* Material light */
-    --color-md-light-primary: #6750a4;
-    --color-md-light-on-primary: #fff;
-    --color-md-light-secondary-container: #e8def8;
-    --color-md-light-on-secondary-container: #1d192b;
-    --color-md-light-outline: #79747e;
-
-    /* Material dark */
-    --color-md-dark-primary: #d0bcff;
-    --color-md-dark-on-primary: #381e72;
-    --color-md-dark-secondary-container: #4a4458;
-    --color-md-dark-on-secondary-container: #e8def8;
-    --color-md-dark-outline: #938f99;
-
-    /* Fonts */
-    --font-ios: -apple-system, blinkmacsystemfont, 'Segoe UI', sans-serif;
-    --font-material: 'Roboto', 'Segoe UI', sans-serif;
-
-    /* Transitions */
-    --transition-transform-opacity: transform 0.3s, opacity 0.3s;
-    --ease-material-in: cubic-bezier(0.4, 0, 0.2, 1);
 
     /*
      * iOS semantic colors (UIKit UIColor)
@@ -57,7 +31,8 @@ export const styles = css`
      *   Color (June 9, 2025 values), incl. increased contrast variants
      * - labels, separators, link, fills, backgrounds: UIKit values (not
      *   published in the HIG); label and tertiary-system-fill match the
-     *   iOS 26 Figma
+     *   iOS 26 Figma, system-fill (light) is the Figma value (switch and
+     *   slider tracks: 120 120 120, UIKit: 120 120 128)
      */
     --color-ios-label: rgb(0 0 0);
     --color-ios-secondary-label: rgb(60 60 67 / 60%);
@@ -67,7 +42,7 @@ export const styles = css`
     --color-ios-separator: rgb(60 60 67 / 29%);
     --color-ios-opaque-separator: rgb(198 198 200);
     --color-ios-link: rgb(0 122 255);
-    --color-ios-system-fill: rgb(120 120 128 / 20%);
+    --color-ios-system-fill: rgb(120 120 120 / 20%);
     --color-ios-secondary-system-fill: rgb(120 120 128 / 16%);
     --color-ios-tertiary-system-fill: rgb(118 118 128 / 12%);
     --color-ios-quaternary-system-fill: rgb(116 116 128 / 8%);
@@ -178,28 +153,6 @@ export const styles = css`
     }
 
     /*
-     * iOS glass
-     *
-     * Source: Framework7 components/app/app-vars.less (--f7-glass-shadow-thumb)
-     */
-    --shadow-ios-glass-thumb:
-      inset -3px -3px 0 -3.5px rgb(255 255 255),
-      inset 3px 3px 0 -3.5px rgb(255 255 255),
-      inset 0 0 0 0.5px rgb(255 255 255 / 50%), inset 3px 3px 10px -2px #eee,
-      inset -3px -3px 10px -2px #eee, inset 0 0 5px 1px #fff;
-
-    @media (prefers-color-scheme: dark) {
-      --shadow-ios-glass-thumb:
-        inset 3px 3px 0 -3.5px rgb(255 255 255),
-        inset -3px -3px 0 -3.5px rgb(255 255 255),
-        inset -0.5px -0.5px 0 rgb(255 255 255 / 50%),
-        inset 0.5px 0.5px 0 rgb(255 255 255 / 10%),
-        inset -3px 3px 0 -3.5px rgb(255 255 255 / 25%),
-        inset 0 -5px 0 -3.5px rgb(255 255 255 / 25%),
-        inset 0 -5px 5px rgb(255 255 255 / 25%);
-    }
-
-    /*
      * iOS glass materials for dim and bright content behind the glass
      *
      * Source: Apple iOS 26 Figma (Tab Bar, BG Context Dim/Bright):
@@ -208,13 +161,19 @@ export const styles = css`
      *   with its blend mode; opacity of the whole fill
      * - content/selection: vibrant tab content and selection (no UIKit
      *   semantic equivalent)
+     * - content-disabled, content-prominent(-disabled): labels of glass
+     *   buttons (Figma “_Label - Text/Symbol”, Default and Preferred, State
+     *   Default/Disabled); the prominent disabled bright label is #262626 at
+     *   layer opacity 0.5; the prominent dim label is white as rendered in
+     *   “Button - Liquid Glass” (“_Label - Preferred - Dim” says #BFBFBF)
      * The “Glass Effect” layer (a Figma layer effect, not part of the CSS
      * export) is emulated as in Framework7 components/app/app-vars.less
      * (--f7-glass-shadow, light for bright, dark for dim) and Konsta UI
      * styles/glass.css (--shadow-ios-light-glass, --shadow-ios-dark-glass).
      * - lens: pressed selection, Framework7 components/toolbar/toolbar-vars.less
      *   (--f7-tabbar-link-highlight-active-bg-color) and app-vars.less
-     *   (--f7-glass-shadow-thumb), light for bright, dark for dim
+     *   (--f7-glass-shadow-thumb), light for bright, dark for dim; see
+     *   --glass-ios-lens-* below
      * plus-darker (unsupported in Chromium) falls back to multiply, which
      * darkens by a similar amount for these light colors.
      */
@@ -227,6 +186,10 @@ export const styles = css`
     --glass-ios-dim-fill-opacity: 0.67;
     --glass-ios-dim-content: #bfbfbf;
     --glass-ios-dim-content-blend: plus-lighter;
+    --glass-ios-dim-content-disabled: #262626;
+    --glass-ios-dim-content-prominent: #fff;
+    --glass-ios-dim-content-prominent-blend: plus-lighter;
+    --glass-ios-dim-content-prominent-disabled: #262626;
     --glass-ios-dim-selection: #121212;
     --glass-ios-dim-selection-blend: plus-lighter;
     --glass-ios-dim-lens: rgb(255 255 255 / 10%);
@@ -254,6 +217,10 @@ export const styles = css`
     --glass-ios-bright-fill-opacity: 1;
     --glass-ios-bright-content: #404040;
     --glass-ios-bright-content-blend: multiply;
+    --glass-ios-bright-content-disabled: #d9d9d9;
+    --glass-ios-bright-content-prominent: #fff;
+    --glass-ios-bright-content-prominent-blend: plus-lighter;
+    --glass-ios-bright-content-prominent-disabled: rgb(38 38 38 / 50%);
     --glass-ios-bright-selection: #ededed;
     --glass-ios-bright-selection-blend: multiply;
     --glass-ios-bright-lens: rgb(0 0 0 / 5%);
@@ -269,25 +236,46 @@ export const styles = css`
       inset 0 0 0 0.5px rgb(0 0 0 / 25%), inset 0 0 24px 0 rgb(0 0 0 / 10%),
       0 0 25px 0 rgb(0 0 0 / 20%);
 
+    /*
+     * Tinted glass (prominent glass buttons), the same in both contexts
+     *
+     * Source: Apple iOS 26 Figma (Button - Liquid Glass, Tinted=True): “Tint”
+     * layer: the tint (#0091FF in both contexts, also where the system tint
+     * is #0088FF), then its fills (bottom to top) with their blend modes, and
+     * its shadow. plus-darker falls back to multiply, as above.
+     */
+    --glass-ios-tint: rgb(0 145 255);
+    --glass-ios-tint-base: rgb(255 255 255 / 50%);
+    --glass-ios-tint-saturation: #fff;
+    --glass-ios-tint-overlay: #999;
+    --glass-ios-tint-blend: multiply;
+    --glass-ios-tint-shadow:
+      0 0 2px rgb(0 0 0 / 10%), 0 1px 8px rgb(0 0 0 / 12%);
+
+    /*
+     * Glass lens: the pressed state of knobs and selections (switch, slider,
+     * tab bar), scaled up and drawn as clear glass
+     *
+     * Source: Framework7 toggle-ios.less, range-ios.less, toolbar-ios.less
+     * (scale 1.4, 300ms transitions); the shadow follows the color scheme
+     * where no dim/bright context applies.
+     * content-scale: content on a lens (glass buttons) scales up less than
+     * the lens (seen on a device; the value is an estimate).
+     */
+    --glass-ios-lens-scale: 1.4;
+    --glass-ios-lens-content-scale: 1.2;
+    --glass-ios-lens-duration: 300ms;
+    --glass-ios-lens-shadow: var(--glass-ios-bright-lens-shadow);
+
+    @media (prefers-color-scheme: dark) {
+      --glass-ios-lens-shadow: var(--glass-ios-dim-lens-shadow);
+    }
+
     @supports (mix-blend-mode: plus-darker) {
       --glass-ios-bright-fill-top-blend: plus-darker;
       --glass-ios-bright-content-blend: plus-darker;
       --glass-ios-bright-selection-blend: plus-darker;
-    }
-
-    &[dark] {
-      --color-ios-light-surface: #000;
-      --color-ios-light-surface-1: #1c1c1d;
-      --color-ios-light-surface-2: #121212;
-      --color-md-light-primary: var(--color-md-dark-primary);
-      --color-md-light-on-primary: var(--color-md-dark-on-primary);
-      --color-md-light-secondary-container: var(
-        --color-md-dark-secondary-container
-      );
-      --color-md-light-on-secondary-container: var(
-        --color-md-dark-on-secondary-container
-      );
-      --color-md-light-outline: var(--color-md-dark-outline);
+      --glass-ios-tint-blend: plus-darker;
     }
   }
 `;

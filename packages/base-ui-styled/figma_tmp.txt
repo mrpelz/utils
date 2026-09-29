@@ -1,0 +1,3641 @@
+/* _Ticks */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 16px;
+
+position: relative;
+width: 282px;
+height: 4px;
+
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+
+
+/* _Track */
+
+position: relative;
+width: 282px;
+height: 6px;
+
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: rgba(120, 120, 120, 0.2);
+border-radius: 3px;
+
+
+/* _Fill */
+
+position: relative;
+width: 282px;
+height: 6px;
+
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: #0088FF;
+border-radius: 3px;
+
+
+/* _Knob */
+
+position: relative;
+width: 2px;
+height: 24px;
+
+border-radius: 100px;
+
+
+/* Knob */
+
+position: absolute;
+width: 38px;
+height: 24px;
+left: calc(50% - 38px/2);
+top: calc(50% - 24px/2);
+
+background: #FFFFFF;
+box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.12), 0px 6px 13px rgba(0, 0, 0, 0.12);
+border-radius: 100px;
+
+
+/* Light examples */
+
+box-sizing: border-box;
+
+position: relative;
+width: 440px;
+height: 250px;
+
+background: #FFFFFF;
+border: 1px solid rgba(0, 0, 0, 0.1);
+border-radius: 22px;
+
+
+/* Sliders
+
+<p><a rel="noreferrer noopener nofollow ugc" target="_blank">Guidelines:
+
+
+
+Feedback:
+http://feedbackassistant.apple.com/new?form=developertools.fba&amp;answers%5B:area%5D=seedx:appledesignresources</a></p>
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: flex-start;
+padding: 0px 16px 1px;
+
+position: relative;
+width: 400px;
+height: 52px;
+left: 20px;
+top: 60px;
+
+border-radius: 0px;
+
+
+/* _Separator */
+
+width: 368px;
+height: 1px;
+
+mix-blend-mode: plus-darker;
+border-top: 1px solid #E6E6E6;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: flex-start;
+padding: 0px;
+gap: 12px;
+
+width: 368px;
+height: 50px;
+
+border-radius: 0px 0px 1px 0px;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Symbol - Min */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Stack */
+
+width: 280px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: rgba(120, 120, 120, 0.2);
+border-radius: 3px;
+
+
+/* Ticks and Knob */
+
+position: absolute;
+height: 24px;
+left: 16px;
+right: 16px;
+top: calc(50% - 24px/2);
+
+
+
+/* Ticks */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 16px;
+
+position: absolute;
+height: 4px;
+left: 0%;
+right: 0%;
+top: calc(50% - 4px/2 + 9px);
+
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+
+
+/* Knob */
+
+position: absolute;
+width: 1.11px;
+height: 24px;
+left: 2.89px;
+top: calc(50% - 24px/2);
+
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Knob */
+
+position: absolute;
+width: 38px;
+height: 24px;
+left: calc(50% - 38px/2 - 0.44px);
+top: calc(50% - 24px/2);
+
+background: #FFFFFF;
+box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.12), 0px 6px 13px rgba(0, 0, 0, 0.12);
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Symbol - Max */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Sliders
+
+<p><a rel="noreferrer noopener nofollow ugc" target="_blank">Guidelines:
+
+
+
+Feedback:
+http://feedbackassistant.apple.com/new?form=developertools.fba&amp;answers%5B:area%5D=seedx:appledesignresources</a></p>
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px 16px 1px;
+
+position: relative;
+width: 400px;
+height: 52px;
+left: 20px;
+top: 112px;
+
+border-radius: 0px;
+
+
+/* _Separator */
+
+width: 368px;
+height: 1px;
+
+mix-blend-mode: plus-darker;
+border-top: 1px solid #E6E6E6;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 12px;
+
+width: 368px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Symbol - Min */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Stack */
+
+width: 280px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: rgba(120, 120, 120, 0.2);
+border-radius: 3px;
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 49.2%;
+top: calc(50% - 6px/2);
+
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0.24px;
+top: calc(50% - 6px/2);
+
+background: #0088FF;
+border-radius: 3px;
+
+
+/* Ticks and Knob */
+
+position: absolute;
+height: 24px;
+left: 16px;
+right: 16px;
+top: calc(50% - 24px/2);
+
+
+
+/* Ticks */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 16px;
+
+position: absolute;
+height: 4px;
+left: 0%;
+right: 0%;
+top: calc(50% - 4px/2 + 9px);
+
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+
+
+/* Knob */
+
+position: absolute;
+width: 1.11px;
+height: 24px;
+left: calc(50% - 1.11px/2 + 0px);
+top: calc(50% - 24px/2);
+
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Knob */
+
+position: absolute;
+width: 38px;
+height: 24px;
+left: calc(50% - 38px/2 - 0.44px);
+top: calc(50% - 24px/2);
+
+background: #FFFFFF;
+box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.12), 0px 6px 13px rgba(0, 0, 0, 0.12);
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Symbol - Max */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Sliders
+
+<p><a rel="noreferrer noopener nofollow ugc" target="_blank">Guidelines:
+
+
+
+Feedback:
+http://feedbackassistant.apple.com/new?form=developertools.fba&amp;answers%5B:area%5D=seedx:appledesignresources</a></p>
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px 16px 1px;
+
+position: relative;
+width: 400px;
+height: 52px;
+left: 20px;
+top: 164px;
+
+border-radius: 0px;
+
+
+/* _Separator */
+
+width: 368px;
+height: 1px;
+
+mix-blend-mode: plus-darker;
+border-top: 1px solid #E6E6E6;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: flex-start;
+padding: 0px;
+gap: 12px;
+
+width: 368px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Symbol - Min */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Stack */
+
+width: 280px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: rgba(120, 120, 120, 0.2);
+border-radius: 3px;
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: #0088FF;
+border-radius: 3px;
+
+
+/* Ticks and Knob */
+
+position: absolute;
+height: 24px;
+left: 16px;
+right: 16px;
+top: calc(50% - 24px/2);
+
+
+
+/* Ticks */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 16px;
+
+position: absolute;
+height: 4px;
+left: 0%;
+right: 0%;
+top: calc(50% - 4px/2 + 9px);
+
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+
+
+/* Knob */
+
+position: absolute;
+width: 1.11px;
+height: 24px;
+right: 2px;
+top: calc(50% - 24px/2);
+
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Knob */
+
+position: absolute;
+width: 38px;
+height: 24px;
+left: calc(50% - 38px/2 - 0.44px);
+top: calc(50% - 24px/2);
+
+background: #FFFFFF;
+box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.12), 0px 6px 13px rgba(0, 0, 0, 0.12);
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Symbol - Max */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Mode */
+
+box-sizing: border-box;
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 3px 6px;
+gap: 4px;
+
+position: relative;
+width: 54px;
+height: 19px;
+right: 10px;
+top: 10px;
+
+background: rgba(120, 120, 128, 0.16);
+border: 1px solid rgba(60, 60, 67, 0.6);
+border-radius: 14px;
+
+
+/* Union */
+
+width: 7.93px;
+height: 9.16px;
+
+background: rgba(60, 60, 67, 0.6);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Vector */
+
+position: absolute;
+left: 11.11%;
+right: 74.21%;
+top: 25.91%;
+bottom: 25.91%;
+
+/* Labels/Secondary */
+background: rgba(60, 60, 67, 0.6);
+
+
+/* Vector */
+
+position: absolute;
+left: 16.6%;
+right: 79.7%;
+top: 44.73%;
+bottom: 44.74%;
+
+/* Labels/Secondary */
+background: rgba(60, 60, 67, 0.6);
+
+
+/* Light */
+
+width: 30.07px;
+height: 13px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 11px;
+line-height: 13px;
+/* identical to box height, or 118% */
+display: flex;
+align-items: center;
+letter-spacing: -0.4px;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+
+/* Dark examples */
+
+box-sizing: border-box;
+
+position: relative;
+width: 440px;
+height: 250px;
+
+background: #000000;
+border: 1px solid rgba(0, 0, 0, 0.1);
+border-radius: 22px;
+
+
+/* Sliders
+
+<p><a rel="noreferrer noopener nofollow ugc" target="_blank">Guidelines:
+
+
+
+Feedback:
+http://feedbackassistant.apple.com/new?form=developertools.fba&amp;answers%5B:area%5D=seedx:appledesignresources</a></p>
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: flex-start;
+padding: 0px 16px 1px;
+
+position: relative;
+width: 400px;
+height: 52px;
+left: 20px;
+top: 60px;
+
+border-radius: 0px;
+
+
+/* _Separator */
+
+width: 368px;
+height: 1px;
+
+mix-blend-mode: plus-darker;
+border-top: 1px solid #1A1A1A;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: flex-start;
+padding: 0px;
+gap: 12px;
+
+width: 368px;
+height: 50px;
+
+border-radius: 0px 0px 1px 0px;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Symbol - Min */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(235, 235, 245, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Stack */
+
+width: 280px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: rgba(120, 120, 128, 0.36);
+border-radius: 3px;
+
+
+/* Ticks and Knob */
+
+position: absolute;
+height: 24px;
+left: 16px;
+right: 16px;
+top: calc(50% - 24px/2);
+
+
+
+/* Ticks */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 16px;
+
+position: absolute;
+height: 4px;
+left: 0%;
+right: 0%;
+top: calc(50% - 4px/2 + 9px);
+
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+
+
+/* Knob */
+
+position: absolute;
+width: 1.11px;
+height: 24px;
+left: 2.89px;
+top: calc(50% - 24px/2);
+
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Knob */
+
+position: absolute;
+width: 38px;
+height: 24px;
+left: calc(50% - 38px/2 - 0.44px);
+top: calc(50% - 24px/2);
+
+background: #FFFFFF;
+box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.12), 0px 6px 13px rgba(0, 0, 0, 0.12);
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Symbol - Max */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(235, 235, 245, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Sliders
+
+<p><a rel="noreferrer noopener nofollow ugc" target="_blank">Guidelines:
+
+
+
+Feedback:
+http://feedbackassistant.apple.com/new?form=developertools.fba&amp;answers%5B:area%5D=seedx:appledesignresources</a></p>
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px 16px 1px;
+
+position: relative;
+width: 400px;
+height: 52px;
+left: 20px;
+top: 112px;
+
+border-radius: 0px;
+
+
+/* _Separator */
+
+width: 368px;
+height: 1px;
+
+mix-blend-mode: plus-darker;
+border-top: 1px solid #1A1A1A;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 12px;
+
+width: 368px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Symbol - Min */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(235, 235, 245, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Stack */
+
+width: 280px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: rgba(120, 120, 128, 0.36);
+border-radius: 3px;
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 49.2%;
+top: calc(50% - 6px/2);
+
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0.24px;
+top: calc(50% - 6px/2);
+
+background: #0091FF;
+border-radius: 3px;
+
+
+/* Ticks and Knob */
+
+position: absolute;
+height: 24px;
+left: 16px;
+right: 16px;
+top: calc(50% - 24px/2);
+
+
+
+/* Ticks */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 16px;
+
+position: absolute;
+height: 4px;
+left: 0%;
+right: 0%;
+top: calc(50% - 4px/2 + 9px);
+
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+
+
+/* Knob */
+
+position: absolute;
+width: 1.11px;
+height: 24px;
+left: calc(50% - 1.11px/2 + 0px);
+top: calc(50% - 24px/2);
+
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Knob */
+
+position: absolute;
+width: 38px;
+height: 24px;
+left: calc(50% - 38px/2 - 0.44px);
+top: calc(50% - 24px/2);
+
+background: #FFFFFF;
+box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.12), 0px 6px 13px rgba(0, 0, 0, 0.12);
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Symbol - Max */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(235, 235, 245, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Sliders
+
+<p><a rel="noreferrer noopener nofollow ugc" target="_blank">Guidelines:
+
+
+
+Feedback:
+http://feedbackassistant.apple.com/new?form=developertools.fba&amp;answers%5B:area%5D=seedx:appledesignresources</a></p>
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px 16px 1px;
+
+position: relative;
+width: 400px;
+height: 52px;
+left: 20px;
+top: 166px;
+
+border-radius: 0px;
+
+
+/* _Separator */
+
+width: 368px;
+height: 1px;
+
+mix-blend-mode: plus-darker;
+border-top: 1px solid #1A1A1A;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: flex-start;
+padding: 0px;
+gap: 12px;
+
+width: 368px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Symbol - Min */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(235, 235, 245, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Stack */
+
+width: 280px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: rgba(120, 120, 128, 0.36);
+border-radius: 3px;
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: #0091FF;
+border-radius: 3px;
+
+
+/* Ticks and Knob */
+
+position: absolute;
+height: 24px;
+left: 16px;
+right: 16px;
+top: calc(50% - 24px/2);
+
+
+
+/* Ticks */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 16px;
+
+position: absolute;
+height: 4px;
+left: 0%;
+right: 0%;
+top: calc(50% - 4px/2 + 9px);
+
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(235, 235, 245, 0.16);
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+
+
+/* Knob */
+
+position: absolute;
+width: 1.11px;
+height: 24px;
+right: 2px;
+top: calc(50% - 24px/2);
+
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Knob */
+
+position: absolute;
+width: 38px;
+height: 24px;
+left: calc(50% - 38px/2 - 0.44px);
+top: calc(50% - 24px/2);
+
+background: #FFFFFF;
+box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.12), 0px 6px 13px rgba(0, 0, 0, 0.12);
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Symbol - Max */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(235, 235, 245, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Mode */
+
+box-sizing: border-box;
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 3px 6px;
+gap: 4px;
+
+position: relative;
+width: 54px;
+height: 19px;
+right: 10px;
+top: 10px;
+
+background: rgba(120, 120, 128, 0.32);
+border: 1px solid rgba(235, 235, 245, 0.6);
+border-radius: 14px;
+
+
+/* Union */
+
+width: 7.93px;
+height: 9.16px;
+
+background: rgba(235, 235, 245, 0.6);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Vector */
+
+position: absolute;
+left: 11.11%;
+right: 74.21%;
+top: 25.91%;
+bottom: 25.91%;
+
+/* Labels/Secondary */
+background: rgba(60, 60, 67, 0.6);
+
+
+/* Vector */
+
+position: absolute;
+left: 16.6%;
+right: 79.7%;
+top: 44.73%;
+bottom: 44.74%;
+
+/* Labels/Secondary */
+background: rgba(60, 60, 67, 0.6);
+
+
+/* Dark */
+
+width: 30.07px;
+height: 13px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 11px;
+line-height: 13px;
+/* identical to box height, or 118% */
+display: flex;
+align-items: center;
+letter-spacing: -0.4px;
+
+color: #FFFFFF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+
+/* Sliders
+
+<p><a rel="noreferrer noopener nofollow ugc" target="_blank">Guidelines:
+
+
+
+Feedback:
+http://feedbackassistant.apple.com/new?form=developertools.fba&amp;answers%5B:area%5D=seedx:appledesignresources</a></p>
+*/
+
+box-sizing: border-box;
+
+position: relative;
+width: 440px;
+height: 330px;
+
+background: #F5F5F5;
+border: 1px dashed #6155F5;
+border-radius: 5px;
+
+
+/* Value=100%
+
+<p><a rel="noreferrer noopener nofollow ugc" target="_blank">Guidelines:
+
+
+
+Feedback:
+http://feedbackassistant.apple.com/new?form=developertools.fba&amp;answers%5B:area%5D=seedx:appledesignresources</a></p>
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px 16px 1px;
+
+position: absolute;
+height: 52px;
+left: 4.55%;
+right: 4.55%;
+top: 260px;
+
+border-radius: 0px;
+
+
+/* _Separator */
+
+width: 368px;
+height: 1px;
+
+mix-blend-mode: plus-darker;
+border-top: 1px solid #E6E6E6;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: flex-start;
+padding: 0px;
+gap: 12px;
+
+width: 368px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Symbol - Min */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Stack */
+
+width: 280px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: rgba(120, 120, 120, 0.2);
+border-radius: 3px;
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: #0088FF;
+border-radius: 3px;
+
+
+/* Ticks and Knob */
+
+position: absolute;
+height: 24px;
+left: 16px;
+right: 16px;
+top: calc(50% - 24px/2);
+
+
+
+/* Ticks */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 16px;
+
+position: absolute;
+height: 4px;
+left: 0%;
+right: 0%;
+top: calc(50% - 4px/2 + 9px);
+
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+
+
+/* Knob */
+
+position: absolute;
+width: 1.11px;
+height: 24px;
+right: 2px;
+top: calc(50% - 24px/2);
+
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Knob */
+
+position: absolute;
+width: 38px;
+height: 24px;
+left: calc(50% - 38px/2 - 0.44px);
+top: calc(50% - 24px/2);
+
+background: #FFFFFF;
+box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.12), 0px 6px 13px rgba(0, 0, 0, 0.12);
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Symbol - Max */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Value=75%
+
+<p><a rel="noreferrer noopener nofollow ugc" target="_blank">Guidelines:
+
+
+
+Feedback:
+http://feedbackassistant.apple.com/new?form=developertools.fba&amp;answers%5B:area%5D=seedx:appledesignresources</a></p>
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px 16px 1px;
+
+position: absolute;
+height: 52px;
+left: 4.55%;
+right: 4.55%;
+top: 200px;
+
+border-radius: 0px;
+
+
+/* _Separator */
+
+width: 368px;
+height: 1px;
+
+mix-blend-mode: plus-darker;
+border-top: 1px solid #E6E6E6;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: flex-start;
+padding: 0px;
+gap: 12px;
+
+width: 368px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Symbol - Min */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Stack */
+
+width: 280px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: rgba(120, 120, 120, 0.2);
+border-radius: 3px;
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 24.6%;
+top: calc(50% - 6px/2);
+
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0.12px;
+top: calc(50% - 6px/2);
+
+background: #0088FF;
+border-radius: 3px;
+
+
+/* Ticks and Knob */
+
+position: absolute;
+height: 24px;
+left: 16px;
+right: 16px;
+top: calc(50% - 24px/2);
+
+
+
+/* Ticks */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 16px;
+
+position: absolute;
+height: 4px;
+left: 0%;
+right: 0%;
+top: calc(50% - 4px/2 + 9px);
+
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+
+
+/* Knob */
+
+position: absolute;
+height: 24px;
+left: 74.4%;
+right: 25.16%;
+top: calc(50% - 24px/2);
+
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Knob */
+
+position: absolute;
+width: 38px;
+height: 24px;
+left: calc(50% - 38px/2 - 0.45px);
+top: calc(50% - 24px/2);
+
+background: #FFFFFF;
+box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.12), 0px 6px 13px rgba(0, 0, 0, 0.12);
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Symbol - Max */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Value=50%
+
+<p><a rel="noreferrer noopener nofollow ugc" target="_blank">Guidelines:
+
+
+
+Feedback:
+http://feedbackassistant.apple.com/new?form=developertools.fba&amp;answers%5B:area%5D=seedx:appledesignresources</a></p>
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px 16px 1px;
+
+position: absolute;
+height: 52px;
+left: 4.55%;
+right: 4.55%;
+top: 140px;
+
+border-radius: 0px;
+
+
+/* _Separator */
+
+width: 368px;
+height: 1px;
+
+mix-blend-mode: plus-darker;
+border-top: 1px solid #E6E6E6;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 12px;
+
+width: 368px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Symbol - Min */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Stack */
+
+width: 280px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: rgba(120, 120, 120, 0.2);
+border-radius: 3px;
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 49.2%;
+top: calc(50% - 6px/2);
+
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0.24px;
+top: calc(50% - 6px/2);
+
+background: #0088FF;
+border-radius: 3px;
+
+
+/* Ticks and Knob */
+
+position: absolute;
+height: 24px;
+left: 16px;
+right: 16px;
+top: calc(50% - 24px/2);
+
+
+
+/* Ticks */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 16px;
+
+position: absolute;
+height: 4px;
+left: 0%;
+right: 0%;
+top: calc(50% - 4px/2 + 9px);
+
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+
+
+/* Knob */
+
+position: absolute;
+width: 1.11px;
+height: 24px;
+left: calc(50% - 1.11px/2 + 0px);
+top: calc(50% - 24px/2);
+
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Knob */
+
+position: absolute;
+width: 38px;
+height: 24px;
+left: calc(50% - 38px/2 - 0.44px);
+top: calc(50% - 24px/2);
+
+background: #FFFFFF;
+box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.12), 0px 6px 13px rgba(0, 0, 0, 0.12);
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Symbol - Max */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Value=25%
+
+<p><a rel="noreferrer noopener nofollow ugc" target="_blank">Guidelines:
+
+
+
+Feedback:
+http://feedbackassistant.apple.com/new?form=developertools.fba&amp;answers%5B:area%5D=seedx:appledesignresources</a></p>
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px 16px 1px;
+
+position: absolute;
+height: 52px;
+left: 4.55%;
+right: 4.55%;
+top: 80px;
+
+border-radius: 0px;
+
+
+/* _Separator */
+
+width: 368px;
+height: 1px;
+
+mix-blend-mode: plus-darker;
+border-top: 1px solid #E6E6E6;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: flex-start;
+padding: 0px;
+gap: 12px;
+
+width: 368px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Symbol - Min */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Stack */
+
+width: 280px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: rgba(120, 120, 120, 0.2);
+border-radius: 3px;
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 73.6%;
+top: calc(50% - 6px/2);
+
+
+
+/* Fill */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: -0.08px;
+top: calc(50% - 6px/2);
+
+background: #0088FF;
+border-radius: 3px;
+
+
+/* Ticks and Knob */
+
+position: absolute;
+height: 24px;
+left: 16px;
+right: 16px;
+top: calc(50% - 24px/2);
+
+
+
+/* Ticks */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 16px;
+
+position: absolute;
+height: 4px;
+left: 0%;
+right: 0%;
+top: calc(50% - 4px/2 + 9px);
+
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+
+
+/* Knob */
+
+position: absolute;
+height: 24px;
+left: 25.2%;
+right: 74.36%;
+top: calc(50% - 24px/2);
+
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Knob */
+
+position: absolute;
+width: 38px;
+height: 24px;
+left: calc(50% - 38px/2 - 0.45px);
+top: calc(50% - 24px/2);
+
+background: #FFFFFF;
+box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.12), 0px 6px 13px rgba(0, 0, 0, 0.12);
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Symbol - Max */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Value=0%
+
+<p><a rel="noreferrer noopener nofollow ugc" target="_blank">Guidelines:
+
+
+
+Feedback:
+http://feedbackassistant.apple.com/new?form=developertools.fba&amp;answers%5B:area%5D=seedx:appledesignresources</a></p>
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: flex-start;
+padding: 0px 16px 1px;
+
+position: absolute;
+height: 52px;
+left: 4.55%;
+right: 4.55%;
+top: 20px;
+
+border-radius: 0px;
+
+
+/* _Separator */
+
+width: 368px;
+height: 1px;
+
+mix-blend-mode: plus-darker;
+border-top: 1px solid #E6E6E6;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: flex-start;
+padding: 0px;
+gap: 12px;
+
+width: 368px;
+height: 50px;
+
+border-radius: 0px 0px 1px 0px;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Symbol - Min */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Stack */
+
+width: 280px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0%;
+right: 0%;
+top: calc(50% - 6px/2);
+
+
+
+/* Track */
+
+position: absolute;
+height: 6px;
+left: 0px;
+right: 0px;
+top: calc(50% - 6px/2);
+
+background: rgba(120, 120, 120, 0.2);
+border-radius: 3px;
+
+
+/* Ticks and Knob */
+
+position: absolute;
+height: 24px;
+left: 16px;
+right: 16px;
+top: calc(50% - 24px/2);
+
+
+
+/* Ticks */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 16px;
+
+position: absolute;
+height: 4px;
+left: 0%;
+right: 0%;
+top: calc(50% - 4px/2 + 9px);
+
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+
+
+/* Tick */
+
+margin: 0 auto;
+width: 4px;
+height: 4px;
+
+background: rgba(60, 60, 67, 0.18);
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+
+
+/* Knob */
+
+position: absolute;
+width: 1.11px;
+height: 24px;
+left: 2.89px;
+top: calc(50% - 24px/2);
+
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Knob */
+
+position: absolute;
+width: 38px;
+height: 24px;
+left: calc(50% - 38px/2 - 0.44px);
+top: calc(50% - 24px/2);
+
+background: #FFFFFF;
+box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.12), 0px 6px 13px rgba(0, 0, 0, 0.12);
+border-radius: 100px;
+transform: matrix(-1, 0, 0, 1, 0, 0);
+
+
+/* Symbol - Max */
+
+width: 32px;
+height: 50px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 17px;
+line-height: 22px;
+/* or 129% */
+display: flex;
+align-items: center;
+text-align: center;
+
+color: rgba(60, 60, 67, 0.6);
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Header */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 32px;
+
+position: relative;
+width: 1400px;
+height: 242px;
+
+
+
+/* Component */
+
+width: 1400px;
+height: 60px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 700;
+font-size: 56px;
+line-height: 60px;
+/* identical to box height, or 107% */
+display: flex;
+align-items: center;
+letter-spacing: -0.28px;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Description */
+
+width: 1400px;
+height: 68px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 400;
+font-size: 28px;
+line-height: 34px;
+/* or 121% */
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 8px 0px;
+gap: 16px;
+
+width: 1400px;
+height: 50px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Link */
+
+width: 1400px;
+height: 34px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 400;
+font-size: 28px;
+line-height: 34px;
+/* identical to box height, or 121% */
+display: flex;
+align-items: center;
+
+color: #0088FF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Link */
+
+display: none;
+width: 2000px;
+height: 34px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 400;
+font-size: 28px;
+line-height: 34px;
+/* identical to box height, or 121% */
+display: flex;
+align-items: center;
+
+color: #0088FF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;

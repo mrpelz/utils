@@ -1,5 +1,5 @@
 import { createGlobalStyles as createGlobalStyle } from 'goober/global';
-import { FunctionComponent } from 'preact';
+import { FunctionComponent } from 'react';
 
 import { styles } from '../../styles.js';
 
@@ -12,7 +12,7 @@ export const DemoStyles = createGlobalStyle`
   :root {
     background-color: white;
     color: black;
-    font-family: -apple-system, "SF UI Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: -apple-system, system-ui, "SF UI Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
     scroll-snap-type: y mandatory;
 
     @media (prefers-color-scheme: dark) {

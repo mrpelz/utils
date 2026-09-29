@@ -1,30 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { isObject, objectKeys } from '@mrpelz/misc-utils/oop';
 import {
-  ComponentChild,
-  ComponentChildren,
   createContext,
   CSSProperties,
+  Dispatch,
   FunctionComponent,
   KeyboardEventHandler,
-  RenderableProps,
-} from 'preact';
-import {
-  Dispatch,
-  StateUpdater,
+  PropsWithChildren,
+  ReactNode,
+  SetStateAction,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-} from 'preact/hooks';
+} from 'react';
 
 import {
   Button,
   ComponentDocsLink,
   ComponentHeader,
   ComponentHeading,
+  ComponentId,
   Config,
   ConfigHeading,
   ConfigInner,
@@ -81,7 +80,7 @@ export class MappedProp<T> {
   ) {}
 }
 
-const PropSelectorOption = <T,>({ value }: { value: T }): ComponentChild => {
+const PropSelectorOption = <T,>({ value }: { value: T }): ReactNode => {
   const displayValue = useMemo(() => {
     if (value === undefined) return 'undefined';
     if (value === null) return 'null';
@@ -96,17 +95,16 @@ const PropSelectorOption = <T,>({ value }: { value: T }): ComponentChild => {
 };
 
 const PropSelector = <T extends PropMap>({
-  key,
   objectKey,
   setState,
   state,
   values,
-}: RenderableProps<{
+}: PropsWithChildren<{
   objectKey: Extract<keyof T, string>;
-  setState: Dispatch<StateUpdater<PropMapState<T>>>;
+  setState: Dispatch<SetStateAction<PropMapState<T>>>;
   state: PropMapState<T>;
   values: readonly T[keyof T][number][];
-}>): ComponentChild => {
+}>): ReactNode => {
   const inputId = useId();
   const datalistId = useId();
 
@@ -248,10 +246,7 @@ const PropSelector = <T extends PropMap>({
 
   return (
     <>
-      <label
-        key={key}
-        htmlFor={inputId}
-      >
+      <label htmlFor={inputId}>
         {objectKey}
         {isCustomValue ? '*' : null}
       </label>
@@ -289,7 +284,7 @@ export const usePropControl = <T extends PropMap>(
   propMap: T,
   title?: string,
   open?: boolean,
-): [ComponentChild, ControlledProps<T>, FunctionComponent] => {
+): [ReactNode, ControlledProps<T>, FunctionComponent] => {
   const propMapSorted = useMemo(
     () =>
       Object.fromEntries(
@@ -333,6 +328,7 @@ export const usePropControl = <T extends PropMap>(
 
   const [mount, setMount] = useState(true);
   useLayoutEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- unmounts the demo for one tick to remount it with the new props
     setMount(false);
     queueMicrotask(() => setMount(true));
   }, [mappedState]);
@@ -370,7 +366,7 @@ export const usePropControl = <T extends PropMap>(
   ] as const;
 };
 
-export const useLog = (): [ComponentChild, (value: string) => void] => {
+export const useLog = (): [ReactNode, (value: string) => void] => {
   const logContainerRef = useRef<HTMLElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -418,7 +414,58 @@ export const useLog = (): [ComponentChild, (value: string) => void] => {
   return [log, addLog] as const;
 };
 
-type TStageBackgroundContext = [boolean, Dispatch<StateUpdater<boolean>>];
+type TOptionsContext = {
+  id?: string | string[];
+  raw?: boolean;
+};
+const OptionsContext = createContext(undefined as unknown as TOptionsContext);
+export const OptionsProvider: FunctionComponent = ({ children }) => {
+  const getFragementOptions = useCallback(() => {
+    const fragment = new URLSearchParams(location.hash.slice(1));
+    const result = {} as any;
+
+    for (const key of fragment.keys()) {
+      const values = fragment.getAll(key);
+      if (values.length === 0) continue;
+
+      const parsed = values
+        .map((value) => {
+          try {
+            return JSON.parse(value);
+          } catch {
+            return undefined;
+          }
+        })
+        .filter((value) => value !== undefined);
+
+      result[key] = parsed.length === 1 ? parsed.at(0) : parsed;
+    }
+
+    return result as TOptionsContext;
+  }, []);
+
+  const [params, setParams] = useState(getFragementOptions);
+
+  useEffect(() => {
+    const abort = new AbortController();
+
+    addEventListener(
+      'hashchange',
+      () => {
+        setParams(getFragementOptions());
+      },
+      { signal: abort.signal },
+    );
+
+    return () => abort.abort();
+  }, [getFragementOptions]);
+
+  return (
+    <OptionsContext.Provider value={params}>{children}</OptionsContext.Provider>
+  );
+};
+
+type TStageBackgroundContext = [boolean, Dispatch<SetStateAction<boolean>>];
 const StageBackgroundContext = createContext(
   undefined as unknown as TStageBackgroundContext,
 );
@@ -434,14 +481,18 @@ export const StageBackgroundProvider: FunctionComponent = ({ children }) => {
 
 export const Component: FunctionComponent<{
   backdrop?: boolean;
+  /** Base UI component the demo is built on, for the docs link. */
+  baseUiId: string;
   center?: boolean;
-  controls?: ComponentChildren;
+  controls?: ReactNode;
+  /** Unique demo id, used for selecting demos (`#id=…`) and storing config. */
   id: string;
-  log?: ComponentChild;
+  log?: ReactNode;
   stretch?: boolean;
   title: string;
 }> = ({
   backdrop = false,
+  baseUiId,
   center = false,
   children,
   controls,
@@ -450,6 +501,7 @@ export const Component: FunctionComponent<{
   stretch = false,
   title,
 }) => {
+  const options = useContext(OptionsContext);
   const [stageBackground, setStageBackground] = useContext(
     StageBackgroundContext,
   );
@@ -463,31 +515,55 @@ export const Component: FunctionComponent<{
     backdrop,
   );
 
+  const isHidden = useMemo(() => {
+    const ids = [options.id].flat().filter((value) => value !== undefined);
+    if (ids.length === 0) return false;
+    if (ids.includes(id)) return false;
+
+    return true;
+  }, [id, options.id]);
+
+  const isRaw = useMemo(() => Boolean(options.raw), [options.raw]);
+
+  if (isHidden) return null;
+  if (isRaw) return children;
+
   return (
     <Container>
-      <Content>
-        <ComponentHeader>
-          <ComponentHeading>{title}</ComponentHeading>
-          <ComponentDocsLink
-            href={`${BASE_URL_DOC}/${id}`}
-            rel="noreferrer"
-            target="_blank"
-          >
-            base-ui.com/react/components/{id}
-          </ComponentDocsLink>
-        </ComponentHeader>
-        <Stage>
-          {stageBackground ? <StageBackground /> : null}
-          <StageInner
-            center={isCentered}
-            drawBackdrop={hasBackdrop}
-            stretch={isStretched}
-          >
-            {children}
-          </StageInner>
-        </Stage>
-      </Content>
-      <Config>
+      {isRaw ? (
+        children
+      ) : (
+        <Content>
+          <ComponentHeader>
+            <ComponentHeading>
+              {title}
+              <ComponentId
+                href={`#id=${encodeURIComponent(JSON.stringify(id))}`}
+              >
+                {id}
+              </ComponentId>
+            </ComponentHeading>
+            <ComponentDocsLink
+              href={`${BASE_URL_DOC}/${baseUiId}`}
+              rel="noreferrer"
+              target="_blank"
+            >
+              base-ui.com/react/components/{baseUiId}
+            </ComponentDocsLink>
+          </ComponentHeader>
+          <Stage>
+            {stageBackground ? <StageBackground /> : null}
+            <StageInner
+              center={isCentered}
+              drawBackdrop={hasBackdrop}
+              stretch={isStretched}
+            >
+              {children}
+            </StageInner>
+          </Stage>
+        </Content>
+      )}
+      <Config hidden={isRaw}>
         <ConfigInner>
           <ConfigHeading>Config</ConfigHeading>
           <label style={{ display: 'block' }}>
@@ -495,10 +571,7 @@ export const Component: FunctionComponent<{
               checked={stageBackground}
               name="stageBackground"
               type="checkbox"
-              onClick={useCallback(
-                () => setStageBackground(!stageBackground),
-                [setStageBackground, stageBackground],
-              )}
+              onClick={() => setStageBackground(!stageBackground)}
             />
             Stage Background
           </label>
@@ -507,10 +580,7 @@ export const Component: FunctionComponent<{
               checked={hasBackdrop}
               name={`${id}.backdrop`}
               type="checkbox"
-              onClick={useCallback(
-                () => setHasBackdrop(!hasBackdrop),
-                [hasBackdrop, setHasBackdrop],
-              )}
+              onClick={() => setHasBackdrop(!hasBackdrop)}
             />
             Backdrop
           </label>
@@ -519,10 +589,7 @@ export const Component: FunctionComponent<{
               checked={isCentered}
               name={`${id}.center`}
               type="checkbox"
-              onClick={useCallback(
-                () => setIsCentered(!isCentered),
-                [isCentered, setIsCentered],
-              )}
+              onClick={() => setIsCentered(!isCentered)}
             />
             Center
           </label>
@@ -531,10 +598,7 @@ export const Component: FunctionComponent<{
               checked={isStretched}
               name={`${id}.stretch`}
               type="checkbox"
-              onClick={useCallback(
-                () => setIsStretched(!isStretched),
-                [isStretched, setIsStretched],
-              )}
+              onClick={() => setIsStretched(!isStretched)}
             />
             Stretch
           </label>

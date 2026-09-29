@@ -1,9 +1,10 @@
 import { Switch as BaseSwitch } from '@base-ui/react/switch';
 import { Properties } from 'csstype';
 import { styled } from 'goober';
-import { PointerEventHandler, TargetedMouseEvent } from 'preact';
-import { forwardRef } from 'preact/compat';
-import { useCallback, useRef } from 'preact/hooks';
+import { forwardRef, MouseEvent, useCallback, useRef } from 'react';
+
+import { glassLensGlow, glassLensScale } from './glass.js';
+import { usePointerDrag } from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Toggle - Switch”, light and dark appearance),
 // with Figma colors mapped to UIKit semantic colors: on `systemGreen`, off
@@ -69,7 +70,7 @@ const StyledRoot = styled<typeof BaseSwitch.Root, SwitchRootProps>(BaseSwitch.Ro
     content: '';
     inset: 0;
     transform: scale(calc(1 - 0.25 * var(--styled-switch-pressed)));
-    transition-duration: 300ms;
+    transition-duration: var(--glass-ios-lens-duration);
   }
 
   &[data-checked] {
@@ -96,8 +97,6 @@ const StyledRoot = styled<typeof BaseSwitch.Root, SwitchRootProps>(BaseSwitch.Ro
   }
 `;
 
-type Handler = PointerEventHandler<HTMLSpanElement>;
-
 type Drag = {
   checked: boolean;
   direction: 1 | -1;
@@ -105,7 +104,6 @@ type Drag = {
   max: number;
   min: number;
   moved: number;
-  pointerId: number;
   start: number;
   startTime: number;
   startX: number;
@@ -134,132 +132,90 @@ const Root = forwardRef<HTMLSpanElement, SwitchRootProps>(
     },
     ref,
   ) => {
-    const dragRef = useRef<Drag | null>(null);
     const suppressClickRef = useRef(false);
 
-    const end = useCallback((root: HTMLElement, pointerId: number) => {
-      const { current: drag } = dragRef;
-      if (drag?.pointerId !== pointerId) return undefined;
+    const handlers = usePointerDrag<HTMLSpanElement, Drag>(
+      {
+        end: (root, drag, cancelled) => {
+          for (const property of dragProperties) {
+            root.style.removeProperty(property);
+          }
+          if (cancelled) return;
 
-      dragRef.current = null;
-      for (const property of dragProperties) {
-        root.style.removeProperty(property);
-      }
+          const quick = performance.now() - drag.startTime < 300;
+          const towardsCurrent = drag.checked ? drag.moved > 0 : drag.moved < 0;
 
-      return drag;
-    }, []);
+          // The native click following this release toggles; suppress it
+          // unless the release acts as a tap.
+          suppressClickRef.current = drag.flipped || !quick || towardsCurrent;
+          setTimeout(() => {
+            suppressClickRef.current = false;
+          });
+        },
+        move: (root, drag, event) => {
+          drag.moved = (event.clientX - drag.startX) * drag.direction;
 
-    const handlePointerDown = useCallback<Handler>(
-      (event) => {
-        (onPointerDown as Handler | undefined)?.(event);
-        if (event.button !== 0) return;
+          const start = Math.max(
+            drag.min,
+            Math.min(drag.start + drag.moved, drag.max),
+          );
 
-        const root = event.currentTarget;
-        const { firstElementChild: thumb } = root;
-        if (!(thumb instanceof HTMLElement)) return;
-        if (
-          Object.hasOwn(root.dataset, 'disabled') ||
-          Object.hasOwn(root.dataset, 'readonly')
-        ) {
-          return;
-        }
+          root.style.setProperty('--styled-switch-knob-move-duration', '0s');
+          root.style.setProperty('--styled-switch-knob-start', `${start}px`);
 
-        const rootRect = root.getBoundingClientRect();
-        const thumbRect = thumb.getBoundingClientRect();
-        const direction = getComputedStyle(root).direction === 'rtl' ? -1 : 1;
-        const min = Number.parseFloat(getComputedStyle(thumb).top);
+          const checked = (start - drag.min) / (drag.max - drag.min) > 0.5;
+          if (checked === isChecked(root)) return;
 
-        root.setPointerCapture(event.pointerId);
-        root.style.setProperty('--styled-switch-pressed', '1');
+          drag.flipped = true;
+          root.click();
+        },
+        start: (root, event) => {
+          const { firstElementChild: thumb } = root;
+          if (!(thumb instanceof HTMLElement)) return undefined;
+          if (
+            Object.hasOwn(root.dataset, 'disabled') ||
+            Object.hasOwn(root.dataset, 'readonly')
+          ) {
+            return undefined;
+          }
 
-        dragRef.current = {
-          checked: isChecked(root),
-          direction,
-          flipped: false,
-          max: rootRect.width - thumbRect.width - min,
-          min,
-          moved: 0,
-          pointerId: event.pointerId,
-          start:
-            direction === 1
-              ? thumbRect.left - rootRect.left
-              : rootRect.right - thumbRect.right,
-          startTime: performance.now(),
-          startX: event.clientX,
-        };
+          const rootRect = root.getBoundingClientRect();
+          const thumbRect = thumb.getBoundingClientRect();
+          const direction = getComputedStyle(root).direction === 'rtl' ? -1 : 1;
+          const min = Number.parseFloat(getComputedStyle(thumb).top);
+
+          root.style.setProperty('--styled-switch-pressed', '1');
+
+          return {
+            checked: isChecked(root),
+            direction,
+            flipped: false,
+            max: rootRect.width - thumbRect.width - min,
+            min,
+            moved: 0,
+            start:
+              direction === 1
+                ? thumbRect.left - rootRect.left
+                : rootRect.right - thumbRect.right,
+            startTime: performance.now(),
+            startX: event.clientX,
+          };
+        },
       },
-      [onPointerDown],
-    );
-
-    const handlePointerMove = useCallback<Handler>(
-      (event) => {
-        (onPointerMove as Handler | undefined)?.(event);
-
-        const { current: drag } = dragRef;
-        if (drag?.pointerId !== event.pointerId) return;
-
-        const root = event.currentTarget;
-        drag.moved = (event.clientX - drag.startX) * drag.direction;
-
-        const start = Math.max(
-          drag.min,
-          Math.min(drag.start + drag.moved, drag.max),
-        );
-
-        root.style.setProperty('--styled-switch-knob-move-duration', '0s');
-        root.style.setProperty('--styled-switch-knob-start', `${start}px`);
-
-        const checked = (start - drag.min) / (drag.max - drag.min) > 0.5;
-        if (checked === isChecked(root)) return;
-
-        drag.flipped = true;
-        root.click();
+      {
+        onLostPointerCapture,
+        onPointerCancel,
+        onPointerDown,
+        onPointerMove,
+        onPointerUp,
       },
-      [onPointerMove],
-    );
-
-    const handlePointerUp = useCallback<Handler>(
-      (event) => {
-        (onPointerUp as Handler | undefined)?.(event);
-
-        const drag = end(event.currentTarget, event.pointerId);
-        if (!drag) return;
-
-        const quick = performance.now() - drag.startTime < 300;
-        const towardsCurrent = drag.checked ? drag.moved > 0 : drag.moved < 0;
-
-        // The native click following this release toggles; suppress it
-        // unless the release acts as a tap.
-        suppressClickRef.current = drag.flipped || !quick || towardsCurrent;
-        setTimeout(() => {
-          suppressClickRef.current = false;
-        });
-      },
-      [end, onPointerUp],
-    );
-
-    const handlePointerCancel = useCallback<Handler>(
-      (event) => {
-        (onPointerCancel as Handler | undefined)?.(event);
-        end(event.currentTarget, event.pointerId);
-      },
-      [end, onPointerCancel],
-    );
-
-    const handleLostPointerCapture = useCallback<Handler>(
-      (event) => {
-        (onLostPointerCapture as Handler | undefined)?.(event);
-        end(event.currentTarget, event.pointerId);
-      },
-      [end, onLostPointerCapture],
     );
 
     const handleClickCapture = useCallback(
-      (event: TargetedMouseEvent<HTMLSpanElement>) => {
+      (event: MouseEvent<HTMLSpanElement>) => {
         (
           onClickCapture as
-            | ((clickEvent: TargetedMouseEvent<HTMLSpanElement>) => void)
-            | undefined
+            ((clickEvent: MouseEvent<HTMLSpanElement>) => void) | undefined
         )?.(event);
         if (!suppressClickRef.current) return;
 
@@ -274,12 +230,8 @@ const Root = forwardRef<HTMLSpanElement, SwitchRootProps>(
       <StyledRoot
         ref={ref}
         {...props}
+        {...handlers}
         onClickCapture={handleClickCapture}
-        onLostPointerCapture={handleLostPointerCapture}
-        onPointerCancel={handlePointerCancel}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
       />
     );
   },
@@ -300,33 +252,28 @@ const Thumb = styled(BaseSwitch.Thumb, forwardRef)`
     transparent
   );
   inset-inline-start: var(--styled-switch-knob-start);
-  transform: scale(calc(1 + 0.4 * var(--styled-switch-pressed)));
+  transform: scale(${glassLensScale('var(--styled-switch-pressed)')});
   transform-origin: center;
   transition-duration:
-    var(--styled-switch-knob-move-duration, 300ms), 300ms, 300ms;
+    var(--styled-switch-knob-move-duration, var(--glass-ios-lens-duration)),
+    var(--glass-ios-lens-duration), var(--glass-ios-lens-duration);
   transition-property: inset-inline-start, background-color, transform;
 
   &::before {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 1px;
-    height: 1px;
-    box-shadow: 0 0 40px 15px
-      color-mix(in srgb, var(--styled-switch-on-color) 75%, transparent);
-    content: '';
-    opacity: var(--styled-switch-pressed);
-    transition-duration: 300ms;
+    ${glassLensGlow(
+      'var(--styled-switch-on-color)',
+      'var(--styled-switch-pressed)',
+    )}
   }
 
   &::after {
     position: absolute;
     border-radius: inherit;
-    box-shadow: var(--shadow-ios-glass-thumb);
+    box-shadow: var(--glass-ios-lens-shadow);
     content: '';
     inset: 0;
     opacity: var(--styled-switch-pressed);
-    transition-duration: 300ms;
+    transition-duration: var(--glass-ios-lens-duration);
   }
 `;
 

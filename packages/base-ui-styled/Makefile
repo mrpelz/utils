@@ -15,8 +15,14 @@ MITM_SLUG := $(shell echo "$(PKG_NAME)/$(GIT_BRANCH)" | sed -r -e 's#@##g' -e 's
 MITM_URL := https://$(MITM_SLUG).localhost
 
 .PHONY: .PHONY \
+	check_browser \
 	util_mitmproxy \
 	watch_dev_proxy
+
+# Headless browser tests of the demo (needs Chrome, see scripts/browser-tests).
+# Optional: make -s check_browser [<filter>] [-- --screenshots <dir>]
+check_browser:
+	node scripts/browser-tests/run.js $(ARGS)
 
 util_mitmproxy:
 	clear; \
