@@ -43,6 +43,9 @@ const isGlass = (variant: ButtonRootProps['variant']) =>
 
 // Source: Apple iOS 26 Figma (Button: Size, Style, Label Type, Enabled,
 // Destructive; Button - Liquid Glass: Tinted, BG Context).
+// Labels and symbols are in the Subheadline (small, medium) and Body
+// (large) text styles; glass buttons' labels (17/20px, no tracking) are in
+// none.
 //
 // The padding and line height give the Figma heights (small 28px, medium
 // 34px, large 50px), which are also the minimum sizes; glass buttons are
@@ -73,10 +76,10 @@ const StyledRoot = styled<typeof BaseButton, ButtonRootProps>(BaseButton, forwar
   --styled-button-blend: normal;
   --styled-button-radius: 1000px;
   --styled-button-size: 34px;
-  --styled-button-symbol-font-size: 15px;
+  --styled-button-symbol-font-size: var(--font-ios-subheadline-size);
   --styled-button-font-weight: 400;
   --styled-button-symbol-font-weight: 400;
-  --styled-button-symbol-line-height: 20px;
+  --styled-button-symbol-line-height: var(--font-ios-subheadline-line-height);
   --styled-glass-outset: 0px;
 
   position: relative;
@@ -94,11 +97,11 @@ const StyledRoot = styled<typeof BaseButton, ButtonRootProps>(BaseButton, forwar
   background-color: var(--styled-button-background);
   color: var(--styled-button-color);
   font-family: inherit;
-  font-size: 15px;
+  font-size: var(--font-ios-subheadline-size);
   ${fontWeight('var(--styled-button-font-weight)')}
   gap: 4px;
-  letter-spacing: -0.23px;
-  line-height: 20px;
+  letter-spacing: var(--font-ios-subheadline-tracking);
+  line-height: var(--font-ios-subheadline-line-height);
   text-align: center;
   text-decoration: none;
   text-transform: none;
@@ -121,13 +124,13 @@ const StyledRoot = styled<typeof BaseButton, ButtonRootProps>(BaseButton, forwar
       case 'large': {
         return css`
           --styled-button-size: 50px;
-          --styled-button-symbol-font-size: 17px;
-          --styled-button-symbol-line-height: 22px;
+          --styled-button-symbol-font-size: var(--font-ios-body-size);
+          --styled-button-symbol-line-height: var(--font-ios-body-line-height);
 
           padding: 14px 20px;
-          font-size: 17px;
-          letter-spacing: -0.43px;
-          line-height: 22px;
+          font-size: var(--font-ios-body-size);
+          letter-spacing: var(--font-ios-body-tracking);
+          line-height: var(--font-ios-body-line-height);
         `;
       }
 
@@ -293,6 +296,7 @@ const Root = wrap(StyledRoot, (props: ButtonRootProps) => ({
 // Figma “Symbol”: the glyph, in the label's typography (glass: its own).
 const ButtonSymbol = styled('span', forwardRef)`
   display: inline-flex;
+  min-height: 1lh;
   align-items: center;
   justify-content: center;
   font-size: var(--styled-button-symbol-font-size);

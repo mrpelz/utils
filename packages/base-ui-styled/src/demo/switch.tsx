@@ -12,17 +12,10 @@ import {
 
 const propOptionsRoot = {
   ...commonPropOptions,
-  id: [undefined, 'switch-id'] as const,
-  name: [undefined, 'switch'] as const,
-  form: [undefined, 'form'] as const,
-  value: [undefined, 'on', 'yes'] as const,
-  uncheckedValue: [undefined, 'off', 'no'] as const,
   defaultChecked: [undefined, false, true] as const,
   checked: [undefined, false, true] as const,
   disabled: [undefined, false, true] as const,
   readOnly: [undefined, false, true] as const,
-  required: [undefined, false, true] as const,
-  nativeButton: [undefined, false, true] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
 };
 

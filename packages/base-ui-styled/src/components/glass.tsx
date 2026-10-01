@@ -85,6 +85,51 @@ export const glassContext = (context?: GlassContext): string =>
         }
       `;
 
+type MediumMode = 'dark' | 'light';
+
+// Glass effect: bright in light mode, dim in dark mode.
+const mediumContext: Record<MediumMode, GlassContext> = {
+  dark: 'dim',
+  light: 'bright',
+};
+
+const mediumVars = (mode: MediumMode) => css`
+  --styled-glass-background: var(--glass-ios-medium-${mode}-background);
+  --styled-glass-content: var(--glass-ios-medium-${mode}-content);
+  --styled-glass-content-blend: var(--glass-ios-medium-${mode}-content-blend);
+  --styled-glass-content-secondary: var(
+    --glass-ios-medium-${mode}-content-secondary
+  );
+  --styled-glass-content-disabled: var(
+    --glass-ios-medium-${mode}-content-disabled
+  );
+  --styled-glass-separator: var(--glass-ios-medium-${mode}-separator);
+  --styled-glass-divider: var(--glass-ios-medium-${mode}-divider);
+  --styled-glass-selection: var(--glass-ios-medium-${mode}-selection);
+  --styled-glass-selection-blend: normal;
+  --styled-glass-shadow: var(--glass-ios-${mediumContext[mode]}-shadow);
+`;
+
+/**
+ * Declarations for an element made of the “Medium” glass material (Figma
+ * “Liquid Glass - Medium”: menus, edit menus) as Framework7 draws popovers:
+ * background, backdrop blur and glass effect on the element itself, so it
+ * works in stacking contexts (positioned by a transform, animated). Also
+ * declares the `--styled-glass-*` properties for its content, following the
+ * color scheme, including `content-secondary`, `separator` and `divider`.
+ */
+export const glassMedium = (): string => css`
+  ${mediumVars('light')}
+
+  backdrop-filter: saturate(180%) blur(16px);
+  background-color: var(--styled-glass-background);
+  box-shadow: var(--styled-glass-shadow);
+
+  @media (prefers-color-scheme: dark) {
+    ${mediumVars('dark')}
+  }
+`;
+
 /**
  * Scale of a glass lens: 1 at rest, `--glass-ios-lens-scale` while pressed.
  *

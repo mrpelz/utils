@@ -21,9 +21,6 @@ const propOptionsContent = {
 
 const propOptionsRoot = {
   ...commonPropOptions,
-  name: [undefined, 'segmented'] as const,
-  form: [undefined, 'form'] as const,
-  required: [undefined, false, true] as const,
   defaultValue: ['first', undefined, 'second'] as const,
   value: [undefined, 'first', 'second', 'third'] as const,
   disabled: [undefined, false, true] as const,
@@ -35,11 +32,8 @@ const getPropOptionsItem = (
   addLog: (message: string) => void,
 ) => ({
   ...commonPropOptions,
-  value: [value, undefined] as const,
   disabled: [undefined, false, true] as const,
   readOnly: [undefined, false, true] as const,
-  required: [undefined, false, true] as const,
-  nativeButton: [undefined, false, true] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
   inputRef: [
     undefined,
@@ -134,16 +128,41 @@ export const SegmentedDemo: FunctionComponent = () => {
     >
       <RemounterRoot>
         <Segmented.Root {...propsRoot}>
-          <Segmented.Item {...propsItemFirst}>{label1}</Segmented.Item>
-          <Segmented.Item {...propsItemSecond}>{label2}</Segmented.Item>
+          <Segmented.Item
+            value="first"
+            {...propsItemFirst}
+          >
+            {label1}
+          </Segmented.Item>
+          <Segmented.Item
+            value="second"
+            {...propsItemSecond}
+          >
+            {label2}
+          </Segmented.Item>
           {count >= 3 ? (
-            <Segmented.Item {...propsItemThird}>{label3}</Segmented.Item>
+            <Segmented.Item
+              value="third"
+              {...propsItemThird}
+            >
+              {label3}
+            </Segmented.Item>
           ) : null}
           {count >= 4 ? (
-            <Segmented.Item {...propsItemFourth}>{label4}</Segmented.Item>
+            <Segmented.Item
+              value="fourth"
+              {...propsItemFourth}
+            >
+              {label4}
+            </Segmented.Item>
           ) : null}
           {count >= 5 ? (
-            <Segmented.Item {...propsItemFifth}>{label5}</Segmented.Item>
+            <Segmented.Item
+              value="fifth"
+              {...propsItemFifth}
+            >
+              {label5}
+            </Segmented.Item>
           ) : null}
           <Segmented.Highlight {...propsHighlight} />
         </Segmented.Root>

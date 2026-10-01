@@ -1,5 +1,5 @@
-import Plus from 'framework7-icons/react/esm/Plus.js';
-import StarFill from 'framework7-icons/react/esm/StarFill.js';
+import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
+import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
 import { styled } from 'goober';
 import { Fragment, FunctionComponent, useMemo } from 'react';
 
@@ -11,12 +11,13 @@ import {
   useLog,
   usePropControl,
 } from './utils/main.js';
+import { SFSymbol } from './utils/symbol.js';
 
 const propOptionsContent = {
   symbol: [
     undefined,
-    new MappedProp(<StarFill />, '[star.fill]'),
-    new MappedProp(<Plus />, '[plus]'),
+    new MappedProp(<SFSymbol icon={sfHeartFill} />, '[heart.fill]'),
+    new MappedProp(<SFSymbol icon={sfPlus} />, '[plus]'),
   ] as const,
   label: ['Button', undefined, 'Long button label'] as const,
 } as const;
@@ -25,7 +26,6 @@ const propOptionsRoot = {
   ...commonPropOptions,
   disabled: [undefined, false, true] as const,
   focusableWhenDisabled: [undefined, false, true] as const,
-  nativeButton: [undefined, false, true] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
   variant: [
     undefined,
@@ -185,7 +185,7 @@ export const ButtonMatrixDemo: FunctionComponent = () => {
               >
                 {labelType === 'text' ? null : (
                   <Button.Symbol>
-                    <StarFill />
+                    <SFSymbol icon={sfHeartFill} />
                   </Button.Symbol>
                 )}
                 {labelType === 'symbol' ? null : (

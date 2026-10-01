@@ -1,6 +1,7 @@
 import { createGlobalStyles as createGlobalStyle } from 'goober/global';
 import { FunctionComponent } from 'react';
 
+import { dynamicTypeSize } from './components/typography.js';
 import { css } from './components/utils.js';
 
 export const styles = css`
@@ -10,6 +11,37 @@ export const styles = css`
      * Figma renders text the same way)
      */
     -webkit-font-smoothing: antialiased;
+
+    /*
+     * iOS text styles (UIFont.TextStyle) at the default Dynamic Type size
+     * (Large): size, line height and tracking (see components/typography.tsx
+     * for all sizes), weight and emphasized weight
+     *
+     * Source: Apple iOS 26 Figma (Typography: Text styles, Dynamic Type)
+     */
+    ${dynamicTypeSize('large')}
+    --font-ios-large-title-weight: 400;
+    --font-ios-large-title-weight-emphasized: 700;
+    --font-ios-title1-weight: 400;
+    --font-ios-title1-weight-emphasized: 700;
+    --font-ios-title2-weight: 400;
+    --font-ios-title2-weight-emphasized: 700;
+    --font-ios-title3-weight: 400;
+    --font-ios-title3-weight-emphasized: 590;
+    --font-ios-headline-weight: 590;
+    --font-ios-headline-weight-emphasized: 590;
+    --font-ios-body-weight: 400;
+    --font-ios-body-weight-emphasized: 590;
+    --font-ios-callout-weight: 400;
+    --font-ios-callout-weight-emphasized: 590;
+    --font-ios-subheadline-weight: 400;
+    --font-ios-subheadline-weight-emphasized: 590;
+    --font-ios-footnote-weight: 400;
+    --font-ios-footnote-weight-emphasized: 590;
+    --font-ios-caption1-weight: 400;
+    --font-ios-caption1-weight-emphasized: 510;
+    --font-ios-caption2-weight: 400;
+    --font-ios-caption2-weight-emphasized: 590;
 
     /*
      * App tint (UIKit tintColor), systemBlue unless overridden
@@ -237,6 +269,46 @@ export const styles = css`
       0 0 25px 0 rgb(0 0 0 / 20%);
 
     /*
+     * iOS “Medium” glass material (menus, edit menus), by color scheme
+     *
+     * Source: Apple iOS 26 Figma (Menus: “Liquid Glass - Medium”, Mode=Light
+     * and Dark) for the content on it:
+     * - content, content-secondary (subtitles, shortcuts), content-disabled
+     *   (also section titles), with their blend mode
+     * - separator (menus), divider (between edit menu actions)
+     * - selection: highlighted items, open submenu (iPad), quick actions,
+     *   edit menu “more”: #ededed plus-darker, #121212 plus-lighter, drawn
+     *   as their equivalent on white or black without blending (black,
+     *   white at 7%): the popup's glass (a backdrop filter) isolates its
+     *   content's blend modes from what is behind it, so a blended selection
+     *   would blend with the glass' translucent background only, turning
+     *   nearly opaque, and show lighter or darker than the glass around it
+     *   depending on the content behind
+     * The material itself is Framework7's popover glass (popover-ios.less
+     * .popover-inner, mixins.less .ios-glass()): a flat background
+     * (app-vars.less --f7-glass-bg-color) with backdrop blur and the glass
+     * shadow (bright in light, dim in dark mode, as above). Figma's blended
+     * fills would need the backdrop, which popups (positioned by a
+     * transform, animated) isolate them from.
+     */
+    --glass-ios-medium-light-background: rgb(255 255 255 / 75%);
+    --glass-ios-medium-light-content: #333;
+    --glass-ios-medium-light-content-blend: multiply;
+    --glass-ios-medium-light-content-secondary: #999;
+    --glass-ios-medium-light-content-disabled: #bfbfbf;
+    --glass-ios-medium-light-separator: #e6e6e6;
+    --glass-ios-medium-light-divider: #ccc;
+    --glass-ios-medium-light-selection: rgb(0 0 0 / 7%);
+    --glass-ios-medium-dark-background: rgb(50 50 50 / 50%);
+    --glass-ios-medium-dark-content: #fff;
+    --glass-ios-medium-dark-content-blend: plus-lighter;
+    --glass-ios-medium-dark-content-secondary: #999;
+    --glass-ios-medium-dark-content-disabled: #404040;
+    --glass-ios-medium-dark-separator: #1a1a1a;
+    --glass-ios-medium-dark-divider: #333;
+    --glass-ios-medium-dark-selection: rgb(255 255 255 / 7%);
+
+    /*
      * Tinted glass (prominent glass buttons), the same in both contexts
      *
      * Source: Apple iOS 26 Figma (Button - Liquid Glass, Tinted=True): “Tint”
@@ -271,11 +343,37 @@ export const styles = css`
       --glass-ios-lens-shadow: var(--glass-ios-dim-lens-shadow);
     }
 
+    /*
+     * List separators, blended with the list's background (no UIKit semantic
+     * equivalent: UIKit's separator is rgb(60 60 67 / 29%))
+     *
+     * Source: Apple iOS 26 Figma (Lists and tables: “_Separator”, Mode=Light
+     * and Dark). plus-darker falls back to multiply, as above.
+     */
+    --color-ios-list-separator: #e6e6e6;
+    --color-ios-list-separator-blend: multiply;
+
+    /*
+     * Section titles of plain lists, opaque (Figma gives none: a blur only)
+     *
+     * Source: Framework7 components/contacts-list/contacts-list-vars.less
+     * (--f7-contacts-list-title-bg-color)
+     */
+    --color-ios-list-section-title-background: #f7f7f7;
+
     @supports (mix-blend-mode: plus-darker) {
       --glass-ios-bright-fill-top-blend: plus-darker;
       --glass-ios-bright-content-blend: plus-darker;
       --glass-ios-bright-selection-blend: plus-darker;
+      --glass-ios-medium-light-content-blend: plus-darker;
       --glass-ios-tint-blend: plus-darker;
+      --color-ios-list-separator-blend: plus-darker;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      --color-ios-list-section-title-background: #323234;
+      --color-ios-list-separator: #1a1a1a;
+      --color-ios-list-separator-blend: plus-lighter;
     }
   }
 `;
