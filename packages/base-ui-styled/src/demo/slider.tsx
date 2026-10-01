@@ -1,10 +1,10 @@
 import { Slider as BaseSlider } from '@base-ui/react/slider';
-import HareFill from 'framework7-icons/react/esm/HareFill.js';
-import Speaker3Fill from 'framework7-icons/react/esm/Speaker3Fill.js';
-import SpeakerFill from 'framework7-icons/react/esm/SpeakerFill.js';
-import SunMax from 'framework7-icons/react/esm/SunMax.js';
-import SunMin from 'framework7-icons/react/esm/SunMin.js';
-import TortoiseFill from 'framework7-icons/react/esm/TortoiseFill.js';
+import { sfHareFill } from '@bradleyhodges/sfsymbols/sfHareFill';
+import { sfSpeakerFill } from '@bradleyhodges/sfsymbols/sfSpeakerFill';
+import { sfSpeakerWave3Fill } from '@bradleyhodges/sfsymbols/sfSpeakerWave3Fill';
+import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
+import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
+import { sfTortoiseFill } from '@bradleyhodges/sfsymbols/sfTortoiseFill';
 import { FunctionComponent, useMemo } from 'react';
 
 import { Slider } from '../components/index.js';
@@ -15,22 +15,26 @@ import {
   useLog,
   usePropControl,
 } from './utils/main.js';
+import { SFSymbol } from './utils/symbol.js';
 
 const propOptionsContent = {
   thumbs: [1, 2] as const,
   ticks: [0, 6, 11] as const,
   minSymbol: [
     undefined,
-    new MappedProp(<TortoiseFill />, '[tortoise.fill]'),
-    new MappedProp(<SpeakerFill />, '[speaker.fill]'),
-    new MappedProp(<SunMin />, '[sun.min]'),
+    new MappedProp(<SFSymbol icon={sfTortoiseFill} />, '[tortoise.fill]'),
+    new MappedProp(<SFSymbol icon={sfSpeakerFill} />, '[speaker.fill]'),
+    new MappedProp(<SFSymbol icon={sfSunMin} />, '[sun.min]'),
     'A',
   ] as const,
   maxSymbol: [
     undefined,
-    new MappedProp(<HareFill />, '[hare.fill]'),
-    new MappedProp(<Speaker3Fill />, '[speaker.3.fill]'),
-    new MappedProp(<SunMax />, '[sun.max]'),
+    new MappedProp(<SFSymbol icon={sfHareFill} />, '[hare.fill]'),
+    new MappedProp(
+      <SFSymbol icon={sfSpeakerWave3Fill} />,
+      '[speaker.wave.3.fill]',
+    ),
+    new MappedProp(<SFSymbol icon={sfSunMax} />, '[sun.max]'),
     'A',
   ] as const,
   label: [undefined, 'Volume'] as const,
@@ -39,8 +43,6 @@ const propOptionsContent = {
 
 const propOptionsRoot = {
   ...commonPropOptions,
-  name: [undefined, 'slider'] as const,
-  form: [undefined, 'form'] as const,
   defaultValue: [
     50,
     0,
@@ -89,18 +91,6 @@ const propOptionsValue = {
 
 const propOptionsThumb = {
   ...commonPropOptions,
-  'aria-valuetext': [undefined, 'custom value text'] as const,
-  getAriaLabel: [
-    undefined,
-    new MappedProp((index: number) => `Thumb ${index + 1}`, '[Thumb n]'),
-  ] as const,
-  getAriaValueText: [
-    undefined,
-    new MappedProp(
-      (formattedValue: string) => `${formattedValue} units`,
-      '[… units]',
-    ),
-  ] as const,
   tabIndex: [undefined, 0, -1] as const,
   disabled: [undefined, false, true] as const,
 };
@@ -204,12 +194,38 @@ export const SliderDemo: FunctionComponent = () => {
   const [controlTicks, propsTicks] = usePropControl(commonPropOptions, 'ticks');
 
   const [controlMinSymbol, propsMinSymbol] = usePropControl(
-    commonPropOptions,
+    useMemo(
+      () => ({
+        ...commonPropOptions,
+        edge: ['min', 'max'] as const,
+        onClick: [
+          undefined,
+          new MappedProp(
+            () => addLog('min symbol clicked (custom onClick)'),
+            '[log click]',
+          ),
+        ] as const,
+      }),
+      [addLog],
+    ),
     'min symbol',
   );
 
   const [controlMaxSymbol, propsMaxSymbol] = usePropControl(
-    commonPropOptions,
+    useMemo(
+      () => ({
+        ...commonPropOptions,
+        edge: ['max', 'min'] as const,
+        onClick: [
+          undefined,
+          new MappedProp(
+            () => addLog('max symbol clicked (custom onClick)'),
+            '[log click]',
+          ),
+        ] as const,
+      }),
+      [addLog],
+    ),
     'max symbol',
   );
 

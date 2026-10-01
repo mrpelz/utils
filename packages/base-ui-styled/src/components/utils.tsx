@@ -1,7 +1,9 @@
+import { styled } from 'goober';
 import {
   forwardRef,
   FunctionComponent,
   PointerEventHandler,
+  ReactNode,
   Ref,
   useCallback,
   useImperativeHandle,
@@ -115,12 +117,54 @@ export const css = String.raw;
  * (fonts without the axis use that). Chrome would otherwise match e.g. 510 to
  * the next heavier static face (Semibold), which the axis can't undo.
  *
+ * SVG symbols inside (fill-only paths at SF Symbols' export scale of 20 units
+ * per em, with visible overflow) are stroked to match: the strokes of SF Pro
+ * glyphs thicken by 1 unit per 326 weight above Regular (`circle`'s ring:
+ * 1.66 units at 400, 2.24 at 600, 2.58 at 700; heavier weights are thinner).
+ *
  * @param weight a number, or a CSS expression evaluating to one
  */
 export const fontWeight = (weight: number | string): string => css`
   font-variation-settings: 'wght' ${weight};
   font-weight: round(down, ${weight}, 100);
+  stroke: currentcolor;
+  stroke-linejoin: round;
+  stroke-width: max(0, (${weight} - 400) / 326);
 `;
+
+const ReserveLayer = styled('span')`
+  grid-area: 1 / 1;
+  white-space: nowrap;
+`;
+
+const ReserveHidden = styled(ReserveLayer)`
+  visibility: hidden;
+`;
+
+/**
+ * Renders `children`, but takes up the size of the largest of `children` and
+ * `reserve` (e.g. a value's widest formatted values): the reserves are hidden
+ * copies in the same grid cell, so the size is found by layout, in the actual
+ * font, without measuring. The parent must be a grid (`display: grid`), and
+ * places the content with `justify-items`/`align-items`.
+ */
+export const Reserve: FunctionComponent<{
+  children: ReactNode;
+  reserve: readonly ReactNode[];
+}> = ({ children, reserve }) => (
+  <>
+    <ReserveLayer>{children}</ReserveLayer>
+    {reserve.map((node, index) => (
+      <ReserveHidden
+        // Reserves are only ever replaced as a whole.
+        key={index}
+        aria-hidden="true"
+      >
+        {node}
+      </ReserveHidden>
+    ))}
+  </>
+);
 
 /**
  * Returns an internal ref object for a `forwardRef` component's element that

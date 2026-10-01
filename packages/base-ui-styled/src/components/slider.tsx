@@ -1,10 +1,19 @@
 import { Slider as BaseSlider } from '@base-ui/react/slider';
 import { Properties } from 'csstype';
 import { styled } from 'goober';
-import { forwardRef } from 'react';
+import {
+  createContext,
+  forwardRef,
+  MouseEvent,
+  ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+} from 'react';
 
 import { glassLensGlow } from './glass.js';
-import { fontWeight, wrap } from './utils.js';
+import { textStyle } from './typography.js';
+import { Reserve, wrap } from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Sliders”, light and dark appearance), with
 // Figma colors mapped to UIKit semantic colors: track `systemFill`, fill the
@@ -23,20 +32,22 @@ import { fontWeight, wrap } from './utils.js';
 //   which alone scales while dragging (Base UI measures the thumb's box for
 //   positioning); only its `transform`, `background-color` and `box-shadow`
 //   transition (Konsta UI `--transition-ios-range-thumb`).
-// - Minimum control length: ten times the knob width (not specified by any
-//   source).
+// - The control's length (Figma example: 280px) is a minimum.
 // - The pressed state is driven by Base UI's `data-dragging`.
 // - Vertical sliders put the minimum symbol at the bottom.
 // - The fill is derived from the value (Base UI couples it to the thumb's
 //   center), so it spans the whole track at the maximum.
 // - The browser's default focus ring is kept.
+// - `Slider.Value` (not in UIKit or Figma) is in the Body text style (the
+//   symbols: Body, emphasized), with tabular numerals, and reserves the width
+//   of its widest value.
 
 export type SliderRootProps = BaseSlider.Root.Props & {
   cursor?: Properties['cursor'];
 };
 
 // eslint-disable-next-line prettier/prettier
-const Root = wrap(styled<typeof BaseSlider.Root, SliderRootProps>(BaseSlider.Root, forwardRef)`
+const StyledRoot = wrap(styled<typeof BaseSlider.Root, SliderRootProps>(BaseSlider.Root, forwardRef)`
     --styled-cursor: attr(
       cursor type(\<custom-ident\>),
       ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')}
@@ -45,6 +56,7 @@ const Root = wrap(styled<typeof BaseSlider.Root, SliderRootProps>(BaseSlider.Roo
     --styled-slider-bar-size: 6px;
     --styled-slider-knob-width: 38px;
     --styled-slider-knob-height: 24px;
+    --styled-slider-min-length: 280px;
 
     position: relative;
     display: flex;
@@ -76,17 +88,45 @@ const Root = wrap(styled<typeof BaseSlider.Root, SliderRootProps>(BaseSlider.Roo
   }),
 );
 
+type RootContextValue = Pick<
+  BaseSlider.Root.Props,
+  'format' | 'locale' | 'max' | 'min' | 'step'
+>;
+
+// Base UI's root context isn't public; `Slider.Value` needs the range and
+// format to find its widest values.
+const RootContext = createContext<RootContextValue>({});
+
+const Root = forwardRef<HTMLDivElement, Omit<SliderRootProps, 'ref'>>(
+  (props, ref) => {
+    const { format, locale, max, min, step } = props;
+    const context = useMemo(
+      () => ({ format, locale, max, min, step }),
+      [format, locale, max, min, step],
+    );
+
+    return (
+      <RootContext.Provider value={context}>
+        <StyledRoot
+          ref={ref}
+          {...props}
+        />
+      </RootContext.Provider>
+    );
+  },
+);
+
 const Control = styled(BaseSlider.Control, forwardRef)`
   position: relative;
   display: flex;
-  min-width: calc(var(--styled-slider-knob-width) * 10);
+  min-width: var(--styled-slider-min-length);
   min-height: var(--styled-slider-size);
   flex-grow: 1;
   align-items: center;
 
   &[data-orientation='vertical'] {
     min-width: var(--styled-slider-size);
-    min-height: calc(var(--styled-slider-knob-width) * 10);
+    min-height: var(--styled-slider-min-length);
     align-items: stretch;
     align-self: stretch;
     justify-content: center;
@@ -241,27 +281,151 @@ const Ticks = forwardRef<HTMLDivElement, SliderTicksProps>(
   ),
 );
 
-/**
- * Minimum/maximum value symbol (UIKit `minimumValueImage`,
- * `maximumValueImage`), to be rendered inside `Slider.Root`.
- */
-const ValueSymbol = styled('span', forwardRef)`
+const StyledSymbol = styled('span', forwardRef)`
   display: flex;
   min-width: 32px;
+  min-height: 1lh;
   flex: none;
   align-items: center;
   align-self: stretch;
   justify-content: center;
   color: var(--color-ios-secondary-label);
-  font-size: 17px;
-  ${fontWeight(590)}
-  line-height: 22px;
+  ${textStyle('body', { emphasized: true })}
   text-align: center;
 `;
+
+export type SliderSymbolProps = React.ComponentProps<'span'> & {
+  /**
+   * The end of the slider the symbol stands for. Clicking it moves the first
+   * thumb to the minimum (`min`), or the last thumb to the maximum (`max`), as
+   * the Home/End keys do; with a range, the other end stays. An `onClick`
+   * replaces this behavior.
+   */
+  edge: 'max' | 'min';
+};
+
+/**
+ * Minimum/maximum value symbol (UIKit `minimumValueImage`,
+ * `maximumValueImage`), to be rendered inside `Slider.Root`.
+ */
+const ValueSymbol = forwardRef<HTMLSpanElement, SliderSymbolProps>(
+  ({ edge, onClick, ...props }, ref) => {
+    // Base UI has no API to set an uncontrolled value from outside, so this
+    // dispatches Home/End to the thumb's input, reusing its handling (range
+    // limits, change and commit callbacks). Base UI focuses the thumb as for a
+    // key press; it's blurred again unless it was focused before.
+    const moveThumb = useCallback(
+      ({ currentTarget }: MouseEvent<HTMLSpanElement>) => {
+        const root = currentTarget.parentElement;
+        if (!root || Object.hasOwn(root.dataset, 'disabled')) return;
+
+        const inputs = [...root.querySelectorAll('input[type="range"]')];
+        const input = edge === 'min' ? inputs[0] : inputs.at(-1);
+        if (!(input instanceof HTMLInputElement) || input.disabled) return;
+
+        const focused = input.ownerDocument.activeElement === input;
+        input.dispatchEvent(
+          new KeyboardEvent('keydown', {
+            bubbles: true,
+            cancelable: true,
+            key: edge === 'min' ? 'Home' : 'End',
+          }),
+        );
+        if (!focused) input.blur();
+      },
+      [edge],
+    );
+
+    return (
+      <StyledSymbol
+        ref={ref}
+        {...props}
+        onClick={onClick ?? moveThumb}
+      />
+    );
+  },
+);
+
+const StyledValue = styled(BaseSlider.Value, forwardRef)`
+  display: grid;
+  flex: none;
+  color: var(--color-ios-secondary-label);
+  ${textStyle('body')}
+  font-variant-numeric: tabular-nums;
+  justify-items: end;
+`;
+
+type ValueRenderer = (
+  formattedValues: readonly string[],
+  values: readonly number[],
+) => ReactNode;
+
+/**
+ * The formatted value(s), taking up the width of the widest value between
+ * `min` and `max` (by digits and fraction digits of `step`), so the slider
+ * doesn't shift while it changes.
+ */
+const Value = forwardRef<
+  HTMLOutputElement,
+  Omit<BaseSlider.Value.Props, 'ref'>
+>(({ children, ...props }, ref) => {
+  const {
+    format,
+    locale,
+    max = 100,
+    min = 0,
+    step = 1,
+  } = useContext(RootContext);
+
+  const render = useCallback<ValueRenderer>(
+    (formattedValues, values) =>
+      typeof children === 'function'
+        ? children(formattedValues, values)
+        : formattedValues.join(' – '),
+    [children],
+  );
+
+  const renderWithReserve = useCallback<ValueRenderer>(
+    (formattedValues, values) => {
+      const formatter = new Intl.NumberFormat(locale, format);
+      // Tabular numerals make width depend on sign, digits and fraction
+      // digits only: the extremes have the most digits, a step off them
+      // the fraction digits of `step`.
+      const extremes = [min, max, min + step, max - step].filter(
+        (value) => value >= min && value <= max,
+      );
+
+      return (
+        <Reserve
+          reserve={extremes.map((extreme) => {
+            const reserveValues = values.map(() => extreme);
+            return render(
+              reserveValues.map((value) => formatter.format(value)),
+              reserveValues,
+            );
+          })}
+        >
+          {render(formattedValues, values)}
+        </Reserve>
+      );
+    },
+    [format, locale, max, min, render, step],
+  );
+
+  return (
+    <StyledValue
+      ref={ref}
+      {...props}
+    >
+      {renderWithReserve}
+    </StyledValue>
+  );
+});
 
 export const Slider = {
   ...BaseSlider,
   Root,
+  Value,
   Control,
   Track,
   Indicator,

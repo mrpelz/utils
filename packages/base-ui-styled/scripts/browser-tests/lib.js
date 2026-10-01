@@ -426,6 +426,24 @@ export class Page {
     await sleep(300);
   }
 
+  /**
+   * Sets a demo prop control of the current section to one of its mapped
+   * options (`MappedProp`, e.g. an element or a function), by its label.
+   *
+   * @param {string} name
+   * @param {string} label
+   */
+  async setMappedControl(name, label) {
+    await this.evaluate(`(() => {
+      const input = ${this.section}.querySelector(${JSON.stringify(`config input[name="${name}"]`)});
+      input.focus();
+      input.value = ${JSON.stringify(label)};
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.blur();
+    })()`);
+    await sleep(300);
+  }
+
   /** Paints a striped background behind the stage, to reveal glass. */
   async stripes() {
     await this.evaluate(

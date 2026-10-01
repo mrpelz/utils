@@ -16,6 +16,8 @@ export const Container = styled('component')`
   scroll-snap-stop: always;
 `;
 
+// Sticky, so a stacking context: it needs the page background, or glass in
+// it blends with nothing (rendering gray and unblurred).
 export const Content = styled('section')`
   position: sticky;
   top: 0;
@@ -23,9 +25,14 @@ export const Content = styled('section')`
   height: 100svh;
   padding: 1rem;
   margin: calc(1rem * -1);
+  background-color: white;
   gap: 1rem;
   grid-area: content;
   grid-template: 'head' auto 'stage' 1fr / 1fr;
+
+  @media (prefers-color-scheme: dark) {
+    background-color: #0a0a0a;
+  }
 `;
 
 export const ComponentHeader = styled('component-header')`
@@ -64,11 +71,14 @@ export const ComponentDocsLink = styled('a')`
   font-size: 0.875rem;
 `;
 
+// Snaps to snap points of demos having them (plain lists' sections).
 export const Stage = styled('stage')`
   position: relative;
   display: grid;
+  overflow: auto;
   align-items: center;
   grid-area: stage;
+  scroll-snap-type: y mandatory;
 `;
 
 export const StageBackground = styled('stage-background')`

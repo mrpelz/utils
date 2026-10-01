@@ -481,8 +481,8 @@ export const StageBackgroundProvider: FunctionComponent = ({ children }) => {
 
 export const Component: FunctionComponent<{
   backdrop?: boolean;
-  /** Base UI component the demo is built on, for the docs link. */
-  baseUiId: string;
+  /** Base UI component the demo is built on, for the docs link (if any). */
+  baseUiId?: string;
   center?: boolean;
   controls?: ReactNode;
   /** Unique demo id, used for selecting demos (`#id=…`) and storing config. */
@@ -543,13 +543,15 @@ export const Component: FunctionComponent<{
                 {id}
               </ComponentId>
             </ComponentHeading>
-            <ComponentDocsLink
-              href={`${BASE_URL_DOC}/${baseUiId}`}
-              rel="noreferrer"
-              target="_blank"
-            >
-              base-ui.com/react/components/{baseUiId}
-            </ComponentDocsLink>
+            {baseUiId === undefined ? null : (
+              <ComponentDocsLink
+                href={`${BASE_URL_DOC}/${baseUiId}`}
+                rel="noreferrer"
+                target="_blank"
+              >
+                base-ui.com/react/components/{baseUiId}
+              </ComponentDocsLink>
+            )}
           </ComponentHeader>
           <Stage>
             {stageBackground ? <StageBackground /> : null}
