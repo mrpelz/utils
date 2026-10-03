@@ -1,13 +1,22 @@
 import { Menu as BaseMenu } from '@base-ui/react/menu';
 import { Properties } from 'csstype';
 import { styled } from 'goober';
-import { forwardRef, ReactNode, Ref } from 'react';
+import {
+  forwardRef,
+  PointerEvent,
+  ReactNode,
+  Ref,
+  useLayoutEffect,
+  useRef,
+} from 'react';
 
 import { glassMedium } from './glass.js';
 import {
   actionCursor,
+  dragOverItems,
   MenuContext,
   MenuRootProps,
+  part,
   popupTransition,
   toggleCursor,
   useCloseOutOfView,
@@ -26,6 +35,13 @@ import { fontWeight, useForwardedRef } from './utils.js';
 // positioner's `anchor`, e.g. a selection), not by a trigger.
 //
 // It closes when its anchor or capsule leaves the viewport (see `Menu`).
+//
+// It never overflows its collision boundary (the viewport, or the
+// positioner's `collisionBoundary`): too narrow for its actions, they scroll
+// within the capsule, the “more” button staying at its end. Touches drag
+// over the actions (no native scrolling), highlighting the one under the
+// finger and choosing it on release; held near an end, they scroll the
+// actions (as the tab bar's lens and menus do).
 //
 // Deviations:
 // - More actions open in a menu below the capsule, an iPad (`regular`)
@@ -97,13 +113,14 @@ const Positioner = forwardRef<
 });
 
 // Figma “Edit Menu”: 44px high, actions from 20px, the “more” button 4px
-// from the end.
+// from the end; at most as wide as the space Base UI's positioner finds.
 const StyledPopup = styled(BaseMenu.Popup, forwardRef)`
   ${glassMedium()}
   ${popupTransition}
 
   position: relative;
   display: flex;
+  max-width: var(--available-width);
   min-height: 44px;
   box-sizing: border-box;
   align-items: center;
@@ -112,16 +129,165 @@ const StyledPopup = styled(BaseMenu.Popup, forwardRef)`
   outline: none;
 `;
 
+// The actions, in a row; too narrow for them, a scroll container (only
+// then: its content blends with the glass otherwise, see Popup), faded at
+// its ends. The “more” button is positioned by the popup (beyond the
+// scroller's clipping and scrolling), the space at the end kept for it.
+const Scroller = styled('div', forwardRef)`
+  --styled-edit-menu-fade: to right;
+
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  touch-action: none;
+
+  &:dir(rtl) {
+    --styled-edit-menu-fade: to left;
+  }
+
+  &:has(> [aria-haspopup='menu']) {
+    padding-inline-end: 36px;
+    scroll-padding-inline-end: 36px;
+  }
+
+  &[data-overflowing] {
+    overflow: auto hidden;
+    mask-image: linear-gradient(
+      var(--styled-edit-menu-fade),
+      transparent,
+      #000 16px,
+      #000 calc(100% - 16px),
+      transparent
+    );
+
+    &:has(> [aria-haspopup='menu']) {
+      mask-image: linear-gradient(
+        var(--styled-edit-menu-fade),
+        transparent,
+        #000 16px,
+        #000 calc(100% - 52px),
+        transparent calc(100% - 36px),
+        #000 calc(100% - 36px)
+      );
+    }
+  }
+`;
+
+const getRanges = (selection: Selection | null) =>
+  selection
+    ? Array.from({ length: selection.rangeCount }, (_, index) =>
+        selection.getRangeAt(index).cloneRange(),
+      )
+    : [];
+
+/**
+ * Keeps the document's selection while the popup or its items have focus:
+ * Base UI focuses the popup on opening and items when highlighted, and
+ * WebKit clears a selection when focus moves outside of it, which would take
+ * the edit menu's anchor away (internal).
+ */
+const useKeepSelection = (popupRef: { current: HTMLDivElement | null }) => {
+  useLayoutEffect(() => {
+    const { current: popup } = popupRef;
+    if (!popup) return undefined;
+
+    const document = popup.ownerDocument;
+    let ranges = getRanges(document.getSelection());
+
+    // Selections made while the popup isn't focused (its own focusing
+    // changes it asynchronously, too late for the restore).
+    const save = () => {
+      if (popup.contains(document.activeElement)) return;
+      ranges = getRanges(document.getSelection());
+    };
+
+    // On every focus inside, too: highlighting an item focuses it.
+    const restore = () => {
+      const selection = document.getSelection();
+      if (!selection?.isCollapsed || ranges.length === 0) return;
+
+      selection.removeAllRanges();
+      for (const range of ranges) selection.addRange(range);
+    };
+
+    document.addEventListener('selectionchange', save);
+    popup.addEventListener('focusin', restore);
+    return () => {
+      document.removeEventListener('selectionchange', save);
+      popup.removeEventListener('focusin', restore);
+    };
+  }, [popupRef]);
+};
+
+// Marks the scroller while its actions overflow it.
+const useOverflow = (scrollerRef: { current: HTMLDivElement | null }) => {
+  useLayoutEffect(() => {
+    const { current: scroller } = scrollerRef;
+    if (!scroller) return undefined;
+
+    const update = () => {
+      scroller.toggleAttribute(
+        'data-overflowing',
+        scroller.scrollWidth > scroller.clientWidth + 1,
+      );
+    };
+    const observer = new ResizeObserver(update);
+    observer.observe(scroller);
+    const mutations = new MutationObserver(() => {
+      for (const child of scroller.children) observer.observe(child);
+      update();
+    });
+    mutations.observe(scroller, { childList: true });
+    for (const child of scroller.children) observer.observe(child);
+
+    return () => {
+      observer.disconnect();
+      mutations.disconnect();
+    };
+  }, [scrollerRef]);
+};
+
 /** The edit menu's glass capsule (Figma “Liquid Glass”, Medium). */
 const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
-  ({ children, ...props }, ref) => (
-    <StyledPopup
-      ref={ref}
-      {...props}
-    >
-      {children}
-    </StyledPopup>
-  ),
+  ({ children, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    const scrollerRef = useRef<HTMLDivElement>(null);
+    useKeepSelection(ref);
+    useOverflow(scrollerRef);
+
+    return (
+      <StyledPopup
+        ref={ref}
+        {...props}
+      >
+        <Scroller
+          ref={scrollerRef}
+          {...{ [part]: 'scroller' }}
+          onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
+            if (event.pointerType !== 'touch' || event.button !== 0) return;
+            if (!(event.target instanceof Element)) return;
+            const item = event.target.closest('[role^="menuitem"]');
+            if (!item || item.matches('[aria-haspopup="menu"]')) return;
+
+            // The drag hovers and clicks the items (see dragOverItems).
+            event.preventDefault();
+            if (item.hasPointerCapture(event.pointerId)) {
+              item.releasePointerCapture(event.pointerId);
+            }
+            dragOverItems(item.ownerDocument, event.pointerId, {
+              x: event.clientX,
+              y: event.clientY,
+            });
+          }}
+        >
+          {children}
+        </Scroller>
+      </StyledPopup>
+    );
+  },
 );
 
 // Figma “_Edit Menu Item”: a label with a 1px divider before it (except the
@@ -152,12 +318,18 @@ const StyledItem = styled(BaseMenu.Item, forwardRef)`
     background-color: var(--styled-glass-selection);
     content: '';
     inset: 0;
-    mix-blend-mode: var(--styled-glass-selection-blend);
     opacity: 0;
   }
 
   &[data-highlighted]::before {
     opacity: 1;
+  }
+
+  /* Touch: the selection while pressed (no hover highlights) */
+  &:active:not([data-disabled]) {
+    &::before {
+      opacity: 1;
+    }
   }
 
   & + & {
@@ -177,7 +349,9 @@ const StyledItem = styled(BaseMenu.Item, forwardRef)`
 
   /* Hidden next to the highlighted action, as in Segmented. */
   &[data-highlighted]::after,
-  &[data-highlighted] + &::after {
+  &[data-highlighted] + &::after,
+  &:active::after,
+  &:active + &::after {
     opacity: 0;
   }
 
@@ -227,6 +401,10 @@ const StyledMore = styled<
 >(BaseMenu.SubmenuTrigger, forwardRef)`
   ${toggleCursor}
 
+  /* At the popup's end (see Scroller) */
+  position: absolute;
+  top: calc(50% - 18px);
+  inset-inline-end: 4px;
   display: flex;
   width: 36px;
   height: 36px;
@@ -240,7 +418,8 @@ const StyledMore = styled<
   outline: none;
 
   &[data-highlighted],
-  &[data-popup-open] {
+  &[data-popup-open],
+  &:active {
     filter: brightness(0.95);
   }
 

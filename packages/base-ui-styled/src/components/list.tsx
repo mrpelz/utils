@@ -1,4 +1,5 @@
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
+import { Radio as BaseRadio } from '@base-ui/react/radio';
 import { useRender } from '@base-ui/react/use-render';
 import { styled } from 'goober';
 import {
@@ -15,7 +16,13 @@ import {
 } from 'react';
 
 import { textStyle } from './typography.js';
-import { css, fontWeight, useForwardedRef, usePointerDrag } from './utils.js';
+import {
+  css,
+  edgeScrollDelta,
+  fontWeight,
+  useForwardedRef,
+  usePointerDrag,
+} from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Lists and tables”: “Row” Height=Regular/Tall,
 // “_Images”, “_Trailing”, “_Edit Buttons”, “_Grabber”, “_Separator”,
@@ -28,15 +35,21 @@ import { css, fontWeight, useForwardedRef, usePointerDrag } from './utils.js';
 // `swipeout-ios.less`, `swipeout.js`, `list-index.less`, `block.less`):
 // - list styles (UIKit `UITableView.Style`): `insetGrouped` (the default:
 //   16px inset, 24px corners), `grouped`, `plain` (Framework7 `.list`,
-//   `.list.inset`); 35px between sections
+//   `.list.inset`); 35px between sections; optionally outlined
+//   (`.list-outline`)
 // - pressed rows (UIKit's cell selection, `systemGray4`), hiding the
 //   separators around pressed and swiped rows
 // - swiping: the row follows the pointer (rubber-banding past its actions)
 //   over its actions, pinned to the list's edge, which scale in one after
 //   another from the edge; it opens on releasing past half the actions, or
 //   on a quick swipe (300ms, 10px); optionally, overswiping (past 1.2 times
-//   the actions) stretches the outermost action over the others (200ms) and
-//   triggers it on release
+//   the actions) stretches the outermost action over the others and the
+//   area the row uncovers (200ms), the others fading out, and triggers it
+//   on release
+// - reordering rows by their grabbers (`sortable.js`, see `useReorder`),
+//   independent of the leading edit controls (`Checkbox`, `Radio`,
+//   `EditButton`)
+// - media rows, as in Mail (`.media-list`: a `Text` part)
 // - the Content Block (`Block`)
 //
 // Titles, subtitles and details are in the Body and Subheadline text styles,
@@ -59,12 +72,16 @@ import { css, fontWeight, useForwardedRef, usePointerDrag } from './utils.js';
 //   opens the trailing actions.
 // - Header and footer text is aligned with the rows' text (Figma: headers are
 //   laid out for the full width, footers for the rows').
-// - The grabber is a handle only: it doesn't reorder rows.
 // - Sticky section titles (plain lists) are opaque (Framework7 contacts
 //   list; Figma: a blur only), and sections snap to the top of a scroll
 //   container with `scroll-snap-type` (Framework7: none).
 // - Images keep their regular size (one line's height) in tall rows (Figma
 //   Height=Tall: rounded 44px, circular 60px, fill 68px).
+// - Swiped rows taller than Figma's tall rows (e.g. Mail's) get 34px
+//   corners (Figma: a capsule, which would cut into their content).
+// - Labelled swipe actions (tall rows) are 36px circles (smaller symbols, as
+//   Framework7's), 4px above 13px labels, centered in the row (Figma: 50px
+//   circles, 3px above 15px labels, which overflow a 68px row).
 // - Rounded and circular images size their symbol to the image (Figma: none
 //   given); header buttons are round (Figma PNG; CSS: 10px corners).
 // - Separators, chevrons and the checkmarks are drawn as CSS borders and SVG
@@ -220,6 +237,13 @@ const mirrored = css`
 // Root: the list's style, as custom properties for its parts (their
 // fallbacks are `insetGrouped`'s, for parts outside of a root).
 
+// Framework7 `.list-outline`: hairlines above and below groups that span
+// the list, a border around inset ones; drawn as shadows, taking no space.
+const outlineBlock = [
+  'inset 0 1px var(--styled-list-outline, transparent)',
+  'inset 0 -1px var(--styled-list-outline, transparent)',
+].join(', ');
+
 const listStyles: Record<ListStyle, string> = {
   grouped: css`
     --styled-list-background: var(--color-ios-system-grouped-background);
@@ -229,6 +253,7 @@ const listStyles: Record<ListStyle, string> = {
     --styled-list-inset: 0px;
     --styled-list-radius: 0px;
     --styled-list-section-spacing: 35px;
+    --styled-list-outline-shadow: ${outlineBlock};
   `,
   insetGrouped: css`
     --styled-list-background: var(--color-ios-system-grouped-background);
@@ -238,6 +263,8 @@ const listStyles: Record<ListStyle, string> = {
     --styled-list-inset: 16px;
     --styled-list-radius: 24px;
     --styled-list-section-spacing: 35px;
+    --styled-list-outline-shadow: inset 0 0 0 1px
+      var(--styled-list-outline, transparent);
   `,
   // Figma “Section Title”: nested headers stick to the top, 22px high on an
   // opaque background (Framework7 contacts list), and sections are snap points, so
@@ -252,6 +279,7 @@ const listStyles: Record<ListStyle, string> = {
     --styled-list-inset: 0px;
     --styled-list-radius: 0px;
     --styled-list-section-spacing: 0px;
+    --styled-list-outline-shadow: ${outlineBlock};
     --styled-list-header-position: sticky;
     --styled-list-header-background: var(
       --color-ios-list-section-title-background
@@ -267,13 +295,20 @@ const listStyles: Record<ListStyle, string> = {
 export type ListRootProps = PartProps<'div'> & {
   /** UIKit `UITableView.Style` (default: `insetGrouped`). */
   listStyle?: ListStyle;
+  /**
+   * Outlines its groups (Framework7 `.list-outline`): hairlines above and
+   * below, or a border around inset ones.
+   */
+  outline?: boolean;
 };
 
 const StyledRoot = styled(
-  partElement('div', 'root', ['listStyle']),
+  partElement('div', 'root', ['listStyle', 'outline']),
   forwardRef,
 )<ListRootProps>`
   ${({ listStyle = 'insetGrouped' }) => listStyles[listStyle]}
+  ${({ outline }) =>
+    outline ? '--styled-list-outline: var(--color-ios-list-separator);' : ''}
 
   display: flow-root;
   min-width: 240px;
@@ -291,10 +326,235 @@ const Section = styled(partElement('section', 'section'), forwardRef)`
   scroll-snap-align: var(--styled-list-section-snap, none);
 `;
 
+// Reordering (Framework7 `sortable.js`, `sortable.less`): dragging a row's
+// grabber lifts the row, which follows the pointer within its group, the
+// other rows making room (300ms); near an end of the scroll container, it
+// scrolls (as the tab bar's lens does). Released, the row settles into its
+// place, and the group's `onReorder` is called; the app reorders its rows.
+// Until their order changes (or, if it doesn't, the rows slide back), they
+// keep their offsets. Arrow keys on a focused grabber move its row by one.
+const reorderDuration = 300;
+
+const isItem = (element: Element): element is HTMLElement =>
+  element instanceof HTMLElement &&
+  element.matches(`[${CSS.escape(part)}='item']`);
+
+// The nearest ancestor scrolling vertically, or the document's.
+const scrollContainerOf = (element: HTMLElement) => {
+  for (
+    let current = element.parentElement;
+    current;
+    current = current.parentElement
+  ) {
+    const { overflowY } = getComputedStyle(current);
+    if (
+      (overflowY === 'auto' || overflowY === 'scroll') &&
+      current.scrollHeight > current.clientHeight
+    ) {
+      return current;
+    }
+  }
+
+  return element.ownerDocument.scrollingElement ?? element.ownerDocument.body;
+};
+
+const setOffset = (item: HTMLElement, offset: number, animate: boolean) => {
+  item.style.transition = animate ? `transform ${reorderDuration}ms` : 'none';
+  item.style.transform = offset === 0 ? '' : `translateY(${offset}px)`;
+};
+
+/** Reorders a group's rows by their grabbers (see above). */
+const useReorder = (
+  groupRef: { current: HTMLElement | null },
+  onReorder: ((from: number, to: number) => void) | undefined,
+) => {
+  const onReorderRef = useRef(onReorder);
+  useLayoutEffect(() => {
+    onReorderRef.current = onReorder;
+  });
+
+  useEffect(() => {
+    const { current: group } = groupRef;
+    if (!group) return undefined;
+
+    const grabberOf = (target: EventTarget | null) => {
+      const grabber =
+        target instanceof Element
+          ? target.closest<HTMLElement>(`[${CSS.escape(part)}='grabber']`)
+          : null;
+      const item = grabber?.parentElement;
+      return grabber && item && isItem(item) && item.parentElement === group
+        ? { grabber, item }
+        : undefined;
+    };
+
+    // Clears the rows' offsets once their order changed, or slides them
+    // back if it doesn't.
+    const commit = (items: HTMLElement[], from: number, to: number) => {
+      const settle = { observer: undefined as MutationObserver | undefined };
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      const clearOffsets = (animate: boolean) => {
+        settle.observer?.disconnect();
+        clearTimeout(timeout);
+        for (const element of items) {
+          setOffset(element, 0, animate);
+          delete element.dataset.reordering;
+          delete element.dataset.reorderEdge;
+        }
+      };
+      settle.observer = new MutationObserver(() => clearOffsets(false));
+      settle.observer.observe(group, { childList: true });
+      timeout = setTimeout(() => clearOffsets(true), reorderDuration);
+
+      if (from === to) {
+        clearOffsets(true);
+        return;
+      }
+      onReorderRef.current?.(from, to);
+    };
+
+    const onPointerDown = (event: globalThis.PointerEvent) => {
+      if (event.button !== 0) return;
+      const target = grabberOf(event.target);
+      if (!target) return;
+
+      const { grabber, item } = target;
+      const items = [...group.children].filter(isItem);
+      const from = items.indexOf(item);
+      const origin = group.getBoundingClientRect().top;
+      // Relative to the group, which may scroll.
+      const tops = items.map(
+        (element) => element.getBoundingClientRect().top - origin,
+      );
+      const heights = items.map((element) => element.offsetHeight);
+      const height = heights[from] ?? 0;
+      const top = tops[from] ?? 0;
+      const bottomLimit =
+        (tops.at(-1) ?? 0) + (heights.at(-1) ?? 0) - top - height;
+      const startY = event.clientY - origin;
+      let clientY = event.clientY;
+      let to = from;
+
+      event.preventDefault();
+      grabber.setPointerCapture(event.pointerId);
+      item.dataset.reordering = '';
+      const scroller = scrollContainerOf(group);
+
+      // The rows' corners and separators follow their order on screen.
+      const markEdges = (place: number) => {
+        const order = items.filter((element) => element !== item);
+        order.splice(place, 0, item);
+        for (const [index, element] of order.entries()) {
+          element.dataset.reorderEdge = [
+            index === 0 ? 'first' : '',
+            index === order.length - 1 ? 'last' : '',
+            order[index - 1] === item ? 'after' : '',
+          ]
+            .filter(Boolean)
+            .join(' ');
+        }
+      };
+      markEdges(from);
+
+      const update = () => {
+        const groupTop = group.getBoundingClientRect().top;
+        const offset = Math.min(
+          Math.max(clientY - groupTop - startY, -top),
+          bottomLimit,
+        );
+        setOffset(item, offset, false);
+
+        // The row's place: past the middle of the rows it's moved over.
+        const center = top + height / 2 + offset;
+        to = from;
+        for (const [index, rowTop] of tops.entries()) {
+          const middle = rowTop + (heights[index] ?? 0) / 2;
+          if (index < from && center < middle) to = Math.min(to, index);
+          if (index > from && center > middle) to = Math.max(to, index);
+        }
+        for (const [index, element] of items.entries()) {
+          if (index === from) continue;
+          const below = index > from && index <= to;
+          const above = index < from && index >= to;
+          setOffset(element, (above ? height : 0) - (below ? height : 0), true);
+        }
+        markEdges(to);
+      };
+
+      let frame = requestAnimationFrame(function scroll() {
+        frame = requestAnimationFrame(scroll);
+        const { bottom, top: scrollerTop } =
+          scroller === scroller.ownerDocument.scrollingElement
+            ? { bottom: window.innerHeight, top: 0 }
+            : scroller.getBoundingClientRect();
+        const delta = edgeScrollDelta(clientY, scrollerTop, bottom);
+        if (delta === 0) return;
+
+        const before = scroller.scrollTop;
+        scroller.scrollTop += delta;
+        if (scroller.scrollTop !== before) update();
+      });
+
+      const onMove = (moveEvent: globalThis.PointerEvent) => {
+        if (moveEvent.pointerId !== event.pointerId) return;
+        clientY = moveEvent.clientY;
+        update();
+      };
+
+      const onEnd = (endEvent: globalThis.PointerEvent) => {
+        if (endEvent.pointerId !== event.pointerId) return;
+        cancelAnimationFrame(frame);
+        grabber.removeEventListener('pointermove', onMove);
+        grabber.removeEventListener('pointerup', onEnd);
+        grabber.removeEventListener('pointercancel', onEnd);
+
+        // Settles into its place, then commits.
+        const place =
+          to > from
+            ? (tops[to] ?? 0) + (heights[to] ?? 0) - top - height
+            : (tops[to] ?? 0) - top;
+        const committed = endEvent.type === 'pointercancel' ? from : to;
+        if (committed === from) {
+          for (const element of items) setOffset(element, 0, true);
+        } else {
+          setOffset(item, place, true);
+        }
+        markEdges(committed);
+        setTimeout(() => commit(items, from, committed), reorderDuration);
+      };
+
+      grabber.addEventListener('pointermove', onMove);
+      grabber.addEventListener('pointerup', onEnd);
+      grabber.addEventListener('pointercancel', onEnd);
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+      const target = grabberOf(event.target);
+      if (!target) return;
+
+      const items = [...group.children].filter(isItem);
+      const from = items.indexOf(target.item);
+      const to = from + (event.key === 'ArrowUp' ? -1 : 1);
+      if (to < 0 || to >= items.length) return;
+
+      event.preventDefault();
+      onReorderRef.current?.(from, to);
+    };
+
+    group.addEventListener('pointerdown', onPointerDown);
+    group.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      group.removeEventListener('pointerdown', onPointerDown);
+      group.removeEventListener('keydown', onKeyDown);
+    };
+  }, [groupRef]);
+};
+
 /** The rows of a section, on the list's background (inset: a card). */
-// Clips swiped rows sideways only, so the labels of a tall row's swipe
-// actions can hang below it (Figma).
-const Group = styled(partElement('ul', 'group'), forwardRef)`
+// Clips swiped rows sideways only (and reordered rows' shadows).
+const StyledGroup = styled(partElement('ul', 'group'), forwardRef)`
   overflow: clip visible;
   padding: 0;
   border-radius: var(--styled-list-radius, 24px);
@@ -302,12 +562,41 @@ const Group = styled(partElement('ul', 'group'), forwardRef)`
     --styled-list-group-background,
     var(--color-ios-secondary-system-grouped-background)
   );
+  box-shadow: var(--styled-list-outline-shadow, none);
   list-style: none;
   margin-block: 0;
   margin-inline: var(--styled-list-inset, 16px);
 `;
 
+export type ListGroupProps = PartProps<'ul'> & {
+  /**
+   * Called when a row is moved by its `Grabber` from one index to another
+   * (among the group's rows); the app reorders them.
+   */
+  onReorder?: (from: number, to: number) => void;
+};
+
+const Group = forwardRef<HTMLElement, ListGroupProps>(
+  ({ onReorder, ...props }, ref) => {
+    const groupRef = useForwardedRef<HTMLElement>(ref);
+    useReorder(groupRef, onReorder);
+
+    return (
+      <StyledGroup
+        ref={groupRef}
+        {...props}
+      />
+    );
+  },
+);
+
 // Rows.
+
+/**
+ * A swiped row's corners: a capsule up to Figma's tall rows (68px), taller
+ * rows (e.g. Mail's) get rounded corners.
+ */
+const swipeRadius = 34;
 
 // Pressable rows: a link or button title, or a button (goober splits
 // selector lists inside parentheses, and mangles selectors continuing after
@@ -325,6 +614,8 @@ const whilePressed = pressable
 const StyledItem = styled(partElement('li', 'item'), forwardRef)`
   --styled-list-min-height: 52px;
   --styled-list-action-size: 52px;
+  --styled-list-action-height: var(--styled-list-action-size);
+  --styled-list-action-symbol-size: var(--font-ios-body-size);
   --styled-list-action-label-display: none;
   --styled-list-actions-align: center;
 
@@ -350,14 +641,90 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)`
   /* Figma Height=Tall (images keep their regular size) */
   &:has(> [${part}='subtitle']) {
     --styled-list-min-height: 68px;
-    --styled-list-action-size: 50px;
+
+    /* Labelled, centered in the row with room around (see Deviations) */
+    --styled-list-action-size: 36px;
+    --styled-list-action-height: calc(36px + 4px + 16px);
+    --styled-list-action-symbol-size: var(--font-ios-subheadline-size);
     --styled-list-action-label-display: block;
-    --styled-list-actions-align: start;
 
     & > [${part}='title'] {
       align-self: end;
       grid-area: 1 / 3;
     }
+  }
+
+  /* Framework7 media list (Mail): a title row with the trailing parts, the
+     subtitle and text below, spanning the row, the image at the top; the
+     title emphasized (Framework7: 600), trailing details in Subheadline. */
+  &:has(> [${part}='text']) {
+    --styled-list-min-height: 0px;
+
+    align-content: start;
+    grid-template-rows: auto auto auto;
+    padding-block: 10px;
+
+    &::after {
+      grid-area: 1 / 1 / 2 / 4;
+    }
+
+    & > [${part}='edit'] {
+      grid-area: 1 / 1 / 4;
+    }
+
+    & > [${part}='image'] {
+      align-self: start;
+      grid-area: 1 / 2 / 4;
+      margin-block: 0;
+    }
+
+    & > [${part}='title'] {
+      align-self: center;
+      grid-area: 1 / 3;
+      ${fontWeight(590)}
+    }
+
+    & > [${part}='subtitle'] {
+      color: var(--color-ios-label);
+      grid-area: 2 / 3 / 3 / 99;
+    }
+
+    & > [${part}='text'] {
+      grid-area: 3 / 3 / 4 / 99;
+    }
+
+    & > [${part}='detail'] {
+      ${textStyle('subheadline')}
+    }
+
+    &
+      > :not(
+        [${part}='edit'],
+        [${part}='image'],
+        [${part}='title'],
+        [${part}='subtitle'],
+        [${part}='text'],
+        [${part}='button'],
+        [${part}='swipe-actions']
+      ) {
+      grid-row: 1;
+    }
+  }
+
+  /* Lifted while reordered (see useReorder), opaque (Framework7: 80%, the
+     rows beneath showing through), its separators hidden */
+  &[data-reordering] {
+    z-index: 2;
+    background-color: var(
+      --styled-list-group-background,
+      var(--color-ios-secondary-system-grouped-background)
+    );
+    box-shadow: var(--shadow-ios-list-reorder);
+  }
+
+  &[data-reordering]::before,
+  &[data-reorder-edge~='after']::before {
+    opacity: 0;
   }
 
   /* Figma “_Separator”, from the text to 16px before the edge */
@@ -368,11 +735,12 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)`
     content: '';
     grid-column: 3 / 99;
     inset-inline: 0 16px;
-    mix-blend-mode: var(--color-ios-list-separator-blend);
     transition: opacity 300ms;
   }
 
-  &:first-child {
+  /* While reordering, by their order on screen (see useReorder) */
+  &:first-child:not([data-reorder-edge]),
+  &[data-reorder-edge~='first'] {
     border-start-end-radius: var(--styled-list-radius, 24px);
     border-start-start-radius: var(--styled-list-radius, 24px);
 
@@ -381,7 +749,8 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)`
     }
   }
 
-  &:last-child {
+  &:last-child:not([data-reorder-edge]),
+  &[data-reorder-edge~='last'] {
     border-end-end-radius: var(--styled-list-radius, 24px);
     border-end-start-radius: var(--styled-list-radius, 24px);
   }
@@ -431,6 +800,7 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)`
       [${part}='image'],
       [${part}='title'],
       [${part}='subtitle'],
+      [${part}='text'],
       [${part}='button'],
       [${part}='swipe-actions']
     ) {
@@ -474,7 +844,7 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)`
 
   /* Figma “Row with Swipe Actions”: the swiped row is a capsule. */
   &[data-swipe] {
-    border-radius: 100px;
+    border-radius: ${swipeRadius}px;
     background-color: var(--color-ios-system-gray5);
   }
 `;
@@ -484,15 +854,21 @@ type ItemContextValue = {
   close: () => void;
   open: (side: Side) => void;
   /**
-   * Sets (or, with `undefined`, removes) the actions of a side, and whether
-   * swiping past them triggers the outermost one.
+   * Sets (or, with `undefined`, removes) the actions of a side, and what
+   * swiping past them does (see `Overswipe`).
    */
   setActions: (
     side: Side,
     element: HTMLElement | undefined,
-    overswipe?: boolean,
+    overswipe?: Overswipe,
   ) => void;
 };
+
+/**
+ * What swiping past a side's actions does: nothing (`false`), triggering
+ * the outermost action (`true`), or calling a handler.
+ */
+type Overswipe = boolean | (() => void);
 
 const ItemContext = createContext<ItemContextValue | undefined>(undefined);
 
@@ -522,8 +898,8 @@ const uncoveredPath = (
   covered: number,
   rowOnLeft: boolean,
 ) => {
-  // The row's `border-radius` (100px), as drawn.
-  const radius = Math.min(100, height / 2);
+  // The row's `border-radius`, as drawn.
+  const radius = Math.min(swipeRadius, height / 2);
   const below = height + 20;
 
   if (rowOnLeft) {
@@ -565,7 +941,8 @@ const placeRow = (
 
     const width = container.offsetWidth;
     const revealed = Math.max(0, side === 'leading' ? offset : -offset);
-    const covered = Math.max(0, width - revealed);
+    // Negative past the actions (overswiped: the stretched action follows).
+    const covered = width - revealed;
     // Whether the row is on the container's left (the edge on its right).
     const rowOnLeft = (side === 'trailing') === (direction === 1);
 
@@ -593,9 +970,7 @@ const placeRow = (
 
       button.style.transition = [
         transition('transform'),
-        ...['width', 'margin-inline-start', 'margin-inline-end'].map(
-          (property) => `${property} ${overswipeDuration}ms`,
-        ),
+        `opacity ${overswipeDuration}ms`,
       ].join(', ');
       button.style.transform = `scale(${scale})`;
     }
@@ -623,44 +998,105 @@ const outermostAction = (container: HTMLElement, side: Side) => {
   return side === 'trailing' ? buttons.at(-1) : buttons.at(0);
 };
 
+/** An outermost action's overswipe stretch (see `stretchAction`). */
+type Stretch = {
+  frame: number;
+  /** The width eased from, since `start`. */
+  from: number;
+  start: number;
+  stretched: boolean;
+  target: number;
+  width: number;
+};
+
+const stretches = new WeakMap<HTMLElement, Stretch>();
+
+const easeOut = (progress: number) => 1 - (1 - progress) ** 3;
+
 /**
- * Overswipe (Framework7 iOS): stretches the outermost action over the others,
- * or, with `false`, back to its size.
+ * Overswipe (Framework7 iOS): stretches the outermost action's circle over
+ * the others (which fade out) and the whole area the row uncovers
+ * (`revealed`, at least the actions' `width`), from the edge, its symbol and
+ * label at the row's end; or, with `false`, back to its size. The circle
+ * overlays the actions (they keep their layout); its width eases from where
+ * it is towards the moving target (200ms), then follows it.
  */
 const stretchAction = (
   container: HTMLElement,
   side: Side,
-  stretch: boolean,
+  stretch: false | { revealed: number; width: number },
 ) => {
   const outermost = outermostAction(container, side);
-  if (!outermost) return;
-
-  const margin =
-    side === 'trailing' ? 'margin-inline-start' : 'margin-inline-end';
-
-  if (!stretch) {
-    outermost.style.removeProperty('width');
-    outermost.style.removeProperty(margin);
-    delete outermost.dataset.overswipe;
+  const [circle, label] = outermost?.children ?? [];
+  if (
+    !outermost ||
+    !(circle instanceof HTMLElement) ||
+    !(label instanceof HTMLElement)
+  ) {
     return;
   }
 
+  const size = outermost.offsetWidth;
+  let state = stretches.get(outermost);
+  if (!state) {
+    if (!stretch) return;
+    state = {
+      frame: 0,
+      from: size,
+      start: 0,
+      stretched: false,
+      target: size,
+      width: size,
+    };
+    stretches.set(outermost, state);
+  }
+
   const style = getComputedStyle(container);
-  const gap = Number.parseFloat(style.columnGap) || 0;
   const padding =
     Number.parseFloat(style.paddingInlineStart) +
     Number.parseFloat(style.paddingInlineEnd);
-  let others = 0;
-  for (const button of container.children) {
-    if (button instanceof HTMLElement && button !== outermost) {
-      others += button.offsetWidth + gap;
-    }
+  if (Boolean(stretch) !== state.stretched) {
+    state.stretched = Boolean(stretch);
+    state.from = state.width;
+    state.start = performance.now();
   }
+  state.target = stretch
+    ? Math.max(stretch.width, stretch.revealed) - padding
+    : size;
 
-  outermost.dataset.overswipe = '';
-  outermost.style.transform = 'scale(1)';
-  outermost.style.width = `${container.offsetWidth - padding}px`;
-  outermost.style.setProperty(margin, `${-others}px`);
+  // Whether the row is on the actions' left (the circle grows leftwards).
+  const rowOnLeft = (side === 'trailing') !== isRtl(container);
+  const current = state;
+
+  const frame = () => {
+    const progress = Math.min(
+      (performance.now() - current.start) / overswipeDuration,
+      1,
+    );
+    current.width =
+      current.from + (current.target - current.from) * easeOut(progress);
+
+    if (progress === 1 && !current.stretched) {
+      stretches.delete(outermost);
+      delete outermost.dataset.overswipe;
+      for (const property of ['left', 'right', 'width', 'justify-content']) {
+        circle.style.removeProperty(property);
+      }
+      label.style.removeProperty('translate');
+      return;
+    }
+
+    outermost.dataset.overswipe = current.stretched ? 'stretched' : '';
+    outermost.style.transform = 'scale(1)';
+    circle.style.setProperty(rowOnLeft ? 'right' : 'left', '0');
+    circle.style.width = `${current.width}px`;
+    circle.style.justifyContent = rowOnLeft ? 'left' : 'right';
+    label.style.translate = `${(rowOnLeft ? -1 : 1) * (current.width - size)}px`;
+    if (progress < 1) current.frame = requestAnimationFrame(frame);
+  };
+
+  cancelAnimationFrame(state.frame);
+  frame();
 };
 
 type Gesture = {
@@ -678,22 +1114,27 @@ type Gesture = {
 };
 
 /**
- * Whether a press on `target` belongs to a control of its own: text entry,
- * or anything capturing the pointer (e.g. a `Switch` being dragged).
+ * Whether a press belongs to a control of its own: text entry, a switch or
+ * slider, or anything capturing the pointer (e.g. a `Switch` being dragged) —
+ * but the touched element itself, which touch captures implicitly.
  */
-const isOwnGesture = (
-  item: HTMLElement,
-  target: EventTarget | null,
-  pointerId: number,
-) => {
+const isOwnGesture = (item: HTMLElement, event: PointerEvent<HTMLElement>) => {
+  const { pointerId, pointerType, target } = event;
   if (!(target instanceof Element)) return false;
-  if (target.closest('input, textarea, select, [contenteditable]')) return true;
+  if (
+    target.closest(
+      'input, textarea, select, [contenteditable], [role="switch"], [role="slider"]',
+    )
+  ) {
+    return true;
+  }
 
   for (
     let element: Element | null = target;
     element && element !== item;
     element = element.parentElement
   ) {
+    if (pointerType === 'touch' && element === target) continue;
     if (element.hasPointerCapture(pointerId)) return true;
   }
 
@@ -720,7 +1161,7 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
   ) => {
     const itemRef = useForwardedRef<HTMLElement>(ref);
     const actionsRef = useRef<Partial<Record<Side, HTMLElement>>>({});
-    const overswipeRef = useRef<Partial<Record<Side, boolean>>>({});
+    const overswipeRef = useRef<Partial<Record<Side, Overswipe>>>({});
     const gestureRef = useRef<Gesture | null>(null);
     const openSideRef = useRef<Side | undefined>(undefined);
     const suppressClickRef = useRef(false);
@@ -730,6 +1171,13 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
     const outsideRef = useRef<((event: Event) => void) | undefined>(undefined);
 
     const context = useMemo<ItemContextValue>(() => {
+      const unstretch = () => {
+        for (const side of sides) {
+          const { [side]: container } = actionsRef.current;
+          if (container) stretchAction(container, side, false);
+        }
+      };
+
       const value: ItemContextValue = {
         close: () => {
           const { current: item } = itemRef;
@@ -744,16 +1192,15 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
           openSideRef.current = undefined;
           if (!item) return;
 
-          for (const side of sides) {
-            const { [side]: container } = actionsRef.current;
-            if (container) stretchAction(container, side, false);
-          }
+          // An overswiped action stays stretched, covered by the row as it
+          // slides back.
           placeRow(item, actionsRef.current, 0, true);
 
           // The row stays a capsule until it's back in place.
           clearTimeout(settleRef.current);
           settleRef.current = setTimeout(() => {
             if (openSideRef.current || gestureRef.current?.started) return;
+            unstretch();
             delete item.dataset.swipe;
             item.style.removeProperty('transition');
           }, swipeDuration);
@@ -767,6 +1214,7 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
           closeOpenItem = value.close;
           openSideRef.current = side;
           clearTimeout(settleRef.current);
+          unstretch();
 
           item.dataset.swipe = side;
           placeRow(
@@ -813,6 +1261,47 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
       [context],
     );
 
+    // A touch moving the slightest bit vertically would be scrolled (the row
+    // pans vertically), cancelling its swipe: a touch on a swipeable row
+    // that first moves more horizontally than vertically isn't scrolled
+    // (as Framework7 swipeouts do; only touch events can prevent it).
+    useEffect(() => {
+      const { current: item } = itemRef;
+      if (!item) return undefined;
+
+      let start: { x: number; y: number } | undefined;
+      let horizontal: boolean | undefined;
+
+      const onTouchStart = ({ touches }: TouchEvent) => {
+        const [touch] = touches;
+        start =
+          touches.length === 1 && touch
+            ? { x: touch.clientX, y: touch.clientY }
+            : undefined;
+        horizontal = undefined;
+      };
+
+      const onTouchMove = (event: TouchEvent) => {
+        const [touch] = event.touches;
+        if (!start || !touch || !gestureRef.current) return;
+
+        if (horizontal === undefined) {
+          const x = Math.abs(touch.clientX - start.x);
+          const y = Math.abs(touch.clientY - start.y);
+          if (x === y) return;
+          horizontal = x > y;
+        }
+        if (horizontal && event.cancelable) event.preventDefault();
+      };
+
+      item.addEventListener('touchstart', onTouchStart, { passive: true });
+      item.addEventListener('touchmove', onTouchMove, { passive: false });
+      return () => {
+        item.removeEventListener('touchstart', onTouchStart);
+        item.removeEventListener('touchmove', onTouchMove);
+      };
+    }, [itemRef]);
+
     const suppressClick = () => {
       suppressClickRef.current = true;
       setTimeout(() => {
@@ -837,10 +1326,16 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
       const { offset, overswipe } = gesture;
       const { [overswipe ?? 'trailing']: container } = actionsRef.current;
 
-      // Overswiped: the outermost action is triggered (and closes the row);
-      // clicked before suppressing the release's click.
+      // Overswiped: the outermost action is triggered (and closes the row;
+      // clicked before suppressing the release's click), or the handler.
       if (overswipe && container && !cancelled) {
-        outermostAction(container, overswipe)?.click();
+        const { [overswipe]: action } = overswipeRef.current;
+        if (typeof action === 'function') {
+          action();
+          context.close();
+        } else {
+          outermostAction(container, overswipe)?.click();
+        }
         suppressClick();
         return;
       }
@@ -879,7 +1374,7 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
       ) {
         return;
       }
-      if (isOwnGesture(item, event.target, event.pointerId)) return;
+      if (isOwnGesture(item, event)) return;
 
       const { current: side } = openSideRef;
       const base = side
@@ -909,7 +1404,7 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
       const { [side]: container } = actionsRef.current;
       const { [side]: width = 0 } = gesture.widths;
       const active =
-        overswipeRef.current[side] === true &&
+        Boolean(overswipeRef.current[side]) &&
         revealed > width * overswipeRatio;
 
       if (gesture.overswipe && (!active || gesture.overswipe !== side)) {
@@ -917,10 +1412,10 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
         if (previous) stretchAction(previous, gesture.overswipe, false);
         gesture.overswipe = undefined;
       }
-      if (!active || !container || gesture.overswipe) return;
+      if (!active || !container) return;
 
       gesture.overswipe = side;
-      stretchAction(container, side, true);
+      stretchAction(container, side, { revealed, width });
     };
 
     const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
@@ -944,6 +1439,11 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
         item.setPointerCapture(event.pointerId);
         if (closeOpenItem !== context.close) closeOpenItem?.();
         clearTimeout(settleRef.current);
+        // Still stretched from a previous overswipe, if it hadn't settled.
+        for (const side of sides) {
+          const { [side]: container } = actionsRef.current;
+          if (container) stretchAction(container, side, false);
+        }
       }
 
       const { current: actions } = actionsRef;
@@ -990,6 +1490,9 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
           onPointerMove={handlePointerMove}
           onLostPointerCapture={(event: PointerEvent<HTMLElement>) => {
             (onLostPointerCapture as Handler<typeof event>)?.(event);
+            // Only the row's own capture: taking it over from the touched
+            // element (implicitly captured) makes that lose its capture.
+            if (event.target !== event.currentTarget) return;
             finish(event, false);
           }}
           onPointerCancel={(event: PointerEvent<HTMLElement>) => {
@@ -1045,6 +1548,28 @@ const Subtitle = styled(partElement('span', 'subtitle'), forwardRef)`
   margin: 0;
   color: var(--color-ios-secondary-label);
   ${textStyle('subheadline')}
+  overflow-wrap: break-word;
+  pointer-events: none;
+`;
+
+export type ListTextProps = PartProps<'span'> & {
+  /** Lines shown at most, ellipsized (default: 2; Framework7 `.item-text`). */
+  lines?: number;
+};
+
+/**
+ * Body text below a row's title and subtitle, making it a media row (as in
+ * Mail; Framework7 `.media-list` `.item-text`).
+ */
+const Text = styled(partElement('span', 'text'), forwardRef)<ListTextProps>`
+  display: -webkit-box;
+  overflow: hidden;
+  min-width: 0;
+  margin: 0;
+  -webkit-box-orient: vertical;
+  color: var(--color-ios-secondary-label);
+  ${textStyle('subheadline')}
+  -webkit-line-clamp: attr(lines type(<integer>), 2);
   overflow-wrap: break-word;
   pointer-events: none;
 `;
@@ -1256,10 +1781,15 @@ const StyledGrabber = styled(partElement('span', 'grabber'), forwardRef)`
   touch-action: none;
 `;
 
+/**
+ * Figma “_Grabber”: drags its row to reorder its group (see `Group`
+ * `onReorder`); focused, arrow keys move the row.
+ */
 const Grabber = forwardRef<HTMLElement, PartProps<'span'>>(
   ({ children, ...props }, ref) => (
     <StyledGrabber
       ref={ref}
+      tabIndex={0}
       {...props}
     >
       {children ?? <Lines />}
@@ -1367,12 +1897,10 @@ const editCircle = css`
   place-items: center;
 `;
 
-const StyledCheckbox = styled(BaseCheckbox.Root, forwardRef)`
+const selectCircle = css`
   ${editCircle}
 
   border: 1.5px solid var(--color-ios-system-gray3);
-  ${({ disabled }: { disabled?: boolean }) =>
-    cursor(disabled ? 'not-allowed' : 'pointer')}
 
   &[data-checked] {
     border-color: transparent;
@@ -1382,6 +1910,14 @@ const StyledCheckbox = styled(BaseCheckbox.Root, forwardRef)`
   &[data-disabled] {
     opacity: 0.5;
   }
+`;
+
+const selectCursor = ({ disabled }: { disabled?: boolean }) =>
+  cursor(disabled ? 'not-allowed' : 'pointer');
+
+const StyledCheckbox = styled(BaseCheckbox.Root, forwardRef)`
+  ${selectCircle}
+  ${selectCursor}
 `;
 
 const CheckboxIndicator = styled(BaseCheckbox.Indicator, forwardRef)`
@@ -1402,6 +1938,35 @@ const Checkbox = forwardRef<HTMLElement, Omit<BaseCheckbox.Root.Props, 'ref'>>(
         </CheckboxIndicator>
       )}
     </StyledCheckbox>
+  ),
+);
+
+const StyledRadio = styled(BaseRadio.Root, forwardRef)`
+  ${selectCircle}
+  ${selectCursor}
+`;
+
+const RadioIndicator = styled(BaseRadio.Indicator, forwardRef)`
+  display: contents;
+`;
+
+/**
+ * A Base UI radio (selecting one row), as `Checkbox`; its group is a Base UI
+ * `RadioGroup` (e.g. rendering a `Group`).
+ */
+const Radio = forwardRef<HTMLElement, Omit<BaseRadio.Root.Props, 'ref'>>(
+  ({ children, ...props }, ref) => (
+    <StyledRadio
+      ref={ref}
+      {...{ [part]: 'edit' }}
+      {...props}
+    >
+      {children ?? (
+        <RadioIndicator>
+          <Check />
+        </RadioIndicator>
+      )}
+    </StyledRadio>
   ),
 );
 
@@ -1460,7 +2025,13 @@ const EditButton = forwardRef<HTMLElement, ListEditButtonProps>(
 
 export type ListSwipeActionsProps = PartProps<'div'> & {
   /**
-   * Swiping on past the actions triggers the outermost one (Framework7
+   * Called when released swiped on past the actions (overswiped), instead of
+   * triggering the outermost action; enables `overswipe`.
+   */
+  onOverswipe?: () => void;
+  /**
+   * Swiping on past the actions stretches the outermost one over the area
+   * the row uncovers, and triggers it on release (Framework7
    * `.swipeout-overswipe`; UIKit `performsFirstActionWithFullSwipe`).
    */
   overswipe?: boolean;
@@ -1494,21 +2065,48 @@ const StyledSwipeActions = styled(
   & > * {
     pointer-events: auto;
   }
+
+  /* The others fade out under a stretched action (labels included). */
+  &:has(> [data-overswipe='stretched']) {
+    & > :not([data-overswipe]) {
+      opacity: 0;
+    }
+  }
 `;
 
 const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
-  ({ onFocusCapture, overswipe = false, side = 'trailing', ...props }, ref) => {
+  (
+    {
+      onFocusCapture,
+      onOverswipe,
+      overswipe = false,
+      side = 'trailing',
+      ...props
+    },
+    ref,
+  ) => {
     const item = useContext(ItemContext);
     const elementRef = useForwardedRef<HTMLElement>(ref);
+
+    // The latest handler, without setting the actions again.
+    const onOverswipeRef = useRef(onOverswipe);
+    useLayoutEffect(() => {
+      onOverswipeRef.current = onOverswipe;
+    });
+    const hasHandler = onOverswipe !== undefined;
 
     useLayoutEffect(() => {
       const { current: element } = elementRef;
       if (!item || !element) return undefined;
 
-      item.setActions(side, element, overswipe);
+      item.setActions(
+        side,
+        element,
+        hasHandler ? () => onOverswipeRef.current?.() : overswipe,
+      );
 
       return () => item.setActions(side, undefined);
-    }, [elementRef, item, overswipe, side]);
+    }, [elementRef, hasHandler, item, overswipe, side]);
 
     return (
       <StyledSwipeActions
@@ -1542,6 +2140,8 @@ const StyledSwipeAction = styled(
   position: relative;
   display: grid;
   width: var(--styled-list-action-size, 52px);
+  height: var(--styled-list-action-height, 52px);
+  align-content: start;
   color: #fff;
   ${cursor('pointer')}
   justify-items: center;
@@ -1551,9 +2151,16 @@ const StyledSwipeAction = styled(
     ${cursorProperty('not-allowed')}
   }
 
-  /* Overswiped: stretched over the other actions, into a capsule */
+  /* Overswiped: its circle stretched over the other actions (see
+     stretchAction) */
   &[data-overswipe] {
     z-index: 1;
+
+    & > [${part}='swipe-action-circle'] {
+      position: absolute;
+      top: 0;
+      grid-template-columns: var(--styled-list-action-size, 52px);
+    }
   }
 
   & > [${part}='swipe-action-circle'] {
@@ -1562,7 +2169,7 @@ const StyledSwipeAction = styled(
     height: var(--styled-list-action-size, 52px);
     border-radius: 100px;
     background-color: ${({ tint }) => tint ?? 'var(--color-ios-system-gray)'};
-    font-size: var(--font-ios-body-size);
+    font-size: var(--styled-list-action-symbol-size);
     ${fontWeight(400)}
     line-height: var(--font-ios-body-line-height);
     place-items: center;
@@ -1570,12 +2177,12 @@ const StyledSwipeAction = styled(
 
   & > [${part}='swipe-action-label'] {
     position: absolute;
-    top: calc(var(--styled-list-action-size, 52px) + 3px);
+    top: calc(var(--styled-list-action-size, 52px) + 4px);
     display: var(--styled-list-action-label-display, none);
     color: var(--color-ios-secondary-label);
-    font-size: 15px;
+    font-size: 13px;
     ${fontWeight(510)}
-    line-height: 20px;
+    line-height: 16px;
     white-space: nowrap;
   }
 `;
@@ -1906,6 +2513,7 @@ export const List = {
   Title,
   Subtitle,
   Supertitle,
+  Text,
   Detail,
   Image,
   Accessory,
@@ -1917,6 +2525,7 @@ export const List = {
   Action,
   Button,
   Checkbox,
+  Radio,
   EditButton,
   SwipeActions,
   SwipeAction,

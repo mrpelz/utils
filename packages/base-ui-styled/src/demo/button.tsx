@@ -4,11 +4,11 @@ import { styled } from 'goober';
 import { Fragment, FunctionComponent, useMemo } from 'react';
 
 import { Button, ButtonRootProps } from '../components/index.js';
+import { useLog } from './utils/log.js';
 import {
   commonPropOptions,
   Component,
   MappedProp,
-  useLog,
   usePropControl,
 } from './utils/main.js';
 import { SFSymbol } from './utils/symbol.js';

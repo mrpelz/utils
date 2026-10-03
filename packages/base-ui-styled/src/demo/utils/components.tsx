@@ -14,6 +14,11 @@ export const Container = styled('component')`
   grid-template: 'content config' 1fr / 1fr 25em;
   scroll-snap-align: start;
   scroll-snap-stop: always;
+  scroll-snap-type: y mandatory;
+
+  @media screen and (width <= 768px) {
+    grid-template: 'content' 'config';
+  }
 `;
 
 // Sticky, so a stacking context: it needs the page background, or glass in
@@ -25,14 +30,10 @@ export const Content = styled('section')`
   height: 100svh;
   padding: 1rem;
   margin: calc(1rem * -1);
-  background-color: white;
+  background-color: light-dark(white, #0a0a0a);
   gap: 1rem;
   grid-area: content;
   grid-template: 'head' auto 'stage' 1fr / 1fr;
-
-  @media (prefers-color-scheme: dark) {
-    background-color: #0a0a0a;
-  }
 `;
 
 export const ComponentHeader = styled('component-header')`
@@ -43,12 +44,8 @@ export const ComponentHeader = styled('component-header')`
   width: stretch;
   padding: 1rem;
   margin: calc(1rem * -1);
-  background-color: white;
+  background-color: light-dark(white, #0a0a0a);
   grid-area: head;
-
-  @media (prefers-color-scheme: dark) {
-    background-color: #0a0a0a;
-  }
 `;
 
 export const ComponentHeading = styled('h2')`
@@ -63,6 +60,7 @@ export const ComponentId = styled('a')`
   font-size: 0.875rem;
   font-weight: 400;
   margin-inline-start: 0.5rem;
+  text-decoration: underline;
 `;
 
 export const ComponentDocsLink = styled('a')`
@@ -78,7 +76,12 @@ export const Stage = styled('stage')`
   overflow: auto;
   align-items: center;
   grid-area: stage;
-  scroll-snap-type: y mandatory;
+  scroll-snap-stop: always;
+
+  @media screen and (width <= 768px) {
+    margin: calc(1rem * -1);
+    margin-block-start: 0;
+  }
 `;
 
 export const StageBackground = styled('stage-background')`
@@ -91,18 +94,10 @@ export const StageBackground = styled('stage-background')`
   inset: 0;
   mask-image: radial-gradient(
     ellipse at center,
-    rgb(255 255 255) 0%,
-    rgb(255 255 255 / 0%) 90%
+    rgb(0 0 0) 0%,
+    rgb(0 0 0 / 0%) 90%
   );
   mask-repeat: no-repeat;
-
-  @media (prefers-color-scheme: dark) {
-    mask-image: radial-gradient(
-      ellipse at center,
-      rgb(0 0 0) 0%,
-      rgb(0 0 0 / 0%) 90%
-    );
-  }
 `;
 
 // eslint-disable-next-line prettier/prettier
@@ -121,7 +116,7 @@ export const StageInner = styled<{ center: boolean; drawBackdrop: boolean; stret
     position: absolute;
     z-index: -1;
     display: block;
-    background-color: white;
+    background-color: light-dark(white, #0a0a0a);
     ${({ drawBackdrop }) =>
       drawBackdrop
         ? css`
@@ -129,28 +124,30 @@ export const StageInner = styled<{ center: boolean; drawBackdrop: boolean; stret
           `
         : undefined}
     inset: 0;
-
-    @media (prefers-color-scheme: dark) {
-      background-color: #0a0a0a;
-    }
   }
 `;
 
 export const Config = styled('config' as 'section')`
+  z-index: 1;
   display: ${({ hidden }) => (hidden ? 'none' : 'flex')};
+  min-height: 100svh;
   flex-direction: column;
   border: 1px dashed #404040;
+  background-color: light-dark(white, #0a0a0a);
+  color: light-dark(black, #a1a1a1);
   font-family: monospace;
   font-size: 0.875rem;
   grid-area: config;
 
-  @media (prefers-color-scheme: dark) {
-    color: #a1a1a1;
-    color-scheme: dark;
+  @media screen and (width <= 768px) {
+    padding: 1rem;
+    margin: calc(1rem * -1);
+    margin-block: 0;
   }
 `;
 
 export const ConfigInner = styled(Config)`
+  min-height: auto;
   padding: 0.5rem;
   border-right: none !important;
   border-left: none !important;
@@ -168,6 +165,11 @@ export const ConfigInner = styled(Config)`
     flex-grow: 1;
     border-bottom: none;
   }
+
+  @media screen and (width <= 768px) {
+    margin: 0;
+    margin-inline: calc(1rem * -1);
+  }
 `;
 
 export const ConfigHeading = styled('summary')`
@@ -176,12 +178,7 @@ export const ConfigHeading = styled('summary')`
   padding: 0.5rem;
   margin: calc(0.5rem * -1);
   margin-bottom: 0.25rem;
-  background-color: white;
-
-  @media (prefers-color-scheme: dark) {
-    background-color: #0a0a0a;
-  }
-
+  background-color: light-dark(white, #0a0a0a);
   cursor: pointer;
 `;
 

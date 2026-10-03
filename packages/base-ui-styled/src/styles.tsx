@@ -1,8 +1,74 @@
 import { createGlobalStyles as createGlobalStyle } from 'goober/global';
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useEffect } from 'react';
 
 import { dynamicTypeSize } from './components/typography.js';
-import { css } from './components/utils.js';
+import { ColorScheme, colorSchemeAttribute, css } from './components/utils.js';
+
+// Dark mode values of the tokens in `styles` (same sources), applied in dark
+// mode unless `colorSchemeAttribute` forces the light scheme, or where it
+// forces the dark one.
+const dark = css`
+  --color-ios-label: rgb(255 255 255);
+  --color-ios-secondary-label: rgb(235 235 245 / 60%);
+  --color-ios-tertiary-label: rgb(235 235 245 / 30%);
+  --color-ios-quaternary-label: rgb(235 235 245 / 16%);
+  --color-ios-placeholder-text: rgb(235 235 245 / 30%);
+  --color-ios-separator: rgb(84 84 88 / 60%);
+  --color-ios-opaque-separator: rgb(56 56 58);
+  --color-ios-link: rgb(9 132 255);
+  --color-ios-system-fill: rgb(120 120 128 / 36%);
+  --color-ios-secondary-system-fill: rgb(120 120 128 / 32%);
+  --color-ios-tertiary-system-fill: rgb(118 118 128 / 24%);
+  --color-ios-quaternary-system-fill: rgb(118 118 128 / 18%);
+  --color-ios-system-background: rgb(0 0 0);
+  --color-ios-secondary-system-background: rgb(28 28 30);
+  --color-ios-tertiary-system-background: rgb(44 44 46);
+  --color-ios-system-grouped-background: rgb(0 0 0);
+  --color-ios-secondary-system-grouped-background: rgb(28 28 30);
+  --color-ios-tertiary-system-grouped-background: rgb(44 44 46);
+  --color-ios-system-gray: rgb(142 142 147);
+  --color-ios-system-gray2: rgb(99 99 102);
+  --color-ios-system-gray3: rgb(72 72 74);
+  --color-ios-system-gray4: rgb(58 58 60);
+  --color-ios-system-gray5: rgb(44 44 46);
+  --color-ios-system-gray6: rgb(28 28 30);
+  --color-ios-system-red: rgb(255 66 69);
+  --color-ios-system-orange: rgb(255 146 48);
+  --color-ios-system-yellow: rgb(255 214 0);
+  --color-ios-system-green: rgb(48 209 88);
+  --color-ios-system-mint: rgb(0 218 195);
+  --color-ios-system-teal: rgb(0 210 224);
+  --color-ios-system-cyan: rgb(60 211 254);
+  --color-ios-system-blue: rgb(0 145 255);
+  --color-ios-system-indigo: rgb(109 124 255);
+  --color-ios-system-purple: rgb(219 52 242);
+  --color-ios-system-pink: rgb(255 55 95);
+  --color-ios-system-brown: rgb(183 138 102);
+  --glass-ios-lens-shadow: var(--glass-ios-dim-lens-shadow);
+  --color-ios-list-section-title-background: #323234;
+  --color-ios-list-separator: rgb(255 255 255 / 11%);
+`;
+
+const darkContrast = css`
+  --color-ios-system-gray: rgb(174 174 178);
+  --color-ios-system-gray2: rgb(124 124 128);
+  --color-ios-system-gray3: rgb(84 84 86);
+  --color-ios-system-gray4: rgb(68 68 70);
+  --color-ios-system-gray5: rgb(54 54 56);
+  --color-ios-system-gray6: rgb(36 36 38);
+  --color-ios-system-red: rgb(255 97 101);
+  --color-ios-system-orange: rgb(255 160 86);
+  --color-ios-system-yellow: rgb(254 223 67);
+  --color-ios-system-green: rgb(74 217 104);
+  --color-ios-system-mint: rgb(84 223 203);
+  --color-ios-system-teal: rgb(59 221 236);
+  --color-ios-system-cyan: rgb(109 217 255);
+  --color-ios-system-blue: rgb(92 184 255);
+  --color-ios-system-indigo: rgb(167 170 255);
+  --color-ios-system-purple: rgb(234 141 255);
+  --color-ios-system-pink: rgb(255 138 196);
+  --color-ios-system-brown: rgb(219 166 121);
+`;
 
 export const styles = css`
   :root {
@@ -103,45 +169,6 @@ export const styles = css`
     --color-ios-system-pink: rgb(255 45 85);
     --color-ios-system-brown: rgb(172 127 94);
 
-    @media (prefers-color-scheme: dark) {
-      --color-ios-label: rgb(255 255 255);
-      --color-ios-secondary-label: rgb(235 235 245 / 60%);
-      --color-ios-tertiary-label: rgb(235 235 245 / 30%);
-      --color-ios-quaternary-label: rgb(235 235 245 / 16%);
-      --color-ios-placeholder-text: rgb(235 235 245 / 30%);
-      --color-ios-separator: rgb(84 84 88 / 60%);
-      --color-ios-opaque-separator: rgb(56 56 58);
-      --color-ios-link: rgb(9 132 255);
-      --color-ios-system-fill: rgb(120 120 128 / 36%);
-      --color-ios-secondary-system-fill: rgb(120 120 128 / 32%);
-      --color-ios-tertiary-system-fill: rgb(118 118 128 / 24%);
-      --color-ios-quaternary-system-fill: rgb(118 118 128 / 18%);
-      --color-ios-system-background: rgb(0 0 0);
-      --color-ios-secondary-system-background: rgb(28 28 30);
-      --color-ios-tertiary-system-background: rgb(44 44 46);
-      --color-ios-system-grouped-background: rgb(0 0 0);
-      --color-ios-secondary-system-grouped-background: rgb(28 28 30);
-      --color-ios-tertiary-system-grouped-background: rgb(44 44 46);
-      --color-ios-system-gray: rgb(142 142 147);
-      --color-ios-system-gray2: rgb(99 99 102);
-      --color-ios-system-gray3: rgb(72 72 74);
-      --color-ios-system-gray4: rgb(58 58 60);
-      --color-ios-system-gray5: rgb(44 44 46);
-      --color-ios-system-gray6: rgb(28 28 30);
-      --color-ios-system-red: rgb(255 66 69);
-      --color-ios-system-orange: rgb(255 146 48);
-      --color-ios-system-yellow: rgb(255 214 0);
-      --color-ios-system-green: rgb(48 209 88);
-      --color-ios-system-mint: rgb(0 218 195);
-      --color-ios-system-teal: rgb(0 210 224);
-      --color-ios-system-cyan: rgb(60 211 254);
-      --color-ios-system-blue: rgb(0 145 255);
-      --color-ios-system-indigo: rgb(109 124 255);
-      --color-ios-system-purple: rgb(219 52 242);
-      --color-ios-system-pink: rgb(255 55 95);
-      --color-ios-system-brown: rgb(183 138 102);
-    }
-
     @media (prefers-contrast: more) {
       --color-ios-system-gray: rgb(108 108 112);
       --color-ios-system-gray2: rgb(142 142 147);
@@ -163,36 +190,27 @@ export const styles = css`
       --color-ios-system-brown: rgb(149 109 81);
     }
 
-    @media (prefers-color-scheme: dark) and (prefers-contrast: more) {
-      --color-ios-system-gray: rgb(174 174 178);
-      --color-ios-system-gray2: rgb(124 124 128);
-      --color-ios-system-gray3: rgb(84 84 86);
-      --color-ios-system-gray4: rgb(68 68 70);
-      --color-ios-system-gray5: rgb(54 54 56);
-      --color-ios-system-gray6: rgb(36 36 38);
-      --color-ios-system-red: rgb(255 97 101);
-      --color-ios-system-orange: rgb(255 160 86);
-      --color-ios-system-yellow: rgb(254 223 67);
-      --color-ios-system-green: rgb(74 217 104);
-      --color-ios-system-mint: rgb(84 223 203);
-      --color-ios-system-teal: rgb(59 221 236);
-      --color-ios-system-cyan: rgb(109 217 255);
-      --color-ios-system-blue: rgb(92 184 255);
-      --color-ios-system-indigo: rgb(167 170 255);
-      --color-ios-system-purple: rgb(234 141 255);
-      --color-ios-system-pink: rgb(255 138 196);
-      --color-ios-system-brown: rgb(219 166 121);
-    }
-
     /*
      * iOS glass materials for dim and bright content behind the glass
      *
      * Source: Apple iOS 26 Figma (Tab Bar, BG Context Dim/Bright):
      * - blur: “Blur” layer (backdrop-filter: blur(20px), opacity 0.67)
-     * - fill: “Fill” layer, split into its three fills (bottom to top), each
-     *   with its blend mode; opacity of the whole fill
+     * - fill: “Fill” layer: its three fills (bottom to top) with their blend
+     *   modes, at the layer's opacity, drawn without blending as a backdrop
+     *   filter and a flat color. The fills are linear in each channel of the
+     *   backdrop b: bright (color-dodge #333, #fff 50%, multiply #F7F7F7):
+     *   min(1.25b, 1) × 0.969 at 50% over #F7F7F7, exactly; dim (color-burn
+     *   #CCC 50%, #000 60%, #FFF 6%, opacity 0.67): 0.04 + 0.58b, through
+     *   its values over black and white (within 0.025 in between). WebKit
+     *   blends an element only with what is on its compositing layer: the
+     *   fills, above the blur's backdrop filter (a layer of its own), would
+     *   blend with nothing (bright glass turns gray).
      * - content/selection: vibrant tab content and selection (no UIKit
-     *   semantic equivalent)
+     *   semantic equivalent); the selection (#121212 plus-lighter, #ededed
+     *   plus-darker) is drawn as its unblended equivalent (white, black at
+     *   7%): WebKit blends an element composited on a layer of its own
+     *   (e.g. while it moves) with that layer's transparent backdrop only,
+     *   drawing the dim selection nearly black, as with menus (see below)
      * - content-disabled, content-prominent(-disabled): labels of glass
      *   buttons (Figma “_Label - Text/Symbol”, Default and Preferred, State
      *   Default/Disabled); the prominent disabled bright label is #262626 at
@@ -206,24 +224,21 @@ export const styles = css`
      *   (--f7-tabbar-link-highlight-active-bg-color) and app-vars.less
      *   (--f7-glass-shadow-thumb), light for bright, dark for dim; see
      *   --glass-ios-lens-* below
-     * plus-darker (unsupported in Chromium) falls back to multiply, which
-     * darkens by a similar amount for these light colors.
+     * plus-darker is drawn as multiply, which darkens by a similar amount
+     * for these light colors: Chromium doesn't support it, and WebKit draws
+     * it black where the glass is composited separately (a layer of its
+     * own, e.g. while transitioning).
      */
     --glass-ios-dim-blur: rgb(255 255 255 / 5%);
-    --glass-ios-dim-fill-bottom: rgb(204 204 204 / 50%);
-    --glass-ios-dim-fill-bottom-blend: color-burn;
-    --glass-ios-dim-fill-middle: rgb(0 0 0 / 60%);
-    --glass-ios-dim-fill-top: rgb(255 255 255 / 6%);
-    --glass-ios-dim-fill-top-blend: normal;
-    --glass-ios-dim-fill-opacity: 0.67;
+    --glass-ios-dim-fill: rgb(255 255 255 / 4%);
+    --glass-ios-dim-fill-filter: brightness(0.606);
     --glass-ios-dim-content: #bfbfbf;
     --glass-ios-dim-content-blend: plus-lighter;
     --glass-ios-dim-content-disabled: #262626;
     --glass-ios-dim-content-prominent: #fff;
     --glass-ios-dim-content-prominent-blend: plus-lighter;
     --glass-ios-dim-content-prominent-disabled: #262626;
-    --glass-ios-dim-selection: #121212;
-    --glass-ios-dim-selection-blend: plus-lighter;
+    --glass-ios-dim-selection: rgb(255 255 255 / 7%);
     --glass-ios-dim-lens: rgb(255 255 255 / 10%);
     --glass-ios-dim-lens-shadow:
       inset 3px 3px 0 -3.5px rgb(255 255 255),
@@ -241,20 +256,15 @@ export const styles = css`
       inset 0 0 10px 0 rgb(255 255 255 / 7.5%),
       inset 0 0 24px 0 rgb(255 255 255 / 5%), 0 0 25px 0 rgb(0 0 0 / 15%);
     --glass-ios-bright-blur: rgb(0 0 0 / 4%);
-    --glass-ios-bright-fill-bottom: #333;
-    --glass-ios-bright-fill-bottom-blend: color-dodge;
-    --glass-ios-bright-fill-middle: rgb(255 255 255 / 50%);
-    --glass-ios-bright-fill-top: #f7f7f7;
-    --glass-ios-bright-fill-top-blend: multiply;
-    --glass-ios-bright-fill-opacity: 1;
+    --glass-ios-bright-fill: rgb(247 247 247 / 50%);
+    --glass-ios-bright-fill-filter: brightness(1.25) brightness(0.969);
     --glass-ios-bright-content: #404040;
     --glass-ios-bright-content-blend: multiply;
     --glass-ios-bright-content-disabled: #d9d9d9;
     --glass-ios-bright-content-prominent: #fff;
     --glass-ios-bright-content-prominent-blend: plus-lighter;
     --glass-ios-bright-content-prominent-disabled: rgb(38 38 38 / 50%);
-    --glass-ios-bright-selection: #ededed;
-    --glass-ios-bright-selection-blend: multiply;
+    --glass-ios-bright-selection: rgb(0 0 0 / 7%);
     --glass-ios-bright-lens: rgb(0 0 0 / 5%);
     --glass-ios-bright-lens-shadow:
       inset -3px -3px 0 -3.5px rgb(255 255 255),
@@ -314,7 +324,7 @@ export const styles = css`
      * Source: Apple iOS 26 Figma (Button - Liquid Glass, Tinted=True): “Tint”
      * layer: the tint (#0091FF in both contexts, also where the system tint
      * is #0088FF), then its fills (bottom to top) with their blend modes, and
-     * its shadow. plus-darker falls back to multiply, as above.
+     * its shadow. plus-darker is drawn as multiply, as above.
      */
     --glass-ios-tint: rgb(0 145 255);
     --glass-ios-tint-base: rgb(255 255 255 / 50%);
@@ -339,19 +349,17 @@ export const styles = css`
     --glass-ios-lens-duration: 300ms;
     --glass-ios-lens-shadow: var(--glass-ios-bright-lens-shadow);
 
-    @media (prefers-color-scheme: dark) {
-      --glass-ios-lens-shadow: var(--glass-ios-dim-lens-shadow);
-    }
-
     /*
      * List separators, blended with the list's background (no UIKit semantic
      * equivalent: UIKit's separator is rgb(60 60 67 / 29%))
      *
      * Source: Apple iOS 26 Figma (Lists and tables: “_Separator”, Mode=Light
-     * and Dark). plus-darker falls back to multiply, as above.
+     * and Dark): #E6E6E6 plus-darker (as multiply), #1A1A1A plus-lighter,
+     * drawn as their unblended equivalent (black at 10%: exact; white at
+     * 11%: exact on dark rows, #1C1C1E): WebKit blends rows on a layer of
+     * their own (e.g. while swiped) with nothing, as the glass above.
      */
-    --color-ios-list-separator: #e6e6e6;
-    --color-ios-list-separator-blend: multiply;
+    --color-ios-list-separator: rgb(0 0 0 / 10%);
 
     /*
      * Section titles of plain lists, opaque (Figma gives none: a blur only)
@@ -361,21 +369,110 @@ export const styles = css`
      */
     --color-ios-list-section-title-background: #f7f7f7;
 
-    @supports (mix-blend-mode: plus-darker) {
-      --glass-ios-bright-fill-top-blend: plus-darker;
-      --glass-ios-bright-content-blend: plus-darker;
-      --glass-ios-bright-selection-blend: plus-darker;
-      --glass-ios-medium-light-content-blend: plus-darker;
-      --glass-ios-tint-blend: plus-darker;
-      --color-ios-list-separator-blend: plus-darker;
-    }
+    /*
+     * The shadow of a row being reordered, lifted (Figma gives none)
+     *
+     * Source: Framework7 components/sortable/sortable-vars.less
+     * (--f7-sortable-sorting-item-box-shadow)
+     */
+    --shadow-ios-list-reorder: 0 2px 8px rgb(0 0 0 / 60%);
+  }
 
-    @media (prefers-color-scheme: dark) {
-      --color-ios-list-section-title-background: #323234;
-      --color-ios-list-separator: #1a1a1a;
-      --color-ios-list-separator-blend: plus-lighter;
+  :root[${colorSchemeAttribute}='light'] {
+    color-scheme: light;
+  }
+
+  :root[${colorSchemeAttribute}='dark'] {
+    color-scheme: dark;
+    ${dark}
+
+    @media (prefers-contrast: more) {
+      ${darkContrast}
     }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([${colorSchemeAttribute}='light']) {
+      ${dark}
+    }
+  }
+
+  @media (prefers-color-scheme: dark) and (prefers-contrast: more) {
+    :root:not([${colorSchemeAttribute}='light']) {
+      ${darkContrast}
+    }
+  }
+
+  /* Lengths that transition as such, so styles computed from them follow
+     every frame (e.g. a clamp): the tab bar's lens (see tab-bar.tsx). */
+  @property --styled-tabbar-lens-height {
+    inherits: true;
+    initial-value: 0;
+    syntax: '<length>';
+  }
+
+  @property --styled-tabbar-lens-width {
+    inherits: true;
+    initial-value: 0;
+    syntax: '<length>';
+  }
+
+  @property --styled-tabbar-lens-x {
+    inherits: true;
+    initial-value: 0;
+    syntax: '<length>';
+  }
+
+  @property --styled-tabbar-lens-y {
+    inherits: true;
+    initial-value: 0;
+    syntax: '<length>';
   }
 `;
 
-export const Styles = createGlobalStyle(styles) as unknown as FunctionComponent;
+const GlobalStyles = createGlobalStyle(styles) as unknown as FunctionComponent;
+
+const noop = () => undefined;
+
+/**
+ * Registers an empty, passive `touchstart` listener on the document while
+ * mounted: iOS Safari applies `:active` (the components' pressed states) only
+ * to elements with such a listener on themselves or an ancestor.
+ */
+export const useTouchActive = (): void => {
+  useEffect(() => {
+    document.addEventListener('touchstart', noop, { passive: true });
+    return () => document.removeEventListener('touchstart', noop);
+  }, []);
+};
+
+/**
+ * Forces a color scheme on the whole document while mounted (sets
+ * `colorSchemeAttribute` on the root element), or follows the browser's
+ * preference (`undefined`).
+ */
+export const useColorScheme = (scheme?: ColorScheme): void => {
+  useEffect(() => {
+    if (!scheme) return undefined;
+
+    const root = document.documentElement;
+    root.setAttribute(colorSchemeAttribute, scheme);
+    return () => root.removeAttribute(colorSchemeAttribute);
+  }, [scheme]);
+};
+
+export type StylesProps = {
+  /** Forces a color scheme, or follows the browser's preference. */
+  colorScheme?: ColorScheme;
+};
+
+/**
+ * The global styles (see `styles`), with pressed states on touch and an
+ * optionally forced color scheme.
+ */
+export const Styles: FunctionComponent<StylesProps> = ({ colorScheme }) => {
+  useTouchActive();
+  useColorScheme(colorScheme);
+
+  return <GlobalStyles />;
+};

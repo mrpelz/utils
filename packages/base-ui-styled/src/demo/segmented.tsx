@@ -2,11 +2,11 @@ import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import { FunctionComponent, useMemo } from 'react';
 
 import { Segmented } from '../components/index.js';
+import { useLog } from './utils/log.js';
 import {
   commonPropOptions,
   Component,
   MappedProp,
-  useLog,
   usePropControl,
 } from './utils/main.js';
 

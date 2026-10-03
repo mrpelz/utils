@@ -4,6 +4,8 @@ import { styled } from 'goober';
 import {
   createContext,
   forwardRef,
+  FunctionComponent,
+  PointerEvent,
   ReactNode,
   Ref,
   RefObject,
@@ -13,7 +15,7 @@ import {
 } from 'react';
 
 import { glassMedium } from './glass.js';
-import { css, fontWeight, useForwardedRef } from './utils.js';
+import { css, edgeScrollDelta, fontWeight, useForwardedRef } from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Menus”: “Menu - iPhone”, “Menu - iPad -
 // Actions (and Submenus)”, “Items - iPhone/iPad”, “Section Title”,
@@ -103,7 +105,8 @@ const sizeVars: Record<Size, string> = {
   `,
 };
 
-const part = 'data-menu-part';
+/** Marks a menu's internal parts (e.g. EditMenu's scroller). */
+export const part = 'data-menu-part';
 
 type MenuContextValue = {
   /** The root menu's actions (closing it). */
@@ -168,6 +171,267 @@ const SubmenuRoot = (props: BaseMenu.SubmenuRoot.Props): ReactNode => {
     </MenuContext.Provider>
   );
 };
+
+/**
+ * The enabled menu item at a point, in the topmost menu there (also beneath
+ * a modal menu's backdrop; not of a menu a submenu covers).
+ */
+const menuItemAt = (x: number, y: number) => {
+  for (const element of document.elementsFromPoint(x, y)) {
+    if (!element.closest('[role="menu"]')) continue;
+
+    const item = element.closest('[role^="menuitem"]');
+    return item instanceof HTMLElement && !item.matches('[data-disabled]')
+      ? item
+      : undefined;
+  }
+
+  return undefined;
+};
+
+const isSubmenuTrigger = (item: HTMLElement) =>
+  item.getAttribute('aria-haspopup') === 'menu';
+
+const isExpanded = (item: HTMLElement) =>
+  item.getAttribute('aria-expanded') === 'true';
+
+/** A dragging finger, and its last movement (never none). */
+type Finger = { movementX: number; movementY: number; x: number; y: number };
+
+/**
+ * Hovers an element (or stops hovering it) as a mouse would: Base UI
+ * highlights an item a mouse hovers (and opens its submenu), and removes the
+ * highlight when the mouse leaves it.
+ */
+const hover = (
+  element: HTMLElement,
+  entering: boolean,
+  { movementX, movementY, x, y }: Finger,
+) => {
+  const types = entering
+    ? (['over', 'enter', 'move'] as const)
+    : (['out', 'leave'] as const);
+
+  for (const type of types) {
+    // At the finger: Base UI keeps submenus open by the pointer's path,
+    // and ignores moves without movement in WebKit.
+    const init = {
+      bubbles: type !== 'enter' && type !== 'leave',
+      clientX: x,
+      clientY: y,
+      movementX,
+      movementY,
+    };
+    element.dispatchEvent(
+      // (`PointerEvent` is React's type here.)
+      new globalThis.PointerEvent(`pointer${type}`, {
+        ...init,
+        pointerType: 'mouse',
+      }),
+    );
+    element.dispatchEvent(new MouseEvent(`mouse${type}`, init));
+  }
+};
+
+/** The menu at a point (the topmost there). */
+const menuAt = (x: number, y: number) =>
+  document
+    .elementsFromPoint(x, y)
+    .map((element) => element.closest<HTMLElement>('[role="menu"]'))
+    .find(Boolean);
+
+/** A menu's element scrolling its items (itself, unless it marks one). */
+const scrollerOf = (menu: HTMLElement) =>
+  menu.querySelector<HTMLElement>(`[${part}='scroller']`) ?? menu;
+
+/**
+ * Drags a touch (`pointerId`) over menus' items, from `start` (if given, it
+ * hovers the item there right away): the finger hovers the items as a mouse
+ * would (see `hover`), so only the item under it is highlighted, and resting
+ * on a submenu's item opens the submenu, to drag on into; released, the item
+ * there is clicked. Held near an end of a menu that scrolls (either way), the
+ * finger scrolls it (as the tab bar's lens does). The touch's own clicks are
+ * kept from the items (internal; Menu's trigger, EditMenu).
+ */
+export const dragOverItems = (
+  document: Document,
+  pointerId: number,
+  start?: { x: number; y: number },
+): void => {
+  let item: HTMLElement | undefined;
+  const types = ['pointermove', 'pointerup', 'pointercancel'] as const;
+  // The touch's boundary events, kept from Base UI as its moves are.
+  const boundaryTypes = [
+    'pointerover',
+    'pointerout',
+    'pointerenter',
+    'pointerleave',
+  ] as const;
+  let finger: Finger | undefined;
+  // The menu the finger was last over, which it scrolls beyond its ends.
+  let menu: HTMLElement | undefined;
+
+  const update = () => {
+    if (!finger) return;
+
+    menu = menuAt(finger.x, finger.y) ?? menu;
+    const next = menuItemAt(finger.x, finger.y);
+    if (next === item) return;
+
+    // Leaving an open submenu's item (into it) resets the submenu's
+    // highlight in Base UI: it stays hovered, as the submenu is.
+    if (item && !(isSubmenuTrigger(item) && isExpanded(item))) {
+      hover(item, false, finger);
+    }
+    item = next;
+    if (item) hover(item, true, finger);
+  };
+
+  let frame = requestAnimationFrame(function scroll() {
+    frame = requestAnimationFrame(scroll);
+    if (!finger || !menu?.isConnected) return;
+
+    // Its ends are inside its scroll padding (e.g. EditMenu's “more”).
+    const scroller = scrollerOf(menu);
+    const { bottom, left, right, top } = scroller.getBoundingClientRect();
+    const style = getComputedStyle(scroller);
+    const padding = (value: string) => Number.parseFloat(value) || 0;
+    const { scrollLeft, scrollTop } = scroller;
+    if (scroller.scrollWidth > scroller.clientWidth) {
+      scroller.scrollLeft += edgeScrollDelta(
+        finger.x,
+        left + padding(style.scrollPaddingLeft),
+        right - padding(style.scrollPaddingRight),
+      );
+    }
+    if (scroller.scrollHeight > scroller.clientHeight) {
+      scroller.scrollTop += edgeScrollDelta(
+        finger.y,
+        top + padding(style.scrollPaddingTop),
+        bottom - padding(style.scrollPaddingBottom),
+      );
+    }
+    // The items moved under the finger.
+    if (scroller.scrollLeft !== scrollLeft || scroller.scrollTop !== scrollTop) {
+      update();
+    }
+  });
+
+  const listener = (pointerEvent: globalThis.PointerEvent) => {
+    // Not the drag's own (synthetic) hovering.
+    if (!pointerEvent.isTrusted) return;
+    if (pointerEvent.pointerId !== pointerId) return;
+    if (
+      pointerEvent.type === 'pointermove' ||
+      (boundaryTypes as readonly string[]).includes(pointerEvent.type)
+    ) {
+      // The drag hovers the items itself (Base UI ends hovering on
+      // touch moves, and as the touch leaves elements).
+      pointerEvent.stopPropagation();
+      if (pointerEvent.type !== 'pointermove') return;
+
+      const x = pointerEvent.clientX;
+      const y = pointerEvent.clientY;
+      finger = {
+        // At least a pixel, also when only scrolling moves the items.
+        movementX: x - (finger?.x ?? x) || 1,
+        movementY: y - (finger?.y ?? y) || 1,
+        x,
+        y,
+      };
+      update();
+      return;
+    }
+
+    cancelAnimationFrame(frame);
+    for (const type of [...types, ...boundaryTypes]) {
+      document.removeEventListener(type, listener, { capture: true });
+    }
+    if (pointerEvent.type !== 'pointerup') return;
+
+    // The touch's own click (on the element touched, if released there) is
+    // the drag's to make.
+    const keep = (click: MouseEvent) => {
+      if (!click.isTrusted) return;
+      click.preventDefault();
+      click.stopPropagation();
+    };
+    document.addEventListener('click', keep, { capture: true });
+    setTimeout(() => {
+      document.removeEventListener('click', keep, { capture: true });
+    }, 500);
+
+    // An open submenu stays open (clicking its item would close it).
+    if (item && (!isSubmenuTrigger(item) || !isExpanded(item))) item.click();
+  };
+
+  for (const type of [...types, ...boundaryTypes]) {
+    document.addEventListener(type, listener, { capture: true });
+  }
+  if (start) {
+    finger = { movementX: 1, movementY: 1, ...start };
+    update();
+  }
+};
+
+// Touch: no scrolling from the trigger, so it can be dragged from.
+type TriggerProps = Omit<BaseMenu.Trigger.Props, 'ref'>;
+
+// (Its ref type doesn't match `forwardRef`'s, as with other Base UI triggers.)
+const StyledTrigger = styled(BaseMenu.Trigger, forwardRef)`
+  touch-action: none;
+` as unknown as FunctionComponent<TriggerProps & { ref?: Ref<HTMLElement> }>;
+
+/**
+ * Opens the menu as Base UI's trigger does, but on touch already on touch
+ * down, as on iOS; dragging on, the item under the finger is highlighted
+ * and chosen where it's released, as Base UI does for the mouse (pressing
+ * the trigger, releasing on an item): the finger hovers the items as a
+ * mouse would, so only the item under it is highlighted, and resting on a
+ * submenu's item opens the submenu, to drag on into. Held near an end of a
+ * menu that scrolls, the finger scrolls it (as the tab bar's lens does).
+ */
+const Trigger = forwardRef<HTMLElement, TriggerProps>(
+  ({ onPointerDown, ...props }, ref) => (
+    <StyledTrigger
+      ref={ref}
+      {...props}
+      onPointerDown={(event: PointerEvent<HTMLElement>) => {
+        (
+          onPointerDown as
+            ((event: PointerEvent<HTMLElement>) => void) | undefined
+        )?.(event);
+        if (event.pointerType !== 'touch' || event.defaultPrevented) return;
+
+        const trigger = event.currentTarget;
+        const document = trigger.ownerDocument;
+        const { pointerId } = event;
+
+        // No emulated mouse events after the touch: Base UI opens and closes
+        // a menu on mouse down.
+        event.preventDefault();
+        // Touch captures the pointer to the trigger; the menu's items are
+        // hit-tested instead.
+        if (trigger.hasPointerCapture(pointerId)) {
+          trigger.releasePointerCapture(pointerId);
+        }
+        // Opens on touch down, as on iOS, by the mouse down Base UI expects.
+        if (trigger.getAttribute('aria-expanded') !== 'true') {
+          trigger.dispatchEvent(
+            new MouseEvent('mousedown', {
+              bubbles: true,
+              button: 0,
+              cancelable: true,
+              view: document.defaultView,
+            }),
+          );
+        }
+
+        dragOverItems(document, pointerId);
+      }}
+    />
+  ),
+);
 
 /**
  * Closes the root menu when a positioner's anchor (Base UI:
@@ -362,7 +626,6 @@ const selection = css`
     background-color: var(--styled-glass-selection);
     content: '';
     inset: 0;
-    mix-blend-mode: var(--styled-glass-selection-blend);
     opacity: 0;
   }
 `;
@@ -410,6 +673,13 @@ const item = css`
   &[data-highlighted]::before,
   &[data-popup-open]::before {
     opacity: 1;
+  }
+
+  /* Touch: the selection while pressed (no hover highlights) */
+  &:active:not([data-disabled]) {
+    &::before {
+      opacity: 1;
+    }
   }
 
   &[data-disabled] {
@@ -807,12 +1077,18 @@ const StyledQuickAction = styled(BaseMenu.Item, forwardRef)`
     background-color: var(--styled-glass-selection);
     content: '';
     inset: 0;
-    mix-blend-mode: var(--styled-glass-selection-blend);
     opacity: 0;
   }
 
   &[data-highlighted]::before {
     opacity: 1;
+  }
+
+  /* Touch: the selection while pressed (no hover highlights) */
+  &:active:not([data-disabled]) {
+    &::before {
+      opacity: 1;
+    }
   }
 
   &[data-disabled] {
@@ -887,6 +1163,7 @@ export const Menu = {
   ...BaseMenu,
   Root,
   SubmenuRoot,
+  Trigger,
   Positioner,
   Popup,
   Item,

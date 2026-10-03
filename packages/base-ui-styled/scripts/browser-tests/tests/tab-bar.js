@@ -3,7 +3,7 @@
 
 import assert from 'node:assert/strict';
 
-import { sleep } from '../lib.js';
+import { sleep, withTouch } from '../lib.js';
 
 /** @typedef {import('../lib.js').Page} Page */
 
@@ -41,6 +41,34 @@ const sampleSelections = async (page, action) => {
   await action();
   return sampling;
 };
+
+/**
+ * The groups of a (collapsed) bar: whether they show, where (relative to the
+ * bar), which of their tabs show, and their selection.
+ *
+ * @param {Page} page
+ * @returns {Promise<{ left: number, right: number, selection: number, selectionWidth: number, tabs: boolean[], visible: boolean, width: number }[]>}
+ */
+const collapsedState = (page) =>
+  page.evaluate(`(() => {
+    const list = ${page.section}.querySelector('[role=tablist]');
+    const bar = list.getBoundingClientRect();
+    return [...list.querySelectorAll(':scope > div')].map((group) => {
+      // Without the spacing of side by side groups (borders).
+      const rect = group.querySelector('[data-tab-bar-part=tabs]').getBoundingClientRect();
+      const style = getComputedStyle(group);
+      const indicator = group.querySelector('[role=presentation]');
+      return {
+        left: Math.round(rect.left - bar.left),
+        right: Math.round(bar.right - rect.right),
+        selection: +getComputedStyle(indicator, '::before').opacity,
+        selectionWidth: indicator.getBoundingClientRect().width,
+        tabs: [...group.querySelectorAll('[role=tab]')].map((tab) => getComputedStyle(tab).visibility === 'visible' && tab.getBoundingClientRect().width > 1),
+        visible: style.visibility === 'visible' && +style.opacity > 0.5,
+        width: Math.round(rect.width),
+      };
+    });
+  })()`);
 
 /** @param {number[]} values */
 const isMonotonic = (values, direction = 1) =>
@@ -201,7 +229,7 @@ export const tests = [
 
       const target = await page.evaluate(`(() => {
         const tabs = [...${page.section}.querySelectorAll('[role=tab]')];
-        const group = tabs.at(-1).parentElement.getBoundingClientRect();
+        const group = tabs.at(-1).closest('[role=tablist] > div').getBoundingClientRect();
         return Math.round(tabs.at(-1).getBoundingClientRect().left - group.left);
       })()`);
 
@@ -247,7 +275,7 @@ export const tests = [
         /** @returns {Promise<{ glass: number, icon: number, scale: string }>} */
         const measure = () =>
           page.evaluate(`(() => {
-            const group = ${page.section}.querySelector('[role=tab]').parentElement;
+            const group = ${page.section}.querySelector('[role=tab]').closest('[role=tablist] > div');
             const glass = group.firstElementChild;
             return {
               glass: glass.getBoundingClientRect().width,
@@ -475,6 +503,516 @@ export const tests = [
       /** @type {number[]} */
       const expandingFrames = await expanding;
       assert.deepEqual([...new Set(expandingFrames)], [0], 'expanding');
+    },
+  },
+  {
+    name: 'tab bar: too narrow, groups keep their shape and scroll their tabs within',
+    run: async (page) => {
+      // A group of several tabs shrinks, a single tab's (search) doesn't;
+      // labels aren't truncated.
+      for (const [id, tabs, width, single] of /** @type {const} */ ([
+        ['tab-bar-regular', undefined, 360, null],
+        [SECONDARY, 5, 260, 54],
+      ])) {
+        await page.open(id);
+        if (tabs) await page.setControl('tabs', tabs);
+        const list = `${page.section}.querySelector('[role=tablist]')`;
+        await page.evaluate(`${list}.style.width = '${width}px'`);
+        await sleep(400);
+
+        const state = await page.evaluate(`(() => {
+          const list = ${list};
+          const listRect = list.getBoundingClientRect();
+          const groups = [...list.querySelectorAll(':scope > div')];
+          const scroller = groups[0].querySelector('[data-tab-bar-part=tabs]');
+          return {
+            inside: groups.every((group) => {
+              const { left, right } = group.getBoundingClientRect();
+              return left >= listRect.left + 31.5 && right <= listRect.right - 31.5;
+            }),
+            listOverflows: list.scrollWidth > list.clientWidth + 1,
+            overflowing: scroller.hasAttribute('data-overflowing') && getComputedStyle(scroller).overflowX === 'auto',
+            scrolls: scroller.scrollWidth > scroller.clientWidth + 1,
+            single: groups.length > 1 ? Math.round(groups.at(-1).getBoundingClientRect().width) : null,
+            truncated: [...list.querySelectorAll('[data-tab-bar-part=label] > span')].filter((text) => text.scrollWidth > text.clientWidth + 0.5).length,
+          };
+        })()`);
+        assert.deepEqual(
+          state,
+          {
+            inside: true,
+            listOverflows: false,
+            overflowing: true,
+            scrolls: true,
+            single,
+            truncated: 0,
+          },
+          id,
+        );
+        await page.screenshot(`${id}-overflow`);
+
+        // Dragging the lens to the group's end scrolls the tabs under it into
+        // view, up to its last one.
+        const first = await page.rect('[role=tab]');
+        const scroller = `${page.section}.querySelector('[data-tab-bar-part=tabs]')`;
+        const end = await page.evaluate(
+          `${scroller}.getBoundingClientRect().right`,
+        );
+        const y = first.y + first.height / 2;
+        await page.mouse('mousePressed', first.x + first.width / 2, y);
+        await page.mouse('mouseMoved', end - 8, y);
+        await sleep(1500);
+        await page.mouse('mouseReleased', end - 8, y);
+        await sleep(600);
+
+        const result = await page.evaluate(`(() => {
+          const scroller = ${scroller};
+          const tabs = [...scroller.querySelectorAll(':scope > [role=tab]')];
+          return {
+            active: tabs.findIndex((tab) => tab.hasAttribute('data-active')),
+            count: tabs.length,
+            range: Math.round(scroller.scrollWidth - scroller.clientWidth),
+            scrolled: Math.round(scroller.scrollLeft),
+          };
+        })()`);
+        assert.equal(result.active, result.count - 1, id);
+        assert.equal(result.scrolled, result.range, id);
+      }
+    },
+  },
+  {
+    name: 'tab bar: touch dragging the lens over scrolling tabs is not taken over by scrolling',
+    run: async (page) => {
+      await page.open('tab-bar-regular');
+      const list = `${page.section}.querySelector('[role=tablist]')`;
+      await page.evaluate(`${list}.style.width = '360px'`);
+      await sleep(400);
+
+      const first = await page.rect('[role=tab]');
+      const scroller = `${page.section}.querySelector('[data-tab-bar-part=tabs]')`;
+      const end = await page.evaluate(
+        `${scroller}.getBoundingClientRect().right`,
+      );
+      const y = first.y + first.height / 2;
+      const pressed = `${list}.style.getPropertyValue('--styled-tabbar-pressed')`;
+
+      /** @type {string[]} */
+      const during = [];
+      await withTouch(page, async (touch) => {
+        const start = first.x + first.width / 2;
+        await touch('touchStart', start, y);
+        for (let step = 1; step <= 10; step += 1) {
+          await touch('touchMove', start + ((end - 8 - start) * step) / 10, y);
+          await sleep(30);
+          during.push(await page.evaluate(pressed));
+        }
+        await sleep(1500);
+        during.push(await page.evaluate(pressed));
+        await touch('touchEnd');
+        await sleep(600);
+      });
+
+      const result = await page.evaluate(`(() => {
+        const scroller = ${scroller};
+        const tabs = [...scroller.querySelectorAll(':scope > [role=tab]')];
+        return {
+          active: tabs.findIndex((tab) => tab.hasAttribute('data-active')) === tabs.length - 1,
+          scrolled: Math.round(scroller.scrollLeft) === Math.round(scroller.scrollWidth - scroller.clientWidth),
+          touchAction: getComputedStyle(scroller).touchAction,
+        };
+      })()`);
+      assert.deepEqual([...new Set(during)], ['1'], 'pressed throughout');
+      assert.deepEqual(result, {
+        active: true,
+        scrolled: true,
+        touchAction: 'none',
+      });
+    },
+  },
+  {
+    name: 'tab bar (iPad): in a container sized by its content, the bar shrinks and its lens stays within',
+    run: async (page) => {
+      // The demo's stage is such a container (fit-content).
+      await page.open('tab-bar-regular');
+      const stage = `${page.section}.querySelector('stage')`;
+      await page.evaluate(`${stage}.style.width = '420px'`);
+      await sleep(400);
+
+      const fits = await page.evaluate(
+        `${stage}.querySelector('[role=tablist]').getBoundingClientRect().width <= 420.5`,
+      );
+      assert.ok(fits, 'the bar fits its container');
+
+      // Dragged quickly onto the circle at the end, the lens is still a
+      // capsule when it gets there, which must not overflow the container.
+      const first = await page.rect('[role=tab]', 1);
+      const end = await page.evaluate(
+        `${stage}.querySelector('[role=tablist]').getBoundingClientRect().right`,
+      );
+      const y = first.y + first.height / 2;
+      await page.mouse('mousePressed', first.x + first.width / 2, y);
+      const sampling = page.sample(
+        `${stage}.scrollWidth - ${stage}.clientWidth`,
+        1500,
+      );
+      for (let step = 1; step <= 4; step += 1) {
+        await page.mouse(
+          'mouseMoved',
+          first.x + ((end - 4 - first.x) * step) / 4,
+          y,
+        );
+        await sleep(16);
+      }
+      /** @type {number[]} */
+      const overflows = await sampling;
+      await page.mouse('mouseReleased', end - 4, y);
+      await sleep(600);
+
+      assert.ok(
+        overflows.every((overflow) => overflow <= 0),
+        `container overflows ${overflows.filter((overflow) => overflow > 0).join(', ')}`,
+      );
+    },
+  },
+  {
+    name: 'tab bar: a group not too narrow for its tabs does not clip them',
+    run: async (page) => {
+      await page.open('tab-bar-regular');
+      assert.equal(
+        await page.evaluate(
+          `getComputedStyle(${page.section}.querySelector('[data-tab-bar-part=tabs]')).overflowX`,
+        ),
+        'visible',
+      );
+    },
+  },
+  {
+    name: 'tab bar: collapsed, marked groups remain at their own positions, side by side at the same one',
+    run: async (page) => {
+      await page.open(SECONDARY);
+      await page.setControl('visibleWhenCollapsed', true, 'group');
+      await page.setControl('visibleWhenCollapsed', true, 'secondary group');
+      await page.setControl('collapsedPosition', 'end', 'secondary group');
+      await page.setControl('collapsed', true);
+      await sleep(800);
+
+      const [primary, secondary] = await collapsedState(page);
+      if (!primary || !secondary) throw new Error('missing groups');
+      assert.ok(primary.visible && secondary.visible, 'both remain');
+      // Several tabs remain (one per group): the active one shows its
+      // selection.
+      assert.equal(primary.selection, 1);
+      // 7pt further in than the bar's padding (32px), as a single group.
+      assert.equal(primary.left, 39);
+      assert.equal(secondary.right, 39);
+      await page.screenshot('tab-bar-collapsed-groups-apart');
+
+      await page.setControl('collapsedPosition', 'start', 'secondary group');
+      await sleep(800);
+      const [first, second] = await collapsedState(page);
+      if (!first || !second) throw new Error('missing groups');
+      assert.equal(first.left, 39);
+      assert.equal(second.left - (first.left + first.width), 16, 'the gap');
+      await page.screenshot('tab-bar-collapsed-groups-together');
+
+      // Expanding, the first group moves back to the bar's padding (from
+      // its margin, spacing it from the other one) without a jump.
+      /** @type {number[]} */
+      const lefts = await Promise.all([
+        page.sample(
+          `${page.section}.querySelector('[role=tablist] > div').getBoundingClientRect().left`,
+          900,
+        ),
+        page.setControl('collapsed', false),
+      ]).then(([sampled]) => sampled);
+      const moves = lefts
+        .slice(1)
+        .map((left, index) => Math.abs(left - (lefts[index] ?? left)));
+      assert.ok(
+        Math.max(...moves) < 4,
+        `largest move per frame ${Math.max(...moves)}`,
+      );
+    },
+  },
+  {
+    name: 'tab bar: a group coming back from collapsing away fades its selection in',
+    run: async (page) => {
+      await page.open(SECONDARY);
+      await page.setControl('visibleWhenCollapsed', true, 'group');
+      const centers = await tabCenters(page);
+      const search = centers.at(-1);
+      if (!search) throw new Error('missing tabs');
+      await page.click(search);
+      await sleep(800);
+      await page.setControl('collapsed', true, 'list');
+      await sleep(900);
+
+      const sampling = page.sample(
+        `(() => {
+          const group = ${page.section}.querySelectorAll('[role=tablist] > div')[1];
+          return +getComputedStyle(group.querySelector('[role=presentation]'), '::before').opacity;
+        })()`,
+        900,
+      );
+      await page.setControl('collapsed', false, 'list');
+      /** @type {number[]} */
+      const opacities = await sampling;
+      assert.ok(isMonotonic(opacities), `fades in: ${opacities.join(', ')}`);
+      assert.ok((opacities[1] ?? 1) < 0.2, `starts hidden: ${opacities.join(', ')}`);
+      assert.equal(opacities.at(-1), 1);
+    },
+  },
+  {
+    name: 'tab bar: collapsed, marked tabs remain, the selection only on the active one among them',
+    run: async (page) => {
+      await page.open(SECONDARY);
+      await page.setControl('visibleWhenCollapsed', true, '1st tab');
+      await page.setControl('visibleWhenCollapsed', true, '2nd tab');
+      await page.setControl('collapsed', true);
+      await sleep(800);
+
+      const [group, secondary] = await collapsedState(page);
+      assert.deepEqual(group?.tabs, [true, true, false]);
+      assert.equal(secondary?.visible, false, 'the group of the active tab');
+      assert.equal(group?.selection, 1, 'the active tab is selected');
+      await page.screenshot('tab-bar-collapsed-tabs');
+
+      // The active tab is not marked: no selection.
+      await page.setControl('visibleWhenCollapsed', false, '1st tab');
+      await page.setControl('visibleWhenCollapsed', true, '3rd tab');
+      await sleep(800);
+      const [unselected] = await collapsedState(page);
+      assert.deepEqual(unselected?.tabs, [false, true, true]);
+      assert.ok(
+        (unselected?.selectionWidth ?? 0) < 1 ||
+          (unselected?.selection ?? 0) === 0,
+        'no selection shows',
+      );
+
+      // A tab marked in another group keeps that group, too.
+      await page.setControl('visibleWhenCollapsed', true, '1st secondary tab');
+      await sleep(800);
+      const [, other] = await collapsedState(page);
+      assert.equal(other?.visible, true, 'the other group remains');
+      assert.deepEqual(other?.tabs, [true]);
+    },
+  },
+  {
+    name: 'tab bar: the accessory sits above the groups, collapsed between them, without taking up space',
+    run: async (page) => {
+      await page.open(SECONDARY);
+      const bar = `${page.section}.querySelector('[role=tablist]')`;
+      const height = await page.evaluate(
+        `${bar}.getBoundingClientRect().height`,
+      );
+      await page.setControl('accessory', true);
+      await sleep(400);
+
+      /** @typedef {{ bottom: number, height: number, left: number, right: number, top: number }} Box */
+      /** @returns {Promise<{ accessory: Box, bar: number, groups: Box[], shadow: string[] }>} */
+      const measure = () =>
+        page.evaluate(`(() => {
+          const list = ${bar};
+          const round = ({ bottom, height, left, right, top }) => ({ bottom: Math.round(bottom), height: Math.round(height), left: Math.round(left), right: Math.round(right), top: Math.round(top) });
+          // Their glass (the blur layer, extending beyond the elements).
+          const glass = (element) => element.firstElementChild;
+          const accessory = ${page.section}.querySelector('[data-tab-bar-part=accessory]');
+          const groups = [...list.querySelectorAll(':scope > div')].filter((group) => getComputedStyle(group).visibility === 'visible');
+          return {
+            accessory: round(glass(accessory).getBoundingClientRect()),
+            bar: list.getBoundingClientRect().height,
+            groups: groups.map((group) => round(glass(group).getBoundingClientRect())),
+            // The same glass material, its edge unclipped.
+            shadow: [accessory, groups[0]].map((element) => [...element.children].slice(0, 3).map((layer) => getComputedStyle(layer).boxShadow + getComputedStyle(element).overflow).join()),
+          };
+        })()`);
+
+      // Not in the tab list, for its content's semantics.
+      assert.equal(
+        await page.evaluate(
+          `${page.section}.querySelector('[data-tab-bar-part=accessory]').closest('[role=tablist]')`,
+        ),
+        null,
+      );
+
+      const expanded = await measure();
+      const [first, last] = [expanded.groups[0], expanded.groups.at(-1)];
+      if (!first || !last) throw new Error('missing groups');
+      assert.equal(expanded.bar, height, 'the bar keeps its height');
+      assert.equal(expanded.shadow[0], expanded.shadow[1]);
+      // Glass 48pt high, 8pt above the groups' glass.
+      assert.deepEqual(
+        expanded.accessory,
+        {
+          bottom: first.top - 8,
+          height: 48,
+          left: first.left,
+          right: last.right,
+          top: first.top - 56,
+        },
+        'above the groups',
+      );
+      await page.screenshot('tab-bar-accessory');
+
+      await page.setControl('collapsed', true);
+      await sleep(900);
+      const alone = await measure();
+      const [only] = alone.groups;
+      if (!only) throw new Error('missing group');
+      const barRight = await page.evaluate(
+        `Math.round(${bar}.getBoundingClientRect().right)`,
+      );
+      // As high as the collapsed group's glass; its box (4px inside its
+      // glass) at the bar's content edge, 16px from the group's box.
+      assert.deepEqual(
+        alone.accessory,
+        {
+          bottom: only.bottom,
+          height: only.height,
+          left: only.right + 8,
+          right: barRight - 39 + 4,
+          top: only.top,
+        },
+        'next to the remaining group',
+      );
+
+      // As in Music: the tab and search remain, the accessory between,
+      // moving there without jumps.
+      await page.setControl('visibleWhenCollapsed', true, 'group');
+      await page.setControl('visibleWhenCollapsed', true, 'secondary group');
+      await page.setControl('collapsedPosition', 'end', 'secondary group');
+      await page.setControl('collapsed', false);
+      await sleep(900);
+      /** @type {number[][]} */
+      const frames = await Promise.all([
+        page.sample(
+          `(() => { const { left, right, top } = ${page.section}.querySelector('[data-tab-bar-part=accessory]').getBoundingClientRect(); return [left, right, top]; })()`,
+          900,
+        ),
+        page.setControl('collapsed', true),
+      ]).then(([sampled]) => sampled);
+      const moves = frames
+        .slice(1)
+        .flatMap((frame, index) =>
+          frame.map((value, edge) =>
+            Math.abs(value - (frames[index]?.[edge] ?? value)),
+          ),
+        );
+      assert.ok(
+        Math.max(...moves) < 16,
+        `largest move per frame ${Math.max(...moves)}`,
+      );
+
+      const collapsed = await measure();
+      const [start, end] = collapsed.groups;
+      if (!start || !end) throw new Error('missing groups');
+      assert.deepEqual(
+        collapsed.accessory,
+        {
+          bottom: start.bottom,
+          height: start.height,
+          left: start.right + 8,
+          right: end.left - 8,
+          top: start.top,
+        },
+        'between the groups',
+      );
+      await page.screenshot('tab-bar-accessory-collapsed');
+    },
+  },
+  {
+    name: 'tab bar: collapsing and expanding, the bar keeps its width',
+    run: async (page) => {
+      for (const id of [PRIMARY, SECONDARY, 'tab-bar-regular']) {
+        await page.open(id);
+        for (const collapsed of [true, false]) {
+          /** @type {number[]} */
+          const widths = await Promise.all([
+            page.sample(
+              `Math.round(${page.section}.querySelector('[role=tablist]').getBoundingClientRect().width)`,
+              800,
+            ),
+            page.setControl('collapsed', collapsed),
+          ]).then(([sampled]) => sampled);
+          assert.equal(new Set(widths).size, 1, `${id}: ${widths.join(', ')}`);
+          await sleep(300);
+        }
+      }
+    },
+  },
+  {
+    name: 'tab bar (iPad): released on an outer tab, the lens shrinks onto it around its center',
+    run: async (page) => {
+      await page.open('tab-bar-regular');
+      for (const index of [0, 8]) {
+        const tab = await page.rect('[role=tab]', index);
+        const x = tab.x + tab.width / 2;
+        const y = tab.y + tab.height / 2;
+        await page.mouse('mousePressed', x, y);
+        await sleep(400);
+        /** @type {number[]} */
+        const centers = await Promise.all([
+          page.sample(
+            `(() => { const lens = ${page.section}.querySelector('[role=tablist]').lastElementChild; const { left, width } = lens.getBoundingClientRect(); return getComputedStyle(lens).opacity > 0.05 ? left + width / 2 : null; })()`,
+            500,
+          ),
+          page.mouse('mouseReleased', x, y),
+        ]).then(([sampled]) => sampled.filter((center) => center !== null));
+        assert.ok(
+          centers.every((center) => Math.abs(center - x) < 1),
+          `tab ${index}: centers ${centers.join(', ')}, tab ${x}`,
+        );
+        await sleep(400);
+      }
+    },
+  },
+  {
+    name: 'tab bar: collapsed content by list, group and tab, never nothing',
+    run: async (page) => {
+      await page.open(SECONDARY);
+
+      /** @returns {Promise<string>} what the collapsed active tab shows */
+      const shows = () =>
+        page.evaluate(`(() => {
+          const tab = ${page.section}.querySelector('[role=tab][data-active]');
+          const icon = tab.querySelector('[data-tab-bar-part=icon]');
+          const label = tab.querySelector('[data-tab-bar-part=label]');
+          return [
+            icon && getComputedStyle(icon).display !== 'none' ? 'symbol' : '',
+            label && +getComputedStyle(label).opacity > 0.5 && label.getBoundingClientRect().width > 1 ? 'label' : '',
+          ].filter(Boolean).join('+');
+        })()`);
+
+      await page.setControl('collapsed', true);
+      await page.setControl('collapsedContent', 'label', 'group');
+      await sleep(600);
+      assert.equal(await shows(), 'label', 'the group over the default');
+
+      await page.setControl('collapsedContent', undefined, 'group');
+      await page.setControl('collapsedContent', 'symbolAndLabel');
+      await sleep(600);
+      assert.equal(await shows(), 'symbol+label', 'the list');
+
+      await page.setControl('collapsedContent', 'label', 'group');
+      await sleep(600);
+      assert.equal(await shows(), 'label', 'the group over the list');
+
+      await page.setControl('collapsedContent', 'symbol', '1st tab');
+      await sleep(600);
+      assert.equal(await shows(), 'symbol', 'the tab over the group');
+
+      // Without a label, a tab shows its symbol, whatever it should show,
+      // and without a symbol, its label.
+      await page.setControl('collapsedContent', 'label', '1st tab');
+      await page.setControl('label', undefined, '1st tab');
+      await sleep(600);
+      assert.equal(await shows(), 'symbol', 'only a symbol');
+
+      await page.setControl('label', 'Label', '1st tab');
+      await page.setControl('collapsedContent', 'symbol', '1st tab');
+      await page.setControl('symbol', undefined, '1st tab');
+      await sleep(600);
+      assert.equal(await shows(), 'label', 'only a label');
     },
   },
   {

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { isObject, objectKeys } from '@mrpelz/misc-utils/oop';
 import {
-  createContext,
   CSSProperties,
   Dispatch,
   FunctionComponent,
@@ -11,13 +10,13 @@ import {
   SetStateAction,
   useCallback,
   useContext,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 
+import { ColorScheme } from '../../components/utils.js';
 import {
   Button,
   ComponentDocsLink,
@@ -29,12 +28,12 @@ import {
   ConfigInner,
   Container,
   Content,
-  LogContainer,
   PropContainer,
   Stage,
   StageBackground,
   StageInner,
 } from './components.js';
+import { OptionsContext, setOptions } from './options-context.js';
 import { useLocalStorage } from './use-local-storage.js';
 
 export type RemappedPropValue<T extends any> =
@@ -366,119 +365,6 @@ export const usePropControl = <T extends PropMap>(
   ] as const;
 };
 
-export const useLog = (): [ReactNode, (value: string) => void] => {
-  const logContainerRef = useRef<HTMLElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  const addLog = useCallback((value: string) => {
-    const { current: logContainer } = logContainerRef;
-    if (!logContainer) return;
-
-    buttonRef.current?.removeAttribute('disabled');
-
-    const date = new Date();
-
-    const line = document.createElement('pre');
-    line.append(
-      `${date.toLocaleTimeString(undefined, { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })} | ${value}`,
-    );
-
-    logContainer.append(line);
-  }, []);
-
-  const resetLogs = useCallback(() => {
-    const { current: logContainer } = logContainerRef;
-    if (!logContainer) return;
-
-    buttonRef.current?.setAttribute('disabled', '');
-
-    const range = document.createRange();
-    range.selectNodeContents(logContainer);
-    range.deleteContents();
-  }, []);
-
-  const log = (
-    <ConfigInner>
-      <ConfigHeading>Log</ConfigHeading>
-      <LogContainer ref={logContainerRef} />
-      <Button
-        ref={buttonRef}
-        disabled
-        onClick={resetLogs}
-      >
-        Clear
-      </Button>
-    </ConfigInner>
-  );
-
-  return [log, addLog] as const;
-};
-
-type TOptionsContext = {
-  id?: string | string[];
-  raw?: boolean;
-};
-const OptionsContext = createContext(undefined as unknown as TOptionsContext);
-export const OptionsProvider: FunctionComponent = ({ children }) => {
-  const getFragementOptions = useCallback(() => {
-    const fragment = new URLSearchParams(location.hash.slice(1));
-    const result = {} as any;
-
-    for (const key of fragment.keys()) {
-      const values = fragment.getAll(key);
-      if (values.length === 0) continue;
-
-      const parsed = values
-        .map((value) => {
-          try {
-            return JSON.parse(value);
-          } catch {
-            return undefined;
-          }
-        })
-        .filter((value) => value !== undefined);
-
-      result[key] = parsed.length === 1 ? parsed.at(0) : parsed;
-    }
-
-    return result as TOptionsContext;
-  }, []);
-
-  const [params, setParams] = useState(getFragementOptions);
-
-  useEffect(() => {
-    const abort = new AbortController();
-
-    addEventListener(
-      'hashchange',
-      () => {
-        setParams(getFragementOptions());
-      },
-      { signal: abort.signal },
-    );
-
-    return () => abort.abort();
-  }, [getFragementOptions]);
-
-  return (
-    <OptionsContext.Provider value={params}>{children}</OptionsContext.Provider>
-  );
-};
-
-type TStageBackgroundContext = [boolean, Dispatch<SetStateAction<boolean>>];
-const StageBackgroundContext = createContext(
-  undefined as unknown as TStageBackgroundContext,
-);
-export const StageBackgroundProvider: FunctionComponent = ({ children }) => {
-  const value = useLocalStorage('stage-background', true);
-
-  return (
-    <StageBackgroundContext.Provider value={value}>
-      {children}
-    </StageBackgroundContext.Provider>
-  );
-};
-
 export const Component: FunctionComponent<{
   backdrop?: boolean;
   /** Base UI component the demo is built on, for the docs link (if any). */
@@ -502,9 +388,6 @@ export const Component: FunctionComponent<{
   title,
 }) => {
   const options = useContext(OptionsContext);
-  const [stageBackground, setStageBackground] = useContext(
-    StageBackgroundContext,
-  );
   const [isCentered, setIsCentered] = useLocalStorage(`${id}.center`, center);
   const [isStretched, setIsStretched] = useLocalStorage(
     `${id}.stretch`,
@@ -523,57 +406,72 @@ export const Component: FunctionComponent<{
     return true;
   }, [id, options.id]);
 
-  const isRaw = useMemo(() => Boolean(options.raw), [options.raw]);
-
   if (isHidden) return null;
-  if (isRaw) return children;
+  if (options.raw) return children;
 
   return (
     <Container>
-      {isRaw ? (
-        children
-      ) : (
-        <Content>
-          <ComponentHeader>
-            <ComponentHeading>
-              {title}
-              <ComponentId
-                href={`#id=${encodeURIComponent(JSON.stringify(id))}`}
-              >
-                {id}
-              </ComponentId>
-            </ComponentHeading>
-            {baseUiId === undefined ? null : (
-              <ComponentDocsLink
-                href={`${BASE_URL_DOC}/${baseUiId}`}
-                rel="noreferrer"
-                target="_blank"
-              >
-                base-ui.com/react/components/{baseUiId}
-              </ComponentDocsLink>
-            )}
-          </ComponentHeader>
-          <Stage>
-            {stageBackground ? <StageBackground /> : null}
-            <StageInner
-              center={isCentered}
-              drawBackdrop={hasBackdrop}
-              stretch={isStretched}
+      <Content>
+        <ComponentHeader>
+          <ComponentHeading>
+            {title}
+            <ComponentId onClick={() => setOptions({ id: [id], raw: true })}>
+              {id}
+            </ComponentId>
+          </ComponentHeading>
+          {baseUiId === undefined ? null : (
+            <ComponentDocsLink
+              href={`${BASE_URL_DOC}/${baseUiId}`}
+              rel="noreferrer"
+              target="_blank"
             >
-              {children}
-            </StageInner>
-          </Stage>
-        </Content>
-      )}
-      <Config hidden={isRaw}>
+              base-ui.com/react/components/{baseUiId}
+            </ComponentDocsLink>
+          )}
+        </ComponentHeader>
+        <Stage>
+          {options.stageBackground ? <StageBackground /> : null}
+          <StageInner
+            center={isCentered}
+            drawBackdrop={hasBackdrop}
+            stretch={isStretched}
+          >
+            {children}
+          </StageInner>
+        </Stage>
+      </Content>
+      <Config>
         <ConfigInner>
           <ConfigHeading>Config</ConfigHeading>
           <label style={{ display: 'block' }}>
+            Color Scheme{' '}
+            <select
+              name="colorScheme"
+              value={options.colorScheme ?? ''}
+              onChange={({ currentTarget }) =>
+                setOptions({
+                  colorScheme:
+                    (currentTarget.value as ColorScheme | '') || undefined,
+                })
+              }
+            >
+              <option value="">[auto]</option>
+              <option value="light">light</option>
+              <option value="dark">dark</option>
+            </select>
+          </label>
+          <label style={{ display: 'block' }}>
             <input
-              checked={stageBackground}
+              checked={options.stageBackground}
               name="stageBackground"
               type="checkbox"
-              onClick={() => setStageBackground(!stageBackground)}
+              onClick={() =>
+                setOptions(
+                  options.stageBackground
+                    ? { stageBackground: false }
+                    : { stageBackground: undefined },
+                )
+              }
             />
             Stage Background
           </label>

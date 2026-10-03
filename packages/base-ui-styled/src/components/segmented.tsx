@@ -5,7 +5,7 @@ import { styled } from 'goober';
 import { forwardRef } from 'react';
 
 import { glassContext, glassLensScale } from './glass.js';
-import { css, fontWeight, usePointerDrag, wrap } from './utils.js';
+import { colorScheme, css, fontWeight, usePointerDrag, wrap } from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Segmented control”, light and dark
 // appearance), with Figma colors mapped to UIKit semantic colors where they
@@ -402,7 +402,14 @@ const Highlight = styled('div', forwardRef)`
   );
   height: calc(100% - var(--styled-segmented-padding-block) * 2);
   border-radius: 20px;
-  background-color: #fff;
+  ${colorScheme(
+    css`
+      background-color: #fff;
+    `,
+    css`
+      background-color: #6c6c71;
+    `,
+  )}
   box-shadow: 0 2px 20px rgb(0 0 0 / 6%);
   inset-inline-start: var(
     --styled-segmented-lens-start,
@@ -419,10 +426,6 @@ const Highlight = styled('div', forwardRef)`
 
   &:dir(rtl) {
     ${highlightClip(highlightEnd, highlightStart)}
-  }
-
-  @media (prefers-color-scheme: dark) {
-    background-color: #6c6c71;
   }
 
   [data-checked] ~ & {

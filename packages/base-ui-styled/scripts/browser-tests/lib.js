@@ -409,15 +409,20 @@ export class Page {
   }
 
   /**
-   * Sets a demo prop control of the current section (by its input `name`),
-   * as if typed in by the user.
+   * Sets a demo prop control of the current section (by its input `name`,
+   * in the controls titled `title`, or the first), as if typed in by the
+   * user.
    *
    * @param {string} name
    * @param {unknown} value
+   * @param {string} [title]
    */
-  async setControl(name, value) {
+  async setControl(name, value, title) {
     await this.evaluate(`(() => {
-      const input = ${this.section}.querySelector(${JSON.stringify(`config input[name="${name}"]`)});
+      const scope = ${JSON.stringify(title ?? null)} === null
+        ? ${this.section}.querySelector('config')
+        : [...${this.section}.querySelectorAll('config details')].find((details) => details.querySelector('summary')?.textContent === ${JSON.stringify(title ?? '')});
+      const input = scope.querySelector(${JSON.stringify(`input[name="${name}"]`)});
       input.focus();
       input.value = ${JSON.stringify(JSON.stringify(value))};
       input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -479,3 +484,32 @@ export class Page {
  *   run: (page: Page) => Promise<void>,
  * }} Test
  */
+
+/**
+ * Runs `action` with touch input (`Input.dispatchTouchEvent`) enabled.
+ *
+ * @param {Page} page
+ * @param {(touch: (type: 'touchEnd' | 'touchMove' | 'touchStart', x?: number, y?: number) => Promise<void>) => Promise<void>} action
+ */
+export const withTouch = async (page, action) => {
+  await page.browser.send('Emulation.setTouchEmulationEnabled', {
+    enabled: true,
+    maxTouchPoints: 5,
+  });
+  try {
+    await action(async (type, x = 0, y = 0) => {
+      await page.browser.send('Input.dispatchTouchEvent', {
+        touchPoints: type === 'touchEnd' ? [] : [{ x, y }],
+        type,
+      });
+    });
+  } finally {
+    // A touch left down (e.g. by a failed assertion) would block the next.
+    await page.browser
+      .send('Input.dispatchTouchEvent', { touchPoints: [], type: 'touchEnd' })
+      .catch(() => undefined);
+    await page.browser.send('Emulation.setTouchEmulationEnabled', {
+      enabled: false,
+    });
+  }
+};

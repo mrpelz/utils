@@ -4,9 +4,13 @@ import { styled } from 'goober';
 import {
   createContext,
   forwardRef,
+  useCallback,
   useContext,
+  useId,
   useLayoutEffect,
+  useMemo,
   useRef,
+  useState,
 } from 'react';
 
 import {
@@ -15,7 +19,14 @@ import {
   glassContext,
   glassLensScale,
 } from './glass.js';
-import { css, fontWeight, useForwardedRef, usePointerDrag } from './utils.js';
+import {
+  colorScheme,
+  css,
+  edgeScrollDelta,
+  fontWeight,
+  useForwardedRef,
+  usePointerDrag,
+} from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Tab Bar - iPhone”, BG Context Dim/Bright),
 // with the selected content color mapped to the app tint
@@ -77,11 +88,17 @@ import { css, fontWeight, useForwardedRef, usePointerDrag } from './utils.js';
 
 type Size = 'compact' | 'regular';
 
-// Metrics of tabs and their content per size, inherited from the list.
+// Metrics of tabs and their content per size, inherited from the list. Tabs
+// of the compact size shrink to fit their group, down to their content's
+// width; those of the regular size keep it. Beyond that, the group scrolls
+// (see `StyledTabs`).
 const sizeVars: Record<Size, string> = {
   compact: css`
     --styled-tabbar-tab-height: 54px;
     --styled-tabbar-tab-width: 102px;
+    --styled-tabbar-tab-shrink: 1;
+    --styled-tabbar-tab-min-width: auto;
+    --styled-tabbar-label-min-width: max-content;
     --styled-tabbar-tab-direction: column;
     --styled-tabbar-tab-padding: 6px 8px 7px;
     --styled-tabbar-tab-gap: 1px;
@@ -105,6 +122,9 @@ const sizeVars: Record<Size, string> = {
   regular: css`
     --styled-tabbar-tab-height: 36px;
     --styled-tabbar-tab-width: auto;
+    --styled-tabbar-tab-shrink: 0;
+    --styled-tabbar-tab-min-width: var(--styled-tabbar-tab-height);
+    --styled-tabbar-label-min-width: max-content;
     --styled-tabbar-tab-direction: row;
     --styled-tabbar-tab-padding: 8px 18px;
     --styled-tabbar-tab-gap: 10px;
@@ -138,17 +158,13 @@ const regularActiveColor = (context?: GlassContext) => {
 
   if (context) return context === 'dim' ? dim : bright;
 
-  return css`
-    ${bright}
-
-    @media (prefers-color-scheme: dark) {
-      ${dim}
-    }
-  `;
+  return colorScheme(bright, dim);
 };
 
-// Marks a tab's symbol and label, so a tab can lay out by its content.
+// Marks a tab's symbol and label, so a tab can lay out by its content, and
+// a group's scroller.
 const part = 'data-tab-bar-part';
+const tabsPart = `[${part}='tabs']`;
 
 const setProperties = (
   element: HTMLElement,
@@ -165,6 +181,83 @@ const isTab = (element: Element): element is HTMLElement =>
 const isActive = (element: HTMLElement) =>
   Object.hasOwn(element.dataset, 'active');
 
+// A group's tabs (and its selection) are in its scroller, inside its glass.
+const scrollerOf = (group: HTMLElement) =>
+  group.querySelector<HTMLElement>(`:scope > [${CSS.escape(part)}='tabs']`);
+
+const groupOf = (tab: HTMLElement) => tab.parentElement?.parentElement ?? null;
+
+const tabsOf = (group: HTMLElement) =>
+  [...(scrollerOf(group)?.children ?? [])].filter(isTab);
+
+// The position of an element in the layout of the scroller containing it
+// (unaffected by scrolling and transforms).
+const offsetIn = (element: HTMLElement, scroller: HTMLElement) => {
+  let x = 0;
+  let y = 0;
+
+  for (
+    let current: Element | null = element;
+    current instanceof HTMLElement && current !== scroller;
+    current = current.offsetParent
+  ) {
+    x += current.offsetLeft;
+    y += current.offsetTop;
+  }
+
+  return { x, y };
+};
+
+// How far a group's scroller scrolls by its tabs' layout (not by their
+// content, which grows beyond while pressed, see `pressGroup`).
+const scrollRange = (scroller: HTMLElement) =>
+  Math.max(
+    0,
+    ...[...scroller.children]
+      .filter(isTab)
+      .map((tab) => tab.offsetLeft + tab.offsetWidth),
+  ) - scroller.clientWidth;
+
+// Only a group too narrow for its tabs clips them: others show their
+// content growing beyond while pressed.
+const updateOverflow = (group: HTMLElement) => {
+  const scroller = scrollerOf(group);
+  scroller?.toggleAttribute('data-overflowing', scrollRange(scroller) > 1);
+};
+
+// A tab's box as far as its group shows it, or `undefined` if scrolled out
+// of view.
+const visibleRect = (tab: HTMLElement) => {
+  const rect = tab.getBoundingClientRect();
+  const { parentElement: scroller } = tab;
+  if (!scroller) return rect;
+
+  const clip = scroller.getBoundingClientRect();
+  const left = Math.max(rect.left, clip.left);
+  const right = Math.min(rect.right, clip.right);
+
+  return right - left > 1
+    ? new DOMRect(left, rect.top, right - left, rect.height)
+    : undefined;
+};
+
+/**
+ * Scrolls a group to show `tab` entirely, if it doesn't. Scrolls to a
+ * position rather than by a distance, so repeating it while scrolling
+ * doesn't scroll further.
+ */
+const reveal = (tab: HTMLElement, behavior: ScrollBehavior = 'smooth') => {
+  const { parentElement: scroller } = tab;
+  if (!scroller) return;
+
+  const { x } = offsetIn(tab, scroller);
+  const left = Math.min(x, scroller.scrollLeft);
+  const target = Math.max(left, x + tab.offsetWidth - scroller.clientWidth);
+  if (Math.abs(target - scroller.scrollLeft) < 1) return;
+
+  scroller.scrollTo({ behavior, left: target });
+};
+
 // Groups that had an active tab when their selection was last positioned.
 const hadActiveTab = new WeakMap<HTMLElement, boolean>();
 
@@ -173,7 +266,13 @@ const setSelection = (
   rect: DOMRect,
   { instant = false, left = rect.left } = {},
 ) => {
-  const groupRect = group.getBoundingClientRect();
+  // Positioned in its scroller's content, so it scrolls with the tabs.
+  const scroller = scrollerOf(group);
+  if (!scroller) return;
+
+  const scrollerRect = scroller.getBoundingClientRect();
+  const originX = scrollerRect.left + scroller.clientLeft - scroller.scrollLeft;
+  const originY = scrollerRect.top + scroller.clientTop - scroller.scrollTop;
 
   if (instant) {
     group.style.setProperty('--styled-tabbar-selection-duration', '0s');
@@ -181,8 +280,8 @@ const setSelection = (
 
   setProperties(group, {
     '--styled-tabbar-selection-height': `${rect.height}px`,
-    '--styled-tabbar-selection-left': `${left - groupRect.left}px`,
-    '--styled-tabbar-selection-top': `${rect.top - groupRect.top}px`,
+    '--styled-tabbar-selection-left': `${left - originX}px`,
+    '--styled-tabbar-selection-top': `${rect.top - originY}px`,
     '--styled-tabbar-selection-width': `${rect.width}px`,
   });
 
@@ -196,9 +295,7 @@ const setSelection = (
 // active tab, the selection fades out in place. A selection appearing in a
 // group is placed instantly, so it does not travel in from elsewhere.
 const updateSelection = (group: HTMLElement, { instant = false } = {}) => {
-  const tab = [...group.children]
-    .filter(isTab)
-    .find((child) => isActive(child));
+  const tab = tabsOf(group).find((child) => isActive(child));
   const hadActive = hadActiveTab.get(group) ?? false;
   hadActiveTab.set(group, Boolean(tab));
 
@@ -223,16 +320,32 @@ const updateSelection = (group: HTMLElement, { instant = false } = {}) => {
 // symbol, side by side, in the regular size's metrics) in a capsule. The bar
 // keeps its size (see `List`). The regular size (iPad doesn't minimize its
 // tab bar) keeps its height.
+//
+// Groups and tabs marked `visibleWhenCollapsed` replace that choice: if any
+// group is marked (by itself, or by any of its tabs), only the marked groups
+// remain, and if any of a group's tabs are, only those. Several remaining tabs show the selection on the
+// active one, if it is among them. Each group goes to its own `collapsedPosition` (or the
+// list's), groups at the same one side by side: ordered by position between
+// two spacers, the list's pseudo-elements, which take up the free space.
 
 export type CollapsedContent = 'label' | 'symbol' | 'symbolAndLabel';
 
 export type CollapsedPosition = 'center' | 'end' | 'start';
 
-const collapsedJustify: Record<CollapsedPosition, string> = {
-  center: 'center',
-  end: 'flex-end',
-  start: 'flex-start',
+// The order of groups by their position, around the spacers (1 and 3).
+const collapsedOrder: Record<CollapsedPosition, number> = {
+  center: 2,
+  end: 4,
+  start: 0,
 };
+
+/** Whether a group or a tab remains while collapsed, if marks decide it. */
+type CollapsedVisibility = 'away' | 'shown';
+
+// Selectors outranking the list's collapsed styles (see `collapsedList`):
+// for groups, and for tabs.
+const groupOverride = '&'.repeat(6);
+const tabOverride = '&'.repeat(9);
 
 // What a collapsed tab shows, as custom properties used by the list's styles
 // (`collapsedList`): set on the list (its `collapsedContent`), or on a tab
@@ -291,26 +404,48 @@ const collapsedAway = css`
   aspect-ratio: auto;
 `;
 
+// A remaining tab, as the list's styles show the active one.
+const collapsedShown = css`
+  width: var(--styled-tabbar-collapsed-width);
+  min-width: var(--styled-tabbar-tab-height);
+  padding: var(--styled-tabbar-collapsed-padding);
+  margin: 0;
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+`;
+
+const collapsedHidden = css`
+  ${collapsedAway}
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+`;
+
+// With several groups marked to remain, they are spaced by transparent
+// borders (see `StyledGroup`), as the list has no gap while collapsed: the
+// groups collapsing away would take it up.
 const collapsedList = ({
   content,
-  position = 'start',
+  spaced,
 }: {
   content?: CollapsedContent;
-  position?: CollapsedPosition;
+  spaced: boolean;
 }) => css`
   --styled-tabbar-tab-height: var(--styled-tabbar-collapsed-tab-height);
   --styled-tabbar-selection-shown: 0;
   --styled-tabbar-group-margin: 0;
+  --styled-tabbar-group-gap: 0px;
+  --styled-tabbar-collapsed-layout: 1;
   --styled-tabbar-label-overflow: clip;
+  --styled-tabbar-label-min-width: 0;
   ${content ? collapsedContents[content] : ''}
 
-  justify-content: ${collapsedJustify[position]};
   padding: calc(16px + var(--styled-tabbar-collapsed-inset))
-    calc(32px + var(--styled-tabbar-collapsed-inset))
+    calc(${spaced ? '24px' : '32px'} + var(--styled-tabbar-collapsed-inset))
     calc(32px + var(--styled-tabbar-collapsed-inset));
-  gap: 0;
 
-  && > div > [role='tab'] {
+  && > div > ${tabsPart} > [role='tab'] {
     --styled-tabbar-label-size: var(--font-ios-subheadline-size);
     --styled-tabbar-label-active-size: var(--font-ios-subheadline-size);
     --styled-tabbar-label-line-height: var(--font-ios-subheadline-line-height);
@@ -331,29 +466,29 @@ const collapsedList = ({
       : css`
           /* By default, its label, or, with a symbol, its symbol (goober can't
            nest :not(:has(…))) */
-          && > div > [role='tab'] {
+          && > div > ${tabsPart} > [role='tab'] {
             ${collapsedContents.label}
           }
 
-          && > div > [role='tab']:has(> [${part}='icon']) {
+          && > div > ${tabsPart} > [role='tab']:has(> [${part}='icon']) {
             ${collapsedContents.symbol}
           }
         `
   }
 
-  && > div > [role='tab'] > [${part}='icon'] {
+  && > div > ${tabsPart} > [role='tab'] > [${part}='icon'] {
     display: var(--styled-tabbar-collapsed-symbol);
     mix-blend-mode: var(--styled-glass-content-blend);
   }
 
-  && > div > [role='tab'] > [${part}='label'] {
+  && > div > ${tabsPart} > [role='tab'] > [${part}='label'] {
     width: var(--styled-tabbar-collapsed-label-extent);
     height: var(--styled-tabbar-collapsed-label-extent);
     mix-blend-mode: var(--styled-glass-content-blend);
     opacity: var(--styled-tabbar-collapsed-label-opacity);
   }
 
-  && > div > [role='tab'] > [${part}='label'] > * {
+  && > div > ${tabsPart} > [role='tab'] > [${part}='label'] > * {
     ${fontWeight(510)}
   }
 
@@ -364,13 +499,20 @@ const collapsedList = ({
     pointer-events: none;
     visibility: hidden;
 
-    & > [role='tab'] {
+    & > ${tabsPart} > [role='tab'] {
       ${collapsedAway}
     }
   }
 
-  && > div[data-has-active='true'] > [role='tab']:not([data-active]),
-  && > div[data-has-active='false'] > [role='tab'] ~ [role='tab'] {
+  &&
+    > div[data-has-active='true']
+    > ${tabsPart}
+    > [role='tab']:not([data-active]),
+  &&
+    > div[data-has-active='false']
+    > ${tabsPart}
+    > [role='tab']
+    ~ [role='tab'] {
     ${collapsedAway}
     opacity: 0;
     pointer-events: none;
@@ -385,7 +527,7 @@ const collapsedList = ({
       pointer-events: auto;
       visibility: visible;
 
-      & > [role='tab']:first-of-type {
+      & > ${tabsPart} > [role='tab']:first-of-type {
         width: var(--styled-tabbar-collapsed-width);
         min-width: var(--styled-tabbar-tab-height);
         padding: var(--styled-tabbar-collapsed-padding);
@@ -396,40 +538,61 @@ const collapsedList = ({
 `;
 
 // eslint-disable-next-line prettier/prettier
-const StyledList = styled<typeof BaseTabs.List, TabBarListProps>(BaseTabs.List, forwardRef)`
+const StyledList = styled<typeof BaseTabs.List, TabBarListProps & { anchor?: string; spaced?: boolean }>(BaseTabs.List, forwardRef)`
   position: relative;
   display: flex;
   box-sizing: border-box;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;
   padding: 16px 32px 32px;
-  gap: 16px;
+  gap: var(--styled-tabbar-group-gap, 16px);
   interpolate-size: allow-keywords;
   touch-action: none;
   transition-duration: var(--glass-ios-lens-duration);
   transition-property: padding, gap;
 
+  /* The spacers placing collapsed groups by position (see collapsedOrder);
+     otherwise empty, their margins taking up the gaps around them, in step
+     with the gap's transition. */
+  &::before,
+  &::after {
+    flex: var(--styled-tabbar-collapsed-layout, 0) 1 0;
+    content: '';
+    transition: margin var(--glass-ios-lens-duration);
+  }
+
+  &::before {
+    order: var(--styled-tabbar-collapsed-layout, 0);
+    margin-inline-end: calc(var(--styled-tabbar-group-gap, 16px) * -1);
+  }
+
+  &::after {
+    order: calc(var(--styled-tabbar-collapsed-layout, 0) * 3);
+    margin-inline-start: calc(var(--styled-tabbar-group-gap, 16px) * -1);
+  }
+
+  ${({ anchor }) => (anchor ? `anchor-name: ${anchor};` : '')}
   ${({ context }) => glassContext(context)}
   ${({ size = 'compact' }) => sizeVars[size]}
   ${({ context, size }) =>
     size === 'regular' ? regularActiveColor(context) : undefined}
-  ${({ collapsed, collapsedContent, collapsedPosition }) =>
+  ${({ collapsed, collapsedContent, spaced = false }) =>
     collapsed
-      ? collapsedList({
-          content: collapsedContent,
-          position: collapsedPosition,
-        })
+      ? collapsedList({ content: collapsedContent, spaced })
       : undefined}
 `;
 
 // Positioned by its center, so it stays under the pointer while its size
-// transitions between tab shapes.
+// transitions between tab shapes, but within its bounds at its current size:
+// its size and position transition as registered lengths (see `styles.tsx`),
+// so the clamp follows. Growing beyond the bar, it would overflow its
+// container.
 const Lens = styled('span')`
   position: absolute;
   top: 0;
   left: 0;
-  width: var(--styled-tabbar-lens-width, 0);
-  height: var(--styled-tabbar-lens-height, 0);
+  width: var(--styled-tabbar-lens-width);
+  height: var(--styled-tabbar-lens-height);
   border-radius: 100px;
   background-color: var(--styled-glass-lens);
   box-shadow: var(--styled-glass-lens-shadow);
@@ -438,13 +601,20 @@ const Lens = styled('span')`
   scale: ${glassLensScale('var(--styled-tabbar-pressed, 0)')};
   transition-duration:
     var(--styled-tabbar-lens-move-duration, var(--glass-ios-lens-duration)),
+    var(--styled-tabbar-lens-move-duration, var(--glass-ios-lens-duration)),
     var(--styled-tabbar-lens-size-duration, var(--glass-ios-lens-duration)),
     var(--styled-tabbar-lens-size-duration, var(--glass-ios-lens-duration)),
     var(--glass-ios-lens-duration), var(--glass-ios-lens-duration);
-  transition-property: translate, width, height, opacity, scale;
+  transition-property:
+    --styled-tabbar-lens-x, --styled-tabbar-lens-y, --styled-tabbar-lens-width,
+    --styled-tabbar-lens-height, opacity, scale;
   transition-timing-function: ease-out;
-  translate: calc(var(--styled-tabbar-lens-x, 0px) - 50%)
-    calc(var(--styled-tabbar-lens-y, 0px) - 50%);
+  translate: clamp(
+      var(--styled-tabbar-lens-min, 0px),
+      var(--styled-tabbar-lens-x) - var(--styled-tabbar-lens-width) / 2,
+      var(--styled-tabbar-lens-max, 0px) - var(--styled-tabbar-lens-width)
+    )
+    calc(var(--styled-tabbar-lens-y) - var(--styled-tabbar-lens-height) / 2);
 `;
 
 // Enabled tabs, but those a collapsed bar hides (see `collapsedList`).
@@ -459,18 +629,35 @@ const getTabs = (list: HTMLElement) =>
 const getGroups = (list: HTMLElement) =>
   new Set(
     getTabs(list)
-      .map(({ parentElement }) => parentElement)
+      .map((tab) => groupOf(tab))
       .filter((group): group is HTMLElement => group !== null),
   );
 
-const setLens = (list: HTMLElement, rect: DOMRect, centerX: number) => {
+// Places the lens on `rect`, centered at `centerX`, its left and right edges
+// within `bounds` (default: those it has, e.g. settling from a press: the
+// rect's own would pin an edge of the still larger lens).
+const setLens = (
+  list: HTMLElement,
+  rect: DOMRect,
+  centerX: number,
+  bounds?: { left: number; right: number },
+) => {
   const listRect = list.getBoundingClientRect();
+  const originX = listRect.left + list.clientLeft - list.scrollLeft;
+  const originY = listRect.top + list.clientTop - list.scrollTop;
+
+  if (bounds) {
+    setProperties(list, {
+      '--styled-tabbar-lens-max': `${bounds.right - originX}px`,
+      '--styled-tabbar-lens-min': `${bounds.left - originX}px`,
+    });
+  }
 
   setProperties(list, {
     '--styled-tabbar-lens-height': `${rect.height}px`,
     '--styled-tabbar-lens-width': `${rect.width}px`,
-    '--styled-tabbar-lens-x': `${centerX - listRect.left - list.clientLeft + list.scrollLeft}px`,
-    '--styled-tabbar-lens-y': `${rect.top + rect.height / 2 - listRect.top - list.clientTop + list.scrollTop}px`,
+    '--styled-tabbar-lens-x': `${centerX - originX}px`,
+    '--styled-tabbar-lens-y': `${rect.top + rect.height / 2 - originY}px`,
   });
 };
 
@@ -478,25 +665,29 @@ const setLens = (list: HTMLElement, rect: DOMRect, centerX: number) => {
 // glass layers scale around their (the group's) center by themselves; its
 // tabs' symbols and labels scale around the group's center too, set as their
 // transform origin. Scaling the group itself would isolate its layers'
-// blending (rendering the glass gray).
+// blending (rendering the glass gray). Called again while the group scrolls,
+// as its center moves over its tabs.
 const pressGroup = (group: HTMLElement, pressed: boolean) => {
-  if (pressed === Object.hasOwn(group.dataset, 'pressed')) return;
-
   if (!pressed) {
     delete group.dataset.pressed;
     return;
   }
 
-  const { height, left, top, width } = group.getBoundingClientRect();
-  const content = group.querySelectorAll(
+  const scroller = scrollerOf(group);
+  if (!scroller) return;
+
+  // The group's center in the layout of its scroller (filling the group).
+  const centerX = scroller.scrollLeft + scroller.clientWidth / 2;
+  const centerY = scroller.scrollTop + scroller.clientHeight / 2;
+  const content = scroller.querySelectorAll(
     `[${CSS.escape(part)}='icon'], [${CSS.escape(part)}='label']`,
   );
 
   for (const element of content) {
     if (!(element instanceof HTMLElement)) continue;
 
-    const rect = element.getBoundingClientRect();
-    element.style.transformOrigin = `${left + width / 2 - rect.left}px ${top + height / 2 - rect.top}px`;
+    const { x, y } = offsetIn(element, scroller);
+    element.style.transformOrigin = `${centerX - x}px ${centerY - y}px`;
   }
 
   group.dataset.pressed = '';
@@ -531,33 +722,45 @@ const growth = (group: HTMLElement) => {
 };
 
 // Moves the lens to the pointer, clamped to the list's tabs, and returns the
-// closest tab (Framework7 `tabbar-highlight.js`, `setHighlightOnTouch`). The
-// (hidden) selection of the closest tab's group follows the lens, so it
-// settles from there on release. The lens and the pointer are where the
-// pressed group shows its (scaled) content.
+// closest tab (Framework7 `tabbar-highlight.js`, `setHighlightOnTouch`), of
+// those its group shows (not scrolled out of view). The (hidden) selection of
+// the closest tab's group follows the lens, so it settles from there on
+// release. The lens and the pointer are where the pressed group shows its
+// (scaled) content.
 const press = (list: HTMLElement, clientX: number) => {
-  const tabs = getTabs(list);
-  const rects = tabs.map((tab) => tab.getBoundingClientRect());
+  const tabs: HTMLElement[] = [];
+  const visible: DOMRect[] = [];
+  for (const tab of getTabs(list)) {
+    const rect = visibleRect(tab);
+    if (!rect) continue;
+
+    tabs.push(tab);
+    visible.push(rect);
+  }
 
   // The pointer in the tabs' unscaled layout, as the group under it grows.
-  const over = tabs[closest(rects, clientX)]?.parentElement;
+  const overTab = tabs[closest(visible, clientX)];
+  const over = overTab ? groupOf(overTab) : undefined;
   const overGrowth = over ? growth(over) : undefined;
   const x = overGrowth
     ? overGrowth.x + (clientX - overGrowth.x) / overGrowth.scale
     : clientX;
 
-  const index = closest(rects, x);
+  const index = closest(visible, x);
   const tab = tabs[index];
-  const rect = rects[index];
-  if (!tab?.parentElement || !rect) return undefined;
+  const pressedGroup = tab ? groupOf(tab) : undefined;
+  if (!tab || !pressedGroup) return undefined;
 
+  const rect = tab.getBoundingClientRect();
+  const left = Math.min(...visible.map((visibleTab) => visibleTab.left));
+  const right = Math.max(...visible.map((visibleTab) => visibleTab.right));
   const centerX = Math.max(
-    Math.min(...rects.map(({ left }) => left)) + rect.width / 2,
-    Math.min(x, Math.max(...rects.map(({ right }) => right)) - rect.width / 2),
+    left + rect.width / 2,
+    Math.min(x, right - rect.width / 2),
   );
 
   // The lens is on the tab as its grown group shows it.
-  const { scale, x: originX, y: originY } = growth(tab.parentElement);
+  const { scale, x: originX, y: originY } = growth(pressedGroup);
   setLens(
     list,
     new DOMRect(
@@ -567,9 +770,11 @@ const press = (list: HTMLElement, clientX: number) => {
       rect.height * scale,
     ),
     originX + (centerX - originX) * scale,
+    {
+      left: originX + (left - originX) * scale,
+      right: originX + (right - originX) * scale,
+    },
   );
-
-  const { parentElement: pressedGroup } = tab;
 
   for (const group of getGroups(list)) {
     pressGroup(group, group === pressedGroup);
@@ -610,7 +815,7 @@ const release = (list: HTMLElement, tab?: HTMLElement) => {
   setLens(list, rect, rect.left + rect.width / 2);
 
   for (const group of groups) {
-    const chosen = group === tab.parentElement;
+    const chosen = group === groupOf(tab);
     const hadActive = hadActiveTab.get(group) ?? false;
     hadActiveTab.set(group, chosen);
     group.style.setProperty(
@@ -630,6 +835,38 @@ const release = (list: HTMLElement, tab?: HTMLElement) => {
   requestAnimationFrame(() => {
     for (const group of groups) updateSelection(group);
   });
+};
+
+/**
+ * Scrolls the group of the lens' tab, if too narrow for its tabs, in every
+ * frame the lens' pointer is near one of the group's ends, faster closer to
+ * it (as text selections scroll). Returns a function stopping it.
+ */
+const autoScroll = (pointer: {
+  current: { clientX: number; state: { tab?: HTMLElement } } | undefined;
+}) => {
+  let frame = requestAnimationFrame(function step() {
+    frame = requestAnimationFrame(step);
+
+    const { current } = pointer;
+    const scroller = current?.state.tab?.parentElement;
+    if (!current || !scroller) return;
+
+    const range = scrollRange(scroller);
+    if (range <= 1) return;
+
+    const { left, right } = scroller.getBoundingClientRect();
+    const delta = edgeScrollDelta(current.clientX, left, right);
+    if (delta === 0) return;
+
+    // Within the tabs' layout (see `scrollRange`).
+    scroller.scrollLeft = Math.max(
+      0,
+      Math.min(range, scroller.scrollLeft + delta),
+    );
+  });
+
+  return () => cancelAnimationFrame(frame);
 };
 
 /**
@@ -664,9 +901,284 @@ const afterTransitions = (element: HTMLElement, done: () => void) => {
   };
 };
 
-/** The list's state, for its tabs (internal). */
-const ListContext = createContext<{ collapsed: boolean }>({
+/**
+ * Counts the elements marked by a context's children: `mark` counts one
+ * until the returned function is called.
+ */
+const useMarks = () => {
+  const [count, setCount] = useState(0);
+  const mark = useCallback(() => {
+    setCount((current) => current + 1);
+    return () => setCount((current) => current - 1);
+  }, []);
+
+  return [count, mark] as const;
+};
+
+// The accessory (UIKit `bottomAccessory`, e.g. Music's mini player), from
+// iOS 26: expanded, a capsule as wide as the bar's groups, its glass 48pt
+// high and 8pt above theirs; collapsed, it moves into their row, filling the
+// space after the remaining groups at the start (spaced as groups are), at
+// the height of their tabs. Sizes are of its box: the glass extends beyond
+// (see `GlassBackground`). It's a sibling of the list (not in the tab list,
+// for its content's semantics), positioned absolutely at it by CSS anchor
+// positioning (see `Root`), so it never changes the bar's layout and moves
+// with it. Both places follow the groups in every frame; while the bar
+// collapses or expands, it morphs from one to the other.
+const accessoryHeight = 40;
+const accessoryGap = 16;
+const accessorySpacing = 16;
+
+// The accessory of a list (see `Accessory`).
+const accessories = new WeakMap<HTMLElement, HTMLElement>();
+
+type Box = { height: number; left: number; right: number; top: number };
+
+/**
+ * The accessory's morph to its place above the groups (`collapsed` false) or
+ * between them: from where it was (relative to the list) since `start`, and
+ * the groups remaining while collapsed (all groups take pointer events again
+ * while expanding).
+ */
+type AccessoryMorph = {
+  collapsed: boolean;
+  frame?: number;
+  from?: Box;
+  remaining: HTMLElement[];
+  start: number;
+};
+
+const accessoryMorphs = new WeakMap<HTMLElement, AccessoryMorph>();
+
+const lensDuration = (list: HTMLElement) => {
+  const value = getComputedStyle(list)
+    .getPropertyValue('--glass-ios-lens-duration')
+    .trim();
+  const number = Number.parseFloat(value);
+  if (!Number.isFinite(number)) return 0;
+
+  return value.endsWith('ms') ? number : number * 1000;
+};
+
+// CSS `ease`, as the groups' transitions (approximately).
+const ease = (progress: number) => {
+  const inOut = progress * progress * (3 - 2 * progress);
+  return inOut + (1 - inOut) * progress * (1 - progress) * 0.5;
+};
+
+// The accessory's box, relative to the list.
+const accessoryBox = (list: HTMLElement, accessory: HTMLElement): Box => {
+  const listRect = list.getBoundingClientRect();
+  const { height, left, right, top } = accessory.getBoundingClientRect();
+
+  return {
+    height,
+    left: left - listRect.left,
+    right: right - listRect.left,
+    top: top - listRect.top,
+  };
+};
+
+/** Starts the accessory's morph to the collapsed (or expanded) place. */
+const morphAccessory = (list: HTMLElement, collapsed: boolean) => {
+  const morph = accessoryMorphs.get(list);
+  if (morph?.collapsed === collapsed) return;
+
+  const accessory = accessories.get(list);
+  accessoryMorphs.set(list, {
+    collapsed,
+    frame: morph?.frame,
+    // From where it is (also mid-morph); placed right away the first time.
+    from: morph && accessory ? accessoryBox(list, accessory) : undefined,
+    remaining: morph?.remaining ?? [],
+    start: performance.now(),
+  });
+};
+
+// A group's box without its spacing (see `StyledGroup`): its scroller's.
+const contentRect = (group: HTMLElement) =>
+  (scrollerOf(group) ?? group).getBoundingClientRect();
+
+// The accessory's place above the groups (all of them).
+const aboveGroups = (rects: DOMRect[]): Box => ({
+  height: accessoryHeight,
+  left: Math.min(...rects.map((rect) => rect.left)),
+  right: Math.max(...rects.map((rect) => rect.right)),
+  top:
+    Math.min(...rects.map((rect) => rect.top)) - accessoryGap - accessoryHeight,
+});
+
+// The accessory's place between the remaining groups, in the order they're
+// placed in (see `collapsedOrder`): after those at the start, where the free
+// space is, at the height of a collapsed tab, centered with them.
+const betweenGroups = (list: HTMLElement, groups: HTMLElement[]): Box => {
+  const listRect = list.getBoundingClientRect();
+  const style = getComputedStyle(list);
+  const sorted = groups
+    .map((group) => ({
+      order: Number.parseFloat(getComputedStyle(group).order) || 0,
+      rect: contentRect(group),
+    }))
+    .toSorted((a, b) => a.order - b.order);
+  const startCount = sorted.filter(({ order }) => order === 0).length;
+  const before = sorted[startCount - 1]?.rect;
+  const after = sorted[startCount]?.rect;
+  const row = before ?? after ?? listRect;
+  const height =
+    Number.parseFloat(
+      style.getPropertyValue('--styled-tabbar-collapsed-tab-height'),
+    ) || accessoryHeight;
+
+  return {
+    height,
+    left: before
+      ? before.right + accessorySpacing
+      : listRect.left + Number.parseFloat(style.paddingLeft),
+    right: after
+      ? after.left - accessorySpacing
+      : listRect.right - Number.parseFloat(style.paddingRight),
+    top: row.top + row.height / 2 - height / 2,
+  };
+};
+
+const placeAccessory = (list: HTMLElement): void => {
+  const accessory = accessories.get(list);
+  const morph: AccessoryMorph = accessoryMorphs.get(list) ?? {
+    collapsed: false,
+    remaining: [],
+    start: 0,
+  };
+  if (!accessory) return;
+
+  const groups = [...list.querySelectorAll<HTMLElement>(':scope > div')];
+  if (groups.length === 0) return;
+
+  if (morph.collapsed) {
+    // Groups collapsing away stop taking pointer events right away.
+    morph.remaining = groups.filter(
+      (group) => getComputedStyle(group).pointerEvents !== 'none',
+    );
+  }
+
+  const listRect = list.getBoundingClientRect();
+  const above = aboveGroups(groups.map((group) => contentRect(group)));
+  const between = betweenGroups(
+    list,
+    morph.remaining.length > 0 ? morph.remaining : groups,
+  );
+
+  // From where it was, to its place as the groups are now.
+  const target = morph.collapsed ? between : above;
+  const duration = lensDuration(list);
+  const progress =
+    morph.from && duration > 0
+      ? Math.min(1, (performance.now() - morph.start) / duration)
+      : 1;
+  const done = progress >= 1;
+  const from = morph.from && {
+    ...morph.from,
+    left: morph.from.left + listRect.left,
+    right: morph.from.right + listRect.left,
+    top: morph.from.top + listRect.top,
+  };
+  const mix = (key: keyof Box) =>
+    from ? from[key] + (target[key] - from[key]) * ease(progress) : target[key];
+  const left = mix('left');
+
+  setProperties(accessory, {
+    '--styled-tabbar-accessory-height': `${mix('height')}px`,
+    '--styled-tabbar-accessory-left': `${left - listRect.left}px`,
+    '--styled-tabbar-accessory-top': `${mix('top') - listRect.top}px`,
+    '--styled-tabbar-accessory-width': `${Math.max(0, mix('right') - left)}px`,
+  });
+
+  // Morphing on by itself, also once the groups have settled.
+  if (!done && morph.frame === undefined && accessoryMorphs.has(list)) {
+    morph.frame = requestAnimationFrame(() => {
+      morph.frame = undefined;
+      placeAccessory(list);
+    });
+  }
+};
+
+/**
+ * Links a bar's list and accessory, as they're added and removed (in any
+ * order).
+ */
+const createAccessoryLink = () => {
+  let list: HTMLElement | null = null;
+  let accessory: HTMLElement | null = null;
+
+  const sync = () => {
+    if (!list) return;
+    if (!accessory) {
+      accessories.delete(list);
+      return;
+    }
+
+    accessories.set(list, accessory);
+    placeAccessory(list);
+  };
+
+  return {
+    setAccessory: (element: HTMLElement | null) => {
+      accessory = element;
+      sync();
+    },
+    setList: (element: HTMLElement | null) => {
+      if (list) accessories.delete(list);
+      list = element;
+      sync();
+    },
+  };
+};
+
+/** The bar's anchor name (unique per bar), for its accessory (internal). */
+type RootState = Partial<ReturnType<typeof createAccessoryLink>> & {
+  anchor?: string;
+};
+
+const RootContext = createContext<RootState>({});
+
+export type TabBarRootProps = Omit<BaseTabs.Root.Props, 'ref'>;
+
+/**
+ * Base UI's `Tabs.Root`, also providing the anchor its `TabBar.Accessory`
+ * is positioned at (the `TabBar.List`).
+ */
+const Root = forwardRef<HTMLDivElement, TabBarRootProps>((props, ref) => {
+  const id = useId();
+  const [link] = useState(createAccessoryLink);
+  const context = useMemo(
+    () => ({
+      ...link,
+      anchor: `--styled-tabbar-${id.replaceAll(/[^\w-]/gu, '')}`,
+    }),
+    [id, link],
+  );
+
+  return (
+    <RootContext.Provider value={context}>
+      <BaseTabs.Root
+        ref={ref}
+        {...props}
+      />
+    </RootContext.Provider>
+  );
+});
+
+/** The list's state, for its groups and tabs (internal). */
+type ListState = {
+  collapsed: boolean;
+  collapsedPosition: CollapsedPosition;
+  markGroup?: () => () => void;
+  markedGroups: number;
+};
+
+const ListContext = createContext<ListState>({
   collapsed: false,
+  collapsedPosition: 'start',
+  markedGroups: 0,
 });
 
 export type TabBarListProps = BaseTabs.List.Props & {
@@ -719,6 +1231,14 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
     ref,
   ) => {
     const listRef = useForwardedRef(ref);
+    const root = useContext(RootContext);
+
+    // For its accessory (see `Accessory`).
+    const { setList } = root;
+    useLayoutEffect(() => {
+      setList?.(listRef.current);
+      return () => setList?.(null);
+    }, [listRef, setList]);
     const expandedWidthRef = useRef<number | undefined>(undefined);
     const resizingRef = useRef(collapsed);
     const wasCollapsedRef = useRef(collapsed);
@@ -730,6 +1250,7 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
       if (!list) return undefined;
 
       const observer = new ResizeObserver(() => {
+        placeAccessory(list);
         if (resizingRef.current) return;
         expandedWidthRef.current = list.getBoundingClientRect().width;
       });
@@ -744,17 +1265,21 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
 
       const wasCollapsed = wasCollapsedRef.current;
       wasCollapsedRef.current = collapsed;
+      morphAccessory(list, collapsed);
 
       // While collapsing or expanding, the selections follow their active
       // tabs in every frame (resize observers lag a frame behind, and miss
-      // tabs that only move).
+      // tabs that only move), which their groups keep in view.
       let frame: number | undefined;
       const follow = () => {
         for (const group of list.querySelectorAll(':scope > div')) {
-          if (group instanceof HTMLElement) {
-            updateSelection(group, { instant: true });
-          }
+          if (!(group instanceof HTMLElement)) continue;
+
+          const active = tabsOf(group).find((tab) => isActive(tab));
+          if (active) reveal(active, 'instant');
+          updateSelection(group, { instant: true });
         }
+        placeAccessory(list);
         frame = requestAnimationFrame(follow);
       };
       const stopFollowing = () => {
@@ -762,11 +1287,24 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
         frame = undefined;
       };
 
+      // While expanding, the groups grow from the collapsed tabs' positions
+      // until they fill the bar, their labels clipped meanwhile. Set from
+      // collapsing on, so they're in place as soon as the collapsed styles
+      // go: layout read in between (e.g. by Base UI's indicator) would start
+      // transitions from the expanded styles (or not at all, from `auto`).
+      const holdCollapsedLayout = () => {
+        list.style.setProperty('--styled-tabbar-collapsed-layout', '1');
+        list.style.setProperty('--styled-tabbar-group-margin', '0');
+        list.style.setProperty('--styled-tabbar-label-overflow', 'clip');
+        list.style.setProperty('--styled-tabbar-label-min-width', '0');
+      };
+
       if (collapsed) {
         resizingRef.current = true;
         if (expandedWidthRef.current !== undefined) {
           list.style.minWidth = `${expandedWidthRef.current}px`;
         }
+        holdCollapsedLayout();
 
         follow();
         const cancel = afterTransitions(list, stopFollowing);
@@ -780,10 +1318,12 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
       const settle = () => {
         resizingRef.current = false;
         list.style.removeProperty('min-width');
-        list.style.removeProperty('justify-content');
+        list.style.removeProperty('--styled-tabbar-collapsed-layout');
         list.style.removeProperty('--styled-tabbar-group-margin');
         list.style.removeProperty('--styled-tabbar-label-overflow');
+        list.style.removeProperty('--styled-tabbar-label-min-width');
         expandedWidthRef.current = list.getBoundingClientRect().width;
+        placeAccessory(list);
       };
 
       if (!wasCollapsed) {
@@ -791,11 +1331,7 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
         return undefined;
       }
 
-      // Expanding: the groups grow from the collapsed tab's position until
-      // they fill the bar, their labels clipped meanwhile.
-      list.style.justifyContent = collapsedJustify[collapsedPosition];
-      list.style.setProperty('--styled-tabbar-group-margin', '0');
-      list.style.setProperty('--styled-tabbar-label-overflow', 'clip');
+      holdCollapsedLayout();
 
       follow();
       const cancel = afterTransitions(list, () => {
@@ -807,21 +1343,100 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
         cancel();
         stopFollowing();
       };
-    }, [collapsed, collapsedPosition, listRef]);
+    }, [collapsed, listRef]);
+
+    // The accessory follows the groups while any of their transitions run
+    // (e.g. groups marked to remain while collapsed).
+    useLayoutEffect(() => {
+      const { current: list } = listRef;
+      if (!list) return undefined;
+
+      let frame: number | undefined;
+      let cancel: (() => void) | undefined;
+      const stop = () => {
+        if (frame !== undefined) cancelAnimationFrame(frame);
+        frame = undefined;
+        cancel?.();
+        cancel = undefined;
+      };
+
+      const onTransitionRun = () => {
+        if (frame !== undefined) return;
+        if (!accessories.has(list)) return;
+
+        const step = () => {
+          placeAccessory(list);
+          frame = requestAnimationFrame(step);
+        };
+        step();
+        cancel = afterTransitions(list, () => {
+          stop();
+          placeAccessory(list);
+        });
+      };
+      list.addEventListener('transitionrun', onTransitionRun);
+
+      return () => {
+        list.removeEventListener('transitionrun', onTransitionRun);
+        stop();
+      };
+    }, [listRef]);
+
+    // The pointer of the lens, so it follows the tabs under it while a
+    // group scrolls.
+    const dragRef = useRef<
+      { clientX: number; state: { tab?: HTMLElement } } | undefined
+    >(undefined);
+    const stopScrollingRef = useRef<(() => void) | undefined>(undefined);
+
+    // A group too narrow for its tabs scrolls (by wheel, or by touches on
+    // the lens, which scroll it while near its ends). Scroll events don't
+    // bubble, but are captured.
+    useLayoutEffect(() => {
+      const { current: list } = listRef;
+      if (!list) return undefined;
+
+      const onScroll = () => {
+        const { current: drag } = dragRef;
+        if (drag) drag.state.tab = press(list, drag.clientX);
+      };
+      list.addEventListener('scroll', onScroll, {
+        capture: true,
+        passive: true,
+      });
+
+      return () => {
+        list.removeEventListener('scroll', onScroll, { capture: true });
+        stopScrollingRef.current?.();
+      };
+    }, [listRef]);
+
+    const [markedGroups, markGroup] = useMarks();
+    const context = useMemo(
+      () => ({ collapsed, collapsedPosition, markGroup, markedGroups }),
+      [collapsed, collapsedPosition, markGroup, markedGroups],
+    );
 
     const handlers = usePointerDrag<HTMLDivElement, { tab?: HTMLElement }>(
       {
         end: (list, state, cancelled) => {
+          dragRef.current = undefined;
+          stopScrollingRef.current?.();
+
           if (cancelled) {
             release(list);
             return;
           }
 
           release(list, state.tab);
-          if (state.tab && !isActive(state.tab)) state.tab.click();
+          if (!state.tab) return;
+
+          if (!isActive(state.tab)) state.tab.click();
+          reveal(state.tab);
         },
         move: (list, state, event) => {
           state.tab = press(list, event.clientX);
+          dragRef.current = { clientX: event.clientX, state };
         },
         start: (list, event) => {
           if (!(event.target instanceof Element)) return undefined;
@@ -836,7 +1451,10 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
           list.style.removeProperty('--styled-tabbar-lens-size-duration');
           list.style.setProperty('--styled-tabbar-pressed', '1');
 
-          return { tab };
+          const state = { tab };
+          dragRef.current = { clientX: event.clientX, state };
+          stopScrollingRef.current = autoScroll(dragRef);
+          return state;
         },
       },
       {
@@ -849,11 +1467,12 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
     );
 
     return (
-      <ListContext.Provider value={{ collapsed }}>
+      <ListContext.Provider value={context}>
         <StyledList
           ref={listRef}
+          anchor={root.anchor}
           collapsed={collapsed}
-          collapsedPosition={collapsedPosition}
+          spaced={markedGroups > 1}
           {...props}
           {...handlers}
         >
@@ -866,20 +1485,40 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
 );
 
 // Neighboring tabs overlap in the compact size (Figma: negative spacing of
-// 10px, 7.333px with 4 and 5.5px with 5 tabs).
-const StyledGroup = styled('div', forwardRef)`
+// 10px, 7.333px with 4 and 5.5px with 5 tabs). Groups of several tabs share
+// the bar's width by their own (single tabs, e.g. search, keep theirs): too
+// narrow, their tabs scroll within (see `StyledTabs`), they keep their shape.
+// A grid track up to their width lets them (and the bar) shrink in
+// intrinsically sized containers too: a scroll container still counts its
+// content as its minimum width, the track doesn't.
+type StyledGroupProps = {
+  collapsedContent?: CollapsedContent;
+  collapsedVisibility?: CollapsedVisibility;
+  positionOrder: number;
+  selectionShown?: boolean;
+  spaced?: boolean;
+};
+
+const StyledGroup = styled<'div', StyledGroupProps>('div', forwardRef)`
   --styled-tabbar-overlap: 10px;
+  --styled-tabbar-collapsed-order: ${({ positionOrder }) => positionOrder};
 
   position: relative;
-  display: flex;
+  display: grid;
   min-width: var(--styled-tabbar-tab-height);
   min-height: var(--styled-tabbar-tab-height);
   box-sizing: border-box;
-  flex: 0 1 auto;
-  align-items: center;
+  flex: 0 0 auto;
+  order: calc(
+    var(--styled-tabbar-collapsed-layout, 0) *
+      var(--styled-tabbar-collapsed-order)
+  );
+  border: 0 solid transparent;
+  grid-template-columns: minmax(0, max-content);
   margin-inline: var(--styled-tabbar-group-margin, auto);
   transition-duration: var(--glass-ios-lens-duration);
-  transition-property: min-width, min-height, opacity, visibility;
+  transition-property:
+    min-width, min-height, margin, border-width, opacity, visibility;
 
   /* Under the lens, the group grows: its glass and content scale up around
      its center (measured on iOS 26: iPhone 1.05, iPad 1.065). Scaled layer
@@ -889,24 +1528,153 @@ const StyledGroup = styled('div', forwardRef)`
     --styled-tabbar-content-scale: var(--styled-tabbar-pressed-group-scale);
   }
 
-  &:has(> [role='tab'] ~ [role='tab'] ~ [role='tab'] ~ [role='tab']) {
+  &:has(> ${tabsPart} > [role='tab'] ~ [role='tab']) {
+    flex-shrink: 1;
+  }
+
+  &:has(
+    > ${tabsPart} > [role='tab'] ~ [role='tab'] ~ [role='tab'] ~ [role='tab']
+  ) {
     --styled-tabbar-overlap: 7.333px;
   }
 
   &:has(
-    > [role='tab'] ~ [role='tab'] ~ [role='tab'] ~ [role='tab'] ~ [role='tab']
+    > ${tabsPart}
+      > [role='tab']
+      ~ [role='tab']
+      ~ [role='tab']
+      ~ [role='tab']
+      ~ [role='tab']
   ) {
     --styled-tabbar-overlap: 5.5px;
+  }
+
+  /* Marked to remain while collapsed (or not, see collapsedList); without an
+     active tab, with its first. */
+  ${({ collapsedVisibility, spaced }) => {
+    switch (collapsedVisibility) {
+      case 'shown': {
+        return css`
+          ${groupOverride} {
+            min-width: var(--styled-tabbar-tab-height);
+            ${spaced ? 'border-inline-width: 8px;' : ''}
+            opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
+          }
+
+          ${groupOverride}[data-has-active='false']
+            > ${tabsPart}
+            > :where([role='tab']:first-of-type) {
+            ${collapsedShown}
+          }
+        `;
+      }
+
+      case 'away': {
+        // Its selection hidden too: coming back, it fades in (rather than
+        // showing on its tab growing from nothing).
+        return css`
+          ${groupOverride} {
+            --styled-tabbar-selection-shown: 0;
+
+            min-width: 0;
+            margin-inline: 0;
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+          }
+
+          ${groupOverride} > ${tabsPart} > [role='tab'] {
+            ${collapsedAway}
+          }
+        `;
+      }
+
+      default: {
+        return undefined;
+      }
+    }
+  }}
+
+  /* Its collapsed content, over the list's, under its tabs' own (see
+     collapsedList, StyledTab) */
+  ${({ collapsedContent }) =>
+    collapsedContent
+      ? css`
+          &&&& > ${tabsPart} > [role='tab'] {
+            ${collapsedContents[collapsedContent]}
+          }
+        `
+      : undefined}
+
+  /* Several remaining tabs (in the group, or in several groups) show the
+     selection on the active one. */
+  ${({ selectionShown }) =>
+    selectionShown
+      ? css`
+          ${groupOverride} {
+            --styled-tabbar-selection-shown: 1;
+          }
+
+          ${groupOverride} > ${tabsPart} > [role='tab'][data-active] {
+            color: var(--styled-tabbar-active-color, var(--color-ios-primary));
+          }
+        `
+      : undefined}
+`;
+
+// A group's tabs (and selection), filling it. Too narrow for them, it
+// scrolls, clipped to the group's shape; otherwise it doesn't clip, so a
+// pressed group's content grows beyond (see `pressGroup`). Touches drag the
+// lens, not the tabs: a scroll container's own `touch-action` decides for
+// the touches within (the list's stops at it); the lens scrolls them near
+// the group's ends (see `autoScroll`).
+const StyledTabs = styled('div', forwardRef)`
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 100px;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  touch-action: none;
+
+  &[data-overflowing] {
+    overflow: auto hidden;
   }
 `;
 
 type Shape = 'capsule' | 'circle';
 
-const GroupContext = createContext<{ shape?: Shape }>({});
+/** The group's state, for its tabs (internal). */
+type GroupState = {
+  away: boolean;
+  markTab?: () => () => void;
+  markedTabs: number;
+  shape?: Shape;
+};
+
+const GroupContext = createContext<GroupState>({ away: false, markedTabs: 0 });
 
 export type TabBarGroupProps = React.ComponentProps<'div'> & {
+  /**
+   * What the collapsed bar's tabs in the group show.
+   * @default the list's `collapsedContent`
+   */
+  collapsedContent?: CollapsedContent;
+  /**
+   * Where the group is, along the collapsed bar.
+   * @default the list's `collapsedPosition`
+   */
+  collapsedPosition?: CollapsedPosition;
   /** Default shape of the contained tabs (default: by their content). */
   shape?: Shape;
+  /**
+   * Remains while the bar is collapsed (as does a group with tabs marked
+   * so). If any group is marked, only marked groups remain (by default, the
+   * group of the active tab, or the first).
+   */
+  visibleWhenCollapsed?: boolean;
 };
 
 /**
@@ -914,8 +1682,35 @@ export type TabBarGroupProps = React.ComponentProps<'div'> & {
  * `TabBar.Indicator` has to precede its tabs.
  */
 const Group = forwardRef<HTMLDivElement, TabBarGroupProps>(
-  ({ children, shape, ...props }, forwardedRef) => {
+  (
+    {
+      children,
+      collapsedContent,
+      collapsedPosition,
+      shape,
+      visibleWhenCollapsed,
+      ...props
+    },
+    forwardedRef,
+  ) => {
     const ref = useForwardedRef(forwardedRef);
+    const list = useContext(ListContext);
+    const { markGroup } = list;
+    const [markedTabs, markTab] = useMarks();
+
+    // Marked itself, or by any of its tabs.
+    const remains = Boolean(visibleWhenCollapsed) || markedTabs > 0;
+    useLayoutEffect(
+      () => (remains ? markGroup?.() : undefined),
+      [markGroup, remains],
+    );
+
+    // Only while collapsed, and only if marks decide it.
+    let collapsedVisibility: CollapsedVisibility | undefined;
+    if (list.collapsed && list.markedGroups > 0) {
+      collapsedVisibility = remains ? 'shown' : 'away';
+    }
+    const away = collapsedVisibility === 'away';
 
     useLayoutEffect(() => {
       const { current: group } = ref;
@@ -924,23 +1719,26 @@ const Group = forwardRef<HTMLDivElement, TabBarGroupProps>(
       // Only the group and its tabs: the selection resizes itself while
       // following the lens, which must not snap it back to the active tab.
       // It follows changes of their size right away (e.g. collapsing).
-      const resizeObserver = new ResizeObserver(() =>
-        updateSelection(group, { instant: true }),
-      );
+      const resizeObserver = new ResizeObserver(() => {
+        updateOverflow(group);
+        updateSelection(group, { instant: true });
+        if (group.parentElement) placeAccessory(group.parentElement);
+      });
       const observe = () => {
         resizeObserver.observe(group);
-        for (const child of group.children) {
-          if (isTab(child)) resizeObserver.observe(child);
-        }
+        for (const tab of tabsOf(group)) resizeObserver.observe(tab);
       };
 
-      const update = () => {
+      const update = (behavior: ScrollBehavior) => {
         observe();
+        updateOverflow(group);
+        const active = tabsOf(group).find((tab) => isActive(tab));
+        if (active) reveal(active, behavior);
         updateSelection(group);
       };
-      update();
+      update('instant');
 
-      const mutationObserver = new MutationObserver(update);
+      const mutationObserver = new MutationObserver(() => update('smooth'));
       mutationObserver.observe(group, {
         attributeFilter: ['data-active'],
         childList: true,
@@ -953,16 +1751,28 @@ const Group = forwardRef<HTMLDivElement, TabBarGroupProps>(
       };
     }, [ref]);
 
-    const context = { shape };
+    const context = useMemo(
+      () => ({ away, markTab, markedTabs, shape }),
+      [away, markTab, markedTabs, shape],
+    );
 
     return (
       <GroupContext.Provider value={context}>
         <StyledGroup
           ref={ref}
+          collapsedContent={list.collapsed ? collapsedContent : undefined}
+          collapsedVisibility={collapsedVisibility}
+          spaced={list.markedGroups > 1}
+          positionOrder={
+            collapsedOrder[collapsedPosition ?? list.collapsedPosition]
+          }
+          selectionShown={
+            list.collapsed && !away && (markedTabs > 1 || list.markedGroups > 1)
+          }
           {...props}
         >
           <GlassBackground />
-          {children}
+          <StyledTabs {...{ [part]: 'tabs' }}>{children}</StyledTabs>
         </StyledGroup>
       </GroupContext.Provider>
     );
@@ -984,6 +1794,13 @@ const Indicator = styled(BaseTabs.Indicator, forwardRef)`
   transition-duration: var(--styled-tabbar-selection-duration, 300ms);
   transition-property: top, left, width, height;
 
+  /* Base UI hides it while the active tab has no size (e.g. collapsed
+     away); its opacity (below) hides it instead, so it fades in again
+     rather than appearing at once (no transition starts from display: none). */
+  &[hidden] {
+    display: block;
+  }
+
   /* Fades here, not on the indicator: opacity on the indicator would isolate
      the fill's blending, rendering its raw color while fading. */
   &::before {
@@ -992,7 +1809,6 @@ const Indicator = styled(BaseTabs.Indicator, forwardRef)`
     background-color: var(--styled-glass-selection);
     content: '';
     inset: 0;
-    mix-blend-mode: var(--styled-glass-selection-blend);
     opacity: calc(
       var(--styled-tabbar-selection-opacity, 0) *
         (1 - var(--styled-tabbar-pressed, 0)) *
@@ -1005,8 +1821,9 @@ const Indicator = styled(BaseTabs.Indicator, forwardRef)`
 
 export type TabBarTabProps = BaseTabs.Tab.Props & {
   /**
-   * What the tab shows while its bar is collapsed.
-   * @default the list's `collapsedContent`
+   * What the tab shows while its bar is collapsed. Never nothing: a tab with
+   * only a label shows its label, one with only a symbol its symbol.
+   * @default the group's `collapsedContent`, or the list's
    */
   collapsedContent?: CollapsedContent;
   cursor?: Properties['cursor'];
@@ -1015,10 +1832,16 @@ export type TabBarTabProps = BaseTabs.Tab.Props & {
    * @default the group's shape, or by the tab's content
    */
   shape?: Shape;
+  /**
+   * Remains while the bar is collapsed, as does its group. If any of a
+   * group's tabs are marked, only those remain (by default, the active one,
+   * or the first); several show the selection on the active one.
+   */
+  visibleWhenCollapsed?: boolean;
 };
 
 // eslint-disable-next-line prettier/prettier
-const StyledTab = styled<typeof BaseTabs.Tab, TabBarTabProps>(BaseTabs.Tab, forwardRef)`
+const StyledTab = styled<typeof BaseTabs.Tab, Omit<TabBarTabProps, 'visibleWhenCollapsed'> & { collapsedVisibility?: CollapsedVisibility }>(BaseTabs.Tab, forwardRef)`
   --styled-cursor: attr(
     cursor type(\<custom-ident\>),
     ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')}
@@ -1030,10 +1853,10 @@ const StyledTab = styled<typeof BaseTabs.Tab, TabBarTabProps>(BaseTabs.Tab, forw
   position: relative;
   display: flex;
   width: var(--styled-tabbar-tab-width);
-  min-width: var(--styled-tabbar-tab-height);
+  min-width: var(--styled-tabbar-tab-min-width);
   min-height: var(--styled-tabbar-tab-height);
   box-sizing: border-box;
-  flex: 0 1 auto;
+  flex: 0 var(--styled-tabbar-tab-shrink) auto;
   flex-direction: var(--styled-tabbar-tab-direction);
   align-items: center;
   justify-content: center;
@@ -1072,7 +1895,7 @@ const StyledTab = styled<typeof BaseTabs.Tab, TabBarTabProps>(BaseTabs.Tab, forw
         return css`
           &&& {
             width: var(--styled-tabbar-tab-width);
-            flex-shrink: 1;
+            flex-shrink: var(--styled-tabbar-tab-shrink);
             padding: var(--styled-tabbar-tab-padding);
             aspect-ratio: auto;
             margin-inline-end: var(--styled-tabbar-tab-overlap);
@@ -1125,27 +1948,62 @@ const StyledTab = styled<typeof BaseTabs.Tab, TabBarTabProps>(BaseTabs.Tab, forw
     opacity: 0.55;
   }
 
-  /* Its own collapsed content, over the list's (see collapsedList) */
+  /* Marked to remain while collapsed, or not (see Group) */
+  ${({ collapsedVisibility }) => {
+    if (!collapsedVisibility) return undefined;
+
+    return css`
+      ${tabOverride} {
+        ${collapsedVisibility === 'shown' ? collapsedShown : collapsedHidden}
+      }
+    `;
+  }}
+
+  /* Its own collapsed content, over its group's and the list's (see
+     collapsedList, StyledGroup) */
   ${({ collapsedContent }) =>
     collapsedContent
       ? css`
-          &&&&& {
+          &&&&&&& {
             ${collapsedContents[collapsedContent]}
           }
         `
       : undefined}
+
+  /* Never collapsed to nothing, over any collapsed content: with only a
+     label, it shows its label; with only a symbol, its symbol. */
+  &&&&&&&:not(:has(> [${part}='icon'])) {
+    ${collapsedContents.label}
+  }
+
+  &&&&&&&:not(:has(> [${part}='label'])) {
+    ${collapsedContents.symbol}
+  }
 `;
 
 const Tab = forwardRef<HTMLButtonElement, TabBarTabProps>(
-  ({ collapsedContent, shape, ...props }, ref) => {
+  ({ collapsedContent, shape, visibleWhenCollapsed, ...props }, ref) => {
     const group = useContext(GroupContext);
+    const { markTab } = group;
     const { collapsed } = useContext(ListContext);
+
+    useLayoutEffect(
+      () => (visibleWhenCollapsed ? markTab?.() : undefined),
+      [markTab, visibleWhenCollapsed],
+    );
+
+    // Only while collapsed, in a remaining group, if marks decide it.
+    let collapsedVisibility: CollapsedVisibility | undefined;
+    if (collapsed && !group.away && group.markedTabs > 0) {
+      collapsedVisibility = visibleWhenCollapsed ? 'shown' : 'away';
+    }
 
     return (
       <StyledTab
         ref={ref}
         {...props}
         collapsedContent={collapsed ? collapsedContent : undefined}
+        collapsedVisibility={collapsedVisibility}
         shape={shape ?? group.shape}
       />
     );
@@ -1199,9 +2057,11 @@ const Icon = forwardRef<HTMLSpanElement, React.ComponentProps<'span'>>(
 // Its text centered vertically, also while the tab's padding animates (e.g.
 // collapsing). Collapsing into a circle, it shrinks away (see
 // collapsedContents), so the symbol moves smoothly.
+// Not narrower than its text (a group scrolls instead), but while the bar
+// collapses or expands.
 const StyledLabel = styled('span', forwardRef)`
   display: grid;
-  min-width: 0;
+  min-width: var(--styled-tabbar-label-min-width, 0);
   min-height: 0;
   align-content: center;
   align-self: stretch;
@@ -1259,8 +2119,83 @@ const Label = forwardRef<HTMLSpanElement, React.ComponentProps<'span'>>(
   ),
 );
 
+// Above its glass (see `GlassBackground`), clipped to the accessory, which
+// its glass extends beyond.
+const AccessoryContent = styled('span')`
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  align-self: stretch;
+  border-radius: inherit;
+  gap: 12px;
+  padding-inline: 16px;
+`;
+
+// eslint-disable-next-line prettier/prettier
+const StyledAccessory = styled<'div', { anchor?: string; context?: GlassContext }>('div', forwardRef)`
+  position: absolute;
+  top: calc(anchor(top) + var(--styled-tabbar-accessory-top, 0px));
+  left: calc(anchor(left) + var(--styled-tabbar-accessory-left, 0px));
+  display: flex;
+  width: var(--styled-tabbar-accessory-width, 0);
+  height: var(--styled-tabbar-accessory-height, 0);
+  box-sizing: border-box;
+  border-radius: 100px;
+  color: var(--styled-glass-content);
+  font-size: var(--font-ios-subheadline-size);
+  letter-spacing: var(--font-ios-subheadline-tracking);
+  line-height: var(--font-ios-subheadline-line-height);
+  ${({ anchor }) => (anchor ? `position-anchor: ${anchor};` : '')}
+  ${({ context }) => glassContext(context)}
+`;
+
+export type TabBarAccessoryProps = React.ComponentProps<'div'> & {
+  /**
+   * Brightness of the content behind the glass (as the list's).
+   * @default 'bright', or 'dim' in dark mode
+   */
+  context?: GlassContext;
+};
+
+/**
+ * A glass capsule of arbitrary content attached to the bar (UIKit
+ * `bottomAccessory`, e.g. a mini player), to be rendered inside
+ * `TabBar.Root`, after `TabBar.List`: above its groups, or, while the bar is
+ * collapsed, between them. Positioned at the list, it doesn't take up space
+ * in the layout.
+ */
+const Accessory = forwardRef<HTMLDivElement, TabBarAccessoryProps>(
+  ({ children, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    const { anchor, setAccessory } = useContext(RootContext);
+
+    // Placed by its list, as its groups change, and when added.
+    useLayoutEffect(() => {
+      setAccessory?.(ref.current);
+      return () => setAccessory?.(null);
+    }, [ref, setAccessory]);
+
+    return (
+      <StyledAccessory
+        ref={ref}
+        anchor={anchor}
+        {...{ [part]: 'accessory' }}
+        {...props}
+      >
+        <GlassBackground />
+        <AccessoryContent>{children}</AccessoryContent>
+      </StyledAccessory>
+    );
+  },
+);
+
 export const TabBar = {
   ...BaseTabs,
+  Accessory,
+  Root,
   List,
   Group,
   Indicator,

@@ -1,7 +1,7 @@
 import { styled } from 'goober';
 import { FunctionComponent } from 'react';
 
-import { css } from './utils.js';
+import { colorScheme, css } from './utils.js';
 
 // Liquid Glass building blocks shared by components: glass materials behind
 // bars and capsules, and glass lenses (the pressed, magnified state of knobs
@@ -40,14 +40,8 @@ const tintedShadow: Record<GlassContext, string> = {
 
 const contextVars = (context: GlassContext) => css`
   --styled-glass-blur: var(--glass-ios-${context}-blur);
-  --styled-glass-fill-bottom: var(--glass-ios-${context}-fill-bottom);
-  --styled-glass-fill-bottom-blend: var(
-    --glass-ios-${context}-fill-bottom-blend
-  );
-  --styled-glass-fill-middle: var(--glass-ios-${context}-fill-middle);
-  --styled-glass-fill-top: var(--glass-ios-${context}-fill-top);
-  --styled-glass-fill-top-blend: var(--glass-ios-${context}-fill-top-blend);
-  --styled-glass-fill-opacity: var(--glass-ios-${context}-fill-opacity);
+  --styled-glass-fill: var(--glass-ios-${context}-fill);
+  --styled-glass-fill-filter: var(--glass-ios-${context}-fill-filter);
   --styled-glass-content: var(--glass-ios-${context}-content);
   --styled-glass-content-blend: var(--glass-ios-${context}-content-blend);
   --styled-glass-content-disabled: var(--glass-ios-${context}-content-disabled);
@@ -61,7 +55,6 @@ const contextVars = (context: GlassContext) => css`
     --glass-ios-${context}-content-prominent-disabled
   );
   --styled-glass-selection: var(--glass-ios-${context}-selection);
-  --styled-glass-selection-blend: var(--glass-ios-${context}-selection-blend);
   --styled-glass-shadow: var(--glass-ios-${context}-shadow);
   --styled-glass-shadow-tinted: ${tintedShadow[context]};
   --styled-glass-lens: var(--glass-ios-${context}-lens);
@@ -77,13 +70,7 @@ const contextVars = (context: GlassContext) => css`
 export const glassContext = (context?: GlassContext): string =>
   context
     ? contextVars(context)
-    : css`
-        ${contextVars('bright')}
-
-        @media (prefers-color-scheme: dark) {
-          ${contextVars('dim')}
-        }
-      `;
+    : colorScheme(contextVars('bright'), contextVars('dim'));
 
 type MediumMode = 'dark' | 'light';
 
@@ -106,7 +93,6 @@ const mediumVars = (mode: MediumMode) => css`
   --styled-glass-separator: var(--glass-ios-medium-${mode}-separator);
   --styled-glass-divider: var(--glass-ios-medium-${mode}-divider);
   --styled-glass-selection: var(--glass-ios-medium-${mode}-selection);
-  --styled-glass-selection-blend: normal;
   --styled-glass-shadow: var(--glass-ios-${mediumContext[mode]}-shadow);
 `;
 
@@ -119,15 +105,11 @@ const mediumVars = (mode: MediumMode) => css`
  * color scheme, including `content-secondary`, `separator` and `divider`.
  */
 export const glassMedium = (): string => css`
-  ${mediumVars('light')}
+  ${colorScheme(mediumVars('light'), mediumVars('dark'))}
 
   backdrop-filter: saturate(180%) blur(16px);
   background-color: var(--styled-glass-background);
   box-shadow: var(--styled-glass-shadow);
-
-  @media (prefers-color-scheme: dark) {
-    ${mediumVars('dark')}
-  }
 `;
 
 /**
@@ -180,47 +162,21 @@ const Halo = styled('span')`
   opacity: 0.67;
 `;
 
-// The opacity applies to the fills as a group (isolating their blend modes
-// from the backdrop when below 1), as in the Figma “Fill” layer. The group is
-// never scaled or faded (which would isolate the fills at full opacity too);
-// its fills are, and they clear as a lens (as the slider thumb's knob).
+// The fills (Figma “Fill”) as a backdrop filter and a flat color, without
+// blend modes (see `styles.tsx`); they clear as a lens (as the slider
+// thumb's knob).
 const Fill = styled('span')`
-  ${glassBox}
+  ${glassLayer}
 
-  opacity: var(--styled-glass-fill-opacity);
+  backdrop-filter: var(--styled-glass-fill-filter);
+  background-color: var(--styled-glass-fill);
+  opacity: calc(1 - var(--styled-glass-pressed, 0));
 `;
 
 const fillLayer = css`
   position: absolute;
   border-radius: inherit;
   inset: 0;
-`;
-
-const lensFillLayer = css`
-  ${fillLayer}
-  ${lensLayer}
-
-  opacity: calc(1 - var(--styled-glass-pressed, 0));
-`;
-
-const FillBottom = styled('span')`
-  ${lensFillLayer}
-
-  background-color: var(--styled-glass-fill-bottom);
-  mix-blend-mode: var(--styled-glass-fill-bottom-blend);
-`;
-
-const FillMiddle = styled('span')`
-  ${lensFillLayer}
-
-  background-color: var(--styled-glass-fill-middle);
-`;
-
-const FillTop = styled('span')`
-  ${lensFillLayer}
-
-  background-color: var(--styled-glass-fill-top);
-  mix-blend-mode: var(--styled-glass-fill-top-blend);
 `;
 
 // The tint layers are a group with a drop shadow, which isolates their blend
@@ -294,9 +250,9 @@ export type GlassBackgroundProps = {
  * The glass material of a capsule (blur, fill or tint, and glass effect
  * layers), rendered as the first children of a positioned element that is
  * inside a `glassContext`. The layers stack by document order (no `z-index`,
- * nothing isolated at full opacity), so the blur and blend modes reach the
- * content behind; the element's later children must be positioned (or
- * blended) to be drawn above.
+ * nothing isolated at full opacity), so the backdrop filters and the tint's
+ * blend modes reach the content behind; the element's later children must be
+ * positioned (or blended) to be drawn above.
  *
  * Tinted glass takes its color from `--styled-glass-tint` (default:
  * `--glass-ios-tint`). As a lens (e.g. pressed), `--styled-glass-scale` scales
@@ -317,11 +273,7 @@ export const GlassBackground: FunctionComponent<GlassBackgroundProps> = ({
         <Tint />
       </TintGroup>
     ) : (
-      <Fill aria-hidden="true">
-        <FillBottom />
-        <FillMiddle />
-        <FillTop />
-      </Fill>
+      <Fill aria-hidden="true" />
     )}
     {tinted ? (
       <TintedEffect aria-hidden="true" />

@@ -10,11 +10,11 @@ import {
 } from 'react';
 
 import { EditMenu, Menu } from '../components/index.js';
+import { useLog } from './utils/log.js';
 import {
   commonPropOptions,
   Component,
   MappedProp,
-  useLog,
   usePropControl,
 } from './utils/main.js';
 
@@ -23,6 +23,9 @@ const Text = styled('p', forwardRef)`
   margin: 80px 0 0;
   font-size: 17px;
   line-height: 22px;
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-user-select: text;
+  user-select: text;
 `;
 
 const propOptionsContent = {
@@ -54,31 +57,57 @@ export const EditMenuDemo: FunctionComponent = () => {
   const [text, setText] = useState<HTMLElement | null>(null);
   const [selection, setSelection] = useState<VirtualAnchor | null>(null);
 
-  // Opens the edit menu above a text selection in the paragraph.
   // Opens the edit menu above a text selection in the paragraph once it's
-  // made: when the pointer is released, or after a pause (keyboard); hidden
-  // while selecting.
+  // made: when the pointer is released, or after a pause (keyboard, touch:
+  // selecting by touch cancels the pointer, the selection handles don't use
+  // it); hidden while selecting. Selection changes keeping the range (e.g.
+  // restored after the menu's focusing cleared it, in WebKit) are ignored.
   useEffect(() => {
     let selecting = false;
     let timeout: ReturnType<typeof setTimeout> | undefined;
+    let shown: Range | null = null;
+
+    const current = () => {
+      const documentSelection = document.getSelection();
+      const range =
+        documentSelection && documentSelection.rangeCount > 0
+          ? documentSelection.getRangeAt(0)
+          : null;
+
+      return range &&
+        !range.collapsed &&
+        text?.contains(range.commonAncestorContainer)
+        ? range.cloneRange()
+        : null;
+    };
+
+    const isShown = (range: Range | null) =>
+      shown !== null &&
+      range !== null &&
+      range.compareBoundaryPoints(Range.START_TO_START, shown) === 0 &&
+      range.compareBoundaryPoints(Range.END_TO_END, shown) === 0;
+
+    const hide = () => {
+      shown = null;
+      setSelection(null);
+    };
 
     const update = () => {
-      const current = document.getSelection();
-      const range =
-        current && current.rangeCount > 0 ? current.getRangeAt(0) : null;
-
+      const range = current();
+      shown = range;
       setSelection(
-        range &&
-          !range.collapsed &&
-          text?.contains(range.commonAncestorContainer)
+        range
           ? { getBoundingClientRect: () => range.getBoundingClientRect() }
           : null,
       );
     };
 
-    const onPointerDown = () => {
+    const onPointerDown = ({ target }: PointerEvent) => {
+      // Pressing the menu itself keeps it.
+      if (target instanceof Element && target.closest('[role=menu]')) return;
+
       selecting = true;
-      setSelection(null);
+      hide();
     };
 
     const onPointerUp = () => {
@@ -87,20 +116,27 @@ export const EditMenuDemo: FunctionComponent = () => {
       update();
     };
 
+    const onPointerCancel = () => {
+      selecting = false;
+    };
+
     const onSelectionChange = () => {
+      if (selecting || isShown(current())) return;
+
       clearTimeout(timeout);
-      if (selecting) return;
-      setSelection(null);
+      hide();
       timeout = setTimeout(update, 500);
     };
 
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('pointercancel', onPointerCancel);
     document.addEventListener('selectionchange', onSelectionChange);
     return () => {
       clearTimeout(timeout);
       document.removeEventListener('pointerdown', onPointerDown);
       document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('pointercancel', onPointerCancel);
       document.removeEventListener('selectionchange', onSelectionChange);
     };
   }, [text]);

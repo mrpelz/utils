@@ -1,11 +1,17 @@
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
 import { Collapsible } from '@base-ui/react/collapsible';
+import { RadioGroup } from '@base-ui/react/radio-group';
 import { sfAirplane } from '@bradleyhodges/sfsymbols/sfAirplane';
+import { sfArchiveboxFill } from '@bradleyhodges/sfsymbols/sfArchiveboxFill';
 import { sfBellFill } from '@bradleyhodges/sfsymbols/sfBellFill';
 import { sfCheckmarkCircleFill } from '@bradleyhodges/sfsymbols/sfCheckmarkCircleFill';
+import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
 import { sfEnvelopeFill } from '@bradleyhodges/sfsymbols/sfEnvelopeFill';
+import { sfEnvelopeOpenFill } from '@bradleyhodges/sfsymbols/sfEnvelopeOpenFill';
+import { sfFlagFill } from '@bradleyhodges/sfsymbols/sfFlagFill';
 import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
+import { sfPersonCropCircleFill } from '@bradleyhodges/sfsymbols/sfPersonCropCircleFill';
 import { sfPersonFill } from '@bradleyhodges/sfsymbols/sfPersonFill';
 import { sfPinFill } from '@bradleyhodges/sfsymbols/sfPinFill';
 import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
@@ -23,11 +29,11 @@ import {
 } from 'react';
 
 import { List, Menu, Switch } from '../components/index.js';
+import { useLog } from './utils/log.js';
 import {
   commonPropOptions,
   Component,
   MappedProp,
-  useLog,
   usePropControl,
 } from './utils/main.js';
 import { SFSymbol } from './utils/symbol.js';
@@ -35,7 +41,6 @@ import { SFSymbol } from './utils/symbol.js';
 const cursorOptions = [undefined, 'auto', 'pointer', 'copy'] as const;
 
 const propOptionsContent = {
-  editing: ['none', 'select', 'delete', 'insert'] as const,
   image: ['rounded', 'symbol', 'circular', 'fill', 'none'] as const,
   supertitle: [false, true] as const,
   headerSubtitle: [false, true] as const,
@@ -44,6 +49,7 @@ const propOptionsContent = {
 const propOptionsRoot = {
   ...commonPropOptions,
   listStyle: [undefined, 'insetGrouped', 'grouped', 'plain'] as const,
+  outline: [undefined, false, true] as const,
 };
 
 const propOptionsHeader = {
@@ -104,9 +110,9 @@ const trailingActions = [
 const selectionOptions = ['Automatic', 'Always', 'Never'] as const;
 
 /**
- * Lists: a settings-like inset grouped list with every part (Figma “Lists
- * and tables”), headers, footers, a content block, swipe actions, a
- * collapsible section (Base UI Collapsible), a pop-up (Menu) and a switch.
+ * Lists: a settings-like inset grouped list with its parts (Figma “Lists
+ * and tables”), headers, footers, a content block, a collapsible section
+ * (Base UI Collapsible), a pop-up (Menu) and a switch.
  */
 export const ListDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
@@ -228,76 +234,6 @@ export const ListDemo: FunctionComponent = () => {
     'action',
   );
 
-  const [controlSwipeActions, propsSwipeActions] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        overswipe: [true, false, undefined] as const,
-      }),
-      [],
-    ),
-    'swipe actions (1st, leading)',
-  );
-
-  const [controlSwipeAction, propsSwipeAction] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        cursor: cursorOptions,
-        disabled: [undefined, false, true] as const,
-        label: [undefined, 'Custom'] as const,
-        tint: [undefined, 'var(--color-ios-system-teal)', '#000'] as const,
-        onClick: [
-          new MappedProp(() => addLog('swipe action clicked'), '[log click]'),
-          undefined,
-        ] as const,
-      }),
-      [addLog],
-    ),
-    'swipe action (1st)',
-  );
-
-  const [controlCheckbox, propsCheckbox, RemounterCheckbox] = usePropControl(
-    useMemo(
-      () => ({
-        ...propOptionsCheckbox,
-        onCheckedChange: [
-          new MappedProp(
-            (
-              checked: boolean,
-              { reason }: BaseCheckbox.Root.ChangeEventDetails,
-            ) => addLog(`checked change: ${checked}/${reason}`),
-            '[log change]',
-          ),
-          undefined,
-        ] as const,
-      }),
-      [addLog],
-    ),
-    'checkbox (1st)',
-  );
-
-  const [controlEditButton, propsEditButton] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        cursor: cursorOptions,
-        disabled: [undefined, false, true] as const,
-        onClick: [
-          new MappedProp(() => addLog('edit button clicked'), '[log click]'),
-          undefined,
-        ] as const,
-      }),
-      [addLog],
-    ),
-    'edit button (1st)',
-  );
-
-  const [controlGrabber, propsGrabber] = usePropControl(
-    useMemo(() => ({ ...commonPropOptions, cursor: cursorOptions }), []),
-    'grabber (1st)',
-  );
-
   const [controlCollapsible, propsCollapsible, RemounterCollapsible] =
     usePropControl(
       useMemo(
@@ -364,63 +300,6 @@ export const ListDemo: FunctionComponent = () => {
       </List.Image>
     );
 
-  const edit = (first: boolean) => {
-    switch (content.editing) {
-      case 'select': {
-        return first ? (
-          <RemounterCheckbox>
-            <List.Checkbox {...propsCheckbox} />
-          </RemounterCheckbox>
-        ) : (
-          <List.Checkbox />
-        );
-      }
-
-      case 'delete':
-      case 'insert': {
-        return (
-          <List.EditButton
-            aria-label={content.editing === 'delete' ? 'Delete' : 'Insert'}
-            editingStyle={content.editing}
-            {...(first ? propsEditButton : {})}
-          />
-        );
-      }
-
-      default: {
-        return null;
-      }
-    }
-  };
-
-  const swipeActions = (
-    side: 'leading' | 'trailing',
-    actions: typeof leadingActions | typeof trailingActions,
-    first: boolean,
-  ) => (
-    <List.SwipeActions
-      side={side}
-      {...(first ? propsSwipeActions : {})}
-    >
-      {actions.map(([label, icon, tint], index) => {
-        const props: Partial<typeof propsSwipeAction> =
-          first && index === 0 ? propsSwipeAction : {};
-
-        return (
-          <List.SwipeAction
-            key={label}
-            onClick={() => addLog(`${label} clicked`)}
-            {...props}
-            label={props.label ?? label}
-            tint={props.tint ?? tint}
-          >
-            <SFSymbol icon={icon} />
-          </List.SwipeAction>
-        );
-      })}
-    </List.SwipeActions>
-  );
-
   return (
     <Component
       stretch
@@ -444,11 +323,6 @@ export const ListDemo: FunctionComponent = () => {
         controlCheckmark,
         controlPopUp,
         controlAction,
-        controlSwipeActions,
-        controlSwipeAction,
-        controlCheckbox,
-        controlEditButton,
-        controlGrabber,
         controlCollapsible,
         controlPanel,
         controlDisclosure,
@@ -477,7 +351,6 @@ export const ListDemo: FunctionComponent = () => {
           </List.Header>
           <List.Group {...propsGroup}>
             <List.Item {...propsItem}>
-              {edit(false)}
               <List.Image
                 {...propsImage}
                 style={{
@@ -504,14 +377,12 @@ export const ListDemo: FunctionComponent = () => {
               </Switch.Root>
             </List.Item>
             <List.Item>
-              {edit(false)}
               {image(sfWifi, 'var(--color-ios-system-blue)')}
               <List.Title {...propsTitle}>Wi-Fi</List.Title>
               <List.Detail {...propsDetail}>Home</List.Detail>
               <List.DrillIn {...propsDrillIn} />
             </List.Item>
             <List.Item>
-              {edit(false)}
               {image(sfBellFill, 'var(--color-ios-system-red)')}
               <List.Title
                 render={<button />}
@@ -523,7 +394,6 @@ export const ListDemo: FunctionComponent = () => {
               <List.DrillIn />
             </List.Item>
             <List.Item>
-              {edit(false)}
               {image(sfPersonFill, 'var(--color-ios-system-gray)')}
               <List.Title>Show Previews</List.Title>
               <Menu.Root>
@@ -544,6 +414,8 @@ export const ListDemo: FunctionComponent = () => {
                         {selectionOptions.map((option) => (
                           <Menu.RadioItem
                             key={option}
+                            // A pop-up closes on choosing (iOS).
+                            closeOnClick
                             value={option}
                           >
                             <Menu.RadioItemIndicator />
@@ -557,7 +429,6 @@ export const ListDemo: FunctionComponent = () => {
               </Menu.Root>
             </List.Item>
             <List.Item>
-              {edit(false)}
               {image(sfHeartFill, 'var(--color-ios-system-pink)')}
               <List.Title>Favorite</List.Title>
               <List.Accessory
@@ -569,7 +440,6 @@ export const ListDemo: FunctionComponent = () => {
               <List.Checkmark {...propsCheckmark} />
             </List.Item>
             <List.Item>
-              {edit(false)}
               <List.Title>Button</List.Title>
               <List.Action {...propsAction}>Button</List.Action>
             </List.Item>
@@ -577,39 +447,6 @@ export const ListDemo: FunctionComponent = () => {
           <List.Footer {...propsFooter}>
             Footer text, aligned with the rows’ text.
           </List.Footer>
-        </List.Section>
-
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title>Swipe Actions</List.Title>
-          </List.Header>
-          <List.Group>
-            {(['Regular', 'Tall'] as const).map((height, index) => (
-              <List.Item key={height}>
-                {edit(index === 0)}
-                {image(sfEnvelopeFill, 'var(--color-ios-system-blue)')}
-                <List.Title
-                  render={<button />}
-                  onClick={() => addLog(`${height} clicked`)}
-                >
-                  {height}
-                </List.Title>
-                {height === 'Tall' ? (
-                  <List.Subtitle>Swipe either way</List.Subtitle>
-                ) : null}
-                <List.Detail>Detail</List.Detail>
-                <List.DrillIn />
-                {content.editing === 'none' ? null : (
-                  <List.Grabber
-                    aria-label="Reorder"
-                    {...(index === 0 ? propsGrabber : {})}
-                  />
-                )}
-                {swipeActions('leading', leadingActions, index === 0)}
-                {swipeActions('trailing', trailingActions, false)}
-              </List.Item>
-            ))}
-          </List.Group>
         </List.Section>
 
         <RemounterCollapsible>
@@ -674,6 +511,367 @@ export const ListDemo: FunctionComponent = () => {
             </p>
           </List.Block>
           <List.Footer>Blocks can have headers and footers, too.</List.Footer>
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
+
+/**
+ * Swipe actions (Figma “Row with Swipe Actions”): regular and tall rows
+ * with actions on both sides, the leading ones overswipeable.
+ */
+export const ListSwipeDemo: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+
+  const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
+
+  const [controlSwipeActions, propsSwipeActions] = usePropControl(
+    useMemo(
+      () => ({
+        ...commonPropOptions,
+        overswipe: [true, false, undefined] as const,
+        onOverswipe: [
+          undefined,
+          new MappedProp(() => addLog('overswiped'), '[log overswipe]'),
+        ] as const,
+      }),
+      [addLog],
+    ),
+    'swipe actions (1st, leading)',
+    true,
+  );
+
+  const [controlSwipeAction, propsSwipeAction] = usePropControl(
+    useMemo(
+      () => ({
+        ...commonPropOptions,
+        cursor: cursorOptions,
+        disabled: [undefined, false, true] as const,
+        label: [undefined, 'Custom'] as const,
+        tint: [undefined, 'var(--color-ios-system-teal)', '#000'] as const,
+        onClick: [
+          new MappedProp(() => addLog('swipe action clicked'), '[log click]'),
+          undefined,
+        ] as const,
+      }),
+      [addLog],
+    ),
+    'swipe action (1st)',
+  );
+
+  const swipeActions = (
+    side: 'leading' | 'trailing',
+    actions: typeof leadingActions | typeof trailingActions,
+    first: boolean,
+  ) => (
+    <List.SwipeActions
+      side={side}
+      {...(first ? propsSwipeActions : {})}
+    >
+      {actions.map(([label, icon, tint], index) => {
+        const props: Partial<typeof propsSwipeAction> =
+          first && index === 0 ? propsSwipeAction : {};
+
+        return (
+          <List.SwipeAction
+            key={label}
+            onClick={() => addLog(`${label} clicked`)}
+            {...props}
+            label={props.label ?? label}
+            tint={props.tint ?? tint}
+          >
+            <SFSymbol icon={icon} />
+          </List.SwipeAction>
+        );
+      })}
+    </List.SwipeActions>
+  );
+
+  return (
+    <Component
+      stretch
+      controls={[controlRoot, controlSwipeActions, controlSwipeAction]}
+      id="list-swipe"
+      log={log}
+      title="List (Swipe Actions)"
+    >
+      <List.Root {...propsRoot}>
+        <List.Section>
+          <List.Group>
+            {(['Regular', 'Tall'] as const).map((height, index) => (
+              <List.Item key={height}>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  variant="rounded"
+                >
+                  <SFSymbol icon={sfEnvelopeFill} />
+                </List.Image>
+                <List.Title
+                  render={<button />}
+                  onClick={() => addLog(`${height} clicked`)}
+                >
+                  {height}
+                </List.Title>
+                {height === 'Tall' ? (
+                  <List.Subtitle>Swipe either way</List.Subtitle>
+                ) : null}
+                <List.Detail>Detail</List.Detail>
+                <List.DrillIn />
+                {swipeActions('leading', leadingActions, index === 0)}
+                {swipeActions('trailing', trailingActions, false)}
+              </List.Item>
+            ))}
+          </List.Group>
+          <List.Footer>
+            Swipe a row to reveal its actions; swipe on past the leading ones
+            to trigger the outermost.
+          </List.Footer>
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
+
+const propOptionsEdit = {
+  prefix: ['none', 'delete', 'insert', 'multiple', 'single'] as const,
+  reorder: [true, false] as const,
+} as const;
+
+const planets = ['Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter'] as const;
+
+/**
+ * Editing (UIKit `UITableView` editing): rows reorderable by their grabbers,
+ * and, independently, a leading control: delete (opening the trailing
+ * swipe actions), insert, or selecting several rows (checkboxes) or one (a
+ * Base UI `RadioGroup` rendering the group, with radios).
+ */
+export const ListEditDemo: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [rows, setRows] = useState<readonly string[]>(planets);
+  const added = useRef(0);
+
+  const [controlContent, content] = usePropControl(
+    propOptionsEdit,
+    '[content]',
+    true,
+  );
+
+  const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
+
+  const [controlCheckbox, propsCheckbox, RemounterCheckbox] = usePropControl(
+    useMemo(
+      () => ({
+        ...propOptionsCheckbox,
+        onCheckedChange: [
+          new MappedProp(
+            (
+              checked: boolean,
+              { reason }: BaseCheckbox.Root.ChangeEventDetails,
+            ) => addLog(`checked change: ${checked}/${reason}`),
+            '[log change]',
+          ),
+          undefined,
+        ] as const,
+      }),
+      [addLog],
+    ),
+    'checkbox (1st)',
+  );
+
+  const [controlRadioGroup, propsRadioGroup, RemounterRadioGroup] =
+    usePropControl(
+      useMemo(
+        () => ({
+          className,
+          style,
+          defaultValue: [undefined, 'Earth'] as const,
+          disabled: [undefined, false, true] as const,
+          readOnly: [undefined, false, true] as const,
+          onValueChange: [
+            new MappedProp(
+              (value: unknown) => addLog(`value change: ${String(value)}`),
+              '[log change]',
+            ),
+            undefined,
+          ] as const,
+        }),
+        [addLog],
+      ),
+      'radio group',
+    );
+
+  const [controlRadio, propsRadio] = usePropControl(
+    useMemo(
+      () => ({
+        ...commonPropOptions,
+        cursor: cursorOptions,
+        disabled: [undefined, false, true] as const,
+        readOnly: [undefined, false, true] as const,
+      }),
+      [],
+    ),
+    'radio (1st)',
+  );
+
+  const [controlEditButton, propsEditButton] = usePropControl(
+    useMemo(
+      () => ({
+        ...commonPropOptions,
+        cursor: cursorOptions,
+        disabled: [undefined, false, true] as const,
+        onClick: [
+          new MappedProp(() => addLog('edit button clicked'), '[log click]'),
+          undefined,
+        ] as const,
+      }),
+      [addLog],
+    ),
+    'edit button (1st)',
+  );
+
+  const [controlGrabber, propsGrabber] = usePropControl(
+    useMemo(() => ({ ...commonPropOptions, cursor: cursorOptions }), []),
+    'grabber (1st)',
+  );
+
+  const prefix = (name: string, first: boolean) => {
+    switch (content.prefix) {
+      case 'multiple': {
+        return first ? (
+          <RemounterCheckbox>
+            <List.Checkbox
+              aria-label={name}
+              {...propsCheckbox}
+            />
+          </RemounterCheckbox>
+        ) : (
+          <List.Checkbox aria-label={name} />
+        );
+      }
+
+      case 'single': {
+        return (
+          <List.Radio
+            aria-label={name}
+            value={name}
+            {...(first ? propsRadio : {})}
+          />
+        );
+      }
+
+      case 'delete': {
+        return (
+          <List.EditButton
+            aria-label={`Delete ${name}`}
+            {...(first ? propsEditButton : {})}
+          />
+        );
+      }
+
+      case 'insert': {
+        return (
+          <List.EditButton
+            aria-label={`Insert after ${name}`}
+            editingStyle="insert"
+            onClick={() => {
+              added.current += 1;
+              const row = `New ${added.current}`;
+              addLog(`insert ${row}`);
+              setRows((current) =>
+                current.toSpliced(current.indexOf(name) + 1, 0, row),
+              );
+            }}
+            {...(first ? propsEditButton : {})}
+          />
+        );
+      }
+
+      default: {
+        return null;
+      }
+    }
+  };
+
+  const group = (
+    <List.Group
+      onReorder={(from, to) => {
+        addLog(`reorder: ${from} → ${to}`);
+        setRows((current) => {
+          const next = [...current];
+          const [moved] = next.splice(from, 1);
+          if (moved) next.splice(to, 0, moved);
+          return next;
+        });
+      }}
+    >
+      {rows.map((name, index) => (
+        <List.Item key={name}>
+          {prefix(name, index === 0)}
+          <List.Title>{name}</List.Title>
+          {content.reorder ? (
+            <List.Grabber
+              aria-label={`Reorder ${name}`}
+              {...(index === 0 ? propsGrabber : {})}
+            />
+          ) : null}
+          <List.SwipeActions overswipe>
+            <List.SwipeAction
+              label="Delete"
+              tint="var(--color-ios-system-red)"
+              onClick={() => {
+                addLog(`delete ${name}`);
+                setRows((current) => current.filter((row) => row !== name));
+              }}
+            >
+              <SFSymbol icon={sfTrashFill} />
+            </List.SwipeAction>
+          </List.SwipeActions>
+        </List.Item>
+      ))}
+    </List.Group>
+  );
+
+  return (
+    <Component
+      stretch
+      controls={[
+        controlContent,
+        controlRoot,
+        controlCheckbox,
+        controlRadioGroup,
+        controlRadio,
+        controlEditButton,
+        controlGrabber,
+      ]}
+      id="list-edit"
+      log={log}
+      title="List (Editing)"
+    >
+      <List.Root {...propsRoot}>
+        <List.Section>
+          <List.Header prominence="nested">
+            <List.Title>Planets</List.Title>
+            <List.Action
+              onClick={() => {
+                addLog('reset');
+                setRows(planets);
+              }}
+            >
+              Reset
+            </List.Action>
+          </List.Header>
+          {content.prefix === 'single' ? (
+            <RemounterRadioGroup>
+              <RadioGroup
+                aria-label="Planet"
+                {...propsRadioGroup}
+                render={group}
+              />
+            </RemounterRadioGroup>
+          ) : (
+            group
+          )}
         </List.Section>
       </List.Root>
     </Component>
@@ -874,6 +1072,132 @@ export const ListIndexDemo: FunctionComponent = () => {
           </StickyIndex>
         </IndexSpace>
       </Plain>
+    </Component>
+  );
+};
+
+const messages = [
+  {
+    date: '09:41',
+    from: 'Kate Bell',
+    preview:
+      'Hi! The photos from the weekend are finally in the shared album, have a look when you get a chance. Some of them turned out really well.',
+    subject: 'Weekend photos',
+  },
+  {
+    date: 'Yesterday',
+    from: 'John Appleseed',
+    preview:
+      'Attached is the agenda for Thursday. Let me know if anything is missing before I send it to everyone else.',
+    subject: 'Agenda for Thursday',
+  },
+  {
+    date: 'Monday',
+    from: 'Anna Haro',
+    preview: 'Thanks, see you there!',
+    subject: 'Re: Dinner',
+  },
+] as const;
+
+/**
+ * Mail-style rows (Framework7 media list): a plain list whose rows have a
+ * title row (sender, date, chevron), a subject (subtitle) and a preview
+ * (`Text`), with swipe actions.
+ */
+export const ListMailDemo: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [archived, setArchived] = useState<readonly string[]>([]);
+
+  const [controlRoot, propsRoot] = usePropControl(
+    useMemo(
+      () => ({
+        ...propOptionsRoot,
+        listStyle: ['plain', 'insetGrouped', 'grouped', undefined] as const,
+      }),
+      [],
+    ),
+    'root',
+    true,
+  );
+
+  const [controlText, propsText] = usePropControl(
+    useMemo(() => ({ ...commonPropOptions, lines: [undefined, 1, 2, 3] }), []),
+    'text',
+    true,
+  );
+
+  return (
+    <Component
+      stretch
+      controls={[controlRoot, controlText]}
+      id="list-mail"
+      log={log}
+      title="List (Mail)"
+    >
+      <List.Root {...propsRoot}>
+        <List.Section>
+          <List.Group>
+            {messages
+              .filter(({ from }) => !archived.includes(from))
+              .map(({ date, from, preview, subject }) => (
+                <List.Item key={from}>
+                  <List.Image variant="circular">
+                    <SFSymbol icon={sfPersonCropCircleFill} />
+                  </List.Image>
+                  <List.Title
+                    render={<button />}
+                    onClick={() => addLog(`${from} clicked`)}
+                  >
+                    {from}
+                  </List.Title>
+                  <List.Detail>{date}</List.Detail>
+                  <List.DrillIn />
+                  <List.Subtitle>{subject}</List.Subtitle>
+                  <List.Text {...propsText}>{preview}</List.Text>
+                  <List.SwipeActions
+                    overswipe
+                    side="leading"
+                  >
+                    <List.SwipeAction
+                      label="Unread"
+                      tint="var(--color-ios-system-blue)"
+                      onClick={() => addLog(`unread ${from}`)}
+                    >
+                      <SFSymbol icon={sfEnvelopeOpenFill} />
+                    </List.SwipeAction>
+                  </List.SwipeActions>
+                  <List.SwipeActions
+                    onOverswipe={() => {
+                      addLog(`archived ${from} (overswipe)`);
+                      setArchived((current) => [...current, from]);
+                    }}
+                  >
+                    <List.SwipeAction
+                      label="More"
+                      onClick={() => addLog(`more ${from}`)}
+                    >
+                      <SFSymbol icon={sfEllipsis} />
+                    </List.SwipeAction>
+                    <List.SwipeAction
+                      label="Flag"
+                      tint="var(--color-ios-system-orange)"
+                      onClick={() => addLog(`flag ${from}`)}
+                    >
+                      <SFSymbol icon={sfFlagFill} />
+                    </List.SwipeAction>
+                    <List.SwipeAction
+                      label="Archive"
+                      tint="var(--color-ios-system-purple)"
+                      onClick={() => addLog(`archived ${from}`)}
+                    >
+                      <SFSymbol icon={sfArchiveboxFill} />
+                    </List.SwipeAction>
+                  </List.SwipeActions>
+                </List.Item>
+              ))}
+          </List.Group>
+        </List.Section>
+      </List.Root>
     </Component>
   );
 };

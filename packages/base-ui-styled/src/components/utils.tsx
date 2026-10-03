@@ -110,6 +110,37 @@ export const wrap = <
  */
 export const css = String.raw;
 
+/** Color schemes that `colorSchemeAttribute` on the root element forces. */
+export type ColorScheme = 'dark' | 'light';
+
+/**
+ * Attribute on the root element (`<html>`) that forces a color scheme
+ * regardless of the browser's preference (see `Styles`).
+ */
+export const colorSchemeAttribute = 'data-color-scheme';
+
+/**
+ * Declarations by color scheme, inside a rule: the dark ones in dark mode
+ * (`prefers-color-scheme: dark`), or where `colorSchemeAttribute` forces
+ * either scheme. The forcing rules keep the rule's specificity (`:where()`)
+ * and follow the media query, so they win over it.
+ */
+export const colorScheme = (light: string, dark: string): string => css`
+  ${light}
+
+  @media (prefers-color-scheme: dark) {
+    ${dark}
+  }
+
+  &:where(:root[${colorSchemeAttribute}='light'] *) {
+    ${light}
+  }
+
+  &:where(:root[${colorSchemeAttribute}='dark'] *) {
+    ${dark}
+  }
+`;
+
 /**
  * Declarations for a font weight, also between the static weights of the
  * system font (SF Pro 510, 590 in Figma): the exact weight is set on the
@@ -131,6 +162,30 @@ export const fontWeight = (weight: number | string): string => css`
   stroke-linejoin: round;
   stroke-width: max(0, (${weight} - 400) / 326);
 `;
+
+/**
+ * How far to scroll in a frame while a pointer drags near an end of a
+ * scrolling area (as text selections scroll): within `edge` of its start
+ * (`-`) or end (`+`), faster closer to it, at most `speed` at or beyond it.
+ *
+ * @param position the pointer's position along the area
+ * @param start the area's start edge, along the same axis
+ * @param end the area's end edge
+ */
+export const edgeScrollDelta = (
+  position: number,
+  start: number,
+  end: number,
+  edge = 48,
+  speed = 16,
+): number => {
+  const towardsStart = Math.min(1, (start + edge - position) / edge);
+  const towardsEnd = Math.min(1, (position - end + edge) / edge);
+
+  if (towardsStart > 0) return -towardsStart * speed;
+  if (towardsEnd > 0) return towardsEnd * speed;
+  return 0;
+};
 
 const ReserveLayer = styled('span')`
   grid-area: 1 / 1;

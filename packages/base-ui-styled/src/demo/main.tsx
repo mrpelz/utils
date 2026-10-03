@@ -1,8 +1,15 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useContext } from 'react';
 
+import { useColorScheme, useTouchActive } from '../styles.js';
 import { ButtonDemo, ButtonMatrixDemo } from './button.js';
 import { EditMenuDemo } from './edit-menu.js';
-import { ListDemo, ListIndexDemo } from './list.js';
+import {
+  ListDemo,
+  ListEditDemo,
+  ListIndexDemo,
+  ListMailDemo,
+  ListSwipeDemo,
+} from './list.js';
 import { MenuDemo, MenuRegularDemo } from './menu.js';
 import { SegmentedDemo } from './segmented.js';
 import { SliderDemo } from './slider.js';
@@ -13,16 +20,30 @@ import {
   TabBarSecondaryDemo,
 } from './tab-bar.js';
 import { TypographyDemo, TypographyMatrixDemo } from './typography.js';
-import { OptionsProvider, StageBackgroundProvider } from './utils/main.js';
+import { OptionsContext, OptionsProvider } from './utils/options-context.js';
 import { DemoStyles } from './utils/styles.js';
 
-export const Demo: FunctionComponent = () => (
-  <OptionsProvider>
-    <StageBackgroundProvider>
+// The forced color scheme (demo option), as the library's `Styles` does.
+const ColorScheme: FunctionComponent = () => {
+  useColorScheme(useContext(OptionsContext).colorScheme);
+
+  return null;
+};
+
+export const Demo: FunctionComponent = () => {
+  // Pressed states on touch (iOS Safari), as the library's `Styles` does.
+  useTouchActive();
+
+  return (
+    <OptionsProvider>
       <DemoStyles />
+      <ColorScheme />
 
       <ListDemo />
+      <ListSwipeDemo />
+      <ListEditDemo />
       <ListIndexDemo />
+      <ListMailDemo />
       <TypographyDemo />
       <TypographyMatrixDemo />
       <ButtonDemo />
@@ -36,6 +57,6 @@ export const Demo: FunctionComponent = () => (
       <MenuDemo />
       <MenuRegularDemo />
       <EditMenuDemo />
-    </StageBackgroundProvider>
-  </OptionsProvider>
-);
+    </OptionsProvider>
+  );
+};

@@ -2,11 +2,11 @@ import { Switch as BaseSwitch } from '@base-ui/react/switch';
 import { FunctionComponent, useMemo } from 'react';
 
 import { Switch } from '../components/index.js';
+import { useLog } from './utils/log.js';
 import {
   commonPropOptions,
   Component,
   MappedProp,
-  useLog,
   usePropControl,
 } from './utils/main.js';
 

@@ -3,7 +3,7 @@
 
 import assert from 'node:assert/strict';
 
-import { sleep } from '../lib.js';
+import { sleep, withTouch } from '../lib.js';
 
 /** @typedef {import('../lib.js').Page} Page */
 
@@ -50,11 +50,142 @@ const measure = (page) =>
     };
   })()`);
 
+/**
+ * Center of an element, by an expression for it.
+ *
+ * @param {Page} page
+ * @param {string} expression
+ * @returns {Promise<[number, number]>}
+ */
+const center = (page, expression) =>
+  page.evaluate(
+    `(() => { const { height, width, x, y } = (${expression}).getBoundingClientRect(); return [x + width / 2, y + height / 2]; })()`,
+  );
+
+/**
+ * Expression for the first enabled item of an open menu (by index, e.g.
+ * -1 for the topmost submenu).
+ *
+ * @param {number} menu
+ */
+const firstItem = (menu) =>
+  `[...document.querySelectorAll(${JSON.stringify('[role=menu]')})].at(${menu}).querySelector('[role^=menuitem]:not([data-disabled])')`;
+
+/**
+ * The highlighted items' labels.
+ *
+ * @param {Page} page
+ * @returns {Promise<string[]>}
+ */
+const highlighted = (page) =>
+  page.evaluate(
+    `[...document.querySelectorAll(${JSON.stringify('[data-highlighted]')})].map((item) => item.querySelector('[data-menu-part=label]')?.textContent ?? item.textContent)`,
+  );
+
 /** Expression for the submenu trigger of the open menu. */
 const submenuTrigger = `[...document.querySelectorAll('[role=menuitem]')].find((element) => element.textContent.startsWith(${JSON.stringify('Submenu')}))`;
 
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
+  {
+    name: 'menu: dragging from the trigger on touch highlights the item under the finger, opens a submenu held over, and chooses in it',
+    run: async (page) => {
+      await page.open('menu');
+      const trigger = await page.rect('stage button');
+      const [triggerX, triggerY] = [
+        trigger.x + trigger.width / 2,
+        trigger.y + trigger.height / 2,
+      ];
+
+      await withTouch(page, async (touch) => {
+        await touch('touchStart', triggerX, triggerY);
+        await sleep(500);
+
+        await touch('touchMove', ...(await center(page, firstItem(0))));
+        await sleep(100);
+        assert.deepEqual(await highlighted(page), ['Share'], 'on an item');
+
+        // Back on the trigger: nothing is.
+        await touch('touchMove', triggerX, triggerY);
+        await sleep(100);
+        assert.deepEqual(await highlighted(page), [], 'on the trigger');
+
+        // On a submenu's item, it opens; its own items aren't highlighted
+        // until the finger is on one.
+        const [x, y] = await center(page, submenuTrigger);
+        await touch('touchMove', x, y - 4);
+        await touch('touchMove', x, y);
+        await sleep(800);
+        assert.equal(await menuCount(page), 2, 'the submenu opens');
+        assert.deepEqual(await highlighted(page), ['Submenu'], 'its trigger');
+
+        const target = await center(page, firstItem(-1));
+        await touch('touchMove', ...target);
+        await sleep(100);
+        assert.deepEqual(
+          await highlighted(page),
+          ['Submenu Action'],
+          'only the item in it',
+        );
+
+        // Back on its trigger: only that is.
+        await touch('touchMove', x, y);
+        await sleep(100);
+        assert.deepEqual(await highlighted(page), ['Submenu'], 'back');
+        assert.equal(await menuCount(page), 2, 'the submenu stays open');
+
+        await touch('touchMove', ...(await center(page, firstItem(-1))));
+        await sleep(100);
+
+        await touch('touchEnd');
+        await sleep(500);
+        assert.equal(await menuCount(page), 0, 'chosen, the menus close');
+      });
+    },
+  },
+  {
+    name: 'menu: dragging on touch near an end of a scrolling menu scrolls it',
+    run: async (page) => {
+      await page.open('menu');
+      const trigger = await page.rect('stage button');
+
+      await withTouch(page, async (touch) => {
+        await touch(
+          'touchStart',
+          trigger.x + trigger.width / 2,
+          trigger.y + trigger.height / 2,
+        );
+        await sleep(500);
+        const menu = `document.querySelector(${JSON.stringify('[role=menu]')})`;
+        await page.evaluate(`${menu}.style.maxHeight = '160px'`);
+        await sleep(100);
+
+        const { bottom, left, width } = await page.evaluate(
+          `(() => { const { bottom, left, width } = ${menu}.getBoundingClientRect(); return { bottom, left, width }; })()`,
+        );
+        const x = left + width / 2;
+        // Above its padding, on an item.
+        await touch('touchMove', x, bottom - 30);
+        await touch('touchMove', x, bottom - 14);
+        await sleep(800);
+
+        const state = await page.evaluate(`(() => {
+          const menu = ${menu};
+          const item = document.elementsFromPoint(${x}, ${bottom - 14}).map((element) => element.closest('[role^=menuitem]')).find(Boolean);
+          return {
+            scrolled: menu.scrollTop,
+            underFinger: item?.hasAttribute('data-highlighted') ?? false,
+          };
+        })()`);
+        assert.ok(state.scrolled > 0, 'scrolled');
+        assert.ok(
+          state.underFinger,
+          'the item under the finger is highlighted',
+        );
+        await touch('touchEnd');
+      });
+    },
+  },
   {
     name: 'menu: items, separators and section titles match Figma',
     run: async (page) => {
@@ -271,6 +402,46 @@ export const tests = [
         `open while dragging: ${openWhileDragging.join(', ')}`,
       );
       assert.equal(await menuCount(page), 1, 'open after release');
+    },
+  },
+  {
+    name: 'edit menu: the selection and the menu stay where focusing clears selections (WebKit)',
+    run: async (page) => {
+      await page.open('edit-menu');
+      // WebKit (FocusController::clearSelectionIfNeeded) clears the
+      // selection when focus moves to an element outside of it.
+      await page.evaluate(`(() => {
+        const { focus } = HTMLElement.prototype;
+        HTMLElement.prototype.focus = function (...args) {
+          const selection = document.getSelection();
+          if (selection.rangeCount > 0 && !this.contains(selection.getRangeAt(0).startContainer)) {
+            selection.removeAllRanges();
+          }
+          return focus.apply(this, args);
+        };
+      })()`);
+      const { height, width, x, y } = await page.rect('p');
+
+      await page.drag(
+        [x + 10, y + height / 4],
+        [x + width - 10, y + height / 2],
+      );
+      await sleep(1500);
+      assert.equal(await menuCount(page), 1, 'open');
+
+      // Highlighting an item focuses it.
+      const item = await page.evaluate(`(() => {
+        const { height, width, x, y } = document.querySelector('[role=menuitem]').getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`);
+      await page.mouse('mouseMoved', item[0], item[1]);
+      await sleep(1000);
+
+      const selected = await page.evaluate(
+        'String(document.getSelection()).length',
+      );
+      assert.ok(selected > 20, `selected ${selected} characters`);
+      assert.equal(await menuCount(page), 1);
     },
   },
   {

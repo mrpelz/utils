@@ -1,17 +1,19 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
+import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
 import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { sfHouseFill } from '@bradleyhodges/sfsymbols/sfHouseFill';
 import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
 import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
+import { sfPlayFill } from '@bradleyhodges/sfsymbols/sfPlayFill';
 import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
 import { FunctionComponent, ReactNode, useMemo } from 'react';
 
 import { TabBar } from '../components/index.js';
+import { useLog } from './utils/log.js';
 import {
   commonPropOptions,
   Component,
   MappedProp,
-  useLog,
   usePropControl,
 } from './utils/main.js';
 import { SFSymbol } from './utils/symbol.js';
@@ -61,6 +63,7 @@ const getPropOptionsTab = ({ label, symbol }: TabPreset) => ({
   label: labelOptions(label),
   shape: [undefined, 'capsule', 'circle'] as const,
   collapsedContent: [undefined, 'symbol', 'label', 'symbolAndLabel'] as const,
+  visibleWhenCollapsed: [undefined, false, true] as const,
   disabled: [undefined, false, true] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
 });
@@ -78,6 +81,9 @@ const propOptionsList = {
 const propOptionsGroup = {
   ...commonPropOptions,
   shape: [undefined, 'capsule', 'circle'] as const,
+  collapsedContent: [undefined, 'symbol', 'label', 'symbolAndLabel'] as const,
+  collapsedPosition: [undefined, 'start', 'center', 'end'] as const,
+  visibleWhenCollapsed: [undefined, false, true] as const,
 };
 
 const propOptionsIndicator = {
@@ -132,6 +138,7 @@ const usePreset = (preset: Preset) =>
           ),
         ],
         panels: [false, true] as const,
+        accessory: [false, true] as const,
       },
       list: {
         ...propOptionsList,
@@ -358,6 +365,14 @@ const TabBarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
               </TabBar.Group>
             ) : null}
           </TabBar.List>
+          {content.accessory ? (
+            // A mini player, as in Music.
+            <TabBar.Accessory>
+              <span style={{ flex: 1 }}>Not Playing</span>
+              <SFSymbol icon={sfPlayFill} />
+              <SFSymbol icon={sfForwardFill} />
+            </TabBar.Accessory>
+          ) : null}
         </TabBar.Root>
       </RemounterRoot>
     </Component>

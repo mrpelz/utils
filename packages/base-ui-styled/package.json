@@ -26,6 +26,7 @@
   "dependencies": {
     "@base-ui/react": "1.9.0",
     "@mrpelz/misc-utils": "*",
+    "@types/node": "26.6.3",
     "goober": "2.1.19"
   },
   "devDependencies": {
@@ -36,7 +37,7 @@
     "csstype": "3.2.3",
     "eslint-plugin-react": "7.37.5",
     "fork-ts-checker-webpack-plugin": "9.1.0",
-    "postcss-styled-syntax": "0.7.2",
+    "postcss-styled-syntax": "0.7.3",
     "source-map-loader": "5.0.0"
   }
 }
