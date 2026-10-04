@@ -1231,6 +1231,21 @@ export const tests = [
     },
   },
   {
+    name: 'list: separators end 16px before the edge, also above multi-line rows',
+    run: async (page) => {
+      await page.open('list-mail');
+      const ends =
+        await page.evaluate(`[...document.querySelector(${JSON.stringify('[data-list-part=group]')}).children].slice(1).map((item) => {
+        // Relative to its grid area, from the text's column (the title's).
+        const style = getComputedStyle(item, '::before');
+        const box = item.getBoundingClientRect();
+        const start = item.querySelector(${JSON.stringify('[data-list-part=title]')}).getBoundingClientRect().left - box.left;
+        return Math.round(box.width - start - parseFloat(style.left) - parseFloat(style.width));
+      })`);
+      assert.deepEqual(ends, [16, 16]);
+    },
+  },
+  {
     name: 'list: screenshots',
     run: async (page) => {
       for (const id of [

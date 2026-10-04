@@ -1,6 +1,8 @@
 import { Popover as BasePopover } from '@base-ui/react/popover';
 import { styled } from 'goober';
 import {
+  CSSProperties,
+  FocusEvent,
   forwardRef,
   Fragment,
   FunctionComponent,
@@ -53,12 +55,27 @@ import { css, fontWeight } from './utils.js';
 //   “Regular” material, blur 50px), its corners 13px, as Figma's.
 // - The calendar's width (Figma: 370px) is a minimum: 7 × 44px days, 16px
 //   from the sides.
-// - The collapsed buttons can be capsules (`buttonShape`; Figma: 6px
+// - The collapsed buttons are capsules (or, `buttonShape`, Figma's 6px
 //   corners).
 
 export type DatePickerMode = 'date' | 'dateAndTime' | 'time';
 
 export type DatePickerStyle = 'compact' | 'inline';
+
+/**
+ * How a day is highlighted: a dot below its date (default), its date in the
+ * tint (`text`), or a circle behind it, the tint at 20% (`circle`); in its
+ * own `tint` (default: the date's color for dots, the app's tint
+ * otherwise).
+ */
+export type DayHighlight = {
+  style?: 'circle' | 'dot' | 'text';
+  tint?: string;
+};
+
+/** A day's highlights (see `CalendarProps` `highlighted`). */
+export type DayHighlights =
+  boolean | DayHighlight | null | readonly DayHighlight[] | undefined;
 
 /** A range of days: its start, and its end (`null` while picking it). */
 export type DateRange = { end: Date | null; start: Date };
@@ -92,26 +109,68 @@ type RangeValue = {
 export type CalendarProps = {
   /** The week's first day (0: Sunday … 6: Saturday; default: the locale's). */
   firstDayOfWeek?: number;
-  /** Days marked with a dot (e.g. with events; Framework7 `events`). */
-  highlighted?: (date: Date) => boolean;
+  /**
+   * Rows below the calendar, after a separator (e.g. `CalendarTimeRow`, or
+   * `CalendarRow`s of `CalendarButton`s jumping to dates), composed from the
+   * calendar's state and actions (see `CalendarFooter`); with a time, by
+   * default `CalendarTimeRow` (none: `() => null`).
+   */
+  footer?: (calendar: CalendarFooter) => ReactNode;
+  /**
+   * Days highlighted (e.g. with events; Framework7 `events`): `true` (a dot
+   * below), how (see `DayHighlight`), or several highlights (dots side by
+   * side; the last text or circle highlight); `false`, `null` or
+   * `undefined`: not. Not the adjacent months' days.
+   */
+  highlighted?: (date: Date) => DayHighlights;
   /**
    * Days of the week shown in the secondary label color (0: Sunday … 6:
    * Saturday; e.g. the weekend: `[0, 6]`; Framework7 `weekendDays`).
    */
   highlightedWeekdays?: readonly number[];
+  /**
+   * Days that can't be selected (e.g. booked ones; besides `min` and
+   * `max`), grayed out as those (programmatic highlights still show).
+   */
+  isDateDisabled?: (date: Date) => boolean;
   /** Locale of names, numerals, the hour cycle and the week's first day. */
   locale?: string;
-  /**
-   * Shows the adjacent months' days filling the first and last weeks, grayed
-   * out (Framework7 `calendarDayPrev`/`Next`; UIKit: none); pressed, they're
-   * selected, showing their month.
-   */
-  showAdjacentDays?: boolean;
   /** The latest selectable day. */
   max?: Date;
   /** The earliest selectable day. */
   min?: Date;
+  /**
+   * Shows the adjacent months' days filling the first and last weeks, grayed
+   * out (Framework7 `calendarDayPrev`/`Next`; UIKit: none); pressed, they
+   * show their month.
+   */
+  showAdjacentDays?: boolean;
 } & (RangeValue | SingleValue);
+
+/** The calendar's state and actions, for its `footer`. */
+export type CalendarFooter = {
+  /** The shape of the picker's collapsed buttons (see `DatePicker`). */
+  buttonShape?: 'capsule' | 'roundedRectangle';
+  /** Whether the picker is disabled. */
+  disabled: boolean;
+  /**
+   * Selects a day (in a range: as pressing it), showing its month; keeping
+   * the selected time, or (`withTime`) taking the date's own.
+   */
+  select: (date: Date, withTime?: boolean) => void;
+  /** Shows a day's month (focusing the day; not selecting it). */
+  show: (date: Date) => void;
+  /** The picker's time (if it has one): its text, and its roll. */
+  time?: {
+    /** The roll's id (for `aria-controls`). */
+    controls: string;
+    label: string;
+    shown: boolean;
+    toggle: () => void;
+  };
+  /** The selected date or range. */
+  value: Date | DateRange | null;
+};
 
 /** What's open: the date (the calendar) or the time (the roll). */
 export type DatePickerOpen = 'date' | 'time';
@@ -121,8 +180,8 @@ export type HourCycle = 'h12' | 'h23';
 
 export type DatePickerProps = CalendarProps & {
   /**
-   * The collapsed buttons' shape (default: `roundedRectangle`, Figma's 6px
-   * corners).
+   * The collapsed buttons' shape (default: `capsule`; `roundedRectangle`:
+   * Figma's 6px corners).
    */
   buttonShape?: 'capsule' | 'roundedRectangle';
   /** The initially open popover (uncontrolled). */
@@ -222,6 +281,35 @@ const monthWeeks = (month: Date, weekStart: number) => {
   );
 };
 
+/**
+ * A day's highlights (see `DayHighlights`): its dots' tints (`undefined`:
+ * the date's color), and its button's attributes for a text and a circle
+ * highlight (the last of each).
+ */
+const highlightsOf = (highlights: DayHighlights) => {
+  if (!highlights) return { attributes: {}, dots: [] };
+  const list: readonly DayHighlight[] =
+    highlights === true ? [{}] : [highlights].flat();
+
+  const dots = list
+    .filter(({ style = 'dot' }) => style === 'dot')
+    .map(({ tint }) => tint);
+  const text = list.findLast(({ style }) => style === 'text');
+  const circle = list.findLast(({ style }) => style === 'circle');
+
+  return {
+    attributes: {
+      'data-highlight-circle': circle ? '' : undefined,
+      'data-highlight-text': text ? '' : undefined,
+      style: {
+        '--styled-date-picker-circle': circle?.tint,
+        '--styled-date-picker-text': text?.tint,
+      } as CSSProperties,
+    },
+    dots,
+  };
+};
+
 /** A day's place in a range (or none). */
 const rangePlace = (day: Date, range: DateRange | null) => {
   if (!range) return undefined;
@@ -270,7 +358,7 @@ const CollapsedButton = forwardRef<
 >(({ shape, ...props }, ref) => (
   <StyledCollapsedButton
     ref={ref}
-    shape={shape === 'capsule' ? 'capsule' : 'roundedRectangle'}
+    shape={shape === 'roundedRectangle' ? 'roundedRectangle' : 'capsule'}
     type="button"
     variant="bordered-secondary"
     {...props}
@@ -548,21 +636,43 @@ const Day = styled('button', forwardRef)`
   }
 
   /* Highlighted weekdays (e.g. the weekend) */
-  &[data-weekday-highlighted]:not([aria-pressed='true']) {
+  &[data-weekday-highlighted]:enabled:not([aria-pressed='true']) {
     color: var(--color-ios-secondary-label);
   }
 
-  /* Highlighted days: a dot below the date (Framework7 events) */
-  &[data-highlighted]::after {
+  /* Highlighted days (see DayHighlight): dots below the date (Framework7
+     events, side by side), the date in the tint, or a circle behind it; not
+     selected ones' text and circles. */
+  & > [data-date-picker-part='dots'] {
     position: absolute;
     bottom: 5px;
-    left: calc(50% - 2.5px);
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background-color: currentcolor;
-    content: '';
-    opacity: 0.6;
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    inset-inline: 0;
+    pointer-events: none;
+
+    & > * {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background-color: currentcolor;
+      opacity: 0.6;
+    }
+  }
+
+  &[data-highlight-text]:not([aria-pressed='true']) {
+    color: var(--styled-date-picker-text, var(--color-ios-primary));
+  }
+
+  &[data-highlight-circle]:not([aria-pressed='true']) {
+    &::before {
+      background-color: color-mix(
+        in srgb,
+        var(--styled-date-picker-circle, var(--color-ios-primary)) 20%,
+        transparent
+      );
+    }
   }
 
   &:disabled {
@@ -843,12 +953,44 @@ type CalendarInternalProps = CalendarProps & {
   /** The roll shown at first (internal, see `DatePicker`). */
   initialRoll?: 'monthYear' | 'time';
   label?: string;
-  /** The time row, with its roll (internal, see `DatePicker`). */
+  /** The picker's time (internal, see `DatePicker`): for the footer. */
   time?: {
     disabled: boolean;
-    label: ReactNode;
     shape?: DatePickerProps['buttonShape'];
   };
+};
+
+/**
+ * The calendar's value: a date or a range (shown, while one is dragged,
+ * as dragged; see `CalendarPanel`).
+ */
+const useCalendarValue = (props: CalendarInternalProps) => {
+  const [value, setValue] = useControlled<Date | DateRange | null>(
+    props.value,
+    props.defaultValue ?? null,
+  );
+  const [dragged, setDragged] = useState<DateRange | null>(null);
+  const range = props.range
+    ? (dragged ?? (value as DateRange | null) ?? null)
+    : null;
+  const single = props.range ? null : ((value as Date | null) ?? null);
+
+  return { dragged, range, setDragged, setValue, single };
+};
+
+/** The footer's state and actions (see `CalendarFooter`). */
+const footerOf = ({
+  time,
+  ...footer
+}: Pick<CalendarFooter, 'select' | 'show' | 'value'> & {
+  time?: NonNullable<CalendarFooter['time']> & {
+    disabled: boolean;
+    shape?: DatePickerProps['buttonShape'];
+  };
+}): CalendarFooter => {
+  if (!time) return { ...footer, disabled: false };
+  const { disabled, shape, ...rest } = time;
+  return { ...footer, buttonShape: shape, disabled, time: rest };
 };
 
 /** A day's button's date (see `CalendarPanel`). */
@@ -872,29 +1014,23 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     highlighted,
     highlightedWeekdays = [],
     hourCycle,
+    isDateDisabled,
     label,
     locale,
     max,
     min,
-    showAdjacentDays = false,
+    showAdjacentDays,
     time,
   } = props;
-  const [value, setValue] = useControlled<Date | DateRange | null>(
-    props.value,
-    props.defaultValue ?? null,
-  );
-  // A range being dragged (see below), shown until released.
-  const [dragged, setDragged] = useState<DateRange | null>(null);
-  const range = props.range
-    ? (dragged ?? (value as DateRange | null) ?? null)
-    : null;
-  const single = props.range ? null : ((value as Date | null) ?? null);
-  const anchor = range?.start ?? single;
+  const { dragged, range, setDragged, setValue, single } =
+    useCalendarValue(props);
 
   const today = startOfDay(new Date());
-  const [month, setMonth] = useState(() => startOfMonth(anchor ?? today));
+  const [month, setMonth] = useState(() =>
+    startOfMonth(range?.start ?? single ?? today),
+  );
   const [focused, setFocused] = useState(() =>
-    clampDay(startOfDay(anchor ?? today), min, max),
+    clampDay(startOfDay(range?.start ?? single ?? today), min, max),
   );
   const [rolled, setRolled] = useState<'monthYear' | 'time' | undefined>(
     props.initialRoll,
@@ -906,7 +1042,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   const leavingRef = useRef<HTMLDivElement>(null);
   const pagesRef = useRef<HTMLDivElement>(null);
   const daysRef = useRef<HTMLDivElement>(null);
-  const focusNext = useRef(false);
+  const focusNext = useRef<Date | undefined>(undefined);
   const drag = useRef<
     | {
         /** Moving on to other months, while held beyond the days. */
@@ -948,18 +1084,25 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     [locale, weekStartProp],
   );
   const weeks = monthWeeks(month, weekStart);
+  // Within the limits, and not disabled.
+  const selectable = (day: Date) =>
+    isSelectable(day, min, max) && !isDateDisabled?.(day);
   // A week of days (any), for the weekday names.
   const weekdays = Array.from({ length: 7 }, (_, index) =>
     addDays(new Date(2024, 0, 7), (weekStart + index) % 7),
   );
 
-  // Keyboard moves focus to the day it moved to (once rendered).
+  // Keyboard moves focus to the day it moved to, once rendered (an effect
+  // of an earlier render may run first).
   useEffect(() => {
-    if (!focusNext.current) return;
-    focusNext.current = false;
-    daysRef.current
-      ?.querySelector<HTMLButtonElement>('[tabindex="0"]')
-      ?.focus();
+    const { current: target } = focusNext;
+    if (!target) return;
+    const day = daysRef.current?.querySelector<HTMLButtonElement>(
+      `[data-date="${CSS.escape(String(target.getTime()))}"]`,
+    );
+    if (!day) return;
+    focusNext.current = undefined;
+    day.focus();
   });
 
   // Months of more or fewer weeks: the days' height transitions.
@@ -1021,11 +1164,20 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     };
   }, [leaving]);
 
+  // Moved by keyboard: on past disabled days (in the direction moved), to
+  // one that can be focused.
   const moveTo = (date: Date) => {
-    const target = clampDay(date, min, max);
+    const direction = Math.sign(date.getTime() - focused.getTime()) || 1;
+    let target = clampDay(date, min, max);
+    for (let step = 0; step < 366 && !selectable(target); step += 1) {
+      const next = addDays(target, direction);
+      if (!isSelectable(next, min, max)) return;
+      target = next;
+    }
+    if (!selectable(target)) return;
     setFocused(target);
     goTo(target);
-    focusNext.current = true;
+    focusNext.current = target;
   };
 
   const changeTime = (date: Date) => {
@@ -1039,8 +1191,8 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     props.onValueChange?.(next);
   };
 
-  const select = (date: Date) => {
-    setFocused(date);
+  const select = (date: Date, withTime = false) => {
+    setFocused(startOfDay(date));
 
     if (props.range) {
       // A new range, or its end (before its start: the other way round).
@@ -1052,9 +1204,11 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
       return;
     }
 
-    // Keeps the time of an earlier value.
+    // Keeps the time of an earlier value (unless taking the date's).
     const next = new Date(date);
-    if (single) next.setHours(single.getHours(), single.getMinutes(), 0, 0);
+    if (single && !withTime) {
+      next.setHours(single.getHours(), single.getMinutes(), 0, 0);
+    }
     setValue(next);
     props.onValueChange?.(next);
   };
@@ -1084,7 +1238,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (!props.range || event.button !== 0) return;
     const from = dayOf(event.target);
-    if (!from || !isSelectable(from, min, max)) return;
+    if (!from || !selectable(from)) return;
     drag.current = {
       edge: 0,
       from,
@@ -1152,7 +1306,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     turnPage(Number(after) - Number(before));
 
     const over = dayOf(under);
-    if (!over || !isSelectable(over, min, max)) return;
+    if (!over || !selectable(over)) return;
     setDragged(between(dragging.from, over));
     setFocused(over);
   };
@@ -1204,37 +1358,78 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
       );
     }
 
+    // Not the adjacent months' days (nor their weekdays, see below).
+    const { attributes, dots } = highlightsOf(
+      outside ? undefined : highlighted?.(day),
+    );
+
     return (
       <Day
         key={day.getTime()}
         aria-current={isSameDay(day, today) ? 'date' : undefined}
         aria-label={interactive ? formats.full.format(day) : undefined}
         data-date={interactive ? day.getTime() : undefined}
-        data-highlighted={highlighted?.(day) || undefined}
+        {...attributes}
         data-outside={outside}
         data-range={rangePlace(day, range)}
-        disabled={!isSelectable(day, min, max)}
+        disabled={!selectable(day)}
         tabIndex={interactive && !outside && isSameDay(day, focused) ? 0 : -1}
         type="button"
         aria-pressed={
           range ? rangePlace(day, range) !== undefined : isSameDay(day, single)
         }
         data-weekday-highlighted={
-          highlightedWeekdays.includes(day.getDay()) || undefined
+          (!outside && highlightedWeekdays.includes(day.getDay())) || undefined
         }
         onClick={
           interactive
             ? () => {
+                // Another month's day: shows its month (not selected).
+                if (outside) {
+                  showMonth(day);
+                  return;
+                }
                 select(day);
-                if (outside) goTo(day);
               }
             : undefined
         }
       >
         {formats.day.format(day)}
+        {dots.length > 0 ? (
+          <span data-date-picker-part="dots">
+            {dots.map((dot, index) => (
+              <span
+                // By place: dots don't move.
+                key={index}
+                style={dot ? { backgroundColor: dot } : undefined}
+              />
+            ))}
+          </span>
+        ) : null}
       </Day>
     );
   };
+
+  const footerContent = props.footer?.(
+    footerOf({
+      select: (date, withTime) => {
+        goTo(date);
+        select(withTime ? date : startOfDay(date), withTime);
+      },
+      show: (date) => {
+        goTo(date);
+        setFocused(clampDay(startOfDay(date), min, max));
+      },
+      time: time && {
+        ...time,
+        controls: rollId,
+        label: single ? formats.time.format(single) : '–',
+        shown: rolled === 'time',
+        toggle: () => toggle('time'),
+      },
+      value: range ?? single,
+    }),
+  );
 
   return (
     <Panel data-date-picker-part="calendar">
@@ -1316,6 +1511,11 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
               suppressClick.current = false;
               event.stopPropagation();
             }}
+            onFocus={(event: FocusEvent<HTMLDivElement>) => {
+              // The day focused (e.g. pressed): keys move on from it.
+              const day = dayOf(event.target);
+              if (day && !isSameDay(day, focused)) setFocused(day);
+            }}
           >
             {weeks.flat().map((day) => cell(day, month, true))}
           </Weeks>
@@ -1344,27 +1544,46 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
           </Overlay>
         )}
       </Body>
-      {time ? (
+      {footerContent === null || footerContent === undefined ? null : (
         <>
           <Separator />
-          <TimeRow>
-            <span aria-hidden="true">{time.label}</span>
-            <CollapsedButton
-              aria-controls={rollId}
-              aria-expanded={rolled === 'time'}
-              aria-label="Time"
-              disabled={time.disabled}
-              shape={time.shape}
-              onClick={() => toggle('time')}
-            >
-              {single ? formats.time.format(single) : '–'}
-            </CollapsedButton>
-          </TimeRow>
+          {footerContent}
         </>
-      ) : null}
+      )}
     </Panel>
   );
 };
+
+/** A footer row (see `CalendarProps` `footer`): Figma “Time”'s, 52px. */
+const CalendarRow = TimeRow;
+
+/** A footer button (see `CalendarProps` `footer`): a collapsed button. */
+const CalendarButton = CollapsedButton;
+
+/**
+ * The footer's Time row (Figma “Time”): the time's button, showing its
+ * roll; the picker's default footer, with a time.
+ */
+const CalendarTimeRow: FunctionComponent<{
+  calendar: CalendarFooter;
+  /** The row's title (default: “Time”). */
+  label?: ReactNode;
+}> = ({ calendar, label = 'Time' }) =>
+  calendar.time ? (
+    <CalendarRow>
+      <span aria-hidden="true">{label}</span>
+      <CalendarButton
+        aria-controls={calendar.time.controls}
+        aria-expanded={calendar.time.shown}
+        aria-label="Time"
+        disabled={calendar.disabled}
+        shape={calendar.buttonShape}
+        onClick={calendar.time.toggle}
+      >
+        {calendar.time.label}
+      </CalendarButton>
+    </CalendarRow>
+  ) : null;
 
 /** The calendar (Figma “Style=Inline”, without the time). */
 const Calendar: FunctionComponent<CalendarProps & { label?: string }> = (
@@ -1406,6 +1625,7 @@ const calendarPropsOf = (
     firstDayOfWeek: props.firstDayOfWeek,
     highlighted: props.highlighted,
     highlightedWeekdays: props.highlightedWeekdays,
+    isDateDisabled: props.isDateDisabled,
     showAdjacentDays: props.showAdjacentDays,
     hourCycle: props.hourCycle,
     locale: props.locale,
@@ -1458,6 +1678,11 @@ const usePickerOpen = (props: DatePickerProps) => {
 
   return [open, change] as const;
 };
+
+/** The picker's default footer, with a time. */
+const defaultFooter = (calendar: CalendarFooter) => (
+  <CalendarTimeRow calendar={calendar} />
+);
 
 /** The compact style's time: its button, the roll in a popover. */
 const TimePopover: FunctionComponent<
@@ -1543,10 +1768,12 @@ const CalendarPopover: FunctionComponent<{
 }) => {
   const dateTriggerId = useId();
   const timeTriggerId = useId();
+  const collapsedRef = useRef<HTMLDivElement>(null);
   const hasTime = timeLabel !== undefined;
 
+  // Positioned at both buttons together, whichever opened it.
   return (
-    <Collapsed>
+    <Collapsed ref={collapsedRef}>
       <BasePopover.Root
         open={open === 'date' || (hasTime && open === 'time')}
         triggerId={open === 'time' ? timeTriggerId : dateTriggerId}
@@ -1581,6 +1808,7 @@ const CalendarPopover: FunctionComponent<{
         ) : null}
         <BasePopover.Portal>
           <BasePopover.Positioner
+            anchor={collapsedRef}
             collisionPadding={8}
             sideOffset={8}
           >
@@ -1667,17 +1895,17 @@ const DatePicker: FunctionComponent<DatePickerProps> = (props) => {
 
   const calendarProps = calendarPropsOf(props, change, range ?? single);
 
-  const calendar = (withTime: boolean, initialRoll?: 'time') => (
+  // With a time, by default the Time row below.
+  const calendar = (initialRoll?: 'time') => (
     <CalendarPanel
       {...calendarProps}
+      footer={props.footer ?? (hasTime ? defaultFooter : undefined)}
       initialRoll={initialRoll}
-      time={
-        withTime ? { disabled, label: 'Time', shape: buttonShape } : undefined
-      }
+      time={hasTime ? { disabled, shape: buttonShape } : undefined}
     />
   );
 
-  if (pickerStyle === 'inline' && hasDate) return calendar(hasTime);
+  if (pickerStyle === 'inline' && hasDate) return calendar();
 
   const dateLabel = dateLabelOf(formats.date, range, single);
   const timeLabel = single ? formats.time.format(single) : '–';
@@ -1723,9 +1951,16 @@ const DatePicker: FunctionComponent<DatePickerProps> = (props) => {
       timeLabel={hasTime ? timeLabel : undefined}
       onOpenChange={changeOpen}
     >
-      {(initialRoll) => calendar(hasTime, initialRoll)}
+      {(initialRoll) => calendar(initialRoll)}
     </CalendarPopover>
   );
 };
 
-export { Calendar, DatePicker, TimeRoll };
+export {
+  Calendar,
+  CalendarButton,
+  CalendarRow,
+  CalendarTimeRow,
+  DatePicker,
+  TimeRoll,
+};

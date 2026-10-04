@@ -3,6 +3,8 @@
 
 import assert from 'node:assert/strict';
 
+import { sleep } from '../lib.js';
+
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
@@ -79,6 +81,36 @@ export const tests = [
         inside: [true, true],
         outside: [false, false],
       });
+    },
+  },
+  {
+    name: 'button: fill grows it to the available width, its content centered',
+    run: async (page) => {
+      await page.open('button');
+      await page.setControl('variant', 'bordered');
+      /** @returns {Promise<[number, number, number]>} */
+      const measure = () =>
+        page.evaluate(`(() => {
+          const button = ${page.section}.querySelector('stage button');
+          const box = button.getBoundingClientRect();
+          const parent = button.parentElement.getBoundingClientRect();
+          const label = button.lastElementChild.getBoundingClientRect();
+          return [Math.round(box.width), Math.round(parent.width - box.width), Math.round(label.left + label.width / 2 - (box.left + box.width / 2))];
+        })()`);
+      const [hugging] = await measure();
+      await page.setControl('fill', true);
+      // In the stage's width (the demo's “Stretch”).
+      await page.evaluate(
+        `${page.section}.querySelector(${JSON.stringify('input[name="button.stretch"]')}).click()`,
+      );
+      await sleep(200);
+      const [width, rest, offset] = await measure();
+      assert.ok(width > hugging + 200, `${hugging}px → ${width}px`);
+      // Back to the demo's own layout (kept in local storage).
+      await page.evaluate(
+        `${page.section}.querySelector(${JSON.stringify('input[name="button.stretch"]')}).click()`,
+      );
+      assert.deepEqual([rest, offset], [0, 0]);
     },
   },
 ];

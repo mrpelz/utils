@@ -424,7 +424,7 @@ export const tests = [
       await page.setControl('locale', 'en-US');
       await page.setControl('firstDayOfWeek', 1);
       await page.setMappedControl('highlightedWeekdays', '[weekend: 0, 6]');
-      await page.setMappedControl('highlighted', '[the 3rd, 14th, 25th]');
+      await page.setMappedControl('highlighted', '[the 3rd, 14th, 25th: dots]');
       await page.setControl('hourCycle', 'h23');
 
       const state = await page.evaluate(`(() => {
@@ -432,7 +432,7 @@ export const tests = [
         const day = (text) => days.find((element) => element.textContent === text);
         const abbrs = [...document.querySelectorAll('abbr')];
         return {
-          dots: days.filter((element) => getComputedStyle(element, '::after').content !== 'none').map((element) => element.textContent),
+          dots: days.filter((element) => element.querySelector(${JSON.stringify('[data-date-picker-part=dots]')})).map((element) => element.textContent),
           first: abbrs[0].textContent,
           time: document.querySelector('[aria-label=Time]').textContent,
           weekend: [abbrs.at(-1).textContent, getComputedStyle(abbrs.at(-1)).color, getComputedStyle(day('5')).color, getComputedStyle(day('7')).color],
@@ -684,8 +684,9 @@ export const tests = [
       await page.click([next.x + next.width / 2, next.y + next.height / 2]);
       await sleep(500);
       const start = await center('29');
+      /** @type {[number, number]} */
       const blank = await page.evaluate(`(() => {
-        const { height, width, x, y } = document.querySelector(${JSON.stringify('[role=group] [data-blank=after]')}).getBoundingClientRect();
+        const { height, width, x, y } = document.querySelector(${JSON.stringify('[role=group] [data-outside=after]')}).getBoundingClientRect();
         return [x + width / 2, y + height / 2];
       })()`);
       await page.mouse('mousePressed', ...start);
@@ -720,6 +721,286 @@ export const tests = [
           id,
         );
       }
+    },
+  },
+  {
+    name: 'date picker: adjacent months’ days, grayed out; over-dragged to the side, a range goes on',
+    run: async (page) => {
+      await page.open('date-picker');
+      await page.setControl('range', true);
+      await page.setControl('pickerStyle', 'inline');
+      await page.setControl('locale', 'en-US');
+      await page.setControl('showAdjacentDays', true);
+
+      // April 2025: March 30 and 31 before, May 1 to 3 after.
+      const adjacent = await page.evaluate(`(() => {
+        const days = [...document.querySelectorAll(${JSON.stringify('[role=group] [data-outside]')})];
+        return [days.map((day) => day.textContent).join(), getComputedStyle(days[0]).color];
+      })()`);
+      assert.deepEqual(adjacent, ['30,31,1,2,3', 'rgba(60, 60, 67, 0.3)']);
+
+      // On to May (its last week full): from the 31st beyond the days' end.
+      const next = await page.rect('[aria-label="Next month"]');
+      await page.click([next.x + next.width / 2, next.y + next.height / 2]);
+      await sleep(500);
+      /** @type {[[number, number], number]} */
+      const [from, right] = await page.evaluate(`(() => {
+        const day = [...document.querySelectorAll(${JSON.stringify('[role=group] [aria-pressed]:not([data-outside])')})].find((element) => element.textContent === '31');
+        const { height, width, x, y } = day.getBoundingClientRect();
+        return [[x + width / 2, y + height / 2], document.querySelector(${JSON.stringify('[role=group]')}).getBoundingClientRect().right];
+      })()`);
+      await page.mouse('mousePressed', ...from);
+      for (let step = 1; step <= 5; step += 1) {
+        await page.mouse(
+          'mouseMoved',
+          from[0] + ((right + 30 - from[0]) * step) / 5,
+          from[1],
+        );
+        await sleep(40);
+      }
+      await sleep(900);
+      await page.mouse('mouseReleased', right + 30, from[1]);
+      await sleep(400);
+      assert.equal(
+        await page.evaluate(
+          `document.querySelector(${JSON.stringify('[data-date-picker-part=calendar] h2')}).textContent`,
+        ),
+        'June 2025',
+      );
+      assert.match(
+        await page.evaluate(
+          `${page.section}.querySelector('config').textContent`,
+        ),
+        /value change: 5\/31\/2025 – 6\/1\/2025/u,
+      );
+    },
+  },
+  {
+    name: 'date picker: capsules by default; highlights as dots, text or circles, tinted',
+    run: async (page) => {
+      await page.open('date-picker');
+      await page.setControl('locale', 'en-US');
+      assert.equal(
+        await page.evaluate(
+          `getComputedStyle(${page.section}.querySelector('stage button')).borderRadius`,
+        ),
+        '1000px',
+      );
+
+      await page.setControl('pickerStyle', 'inline');
+      await page.setMappedControl(
+        'highlighted',
+        '[3rd: red dot, 14th: orange text, 25th: green circle]',
+      );
+      const styles = await page.evaluate(`(() => {
+        const day = (text) => [...document.querySelectorAll('[aria-pressed]')].find((element) => element.textContent === text);
+        return [
+          getComputedStyle(day('3').querySelector(${JSON.stringify('[data-date-picker-part=dots] > *')})).backgroundColor,
+          getComputedStyle(day('14')).color,
+          getComputedStyle(day('25'), '::before').backgroundColor,
+        ];
+      })()`);
+      assert.deepEqual(styles, [
+        'rgb(255, 56, 60)',
+        'rgb(255, 141, 40)',
+        'color(srgb 0.203922 0.780392 0.34902 / 0.2)',
+      ]);
+    },
+  },
+  {
+    name: 'date picker: pressing another month’s day shows its month, unselected',
+    run: async (page) => {
+      await page.open('date-picker');
+      await page.setControl('pickerStyle', 'inline');
+      await page.setControl('locale', 'en-US');
+      await page.setControl('showAdjacentDays', true);
+      const may = await page.evaluate(`(() => {
+        const day = document.querySelector(${JSON.stringify('[role=group] [data-outside=after]')});
+        const { height, width, x, y } = day.getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`);
+      await page.click(may);
+      await sleep(500);
+      assert.deepEqual(
+        await page.evaluate(
+          `[document.querySelector(${JSON.stringify('[data-date-picker-part=calendar] h2')}).textContent, [...document.querySelectorAll(${JSON.stringify('[role=group] [aria-pressed=true]')})].map((day) => day.textContent)]`,
+        ),
+        ['May 2025', []],
+      );
+      assert.doesNotMatch(
+        await page.evaluate(
+          `${page.section}.querySelector('config').textContent`,
+        ),
+        /value change/u,
+      );
+    },
+  },
+  {
+    name: 'date picker: date and time open one popover at both buttons; the time row can be left out (footer)',
+    run: async (page) => {
+      await page.open('date-and-time-picker');
+      await page.setControl('locale', 'en-US');
+      /** @param {string} selector */
+      const openBy = async (selector) => {
+        const button = await page.rect(selector);
+        await page.click([
+          button.x + button.width / 2,
+          button.y + button.height / 2,
+        ]);
+        await sleep(600);
+        return page.evaluate(`(() => {
+          const popup = document.querySelector(${JSON.stringify('[role=dialog]')});
+          const { left, top } = popup.getBoundingClientRect();
+          return [Math.round(left), Math.round(top), [...popup.querySelectorAll(${JSON.stringify('[aria-label=Time]')})].length];
+        })()`);
+      };
+
+      const byDate = await openBy('stage button');
+      await page.key('Escape');
+      await sleep(400);
+      const byTime = await openBy('stage [aria-label=Time]');
+      assert.deepEqual(byTime.slice(0, 2), byDate.slice(0, 2));
+      assert.equal(byDate[2], 1, 'the time row');
+      await page.key('Escape');
+      await sleep(400);
+
+      await page.setControl('footer', 'none');
+      const opened = await openBy('stage button');
+      const rows = opened.at(2);
+      assert.equal(rows, 0, 'no time row');
+      await page.key('Escape');
+      await sleep(400);
+      await openBy('stage [aria-label=Time]');
+      assert.deepEqual(
+        await page.evaluate(
+          `[...document.querySelectorAll(${JSON.stringify('[role=dialog] [role=listbox]')})].map((column) => column.getAttribute('aria-label'))`,
+        ),
+        ['Hours', 'Minutes', 'AM/PM'],
+      );
+    },
+  },
+  {
+    name: 'date picker: several highlights on a day; none (nor weekdays’) on adjacent months’ days',
+    run: async (page) => {
+      await page.open('date-picker');
+      await page.setControl('pickerStyle', 'inline');
+      await page.setControl('locale', 'en-US');
+      await page.setControl('showAdjacentDays', true);
+      await page.setMappedControl(
+        'highlighted',
+        '[several: 14th three dots, 22nd dots, text and a circle]',
+      );
+      await page.setMappedControl('highlightedWeekdays', '[weekend: 0, 6]');
+      const state = await page.evaluate(`(() => {
+        const day = (text) => [...document.querySelectorAll(${JSON.stringify('[role=group] [aria-pressed]:not([data-outside])')})].find((element) => element.textContent === text);
+        const dots = (element) => [...element.querySelectorAll(${JSON.stringify('[data-date-picker-part=dots] > *')})].map((dot) => getComputedStyle(dot).backgroundColor);
+        return {
+          adjacent: document.querySelectorAll(${JSON.stringify('[data-outside] [data-date-picker-part=dots], [data-outside][data-highlight-text], [data-outside][data-highlight-circle], [data-outside][data-weekday-highlighted]')}).length,
+          fourteenth: dots(day('14')),
+          twentySecond: [dots(day('22')).length, getComputedStyle(day('22')).color, getComputedStyle(day('22'), '::before').backgroundColor],
+        };
+      })()`);
+      assert.deepEqual(state, {
+        adjacent: 0,
+        fourteenth: [
+          'rgb(255, 56, 60)',
+          'rgb(0, 136, 255)',
+          'rgb(52, 199, 89)',
+        ],
+        twentySecond: [
+          2,
+          'rgb(203, 48, 224)',
+          'color(srgb 0 0.764706 0.815686 / 0.2)',
+        ],
+      });
+    },
+  },
+  {
+    name: 'date picker: disabled days (by function, or limits) are grayed out, over weekday highlights, under highlights',
+    run: async (page) => {
+      await page.open('date-picker');
+      await page.setControl('pickerStyle', 'inline');
+      await page.setControl('locale', 'en-US');
+      await page.setMappedControl('highlightedWeekdays', '[weekend: 0, 6]');
+      await page.setMappedControl('isDateDisabled', '[weekends]');
+      await page.setMappedControl(
+        'highlighted',
+        '[3rd: red dot, 14th: orange text, 25th: green circle]',
+      );
+      await page.setMappedControl('min', '[April 10, 2025]');
+
+      const state = await page.evaluate(`(() => {
+        const day = (text) => [...document.querySelectorAll(${JSON.stringify('[role=group] [aria-pressed]')})].find((element) => element.textContent === text);
+        const style = (text) => [day(text).disabled, getComputedStyle(day(text)).color];
+        return { limit: style('9'), weekday: style('12'), weekend: style('5'), highlighted: style('14'), open: style('11') };
+      })()`);
+      assert.deepEqual(state, {
+        highlighted: [false, 'rgb(255, 141, 40)'],
+        limit: [true, 'rgba(60, 60, 67, 0.3)'],
+        open: [false, 'rgb(0, 0, 0)'],
+        weekday: [true, 'rgba(60, 60, 67, 0.3)'],
+        weekend: [true, 'rgba(60, 60, 67, 0.3)'],
+      });
+
+      // Moved by keyboard past disabled days: from Friday the 11th to
+      // Monday the 14th.
+      await page.evaluate(
+        `[...document.querySelectorAll(${JSON.stringify('[role=group] [aria-pressed]')})].find((element) => element.textContent === '11').focus()`,
+      );
+      await page.key('ArrowRight');
+      assert.equal(
+        await page.evaluate('document.activeElement.textContent'),
+        '14',
+      );
+    },
+  },
+  {
+    name: 'date picker: footers composed: buttons jumping to dates from the selection',
+    run: async (page) => {
+      await page.open('date-and-time-picker');
+      await page.setControl('pickerStyle', 'inline');
+      await page.setControl('locale', 'en-US');
+      await page.setControl('footer', 'timeRowAndJumps');
+      const press = async (/** @type {string} */ text) => {
+        const point = await page.evaluate(`(() => {
+          const button = [...document.querySelectorAll(${JSON.stringify('[data-date-picker-part=calendar] button')})].find((element) => element.textContent === ${JSON.stringify(text)});
+          const { height, width, x, y } = button.getBoundingClientRect();
+          return [x + width / 2, y + height / 2];
+        })()`);
+        await page.click(point);
+        await sleep(500);
+      };
+      const state = () =>
+        page.evaluate(
+          `[document.querySelector(${JSON.stringify('[data-date-picker-part=calendar] h2')}).textContent, document.querySelector(${JSON.stringify('[role=group] [aria-pressed=true]')})?.textContent]`,
+        );
+
+      // The Time row, and the jumps below it.
+      assert.equal(
+        await page.evaluate(
+          `document.querySelectorAll(${JSON.stringify('[data-date-picker-part=calendar] [aria-label=Time]')}).length`,
+        ),
+        1,
+      );
+      await press('In a week');
+      assert.deepEqual(await state(), ['April 2025', '27']);
+      await press('Next month');
+      assert.deepEqual(await state(), ['May 2025', '1']);
+      assert.match(
+        await page.evaluate(
+          `${page.section}.querySelector('config').textContent`,
+        ),
+        /value change: 5\/1\/2025, 9:41:00 AM/u,
+      );
+
+      // “Now”: today, at the current time (the others keep the time).
+      await press('Now');
+      const [time, expected] = await page.evaluate(
+        `[document.querySelector(${JSON.stringify('[data-date-picker-part=calendar] [aria-label=Time]')}).textContent, new Intl.DateTimeFormat('en-US', { timeStyle: 'short' }).format(new Date())]`,
+      );
+      assert.equal(time, expected);
+      const [, day] = await state();
+      assert.equal(day, String(new Date().getDate()));
     },
   },
 ];

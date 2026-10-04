@@ -801,7 +801,10 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)<ListItemProps>`
     top: 0;
     border-top: 1px solid var(--color-ios-list-separator);
     content: '';
-    grid-column: 3 / 99;
+
+    /* To the padding edge (auto, as absolutely positioned; line 99 exists
+       in rows spanning to it, e.g. media rows). */
+    grid-column: 3 / auto;
     inset-inline: 0 16px;
     transition: opacity 300ms;
   }

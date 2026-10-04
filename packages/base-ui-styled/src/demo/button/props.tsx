@@ -33,6 +33,7 @@ export const propOptionsRoot = {
   size: [undefined, 'small', 'medium', 'large'] as const,
   shape: [undefined, 'capsule', 'circle', 'roundedRectangle'] as const,
   destructive: [undefined, false, true] as const,
+  fill: [undefined, false, true] as const,
   context: [undefined, 'bright', 'dim'] as const,
 };
 

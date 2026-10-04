@@ -100,4 +100,34 @@ export const tests = [
       assert.equal(await page.evaluate('window.scrollY'), 0);
     },
   },
+  {
+    name: 'viewport: the locked app is left by “Done”, or Escape',
+    run: async (page) => {
+      await page.open('viewport');
+      const apps = `document.querySelectorAll(${JSON.stringify('[role=dialog][aria-label="Locked app"]')}).length`;
+      const open = async () => {
+        const button = await page.rect('stage button');
+        await page.click([
+          button.x + button.width / 2,
+          button.y + button.height / 2,
+        ]);
+        await sleep(300);
+      };
+
+      await open();
+      assert.equal(await page.evaluate(apps), 1);
+      const done = await page.evaluate(`(() => {
+        const button = [...document.querySelectorAll('button')].find((element) => element.textContent === 'Done');
+        const { height, width, x, y } = button.getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`);
+      await page.click(done);
+      await sleep(300);
+      assert.equal(await page.evaluate(apps), 0);
+
+      await open();
+      await page.key('Escape');
+      assert.equal(await page.evaluate(apps), 0);
+    },
+  },
 ];

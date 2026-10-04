@@ -1,5 +1,12 @@
 import { styled } from 'goober';
-import { forwardRef, FunctionComponent, useRef, useState } from 'react';
+import {
+  forwardRef,
+  FunctionComponent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { createPortal } from 'react-dom';
 
 import {
   Button,
@@ -121,12 +128,27 @@ const Status: FunctionComponent<{ onScrollLog: (text: string) => void }> = ({
   );
 };
 
+// Over the whole page (the demo's controls, too), so “Done” (or Escape)
+// leaves it.
 const LockedApp: FunctionComponent<{ onClose: () => void }> = ({ onClose }) => {
   const appRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
-  return (
-    <App ref={appRef}>
+  useEffect(() => {
+    const onKeyDown = ({ key }: KeyboardEvent) => {
+      if (key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
+  return createPortal(
+    <App
+      ref={appRef}
+      aria-label="Locked app"
+      aria-modal="true"
+      role="dialog"
+    >
       <Viewport.Provider
         lock={appRef}
         scroller={messagesRef}
@@ -157,7 +179,8 @@ const LockedApp: FunctionComponent<{ onClose: () => void }> = ({ onClose }) => {
           <Field />
         </Composer>
       </Viewport.Provider>
-    </App>
+    </App>,
+    document.body,
   );
 };
 

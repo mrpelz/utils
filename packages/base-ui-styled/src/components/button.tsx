@@ -21,6 +21,11 @@ export type ButtonRootProps = BaseButtonProps & {
   /** Figma “Destructive”: tints the button red. */
   destructive?: boolean;
   /**
+   * Grows to fill the available width (a block, or a flex item sharing a
+   * row's free space), its content centered (Figma: hugging its content).
+   */
+  fill?: boolean;
+  /**
    * `circle` is square with a round shape, for symbol-only buttons;
    * `roundedRectangle` has 6px corners (large: 12px; Figma “Date and time -
    * Collapsed”, large borderless buttons).
@@ -115,6 +120,14 @@ const StyledRoot = styled<typeof BaseButton, ButtonRootProps>(BaseButton, forwar
   vertical-align: middle;
   white-space: nowrap;
 
+  ${({ fill }) =>
+    fill
+      ? css`
+          display: flex;
+          width: 100%;
+          flex: 1 1 auto;
+        `
+      : undefined}
   ${({ destructive }) =>
     destructive
       ? css`

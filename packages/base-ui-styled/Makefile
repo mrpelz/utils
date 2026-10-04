@@ -20,7 +20,8 @@ MITM_URL := https://$(MITM_SLUG).localhost
 	watch_dev_proxy
 
 # Headless browser tests of the demo (needs Chrome, see scripts/browser-tests).
-# Optional: make -s check_browser [<filter>] [-- --screenshots <dir>]
+# Optional: make -s check_browser ARGS='[<filter>] [--changed] [--screenshots <dir>]'
+# (--changed: only the tests affected by uncommitted changes)
 check_browser:
 	node scripts/browser-tests/run.js $(ARGS)
 
