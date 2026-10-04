@@ -1451,4 +1451,96 @@ export const tests = [
       ]);
     },
   },
+  {
+    name: 'tab bar: the app collapses it on a secondary tab, a click on a collapsed group expands it',
+    run: async (page) => {
+      await page.open(SECONDARY);
+      const collapsed = () =>
+        page.evaluate(
+          `getComputedStyle(${page.section}.querySelector('[role=tablist]')).paddingTop`,
+        );
+      assert.equal(await collapsed(), '16px');
+
+      // Search (the demo's `onValueChange`): collapsed, only its group.
+      const centers = await tabCenters(page);
+      await page.click(centers[3] ?? [0, 0]);
+      await sleep(700);
+      assert.equal(await collapsed(), '23px');
+      const state = await collapsedState(page);
+      assert.deepEqual(
+        state.map(({ tabs, visible }) => [visible, tabs]),
+        [
+          [false, [false, false, false]],
+          [true, [true]],
+        ],
+      );
+
+      // Its (active) tab clicked again: no value change, but its group's
+      // click expands the bar.
+      const after = await tabCenters(page);
+      await page.click(after[3] ?? [0, 0]);
+      await sleep(700);
+      assert.equal(await collapsed(), '16px');
+      const log = await page.evaluate(
+        `${page.section}.querySelector('config').textContent`,
+      );
+      assert.equal(log.match(/value change: secondary-1/gu)?.length, 1);
+    },
+  },
+  {
+    name: 'tab bar: tabs of a collapsed group can be selected, expanding it',
+    run: async (page) => {
+      await page.open(PRIMARY);
+      // Three remaining tabs (marked), the bar collapsed by the demo's
+      // scroll handler stand-in: the list's control.
+      for (const tab of ['1st tab', '2nd tab', '3rd tab']) {
+        await page.setControl('visibleWhenCollapsed', true, tab);
+      }
+      await page.setControl('collapsed', true);
+      await sleep(600);
+      const centers = await tabCenters(page);
+      await page.click(centers[2] ?? [0, 0]);
+      await sleep(600);
+      assert.match(
+        await page.evaluate(
+          `${page.section}.querySelector('config').textContent`,
+        ),
+        /value change: tab-3/u,
+      );
+    },
+  },
+  {
+    name: 'tab bar: collapsedSelection: the active tab and its group, or the first',
+    run: async (page) => {
+      await page.open(SECONDARY);
+      await page.setControl('collapsed', true);
+      await sleep(600);
+      // The first group's first tab (the active one).
+      const state = await collapsedState(page);
+      assert.deepEqual(
+        state.map(({ tabs, visible }) => [visible, tabs]),
+        [
+          [true, [true, false, false]],
+          [false, [false]],
+        ],
+      );
+    },
+  },
+  {
+    name: 'tab bar: scrolling down collapses it, scrolling up expands it (the demo)',
+    run: async (page) => {
+      await page.open(PRIMARY);
+      await page.setControl('collapseOnScroll', true);
+      const padding = () =>
+        page.evaluate(
+          `getComputedStyle(${page.section}.querySelector('[role=tablist]')).paddingTop`,
+        );
+      await page.evaluate('window.scrollBy(0, 200)');
+      await sleep(700);
+      assert.equal(await padding(), '23px');
+      await page.evaluate('window.scrollBy(0, -40)');
+      await sleep(700);
+      assert.equal(await padding(), '16px');
+    },
+  },
 ];

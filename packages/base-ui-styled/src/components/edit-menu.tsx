@@ -61,7 +61,9 @@ const HiddenTrigger = styled('span', forwardRef)`
 
 /**
  * An edit menu: controlled by `open` (e.g. when a selection is made), shown
- * at its positioner's `anchor`; it has no visible trigger.
+ * at its positioner's `anchor`; it has no visible trigger. It isn't modal
+ * (by default): the page stays interactive, and pressing outside of it
+ * reaches the page (e.g. clearing the selection) as it closes the menu.
  */
 const Root = ({
   children,
@@ -74,6 +76,7 @@ const Root = ({
   return (
     <MenuContext.Provider value={{ actionsRef, orientation, size }}>
       <BaseMenu.Root
+        modal={false}
         orientation={orientation}
         {...props}
         actionsRef={actionsRef}

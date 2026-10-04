@@ -1,4 +1,3 @@
-import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
 import { Collapsible } from '@base-ui/react/collapsible';
 import { RadioGroup } from '@base-ui/react/radio-group';
 import { sfAirplane } from '@bradleyhodges/sfsymbols/sfAirplane';
@@ -22,6 +21,7 @@ import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
 import { sfWifi } from '@bradleyhodges/sfsymbols/sfWifi';
 import { styled } from 'goober';
 import {
+  Fragment,
   FunctionComponent,
   ReactNode,
   useCallback,
@@ -31,7 +31,9 @@ import {
 } from 'react';
 
 import {
+  Calendar,
   DatePicker,
+  DatePickerOpen,
   List,
   Menu,
   Segmented,
@@ -39,70 +41,45 @@ import {
   Stepper,
   Switch,
   TextField,
-} from '../components/index.js';
-import { useLog } from './utils/log.js';
+  TimeRoll,
+} from '../../components/index.js';
+import { useLog } from '../utils/log.js';
+import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
+import { SFSymbol } from '../utils/symbol.js';
 import {
-  commonPropOptions,
-  Component,
-  MappedProp,
-  usePropControl,
-} from './utils/main.js';
-import { SFSymbol } from './utils/symbol.js';
-
-const cursorOptions = [undefined, 'auto', 'pointer', 'copy'] as const;
-
-const propOptionsContent = {
-  image: ['rounded', 'symbol', 'circular', 'fill', 'none'] as const,
-  supertitle: [false, true] as const,
-  headerSubtitle: [false, true] as const,
-} as const;
-
-const propOptionsRoot = {
-  ...commonPropOptions,
-  listStyle: [undefined, 'insetGrouped', 'grouped', 'plain'] as const,
-  outline: [undefined, false, true] as const,
-};
-
-const propOptionsHeader = {
-  ...commonPropOptions,
-  prominence: [undefined, 'nested', 'prominent', 'extraProminent'] as const,
-};
-
-const propOptionsImage = {
-  ...commonPropOptions,
-  variant: [undefined, 'symbol', 'rounded', 'circular', 'fill'] as const,
-};
-
-const propOptionsBlock = {
-  ...commonPropOptions,
-  strong: [true, false, undefined] as const,
-};
-
-const propOptionsCheckbox = {
-  ...commonPropOptions,
-  defaultChecked: [undefined, false, true] as const,
-  checked: [undefined, false, true] as const,
-  disabled: [undefined, false, true] as const,
-  readOnly: [undefined, false, true] as const,
-  cursor: cursorOptions,
-};
-
-// Rendered as list parts, so without the common `render` option.
-const { className, style } = commonPropOptions;
-
-const propOptionsCollapsible = {
-  className,
-  style,
-  defaultOpen: [true, false, undefined] as const,
-  open: [undefined, false, true] as const,
-  disabled: [undefined, false, true] as const,
-};
-
-const propOptionsPanel = {
-  className,
-  style,
-  hiddenUntilFound: [undefined, false, true] as const,
-};
+  forwardClick,
+  getPropOptionsAccessory,
+  getPropOptionsAction,
+  getPropOptionsButton,
+  getPropOptionsCheckboxFirst,
+  getPropOptionsCollapsible,
+  getPropOptionsEditButton,
+  getPropOptionsEditButtonFirst,
+  getPropOptionsItemFirst,
+  getPropOptionsRadioGroup,
+  getPropOptionsSwipeActionFirst,
+  getPropOptionsSwipeActionOutermost,
+  getPropOptionsSwipeActionsFirstLeading,
+  getPropOptionsSwipeActionsTrailing,
+  getPropOptionsTitleFirst,
+  propOptionsBlock,
+  propOptionsCheckbox,
+  propOptionsCollapsible,
+  propOptionsContent,
+  propOptionsCursor,
+  propOptionsEdit,
+  propOptionsExpandable,
+  propOptionsHeader,
+  propOptionsImage,
+  propOptionsIndex,
+  propOptionsItemFirst,
+  propOptionsPanel,
+  propOptionsPartsContent,
+  propOptionsRadioFirst,
+  propOptionsRoot,
+  propOptionsRootPlain,
+  propOptionsText,
+} from './props.js';
 
 // Figma “Row with Swipe Actions” colors: leading orange, gray, red;
 // trailing purple, indigo, green.
@@ -121,9 +98,11 @@ const trailingActions = [
 const selectionOptions = ['Automatic', 'Always', 'Never'] as const;
 
 /**
- * Lists: a settings-like inset grouped list with its parts (Figma “Lists
- * and tables”), headers, footers, a content block, a collapsible section
- * (Base UI Collapsible), a pop-up (Menu) and a switch.
+ * Lists: a settings-like inset grouped list (Figma “Lists and tables”) with
+ * a switch, drill-ins, a pop-up (Menu), an info button, a segmented control,
+ * a stepper and a slider, a collapsible section (Base UI Collapsible),
+ * buttons and a content block. Rows with a control pass their clicks on to
+ * it (`onClick`).
  */
 export const ListDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
@@ -139,165 +118,27 @@ export const ListDemo: FunctionComponent = () => {
     'root',
     true,
   );
-  const [controlSection, propsSection] = usePropControl(
-    commonPropOptions,
-    'section (1st)',
-  );
-  const [controlHeader, propsHeader] = usePropControl(
-    propOptionsHeader,
-    'header (1st)',
-    true,
-  );
-  const [controlSupertitle, propsSupertitle] = usePropControl(
-    commonPropOptions,
-    'supertitle',
-  );
-  const [controlGroup, propsGroup] = usePropControl(
-    commonPropOptions,
-    'group (1st)',
-  );
+
   const [controlItem, propsItem] = usePropControl(
-    commonPropOptions,
+    propOptionsItemFirst,
     'item (1st)',
-  );
-  const [controlImage, propsImage] = usePropControl(
-    propOptionsImage,
-    'image (1st)',
-  );
-
-  const [controlTitle, propsTitle] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        cursor: cursorOptions,
-        onClick: [
-          new MappedProp(() => addLog('title clicked'), '[log click]'),
-          undefined,
-        ] as const,
-        render: [
-          new MappedProp(<button />, '[<button />]'),
-          undefined,
-          new MappedProp(<a href="#list" />, '[<a href="#list" />]'),
-          new MappedProp(<main />, '[<main />]'),
-        ] as const,
-      }),
-      [addLog],
-    ),
-    'title (2nd)',
-  );
-
-  const [controlSubtitle, propsSubtitle] = usePropControl(
-    commonPropOptions,
-    'subtitle (1st)',
-  );
-  const [controlDetail, propsDetail] = usePropControl(
-    commonPropOptions,
-    'detail (1st)',
-  );
-  const [controlDrillIn, propsDrillIn] = usePropControl(
-    commonPropOptions,
-    'drill-in (1st)',
-  );
-
-  const [controlAccessory, propsAccessory] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        cursor: cursorOptions,
-        onClick: [
-          new MappedProp(() => addLog('accessory clicked'), '[log click]'),
-          undefined,
-        ] as const,
-        render: [
-          new MappedProp(<button type="button" />, '[<button />]'),
-          undefined,
-          new MappedProp(<main />, '[<main />]'),
-        ] as const,
-      }),
-      [addLog],
-    ),
-    'accessory (1st)',
-  );
-
-  const [controlCheckmark, propsCheckmark] = usePropControl(
-    commonPropOptions,
-    'checkmark',
-  );
-
-  const [controlPopUp, propsPopUp] = usePropControl(
-    useMemo(() => ({ ...commonPropOptions, cursor: cursorOptions }), []),
-    'pop-up',
-  );
-
-  const [controlAction, propsAction] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        cursor: cursorOptions,
-        disabled: [undefined, false, true] as const,
-        onClick: [
-          new MappedProp(() => addLog('action clicked'), '[log click]'),
-          undefined,
-        ] as const,
-      }),
-      [addLog],
-    ),
-    'action',
+    true,
   );
 
   const [controlCollapsible, propsCollapsible, RemounterCollapsible] =
     usePropControl(
-      useMemo(
-        () => ({
-          ...propOptionsCollapsible,
-          onOpenChange: [
-            new MappedProp(
-              (open: boolean) => addLog(`open change: ${open}`),
-              '[log change]',
-            ),
-            undefined,
-          ] as const,
-        }),
-        [addLog],
-      ),
+      useMemo(() => getPropOptionsCollapsible(addLog), [addLog]),
       'collapsible',
     );
 
-  const [controlPanel, propsPanel] = usePropControl(
-    propOptionsPanel,
-    'collapsible panel',
+  const [controlTrigger, propsTrigger] = usePropControl(
+    propOptionsCursor,
+    'collapsible trigger (header)',
   );
-
-  const [controlDisclosure, propsDisclosure] = usePropControl(
-    commonPropOptions,
-    'disclosure',
-  );
-
-  const [controlButton, propsButton] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        cursor: cursorOptions,
-        destructive: [undefined, false, true] as const,
-        disabled: [undefined, false, true] as const,
-        onClick: [
-          new MappedProp(() => addLog('button clicked'), '[log click]'),
-          undefined,
-        ] as const,
-      }),
-      [addLog],
-    ),
-    'button (1st)',
-  );
-
-  const [controlFooter, propsFooter] = usePropControl(
-    commonPropOptions,
-    'footer (1st)',
-  );
-  const [controlBlock, propsBlock] = usePropControl(propOptionsBlock, 'block');
 
   const [selection, setSelection] =
     useState<(typeof selectionOptions)[number]>('Automatic');
+  const [favorite, setFavorite] = useState(true);
   const [quantity, setQuantity] = useState(1);
 
   const image = (icon: Parameters<typeof SFSymbol>[0]['icon'], tint: string) =>
@@ -321,33 +162,16 @@ export const ListDemo: FunctionComponent = () => {
       controls={[
         controlContent,
         controlRoot,
-        controlSection,
-        controlHeader,
-        controlSupertitle,
-        controlGroup,
         controlItem,
-        controlImage,
-        controlTitle,
-        controlSubtitle,
-        controlDetail,
-        controlDrillIn,
-        controlAccessory,
-        controlCheckmark,
-        controlPopUp,
-        controlAction,
         controlCollapsible,
-        controlPanel,
-        controlDisclosure,
-        controlButton,
-        controlFooter,
-        controlBlock,
+        controlTrigger,
       ]}
     >
       <List.Root {...propsRoot}>
-        <List.Section {...propsSection}>
-          <List.Header {...propsHeader}>
+        <List.Section>
+          <List.Header>
             {content.supertitle ? (
-              <List.Supertitle {...propsSupertitle}>Supertitle</List.Supertitle>
+              <List.Supertitle>Supertitle</List.Supertitle>
             ) : null}
             <List.Title render={<h3 />}>Header</List.Title>
             {content.headerSubtitle ? (
@@ -361,23 +185,9 @@ export const ListDemo: FunctionComponent = () => {
               <SFSymbol icon={sfSquareAndPencil} />
             </List.Accessory>
           </List.Header>
-          <List.Group {...propsGroup}>
+          <List.Group>
             <List.Item {...propsItem}>
-              <List.Image
-                {...propsImage}
-                style={{
-                  ...(content.image === 'rounded' && {
-                    backgroundColor: 'var(--color-ios-system-orange)',
-                  }),
-                  ...propsImage.style,
-                }}
-                variant={
-                  propsImage.variant ??
-                  (content.image === 'none' ? undefined : content.image)
-                }
-              >
-                <SFSymbol icon={sfAirplane} />
-              </List.Image>
+              {image(sfAirplane, 'var(--color-ios-system-orange)')}
               <List.Title>Airplane Mode</List.Title>
               <Switch.Root
                 aria-label="Airplane Mode"
@@ -391,9 +201,14 @@ export const ListDemo: FunctionComponent = () => {
             </List.Item>
             <List.Item>
               {image(sfWifi, 'var(--color-ios-system-blue)')}
-              <List.Title {...propsTitle}>Wi-Fi</List.Title>
-              <List.Detail {...propsDetail}>Home</List.Detail>
-              <List.DrillIn {...propsDrillIn} />
+              <List.Title
+                render={<button />}
+                onClick={() => addLog('Wi-Fi clicked')}
+              >
+                Wi-Fi
+              </List.Title>
+              <List.Detail>Home</List.Detail>
+              <List.DrillIn />
             </List.Item>
             <List.Item>
               {image(sfBellFill, 'var(--color-ios-system-red)')}
@@ -403,16 +218,14 @@ export const ListDemo: FunctionComponent = () => {
               >
                 Notifications
               </List.Title>
-              <List.Subtitle {...propsSubtitle}>Banners, Sounds</List.Subtitle>
+              <List.Subtitle>Banners, Sounds</List.Subtitle>
               <List.DrillIn />
             </List.Item>
-            <List.Item>
+            <List.Item onClick={forwardClick('[data-list-part=pop-up]')}>
               {image(sfPersonFill, 'var(--color-ios-system-gray)')}
               <List.Title>Show Previews</List.Title>
               <Menu.Root>
-                <Menu.Trigger render={<List.PopUp {...propsPopUp} />}>
-                  {selection}
-                </Menu.Trigger>
+                <Menu.Trigger render={<List.PopUp />}>{selection}</Menu.Trigger>
                 <Menu.Portal>
                   <Menu.Positioner align="end">
                     <Menu.Popup>
@@ -441,20 +254,31 @@ export const ListDemo: FunctionComponent = () => {
                 </Menu.Portal>
               </Menu.Root>
             </List.Item>
-            <List.Item>
+            <List.Item
+              onClick={({ target }) => {
+                if (target instanceof Element && target.closest('button')) {
+                  return;
+                }
+                addLog(`favorite: ${!favorite}`);
+                setFavorite(!favorite);
+              }}
+            >
               {image(sfHeartFill, 'var(--color-ios-system-pink)')}
               <List.Title>Favorite</List.Title>
               <List.Accessory
                 aria-label="Info"
-                {...propsAccessory}
+                render={<button type="button" />}
+                onClick={() => addLog('info clicked')}
               >
                 <SFSymbol icon={sfICircle} />
               </List.Accessory>
-              <List.Checkmark {...propsCheckmark} />
+              {favorite ? <List.Checkmark /> : null}
             </List.Item>
-            <List.Item>
+            <List.Item onClick={forwardClick('[data-list-part=action]')}>
               <List.Title>Button</List.Title>
-              <List.Action {...propsAction}>Button</List.Action>
+              <List.Action onClick={() => addLog('action clicked')}>
+                Button
+              </List.Action>
             </List.Item>
             <List.Item>
               <List.Title>Text Size</List.Title>
@@ -510,6 +334,418 @@ export const ListDemo: FunctionComponent = () => {
               </Slider.Root>
             </List.Item>
           </List.Group>
+          <List.Footer>Footer text, aligned with the rows’ text.</List.Footer>
+        </List.Section>
+
+        <RemounterCollapsible>
+          <Collapsible.Root
+            {...propsCollapsible}
+            render={<List.Section />}
+          >
+            <Collapsible.Trigger
+              nativeButton={false}
+              render={
+                <List.Header
+                  prominence="nested"
+                  {...propsTrigger}
+                />
+              }
+            >
+              <List.Title>Collapsible</List.Title>
+              <List.Detail>{selection}</List.Detail>
+              <List.Disclosure />
+            </Collapsible.Trigger>
+            <Collapsible.Panel render={<List.Group />}>
+              {selectionOptions.map((option) => (
+                <List.Item key={option}>
+                  <List.Title
+                    render={<button />}
+                    onClick={() => setSelection(option)}
+                  >
+                    {option}
+                  </List.Title>
+                  {selection === option ? <List.Checkmark /> : null}
+                </List.Item>
+              ))}
+            </Collapsible.Panel>
+          </Collapsible.Root>
+        </RemounterCollapsible>
+
+        <List.Section>
+          <List.Group>
+            <List.Item>
+              <List.Button onClick={() => addLog('action clicked')}>
+                Action
+              </List.Button>
+            </List.Item>
+            <List.Item>
+              <List.Button
+                destructive
+                onClick={() => addLog('destructive clicked')}
+              >
+                Action
+              </List.Button>
+            </List.Item>
+            <List.Item>
+              <List.Button disabled>Action</List.Button>
+            </List.Item>
+          </List.Group>
+        </List.Section>
+
+        <List.Section>
+          <List.Header prominence="extraProminent">
+            <List.Title render={<h3 />}>Content Block</List.Title>
+          </List.Header>
+          <List.Block strong>
+            <p>
+              Lists and tables present data in one or more columns of rows. A
+              content block holds text between them, aligned with the rows.
+            </p>
+          </List.Block>
+          <List.Footer>Blocks can have headers and footers, too.</List.Footer>
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
+
+/**
+ * Every part of a list, once, each with its props: a header, rows of each
+ * kind, swipe actions, a collapsible section, a footer and a block (the
+ * index: see “List (Index)”, selection: “List (Editing)”).
+ */
+export const ListPartsDemo: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+
+  const [controlContent, content] = usePropControl(
+    propOptionsPartsContent,
+    '[content]',
+    true,
+  );
+  const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
+  const [controlSection, propsSection] = usePropControl(
+    commonPropOptions,
+    'section',
+  );
+  const [controlHeader, propsHeader] = usePropControl(
+    propOptionsHeader,
+    'header',
+    true,
+  );
+  const [controlSupertitle, propsSupertitle] = usePropControl(
+    commonPropOptions,
+    'supertitle',
+  );
+  const [controlGroup, propsGroup] = usePropControl(commonPropOptions, 'group');
+  const [controlItem, propsItem] = usePropControl(
+    useMemo(() => getPropOptionsItemFirst(addLog), [addLog]),
+    'item (1st)',
+  );
+  const [controlImage, propsImage] = usePropControl(propOptionsImage, 'image');
+  const [controlTitle, propsTitle] = usePropControl(
+    useMemo(() => getPropOptionsTitleFirst(addLog), [addLog]),
+    'title (1st)',
+  );
+  const [controlSubtitle, propsSubtitle] = usePropControl(
+    commonPropOptions,
+    'subtitle',
+  );
+  const [controlDetail, propsDetail] = usePropControl(
+    commonPropOptions,
+    'detail',
+  );
+  const [controlDrillIn, propsDrillIn] = usePropControl(
+    commonPropOptions,
+    'drill-in',
+  );
+  const [controlAccessory, propsAccessory] = usePropControl(
+    useMemo(() => getPropOptionsAccessory(addLog), [addLog]),
+    'accessory',
+  );
+  const [controlCheckmark, propsCheckmark] = usePropControl(
+    commonPropOptions,
+    'checkmark',
+  );
+  const [controlPopUp, propsPopUp] = usePropControl(
+    propOptionsCursor,
+    'pop-up',
+  );
+  const [controlAction, propsAction] = usePropControl(
+    useMemo(() => getPropOptionsAction(addLog), [addLog]),
+    'action',
+  );
+  const [controlButton, propsButton] = usePropControl(
+    useMemo(() => getPropOptionsButton(addLog), [addLog]),
+    'button',
+  );
+  const [controlCheckbox, propsCheckbox, RemounterCheckbox] = usePropControl(
+    propOptionsCheckbox,
+    'checkbox',
+  );
+  const [controlEditButton, propsEditButton] = usePropControl(
+    useMemo(() => getPropOptionsEditButton(addLog), [addLog]),
+    'edit button',
+  );
+  const [controlGrabber, propsGrabber] = usePropControl(
+    propOptionsCursor,
+    'grabber',
+  );
+  const [controlText, propsText] = usePropControl(propOptionsText, 'text');
+  const [controlSwipeActions, propsSwipeActions] = usePropControl(
+    useMemo(() => getPropOptionsSwipeActionsTrailing(addLog), [addLog]),
+    'swipe actions (trailing)',
+    true,
+  );
+  const [controlSwipeAction, propsSwipeAction] = usePropControl(
+    useMemo(() => getPropOptionsSwipeActionOutermost(addLog), [addLog]),
+    'swipe action (outermost)',
+  );
+  const [controlCollapsible, propsCollapsible, RemounterCollapsible] =
+    usePropControl(propOptionsCollapsible, 'collapsible');
+  const [controlTrigger, propsTrigger] = usePropControl(
+    propOptionsCursor,
+    'collapsible trigger (header)',
+  );
+  const [controlPanel, propsPanel] = usePropControl(
+    propOptionsPanel,
+    'collapsible panel',
+  );
+  const [controlDisclosure, propsDisclosure] = usePropControl(
+    commonPropOptions,
+    'disclosure',
+  );
+  const [controlFooter, propsFooter] = usePropControl(
+    commonPropOptions,
+    'footer',
+  );
+  const [controlBlock, propsBlock] = usePropControl(propOptionsBlock, 'block');
+  const [controlExpandable, propsExpandable] = usePropControl(
+    propOptionsExpandable,
+    'expandable',
+  );
+  // The expandable row, toggled by the row above (unless its control says).
+  const [expanded, setExpanded] = useState(false);
+  const open = propsExpandable.open ?? expanded;
+
+  const [selection, setSelection] =
+    useState<(typeof selectionOptions)[number]>('Automatic');
+
+  return (
+    <Component
+      stretch
+      id="list-parts"
+      log={log}
+      title="List (Parts)"
+      controls={[
+        controlContent,
+        controlRoot,
+        controlSection,
+        controlHeader,
+        controlSupertitle,
+        controlGroup,
+        controlItem,
+        controlImage,
+        controlTitle,
+        controlSubtitle,
+        controlDetail,
+        controlDrillIn,
+        controlAccessory,
+        controlCheckmark,
+        controlPopUp,
+        controlAction,
+        controlButton,
+        controlCheckbox,
+        controlEditButton,
+        controlGrabber,
+        controlText,
+        controlSwipeActions,
+        controlSwipeAction,
+        controlCollapsible,
+        controlTrigger,
+        controlPanel,
+        controlDisclosure,
+        controlFooter,
+        controlBlock,
+        controlExpandable,
+      ]}
+    >
+      <List.Root {...propsRoot}>
+        <List.Section {...propsSection}>
+          <List.Header {...propsHeader}>
+            {content.supertitle ? (
+              <List.Supertitle {...propsSupertitle}>Supertitle</List.Supertitle>
+            ) : null}
+            <List.Title render={<h3 />}>Header</List.Title>
+            {content.headerSubtitle ? (
+              <List.Subtitle>Subtitle</List.Subtitle>
+            ) : null}
+            <List.Accessory
+              aria-label="Edit"
+              render={<button type="button" />}
+              onClick={() => addLog('header accessory clicked')}
+            >
+              <SFSymbol icon={sfSquareAndPencil} />
+            </List.Accessory>
+          </List.Header>
+          <List.Group {...propsGroup}>
+            <List.Item {...propsItem}>
+              <List.Image
+                {...propsImage}
+                variant={propsImage.variant ?? 'rounded'}
+                style={{
+                  backgroundColor: 'var(--color-ios-system-blue)',
+                  ...propsImage.style,
+                }}
+              >
+                <SFSymbol icon={sfWifi} />
+              </List.Image>
+              <List.Title {...propsTitle}>Title</List.Title>
+              <List.Subtitle {...propsSubtitle}>Subtitle</List.Subtitle>
+              <List.Detail {...propsDetail}>Detail</List.Detail>
+              <List.DrillIn {...propsDrillIn} />
+            </List.Item>
+            <List.Item>
+              <List.Title>Accessory, checkmark</List.Title>
+              <List.Accessory
+                aria-label="Info"
+                {...propsAccessory}
+              >
+                <SFSymbol icon={sfICircle} />
+              </List.Accessory>
+              <List.Checkmark {...propsCheckmark} />
+            </List.Item>
+            <List.Item>
+              <List.Title>Pop-up</List.Title>
+              <Menu.Root>
+                <Menu.Trigger render={<List.PopUp {...propsPopUp} />}>
+                  {selection}
+                </Menu.Trigger>
+                <Menu.Portal>
+                  <Menu.Positioner align="end">
+                    <Menu.Popup>
+                      <Menu.RadioGroup
+                        value={selection}
+                        onValueChange={(value: unknown) =>
+                          setSelection(
+                            value as (typeof selectionOptions)[number],
+                          )
+                        }
+                      >
+                        {selectionOptions.map((option) => (
+                          <Menu.RadioItem
+                            key={option}
+                            closeOnClick
+                            value={option}
+                          >
+                            <Menu.RadioItemIndicator />
+                            <Menu.Label>{option}</Menu.Label>
+                          </Menu.RadioItem>
+                        ))}
+                      </Menu.RadioGroup>
+                    </Menu.Popup>
+                  </Menu.Positioner>
+                </Menu.Portal>
+              </Menu.Root>
+            </List.Item>
+            <List.Item>
+              <List.Title>Action</List.Title>
+              <List.Action {...propsAction}>Action</List.Action>
+            </List.Item>
+            <List.Item>
+              <List.Button {...propsButton}>Button</List.Button>
+            </List.Item>
+            <List.Item>
+              <RemounterCheckbox>
+                <List.Checkbox
+                  aria-label="Checkbox"
+                  {...propsCheckbox}
+                />
+              </RemounterCheckbox>
+              <List.Title>Checkbox, grabber</List.Title>
+              <List.Grabber
+                aria-label="Reorder"
+                {...propsGrabber}
+              />
+            </List.Item>
+            <List.Item>
+              <List.EditButton
+                aria-label="Edit"
+                {...propsEditButton}
+              />
+              <List.Title>Edit button</List.Title>
+              <List.SwipeActions>
+                <List.SwipeAction
+                  label="Delete"
+                  tint="var(--color-ios-system-red)"
+                  onClick={() => addLog('delete clicked')}
+                >
+                  <SFSymbol icon={sfTrashFill} />
+                </List.SwipeAction>
+              </List.SwipeActions>
+            </List.Item>
+            <List.Item onClick={() => setExpanded(!open)}>
+              <List.Title>Expandable row</List.Title>
+              <List.Detail>{open ? 'Shown' : 'Hidden'}</List.Detail>
+              <List.Disclosure data-panel-open={open || undefined} />
+            </List.Item>
+            <List.Expandable
+              {...propsExpandable}
+              open={open}
+            >
+              <List.Image variant="rounded">
+                <SFSymbol icon={sfWifi} />
+              </List.Image>
+              <List.Title>Expanded</List.Title>
+              <List.Subtitle>
+                Shown below the row above, opening and closing in place.
+              </List.Subtitle>
+            </List.Expandable>
+            <List.Item>
+              <List.Image variant="circular">
+                <SFSymbol icon={sfPersonCropCircleFill} />
+              </List.Image>
+              <List.Title>Swipe actions</List.Title>
+              <List.Detail>09:41</List.Detail>
+              <List.Subtitle>Text, swipe actions</List.Subtitle>
+              <List.Text {...propsText}>
+                A multi-line row: body text below the title and subtitle, at
+                most two lines by default. Swipe it either way.
+              </List.Text>
+              <List.SwipeActions
+                overswipe
+                side="leading"
+              >
+                <List.SwipeAction
+                  showLabel
+                  label="Unread"
+                  tint="var(--color-ios-system-blue)"
+                  onClick={() => addLog('unread clicked')}
+                >
+                  <SFSymbol icon={sfEnvelopeOpenFill} />
+                </List.SwipeAction>
+              </List.SwipeActions>
+              <List.SwipeActions {...propsSwipeActions}>
+                <List.SwipeAction
+                  showLabel
+                  label="More"
+                  onClick={() => addLog('more clicked')}
+                >
+                  <SFSymbol icon={sfEllipsis} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  showLabel
+                  label="Flag"
+                  tint="var(--color-ios-system-orange)"
+                  onClick={() => addLog('flag clicked')}
+                >
+                  <SFSymbol icon={sfFlagFill} />
+                </List.SwipeAction>
+                <List.SwipeAction {...propsSwipeAction}>
+                  <SFSymbol icon={sfArchiveboxFill} />
+                </List.SwipeAction>
+              </List.SwipeActions>
+            </List.Item>
+          </List.Group>
           <List.Footer {...propsFooter}>
             Footer text, aligned with the rows’ text.
           </List.Footer>
@@ -522,7 +758,12 @@ export const ListDemo: FunctionComponent = () => {
           >
             <Collapsible.Trigger
               nativeButton={false}
-              render={<List.Header prominence="nested" />}
+              render={
+                <List.Header
+                  prominence="nested"
+                  {...propsTrigger}
+                />
+              }
             >
               <List.Title>Collapsible</List.Title>
               <List.Detail>{selection}</List.Detail>
@@ -548,45 +789,56 @@ export const ListDemo: FunctionComponent = () => {
         </RemounterCollapsible>
 
         <List.Section>
-          <List.Group>
-            <List.Item>
-              <List.Button {...propsButton}>Action</List.Button>
-            </List.Item>
-            <List.Item>
-              <List.Button
-                destructive
-                onClick={() => addLog('destructive clicked')}
-              >
-                Action
-              </List.Button>
-            </List.Item>
-            <List.Item>
-              <List.Button disabled>Action</List.Button>
-            </List.Item>
-          </List.Group>
-        </List.Section>
-
-        <List.Section>
-          <List.Header prominence="extraProminent">
-            <List.Title render={<h3 />}>Content Block</List.Title>
-          </List.Header>
           <List.Block {...propsBlock}>
-            <p>
-              Lists and tables present data in one or more columns of rows. A
-              content block holds text between them, aligned with the rows.
-            </p>
+            <p>A content block, with text aligned with the rows’ text.</p>
           </List.Block>
-          <List.Footer>Blocks can have headers and footers, too.</List.Footer>
         </List.Section>
       </List.Root>
     </Component>
   );
 };
 
+type SwipeRow = {
+  /** Multi-line (with `Text`). */
+  multiLine?: boolean;
+  name: string;
+  /** Each action's shape (by index), labels shown, text for symbols. */
+  shape?: (index: number) => 'circle' | 'roundedRectangle';
+  showLabel?: boolean;
+  subtitle?: boolean;
+  text?: boolean;
+};
+
+const swipeRows: readonly SwipeRow[] = [
+  { name: 'Regular' },
+  { name: 'Tall', subtitle: true },
+  { multiLine: true, name: 'Multi-line', showLabel: true, subtitle: true },
+  {
+    multiLine: true,
+    name: 'Rounded rectangles',
+    shape: () => 'roundedRectangle',
+    showLabel: true,
+    subtitle: true,
+  },
+  // The outermost (Delete, Done) a rounded rectangle, the others circles.
+  {
+    name: 'Mixed',
+    shape: (index) => (index === 2 ? 'roundedRectangle' : 'circle'),
+    subtitle: true,
+  },
+  {
+    name: 'Text',
+    shape: () => 'roundedRectangle',
+    subtitle: true,
+    text: true,
+  },
+];
+
 /**
- * Swipe actions (Figma “Row with Swipe Actions”): regular, tall and
- * multi-line rows (the latter two with labelled actions), with actions on
- * both sides, overswipeable either way.
+ * Swipe actions (Figma “Row with Swipe Actions”): regular and tall rows
+ * (circles), a multi-line row (labelled), rounded rectangles, both mixed,
+ * and text instead of symbols; with actions on both sides, overswipeable
+ * either way.
  */
 export const ListSwipeDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
@@ -594,36 +846,13 @@ export const ListSwipeDemo: FunctionComponent = () => {
   const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
 
   const [controlSwipeActions, propsSwipeActions] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        overswipe: [true, false, undefined] as const,
-        onOverswipe: [
-          undefined,
-          new MappedProp(() => addLog('overswiped'), '[log overswipe]'),
-        ] as const,
-      }),
-      [addLog],
-    ),
+    useMemo(() => getPropOptionsSwipeActionsFirstLeading(addLog), [addLog]),
     'swipe actions (1st, leading)',
     true,
   );
 
   const [controlSwipeAction, propsSwipeAction] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        cursor: cursorOptions,
-        disabled: [undefined, false, true] as const,
-        label: [undefined, 'Custom'] as const,
-        tint: [undefined, 'var(--color-ios-system-teal)', '#000'] as const,
-        onClick: [
-          new MappedProp(() => addLog('swipe action clicked'), '[log click]'),
-          undefined,
-        ] as const,
-      }),
-      [addLog],
-    ),
+    useMemo(() => getPropOptionsSwipeActionFirst(addLog), [addLog]),
     'swipe action (1st)',
   );
 
@@ -631,6 +860,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
     side: 'leading' | 'trailing',
     actions: typeof leadingActions | typeof trailingActions,
     first: boolean,
+    { shape, showLabel, text }: SwipeRow,
   ) => (
     <List.SwipeActions
       overswipe
@@ -640,16 +870,20 @@ export const ListSwipeDemo: FunctionComponent = () => {
       {actions.map(([label, icon, tint], index) => {
         const props: Partial<typeof propsSwipeAction> =
           first && index === 0 ? propsSwipeAction : {};
+        // The outermost, by side.
+        const outer = side === 'leading' ? 2 - index : index;
 
         return (
           <List.SwipeAction
             key={label}
+            shape={shape?.(outer)}
+            showLabel={showLabel}
             onClick={() => addLog(`${label} clicked`)}
             {...props}
             label={props.label ?? label}
             tint={props.tint ?? tint}
           >
-            <SFSymbol icon={icon} />
+            {text ? label : <SFSymbol icon={icon} />}
           </List.SwipeAction>
         );
       })}
@@ -667,37 +901,35 @@ export const ListSwipeDemo: FunctionComponent = () => {
       <List.Root {...propsRoot}>
         <List.Section>
           <List.Group>
-            {(['Regular', 'Tall', 'Multi-line'] as const).map(
-              (height, index) => (
-                <List.Item key={height}>
-                  <List.Image
-                    style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
-                    variant="rounded"
-                  >
-                    <SFSymbol icon={sfEnvelopeFill} />
-                  </List.Image>
-                  <List.Title
-                    render={<button />}
-                    onClick={() => addLog(`${height} clicked`)}
-                  >
-                    {height}
-                  </List.Title>
-                  {height === 'Regular' ? null : (
-                    <List.Subtitle>Swipe either way</List.Subtitle>
-                  )}
-                  {height === 'Multi-line' ? (
-                    <List.Text>
-                      Swipe on past the actions to trigger the outermost one, on
-                      either side; let go before to keep them open.
-                    </List.Text>
-                  ) : null}
-                  <List.Detail>Detail</List.Detail>
-                  <List.DrillIn />
-                  {swipeActions('leading', leadingActions, index === 0)}
-                  {swipeActions('trailing', trailingActions, false)}
-                </List.Item>
-              ),
-            )}
+            {swipeRows.map((row, index) => (
+              <List.Item key={row.name}>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  variant="rounded"
+                >
+                  <SFSymbol icon={sfEnvelopeFill} />
+                </List.Image>
+                <List.Title
+                  render={<button />}
+                  onClick={() => addLog(`${row.name} clicked`)}
+                >
+                  {row.name}
+                </List.Title>
+                {row.subtitle ? (
+                  <List.Subtitle>Swipe either way</List.Subtitle>
+                ) : null}
+                {row.multiLine ? (
+                  <List.Text>
+                    Swipe on past the actions to trigger the outermost one, on
+                    either side; let go before to keep them open.
+                  </List.Text>
+                ) : null}
+                <List.Detail>Detail</List.Detail>
+                <List.DrillIn />
+                {swipeActions('leading', leadingActions, index === 0, row)}
+                {swipeActions('trailing', trailingActions, false, row)}
+              </List.Item>
+            ))}
           </List.Group>
           <List.Footer>
             Swipe a row to reveal its actions; swipe on past them to trigger the
@@ -708,11 +940,6 @@ export const ListSwipeDemo: FunctionComponent = () => {
     </Component>
   );
 };
-
-const propOptionsEdit = {
-  prefix: ['none', 'delete', 'insert', 'multiple', 'single'] as const,
-  reorder: [true, false] as const,
-} as const;
 
 const planets = ['Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter'] as const;
 
@@ -736,78 +963,28 @@ export const ListEditDemo: FunctionComponent = () => {
   const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
 
   const [controlCheckbox, propsCheckbox, RemounterCheckbox] = usePropControl(
-    useMemo(
-      () => ({
-        ...propOptionsCheckbox,
-        onCheckedChange: [
-          new MappedProp(
-            (
-              checked: boolean,
-              { reason }: BaseCheckbox.Root.ChangeEventDetails,
-            ) => addLog(`checked change: ${checked}/${reason}`),
-            '[log change]',
-          ),
-          undefined,
-        ] as const,
-      }),
-      [addLog],
-    ),
+    useMemo(() => getPropOptionsCheckboxFirst(addLog), [addLog]),
     'checkbox (1st)',
   );
 
   const [controlRadioGroup, propsRadioGroup, RemounterRadioGroup] =
     usePropControl(
-      useMemo(
-        () => ({
-          className,
-          style,
-          defaultValue: [undefined, 'Earth'] as const,
-          disabled: [undefined, false, true] as const,
-          readOnly: [undefined, false, true] as const,
-          onValueChange: [
-            new MappedProp(
-              (value: unknown) => addLog(`value change: ${String(value)}`),
-              '[log change]',
-            ),
-            undefined,
-          ] as const,
-        }),
-        [addLog],
-      ),
+      useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
       'radio group',
     );
 
   const [controlRadio, propsRadio] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        cursor: cursorOptions,
-        disabled: [undefined, false, true] as const,
-        readOnly: [undefined, false, true] as const,
-      }),
-      [],
-    ),
+    propOptionsRadioFirst,
     'radio (1st)',
   );
 
   const [controlEditButton, propsEditButton] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        cursor: cursorOptions,
-        disabled: [undefined, false, true] as const,
-        onClick: [
-          new MappedProp(() => addLog('edit button clicked'), '[log click]'),
-          undefined,
-        ] as const,
-      }),
-      [addLog],
-    ),
+    useMemo(() => getPropOptionsEditButtonFirst(addLog), [addLog]),
     'edit button (1st)',
   );
 
   const [controlGrabber, propsGrabber] = usePropControl(
-    useMemo(() => ({ ...commonPropOptions, cursor: cursorOptions }), []),
+    propOptionsCursor,
     'grabber (1st)',
   );
 
@@ -836,7 +1013,8 @@ export const ListEditDemo: FunctionComponent = () => {
         );
       }
 
-      case 'delete': {
+      case 'delete':
+      case 'delete + insert': {
         return (
           <List.EditButton
             aria-label={`Delete ${name}`}
@@ -876,7 +1054,8 @@ export const ListEditDemo: FunctionComponent = () => {
         setRows((current) => {
           const next = [...current];
           const [moved] = next.splice(from, 1);
-          if (moved) next.splice(to, 0, moved);
+          // Not past the insert row.
+          if (moved) next.splice(Math.min(to, next.length), 0, moved);
           return next;
         });
       }}
@@ -905,6 +1084,22 @@ export const ListEditDemo: FunctionComponent = () => {
           </List.SwipeActions>
         </List.Item>
       ))}
+      {content.prefix === 'delete + insert' ? (
+        // UIKit: an insert row at the end, deleting the others.
+        <List.Item>
+          <List.EditButton
+            aria-label="Add Planet"
+            editingStyle="insert"
+            onClick={() => {
+              added.current += 1;
+              const row = `New ${added.current}`;
+              addLog(`insert ${row}`);
+              setRows((current) => [...current, row]);
+            }}
+          />
+          <List.Title>Add Planet</List.Title>
+        </List.Item>
+      ) : null}
     </List.Group>
   );
 
@@ -1036,10 +1231,17 @@ export const ListSegmentedDemo: FunctionComponent = () => {
 /**
  * A form (Framework7 list inputs): fields as rows, with inline labels, a
  * clear button while editing, a placeholder-only row, validation (an email
- * field's error shows once it's left invalid) and a textarea.
+ * field's error shows once it's left invalid), dates and times picked in
+ * expandable rows (`List.Expandable`), and a textarea.
  */
 export const ListFormDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
+  const [starts, setStarts] = useState(() => new Date(2025, 3, 20, 9, 41));
+  const [ends, setEnds] = useState(() => new Date(2025, 3, 21, 18, 0));
+  // The open picker: of which row, the date's or the time's.
+  const [open, setOpen] = useState<
+    readonly ['ends' | 'starts', DatePickerOpen] | null
+  >(null);
 
   const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
 
@@ -1097,26 +1299,50 @@ export const ListFormDemo: FunctionComponent = () => {
             <List.Title>Event</List.Title>
           </List.Header>
           <List.Group>
-            <List.Item>
-              <List.Title>Starts</List.Title>
-              <DatePicker
-                defaultValue={new Date(2025, 3, 20, 9, 41)}
-                mode="dateAndTime"
-                onValueChange={(date) =>
-                  addLog(`starts: ${date.toLocaleString()}`)
-                }
-              />
-            </List.Item>
-            <List.Item>
-              <DatePicker
-                defaultValue={new Date(2025, 3, 21, 18, 0)}
-                mode="dateAndTime"
-                pickerStyle="inline"
-                onValueChange={(date) =>
-                  addLog(`ends: ${date.toLocaleString()}`)
-                }
-              />
-            </List.Item>
+            {(
+              [
+                ['starts', 'Starts', starts, setStarts],
+                ['ends', 'Ends', ends, setEnds],
+              ] as const
+            ).map(([key, title, date, setDate]) => {
+              const change = (next: Date) => {
+                addLog(`${key}: ${next.toLocaleString()}`);
+                setDate(next);
+              };
+              const opened = open?.[0] === key ? open[1] : null;
+
+              // The date's and the time's buttons open their pickers in
+              // expandable rows below (as iOS's Calendar), one at a time.
+              return (
+                <Fragment key={key}>
+                  <List.Item>
+                    <List.Title>{title}</List.Title>
+                    <DatePicker
+                      mode="dateAndTime"
+                      open={opened}
+                      popover={false}
+                      value={date}
+                      onValueChange={change}
+                      onOpenChange={(next) =>
+                        setOpen(next ? [key, next] : null)
+                      }
+                    />
+                  </List.Item>
+                  <List.Expandable open={opened === 'date'}>
+                    <Calendar
+                      value={date}
+                      onValueChange={change}
+                    />
+                  </List.Expandable>
+                  <List.Expandable open={opened === 'time'}>
+                    <TimeRoll
+                      value={date}
+                      onValueChange={change}
+                    />
+                  </List.Expandable>
+                </Fragment>
+              );
+            })}
           </List.Group>
         </List.Section>
         <List.Section>
@@ -1204,13 +1430,7 @@ export const ListIndexDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
   const [controlRoot, propsRoot] = usePropControl(
-    useMemo(
-      () => ({
-        ...propOptionsRoot,
-        listStyle: ['plain', 'insetGrouped', 'grouped', undefined] as const,
-      }),
-      [],
-    ),
+    propOptionsRootPlain,
     'root',
     true,
   );
@@ -1221,19 +1441,13 @@ export const ListIndexDemo: FunctionComponent = () => {
   );
 
   const [controlIndex, propsIndex] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        size: [undefined, 'compact', 'regular'] as const,
-      }),
-      [],
-    ),
+    propOptionsIndex,
     'index',
     true,
   );
 
   const [controlIndexItem, propsIndexItem] = usePropControl(
-    useMemo(() => ({ ...commonPropOptions, cursor: cursorOptions }), []),
+    propOptionsCursor,
     'index item',
   );
 
@@ -1370,19 +1584,13 @@ export const ListMailDemo: FunctionComponent = () => {
   const [archived, setArchived] = useState<readonly string[]>([]);
 
   const [controlRoot, propsRoot] = usePropControl(
-    useMemo(
-      () => ({
-        ...propOptionsRoot,
-        listStyle: ['plain', 'insetGrouped', 'grouped', undefined] as const,
-      }),
-      [],
-    ),
+    propOptionsRootPlain,
     'root',
     true,
   );
 
   const [controlText, propsText] = usePropControl(
-    useMemo(() => ({ ...commonPropOptions, lines: [undefined, 1, 2, 3] }), []),
+    propOptionsText,
     'text',
     true,
   );
@@ -1420,6 +1628,7 @@ export const ListMailDemo: FunctionComponent = () => {
                     side="leading"
                   >
                     <List.SwipeAction
+                      showLabel
                       label="Unread"
                       tint="var(--color-ios-system-blue)"
                       onClick={() => addLog(`unread ${from}`)}
@@ -1434,12 +1643,14 @@ export const ListMailDemo: FunctionComponent = () => {
                     }}
                   >
                     <List.SwipeAction
+                      showLabel
                       label="More"
                       onClick={() => addLog(`more ${from}`)}
                     >
                       <SFSymbol icon={sfEllipsis} />
                     </List.SwipeAction>
                     <List.SwipeAction
+                      showLabel
                       label="Flag"
                       tint="var(--color-ios-system-orange)"
                       onClick={() => addLog(`flag ${from}`)}
@@ -1447,6 +1658,7 @@ export const ListMailDemo: FunctionComponent = () => {
                       <SFSymbol icon={sfFlagFill} />
                     </List.SwipeAction>
                     <List.SwipeAction
+                      showLabel
                       label="Archive"
                       tint="var(--color-ios-system-purple)"
                       onClick={() => addLog(`archived ${from}`)}

@@ -20,8 +20,12 @@ export type ButtonRootProps = BaseButtonProps & {
   cursor?: Properties['cursor'];
   /** Figma “Destructive”: tints the button red. */
   destructive?: boolean;
-  /** `circle` is square with a round shape, for symbol-only buttons. */
-  shape?: 'capsule' | 'circle';
+  /**
+   * `circle` is square with a round shape, for symbol-only buttons;
+   * `roundedRectangle` has 6px corners (large: 12px; Figma “Date and time -
+   * Collapsed”, large borderless buttons).
+   */
+  shape?: 'capsule' | 'circle' | 'roundedRectangle';
   /** Figma “Size” (not applicable to glass variants, which have one size). */
   size?: 'large' | 'medium' | 'small';
   /** Figma “Style”, and “Button - Liquid Glass” with “Tinted”. */
@@ -226,14 +230,25 @@ const StyledRoot = styled<typeof BaseButton, ButtonRootProps>(BaseButton, forwar
     }
   }}
 
-  ${({ shape }) =>
-    shape === 'circle'
-      ? css`
+  ${({ shape, size }) => {
+    switch (shape) {
+      case 'circle': {
+        return css`
           --styled-button-radius: 1000px;
 
           padding: 0;
-        `
-      : undefined}
+        `;
+      }
+      case 'roundedRectangle': {
+        return css`
+          --styled-button-radius: ${size === 'large' ? '12px' : '6px'};
+        `;
+      }
+      default: {
+        return undefined;
+      }
+    }
+  }}
 
   @media (hover: hover) {
     cursor: var(--styled-cursor);

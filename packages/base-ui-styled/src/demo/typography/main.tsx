@@ -1,54 +1,15 @@
 import { styled } from 'goober';
 import { Fragment, FunctionComponent } from 'react';
 
-import { DynamicTypeSize, TextStyle, Typography } from '../components/index.js';
-import { commonPropOptions, Component, usePropControl } from './utils/main.js';
-
-const textStyles: [TextStyle, string][] = [
-  ['largeTitle', 'Large Title'],
-  ['title1', 'Title 1'],
-  ['title2', 'Title 2'],
-  ['title3', 'Title 3'],
-  ['headline', 'Headline'],
-  ['body', 'Body'],
-  ['callout', 'Callout'],
-  ['subheadline', 'Subheadline'],
-  ['footnote', 'Footnote'],
-  ['caption1', 'Caption 1'],
-  ['caption2', 'Caption 2'],
-];
-
-const dynamicTypeSizes: DynamicTypeSize[] = [
-  'xSmall',
-  'small',
-  'medium',
-  'large',
-  'xLarge',
-  'xxLarge',
-  'xxxLarge',
-  'ax1',
-  'ax2',
-  'ax3',
-  'ax4',
-  'ax5',
-];
-
-const propOptionsContent = {
-  text: ['The quick brown fox jumps over the lazy dog', 'Label'] as const,
-} as const;
-
-const propOptionsTypography = {
-  ...commonPropOptions,
-  textStyle: [
-    undefined,
-    ...textStyles.map(([textStyle]) => textStyle),
-  ] as const,
-  emphasized: [undefined, false, true] as const,
-  italic: [undefined, false, true] as const,
-  color: [undefined, 'primary', 'secondary', 'tertiary', 'quaternary'] as const,
-  dynamicTypeSize: [undefined, ...dynamicTypeSizes] as const,
-  as: [undefined, 'span', 'p', 'h1', 'label'] as const,
-};
+import { Typography } from '../../components/index.js';
+import { Component, usePropControl } from '../utils/main.js';
+import {
+  dynamicTypeSizes,
+  propOptionsContent,
+  propOptionsMatrix,
+  propOptionsTypography,
+  textStyles,
+} from './props.js';
 
 export const TypographyDemo: FunctionComponent = () => {
   const [controlContent, content] = usePropControl(
@@ -100,14 +61,6 @@ const variants = [
   { emphasized: false, italic: true, name: 'italic' },
   { emphasized: true, italic: true, name: 'emphasized italic' },
 ] as const;
-
-const propOptionsMatrix = {
-  color: ['primary', 'secondary', 'tertiary', 'quaternary'] as const,
-  dynamicTypeSize: [
-    'large',
-    ...dynamicTypeSizes.filter((size) => size !== 'large'),
-  ] as const,
-};
 
 // Figma “Text styles” (the variants, in a label color) and “Dynamic Type”
 // (the sizes), with the color and size as controls.

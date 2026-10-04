@@ -1,4 +1,3 @@
-import { Menu as BaseMenu } from '@base-ui/react/menu';
 import { styled } from 'goober';
 import {
   forwardRef,
@@ -9,14 +8,17 @@ import {
   useState,
 } from 'react';
 
-import { EditMenu, Menu } from '../components/index.js';
-import { useLog } from './utils/log.js';
+import { EditMenu, Menu } from '../../components/index.js';
+import { useLog } from '../utils/log.js';
+import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
 import {
-  commonPropOptions,
-  Component,
-  MappedProp,
-  usePropControl,
-} from './utils/main.js';
+  getPropOptionsItems,
+  getPropOptionsRoot,
+  propOptionsContent,
+  propOptionsMore,
+  propOptionsPopup,
+  propOptionsPositioner,
+} from './props.js';
 
 const Text = styled('p', forwardRef)`
   max-width: 320px;
@@ -27,26 +29,6 @@ const Text = styled('p', forwardRef)`
   -webkit-user-select: text;
   user-select: text;
 `;
-
-const propOptionsContent = {
-  actions: [6, 1, 2, 3, 4, 5] as const,
-  more: [true, false] as const,
-} as const;
-
-const propOptionsPositioner = {
-  ...commonPropOptions,
-  side: [undefined, 'top', 'bottom'] as const,
-  align: [undefined, 'start', 'center', 'end'] as const,
-  sideOffset: [undefined, 0, 8, 16] as const,
-};
-
-const propOptionsItem = {
-  ...commonPropOptions,
-  disabled: [undefined, false, true] as const,
-  destructive: [undefined, false, true] as const,
-  cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
-  closeOnClick: [undefined, false, true] as const,
-};
 
 const actions = ['Cut', 'Copy', 'Paste', 'Delete', 'Replace…', 'AutoFill'];
 
@@ -61,11 +43,14 @@ export const EditMenuDemo: FunctionComponent = () => {
   // made: when the pointer is released, or after a pause (keyboard, touch:
   // selecting by touch cancels the pointer, the selection handles don't use
   // it); hidden while selecting. Selection changes keeping the range (e.g.
-  // restored after the menu's focusing cleared it, in WebKit) are ignored.
+  // restored after the menu's focusing cleared it, in WebKit) are ignored,
+  // and so are presses not changing it (e.g. outside the text, on content
+  // that can't be selected): they only close the menu.
   useEffect(() => {
     let selecting = false;
     let timeout: ReturnType<typeof setTimeout> | undefined;
     let shown: Range | null = null;
+    let changed = false;
 
     const current = () => {
       const documentSelection = document.getSelection();
@@ -107,13 +92,14 @@ export const EditMenuDemo: FunctionComponent = () => {
       if (target instanceof Element && target.closest('[role=menu]')) return;
 
       selecting = true;
+      changed = false;
       hide();
     };
 
     const onPointerUp = () => {
       if (!selecting) return;
       selecting = false;
-      update();
+      if (changed) update();
     };
 
     const onPointerCancel = () => {
@@ -121,6 +107,7 @@ export const EditMenuDemo: FunctionComponent = () => {
     };
 
     const onSelectionChange = () => {
+      if (selecting) changed = true;
       if (selecting || isShown(current())) return;
 
       clearTimeout(timeout);
@@ -148,22 +135,7 @@ export const EditMenuDemo: FunctionComponent = () => {
   );
 
   const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
-    useMemo(
-      () => ({
-        open: [undefined, true] as const,
-        modal: [false, true, undefined] as const,
-        loopFocus: [undefined, false, true] as const,
-        onOpenChange: [
-          new MappedProp(
-            (open: boolean, { reason }: BaseMenu.Root.ChangeEventDetails) =>
-              addLog(`open change: ${String(open)}/${reason}`),
-            '[log change]',
-          ),
-          undefined,
-        ] as const,
-      }),
-      [addLog],
-    ),
+    useMemo(() => getPropOptionsRoot(addLog), [addLog]),
     'root',
     true,
   );
@@ -173,43 +145,14 @@ export const EditMenuDemo: FunctionComponent = () => {
     'positioner',
   );
 
-  const [controlPopup, propsPopup] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        finalFocus: [undefined, false, true] as const,
-      }),
-      [],
-    ),
-    'popup',
-  );
+  const [controlPopup, propsPopup] = usePropControl(propOptionsPopup, 'popup');
 
   const [controlItem, propsItem] = usePropControl(
-    useMemo(
-      () => ({
-        ...propOptionsItem,
-        onClick: [
-          new MappedProp(() => addLog('item clicked'), '[log click]'),
-          undefined,
-        ] as const,
-      }),
-      [addLog],
-    ),
+    useMemo(() => getPropOptionsItems(addLog), [addLog]),
     'items',
   );
 
-  const [controlMore, propsMore] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        disabled: [undefined, false, true] as const,
-        openOnHover: [undefined, false, true] as const,
-        cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
-      }),
-      [],
-    ),
-    'more',
-  );
+  const [controlMore, propsMore] = usePropControl(propOptionsMore, 'more');
 
   const [controlSubmenuPositioner, propsSubmenuPositioner] = usePropControl(
     propOptionsPositioner,

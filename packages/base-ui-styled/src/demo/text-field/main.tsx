@@ -1,29 +1,14 @@
 import { FunctionComponent, useMemo } from 'react';
 
-import { List, TextField } from '../components/index.js';
-import { useLog } from './utils/log.js';
+import { List, TextField } from '../../components/index.js';
+import { useLog } from '../utils/log.js';
+import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
 import {
-  commonPropOptions,
-  Component,
-  MappedProp,
-  usePropControl,
-} from './utils/main.js';
-
-const propOptionsRoot = {
-  ...commonPropOptions,
-  disabled: [undefined, false, true] as const,
-  invalid: [undefined, false, true] as const,
-  validationMode: [undefined, 'onSubmit', 'onBlur', 'onChange'] as const,
-};
-
-const propOptionsControl = {
-  ...commonPropOptions,
-  placeholder: ['Name', undefined, 'A longer placeholder'] as const,
-  defaultValue: [undefined, 'Kate Bell'] as const,
-  type: [undefined, 'text', 'email', 'password', 'number'] as const,
-  required: [undefined, false, true] as const,
-  render: [undefined, new MappedProp(<textarea />, '[<textarea />]')] as const,
-};
+  getPropOptionsClear,
+  getPropOptionsControl,
+  propOptionsError,
+  propOptionsRoot,
+} from './props.js';
 
 /**
  * A text field (Base UI Field, Framework7's iOS inputs) as a list row, its
@@ -39,19 +24,7 @@ export const TextFieldDemo: FunctionComponent = () => {
   );
   const [controlLabel, propsLabel] = usePropControl(commonPropOptions, 'label');
   const [controlControl, propsControl] = usePropControl(
-    useMemo(
-      () => ({
-        ...propOptionsControl,
-        onValueChange: [
-          undefined,
-          new MappedProp(
-            (value: string) => addLog(`value change: ${value}`),
-            '[log change]',
-          ),
-        ] as const,
-      }),
-      [addLog],
-    ),
+    useMemo(() => getPropOptionsControl(addLog), [addLog]),
     'control',
     true,
   );
@@ -59,7 +32,11 @@ export const TextFieldDemo: FunctionComponent = () => {
     commonPropOptions,
     'description',
   );
-  const [controlError, propsError] = usePropControl(commonPropOptions, 'error');
+  const [controlError, propsError] = usePropControl(propOptionsError, 'error');
+  const [controlClear, propsClear] = usePropControl(
+    useMemo(() => getPropOptionsClear(addLog), [addLog]),
+    'clear',
+  );
 
   return (
     <Component
@@ -72,6 +49,7 @@ export const TextFieldDemo: FunctionComponent = () => {
         controlRoot,
         controlLabel,
         controlControl,
+        controlClear,
         controlDescription,
         controlError,
       ]}
@@ -86,7 +64,7 @@ export const TextFieldDemo: FunctionComponent = () => {
               >
                 <TextField.Label {...propsLabel}>Name</TextField.Label>
                 <TextField.Control {...propsControl} />
-                <TextField.Clear />
+                <TextField.Clear {...propsClear} />
                 <TextField.Description {...propsDescription}>
                   As shown to others.
                 </TextField.Description>

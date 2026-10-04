@@ -1,46 +1,16 @@
 import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
-import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
 import { styled } from 'goober';
 import { Fragment, FunctionComponent, useMemo } from 'react';
 
-import { Button, ButtonRootProps } from '../components/index.js';
-import { useLog } from './utils/log.js';
+import { Button, ButtonRootProps } from '../../components/index.js';
+import { useLog } from '../utils/log.js';
+import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
+import { SFSymbol } from '../utils/symbol.js';
 import {
-  commonPropOptions,
-  Component,
-  MappedProp,
-  usePropControl,
-} from './utils/main.js';
-import { SFSymbol } from './utils/symbol.js';
-
-const propOptionsContent = {
-  symbol: [
-    undefined,
-    new MappedProp(<SFSymbol icon={sfHeartFill} />, '[heart.fill]'),
-    new MappedProp(<SFSymbol icon={sfPlus} />, '[plus]'),
-  ] as const,
-  label: ['Button', undefined, 'Long button label'] as const,
-} as const;
-
-const propOptionsRoot = {
-  ...commonPropOptions,
-  disabled: [undefined, false, true] as const,
-  focusableWhenDisabled: [undefined, false, true] as const,
-  cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
-  variant: [
-    undefined,
-    'borderless',
-    'bordered',
-    'bordered-secondary',
-    'bordered-prominent',
-    'glass',
-    'glass-prominent',
-  ] as const,
-  size: [undefined, 'small', 'medium', 'large'] as const,
-  shape: [undefined, 'capsule', 'circle'] as const,
-  destructive: [undefined, false, true] as const,
-  context: [undefined, 'bright', 'dim'] as const,
-};
+  getPropOptionsRoot,
+  propOptionsContent,
+  propOptionsMatrix,
+} from './props.js';
 
 export const ButtonDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
@@ -52,19 +22,7 @@ export const ButtonDemo: FunctionComponent = () => {
   );
 
   const [controlRoot, propsRoot, Remounter] = usePropControl(
-    useMemo(
-      () => ({
-        ...propOptionsRoot,
-        onClick: [
-          new MappedProp(
-            () => addLog('button has been clicked'),
-            '[log click]',
-          ),
-          undefined,
-        ] as const,
-      }),
-      [addLog],
-    ),
+    useMemo(() => getPropOptionsRoot(addLog), [addLog]),
     'root',
     true,
   );
@@ -124,11 +82,6 @@ const matrixRows = matrixVariants.flatMap<{
 const matrixColumns = [false, true].flatMap((disabled) =>
   matrixLabelTypes.map((labelType) => ({ disabled, labelType })),
 );
-
-const propOptionsMatrix = {
-  destructive: [false, true] as const,
-  context: [undefined, 'bright', 'dim'] as const,
-};
 
 const Matrix = styled('div')`
   display: grid;

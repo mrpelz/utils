@@ -8,7 +8,10 @@ import {
   LogContainer,
 } from './components.js';
 
-export const useLog = (): [ReactNode, (value: string) => void] => {
+/** Adds a line to a demo's log. */
+export type AddLog = (value: string) => void;
+
+export const useLog = (): [ReactNode, AddLog] => {
   const logContainerRef = useRef<HTMLElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 

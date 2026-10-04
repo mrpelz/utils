@@ -299,8 +299,6 @@ const updateSelection = (group: HTMLElement, { instant = false } = {}) => {
   const hadActive = hadActiveTab.get(group) ?? false;
   hadActiveTab.set(group, Boolean(tab));
 
-  // State for the collapsed bar's styles (see `collapsedList`).
-  group.dataset.hasActive = String(Boolean(tab));
   group.style.setProperty('--styled-tabbar-selection-opacity', tab ? '1' : '0');
   if (!tab) return;
 
@@ -312,23 +310,41 @@ const updateSelection = (group: HTMLElement, { instant = false } = {}) => {
 };
 
 // Collapsed (measured on iOS 26, iPhone): the bar is 48pt high instead of
-// 62pt around the same center line, 7pt further in from the edges. Only the
-// group of the active tab (or, without one, the first) remains, with only
-// that tab (or its first), at `collapsedPosition`; the other tabs and groups
-// collapse away. The tab shows `collapsedContent`, in the content color, its
-// selection faded out: its symbol in a 40pt circle, or its label (and
-// symbol, side by side, in the regular size's metrics) in a capsule. The bar
-// keeps its size (see `List`). The regular size (iPad doesn't minimize its
-// tab bar) keeps its height.
-//
-// Groups and tabs marked `visibleWhenCollapsed` replace that choice: if any
-// group is marked (by itself, or by any of its tabs), only the marked groups
-// remain, and if any of a group's tabs are, only those. Several remaining tabs show the selection on the
-// active one, if it is among them. Each group goes to its own `collapsedPosition` (or the
-// list's), groups at the same one side by side: ordered by position between
-// two spacers, the list's pseudo-elements, which take up the free space.
+// 62pt around the same center line, 7pt further in from the edges. The
+// groups and tabs marked `visibleWhenCollapsed` remain (and only those: what
+// remains is the app's to decide, e.g. by `collapsedSelection`), the others
+// collapse away; each group at its `collapsedPosition` (or the list's),
+// groups at the same one side by side: ordered by position between two
+// spacers, the list's pseudo-elements, which take up the free space. Tabs
+// show `collapsedContent`, in the content color, the selection faded out
+// (with several remaining tabs, on the active one, if it's among them): a
+// symbol in a 40pt circle, or a label (and symbol, side by side, in the
+// regular size's metrics) in a capsule. The bar keeps its size (see `List`).
+// The regular size (iPad doesn't minimize its tab bar) keeps its height.
 
 export type CollapsedContent = 'label' | 'symbol' | 'symbolAndLabel';
+
+/** Whether a group remains while collapsed, and which of its tabs does. */
+export type CollapsedGroupSelection = { remains: boolean; tab: number };
+
+/**
+ * A choice of what remains while collapsed (for `visibleWhenCollapsed`), as
+ * iOS's: the active tab (by its value, among the groups' tab values) and its
+ * group; without one, the first group's first tab. Every group's `tab` is
+ * its active tab, or its first (for groups the app keeps, too).
+ */
+export const collapsedSelection = <Value,>(
+  groups: readonly (readonly Value[])[],
+  value: Value | undefined,
+): CollapsedGroupSelection[] => {
+  const active = groups.findIndex((tabs) => tabs.includes(value as Value));
+  const remaining = Math.max(active, 0);
+
+  return groups.map((tabs, index) => ({
+    remains: index === remaining,
+    tab: Math.max(tabs.indexOf(value as Value), 0),
+  }));
+};
 
 export type CollapsedPosition = 'center' | 'end' | 'start';
 
@@ -492,50 +508,6 @@ const collapsedList = ({
 
   && > div > ${tabsPart} > [role='tab'] > [${part}='label'] > * {
     ${fontWeight(510)}
-  }
-
-  /* Groups without the active tab collapse away, all their tabs hidden
-     (none fades in ahead of the others when expanding). */
-  && > div[data-has-active='false'] {
-    --styled-glass-fade: 0;
-
-    min-width: 0;
-    pointer-events: none;
-    visibility: hidden;
-  }
-
-  &&
-    > div[data-has-active='true']
-    > ${tabsPart}
-    > [role='tab']:not([data-active]),
-  && > div[data-has-active='false'] > ${tabsPart} > [role='tab'] {
-    --styled-tabbar-tab-fade: 0;
-
-    ${collapsedAway}
-    pointer-events: none;
-    visibility: hidden;
-  }
-
-  /* Without an active tab, the first group remains, with its first tab. */
-  &&:not(:has(> div[data-has-active='true'])) {
-    & > div:first-of-type {
-      --styled-glass-fade: 1;
-
-      min-width: var(--styled-tabbar-tab-height);
-      pointer-events: auto;
-      visibility: visible;
-
-      & > ${tabsPart} > [role='tab']:first-of-type {
-        --styled-tabbar-tab-fade: 1;
-
-        width: var(--styled-tabbar-collapsed-width);
-        min-width: var(--styled-tabbar-tab-height);
-        padding: var(--styled-tabbar-collapsed-padding);
-        margin: 0;
-        pointer-events: auto;
-        visibility: visible;
-      }
-    }
   }
 `;
 
@@ -1196,8 +1168,8 @@ const ListContext = createContext<ListState>({
 
 export type TabBarListProps = BaseTabs.List.Props & {
   /**
-   * Minimized (UIKit `tabBarMinimizeBehavior`): each group shows only its
-   * active tab (or its first) as a symbol in a circle.
+   * Minimized (UIKit `tabBarMinimizeBehavior`): only the groups and tabs
+   * marked `visibleWhenCollapsed` remain, by default as symbols in circles.
    */
   collapsed?: boolean;
   /**
@@ -1444,7 +1416,9 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
           release(list, state.tab);
           if (!state.tab) return;
 
-          if (!isActive(state.tab)) state.tab.click();
+          // Also the active tab: the click reaches it and its group (e.g. to
+          // expand a collapsed bar), the press having captured the pointer.
+          state.tab.click();
           reveal(state.tab);
         },
         move: (list, state, event) => {
@@ -1561,8 +1535,7 @@ const StyledGroup = styled<'div', StyledGroupProps>('div', forwardRef)`
     --styled-tabbar-overlap: 5.5px;
   }
 
-  /* Marked to remain while collapsed (or not, see collapsedList); without an
-     active tab, with its first. */
+  /* Remaining while collapsed, or collapsing away (see Group) */
   ${({ collapsedVisibility, spaced }) => {
     switch (collapsedVisibility) {
       case 'shown': {
@@ -1574,12 +1547,6 @@ const StyledGroup = styled<'div', StyledGroupProps>('div', forwardRef)`
             ${spaced ? 'border-inline-width: 8px;' : ''}
             pointer-events: auto;
             visibility: visible;
-          }
-
-          ${groupOverride}[data-has-active='false']
-            > ${tabsPart}
-            > :where([role='tab']:first-of-type) {
-            ${collapsedShown}
           }
         `;
       }
@@ -1683,9 +1650,8 @@ export type TabBarGroupProps = React.ComponentProps<'div'> & {
   /** Default shape of the contained tabs (default: by their content). */
   shape?: Shape;
   /**
-   * Remains while the bar is collapsed (as does a group with tabs marked
-   * so). If any group is marked, only marked groups remain (by default, the
-   * group of the active tab, or the first).
+   * Remains while the bar is collapsed, with its tabs marked so; groups not
+   * marked collapse away (see `collapsedSelection`).
    */
   visibleWhenCollapsed?: boolean;
 };
@@ -1711,17 +1677,15 @@ const Group = forwardRef<HTMLDivElement, TabBarGroupProps>(
     const { markGroup } = list;
     const [markedTabs, markTab] = useMarks();
 
-    // Marked itself, or by any of its tabs.
-    const remains = Boolean(visibleWhenCollapsed) || markedTabs > 0;
+    // Counted, for the layout of several remaining groups.
     useLayoutEffect(
-      () => (remains ? markGroup?.() : undefined),
-      [markGroup, remains],
+      () => (visibleWhenCollapsed ? markGroup?.() : undefined),
+      [markGroup, visibleWhenCollapsed],
     );
 
-    // Only while collapsed, and only if marks decide it.
     let collapsedVisibility: CollapsedVisibility | undefined;
-    if (list.collapsed && list.markedGroups > 0) {
-      collapsedVisibility = remains ? 'shown' : 'away';
+    if (list.collapsed) {
+      collapsedVisibility = visibleWhenCollapsed ? 'shown' : 'away';
     }
     const away = collapsedVisibility === 'away';
 
@@ -1846,9 +1810,9 @@ export type TabBarTabProps = BaseTabs.Tab.Props & {
    */
   shape?: Shape;
   /**
-   * Remains while the bar is collapsed, as does its group. If any of a
-   * group's tabs are marked, only those remain (by default, the active one,
-   * or the first); several show the selection on the active one.
+   * Remains while the bar is collapsed, in its group (if the group does);
+   * tabs not marked collapse away. Several remaining tabs show the
+   * selection on the active one.
    */
   visibleWhenCollapsed?: boolean;
 };
@@ -2005,9 +1969,9 @@ const Tab = forwardRef<HTMLButtonElement, TabBarTabProps>(
       [markTab, visibleWhenCollapsed],
     );
 
-    // Only while collapsed, in a remaining group, if marks decide it.
+    // Only while collapsed, in a remaining group.
     let collapsedVisibility: CollapsedVisibility | undefined;
-    if (collapsed && !group.away && group.markedTabs > 0) {
+    if (collapsed && !group.away) {
       collapsedVisibility = visibleWhenCollapsed ? 'shown' : 'away';
     }
 

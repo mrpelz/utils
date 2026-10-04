@@ -324,7 +324,7 @@ export const tests = [
   {
     name: 'list: headers and footers match Figma',
     run: async (page) => {
-      await page.open('list');
+      await page.open('list-parts');
 
       /** @param {string} prominence */
       const header = async (prominence) => {
@@ -552,7 +552,7 @@ export const tests = [
           atRow: Math.round(circle.right - (symbol.left + symbol.width / 2)),
           edge: Math.round(circle.left - box.left),
           next: Math.round(next.getBoundingClientRect().left - circle.right),
-          others: [getComputedStyle(next).opacity, getComputedStyle(last).opacity],
+          others: [next, last].map((button) => [...button.children, button.querySelector('[data-list-part=swipe-action-symbol]')].map((part) => getComputedStyle(part).opacity)),
           row: Math.round(rowLeft - last.getBoundingClientRect().right),
         };
       })()`);
@@ -561,7 +561,11 @@ export const tests = [
         atRow: 22,
         edge: 16,
         next: 10,
-        others: ['1', '1'],
+        // Faded while overswiping (iOS, measured: 36%).
+        others: [
+          ['1', '0.36', '0.36'],
+          ['1', '0.36', '0.36'],
+        ],
         row: 10,
       });
 
@@ -621,10 +625,10 @@ export const tests = [
     },
   },
   {
-    name: 'list: rows arm overswiping at the same distance, with labelled actions, too',
+    name: 'list: rows arm overswiping at the same distance, in tall rows, too',
     run: async (page) => {
       await page.open('list-swipe');
-      // Tall row: 36px labelled actions, armed past 304px all the same.
+      // Tall row: armed past 304px all the same.
       const { height, width, x, y } = await rowRect(page, 0, 1);
       const from = /** @type {[number, number]} */ ([
         x + width - 40,
@@ -680,38 +684,40 @@ export const tests = [
     run: async (page) => {
       await page.open('list-swipe');
 
-      // Tall row, trailing: circles 36px with labels (smaller than Figma's
-      // 50px, to fit the row), 10px from the row and each other, 16px from
-      // the edge.
-      await swipe(page, 0, 1, -150);
+      // Tall row, trailing: 44px circles without labels, 10px from the row
+      // and each other, 16px from the edge.
+      await swipe(page, 0, 1, -200);
       const tall = await swipeState(page, 0, 1);
       assert.equal(tall.swipe, 'trailing');
       assert.deepEqual(tall.actions, [1, 1, 1]);
-      assert.equal(tall.width, 10 + 36 * 3 + 10 * 2 + 16);
+      assert.equal(tall.width, 10 + 44 * 3 + 10 * 2 + 16);
       assert.equal(tall.offset, -tall.width);
 
+      // Multi-line row (labels): circles 44px, 4px above 13px labels,
+      // centered in the row.
+      await swipe(page, 0, 2, -200);
       const geometry = await page.evaluate(`(() => {
-        const item = ${row(0, 1)};
+        const item = ${row(0, 2)};
         const box = item.getBoundingClientRect();
-        const buttons = [...item.querySelectorAll('[data-list-part=swipe-action]')].slice(3);
-        const label = buttons[0].querySelector('[data-list-part=swipe-action-label]');
+        const button = [...item.querySelectorAll('[data-list-part=swipe-action]')].at(-1);
+        const shape = button.firstElementChild.getBoundingClientRect();
+        const label = button.querySelector('[data-list-part=swipe-action-label]').getBoundingClientRect();
         return {
-          // Circle and label centered: 6px above, 4px between, 6px below.
-          circleTop: Math.round(buttons[0].getBoundingClientRect().top - box.top),
-          labelBottom: Math.round(box.bottom - label.getBoundingClientRect().bottom),
-          labelGap: Math.round(label.getBoundingClientRect().top - buttons[0].firstElementChild.getBoundingClientRect().bottom),
-          label: getComputedStyle(label).display,
+          centered: Math.round(box.top + box.height / 2 - (shape.top + label.bottom) / 2),
+          label: label.height,
+          labelGap: Math.round(label.top - shape.bottom),
           radius: getComputedStyle(item).borderTopLeftRadius,
           separators: [getComputedStyle(item, '::before').opacity],
+          shape: [shape.width, shape.height],
         };
       })()`);
       assert.deepEqual(geometry, {
-        circleTop: 6,
-        label: 'block',
-        labelBottom: 6,
+        centered: 0,
+        label: 16,
         labelGap: 4,
         radius: '34px',
         separators: ['0'],
+        shape: [44, 44],
       });
 
       // Regular row, leading: 44px circles without labels, 4px from the
@@ -727,7 +733,7 @@ export const tests = [
         4,
       );
       assert.equal(regular.offset, regular.width);
-      assert.equal(await swipeSide(page, 0, 1), undefined);
+      assert.equal(await swipeSide(page, 0, 2), undefined);
 
       // A short swipe back closes it; so does a tap elsewhere.
       await swipe(page, 0, 0, -60);
@@ -1028,10 +1034,208 @@ export const tests = [
     },
   },
   {
+    name: 'list: rounded rectangle actions fill the row; text in capitals; shapes mixed',
+    run: async (page) => {
+      await page.open('list-swipe');
+
+      // “Rounded rectangles” (labelled), “Text”: 4px from the row's edges
+      // (above the labels), at least 60px wide, concentric corners.
+      /** @param {number} index */
+      const shapes = async (index) => {
+        await swipe(page, 0, index, -240);
+        return page.evaluate(`(() => {
+          const item = ${row(0, index)};
+          const box = item.getBoundingClientRect();
+          const button = [...item.querySelectorAll('[data-list-part=swipe-action]')].at(-1);
+          const shape = button.firstElementChild;
+          const { bottom, top, width } = shape.getBoundingClientRect();
+          const symbol = shape.firstElementChild;
+          return {
+            bottom: Math.round(box.bottom - bottom),
+            radius: getComputedStyle(shape).borderTopLeftRadius,
+            text: [getComputedStyle(symbol).textTransform, getComputedStyle(symbol).fontSize],
+            top: Math.round(top - box.top),
+            wide: width >= 60,
+          };
+        })()`);
+      };
+
+      assert.deepEqual(await shapes(3), {
+        bottom: 4 + 20,
+        radius: '12px',
+        text: ['uppercase', '15px'],
+        top: 4,
+        wide: true,
+      });
+      assert.deepEqual(await shapes(5), {
+        bottom: 4,
+        radius: '12px',
+        text: ['uppercase', '15px'],
+        top: 4,
+        wide: true,
+      });
+
+      // “Mixed”: circles, the outermost a rounded rectangle.
+      await swipe(page, 0, 4, -240);
+      const mixed = await page.evaluate(
+        `[...${row(0, 4)}.querySelectorAll(${JSON.stringify('[data-list-part=swipe-actions]')})[1].children].map((button) => getComputedStyle(button.firstElementChild).borderTopLeftRadius)`,
+      );
+      assert.deepEqual(mixed, ['100px', '100px', '12px']);
+    },
+  },
+  {
+    name: 'list: actions fade in as they scale in',
+    run: async (page) => {
+      await page.open('list-swipe');
+      const { height, width, x, y } = await rowRect(page, 0, 0);
+      const from = /** @type {[number, number]} */ ([
+        x + width - 40,
+        y + height / 2,
+      ]);
+
+      // Halfway into the outermost (last) action's 44px.
+      await page.mouse('mousePressed', ...from);
+      for (let step = 1; step <= 4; step += 1) {
+        await page.mouse('mouseMoved', from[0] - 8 - step * 9.5, from[1]);
+        await sleep(30);
+      }
+      await sleep(100);
+      const fade = await page.evaluate(`(() => {
+        const button = ${row(0, 0)}.querySelectorAll('[data-list-part=swipe-actions]')[1].lastElementChild;
+        return [new DOMMatrix(getComputedStyle(button).transform).a, Number(getComputedStyle(button.querySelector('[data-list-part=swipe-action-symbol]')).opacity)];
+      })()`);
+      await page.mouse('mouseReleased', from[0] - 46, from[1]);
+      await sleep(500);
+
+      const [scale, opacity] = fade;
+      assert.ok(scale > 0.2 && scale < 0.8, `scale ${scale}`);
+      assert.ok(
+        Math.abs(opacity - (0.36 + 0.64 * scale)) < 0.01,
+        `opacity ${opacity} at scale ${scale}`,
+      );
+    },
+  },
+  {
+    name: 'list: rows with a click handler are pressable, passing clicks on',
+    run: async (page) => {
+      await page.open('list');
+      const state = () =>
+        page.evaluate(
+          `[document.querySelector('[role=switch]').getAttribute('aria-checked'), getComputedStyle(${row(0, 0)}).backgroundColor, getComputedStyle(${row(0, 0)}).cursor]`,
+        );
+      const { height, width, x, y } = await rowRect(page, 0, 0);
+
+      // Pressed on the row: highlighted, clicking the switch.
+      await page.mouse('mousePressed', x + width / 2, y + height / 2);
+      await sleep(100);
+      const [, pressed, cursor] = await state();
+      await page.mouse('mouseReleased', x + width / 2, y + height / 2);
+      await sleep(300);
+      assert.deepEqual([pressed, cursor], ['rgb(209, 209, 214)', 'pointer']);
+      const [checked] = await state();
+      assert.equal(checked, 'true');
+
+      // Pressed on the switch: not highlighted, toggled once.
+      /** @type {[number, number]} */
+      const control = await page.evaluate(`(() => {
+        const { height, width, x, y } = document.querySelector('[role=switch]').getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`);
+      await page.mouse('mousePressed', ...control);
+      await sleep(100);
+      const [, background] = await state();
+      await page.mouse('mouseReleased', ...control);
+      await sleep(300);
+      assert.equal(background, 'rgba(0, 0, 0, 0)');
+      const [unchecked] = await state();
+      assert.equal(unchecked, 'false');
+
+      // The pop-up row opens its menu.
+      const popUp = await rowRect(page, 0, 3);
+      await page.click([popUp.x + 100, popUp.y + popUp.height / 2]);
+      await sleep(400);
+      assert.equal(
+        await page.evaluate(
+          `document.querySelectorAll(${JSON.stringify('[role=menu]')}).length`,
+        ),
+        1,
+      );
+    },
+  },
+  {
+    name: 'list: a collapsible header is a button (cursor)',
+    run: async (page) => {
+      await page.open('list-parts');
+      const cursor = () =>
+        page.evaluate(
+          `getComputedStyle(${page.section}.querySelector('[data-list-part=header][role=button]')).cursor`,
+        );
+      assert.equal(await cursor(), 'pointer');
+      await page.setControl('cursor', 'copy', 'collapsible trigger (header)');
+      assert.equal(await cursor(), 'copy');
+    },
+  },
+  {
+    name: 'list: deleting rows, with an insert row at the end',
+    run: async (page) => {
+      await page.open('list-edit');
+      await page.setControl('prefix', 'delete + insert');
+      const titles = () =>
+        page.evaluate(
+          `[...document.querySelector('[data-list-part=group]').children].map((item) => item.querySelector(${JSON.stringify('[data-list-part=title]')}).textContent)`,
+        );
+      const insert = await page.evaluate(`(() => {
+        const button = [...document.querySelectorAll('[data-list-part=edit]')].at(-1);
+        button.scrollIntoView({ block: 'center' });
+        const { height, width, x, y } = button.getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`);
+      await page.click(insert);
+      await sleep(300);
+      assert.deepEqual(await titles(), [
+        'Mercury',
+        'Venus',
+        'Earth',
+        'Mars',
+        'Jupiter',
+        'New 1',
+        'Add Planet',
+      ]);
+    },
+  },
+  {
+    name: 'list: an expandable row opens and closes below its row',
+    run: async (page) => {
+      await page.open('list-parts');
+      const state = () =>
+        page.evaluate(`(() => {
+          const row = document.querySelector(${JSON.stringify('[data-list-part=item]:has(> [data-list-part=disclosure])')});
+          const expandable = row.nextElementSibling;
+          return [Math.round(expandable.getBoundingClientRect().height), expandable.inert];
+        })()`);
+      assert.deepEqual(await state(), [0, true]);
+      const toggle = /** @type {[number, number]} */ (
+        await page.evaluate(`(() => {
+        const row = document.querySelector(${JSON.stringify('[data-list-part=item]:has(> [data-list-part=disclosure])')});
+        row.scrollIntoView({ block: 'center' });
+        const { height, width, x, y } = row.getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`)
+      );
+      await page.click(toggle);
+      await sleep(500);
+      assert.deepEqual(await state(), [68, false]);
+      await page.click(toggle);
+      await sleep(500);
+      assert.deepEqual(await state(), [0, true]);
+    },
+  },
+  {
     name: 'list: screenshots',
     run: async (page) => {
       for (const id of [
         'list',
+        'list-parts',
         'list-swipe',
         'list-edit',
         'list-mail',

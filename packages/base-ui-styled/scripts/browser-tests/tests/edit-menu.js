@@ -203,4 +203,30 @@ export const tests = [
       assert.deepEqual(state, { kept: true, menus: 2, selected: true });
     },
   },
+  {
+    name: 'edit menu: pressing outside closes it, also where the selection stays',
+    run: async (page) => {
+      await page.open('edit-menu');
+      const menus = `document.querySelectorAll(${JSON.stringify('[role=menu]')}).length`;
+      const [x, y, width, height] = await page.evaluate(`(() => {
+        const text = ${page.section}.querySelector('stage p');
+        text.scrollIntoView({ block: 'center' });
+        const { height, width, x, y } = text.getBoundingClientRect();
+        return [x, y, width, height];
+      })()`);
+
+      await page.drag([x + 5, y + 8], [x + 120, y + 8], { duration: 300 });
+      await sleep(800);
+      assert.equal(await page.evaluate(menus), 1, 'open');
+
+      // The stage can't be selected: the selection stays, the menu closes.
+      await page.click([x + width / 2, y + height + 60]);
+      await sleep(600);
+      assert.equal(await page.evaluate(menus), 0, 'closed');
+      assert.notEqual(
+        await page.evaluate('String(document.getSelection())'),
+        '',
+      );
+    },
+  },
 ];

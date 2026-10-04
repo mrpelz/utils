@@ -1,6 +1,7 @@
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
 import { Radio as BaseRadio } from '@base-ui/react/radio';
 import { useRender } from '@base-ui/react/use-render';
+import { Properties } from 'csstype';
 import { styled } from 'goober';
 import {
   createContext,
@@ -64,7 +65,7 @@ import {
 // (Figma “Contents - Trailing”: 16px apart), e.g. a `Switch` or a `Menu`
 // trigger; up to 36px high (e.g. a `Stepper` or `Segmented`), they fit
 // regular rows (8px from their edges). Rows with a subtitle are tall (Figma
-// Height=Tall: 68px, labelled swipe actions); others are regular (52px).
+// Height=Tall: 68px); others are regular (52px).
 // Both are minimum heights, growing with wrapping text. A row is pressable when its
 // `Title` (or `Button`) is a link or button (`render`): its hit area covers
 // the row, beneath the trailing controls.
@@ -83,11 +84,14 @@ import {
 //   corners (Figma: a capsule, which would cut into their content).
 // - Swiped rows keep a round end at their place's edge, their content
 //   sliding away beneath it (iOS; Figma shows rows opened in place only).
-// - Swipe actions of regular rows are 44px circles, 4px from the row's
-//   edges (Figma: 52px, the row's height).
-// - Labelled swipe actions (tall rows) are 36px circles (smaller symbols, as
-//   Framework7's), 4px above 13px labels, centered in the row (Figma: 50px
-//   circles, 3px above 15px labels, which overflow a 68px row).
+// - Swipe actions are 44px circles, 4px from a regular row's edges (Figma:
+//   52px, the row's height), or rounded rectangles as high as the row (as
+//   iOS notifications'), by action; labels are optional (for multi-line
+//   rows), 4px below the shapes, in 13px (Figma: 50px circles, 3px above
+//   15px labels, which overflow a 68px row). Symbols can be text, in
+//   capitals (regular weight).
+// - Actions fade in as they scale in, and the others fade out while
+//   overswiping (iOS; Figma: none).
 // - Rounded and circular images size their symbol to the image (Figma: none
 //   given); header buttons are round (Figma PNG; CSS: 10px corners).
 // - Separators, chevrons and the checkmarks are drawn as CSS borders and SVG
@@ -615,17 +619,26 @@ const pressable = [
   `button[${part}='button']:enabled`,
 ];
 
-const whilePressed = pressable
-  .map((selector) => `&:has(> ${selector}:active)`)
-  .join(', ');
+// Pressed: a pressable title or button, or a row with a click handler,
+// pressed itself (see `Item`).
+const whilePressed = [
+  ...pressable.map((selector) => `&:has(> ${selector}:active)`),
+  '&[data-pressed]',
+].join(', ');
 
-const StyledItem = styled(partElement('li', 'item'), forwardRef)`
+/** A row's own controls (pressing them doesn't press a pressable row). */
+const ownControl =
+  'a, button, input, select, textarea, label, [role], [tabindex]';
+
+export type ListItemProps = PartProps<'li'> & {
+  /** As `Button`: the cursor (default: `pointer` with a click handler). */
+  cursor?: Properties['cursor'];
+};
+
+const StyledItem = styled(partElement('li', 'item'), forwardRef)<ListItemProps>`
   --styled-list-min-height: 52px;
-  --styled-list-action-size: 44px;
-  --styled-list-action-height: var(--styled-list-action-size);
-  --styled-list-action-symbol-size: var(--font-ios-body-size);
-  --styled-list-action-label-display: none;
-  --styled-list-actions-align: center;
+
+  ${({ onClick }) => cursor(onClick ? 'pointer' : 'auto')}
 
   position: relative;
   display: grid;
@@ -649,12 +662,6 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)`
   /* Figma Height=Tall (images keep their regular size) */
   &:has(> [${part}='subtitle']) {
     --styled-list-min-height: 68px;
-
-    /* Labelled, centered in the row with room around (see Deviations) */
-    --styled-list-action-size: 36px;
-    --styled-list-action-height: calc(36px + 4px + 16px);
-    --styled-list-action-symbol-size: var(--font-ios-subheadline-size);
-    --styled-list-action-label-display: block;
 
     & > [${part}='title'] {
       align-self: end;
@@ -931,6 +938,19 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)`
     border-radius: ${swipeRadius}px;
     background-color: var(--color-ios-system-gray5);
   }
+
+  /* An expandable row, closed (see Expandable): no height, nor separator. */
+  &[data-closed] {
+    overflow: hidden;
+    height: 0;
+    min-height: 0;
+    padding-block: 0;
+    visibility: hidden;
+
+    &::before {
+      opacity: 0;
+    }
+  }
 `;
 
 type ItemContextValue = {
@@ -962,8 +982,8 @@ let closeOpenItem: (() => void) | undefined;
 const swipeDuration = 300;
 const swipeThreshold = 8;
 /**
- * How far a row arms overswiping, in any row (also with smaller, labelled
- * actions): past 5 regular actions (5 × (44 + 10) + 16 + 10 + 8px;
+ * How far a row arms overswiping, with any actions (also fewer, or
+ * labelled ones): past 5 circles (5 × (44 + 10) + 16 + 10 + 8px;
  * Framework7: 1.2 times the actions' width), at least 8px past its actions.
  * Released before, it doesn't.
  */
@@ -971,6 +991,12 @@ const overswipeArm = 304;
 const overswipeDistance = 8;
 /** Armed (or disarmed), the outermost action's symbol moves quickly. */
 const armDuration = 150;
+/**
+ * Actions fade in from this opacity as they scale in, and the others fade
+ * to it while overswiping, until armed (iOS, measured: shapes, symbols and
+ * labels each at 36%).
+ */
+const actionFade = 0.36;
 
 const sides = ['leading', 'trailing'] as const;
 
@@ -1004,9 +1030,10 @@ const uncoveredPath = (
 };
 
 /**
- * Overswipe (Framework7 iOS): widens the outermost action's circle by
- * `extra` px towards the row (`towardsRow`, physical), from the edge, its
- * symbol and label centered in it, as the row moves (`transition`).
+ * Overswipe (Framework7 iOS): widens the outermost action's shape by
+ * `extra` px towards the row (`towardsRow`, physical), from the edge (its
+ * negative margin keeps the action's size), its symbol and label centered in
+ * it, as the row moves (`transition`).
  */
 const stretchAction = (
   button: HTMLElement,
@@ -1014,13 +1041,21 @@ const stretchAction = (
   towardsRow: number,
   transition: (...properties: string[]) => string,
 ) => {
-  const [circle, label] = button.children;
-  if (!(circle instanceof HTMLElement) || !(label instanceof HTMLElement)) {
+  const [shape, label] = button.children;
+  if (!(shape instanceof HTMLElement) || !(label instanceof HTMLElement)) {
     return;
   }
 
-  circle.style.transition = transition('width');
-  circle.style.width = extra > 0 ? `${button.offsetWidth + extra}px` : '';
+  const width = button.offsetWidth;
+  const margin = extra > 0 ? `${-extra}px` : '';
+  // Armed, the symbol's box narrows to the action's size (see SwipeAction).
+  button.style.setProperty('--styled-list-action-width', `${width}px`);
+  shape.style.transition = transition('width', 'margin');
+  // In pixels (from and to its own size), to transition; cleared once the
+  // row is closed (see `Item`).
+  shape.style.width = `${width + Math.max(extra, 0)}px`;
+  shape.style.marginLeft = towardsRow < 0 ? margin : '';
+  shape.style.marginRight = towardsRow > 0 ? margin : '';
   label.style.transition = `${transition('translate')}, opacity ${armDuration}ms`;
   label.style.translate = extra > 0 ? `${(towardsRow * extra) / 2}px` : '';
 };
@@ -1102,11 +1137,16 @@ const placeRow = (
       rowOnLeft,
     );
 
-    // Overswiping: the others follow the row, the outermost action's circle
-    // fills the space up to them, from the edge (see `stretchAction`).
+    // Overswiping: the others follow the row, the outermost action's shape
+    // fills the space up to them, from the edge (see `stretchAction`), the
+    // others fading until it's armed.
     const extra = overswipes(side) ? Math.max(0, revealed - width) : 0;
     const outermost = outermostAction(container, side);
     const towardsRow = rowOnLeft ? -1 : 1;
+    const arming = Math.min(
+      extra / (Math.max(width + overswipeDistance, overswipeArm) - width),
+      1,
+    );
 
     for (const button of container.children) {
       if (!(button instanceof HTMLElement)) continue;
@@ -1118,9 +1158,18 @@ const placeRow = (
         Math.max((revealed - start) / button.offsetWidth, 0),
         1,
       );
+      const fade = Math.min(
+        actionFade + (1 - actionFade) * scale,
+        button === outermost ? 1 : 1 - (1 - actionFade) * arming,
+      );
 
       button.style.transition = transition('transform', 'translate');
       button.style.transform = `scale(${scale})`;
+      button.style.setProperty('--styled-list-action-fade', String(fade));
+      button.style.setProperty(
+        '--styled-list-action-fade-duration',
+        `${animate ? swipeDuration : 0}ms`,
+      );
       if (button === outermost) {
         stretchAction(button, extra, towardsRow, transition);
       } else {
@@ -1192,8 +1241,12 @@ const isOwnGesture = (item: HTMLElement, event: PointerEvent<HTMLElement>) => {
 
 type Handler<E> = ((event: E) => void) | undefined;
 
-/** A row (UIKit `UITableViewCell`), with optional swipe actions. */
-const Item = forwardRef<HTMLElement, PartProps<'li'>>(
+/**
+ * A row (UIKit `UITableViewCell`), with optional swipe actions. With a click
+ * handler, it's pressable itself (e.g. passing the click on to a control in
+ * it), but where its own controls are pressed.
+ */
+const Item = forwardRef<HTMLElement, ListItemProps>(
   (
     {
       children,
@@ -1248,6 +1301,11 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
               '[data-armed]',
             )) {
               delete button.dataset.armed;
+            }
+            for (const shape of item.querySelectorAll<HTMLElement>(
+              `[${CSS.escape(part)}='swipe-action-shape']`,
+            )) {
+              shape.style.removeProperty('width');
             }
             item.style.removeProperty('transition');
             item.style.removeProperty('clip-path');
@@ -1408,12 +1466,23 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
       }
     };
 
+    const release = () => {
+      if (itemRef.current) delete itemRef.current.dataset.pressed;
+    };
+
     const handlePointerDown = (event: PointerEvent<HTMLElement>) => {
       (onPointerDown as Handler<typeof event>)?.(event);
 
       const { current: item } = itemRef;
       const { current: actions } = actionsRef;
       if (event.button !== 0 || gestureRef.current || !item) return;
+
+      const { target } = event;
+      const control =
+        target instanceof Element ? target.closest(ownControl) : null;
+      if (props.onClick && !(control && item.contains(control))) {
+        item.dataset.pressed = '';
+      }
       if (!actions.leading && !actions.trailing) return;
       if (
         sides.some((side) =>
@@ -1482,6 +1551,7 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
         if (Math.abs(moved) < swipeThreshold) return;
 
         gesture.started = true;
+        release();
         item.setPointerCapture(event.pointerId);
         if (closeOpenItem !== context.close) closeOpenItem?.();
         clearTimeout(settleRef.current);
@@ -1542,16 +1612,108 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
           }}
           onPointerCancel={(event: PointerEvent<HTMLElement>) => {
             (onPointerCancel as Handler<typeof event>)?.(event);
+            release();
             finish(event, true);
           }}
           onPointerUp={(event: PointerEvent<HTMLElement>) => {
             (onPointerUp as Handler<typeof event>)?.(event);
+            release();
             finish(event, false);
           }}
         >
           {children}
         </StyledItem>
       </ItemContext.Provider>
+    );
+  },
+);
+
+/** How long an expandable row opens or closes (as swiping). */
+const expandDuration = 300;
+
+export type ListExpandableProps = ListItemProps & {
+  /** Shown (default: not); changing, its height and padding transition. */
+  open?: boolean;
+};
+
+/**
+ * An expandable row: a row shown or not (`open`), opening and closing in
+ * place, e.g. an inline `Calendar` or `TimeRoll` below a row with a
+ * `DatePicker` (without popovers, as iOS's Calendar). Closed, it's inert.
+ */
+const Expandable = forwardRef<HTMLElement, ListExpandableProps>(
+  ({ open = false, ...props }, ref) => {
+    const itemRef = useForwardedRef<HTMLElement>(ref);
+    const shown = useRef<boolean | undefined>(undefined);
+
+    useLayoutEffect(() => {
+      const { current: item } = itemRef;
+      if (!item) return undefined;
+      const was = shown.current;
+      shown.current = open;
+
+      const settle = () => {
+        item.toggleAttribute('data-closed', !open);
+        item.inert = !open;
+      };
+      if (was === undefined || was === open) {
+        settle();
+        return undefined;
+      }
+
+      // From its height as it is, to the other state's. Opening, it's
+      // measured open; closing, it closes once the animation finishes (its
+      // content shrinking at once, a scroll container could scroll back).
+      const box = (element: HTMLElement) => {
+        const style = getComputedStyle(element);
+        return {
+          height: `${String(element.offsetHeight)}px`,
+          paddingBottom: style.paddingBottom,
+          paddingTop: style.paddingTop,
+        };
+      };
+      const closed = { height: '0px', paddingBottom: '0px', paddingTop: '0px' };
+      const from = open ? closed : box(item);
+      if (open) settle();
+      const to = open ? box(item) : closed;
+      item.inert = !open;
+
+      item.style.overflow = 'clip';
+      const animation = item.animate(
+        [
+          {
+            ...from,
+            minHeight: '0px',
+            opacity: open ? 0 : 1,
+            visibility: 'visible',
+          },
+          {
+            ...to,
+            minHeight: '0px',
+            opacity: open ? 1 : 0,
+            visibility: 'visible',
+          },
+        ],
+        { duration: expandDuration, easing: 'ease' },
+      );
+      const done = () => {
+        item.style.removeProperty('overflow');
+        if (!open) settle();
+      };
+      animation.finished.then(done).catch(() => undefined);
+
+      return () => {
+        animation.cancel();
+        item.style.removeProperty('overflow');
+        settle();
+      };
+    }, [itemRef, open]);
+
+    return (
+      <Item
+        ref={itemRef}
+        {...props}
+      />
     );
   },
 );
@@ -2065,7 +2227,7 @@ const EditButton = forwardRef<HTMLElement, ListEditButtonProps>(
   },
 );
 
-// Swipe actions (Figma “Row with Swipe Actions”, “_Swipe Actions”): circles
+// Swipe actions (Figma “Row with Swipe Actions”, “_Swipe Actions”): shapes
 // 10px apart, 10px from the row and 16px from the edge.
 
 export type ListSwipeActionsProps = PartProps<'div'> & {
@@ -2085,6 +2247,7 @@ export type ListSwipeActionsProps = PartProps<'div'> & {
   side?: Side;
 };
 
+// Circles centered in the row, rounded rectangles 4px from its edges.
 const StyledSwipeActions = styled(
   partElement('div', 'swipe-actions', ['overswipe', 'side']),
   forwardRef,
@@ -2094,8 +2257,10 @@ const StyledSwipeActions = styled(
   top: 0;
   bottom: 0;
   display: flex;
-  align-items: var(--styled-list-actions-align, center);
+  box-sizing: border-box;
+  align-items: center;
   gap: 10px;
+  padding-block: 4px;
   pointer-events: none;
   ${({ side }) =>
     side === 'leading'
@@ -2103,18 +2268,16 @@ const StyledSwipeActions = styled(
           inset-inline-start: 0;
           padding-inline: 16px 10px;
 
-          & > * > [${part}='swipe-action-circle'] {
+          & > * > [${part}='swipe-action-shape'] {
             justify-content: flex-end;
-            inset-inline-start: 0;
           }
         `
       : css`
           inset-inline-end: 0;
           padding-inline: 10px 16px;
 
-          & > * > [${part}='swipe-action-circle'] {
+          & > * > [${part}='swipe-action-shape'] {
             justify-content: flex-start;
-            inset-inline-end: 0;
           }
         `}
 
@@ -2172,64 +2335,140 @@ const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
 );
 
 export type ListSwipeActionProps = PartProps<'button'> & {
-  /** The action's name, shown below it in tall rows (Figma “Label”). */
+  /** The action's name: its accessible name (see `showLabel`). */
   label: string;
+  /**
+   * The action's shape: a 44px circle, or a capsule around wider content
+   * (default); or a rounded rectangle (12px corners, as large buttons') as
+   * high as the row (4px from its edges), at least 60px wide.
+   */
+  shape?: 'circle' | 'roundedRectangle';
+  /**
+   * Shows the label below the shape (Figma “Label”; default: not). It needs
+   * room: for multi-line rows (`Text`).
+   */
+  showLabel?: boolean;
   /** Background color (default: `systemGray`). */
   tint?: string;
 };
 
+const swipeActionShapes: Record<
+  Required<ListSwipeActionProps>['shape'],
+  string
+> = {
+  circle: css`
+    --styled-list-action-min-width: 44px;
+    --styled-list-action-height: calc(
+      44px + var(--styled-list-action-label-space)
+    );
+    --styled-list-action-shape-height: 44px;
+    --styled-list-action-shape-grow: 0;
+    --styled-list-action-radius: 100px;
+  `,
+  roundedRectangle: css`
+    --styled-list-action-min-width: 60px;
+    --styled-list-action-height: auto;
+    --styled-list-action-shape-height: auto;
+    --styled-list-action-shape-grow: 1;
+    --styled-list-action-radius: 12px;
+
+    align-self: stretch;
+  `,
+};
+
+// Faded (see `actionFade`) as the row moves (see `placeRow`): the shape's
+// fill, the symbol and the label each.
+const actionFadeStyle = css`
+  opacity: var(--styled-list-action-fade, 1);
+`;
+
+const actionFadeTransition =
+  'opacity var(--styled-list-action-fade-duration, 0ms)';
+
 const StyledSwipeAction = styled(
-  partElement('button', 'swipe-action', ['label', 'tint'], {
+  partElement('button', 'swipe-action', ['shape', 'showLabel', 'tint'], {
     type: 'button',
   }),
   forwardRef,
 )<Omit<ListSwipeActionProps, 'label'>>`
+  /* Its label: 4px below the shape, 16px high */
+  --styled-list-action-label-space: ${({ showLabel }) =>
+    showLabel ? '20px' : '0px'};
+  --styled-list-action-label-display: ${({ showLabel }) =>
+    showLabel ? 'block' : 'none'};
+
   ${reset}
+  ${({ shape = 'circle' }) => swipeActionShapes[shape]}
 
   position: relative;
-  display: grid;
-  width: var(--styled-list-action-size, 44px);
+  display: flex;
   height: var(--styled-list-action-height, 44px);
-  align-content: start;
+  box-sizing: border-box;
+  flex-direction: column;
+  align-items: center;
   color: #fff;
+  padding-block-end: var(--styled-list-action-label-space, 0);
   ${cursor('pointer')}
-  justify-items: center;
   transform: scale(0);
 
   &:disabled {
     ${cursorProperty('not-allowed')}
   }
 
-  /* Positioned at the edge's side (see SwipeActions), to stretch (see
-     stretchAction) */
-  & > [${part}='swipe-action-circle'] {
-    position: absolute;
-    top: 0;
+  /* The shape: its fill beneath, sized by the symbol (or text), stretched
+     from the edge's side (see stretchAction). */
+  & > [${part}='swipe-action-shape'] {
+    position: relative;
     display: flex;
-    width: 100%;
-    height: var(--styled-list-action-size, 44px);
-    border-radius: 100px;
-    background-color: ${({ tint }) => tint ?? 'var(--color-ios-system-gray)'};
-    font-size: var(--styled-list-action-symbol-size);
-    ${fontWeight(400)}
-    line-height: var(--font-ios-body-line-height);
+    min-width: var(--styled-list-action-min-width, 44px);
+    height: var(--styled-list-action-shape-height, 44px);
+    box-sizing: border-box;
+    flex-grow: var(--styled-list-action-shape-grow, 0);
+    border-radius: var(--styled-list-action-radius, 100px);
+
+    &::before {
+      position: absolute;
+      border-radius: inherit;
+      background-color: ${({ tint }) => tint ?? 'var(--color-ios-system-gray)'};
+      content: '';
+      inset: 0;
+      ${actionFadeStyle}
+      transition: ${actionFadeTransition};
+    }
   }
 
-  /* The symbol's box: the circle's width (centered in it, also stretched,
-     following without delay), at the row's end of it (see SwipeActions). */
+  /* The symbol's box: the shape's width (centered in it, also stretched,
+     following without delay), at the row's end of it (see SwipeActions).
+     Text (instead of a symbol) is in capitals. */
   & > * > [${part}='swipe-action-symbol'] {
+    position: relative;
     display: grid;
     width: 100%;
+    box-sizing: border-box;
     flex: none;
+    font-size: 15px;
+    ${fontWeight(400)}
+    letter-spacing: -0.23px;
+    line-height: 20px;
+    padding-inline: 10px;
     place-items: center;
-    transition: width ${armDuration}ms;
+    text-transform: uppercase;
+    ${actionFadeStyle}
+    transition:
+      width ${armDuration}ms,
+      ${actionFadeTransition};
+    white-space: nowrap;
+
+    & > svg {
+      font-size: var(--font-ios-body-size);
+    }
   }
 
   /* Armed (overswiped far enough to trigger on release): the symbol at the
-     row's end of the stretched circle, without its label. */
+     row's end of the stretched shape, without its label. */
   &[data-armed] {
     & > * > [${part}='swipe-action-symbol'] {
-      width: var(--styled-list-action-size, 44px);
+      width: var(--styled-list-action-width, 44px);
     }
 
     & > [${part}='swipe-action-label'] {
@@ -2239,17 +2478,22 @@ const StyledSwipeAction = styled(
 
   & > [${part}='swipe-action-label'] {
     position: absolute;
-    top: calc(var(--styled-list-action-size, 44px) + 4px);
+    bottom: 0;
     display: var(--styled-list-action-label-display, none);
     color: var(--color-ios-secondary-label);
     font-size: 13px;
     ${fontWeight(510)}
     line-height: 16px;
+    ${actionFadeStyle}
+    transition: ${actionFadeTransition};
     white-space: nowrap;
   }
 `;
 
-/** A swipe action: a symbol in a circle, closing the actions when clicked. */
+/**
+ * A swipe action: a symbol (or short text) in a shape, closing the actions
+ * when clicked.
+ */
 const SwipeAction = forwardRef<HTMLElement, ListSwipeActionProps>(
   ({ children, label, onClick, ...props }, ref) => {
     const item = useContext(ItemContext);
@@ -2264,7 +2508,7 @@ const SwipeAction = forwardRef<HTMLElement, ListSwipeActionProps>(
           item?.close();
         }}
       >
-        <span {...{ [part]: 'swipe-action-circle' }}>
+        <span {...{ [part]: 'swipe-action-shape' }}>
           <span {...{ [part]: 'swipe-action-symbol' }}>{children}</span>
         </span>
         <span
@@ -2282,6 +2526,11 @@ const SwipeAction = forwardRef<HTMLElement, ListSwipeActionProps>(
 // “Grouped Table Footer”).
 
 export type ListHeaderProps = PartProps<'div'> & {
+  /**
+   * As `Button`, when it's a button (e.g. a Base UI `Collapsible.Trigger`):
+   * the cursor (default: `pointer`).
+   */
+  cursor?: Properties['cursor'];
   /**
    * Figma “Header” Type (default: `prominent`); `nested` headers of plain
    * lists are section titles (Figma “Section Title”).
@@ -2340,6 +2589,17 @@ const Header = styled(
   grid-template-rows: auto auto auto;
   padding-inline: calc(16px + var(--styled-list-inset, 16px));
   ${({ prominence = 'prominent' }) => prominences[prominence]}
+
+  &[role='button'],
+  button&,
+  a& {
+    ${cursor('pointer')}
+  }
+
+  &[aria-disabled='true'],
+  &[data-disabled] {
+    ${cursorProperty('not-allowed')}
+  }
 
   &::after {
     content: '';
@@ -2572,6 +2832,7 @@ export const List = {
   Header,
   Group,
   Item,
+  Expandable,
   Footer,
   Block,
   Title,

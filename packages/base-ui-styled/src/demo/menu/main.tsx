@@ -1,4 +1,3 @@
-import { Menu as BaseMenu } from '@base-ui/react/menu';
 import { sfLockFill } from '@bradleyhodges/sfsymbols/sfLockFill';
 import { sfPinFill } from '@bradleyhodges/sfsymbols/sfPinFill';
 import { sfSquare } from '@bradleyhodges/sfsymbols/sfSquare';
@@ -6,15 +5,27 @@ import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp'
 import { styled } from 'goober';
 import { FunctionComponent, useMemo } from 'react';
 
-import { Button, Menu } from '../components/index.js';
-import { useLog } from './utils/log.js';
+import { Button, Menu } from '../../components/index.js';
+import { useLog } from '../utils/log.js';
+import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
+import { SFSymbol } from '../utils/symbol.js';
 import {
-  commonPropOptions,
-  Component,
-  MappedProp,
-  usePropControl,
-} from './utils/main.js';
-import { SFSymbol } from './utils/symbol.js';
+  getPropOptionsCheckboxItems,
+  getPropOptionsItem,
+  getPropOptionsRadioGroup,
+  getPropOptionsRoot,
+  getPropOptionsSubmenuRoot,
+  propOptionsContent,
+  propOptionsIndicator,
+  propOptionsItem,
+  propOptionsItemDestructive,
+  propOptionsItemDisabled,
+  propOptionsPopup,
+  propOptionsPositioner,
+  propOptionsSubmenuTrigger,
+  propOptionsToggleItem,
+  propOptionsTrigger,
+} from './props.js';
 
 const square = <SFSymbol icon={sfSquare} />;
 
@@ -22,68 +33,6 @@ const square = <SFSymbol icon={sfSquare} />;
 const TriggerSpace = styled('div')`
   margin-bottom: 560px;
 `;
-
-const propOptionsContent = {
-  quickActions: [3, 0, 2] as const,
-  icons: [true, false] as const,
-  subtitles: [true, false] as const,
-  shortcuts: [true, false] as const,
-  sections: [true, false] as const,
-  submenu: [true, false] as const,
-  toggles: ['none', 'checkbox', 'radio'] as const,
-} as const;
-
-const propOptionsPositioner = {
-  ...commonPropOptions,
-  side: [
-    undefined,
-    'top',
-    'right',
-    'bottom',
-    'left',
-    'inline-start',
-    'inline-end',
-  ] as const,
-  align: [undefined, 'start', 'center', 'end'] as const,
-  sideOffset: [undefined, 0, 8, 16] as const,
-  alignOffset: [undefined, 0, -16, 16] as const,
-  sticky: [undefined, false, true] as const,
-  disableAnchorTracking: [undefined, false, true] as const,
-};
-
-const propOptionsPopup = {
-  ...commonPropOptions,
-  finalFocus: [undefined, false, true] as const,
-};
-
-const propOptionsItem = {
-  ...commonPropOptions,
-  disabled: [undefined, false, true] as const,
-  destructive: [undefined, false, true] as const,
-  cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
-  closeOnClick: [undefined, false, true] as const,
-};
-
-const propOptionsToggleItem = {
-  ...commonPropOptions,
-  disabled: [undefined, false, true] as const,
-  destructive: [undefined, false, true] as const,
-  cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
-  closeOnClick: [undefined, false, true] as const,
-};
-
-const propOptionsIndicator = {
-  ...commonPropOptions,
-};
-
-const propOptionsSubmenuTrigger = {
-  ...commonPropOptions,
-  disabled: [undefined, false, true] as const,
-  destructive: [undefined, false, true] as const,
-  cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
-  openOnHover: [undefined, false, true] as const,
-  delay: [undefined, 0, 500] as const,
-};
 
 type Preset = {
   id: string;
@@ -102,28 +51,7 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
 
   const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
     useMemo(
-      () => ({
-        size: [
-          preset.size,
-          ...([undefined, 'compact', 'regular'] as const).filter(
-            (size) => size !== preset.size,
-          ),
-        ],
-        defaultOpen: [undefined, false, true] as const,
-        open: [undefined, true] as const,
-        modal: [undefined, false, true] as const,
-        loopFocus: [undefined, false, true] as const,
-        disabled: [undefined, false, true] as const,
-        highlightItemOnHover: [undefined, false, true] as const,
-        onOpenChange: [
-          new MappedProp(
-            (open: boolean, { reason }: BaseMenu.Root.ChangeEventDetails) =>
-              addLog(`open change: ${String(open)}/${reason}`),
-            '[log change]',
-          ),
-          undefined,
-        ] as const,
-      }),
+      () => getPropOptionsRoot(preset.size, addLog),
       [addLog, preset.size],
     ),
     'root',
@@ -131,15 +59,7 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
   );
 
   const [controlTrigger, propsTrigger] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        disabled: [undefined, false, true] as const,
-        openOnHover: [undefined, false, true] as const,
-        delay: [undefined, 0, 500] as const,
-      }),
-      [],
-    ),
+    propOptionsTrigger,
     'trigger',
   );
 
@@ -160,69 +80,27 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
     'quick action (1st)',
   );
 
-  const itemOptions = useMemo(
-    () => ({
-      ...propOptionsItem,
-      onClick: [
-        new MappedProp(() => addLog('item clicked'), '[log click]'),
-        undefined,
-      ] as const,
-    }),
-    [addLog],
-  );
+  const itemOptions = useMemo(() => getPropOptionsItem(addLog), [addLog]);
 
   const [controlItem, propsItem] = usePropControl(itemOptions, 'item (1st)');
 
   const [controlDisabledItem, propsDisabledItem] = usePropControl(
-    useMemo(
-      () => ({ ...propOptionsItem, disabled: [true, false, undefined] }),
-      [],
-    ),
+    propOptionsItemDisabled,
     'item (disabled)',
   );
 
   const [controlDestructiveItem, propsDestructiveItem] = usePropControl(
-    useMemo(
-      () => ({ ...propOptionsItem, destructive: [true, false, undefined] }),
-      [],
-    ),
+    propOptionsItemDestructive,
     'item (destructive)',
   );
 
   const [controlCheckboxItem, propsCheckboxItem] = usePropControl(
-    useMemo(
-      () => ({
-        ...propOptionsToggleItem,
-        defaultChecked: [true, false, undefined] as const,
-        onCheckedChange: [
-          new MappedProp(
-            (checked: boolean) => addLog(`checked change: ${String(checked)}`),
-            '[log change]',
-          ),
-          undefined,
-        ] as const,
-      }),
-      [addLog],
-    ),
+    useMemo(() => getPropOptionsCheckboxItems(addLog), [addLog]),
     'checkbox items',
   );
 
   const [controlRadioGroup, propsRadioGroup] = usePropControl(
-    useMemo(
-      () => ({
-        ...commonPropOptions,
-        defaultValue: ['first', 'second', undefined] as const,
-        disabled: [undefined, false, true] as const,
-        onValueChange: [
-          new MappedProp(
-            (value: unknown) => addLog(`value change: ${String(value)}`),
-            '[log change]',
-          ),
-          undefined,
-        ] as const,
-      }),
-      [addLog],
-    ),
+    useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
     'radio group',
   );
 
@@ -252,20 +130,7 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
   );
 
   const [controlSubmenuRoot, propsSubmenuRoot] = usePropControl(
-    useMemo(
-      () => ({
-        closeParentOnEsc: [undefined, false, true] as const,
-        disabled: [undefined, false, true] as const,
-        onOpenChange: [
-          undefined,
-          new MappedProp(
-            (open: boolean) => addLog(`submenu open change: ${String(open)}`),
-            '[log change]',
-          ),
-        ] as const,
-      }),
-      [addLog],
-    ),
+    useMemo(() => getPropOptionsSubmenuRoot(addLog), [addLog]),
     'submenu root',
   );
 

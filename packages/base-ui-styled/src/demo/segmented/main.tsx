@@ -1,49 +1,13 @@
-import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import { FunctionComponent, useMemo } from 'react';
 
-import { Segmented } from '../components/index.js';
-import { useLog } from './utils/log.js';
+import { Segmented } from '../../components/index.js';
+import { useLog } from '../utils/log.js';
+import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
 import {
-  commonPropOptions,
-  Component,
-  MappedProp,
-  usePropControl,
-} from './utils/main.js';
-
-const propOptionsContent = {
-  count: [3, 2, 4, 5] as const,
-  label1: ['Day'] as const,
-  label2: ['Week'] as const,
-  label3: ['Month'] as const,
-  label4: ['Year'] as const,
-  label5: ['All Time'] as const,
-} as const;
-
-const propOptionsRoot = {
-  ...commonPropOptions,
-  defaultValue: ['first', undefined, 'second'] as const,
-  value: [undefined, 'first', 'second', 'third'] as const,
-  disabled: [undefined, false, true] as const,
-  readOnly: [undefined, false, true] as const,
-};
-
-const getPropOptionsItem = (
-  value: string,
-  addLog: (message: string) => void,
-) => ({
-  ...commonPropOptions,
-  disabled: [undefined, false, true] as const,
-  readOnly: [undefined, false, true] as const,
-  cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
-  inputRef: [
-    undefined,
-    new MappedProp(
-      (element: HTMLInputElement | null) =>
-        addLog(`${value} input ref: ${element?.type ?? 'null'}`),
-      '[log ref]',
-    ),
-  ] as const,
-});
+  getPropOptionsItem,
+  getPropOptionsRoot,
+  propOptionsContent,
+} from './props.js';
 
 export const SegmentedDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
@@ -52,28 +16,7 @@ export const SegmentedDemo: FunctionComponent = () => {
     usePropControl(propOptionsContent, '[content]', true);
 
   const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
-    useMemo(
-      () => ({
-        ...propOptionsRoot,
-        onValueChange: [
-          new MappedProp(
-            (value: unknown, { reason }: BaseRadioGroup.ChangeEventDetails) =>
-              addLog(`root value: ${String(value)}/${reason}`),
-            '[log change]',
-          ),
-          undefined,
-        ] as const,
-        inputRef: [
-          undefined,
-          new MappedProp(
-            (element: HTMLInputElement | null) =>
-              addLog(`root input ref: ${element?.type ?? 'null'}`),
-            '[log ref]',
-          ),
-        ] as const,
-      }),
-      [addLog],
-    ),
+    useMemo(() => getPropOptionsRoot(addLog), [addLog]),
     'root',
     true,
   );
