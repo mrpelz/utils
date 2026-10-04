@@ -138,9 +138,15 @@ const lensLayer = css`
   transition-property: scale, opacity;
 `;
 
+// Each layer fades by itself (`--styled-glass-fade`, see GlassBackground),
+// at full opacity without one.
+const fade = 'var(--styled-glass-fade, 1)';
+
 const glassLayer = css`
   ${glassBox}
   ${lensLayer}
+
+  opacity: ${fade};
 `;
 
 const Blur = styled('span')`
@@ -148,7 +154,7 @@ const Blur = styled('span')`
 
   backdrop-filter: saturate(180%) blur(20px);
   background-color: var(--styled-glass-blur);
-  opacity: 0.67;
+  opacity: calc(0.67 * ${fade});
 `;
 
 // Figma “Button - Liquid Glass” “Blur”: a blurred copy of the shape (2px
@@ -159,7 +165,7 @@ const Halo = styled('span')`
   ${glassLayer}
 
   box-shadow: 0 2px 20px var(--styled-glass-blur);
-  opacity: 0.67;
+  opacity: calc(0.67 * ${fade});
 `;
 
 // The fills (Figma “Fill”) as a backdrop filter and a flat color, without
@@ -170,7 +176,7 @@ const Fill = styled('span')`
 
   backdrop-filter: var(--styled-glass-fill-filter);
   background-color: var(--styled-glass-fill);
-  opacity: calc(1 - var(--styled-glass-pressed, 0));
+  opacity: calc((1 - var(--styled-glass-pressed, 0)) * ${fade});
 `;
 
 const fillLayer = css`
@@ -233,7 +239,7 @@ const Lens = styled('span')`
   ${glassLayer}
 
   box-shadow: var(--styled-glass-lens-shadow);
-  opacity: var(--styled-glass-pressed, 0);
+  opacity: calc(var(--styled-glass-pressed, 0) * ${fade});
 `;
 
 export type GlassBackgroundProps = {
@@ -255,7 +261,10 @@ export type GlassBackgroundProps = {
  * positioned (or blended) to be drawn above.
  *
  * Tinted glass takes its color from `--styled-glass-tint` (default:
- * `--glass-ios-tint`). As a lens (e.g. pressed), `--styled-glass-scale` scales
+ * `--glass-ios-tint`). `--styled-glass-fade` (0 to 1, switched: the layers
+ * transition themselves) fades it out: opacity on the element instead would
+ * make it a backdrop root (the blur and fill would see nothing behind) and
+ * isolate its content's blend modes while fading (WebKit). As a lens (e.g. pressed), `--styled-glass-scale` scales
  * it up, and `--styled-glass-pressed` (0 to 1) clears the fill and shows the
  * lens' edge.
  */

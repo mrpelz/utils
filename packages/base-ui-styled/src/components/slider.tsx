@@ -37,7 +37,9 @@ import { Reserve, wrap } from './utils.js';
 // - Vertical sliders put the minimum symbol at the bottom.
 // - The fill is derived from the value (Base UI couples it to the thumb's
 //   center), so it spans the whole track at the maximum.
-// - The browser's default focus ring is kept.
+// - Focused by keyboard, the knob has a 2px ring in the tint, 2px around
+//   it (Figma: none; Base UI focuses a visually hidden input, which shows no
+//   ring).
 // - `Slider.Value` (not in UIKit or Figma) is in the Body text style (the
 //   symbols: Body, emphasized), with tabular numerals, and reserves the width
 //   of its widest value.
@@ -213,6 +215,15 @@ const Thumb = styled(BaseSlider.Thumb, forwardRef)`
     inset: 0;
     transition-duration: var(--glass-ios-lens-duration);
     transition-property: transform, background-color, box-shadow;
+  }
+
+  /* Focused by keyboard (its hidden input): a ring in the tint around the
+     knob (as List's), following its shape. */
+  &:has(input:focus-visible) {
+    &::after {
+      outline: 2px solid var(--color-ios-primary);
+      outline-offset: 2px;
+    }
   }
 
   &[data-dragging] {

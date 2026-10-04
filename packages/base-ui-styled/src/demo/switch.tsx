@@ -1,5 +1,5 @@
 import { Switch as BaseSwitch } from '@base-ui/react/switch';
-import { FunctionComponent, useMemo } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import { Switch } from '../components/index.js';
 import { useLog } from './utils/log.js';
@@ -17,6 +17,14 @@ const propOptionsRoot = {
   disabled: [undefined, false, true] as const,
   readOnly: [undefined, false, true] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
+  indeterminate: [undefined, false, true] as const,
+  onOffLabels: [undefined, false, true] as const,
+  tint: [
+    undefined,
+    'var(--color-ios-system-blue)',
+    'var(--color-ios-system-orange)',
+    '#000',
+  ] as const,
 };
 
 const propOptionsThumb = {
@@ -26,9 +34,15 @@ const propOptionsThumb = {
 export const SwitchDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  // Indeterminate for a while after each change (e.g. while an app saves
+  // the new state), once the knob has moved over.
+  const [pending, setPending] = useState(false);
+
   const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
-    useMemo(
-      () => ({
+    useMemo(() => {
+      const timer: { timeout?: ReturnType<typeof setTimeout> } = {};
+
+      return {
         ...propOptionsRoot,
         onCheckedChange: [
           new MappedProp(
@@ -37,6 +51,21 @@ export const SwitchDemo: FunctionComponent = () => {
               { reason }: BaseSwitch.Root.ChangeEventDetails,
             ) => addLog(`checked change: ${checked}/${reason}`),
             '[log change]',
+          ),
+          new MappedProp(
+            (
+              checked: boolean,
+              { reason }: BaseSwitch.Root.ChangeEventDetails,
+            ) => {
+              addLog(`checked change: ${checked}/${reason}, indeterminate`);
+              setPending(true);
+              clearTimeout(timer.timeout);
+              timer.timeout = setTimeout(() => {
+                addLog('indeterminate: false');
+                setPending(false);
+              }, 2000);
+            },
+            '[indeterminate for 2s]',
           ),
           undefined,
         ] as const,
@@ -48,9 +77,8 @@ export const SwitchDemo: FunctionComponent = () => {
             '[log ref]',
           ),
         ] as const,
-      }),
-      [addLog],
-    ),
+      };
+    }, [addLog]),
     'root',
     true,
   );
@@ -67,7 +95,10 @@ export const SwitchDemo: FunctionComponent = () => {
       title="Switch"
     >
       <RemounterRoot>
-        <Switch.Root {...propsRoot}>
+        <Switch.Root
+          {...propsRoot}
+          indeterminate={propsRoot.indeterminate ?? pending}
+        >
           <Switch.Thumb {...propsThumb} />
         </Switch.Root>
       </RemounterRoot>

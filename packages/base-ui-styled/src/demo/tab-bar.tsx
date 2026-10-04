@@ -138,7 +138,8 @@ const usePreset = (preset: Preset) =>
           ),
         ],
         panels: [false, true] as const,
-        accessory: [false, true] as const,
+        // The accessory, shown in these states (`visibleIn`).
+        accessory: [false, 'both', 'expanded', 'collapsed'] as const,
       },
       list: {
         ...propOptionsList,
@@ -367,7 +368,7 @@ const TabBarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
           </TabBar.List>
           {content.accessory ? (
             // A mini player, as in Music.
-            <TabBar.Accessory>
+            <TabBar.Accessory visibleIn={content.accessory}>
               <span style={{ flex: 1 }}>Not Playing</span>
               <SFSymbol icon={sfPlayFill} />
               <SFSymbol icon={sfForwardFill} />

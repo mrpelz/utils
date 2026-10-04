@@ -1,14 +1,22 @@
 import { Switch as BaseSwitch } from '@base-ui/react/switch';
 import { Properties } from 'csstype';
 import { styled } from 'goober';
-import { forwardRef, MouseEvent, useCallback, useRef } from 'react';
+import {
+  forwardRef,
+  MouseEvent,
+  Ref,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+} from 'react';
 
 import { glassLensGlow, glassLensScale } from './glass.js';
-import { usePointerDrag } from './utils.js';
+import { css, usePointerDrag } from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Toggle - Switch”, light and dark appearance),
-// with Figma colors mapped to UIKit semantic colors: on `systemGreen`, off
-// `systemFill`; the knob (`#fff`) has no semantic equivalent.
+// with Figma colors mapped to UIKit semantic colors: on `systemGreen` (or
+// `tint`, UIKit `onTintColor`), off `systemFill`; the knob (`#fff`) has no
+// semantic equivalent.
 // The pressed glass effect and everything Figma does not specify come from
 // Framework7 `components/toggle/toggle.less`, `toggle-ios.less` (iOS values,
 // `.toggle-active-state`): transitions, pressed scales, glow, glass shadow.
@@ -28,13 +36,48 @@ import { usePointerDrag } from './utils.js';
 //   not flip the state act as a tap (toggling), unless they flick towards the
 //   current side (Framework7: swipes within 300ms toggle).
 // - The browser's default focus ring is kept.
+// - Indeterminate (as a checkbox, which the platform's switches are; UIKit:
+//   none): the knob in the middle, on the off color.
+//
+// On/off labels (UIKit's accessibility setting “On/Off Labels”, measured on
+// Apple's illustration): a 9px “I” bar (white) and a 9px “O” ring (tertiary
+// label), 1px strokes, each centered in the track beside the knob on its
+// side; the knob covers the other (both hidden while indeterminate, and
+// while pressed, as the knob is a lens).
 
 export type SwitchRootProps = BaseSwitch.Root.Props & {
   cursor?: Properties['cursor'];
+  /**
+   * Neither on nor off (as a checkbox's `indeterminate`, also of the hidden
+   * input): the knob in the middle. Toggling still flips `checked`.
+   */
+  indeterminate?: boolean;
+  /** Shows “I” and “O” on the track (UIKit's “On/Off Labels”). */
+  onOffLabels?: boolean;
+  /**
+   * The track's color while on, and the pressed knob's glow (UIKit
+   * `onTintColor`; default: `systemGreen`).
+   */
+  tint?: string;
 };
 
+// Base UI's root, without the props that only style it.
+const BaseRoot = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
+  (props, ref) => {
+    const rootProps = { ...props };
+    delete rootProps.indeterminate;
+
+    return (
+      <BaseSwitch.Root
+        ref={ref}
+        {...rootProps}
+      />
+    );
+  },
+);
+
 // eslint-disable-next-line prettier/prettier
-const StyledRoot = styled<typeof BaseSwitch.Root, SwitchRootProps>(BaseSwitch.Root, forwardRef)`
+const StyledRoot = styled<typeof BaseRoot, SwitchRootProps>(BaseRoot, forwardRef)`
   --styled-cursor: attr(
     cursor type(\<custom-ident\>),
     ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')}
@@ -44,7 +87,8 @@ const StyledRoot = styled<typeof BaseSwitch.Root, SwitchRootProps>(BaseSwitch.Ro
   --styled-switch-knob-width: 39px;
   --styled-switch-knob-start: 2px;
   --styled-switch-pressed: 0;
-  --styled-switch-on-color: var(--color-ios-system-green);
+  --styled-switch-on-color: ${({ tint }) =>
+    tint ?? 'var(--color-ios-system-green)'};
   --styled-switch-off-color: var(--color-ios-system-fill);
 
   position: relative;
@@ -95,6 +139,68 @@ const StyledRoot = styled<typeof BaseSwitch.Root, SwitchRootProps>(BaseSwitch.Ro
   &[data-disabled] {
     opacity: 0.55;
   }
+
+  ${({ indeterminate }) =>
+    indeterminate
+      ? css`
+          &&& {
+            --styled-switch-knob-start: calc(
+              50% - var(--styled-switch-knob-width) / 2
+            );
+
+            &::before {
+              background-color: var(--styled-switch-off-color);
+            }
+
+            & > [data-switch-part='label'] {
+              opacity: 0;
+            }
+          }
+        `
+      : undefined}
+`;
+
+// The on/off labels' places: the track beside the knob on either side.
+const labelPlace = css`
+  position: absolute;
+  display: grid;
+  width: calc(100% - var(--styled-switch-knob-width) - 2px);
+  inset-block: 0;
+  opacity: calc(1 - var(--styled-switch-pressed));
+  place-items: center;
+  pointer-events: none;
+  transition: opacity var(--glass-ios-lens-duration);
+
+  &::before {
+    box-sizing: border-box;
+    content: '';
+  }
+`;
+
+const OnLabel = styled('span')`
+  ${labelPlace}
+
+  inset-inline-start: 0;
+
+  &::before {
+    width: 1px;
+    height: 9px;
+    border-radius: 1px;
+    background-color: #fff;
+  }
+`;
+
+const OffLabel = styled('span')`
+  ${labelPlace}
+
+  inset-inline-end: 0;
+
+  &::before {
+    width: 9px;
+    height: 9px;
+    border: 1px solid var(--color-ios-tertiary-label);
+    border-radius: 50%;
+  }
 `;
 
 type Drag = {
@@ -128,11 +234,33 @@ const Root = forwardRef<HTMLSpanElement, SwitchRootProps>(
       onPointerDown,
       onPointerMove,
       onPointerUp,
+      children,
+      indeterminate = false,
+      inputRef,
+      onOffLabels = false,
       ...props
     },
     ref,
   ) => {
     const suppressClickRef = useRef(false);
+
+    // The hidden input is indeterminate, too (as a checkbox's).
+    const ownInputRef = useRef<HTMLInputElement | null>(null);
+    const handleInputRef = useCallback(
+      (element: HTMLInputElement | null) => {
+        ownInputRef.current = element;
+        if (typeof inputRef === 'function') {
+          inputRef(element);
+        } else if (inputRef) {
+          (inputRef as { current: HTMLInputElement | null }).current = element;
+        }
+      },
+      [inputRef],
+    );
+    useLayoutEffect(() => {
+      const { current: input } = ownInputRef;
+      if (input) input.indeterminate = indeterminate;
+    });
 
     const handlers = usePointerDrag<HTMLSpanElement, Drag>(
       {
@@ -229,10 +357,26 @@ const Root = forwardRef<HTMLSpanElement, SwitchRootProps>(
     return (
       <StyledRoot
         ref={ref}
+        indeterminate={indeterminate}
+        inputRef={handleInputRef as Ref<HTMLInputElement>}
         {...props}
         {...handlers}
         onClickCapture={handleClickCapture}
-      />
+      >
+        {children}
+        {onOffLabels ? (
+          <>
+            <OnLabel
+              aria-hidden="true"
+              data-switch-part="label"
+            />
+            <OffLabel
+              aria-hidden="true"
+              data-switch-part="label"
+            />
+          </>
+        ) : null}
+      </StyledRoot>
     );
   },
 );

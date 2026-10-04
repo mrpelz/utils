@@ -98,7 +98,7 @@ export const tests = [
         const start = x + width - 80;
         await touch('touchStart', start, y + height / 2);
         for (let step = 1; step <= 10; step += 1) {
-          await touch('touchMove', start - step * 30, y + height / 2);
+          await touch('touchMove', start - step * 16, y + height / 2);
           await sleep(30);
         }
         await touch('touchEnd');
@@ -122,8 +122,8 @@ export const tests = [
         for (let step = 1; step <= 10; step += 1) {
           await touch(
             'touchMove',
-            start - step * 30,
-            y + height / 2 - step * 12,
+            start - step * 16,
+            y + height / 2 - step * 6,
           );
           await sleep(30);
         }
@@ -223,7 +223,7 @@ export const tests = [
           };
         };
         const group = document.querySelector('[data-list-part=group]');
-        return [...group.children].map(measure);
+        return [...group.children].slice(0, 3).map(measure);
       })()`);
 
       // Airplane Mode (first: no separator), Wi-Fi, Notifications (tall).
@@ -412,6 +412,89 @@ export const tests = [
     },
   },
   {
+    name: 'list: a segmented control is a trailing part, centered, 16px from the edge',
+    run: async (page) => {
+      await page.open('list');
+      const state = () =>
+        page.evaluate(`(() => {
+          const item = ${row(0, 6)};
+          const box = item.getBoundingClientRect();
+          const control = item.querySelector('[role=radiogroup]').getBoundingClientRect();
+          return {
+            center: Math.round(control.top + control.height / 2 - (box.top + box.height / 2)),
+            height: box.height,
+            inset: Math.round(box.right - control.right),
+            value: item.querySelector('[role=radio][aria-checked=true]').getAttribute('value') ?? item.querySelector('[role=radio][aria-checked=true]').textContent.charAt(0),
+          };
+        })()`);
+      // 36px high, it fits the row (8px from its edges).
+      assert.deepEqual(await state(), {
+        center: 0,
+        height: 52,
+        inset: 16,
+        value: 'M',
+      });
+
+      const large = await page.evaluate(`(() => {
+        const { height, width, x, y } = [...${row(0, 6)}.querySelectorAll('[role=radio]')].at(-1).getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`);
+      await page.click(large);
+      await sleep(400);
+      const { value } = await state();
+      assert.equal(value, 'L');
+    },
+  },
+  {
+    name: 'list: a stepper is a trailing part, its value a detail',
+    run: async (page) => {
+      await page.open('list');
+      const state = () =>
+        page.evaluate(`(() => {
+          const item = ${row(0, 7)};
+          const box = item.getBoundingClientRect();
+          const group = item.querySelector('[role=group]').getBoundingClientRect();
+          const detail = item.querySelector('[data-list-part=detail]');
+          return {
+            center: Math.round(group.top + group.height / 2 - (box.top + box.height / 2)),
+            gap: Math.round(group.left - detail.getBoundingClientRect().right),
+            height: box.height,
+            inset: Math.round(box.right - group.right),
+            value: detail.textContent,
+          };
+        })()`);
+      assert.deepEqual(await state(), {
+        center: 0,
+        gap: 16,
+        height: 52,
+        inset: 16,
+        value: '1',
+      });
+
+      const increment = await page.evaluate(`(() => {
+        const { height, width, x, y } = ${row(0, 7)}.querySelectorAll('[role=group] button')[1].getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`);
+      await page.click(increment);
+      await sleep(300);
+      const { value } = await state();
+      assert.equal(value, '2');
+    },
+  },
+  {
+    name: 'list: a row of a single control (a slider) spans its content',
+    run: async (page) => {
+      await page.open('list');
+      const geometry = await page.evaluate(`(() => {
+        const item = ${row(0, 8)};
+        const box = item.getBoundingClientRect();
+        const slider = item.firstElementChild.getBoundingClientRect();
+        return [Math.round(slider.left - box.left), Math.round(box.right - slider.right), Math.round(slider.top + slider.height / 2 - (box.top + box.height / 2))];
+      })()`);
+      assert.deepEqual(geometry, [16, 16, 0]);
+    },
+  },
+  {
     name: 'list: overswiping triggers the outermost action',
     run: async (page) => {
       await page.open('list-swipe');
@@ -419,42 +502,79 @@ export const tests = [
       const { height, x, y } = await rowRect(page, 0, 0);
       const from = /** @type {[number, number]} */ ([x + 80, y + height / 2]);
 
+      // The symbol's offset from the circle's center, whether armed, the
+      // label's opacity.
+      const symbolState = () =>
+        page.evaluate(`(() => {
+          const outermost = ${row(0, 0)}.querySelector('[data-list-part=swipe-action]');
+          const circle = outermost.firstElementChild.getBoundingClientRect();
+          const symbol = outermost.querySelector('[data-list-part=swipe-action-symbol] > *').getBoundingClientRect();
+          return {
+            armed: outermost.hasAttribute('data-armed'),
+            label: getComputedStyle(outermost.lastElementChild).opacity,
+            shift: Math.round(symbol.left + symbol.width / 2 - (circle.left + circle.width / 2)),
+          };
+        })()`);
+
+      // Past the actions (178px), not armed yet (5 × 54 + 26 + 8px).
       await page.mouse('mousePressed', ...from);
-      for (let step = 1; step <= 12; step += 1) {
+      for (let step = 1; step <= 5; step += 1) {
+        await page.mouse('mouseMoved', from[0] + step * 40, from[1]);
+        await sleep(30);
+      }
+      await sleep(300);
+      assert.deepEqual(await symbolState(), {
+        armed: false,
+        label: '1',
+        shift: 0,
+      });
+
+      for (let step = 6; step <= 12; step += 1) {
         await page.mouse('mouseMoved', from[0] + step * 40, from[1]);
         await sleep(30);
       }
       await sleep(300);
 
-      // The outermost (leading: first) action's circle covers the others
-      // (faded out, labels included) and the whole area the row uncovers
-      // (10px from it, 16px from the edge); the actions stay in place, at
-      // the edge.
+      // The outermost (leading: first) action's circle fills the space from
+      // the edge (16px) up to the others (10px), which follow the row (10px
+      // from it); armed, its symbol at the row's end (centered in its own
+      // size: 22px from it).
       const stretched = await page.evaluate(`(() => {
         const item = ${row(0, 0)};
         const actions = item.querySelector('[data-list-part=swipe-actions]');
         const [outermost, next, last] = actions.children;
         const box = actions.getBoundingClientRect();
         const circle = outermost.firstElementChild.getBoundingClientRect();
+        const symbol = outermost.querySelector('[data-list-part=swipe-action-symbol] > *').getBoundingClientRect();
+        const rowLeft = item.getBoundingClientRect().left;
         return {
-          covers: circle.right > last.getBoundingClientRect().right,
-          edge: Math.round(box.left - item.parentElement.getBoundingClientRect().left),
-          inset: Math.round(circle.left - box.left),
-          next: Math.round(next.getBoundingClientRect().left - box.left),
+          armed: outermost.hasAttribute('data-armed'),
+          atRow: Math.round(circle.right - (symbol.left + symbol.width / 2)),
+          edge: Math.round(circle.left - box.left),
+          next: Math.round(next.getBoundingClientRect().left - circle.right),
           others: [getComputedStyle(next).opacity, getComputedStyle(last).opacity],
-          overswipe: outermost.dataset.overswipe,
-          row: Math.round(item.getBoundingClientRect().left - circle.right),
+          row: Math.round(rowLeft - last.getBoundingClientRect().right),
         };
       })()`);
       assert.deepEqual(stretched, {
-        covers: true,
-        edge: 0,
-        inset: 16,
-        next: 16 + 52 + 10,
-        others: ['0', '0'],
-        overswipe: 'stretched',
+        armed: true,
+        atRow: 22,
+        edge: 16,
+        next: 10,
+        others: ['1', '1'],
         row: 10,
       });
+
+      // Moved back, disarmed: centered again, with the label.
+      await page.mouse('mouseMoved', from[0] + 200, from[1]);
+      await sleep(300);
+      assert.deepEqual(await symbolState(), {
+        armed: false,
+        label: '1',
+        shift: 0,
+      });
+      await page.mouse('mouseMoved', from[0] + 480, from[1]);
+      await sleep(300);
 
       await page.mouse('mouseReleased', from[0] + 480, from[1]);
       await sleep(500);
@@ -465,15 +585,69 @@ export const tests = [
       assert.match(log, /swipe action clicked/);
       assert.equal(await swipeSide(page, 0, 0), undefined);
 
-      // Without overswipe (trailing), the actions just open.
+      // Trailing, too: the outermost (last) action.
       await swipe(page, 0, 0, -400);
-      assert.equal(await swipeSide(page, 0, 0), 'trailing');
-      assert.doesNotMatch(
+      assert.match(
         await page.evaluate(
           `${page.section}.querySelector('config').textContent`,
         ),
         /Done clicked/,
       );
+
+      // Without overswipe, the actions just open.
+      await page.setControl('overswipe', false);
+      await swipe(page, 0, 0, 400);
+      assert.equal(await swipeSide(page, 0, 0), 'leading');
+    },
+  },
+  {
+    name: 'list: a single action arms overswiping only past 5 actions',
+    run: async (page) => {
+      await page.open('list-edit');
+      const titles = () =>
+        page.evaluate(
+          `[...${row(0, 0)}.parentElement.children].map((item) => item.querySelector(${JSON.stringify('[data-list-part=title]')}).textContent)`,
+        );
+
+      // Past the Delete action (70px), not past 5 actions: it opens.
+      await swipe(page, 0, 0, -150);
+      assert.equal(await swipeSide(page, 0, 0), 'trailing');
+      const { length } = await titles();
+      assert.equal(length, 5);
+
+      // Past 5 actions (5 × 54 + 26 + 8px): deleted.
+      await swipe(page, 0, 1, -420);
+      assert.deepEqual(await titles(), ['Mercury', 'Earth', 'Mars', 'Jupiter']);
+    },
+  },
+  {
+    name: 'list: rows arm overswiping at the same distance, with labelled actions, too',
+    run: async (page) => {
+      await page.open('list-swipe');
+      // Tall row: 36px labelled actions, armed past 304px all the same.
+      const { height, width, x, y } = await rowRect(page, 0, 1);
+      const from = /** @type {[number, number]} */ ([
+        x + width - 40,
+        y + height / 2,
+      ]);
+      const armed = () =>
+        page.evaluate(
+          `${row(0, 1)}.querySelectorAll('[data-list-part=swipe-actions]')[1].lastElementChild.hasAttribute('data-armed')`,
+        );
+
+      await page.mouse('mousePressed', ...from);
+      for (let step = 1; step <= 7; step += 1) {
+        await page.mouse('mouseMoved', from[0] - step * 40, from[1]);
+        await sleep(30);
+      }
+      assert.equal(await armed(), false, '280px');
+      await page.mouse('mouseMoved', from[0] - 330, from[1]);
+      await sleep(100);
+      assert.equal(await armed(), true, '330px');
+      await page.mouse('mouseMoved', from[0] - 200, from[1]);
+      await sleep(100);
+      await page.mouse('mouseReleased', from[0] - 200, from[1]);
+      await sleep(500);
     },
   },
   {
@@ -509,7 +683,7 @@ export const tests = [
       // Tall row, trailing: circles 36px with labels (smaller than Figma's
       // 50px, to fit the row), 10px from the row and each other, 16px from
       // the edge.
-      await swipe(page, 0, 1, -300);
+      await swipe(page, 0, 1, -150);
       const tall = await swipeState(page, 0, 1);
       assert.equal(tall.swipe, 'trailing');
       assert.deepEqual(tall.actions, [1, 1, 1]);
@@ -540,12 +714,18 @@ export const tests = [
         separators: ['0'],
       });
 
-      // Regular row, leading: 52px circles without labels; the other row
-      // closes (one open at a time).
-      await swipe(page, 0, 0, 300);
+      // Regular row, leading: 44px circles without labels, 4px from the
+      // row's edges; the other row closes (one open at a time).
+      await swipe(page, 0, 0, 170);
       const regular = await swipeState(page, 0, 0);
       assert.equal(regular.swipe, 'leading');
-      assert.equal(regular.width, 16 + 52 * 3 + 10 * 2 + 10);
+      assert.equal(regular.width, 16 + 44 * 3 + 10 * 2 + 10);
+      assert.equal(
+        await page.evaluate(
+          `Math.round(${row(0, 0)}.querySelector('[data-list-part=swipe-action]').getBoundingClientRect().top - ${row(0, 0)}.getBoundingClientRect().top)`,
+        ),
+        4,
+      );
       assert.equal(regular.offset, regular.width);
       assert.equal(await swipeSide(page, 0, 1), undefined);
 
@@ -553,7 +733,7 @@ export const tests = [
       await swipe(page, 0, 0, -60);
       assert.equal(await swipeSide(page, 0, 0), undefined);
 
-      await swipe(page, 0, 0, 300);
+      await swipe(page, 0, 0, 170);
       const { height, width, x, y } = await rowRect(page, 0, 1);
       await page.click([x + width / 2, y + height / 2]);
       await sleep(500);
@@ -568,7 +748,7 @@ export const tests = [
         `window.clicks = 0; ${row(0, 0)}.querySelector('[data-list-part=title]').addEventListener('click', () => { window.clicks += 1; })`,
       );
 
-      await swipe(page, 0, 0, -300);
+      await swipe(page, 0, 0, -170);
       const { height, width, x, y } = await rowRect(page, 0, 0);
       // The open row closes on a tap, without clicking.
       await page.click([x + width / 2, y + height / 2]);
@@ -666,6 +846,7 @@ export const tests = [
         })()`);
       const planets = ['Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter'];
 
+      /** @type {[number, number]} */
       const grabber = await page.evaluate(`(() => {
         const element = ${row(0, 0)}.querySelector('[data-list-part=grabber]');
         element.scrollIntoView({ block: 'center' });
@@ -688,7 +869,11 @@ export const tests = [
       // corners and separators follow the order on screen.
       await page.mouse('mousePressed', ...grabber);
       for (let step = 1; step <= 6; step += 1) {
-        await page.mouse('mouseMoved', grabber[0], grabber[1] + height * 0.2 * step);
+        await page.mouse(
+          'mouseMoved',
+          grabber[0],
+          grabber[1] + height * 0.2 * step,
+        );
         await sleep(40);
       }
       await sleep(400);
@@ -723,6 +908,81 @@ export const tests = [
       await sleep(300);
       const { titles } = await state();
       assert.deepEqual(titles, planets);
+
+      // Dragged past the group's end, the first row reaches the last place
+      // (rounded at the bottom while held there).
+      await page.mouse('mousePressed', ...grabber);
+      for (let step = 1; step <= 10; step += 1) {
+        await page.mouse(
+          'mouseMoved',
+          grabber[0],
+          grabber[1] + height * 0.6 * step,
+        );
+        await sleep(40);
+      }
+      await sleep(400);
+      assert.equal(
+        await page.evaluate(
+          `getComputedStyle(${row(0, 0)}).borderBottomLeftRadius`,
+        ),
+        '24px',
+      );
+      await page.mouse('mouseReleased', grabber[0], grabber[1] + height * 6);
+      await sleep(900);
+      const { titles: moved } = await state();
+      assert.deepEqual(moved, ['Venus', 'Earth', 'Mars', 'Jupiter', 'Mercury']);
+
+      // And the last row the first place.
+      const last = await page.evaluate(`(() => {
+        const { height, width, x, y } = ${row(0, 4)}.querySelector('[data-list-part=grabber]').getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`);
+      await page.drag(last, [last[0], last[1] - height * 6], {
+        duration: 500,
+      });
+      await sleep(900);
+      const { titles: back } = await state();
+      assert.deepEqual(back, planets);
+    },
+  },
+  {
+    name: 'list: a segmented control switches between groups',
+    run: async (page) => {
+      await page.open('list-segmented');
+      const state = () =>
+        page.evaluate(`(() => {
+          const control = ${page.section}.querySelector('[role=radiogroup]').getBoundingClientRect();
+          const groups = [...${page.section}.querySelectorAll('[data-list-part=group]')];
+          const shown = groups.find((group) => !group.hidden);
+          const box = shown.getBoundingClientRect();
+          return {
+            aligned: [Math.round(control.left - box.left), Math.round(control.right - box.right)],
+            gap: Math.round(box.top - control.bottom),
+            rows: [...shown.children].map((item) => item.querySelector('[data-list-part=title]').textContent),
+            shown: shown.id,
+          };
+        })()`);
+      assert.deepEqual(await state(), {
+        aligned: [0, 0],
+        gap: 16,
+        rows: ['Planning', 'Offsite', 'Release 1.3', 'Retrospective'],
+        shown: 'list-segmented-upcoming',
+      });
+
+      const past = await page.evaluate(`(() => {
+        const { height, width, x, y } = ${page.section}.querySelector('[aria-controls=list-segmented-past]').getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`);
+      await page.click(past);
+      await sleep(400);
+      const { rows, shown } = await state();
+      assert.deepEqual(
+        { rows, shown },
+        {
+          rows: ['Design Review', 'Team Lunch', 'Release 1.2'],
+          shown: 'list-segmented-past',
+        },
+      );
     },
   },
   {
@@ -770,7 +1030,13 @@ export const tests = [
   {
     name: 'list: screenshots',
     run: async (page) => {
-      for (const id of ['list', 'list-swipe', 'list-edit', 'list-mail']) {
+      for (const id of [
+        'list',
+        'list-swipe',
+        'list-edit',
+        'list-mail',
+        'list-segmented',
+      ]) {
         for (const scheme of /** @type {const} */ (['light', 'dark'])) {
           await page.open(id, scheme);
           await page.screenshot(`${id}-${scheme}`);

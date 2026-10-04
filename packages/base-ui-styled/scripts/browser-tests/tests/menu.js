@@ -277,7 +277,7 @@ export const tests = [
     },
   },
   {
-    name: 'edit menu: capsule matches Figma',
+    name: 'edit menu: capsule matches iOS 26 (measured)',
     run: async (page) => {
       for (const scheme of /** @type {const} */ (['light', 'dark'])) {
         await page.open('edit-menu', scheme);
@@ -307,8 +307,8 @@ export const tests = [
             above: 8,
             between: 33,
             firstLabel: 20,
-            height: 44,
-            more: [36, 36, 4],
+            height: 42,
+            more: [34, 34, 4],
           },
           scheme,
         );

@@ -758,8 +758,57 @@ export const tests = [
       /** @type {number[]} */
       const opacities = await sampling;
       assert.ok(isMonotonic(opacities), `fades in: ${opacities.join(', ')}`);
-      assert.ok((opacities[1] ?? 1) < 0.2, `starts hidden: ${opacities.join(', ')}`);
+      assert.ok(
+        (opacities[1] ?? 1) < 0.2,
+        `starts hidden: ${opacities.join(', ')}`,
+      );
       assert.equal(opacities.at(-1), 1);
+    },
+  },
+  {
+    name: 'tab bar: a group coming back from collapsing away fades all its tabs in alike, its glass intact',
+    run: async (page) => {
+      await page.open(SECONDARY);
+      const centers = await tabCenters(page);
+      const search = centers.at(-1);
+      if (!search) throw new Error('missing tabs');
+      await page.click(search);
+      await sleep(800);
+      await page.setControl('collapsed', true, 'list');
+      await sleep(900);
+
+      // Its tabs' content fades (inside the blended parts); neither the
+      // group nor its tabs (which would isolate the glass and blending).
+      const sampling = page.sample(
+        `(() => {
+          const group = ${page.section}.querySelector('[role=tablist] > div');
+          return {
+            container: [group, ...group.querySelectorAll('[role=tab]')].map((element) => +getComputedStyle(element).opacity),
+            content: [...group.querySelectorAll('[data-tab-bar-part=icon] > *')].map((element) => +getComputedStyle(element).opacity),
+          };
+        })()`,
+        900,
+      );
+      await page.setControl('collapsed', false, 'list');
+      /** @type {{ container: number[], content: number[] }[]} */
+      const frames = await sampling;
+      const spread = frames.map(
+        ({ content }) => Math.max(...content) - Math.min(...content),
+      );
+      assert.ok(
+        Math.max(...spread) < 0.01,
+        `tabs' opacities differ by up to ${Math.max(...spread)}`,
+      );
+      assert.ok(
+        frames.every(({ container }) =>
+          container.every((value) => value === 1),
+        ),
+        'the group and its tabs stay opaque',
+      );
+      assert.ok(
+        isMonotonic(frames.map(({ content }) => content[0] ?? 0)),
+        'fades in',
+      );
     },
   },
   {
@@ -805,7 +854,7 @@ export const tests = [
       const height = await page.evaluate(
         `${bar}.getBoundingClientRect().height`,
       );
-      await page.setControl('accessory', true);
+      await page.setControl('accessory', 'both');
       await sleep(400);
 
       /** @typedef {{ bottom: number, height: number, left: number, right: number, top: number }} Box */
@@ -918,6 +967,81 @@ export const tests = [
         'between the groups',
       );
       await page.screenshot('tab-bar-accessory-collapsed');
+    },
+  },
+  {
+    name: 'tab bar: an accessory shown in one state only fades at its place there',
+    run: async (page) => {
+      const accessory = `${page.section}.querySelector('[data-tab-bar-part=accessory]')`;
+      const bar = `${page.section}.querySelector('[role=tablist]')`;
+      /** @returns {Promise<{ above: boolean, opacity: number, visible: boolean }>} */
+      const state = () =>
+        page.evaluate(`(() => {
+          const accessory = ${accessory};
+          const group = ${bar}.querySelector(':scope > div').getBoundingClientRect();
+          const style = getComputedStyle(accessory);
+          return {
+            above: accessory.getBoundingClientRect().bottom <= group.top,
+            // Its content and glass fade, not the accessory (see GlassBackground).
+            opacity: +getComputedStyle(accessory.lastElementChild.firstElementChild).opacity,
+            visible: style.visibility === 'visible',
+          };
+        })()`);
+
+      // Expanded only: above the groups, fading out (there) on collapsing.
+      await page.open(SECONDARY);
+      await page.setControl('accessory', 'expanded');
+      await sleep(400);
+      assert.deepEqual(await state(), {
+        above: true,
+        opacity: 1,
+        visible: true,
+      });
+      /** @type {number[]} */
+      const fading = await Promise.all([
+        page.sample(
+          `+getComputedStyle(${accessory}.lastElementChild.firstElementChild).opacity`,
+          900,
+        ),
+        page.setControl('collapsed', true),
+      ]).then(([sampled]) => sampled);
+      assert.ok(isMonotonic(fading, -1), `fades out: ${fading.join(', ')}`);
+      assert.deepEqual(await state(), {
+        above: true,
+        opacity: 0,
+        visible: false,
+      });
+
+      // Collapsed only: hidden while expanded, fading in between the
+      // remaining groups (where an accessory shown in both states goes).
+      await page.open(SECONDARY);
+      await page.setControl('accessory', 'collapsed');
+      await sleep(400);
+      assert.deepEqual(await state(), {
+        above: false,
+        opacity: 0,
+        visible: false,
+      });
+      /** @type {number[]} */
+      const appearing = await Promise.all([
+        page.sample(
+          `+getComputedStyle(${accessory}.lastElementChild.firstElementChild).opacity`,
+          900,
+        ),
+        page.setControl('collapsed', true),
+      ]).then(([sampled]) => sampled);
+      assert.ok(isMonotonic(appearing), `fades in: ${appearing.join(', ')}`);
+      assert.deepEqual(await state(), {
+        above: false,
+        opacity: 1,
+        visible: true,
+      });
+      const place = await page.evaluate(`(() => {
+        const box = ${accessory}.getBoundingClientRect();
+        const group = ${bar}.querySelector('[data-tab-bar-part=tabs]').getBoundingClientRect();
+        return [Math.round(box.left - group.right), Math.round(box.top + box.height / 2 - (group.top + group.height / 2))];
+      })()`);
+      assert.deepEqual(place, [16, 0], 'next to the remaining group');
     },
   },
   {

@@ -1,7 +1,17 @@
 // Buttons & inputs
 export { Button, type ButtonRootProps } from './button.js';
+export {
+  Calendar,
+  type CalendarProps,
+  DatePicker,
+  type DatePickerMode,
+  type DatePickerProps,
+  type DatePickerStyle,
+} from './date-picker.js';
+export { TextField } from './text-field.js';
 export { Segmented } from './segmented.js';
 export { Slider } from './slider.js';
+export { Stepper } from './stepper.js';
 export { Switch } from './switch.js';
 
 // Lists

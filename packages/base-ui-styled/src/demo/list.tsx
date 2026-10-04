@@ -15,6 +15,8 @@ import { sfPersonCropCircleFill } from '@bradleyhodges/sfsymbols/sfPersonCropCir
 import { sfPersonFill } from '@bradleyhodges/sfsymbols/sfPersonFill';
 import { sfPinFill } from '@bradleyhodges/sfsymbols/sfPinFill';
 import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
+import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
+import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
 import { sfTagFill } from '@bradleyhodges/sfsymbols/sfTagFill';
 import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
 import { sfWifi } from '@bradleyhodges/sfsymbols/sfWifi';
@@ -28,7 +30,16 @@ import {
   useState,
 } from 'react';
 
-import { List, Menu, Switch } from '../components/index.js';
+import {
+  DatePicker,
+  List,
+  Menu,
+  Segmented,
+  Slider,
+  Stepper,
+  Switch,
+  TextField,
+} from '../components/index.js';
 import { useLog } from './utils/log.js';
 import {
   commonPropOptions,
@@ -287,6 +298,7 @@ export const ListDemo: FunctionComponent = () => {
 
   const [selection, setSelection] =
     useState<(typeof selectionOptions)[number]>('Automatic');
+  const [quantity, setQuantity] = useState(1);
 
   const image = (icon: Parameters<typeof SFSymbol>[0]['icon'], tint: string) =>
     content.image === 'none' ? null : (
@@ -369,6 +381,7 @@ export const ListDemo: FunctionComponent = () => {
               <List.Title>Airplane Mode</List.Title>
               <Switch.Root
                 aria-label="Airplane Mode"
+                tint="var(--color-ios-system-orange)"
                 onCheckedChange={(checked) =>
                   addLog(`airplane mode: ${checked}`)
                 }
@@ -442,6 +455,59 @@ export const ListDemo: FunctionComponent = () => {
             <List.Item>
               <List.Title>Button</List.Title>
               <List.Action {...propsAction}>Button</List.Action>
+            </List.Item>
+            <List.Item>
+              <List.Title>Text Size</List.Title>
+              <Segmented.Root
+                aria-label="Text Size"
+                defaultValue="medium"
+                onValueChange={(value) => addLog(`text size: ${String(value)}`)}
+              >
+                <Segmented.Item value="small">S</Segmented.Item>
+                <Segmented.Item value="medium">M</Segmented.Item>
+                <Segmented.Item value="large">L</Segmented.Item>
+                <Segmented.Highlight />
+              </Segmented.Root>
+            </List.Item>
+            <List.Item>
+              <List.Title>Quantity</List.Title>
+              <List.Detail>{quantity}</List.Detail>
+              <Stepper.Root
+                max={10}
+                min={0}
+                value={quantity}
+                onValueChange={(value) => {
+                  addLog(`quantity: ${String(value)}`);
+                  setQuantity(value ?? 0);
+                }}
+              >
+                <Stepper.Group inputProps={{ 'aria-label': 'Quantity' }}>
+                  <Stepper.Decrement />
+                  <Stepper.Increment />
+                </Stepper.Group>
+              </Stepper.Root>
+            </List.Item>
+            <List.Item>
+              <Slider.Root
+                aria-label="Brightness"
+                defaultValue={60}
+                onValueCommitted={(value) =>
+                  addLog(`brightness: ${String(value)}`)
+                }
+              >
+                <Slider.Symbol edge="min">
+                  <SFSymbol icon={sfSunMin} />
+                </Slider.Symbol>
+                <Slider.Control>
+                  <Slider.Track>
+                    <Slider.Indicator />
+                    <Slider.Thumb />
+                  </Slider.Track>
+                </Slider.Control>
+                <Slider.Symbol edge="max">
+                  <SFSymbol icon={sfSunMax} />
+                </Slider.Symbol>
+              </Slider.Root>
             </List.Item>
           </List.Group>
           <List.Footer {...propsFooter}>
@@ -518,8 +584,9 @@ export const ListDemo: FunctionComponent = () => {
 };
 
 /**
- * Swipe actions (Figma “Row with Swipe Actions”): regular and tall rows
- * with actions on both sides, the leading ones overswipeable.
+ * Swipe actions (Figma “Row with Swipe Actions”): regular, tall and
+ * multi-line rows (the latter two with labelled actions), with actions on
+ * both sides, overswipeable either way.
  */
 export const ListSwipeDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
@@ -566,6 +633,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
     first: boolean,
   ) => (
     <List.SwipeActions
+      overswipe
       side={side}
       {...(first ? propsSwipeActions : {})}
     >
@@ -599,33 +667,41 @@ export const ListSwipeDemo: FunctionComponent = () => {
       <List.Root {...propsRoot}>
         <List.Section>
           <List.Group>
-            {(['Regular', 'Tall'] as const).map((height, index) => (
-              <List.Item key={height}>
-                <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
-                  variant="rounded"
-                >
-                  <SFSymbol icon={sfEnvelopeFill} />
-                </List.Image>
-                <List.Title
-                  render={<button />}
-                  onClick={() => addLog(`${height} clicked`)}
-                >
-                  {height}
-                </List.Title>
-                {height === 'Tall' ? (
-                  <List.Subtitle>Swipe either way</List.Subtitle>
-                ) : null}
-                <List.Detail>Detail</List.Detail>
-                <List.DrillIn />
-                {swipeActions('leading', leadingActions, index === 0)}
-                {swipeActions('trailing', trailingActions, false)}
-              </List.Item>
-            ))}
+            {(['Regular', 'Tall', 'Multi-line'] as const).map(
+              (height, index) => (
+                <List.Item key={height}>
+                  <List.Image
+                    style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                    variant="rounded"
+                  >
+                    <SFSymbol icon={sfEnvelopeFill} />
+                  </List.Image>
+                  <List.Title
+                    render={<button />}
+                    onClick={() => addLog(`${height} clicked`)}
+                  >
+                    {height}
+                  </List.Title>
+                  {height === 'Regular' ? null : (
+                    <List.Subtitle>Swipe either way</List.Subtitle>
+                  )}
+                  {height === 'Multi-line' ? (
+                    <List.Text>
+                      Swipe on past the actions to trigger the outermost one, on
+                      either side; let go before to keep them open.
+                    </List.Text>
+                  ) : null}
+                  <List.Detail>Detail</List.Detail>
+                  <List.DrillIn />
+                  {swipeActions('leading', leadingActions, index === 0)}
+                  {swipeActions('trailing', trailingActions, false)}
+                </List.Item>
+              ),
+            )}
           </List.Group>
           <List.Footer>
-            Swipe a row to reveal its actions; swipe on past the leading ones
-            to trigger the outermost.
+            Swipe a row to reveal its actions; swipe on past them to trigger the
+            outermost.
           </List.Footer>
         </List.Section>
       </List.Root>
@@ -835,6 +911,9 @@ export const ListEditDemo: FunctionComponent = () => {
   return (
     <Component
       stretch
+      id="list-edit"
+      log={log}
+      title="List (Editing)"
       controls={[
         controlContent,
         controlRoot,
@@ -844,9 +923,6 @@ export const ListEditDemo: FunctionComponent = () => {
         controlEditButton,
         controlGrabber,
       ]}
-      id="list-edit"
-      log={log}
-      title="List (Editing)"
     >
       <List.Root {...propsRoot}>
         <List.Section>
@@ -872,6 +948,191 @@ export const ListEditDemo: FunctionComponent = () => {
           ) : (
             group
           )}
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
+
+const events = {
+  past: ['Design Review', 'Team Lunch', 'Release 1.2'],
+  upcoming: ['Planning', 'Offsite', 'Release 1.3', 'Retrospective'],
+} as const;
+
+type EventsView = keyof typeof events;
+
+/**
+ * A full-width segmented control switching between two groups of rows (as
+ * iOS apps switch views): the segments are radios (Base UI `RadioGroup`),
+ * each controlling its group (`aria-controls`), the other one hidden.
+ */
+export const ListSegmentedDemo: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [view, setView] = useState<EventsView>('upcoming');
+
+  const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
+
+  return (
+    <Component
+      stretch
+      controls={[controlRoot]}
+      id="list-segmented"
+      log={log}
+      title="List (Segmented)"
+    >
+      <List.Root {...propsRoot}>
+        <List.Section>
+          {/* Aligned with the groups' edges, not the rows' text. */}
+          <List.Block style={{ marginBlockEnd: 16, paddingInline: 0 }}>
+            <Segmented.Root
+              aria-label="Events"
+              value={view}
+              onValueChange={(value) => {
+                addLog(`view: ${String(value)}`);
+                setView(value as EventsView);
+              }}
+            >
+              <Segmented.Item
+                aria-controls="list-segmented-upcoming"
+                value="upcoming"
+              >
+                Upcoming
+              </Segmented.Item>
+              <Segmented.Item
+                aria-controls="list-segmented-past"
+                value="past"
+              >
+                Past
+              </Segmented.Item>
+              <Segmented.Highlight />
+            </Segmented.Root>
+          </List.Block>
+          {(Object.keys(events) as EventsView[]).map((key) => (
+            <List.Group
+              key={key}
+              aria-label={key === 'upcoming' ? 'Upcoming' : 'Past'}
+              hidden={view !== key}
+              id={`list-segmented-${key}`}
+            >
+              {events[key].map((name) => (
+                <List.Item key={name}>
+                  <List.Title
+                    render={<button />}
+                    onClick={() => addLog(`${name} clicked`)}
+                  >
+                    {name}
+                  </List.Title>
+                  <List.DrillIn />
+                </List.Item>
+              ))}
+            </List.Group>
+          ))}
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
+
+/**
+ * A form (Framework7 list inputs): fields as rows, with inline labels, a
+ * clear button while editing, a placeholder-only row, validation (an email
+ * field's error shows once it's left invalid) and a textarea.
+ */
+export const ListFormDemo: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+
+  const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
+
+  return (
+    <Component
+      stretch
+      controls={[controlRoot]}
+      id="list-form"
+      log={log}
+      title="List (Form)"
+    >
+      <List.Root {...propsRoot}>
+        <List.Section>
+          <List.Header prominence="nested">
+            <List.Title>Contact</List.Title>
+          </List.Header>
+          <List.Group>
+            <TextField.Root render={<List.Item />}>
+              <TextField.Label>Name</TextField.Label>
+              <TextField.Control
+                defaultValue="Kate Bell"
+                placeholder="Required"
+                onValueChange={(value) => addLog(`name: ${value}`)}
+              />
+              <TextField.Clear />
+            </TextField.Root>
+            <TextField.Root
+              render={<List.Item />}
+              validationMode="onBlur"
+            >
+              <TextField.Label>Email</TextField.Label>
+              <TextField.Control
+                placeholder="name@example.com"
+                type="email"
+              />
+              <TextField.Clear />
+              <TextField.Description>
+                Used for receipts only.
+              </TextField.Description>
+              <TextField.Error match="typeMismatch">
+                Not an email address.
+              </TextField.Error>
+            </TextField.Root>
+            <TextField.Root render={<List.Item />}>
+              <TextField.Control
+                aria-label="Company"
+                placeholder="Company"
+              />
+              <TextField.Clear />
+            </TextField.Root>
+          </List.Group>
+        </List.Section>
+        <List.Section>
+          <List.Header prominence="nested">
+            <List.Title>Event</List.Title>
+          </List.Header>
+          <List.Group>
+            <List.Item>
+              <List.Title>Starts</List.Title>
+              <DatePicker
+                defaultValue={new Date(2025, 3, 20, 9, 41)}
+                mode="dateAndTime"
+                onValueChange={(date) =>
+                  addLog(`starts: ${date.toLocaleString()}`)
+                }
+              />
+            </List.Item>
+            <List.Item>
+              <DatePicker
+                defaultValue={new Date(2025, 3, 21, 18, 0)}
+                mode="dateAndTime"
+                pickerStyle="inline"
+                onValueChange={(date) =>
+                  addLog(`ends: ${date.toLocaleString()}`)
+                }
+              />
+            </List.Item>
+          </List.Group>
+        </List.Section>
+        <List.Section>
+          <List.Header prominence="nested">
+            <List.Title>Notes</List.Title>
+          </List.Header>
+          <List.Group>
+            <TextField.Root render={<List.Item />}>
+              <TextField.Control
+                aria-label="Notes"
+                placeholder="Anything else?"
+                render={<textarea />}
+              />
+            </TextField.Root>
+          </List.Group>
+          <List.Footer>Fields as list rows, after Framework7.</List.Footer>
         </List.Section>
       </List.Root>
     </Component>

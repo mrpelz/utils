@@ -44,6 +44,114 @@ const setup = async (page) => {
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
+    name: 'switch: on/off labels sit beside the knob, each on its side (Apple)',
+    run: async (page) => {
+      await page.open('switch');
+      await page.setControl('onOffLabels', true);
+
+      const labels = await page.evaluate(`(() => {
+        const root = ${page.section}.querySelector('[role=switch]');
+        const box = root.getBoundingClientRect();
+        const [on, off] = [...root.querySelectorAll('[aria-hidden=true]')].map((label) => {
+          const style = getComputedStyle(label, '::before');
+          const rect = label.getBoundingClientRect();
+          return [style.width, style.height, Math.round((rect.left + rect.width / 2 - box.left) * 2) / 2];
+        });
+        return { off, on };
+      })()`);
+      // Centered in the track beside the knob (64 - 39 - 2px wide).
+      assert.deepEqual(labels, {
+        off: ['9px', '9px', 52.5],
+        on: ['1px', '9px', 11.5],
+      });
+
+      // Hidden while pressed (the knob a lens).
+      const { height, width, x, y } = await page.rect('[role=switch]');
+      await page.mouse('mousePressed', x + width / 2, y + height / 2);
+      await sleep(500);
+      const pressed = await page.evaluate(
+        `[...${page.section}.querySelectorAll('[data-switch-part=label]')].map((label) => getComputedStyle(label).opacity)`,
+      );
+      await page.mouse('mouseReleased', x + width / 2, y + height / 2);
+      assert.deepEqual(pressed, ['0', '0']);
+    },
+  },
+  {
+    name: 'switch: indeterminate, the knob sits in the middle, the input is indeterminate',
+    run: async (page) => {
+      await page.open('switch');
+      await page.setControl('indeterminate', true);
+      await sleep(500);
+
+      const state = await page.evaluate(`(() => {
+        const root = ${page.section}.querySelector('[role=switch]');
+        const box = root.getBoundingClientRect();
+        const knob = root.firstElementChild.getBoundingClientRect();
+        return {
+          center: Math.round(knob.left + knob.width / 2 - (box.left + box.width / 2)),
+          input: ${page.section}.querySelector('input[type=checkbox]').indeterminate,
+        };
+      })()`);
+      assert.deepEqual(state, { center: 0, input: true });
+
+      // Neither label while neither on nor off.
+      await page.setControl('onOffLabels', true);
+      assert.deepEqual(
+        await page.evaluate(
+          `[...${page.section}.querySelectorAll('[data-switch-part=label]')].map((label) => getComputedStyle(label).opacity)`,
+        ),
+        ['0', '0'],
+      );
+    },
+  },
+  {
+    name: 'switch: demo: indeterminate for two seconds after a change',
+    run: async (page) => {
+      const { off } = await setup(page);
+      await page.setMappedControl('onCheckedChange', '[indeterminate for 2s]');
+
+      /** @returns {Promise<number>} the knob's center, from the track's */
+      const knob = () =>
+        page.evaluate(`(() => {
+          const root = ${page.section}.querySelector('[role=switch]');
+          const box = root.getBoundingClientRect();
+          const rect = root.firstElementChild.getBoundingClientRect();
+          return Math.round(rect.left + rect.width / 2 - (box.left + box.width / 2));
+        })()`);
+
+      await page.click(off);
+      await sleep(800);
+      assert.equal(await knob(), 0, 'in the middle');
+      await sleep(2000);
+      assert.equal(await knob(), 11, 'on');
+      assert.equal(
+        await page.evaluate(
+          `${page.section}.querySelector('[role=switch]').getAttribute('aria-checked')`,
+        ),
+        'true',
+      );
+    },
+  },
+  {
+    name: 'switch: tint replaces the on color, also of the pressed glow',
+    run: async (page) => {
+      await page.open('switch');
+      await page.setControl('defaultChecked', true);
+      const colors = () =>
+        page.evaluate(`(() => {
+          const root = ${page.section}.querySelector('[role=switch]');
+          return [getComputedStyle(root, '::before').backgroundColor, getComputedStyle(root.firstElementChild, '::before').boxShadow];
+        })()`);
+
+      const [track, glow] = await colors();
+      assert.equal(track, 'rgb(52, 199, 89)');
+      await page.setControl('tint', '#000');
+      const [tinted, tintedGlow] = await colors();
+      assert.equal(tinted, 'rgb(0, 0, 0)');
+      assert.notEqual(tintedGlow, glow, 'the glow follows');
+    },
+  },
+  {
     name: 'switch: a tap toggles once',
     run: async (page) => {
       const { off, state } = await setup(page);

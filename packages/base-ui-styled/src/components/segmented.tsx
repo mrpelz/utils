@@ -4,7 +4,7 @@ import { Properties } from 'csstype';
 import { styled } from 'goober';
 import { forwardRef } from 'react';
 
-import { glassContext, glassLensScale } from './glass.js';
+import { glassContext } from './glass.js';
 import { colorScheme, css, fontWeight, usePointerDrag, wrap } from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Segmented control”, light and dark
@@ -40,7 +40,8 @@ import { colorScheme, css, fontWeight, usePointerDrag, wrap } from './utils.js';
 //   has no lens here; it's the tab bar's, see `tab-bar.tsx`). It replaces
 //   Framework7's pressed background. The lens is drawn above the items and
 //   outside the track, so the track doesn't clip its content; the highlight
-//   clips itself (and its shadow) to the track, as in Figma.
+//   clips itself (and its shadow) to the track, as in Figma. Sideways, it
+//   grows by at most twice as much as vertically (wide items).
 
 export type SegmentedRootProps = BaseRadioGroup.Props;
 
@@ -73,18 +74,35 @@ const Lens = styled('span')`
   z-index: 2;
   top: 0;
   left: 0;
-  width: var(--styled-segmented-lens-width, 0);
-  height: var(--styled-segmented-lens-height, 0);
-  border-radius: 20px;
+
+  /* Pressed, it grows by the lens' scale of its height, sideways by at
+     most twice as much (the scale of its width would be too much for wide
+     items); sized, not scaled, so it stays a capsule. */
+  width: calc(
+    var(--styled-segmented-lens-width, 0px) +
+      (var(--glass-ios-lens-scale) - 1) *
+      min(
+        var(--styled-segmented-lens-width, 0px),
+        2 * var(--styled-segmented-lens-height, 0px)
+      ) *
+      var(--styled-segmented-pressed, 0)
+  );
+  height: calc(
+    var(--styled-segmented-lens-height, 0px) +
+      (var(--glass-ios-lens-scale) - 1) *
+      var(--styled-segmented-lens-height, 0px) *
+      var(--styled-segmented-pressed, 0)
+  );
+  border-radius: 100px;
   background-color: var(--styled-glass-lens);
   box-shadow: var(--styled-glass-lens-shadow);
   opacity: var(--styled-segmented-pressed, 0);
   pointer-events: none;
-  scale: ${glassLensScale('var(--styled-segmented-pressed, 0)')};
   transition-duration:
     var(--styled-segmented-lens-move-duration, var(--glass-ios-lens-duration)),
-    var(--glass-ios-lens-duration), var(--glass-ios-lens-duration);
-  transition-property: translate, opacity, scale;
+    var(--glass-ios-lens-duration), var(--glass-ios-lens-duration),
+    var(--glass-ios-lens-duration);
+  transition-property: translate, opacity, width, height;
   transition-timing-function: ease-out;
   translate: calc(var(--styled-segmented-lens-x, 0px) - 50%)
     calc(var(--styled-segmented-lens-y, 0px) - 50%);
@@ -157,7 +175,10 @@ const press = (root: HTMLElement, clientX: number) => {
 // Settles the lens on the chosen item (if any) while it fades out, and lets
 // the highlight return to the checked item.
 const release = (root: HTMLElement, item?: HTMLElement) => {
-  if (item) press(root, item.getBoundingClientRect().left + 1);
+  if (item) {
+    const { left, width } = item.getBoundingClientRect();
+    press(root, left + width / 2);
+  }
 
   root.style.removeProperty('--styled-segmented-lens-move-duration');
   root.style.removeProperty('--styled-segmented-lens-start');

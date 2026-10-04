@@ -406,18 +406,20 @@ const collapsedAway = css`
 
 // A remaining tab, as the list's styles show the active one.
 const collapsedShown = css`
+  --styled-tabbar-tab-fade: 1;
+
   width: var(--styled-tabbar-collapsed-width);
   min-width: var(--styled-tabbar-tab-height);
   padding: var(--styled-tabbar-collapsed-padding);
   margin: 0;
-  opacity: 1;
   pointer-events: auto;
   visibility: visible;
 `;
 
 const collapsedHidden = css`
+  --styled-tabbar-tab-fade: 0;
+
   ${collapsedAway}
-  opacity: 0;
   pointer-events: none;
   visibility: hidden;
 `;
@@ -492,46 +494,46 @@ const collapsedList = ({
     ${fontWeight(510)}
   }
 
-  /* Groups without the active tab collapse away. */
+  /* Groups without the active tab collapse away, all their tabs hidden
+     (none fades in ahead of the others when expanding). */
   && > div[data-has-active='false'] {
+    --styled-glass-fade: 0;
+
     min-width: 0;
-    opacity: 0;
     pointer-events: none;
     visibility: hidden;
-
-    & > ${tabsPart} > [role='tab'] {
-      ${collapsedAway}
-    }
   }
 
   &&
     > div[data-has-active='true']
     > ${tabsPart}
     > [role='tab']:not([data-active]),
-  &&
-    > div[data-has-active='false']
-    > ${tabsPart}
-    > [role='tab']
-    ~ [role='tab'] {
+  && > div[data-has-active='false'] > ${tabsPart} > [role='tab'] {
+    --styled-tabbar-tab-fade: 0;
+
     ${collapsedAway}
-    opacity: 0;
     pointer-events: none;
     visibility: hidden;
   }
 
-  /* Without an active tab, the first group remains. */
+  /* Without an active tab, the first group remains, with its first tab. */
   &&:not(:has(> div[data-has-active='true'])) {
     & > div:first-of-type {
+      --styled-glass-fade: 1;
+
       min-width: var(--styled-tabbar-tab-height);
-      opacity: 1;
       pointer-events: auto;
       visibility: visible;
 
       & > ${tabsPart} > [role='tab']:first-of-type {
+        --styled-tabbar-tab-fade: 1;
+
         width: var(--styled-tabbar-collapsed-width);
         min-width: var(--styled-tabbar-tab-height);
         padding: var(--styled-tabbar-collapsed-padding);
         margin: 0;
+        pointer-events: auto;
+        visibility: visible;
       }
     }
   }
@@ -924,7 +926,9 @@ const useMarks = () => {
 // for its content's semantics), positioned absolutely at it by CSS anchor
 // positioning (see `Root`), so it never changes the bar's layout and moves
 // with it. Both places follow the groups in every frame; while the bar
-// collapses or expands, it morphs from one to the other.
+// collapses or expands, it morphs from one to the other. Shown in one state
+// only (`visibleIn`), it stays at its place there, fading in and out as the
+// bar collapses and expands.
 const accessoryHeight = 40;
 const accessoryGap = 16;
 const accessorySpacing = 16;
@@ -1067,11 +1071,20 @@ const placeAccessory = (list: HTMLElement): void => {
     morph.remaining.length > 0 ? morph.remaining : groups,
   );
 
-  // From where it was, to its place as the groups are now.
-  const target = morph.collapsed ? between : above;
+  // State for its styles (see `StyledAccessory`).
+  accessory.toggleAttribute('data-collapsed', morph.collapsed);
+  const visibleIn = getComputedStyle(accessory)
+    .getPropertyValue('--styled-tabbar-accessory-visible-in')
+    .trim();
+
+  // From where it was, to its place as the groups are now; shown in one
+  // state only, at its place there.
+  const collapsedPlace =
+    visibleIn === 'both' ? morph.collapsed : visibleIn === 'collapsed';
+  const target = collapsedPlace ? between : above;
   const duration = lensDuration(list);
   const progress =
-    morph.from && duration > 0
+    morph.from && duration > 0 && visibleIn === 'both'
       ? Math.min(1, (performance.now() - morph.start) / duration)
       : 1;
   const done = progress >= 1;
@@ -1517,8 +1530,7 @@ const StyledGroup = styled<'div', StyledGroupProps>('div', forwardRef)`
   grid-template-columns: minmax(0, max-content);
   margin-inline: var(--styled-tabbar-group-margin, auto);
   transition-duration: var(--glass-ios-lens-duration);
-  transition-property:
-    min-width, min-height, margin, border-width, opacity, visibility;
+  transition-property: min-width, min-height, margin, border-width, visibility;
 
   /* Under the lens, the group grows: its glass and content scale up around
      its center (measured on iOS 26: iPhone 1.05, iPad 1.065). Scaled layer
@@ -1556,9 +1568,10 @@ const StyledGroup = styled<'div', StyledGroupProps>('div', forwardRef)`
       case 'shown': {
         return css`
           ${groupOverride} {
+            --styled-glass-fade: 1;
+
             min-width: var(--styled-tabbar-tab-height);
             ${spaced ? 'border-inline-width: 8px;' : ''}
-            opacity: 1;
             pointer-events: auto;
             visibility: visible;
           }
@@ -1577,10 +1590,10 @@ const StyledGroup = styled<'div', StyledGroupProps>('div', forwardRef)`
         return css`
           ${groupOverride} {
             --styled-tabbar-selection-shown: 0;
+            --styled-glass-fade: 0;
 
             min-width: 0;
             margin-inline: 0;
-            opacity: 0;
             pointer-events: none;
             visibility: hidden;
           }
@@ -1810,7 +1823,7 @@ const Indicator = styled(BaseTabs.Indicator, forwardRef)`
     content: '';
     inset: 0;
     opacity: calc(
-      var(--styled-tabbar-selection-opacity, 0) *
+      var(--styled-glass-fade, 1) * var(--styled-tabbar-selection-opacity, 0) *
         (1 - var(--styled-tabbar-pressed, 0)) *
         var(--styled-tabbar-selection-shown, 1)
     );
@@ -1872,7 +1885,7 @@ const StyledTab = styled<typeof BaseTabs.Tab, Omit<TabBarTabProps, 'visibleWhenC
   text-align: center;
   transition-duration: var(--glass-ios-lens-duration);
   transition-property:
-    width, min-width, min-height, padding, margin, gap, opacity, visibility;
+    width, min-width, min-height, padding, margin, gap, visibility;
   user-select: none;
 
   @media (hover: hover) {
@@ -2010,6 +2023,18 @@ const Tab = forwardRef<HTMLButtonElement, TabBarTabProps>(
   },
 );
 
+// A tab's content fading with its group's glass and the tab (collapsing
+// away): inside its blended parts (the blending stays with the glass), not
+// on the group or the tab, which would isolate it (see GlassBackground).
+const contentFade = css`
+  & > * {
+    opacity: calc(
+      var(--styled-glass-fade, 1) * var(--styled-tabbar-tab-fade, 1)
+    );
+    transition: opacity var(--glass-ios-lens-duration);
+  }
+`;
+
 // Symbol of a tab (Figma “􀋃”, “􀰱”), sized by the list's size.
 const StyledIcon = styled('span', forwardRef)`
   display: flex;
@@ -2034,6 +2059,8 @@ const StyledIcon = styled('span', forwardRef)`
   mix-blend-mode: var(--styled-glass-content-blend);
   scale: var(--styled-tabbar-content-scale, none);
   transition: scale var(--glass-ios-lens-duration);
+
+  ${contentFade}
 
   [data-active] > & {
     ${fontWeight('var(--styled-tabbar-icon-active-weight)')}
@@ -2074,6 +2101,8 @@ const StyledLabel = styled('span', forwardRef)`
   text-align: center;
   transition-duration: var(--glass-ios-lens-duration);
   transition-property: scale, width, height, opacity;
+
+  ${contentFade}
 
   [data-active] > & {
     mix-blend-mode: normal;
@@ -2120,7 +2149,8 @@ const Label = forwardRef<HTMLSpanElement, React.ComponentProps<'span'>>(
 );
 
 // Above its glass (see `GlassBackground`), clipped to the accessory, which
-// its glass extends beyond.
+// its glass extends beyond, on one line (also while it's narrow, e.g.
+// growing from nothing); fading with the glass (see `visibleIn`).
 const AccessoryContent = styled('span')`
   position: relative;
   display: flex;
@@ -2132,10 +2162,34 @@ const AccessoryContent = styled('span')`
   border-radius: inherit;
   gap: 12px;
   padding-inline: 16px;
+  white-space: nowrap;
+
+  & > * {
+    opacity: var(--styled-glass-fade, 1);
+    transition: opacity var(--glass-ios-lens-duration);
+  }
+`;
+
+/**
+ * The bar's states the accessory shows in: `both` (morphing between its
+ * places), only `expanded` (above the groups), or only `collapsed` (between
+ * the remaining groups).
+ */
+export type AccessoryVisibility = 'both' | 'collapsed' | 'expanded';
+
+// Hidden in the state it isn't shown in (see `visibleIn`), fading.
+const accessoryHidden = css`
+  --styled-glass-fade: 0;
+
+  pointer-events: none;
+  visibility: hidden;
 `;
 
 // eslint-disable-next-line prettier/prettier
-const StyledAccessory = styled<'div', { anchor?: string; context?: GlassContext }>('div', forwardRef)`
+const StyledAccessory = styled<'div', { anchor?: string; context?: GlassContext; visibleIn?: AccessoryVisibility }>('div', forwardRef)`
+  --styled-tabbar-accessory-visible-in: ${({ visibleIn = 'both' }) =>
+    visibleIn};
+
   position: absolute;
   top: calc(anchor(top) + var(--styled-tabbar-accessory-top, 0px));
   left: calc(anchor(left) + var(--styled-tabbar-accessory-left, 0px));
@@ -2148,8 +2202,34 @@ const StyledAccessory = styled<'div', { anchor?: string; context?: GlassContext 
   font-size: var(--font-ios-subheadline-size);
   letter-spacing: var(--font-ios-subheadline-tracking);
   line-height: var(--font-ios-subheadline-line-height);
+  transition-duration: var(--glass-ios-lens-duration);
+  transition-property: visibility;
   ${({ anchor }) => (anchor ? `position-anchor: ${anchor};` : '')}
   ${({ context }) => glassContext(context)}
+
+  ${({ visibleIn }) => {
+    switch (visibleIn) {
+      case 'expanded': {
+        return css`
+          &[data-collapsed] {
+            ${accessoryHidden}
+          }
+        `;
+      }
+
+      case 'collapsed': {
+        return css`
+          &:not([data-collapsed]) {
+            ${accessoryHidden}
+          }
+        `;
+      }
+
+      default: {
+        return undefined;
+      }
+    }
+  }}
 `;
 
 export type TabBarAccessoryProps = React.ComponentProps<'div'> & {
@@ -2158,6 +2238,12 @@ export type TabBarAccessoryProps = React.ComponentProps<'div'> & {
    * @default 'bright', or 'dim' in dark mode
    */
   context?: GlassContext;
+  /**
+   * The bar's states it shows in; fading out and in as the bar collapses
+   * and expands, unless `both`.
+   * @default 'both'
+   */
+  visibleIn?: AccessoryVisibility;
 };
 
 /**
@@ -2168,20 +2254,22 @@ export type TabBarAccessoryProps = React.ComponentProps<'div'> & {
  * in the layout.
  */
 const Accessory = forwardRef<HTMLDivElement, TabBarAccessoryProps>(
-  ({ children, ...props }, forwardedRef) => {
+  ({ children, visibleIn = 'both', ...props }, forwardedRef) => {
     const ref = useForwardedRef(forwardedRef);
     const { anchor, setAccessory } = useContext(RootContext);
 
-    // Placed by its list, as its groups change, and when added.
+    // Placed by its list, as its groups change, and when added (or shown in
+    // other states).
     useLayoutEffect(() => {
       setAccessory?.(ref.current);
       return () => setAccessory?.(null);
-    }, [ref, setAccessory]);
+    }, [ref, setAccessory, visibleIn]);
 
     return (
       <StyledAccessory
         ref={ref}
         anchor={anchor}
+        visibleIn={visibleIn}
         {...{ [part]: 'accessory' }}
         {...props}
       >

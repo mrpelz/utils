@@ -8,6 +8,83 @@ import { sleep } from '../lib.js';
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
+    name: 'segmented: on wide items, the lens grows sideways by at most twice its vertical growth, a capsule',
+    run: async (page) => {
+      await page.open('list-segmented');
+      const item = await page.evaluate(`(() => {
+        const item = ${page.section}.querySelector('[role=radio]');
+        const { height, width, x, y } = item.getBoundingClientRect();
+        return { height, width, x, y };
+      })()`);
+      await page.mouse(
+        'mousePressed',
+        item.x + item.width / 2,
+        item.y + item.height / 2,
+      );
+      await sleep(600);
+      const lens = await page.evaluate(`(() => {
+        const root = ${page.section}.querySelector('[role=radiogroup]');
+        const lens = [...root.querySelectorAll(':scope > span')].find((span) => getComputedStyle(span).zIndex === '2');
+        const box = lens.getBoundingClientRect();
+        const style = getComputedStyle(root);
+        return {
+          base: [parseFloat(style.getPropertyValue('--styled-segmented-lens-width')), parseFloat(style.getPropertyValue('--styled-segmented-lens-height'))],
+          height: box.height,
+          radius: getComputedStyle(lens).borderRadius,
+          scale: getComputedStyle(lens).scale,
+          width: box.width,
+        };
+      })()`);
+      await page.mouse(
+        'mouseReleased',
+        item.x + item.width / 2,
+        item.y + item.height / 2,
+      );
+
+      const [width, height] = lens.base;
+      const grownX = lens.width - width;
+      const grownY = lens.height - height;
+      assert.ok(grownY > 0, 'grows');
+      assert.ok(
+        grownX <= 2 * grownY + 0.5,
+        `sideways ${grownX}, vertically ${grownY}`,
+      );
+      // Sized, not scaled: round ends.
+      assert.deepEqual([lens.radius, lens.scale], ['100px', 'none']);
+    },
+  },
+  {
+    name: 'segmented: released, the lens settles on the center of the chosen item',
+    run: async (page) => {
+      await page.open('segmented');
+      /** @type {[number, number][]} */
+      const items = await page.evaluate(
+        `[...${page.section}.querySelectorAll('[role=radio]')].map((item) => { const { height, width, x, y } = item.getBoundingClientRect(); return [x + width / 2, y + height / 2]; })`,
+      );
+      const [first, second] = items;
+      if (!first || !second) throw new Error('missing items');
+      await page.mouse('mousePressed', ...first);
+      await sleep(300);
+      await page.mouse('mouseMoved', ...second);
+      await sleep(400);
+      const sampling = page.sample(
+        `(() => {
+          const lens = [...${page.section}.querySelectorAll('[role=radiogroup] > span')].find((span) => getComputedStyle(span).zIndex === '2');
+          const box = lens.getBoundingClientRect();
+          return Math.round(box.left + box.width / 2);
+        })()`,
+        500,
+      );
+      await page.mouse('mouseReleased', ...second);
+      /** @type {number[]} */
+      const centers = await sampling;
+      const drift = Math.max(
+        ...centers.map((center) => Math.abs(center - second[0])),
+      );
+      assert.ok(drift <= 1, `drifts ${drift}px`);
+    },
+  },
+  {
     name: 'segmented: labels fit when sized to content',
     run: async (page) => {
       await page.open('segmented');

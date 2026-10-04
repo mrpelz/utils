@@ -240,9 +240,18 @@ const menuAt = (x: number, y: number) =>
     .map((element) => element.closest<HTMLElement>('[role="menu"]'))
     .find(Boolean);
 
+const pixels = (value: string) => Number.parseFloat(value) || 0;
+
+// Keeps a (trusted) click from its target.
+const keepTrustedClick = (click: MouseEvent) => {
+  if (!click.isTrusted) return;
+  click.preventDefault();
+  click.stopPropagation();
+};
+
 /** A menu's element scrolling its items (itself, unless it marks one). */
 const scrollerOf = (menu: HTMLElement) =>
-  menu.querySelector<HTMLElement>(`[${part}='scroller']`) ?? menu;
+  menu.querySelector<HTMLElement>(`[${CSS.escape(part)}='scroller']`) ?? menu;
 
 /**
  * Drags a touch (`pointerId`) over menus' items, from `start` (if given, it
@@ -295,24 +304,26 @@ export const dragOverItems = (
     const scroller = scrollerOf(menu);
     const { bottom, left, right, top } = scroller.getBoundingClientRect();
     const style = getComputedStyle(scroller);
-    const padding = (value: string) => Number.parseFloat(value) || 0;
     const { scrollLeft, scrollTop } = scroller;
     if (scroller.scrollWidth > scroller.clientWidth) {
       scroller.scrollLeft += edgeScrollDelta(
         finger.x,
-        left + padding(style.scrollPaddingLeft),
-        right - padding(style.scrollPaddingRight),
+        left + pixels(style.scrollPaddingLeft),
+        right - pixels(style.scrollPaddingRight),
       );
     }
     if (scroller.scrollHeight > scroller.clientHeight) {
       scroller.scrollTop += edgeScrollDelta(
         finger.y,
-        top + padding(style.scrollPaddingTop),
-        bottom - padding(style.scrollPaddingBottom),
+        top + pixels(style.scrollPaddingTop),
+        bottom - pixels(style.scrollPaddingBottom),
       );
     }
     // The items moved under the finger.
-    if (scroller.scrollLeft !== scrollLeft || scroller.scrollTop !== scrollTop) {
+    if (
+      scroller.scrollLeft !== scrollLeft ||
+      scroller.scrollTop !== scrollTop
+    ) {
       update();
     }
   });
@@ -351,14 +362,11 @@ export const dragOverItems = (
 
     // The touch's own click (on the element touched, if released there) is
     // the drag's to make.
-    const keep = (click: MouseEvent) => {
-      if (!click.isTrusted) return;
-      click.preventDefault();
-      click.stopPropagation();
-    };
-    document.addEventListener('click', keep, { capture: true });
+    document.addEventListener('click', keepTrustedClick, { capture: true });
     setTimeout(() => {
-      document.removeEventListener('click', keep, { capture: true });
+      document.removeEventListener('click', keepTrustedClick, {
+        capture: true,
+      });
     }, 500);
 
     // An open submenu stays open (clicking its item would close it).

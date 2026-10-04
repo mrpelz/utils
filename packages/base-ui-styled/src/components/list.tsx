@@ -42,10 +42,11 @@ import {
 // - swiping: the row follows the pointer (rubber-banding past its actions)
 //   over its actions, pinned to the list's edge, which scale in one after
 //   another from the edge; it opens on releasing past half the actions, or
-//   on a quick swipe (300ms, 10px); optionally, overswiping (past 1.2 times
-//   the actions) stretches the outermost action over the others and the
-//   area the row uncovers (200ms), the others fading out, and triggers it
-//   on release
+//   on a quick swipe (300ms, 10px); optionally, swiping on past them
+//   (without rubber-banding) stretches the outermost action from the edge
+//   up to the others, which follow the row, and arms overswiping past 304px
+//   (Framework7: 1.2 times the actions), triggering it on release;
+//   armed, its symbol moves to the row's end, its label hides (150ms)
 // - reordering rows by their grabbers (`sortable.js`, see `useReorder`),
 //   independent of the leading edit controls (`Checkbox`, `Radio`,
 //   `EditButton`)
@@ -61,9 +62,10 @@ import {
 // Rows are grids: [edit control] [image] title/subtitle [trailing …], where
 // everything that is not a leading part, a title or a subtitle is trailing
 // (Figma “Contents - Trailing”: 16px apart), e.g. a `Switch` or a `Menu`
-// trigger. Rows with a subtitle are tall (Figma Height=Tall: 68px, labelled
-// swipe actions); others are regular (52px). Both are
-// minimum heights, growing with wrapping text. A row is pressable when its
+// trigger; up to 36px high (e.g. a `Stepper` or `Segmented`), they fit
+// regular rows (8px from their edges). Rows with a subtitle are tall (Figma
+// Height=Tall: 68px, labelled swipe actions); others are regular (52px).
+// Both are minimum heights, growing with wrapping text. A row is pressable when its
 // `Title` (or `Button`) is a link or button (`render`): its hit area covers
 // the row, beneath the trailing controls.
 //
@@ -79,6 +81,10 @@ import {
 //   Height=Tall: rounded 44px, circular 60px, fill 68px).
 // - Swiped rows taller than Figma's tall rows (e.g. Mail's) get 34px
 //   corners (Figma: a capsule, which would cut into their content).
+// - Swiped rows keep a round end at their place's edge, their content
+//   sliding away beneath it (iOS; Figma shows rows opened in place only).
+// - Swipe actions of regular rows are 44px circles, 4px from the row's
+//   edges (Figma: 52px, the row's height).
 // - Labelled swipe actions (tall rows) are 36px circles (smaller symbols, as
 //   Framework7's), 4px above 13px labels, centered in the row (Figma: 50px
 //   circles, 3px above 15px labels, which overflow a 68px row).
@@ -464,13 +470,15 @@ const useReorder = (
         );
         setOffset(item, offset, false);
 
-        // The row's place: past the middle of the rows it's moved over.
-        const center = top + height / 2 + offset;
+        // The row's place: its leading edge past the middle of the rows
+        // it's moved over (so it reaches the group's ends at any heights).
         to = from;
         for (const [index, rowTop] of tops.entries()) {
           const middle = rowTop + (heights[index] ?? 0) / 2;
-          if (index < from && center < middle) to = Math.min(to, index);
-          if (index > from && center > middle) to = Math.max(to, index);
+          if (index < from && top + offset <= middle) to = Math.min(to, index);
+          if (index > from && top + height + offset >= middle) {
+            to = Math.max(to, index);
+          }
         }
         for (const [index, element] of items.entries()) {
           if (index === from) continue;
@@ -613,7 +621,7 @@ const whilePressed = pressable
 
 const StyledItem = styled(partElement('li', 'item'), forwardRef)`
   --styled-list-min-height: 52px;
-  --styled-list-action-size: 52px;
+  --styled-list-action-size: 44px;
   --styled-list-action-height: var(--styled-list-action-size);
   --styled-list-action-symbol-size: var(--font-ios-body-size);
   --styled-list-action-label-display: none;
@@ -708,6 +716,59 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)`
         [${part}='swipe-actions']
       ) {
       grid-row: 1;
+    }
+  }
+
+  /* Fields (see Field, Root rendering the row): the label as the title, in
+     Body, the control filling the rest of the row (the label's column as
+     wide as it), the clear button 8px after it, messages below. */
+  &:has(> [data-text-field-part='control']) {
+    grid-template-columns: auto auto minmax(0, max-content) minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+
+    & > [data-text-field-part='label'] {
+      align-self: center;
+      color: var(--color-ios-label);
+      grid-area: 1 / 3;
+      margin-block: 0;
+      margin-inline: 0 16px;
+      ${textStyle('body')}
+    }
+
+    & > [data-text-field-part='control'] {
+      position: relative;
+      align-self: center;
+      margin: 0;
+      grid-area: 1 / 4;
+    }
+
+    & > textarea[data-text-field-part='control'] {
+      align-self: start;
+    }
+
+    &:not(:has(> [data-text-field-part='label']))
+      > [data-text-field-part='control'] {
+      grid-column: 3 / 5;
+    }
+
+    & > [data-text-field-part='clear'] {
+      grid-row: 1;
+      margin-block: 0;
+      margin-inline-start: 8px;
+    }
+
+    & > [data-text-field-part='description'],
+    & > [data-text-field-part='error'] {
+      margin: 4px 0 0;
+      grid-column: 3 / -1;
+    }
+
+    & > [data-text-field-part='description'] {
+      grid-row: 2;
+    }
+
+    & > [data-text-field-part='error'] {
+      grid-row: 3;
     }
   }
 
@@ -808,7 +869,29 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)`
     z-index: 1;
     align-self: center;
     grid-row: 1 / 3;
+    margin-block: -4px;
     margin-inline-start: 16px;
+  }
+
+  /* A row of a single control (no row part, e.g. a Slider): across the
+     row's content. */
+  &:not(:has(> [${part}])) > :only-child {
+    z-index: auto;
+    margin: 0;
+    grid-column: 1 / -1;
+    grid-row: 1 / 3;
+    justify-self: stretch;
+  }
+
+  /* A calendar (DatePicker, inline) has its own insets: across the row. */
+  &:not(:has(> [${part}])) > [data-date-picker-part='calendar']:only-child {
+    margin: -12px -16px;
+  }
+
+  /* Trailing controls filling their container elsewhere (e.g. Segmented)
+     take their content's width. */
+  & > [role='radiogroup'] {
+    width: auto;
   }
 
   /* Figma Type=Disclosure */
@@ -842,8 +925,9 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)`
     opacity: 0;
   }
 
-  /* Figma “Row with Swipe Actions”: the swiped row is a capsule. */
-  &[data-swipe] {
+  /* Figma “Row with Swipe Actions”: the swiped row is a capsule (also
+     first and last rows, see above). */
+  &&[data-swipe] {
     border-radius: ${swipeRadius}px;
     background-color: var(--color-ios-system-gray5);
   }
@@ -877,10 +961,16 @@ let closeOpenItem: (() => void) | undefined;
 
 const swipeDuration = 300;
 const swipeThreshold = 8;
-/** Framework7 `swipeout.overswipeRatio`: of the actions' width. */
-const overswipeRatio = 1.2;
-/** Framework7 `swipeout-ios.less` `.swipeout-overswipe`. */
-const overswipeDuration = 200;
+/**
+ * How far a row arms overswiping, in any row (also with smaller, labelled
+ * actions): past 5 regular actions (5 × (44 + 10) + 16 + 10 + 8px;
+ * Framework7: 1.2 times the actions' width), at least 8px past its actions.
+ * Released before, it doesn't.
+ */
+const overswipeArm = 304;
+const overswipeDistance = 8;
+/** Armed (or disarmed), the outermost action's symbol moves quickly. */
+const armDuration = 150;
 
 const sides = ['leading', 'trailing'] as const;
 
@@ -914,6 +1004,56 @@ const uncoveredPath = (
 };
 
 /**
+ * Overswipe (Framework7 iOS): widens the outermost action's circle by
+ * `extra` px towards the row (`towardsRow`, physical), from the edge, its
+ * symbol and label centered in it, as the row moves (`transition`).
+ */
+const stretchAction = (
+  button: HTMLElement,
+  extra: number,
+  towardsRow: number,
+  transition: (...properties: string[]) => string,
+) => {
+  const [circle, label] = button.children;
+  if (!(circle instanceof HTMLElement) || !(label instanceof HTMLElement)) {
+    return;
+  }
+
+  circle.style.transition = transition('width');
+  circle.style.width = extra > 0 ? `${button.offsetWidth + extra}px` : '';
+  label.style.transition = `${transition('translate')}, opacity ${armDuration}ms`;
+  label.style.translate = extra > 0 ? `${(towardsRow * extra) / 2}px` : '';
+};
+
+/** The outermost action of a side's actions (Framework7: overswipe). */
+const outermostAction = (container: HTMLElement, side: Side) => {
+  const buttons = [...container.children].filter(
+    (child) => child instanceof HTMLElement,
+  );
+
+  return side === 'trailing' ? buttons.at(-1) : buttons.at(0);
+};
+
+/**
+ * A swiped row's clip (`width` × `height`), moved `offset` px (physical):
+ * rounded at its place's edge on the side it leaves, so its content slides
+ * away beneath that round end; reaching beyond its other end, over its
+ * actions (which clip themselves, see `uncoveredPath`).
+ */
+const rowPath = (width: number, height: number, offset: number) => {
+  const radius = Math.min(swipeRadius, height / 2);
+  const distance = Math.abs(offset);
+
+  if (offset <= 0) {
+    const start = distance + radius;
+    return `path('M ${start} 0 H ${width + distance} V ${height} H ${start} A ${radius} ${radius} 0 0 1 ${distance} ${height - radius} V ${radius} A ${radius} ${radius} 0 0 1 ${start} 0 Z')`;
+  }
+
+  const end = width - distance;
+  return `path('M ${-distance} 0 H ${end - radius} A ${radius} ${radius} 0 0 1 ${end} ${radius} V ${height - radius} A ${radius} ${radius} 0 0 1 ${end - radius} ${height} H ${-distance} Z')`;
+};
+
+/**
  * Moves the row `offset` px towards its inline end (negative: its start),
  * over its actions, which stay at the list's edge (Framework7: the row's
  * content slides over them): they show where the row uncovers them, scaling
@@ -924,6 +1064,7 @@ const placeRow = (
   actions: Partial<Record<Side, HTMLElement>>,
   offset: number,
   animate: boolean,
+  overswipes: (side: Side) => boolean,
 ) => {
   const direction = isRtl(item) ? -1 : 1;
   const transition = (...properties: string[]) =>
@@ -931,9 +1072,14 @@ const placeRow = (
       .map((property) => `${property} ${animate ? swipeDuration : 0}ms`)
       .join(', ');
 
-  item.style.transition = transition('transform');
+  item.style.transition = transition('transform', 'clip-path');
   item.style.transform =
     offset === 0 ? '' : `translateX(${offset * direction}px)`;
+  item.style.clipPath = rowPath(
+    item.offsetWidth,
+    item.offsetHeight,
+    offset * direction,
+  );
 
   for (const side of sides) {
     const container = actions[side];
@@ -956,9 +1102,14 @@ const placeRow = (
       rowOnLeft,
     );
 
+    // Overswiping: the others follow the row, the outermost action's circle
+    // fills the space up to them, from the edge (see `stretchAction`).
+    const extra = overswipes(side) ? Math.max(0, revealed - width) : 0;
+    const outermost = outermostAction(container, side);
+    const towardsRow = rowOnLeft ? -1 : 1;
+
     for (const button of container.children) {
       if (!(button instanceof HTMLElement)) continue;
-      if (Object.hasOwn(button.dataset, 'overswipe')) continue;
 
       const start = rowOnLeft
         ? width - button.offsetLeft - button.offsetWidth
@@ -968,141 +1119,39 @@ const placeRow = (
         1,
       );
 
-      button.style.transition = [
-        transition('transform'),
-        `opacity ${overswipeDuration}ms`,
-      ].join(', ');
+      button.style.transition = transition('transform', 'translate');
       button.style.transform = `scale(${scale})`;
+      if (button === outermost) {
+        stretchAction(button, extra, towardsRow, transition);
+      } else {
+        button.style.translate = extra > 0 ? `${towardsRow * extra}px` : '';
+      }
     }
   }
 };
 
 /**
  * The row's offset for a swipe to `offset`: none towards a side without
- * actions, rubber-banding past the actions (Framework7 `swipeout.js`).
+ * actions, rubber-banding past the actions (Framework7 `swipeout.js`),
+ * unless they can be overswiped (`overswipes`).
  */
-const swipeOffset = (widths: Partial<Record<Side, number>>, offset: number) => {
-  const width = widths[offset > 0 ? 'leading' : 'trailing'];
+const swipeOffset = (
+  widths: Partial<Record<Side, number>>,
+  offset: number,
+  overswipes: (side: Side) => boolean,
+) => {
+  const side = offset > 0 ? 'leading' : 'trailing';
+  const width = widths[side];
   if (width === undefined) return 0;
-  if (Math.abs(offset) <= width) return offset;
+  if (Math.abs(offset) <= width || overswipes(side)) return offset;
 
   return Math.sign(offset) * (width + (Math.abs(offset) - width) ** 0.8);
-};
-
-/** The outermost action of a side's actions (Framework7: overswipe). */
-const outermostAction = (container: HTMLElement, side: Side) => {
-  const buttons = [...container.children].filter(
-    (child) => child instanceof HTMLElement,
-  );
-
-  return side === 'trailing' ? buttons.at(-1) : buttons.at(0);
-};
-
-/** An outermost action's overswipe stretch (see `stretchAction`). */
-type Stretch = {
-  frame: number;
-  /** The width eased from, since `start`. */
-  from: number;
-  start: number;
-  stretched: boolean;
-  target: number;
-  width: number;
-};
-
-const stretches = new WeakMap<HTMLElement, Stretch>();
-
-const easeOut = (progress: number) => 1 - (1 - progress) ** 3;
-
-/**
- * Overswipe (Framework7 iOS): stretches the outermost action's circle over
- * the others (which fade out) and the whole area the row uncovers
- * (`revealed`, at least the actions' `width`), from the edge, its symbol and
- * label at the row's end; or, with `false`, back to its size. The circle
- * overlays the actions (they keep their layout); its width eases from where
- * it is towards the moving target (200ms), then follows it.
- */
-const stretchAction = (
-  container: HTMLElement,
-  side: Side,
-  stretch: false | { revealed: number; width: number },
-) => {
-  const outermost = outermostAction(container, side);
-  const [circle, label] = outermost?.children ?? [];
-  if (
-    !outermost ||
-    !(circle instanceof HTMLElement) ||
-    !(label instanceof HTMLElement)
-  ) {
-    return;
-  }
-
-  const size = outermost.offsetWidth;
-  let state = stretches.get(outermost);
-  if (!state) {
-    if (!stretch) return;
-    state = {
-      frame: 0,
-      from: size,
-      start: 0,
-      stretched: false,
-      target: size,
-      width: size,
-    };
-    stretches.set(outermost, state);
-  }
-
-  const style = getComputedStyle(container);
-  const padding =
-    Number.parseFloat(style.paddingInlineStart) +
-    Number.parseFloat(style.paddingInlineEnd);
-  if (Boolean(stretch) !== state.stretched) {
-    state.stretched = Boolean(stretch);
-    state.from = state.width;
-    state.start = performance.now();
-  }
-  state.target = stretch
-    ? Math.max(stretch.width, stretch.revealed) - padding
-    : size;
-
-  // Whether the row is on the actions' left (the circle grows leftwards).
-  const rowOnLeft = (side === 'trailing') !== isRtl(container);
-  const current = state;
-
-  const frame = () => {
-    const progress = Math.min(
-      (performance.now() - current.start) / overswipeDuration,
-      1,
-    );
-    current.width =
-      current.from + (current.target - current.from) * easeOut(progress);
-
-    if (progress === 1 && !current.stretched) {
-      stretches.delete(outermost);
-      delete outermost.dataset.overswipe;
-      for (const property of ['left', 'right', 'width', 'justify-content']) {
-        circle.style.removeProperty(property);
-      }
-      label.style.removeProperty('translate');
-      return;
-    }
-
-    outermost.dataset.overswipe = current.stretched ? 'stretched' : '';
-    outermost.style.transform = 'scale(1)';
-    circle.style.setProperty(rowOnLeft ? 'right' : 'left', '0');
-    circle.style.width = `${current.width}px`;
-    circle.style.justifyContent = rowOnLeft ? 'left' : 'right';
-    label.style.translate = `${(rowOnLeft ? -1 : 1) * (current.width - size)}px`;
-    if (progress < 1) current.frame = requestAnimationFrame(frame);
-  };
-
-  cancelAnimationFrame(state.frame);
-  frame();
 };
 
 type Gesture = {
   base: number;
   offset: number;
-  /** The side being overswiped. */
+  /** The side overswiping is armed on. */
   overswipe?: Side;
   pointerId: number;
   started: boolean;
@@ -1171,12 +1220,7 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
     const outsideRef = useRef<((event: Event) => void) | undefined>(undefined);
 
     const context = useMemo<ItemContextValue>(() => {
-      const unstretch = () => {
-        for (const side of sides) {
-          const { [side]: container } = actionsRef.current;
-          if (container) stretchAction(container, side, false);
-        }
-      };
+      const overswipes = (side: Side) => Boolean(overswipeRef.current[side]);
 
       const value: ItemContextValue = {
         close: () => {
@@ -1192,17 +1236,21 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
           openSideRef.current = undefined;
           if (!item) return;
 
-          // An overswiped action stays stretched, covered by the row as it
-          // slides back.
-          placeRow(item, actionsRef.current, 0, true);
+          // An overswiped action narrows as the row slides back.
+          placeRow(item, actionsRef.current, 0, true, overswipes);
 
           // The row stays a capsule until it's back in place.
           clearTimeout(settleRef.current);
           settleRef.current = setTimeout(() => {
             if (openSideRef.current || gestureRef.current?.started) return;
-            unstretch();
             delete item.dataset.swipe;
+            for (const button of item.querySelectorAll<HTMLElement>(
+              '[data-armed]',
+            )) {
+              delete button.dataset.armed;
+            }
             item.style.removeProperty('transition');
+            item.style.removeProperty('clip-path');
           }, swipeDuration);
         },
         open: (side) => {
@@ -1214,7 +1262,6 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
           closeOpenItem = value.close;
           openSideRef.current = side;
           clearTimeout(settleRef.current);
-          unstretch();
 
           item.dataset.swipe = side;
           placeRow(
@@ -1222,6 +1269,7 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
             actionsRef.current,
             (side === 'leading' ? 1 : -1) * container.offsetWidth,
             true,
+            overswipes,
           );
 
           if (outsideRef.current) return;
@@ -1398,24 +1446,22 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
       };
     };
 
-    // Framework7: past 1.2 times the actions' width, the outermost action
-    // covers the others.
+    // Far enough past its actions, overswiping is armed (the outermost
+    // action is triggered on release).
     const overswipe = (gesture: Gesture, side: Side, revealed: number) => {
       const { [side]: container } = actionsRef.current;
       const { [side]: width = 0 } = gesture.widths;
-      const active =
+      const armed =
         Boolean(overswipeRef.current[side]) &&
-        revealed > width * overswipeRatio;
+        container !== undefined &&
+        revealed > Math.max(width + overswipeDistance, overswipeArm);
 
-      if (gesture.overswipe && (!active || gesture.overswipe !== side)) {
-        const { [gesture.overswipe]: previous } = actionsRef.current;
-        if (previous) stretchAction(previous, gesture.overswipe, false);
-        gesture.overswipe = undefined;
+      gesture.overswipe = armed ? side : undefined;
+      for (const key of sides) {
+        const { [key]: actions } = actionsRef.current;
+        const action = actions && outermostAction(actions, key);
+        action?.toggleAttribute('data-armed', armed && key === side);
       }
-      if (!active || !container) return;
-
-      gesture.overswipe = side;
-      stretchAction(container, side, { revealed, width });
     };
 
     const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
@@ -1439,20 +1485,19 @@ const Item = forwardRef<HTMLElement, PartProps<'li'>>(
         item.setPointerCapture(event.pointerId);
         if (closeOpenItem !== context.close) closeOpenItem?.();
         clearTimeout(settleRef.current);
-        // Still stretched from a previous overswipe, if it hadn't settled.
-        for (const side of sides) {
-          const { [side]: container } = actionsRef.current;
-          if (container) stretchAction(container, side, false);
-        }
       }
 
       const { current: actions } = actionsRef;
-      const offset = swipeOffset(gesture.widths, gesture.base + moved);
+      const offset = swipeOffset(gesture.widths, gesture.base + moved, (key) =>
+        Boolean(overswipeRef.current[key]),
+      );
       const side = offset > 0 ? 'leading' : 'trailing';
 
       gesture.offset = offset;
       if (offset !== 0) item.dataset.swipe = side;
-      placeRow(item, actions, offset, false);
+      placeRow(item, actions, offset, false, (key) =>
+        Boolean(overswipeRef.current[key]),
+      );
       overswipe(gesture, side, Math.abs(offset));
     };
 
@@ -2030,9 +2075,10 @@ export type ListSwipeActionsProps = PartProps<'div'> & {
    */
   onOverswipe?: () => void;
   /**
-   * Swiping on past the actions stretches the outermost one over the area
-   * the row uncovers, and triggers it on release (Framework7
-   * `.swipeout-overswipe`; UIKit `performsFirstActionWithFullSwipe`).
+   * Swiping on past the actions stretches the outermost one up to the
+   * others (following the row), and, past 304px, triggers it on
+   * release (Framework7 `.swipeout-overswipe`; UIKit
+   * `performsFirstActionWithFullSwipe`).
    */
   overswipe?: boolean;
   /** The row's side the actions are revealed on (default: `trailing`). */
@@ -2056,21 +2102,24 @@ const StyledSwipeActions = styled(
       ? css`
           inset-inline-start: 0;
           padding-inline: 16px 10px;
+
+          & > * > [${part}='swipe-action-circle'] {
+            justify-content: flex-end;
+            inset-inline-start: 0;
+          }
         `
       : css`
           inset-inline-end: 0;
           padding-inline: 10px 16px;
+
+          & > * > [${part}='swipe-action-circle'] {
+            justify-content: flex-start;
+            inset-inline-end: 0;
+          }
         `}
 
   & > * {
     pointer-events: auto;
-  }
-
-  /* The others fade out under a stretched action (labels included). */
-  &:has(> [data-overswipe='stretched']) {
-    & > :not([data-overswipe]) {
-      opacity: 0;
-    }
   }
 `;
 
@@ -2139,8 +2188,8 @@ const StyledSwipeAction = styled(
 
   position: relative;
   display: grid;
-  width: var(--styled-list-action-size, 52px);
-  height: var(--styled-list-action-height, 52px);
+  width: var(--styled-list-action-size, 44px);
+  height: var(--styled-list-action-height, 44px);
   align-content: start;
   color: #fff;
   ${cursor('pointer')}
@@ -2151,33 +2200,46 @@ const StyledSwipeAction = styled(
     ${cursorProperty('not-allowed')}
   }
 
-  /* Overswiped: its circle stretched over the other actions (see
+  /* Positioned at the edge's side (see SwipeActions), to stretch (see
      stretchAction) */
-  &[data-overswipe] {
-    z-index: 1;
-
-    & > [${part}='swipe-action-circle'] {
-      position: absolute;
-      top: 0;
-      grid-template-columns: var(--styled-list-action-size, 52px);
-    }
-  }
-
   & > [${part}='swipe-action-circle'] {
-    display: grid;
+    position: absolute;
+    top: 0;
+    display: flex;
     width: 100%;
-    height: var(--styled-list-action-size, 52px);
+    height: var(--styled-list-action-size, 44px);
     border-radius: 100px;
     background-color: ${({ tint }) => tint ?? 'var(--color-ios-system-gray)'};
     font-size: var(--styled-list-action-symbol-size);
     ${fontWeight(400)}
     line-height: var(--font-ios-body-line-height);
+  }
+
+  /* The symbol's box: the circle's width (centered in it, also stretched,
+     following without delay), at the row's end of it (see SwipeActions). */
+  & > * > [${part}='swipe-action-symbol'] {
+    display: grid;
+    width: 100%;
+    flex: none;
     place-items: center;
+    transition: width ${armDuration}ms;
+  }
+
+  /* Armed (overswiped far enough to trigger on release): the symbol at the
+     row's end of the stretched circle, without its label. */
+  &[data-armed] {
+    & > * > [${part}='swipe-action-symbol'] {
+      width: var(--styled-list-action-size, 44px);
+    }
+
+    & > [${part}='swipe-action-label'] {
+      opacity: 0;
+    }
   }
 
   & > [${part}='swipe-action-label'] {
     position: absolute;
-    top: calc(var(--styled-list-action-size, 52px) + 4px);
+    top: calc(var(--styled-list-action-size, 44px) + 4px);
     display: var(--styled-list-action-label-display, none);
     color: var(--color-ios-secondary-label);
     font-size: 13px;
@@ -2202,7 +2264,9 @@ const SwipeAction = forwardRef<HTMLElement, ListSwipeActionProps>(
           item?.close();
         }}
       >
-        <span {...{ [part]: 'swipe-action-circle' }}>{children}</span>
+        <span {...{ [part]: 'swipe-action-circle' }}>
+          <span {...{ [part]: 'swipe-action-symbol' }}>{children}</span>
+        </span>
         <span
           aria-hidden="true"
           {...{ [part]: 'swipe-action-label' }}

@@ -7,7 +7,7 @@ import { sleep, withTouch } from '../lib.js';
 
 /** @typedef {import('../lib.js').Page} Page */
 
-const popup = `document.querySelector('[role=menu]')`;
+const popup = `document.querySelector(${JSON.stringify('[role=menu]')})`;
 
 /**
  * The capsule's geometry: its width, whether its actions overflow (and
@@ -23,7 +23,7 @@ const capsule = (page) =>
     const box = popup.getBoundingClientRect();
     return {
       moreEnd: Math.round(box.right - more.right),
-      overflowing: scroller.hasAttribute('data-overflowing'),
+      overflowing: scroller.parentElement.hasAttribute('data-overflowing'),
       right: box.right,
       scrolled: Math.round(scroller.scrollLeft),
       range: Math.round(scroller.scrollWidth - scroller.clientWidth),
@@ -86,8 +86,21 @@ export const tests = [
           await sleep(1500);
 
           const scrolled = await capsule(page);
-          assert.equal(scrolled.scrolled, scrolled.range, 'scrolled to the end');
+          assert.equal(
+            scrolled.scrolled,
+            scrolled.range,
+            'scrolled to the end',
+          );
           assert.equal(scrolled.moreEnd, 4, 'the “more” button stays');
+          // No action scrolls beneath it: the scroller ends before it.
+          assert.ok(
+            await page.evaluate(`(() => {
+              const scroller = ${popup}.querySelector('[data-menu-part=scroller]').getBoundingClientRect();
+              const more = ${popup}.querySelector('[aria-haspopup=menu]').getBoundingClientRect();
+              return scroller.right <= more.left + 0.5;
+            })()`),
+            'nothing beneath the “more” button',
+          );
           assert.equal(await page.evaluate(highlighted), 'AutoFill');
 
           await touch('touchEnd');
@@ -123,6 +136,71 @@ export const tests = [
         ),
         'visible',
       );
+    },
+  },
+  {
+    name: 'edit menu: only ends with more actions beyond are faded',
+    run: async (page) => {
+      await page.browser.send('Emulation.setDeviceMetricsOverride', {
+        deviceScaleFactor: 1,
+        height: 800,
+        mobile: false,
+        width: 320,
+      });
+      try {
+        await page.open('edit-menu');
+        await page.setControl('open', true);
+        await sleep(500);
+
+        const fades = () =>
+          page.evaluate(`(() => {
+            const scroller = ${popup}.querySelector('[data-menu-part=scroller]');
+            return ['data-before', 'data-after'].map((name) => scroller.parentElement.hasAttribute(name));
+          })()`);
+        assert.deepEqual(await fades(), [false, true], 'at the start');
+
+        await page.evaluate(
+          `${popup}.querySelector('[data-menu-part=scroller]').scrollLeft = 1e4`,
+        );
+        await sleep(200);
+        assert.deepEqual(await fades(), [true, false], 'at the end');
+      } finally {
+        await page.browser.send('Emulation.clearDeviceMetricsOverride');
+      }
+    },
+  },
+  {
+    name: 'edit menu: touching “more” opens its submenu, keeping the selection',
+    run: async (page) => {
+      await page.open('edit-menu');
+      const { height, width, x, y } = await page.rect('p');
+      await page.drag(
+        [x + 10, y + height / 4],
+        [x + width - 10, y + height / 2],
+      );
+      await sleep(1500);
+
+      /** @type {[number, number]} */
+      const more = await page.evaluate(`(() => {
+        const { height, width, x, y } = ${popup}.querySelector('[aria-haspopup=menu]').getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`);
+      await page.evaluate(
+        `document.addEventListener(${JSON.stringify('touchstart')}, (event) => { window.touchKept = event.defaultPrevented; }, { once: true })`,
+      );
+      await withTouch(page, async (touch) => {
+        await touch('touchStart', ...more);
+        await sleep(100);
+        await touch('touchEnd');
+        await sleep(800);
+      });
+
+      const state = await page.evaluate(`({
+        kept: window.touchKept,
+        menus: document.querySelectorAll('[role=menu]').length,
+        selected: String(document.getSelection()).length > 20,
+      })`);
+      assert.deepEqual(state, { kept: true, menus: 2, selected: true });
     },
   },
 ];

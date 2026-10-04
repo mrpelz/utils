@@ -78,6 +78,30 @@ const clickSymbols = async (page) => {
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
+    name: 'slider: keyboard focus rings the knob, a pointer does not',
+    run: async (page) => {
+      await page.open('slider');
+      const ring = () =>
+        page.evaluate(`(() => {
+          const style = getComputedStyle(${thumb(page)}, '::after');
+          return [style.outlineStyle, style.outlineWidth, style.outlineOffset];
+        })()`);
+
+      await press(page, 'ArrowRight');
+      assert.deepEqual(await ring(), ['solid', '2px', '2px']);
+
+      const { height, width, x, y } = await page.evaluate(`(() => {
+        ${page.section}.querySelector('input[type=range]').blur();
+        const { height, width, x, y } = ${thumb(page)}.getBoundingClientRect();
+        return { height, width, x, y };
+      })()`);
+      await page.click([x + width / 2, y + height / 2]);
+      await sleep(400);
+      const [style] = await ring();
+      assert.equal(style, 'none');
+    },
+  },
+  {
     name: 'slider: fill spans the track at min and max',
     run: async (page) => {
       await page.open('slider');
