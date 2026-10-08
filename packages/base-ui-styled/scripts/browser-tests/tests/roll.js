@@ -97,12 +97,7 @@ export const tests = [
       await page.click([x, y - 34]);
       await sleep(900);
       assert.deepEqual(await column(page, 0), ['Hours', '9', true]);
-      assert.match(
-        await page.evaluate(
-          `${page.section}.querySelector('config').textContent`,
-        ),
-        /hours: 12.*hours: 10.*hours: 9/su,
-      );
+      assert.match(await page.log(), /hours: 12.*hours: 10.*hours: 9/su);
     },
   },
   {
@@ -129,6 +124,32 @@ export const tests = [
       const [, fruit, centered] = (await column(page, 2)) ?? [];
       assert.notEqual(fruit, 'Durian');
       assert.equal(centered, true);
+    },
+  },
+  {
+    name: 'roll: pressed, a disabled row is scrolled to, then left a moment later',
+    run: async (page) => {
+      await page.open('roll');
+      // The centered row's text.
+      const centered = () =>
+        page.evaluate(`(() => {
+          const column = ${page.section}.querySelectorAll('[role=listbox]')[2];
+          const box = column.getBoundingClientRect();
+          const middle = box.top + box.height / 2;
+          return [...column.querySelectorAll('[role=option]')].find((row) => { const { bottom, top } = row.getBoundingClientRect(); return top <= middle && bottom > middle; })?.textContent;
+        })()`);
+      const point = await page.evaluate(`(() => {
+        const row = [...${page.section}.querySelectorAll('[role=listbox]')[2].querySelectorAll('[role=option]')].find((option) => option.textContent === 'Durian');
+        const { height, width, x, y } = row.getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`);
+      await page.click(point);
+      await sleep(250);
+      assert.equal(await centered(), 'Durian');
+      await sleep(1000);
+      assert.notEqual(await centered(), 'Durian');
+      const isCentered = ((await column(page, 2)) ?? [])[2];
+      assert.equal(isCentered, true);
     },
   },
   {
@@ -165,6 +186,57 @@ export const tests = [
           ['Minutes', '07', true],
         ],
       );
+    },
+  },
+  {
+    name: 'roll: looping columns go on past their last row to the first, and back',
+    run: async (page) => {
+      await page.open('roll', 'light', {
+        state: [null, { $rest: true, loop: true }],
+      });
+      const [x, y] = await center(page, 0);
+      // Ten rows up from 9: past 0, on to 23.
+      await page.browser.send('Input.dispatchMouseEvent', {
+        deltaX: 0,
+        deltaY: -340,
+        type: 'mouseWheel',
+        x,
+        y,
+      });
+      await sleep(1500);
+      const state = await page.evaluate(`(() => {
+        const column = ${page.section}.querySelectorAll('[role=listbox]')[0];
+        const box = column.getBoundingClientRect();
+        const middle = box.top + box.height / 2;
+        const atCenter = [...column.querySelectorAll('[role=option]')].find((row) => { const { bottom, top } = row.getBoundingClientRect(); return top <= middle && bottom > middle; });
+        return [atCenter.textContent, atCenter.hasAttribute('data-roll-copy'), column.getAttribute('aria-activedescendant') === atCenter.id];
+      })()`);
+      // Centered on the row itself (not a copy), selected.
+      assert.deepEqual(state, ['23', false, true]);
+      assert.match(await page.log(), /hours: 23/u);
+    },
+  },
+  {
+    name: 'roll: scrolled onto a disabled row, it moves on in the direction scrolled (not back)',
+    run: async (page) => {
+      await page.open('roll');
+      const [x, y] = await center(page, 2);
+      const scroll = async (/** @type {number} */ deltaY) => {
+        await page.browser.send('Input.dispatchMouseEvent', {
+          deltaX: 0,
+          deltaY,
+          type: 'mouseWheel',
+          x,
+          y,
+        });
+        await sleep(1500);
+        const [, fruit] = (await column(page, 2)) ?? [];
+        return fruit;
+      };
+
+      // Down from Cherry onto Durian: on to Elderberry; up again: Cherry.
+      assert.equal(await scroll(34), 'Elderberry');
+      assert.equal(await scroll(-34), 'Cherry');
     },
   },
 ];

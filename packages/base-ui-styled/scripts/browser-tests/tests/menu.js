@@ -18,7 +18,7 @@ import { sleep, withTouch } from '../lib.js';
  * @param {Page} page
  */
 const openMenu = async (page) => {
-  const { height, width, x, y } = await page.rect('stage button');
+  const { height, width, x, y } = await page.rect('button');
   await page.click([x + width / 2, y + height / 2]);
   await sleep(500);
 };
@@ -85,13 +85,60 @@ const highlighted = (page) =>
 /** Expression for the submenu trigger of the open menu. */
 const submenuTrigger = `[...document.querySelectorAll('[role=menuitem]')].find((element) => element.textContent.startsWith(${JSON.stringify('Submenu')}))`;
 
+/**
+ * Moves the pointer from one item of a popup (the one containing `text`) to
+ * another (by way of `via`, e.g. a separator), sampling its selection's
+ * vertical center: it moves there, by way of between, without fading.
+ *
+ * @param {Page} page
+ * @param {string} text
+ * @param {[number, number]} indices
+ * @param {string} [via]
+ */
+const assertMoves = async (page, text, [fromIndex, toIndex], via) => {
+  const popup = `[...document.querySelectorAll('[role=menu]')].find((menu) => menu.textContent.includes(${JSON.stringify(text)}))`;
+  /** @type {[number, number][]} */
+  const centers = await page.evaluate(
+    `[...${popup}.querySelectorAll(${JSON.stringify('[role^=menuitem]')})].map((item) => { const { height, width, x, y } = item.getBoundingClientRect(); return [x + width / 2, y + height / 2]; })`,
+  );
+  const from = centers[fromIndex] ?? [0, 0];
+  const to = centers[toIndex] ?? [0, 0];
+  const pill = `(() => { const pill = ${popup}.querySelector(${JSON.stringify('[data-moving-highlight]')}); const { height, top } = pill.getBoundingClientRect(); return [top + height / 2, Number(getComputedStyle(pill).opacity)]; })()`;
+
+  await page.mouse('mouseMoved', ...from);
+  await sleep(400);
+  const sampled = page.sample(pill, 400);
+  if (via) {
+    /** @type {[number, number]} */
+    const between = await page.evaluate(
+      `(() => { const { height, width, x, y } = ${popup}.querySelector(${JSON.stringify(via)}).getBoundingClientRect(); return [x + width / 2, y + height / 2]; })()`,
+    );
+    await page.mouse('mouseMoved', ...between);
+    await sleep(40);
+  }
+  await page.mouse('mouseMoved', ...to);
+  /** @type {[number, number][]} */
+  const frames = await sampled;
+  const tops = frames.map(([top]) => top);
+  assert.ok(Math.abs((tops[0] ?? 0) - from[1]) < 2, `from ${tops[0]}`);
+  assert.ok(Math.abs((tops.at(-1) ?? 0) - to[1]) < 2, `to ${tops.at(-1)}`);
+  assert.ok(
+    tops.some((top) => top > from[1] + 2 && top < to[1] - 2),
+    `frames ${tops.map((top) => Math.round(top)).join(', ')}`,
+  );
+  assert.ok(
+    frames.every(([, opacity]) => opacity > 0.9),
+    'never fading',
+  );
+};
+
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
     name: 'menu: dragging from the trigger on touch highlights the item under the finger, opens a submenu held over, and chooses in it',
     run: async (page) => {
       await page.open('menu');
-      const trigger = await page.rect('stage button');
+      const trigger = await page.rect('button');
       const [triggerX, triggerY] = [
         trigger.x + trigger.width / 2,
         trigger.y + trigger.height / 2,
@@ -147,7 +194,7 @@ export const tests = [
     name: 'menu: dragging on touch near an end of a scrolling menu scrolls it',
     run: async (page) => {
       await page.open('menu');
-      const trigger = await page.rect('stage button');
+      const trigger = await page.rect('button');
 
       await withTouch(page, async (touch) => {
         await touch(
@@ -240,8 +287,9 @@ export const tests = [
       await openMenu(page);
       const { labelInset: before } = await measure(page);
 
-      await page.open('menu');
-      await page.setControl('toggles', 'checkbox');
+      await page.open('menu', 'light', {
+        state: [{ $rest: true, toggles: 'checkbox' }],
+      });
       await openMenu(page);
       await page.screenshot('menu-toggles');
       const { labelInset: after } = await measure(page);
@@ -281,7 +329,7 @@ export const tests = [
     run: async (page) => {
       for (const scheme of /** @type {const} */ (['light', 'dark'])) {
         await page.open('edit-menu', scheme);
-        await page.setControl('open', true);
+        await page.setState(1, { open: true });
         await sleep(500);
         await page.screenshot(`edit-menu-${scheme}`);
 
@@ -290,7 +338,7 @@ export const tests = [
           const box = popup.getBoundingClientRect();
           const [first] = popup.querySelectorAll('[role=menuitem] > span');
           const more = popup.querySelector('[aria-haspopup]').getBoundingClientRect();
-          const text = document.querySelector('component p').getBoundingClientRect();
+          const text = document.querySelector('p').getBoundingClientRect();
           const [one, two] = [...popup.querySelectorAll('[role=menuitem] > span')].map((label) => label.getBoundingClientRect());
           return {
             above: Math.round(text.top - box.bottom),
@@ -322,10 +370,10 @@ export const tests = [
       await openMenu(page);
       assert.equal(await menuCount(page), 1, 'open');
 
-      // The demo's stage is sticky: move the trigger out instead of
-      // scrolling it out.
+      // The demo's stage is sticky: move the trigger (its contextual menu's
+      // wrapper) out instead of scrolling it out.
       await page.evaluate(
-        `document.querySelector(${JSON.stringify('stage button')}).style.translate = '0 -2000px'`,
+        `document.querySelector(${JSON.stringify('button')}).parentElement.style.translate = '0 -2000px'`,
       );
       await sleep(800);
       assert.equal(await menuCount(page), 0, 'closed');
@@ -336,7 +384,7 @@ export const tests = [
     run: async (page) => {
       await page.open('menu');
       const trigger = await page.evaluate(
-        `getComputedStyle(document.querySelector(${JSON.stringify('stage button')})).cursor`,
+        `getComputedStyle(document.querySelector(${JSON.stringify('button')})).cursor`,
       );
       await openMenu(page);
 
@@ -362,8 +410,17 @@ export const tests = [
         },
       );
 
-      await page.open('menu');
-      await page.setControl('cursor', 'copy');
+      await page.open('menu', 'light', {
+        state: [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          { $rest: true, cursor: 'copy' },
+        ],
+      });
       await openMenu(page);
       assert.equal(
         await page.evaluate(
@@ -505,8 +562,9 @@ export const tests = [
   {
     name: 'edit menu: dividers next to the highlighted action are hidden',
     run: async (page) => {
-      await page.open('edit-menu');
-      await page.setControl('open', true);
+      await page.open('edit-menu', 'light', {
+        state: [null, { $rest: true, open: true }],
+      });
       await sleep(500);
       const { height, width, x, y } = await page.evaluate(`(() => {
         const { height, width, x, y } = document.querySelectorAll('[role=menu] [role=menuitem]')[2].getBoundingClientRect();
@@ -525,8 +583,9 @@ export const tests = [
   {
     name: 'edit menu: its submenu is an iPad menu',
     run: async (page) => {
-      await page.open('edit-menu');
-      await page.setControl('open', true);
+      await page.open('edit-menu', 'light', {
+        state: [null, { $rest: true, open: true }],
+      });
       await sleep(500);
       await page.evaluate(
         `document.querySelector(${JSON.stringify('[role=menu] [aria-haspopup]')}).click()`,
@@ -542,6 +601,78 @@ export const tests = [
         };
       })()`);
       assert.deepEqual(submenu, { item: 36, radius: '26px / 28px' });
+    },
+  },
+  {
+    name: 'menu: the selection moves between highlighted items (not jumping)',
+    run: async (page) => {
+      await page.open('menu');
+      await openMenu(page);
+      /** @returns {Promise<[number, number]>} */
+      const centerOf = (/** @type {number} */ index) =>
+        page.evaluate(`(() => {
+          const items = [...document.querySelectorAll('[role=menu] > [role=menuitem]')];
+          const { height, width, x, y } = items[${index}].getBoundingClientRect();
+          return [x + width / 2, y + height / 2];
+        })()`);
+      const pill = `(() => { const pill = document.querySelector(${JSON.stringify('[role=menu] [data-moving-highlight]')}).getBoundingClientRect(); return pill.top + pill.height / 2; })()`;
+
+      const [first, second] = [await centerOf(0), await centerOf(1)];
+      await page.mouse('mouseMoved', ...first);
+      await sleep(400);
+      const sampled = page.sample(pill, 300);
+      await page.mouse('mouseMoved', ...second);
+      /** @type {number[]} */
+      const frames = await sampled;
+      const [, from = 0] = first;
+      const [, to = 0] = second;
+      // From the first item's center to the second's, by way of between.
+      assert.ok(Math.abs((frames[0] ?? 0) - from) < 2, `from ${frames[0]}`);
+      assert.ok(Math.abs((frames.at(-1) ?? 0) - to) < 2, `to ${frames.at(-1)}`);
+      assert.ok(
+        frames.some((value) => value > from + 2 && value < to - 2),
+        `frames ${frames.map((value) => Math.round(value)).join(', ')}`,
+      );
+    },
+  },
+  {
+    name: 'menu: the selection moves past separators, and in submenus (also an edit menu’s)',
+    run: async (page) => {
+      await page.open('menu-open');
+      await assertMoves(page, 'Copy', [1, 2], '[role=separator]');
+
+      await page.open('edit-menu', 'light', {
+        state: [null, { $rest: true, open: true }],
+      });
+      await sleep(500);
+      /** @type {[number, number]} */
+      const more = await page.evaluate(`(() => {
+        const { height, width, x, y } = document.querySelector(${JSON.stringify('[role=menu] [aria-haspopup=menu]')}).getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`);
+      await page.mouse('mouseMoved', ...more);
+      await sleep(150);
+      await page.click(more);
+      await sleep(600);
+      await assertMoves(page, 'Look Up', [0, 1]);
+    },
+  },
+  {
+    name: 'menu: open, it stays above positioned page content (e.g. list rows)',
+    run: async (page) => {
+      await page.open('menu');
+      await openMenu(page);
+      const covered = await page.evaluate(`(() => {
+        const menu = document.querySelector(${JSON.stringify('[role=menu]')});
+        const { height, left, top, width } = menu.getBoundingClientRect();
+        // Page content with a z-index of its own, where the menu is.
+        const block = document.createElement('div');
+        block.style.cssText = 'position: fixed; z-index: 50; background: red';
+        Object.assign(block.style, { height: height + 'px', left: left + 'px', top: top + 'px', width: width + 'px' });
+        document.body.append(block);
+        return menu.contains(document.elementFromPoint(left + width / 2, top + height / 2));
+      })()`);
+      assert.equal(covered, true);
     },
   },
 ];

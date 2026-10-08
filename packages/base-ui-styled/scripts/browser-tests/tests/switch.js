@@ -2,7 +2,7 @@
 
 import assert from 'node:assert/strict';
 
-import { sleep } from '../lib.js';
+import { mapped, sleep } from '../lib.js';
 
 /** @typedef {import('../lib.js').Page} Page */
 
@@ -46,8 +46,9 @@ export const tests = [
   {
     name: 'switch: on/off labels sit beside the knob, each on its side (Apple)',
     run: async (page) => {
-      await page.open('switch');
-      await page.setControl('onOffLabels', true);
+      await page.open('switch', 'light', {
+        state: [{ $rest: true, onOffLabels: true }],
+      });
 
       const labels = await page.evaluate(`(() => {
         const root = ${page.section}.querySelector('[role=switch]');
@@ -79,8 +80,9 @@ export const tests = [
   {
     name: 'switch: indeterminate, the knob sits in the middle, the input is indeterminate',
     run: async (page) => {
-      await page.open('switch');
-      await page.setControl('indeterminate', true);
+      await page.open('switch', 'light', {
+        state: [{ $rest: true, indeterminate: true }],
+      });
       await sleep(500);
 
       const state = await page.evaluate(`(() => {
@@ -95,7 +97,7 @@ export const tests = [
       assert.deepEqual(state, { center: 0, input: true });
 
       // Neither label while neither on nor off.
-      await page.setControl('onOffLabels', true);
+      await page.setState(0, { onOffLabels: true });
       assert.deepEqual(
         await page.evaluate(
           `[...${page.section}.querySelectorAll('[data-switch-part=label]')].map((label) => getComputedStyle(label).opacity)`,
@@ -108,7 +110,9 @@ export const tests = [
     name: 'switch: demo: indeterminate for two seconds after a change',
     run: async (page) => {
       const { off } = await setup(page);
-      await page.setMappedControl('onCheckedChange', '[indeterminate for 2s]');
+      await page.setState(0, {
+        onCheckedChange: mapped('[indeterminate for 2s]'),
+      });
 
       /** @returns {Promise<number>} the knob's center, from the track's */
       const knob = () =>
@@ -135,8 +139,9 @@ export const tests = [
   {
     name: 'switch: tint replaces the on color, also of the pressed glow',
     run: async (page) => {
-      await page.open('switch');
-      await page.setControl('defaultChecked', true);
+      await page.open('switch', 'light', {
+        state: [{ $rest: true, defaultChecked: true }],
+      });
       const colors = () =>
         page.evaluate(`(() => {
           const root = ${page.section}.querySelector('[role=switch]');
@@ -145,7 +150,7 @@ export const tests = [
 
       const [track, glow] = await colors();
       assert.equal(track, 'rgb(52, 199, 89)');
-      await page.setControl('tint', '#000');
+      await page.setState(0, { tint: '#000' });
       const [tinted, tintedGlow] = await colors();
       assert.equal(tinted, 'rgb(0, 0, 0)');
       assert.notEqual(tintedGlow, glow, 'the glow follows');

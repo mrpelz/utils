@@ -4,6 +4,7 @@ import { styled } from 'goober';
 import {
   createContext,
   forwardRef,
+  MouseEvent,
   useCallback,
   useContext,
   useId,
@@ -24,6 +25,7 @@ import {
   css,
   edgeScrollDelta,
   fontWeight,
+  frameElapsed,
   useForwardedRef,
   usePointerDrag,
 } from './utils.js';
@@ -62,6 +64,8 @@ import {
 //   sizes). Labels reserve their selected width, so selecting a tab doesn't
 //   shift the tabs.
 // - The bar's inline padding is always 32px (Figma: 28px with up to 3 tabs).
+// - In a bar wider than its groups, the space between them widens (Figma:
+//   groups centered), the first at the bar's start, as when collapsed.
 // - Nothing isolates blending (Figma: each group), as that would cut the
 //   glass blur off from the content behind the bar; glass, indicator and tabs
 //   stack by document order instead.
@@ -452,7 +456,6 @@ const collapsedList = ({
 }) => css`
   --styled-tabbar-tab-height: var(--styled-tabbar-collapsed-tab-height);
   --styled-tabbar-selection-shown: 0;
-  --styled-tabbar-group-margin: 0;
   --styled-tabbar-group-gap: 0px;
   --styled-tabbar-collapsed-layout: 1;
   --styled-tabbar-label-overflow: clip;
@@ -511,13 +514,17 @@ const collapsedList = ({
   }
 `;
 
+// The accessory's height and gap above the groups (see `Accessory`).
+const accessoryHeight = 40;
+const accessoryGap = 16;
+
 // eslint-disable-next-line prettier/prettier
 const StyledList = styled<typeof BaseTabs.List, TabBarListProps & { anchor?: string; spaced?: boolean }>(BaseTabs.List, forwardRef)`
   position: relative;
   display: flex;
   box-sizing: border-box;
   align-items: center;
-  justify-content: safe center;
+  justify-content: flex-start;
   padding: 16px 32px 32px;
   gap: var(--styled-tabbar-group-gap, 16px);
   interpolate-size: allow-keywords;
@@ -525,14 +532,34 @@ const StyledList = styled<typeof BaseTabs.List, TabBarListProps & { anchor?: str
   transition-duration: var(--glass-ios-lens-duration);
   transition-property: padding, gap;
 
+  /* Room for its accessory above the groups (see placeAccessory), in the
+     bar's layout: its height and gap above the groups (at the padding),
+     also while collapsed (nothing moves). */
+  &[data-accessory-above] {
+    margin-block-start: ${accessoryHeight + accessoryGap - 16}px;
+  }
+
   /* The spacers placing collapsed groups by position (see collapsedOrder);
      otherwise empty, their margins taking up the gaps around them, in step
-     with the gap's transition. */
+     with the gap's transition. In a bar wider than its groups (data-wide),
+     they grow and shrink in step with the space between the groups (see
+     List), so the groups move instead of jumping. */
   &::before,
   &::after {
-    flex: var(--styled-tabbar-collapsed-layout, 0) 1 0;
+    flex: var(
+        --styled-tabbar-spacer-grow,
+        var(--styled-tabbar-collapsed-layout, 0)
+      )
+      1 0;
     content: '';
     transition: margin var(--glass-ios-lens-duration);
+  }
+
+  &[data-wide]::before,
+  &[data-wide]::after {
+    transition:
+      margin var(--glass-ios-lens-duration),
+      flex-grow var(--glass-ios-lens-duration);
   }
 
   &::before {
@@ -543,6 +570,17 @@ const StyledList = styled<typeof BaseTabs.List, TabBarListProps & { anchor?: str
   &::after {
     order: calc(var(--styled-tabbar-collapsed-layout, 0) * 3);
     margin-inline-start: calc(var(--styled-tabbar-group-gap, 16px) * -1);
+  }
+
+  /* Expanding is the collapse played backwards (see List): every
+     transition's easing reversed (CSS ease's). */
+  &[data-expanding],
+  &[data-expanding]::before,
+  &[data-expanding]::after,
+  &[data-expanding] *,
+  &[data-expanding] *::before,
+  &[data-expanding] *::after {
+    transition-timing-function: cubic-bezier(0.75, 0, 0.75, 0.9) !important;
   }
 
   ${({ anchor }) => (anchor ? `anchor-name: ${anchor};` : '')}
@@ -819,8 +857,10 @@ const release = (list: HTMLElement, tab?: HTMLElement) => {
 const autoScroll = (pointer: {
   current: { clientX: number; state: { tab?: HTMLElement } } | undefined;
 }) => {
-  let frame = requestAnimationFrame(function step() {
+  const elapsedOf = frameElapsed();
+  let frame = requestAnimationFrame(function step(time) {
     frame = requestAnimationFrame(step);
+    const elapsed = elapsedOf(time);
 
     const { current } = pointer;
     const scroller = current?.state.tab?.parentElement;
@@ -830,7 +870,7 @@ const autoScroll = (pointer: {
     if (range <= 1) return;
 
     const { left, right } = scroller.getBoundingClientRect();
-    const delta = edgeScrollDelta(current.clientX, left, right);
+    const delta = edgeScrollDelta(current.clientX, left, right, elapsed);
     if (delta === 0) return;
 
     // Within the tabs' layout (see `scrollRange`).
@@ -901,8 +941,6 @@ const useMarks = () => {
 // collapses or expands, it morphs from one to the other. Shown in one state
 // only (`visibleIn`), it stays at its place there, fading in and out as the
 // bar collapses and expands.
-const accessoryHeight = 40;
-const accessoryGap = 16;
 const accessorySpacing = 16;
 
 // The accessory of a list (see `Accessory`).
@@ -914,14 +952,48 @@ type Box = { height: number; left: number; right: number; top: number };
  * The accessory's morph to its place above the groups (`collapsed` false) or
  * between them: from where it was (relative to the list) since `start`, and
  * the groups remaining while collapsed (all groups take pointer events again
- * while expanding).
+ * while expanding). Expanding is the collapse played backwards: its
+ * recorded `path` (by progress, relative to the list), or, if the collapse
+ * didn't finish, from its place between the groups (`weight`: how far it
+ * had got there) back to the place above them it collapsed from
+ * (`expanded`).
  */
 type AccessoryMorph = {
   collapsed: boolean;
+  expanded?: Box;
   frame?: number;
   from?: Box;
+  path?: { box: Box; progress: number }[];
   remaining: HTMLElement[];
   start: number;
+  weight: number;
+};
+
+/** Boxes mixed, `fraction` of the way from `from` to `to`. */
+const mixBoxes = (from: Box, to: Box, fraction: number): Box => {
+  const mix = (key: keyof Box) => from[key] + (to[key] - from[key]) * fraction;
+  return {
+    height: mix('height'),
+    left: mix('left'),
+    right: mix('right'),
+    top: mix('top'),
+  };
+};
+
+/** The box on a recorded `path` at `progress` (interpolated). */
+const boxOnPath = (
+  path: NonNullable<AccessoryMorph['path']>,
+  progress: number,
+): Box | undefined => {
+  const after = path.findIndex((point) => point.progress >= progress);
+  const next = path[after];
+  const previous = path[after - 1];
+  if (!next) return path.at(-1)?.box;
+  if (!previous) return next.box;
+
+  const fraction =
+    (progress - previous.progress) / (next.progress - previous.progress || 1);
+  return mixBoxes(previous.box, next.box, fraction);
 };
 
 const accessoryMorphs = new WeakMap<HTMLElement, AccessoryMorph>();
@@ -955,20 +1027,90 @@ const accessoryBox = (list: HTMLElement, accessory: HTMLElement): Box => {
   };
 };
 
+/** How far a morph since `start` has got (0 to 1). */
+const morphProgress = (list: HTMLElement, start: number) => {
+  const duration = lensDuration(list);
+  return duration > 0 ? Math.min(1, (performance.now() - start) / duration) : 1;
+};
+
+/**
+ * The free space of an expanded list (the space between its groups, or
+ * after its only group): while it collapses or expands, a length for its
+ * groups' margins, so they transition (from or to `auto` they couldn't).
+ */
+const measureFreeSpace = (list: HTMLElement) => {
+  const groups = [...list.querySelectorAll<HTMLElement>(':scope > div')];
+  const last = groups.at(-1);
+  if (!last) return 0;
+
+  const style = getComputedStyle(list);
+  const rtl = style.direction === 'rtl';
+  const box = list.getBoundingClientRect();
+  const rect = last.getBoundingClientRect();
+  const rest = rtl
+    ? rect.left - (box.left + Number.parseFloat(style.paddingLeft))
+    : box.right - Number.parseFloat(style.paddingRight) - rect.right;
+  if (groups.length < 2) return Math.max(0, rest);
+
+  // The space between: the second group's margin (auto, or the length).
+  const [, second] = groups;
+  const margin = second
+    ? Number.parseFloat(
+        getComputedStyle(second)[rtl ? 'marginRight' : 'marginLeft'],
+      )
+    : 0;
+  const free = Math.max(0, margin + rest);
+  return free;
+};
+
 /** Starts the accessory's morph to the collapsed (or expanded) place. */
 const morphAccessory = (list: HTMLElement, collapsed: boolean) => {
   const morph = accessoryMorphs.get(list);
   if (morph?.collapsed === collapsed) return;
 
   const accessory = accessories.get(list);
-  accessoryMorphs.set(list, {
-    collapsed,
-    frame: morph?.frame,
-    // From where it is (also mid-morph); placed right away the first time.
-    from: morph && accessory ? accessoryBox(list, accessory) : undefined,
-    remaining: morph?.remaining ?? [],
-    start: performance.now(),
-  });
+  // From where it is (also mid-morph); placed right away the first time.
+  const from = morph && accessory ? accessoryBox(list, accessory) : undefined;
+  const start = performance.now();
+  if (!morph) {
+    accessoryMorphs.set(list, {
+      collapsed,
+      path: collapsed ? [] : undefined,
+      remaining: [],
+      start,
+      weight: collapsed ? 1 : 0,
+    });
+    return;
+  }
+
+  const progress = morphProgress(list, morph.start);
+  const finished = progress >= 1;
+  accessoryMorphs.set(
+    list,
+    collapsed
+      ? {
+          ...morph,
+          collapsed,
+          // From above the groups: that place, to expand back to
+          // (interrupted while expanding, the earlier one).
+          expanded: finished || !morph.expanded ? from : morph.expanded,
+          from,
+          // Recorded, to play backwards.
+          path: [],
+          start,
+          weight: 1,
+        }
+      : {
+          ...morph,
+          collapsed,
+          from,
+          // The finished collapse, played backwards.
+          path: finished ? morph.path : undefined,
+          start,
+          // How far it had got between the groups.
+          weight: morph.weight * ease(progress),
+        },
+  );
 };
 
 // A group's box without its spacing (see `StyledGroup`): its scroller's.
@@ -1017,12 +1159,48 @@ const betweenGroups = (list: HTMLElement, groups: HTMLElement[]): Box => {
   };
 };
 
+/** A box (in the viewport) relative to the list's `rect`. */
+const relativeTo = (box: Box, rect: DOMRect): Box => ({
+  height: box.height,
+  left: box.left - rect.left,
+  right: box.right - rect.left,
+  top: box.top - rect.top,
+});
+
+/**
+ * The accessory's place (relative to the list) at `progress` of its morph
+ * (see `AccessoryMorph`): to the `target`, or, `expanding`, backwards.
+ */
+const morphedPlace = (
+  morph: AccessoryMorph,
+  {
+    between,
+    expanding,
+    progress,
+    target,
+  }: { between: Box; expanding: boolean; progress: number; target: Box },
+): Box => {
+  if (expanding && morph.expanded) {
+    const recorded =
+      morph.path && morph.path.length > 1
+        ? boxOnPath(morph.path, 1 - progress)
+        : undefined;
+    return (
+      recorded ??
+      mixBoxes(morph.expanded, between, morph.weight * ease(1 - progress))
+    );
+  }
+
+  return morph.from ? mixBoxes(morph.from, target, ease(progress)) : target;
+};
+
 const placeAccessory = (list: HTMLElement): void => {
   const accessory = accessories.get(list);
   const morph: AccessoryMorph = accessoryMorphs.get(list) ?? {
     collapsed: false,
     remaining: [],
     start: 0,
+    weight: 0,
   };
   if (!accessory) return;
 
@@ -1054,27 +1232,30 @@ const placeAccessory = (list: HTMLElement): void => {
   const collapsedPlace =
     visibleIn === 'both' ? morph.collapsed : visibleIn === 'collapsed';
   const target = collapsedPlace ? between : above;
-  const duration = lensDuration(list);
   const progress =
-    morph.from && duration > 0 && visibleIn === 'both'
-      ? Math.min(1, (performance.now() - morph.start) / duration)
-      : 1;
+    morph.from && visibleIn === 'both' ? morphProgress(list, morph.start) : 1;
   const done = progress >= 1;
-  const from = morph.from && {
-    ...morph.from,
-    left: morph.from.left + listRect.left,
-    right: morph.from.right + listRect.left,
-    top: morph.from.top + listRect.top,
-  };
-  const mix = (key: keyof Box) =>
-    from ? from[key] + (target[key] - from[key]) * ease(progress) : target[key];
-  const left = mix('left');
+  const place = morphedPlace(morph, {
+    between: relativeTo(between, listRect),
+    expanding: !morph.collapsed && !collapsedPlace && !done,
+    progress,
+    target: relativeTo(target, listRect),
+  });
+
+  // Collapsing: its path (once at its end), to play backwards when
+  // expanding.
+  if (morph.collapsed && morph.path?.at(-1)?.progress !== 1) {
+    morph.path?.push({ box: place, progress });
+  }
+
+  // Room above the list for its place above the groups (see StyledList).
+  list.toggleAttribute('data-accessory-above', visibleIn !== 'collapsed');
 
   setProperties(accessory, {
-    '--styled-tabbar-accessory-height': `${mix('height')}px`,
-    '--styled-tabbar-accessory-left': `${left - listRect.left}px`,
-    '--styled-tabbar-accessory-top': `${mix('top') - listRect.top}px`,
-    '--styled-tabbar-accessory-width': `${Math.max(0, mix('right') - left)}px`,
+    '--styled-tabbar-accessory-height': `${place.height}px`,
+    '--styled-tabbar-accessory-left': `${place.left}px`,
+    '--styled-tabbar-accessory-top': `${place.top}px`,
+    '--styled-tabbar-accessory-width': `${Math.max(0, place.right - place.left)}px`,
   });
 
   // Morphing on by itself, also once the groups have settled.
@@ -1098,6 +1279,7 @@ const createAccessoryLink = () => {
     if (!list) return;
     if (!accessory) {
       accessories.delete(list);
+      delete list.dataset.accessoryAbove;
       return;
     }
 
@@ -1206,6 +1388,7 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
       children,
       collapsed = false,
       collapsedPosition = 'start',
+      onClickCapture,
       onLostPointerCapture,
       onPointerCancel,
       onPointerDown,
@@ -1227,6 +1410,18 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
     const expandedWidthRef = useRef<number | undefined>(undefined);
     const resizingRef = useRef(collapsed);
     const wasCollapsedRef = useRef(collapsed);
+    // Expanding (from collapsed, until settled): set while rendering, so
+    // the transitions start with its easing (see `StyledList`).
+    const [expanding, setExpanding] = useState(false);
+    // Wider than its groups (expanded): the space between them as a length
+    // (see `freeSpace`), so it transitions as the bar collapses.
+    const [wide, setWide] = useState(false);
+    const freeRef = useRef(0);
+    const [renderedCollapsed, setRenderedCollapsed] = useState(collapsed);
+    if (collapsed !== renderedCollapsed) {
+      setRenderedCollapsed(collapsed);
+      setExpanding(!collapsed);
+    }
 
     // The width while expanded, kept while collapsed (and until it has
     // expanded again), so the bar doesn't change size.
@@ -1238,6 +1433,8 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
         placeAccessory(list);
         if (resizingRef.current) return;
         expandedWidthRef.current = list.getBoundingClientRect().width;
+        freeRef.current = measureFreeSpace(list);
+        setWide(freeRef.current > 0.5);
       });
       observer.observe(list);
 
@@ -1286,15 +1483,29 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
 
       if (collapsed) {
         resizingRef.current = true;
+        list.style.removeProperty('--styled-tabbar-spacer-grow');
         if (expandedWidthRef.current !== undefined) {
           list.style.minWidth = `${expandedWidthRef.current}px`;
         }
         holdCollapsedLayout();
+        // Wider than its groups: the space between them shrinks from its
+        // length (a frame later: from it, not from auto).
+        let shrink: number | undefined;
+        if (Object.hasOwn(list.dataset, 'wide')) {
+          list.style.setProperty(
+            '--styled-tabbar-group-margin',
+            `${String(freeRef.current)}px`,
+          );
+          shrink = requestAnimationFrame(() =>
+            list.style.setProperty('--styled-tabbar-group-margin', '0'),
+          );
+        }
 
         follow();
         const cancel = afterTransitions(list, stopFollowing);
 
         return () => {
+          if (shrink !== undefined) cancelAnimationFrame(shrink);
           cancel();
           stopFollowing();
         };
@@ -1307,8 +1518,12 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
         list.style.removeProperty('--styled-tabbar-group-margin');
         list.style.removeProperty('--styled-tabbar-label-overflow');
         list.style.removeProperty('--styled-tabbar-label-min-width');
+        list.style.removeProperty('--styled-tabbar-spacer-grow');
         expandedWidthRef.current = list.getBoundingClientRect().width;
         placeAccessory(list);
+        setExpanding(false);
+        freeRef.current = measureFreeSpace(list);
+        setWide(freeRef.current > 0.5);
       };
 
       if (!wasCollapsed) {
@@ -1317,6 +1532,15 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
       }
 
       holdCollapsedLayout();
+      // Wider than its groups: the space between them grows back, the
+      // spacers shrink, all in step (the groups' order still held).
+      if (Object.hasOwn(list.dataset, 'wide')) {
+        list.style.setProperty(
+          '--styled-tabbar-group-margin',
+          `${String(freeRef.current)}px`,
+        );
+        list.style.setProperty('--styled-tabbar-spacer-grow', '0');
+      }
 
       follow();
       const cancel = afterTransitions(list, () => {
@@ -1373,6 +1597,11 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
       { clientX: number; state: { tab?: HTMLElement } } | undefined
     >(undefined);
     const stopScrollingRef = useRef<(() => void) | undefined>(undefined);
+    // A press releases on its tab by clicking it (see `end`); the browser's
+    // own click that may follow (WebKit: on the tab, despite the capture)
+    // would reach the tab and its group a second time (e.g. collapsing the
+    // bar its first click expanded).
+    const pressClickedRef = useRef(false);
 
     // A group too narrow for its tabs scrolls (by wheel, or by touches on
     // the lens, which scroll it while near its ends). Scroll events don't
@@ -1419,6 +1648,10 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
           // Also the active tab: the click reaches it and its group (e.g. to
           // expand a collapsed bar), the press having captured the pointer.
           state.tab.click();
+          pressClickedRef.current = true;
+          setTimeout(() => {
+            pressClickedRef.current = false;
+          }, 300);
           reveal(state.tab);
         },
         move: (list, state, event) => {
@@ -1459,9 +1692,21 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
           ref={listRef}
           anchor={root.anchor}
           collapsed={collapsed}
+          data-expanding={expanding ? '' : undefined}
+          data-wide={wide ? '' : undefined}
           spaced={markedGroups > 1}
           {...props}
           {...handlers}
+          onClickCapture={(event: MouseEvent<HTMLDivElement>) => {
+            (
+              onClickCapture as
+                ((event: MouseEvent<HTMLDivElement>) => void) | undefined
+            )?.(event);
+            if (!event.isTrusted || !pressClickedRef.current) return;
+            pressClickedRef.current = false;
+            event.preventDefault();
+            event.stopPropagation();
+          }}
         >
           {children}
           <Lens aria-hidden="true" />
@@ -1502,9 +1747,16 @@ const StyledGroup = styled<'div', StyledGroupProps>('div', forwardRef)`
   );
   border: 0 solid transparent;
   grid-template-columns: minmax(0, max-content);
-  margin-inline: var(--styled-tabbar-group-margin, auto);
+  margin-inline: 0;
   transition-duration: var(--glass-ios-lens-duration);
   transition-property: min-width, min-height, margin, border-width, visibility;
+
+  /* Groups after the first take the free space before them: in a wide bar,
+     the space between the groups widens, the first at the bar's start (as
+     collapsed, so expanded and collapsed bars line up). */
+  div ~ & {
+    margin-inline-start: var(--styled-tabbar-group-margin, auto);
+  }
 
   /* Under the lens, the group grows: its glass and content scale up around
      its center (measured on iOS 26: iPhone 1.05, iPad 1.065). Scaled layer

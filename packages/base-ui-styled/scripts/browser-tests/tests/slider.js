@@ -3,7 +3,7 @@
 
 import assert from 'node:assert/strict';
 
-import { sleep } from '../lib.js';
+import { mapped, sleep } from '../lib.js';
 
 /** @typedef {import('../lib.js').Page} Page */
 
@@ -57,7 +57,7 @@ const clickSymbols = async (page) => {
     );
   const symbol = async (/** @type {'first' | 'last'} */ which) => {
     const { height, width, x, y } = await page.evaluate(`(() => {
-      const symbols = [...${page.section}.querySelectorAll('stage-inner [data-orientation] > span')].filter((element) => element.textContent === 'A');
+      const symbols = [...${page.section}.querySelectorAll('[data-orientation] > span')].filter((element) => element.textContent === 'A');
       const { height, width, x, y } = symbols.${which === 'first' ? 'at(0)' : 'at(-1)'}.getBoundingClientRect();
       return { height, width, x, y };
     })()`);
@@ -148,8 +148,9 @@ export const tests = [
   {
     name: 'slider: vertical track fills its control',
     run: async (page) => {
-      await page.open('slider');
-      await page.setControl('orientation', 'vertical');
+      await page.open('slider', 'light', {
+        state: [null, { $rest: true, orientation: 'vertical' }],
+      });
 
       const track = await page.evaluate(`(() => {
         const { height, width } = ${thumb(page)}.parentElement.getBoundingClientRect();
@@ -162,9 +163,9 @@ export const tests = [
   {
     name: 'slider: clicking the symbols moves the thumb to the ends',
     run: async (page) => {
-      await page.open('slider');
-      await page.setControl('minSymbol', 'A');
-      await page.setControl('maxSymbol', 'A');
+      await page.open('slider', 'light', {
+        state: [{ $rest: true, maxSymbol: 'A', minSymbol: 'A' }],
+      });
 
       assert.deepEqual(await clickSymbols(page), {
         afterMax: ['100'],
@@ -175,11 +176,12 @@ export const tests = [
   {
     name: 'slider: clicking the symbols moves a range to the ends',
     run: async (page) => {
-      await page.open('slider');
-      await page.setControl('minSymbol', 'A');
-      await page.setControl('maxSymbol', 'A');
-      await page.setControl('thumbs', 2);
-      await page.setMappedControl('defaultValue', '[25, 75]');
+      await page.open('slider', 'light', {
+        state: [
+          { $rest: true, maxSymbol: 'A', minSymbol: 'A', thumbs: 2 },
+          { $rest: true, defaultValue: mapped('[25, 75]') },
+        ],
+      });
 
       assert.deepEqual(await clickSymbols(page), {
         afterMax: ['0', '100'],
@@ -190,11 +192,11 @@ export const tests = [
   {
     name: 'slider: a symbol onClick replaces moving the thumb',
     run: async (page) => {
-      await page.open('slider');
-      await page.setControl('minSymbol', 'A');
-      await page.setControl('maxSymbol', 'A');
+      await page.open('slider', 'light', {
+        state: [{ $rest: true, maxSymbol: 'A', minSymbol: 'A' }],
+      });
       // Only the min symbol gets an `onClick` (the first such control).
-      await page.setMappedControl('onClick', '[log click]');
+      await page.setState(10, { onClick: mapped('[log click]') });
 
       assert.deepEqual(await clickSymbols(page), {
         afterMax: ['100'],
@@ -211,28 +213,28 @@ export const tests = [
         [
           'range',
           async () => {
-            await page.setControl('thumbs', 2);
-            await page.setMappedControl('defaultValue', '[25, 75]');
+            await page.setState(0, { thumbs: 2 });
+            await page.setState(1, { defaultValue: mapped('[25, 75]') });
           },
         ],
         [
           'currency',
           () =>
-            page.setMappedControl(
-              'format',
-              '[{ style: currency, currency: EUR }]',
-            ),
+            page.setState(1, {
+              format: mapped('[{ style: currency, currency: EUR }]'),
+            }),
         ],
       ];
 
       for (const [name, setup] of cases) {
-        await page.open('slider');
-        await page.setControl('value', true);
+        await page.open('slider', 'light', {
+          state: [{ $rest: true, value: true }],
+        });
         await setup();
 
         const value = () =>
           page.evaluate(`(() => {
-            const output = ${page.section}.querySelector('stage-inner output');
+            const output = ${page.section}.querySelector('output');
             return { text: output.firstElementChild.textContent, width: output.getBoundingClientRect().width };
           })()`);
 

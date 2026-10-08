@@ -99,10 +99,13 @@ if (config.module) {
 }
 
 config.plugins = [
+  // @ts-ignore
   new HtmlWebpackPlugin({
     title: '@mrpelz/base-ui-styled',
   }),
+  // @ts-ignore
   new MiniCssExtractPlugin(),
+  // @ts-ignore
   new ForkTsCheckerWebpackPlugin(),
 ];
 

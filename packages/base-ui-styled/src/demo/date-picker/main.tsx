@@ -8,9 +8,14 @@ import {
 import { useLog } from '../utils/log.js';
 import { Component, usePropControl } from '../utils/main.js';
 import {
-  footers,
+  useCreateStateUrl,
+  useProvidedState,
+} from '../utils/options-context.js';
+import {
+  getFooters,
   getPropOptionsContent,
   getPropOptionsDatePicker,
+  withRangeMessage,
 } from './props.js';
 
 // Figma's example: April 20, 2025, 9:41 (a range: to April 24).
@@ -29,25 +34,36 @@ const DatePickerDemoBase: FunctionComponent<{ preset: Preset }> = ({
 }) => {
   const [log, addLog] = useLog();
 
-  const [controlContent, content, RemounterContent] = usePropControl(
-    useMemo(() => getPropOptionsContent(preset.mode), [preset.mode]),
-    '[content]',
-    true,
-  );
+  const [externalContent, externalControl] = useProvidedState(preset.id);
+
+  const [controlContent, content, stateContent, RemounterContent] =
+    usePropControl(
+      useMemo(() => getPropOptionsContent(preset.mode), [preset.mode]),
+      '[content]',
+      externalContent,
+      true,
+    );
   // The calendar's footer, composed (see `footers`); by default, the
   // picker's own.
   const footer =
-    'footer' in content && content.footer ? footers[content.footer] : undefined;
+    'footer' in content && content.footer
+      ? getFooters(preset.mode)[content.footer]
+      : undefined;
   const range = 'range' in content && content.range;
 
-  const [control, props, Remounter] = usePropControl(
+  const [control, props, stateControl, Remounter] = usePropControl(
     useMemo(
       () => getPropOptionsDatePicker(preset.mode, addLog),
       [addLog, preset.mode],
     ),
     'date picker',
+    externalControl,
     true,
   );
+  // Ranges' only (dates only, see `getPropOptionsDatePicker`).
+  const { isRangeDisabled, ...pickerProps } = props as typeof props & {
+    isRangeDisabled?: (start: Date, end: Date) => boolean;
+  };
 
   return (
     <Component
@@ -56,6 +72,7 @@ const DatePickerDemoBase: FunctionComponent<{ preset: Preset }> = ({
       controls={preset.mode === 'time' ? [control] : [controlContent, control]}
       id={preset.id}
       log={log}
+      stateUrl={useCreateStateUrl(preset.id, [stateContent, stateControl])}
       title={preset.title}
     >
       <RemounterContent>
@@ -64,14 +81,15 @@ const DatePickerDemoBase: FunctionComponent<{ preset: Preset }> = ({
             <DatePicker
               range
               defaultValue={exampleRange}
-              footer={footer}
-              {...props}
+              footer={withRangeMessage(footer, isRangeDisabled)}
+              isRangeDisabled={isRangeDisabled}
+              {...pickerProps}
             />
           ) : (
             <DatePicker
               defaultValue={example}
               footer={footer}
-              {...props}
+              {...pickerProps}
             />
           )}
         </Remounter>

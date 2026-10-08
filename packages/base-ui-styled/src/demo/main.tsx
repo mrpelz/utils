@@ -1,14 +1,14 @@
-import { FunctionComponent, useContext } from 'react';
+import { FunctionComponent } from 'react';
 
 import { useColorScheme, useTouchActive } from '../styles.js';
 import { ButtonDemo, ButtonMatrixDemo } from './button/main.js';
+import { ContextualMenuDemo } from './contextual-menu/main.js';
 import {
   DateAndTimePickerDemo,
   DatePickerDemo,
   TimePickerDemo,
 } from './date-picker/main.js';
 import { EditMenuDemo } from './edit-menu/main.js';
-import { HapticsDemo } from './haptics/main.js';
 import {
   ListDemo,
   ListEditDemo,
@@ -19,7 +19,8 @@ import {
   ListSegmentedDemo,
   ListSwipeDemo,
 } from './list/main.js';
-import { MenuDemo, MenuRegularDemo } from './menu/main.js';
+import { MenuDemo, MenuOpenDemo, MenuRegularDemo } from './menu/main.js';
+import { PageControlDemo } from './page-control/main.js';
 import { RollDemo } from './roll/main.js';
 import { SegmentedDemo } from './segmented/main.js';
 import { SliderDemo } from './slider/main.js';
@@ -31,14 +32,21 @@ import {
   TabBarSecondaryDemo,
 } from './tab-bar/main.js';
 import { TextFieldDemo } from './text-field/main.js';
+import {
+  ToolbarDemo,
+  ToolbarPageDotsDemo,
+  ToolbarSymbolsDemo,
+  ToolbarTextDemo,
+} from './toolbar/main.js';
+import { ToolbarTopDemo } from './toolbar-top/main.js';
 import { TypographyDemo, TypographyMatrixDemo } from './typography/main.js';
-import { OptionsContext, OptionsProvider } from './utils/options-context.js';
+import { OptionsProvider, useOptions } from './utils/options-context.js';
 import { DemoStyles } from './utils/styles.js';
 import { ViewportDemo } from './viewport/main.js';
 
 // The forced color scheme (demo option), as the library's `Styles` does.
 const ColorScheme: FunctionComponent = () => {
-  useColorScheme(useContext(OptionsContext).colorScheme);
+  useColorScheme(useOptions().colorScheme);
 
   return null;
 };
@@ -76,10 +84,17 @@ export const Demo: FunctionComponent = () => {
       <TabBarDemo />
       <TabBarSecondaryDemo />
       <TabBarRegularDemo />
+      <ToolbarDemo />
+      <ToolbarPageDotsDemo />
+      <ToolbarSymbolsDemo />
+      <ToolbarTextDemo />
+      <ToolbarTopDemo />
+      <PageControlDemo />
+      <MenuOpenDemo />
       <MenuDemo />
       <MenuRegularDemo />
+      <ContextualMenuDemo />
       <EditMenuDemo />
-      <HapticsDemo />
       <ViewportDemo />
     </OptionsProvider>
   );

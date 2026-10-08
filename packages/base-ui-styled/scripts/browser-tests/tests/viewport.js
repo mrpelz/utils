@@ -51,6 +51,10 @@ export const tests = [
     name: 'viewport: scroll tracking turns past a threshold',
     run: async (page) => {
       await page.open('viewport');
+      // Something to scroll (raw, the page is as high as the demo).
+      await page.evaluate(
+        `document.body.style.minHeight = ${JSON.stringify('300vh')}`,
+      );
       const scrollBy = async (/** @type {number} */ distance) => {
         await page.evaluate(`window.scrollBy(0, ${distance})`);
         await sleep(150);
@@ -64,18 +68,17 @@ export const tests = [
       await scrollBy(-20);
       assert.equal(await metric(page, 'Scrolling'), 'up');
       assert.match(
-        await page.evaluate(
-          `${page.section}.querySelector('config').textContent`,
-        ),
+        await page.log(),
         /scrolling down at \d+px.*scrolling up at \d+px/su,
       );
     },
   },
   {
-    name: 'viewport: bars at the visual viewport, a locked app as high as it',
+    name: 'viewport: bars at the visual viewport',
     run: async (page) => {
-      await page.open('viewport');
-      await page.setControl('bottomBar', true);
+      await page.open('viewport', 'light', {
+        state: [{ $rest: true, bottomBar: true }],
+      });
       const bar = await page.evaluate(`(() => {
         const field = document.querySelector('[aria-label=Message]');
         let bar = field;
@@ -83,51 +86,6 @@ export const tests = [
         return Math.round(innerHeight - bar.getBoundingClientRect().bottom);
       })()`);
       assert.equal(bar, 0);
-
-      const open = await page.rect('stage button');
-      await page.click([open.x + open.width / 2, open.y + open.height / 2]);
-      await sleep(300);
-      const app = await page.evaluate(`(() => {
-        const field = [...document.querySelectorAll('[aria-label=Message]')].at(-1);
-        let app = field;
-        while (getComputedStyle(app).position !== 'fixed') app = app.parentElement;
-        // Scrolled anyway: back.
-        window.scrollTo(0, 300);
-        return [app.style.height, innerHeight, Math.round(innerHeight - field.getBoundingClientRect().bottom) < 80];
-      })()`);
-      await sleep(200);
-      assert.deepEqual(app, [`${app[1]}px`, app[1], true]);
-      assert.equal(await page.evaluate('window.scrollY'), 0);
-    },
-  },
-  {
-    name: 'viewport: the locked app is left by “Done”, or Escape',
-    run: async (page) => {
-      await page.open('viewport');
-      const apps = `document.querySelectorAll(${JSON.stringify('[role=dialog][aria-label="Locked app"]')}).length`;
-      const open = async () => {
-        const button = await page.rect('stage button');
-        await page.click([
-          button.x + button.width / 2,
-          button.y + button.height / 2,
-        ]);
-        await sleep(300);
-      };
-
-      await open();
-      assert.equal(await page.evaluate(apps), 1);
-      const done = await page.evaluate(`(() => {
-        const button = [...document.querySelectorAll('button')].find((element) => element.textContent === 'Done');
-        const { height, width, x, y } = button.getBoundingClientRect();
-        return [x + width / 2, y + height / 2];
-      })()`);
-      await page.click(done);
-      await sleep(300);
-      assert.equal(await page.evaluate(apps), 0);
-
-      await open();
-      await page.key('Escape');
-      assert.equal(await page.evaluate(apps), 0);
     },
   },
 ];

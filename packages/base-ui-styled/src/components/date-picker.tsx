@@ -95,6 +95,14 @@ type RangeValue = {
   /** The initially selected range (uncontrolled). */
   defaultValue?: DateRange | null;
   /**
+   * Ranges that can't be selected (besides those over disabled days, which
+   * never can): while a range's end is picked (or dragged), called with
+   * the range to each shown day (again as other months show), from its
+   * fixed day, the `start` or (picked backwards) the `end`; days it
+   * returns `true` for are disabled.
+   */
+  isRangeDisabled?: (start: Date, end: Date) => boolean;
+  /**
    * Called with the newly selected range: a start (its end `null`), then
    * the range.
    */
@@ -144,7 +152,7 @@ export type CalendarProps = {
    * out (Framework7 `calendarDayPrev`/`Next`; UIKit: none); pressed, they
    * show their month.
    */
-  showAdjacentDays?: boolean;
+  showAdjacentMonths?: boolean;
 } & (RangeValue | SingleValue);
 
 /** The calendar's state and actions, for its `footer`. */
@@ -630,7 +638,7 @@ const Day = styled('button', forwardRef)`
     --styled-date-picker-end: left;
   }
 
-  /* The adjacent months' days (see showAdjacentDays) */
+  /* The adjacent months' days (see showAdjacentMonths) */
   &[data-outside]:not([aria-pressed='true'], [data-range]) {
     color: var(--color-ios-tertiary-label);
   }
@@ -953,6 +961,8 @@ type CalendarInternalProps = CalendarProps & {
   /** The roll shown at first (internal, see `DatePicker`). */
   initialRoll?: 'monthYear' | 'time';
   label?: string;
+  /** Called as the time's roll shows or hides (internal, see `DatePicker`). */
+  onTimeShownChange?: (shown: boolean) => void;
   /** The picker's time (internal, see `DatePicker`): for the footer. */
   time?: {
     disabled: boolean;
@@ -974,8 +984,18 @@ const useCalendarValue = (props: CalendarInternalProps) => {
     ? (dragged ?? (value as DateRange | null) ?? null)
     : null;
   const single = props.range ? null : ((value as Date | null) ?? null);
+  // The day a dragged range is dragged from (see `CalendarPanel`).
+  const [draggedFrom, setDraggedFrom] = useState<Date | null>(null);
 
-  return { dragged, range, setDragged, setValue, single };
+  return {
+    dragged,
+    draggedFrom,
+    range,
+    setDragged,
+    setDraggedFrom,
+    setValue,
+    single,
+  };
 };
 
 /** The footer's state and actions (see `CalendarFooter`). */
@@ -1003,6 +1023,51 @@ const dayOf = (target: EventTarget | null) => {
   return element && Number.isFinite(time) ? new Date(time) : undefined;
 };
 
+/** A range's drag (see `CalendarPanel`). */
+type RangeDrag = {
+  /** Moving on to other months, while held beyond the days. */
+  edge: number;
+  from: Date;
+  moved: boolean;
+  /** The days the range can reach (see `rangeReach`). */
+  reachable: (day: Date) => boolean;
+  timer?: ReturnType<typeof setTimeout>;
+  x: number;
+  y: number;
+};
+
+/**
+ * The days a range from `fixed` can end on: not over unselectable days (up
+ * to the nearest ones, within ten years; only looked for with disabled
+ * days, the limits being `selectable`'s), nor `isRangeDisabled`'s ranges.
+ */
+const rangeReach = (
+  fixed: Date,
+  selectable: (day: Date) => boolean,
+  hasDisabledDays: boolean,
+  isRangeDisabled?: (start: Date, end: Date) => boolean,
+) => {
+  const walk = (direction: number) => {
+    if (!hasDisabledDays) return undefined;
+    let day = fixed;
+    for (let step = 0; step < 3660; step += 1) {
+      const next = addDays(day, direction);
+      if (!selectable(next)) break;
+      day = next;
+    }
+    return day;
+  };
+  const first = walk(-1);
+  const last = walk(1);
+
+  return (day: Date) =>
+    !(first && day < first) &&
+    !(last && day > last) &&
+    !isRangeDisabled?.(
+      ...((day < fixed ? [day, fixed] : [fixed, day]) as [Date, Date]),
+    );
+};
+
 /** A range from two days, in either order. */
 const between = (a: Date, b: Date): DateRange =>
   a <= b ? { end: b, start: a } : { end: a, start: b };
@@ -1019,11 +1084,18 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     locale,
     max,
     min,
-    showAdjacentDays,
+    showAdjacentMonths,
     time,
   } = props;
-  const { dragged, range, setDragged, setValue, single } =
-    useCalendarValue(props);
+  const {
+    dragged,
+    draggedFrom,
+    range,
+    setDragged,
+    setDraggedFrom,
+    setValue,
+    single,
+  } = useCalendarValue(props);
 
   const today = startOfDay(new Date());
   const [month, setMonth] = useState(() =>
@@ -1043,18 +1115,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   const pagesRef = useRef<HTMLDivElement>(null);
   const daysRef = useRef<HTMLDivElement>(null);
   const focusNext = useRef<Date | undefined>(undefined);
-  const drag = useRef<
-    | {
-        /** Moving on to other months, while held beyond the days. */
-        edge: number;
-        from: Date;
-        moved: boolean;
-        timer?: ReturnType<typeof setTimeout>;
-        x: number;
-        y: number;
-      }
-    | undefined
-  >(undefined);
+  const drag = useRef<RangeDrag | undefined>(undefined);
   // The shown month, for the drag's timers.
   const monthRef = useRef(month);
   useLayoutEffect(() => {
@@ -1087,6 +1148,18 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   // Within the limits, and not disabled.
   const selectable = (day: Date) =>
     isSelectable(day, min, max) && !isDateDisabled?.(day);
+  const reachOf = (fixed: Date) =>
+    rangeReach(
+      fixed,
+      selectable,
+      Boolean(isDateDisabled),
+      props.range ? props.isRangeDisabled : undefined,
+    );
+  // While a range's end is picked: from its start, or the day dragged from.
+  const fixed = draggedFrom ?? (range && !range.end ? range.start : null);
+  const reachable = fixed ? reachOf(fixed) : () => true;
+  // A range's end is also reachable.
+  const enabled = (day: Date) => selectable(day) && reachable(day);
   // A week of days (any), for the weekday names.
   const weekdays = Array.from({ length: 7 }, (_, index) =>
     addDays(new Date(2024, 0, 7), (weekStart + index) % 7),
@@ -1169,12 +1242,12 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   const moveTo = (date: Date) => {
     const direction = Math.sign(date.getTime() - focused.getTime()) || 1;
     let target = clampDay(date, min, max);
-    for (let step = 0; step < 366 && !selectable(target); step += 1) {
+    for (let step = 0; step < 366 && !enabled(target); step += 1) {
       const next = addDays(target, direction);
       if (!isSelectable(next, min, max)) return;
       target = next;
     }
-    if (!selectable(target)) return;
+    if (!enabled(target)) return;
     setFocused(target);
     goTo(target);
     focusNext.current = target;
@@ -1195,9 +1268,10 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     setFocused(startOfDay(date));
 
     if (props.range) {
-      // A new range, or its end (before its start: the other way round).
+      // A new range, or its end (before its start: the other way round; out
+      // of the start's reach, a new range).
       commitRange(
-        !range || range.end
+        !range || range.end || !reachable(date)
           ? { end: null, start: date }
           : between(range.start, date),
       );
@@ -1238,11 +1312,12 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (!props.range || event.button !== 0) return;
     const from = dayOf(event.target);
-    if (!from || !selectable(from)) return;
+    if (!from || !enabled(from)) return;
     drag.current = {
       edge: 0,
       from,
       moved: false,
+      reachable: reachOf(from),
       x: event.clientX,
       y: event.clientY,
     };
@@ -1263,8 +1338,9 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
       const edgeDay =
         edge > 0 ? next : new Date(next.getFullYear(), next.getMonth() + 1, 0);
       const day = clampDay(edgeDay, min, max);
-      // Not beyond the limits.
+      // Not beyond the limits, nor over disabled days.
       if (day.getMonth() !== next.getMonth()) return;
+      if (!selectable(day) || !dragging.reachable(day)) return;
       monthRef.current = next;
       goTo(next);
       setDragged(between(dragging.from, day));
@@ -1285,6 +1361,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
       // Moves beyond the days are its own, too (the edges, see turnPage).
       dragging.moved = true;
       event.currentTarget.setPointerCapture(event.pointerId);
+      setDraggedFrom(dragging.from);
       setDragged(between(dragging.from, dragging.from));
     }
 
@@ -1306,7 +1383,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     turnPage(Number(after) - Number(before));
 
     const over = dayOf(under);
-    if (!over || !selectable(over)) return;
+    if (!over || !selectable(over) || !dragging.reachable(over)) return;
     setDragged(between(dragging.from, over));
     setFocused(over);
   };
@@ -1315,6 +1392,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     const { current: dragging } = drag;
     clearTimeout(dragging?.timer);
     drag.current = undefined;
+    setDraggedFrom(null);
     if (!dragging?.moved || !dragged) {
       setDragged(null);
       return;
@@ -1340,16 +1418,21 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     max && startOfMonth(addMonths(month, 1)) > startOfDay(max),
   );
 
-  const toggle = (roll: 'monthYear' | 'time') =>
-    setRolled(rolled === roll ? undefined : roll);
+  const toggle = (roll: 'monthYear' | 'time') => {
+    const next = rolled === roll ? undefined : roll;
+    setRolled(next);
+    if ((next === 'time') !== (rolled === 'time')) {
+      props.onTimeShownChange?.(next === 'time');
+    }
+  };
 
   // A day of the grid of `shown` (the month, or the one sliding out, not
   // `interactive`): another month's is blank, or grayed out (see
-  // `showAdjacentDays`); either is marked `data-outside`, for drags.
+  // `showAdjacentMonths`); either is marked `data-outside`, for drags.
   const cell = (day: Date, shown: Date, interactive: boolean) => {
     const outsideOf = day < shown ? 'before' : ('after' as 'after' | 'before');
     const outside = day.getMonth() === shown.getMonth() ? undefined : outsideOf;
-    if (outside && !showAdjacentDays) {
+    if (outside && !showAdjacentMonths) {
       return (
         <span
           key={day.getTime()}
@@ -1372,7 +1455,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
         {...attributes}
         data-outside={outside}
         data-range={rangePlace(day, range)}
-        disabled={!selectable(day)}
+        disabled={!enabled(day)}
         tabIndex={interactive && !outside && isSameDay(day, focused) ? 0 : -1}
         type="button"
         aria-pressed={
@@ -1560,6 +1643,47 @@ const CalendarRow = TimeRow;
 /** A footer button (see `CalendarProps` `footer`): a collapsed button. */
 const CalendarButton = CollapsedButton;
 
+export type CalendarMessageProps = React.ComponentProps<'p'> & {
+  /**
+   * `info` (e.g. what can be picked) in the secondary label color, or
+   * `error` (e.g. what's still missing) in `systemRed`.
+   * @default 'info'
+   */
+  variant?: 'error' | 'info';
+};
+
+// Footnote, 16px from the sides (as the rows' content), 12px from the
+// rows (UIKit footers' metrics).
+const StyledMessage = styled<'p', { variant?: 'error' | 'info' }>(
+  'p',
+  forwardRef,
+)`
+  padding: 12px 16px;
+  margin: 0;
+  color: ${({ variant }) =>
+    variant === 'error'
+      ? 'var(--color-ios-system-red)'
+      : 'var(--color-ios-secondary-label)'};
+  ${textStyle('footnote')}
+`;
+
+/**
+ * A footer message (see `CalendarProps` `footer`): information on what
+ * can be picked, or an error (announced, e.g. a range's end still
+ * missing).
+ */
+const CalendarMessage = forwardRef<HTMLParagraphElement, CalendarMessageProps>(
+  ({ variant = 'info', ...props }, ref) => (
+    <StyledMessage
+      ref={ref}
+      aria-live="polite"
+      role={variant === 'error' ? 'alert' : undefined}
+      variant={variant}
+      {...props}
+    />
+  ),
+);
+
 /**
  * The footer's Time row (Figma “Time”): the time's button, showing its
  * roll; the picker's default footer, with a time.
@@ -1626,7 +1750,7 @@ const calendarPropsOf = (
     highlighted: props.highlighted,
     highlightedWeekdays: props.highlightedWeekdays,
     isDateDisabled: props.isDateDisabled,
-    showAdjacentDays: props.showAdjacentDays,
+    showAdjacentMonths: props.showAdjacentMonths,
     hourCycle: props.hourCycle,
     locale: props.locale,
     max: props.max,
@@ -1635,6 +1759,7 @@ const calendarPropsOf = (
   return props.range
     ? {
         ...shared,
+        isRangeDisabled: props.isRangeDisabled,
         onValueChange: change,
         range: true,
         value: value as DateRange | null,
@@ -1750,7 +1875,10 @@ const dateLabelOf = (
  * popover for both).
  */
 const CalendarPopover: FunctionComponent<{
-  children: (initialRoll?: 'time') => ReactNode;
+  children: (
+    initialRoll: 'time' | undefined,
+    onTimeShownChange: (shown: boolean) => void,
+  ) => ReactNode;
   dateLabel: string;
   disabled: boolean;
   onOpenChange: (open: DatePickerOpen | null) => void;
@@ -1770,13 +1898,21 @@ const CalendarPopover: FunctionComponent<{
   const timeTriggerId = useId();
   const collapsedRef = useRef<HTMLDivElement>(null);
   const hasTime = timeLabel !== undefined;
+  // The time's button is the open one while the time's roll shows (however
+  // it was opened, or shown), the date's otherwise.
+  const [timeShown, setTimeShown] = useState(open === 'time');
+  const [openBefore, setOpenBefore] = useState(open);
+  if (open !== openBefore) {
+    setOpenBefore(open);
+    setTimeShown(open === 'time');
+  }
 
   // Positioned at both buttons together, whichever opened it.
   return (
     <Collapsed ref={collapsedRef}>
       <BasePopover.Root
         open={open === 'date' || (hasTime && open === 'time')}
-        triggerId={open === 'time' ? timeTriggerId : dateTriggerId}
+        triggerId={hasTime && timeShown ? timeTriggerId : dateTriggerId}
         onOpenChange={(next: boolean, { event }) => {
           const trigger =
             event.target instanceof Element
@@ -1814,7 +1950,7 @@ const CalendarPopover: FunctionComponent<{
           >
             <Popup aria-label={hasTime ? 'Date and time' : 'Date'}>
               <Fragment key={open ?? 'closed'}>
-                {children(open === 'time' ? 'time' : undefined)}
+                {children(open === 'time' ? 'time' : undefined, setTimeShown)}
               </Fragment>
             </Popup>
           </BasePopover.Positioner>
@@ -1896,12 +2032,16 @@ const DatePicker: FunctionComponent<DatePickerProps> = (props) => {
   const calendarProps = calendarPropsOf(props, change, range ?? single);
 
   // With a time, by default the Time row below.
-  const calendar = (initialRoll?: 'time') => (
+  const calendar = (
+    initialRoll?: 'time',
+    onTimeShownChange?: (shown: boolean) => void,
+  ) => (
     <CalendarPanel
       {...calendarProps}
       footer={props.footer ?? (hasTime ? defaultFooter : undefined)}
       initialRoll={initialRoll}
       time={hasTime ? { disabled, shape: buttonShape } : undefined}
+      onTimeShownChange={onTimeShownChange}
     />
   );
 
@@ -1951,7 +2091,9 @@ const DatePicker: FunctionComponent<DatePickerProps> = (props) => {
       timeLabel={hasTime ? timeLabel : undefined}
       onOpenChange={changeOpen}
     >
-      {(initialRoll) => calendar(initialRoll)}
+      {(initialRoll, onTimeShownChange) =>
+        calendar(initialRoll, onTimeShownChange)
+      }
     </CalendarPopover>
   );
 };
@@ -1959,6 +2101,7 @@ const DatePicker: FunctionComponent<DatePickerProps> = (props) => {
 export {
   Calendar,
   CalendarButton,
+  CalendarMessage,
   CalendarRow,
   CalendarTimeRow,
   DatePicker,

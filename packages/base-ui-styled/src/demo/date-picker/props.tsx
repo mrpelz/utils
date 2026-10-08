@@ -6,6 +6,7 @@ import { FunctionComponent, ReactNode } from 'react';
 import {
   CalendarButton,
   CalendarFooter,
+  CalendarMessage,
   CalendarRow,
   CalendarTimeRow,
   DatePickerMode,
@@ -57,25 +58,22 @@ const baseOf = (value: CalendarFooter['value']) => {
 const addDays = (date: Date, days: number) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
 
-const jumps = {
-  inAWeek: ['In a week', (value) => addDays(baseOf(value), 7)],
-  nextMonth: [
-    'Next month',
-    (value) => {
-      const base = baseOf(value);
-      return new Date(base.getFullYear(), base.getMonth() + 1, 1);
-    },
-  ],
-  today: ['Today', () => new Date()],
-  // With its time, too (see `withTime`).
-  now: ['Now', () => new Date()],
-} satisfies Record<
-  string,
-  readonly [string, (value: CalendarFooter['value']) => Date]
->;
+type Jump = readonly [string, (value: CalendarFooter['value']) => Date];
+
+const inAWeek: Jump = ['In a week', (value) => addDays(baseOf(value), 7)];
+const nextMonth: Jump = [
+  'Next month',
+  (value) => {
+    const base = baseOf(value);
+    return new Date(base.getFullYear(), base.getMonth() + 1, 1);
+  },
+];
+const today: Jump = ['Today', () => new Date()];
+// With its time, too (see `withTime`).
+const now: Jump = ['Now', () => new Date()];
 
 /** Jumps taking the date's time, too (others keep the selected time). */
-const withTime = new Set<string>(['Now']);
+const withTime = new Set<Jump>([now]);
 
 const JumpGroup = styled('span')`
   display: flex;
@@ -86,50 +84,134 @@ const JumpGroup = styled('span')`
 
 const JumpButtons: FunctionComponent<{
   calendar: CalendarFooter;
-  only?: boolean;
-}> = ({ calendar, only = false }) => (
+  jumps: readonly Jump[];
+}> = ({ calendar, jumps }) => (
   <CalendarRow>
     <span aria-hidden="true">Jump to</span>
     <JumpGroup>
-      {(only ? [jumps.inAWeek] : Object.values(jumps)).map(([label, to]) => (
-        <CalendarButton
-          key={label}
-          disabled={calendar.disabled}
-          shape={calendar.buttonShape}
-          onClick={() =>
-            calendar.select(to(calendar.value), withTime.has(label))
-          }
-        >
-          {label}
-        </CalendarButton>
-      ))}
+      {jumps.map((jump) => {
+        const [label, to] = jump;
+
+        return (
+          <CalendarButton
+            key={label}
+            disabled={calendar.disabled}
+            shape={calendar.buttonShape}
+            onClick={() =>
+              calendar.select(to(calendar.value), withTime.has(jump))
+            }
+          >
+            {label}
+          </CalendarButton>
+        );
+      })}
     </JumpGroup>
   </CalendarRow>
 );
 
-export const footers = {
+const dateJumps = [inAWeek, nextMonth, today] as const;
+const dateAndTimeJumps = [...dateJumps, now] as const;
+
+/** Footers of a date-only calendar. */
+const dateFooters = {
   none: () => null,
   oneJump: (calendar) => (
     <JumpButtons
-      only
       calendar={calendar}
+      jumps={[inAWeek]}
     />
   ),
-  severalJumps: (calendar) => <JumpButtons calendar={calendar} />,
+  severalJumps: (calendar) => (
+    <JumpButtons
+      calendar={calendar}
+      jumps={dateJumps}
+    />
+  ),
+} satisfies Record<string, Footer>;
+
+/** Footers of a calendar with a time: jumps to now, and the Time row. */
+const dateAndTimeFooters = {
+  ...dateFooters,
+  severalJumps: (calendar) => (
+    <JumpButtons
+      calendar={calendar}
+      jumps={dateAndTimeJumps}
+    />
+  ),
   timeRow: (calendar) => <CalendarTimeRow calendar={calendar} />,
   timeRowAndJumps: (calendar) => (
     <>
       <CalendarTimeRow calendar={calendar} />
-      <JumpButtons calendar={calendar} />
+      <JumpButtons
+        calendar={calendar}
+        jumps={dateAndTimeJumps}
+      />
     </>
   ),
 } satisfies Record<string, Footer>;
 
+/** The footers fitting the mode's calendar. */
+export const getFooters = (mode: DatePickerMode): Record<string, Footer> =>
+  mode === 'dateAndTime' ? dateAndTimeFooters : dateFooters;
+
 /** The demo's content: a range (dates only), and the calendar's footer. */
 export const getPropOptionsContent = (mode: DatePickerMode) => ({
   ...(mode === 'date' && { range: [false, true] as const }),
-  footer: [undefined, ...(Object.keys(footers) as (keyof typeof footers)[])],
+  footer: [undefined, ...Object.keys(getFooters(mode))],
 });
+
+const day = 24 * 60 * 60 * 1000;
+
+type RangeRule = (start: Date, end: Date) => boolean;
+type RangeMessage = { error?: string; info: string };
+
+/** Stays of at most a week. */
+const longerThanAWeek = (start: Date, end: Date) =>
+  end.getTime() - start.getTime() > 6 * day;
+
+/** Stays of at least two nights. */
+const shorterThanThreeDays = (start: Date, end: Date) =>
+  end.getTime() - start.getTime() < 2 * day;
+
+/**
+ * Messages of range rules (`isRangeDisabled`), for the calendar's footer:
+ * what can be picked, and (while a range's end is missing) what's wrong.
+ */
+export const rangeMessages = new Map<RangeRule, RangeMessage>([
+  [longerThanAWeek, { info: 'Your stay can be at most one week long.' }],
+  [
+    shorterThanThreeDays,
+    {
+      error: 'Select a stay spanning at least two nights.',
+      info: 'Stay at least two nights.',
+    },
+  ],
+]);
+
+/** A range rule's message, in the footer below any other rows. */
+export const withRangeMessage = (
+  footer: Footer | undefined,
+  rule: RangeRule | undefined,
+): Footer | undefined => {
+  const message = rule && rangeMessages.get(rule);
+  if (!message) return footer;
+
+  return (calendar) => {
+    const { value } = calendar;
+    const pending =
+      value !== null && !(value instanceof Date) && value.end === null;
+    const error = pending ? message.error : undefined;
+
+    return (
+      <>
+        {footer?.(calendar)}
+        <CalendarMessage variant={error ? 'error' : 'info'}>
+          {error ?? message.info}
+        </CalendarMessage>
+      </>
+    );
+  };
+};
 
 export const weekdayOptions = [undefined, 0, 1, 2, 3, 4, 5, 6] as const;
 
@@ -149,7 +231,7 @@ const propOptions = (mode: DatePickerMode) => ({
   locale: [undefined, 'en-US', 'de-DE', 'fr-FR', 'ar-EG', 'ko-KR'] as const,
   hourCycle: [undefined, 'h12', 'h23'] as const,
   firstDayOfWeek: weekdayOptions,
-  showAdjacentDays: [undefined, false, true] as const,
+  showAdjacentMonths: [undefined, false, true] as const,
   highlightedWeekdays: [
     undefined,
     new MappedProp([0, 6], '[weekend: 0, 6]'),
@@ -193,6 +275,18 @@ const propOptions = (mode: DatePickerMode) => ({
       '[the 15th to 18th]',
     ),
   ] as const,
+  // Ranges only (see `[content]`).
+  ...(mode === 'date' && {
+    isRangeDisabled: [
+      undefined,
+      new MappedProp(longerThanAWeek, '[longer than a week]'),
+      new MappedProp(shorterThanThreeDays, '[at least three days]'),
+      new MappedProp(
+        (start: Date, end: Date) => start.getMonth() !== end.getMonth(),
+        '[across months]',
+      ),
+    ] as const,
+  }),
   min: [
     undefined,
     new MappedProp(new Date(2025, 3, 10), '[April 10, 2025]'),

@@ -15,7 +15,14 @@ import {
 } from 'react';
 
 import { glassMedium } from './glass.js';
-import { css, edgeScrollDelta, fontWeight, useForwardedRef } from './utils.js';
+import {
+  css,
+  edgeScrollDelta,
+  fontWeight,
+  frameElapsed,
+  MovingHighlight,
+  useForwardedRef,
+} from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Menus”: “Menu - iPhone”, “Menu - iPad -
 // Actions (and Submenus)”, “Items - iPhone/iPad”, “Section Title”,
@@ -296,8 +303,10 @@ export const dragOverItems = (
     if (item) hover(item, true, finger);
   };
 
-  let frame = requestAnimationFrame(function scroll() {
+  const elapsedOf = frameElapsed();
+  let frame = requestAnimationFrame(function scroll(time) {
     frame = requestAnimationFrame(scroll);
+    const elapsed = elapsedOf(time);
     if (!finger || !menu?.isConnected) return;
 
     // Its ends are inside its scroll padding (e.g. EditMenu's “more”).
@@ -310,6 +319,7 @@ export const dragOverItems = (
         finger.x,
         left + pixels(style.scrollPaddingLeft),
         right - pixels(style.scrollPaddingRight),
+        elapsed,
       );
     }
     if (scroller.scrollHeight > scroller.clientHeight) {
@@ -317,6 +327,7 @@ export const dragOverItems = (
         finger.y,
         top + pixels(style.scrollPaddingTop),
         bottom - pixels(style.scrollPaddingBottom),
+        elapsed,
       );
     }
     // The items moved under the finger.
@@ -479,6 +490,12 @@ export const useCloseOutOfView = (
 // Compact submenus open below their trigger, over the parent's items,
 // aligned with its popup's edge; regular ones beside it, aligned with its
 // first item; those of a horizontal menu (edit menu) below it, at its end.
+// Above the page's own stacking (e.g. list rows' and segmented items'
+// z-indexes, bars at 10), which would otherwise show through it.
+const StyledPositioner = styled(BaseMenu.Positioner, forwardRef)`
+  z-index: 100;
+`;
+
 const Positioner = forwardRef<
   HTMLDivElement,
   Omit<BaseMenu.Positioner.Props, 'ref'>
@@ -514,7 +531,7 @@ const Positioner = forwardRef<
   })();
 
   return (
-    <BaseMenu.Positioner
+    <StyledPositioner
       ref={ref}
       {...props}
       align={props.align ?? defaults.align}
@@ -607,6 +624,8 @@ const StyledPopup = styled(BaseMenu.Popup, forwardRef)<{
   }
 `;
 
+const highlightSelectors = ['[data-highlighted]', '[data-popup-open]'];
+
 /** The menu's glass popup (Figma “Liquid Glass - Medium”). */
 const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
   ({ children, ...props }, ref) => {
@@ -621,6 +640,16 @@ const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
         {...props}
       >
         {children}
+        {/* The selection, moving between items: the highlighted one, or
+            (regular) the trigger of the open submenu (compact submenus
+            cover it). */}
+        <MovingHighlight
+          selectors={
+            size === 'compact'
+              ? highlightSelectors.slice(0, 1)
+              : highlightSelectors
+          }
+        />
       </StyledPopup>
     );
   },
@@ -678,12 +707,8 @@ const item = css`
   padding-inline-start: calc(8px + var(--styled-menu-toggle-space));
   user-select: none;
 
-  &[data-highlighted]::before,
-  &[data-popup-open]::before {
-    opacity: 1;
-  }
-
-  /* Touch: the selection while pressed (no hover highlights) */
+  /* Highlighted (or its submenu open), the popup's moving selection (see
+     Popup). Touch: the selection while pressed (no hover highlights). */
   &:active:not([data-disabled]) {
     &::before {
       opacity: 1;
@@ -876,10 +901,6 @@ const StyledSubmenuTrigger = styled(BaseMenu.SubmenuTrigger, forwardRef)<{
   ${toggleCursor}
   --styled-menu-chevron-open-rotation: ${({ size }) =>
     size === 'compact' ? '90deg' : '0deg'};
-
-  &[data-popup-open]::before {
-    opacity: ${({ size }) => (size === 'compact' ? 0 : 1)};
-  }
 `;
 
 /** An item opening a submenu, with a chevron. */
@@ -1088,11 +1109,8 @@ const StyledQuickAction = styled(BaseMenu.Item, forwardRef)`
     opacity: 0;
   }
 
-  &[data-highlighted]::before {
-    opacity: 1;
-  }
-
-  /* Touch: the selection while pressed (no hover highlights) */
+  /* Highlighted, the popup's moving selection (see Popup). Touch: the
+     selection while pressed (no hover highlights). */
   &:active:not([data-disabled]) {
     &::before {
       opacity: 1;
@@ -1166,6 +1184,9 @@ const Subtitle = forwardRef<HTMLSpanElement, SpanProps>((props, ref) => (
     {...props}
   />
 ));
+
+/** The menu's trigger (also of `ContextualMenu`). */
+export { Trigger as MenuTrigger };
 
 export const Menu = {
   ...BaseMenu,

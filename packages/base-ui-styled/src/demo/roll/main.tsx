@@ -4,6 +4,10 @@ import { Roll } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
 import { Component, usePropControl } from '../utils/main.js';
 import {
+  useCreateStateUrl,
+  useProvidedState,
+} from '../utils/options-context.js';
+import {
   fruits,
   getPropOptionsColumn,
   hours,
@@ -19,30 +23,49 @@ import {
  * disabled row (“Durian”: settling on it moves on).
  */
 export const RollDemo: FunctionComponent = () => {
+  const id = 'roll';
+
   const [log, addLog] = useLog();
 
-  const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
-  const [controlColumn, propsColumn, RemounterColumn] = usePropControl(
-    useMemo(() => getPropOptionsColumn(addLog), [addLog]),
-    'column (hours)',
-    true,
+  const [externalRoot, externalColumn, externalItem, externalSeparator] =
+    useProvidedState(id);
+
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
   );
-  const [controlItem, propsItem] = usePropControl(
+  const [controlColumn, propsColumn, stateColumn, RemounterColumn] =
+    usePropControl(
+      useMemo(() => getPropOptionsColumn(addLog), [addLog]),
+      'column (hours)',
+      externalColumn,
+      true,
+    );
+  const [controlItem, propsItem, stateItem] = usePropControl(
     propOptionsItem,
     'item (hours: 12)',
+    externalItem,
   );
-  const [controlSeparator, propsSeparator] = usePropControl(
+  const [controlSeparator, propsSeparator, stateSeparator] = usePropControl(
     propOptionsSeparator,
     'separator',
+    externalSeparator,
   );
 
   return (
     <Component
       center
       controls={[controlRoot, controlColumn, controlItem, controlSeparator]}
-      id="roll"
+      id={id}
       log={log}
       title="Roll"
+      stateUrl={useCreateStateUrl(id, [
+        stateRoot,
+        stateColumn,
+        stateItem,
+        stateSeparator,
+      ])}
     >
       <Roll.Root {...propsRoot}>
         <RemounterColumn>

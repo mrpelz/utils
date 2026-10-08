@@ -3,7 +3,7 @@
 
 import assert from 'node:assert/strict';
 
-import { sleep, withTouch } from '../lib.js';
+import { mapped, sleep, withTouch } from '../lib.js';
 
 /** @typedef {import('../lib.js').Page} Page */
 
@@ -78,6 +78,21 @@ const isMonotonic = (values, direction = 1) =>
       (value - (values[index - 1] ?? value)) * direction >= -0.01,
   );
 
+/**
+ * Opens a tab bar demo, its bar sized by its content in the page's center
+ * (as in a phone's width; raw, the page is a centering grid).
+ *
+ * @param {Page} page
+ * @param {Parameters<Page['open']>} args
+ */
+const openBar = async (page, ...args) => {
+  await page.open(...args);
+  await page.evaluate(
+    `document.body.style.cssText = ${JSON.stringify('display: grid; min-height: 100vh; margin: 0; place-items: center')}`,
+  );
+  await sleep(300);
+};
+
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
@@ -95,8 +110,8 @@ export const tests = [
       ];
 
       for (const [id, tabs, groups, widths] of cases) {
-        await page.open(id);
-        await page.setControl('tabs', tabs);
+        await openBar(page, id);
+        await page.setState(0, { tabs });
         await page.evaluate(
           `${page.section}.querySelector('[role=tablist]').style.width = '402px'`,
         );
@@ -118,7 +133,7 @@ export const tests = [
   {
     name: 'tab bar: lens is placed at the tab size and follows the pointer',
     run: async (page) => {
-      await page.open(SECONDARY);
+      await openBar(page, SECONDARY);
       const [first, second] = await tabCenters(page);
       if (!first || !second) throw new Error('missing tabs');
 
@@ -159,7 +174,7 @@ export const tests = [
   {
     name: 'tab bar: selection slides within a group',
     run: async (page) => {
-      await page.open(PRIMARY);
+      await openBar(page, PRIMARY);
       const [, second] = await tabCenters(page);
       if (!second) throw new Error('missing tabs');
 
@@ -173,7 +188,7 @@ export const tests = [
   {
     name: 'tab bar: selection fades in place between groups',
     run: async (page) => {
-      await page.open(SECONDARY);
+      await openBar(page, SECONDARY);
       const centers = await tabCenters(page);
       const [first, , third] = centers;
       const secondary = centers.at(-1);
@@ -211,16 +226,14 @@ export const tests = [
   {
     name: 'tab bar: the lens settles into the selection on a tab of another size',
     run: async (page) => {
-      await page.open(PRIMARY);
+      await openBar(page, PRIMARY);
       // The third tab without its label: a circle, narrower than the others.
-      await page.evaluate(`(() => {
-        const input = [...${page.section}.querySelectorAll('config input[name=label]')][2];
-        input.focus();
-        input.value = 'undefined';
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.blur();
-      })()`);
-      await sleep(300);
+      // (The 3rd tab's, verbatim: no label.)
+      await page.setState(
+        7,
+        { symbol: mapped('[heart.fill]') },
+        { verbatim: true },
+      );
 
       const centers = await tabCenters(page);
       const first = centers[0];
@@ -270,7 +283,7 @@ export const tests = [
         [PRIMARY, 1.05],
         ['tab-bar-regular', 1.065],
       ])) {
-        await page.open(id);
+        await openBar(page, id);
 
         /** @returns {Promise<{ glass: number, icon: number, scale: string }>} */
         const measure = () =>
@@ -314,7 +327,7 @@ export const tests = [
   {
     name: 'tab bar: collapsed, the active tab remains in a 48pt circle (iOS), other groups go',
     run: async (page) => {
-      await page.open(SECONDARY);
+      await openBar(page, SECONDARY);
 
       /** @returns {Promise<{ center: number, glass: number[][], left: number, right: number, size: string, tabs: number[][], visible: boolean[] }>} */
       const measure = () =>
@@ -335,7 +348,7 @@ export const tests = [
         })()`);
 
       const expanded = await measure();
-      await page.setControl('collapsed', true);
+      await page.setState(2, { collapsed: true });
       await sleep(500);
       const collapsed = await measure();
 
@@ -349,13 +362,13 @@ export const tests = [
 
       // `collapsedPosition`: collapsing into the center moves steadily, also
       // as the other group (a circle) goes.
-      await page.setControl('collapsed', false);
-      await page.setControl('collapsedPosition', 'center');
+      await page.setState(2, { collapsed: false });
+      await page.setState(2, { collapsedPosition: 'center' });
       await sleep(500);
       const centering = page.sample(
         `(() => { const glass = ${page.section}.querySelector('[role=tablist] > div').firstElementChild.getBoundingClientRect(); return glass.left + glass.width / 2; })()`,
       );
-      await page.setControl('collapsed', true);
+      await page.setState(2, { collapsed: true });
       /** @type {number[]} */
       const groupCenters = await centering;
       assert.ok(
@@ -373,11 +386,11 @@ export const tests = [
       await sleep(300);
       const center = await measure();
       assert.ok(Math.abs(center.center) <= 1, `center offset ${center.center}`);
-      await page.setControl('collapsedPosition', 'end');
+      await page.setState(2, { collapsedPosition: 'end' });
       await sleep(500);
       const end = await measure();
       assert.equal(end.right, collapsed.left);
-      await page.setControl('collapsedPosition', 'start');
+      await page.setState(2, { collapsedPosition: 'start' });
       await sleep(500);
 
       // Expanding again: the selection fades in on the active tab, the glass
@@ -390,10 +403,11 @@ export const tests = [
           glass: group.firstElementChild.getBoundingClientRect().width,
           offset: Math.abs(indicator.getBoundingClientRect().left - tab.left),
           opacity: +getComputedStyle(indicator, '::before').opacity,
+          time: performance.now(),
         };
       })()`);
-      await page.setControl('collapsed', false);
-      /** @type {{ glass: number, offset: number, opacity: number }[]} */
+      await page.setState(2, { collapsed: false });
+      /** @type {{ glass: number, offset: number, opacity: number, time: number }[]} */
       const frames = await expanding;
       await sleep(300);
 
@@ -405,16 +419,21 @@ export const tests = [
         frames.every(({ offset }) => offset < 1),
         'the selection stays on the active tab',
       );
+      // Per 60 Hz frame (at any frame rate).
       assert.ok(
-        frames.every(
-          ({ glass }, index) =>
-            index === 0 || glass - (frames[index - 1]?.glass ?? glass) < 40,
-        ),
+        frames.every(({ glass, time }, index) => {
+          const previous = frames[index - 1];
+          if (!previous) return true;
+          const perFrame =
+            (1000 / 60 / (time - previous.time || 1000 / 60)) *
+            (glass - previous.glass);
+          return perFrame < 40;
+        }),
         `glass widths ${frames.map(({ glass }) => Math.round(glass)).join(', ')}`,
       );
       const settled = await measure();
       assert.equal(settled.size, expanded.size);
-      await page.setControl('collapsed', true);
+      await page.setState(2, { collapsed: true });
       await sleep(500);
 
       // The lens skips the hidden tabs: released just past the first tab,
@@ -434,7 +453,7 @@ export const tests = [
   {
     name: 'tab bar: collapsed content: a label-only tab is a capsule, labels never ellipsize',
     run: async (page) => {
-      await page.open(SECONDARY);
+      await openBar(page, SECONDARY);
 
       /** @returns {Promise<string>} */
       const shown = () =>
@@ -451,7 +470,7 @@ export const tests = [
       // Labels clip (no ellipsis) while the bar collapses and expands.
       const truncated = `[...${page.section}.querySelectorAll('[data-tab-bar-part=label] > span:first-child')].filter((text) => text.scrollWidth > text.clientWidth + 0.5 && getComputedStyle(text).textOverflow === 'ellipsis' && Number(getComputedStyle(text.closest('[role=tab]')).opacity) > 0).length`;
       const collapsing = page.sample(truncated, 600);
-      await page.setControl('collapsed', true);
+      await page.setState(2, { collapsed: true });
       /** @type {number[]} */
       const collapsingFrames = await collapsing;
       assert.deepEqual([...new Set(collapsingFrames)], [0], 'collapsing');
@@ -461,45 +480,28 @@ export const tests = [
         ['label', /^7\dx40 label$/],
         ['symbolAndLabel', /^1\d\dx40 label symbol$/],
       ])) {
-        await page.setControl('collapsedContent', content);
+        await page.setState(2, { collapsedContent: content });
         await sleep(500);
         assert.match(await shown(), expected, content);
       }
 
       // A tab's own content wins over the list's.
-      await page.setControl('collapsedContent', 'symbol');
-      await page.evaluate(`(() => {
-        const input = ${page.section}.querySelectorAll('config input[name=collapsedContent]')[1];
-        input.focus();
-        input.value = ${JSON.stringify(JSON.stringify('label'))};
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.blur();
-      })()`);
-      await sleep(500);
+      await page.setState(2, { collapsedContent: 'symbol' });
+      // (The group's.)
+      await page.setState(3, { collapsedContent: 'label' });
+      await sleep(200);
       assert.match(await shown(), /^7\dx40 label$/, 'own content');
-      await page.evaluate(`(() => {
-        const input = ${page.section}.querySelectorAll('config input[name=collapsedContent]')[1];
-        input.focus();
-        input.value = 'undefined';
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.blur();
-      })()`);
-      await sleep(300);
+      await page.setState(3, { collapsedContent: undefined });
 
       // Without a symbol: its label, in a capsule.
-      await page.setMappedControl('collapsedContent', 'undefined');
-      await page.evaluate(`(() => {
-        const input = ${page.section}.querySelector('config input[name=symbol]');
-        input.focus();
-        input.value = 'undefined';
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.blur();
-      })()`);
-      await sleep(500);
+      await page.setState(2, { collapsedContent: undefined });
+      // (The 1st tab's, verbatim: no symbol.)
+      await page.setState(5, { label: 'Label' }, { verbatim: true });
+      await sleep(200);
       assert.match(await shown(), /^7\dx40 label$/);
 
       const expanding = page.sample(truncated, 600);
-      await page.setControl('collapsed', false);
+      await page.setState(2, { collapsed: false });
       /** @type {number[]} */
       const expandingFrames = await expanding;
       assert.deepEqual([...new Set(expandingFrames)], [0], 'expanding');
@@ -514,8 +516,8 @@ export const tests = [
         ['tab-bar-regular', undefined, 360, null],
         [SECONDARY, 5, 260, 54],
       ])) {
-        await page.open(id);
-        if (tabs) await page.setControl('tabs', tabs);
+        await openBar(page, id);
+        if (tabs) await page.setState(0, { tabs });
         const list = `${page.section}.querySelector('[role=tablist]')`;
         await page.evaluate(`${list}.style.width = '${width}px'`);
         await sleep(400);
@@ -583,7 +585,7 @@ export const tests = [
   {
     name: 'tab bar: touch dragging the lens over scrolling tabs is not taken over by scrolling',
     run: async (page) => {
-      await page.open('tab-bar-regular');
+      await openBar(page, 'tab-bar-regular');
       const list = `${page.section}.querySelector('[role=tablist]')`;
       await page.evaluate(`${list}.style.width = '360px'`);
       await sleep(400);
@@ -632,10 +634,17 @@ export const tests = [
   {
     name: 'tab bar (iPad): in a container sized by its content, the bar shrinks and its lens stays within',
     run: async (page) => {
-      // The demo's stage is such a container (fit-content).
       await page.open('tab-bar-regular');
-      const stage = `${page.section}.querySelector('stage')`;
-      await page.evaluate(`${stage}.style.width = '420px'`);
+      // Such a container (a grid, scrolling), 420px wide, around the bar.
+      await page.evaluate(`(() => {
+        const container = document.createElement('div');
+        container.id = 'container';
+        container.style.cssText = 'display: grid; width: 420px; overflow: auto';
+        const bar = document.querySelector('[role=tablist]').parentElement;
+        bar.before(container);
+        container.append(bar);
+      })()`);
+      const stage = `document.querySelector(${JSON.stringify('#container')})`;
       await sleep(400);
 
       const fits = await page.evaluate(
@@ -677,7 +686,7 @@ export const tests = [
   {
     name: 'tab bar: a group not too narrow for its tabs does not clip them',
     run: async (page) => {
-      await page.open('tab-bar-regular');
+      await openBar(page, 'tab-bar-regular');
       assert.equal(
         await page.evaluate(
           `getComputedStyle(${page.section}.querySelector('[data-tab-bar-part=tabs]')).overflowX`,
@@ -689,11 +698,27 @@ export const tests = [
   {
     name: 'tab bar: collapsed, marked groups remain at their own positions, side by side at the same one',
     run: async (page) => {
-      await page.open(SECONDARY);
-      await page.setControl('visibleWhenCollapsed', true, 'group');
-      await page.setControl('visibleWhenCollapsed', true, 'secondary group');
-      await page.setControl('collapsedPosition', 'end', 'secondary group');
-      await page.setControl('collapsed', true);
+      await openBar(page, SECONDARY, 'light', {
+        state: [
+          null,
+          null,
+          null,
+          { $rest: true, visibleWhenCollapsed: true },
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          { $rest: true, collapsedPosition: 'end', visibleWhenCollapsed: true },
+        ],
+      });
+      // Collapsed once laid out (as it keeps its expanded width).
+      await page.setState(2, { collapsed: true });
       await sleep(800);
 
       const [primary, secondary] = await collapsedState(page);
@@ -707,7 +732,7 @@ export const tests = [
       assert.equal(secondary.right, 39);
       await page.screenshot('tab-bar-collapsed-groups-apart');
 
-      await page.setControl('collapsedPosition', 'start', 'secondary group');
+      await page.setState(14, { collapsedPosition: 'start' });
       await sleep(800);
       const [first, second] = await collapsedState(page);
       if (!first || !second) throw new Error('missing groups');
@@ -723,7 +748,7 @@ export const tests = [
           `${page.section}.querySelector('[role=tablist] > div').getBoundingClientRect().left`,
           900,
         ),
-        page.setControl('collapsed', false),
+        page.setState(2, { collapsed: false }),
       ]).then(([sampled]) => sampled);
       const moves = lefts
         .slice(1)
@@ -737,14 +762,15 @@ export const tests = [
   {
     name: 'tab bar: a group coming back from collapsing away fades its selection in',
     run: async (page) => {
-      await page.open(SECONDARY);
-      await page.setControl('visibleWhenCollapsed', true, 'group');
+      await openBar(page, SECONDARY, 'light', {
+        state: [null, null, null, { $rest: true, visibleWhenCollapsed: true }],
+      });
       const centers = await tabCenters(page);
       const search = centers.at(-1);
       if (!search) throw new Error('missing tabs');
       await page.click(search);
       await sleep(800);
-      await page.setControl('collapsed', true, 'list');
+      await page.setState(2, { collapsed: true });
       await sleep(900);
 
       const sampling = page.sample(
@@ -754,7 +780,7 @@ export const tests = [
         })()`,
         900,
       );
-      await page.setControl('collapsed', false, 'list');
+      await page.setState(2, { collapsed: false });
       /** @type {number[]} */
       const opacities = await sampling;
       assert.ok(isMonotonic(opacities), `fades in: ${opacities.join(', ')}`);
@@ -768,13 +794,13 @@ export const tests = [
   {
     name: 'tab bar: a group coming back from collapsing away fades all its tabs in alike, its glass intact',
     run: async (page) => {
-      await page.open(SECONDARY);
+      await openBar(page, SECONDARY);
       const centers = await tabCenters(page);
       const search = centers.at(-1);
       if (!search) throw new Error('missing tabs');
       await page.click(search);
       await sleep(800);
-      await page.setControl('collapsed', true, 'list');
+      await page.setState(2, { collapsed: true });
       await sleep(900);
 
       // Its tabs' content fades (inside the blended parts); neither the
@@ -789,7 +815,7 @@ export const tests = [
         })()`,
         900,
       );
-      await page.setControl('collapsed', false, 'list');
+      await page.setState(2, { collapsed: false });
       /** @type {{ container: number[], content: number[] }[]} */
       const frames = await sampling;
       const spread = frames.map(
@@ -814,10 +840,17 @@ export const tests = [
   {
     name: 'tab bar: collapsed, marked tabs remain, the selection only on the active one among them',
     run: async (page) => {
-      await page.open(SECONDARY);
-      await page.setControl('visibleWhenCollapsed', true, '1st tab');
-      await page.setControl('visibleWhenCollapsed', true, '2nd tab');
-      await page.setControl('collapsed', true);
+      await openBar(page, SECONDARY, 'light', {
+        state: [
+          null,
+          null,
+          { $rest: true, collapsed: true },
+          null,
+          null,
+          { $rest: true, visibleWhenCollapsed: true },
+          { $rest: true, visibleWhenCollapsed: true },
+        ],
+      });
       await sleep(800);
 
       const [group, secondary] = await collapsedState(page);
@@ -827,8 +860,8 @@ export const tests = [
       await page.screenshot('tab-bar-collapsed-tabs');
 
       // The active tab is not marked: no selection.
-      await page.setControl('visibleWhenCollapsed', false, '1st tab');
-      await page.setControl('visibleWhenCollapsed', true, '3rd tab');
+      await page.setState(5, { visibleWhenCollapsed: false });
+      await page.setState(7, { visibleWhenCollapsed: true });
       await sleep(800);
       const [unselected] = await collapsedState(page);
       assert.deepEqual(unselected?.tabs, [false, true, true]);
@@ -839,7 +872,7 @@ export const tests = [
       );
 
       // A tab marked in another group keeps that group, too.
-      await page.setControl('visibleWhenCollapsed', true, '1st secondary tab');
+      await page.setState(16, { visibleWhenCollapsed: true });
       await sleep(800);
       const [, other] = await collapsedState(page);
       assert.equal(other?.visible, true, 'the other group remains');
@@ -847,14 +880,14 @@ export const tests = [
     },
   },
   {
-    name: 'tab bar: the accessory sits above the groups, collapsed between them, without taking up space',
+    name: 'tab bar: the accessory sits above the groups (in the bar’s layout), collapsed between them',
     run: async (page) => {
-      await page.open(SECONDARY);
+      await openBar(page, SECONDARY);
       const bar = `${page.section}.querySelector('[role=tablist]')`;
       const height = await page.evaluate(
         `${bar}.getBoundingClientRect().height`,
       );
-      await page.setControl('accessory', 'both');
+      await page.setState(0, { accessory: 'both' });
       await sleep(400);
 
       /** @typedef {{ bottom: number, height: number, left: number, right: number, top: number }} Box */
@@ -901,9 +934,16 @@ export const tests = [
         },
         'above the groups',
       );
+      // The bar's layout includes it (e.g. at the page's top).
+      const contained = await page.evaluate(`(() => {
+        const accessory = ${page.section}.querySelector('[data-tab-bar-part=accessory]').getBoundingClientRect();
+        const root = ${bar}.parentElement.getBoundingClientRect();
+        return Math.round(accessory.top - root.top) >= 0;
+      })()`);
+      assert.equal(contained, true, 'within the bar');
       await page.screenshot('tab-bar-accessory');
 
-      await page.setControl('collapsed', true);
+      await page.setState(2, { collapsed: true });
       await sleep(900);
       const alone = await measure();
       const [only] = alone.groups;
@@ -927,10 +967,10 @@ export const tests = [
 
       // As in Music: the tab and search remain, the accessory between,
       // moving there without jumps.
-      await page.setControl('visibleWhenCollapsed', true, 'group');
-      await page.setControl('visibleWhenCollapsed', true, 'secondary group');
-      await page.setControl('collapsedPosition', 'end', 'secondary group');
-      await page.setControl('collapsed', false);
+      await page.setState(3, { visibleWhenCollapsed: true });
+      await page.setState(14, { visibleWhenCollapsed: true });
+      await page.setState(14, { collapsedPosition: 'end' });
+      await page.setState(2, { collapsed: false });
       await sleep(900);
       /** @type {number[][]} */
       const frames = await Promise.all([
@@ -938,7 +978,7 @@ export const tests = [
           `(() => { const { left, right, top } = ${page.section}.querySelector('[data-tab-bar-part=accessory]').getBoundingClientRect(); return [left, right, top]; })()`,
           900,
         ),
-        page.setControl('collapsed', true),
+        page.setState(2, { collapsed: true }),
       ]).then(([sampled]) => sampled);
       const moves = frames
         .slice(1)
@@ -989,8 +1029,9 @@ export const tests = [
         })()`);
 
       // Expanded only: above the groups, fading out (there) on collapsing.
-      await page.open(SECONDARY);
-      await page.setControl('accessory', 'expanded');
+      await openBar(page, SECONDARY, 'light', {
+        state: [{ $rest: true, accessory: 'expanded' }],
+      });
       await sleep(400);
       assert.deepEqual(await state(), {
         above: true,
@@ -1003,7 +1044,7 @@ export const tests = [
           `+getComputedStyle(${accessory}.lastElementChild.firstElementChild).opacity`,
           900,
         ),
-        page.setControl('collapsed', true),
+        page.setState(2, { collapsed: true }),
       ]).then(([sampled]) => sampled);
       assert.ok(isMonotonic(fading, -1), `fades out: ${fading.join(', ')}`);
       assert.deepEqual(await state(), {
@@ -1014,8 +1055,9 @@ export const tests = [
 
       // Collapsed only: hidden while expanded, fading in between the
       // remaining groups (where an accessory shown in both states goes).
-      await page.open(SECONDARY);
-      await page.setControl('accessory', 'collapsed');
+      await openBar(page, SECONDARY, 'light', {
+        state: [{ $rest: true, accessory: 'collapsed' }],
+      });
       await sleep(400);
       assert.deepEqual(await state(), {
         above: false,
@@ -1028,7 +1070,7 @@ export const tests = [
           `+getComputedStyle(${accessory}.lastElementChild.firstElementChild).opacity`,
           900,
         ),
-        page.setControl('collapsed', true),
+        page.setState(2, { collapsed: true }),
       ]).then(([sampled]) => sampled);
       assert.ok(isMonotonic(appearing), `fades in: ${appearing.join(', ')}`);
       assert.deepEqual(await state(), {
@@ -1048,7 +1090,7 @@ export const tests = [
     name: 'tab bar: collapsing and expanding, the bar keeps its width',
     run: async (page) => {
       for (const id of [PRIMARY, SECONDARY, 'tab-bar-regular']) {
-        await page.open(id);
+        await openBar(page, id);
         for (const collapsed of [true, false]) {
           /** @type {number[]} */
           const widths = await Promise.all([
@@ -1056,7 +1098,7 @@ export const tests = [
               `Math.round(${page.section}.querySelector('[role=tablist]').getBoundingClientRect().width)`,
               800,
             ),
-            page.setControl('collapsed', collapsed),
+            page.setState(2, { collapsed }),
           ]).then(([sampled]) => sampled);
           assert.equal(new Set(widths).size, 1, `${id}: ${widths.join(', ')}`);
           await sleep(300);
@@ -1067,7 +1109,7 @@ export const tests = [
   {
     name: 'tab bar (iPad): released on an outer tab, the lens shrinks onto it around its center',
     run: async (page) => {
-      await page.open('tab-bar-regular');
+      await openBar(page, 'tab-bar-regular');
       for (const index of [0, 8]) {
         const tab = await page.rect('[role=tab]', index);
         const x = tab.x + tab.width / 2;
@@ -1093,7 +1135,7 @@ export const tests = [
   {
     name: 'tab bar: collapsed content by list, group and tab, never nothing',
     run: async (page) => {
-      await page.open(SECONDARY);
+      await openBar(page, SECONDARY);
 
       /** @returns {Promise<string>} what the collapsed active tab shows */
       const shows = () =>
@@ -1107,34 +1149,41 @@ export const tests = [
           ].filter(Boolean).join('+');
         })()`);
 
-      await page.setControl('collapsed', true);
-      await page.setControl('collapsedContent', 'label', 'group');
+      await page.setState(2, { collapsed: true });
+      await page.setState(3, { collapsedContent: 'label' });
       await sleep(600);
       assert.equal(await shows(), 'label', 'the group over the default');
 
-      await page.setControl('collapsedContent', undefined, 'group');
-      await page.setControl('collapsedContent', 'symbolAndLabel');
+      await page.setState(3, { collapsedContent: undefined });
+      await page.setState(2, { collapsedContent: 'symbolAndLabel' });
       await sleep(600);
       assert.equal(await shows(), 'symbol+label', 'the list');
 
-      await page.setControl('collapsedContent', 'label', 'group');
+      await page.setState(3, { collapsedContent: 'label' });
       await sleep(600);
       assert.equal(await shows(), 'label', 'the group over the list');
 
-      await page.setControl('collapsedContent', 'symbol', '1st tab');
+      await page.setState(5, { collapsedContent: 'symbol' });
       await sleep(600);
       assert.equal(await shows(), 'symbol', 'the tab over the group');
 
       // Without a label, a tab shows its symbol, whatever it should show,
       // and without a symbol, its label.
-      await page.setControl('collapsedContent', 'label', '1st tab');
-      await page.setControl('label', undefined, '1st tab');
+      // (Verbatim: no label.)
+      await page.setState(
+        5,
+        { collapsedContent: 'label', symbol: mapped('[heart.fill]') },
+        { verbatim: true },
+      );
       await sleep(600);
       assert.equal(await shows(), 'symbol', 'only a symbol');
 
-      await page.setControl('label', 'Label', '1st tab');
-      await page.setControl('collapsedContent', 'symbol', '1st tab');
-      await page.setControl('symbol', undefined, '1st tab');
+      // (Verbatim: no symbol.)
+      await page.setState(
+        5,
+        { collapsedContent: 'symbol', label: 'Label' },
+        { verbatim: true },
+      );
       await sleep(600);
       assert.equal(await shows(), 'label', 'only a label');
     },
@@ -1142,8 +1191,9 @@ export const tests = [
   {
     name: 'tab bar (iPad): expanding slowly, labels clip and the selection stays on its tab',
     run: async (page) => {
-      await page.open('tab-bar-regular');
-      await page.setControl('collapsed', true);
+      await openBar(page, 'tab-bar-regular');
+      // Collapsed once laid out (as it keeps its expanded width).
+      await page.setState(2, { collapsed: true });
       await sleep(500);
 
       // Slowed down (as in the developer tools): ending the expansion waits
@@ -1153,7 +1203,7 @@ export const tests = [
         playbackRate: 0.1,
       });
       try {
-        await page.setControl('collapsed', false);
+        await page.setState(2, { collapsed: false });
         // Sampled after the bar's own per-frame updates.
         /** @type {{ ellipsis: number, left: number, offset: number }[]} */
         const frames = await page.sample(
@@ -1194,8 +1244,8 @@ export const tests = [
     run: async (page) => {
       /** @param {string} id */
       const expandSlowly = async (id) => {
-        await page.open(id);
-        await page.setControl('collapsed', true);
+        await openBar(page, id);
+        await page.setState(2, { collapsed: true });
         await sleep(500);
         await page.browser.send('Animation.enable');
         await page.browser.send('Animation.setPlaybackRate', {
@@ -1218,7 +1268,7 @@ export const tests = [
             3500,
           );
           await sleep(100);
-          await page.setControl('collapsed', false);
+          await page.setState(2, { collapsed: false });
           /** @type {{ icon: number, text: number }[]} */
           const frames = await sampling;
           return frames;
@@ -1251,8 +1301,9 @@ export const tests = [
   {
     name: 'tab bar (iPad): a collapsed bar keeps its height; a capsule search is no circle',
     run: async (page) => {
-      await page.open(SECONDARY);
-      await page.setControl('size', 'regular');
+      await openBar(page, SECONDARY, 'light', {
+        state: [null, null, { $rest: true, size: 'regular' }],
+      });
 
       /** @returns {Promise<string>} */
       const listSize = () =>
@@ -1268,30 +1319,24 @@ export const tests = [
         })()`);
 
       const expanded = await listSize();
-      await page.setControl('collapsed', true);
+      await page.setState(2, { collapsed: true });
       await sleep(500);
       assert.equal(await listSize(), expanded);
-      await page.setControl('collapsed', false);
+      await page.setState(2, { collapsed: false });
       await sleep(500);
 
       // Alone in its group: a circle; as a capsule: 50×36 (Figma iPad).
       assert.equal(await search(), '36x36');
-      await page.evaluate(`(() => {
-        const group = [...${page.section}.querySelectorAll('config details')].find((details) => details.querySelector('summary').textContent === 'secondary group');
-        const input = group.querySelector('input[name=shape]');
-        input.focus();
-        input.value = ${JSON.stringify(JSON.stringify('capsule'))};
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.blur();
-      })()`);
-      await sleep(500);
+      // (The secondary group's.)
+      await page.setState(14, { shape: 'capsule' });
+      await sleep(200);
       assert.match(await search(), /^(?:49|50)x36$/);
     },
   },
   {
     name: 'tab bar (iPad): circles are circles, symbol capsules 50×36',
     run: async (page) => {
-      await page.open('tab-bar-regular');
+      await openBar(page, 'tab-bar-regular');
 
       /** @returns {Promise<string>} */
       const first = () =>
@@ -1301,22 +1346,15 @@ export const tests = [
         })()`);
 
       assert.equal(await first(), '50x36');
-      await page.evaluate(`(() => {
-        // The group's shape comes first, then the 1st tab's.
-        const input = ${page.section}.querySelectorAll('config input[name=shape]')[1];
-        input.focus();
-        input.value = ${JSON.stringify(JSON.stringify('circle'))};
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.blur();
-      })()`);
-      await sleep(300);
+      // (The 1st tab's.)
+      await page.setState(5, { shape: 'circle' });
       assert.equal(await first(), '36x36');
     },
   },
   {
     name: 'tab bar: dragging the lens across groups activates the target',
     run: async (page) => {
-      await page.open(SECONDARY);
+      await openBar(page, SECONDARY);
       await page.stripes();
       const centers = await tabCenters(page);
       const first = centers[0];
@@ -1341,7 +1379,7 @@ export const tests = [
   {
     name: 'tab bar (iPad): tabs match Figma',
     run: async (page) => {
-      await page.open('tab-bar-regular');
+      await openBar(page, 'tab-bar-regular');
       await page.screenshot('tab-bar-regular');
 
       const tabs =
@@ -1389,7 +1427,7 @@ export const tests = [
   {
     name: 'tab bar (iPad): selecting a tab does not shift the tabs',
     run: async (page) => {
-      await page.open('tab-bar-regular');
+      await openBar(page, 'tab-bar-regular');
 
       const widths = () =>
         page.evaluate(
@@ -1408,7 +1446,7 @@ export const tests = [
   {
     name: 'tab bar: symbols take up a line like a glyph (Figma 􀋃)',
     run: async (page) => {
-      await page.open(SECONDARY);
+      await openBar(page, SECONDARY);
 
       const icons = () =>
         page.evaluate(`(() => {
@@ -1420,7 +1458,7 @@ export const tests = [
 
       // Figma: 28px line, 1px gap (compact); 20px line, 10px gap (regular).
       assert.deepEqual(await icons(), { gap: 1, height: 28 }, 'compact');
-      await page.setControl('size', 'regular');
+      await page.setState(2, { size: 'regular' });
       await sleep(400);
       assert.deepEqual(await icons(), { gap: 10, height: 20 }, 'regular');
     },
@@ -1428,8 +1466,9 @@ export const tests = [
   {
     name: 'tab bar: the regular size turns an iPhone bar into an iPad bar',
     run: async (page) => {
-      await page.open(SECONDARY);
-      await page.setControl('size', 'regular');
+      await openBar(page, SECONDARY, 'light', {
+        state: [null, null, { $rest: true, size: 'regular' }],
+      });
       await sleep(400);
       await page.screenshot('tab-bar-secondary-regular');
 
@@ -1454,7 +1493,7 @@ export const tests = [
   {
     name: 'tab bar: the app collapses it on a secondary tab, a click on a collapsed group expands it',
     run: async (page) => {
-      await page.open(SECONDARY);
+      await openBar(page, SECONDARY);
       const collapsed = () =>
         page.evaluate(
           `getComputedStyle(${page.section}.querySelector('[role=tablist]')).paddingTop`,
@@ -1481,39 +1520,34 @@ export const tests = [
       await page.click(after[3] ?? [0, 0]);
       await sleep(700);
       assert.equal(await collapsed(), '16px');
-      const log = await page.evaluate(
-        `${page.section}.querySelector('config').textContent`,
-      );
+      const log = await page.log();
       assert.equal(log.match(/value change: secondary-1/gu)?.length, 1);
     },
   },
   {
     name: 'tab bar: tabs of a collapsed group can be selected, expanding it',
     run: async (page) => {
-      await page.open(PRIMARY);
+      await openBar(page, PRIMARY);
       // Three remaining tabs (marked), the bar collapsed by the demo's
       // scroll handler stand-in: the list's control.
-      for (const tab of ['1st tab', '2nd tab', '3rd tab']) {
-        await page.setControl('visibleWhenCollapsed', true, tab);
+      // The 1st to 3rd tab's controls.
+      for (const index of [5, 6, 7]) {
+        await page.setState(index, { visibleWhenCollapsed: true });
       }
-      await page.setControl('collapsed', true);
+      await page.setState(2, { collapsed: true });
       await sleep(600);
       const centers = await tabCenters(page);
       await page.click(centers[2] ?? [0, 0]);
       await sleep(600);
-      assert.match(
-        await page.evaluate(
-          `${page.section}.querySelector('config').textContent`,
-        ),
-        /value change: tab-3/u,
-      );
+      assert.match(await page.log(), /value change: tab-3/u);
     },
   },
   {
     name: 'tab bar: collapsedSelection: the active tab and its group, or the first',
     run: async (page) => {
-      await page.open(SECONDARY);
-      await page.setControl('collapsed', true);
+      await openBar(page, SECONDARY, 'light', {
+        state: [null, null, { $rest: true, collapsed: true }],
+      });
       await sleep(600);
       // The first group's first tab (the active one).
       const state = await collapsedState(page);
@@ -1529,8 +1563,13 @@ export const tests = [
   {
     name: 'tab bar: scrolling down collapses it, scrolling up expands it (the demo)',
     run: async (page) => {
-      await page.open(PRIMARY);
-      await page.setControl('collapseOnScroll', true);
+      await openBar(page, PRIMARY, 'light', {
+        state: [{ $rest: true, collapseOnScroll: true }],
+      });
+      // Something to scroll (raw, the page is as high as the demo).
+      await page.evaluate(
+        `document.body.style.minHeight = ${JSON.stringify('300vh')}`,
+      );
       const padding = () =>
         page.evaluate(
           `getComputedStyle(${page.section}.querySelector('[role=tablist]')).paddingTop`,
@@ -1541,6 +1580,153 @@ export const tests = [
       await page.evaluate('window.scrollBy(0, -40)');
       await sleep(700);
       assert.equal(await padding(), '16px');
+    },
+  },
+  {
+    name: 'tab bar: in a wide bar (e.g. a page of its own), the space between the groups widens; collapsing and expanding at its start without jumps',
+    run: async (page) => {
+      await page.open(SECONDARY);
+      const list = `${page.section}.querySelector('[role=tablist]')`;
+      await page.evaluate(`${list}.style.width = '1000px'`);
+      await sleep(300);
+      // The groups' starts and widths, relative to the bar.
+      const groups = `(() => { const box = ${list}.getBoundingClientRect(); return [...${list}.querySelectorAll(':scope > div')].map((group) => { const rect = group.getBoundingClientRect(); return { left: Math.round(rect.left - box.left), width: Math.round(rect.width) }; }); })()`;
+
+      // Their own widths (Figma), at the bar's ends.
+      assert.deepEqual(await page.evaluate(groups), [
+        { left: 32, width: 286 },
+        { left: 1000 - 32 - 54, width: 54 },
+      ]);
+
+      for (const collapsed of [true, false]) {
+        const sampled = page.sample(`${groups}[0]`, 700);
+        await page.setState(2, { collapsed });
+        /** @type {{ left: number, width: number }[]} */
+        const frames = await sampled;
+        const lefts = frames.map(({ left }) => left);
+        assert.ok(
+          lefts.every(
+            (left, index) =>
+              index === 0 || Math.abs(left - (lefts[index - 1] ?? 0)) <= 2,
+          ),
+          `group starts ${lefts.join(', ')}`,
+        );
+        assert.equal(frames.at(-1)?.left, collapsed ? 39 : 32);
+        await sleep(300);
+      }
+    },
+  },
+  {
+    name: 'tab bar: the accessory expands along its collapse’s path, backwards',
+    run: async (page) => {
+      await openBar(page, SECONDARY, 'light', {
+        state: [{ $rest: true, accessory: 'both' }],
+      });
+      await sleep(300);
+      const place = `(() => { const box = ${page.section}.querySelector('[role=tablist]').getBoundingClientRect(); const { left, right, top } = ${page.section}.querySelector('[data-tab-bar-part=accessory]').getBoundingClientRect(); return [left - box.left, right - box.left, top - box.top]; })()`;
+
+      /** @type {Record<string, number[][]>} */
+      const paths = {};
+      for (const collapsed of [true, false]) {
+        const sampled = page.sample(place, 600);
+        await page.setState(2, { collapsed });
+        paths[String(collapsed)] = await sampled;
+        await sleep(300);
+      }
+
+      // Every place expanding passes is on the collapse's path (within
+      // a frame's move).
+      const collapsing = paths.true ?? [];
+      const expanding = paths.false ?? [];
+      const off = expanding.map((point) =>
+        Math.min(
+          ...collapsing.map((other) =>
+            Math.hypot(
+              ...point.map((value, index) => value - (other[index] ?? 0)),
+            ),
+          ),
+        ),
+      );
+      assert.ok(
+        Math.max(...off) < 12,
+        `off the path by ${off.map((value) => Math.round(value)).join(', ')}`,
+      );
+      // And the furthest it swings out sideways, both ways.
+      const furthest = (/** @type {number[][]} */ path) =>
+        Math.max(...path.map(([left]) => left ?? 0));
+      assert.ok(Math.abs(furthest(collapsing) - furthest(expanding)) < 3);
+    },
+  },
+  {
+    name: 'tab bar demo: “collapse on any change” collapses on a change, not again after the click expanding the bar',
+    run: async (page) => {
+      await openBar(page, SECONDARY, 'light', {
+        state: [
+          null,
+          {
+            $rest: true,
+            onValueChange: mapped('[log change, collapse on any change]'),
+          },
+          null,
+          // Both groups remain while collapsed, so search can be pressed.
+          { $rest: true, visibleWhenCollapsed: true },
+        ],
+      });
+      // The secondary group's, too.
+      await page.setState(14, { visibleWhenCollapsed: true });
+      const collapsed = () =>
+        page.evaluate(
+          `${page.section}.querySelector('[role=tablist] > div:last-of-type').getBoundingClientRect().height < 50`,
+        );
+      const press = async (/** @type {number} */ index) => {
+        const centers = await tabCenters(page);
+        const center = centers[index];
+        if (!center) throw new Error('missing tab');
+        await page.click(center);
+        await sleep(700);
+      };
+
+      // A change collapses the bar.
+      await press(1);
+      assert.equal(await collapsed(), true, 'collapsed by the change');
+
+      // Pressing search on the collapsed bar expands it and selects search:
+      // that change doesn't collapse it again.
+      const centers = await tabCenters(page);
+      await press(centers.length - 1);
+      assert.equal(await collapsed(), false, 'expanded');
+
+      // Search is selected: pressing it again changes nothing, so the bar
+      // stays expanded.
+      await press(centers.length - 1);
+      assert.equal(await collapsed(), false, 'still expanded');
+
+      // Search selected (collapsing the bar): pressing it expands the bar,
+      // pressing it again keeps it so.
+      const last = async () => {
+        const all = await tabCenters(page);
+        return all.length - 1;
+      };
+      const firstVisible = () =>
+        page.evaluate(
+          `[...${page.section}.querySelectorAll('[role=tab]')].findIndex((tab) => tab.getBoundingClientRect().width > 0)`,
+        );
+      await press(0);
+      assert.equal(await collapsed(), true, 'collapsed by the first tab');
+      await press(await firstVisible());
+      assert.equal(await collapsed(), false, 'expanded by the first group');
+      await press(await last());
+      assert.equal(await collapsed(), true, 'collapsed by selecting search');
+      await press(await last());
+      assert.equal(await collapsed(), false, 'expanded by search');
+      await press(await last());
+      assert.equal(await collapsed(), false, 'not collapsed again');
+      const log = await page.log();
+      assert.equal(
+        log.match(/value change/gu)?.length,
+        4,
+        'no change by pressing the selected tab',
+      );
     },
   },
 ];

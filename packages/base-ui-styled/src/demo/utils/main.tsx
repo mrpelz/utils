@@ -9,7 +9,7 @@ import {
   ReactNode,
   SetStateAction,
   useCallback,
-  useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -33,7 +33,7 @@ import {
   StageBackground,
   StageInner,
 } from './components.js';
-import { OptionsContext, setOptions } from './options-context.js';
+import { setOptions, useOptions } from './options-context.js';
 import { useLocalStorage } from './use-local-storage.js';
 
 export type RemappedPropValue<T extends any> =
@@ -94,11 +94,13 @@ const PropSelectorOption = <T,>({ value }: { value: T }): ReactNode => {
 };
 
 const PropSelector = <T extends PropMap>({
+  initialState,
   objectKey,
   setState,
   state,
   values,
 }: PropsWithChildren<{
+  initialState: PropMapState<T>;
   objectKey: Extract<keyof T, string>;
   setState: Dispatch<SetStateAction<PropMapState<T>>>;
   state: PropMapState<T>;
@@ -107,7 +109,7 @@ const PropSelector = <T extends PropMap>({
   const inputId = useId();
   const datalistId = useId();
 
-  const [initialValue] = useState(state[objectKey]);
+  const initialValue = initialState[objectKey];
 
   const handleSet = useCallback(
     (value: T[keyof T][number]) => {
@@ -282,8 +284,9 @@ const PropSelector = <T extends PropMap>({
 export const usePropControl = <T extends PropMap>(
   propMap: T,
   title?: string,
+  externalState?: unknown,
   open?: boolean,
-): [ReactNode, ControlledProps<T>, FunctionComponent] => {
+): [ReactNode, ControlledProps<T>, object, FunctionComponent] => {
   const propMapSorted = useMemo(
     () =>
       Object.fromEntries(
@@ -305,7 +308,55 @@ export const usePropControl = <T extends PropMap>(
       },
     [propMapSorted],
   );
-  const [state, setState] = useState(initialState);
+
+  const fromExternalState = useMemo(() => {
+    if (!externalState) return undefined;
+    if (!isObject(externalState)) return undefined;
+
+    const { $rest, ...externalState_ } = externalState as object & {
+      $rest?: true;
+    };
+    const externalState__ = $rest
+      ? { ...initialState, ...externalState_ }
+      : externalState_;
+
+    return Object.fromEntries(
+      Object.entries(externalState__).map(([key, value]) => {
+        if (typeof value !== 'string') {
+          return [key, value] as const;
+        }
+
+        if (value.startsWith('$')) {
+          const mappedProp = propMap[key as keyof T]?.find((candidate) => {
+            if (!(candidate instanceof MappedProp)) return false;
+            if (candidate.label !== value.slice(1)) return false;
+
+            return true;
+          }) as MappedProp<unknown> | undefined;
+
+          return [key, mappedProp] as const;
+        }
+
+        return [key, value] as const;
+      }),
+    ) as {
+      [P in keyof T]: T[P][number];
+    };
+  }, [externalState, initialState, propMap]);
+
+  const [state, setState] = useState(fromExternalState ?? initialState);
+
+  useEffect(() => {
+    /**
+     * legal here because prop control needs to
+     * maintain its own state for interactive input
+     *
+     * externalState is expected to only change when when
+     * triggering manual URL fragment updates for test purposes
+     */
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setState(fromExternalState ?? initialState);
+  }, [fromExternalState, initialState]);
 
   const isModified = useMemo(
     () => !isEqual(initialState, state),
@@ -325,9 +376,23 @@ export const usePropControl = <T extends PropMap>(
     [state],
   ) as ControlledProps<T>;
 
+  const toExternalState = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(state).map(
+          ([key, value]) =>
+            [
+              key,
+              value instanceof MappedProp ? `$${value.label}` : value,
+            ] as const,
+        ),
+      ),
+    [state],
+  ) as object;
+
   const [mount, setMount] = useState(true);
   useLayoutEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- unmounts the demo for one tick to remount it with the new props
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMount(false);
     queueMicrotask(() => setMount(true));
   }, [mappedState]);
@@ -345,6 +410,7 @@ export const usePropControl = <T extends PropMap>(
           {Object.entries(propMapSorted).map(([key, values]) => (
             <PropSelector<T>
               key={key}
+              initialState={initialState}
               objectKey={key as Extract<keyof T, string>}
               setState={setState}
               state={state}
@@ -361,6 +427,7 @@ export const usePropControl = <T extends PropMap>(
       </details>
     </ConfigInner>,
     mappedState,
+    toExternalState,
     Remounter,
   ] as const;
 };
@@ -374,6 +441,7 @@ export const Component: FunctionComponent<{
   /** Unique demo id, used for selecting demos (`#id=…`) and storing config. */
   id: string;
   log?: ReactNode;
+  stateUrl?: string;
   stretch?: boolean;
   title: string;
 }> = ({
@@ -384,10 +452,11 @@ export const Component: FunctionComponent<{
   controls,
   id,
   log,
+  stateUrl,
   stretch = false,
   title,
 }) => {
-  const options = useContext(OptionsContext);
+  const { colorScheme, id: showId, raw, stageBackground } = useOptions();
   const [isCentered, setIsCentered] = useLocalStorage(`${id}.center`, center);
   const [isStretched, setIsStretched] = useLocalStorage(
     `${id}.stretch`,
@@ -399,15 +468,14 @@ export const Component: FunctionComponent<{
   );
 
   const isHidden = useMemo(() => {
-    const ids = [options.id].flat().filter((value) => value !== undefined);
-    if (ids.length === 0) return false;
-    if (ids.includes(id)) return false;
+    if (showId === undefined) return false;
+    if (showId === id) return false;
 
     return true;
-  }, [id, options.id]);
+  }, [id, showId]);
 
   if (isHidden) return null;
-  if (options.raw) return children;
+  if (raw) return children;
 
   return (
     <Container>
@@ -415,9 +483,14 @@ export const Component: FunctionComponent<{
         <ComponentHeader>
           <ComponentHeading>
             {title}
-            <ComponentId onClick={() => setOptions({ id: [id], raw: true })}>
-              {id}
-            </ComponentId>
+            {stateUrl ? (
+              <ComponentId
+                href={stateUrl}
+                target="_blank"
+              >
+                [new tab]
+              </ComponentId>
+            ) : null}
           </ComponentHeading>
           {baseUiId === undefined ? null : (
             <ComponentDocsLink
@@ -430,7 +503,7 @@ export const Component: FunctionComponent<{
           )}
         </ComponentHeader>
         <Stage>
-          {options.stageBackground ? <StageBackground /> : null}
+          {stageBackground ? <StageBackground /> : null}
           <StageInner
             center={isCentered}
             drawBackdrop={hasBackdrop}
@@ -447,7 +520,7 @@ export const Component: FunctionComponent<{
             Color Scheme{' '}
             <select
               name="colorScheme"
-              value={options.colorScheme ?? ''}
+              value={colorScheme ?? ''}
               onChange={({ currentTarget }) =>
                 setOptions({
                   colorScheme:
@@ -462,12 +535,12 @@ export const Component: FunctionComponent<{
           </label>
           <label style={{ display: 'block' }}>
             <input
-              checked={options.stageBackground}
+              checked={stageBackground}
               name="stageBackground"
               type="checkbox"
               onClick={() =>
                 setOptions(
-                  options.stageBackground
+                  stageBackground
                     ? { stageBackground: false }
                     : { stageBackground: undefined },
                 )

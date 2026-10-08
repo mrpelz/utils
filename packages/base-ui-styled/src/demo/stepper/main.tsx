@@ -5,6 +5,10 @@ import { FunctionComponent, useMemo, useState } from 'react';
 import { Stepper } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
 import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
+import {
+  useCreateStateUrl,
+  useProvidedState,
+} from '../utils/options-context.js';
 import { getPropOptionsRoot, propOptionsHalf } from './props.js';
 
 // The value next to the stepper (as apps show it, UIKit's stepper doesn't).
@@ -23,22 +27,34 @@ const Row = styled('div')`
  * next to it by the app, as UIKit's isn't.
  */
 export const StepperDemo: FunctionComponent = () => {
+  const id = 'stepper';
+
   const [log, addLog] = useLog();
+
+  const [externalRoot, externalGroup, externalDecrement, externalIncrement] =
+    useProvidedState(id);
   const [value, setValue] = useState<number | null>(5);
 
-  const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
+  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
     'root',
+    externalRoot,
     true,
   );
-  const [controlGroup, propsGroup] = usePropControl(commonPropOptions, 'group');
-  const [controlDecrement, propsDecrement] = usePropControl(
+  const [controlGroup, propsGroup, stateGroup] = usePropControl(
+    commonPropOptions,
+    'group',
+    externalGroup,
+  );
+  const [controlDecrement, propsDecrement, stateDecrement] = usePropControl(
     propOptionsHalf,
     'decrement',
+    externalDecrement,
   );
-  const [controlIncrement, propsIncrement] = usePropControl(
+  const [controlIncrement, propsIncrement, stateIncrement] = usePropControl(
     propOptionsHalf,
     'increment',
+    externalIncrement,
   );
 
   return (
@@ -46,9 +62,15 @@ export const StepperDemo: FunctionComponent = () => {
       center
       baseUiId="number-field"
       controls={[controlRoot, controlGroup, controlDecrement, controlIncrement]}
-      id="stepper"
+      id={id}
       log={log}
       title="Stepper"
+      stateUrl={useCreateStateUrl(id, [
+        stateRoot,
+        stateGroup,
+        stateDecrement,
+        stateIncrement,
+      ])}
     >
       <Row>
         <output>{value ?? '–'}</output>

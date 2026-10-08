@@ -4,6 +4,10 @@ import { Fragment, FunctionComponent } from 'react';
 import { Typography } from '../../components/index.js';
 import { Component, usePropControl } from '../utils/main.js';
 import {
+  useCreateStateUrl,
+  useProvidedState,
+} from '../utils/options-context.js';
+import {
   dynamicTypeSizes,
   propOptionsContent,
   propOptionsMatrix,
@@ -12,15 +16,21 @@ import {
 } from './props.js';
 
 export const TypographyDemo: FunctionComponent = () => {
-  const [controlContent, content] = usePropControl(
+  const id = 'typography';
+
+  const [externalContent, externalControl] = useProvidedState(id);
+
+  const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
     '[content]',
+    externalContent,
     true,
   );
 
-  const [control, props] = usePropControl(
+  const [control, props, stateControl] = usePropControl(
     propOptionsTypography,
     'typography',
+    externalControl,
     true,
   );
 
@@ -28,7 +38,8 @@ export const TypographyDemo: FunctionComponent = () => {
     <Component
       center
       controls={[controlContent, control]}
-      id="typography"
+      id={id}
+      stateUrl={useCreateStateUrl(id, [stateContent, stateControl])}
       title="Typography"
     >
       <Typography {...props}>{content.text}</Typography>
@@ -65,16 +76,22 @@ const variants = [
 // Figma “Text styles” (the variants, in a label color) and “Dynamic Type”
 // (the sizes), with the color and size as controls.
 export const TypographyMatrixDemo: FunctionComponent = () => {
-  const [control, { color, dynamicTypeSize }] = usePropControl(
+  const id = 'typography-matrix';
+
+  const [externalControl] = useProvidedState(id);
+
+  const [control, { color, dynamicTypeSize }, stateControl] = usePropControl(
     propOptionsMatrix,
     'matrix',
+    externalControl,
     true,
   );
 
   return (
     <Component
       controls={control}
-      id="typography-matrix"
+      id={id}
+      stateUrl={useCreateStateUrl(id, [stateControl])}
       title="Typography (Matrix)"
     >
       <Matrices>

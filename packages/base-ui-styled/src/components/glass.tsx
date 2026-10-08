@@ -1,5 +1,5 @@
 import { styled } from 'goober';
-import { FunctionComponent } from 'react';
+import { createContext, FunctionComponent } from 'react';
 
 import { colorScheme, css } from './utils.js';
 
@@ -71,6 +71,14 @@ export const glassContext = (context?: GlassContext): string =>
   context
     ? contextVars(context)
     : colorScheme(contextVars('bright'), contextVars('dim'));
+
+/**
+ * The context of the glass bar a component is in (e.g. a `Toolbar`'s), for
+ * glass inside it without a context of its own (e.g. a `PageControl`).
+ */
+export const InheritedGlassContext = createContext<GlassContext | undefined>(
+  undefined,
+);
 
 type MediumMode = 'dark' | 'light';
 

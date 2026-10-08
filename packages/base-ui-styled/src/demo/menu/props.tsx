@@ -34,6 +34,11 @@ export const propOptionsPositioner = {
   disableAnchorTracking: [undefined, false, true] as const,
 };
 
+/** The open menu's root (always open, see `MenuOpenDemo`). */
+export const propOptionsOpenRoot = {
+  size: [undefined, 'compact', 'regular'] as const,
+};
+
 export const propOptionsPopup = {
   ...commonPropOptions,
   finalFocus: [undefined, false, true] as const,

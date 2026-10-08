@@ -4,6 +4,10 @@ import { Slider } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
 import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
 import {
+  useCreateStateUrl,
+  useProvidedState,
+} from '../utils/options-context.js';
+import {
   getPropOptionsMaxSymbol,
   getPropOptionsMinSymbol,
   getPropOptionsRoot,
@@ -13,34 +17,67 @@ import {
 } from './props.js';
 
 export const SliderDemo: FunctionComponent = () => {
+  const id = 'slider';
+
   const [log, addLog] = useLog();
 
-  const [controlContent, content] = usePropControl(
+  const [
+    externalContent,
+    externalRoot,
+    externalLabel,
+    externalValue,
+    externalControl,
+    externalTrack,
+    externalIndicator,
+    externalThumbFirst,
+    externalThumbSecond,
+    externalTicks,
+    externalMinSymbol,
+    externalMaxSymbol,
+  ] = useProvidedState(id);
+
+  const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
     '[content]',
+    externalContent,
     true,
   );
 
-  const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
+  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
     'root',
+    externalRoot,
     true,
   );
 
-  const [controlLabel, propsLabel] = usePropControl(commonPropOptions, 'label');
-
-  const [controlValue, propsValue] = usePropControl(propOptionsValue, 'value');
-
-  const [controlControl, propsControl] = usePropControl(
+  const [controlLabel, propsLabel, stateLabel] = usePropControl(
     commonPropOptions,
-    'control',
+    'label',
+    externalLabel,
   );
 
-  const [controlTrack, propsTrack] = usePropControl(commonPropOptions, 'track');
+  const [controlValue, propsValue, stateValue] = usePropControl(
+    propOptionsValue,
+    'value',
+    externalValue,
+  );
 
-  const [controlIndicator, propsIndicator] = usePropControl(
+  const [controlControl, propsControl, stateControl] = usePropControl(
+    commonPropOptions,
+    'control',
+    externalControl,
+  );
+
+  const [controlTrack, propsTrack, stateTrack] = usePropControl(
+    commonPropOptions,
+    'track',
+    externalTrack,
+  );
+
+  const [controlIndicator, propsIndicator, stateIndicator] = usePropControl(
     commonPropOptions,
     'indicator',
+    externalIndicator,
   );
 
   const propOptionsThumbWithLog = useMemo(
@@ -48,33 +85,38 @@ export const SliderDemo: FunctionComponent = () => {
     [addLog],
   );
 
-  const [controlThumbFirst, propsThumbFirst] = usePropControl(
+  const [controlThumbFirst, propsThumbFirst, stateThumbFirst] = usePropControl(
     propOptionsThumbWithLog,
     '1st thumb',
+    externalThumbFirst,
   );
 
-  const [controlThumbSecond, propsThumbSecond] = usePropControl(
-    propOptionsThumbWithLog,
-    '2nd thumb',
+  const [controlThumbSecond, propsThumbSecond, stateThumbSecond] =
+    usePropControl(propOptionsThumbWithLog, '2nd thumb', externalThumbSecond);
+
+  const [controlTicks, propsTicks, stateTicks] = usePropControl(
+    commonPropOptions,
+    'ticks',
+    externalTicks,
   );
 
-  const [controlTicks, propsTicks] = usePropControl(commonPropOptions, 'ticks');
-
-  const [controlMinSymbol, propsMinSymbol] = usePropControl(
+  const [controlMinSymbol, propsMinSymbol, stateMinSymbol] = usePropControl(
     useMemo(() => getPropOptionsMinSymbol(addLog), [addLog]),
     'min symbol',
+    externalMinSymbol,
   );
 
-  const [controlMaxSymbol, propsMaxSymbol] = usePropControl(
+  const [controlMaxSymbol, propsMaxSymbol, stateMaxSymbol] = usePropControl(
     useMemo(() => getPropOptionsMaxSymbol(addLog), [addLog]),
     'max symbol',
+    externalMaxSymbol,
   );
 
   return (
     <Component
       center
       baseUiId="slider"
-      id="slider"
+      id={id}
       log={log}
       title="Slider"
       controls={[
@@ -91,6 +133,20 @@ export const SliderDemo: FunctionComponent = () => {
         controlMinSymbol,
         controlMaxSymbol,
       ]}
+      stateUrl={useCreateStateUrl(id, [
+        stateContent,
+        stateRoot,
+        stateLabel,
+        stateValue,
+        stateControl,
+        stateTrack,
+        stateIndicator,
+        stateThumbFirst,
+        stateThumbSecond,
+        stateTicks,
+        stateMinSymbol,
+        stateMaxSymbol,
+      ])}
     >
       <RemounterRoot>
         <Slider.Root {...propsRoot}>

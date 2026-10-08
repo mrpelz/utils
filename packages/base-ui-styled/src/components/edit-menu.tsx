@@ -15,7 +15,7 @@ import {
   useCloseOutOfView,
   useRootActions,
 } from './menu.js';
-import { fontWeight, useForwardedRef } from './utils.js';
+import { fontWeight, MovingHighlight, useForwardedRef } from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Menus”: “Edit Menu”, “_Edit Menu Item”,
 // Mode=Light and Dark), with the destructive color mapped to `systemRed`;
@@ -94,6 +94,12 @@ const Root = ({
 };
 
 /** Positions the capsule above its anchor (e.g. a text selection). */
+// Above the page's own stacking (e.g. list rows' and segmented items'
+// z-indexes, bars at 10), which would otherwise show through it.
+const StyledPositioner = styled(BaseMenu.Positioner, forwardRef)`
+  z-index: 100;
+`;
+
 const Positioner = forwardRef<
   HTMLDivElement,
   Omit<BaseMenu.Positioner.Props, 'ref'>
@@ -102,7 +108,7 @@ const Positioner = forwardRef<
   useCloseOutOfView(ref);
 
   return (
-    <BaseMenu.Positioner
+    <StyledPositioner
       ref={ref}
       {...props}
       side={props.side ?? 'top'}
@@ -354,6 +360,8 @@ const useTouchDrag = (popupRef: { current: HTMLDivElement | null }) => {
   }, [popupRef]);
 };
 
+const highlightSelectors = [':scope > [data-highlighted]:not([aria-haspopup])'];
+
 /** The edit menu's glass capsule (Figma “Liquid Glass”, Medium). */
 const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
   ({ children, ...props }, forwardedRef) => {
@@ -374,6 +382,9 @@ const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
             {...{ [part]: 'scroller' }}
           >
             {children}
+            {/* The selection, moving between actions (not the “more”
+                circle, which shows its own). */}
+            <MovingHighlight selectors={highlightSelectors} />
           </Scroller>
         </Actions>
       </StyledPopup>
@@ -413,11 +424,8 @@ const StyledItem = styled(BaseMenu.Item, forwardRef)`
     opacity: 0;
   }
 
-  &[data-highlighted]::before {
-    opacity: 1;
-  }
-
-  /* Touch: the selection while pressed (no hover highlights) */
+  /* Highlighted, the scroller's moving selection (see Popup). Touch: the
+     selection while pressed (no hover highlights). */
   &:active:not([data-disabled]) {
     &::before {
       opacity: 1;

@@ -16,6 +16,9 @@ export const useLog = (): [ReactNode, AddLog] => {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const addLog = useCallback((value: string) => {
+    // Also where the log isn't shown (raw demos), e.g. for tests.
+    dispatchEvent(new CustomEvent('demo-log', { detail: value }));
+
     const { current: logContainer } = logContainerRef;
     if (!logContainer) return;
 

@@ -3,11 +3,15 @@ import { sfPinFill } from '@bradleyhodges/sfsymbols/sfPinFill';
 import { sfSquare } from '@bradleyhodges/sfsymbols/sfSquare';
 import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
 import { styled } from 'goober';
-import { FunctionComponent, useMemo } from 'react';
+import { forwardRef, FunctionComponent, useMemo, useRef } from 'react';
 
 import { Button, Menu } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
 import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
+import {
+  useCreateStateUrl,
+  useProvidedState,
+} from '../utils/options-context.js';
 import { SFSymbol } from '../utils/symbol.js';
 import {
   getPropOptionsCheckboxItems,
@@ -20,6 +24,7 @@ import {
   propOptionsItem,
   propOptionsItemDestructive,
   propOptionsItemDisabled,
+  propOptionsOpenRoot,
   propOptionsPopup,
   propOptionsPositioner,
   propOptionsSubmenuTrigger,
@@ -43,127 +48,189 @@ type Preset = {
 const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
   const [log, addLog] = useLog();
 
-  const [controlContent, content] = usePropControl(
+  const [
+    externalContent,
+    externalRoot,
+    externalTrigger,
+    externalPositioner,
+    externalPopup,
+    externalQuickActions,
+    externalQuickAction,
+    externalItem,
+    externalDisabledItem,
+    externalDestructiveItem,
+    externalCheckboxItem,
+    externalRadioGroup,
+    externalRadioItem,
+    externalIndicator,
+    externalSeparator,
+    externalGroup,
+    externalGroupLabel,
+    externalSubmenuRoot,
+    externalSubmenuTrigger,
+    externalSubmenuPositioner,
+    externalSubmenuPopup,
+    externalIcon,
+    externalLabel,
+    externalSubtitle,
+    externalShortcut,
+  ] = useProvidedState(preset.id);
+
+  const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
     '[content]',
+    externalContent,
     true,
   );
 
-  const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
+  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
     useMemo(
       () => getPropOptionsRoot(preset.size, addLog),
       [addLog, preset.size],
     ),
     'root',
+    externalRoot,
     true,
   );
 
-  const [controlTrigger, propsTrigger] = usePropControl(
+  const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
     propOptionsTrigger,
     'trigger',
+    externalTrigger,
   );
 
-  const [controlPositioner, propsPositioner] = usePropControl(
+  const [controlPositioner, propsPositioner, statePositioner] = usePropControl(
     propOptionsPositioner,
     'positioner',
+    externalPositioner,
   );
 
-  const [controlPopup, propsPopup] = usePropControl(propOptionsPopup, 'popup');
-
-  const [controlQuickActions, propsQuickActions] = usePropControl(
-    commonPropOptions,
-    'quick actions',
+  const [controlPopup, propsPopup, statePopup] = usePropControl(
+    propOptionsPopup,
+    'popup',
+    externalPopup,
   );
 
-  const [controlQuickAction, propsQuickAction] = usePropControl(
-    propOptionsItem,
-    'quick action (1st)',
-  );
+  const [controlQuickActions, propsQuickActions, stateQuickActions] =
+    usePropControl(commonPropOptions, 'quick actions', externalQuickActions);
+
+  const [controlQuickAction, propsQuickAction, stateQuickAction] =
+    usePropControl(propOptionsItem, 'quick action (1st)', externalQuickAction);
 
   const itemOptions = useMemo(() => getPropOptionsItem(addLog), [addLog]);
 
-  const [controlItem, propsItem] = usePropControl(itemOptions, 'item (1st)');
-
-  const [controlDisabledItem, propsDisabledItem] = usePropControl(
-    propOptionsItemDisabled,
-    'item (disabled)',
+  const [controlItem, propsItem, stateItem] = usePropControl(
+    itemOptions,
+    'item (1st)',
+    externalItem,
   );
 
-  const [controlDestructiveItem, propsDestructiveItem] = usePropControl(
-    propOptionsItemDestructive,
-    'item (destructive)',
-  );
+  const [controlDisabledItem, propsDisabledItem, stateDisabledItem] =
+    usePropControl(
+      propOptionsItemDisabled,
+      'item (disabled)',
+      externalDisabledItem,
+    );
 
-  const [controlCheckboxItem, propsCheckboxItem] = usePropControl(
-    useMemo(() => getPropOptionsCheckboxItems(addLog), [addLog]),
-    'checkbox items',
-  );
+  const [controlDestructiveItem, propsDestructiveItem, stateDestructiveItem] =
+    usePropControl(
+      propOptionsItemDestructive,
+      'item (destructive)',
+      externalDestructiveItem,
+    );
 
-  const [controlRadioGroup, propsRadioGroup] = usePropControl(
+  const [controlCheckboxItem, propsCheckboxItem, stateCheckboxItem] =
+    usePropControl(
+      useMemo(() => getPropOptionsCheckboxItems(addLog), [addLog]),
+      'checkbox items',
+      externalCheckboxItem,
+    );
+
+  const [controlRadioGroup, propsRadioGroup, stateRadioGroup] = usePropControl(
     useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
     'radio group',
+    externalRadioGroup,
   );
 
-  const [controlRadioItem, propsRadioItem] = usePropControl(
+  const [controlRadioItem, propsRadioItem, stateRadioItem] = usePropControl(
     propOptionsToggleItem,
     'radio items',
+    externalRadioItem,
   );
 
-  const [controlIndicator, propsIndicator] = usePropControl(
+  const [controlIndicator, propsIndicator, stateIndicator] = usePropControl(
     propOptionsIndicator,
     'indicators',
+    externalIndicator,
   );
 
-  const [controlSeparator, propsSeparator] = usePropControl(
+  const [controlSeparator, propsSeparator, stateSeparator] = usePropControl(
     commonPropOptions,
     'separators',
+    externalSeparator,
   );
 
-  const [controlGroup, propsGroup] = usePropControl(
+  const [controlGroup, propsGroup, stateGroup] = usePropControl(
     commonPropOptions,
     'groups',
+    externalGroup,
   );
 
-  const [controlGroupLabel, propsGroupLabel] = usePropControl(
+  const [controlGroupLabel, propsGroupLabel, stateGroupLabel] = usePropControl(
     commonPropOptions,
     'group labels',
+    externalGroupLabel,
   );
 
-  const [controlSubmenuRoot, propsSubmenuRoot] = usePropControl(
-    useMemo(() => getPropOptionsSubmenuRoot(addLog), [addLog]),
-    'submenu root',
-  );
+  const [controlSubmenuRoot, propsSubmenuRoot, stateSubmenuRoot] =
+    usePropControl(
+      useMemo(() => getPropOptionsSubmenuRoot(addLog), [addLog]),
+      'submenu root',
+      externalSubmenuRoot,
+    );
 
-  const [controlSubmenuTrigger, propsSubmenuTrigger] = usePropControl(
-    propOptionsSubmenuTrigger,
-    'submenu trigger',
-  );
+  const [controlSubmenuTrigger, propsSubmenuTrigger, stateSubmenuTrigger] =
+    usePropControl(
+      propOptionsSubmenuTrigger,
+      'submenu trigger',
+      externalSubmenuTrigger,
+    );
 
-  const [controlSubmenuPositioner, propsSubmenuPositioner] = usePropControl(
+  const [
+    controlSubmenuPositioner,
+    propsSubmenuPositioner,
+    stateSubmenuPositioner,
+  ] = usePropControl(
     propOptionsPositioner,
     'submenu positioner',
+    externalSubmenuPositioner,
   );
 
-  const [controlSubmenuPopup, propsSubmenuPopup] = usePropControl(
-    propOptionsPopup,
-    'submenu popup',
+  const [controlSubmenuPopup, propsSubmenuPopup, stateSubmenuPopup] =
+    usePropControl(propOptionsPopup, 'submenu popup', externalSubmenuPopup);
+
+  const [controlIcon, propsIcon, stateIcon] = usePropControl(
+    commonPropOptions,
+    'icons',
+    externalIcon,
   );
 
-  const [controlIcon, propsIcon] = usePropControl(commonPropOptions, 'icons');
-
-  const [controlLabel, propsLabel] = usePropControl(
+  const [controlLabel, propsLabel, stateLabel] = usePropControl(
     commonPropOptions,
     'labels',
+    externalLabel,
   );
 
-  const [controlSubtitle, propsSubtitle] = usePropControl(
+  const [controlSubtitle, propsSubtitle, stateSubtitle] = usePropControl(
     commonPropOptions,
     'subtitles',
+    externalSubtitle,
   );
 
-  const [controlShortcut, propsShortcut] = usePropControl(
+  const [controlShortcut, propsShortcut, stateShortcut] = usePropControl(
     commonPropOptions,
     'shortcuts',
+    externalShortcut,
   );
 
   const icon = content.icons ? (
@@ -219,6 +286,33 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
         controlSubtitle,
         controlShortcut,
       ]}
+      stateUrl={useCreateStateUrl(preset.id, [
+        stateContent,
+        stateRoot,
+        stateTrigger,
+        statePositioner,
+        statePopup,
+        stateQuickActions,
+        stateQuickAction,
+        stateItem,
+        stateDisabledItem,
+        stateDestructiveItem,
+        stateCheckboxItem,
+        stateRadioGroup,
+        stateRadioItem,
+        stateIndicator,
+        stateSeparator,
+        stateGroup,
+        stateGroupLabel,
+        stateSubmenuRoot,
+        stateSubmenuTrigger,
+        stateSubmenuPositioner,
+        stateSubmenuPopup,
+        stateIcon,
+        stateLabel,
+        stateSubtitle,
+        stateShortcut,
+      ])}
     >
       <RemounterRoot>
         <Menu.Root {...propsRoot}>
@@ -380,3 +474,81 @@ export const MenuRegularDemo: FunctionComponent = () => (
     preset={{ id: 'menu-regular', size: 'regular', title: 'Menu (iPad)' }}
   />
 );
+
+// Where the open menu sits in the stage (no trigger: an empty anchor).
+const Anchor = styled('span', forwardRef)`
+  display: block;
+  margin-bottom: 320px;
+`;
+
+/**
+ * The menu on its own, open: `Menu` is just the menu; a trigger (usually
+ * `Menu.Trigger`, rendered as a `Button` by `render`) opens it, as in the
+ * other menu demos. Here it's open without one, at an anchor.
+ */
+export const MenuOpenDemo: FunctionComponent = () => {
+  const id = 'menu-open';
+  const [log, addLog] = useLog();
+  const anchorRef = useRef<HTMLSpanElement>(null);
+
+  const [externalRoot, externalPopup] = useProvidedState(id);
+
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsOpenRoot,
+    'root',
+    externalRoot,
+    true,
+  );
+
+  const [controlPopup, propsPopup, statePopup] = usePropControl(
+    propOptionsPopup,
+    'popup',
+    externalPopup,
+  );
+
+  return (
+    <Component
+      center
+      baseUiId="menu"
+      controls={[controlRoot, controlPopup]}
+      id={id}
+      log={log}
+      stateUrl={useCreateStateUrl(id, [stateRoot, statePopup])}
+      title="Menu (Open)"
+    >
+      <Anchor ref={anchorRef} />
+      {/* Always open. */}
+      <Menu.Root
+        {...propsRoot}
+        open
+        modal={false}
+      >
+        <Menu.Portal>
+          <Menu.Positioner
+            anchor={anchorRef}
+            side="bottom"
+          >
+            <Menu.Popup {...propsPopup}>
+              <Menu.Item onClick={() => addLog('Copy clicked')}>
+                <Menu.Label>Copy</Menu.Label>
+              </Menu.Item>
+              <Menu.Item onClick={() => addLog('Share clicked')}>
+                <Menu.Label>Share</Menu.Label>
+                <Menu.Icon>
+                  <SFSymbol icon={sfSquareAndArrowUp} />
+                </Menu.Icon>
+              </Menu.Item>
+              <Menu.Separator />
+              <Menu.Item
+                destructive
+                onClick={() => addLog('Delete clicked')}
+              >
+                <Menu.Label>Delete</Menu.Label>
+              </Menu.Item>
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </Menu.Root>
+    </Component>
+  );
+};

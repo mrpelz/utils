@@ -43,12 +43,9 @@ export const tests = [
         width: 320,
       });
       try {
-        await page.open('edit-menu');
-        await page.setControl('open', true);
-        // At this width, the demo's controls cover the stage.
-        await page.evaluate(
-          `${page.section}.querySelector('config').style.visibility = 'hidden'`,
-        );
+        await page.open('edit-menu', 'light', {
+          state: [null, { $rest: true, open: true }],
+        });
         await sleep(500);
 
         const before = await capsule(page);
@@ -109,12 +106,7 @@ export const tests = [
 
         // Released on the last action, it's chosen (closing the menu,
         // reported as an item press).
-        assert.match(
-          await page.evaluate(
-            `${page.section}.querySelector('config').textContent`,
-          ),
-          /open change: false\/item-press/,
-        );
+        assert.match(await page.log(), /open change: false\/item-press/);
       } finally {
         await page.browser.send('Emulation.clearDeviceMetricsOverride');
       }
@@ -123,8 +115,9 @@ export const tests = [
   {
     name: 'edit menu: with room, the capsule does not scroll',
     run: async (page) => {
-      await page.open('edit-menu');
-      await page.setControl('open', true);
+      await page.open('edit-menu', 'light', {
+        state: [null, { $rest: true, open: true }],
+      });
       await sleep(500);
 
       const state = await capsule(page);
@@ -148,8 +141,9 @@ export const tests = [
         width: 320,
       });
       try {
-        await page.open('edit-menu');
-        await page.setControl('open', true);
+        await page.open('edit-menu', 'light', {
+          state: [null, { $rest: true, open: true }],
+        });
         await sleep(500);
 
         const fades = () =>
@@ -209,7 +203,7 @@ export const tests = [
       await page.open('edit-menu');
       const menus = `document.querySelectorAll(${JSON.stringify('[role=menu]')}).length`;
       const [x, y, width, height] = await page.evaluate(`(() => {
-        const text = ${page.section}.querySelector('stage p');
+        const text = ${page.section}.querySelector('p');
         text.scrollIntoView({ block: 'center' });
         const { height, width, x, y } = text.getBoundingClientRect();
         return [x, y, width, height];

@@ -4,6 +4,8 @@ export {
   Calendar,
   CalendarButton,
   type CalendarFooter,
+  CalendarMessage,
+  type CalendarMessageProps,
   type CalendarProps,
   CalendarRow,
   CalendarTimeRow,
@@ -31,9 +33,6 @@ export { Slider } from './slider.js';
 export { Stepper } from './stepper.js';
 export { Switch } from './switch.js';
 
-// Feedback
-export { haptics } from './haptics.js';
-
 // Lists
 export {
   List,
@@ -52,8 +51,33 @@ export {
 } from './list.js';
 
 // Menus
+export {
+  ContextualMenu,
+  type ContextualMenuPopupProps,
+  type ContextualMenuPositionerProps,
+  type ContextualMenuPreviewProps,
+  type ContextualMenuRootProps,
+  type ContextualMenuTriggerProps,
+} from './contextual-menu.js';
 export { EditMenu } from './edit-menu.js';
 export { Menu, type MenuRootProps } from './menu.js';
+
+// Bars
+export {
+  Header,
+  type HeaderBarProps,
+  type HeaderLargeTitleProps,
+  type HeaderRootProps,
+} from './header.js';
+export { PageControl, type PageControlProps } from './page-control.js';
+export {
+  Toolbar,
+  type ToolbarButtonProps,
+  type ToolbarGroupProps,
+  type ToolbarRootProps,
+  type ToolbarSideProps,
+  type ToolbarTitleProps,
+} from './toolbar.js';
 
 // Navigation
 export {
@@ -67,9 +91,7 @@ export {
 
 // Viewport
 export {
-  createViewportLock,
   useScrollDirection,
-  useViewportLock,
   useViewportScroll,
   useVisualViewport,
   Viewport,

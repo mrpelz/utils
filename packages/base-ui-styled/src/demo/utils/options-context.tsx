@@ -3,44 +3,47 @@ import {
   createContext,
   FunctionComponent,
   useCallback,
+  useContext,
   useEffect,
+  useMemo,
   useState,
-} from 'react-dom';
+} from 'react';
 
 import { ColorScheme } from '../../components/utils.js';
 
 type TOptionsContext = {
   colorScheme?: ColorScheme;
-  id: string[];
+  id?: string;
   raw: boolean;
   stageBackground: boolean;
+  state?: unknown[];
 };
 
 const optionsDefaults: TOptionsContext = {
-  id: [],
   raw: false,
   stageBackground: true,
 };
 
-export const setOptions = (options: Partial<TOptionsContext>): void => {
+const createFragment = (options: Partial<TOptionsContext>) => {
   const fragment = new URLSearchParams(location.hash.slice(1));
 
-  for (const [key, values] of Object.entries(options)) {
+  for (const [key, value] of Object.entries(options)) {
     fragment.delete(key);
 
-    if (values === undefined) continue;
+    if (value === undefined) continue;
 
-    for (const value of Array.isArray(values) ? values : [values]) {
-      fragment.append(key, JSON.stringify(value));
-    }
+    fragment.set(key, JSON.stringify(value));
   }
 
-  location.hash = fragment.size > 0 ? fragment.toString() : '?';
+  return fragment.size > 0 ? fragment.toString() : undefined;
 };
 
-export const OptionsContext = createContext(
-  undefined as unknown as TOptionsContext,
-);
+export const setOptions = (options: Partial<TOptionsContext>): void => {
+  const fragment = createFragment(options);
+  location.hash = fragment ?? '?';
+};
+
+const OptionsContext = createContext(undefined as unknown as TOptionsContext);
 
 export const OptionsProvider: FunctionComponent = ({ children }) => {
   const getFragementOptions = useCallback(() => {
@@ -48,20 +51,18 @@ export const OptionsProvider: FunctionComponent = ({ children }) => {
     const result = {} as any;
 
     for (const key of fragment.keys()) {
-      const values = fragment.getAll(key);
-      if (values.length === 0) continue;
+      const value = fragment.get(key);
+      if (value === null) continue;
 
-      const parsed = values
-        .map((value) => {
-          try {
-            return JSON.parse(value);
-          } catch {
-            return undefined;
-          }
-        })
-        .filter((value) => value !== undefined);
+      const parsed = (() => {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return undefined;
+        }
+      })();
 
-      result[key] = parsed.length === 1 ? parsed.at(0) : parsed;
+      result[key] = parsed;
     }
 
     return { ...optionsDefaults, ...result } as TOptionsContext;
@@ -87,3 +88,32 @@ export const OptionsProvider: FunctionComponent = ({ children }) => {
     <OptionsContext.Provider value={params}>{children}</OptionsContext.Provider>
   );
 };
+
+export const useOptions = (): TOptionsContext => useContext(OptionsContext);
+
+export const useProvidedState = (demoId: string): unknown[] => {
+  const { id, state } = useOptions();
+
+  return useMemo(() => {
+    if (id === demoId && state) {
+      return state;
+    }
+
+    return [];
+  }, [demoId, id, state]);
+};
+
+export const useCreateStateUrl = (
+  id: string,
+  states: unknown[],
+): string | undefined =>
+  useMemo(() => {
+    const url = new URL(location.href);
+
+    const fragment = createFragment({ id, raw: true, state: states });
+    if (!fragment) return undefined;
+
+    url.hash = fragment;
+
+    return url.href;
+  }, [id, states]);

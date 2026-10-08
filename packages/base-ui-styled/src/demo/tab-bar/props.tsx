@@ -89,26 +89,60 @@ export const onActiveTab = ({ target }: MouseEvent<HTMLElement>) =>
   target instanceof Element &&
   Boolean(target.closest('[role=tab]')?.hasAttribute('data-active'));
 
+/**
+ * Clicks expanding the collapsed bar (see `getPropOptionsGroup`), so the
+ * value change of the same click doesn't collapse it again (see
+ * `getPropOptionsRoot`): marked by a group's handler, taken by the root's.
+ */
+export const createExpansion = () => {
+  let collapsed = false;
+  let expanded = false;
+
+  return {
+    /** Whether the bar is collapsed (as last rendered, see `sync`). */
+    isCollapsed: () => collapsed,
+    /** Marks the click expanding the bar (until it has been handled). */
+    mark: () => {
+      expanded = true;
+      setTimeout(() => {
+        expanded = false;
+      });
+    },
+    /** Keeps whether the bar is collapsed. */
+    sync: (next: boolean) => {
+      collapsed = next;
+    },
+    /** Whether the current click expanded the bar. */
+    take: () => {
+      const was = expanded;
+      expanded = false;
+      return was;
+    },
+  };
+};
+
+export type Expansion = ReturnType<typeof createExpansion>;
+
 // A group's click (also on its active tab, which doesn't change the value)
 // expands the collapsed bar; the tab is selected all the same. Captured,
 // before the tab's value changes (which may collapse it again, see
 // `secondaryCollapses`).
 //
-// Re-clicking the active tab changes no value: a group's click handler
-// collapses the bar again (`recollapse`, first for the secondary group).
+// Re-clicking the active tab changes no value, so nothing collapses the bar
+// again, unless a group's click handler does (“collapse on the active tab”).
 export const getPropOptionsGroup = (
   setCollapsed: SetCollapsed,
-  recollapse = false,
+  expansion: Expansion,
 ) => {
-  const expand = new MappedProp(
-    () => setCollapsed(false),
-    '[expand when collapsed]',
-  );
-  const toggleOnActive = new MappedProp(
-    (event: MouseEvent<HTMLElement>) =>
-      setCollapsed((collapsed) => (collapsed ? false : onActiveTab(event))),
-    '[expand when collapsed, collapse on the active tab]',
-  );
+  const expand = new MappedProp(() => {
+    if (expansion.isCollapsed()) expansion.mark();
+    setCollapsed(false);
+  }, '[expand when collapsed]');
+  const toggleOnActive = new MappedProp((event: MouseEvent<HTMLElement>) => {
+    const collapsed = expansion.isCollapsed();
+    if (collapsed) expansion.mark();
+    setCollapsed(collapsed ? false : onActiveTab(event));
+  }, '[expand when collapsed, collapse on the active tab]');
   const toggle = new MappedProp(
     () => setCollapsed((collapsed) => !collapsed),
     '[toggle collapsed]',
@@ -116,11 +150,7 @@ export const getPropOptionsGroup = (
 
   return {
     ...propOptionsGroup,
-    onClickCapture: [
-      ...(recollapse ? [toggleOnActive, expand] : [expand, toggleOnActive]),
-      toggle,
-      undefined,
-    ] as const,
+    onClickCapture: [expand, toggleOnActive, toggle, undefined] as const,
   };
 };
 
@@ -205,6 +235,7 @@ export const getPropOptionsRoot = (
   preset: Preset,
   addLog: AddLog,
   setCollapsed: SetCollapsed,
+  expansion: Expansion,
 ) => ({
   ...commonPropOptions,
   defaultValue: [
@@ -237,7 +268,8 @@ export const getPropOptionsRoot = (
     new MappedProp(
       (next: unknown, { reason }: BaseTabs.Root.ChangeEventDetails) => {
         addLog(`value change: ${String(next)}/${reason}`);
-        setCollapsed(true);
+        // Not by the click that expanded the bar.
+        if (!expansion.take()) setCollapsed(true);
       },
       '[log change, collapse on any change]',
     ),

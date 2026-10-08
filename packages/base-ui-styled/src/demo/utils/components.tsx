@@ -18,6 +18,9 @@ export const Container = styled('component')`
 
   @media screen and (width <= 768px) {
     grid-template: 'content' 'config';
+    scroll-snap-align: unset;
+    scroll-snap-stop: normal;
+    scroll-snap-type: none;
   }
 `;
 
@@ -34,6 +37,11 @@ export const Content = styled('section')`
   gap: 1rem;
   grid-area: content;
   grid-template: 'head' auto 'stage' 1fr / 1fr;
+
+  @media screen and (width <= 768px) {
+    position: static;
+    height: auto;
+  }
 `;
 
 export const ComponentHeader = styled('component-header')`
@@ -46,6 +54,10 @@ export const ComponentHeader = styled('component-header')`
   margin: calc(1rem * -1);
   background-color: light-dark(white, #0a0a0a);
   grid-area: head;
+
+  @media screen and (width <= 768px) {
+    position: static;
+  }
 `;
 
 export const ComponentHeading = styled('h2')`
@@ -74,13 +86,16 @@ export const Stage = styled('stage')`
   position: relative;
   display: grid;
   overflow: auto;
+  min-height: 100svh;
   align-items: center;
   grid-area: stage;
   scroll-snap-stop: always;
 
   @media screen and (width <= 768px) {
+    min-height: 150svh;
     margin: calc(1rem * -1);
     margin-block-start: 0;
+    scroll-snap-stop: normal;
   }
 `;
 
@@ -180,6 +195,10 @@ export const ConfigHeading = styled('summary')`
   margin-bottom: 0.25rem;
   background-color: light-dark(white, #0a0a0a);
   cursor: pointer;
+
+  @media screen and (width <= 768px) {
+    position: static;
+  }
 `;
 
 export const PropContainer = styled('prop-container')`

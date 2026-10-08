@@ -108,8 +108,9 @@ export const tests = [
   {
     name: 'segmented: separators are hidden next to the selection only',
     run: async (page) => {
-      await page.open('segmented');
-      await page.setControl('count', 4);
+      await page.open('segmented', 'light', {
+        state: [{ $rest: true, count: 4 }],
+      });
 
       const second = await page.rect('[role=radio]', 1);
       await page.click([
@@ -127,10 +128,27 @@ export const tests = [
     },
   },
   {
+    name: 'segmented: hideSeparators hides all separators',
+    run: async (page) => {
+      await page.open('segmented', 'light', {
+        state: [
+          { $rest: true, count: 4 },
+          { $rest: true, hideSeparators: true },
+        ],
+      });
+
+      const shown = await page.evaluate(
+        `[...${page.section}.querySelectorAll('[role=radio]')].slice(1).map((item) => getComputedStyle(item, '::before').display !== 'none')`,
+      );
+      assert.deepEqual(shown, [false, false, false]);
+    },
+  },
+  {
     name: 'segmented: geometry matches Figma',
     run: async (page) => {
-      await page.open('segmented');
-      await page.setControl('count', 5);
+      await page.open('segmented', 'light', {
+        state: [{ $rest: true, count: 5 }],
+      });
       await sleep(400);
 
       const geometry = await page.evaluate(`(() => {
@@ -157,8 +175,9 @@ export const tests = [
   {
     name: 'segmented: width does not change with the selection',
     run: async (page) => {
-      await page.open('segmented');
-      await page.setControl('count', 5);
+      await page.open('segmented', 'light', {
+        state: [{ $rest: true, count: 5 }],
+      });
 
       /** @type {number[]} */
       const widths = [];
@@ -178,8 +197,9 @@ export const tests = [
   {
     name: 'segmented: dragging the lens checks the item under the pointer',
     run: async (page) => {
-      await page.open('segmented');
-      await page.setControl('count', 5);
+      await page.open('segmented', 'light', {
+        state: [{ $rest: true, count: 5 }],
+      });
 
       const first = await page.rect('[role=radio]', 0);
       const fourth = await page.rect('[role=radio]', 3);
@@ -221,8 +241,9 @@ export const tests = [
   {
     name: 'segmented: arrow keys still move the selection',
     run: async (page) => {
-      await page.open('segmented');
-      await page.setControl('count', 3);
+      await page.open('segmented', 'light', {
+        state: [{ $rest: true, count: 3 }],
+      });
 
       await page.evaluate(
         `${page.section}.querySelector('[role=radio][data-checked]').focus()`,

@@ -213,22 +213,51 @@ export const launchBrowser = async () => {
   };
 };
 
-/** Element of a demo section. */
-const SECTION = 'component';
+/**
+ * A mapped prop's value in a demo's initial state (see `Page.open`): by its
+ * label.
+ *
+ * @param {string} label
+ */
+export const mapped = (label) => `$${label}`;
 
 /**
- * Page helpers for tests, relative to one demo section (`component`). Only the
- * demo with the opened id is rendered (the demo's `#id=…` option).
+ * Collects the demo's log (its `demo-log` events), from the page's start
+ * (once, however many pages add it).
+ */
+const COLLECT_LOG = `
+  if (!window.demoLog) {
+    window.demoLog = [];
+    addEventListener('demo-log', ({ detail }) => window.demoLog.push(detail));
+  }
+`;
+
+/**
+ * Page helpers for tests. Only the opened demo is rendered, raw (the
+ * component only, see `open`), its props set by the URL fragment.
  */
 export class Page {
   /** @type {Browser} */
   browser;
 
+  /** The opened demo's id (see `open`). */
+  id = '';
+
   /** @type {string | undefined} */
   screenshotDirectory;
 
+  /**
+   * The opened demo's prop control states (see `open`, `setState`).
+   *
+   * @type {(Record<string, unknown> | null | undefined)[]}
+   */
+  state = [];
+
   /** @type {string} */
   url;
+
+  /** Whether the log is collected on new documents (see `log`). */
+  #logging = false;
 
   /**
    * @param {Browser} cdp the browser to drive
@@ -241,9 +270,25 @@ export class Page {
     this.screenshotDirectory = screenshots;
   }
 
-  /** JavaScript expression for the current demo section element. */
+  /** JavaScript expression for the opened demo's element (raw: the body). */
+
   get section() {
-    return `document.querySelector(${JSON.stringify(SECTION)})`;
+    return 'document.body';
+  }
+
+  /** The URL fragment for the opened demo and its state (see `open`). */
+  get #fragment() {
+    const fragment = new URLSearchParams({
+      id: JSON.stringify(this.id),
+      raw: 'true',
+    });
+    if (this.state.length > 0) {
+      fragment.set(
+        'state',
+        JSON.stringify(Array.from(this.state, (entry) => entry ?? null)),
+      );
+    }
+    return fragment.toString();
   }
 
   /**
@@ -315,6 +360,15 @@ export class Page {
   }
 
   /**
+   * The demo's log so far (its lines, joined by newlines).
+   *
+   * @returns {Promise<string>}
+   */
+  async log() {
+    return this.evaluate(String.raw`(window.demoLog ?? []).join('\n')`);
+  }
+
+  /**
    * Dispatches a mouse event at viewport coordinates.
    *
    * @param {'mouseMoved' | 'mousePressed' | 'mouseReleased'} type
@@ -333,24 +387,37 @@ export class Page {
   }
 
   /**
-   * Loads the demo with only the section of one id, in the given color
-   * scheme, and scrolls to the section.
+   * Loads the demo of an id, raw (only the component), in the given color
+   * scheme.
    *
-   * @param {string} id the demo section's id
+   * @param {string} id the demo's id
    * @param {'dark' | 'light'} [colorScheme]
+   * @param {object} [options]
+   * @param {(Record<string, unknown> | null | undefined)[]} [options.state]
+   *   initial props, per prop control (in the demo's order of controls, a
+   *   missing one keeps its own): verbatim (props left out are `undefined`),
+   *   or, with `$rest: true`, over the control's own; mapped props by their
+   *   label (`mapped`); changed later by `setState`
    */
-  async open(id, colorScheme = 'light') {
+  async open(id, colorScheme = 'light', { state = [] } = {}) {
+    if (!this.#logging) {
+      await this.browser.send('Page.addScriptToEvaluateOnNewDocument', {
+        source: COLLECT_LOG,
+      });
+      this.#logging = true;
+    }
     await this.browser.send('Emulation.setEmulatedMedia', {
       features: [{ name: 'prefers-color-scheme', value: colorScheme }],
     });
+    this.id = id;
+    this.state = [...state];
     // Only the hash differs between tests, so leave the page first to get a
     // fresh load instead of a same-document navigation.
     await this.browser.send('Page.navigate', { url: 'about:blank' });
     await this.browser.send('Page.navigate', {
-      url: `${this.url}#id=${encodeURIComponent(JSON.stringify(id))}`,
+      url: `${this.url}#${this.#fragment}`,
     });
-    await this.waitFor(`Boolean(${this.section})`);
-    await this.evaluate(`${this.section}.scrollIntoView()`);
+    await this.waitFor(`Boolean(${this.section}.firstElementChild)`);
     await sleep(300);
   }
 
@@ -388,19 +455,15 @@ export class Page {
   }
 
   /**
-   * Saves a screenshot of the current section's stage (only when a
-   * screenshot directory is set).
+   * Saves a screenshot of the viewport (only when a screenshot directory is
+   * set).
    *
    * @param {string} name
    */
   async screenshot(name) {
     if (!this.screenshotDirectory) return;
 
-    const stage = await this.rect('stage');
-    const scrollY = await this.evaluate('scrollY');
-    const { data } = await this.browser.send('Page.captureScreenshot', {
-      clip: { ...stage, scale: 1, y: stage.y + scrollY },
-    });
+    const { data } = await this.browser.send('Page.captureScreenshot', {});
 
     await writeFile(
       path.join(this.screenshotDirectory, `${name}.png`),
@@ -409,50 +472,33 @@ export class Page {
   }
 
   /**
-   * Sets a demo prop control of the current section (by its input `name`,
-   * in the controls titled `title`, or the first), as if typed in by the
-   * user.
+   * Sets props of a prop control of the opened demo (by its index, as in
+   * `open`'s `state`), over its current ones (as `$rest`, unless the
+   * control's state is verbatim), or `verbatim`, as all of them (props left
+   * out are `undefined`), as the URL fragment (the demo applies it live).
+   * An `undefined` value removes the prop: verbatim, it's `undefined`; over
+   * the control's own, its own.
    *
-   * @param {string} name
-   * @param {unknown} value
-   * @param {string} [title]
+   * @param {number} index
+   * @param {Record<string, unknown>} props
+   * @param {{ verbatim?: boolean }} [options]
    */
-  async setControl(name, value, title) {
-    await this.evaluate(`(() => {
-      const scope = ${JSON.stringify(title ?? null)} === null
-        ? ${this.section}.querySelector('config')
-        : [...${this.section}.querySelectorAll('config details')].find((details) => details.querySelector('summary')?.textContent === ${JSON.stringify(title ?? '')});
-      const input = scope.querySelector(${JSON.stringify(`input[name="${name}"]`)});
-      input.focus();
-      input.value = ${JSON.stringify(JSON.stringify(value))};
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      input.blur();
-    })()`);
+  async setState(index, props, { verbatim = false } = {}) {
+    const current = this.state[index];
+    const merged = verbatim
+      ? props
+      : { ...(current ?? { $rest: true }), ...props };
+    this.state[index] = Object.fromEntries(
+      Object.entries(merged).filter(([, value]) => value !== undefined),
+    );
+    await this.evaluate(`location.hash = ${JSON.stringify(this.#fragment)}`);
     await sleep(300);
   }
 
-  /**
-   * Sets a demo prop control of the current section to one of its mapped
-   * options (`MappedProp`, e.g. an element or a function), by its label.
-   *
-   * @param {string} name
-   * @param {string} label
-   */
-  async setMappedControl(name, label) {
-    await this.evaluate(`(() => {
-      const input = ${this.section}.querySelector(${JSON.stringify(`config input[name="${name}"]`)});
-      input.focus();
-      input.value = ${JSON.stringify(label)};
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      input.blur();
-    })()`);
-    await sleep(300);
-  }
-
-  /** Paints a striped background behind the stage, to reveal glass. */
+  /** Paints a striped background behind the demo, to reveal glass. */
   async stripes() {
     await this.evaluate(
-      `${this.section}.querySelector('stage-inner').style.backgroundImage = 'repeating-linear-gradient(90deg, #f00 0 20px, #00f 20px 40px, #0c0 40px 60px, #fc0 60px 80px)'`,
+      `document.body.style.backgroundImage = ${JSON.stringify('repeating-linear-gradient(90deg, #f00 0 20px, #00f 20px 40px, #0c0 40px 60px, #fc0 60px 80px)')}`,
     );
   }
 

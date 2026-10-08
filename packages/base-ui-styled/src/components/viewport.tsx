@@ -13,18 +13,8 @@ import {
   useState,
 } from 'react';
 
-// The viewport, for app logic (Source: `viewport-lock`,
-// github.com/jmmoser/viewport-lock, and the Visual Viewport API):
+// The viewport, for app logic (the Visual Viewport API):
 //
-// - Locking (`useViewportLock`, `createViewportLock`, `Provider` `lock`):
-//   on iOS, the on-screen keyboard shrinks the visual viewport, and Safari
-//   scrolls the layout viewport to keep a focused field in view, taking
-//   fixed bars (e.g. a tab bar) off screen. Locked, the app's container is
-//   as high as the visual viewport, focusing fields doesn't scroll
-//   (focused on `touchend`, with `preventScroll`), and the page scrolls
-//   back if it scrolls anyway. The container needs `touch-action: none`
-//   (or the visual viewport can be dragged while the keyboard is open), its
-//   scrolling descendants `touch-action: pan-y` (or `pan-x`).
 // - The visual viewport (`Provider`, `useVisualViewport`): its size, offset
 //   and the keyboard's height (what it covers of the layout viewport), as
 //   custom properties on the root element (`--styled-viewport-height`,
@@ -35,7 +25,7 @@ import {
 //   it's at its top or bottom; e.g. to collapse a tab bar while scrolling
 //   down.
 // - Bars (`Top`, `Bottom`): fixed to the visual viewport's top or bottom:
-//   above the keyboard (e.g. a message field), also unlocked.
+//   above the keyboard (e.g. a message field).
 
 /** The visual viewport, and the keyboard's height (0 without one). */
 export type VisualViewportState = {
@@ -111,70 +101,8 @@ const readVisual = (): VisualViewportState => {
   };
 };
 
-const fields = 'input, textarea, select, [contenteditable]';
-
-// Scrolled anyway (e.g. scroll chaining, or back from the background).
-const resetScroll = () => {
-  if (window.scrollX !== 0 || window.scrollY !== 0) window.scrollTo(0, 0);
-};
-
-/**
- * Locks the viewport (see above) to `container`; returns the unlock.
- */
-export const createViewportLock = (container: HTMLElement): (() => void) => {
-  const { visualViewport: viewport } = window;
-  const { ownerDocument: document } = container;
-  const height = container.style.height;
-
-  // The container: the visual viewport's height.
-  const resize = () => {
-    container.style.height = `${viewport?.height ?? window.innerHeight}px`;
-  };
-
-  // Fields focused without scrolling (before the browser would focus them).
-  const onTouchEnd = (event: TouchEvent) => {
-    const { target } = event;
-    if (!(target instanceof HTMLElement)) return;
-    const field = target.closest<HTMLElement>(fields);
-    if (!field || field === document.activeElement) return;
-    if (field instanceof HTMLInputElement && field.disabled) return;
-    if (field instanceof HTMLTextAreaElement && field.disabled) return;
-
-    event.preventDefault();
-    field.focus({ preventScroll: true });
-  };
-
-  resize();
-  viewport?.addEventListener('resize', resize);
-  viewport?.addEventListener('scroll', resetScroll);
-  window.addEventListener('scroll', resetScroll, { passive: true });
-  container.addEventListener('touchend', onTouchEnd, { passive: false });
-
-  return () => {
-    viewport?.removeEventListener('resize', resize);
-    viewport?.removeEventListener('scroll', resetScroll);
-    window.removeEventListener('scroll', resetScroll);
-    container.removeEventListener('touchend', onTouchEnd);
-    container.style.height = height;
-  };
-};
-
-/** Locks the viewport (see above) to the container, while `enabled`. */
-export const useViewportLock = (
-  containerRef: RefObject<HTMLElement | null>,
-  enabled = true,
-): void => {
-  useEffect(() => {
-    const { current: container } = containerRef;
-    if (!enabled || !container) return undefined;
-    return createViewportLock(container);
-  }, [containerRef, enabled]);
-};
-
 export type ViewportProviderProps = {
   children?: ReactNode;
-  /** The app's container, locked to the viewport (see above). */
-  lock?: RefObject<HTMLElement | null>;
   /**
    * The scroll container tracked (default: the document's scrolling
    * element).
@@ -184,21 +112,14 @@ export type ViewportProviderProps = {
   threshold?: number;
 };
 
-/**
- * Provides the visual viewport and scroll tracking (see above), and locks
- * the viewport to `lock`'s container.
- */
+/** Provides the visual viewport and scroll tracking (see above). */
 const Provider: FunctionComponent<ViewportProviderProps> = ({
   children,
-  lock,
   scroller,
   threshold = 8,
 }) => {
   const [visual, setVisual] = useState(readVisual);
   const [scroll] = useState(createScrollStore);
-
-  const fallback = useRef<HTMLElement | null>(null);
-  useViewportLock(lock ?? fallback, lock !== undefined);
 
   // The visual viewport (once per frame), as custom properties, too.
   useLayoutEffect(() => {

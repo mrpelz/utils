@@ -9,6 +9,12 @@
       "react": ["../../node_modules/preact/compat/src/index.d.ts"],
       "react/jsx-runtime": ["../../node_modules/preact/jsx-runtime/src/index.d.ts"]
     },
+    "plugins": [
+      {
+        "name": "@styled/typescript-styled-plugin",
+        "validate": false
+      }
+    ],
     "rootDir": "src",
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
     "types": ["@types/webpack-env"]

@@ -3,8 +3,6 @@
 
 import assert from 'node:assert/strict';
 
-import { sleep } from '../lib.js';
-
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
@@ -21,11 +19,11 @@ export const tests = [
       ];
 
       for (const [variant, size, height] of cases) {
-        await page.setControl('variant', variant);
-        await page.setControl('size', size);
+        await page.setState(1, { variant });
+        await page.setState(1, { size });
         await page.screenshot(`button-${variant}-${size ?? 'default'}`);
 
-        const rect = await page.rect('stage button');
+        const rect = await page.rect('button');
         assert.equal(rect.height, height, `${variant} ${size} height`);
       }
     },
@@ -33,10 +31,10 @@ export const tests = [
   {
     name: 'button: circle shape is square with a symbol only',
     run: async (page) => {
-      await page.open('button');
-      await page.setControl('symbol', '★');
-      await page.setControl('label', undefined);
-      await page.setControl('shape', 'circle');
+      // Verbatim content (without `$rest`): a symbol, no label.
+      await page.open('button', 'light', {
+        state: [{ symbol: '★' }, { $rest: true, shape: 'circle' }],
+      });
 
       /** @type {[string | undefined, string | undefined, number][]} */
       const cases = [
@@ -47,11 +45,11 @@ export const tests = [
       ];
 
       for (const [variant, size, side] of cases) {
-        await page.setControl('variant', variant);
-        await page.setControl('size', size);
+        await page.setState(1, { variant });
+        await page.setState(1, { size });
         await page.screenshot(`button-circle-${variant}-${size ?? 'default'}`);
 
-        const { height, width } = await page.rect('stage button');
+        const { height, width } = await page.rect('button');
         assert.deepEqual(
           { height, width },
           { height: side, width: side },
@@ -63,12 +61,17 @@ export const tests = [
   {
     name: 'button: small buttons have a 44px hit region',
     run: async (page) => {
-      await page.open('button');
-      await page.setControl('size', 'small');
+      await page.open('button', 'light', {
+        state: [null, { $rest: true, size: 'small' }],
+      });
+      // Room around it (raw, it's at the page's top).
+      await page.evaluate(
+        `document.body.style.padding = ${JSON.stringify('48px')}`,
+      );
 
-      const { height, width, x, y } = await page.rect('stage button');
+      const { height, width, x, y } = await page.rect('button');
       const hits = await page.evaluate(`(() => {
-        const button = ${page.section}.querySelector('stage button');
+        const button = ${page.section}.querySelector('button');
         const hit = (px, py) => button.contains(document.elementFromPoint(px, py));
         const cx = ${x + width / 2};
         const cy = ${y + height / 2};
@@ -86,30 +89,23 @@ export const tests = [
   {
     name: 'button: fill grows it to the available width, its content centered',
     run: async (page) => {
-      await page.open('button');
-      await page.setControl('variant', 'bordered');
+      await page.open('button', 'light', {
+        state: [null, { $rest: true, variant: 'bordered' }],
+      });
       /** @returns {Promise<[number, number, number]>} */
       const measure = () =>
         page.evaluate(`(() => {
-          const button = ${page.section}.querySelector('stage button');
+          const button = ${page.section}.querySelector('button');
           const box = button.getBoundingClientRect();
           const parent = button.parentElement.getBoundingClientRect();
           const label = button.lastElementChild.getBoundingClientRect();
           return [Math.round(box.width), Math.round(parent.width - box.width), Math.round(label.left + label.width / 2 - (box.left + box.width / 2))];
         })()`);
       const [hugging] = await measure();
-      await page.setControl('fill', true);
-      // In the stage's width (the demo's “Stretch”).
-      await page.evaluate(
-        `${page.section}.querySelector(${JSON.stringify('input[name="button.stretch"]')}).click()`,
-      );
-      await sleep(200);
+      // In the page's width (raw, its parent).
+      await page.setState(1, { fill: true });
       const [width, rest, offset] = await measure();
       assert.ok(width > hugging + 200, `${hugging}px → ${width}px`);
-      // Back to the demo's own layout (kept in local storage).
-      await page.evaluate(
-        `${page.section}.querySelector(${JSON.stringify('input[name="button.stretch"]')}).click()`,
-      );
       assert.deepEqual([rest, offset], [0, 0]);
     },
   },

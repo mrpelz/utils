@@ -2,7 +2,7 @@ import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
 import { Radio as BaseRadio } from '@base-ui/react/radio';
 import { useRender } from '@base-ui/react/use-render';
 import { Properties } from 'csstype';
-import { styled } from 'goober';
+import { keyframes, styled } from 'goober';
 import {
   createContext,
   FocusEvent,
@@ -14,13 +14,16 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
+import { createPortal } from 'react-dom';
 
 import { textStyle } from './typography.js';
 import {
   css,
   edgeScrollDelta,
   fontWeight,
+  frameElapsed,
   useForwardedRef,
   usePointerDrag,
 } from './utils.js';
@@ -45,9 +48,10 @@ import {
 //   another from the edge; it opens on releasing past half the actions, or
 //   on a quick swipe (300ms, 10px); optionally, swiping on past them
 //   (without rubber-banding) stretches the outermost action from the edge
-//   up to the others, which follow the row, and arms overswiping past 304px
-//   (Framework7: 1.2 times the actions), triggering it on release;
-//   armed, its symbol moves to the row's end, its label hides (150ms)
+//   up to the others, which follow the row, and arms overswiping (see
+//   `armDistance`; Framework7: past 1.2 times the actions), triggering it on
+//   release; armed, its symbol moves to the row's end, its label hides
+//   (150ms)
 // - reordering rows by their grabbers (`sortable.js`, see `useReorder`),
 //   independent of the leading edit controls (`Checkbox`, `Radio`,
 //   `EditButton`)
@@ -203,22 +207,6 @@ const Lines = () => (
     width="1.06em"
   >
     <path d="M1 1h16M1 6h16M1 11h16" />
-  </svg>
-);
-
-const UpDown = () => (
-  <svg
-    aria-hidden="true"
-    fill="none"
-    height="0.94em"
-    stroke="currentcolor"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="1.6"
-    viewBox="0 0 10 16"
-    width="0.59em"
-  >
-    <path d="M2 6l3-3.5L8 6M2 10l3 3.5L8 10" />
   </svg>
 );
 
@@ -392,8 +380,10 @@ const useReorder = (
         target instanceof Element
           ? target.closest<HTMLElement>(`[${CSS.escape(part)}='grabber']`)
           : null;
-      const item = grabber?.parentElement;
-      return grabber && item && isItem(item) && item.parentElement === group
+      const item = grabber?.closest<HTMLElement>(
+        `[${CSS.escape(part)}='item']`,
+      );
+      return grabber && item && item.parentElement === group
         ? { grabber, item }
         : undefined;
     };
@@ -493,13 +483,15 @@ const useReorder = (
         markEdges(to);
       };
 
-      let frame = requestAnimationFrame(function scroll() {
+      const elapsedOf = frameElapsed();
+      let frame = requestAnimationFrame(function scroll(time) {
         frame = requestAnimationFrame(scroll);
+        const elapsed = elapsedOf(time);
         const { bottom, top: scrollerTop } =
           scroller === scroller.ownerDocument.scrollingElement
             ? { bottom: window.innerHeight, top: 0 }
             : scroller.getBoundingClientRect();
-        const delta = edgeScrollDelta(clientY, scrollerTop, bottom);
+        const delta = edgeScrollDelta(clientY, scrollerTop, bottom, elapsed);
         if (delta === 0) return;
 
         const before = scroller.scrollTop;
@@ -622,7 +614,7 @@ const pressable = [
 // Pressed: a pressable title or button, or a row with a click handler,
 // pressed itself (see `Item`).
 const whilePressed = [
-  ...pressable.map((selector) => `&:has(> ${selector}:active)`),
+  ...pressable.map((selector) => `&:has(> * > * > ${selector}:active)`),
   '&[data-pressed]',
 ].join(', ');
 
@@ -635,10 +627,10 @@ export type ListItemProps = PartProps<'li'> & {
   cursor?: Properties['cursor'];
 };
 
-const StyledItem = styled(partElement('li', 'item'), forwardRef)<ListItemProps>`
+// The row's content: a grid of its parts (see above), with its separator;
+// in its item, offset by the item's leading swipe room (see `Item`).
+const StyledRow = styled(partElement('div', 'row'), forwardRef)`
   --styled-list-min-height: 52px;
-
-  ${({ onClick }) => cursor(onClick ? 'pointer' : 'auto')}
 
   position: relative;
   display: grid;
@@ -646,18 +638,10 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)<ListItemProps>`
   box-sizing: border-box;
   align-content: center;
   padding: 12px 16px;
-  background-color: var(--styled-list-row-background, transparent);
   grid-auto-columns: auto;
   grid-auto-flow: column;
   grid-template-columns: auto auto minmax(0, 1fr);
   grid-template-rows: auto auto;
-
-  /* The pressed state is the row's (a title's hit area covers it). */
-  -webkit-tap-highlight-color: transparent;
-  touch-action: pan-y;
-  transition-duration: 300ms;
-  transition-property: background-color;
-  user-select: none;
 
   /* Figma Height=Tall (images keep their regular size) */
   &:has(> [${part}='subtitle']) {
@@ -779,22 +763,6 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)<ListItemProps>`
     }
   }
 
-  /* Lifted while reordered (see useReorder), opaque (Framework7: 80%, the
-     rows beneath showing through), its separators hidden */
-  &[data-reordering] {
-    z-index: 2;
-    background-color: var(
-      --styled-list-group-background,
-      var(--color-ios-secondary-system-grouped-background)
-    );
-    box-shadow: var(--shadow-ios-list-reorder);
-  }
-
-  &[data-reordering]::before,
-  &[data-reorder-edge~='after']::before {
-    opacity: 0;
-  }
-
   /* Figma “_Separator”, from the text to 16px before the edge */
   &::before {
     position: absolute;
@@ -806,24 +774,10 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)<ListItemProps>`
        in rows spanning to it, e.g. media rows). */
     grid-column: 3 / auto;
     inset-inline: 0 16px;
+
+    /* Hidden by its row's state (see StyledItem). */
+    opacity: var(--styled-list-separator-opacity, 1);
     transition: opacity 300ms;
-  }
-
-  /* While reordering, by their order on screen (see useReorder) */
-  &:first-child:not([data-reorder-edge]),
-  &[data-reorder-edge~='first'] {
-    border-start-end-radius: var(--styled-list-radius, 24px);
-    border-start-start-radius: var(--styled-list-radius, 24px);
-
-    &::before {
-      display: none;
-    }
-  }
-
-  &:last-child:not([data-reorder-edge]),
-  &[data-reorder-edge~='last'] {
-    border-end-end-radius: var(--styled-list-radius, 24px);
-    border-end-start-radius: var(--styled-list-radius, 24px);
   }
 
   /* Keeps the trailing parts out of the leading and text columns. */
@@ -913,31 +867,94 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)<ListItemProps>`
   & > [${part}='grabber'] {
     margin-inline-start: 12px;
   }
+`;
+
+// The row's box (see `Item`): its background, corners and states; with
+// swipe actions, a horizontal scroll container (no scroll bar), its row in
+// a track with room for the actions (and overswiping) on both sides, the
+// row's offset its scroll position, snapping open or closed.
+const StyledItem = styled(partElement('li', 'item'), forwardRef)<ListItemProps>`
+  ${({ onClick }) => cursor(onClick ? 'pointer' : 'auto')}
+
+  position: relative;
+  display: block;
+  background-color: var(--styled-list-row-background, transparent);
+
+  /* The pressed state is the row's (a title's hit area covers it). */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+  transition-duration: 300ms;
+  transition-property: background-color;
+  user-select: none;
+
+  &[data-swipeable] {
+    overflow: auto hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    touch-action: pan-x pan-y;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  /* Lifted while reordered (see useReorder), opaque (Framework7: 80%, the
+     rows beneath showing through), its separators hidden */
+  &[data-reordering] {
+    z-index: 2;
+    background-color: var(
+      --styled-list-group-background,
+      var(--color-ios-secondary-system-grouped-background)
+    );
+    box-shadow: var(--shadow-ios-list-reorder);
+  }
+
+  &[data-reordering],
+  &[data-reorder-edge~='after'] {
+    --styled-list-separator-opacity: 0;
+  }
+
+  /* While reordering, by their order on screen (see useReorder) */
+  &:first-child:not([data-reorder-edge]),
+  &[data-reorder-edge~='first'] {
+    border-start-end-radius: var(--styled-list-radius, 24px);
+    border-start-start-radius: var(--styled-list-radius, 24px);
+
+    --styled-list-separator-opacity: 0;
+  }
+
+  &:last-child:not([data-reorder-edge]),
+  &[data-reorder-edge~='last'] {
+    border-end-end-radius: var(--styled-list-radius, 24px);
+    border-end-start-radius: var(--styled-list-radius, 24px);
+  }
 
   ${whilePressed} {
     --styled-list-row-background: var(--color-ios-system-gray4);
 
     transition-duration: 0ms;
 
-    &::before,
-    & + *::before {
-      opacity: 0;
+    &,
+    & + * {
+      --styled-list-separator-opacity: 0;
     }
   }
 
-  ${pressable.map((selector) => `&:has(> ${selector}:focus-visible)`).join(', ')} {
+  ${pressable.map((selector) => `&:has(> * > * > ${selector}:focus-visible)`).join(', ')} {
     outline: 2px solid var(--color-ios-primary);
     outline-offset: -2px;
   }
 
-  &[data-swipe]::before,
-  &[data-swipe] + *::before {
-    opacity: 0;
+  &[data-swipe],
+  &[data-swipe] + * {
+    --styled-list-separator-opacity: 0;
   }
 
-  /* Figma “Row with Swipe Actions”: the swiped row is a capsule (also
-     first and last rows, see above). */
-  &&[data-swipe] {
+  /* Figma “Row with Swipe Actions”: the swiped row's content is a capsule
+     (its end leaving the row rounded by its clip, see rowPath); its actions
+     on the row's background. */
+  &[data-swipe] > * > [${part}='row'] {
     border-radius: ${swipeRadius}px;
     background-color: var(--color-ios-system-gray5);
   }
@@ -947,12 +964,9 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)<ListItemProps>`
     overflow: hidden;
     height: 0;
     min-height: 0;
-    padding-block: 0;
     visibility: hidden;
 
-    &::before {
-      opacity: 0;
-    }
+    --styled-list-separator-opacity: 0;
   }
 `;
 
@@ -984,14 +998,16 @@ let closeOpenItem: (() => void) | undefined;
 
 const swipeDuration = 300;
 const swipeThreshold = 8;
+/** A sideways scroll swiping a row ends after this long without scrolling. */
+const scrollEndDelay = 150;
 /**
  * How far a row arms overswiping, with any actions (also fewer, or
  * labelled ones): past 5 circles (5 × (44 + 10) + 16 + 10 + 8px;
- * Framework7: 1.2 times the actions' width), at least 8px past its actions.
- * Released before, it doesn't.
+ * Framework7: 1.2 times the actions' width), or half the row, if less (on
+ * narrow screens), but at least one more action's width past its actions
+ * (see `armDistance`). Released before, it doesn't.
  */
 const overswipeArm = 304;
-const overswipeDistance = 8;
 /** Armed (or disarmed), the outermost action's symbol moves quickly. */
 const armDuration = 150;
 /**
@@ -1005,32 +1021,6 @@ const sides = ['leading', 'trailing'] as const;
 
 const isRtl = (element: HTMLElement) =>
   getComputedStyle(element).direction === 'rtl';
-
-/**
- * The part of a row's actions (`width` × `height`) the capsule-shaped row
- * doesn't cover, when it covers `covered` px of them from the row's side: up
- * to the row's rounded end, and below it (tall rows' labels hang below).
- */
-const uncoveredPath = (
-  width: number,
-  height: number,
-  covered: number,
-  rowOnLeft: boolean,
-) => {
-  // The row's `border-radius`, as drawn.
-  const radius = Math.min(swipeRadius, height / 2);
-  const below = height + 20;
-
-  if (rowOnLeft) {
-    const end = covered;
-    const start = end - radius;
-    return `path('M ${start} 0 A ${radius} ${radius} 0 0 1 ${end} ${radius} L ${end} ${height - radius} A ${radius} ${radius} 0 0 1 ${start} ${height} L ${start} ${below} L ${width} ${below} L ${width} 0 Z')`;
-  }
-
-  const end = width - covered;
-  const start = end + radius;
-  return `path('M ${start} 0 A ${radius} ${radius} 0 0 0 ${end} ${radius} L ${end} ${height - radius} A ${radius} ${radius} 0 0 0 ${start} ${height} L ${start} ${below} L 0 ${below} L 0 0 Z')`;
-};
 
 /**
  * Overswipe (Framework7 iOS): widens the outermost action's shape by
@@ -1059,7 +1049,7 @@ const stretchAction = (
   shape.style.width = `${width + Math.max(extra, 0)}px`;
   shape.style.marginLeft = towardsRow < 0 ? margin : '';
   shape.style.marginRight = towardsRow > 0 ? margin : '';
-  label.style.transition = `${transition('translate')}, opacity ${armDuration}ms`;
+  label.style.transition = `${transition('translate')}, filter ${armDuration}ms`;
   label.style.translate = extra > 0 ? `${(towardsRow * extra) / 2}px` : '';
 };
 
@@ -1073,29 +1063,78 @@ const outermostAction = (container: HTMLElement, side: Side) => {
 };
 
 /**
- * A swiped row's clip (`width` × `height`), moved `offset` px (physical):
- * rounded at its place's edge on the side it leaves, so its content slides
- * away beneath that round end; reaching beyond its other end, over its
- * actions (which clip themselves, see `uncoveredPath`).
+ * How far a row (`item`) is swiped to arm overswiping its side's actions
+ * (`container`, `width` wide): `overswipeArm`, or half the row if less, but
+ * at least its outermost action's width past them.
+ */
+const armDistance = (
+  item: HTMLElement,
+  container: HTMLElement,
+  side: Side,
+  width: number,
+) =>
+  Math.max(
+    width + (outermostAction(container, side)?.offsetWidth ?? 0),
+    Math.min(overswipeArm, item.offsetWidth / 2),
+  );
+
+/**
+ * A swiped row's clip (`width` × `height`), its content moved `offset` px
+ * (physical) within it (scrolled, see `Item`): its box, rounded at the side
+ * the content leaves, so it slides away beneath that round end; over its
+ * actions on the other side (beneath the row, see `Pin`).
  */
 const rowPath = (width: number, height: number, offset: number) => {
   const radius = Math.min(swipeRadius, height / 2);
-  const distance = Math.abs(offset);
 
   if (offset <= 0) {
-    const start = distance + radius;
-    return `path('M ${start} 0 H ${width + distance} V ${height} H ${start} A ${radius} ${radius} 0 0 1 ${distance} ${height - radius} V ${radius} A ${radius} ${radius} 0 0 1 ${start} 0 Z')`;
+    return `path('M ${radius} 0 H ${width} V ${height} H ${radius} A ${radius} ${radius} 0 0 1 0 ${height - radius} V ${radius} A ${radius} ${radius} 0 0 1 ${radius} 0 Z')`;
   }
 
-  const end = width - distance;
-  return `path('M ${-distance} 0 H ${end - radius} A ${radius} ${radius} 0 0 1 ${end} ${radius} V ${height - radius} A ${radius} ${radius} 0 0 1 ${end - radius} ${height} H ${-distance} Z')`;
+  const end = width - radius;
+  return `path('M 0 0 H ${end} A ${radius} ${radius} 0 0 1 ${width} ${radius} V ${height - radius} A ${radius} ${radius} 0 0 1 ${end} ${height} H 0 Z')`;
 };
 
 /**
- * Moves the row `offset` px towards its inline end (negative: its start),
- * over its actions, which stay at the list's edge (Framework7: the row's
- * content slides over them): they show where the row uncovers them, scaling
- * in one after another from the edge.
+ * The scroll range each of a row's actions (`container`, on `side`) scales
+ * in over, one after another from the edge, as the row uncovers them (see
+ * `StyledSwipeAction`): in the row's scroll position (logical, its content
+ * at rest at `lead`).
+ */
+const revealRanges = (container: HTMLElement, side: Side, lead: number) => {
+  const width = container.offsetWidth;
+  // Whether the row is on the container's left (the edge on its right).
+  const rowOnLeft = (side === 'trailing') === !isRtl(container);
+
+  for (const button of container.children) {
+    if (!(button instanceof HTMLElement)) continue;
+
+    // From the edge, uncovered from `start` to `start` + its width.
+    const start = rowOnLeft
+      ? width - button.offsetLeft - button.offsetWidth
+      : button.offsetLeft;
+    const end = start + button.offsetWidth;
+    // Trailing: scrolled on; leading: scrolled back (reversed).
+    const [from, to] =
+      side === 'trailing'
+        ? [lead + start, lead + end]
+        : [lead - end, lead - start];
+    button.style.setProperty('--styled-list-action-reveal-from', `${from}px`);
+    button.style.setProperty('--styled-list-action-reveal-to', `${to}px`);
+    button.style.setProperty(
+      '--styled-list-action-reveal-direction',
+      side === 'trailing' ? 'normal' : 'reverse',
+    );
+  }
+};
+
+/**
+ * Overswiping (the row's content moved `offset` px towards its inline end,
+ * negative: its start, past its actions): the others follow the row, the
+ * outermost action's shape fills the space up to them, from the edge (see
+ * `stretchAction`), the others fading until it's armed. Up to then, the
+ * actions stay in place by themselves (see `Pin`) and scale in with the
+ * scroll (see `StyledSwipeAction`).
  */
 const placeRow = (
   item: HTMLElement,
@@ -1110,14 +1149,13 @@ const placeRow = (
       .map((property) => `${property} ${animate ? swipeDuration : 0}ms`)
       .join(', ');
 
-  item.style.transition = transition('transform', 'clip-path');
-  item.style.transform =
-    offset === 0 ? '' : `translateX(${offset * direction}px)`;
-  item.style.clipPath = rowPath(
+  // Rounded at the side the content leaves (changing with the side only).
+  const clipPath = rowPath(
     item.offsetWidth,
     item.offsetHeight,
     offset * direction,
   );
+  if (item.style.clipPath !== clipPath) item.style.clipPath = clipPath;
 
   for (const side of sides) {
     const container = actions[side];
@@ -1125,93 +1163,29 @@ const placeRow = (
 
     const width = container.offsetWidth;
     const revealed = Math.max(0, side === 'leading' ? offset : -offset);
-    // Negative past the actions (overswiped: the stretched action follows).
-    const covered = width - revealed;
-    // Whether the row is on the container's left (the edge on its right).
-    const rowOnLeft = (side === 'trailing') === (direction === 1);
-
-    container.style.transition = transition('transform', 'clip-path');
-    container.style.transform =
-      offset === 0 ? '' : `translateX(${-offset * direction}px)`;
-    container.style.clipPath = uncoveredPath(
-      width,
-      container.offsetHeight,
-      covered,
-      rowOnLeft,
-    );
-
-    // Overswiping: the others follow the row, the outermost action's shape
-    // fills the space up to them, from the edge (see `stretchAction`), the
-    // others fading until it's armed.
     const extra = overswipes(side) ? Math.max(0, revealed - width) : 0;
     const outermost = outermostAction(container, side);
+    const rowOnLeft = (side === 'trailing') === (direction === 1);
     const towardsRow = rowOnLeft ? -1 : 1;
     const arming = Math.min(
-      extra / (Math.max(width + overswipeDistance, overswipeArm) - width),
+      extra / (armDistance(item, container, side, width) - width),
       1,
     );
 
     for (const button of container.children) {
       if (!(button instanceof HTMLElement)) continue;
 
-      const start = rowOnLeft
-        ? width - button.offsetLeft - button.offsetWidth
-        : button.offsetLeft;
-      const scale = Math.min(
-        Math.max((revealed - start) / button.offsetWidth, 0),
-        1,
-      );
-      const fade = Math.min(
-        actionFade + (1 - actionFade) * scale,
-        button === outermost ? 1 : 1 - (1 - actionFade) * arming,
-      );
-
-      button.style.transition = transition('transform', 'translate');
-      button.style.transform = `scale(${scale})`;
-      button.style.setProperty('--styled-list-action-fade', String(fade));
-      button.style.setProperty(
-        '--styled-list-action-fade-duration',
-        `${animate ? swipeDuration : 0}ms`,
-      );
       if (button === outermost) {
         stretchAction(button, extra, towardsRow, transition);
-      } else {
-        button.style.translate = extra > 0 ? `${towardsRow * extra}px` : '';
+        continue;
       }
+      button.style.setProperty(
+        '--styled-list-action-arming',
+        String(1 - (1 - actionFade) * arming),
+      );
+      button.style.translate = extra > 0 ? `${towardsRow * extra}px` : '';
     }
   }
-};
-
-/**
- * The row's offset for a swipe to `offset`: none towards a side without
- * actions, rubber-banding past the actions (Framework7 `swipeout.js`),
- * unless they can be overswiped (`overswipes`).
- */
-const swipeOffset = (
-  widths: Partial<Record<Side, number>>,
-  offset: number,
-  overswipes: (side: Side) => boolean,
-) => {
-  const side = offset > 0 ? 'leading' : 'trailing';
-  const width = widths[side];
-  if (width === undefined) return 0;
-  if (Math.abs(offset) <= width || overswipes(side)) return offset;
-
-  return Math.sign(offset) * (width + (Math.abs(offset) - width) ** 0.8);
-};
-
-type Gesture = {
-  base: number;
-  offset: number;
-  /** The side overswiping is armed on. */
-  overswipe?: Side;
-  pointerId: number;
-  started: boolean;
-  time: number;
-  /** The actions' widths, before any overswipe. */
-  widths: Partial<Record<Side, number>>;
-  x: number;
-  y: number;
 };
 
 /**
@@ -1244,10 +1218,109 @@ const isOwnGesture = (item: HTMLElement, event: PointerEvent<HTMLElement>) => {
 
 type Handler<E> = ((event: E) => void) | undefined;
 
+// The track a swipeable row scrolls in (see `Item`): the row, with room
+// for its actions (and overswiping) on both sides.
+const Track = styled('div', forwardRef)`
+  position: relative;
+  display: grid;
+  width: calc(
+    100% + var(--styled-list-swipe-lead, 0px) +
+      var(--styled-list-swipe-trail, 0px)
+  );
+  box-sizing: border-box;
+  grid-template-columns:
+    var(--styled-list-swipe-lead, 0)
+    minmax(0, 1fr)
+    var(--styled-list-swipe-trail, 0);
+
+  /* Not part of the row's intrinsic width (e.g. a list sized by its
+     content): its room cancelled out (without effect on its layout). */
+  margin-inline-end: calc(
+    -1 *
+      (var(--styled-list-swipe-lead, 0px) + var(--styled-list-swipe-trail, 0px))
+  );
+
+  & > [${part}='row'] {
+    grid-area: 1 / 2;
+  }
+`;
+
+// The layer a swipeable row's actions are in (see `SwipeActions`): beneath
+// the row, as wide as it, stuck to the scrollport's start, so it stays in
+// place while the row scrolls (natively, in every frame). At the track's
+// start (a margin would keep it from moving there: sticky boxes stay in
+// their containing block with their margins).
+const Pin = styled('div', forwardRef)`
+  position: sticky;
+  z-index: 0;
+  width: calc(
+    100% - var(--styled-list-swipe-lead, 0px) - var(
+        --styled-list-swipe-trail,
+        0px
+      )
+  );
+  grid-area: 1 / 1 / 2 / 4;
+  inset-inline: 0;
+  justify-self: start;
+  pointer-events: none;
+`;
+
+/** The layer a row's swipe actions are rendered in (see `Pin`). */
+const PinContext = createContext<HTMLElement | null>(null);
+
+// Where a swipeable row snaps (see `Item`), in the track.
+const Snap = styled('span', forwardRef)`
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+  scroll-snap-align: start;
+`;
+
+/** The snap points of a swipeable row (see `Item`). */
+const snapPoints = [
+  'closed',
+  'leading',
+  'leadingOverswipe',
+  'trailing',
+  'trailingOverswipe',
+] as const;
+
+type SnapPoint = (typeof snapPoints)[number];
+
+/** A swipeable row's geometry (see `Item`), by side. */
+type Swipe = {
+  /** How far the row moves to arm overswiping. */
+  arms: Partial<Record<Side, number>>;
+  /** How far the row moves at most (overswiping: past the actions). */
+  extents: Partial<Record<Side, number>>;
+  /** The actions' widths. */
+  widths: Partial<Record<Side, number>>;
+};
+
+/** A mouse drag swiping a row (see `Item`). */
+type Drag = {
+  /** The row's offset when it started. */
+  base: number;
+  moved: boolean;
+  pointerId: number;
+  scroll: number;
+  time: number;
+  x: number;
+  y: number;
+};
+
 /**
  * A row (UIKit `UITableViewCell`), with optional swipe actions. With a click
  * handler, it's pressable itself (e.g. passing the click on to a control in
  * it), but where its own controls are pressed.
+ *
+ * With swipe actions, it scrolls sideways natively (touch, trackpads,
+ * wheels, with their inertia; dragged with a mouse, as it moves), snapping
+ * closed, open, or overswiped (as far as twice the distance arming it:
+ * snapping there, it's armed); the overswipe triggers only once the scroll
+ * comes to rest there, so scrolling back disarms it.
  */
 const Item = forwardRef<HTMLElement, ListItemProps>(
   (
@@ -1260,6 +1333,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>(
       onPointerDown,
       onPointerMove,
       onPointerUp,
+      style,
       ...props
     },
     ref,
@@ -1267,21 +1341,117 @@ const Item = forwardRef<HTMLElement, ListItemProps>(
     const itemRef = useForwardedRef<HTMLElement>(ref);
     const actionsRef = useRef<Partial<Record<Side, HTMLElement>>>({});
     const overswipeRef = useRef<Partial<Record<Side, Overswipe>>>({});
-    const gestureRef = useRef<Gesture | null>(null);
+    const snapsRef = useRef<Partial<Record<SnapPoint, HTMLElement | null>>>({});
+    const swipeRef = useRef<Swipe>({ arms: {}, extents: {}, widths: {} });
+    const dragRef = useRef<Drag | null>(null);
+    const pressRef = useRef<{ pointerId: number; x: number; y: number } | null>(
+      null,
+    );
     const openSideRef = useRef<Side | undefined>(undefined);
     const suppressClickRef = useRef(false);
     const settleRef = useRef<ReturnType<typeof setTimeout> | undefined>(
       undefined,
     );
     const outsideRef = useRef<((event: Event) => void) | undefined>(undefined);
+    const [swipeable, setSwipeable] = useState(false);
+    const [pin, setPin] = useState<HTMLElement | null>(null);
+
+    const overswipes = (side: Side) => Boolean(overswipeRef.current[side]);
+
+    // The track's room before the row (the leading side's extent).
+    const lead = () => swipeRef.current.extents.leading ?? 0;
+
+    // The row's offset (towards its inline end), from the scroll position.
+    const offsetOf = (item: HTMLElement) =>
+      isRtl(item) ? item.scrollLeft + lead() : lead() - item.scrollLeft;
+
+    const scrollTo = (offset: number, smooth: boolean) => {
+      const { current: item } = itemRef;
+      if (!item) return;
+      const rtl = isRtl(item);
+      const left = rtl ? offset - lead() : lead() - offset;
+      item.scrollTo({ behavior: smooth ? 'smooth' : 'instant', left });
+    };
+
+    // Measures the actions (and the row) for the track's room and snap
+    // points, keeping the row where it is (closed, or open).
+    const measure = () => {
+      const { current: item } = itemRef;
+      if (!item) return;
+      const swipe: Swipe = { arms: {}, extents: {}, widths: {} };
+      for (const side of sides) {
+        const { [side]: container } = actionsRef.current;
+        if (!container) continue;
+        const width = container.offsetWidth;
+        const arm = armDistance(item, container, side, width);
+        swipe.widths[side] = width;
+        swipe.arms[side] = arm;
+        // Snapping overswiped past the arming distance, open before it.
+        swipe.extents[side] = overswipes(side) ? 2 * arm - width : width;
+      }
+      swipeRef.current = swipe;
+      item.style.setProperty('--styled-list-swipe-lead', `${String(lead())}px`);
+      item.style.setProperty(
+        '--styled-list-swipe-trail',
+        `${String(swipe.extents.trailing ?? 0)}px`,
+      );
+
+      const places: Record<SnapPoint, number | undefined> = {
+        closed: lead(),
+        leading:
+          swipe.widths.leading === undefined
+            ? undefined
+            : lead() - swipe.widths.leading,
+        leadingOverswipe: overswipes('leading') ? 0 : undefined,
+        trailing:
+          swipe.widths.trailing === undefined
+            ? undefined
+            : lead() + swipe.widths.trailing,
+        trailingOverswipe: overswipes('trailing')
+          ? lead() + (swipe.extents.trailing ?? 0)
+          : undefined,
+      };
+      for (const side of sides) {
+        const { [side]: container } = actionsRef.current;
+        if (container) revealRanges(container, side, lead());
+      }
+
+      for (const point of snapPoints) {
+        const snap = snapsRef.current[point];
+        if (!snap) continue;
+        const place = places[point];
+        snap.hidden = place === undefined;
+        snap.style.insetInlineStart = `${String(place ?? 0)}px`;
+      }
+
+      const { current: side } = openSideRef;
+      const offset = side
+        ? (side === 'leading' ? 1 : -1) * (swipe.widths[side] ?? 0)
+        : 0;
+      scrollTo(offset, false);
+    };
+    const measureRef = useRef(measure);
+    useLayoutEffect(() => {
+      measureRef.current = measure;
+    });
+
+    // Back in place: no longer a capsule, its actions reset.
+    const resetRow = (item: HTMLElement) => {
+      delete item.dataset.swipe;
+      for (const button of item.querySelectorAll<HTMLElement>('[data-armed]')) {
+        delete button.dataset.armed;
+      }
+      for (const shape of item.querySelectorAll<HTMLElement>(
+        `[${CSS.escape(part)}='swipe-action-shape']`,
+      )) {
+        shape.style.removeProperty('width');
+      }
+      item.style.removeProperty('clip-path');
+    };
 
     const context = useMemo<ItemContextValue>(() => {
-      const overswipes = (side: Side) => Boolean(overswipeRef.current[side]);
-
       const value: ItemContextValue = {
         close: () => {
-          const { current: item } = itemRef;
-
           if (outsideRef.current) {
             document.removeEventListener('pointerdown', outsideRef.current, {
               capture: true,
@@ -1290,48 +1460,17 @@ const Item = forwardRef<HTMLElement, ListItemProps>(
           }
           if (closeOpenItem === value.close) closeOpenItem = undefined;
           openSideRef.current = undefined;
-          if (!item) return;
-
-          // An overswiped action narrows as the row slides back.
-          placeRow(item, actionsRef.current, 0, true, overswipes);
-
-          // The row stays a capsule until it's back in place.
-          clearTimeout(settleRef.current);
-          settleRef.current = setTimeout(() => {
-            if (openSideRef.current || gestureRef.current?.started) return;
-            delete item.dataset.swipe;
-            for (const button of item.querySelectorAll<HTMLElement>(
-              '[data-armed]',
-            )) {
-              delete button.dataset.armed;
-            }
-            for (const shape of item.querySelectorAll<HTMLElement>(
-              `[${CSS.escape(part)}='swipe-action-shape']`,
-            )) {
-              shape.style.removeProperty('width');
-            }
-            item.style.removeProperty('transition');
-            item.style.removeProperty('clip-path');
-          }, swipeDuration);
+          scrollTo(0, true);
         },
         open: (side) => {
           const { current: item } = itemRef;
-          const { [side]: container } = actionsRef.current;
-          if (!item || !container) return;
+          const width = swipeRef.current.widths[side];
+          if (!item || width === undefined) return;
 
           if (closeOpenItem !== value.close) closeOpenItem?.();
           closeOpenItem = value.close;
           openSideRef.current = side;
-          clearTimeout(settleRef.current);
-
-          item.dataset.swipe = side;
-          placeRow(
-            item,
-            actionsRef.current,
-            (side === 'leading' ? 1 : -1) * container.offsetWidth,
-            true,
-            overswipes,
-          );
+          scrollTo((side === 'leading' ? 1 : -1) * width, true);
 
           if (outsideRef.current) return;
           outsideRef.current = (event) => {
@@ -1351,10 +1490,15 @@ const Item = forwardRef<HTMLElement, ListItemProps>(
           } else {
             delete actionsRef.current[side];
           }
+          setSwipeable(
+            Boolean(actionsRef.current.leading ?? actionsRef.current.trailing),
+          );
+          measureRef.current();
         },
       };
 
       return value;
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- once
     }, [itemRef]);
 
     useEffect(
@@ -1370,47 +1514,6 @@ const Item = forwardRef<HTMLElement, ListItemProps>(
       [context],
     );
 
-    // A touch moving the slightest bit vertically would be scrolled (the row
-    // pans vertically), cancelling its swipe: a touch on a swipeable row
-    // that first moves more horizontally than vertically isn't scrolled
-    // (as Framework7 swipeouts do; only touch events can prevent it).
-    useEffect(() => {
-      const { current: item } = itemRef;
-      if (!item) return undefined;
-
-      let start: { x: number; y: number } | undefined;
-      let horizontal: boolean | undefined;
-
-      const onTouchStart = ({ touches }: TouchEvent) => {
-        const [touch] = touches;
-        start =
-          touches.length === 1 && touch
-            ? { x: touch.clientX, y: touch.clientY }
-            : undefined;
-        horizontal = undefined;
-      };
-
-      const onTouchMove = (event: TouchEvent) => {
-        const [touch] = event.touches;
-        if (!start || !touch || !gestureRef.current) return;
-
-        if (horizontal === undefined) {
-          const x = Math.abs(touch.clientX - start.x);
-          const y = Math.abs(touch.clientY - start.y);
-          if (x === y) return;
-          horizontal = x > y;
-        }
-        if (horizontal && event.cancelable) event.preventDefault();
-      };
-
-      item.addEventListener('touchstart', onTouchStart, { passive: true });
-      item.addEventListener('touchmove', onTouchMove, { passive: false });
-      return () => {
-        item.removeEventListener('touchstart', onTouchStart);
-        item.removeEventListener('touchmove', onTouchMove);
-      };
-    }, [itemRef]);
-
     const suppressClick = () => {
       suppressClickRef.current = true;
       setTimeout(() => {
@@ -1418,56 +1521,81 @@ const Item = forwardRef<HTMLElement, ListItemProps>(
       });
     };
 
-    const finish = (event: PointerEvent<HTMLElement>, cancelled: boolean) => {
-      const { current: gesture } = gestureRef;
-      if (gesture?.pointerId !== event.pointerId) return;
-      gestureRef.current = null;
-
-      if (!gesture.started) {
-        // A tap on an open row closes it.
-        if (!cancelled && openSideRef.current) {
-          context.close();
-          suppressClick();
-        }
-        return;
-      }
-
-      const { offset, overswipe } = gesture;
-      const { [overswipe ?? 'trailing']: container } = actionsRef.current;
-
-      // Overswiped: the outermost action is triggered (and closes the row;
-      // clicked before suppressing the release's click), or the handler.
-      if (overswipe && container && !cancelled) {
-        const { [overswipe]: action } = overswipeRef.current;
-        if (typeof action === 'function') {
-          action();
-          context.close();
-        } else {
-          outermostAction(container, overswipe)?.click();
-        }
-        suppressClick();
-        return;
-      }
-
-      suppressClick();
-
-      if (offset === 0 || cancelled) {
+    // Overswiped (at rest there): the outermost action is triggered (and
+    // closes the row), or the handler.
+    const trigger = (side: Side) => {
+      const { [side]: container } = actionsRef.current;
+      const { [side]: action } = overswipeRef.current;
+      if (typeof action === 'function') {
+        action();
         context.close();
         return;
       }
+      if (container) outermostAction(container, side)?.click();
+    };
 
-      const side = offset > 0 ? 'leading' : 'trailing';
-      const width = gesture.widths[side] ?? 0;
-      const moved = offset - gesture.base;
-      const quick = performance.now() - gesture.time < 300;
-      const towards = side === 'leading' ? moved > 10 : moved < -10;
+    // The scroll at rest: overswiped (triggering), open or closed.
+    const settle = () => {
+      const { current: item } = itemRef;
+      if (!item || dragRef.current?.moved) return;
+      const offset = offsetOf(item);
+      const side: Side = offset > 0 ? 'leading' : 'trailing';
+      const distance = Math.abs(offset);
+      const { [side]: width = 0 } = swipeRef.current.widths;
+      const { [side]: extent = 0 } = swipeRef.current.extents;
 
-      if (quick ? towards : Math.abs(offset) > width / 2) {
+      if (distance < 1) {
+        openSideRef.current = undefined;
+        if (closeOpenItem === context.close) closeOpenItem = undefined;
+        resetRow(item);
+        return;
+      }
+      if (overswipes(side) && distance >= extent - 1) {
+        trigger(side);
+        return;
+      }
+      if (Math.abs(distance - width) < 1 && openSideRef.current !== side) {
         context.open(side);
-      } else {
-        context.close();
       }
     };
+
+    // Scrolled (by any means): the row's actions follow, overswiping arms
+    // past its distance.
+    const onScroll = () => {
+      const { current: item } = itemRef;
+      if (!item) return;
+      const offset = offsetOf(item);
+      const side: Side = offset > 0 ? 'leading' : 'trailing';
+      if (Math.abs(offset) >= 1) {
+        item.dataset.swipe = side;
+        if (closeOpenItem && closeOpenItem !== context.close) closeOpenItem();
+      }
+      placeRow(item, actionsRef.current, offset, false, overswipes);
+
+      const { [side]: arm = Infinity } = swipeRef.current.arms;
+      const armed = overswipes(side) && Math.abs(offset) > arm;
+      for (const key of sides) {
+        const { [key]: actions } = actionsRef.current;
+        const action = actions && outermostAction(actions, key);
+        action?.toggleAttribute('data-armed', armed && key === side);
+      }
+
+      clearTimeout(settleRef.current);
+      settleRef.current = setTimeout(settle, scrollEndDelay);
+    };
+
+    useLayoutEffect(() => {
+      const { current: item } = itemRef;
+      if (!item || !swipeable) return undefined;
+      measureRef.current();
+      const observer = new ResizeObserver(() => measureRef.current());
+      observer.observe(item);
+      for (const side of sides) {
+        const { [side]: container } = actionsRef.current;
+        if (container) observer.observe(container);
+      }
+      return () => observer.disconnect();
+    }, [itemRef, swipeable]);
 
     const release = () => {
       if (itemRef.current) delete itemRef.current.dataset.pressed;
@@ -1478,7 +1606,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>(
 
       const { current: item } = itemRef;
       const { current: actions } = actionsRef;
-      if (event.button !== 0 || gestureRef.current || !item) return;
+      if (event.button !== 0 || !item) return;
 
       const { target } = event;
       const control =
@@ -1486,7 +1614,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>(
       if (props.onClick && !(control && item.contains(control))) {
         item.dataset.pressed = '';
       }
-      if (!actions.leading && !actions.trailing) return;
+      if (!swipeable) return;
       if (
         sides.some((side) =>
           actions[side]?.contains(event.target as Node | null),
@@ -1494,84 +1622,105 @@ const Item = forwardRef<HTMLElement, ListItemProps>(
       ) {
         return;
       }
-      if (isOwnGesture(item, event)) return;
-
-      const { current: side } = openSideRef;
-      const base = side
-        ? (side === 'leading' ? 1 : -1) * (actions[side]?.offsetWidth ?? 0)
-        : 0;
-
-      gestureRef.current = {
-        base,
-        offset: base,
+      pressRef.current = {
         pointerId: event.pointerId,
-        started: false,
+        x: event.clientX,
+        y: event.clientY,
+      };
+      // Touch scrolls natively; a mouse drags the scroll position.
+      if (event.pointerType !== 'mouse' || isOwnGesture(item, event)) return;
+      dragRef.current = {
+        base: offsetOf(item),
+        moved: false,
+        pointerId: event.pointerId,
+        scroll: item.scrollLeft,
         time: performance.now(),
-        widths: Object.fromEntries(
-          sides.flatMap((key) => {
-            const { [key]: container } = actions;
-            return container ? [[key, container.offsetWidth]] : [];
-          }),
-        ),
         x: event.clientX,
         y: event.clientY,
       };
     };
 
-    // Far enough past its actions, overswiping is armed (the outermost
-    // action is triggered on release).
-    const overswipe = (gesture: Gesture, side: Side, revealed: number) => {
-      const { [side]: container } = actionsRef.current;
-      const { [side]: width = 0 } = gesture.widths;
-      const armed =
-        Boolean(overswipeRef.current[side]) &&
-        container !== undefined &&
-        revealed > Math.max(width + overswipeDistance, overswipeArm);
-
-      gesture.overswipe = armed ? side : undefined;
-      for (const key of sides) {
-        const { [key]: actions } = actionsRef.current;
-        const action = actions && outermostAction(actions, key);
-        action?.toggleAttribute('data-armed', armed && key === side);
-      }
-    };
-
     const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
       (onPointerMove as Handler<typeof event>)?.(event);
 
-      const { current: gesture } = gestureRef;
+      const { current: drag } = dragRef;
       const { current: item } = itemRef;
-      if (!item || gesture?.pointerId !== event.pointerId) return;
+      if (!item || drag?.pointerId !== event.pointerId) return;
 
-      const moved = (event.clientX - gesture.x) * (isRtl(item) ? -1 : 1);
-
-      if (!gesture.started) {
-        const vertical = Math.abs(event.clientY - gesture.y);
-        if (vertical > swipeThreshold && vertical > Math.abs(moved)) {
-          gestureRef.current = null;
+      const dx = event.clientX - drag.x;
+      if (!drag.moved) {
+        const vertical = Math.abs(event.clientY - drag.y);
+        if (vertical > swipeThreshold && vertical > Math.abs(dx)) {
+          dragRef.current = null;
           return;
         }
-        if (Math.abs(moved) < swipeThreshold) return;
+        if (Math.abs(dx) < swipeThreshold) return;
 
-        gesture.started = true;
+        drag.moved = true;
         release();
         item.setPointerCapture(event.pointerId);
-        if (closeOpenItem !== context.close) closeOpenItem?.();
-        clearTimeout(settleRef.current);
+        item.style.scrollSnapType = 'none';
       }
 
-      const { current: actions } = actionsRef;
-      const offset = swipeOffset(gesture.widths, gesture.base + moved, (key) =>
-        Boolean(overswipeRef.current[key]),
-      );
-      const side = offset > 0 ? 'leading' : 'trailing';
+      // The content follows the pointer.
+      item.scrollLeft = drag.scroll - dx;
+    };
 
-      gesture.offset = offset;
-      if (offset !== 0) item.dataset.swipe = side;
-      placeRow(item, actions, offset, false, (key) =>
-        Boolean(overswipeRef.current[key]),
+    // A mouse drag released: overswiped (armed), opened (past half its
+    // actions, or quickly towards them) or closed, scrolling there.
+    const endDrag = (drag: Drag, cancelled: boolean) => {
+      const { current: item } = itemRef;
+      if (!item) return;
+      item.style.removeProperty('scroll-snap-type');
+      const offset = offsetOf(item);
+      const side: Side = offset > 0 ? 'leading' : 'trailing';
+      const distance = Math.abs(offset);
+      const { [side]: width } = swipeRef.current.widths;
+      const { [side]: arm = Infinity } = swipeRef.current.arms;
+
+      // Triggered before suppressing the release's click.
+      if (!cancelled && overswipes(side) && distance > arm) {
+        trigger(side);
+        suppressClick();
+        return;
+      }
+      suppressClick();
+      if (cancelled || width === undefined || distance < 1) {
+        context.close();
+        return;
+      }
+      const moved = offset - drag.base;
+      const quick = performance.now() - drag.time < 300;
+      const towards = side === 'leading' ? moved > 10 : moved < -10;
+      if (quick ? towards : distance > width / 2) {
+        context.open(side);
+      } else {
+        context.close();
+      }
+    };
+
+    const finish = (event: PointerEvent<HTMLElement>, cancelled: boolean) => {
+      const { current: press } = pressRef;
+      const { current: drag } = dragRef;
+      if (press?.pointerId === event.pointerId) pressRef.current = null;
+      if (drag?.pointerId === event.pointerId) {
+        dragRef.current = null;
+        if (drag.moved) {
+          endDrag(drag, cancelled);
+          return;
+        }
+      }
+      if (press?.pointerId !== event.pointerId) return;
+
+      // A tap on an open row closes it.
+      const moved = Math.hypot(
+        event.clientX - press.x,
+        event.clientY - press.y,
       );
-      overswipe(gesture, side, Math.abs(offset));
+      if (!cancelled && moved < swipeThreshold && openSideRef.current) {
+        context.close();
+        suppressClick();
+      }
     };
 
     const handleBlurCapture = (event: FocusEvent<HTMLElement>) => {
@@ -1601,11 +1750,14 @@ const Item = forwardRef<HTMLElement, ListItemProps>(
       <ItemContext.Provider value={context}>
         <StyledItem
           ref={itemRef}
+          data-swipeable={swipeable ? '' : undefined}
+          style={style}
           {...props}
           onBlurCapture={handleBlurCapture}
           onClickCapture={handleClickCapture}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
+          onScroll={swipeable ? onScroll : undefined}
           onLostPointerCapture={(event: PointerEvent<HTMLElement>) => {
             (onLostPointerCapture as Handler<typeof event>)?.(event);
             // Only the row's own capture: taking it over from the touched
@@ -1624,7 +1776,24 @@ const Item = forwardRef<HTMLElement, ListItemProps>(
             finish(event, false);
           }}
         >
-          {children}
+          <Track>
+            <Pin ref={setPin} />
+            {swipeable
+              ? snapPoints.map((point) => (
+                  <Snap
+                    key={point}
+                    ref={(element: HTMLElement | null) => {
+                      snapsRef.current[point] = element;
+                    }}
+                    hidden
+                    aria-hidden="true"
+                  />
+                ))
+              : null}
+            <PinContext.Provider value={pin}>
+              <StyledRow>{children}</StyledRow>
+            </PinContext.Provider>
+          </Track>
         </StyledItem>
       </ItemContext.Provider>
     );
@@ -2007,38 +2176,6 @@ const Grabber = forwardRef<HTMLElement, PartProps<'span'>>(
   ),
 );
 
-// Figma Type=Pop-up: the value and 􀆏 (e.g. as a `Menu.Trigger`).
-const StyledPopUp = styled(
-  partElement('button', 'pop-up', [], { type: 'button' }),
-  forwardRef,
-)`
-  ${reset}
-
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-ios-secondary-label);
-  ${cursor('pointer')}
-  ${textStyle('body')}
-  gap: 10px;
-  white-space: nowrap;
-
-  & > svg {
-    width: 13px;
-  }
-`;
-
-const PopUp = forwardRef<HTMLElement, PartProps<'button'>>(
-  ({ children, ...props }, ref) => (
-    <StyledPopUp
-      ref={ref}
-      {...props}
-    >
-      {children}
-      <UpDown />
-    </StyledPopUp>
-  ),
-);
-
 // Figma Type=Button (rows) and Type=Action (headers): text in the tint
 // color.
 const Action = styled(
@@ -2301,6 +2438,7 @@ const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
     ref,
   ) => {
     const item = useContext(ItemContext);
+    const pin = useContext(PinContext);
     const elementRef = useForwardedRef<HTMLElement>(ref);
 
     // The latest handler, without setting the actions again.
@@ -2321,9 +2459,12 @@ const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
       );
 
       return () => item.setActions(side, undefined);
-    }, [elementRef, hasHandler, item, overswipe, side]);
+    }, [elementRef, hasHandler, item, overswipe, pin, side]);
 
-    return (
+    // In the row's pin layer, staying in place as it scrolls (see `Pin`).
+    if (!pin) return null;
+
+    return createPortal(
       <StyledSwipeActions
         ref={elementRef}
         side={side}
@@ -2332,7 +2473,8 @@ const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
           (onFocusCapture as Handler<typeof event>)?.(event);
           item?.open(side);
         }}
-      />
+      />,
+      pin,
     );
   },
 );
@@ -2379,14 +2521,44 @@ const swipeActionShapes: Record<
   `,
 };
 
-// Faded (see `actionFade`) as the row moves (see `placeRow`): the shape's
-// fill, the symbol and the label each.
-const actionFadeStyle = css`
-  opacity: var(--styled-list-action-fade, 1);
+// An action's reveal (see `StyledSwipeAction`): scaling in, and its parts
+// fading in (see `actionFade`).
+const revealScale = keyframes`
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
 `;
 
-const actionFadeTransition =
-  'opacity var(--styled-list-action-fade-duration, 0ms)';
+const revealFade = keyframes`
+  from {
+    opacity: ${actionFade};
+  }
+
+  to {
+    opacity: 1;
+  }
+`;
+
+// With the row's scroll, over the action's range (see revealRanges).
+const revealAnimation = (name: string) => css`
+  animation: ${name} linear both;
+  animation-direction: var(--styled-list-action-reveal-direction, normal);
+  animation-range: var(--styled-list-action-reveal-from, 0)
+    var(--styled-list-action-reveal-to, 0);
+  animation-timeline: scroll(nearest inline);
+`;
+
+// Faded in as the row uncovers the action, and, overswiping, until the
+// outermost action is armed (see `placeRow`): the shape's fill, the symbol
+// and the label each.
+const actionFadeStyle = css`
+  ${revealAnimation(revealFade)}
+  filter: opacity(var(--styled-list-action-arming, 1));
+`;
 
 const StyledSwipeAction = styled(
   partElement('button', 'swipe-action', ['shape', 'showLabel', 'tint'], {
@@ -2414,6 +2586,10 @@ const StyledSwipeAction = styled(
   ${cursor('pointer')}
   transform: scale(0);
 
+  /* Scaling in with the row's scroll as it uncovers it (natively: see
+     revealRanges). Without a scroll timeline (not swipeable yet), hidden. */
+  ${revealAnimation(revealScale)}
+
   &:disabled {
     ${cursorProperty('not-allowed')}
   }
@@ -2436,7 +2612,6 @@ const StyledSwipeAction = styled(
       content: '';
       inset: 0;
       ${actionFadeStyle}
-      transition: ${actionFadeTransition};
     }
   }
 
@@ -2457,9 +2632,7 @@ const StyledSwipeAction = styled(
     place-items: center;
     text-transform: uppercase;
     ${actionFadeStyle}
-    transition:
-      width ${armDuration}ms,
-      ${actionFadeTransition};
+    transition: width ${armDuration}ms;
     white-space: nowrap;
 
     & > svg {
@@ -2475,7 +2648,7 @@ const StyledSwipeAction = styled(
     }
 
     & > [${part}='swipe-action-label'] {
-      opacity: 0;
+      filter: opacity(0);
     }
   }
 
@@ -2488,7 +2661,6 @@ const StyledSwipeAction = styled(
     ${fontWeight(510)}
     line-height: 16px;
     ${actionFadeStyle}
-    transition: ${actionFadeTransition};
     white-space: nowrap;
   }
 `;
@@ -2849,7 +3021,6 @@ export const List = {
   DrillIn,
   Disclosure,
   Grabber,
-  PopUp,
   Action,
   Button,
   Checkbox,

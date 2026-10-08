@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
-import { haptics, RollValue } from '../../components/index.js';
+import { RollValue } from '../../components/index.js';
 import { AddLog } from '../utils/log.js';
 import { commonPropOptions, MappedProp } from '../utils/main.js';
 
@@ -23,6 +23,7 @@ export const getPropOptionsColumn = (addLog: AddLog) => ({
   align: [undefined, 'start', 'center', 'end'] as const,
   disabled: [undefined, false, true] as const,
   editable: [true, false, undefined] as const,
+  loop: [undefined, false, true] as const,
   onValueChange: [
     new MappedProp(
       (value: RollValue) => addLog(`hours: ${String(value)}`),
@@ -31,7 +32,6 @@ export const getPropOptionsColumn = (addLog: AddLog) => ({
     undefined,
   ] as const,
   onHighlightChange: [
-    new MappedProp(() => haptics.tap(), '[haptic tap]'),
     new MappedProp(
       (value: RollValue) => addLog(`hours highlighted: ${String(value)}`),
       '[log highlight]',

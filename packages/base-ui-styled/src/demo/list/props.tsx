@@ -8,16 +8,18 @@ import { commonPropOptions, MappedProp } from '../utils/main.js';
 
 /**
  * Passes a row's click on to the control in it (`selector`), as iOS rows
- * do, unless it was the control's own.
+ * do, unless it was the control's own. As the click it is: a pointer's
+ * (`detail` > 0) or a keyboard's (`control.click()` would be a keyboard's,
+ * so menus would open with their first item highlighted).
  */
 export const forwardClick =
-  (selector: string) =>
-  ({ currentTarget, target }: MouseEvent<HTMLElement>) => {
+  (selector: string) => (event: MouseEvent<HTMLElement>) => {
+    const { currentTarget, target } = event;
     const control = currentTarget.querySelector<HTMLElement>(selector);
     if (!control || (target instanceof Node && control.contains(target))) {
       return;
     }
-    control.click();
+    control.dispatchEvent(new globalThis.MouseEvent('click', event));
   };
 
 export const cursorOptions = [undefined, 'auto', 'pointer', 'copy'] as const;

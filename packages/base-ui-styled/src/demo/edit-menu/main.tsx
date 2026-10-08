@@ -12,6 +12,10 @@ import { EditMenu, Menu } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
 import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
 import {
+  useCreateStateUrl,
+  useProvidedState,
+} from '../utils/options-context.js';
+import {
   getPropOptionsItems,
   getPropOptionsRoot,
   propOptionsContent,
@@ -35,7 +39,20 @@ const actions = ['Cut', 'Copy', 'Paste', 'Delete', 'Replace…', 'AutoFill'];
 type VirtualAnchor = { getBoundingClientRect: () => DOMRect };
 
 export const EditMenuDemo: FunctionComponent = () => {
+  const id = 'edit-menu';
+
   const [log, addLog] = useLog();
+
+  const [
+    externalContent,
+    externalRoot,
+    externalPositioner,
+    externalPopup,
+    externalItem,
+    externalMore,
+    externalSubmenuPositioner,
+    externalSubmenuPopup,
+  ] = useProvidedState(id);
   const [text, setText] = useState<HTMLElement | null>(null);
   const [selection, setSelection] = useState<VirtualAnchor | null>(null);
 
@@ -128,41 +145,56 @@ export const EditMenuDemo: FunctionComponent = () => {
     };
   }, [text]);
 
-  const [controlContent, content] = usePropControl(
+  const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
     '[content]',
+    externalContent,
     true,
   );
 
-  const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
+  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
     'root',
+    externalRoot,
     true,
   );
 
-  const [controlPositioner, propsPositioner] = usePropControl(
+  const [controlPositioner, propsPositioner, statePositioner] = usePropControl(
     propOptionsPositioner,
     'positioner',
+    externalPositioner,
   );
 
-  const [controlPopup, propsPopup] = usePropControl(propOptionsPopup, 'popup');
+  const [controlPopup, propsPopup, statePopup] = usePropControl(
+    propOptionsPopup,
+    'popup',
+    externalPopup,
+  );
 
-  const [controlItem, propsItem] = usePropControl(
+  const [controlItem, propsItem, stateItem] = usePropControl(
     useMemo(() => getPropOptionsItems(addLog), [addLog]),
     'items',
+    externalItem,
   );
 
-  const [controlMore, propsMore] = usePropControl(propOptionsMore, 'more');
+  const [controlMore, propsMore, stateMore] = usePropControl(
+    propOptionsMore,
+    'more',
+    externalMore,
+  );
 
-  const [controlSubmenuPositioner, propsSubmenuPositioner] = usePropControl(
+  const [
+    controlSubmenuPositioner,
+    propsSubmenuPositioner,
+    stateSubmenuPositioner,
+  ] = usePropControl(
     propOptionsPositioner,
     'more positioner',
+    externalSubmenuPositioner,
   );
 
-  const [controlSubmenuPopup, propsSubmenuPopup] = usePropControl(
-    commonPropOptions,
-    'more popup',
-  );
+  const [controlSubmenuPopup, propsSubmenuPopup, stateSubmenuPopup] =
+    usePropControl(commonPropOptions, 'more popup', externalSubmenuPopup);
 
   const { onOpenChange, open, ...rootProps } = propsRoot;
 
@@ -178,7 +210,7 @@ export const EditMenuDemo: FunctionComponent = () => {
     <Component
       center
       baseUiId="menu"
-      id="edit-menu"
+      id={id}
       log={log}
       title="Edit Menu"
       controls={[
@@ -191,6 +223,16 @@ export const EditMenuDemo: FunctionComponent = () => {
         controlSubmenuPositioner,
         controlSubmenuPopup,
       ]}
+      stateUrl={useCreateStateUrl(id, [
+        stateContent,
+        stateRoot,
+        statePositioner,
+        statePopup,
+        stateItem,
+        stateMore,
+        stateSubmenuPositioner,
+        stateSubmenuPopup,
+      ])}
     >
       <RemounterRoot>
         <EditMenu.Root

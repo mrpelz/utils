@@ -43,9 +43,13 @@ import { colorScheme, css, fontWeight, usePointerDrag, wrap } from './utils.js';
 //   clips itself (and its shadow) to the track, as in Figma. Sideways, it
 //   grows by at most twice as much as vertically (wide items).
 
-export type SegmentedRootProps = BaseRadioGroup.Props;
+export type SegmentedRootProps = BaseRadioGroup.Props & {
+  /** Hides the separators between unselected items. */
+  hideSeparators?: boolean;
+};
 
-const StyledRoot = styled(BaseRadioGroup, forwardRef)`
+// eslint-disable-next-line prettier/prettier
+const StyledRoot = styled<typeof BaseRadioGroup, SegmentedRootProps>(BaseRadioGroup, forwardRef)`
   --styled-segmented-padding-block: 4px;
   --styled-segmented-padding-inline: 8px;
   --styled-segmented-highlight-outset: 4px;
@@ -66,6 +70,15 @@ const StyledRoot = styled(BaseRadioGroup, forwardRef)`
   grid-auto-columns: 1fr;
   grid-auto-flow: column;
   touch-action: pan-y;
+
+  ${({ hideSeparators }) =>
+    hideSeparators
+      ? css`
+          [role='radio']::before {
+            display: none;
+          }
+        `
+      : undefined}
 `;
 
 // Positioned by its center, so it stays under the pointer.

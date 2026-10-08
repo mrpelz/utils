@@ -3,7 +3,7 @@
 
 import assert from 'node:assert/strict';
 
-import { sleep, withTouch } from '../lib.js';
+import { mapped, sleep, withTouch } from '../lib.js';
 
 /** @typedef {import('../lib.js').Page} Page */
 
@@ -15,6 +15,16 @@ import { sleep, withTouch } from '../lib.js';
  */
 const row = (group, index) =>
   `document.querySelectorAll('[data-list-part=group]')[${group}].children[${index}]`;
+
+/**
+ * Expression for a row's content (in its swipe track): its grid, and its
+ * separator.
+ *
+ * @param {number} group
+ * @param {number} index
+ */
+const rowContent = (group, index) =>
+  `${row(group, index)}.querySelector('[data-list-part=row]')`;
 
 /**
  * Scrolls a row into view and returns its viewport rectangle.
@@ -65,7 +75,8 @@ const swipeState = (page, group, index) =>
     const opened = [...element.querySelectorAll('[data-list-part=swipe-actions]')].find((container) => container.getBoundingClientRect().width && [...container.children].some((button) => getComputedStyle(button).transform !== 'matrix(0, 0, 0, 0, 0, 0)'));
     return {
       actions: opened ? [...opened.children].map((button) => new DOMMatrix(getComputedStyle(button).transform).a) : [],
-      offset: new DOMMatrix(getComputedStyle(element).transform).e,
+      // Scrolled in its track: where its content is.
+      offset: Math.round(element.querySelector('[data-list-part=row]').getBoundingClientRect().left - element.getBoundingClientRect().left),
       swipe: element.dataset.swipe,
       width: (opened ?? actions).getBoundingClientRect().width,
     };
@@ -141,7 +152,7 @@ export const tests = [
       await page.open('list');
       /** @type {[number, number]} */
       const trigger = await page.evaluate(`(() => {
-        const button = document.querySelector('[data-list-part=pop-up]');
+        const button = document.querySelector('[aria-haspopup=menu]');
         button.scrollIntoView({ block: 'center' });
         const { height, width, x, y } = button.getBoundingClientRect();
         return [x + width / 2, y + height / 2];
@@ -173,7 +184,7 @@ export const tests = [
       });
 
       const result = await page.evaluate(
-        `[document.querySelector(${JSON.stringify('[data-list-part=pop-up]')}).textContent, document.querySelectorAll(${JSON.stringify('[role=menu]')}).length]`,
+        `[document.querySelector(${JSON.stringify('[aria-haspopup=menu]')}).textContent, document.querySelectorAll(${JSON.stringify('[role=menu]')}).length]`,
       );
       assert.deepEqual(result, ['Never', 0]);
     },
@@ -184,7 +195,7 @@ export const tests = [
       await page.open('list');
       /** @type {[number, number]} */
       const trigger = await page.evaluate(`(() => {
-        const button = document.querySelector('[data-list-part=pop-up]');
+        const button = document.querySelector('[aria-haspopup=menu]');
         button.scrollIntoView({ block: 'center' });
         const { height, width, x, y } = button.getBoundingClientRect();
         return [x + width / 2, y + height / 2];
@@ -217,13 +228,13 @@ export const tests = [
             height: box.height,
             image: part('image')?.width,
             imageGap: part('image') ? Math.round(title.left - part('image').right) : undefined,
-            separator: separator.display === 'none' ? null : [Math.round(title.left - box.left), Math.round(box.right - (title.left + parseFloat(separator.width)))],
+            separator: separator.display === 'none' || separator.opacity === '0' ? null : [Math.round(title.left - box.left), Math.round(box.right - (title.left + parseFloat(separator.width)))],
             titleInset: Math.round((part('image') ?? title).left - box.left),
             trailingInset: Math.round(box.right - [...element.children].filter((child) => child.tagName !== 'INPUT').at(-1).getBoundingClientRect().right),
           };
         };
         const group = document.querySelector('[data-list-part=group]');
-        return [...group.children].slice(0, 3).map(measure);
+        return [...group.children].slice(0, 3).map((item) => measure(item.querySelector('[data-list-part=row]')));
       })()`);
 
       // Airplane Mode (first: no separator), Wi-Fi, Notifications (tall).
@@ -297,7 +308,7 @@ export const tests = [
       await page.open('list');
 
       const trigger = await page.evaluate(`(() => {
-        const button = document.querySelector('[data-list-part=pop-up]');
+        const button = document.querySelector('[aria-haspopup=menu]');
         button.scrollIntoView({ block: 'center' });
         const { height, width, x, y } = button.getBoundingClientRect();
         return [x + width / 2, y + height / 2];
@@ -313,9 +324,10 @@ export const tests = [
       await sleep(300);
 
       // The glass (a backdrop filter) isolates blend modes: a blended
-      // selection would turn nearly opaque.
+      // selection would turn nearly opaque. (The popup's moving selection,
+      // on the highlighted item.)
       const selection = await page.evaluate(`(() => {
-        const style = getComputedStyle(document.querySelector('[role=menuitemradio][data-highlighted]'), '::before');
+        const style = getComputedStyle(document.querySelector('[role=menu] [data-moving-highlight]'));
         return [style.backgroundColor, style.mixBlendMode, style.opacity];
       })()`);
       assert.deepEqual(selection, ['rgba(0, 0, 0, 0.07)', 'normal', '1']);
@@ -328,7 +340,7 @@ export const tests = [
 
       /** @param {string} prominence */
       const header = async (prominence) => {
-        await page.setControl('prominence', prominence);
+        await page.setState(3, { prominence });
         return page.evaluate(`(() => {
           const header = document.querySelector('[data-list-part=header]');
           const title = header.querySelector('[data-list-part=title]');
@@ -386,9 +398,9 @@ export const tests = [
 
       const pressed = await page.evaluate(`[
         getComputedStyle(${row(0, 1)}).backgroundColor,
-        getComputedStyle(${row(0, 1)}, '::before').opacity,
-        getComputedStyle(${row(0, 2)}, '::before').opacity,
-        getComputedStyle(${row(0, 3)}, '::before').opacity,
+        getComputedStyle(${rowContent(0, 1)}, '::before').opacity,
+        getComputedStyle(${rowContent(0, 2)}, '::before').opacity,
+        getComputedStyle(${rowContent(0, 3)}, '::before').opacity,
       ]`);
       await page.mouse('mouseReleased', x + width / 2, y + height / 2);
 
@@ -486,7 +498,7 @@ export const tests = [
     run: async (page) => {
       await page.open('list');
       const geometry = await page.evaluate(`(() => {
-        const item = ${row(0, 8)};
+        const item = ${rowContent(0, 8)};
         const box = item.getBoundingClientRect();
         const slider = item.firstElementChild.getBoundingClientRect();
         return [Math.round(slider.left - box.left), Math.round(box.right - slider.right), Math.round(slider.top + slider.height / 2 - (box.top + box.height / 2))];
@@ -539,20 +551,20 @@ export const tests = [
       // the edge (16px) up to the others (10px), which follow the row (10px
       // from it); armed, its symbol at the row's end (centered in its own
       // size: 22px from it).
-      const stretched = await page.evaluate(`(() => {
+      const stretched = await page.evaluate(String.raw`(() => {
         const item = ${row(0, 0)};
         const actions = item.querySelector('[data-list-part=swipe-actions]');
         const [outermost, next, last] = actions.children;
         const box = actions.getBoundingClientRect();
         const circle = outermost.firstElementChild.getBoundingClientRect();
         const symbol = outermost.querySelector('[data-list-part=swipe-action-symbol] > *').getBoundingClientRect();
-        const rowLeft = item.getBoundingClientRect().left;
+        const rowLeft = item.querySelector('[data-list-part=row]').getBoundingClientRect().left;
         return {
           armed: outermost.hasAttribute('data-armed'),
           atRow: Math.round(circle.right - (symbol.left + symbol.width / 2)),
           edge: Math.round(circle.left - box.left),
           next: Math.round(next.getBoundingClientRect().left - circle.right),
-          others: [next, last].map((button) => [...button.children, button.querySelector('[data-list-part=swipe-action-symbol]')].map((part) => getComputedStyle(part).opacity)),
+          others: [next, last].map((button) => [...button.children, button.querySelector('[data-list-part=swipe-action-symbol]')].map((part) => { const style = getComputedStyle(part); const filtered = /opacity\(([\d.]+)\)/u.exec(style.filter); return String(Math.round(Number(style.opacity) * Number(filtered?.[1] ?? 1) * 100) / 100); })),
           row: Math.round(rowLeft - last.getBoundingClientRect().right),
         };
       })()`);
@@ -583,23 +595,16 @@ export const tests = [
       await page.mouse('mouseReleased', from[0] + 480, from[1]);
       await sleep(500);
 
-      const log = await page.evaluate(
-        `${page.section}.querySelector('config').textContent`,
-      );
+      const log = await page.log();
       assert.match(log, /swipe action clicked/);
       assert.equal(await swipeSide(page, 0, 0), undefined);
 
       // Trailing, too: the outermost (last) action.
       await swipe(page, 0, 0, -400);
-      assert.match(
-        await page.evaluate(
-          `${page.section}.querySelector('config').textContent`,
-        ),
-        /Done clicked/,
-      );
+      assert.match(await page.log(), /Done clicked/);
 
       // Without overswipe, the actions just open.
-      await page.setControl('overswipe', false);
+      await page.setState(1, { overswipe: false });
       await swipe(page, 0, 0, 400);
       assert.equal(await swipeSide(page, 0, 0), 'leading');
     },
@@ -622,6 +627,94 @@ export const tests = [
       // Past 5 actions (5 × 54 + 26 + 8px): deleted.
       await swipe(page, 0, 1, -420);
       assert.deepEqual(await titles(), ['Mercury', 'Earth', 'Mars', 'Jupiter']);
+    },
+  },
+  {
+    name: 'list: in narrow rows, overswiping arms at half the row, but one action past the actions',
+    run: async (page) => {
+      await page.open('list-edit');
+      // A phone's width.
+      await page.evaluate(
+        `document.body.style.width = ${JSON.stringify('390px')}`,
+      );
+      await sleep(100);
+      const rowWidth = await page.evaluate(
+        `${row(0, 0)}.getBoundingClientRect().width`,
+      );
+      assert.ok(rowWidth < 400, `row ${rowWidth}px`);
+      const count = () =>
+        page.evaluate(`${row(0, 0)}.parentElement.children.length`);
+
+      // Past the Delete action and one more, not half the row: it opens.
+      await swipe(page, 0, 0, -Math.round(rowWidth / 2) + 30);
+      assert.equal(await swipeSide(page, 0, 0), 'trailing');
+      assert.equal(await count(), 5);
+
+      // Past half the row (not 304px): deleted.
+      await swipe(page, 0, 1, -Math.round(rowWidth / 2) - 30);
+      assert.equal(await count(), 4);
+    },
+  },
+  {
+    name: 'list: scrolled sideways (trackpad), rows swipe, settling open or closed; vertical scrolls stay the page’s',
+    run: async (page) => {
+      await page.open('list-swipe');
+      const { height, width, x, y } = await rowRect(page, 0, 1);
+      const at = { x: x + width / 2, y: y + height / 2 };
+      /** @param {number} deltaX @param {number} [deltaY] */
+      const scroll = async (deltaX, deltaY = 0, times = 6) => {
+        for (let step = 0; step < times; step += 1) {
+          await page.browser.send('Input.dispatchMouseEvent', {
+            deltaX,
+            deltaY,
+            type: 'mouseWheel',
+            ...at,
+          });
+          await sleep(16);
+        }
+        await sleep(600);
+      };
+
+      // Scrolled right (fingers moving left): the trailing actions open.
+      await scroll(30);
+      const opened = await swipeState(page, 0, 1);
+      assert.equal(opened.swipe, 'trailing');
+      assert.equal(opened.offset, -opened.width);
+
+      // Back: closed.
+      await scroll(-30);
+      assert.equal(await swipeSide(page, 0, 1), undefined);
+
+      // A little: snaps back closed.
+      await scroll(10, 0, 2);
+      assert.equal(await swipeSide(page, 0, 1), undefined);
+
+      // Vertically: not swiped.
+      await scroll(4, 40);
+      assert.equal(await swipeSide(page, 0, 1), undefined);
+    },
+  },
+  {
+    name: 'list: scrolled sideways past the arming distance, a row overswipes once at rest',
+    run: async (page) => {
+      await page.open('list-swipe');
+      const { height, width, x, y } = await rowRect(page, 0, 0);
+      // (Synthetic wheel events have no phases: the browser doesn't latch
+      // them to the row once the pointer leaves it, as with a trackpad, and
+      // snaps between them: a quick fling, far enough even at a low frame
+      // rate.)
+      const at = { x: x + width - 10, y: y + height / 2 };
+      for (let step = 0; step < 16; step += 1) {
+        await page.browser.send('Input.dispatchMouseEvent', {
+          deltaX: 60,
+          deltaY: 0,
+          type: 'mouseWheel',
+          ...at,
+        });
+        await sleep(16);
+      }
+      await sleep(700);
+      assert.match(await page.log(), /Done clicked/u);
     },
   },
   {
@@ -657,8 +750,9 @@ export const tests = [
   {
     name: 'list: an overswipe handler replaces triggering the outermost action',
     run: async (page) => {
-      await page.open('list-swipe');
-      await page.setMappedControl('onOverswipe', '[log overswipe]');
+      await page.open('list-swipe', 'light', {
+        state: [null, { $rest: true, onOverswipe: mapped('[log overswipe]') }],
+      });
 
       const { height, x, y } = await rowRect(page, 0, 0);
       const from = /** @type {[number, number]} */ ([x + 80, y + height / 2]);
@@ -671,12 +765,34 @@ export const tests = [
       await page.mouse('mouseReleased', from[0] + 480, from[1]);
       await sleep(500);
 
-      const log = await page.evaluate(
-        `${page.section}.querySelector('config').textContent`,
-      );
+      const log = await page.log();
       assert.match(log, /overswiped/);
       assert.doesNotMatch(log, /swipe action clicked/);
       assert.equal(await swipeSide(page, 0, 0), undefined, 'closed');
+    },
+  },
+  {
+    name: 'list: swipe actions take no room in a list sized by its content',
+    run: async (page) => {
+      await page.open('list-swipe');
+      const width = () =>
+        page.evaluate(
+          `document.querySelector(${JSON.stringify('[data-list-part=group]')}).getBoundingClientRect().width`,
+        );
+      await page.evaluate(
+        `document.body.style.cssText = ${JSON.stringify('width: max-content; margin: 0')}`,
+      );
+      await sleep(300);
+      const swipeable = await width();
+      // The same rows without their actions.
+      await page.evaluate(
+        `document.querySelectorAll(${JSON.stringify('[data-list-part=swipe-actions]')}).forEach((actions) => actions.remove())`,
+      );
+      await page.evaluate(
+        `document.querySelectorAll(${JSON.stringify('[data-swipeable]')}).forEach((item) => item.style.cssText = '')`,
+      );
+      await sleep(300);
+      assert.equal(swipeable, await width());
     },
   },
   {
@@ -703,15 +819,19 @@ export const tests = [
         const shape = button.firstElementChild.getBoundingClientRect();
         const label = button.querySelector('[data-list-part=swipe-action-label]').getBoundingClientRect();
         return {
+          // Gray only behind the row's content, its actions on the row's
+          // background (its group's).
+          backgrounds: [getComputedStyle(item).backgroundColor, getComputedStyle(item.querySelector('[data-list-part=row]')).backgroundColor],
           centered: Math.round(box.top + box.height / 2 - (shape.top + label.bottom) / 2),
           label: label.height,
           labelGap: Math.round(label.top - shape.bottom),
-          radius: getComputedStyle(item).borderTopLeftRadius,
-          separators: [getComputedStyle(item, '::before').opacity],
+          radius: getComputedStyle(item.querySelector('[data-list-part=row]')).borderTopLeftRadius,
+          separators: [getComputedStyle(item.querySelector('[data-list-part=row]'), '::before').opacity],
           shape: [shape.width, shape.height],
         };
       })()`);
       assert.deepEqual(geometry, {
+        backgrounds: ['rgba(0, 0, 0, 0)', 'rgb(229, 229, 234)'],
         centered: 0,
         label: 16,
         labelGap: 4,
@@ -735,8 +855,9 @@ export const tests = [
       assert.equal(regular.offset, regular.width);
       assert.equal(await swipeSide(page, 0, 2), undefined);
 
-      // A short swipe back closes it; so does a tap elsewhere.
-      await swipe(page, 0, 0, -60);
+      // Swiped back past half its actions, it closes; so does a tap
+      // elsewhere.
+      await swipe(page, 0, 0, -100);
       assert.equal(await swipeSide(page, 0, 0), undefined);
 
       await swipe(page, 0, 0, 170);
@@ -768,9 +889,9 @@ export const tests = [
   {
     name: 'list: edit controls match Figma; delete opens the swipe actions',
     run: async (page) => {
-      await page.open('list-edit');
-
-      await page.setControl('prefix', 'multiple');
+      await page.open('list-edit', 'light', {
+        state: [{ $rest: true, prefix: 'multiple' }],
+      });
       const checkbox = await page.evaluate(`(() => {
         const item = ${row(0, 1)};
         const edit = item.querySelector('[data-list-part=edit]').getBoundingClientRect();
@@ -779,7 +900,7 @@ export const tests = [
       })()`);
       assert.deepEqual(checkbox, [22, 18, 17]);
 
-      await page.setControl('prefix', 'delete');
+      await page.setState(0, { prefix: 'delete' });
       const { height, width, x, y } = await page.evaluate(`(() => {
         const button = ${row(0, 0)}.querySelector('[data-list-part=edit]');
         button.scrollIntoView({ block: 'center' });
@@ -817,7 +938,7 @@ export const tests = [
       };
 
       // Single (radios in a radio group): one at a time.
-      await page.setControl('prefix', 'single');
+      await page.setState(0, { prefix: 'single' });
       await choose(2);
       await choose(3);
       assert.deepEqual(await state(), {
@@ -826,8 +947,8 @@ export const tests = [
       });
 
       // Multiple (checkboxes), without grabbers.
-      await page.setControl('prefix', 'multiple');
-      await page.setControl('reorder', false);
+      await page.setState(0, { prefix: 'multiple' });
+      await page.setState(0, { reorder: false });
       await choose(0);
       await choose(2);
       assert.deepEqual(await state(), {
@@ -885,7 +1006,7 @@ export const tests = [
       await sleep(400);
       const dragging = await page.evaluate(`(() => {
         const items = [...document.querySelector('[data-list-part=group]').children];
-        return items.slice(0, 3).map((item) => [getComputedStyle(item).borderTopLeftRadius, getComputedStyle(item, '::before').display === 'none' || getComputedStyle(item, '::before').opacity === '0']);
+        return items.slice(0, 3).map((item) => { const separator = getComputedStyle(item.querySelector('[data-list-part=row]'), '::before'); return [getComputedStyle(item).borderTopLeftRadius, separator.display === 'none' || separator.opacity === '0']; });
       })()`);
       // Mercury (lifted, second), Venus (first), Earth (below Mercury).
       assert.deepEqual(dragging, [
@@ -899,12 +1020,7 @@ export const tests = [
         offsets: ['', '', '', '', ''],
         titles: ['Venus', 'Mercury', 'Earth', 'Mars', 'Jupiter'],
       });
-      assert.match(
-        await page.evaluate(
-          `${page.section}.querySelector('config').textContent`,
-        ),
-        /reorder: 0 → 1/,
-      );
+      assert.match(await page.log(), /reorder: 0 → 1/);
 
       // Arrow keys on a focused grabber.
       await page.evaluate(
@@ -1012,7 +1128,7 @@ export const tests = [
         })()`);
       assert.deepEqual(await index(), [16, 16, 0]);
 
-      await page.setControl('size', 'regular');
+      await page.setState(2, { size: 'regular' });
       assert.deepEqual(await index(), [30, 16, 9]);
 
       // Scrubbing from A to J jumps to J's section.
@@ -1024,11 +1140,10 @@ export const tests = [
       await page.drag(first, target, { duration: 400 });
       await sleep(500);
 
-      const top = await page.evaluate(`(() => {
-        const stage = ${page.section}.querySelector('stage').getBoundingClientRect();
-        const section = document.querySelector('[data-letter="J"]');
-        return Math.round(section.getBoundingClientRect().top - stage.top);
-      })()`);
+      // At the top of the scrolled page (raw, the document scrolls).
+      const top = await page.evaluate(
+        'Math.round(document.querySelector(\'[data-letter="J"]\').getBoundingClientRect().top)',
+      );
       assert.equal(top, 0);
       await page.screenshot('list-index');
     },
@@ -1150,15 +1265,16 @@ export const tests = [
       const [unchecked] = await state();
       assert.equal(unchecked, 'false');
 
-      // The pop-up row opens its menu.
+      // The pop-up row opens its menu, as its button does: no item
+      // highlighted (as when opened by keyboard).
       const popUp = await rowRect(page, 0, 3);
       await page.click([popUp.x + 100, popUp.y + popUp.height / 2]);
       await sleep(400);
-      assert.equal(
+      assert.deepEqual(
         await page.evaluate(
-          `document.querySelectorAll(${JSON.stringify('[role=menu]')}).length`,
+          `[document.querySelectorAll(${JSON.stringify('[role=menu]')}).length, document.querySelectorAll(${JSON.stringify('[role=menu] [data-highlighted]')}).length]`,
         ),
-        1,
+        [1, 0],
       );
     },
   },
@@ -1171,15 +1287,16 @@ export const tests = [
           `getComputedStyle(${page.section}.querySelector('[data-list-part=header][role=button]')).cursor`,
         );
       assert.equal(await cursor(), 'pointer');
-      await page.setControl('cursor', 'copy', 'collapsible trigger (header)');
+      await page.setState(24, { cursor: 'copy' });
       assert.equal(await cursor(), 'copy');
     },
   },
   {
     name: 'list: deleting rows, with an insert row at the end',
     run: async (page) => {
-      await page.open('list-edit');
-      await page.setControl('prefix', 'delete + insert');
+      await page.open('list-edit', 'light', {
+        state: [{ $rest: true, prefix: 'delete + insert' }],
+      });
       const titles = () =>
         page.evaluate(
           `[...document.querySelector('[data-list-part=group]').children].map((item) => item.querySelector(${JSON.stringify('[data-list-part=title]')}).textContent)`,
@@ -1209,14 +1326,14 @@ export const tests = [
       await page.open('list-parts');
       const state = () =>
         page.evaluate(`(() => {
-          const row = document.querySelector(${JSON.stringify('[data-list-part=item]:has(> [data-list-part=disclosure])')});
+          const row = document.querySelector(${JSON.stringify('[data-list-part=item]:has([data-list-part=row] > [data-list-part=disclosure])')});
           const expandable = row.nextElementSibling;
           return [Math.round(expandable.getBoundingClientRect().height), expandable.inert];
         })()`);
       assert.deepEqual(await state(), [0, true]);
       const toggle = /** @type {[number, number]} */ (
         await page.evaluate(`(() => {
-        const row = document.querySelector(${JSON.stringify('[data-list-part=item]:has(> [data-list-part=disclosure])')});
+        const row = document.querySelector(${JSON.stringify('[data-list-part=item]:has([data-list-part=row] > [data-list-part=disclosure])')});
         row.scrollIntoView({ block: 'center' });
         const { height, width, x, y } = row.getBoundingClientRect();
         return [x + width / 2, y + height / 2];
@@ -1235,7 +1352,8 @@ export const tests = [
     run: async (page) => {
       await page.open('list-mail');
       const ends =
-        await page.evaluate(`[...document.querySelector(${JSON.stringify('[data-list-part=group]')}).children].slice(1).map((item) => {
+        await page.evaluate(`[...document.querySelector(${JSON.stringify('[data-list-part=group]')}).children].slice(1).map((li) => {
+        const item = li.querySelector(${JSON.stringify('[data-list-part=row]')});
         // Relative to its grid area, from the text's column (the title's).
         const style = getComputedStyle(item, '::before');
         const box = item.getBoundingClientRect();

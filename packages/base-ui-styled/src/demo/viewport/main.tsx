@@ -1,15 +1,7 @@
 import { styled } from 'goober';
-import {
-  forwardRef,
-  FunctionComponent,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import { createPortal } from 'react-dom';
+import { FunctionComponent, useRef } from 'react';
 
 import {
-  Button,
   List,
   TextField,
   useScrollDirection,
@@ -19,6 +11,10 @@ import {
 } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
 import { Component, usePropControl } from '../utils/main.js';
+import {
+  useCreateStateUrl,
+  useProvidedState,
+} from '../utils/options-context.js';
 import { propOptionsContent } from './props.js';
 
 const Metrics = styled('dl')`
@@ -46,41 +42,6 @@ const Bar = styled('div')`
   & > :first-child {
     flex: 1;
   }
-`;
-
-// The locked app: the visual viewport's height (see `useViewportLock`),
-// its messages scrolling (pan-y), the composer at its end.
-const App = styled('div', forwardRef)`
-  position: fixed;
-  z-index: 100;
-  top: 0;
-  display: flex;
-  height: 100dvh;
-  flex-direction: column;
-  background-color: var(--color-ios-system-grouped-background);
-  inset-inline: 0;
-  touch-action: none;
-`;
-
-const AppHeader = styled('div')`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: calc(env(safe-area-inset-top) + 8px) 16px 8px;
-  color: var(--color-ios-label);
-  font-size: 17px;
-  font-weight: 600;
-`;
-
-const Messages = styled('div', forwardRef)`
-  overflow: auto;
-  flex: 1;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
-`;
-
-const Composer = styled('div')`
-  padding-bottom: env(safe-area-inset-bottom);
 `;
 
 const Field = () => (
@@ -128,75 +89,21 @@ const Status: FunctionComponent<{ onScrollLog: (text: string) => void }> = ({
   );
 };
 
-// Over the whole page (the demo's controls, too), so “Done” (or Escape)
-// leaves it.
-const LockedApp: FunctionComponent<{ onClose: () => void }> = ({ onClose }) => {
-  const appRef = useRef<HTMLDivElement>(null);
-  const messagesRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const onKeyDown = ({ key }: KeyboardEvent) => {
-      if (key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
-
-  return createPortal(
-    <App
-      ref={appRef}
-      aria-label="Locked app"
-      aria-modal="true"
-      role="dialog"
-    >
-      <Viewport.Provider
-        lock={appRef}
-        scroller={messagesRef}
-      >
-        <AppHeader>
-          <span>Locked</span>
-          <Button.Root
-            variant="borderless"
-            onClick={onClose}
-          >
-            <Button.Label>Done</Button.Label>
-          </Button.Root>
-        </AppHeader>
-        <Messages ref={messagesRef}>
-          <List.Root>
-            <List.Section>
-              <List.Group>
-                {Array.from({ length: 30 }, (_, index) => (
-                  <List.Item key={index}>
-                    <List.Title>Message {index + 1}</List.Title>
-                  </List.Item>
-                ))}
-              </List.Group>
-            </List.Section>
-          </List.Root>
-        </Messages>
-        <Composer>
-          <Field />
-        </Composer>
-      </Viewport.Provider>
-    </App>,
-    document.body,
-  );
-};
-
 /**
  * The viewport (`Viewport`): the visual viewport and the keyboard's height,
- * the page's scroll direction (e.g. for collapsing a tab bar), a bar fixed
- * above the keyboard, and a locked app (iOS: focusing its field doesn't
- * scroll it off screen).
+ * the page's scroll direction (e.g. for collapsing a tab bar), and a bar
+ * fixed above the keyboard.
  */
 export const ViewportDemo: FunctionComponent = () => {
+  const id = 'viewport';
   const [log, addLog] = useLog();
-  const [locked, setLocked] = useState(false);
 
-  const [controlContent, content] = usePropControl(
+  const [externalContent] = useProvidedState(id);
+
+  const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
     '[content]',
+    externalContent,
     true,
   );
 
@@ -204,18 +111,13 @@ export const ViewportDemo: FunctionComponent = () => {
     <Component
       center
       controls={[controlContent]}
-      id="viewport"
+      id={id}
       log={log}
+      stateUrl={useCreateStateUrl(id, [stateContent])}
       title="Viewport"
     >
       <Viewport.Provider>
         <Status onScrollLog={addLog} />
-        <Button.Root
-          variant="bordered"
-          onClick={() => setLocked(true)}
-        >
-          <Button.Label>Open a locked app</Button.Label>
-        </Button.Root>
         {content.bottomBar ? (
           <Viewport.Bottom>
             <Bar>
@@ -223,7 +125,6 @@ export const ViewportDemo: FunctionComponent = () => {
             </Bar>
           </Viewport.Bottom>
         ) : null}
-        {locked ? <LockedApp onClose={() => setLocked(false)} /> : null}
       </Viewport.Provider>
     </Component>
   );

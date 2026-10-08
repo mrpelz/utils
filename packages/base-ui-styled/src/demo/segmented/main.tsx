@@ -4,58 +4,85 @@ import { Segmented } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
 import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
 import {
+  useCreateStateUrl,
+  useProvidedState,
+} from '../utils/options-context.js';
+import {
   getPropOptionsItem,
   getPropOptionsRoot,
   propOptionsContent,
 } from './props.js';
 
 export const SegmentedDemo: FunctionComponent = () => {
+  const id = 'segmented';
+
   const [log, addLog] = useLog();
 
-  const [controlContent, { count, label1, label2, label3, label4, label5 }] =
-    usePropControl(propOptionsContent, '[content]', true);
+  const [
+    externalContent,
+    externalRoot,
+    externalItemFirst,
+    externalItemSecond,
+    externalItemThird,
+    externalItemFourth,
+    externalItemFifth,
+    externalHighlight,
+  ] = useProvidedState(id);
 
-  const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
+  const [
+    controlContent,
+    { count, label1, label2, label3, label4, label5 },
+    stateContent,
+  ] = usePropControl(propOptionsContent, '[content]', externalContent, true);
+
+  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
     'root',
+    externalRoot,
     true,
   );
 
-  const [controlItemFirst, propsItemFirst] = usePropControl(
+  const [controlItemFirst, propsItemFirst, stateItemFirst] = usePropControl(
     useMemo(() => getPropOptionsItem('first', addLog), [addLog]),
     '1st item',
+    externalItemFirst,
   );
 
-  const [controlItemSecond, propsItemSecond] = usePropControl(
+  const [controlItemSecond, propsItemSecond, stateItemSecond] = usePropControl(
     useMemo(() => getPropOptionsItem('second', addLog), [addLog]),
     '2nd item',
+    externalItemSecond,
   );
 
-  const [controlItemThird, propsItemThird] = usePropControl(
+  const [controlItemThird, propsItemThird, stateItemThird] = usePropControl(
     useMemo(() => getPropOptionsItem('third', addLog), [addLog]),
     '3rd item',
+    externalItemThird,
   );
 
-  const [controlItemFourth, propsItemFourth] = usePropControl(
+  const [controlItemFourth, propsItemFourth, stateItemFourth] = usePropControl(
     useMemo(() => getPropOptionsItem('fourth', addLog), [addLog]),
     '4th item',
+    externalItemFourth,
   );
 
-  const [controlItemFifth, propsItemFifth] = usePropControl(
+  const [controlItemFifth, propsItemFifth, stateItemFifth] = usePropControl(
     useMemo(() => getPropOptionsItem('fifth', addLog), [addLog]),
     '5th item',
+    externalItemFifth,
   );
 
-  const [controlHighlight, propsHighlight] = usePropControl(
+  const [controlHighlight, propsHighlight, stateHighlight] = usePropControl(
     commonPropOptions,
     'highlight',
+    externalHighlight,
   );
 
   return (
     <Component
       center
       baseUiId="radio"
-      id="segmented"
+      id={id}
       log={log}
       title="Segmented"
       controls={[
@@ -68,6 +95,16 @@ export const SegmentedDemo: FunctionComponent = () => {
         controlItemFifth,
         controlHighlight,
       ]}
+      stateUrl={useCreateStateUrl(id, [
+        stateContent,
+        stateRoot,
+        stateItemFirst,
+        stateItemSecond,
+        stateItemThird,
+        stateItemFourth,
+        stateItemFifth,
+        stateHighlight,
+      ])}
     >
       <RemounterRoot>
         <Segmented.Root {...propsRoot}>

@@ -1,10 +1,12 @@
 import { keyframes, styled } from 'goober';
 import {
+  Children,
   ComponentProps,
   createContext,
   CSSProperties,
   FocusEvent,
   forwardRef,
+  Fragment,
   KeyboardEvent,
   MouseEvent,
   PointerEvent,
@@ -33,8 +35,8 @@ import { css, useForwardedRef } from './utils.js';
 // its edges, by a scroll-driven animation (without one: flat). A column is a
 // listbox: arrow keys, Page Up/Down and Home/End move its selection, and a
 // press on a row scrolls to it. Disabled rows (e.g. days past a maximum)
-// can be scrolled over; settled on one, a column moves to the nearest
-// enabled row (as iOS).
+// can be scrolled (or dragged, or pressed) to; settled on one a moment, a
+// column moves to the nearest enabled row (as iOS), unless scrolled on.
 //
 // `editable` columns (e.g. numbers) take typed values: pressing their
 // selected row (or typing a digit while focused) shows a numeric text field
@@ -58,6 +60,9 @@ const radius = 110;
 
 /** Scroll settles after this long without scrolling (without `scrollend`). */
 const settleDelay = 120;
+
+/** Settled on a disabled row, a column moves on after this long. */
+const rejectDelay = 400;
 
 // The rows' turn on the cylinder, by their progress through the column
 // (`view()`: 0 entering at the bottom, 1 leaving at the top): its angle
@@ -99,6 +104,18 @@ type ColumnContextValue = {
 };
 
 const ColumnContext = createContext<ColumnContextValue | undefined>(undefined);
+
+// Rows of a looping column's copies of its rows (see `Column` `loop`).
+const CopyContext = createContext(false);
+
+const copyAttribute = 'data-roll-copy';
+
+// A looping column's copies before (and after) its rows: at least two, and
+// at least 60 rows, so inertial scrolling (several flicks in a row, too)
+// doesn't reach their end before the column settles (and moves back to its
+// rows, unseen).
+const copiesOf = (rows: number) =>
+  Math.max(2, Math.ceil(60 / Math.max(rows, 1)));
 
 // Figma none (see Source): the wheel, the band behind its center.
 const Root = styled('div', forwardRef)`
@@ -237,6 +254,11 @@ export type RollColumnProps = Omit<
    * (a numeric keyboard; see above).
    */
   editable?: boolean;
+  /**
+   * Its rows repeat endlessly (as iOS's time wheels): scrolled past the
+   * last row, the first follows, and so on.
+   */
+  loop?: boolean;
   /** Called as rows pass the center while scrolling (e.g. for haptics). */
   onHighlightChange?: (value: RollValue) => void;
   /** Called with the newly selected value, once the column settled. */
@@ -263,6 +285,7 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       defaultValue,
       disabled = false,
       editable = false,
+      loop = false,
       onHighlightChange,
       onValueChange,
       style,
@@ -287,6 +310,12 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       drag: undefined as Drag | undefined,
       highlighted: undefined as number | undefined,
       mounted: false,
+      /** The direction last scrolled in (1: down, -1: up). */
+      direction: 1,
+      /** The scroll position last seen (for `direction`). */
+      position: 0,
+      /** Moving on from a disabled row (see `settle`). */
+      reject: undefined as ReturnType<typeof setTimeout> | undefined,
       /**
        * The row scrolled to (by `scrollToIndex`): until it's reached, the
        * column doesn't settle (a smooth scroll can be interrupted, e.g. by
@@ -302,6 +331,24 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
           `[${CSS.escape(part)}='item']`,
         ) ?? []),
       ].filter((element) => entries.has(element));
+
+    // The rows themselves (a looping column's, not its copies): their first
+    // index, and how many.
+    const originals = () => {
+      const rows = items();
+      const first = rows.findIndex((row) => !row.hasAttribute(copyAttribute));
+      const count = rows.filter(
+        (row) => !row.hasAttribute(copyAttribute),
+      ).length;
+      return { count, first: Math.max(first, 0) };
+    };
+
+    // A row's own index (a copy's: the row it copies).
+    const ownIndex = (index: number) => {
+      const { count, first } = originals();
+      if (count === 0) return index;
+      return first + ((((index - first) % count) + count) % count);
+    };
 
     // The row at the center.
     const centered = () => {
@@ -328,11 +375,15 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       scroller.scrollTo({ behavior: smooth ? 'smooth' : 'instant', top });
     };
 
-    // The nearest enabled row to `index` (searching both ways).
-    const nearestEnabled = (index: number) => {
+    // The nearest enabled row to `index` (searching both ways, first in
+    // `direction`: 1 down, -1 up).
+    const nearestEnabled = (index: number, direction = -1) => {
       const rows = items();
       for (let distance = 0; distance < rows.length; distance += 1) {
-        for (const candidate of [index - distance, index + distance]) {
+        for (const candidate of [
+          index + distance * direction,
+          index - distance * direction,
+        ]) {
           const row = rows[candidate];
           if (row && !entries.get(row)?.disabled) return candidate;
         }
@@ -362,13 +413,30 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
         internal.current.target = undefined;
       }
 
+      // Settled on a copy (looping): to its row, unseen.
+      const own = ownIndex(index);
+      const { current: scroller } = scrollerRef;
+      if (own !== index && scroller) {
+        scroller.scrollTop += (own - index) * itemHeight;
+        internal.current.position = scroller.scrollTop;
+        return;
+      }
+
       const row = items()[index];
       const entry = row ? entries.get(row) : undefined;
       if (!entry) return;
 
+      // A moment later (scrolled on meanwhile: not), to the nearest
+      // enabled row.
       if (entry.disabled) {
-        const enabled = nearestEnabled(index);
-        if (enabled !== -1 && enabled !== index) scrollToIndex(enabled, true);
+        clearTimeout(internal.current.reject);
+        internal.current.reject = setTimeout(() => {
+          if (internal.current.drag || centered() !== index) return;
+          // Onwards, as scrolled (not back: scrolled on row by row, the
+          // column would never pass it).
+          const enabled = nearestEnabled(index, internal.current.direction);
+          if (enabled !== -1 && enabled !== index) scrollToIndex(enabled, true);
+        }, rejectDelay);
         return;
       }
 
@@ -381,8 +449,10 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
     // when changed later (unless already there, e.g. scrolled to).
     useLayoutEffect(() => {
       const rows = items();
-      const index = rows.findIndex((row) =>
-        Object.is(entries.get(row)?.value, value),
+      const index = rows.findIndex(
+        (row) =>
+          !row.hasAttribute(copyAttribute) &&
+          Object.is(entries.get(row)?.value, value),
       );
       if (index === -1 || internal.current.drag) return;
       if (index !== centered() || !internal.current.mounted) {
@@ -397,6 +467,13 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       if (!scroller) return undefined;
 
       const onScroll = () => {
+        const { scrollTop } = scroller;
+        if (scrollTop !== internal.current.position) {
+          internal.current.direction = Math.sign(
+            scrollTop - internal.current.position,
+          );
+          internal.current.position = scrollTop;
+        }
         const index = centered();
         if (index !== internal.current.highlighted) {
           internal.current.highlighted = index;
@@ -407,6 +484,7 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
           }
         }
 
+        clearTimeout(internal.current.reject);
         clearTimeout(internal.current.timeout);
         internal.current.timeout = setTimeout(settle, settleDelay);
       };
@@ -423,6 +501,7 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
         scroller.addEventListener(type, onInput, { passive: true });
       }
       return () => {
+        clearTimeout(refs.reject);
         clearTimeout(refs.timeout);
         scroller.removeEventListener('scroll', onScroll);
         scroller.removeEventListener('scrollend', settle);
@@ -470,7 +549,9 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       const number = Number(trimmed);
       const index = items().findIndex((row) => {
         const entry = entries.get(row);
-        if (!entry || entry.disabled) return false;
+        if (!entry || entry.disabled || row.hasAttribute(copyAttribute)) {
+          return false;
+        }
         if (row.textContent?.trim().toLowerCase() === trimmed.toLowerCase()) {
           return true;
         }
@@ -487,6 +568,18 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       scrollToIndex(index, true);
       commit(entry.value);
     };
+
+    // Looping, copies of the rows before and after them.
+    const copies = loop ? (
+      <CopyContext.Provider value>
+        {Array.from(
+          { length: copiesOf(Children.count(children)) },
+          (_, index) => (
+            <Fragment key={index}>{children}</Fragment>
+          ),
+        )}
+      </CopyContext.Provider>
+    ) : null;
 
     const idOf = (row: RollValue) =>
       `${listId}-${encodeURIComponent(String(row))}`;
@@ -517,10 +610,13 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       const moves: Record<string, () => void> = {
         ArrowDown: () => step(1),
         ArrowUp: () => step(-1),
-        End: () => scrollToIndex(nearestEnabled(items().length - 1), true),
+        End: () => {
+          const { count, first } = originals();
+          scrollToIndex(nearestEnabled(first + count - 1), true);
+        },
         Enter: () =>
           startEditing(items()[centered()]?.textContent?.trim() ?? ''),
-        Home: () => scrollToIndex(nearestEnabled(0), true),
+        Home: () => scrollToIndex(nearestEnabled(originals().first, 1), true),
         PageDown: () => step(5),
         PageUp: () => step(-5),
       };
@@ -600,7 +696,7 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
         count - 1,
       );
       internal.current.drag = { ...drag, moved: true, pointerId: -1 };
-      scrollToIndex(nearestEnabled(index), true);
+      scrollToIndex(index, true);
       setTimeout(() => {
         internal.current.drag = undefined;
       });
@@ -637,7 +733,15 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
             onPointerMove={onPointerMove}
             onPointerUp={onPointerEnd}
           >
-            {children}
+            {loop ? (
+              <>
+                {copies}
+                {children}
+                {copies}
+              </>
+            ) : (
+              children
+            )}
           </Scroller>
           {editing === undefined ? null : (
             <EditField
@@ -690,6 +794,7 @@ export type RollItemProps = Omit<ComponentProps<'div'>, 'ref'> & {
 const Item = forwardRef<HTMLDivElement, RollItemProps>(
   ({ children, disabled = false, onClick, value, ...props }, ref) => {
     const context = useContext(ColumnContext);
+    const copy = useContext(CopyContext);
     const elementRef = useForwardedRef<HTMLDivElement>(ref);
 
     useLayoutEffect(() => {
@@ -704,11 +809,12 @@ const Item = forwardRef<HTMLDivElement, RollItemProps>(
         ref={elementRef}
         aria-disabled={disabled || undefined}
         aria-selected={selected}
-        data-editing={(selected && context?.editing) || undefined}
-        id={context?.idOf(value)}
+        data-editing={(selected && !copy && context?.editing) || undefined}
+        id={copy ? undefined : context?.idOf(value)}
         role="option"
         {...props}
         {...{ [part]: 'item' }}
+        {...(copy && { 'aria-hidden': true, [copyAttribute]: '' })}
         onClick={(event: MouseEvent<HTMLDivElement>) => {
           (
             onClick as ((event: MouseEvent<HTMLDivElement>) => void) | undefined

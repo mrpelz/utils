@@ -1,7 +1,7 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
 import { sfPlayFill } from '@bradleyhodges/sfsymbols/sfPlayFill';
-import { FunctionComponent, useMemo, useState } from 'react';
+import { FunctionComponent, useLayoutEffect, useMemo, useState } from 'react';
 
 import {
   collapsedSelection,
@@ -11,8 +11,13 @@ import {
 } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
 import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
+import {
+  useCreateStateUrl,
+  useProvidedState,
+} from '../utils/options-context.js';
 import { SFSymbol } from '../utils/symbol.js';
 import {
+  createExpansion,
   fallbackTabOptions,
   getPresetOptions,
   getPropOptionsGroup,
@@ -34,17 +39,45 @@ import {
 // the list's control says), and what remains while it is (see `remaining`).
 const TabBarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
   const [log, addLog] = useLog();
+
+  const [
+    externalContent,
+    externalRoot,
+    externalList,
+    externalGroup,
+    externalIndicator,
+    externalTab1,
+    externalTab2,
+    externalTab3,
+    externalTab4,
+    externalTab5,
+    externalTab6,
+    externalTab7,
+    externalTab8,
+    externalTab9,
+    externalSecondaryGroup,
+    externalSecondaryIndicator,
+    externalSecondaryTab1,
+    externalSecondaryTab2,
+    externalSecondaryTab3,
+    externalIcon,
+    externalLabel,
+    externalPanel,
+  ] = useProvidedState(preset.id);
   const options = useMemo(() => getPresetOptions(preset), [preset]);
   const [collapsedState, setCollapsed] = useState(false);
+  // Clicks expanding the bar, for the handlers (see `createExpansion`).
+  const [expansion] = useState(createExpansion);
   // The active tab's value, since the root's default value (see below).
   const [active, setActive] = useState<{ since: unknown; value: unknown }>({
     since: preset.defaultValue,
     value: preset.defaultValue,
   });
 
-  const [controlContent, content] = usePropControl(
+  const [controlContent, content, stateContent] = usePropControl(
     options.content,
     '[content]',
+    externalContent,
     true,
   );
 
@@ -54,12 +87,13 @@ const TabBarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
     setCollapsed(!atTop && direction === 'down');
   });
 
-  const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
+  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
     useMemo(
-      () => getPropOptionsRoot(preset, addLog, setCollapsed),
-      [addLog, preset],
+      () => getPropOptionsRoot(preset, addLog, setCollapsed, expansion),
+      [addLog, expansion, preset],
     ),
     'root',
+    externalRoot,
     true,
   );
 
@@ -71,89 +105,125 @@ const TabBarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
       : rootProps.defaultValue;
   const shownValue = rootProps.value ?? activeValue;
 
-  const [controlList, propsList] = usePropControl(options.list, 'list', true);
-
-  const groupOptions = useMemo(() => getPropOptionsGroup(setCollapsed), []);
-  const secondaryGroupOptions = useMemo(
-    () => getPropOptionsGroup(setCollapsed, preset.secondaryCollapses),
-    [preset.secondaryCollapses],
+  const [controlList, propsList, stateList] = usePropControl(
+    options.list,
+    'list',
+    externalList,
+    true,
   );
 
-  const [controlGroup, propsGroup] = usePropControl(groupOptions, 'group');
+  const collapsed = propsList.collapsed ?? collapsedState;
+  useLayoutEffect(() => expansion.sync(collapsed));
 
-  const [controlIndicator, propsIndicator] = usePropControl(
+  const groupOptions = useMemo(
+    () => getPropOptionsGroup(setCollapsed, expansion),
+    [expansion],
+  );
+
+  const [controlGroup, propsGroup, stateGroup] = usePropControl(
+    groupOptions,
+    'group',
+    externalGroup,
+  );
+
+  const [controlIndicator, propsIndicator, stateIndicator] = usePropControl(
     propOptionsIndicator,
     'indicator',
+    externalIndicator,
   );
 
   const tab1 = usePropControl(
     options.primary[0] ?? fallbackTabOptions,
     '1st tab',
+    externalTab1,
   );
   const tab2 = usePropControl(
     options.primary[1] ?? fallbackTabOptions,
     '2nd tab',
+    externalTab2,
   );
   const tab3 = usePropControl(
     options.primary[2] ?? fallbackTabOptions,
     '3rd tab',
+    externalTab3,
   );
   const tab4 = usePropControl(
     options.primary[3] ?? fallbackTabOptions,
     '4th tab',
+    externalTab4,
   );
   const tab5 = usePropControl(
     options.primary[4] ?? fallbackTabOptions,
     '5th tab',
+    externalTab5,
   );
   const tab6 = usePropControl(
     options.primary[5] ?? fallbackTabOptions,
     '6th tab',
+    externalTab6,
   );
   const tab7 = usePropControl(
     options.primary[6] ?? fallbackTabOptions,
     '7th tab',
+    externalTab7,
   );
   const tab8 = usePropControl(
     options.primary[7] ?? fallbackTabOptions,
     '8th tab',
+    externalTab8,
   );
   const tab9 = usePropControl(
     options.primary[8] ?? fallbackTabOptions,
     '9th tab',
+    externalTab9,
   );
 
-  const [controlSecondaryGroup, propsSecondaryGroup] = usePropControl(
-    secondaryGroupOptions,
-    'secondary group',
-  );
+  const [controlSecondaryGroup, propsSecondaryGroup, stateSecondaryGroup] =
+    usePropControl(groupOptions, 'secondary group', externalSecondaryGroup);
 
-  const [controlSecondaryIndicator, propsSecondaryIndicator] = usePropControl(
+  const [
+    controlSecondaryIndicator,
+    propsSecondaryIndicator,
+    stateSecondaryIndicator,
+  ] = usePropControl(
     propOptionsIndicator,
     'secondary indicator',
+    externalSecondaryIndicator,
   );
 
   const secondaryTab1 = usePropControl(
     options.secondary[0] ?? fallbackTabOptions,
     '1st secondary tab',
+    externalSecondaryTab1,
   );
   const secondaryTab2 = usePropControl(
     options.secondary[1] ?? fallbackTabOptions,
     '2nd secondary tab',
+    externalSecondaryTab2,
   );
   const secondaryTab3 = usePropControl(
     options.secondary[2] ?? fallbackTabOptions,
     '3rd secondary tab',
+    externalSecondaryTab3,
   );
 
-  const [controlIcon, propsIcon] = usePropControl(commonPropOptions, 'icons');
+  const [controlIcon, propsIcon, stateIcon] = usePropControl(
+    commonPropOptions,
+    'icons',
+    externalIcon,
+  );
 
-  const [controlLabel, propsLabel] = usePropControl(
+  const [controlLabel, propsLabel, stateLabel] = usePropControl(
     commonPropOptions,
     'labels',
+    externalLabel,
   );
 
-  const [controlPanel, propsPanel] = usePropControl(propOptionsPanel, 'panels');
+  const [controlPanel, propsPanel, statePanel] = usePropControl(
+    propOptionsPanel,
+    'panels',
+    externalPanel,
+  );
 
   const primaryTabs = [tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9]
     .slice(0, content.tabs)
@@ -246,6 +316,30 @@ const TabBarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
         controlLabel,
         controlPanel,
       ]}
+      stateUrl={useCreateStateUrl(preset.id, [
+        stateContent,
+        stateRoot,
+        stateList,
+        stateGroup,
+        stateIndicator,
+        tab1[2],
+        tab2[2],
+        tab3[2],
+        tab4[2],
+        tab5[2],
+        tab6[2],
+        tab7[2],
+        tab8[2],
+        tab9[2],
+        stateSecondaryGroup,
+        stateSecondaryIndicator,
+        secondaryTab1[2],
+        secondaryTab2[2],
+        secondaryTab3[2],
+        stateIcon,
+        stateLabel,
+        statePanel,
+      ])}
     >
       <RemounterRoot>
         <TabBar.Root
@@ -271,7 +365,7 @@ const TabBarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
             : null}
           <TabBar.List
             {...propsList}
-            collapsed={propsList.collapsed ?? collapsedState}
+            collapsed={collapsed}
           >
             <TabBar.Group
               {...propsGroup}

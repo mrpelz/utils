@@ -20,6 +20,7 @@ export const propOptionsRoot = {
   value: [undefined, 'first', 'second', 'third'] as const,
   disabled: [undefined, false, true] as const,
   readOnly: [undefined, false, true] as const,
+  hideSeparators: [undefined, false, true] as const,
 };
 
 export const getPropOptionsItem = (

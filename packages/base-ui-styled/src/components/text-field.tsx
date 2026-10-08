@@ -39,8 +39,13 @@ const StyledRoot = styled(BaseField.Root, forwardRef)`
     gap: 4px;
   }
 
-  /* The clear button, only while focused and filled */
-  &:not([data-filled][data-focused]) > [${part}='clear'] {
+  /* The clear button, only while focused and filled (in a list row: in its
+     content) */
+  &:not([data-filled][data-focused]) > [${part}='clear'],
+  &[data-list-part]:not([data-filled][data-focused])
+    > *
+    > [data-list-part='row']
+    > [${part}='clear'] {
     visibility: hidden;
   }
 `;

@@ -79,7 +79,7 @@ export const tests = [
         'none',
       );
 
-      await page.setControl('defaultValue', 0);
+      await page.setState(0, { defaultValue: 0 });
       await sleep(300);
       const disabled = await page.evaluate(
         `[...${page.section}.querySelectorAll('[role=group] button')].map((button) => [button.disabled, getComputedStyle(button).color])`,

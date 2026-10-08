@@ -4,6 +4,10 @@ import { List, TextField } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
 import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
 import {
+  useCreateStateUrl,
+  useProvidedState,
+} from '../utils/options-context.js';
+import {
   getPropOptionsClear,
   getPropOptionsControl,
   propOptionsError,
@@ -15,34 +19,54 @@ import {
  * label the row's title (see the form list for more).
  */
 export const TextFieldDemo: FunctionComponent = () => {
+  const id = 'text-field';
+
   const [log, addLog] = useLog();
 
-  const [controlRoot, propsRoot, RemounterRoot] = usePropControl(
+  const [
+    externalRoot,
+    externalLabel,
+    externalControl,
+    externalClear,
+    externalDescription,
+    externalError,
+  ] = useProvidedState(id);
+
+  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
     propOptionsRoot,
     'root',
+    externalRoot,
     true,
   );
-  const [controlLabel, propsLabel] = usePropControl(commonPropOptions, 'label');
-  const [controlControl, propsControl] = usePropControl(
+  const [controlLabel, propsLabel, stateLabel] = usePropControl(
+    commonPropOptions,
+    'label',
+    externalLabel,
+  );
+  const [controlControl, propsControl, stateControl] = usePropControl(
     useMemo(() => getPropOptionsControl(addLog), [addLog]),
     'control',
+    externalControl,
     true,
   );
-  const [controlDescription, propsDescription] = usePropControl(
-    commonPropOptions,
-    'description',
+  const [controlDescription, propsDescription, stateDescription] =
+    usePropControl(commonPropOptions, 'description', externalDescription);
+  const [controlError, propsError, stateError] = usePropControl(
+    propOptionsError,
+    'error',
+    externalError,
   );
-  const [controlError, propsError] = usePropControl(propOptionsError, 'error');
-  const [controlClear, propsClear] = usePropControl(
+  const [controlClear, propsClear, stateClear] = usePropControl(
     useMemo(() => getPropOptionsClear(addLog), [addLog]),
     'clear',
+    externalClear,
   );
 
   return (
     <Component
       stretch
       baseUiId="field"
-      id="text-field"
+      id={id}
       log={log}
       title="Text Field"
       controls={[
@@ -53,6 +77,14 @@ export const TextFieldDemo: FunctionComponent = () => {
         controlDescription,
         controlError,
       ]}
+      stateUrl={useCreateStateUrl(id, [
+        stateRoot,
+        stateLabel,
+        stateControl,
+        stateClear,
+        stateDescription,
+        stateError,
+      ])}
     >
       <List.Root>
         <List.Section>

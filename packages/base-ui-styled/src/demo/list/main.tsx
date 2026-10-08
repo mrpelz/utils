@@ -4,6 +4,7 @@ import { sfAirplane } from '@bradleyhodges/sfsymbols/sfAirplane';
 import { sfArchiveboxFill } from '@bradleyhodges/sfsymbols/sfArchiveboxFill';
 import { sfBellFill } from '@bradleyhodges/sfsymbols/sfBellFill';
 import { sfCheckmarkCircleFill } from '@bradleyhodges/sfsymbols/sfCheckmarkCircleFill';
+import { sfChevronUpChevronDown } from '@bradleyhodges/sfsymbols/sfChevronUpChevronDown';
 import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
 import { sfEnvelopeFill } from '@bradleyhodges/sfsymbols/sfEnvelopeFill';
 import { sfEnvelopeOpenFill } from '@bradleyhodges/sfsymbols/sfEnvelopeOpenFill';
@@ -19,6 +20,7 @@ import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
 import { sfTagFill } from '@bradleyhodges/sfsymbols/sfTagFill';
 import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
 import { sfWifi } from '@bradleyhodges/sfsymbols/sfWifi';
+import { Properties } from 'csstype';
 import { styled } from 'goober';
 import {
   Fragment,
@@ -31,6 +33,7 @@ import {
 } from 'react';
 
 import {
+  Button,
   Calendar,
   DatePicker,
   DatePickerOpen,
@@ -45,6 +48,10 @@ import {
 } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
 import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
+import {
+  useCreateStateUrl,
+  useProvidedState,
+} from '../utils/options-context.js';
 import { SFSymbol } from '../utils/symbol.js';
 import {
   forwardClick,
@@ -97,43 +104,105 @@ const trailingActions = [
 
 const selectionOptions = ['Automatic', 'Always', 'Never'] as const;
 
+type Selection = (typeof selectionOptions)[number];
+
+/**
+ * A pop-up button: a menu of the options, its trigger a button (the chosen
+ * option's label, then chevron.up.chevron.down), closing on choosing.
+ */
+const PopUp: FunctionComponent<{
+  cursor?: Properties['cursor'];
+  onValueChange: (value: Selection) => void;
+  value: Selection;
+}> = ({ cursor, onValueChange, value }) => (
+  <Menu.Root>
+    <Menu.Trigger render={<Button.Root cursor={cursor} />}>
+      <Button.Label>{value}</Button.Label>
+      <Button.Symbol>
+        <SFSymbol icon={sfChevronUpChevronDown} />
+      </Button.Symbol>
+    </Menu.Trigger>
+    <Menu.Portal>
+      <Menu.Positioner align="end">
+        <Menu.Popup>
+          <Menu.RadioGroup
+            value={value}
+            onValueChange={(next: unknown) => onValueChange(next as Selection)}
+          >
+            {selectionOptions.map((option) => (
+              <Menu.RadioItem
+                key={option}
+                // A pop-up closes on choosing (iOS).
+                closeOnClick
+                value={option}
+              >
+                <Menu.RadioItemIndicator />
+                <Menu.Label>{option}</Menu.Label>
+              </Menu.RadioItem>
+            ))}
+          </Menu.RadioGroup>
+        </Menu.Popup>
+      </Menu.Positioner>
+    </Menu.Portal>
+  </Menu.Root>
+);
+
 /**
  * Lists: a settings-like inset grouped list (Figma “Lists and tables”) with
- * a switch, drill-ins, a pop-up (Menu), an info button, a segmented control,
+ * a switch, drill-ins, a pop-up (a menu, its trigger a button), an info button, a segmented control,
  * a stepper and a slider, a collapsible section (Base UI Collapsible),
  * buttons and a content block. Rows with a control pass their clicks on to
  * it (`onClick`).
  */
 export const ListDemo: FunctionComponent = () => {
+  const id = 'list';
+
   const [log, addLog] = useLog();
 
-  const [controlContent, content] = usePropControl(
+  const [
+    externalContent,
+    externalRoot,
+    externalItem,
+    externalCollapsible,
+    externalTrigger,
+  ] = useProvidedState(id);
+
+  const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
     '[content]',
+    externalContent,
     true,
   );
 
-  const [controlRoot, propsRoot] = usePropControl(
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
     'root',
+    externalRoot,
     true,
   );
 
-  const [controlItem, propsItem] = usePropControl(
+  const [controlItem, propsItem, stateItem] = usePropControl(
     propOptionsItemFirst,
     'item (1st)',
+    externalItem,
     true,
   );
 
-  const [controlCollapsible, propsCollapsible, RemounterCollapsible] =
-    usePropControl(
-      useMemo(() => getPropOptionsCollapsible(addLog), [addLog]),
-      'collapsible',
-    );
+  const [
+    controlCollapsible,
+    propsCollapsible,
+    stateCollapsible,
+    RemounterCollapsible,
+  ] = usePropControl(
+    useMemo(() => getPropOptionsCollapsible(addLog), [addLog]),
+    'collapsible',
+    externalCollapsible,
+  );
 
-  const [controlTrigger, propsTrigger] = usePropControl(
+  const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
     propOptionsCursor,
     'collapsible trigger (header)',
+    externalTrigger,
   );
 
   const [selection, setSelection] =
@@ -156,7 +225,7 @@ export const ListDemo: FunctionComponent = () => {
   return (
     <Component
       stretch
-      id="list"
+      id={id}
       log={log}
       title="List"
       controls={[
@@ -166,6 +235,13 @@ export const ListDemo: FunctionComponent = () => {
         controlCollapsible,
         controlTrigger,
       ]}
+      stateUrl={useCreateStateUrl(id, [
+        stateContent,
+        stateRoot,
+        stateItem,
+        stateCollapsible,
+        stateTrigger,
+      ])}
     >
       <List.Root {...propsRoot}>
         <List.Section>
@@ -221,38 +297,13 @@ export const ListDemo: FunctionComponent = () => {
               <List.Subtitle>Banners, Sounds</List.Subtitle>
               <List.DrillIn />
             </List.Item>
-            <List.Item onClick={forwardClick('[data-list-part=pop-up]')}>
+            <List.Item onClick={forwardClick('[aria-haspopup]')}>
               {image(sfPersonFill, 'var(--color-ios-system-gray)')}
               <List.Title>Show Previews</List.Title>
-              <Menu.Root>
-                <Menu.Trigger render={<List.PopUp />}>{selection}</Menu.Trigger>
-                <Menu.Portal>
-                  <Menu.Positioner align="end">
-                    <Menu.Popup>
-                      <Menu.RadioGroup
-                        value={selection}
-                        onValueChange={(value: unknown) =>
-                          setSelection(
-                            value as (typeof selectionOptions)[number],
-                          )
-                        }
-                      >
-                        {selectionOptions.map((option) => (
-                          <Menu.RadioItem
-                            key={option}
-                            // A pop-up closes on choosing (iOS).
-                            closeOnClick
-                            value={option}
-                          >
-                            <Menu.RadioItemIndicator />
-                            <Menu.Label>{option}</Menu.Label>
-                          </Menu.RadioItem>
-                        ))}
-                      </Menu.RadioGroup>
-                    </Menu.Popup>
-                  </Menu.Positioner>
-                </Menu.Portal>
-              </Menu.Root>
+              <PopUp
+                value={selection}
+                onValueChange={setSelection}
+              />
             </List.Item>
             <List.Item
               onClick={({ target }) => {
@@ -415,113 +466,199 @@ export const ListDemo: FunctionComponent = () => {
  * index: see “List (Index)”, selection: “List (Editing)”).
  */
 export const ListPartsDemo: FunctionComponent = () => {
+  const id = 'list-parts';
+
   const [log, addLog] = useLog();
 
-  const [controlContent, content] = usePropControl(
+  const [
+    externalContent,
+    externalRoot,
+    externalSection,
+    externalHeader,
+    externalSupertitle,
+    externalGroup,
+    externalItem,
+    externalImage,
+    externalTitle,
+    externalSubtitle,
+    externalDetail,
+    externalDrillIn,
+    externalAccessory,
+    externalCheckmark,
+    externalPopUp,
+    externalAction,
+    externalButton,
+    externalCheckbox,
+    externalEditButton,
+    externalGrabber,
+    externalText,
+    externalSwipeActions,
+    externalSwipeAction,
+    externalCollapsible,
+    externalTrigger,
+    externalPanel,
+    externalDisclosure,
+    externalFooter,
+    externalBlock,
+    externalExpandable,
+  ] = useProvidedState(id);
+
+  const [controlContent, content, stateContent] = usePropControl(
     propOptionsPartsContent,
     '[content]',
+    externalContent,
     true,
   );
-  const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
-  const [controlSection, propsSection] = usePropControl(
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
+  );
+  const [controlSection, propsSection, stateSection] = usePropControl(
     commonPropOptions,
     'section',
+    externalSection,
   );
-  const [controlHeader, propsHeader] = usePropControl(
+  const [controlHeader, propsHeader, stateHeader] = usePropControl(
     propOptionsHeader,
     'header',
+    externalHeader,
     true,
   );
-  const [controlSupertitle, propsSupertitle] = usePropControl(
+  const [controlSupertitle, propsSupertitle, stateSupertitle] = usePropControl(
     commonPropOptions,
     'supertitle',
+    externalSupertitle,
   );
-  const [controlGroup, propsGroup] = usePropControl(commonPropOptions, 'group');
-  const [controlItem, propsItem] = usePropControl(
+  const [controlGroup, propsGroup, stateGroup] = usePropControl(
+    commonPropOptions,
+    'group',
+    externalGroup,
+  );
+  const [controlItem, propsItem, stateItem] = usePropControl(
     useMemo(() => getPropOptionsItemFirst(addLog), [addLog]),
     'item (1st)',
+    externalItem,
   );
-  const [controlImage, propsImage] = usePropControl(propOptionsImage, 'image');
-  const [controlTitle, propsTitle] = usePropControl(
+  const [controlImage, propsImage, stateImage] = usePropControl(
+    propOptionsImage,
+    'image',
+    externalImage,
+  );
+  const [controlTitle, propsTitle, stateTitle] = usePropControl(
     useMemo(() => getPropOptionsTitleFirst(addLog), [addLog]),
     'title (1st)',
+    externalTitle,
   );
-  const [controlSubtitle, propsSubtitle] = usePropControl(
+  const [controlSubtitle, propsSubtitle, stateSubtitle] = usePropControl(
     commonPropOptions,
     'subtitle',
+    externalSubtitle,
   );
-  const [controlDetail, propsDetail] = usePropControl(
+  const [controlDetail, propsDetail, stateDetail] = usePropControl(
     commonPropOptions,
     'detail',
+    externalDetail,
   );
-  const [controlDrillIn, propsDrillIn] = usePropControl(
+  const [controlDrillIn, propsDrillIn, stateDrillIn] = usePropControl(
     commonPropOptions,
     'drill-in',
+    externalDrillIn,
   );
-  const [controlAccessory, propsAccessory] = usePropControl(
+  const [controlAccessory, propsAccessory, stateAccessory] = usePropControl(
     useMemo(() => getPropOptionsAccessory(addLog), [addLog]),
     'accessory',
+    externalAccessory,
   );
-  const [controlCheckmark, propsCheckmark] = usePropControl(
+  const [controlCheckmark, propsCheckmark, stateCheckmark] = usePropControl(
     commonPropOptions,
     'checkmark',
+    externalCheckmark,
   );
-  const [controlPopUp, propsPopUp] = usePropControl(
+  const [controlPopUp, propsPopUp, statePopUp] = usePropControl(
     propOptionsCursor,
     'pop-up',
+    externalPopUp,
   );
-  const [controlAction, propsAction] = usePropControl(
+  const [controlAction, propsAction, stateAction] = usePropControl(
     useMemo(() => getPropOptionsAction(addLog), [addLog]),
     'action',
+    externalAction,
   );
-  const [controlButton, propsButton] = usePropControl(
+  const [controlButton, propsButton, stateButton] = usePropControl(
     useMemo(() => getPropOptionsButton(addLog), [addLog]),
     'button',
+    externalButton,
   );
-  const [controlCheckbox, propsCheckbox, RemounterCheckbox] = usePropControl(
-    propOptionsCheckbox,
-    'checkbox',
-  );
-  const [controlEditButton, propsEditButton] = usePropControl(
+  const [controlCheckbox, propsCheckbox, stateCheckbox, RemounterCheckbox] =
+    usePropControl(propOptionsCheckbox, 'checkbox', externalCheckbox);
+  const [controlEditButton, propsEditButton, stateEditButton] = usePropControl(
     useMemo(() => getPropOptionsEditButton(addLog), [addLog]),
     'edit button',
+    externalEditButton,
   );
-  const [controlGrabber, propsGrabber] = usePropControl(
+  const [controlGrabber, propsGrabber, stateGrabber] = usePropControl(
     propOptionsCursor,
     'grabber',
+    externalGrabber,
   );
-  const [controlText, propsText] = usePropControl(propOptionsText, 'text');
-  const [controlSwipeActions, propsSwipeActions] = usePropControl(
-    useMemo(() => getPropOptionsSwipeActionsTrailing(addLog), [addLog]),
-    'swipe actions (trailing)',
-    true,
+  const [controlText, propsText, stateText] = usePropControl(
+    propOptionsText,
+    'text',
+    externalText,
   );
-  const [controlSwipeAction, propsSwipeAction] = usePropControl(
-    useMemo(() => getPropOptionsSwipeActionOutermost(addLog), [addLog]),
-    'swipe action (outermost)',
+  const [controlSwipeActions, propsSwipeActions, stateSwipeActions] =
+    usePropControl(
+      useMemo(() => getPropOptionsSwipeActionsTrailing(addLog), [addLog]),
+      'swipe actions (trailing)',
+      externalSwipeActions,
+      true,
+    );
+  const [controlSwipeAction, propsSwipeAction, stateSwipeAction] =
+    usePropControl(
+      useMemo(() => getPropOptionsSwipeActionOutermost(addLog), [addLog]),
+      'swipe action (outermost)',
+      externalSwipeAction,
+    );
+  const [
+    controlCollapsible,
+    propsCollapsible,
+    stateCollapsible,
+    RemounterCollapsible,
+  ] = usePropControl(
+    propOptionsCollapsible,
+    'collapsible',
+    externalCollapsible,
   );
-  const [controlCollapsible, propsCollapsible, RemounterCollapsible] =
-    usePropControl(propOptionsCollapsible, 'collapsible');
-  const [controlTrigger, propsTrigger] = usePropControl(
+  const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
     propOptionsCursor,
     'collapsible trigger (header)',
+    externalTrigger,
   );
-  const [controlPanel, propsPanel] = usePropControl(
+  const [controlPanel, propsPanel, statePanel] = usePropControl(
     propOptionsPanel,
     'collapsible panel',
+    externalPanel,
   );
-  const [controlDisclosure, propsDisclosure] = usePropControl(
+  const [controlDisclosure, propsDisclosure, stateDisclosure] = usePropControl(
     commonPropOptions,
     'disclosure',
+    externalDisclosure,
   );
-  const [controlFooter, propsFooter] = usePropControl(
+  const [controlFooter, propsFooter, stateFooter] = usePropControl(
     commonPropOptions,
     'footer',
+    externalFooter,
   );
-  const [controlBlock, propsBlock] = usePropControl(propOptionsBlock, 'block');
-  const [controlExpandable, propsExpandable] = usePropControl(
+  const [controlBlock, propsBlock, stateBlock] = usePropControl(
+    propOptionsBlock,
+    'block',
+    externalBlock,
+  );
+  const [controlExpandable, propsExpandable, stateExpandable] = usePropControl(
     propOptionsExpandable,
     'expandable',
+    externalExpandable,
   );
   // The expandable row, toggled by the row above (unless its control says).
   const [expanded, setExpanded] = useState(false);
@@ -533,7 +670,7 @@ export const ListPartsDemo: FunctionComponent = () => {
   return (
     <Component
       stretch
-      id="list-parts"
+      id={id}
       log={log}
       title="List (Parts)"
       controls={[
@@ -568,6 +705,38 @@ export const ListPartsDemo: FunctionComponent = () => {
         controlBlock,
         controlExpandable,
       ]}
+      stateUrl={useCreateStateUrl(id, [
+        stateContent,
+        stateRoot,
+        stateSection,
+        stateHeader,
+        stateSupertitle,
+        stateGroup,
+        stateItem,
+        stateImage,
+        stateTitle,
+        stateSubtitle,
+        stateDetail,
+        stateDrillIn,
+        stateAccessory,
+        stateCheckmark,
+        statePopUp,
+        stateAction,
+        stateButton,
+        stateCheckbox,
+        stateEditButton,
+        stateGrabber,
+        stateText,
+        stateSwipeActions,
+        stateSwipeAction,
+        stateCollapsible,
+        stateTrigger,
+        statePanel,
+        stateDisclosure,
+        stateFooter,
+        stateBlock,
+        stateExpandable,
+      ])}
     >
       <List.Root {...propsRoot}>
         <List.Section {...propsSection}>
@@ -614,47 +783,23 @@ export const ListPartsDemo: FunctionComponent = () => {
               </List.Accessory>
               <List.Checkmark {...propsCheckmark} />
             </List.Item>
-            <List.Item>
+            {/* Rows with a single control pass their clicks on to it. */}
+            <List.Item onClick={forwardClick('[aria-haspopup]')}>
               <List.Title>Pop-up</List.Title>
-              <Menu.Root>
-                <Menu.Trigger render={<List.PopUp {...propsPopUp} />}>
-                  {selection}
-                </Menu.Trigger>
-                <Menu.Portal>
-                  <Menu.Positioner align="end">
-                    <Menu.Popup>
-                      <Menu.RadioGroup
-                        value={selection}
-                        onValueChange={(value: unknown) =>
-                          setSelection(
-                            value as (typeof selectionOptions)[number],
-                          )
-                        }
-                      >
-                        {selectionOptions.map((option) => (
-                          <Menu.RadioItem
-                            key={option}
-                            closeOnClick
-                            value={option}
-                          >
-                            <Menu.RadioItemIndicator />
-                            <Menu.Label>{option}</Menu.Label>
-                          </Menu.RadioItem>
-                        ))}
-                      </Menu.RadioGroup>
-                    </Menu.Popup>
-                  </Menu.Positioner>
-                </Menu.Portal>
-              </Menu.Root>
+              <PopUp
+                {...propsPopUp}
+                value={selection}
+                onValueChange={setSelection}
+              />
             </List.Item>
-            <List.Item>
+            <List.Item onClick={forwardClick('[data-list-part=action]')}>
               <List.Title>Action</List.Title>
               <List.Action {...propsAction}>Action</List.Action>
             </List.Item>
             <List.Item>
               <List.Button {...propsButton}>Button</List.Button>
             </List.Item>
-            <List.Item>
+            <List.Item onClick={forwardClick('[role=checkbox]')}>
               <RemounterCheckbox>
                 <List.Checkbox
                   aria-label="Checkbox"
@@ -841,20 +986,33 @@ const swipeRows: readonly SwipeRow[] = [
  * either way.
  */
 export const ListSwipeDemo: FunctionComponent = () => {
+  const id = 'list-swipe';
+
   const [log, addLog] = useLog();
 
-  const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
+  const [externalRoot, externalSwipeActions, externalSwipeAction] =
+    useProvidedState(id);
 
-  const [controlSwipeActions, propsSwipeActions] = usePropControl(
-    useMemo(() => getPropOptionsSwipeActionsFirstLeading(addLog), [addLog]),
-    'swipe actions (1st, leading)',
-    true,
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
   );
 
-  const [controlSwipeAction, propsSwipeAction] = usePropControl(
-    useMemo(() => getPropOptionsSwipeActionFirst(addLog), [addLog]),
-    'swipe action (1st)',
-  );
+  const [controlSwipeActions, propsSwipeActions, stateSwipeActions] =
+    usePropControl(
+      useMemo(() => getPropOptionsSwipeActionsFirstLeading(addLog), [addLog]),
+      'swipe actions (1st, leading)',
+      externalSwipeActions,
+      true,
+    );
+
+  const [controlSwipeAction, propsSwipeAction, stateSwipeAction] =
+    usePropControl(
+      useMemo(() => getPropOptionsSwipeActionFirst(addLog), [addLog]),
+      'swipe action (1st)',
+      externalSwipeAction,
+    );
 
   const swipeActions = (
     side: 'leading' | 'trailing',
@@ -894,9 +1052,14 @@ export const ListSwipeDemo: FunctionComponent = () => {
     <Component
       stretch
       controls={[controlRoot, controlSwipeActions, controlSwipeAction]}
-      id="list-swipe"
+      id={id}
       log={log}
       title="List (Swipe Actions)"
+      stateUrl={useCreateStateUrl(id, [
+        stateRoot,
+        stateSwipeActions,
+        stateSwipeAction,
+      ])}
     >
       <List.Root {...propsRoot}>
         <List.Section>
@@ -950,42 +1113,69 @@ const planets = ['Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter'] as const;
  * Base UI `RadioGroup` rendering the group, with radios).
  */
 export const ListEditDemo: FunctionComponent = () => {
+  const id = 'list-edit';
+
   const [log, addLog] = useLog();
+
+  const [
+    externalContent,
+    externalRoot,
+    externalCheckbox,
+    externalRadioGroup,
+    externalRadio,
+    externalEditButton,
+    externalGrabber,
+  ] = useProvidedState(id);
   const [rows, setRows] = useState<readonly string[]>(planets);
   const added = useRef(0);
 
-  const [controlContent, content] = usePropControl(
+  const [controlContent, content, stateContent] = usePropControl(
     propOptionsEdit,
     '[content]',
+    externalContent,
     true,
   );
 
-  const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
-
-  const [controlCheckbox, propsCheckbox, RemounterCheckbox] = usePropControl(
-    useMemo(() => getPropOptionsCheckboxFirst(addLog), [addLog]),
-    'checkbox (1st)',
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
   );
 
-  const [controlRadioGroup, propsRadioGroup, RemounterRadioGroup] =
+  const [controlCheckbox, propsCheckbox, stateCheckbox, RemounterCheckbox] =
     usePropControl(
-      useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
-      'radio group',
+      useMemo(() => getPropOptionsCheckboxFirst(addLog), [addLog]),
+      'checkbox (1st)',
+      externalCheckbox,
     );
 
-  const [controlRadio, propsRadio] = usePropControl(
+  const [
+    controlRadioGroup,
+    propsRadioGroup,
+    stateRadioGroup,
+    RemounterRadioGroup,
+  ] = usePropControl(
+    useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
+    'radio group',
+    externalRadioGroup,
+  );
+
+  const [controlRadio, propsRadio, stateRadio] = usePropControl(
     propOptionsRadioFirst,
     'radio (1st)',
+    externalRadio,
   );
 
-  const [controlEditButton, propsEditButton] = usePropControl(
+  const [controlEditButton, propsEditButton, stateEditButton] = usePropControl(
     useMemo(() => getPropOptionsEditButtonFirst(addLog), [addLog]),
     'edit button (1st)',
+    externalEditButton,
   );
 
-  const [controlGrabber, propsGrabber] = usePropControl(
+  const [controlGrabber, propsGrabber, stateGrabber] = usePropControl(
     propOptionsCursor,
     'grabber (1st)',
+    externalGrabber,
   );
 
   const prefix = (name: string, first: boolean) => {
@@ -1106,7 +1296,7 @@ export const ListEditDemo: FunctionComponent = () => {
   return (
     <Component
       stretch
-      id="list-edit"
+      id={id}
       log={log}
       title="List (Editing)"
       controls={[
@@ -1118,6 +1308,15 @@ export const ListEditDemo: FunctionComponent = () => {
         controlEditButton,
         controlGrabber,
       ]}
+      stateUrl={useCreateStateUrl(id, [
+        stateContent,
+        stateRoot,
+        stateCheckbox,
+        stateRadioGroup,
+        stateRadio,
+        stateEditButton,
+        stateGrabber,
+      ])}
     >
       <List.Root {...propsRoot}>
         <List.Section>
@@ -1162,17 +1361,26 @@ type EventsView = keyof typeof events;
  * each controlling its group (`aria-controls`), the other one hidden.
  */
 export const ListSegmentedDemo: FunctionComponent = () => {
+  const id = 'list-segmented';
+
   const [log, addLog] = useLog();
+
+  const [externalRoot] = useProvidedState(id);
   const [view, setView] = useState<EventsView>('upcoming');
 
-  const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
+  );
 
   return (
     <Component
       stretch
       controls={[controlRoot]}
-      id="list-segmented"
+      id={id}
       log={log}
+      stateUrl={useCreateStateUrl(id, [stateRoot])}
       title="List (Segmented)"
     >
       <List.Root {...propsRoot}>
@@ -1235,7 +1443,11 @@ export const ListSegmentedDemo: FunctionComponent = () => {
  * expandable rows (`List.Expandable`), and a textarea.
  */
 export const ListFormDemo: FunctionComponent = () => {
+  const id = 'list-form';
+
   const [log, addLog] = useLog();
+
+  const [externalRoot] = useProvidedState(id);
   const [starts, setStarts] = useState(() => new Date(2025, 3, 20, 9, 41));
   const [ends, setEnds] = useState(() => new Date(2025, 3, 21, 18, 0));
   // The open picker: of which row, the date's or the time's.
@@ -1243,14 +1455,19 @@ export const ListFormDemo: FunctionComponent = () => {
     readonly ['ends' | 'starts', DatePickerOpen] | null
   >(null);
 
-  const [controlRoot, propsRoot] = usePropControl(propOptionsRoot, 'root');
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
+  );
 
   return (
     <Component
       stretch
       controls={[controlRoot]}
-      id="list-form"
+      id={id}
       log={log}
+      stateUrl={useCreateStateUrl(id, [stateRoot])}
       title="List (Form)"
     >
       <List.Root {...propsRoot}>
@@ -1427,28 +1644,37 @@ const Plain = styled('div')`
  * Title”, always nested) and an index (Figma “Index Bar”) jumping to them.
  */
 export const ListIndexDemo: FunctionComponent = () => {
+  const id = 'list-index';
+
   const [log, addLog] = useLog();
 
-  const [controlRoot, propsRoot] = usePropControl(
+  const [externalRoot, externalHeader, externalIndex, externalIndexItem] =
+    useProvidedState(id);
+
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRootPlain,
     'root',
+    externalRoot,
     true,
   );
 
-  const [controlHeader, propsHeader] = usePropControl(
+  const [controlHeader, propsHeader, stateHeader] = usePropControl(
     commonPropOptions,
     'header',
+    externalHeader,
   );
 
-  const [controlIndex, propsIndex] = usePropControl(
+  const [controlIndex, propsIndex, stateIndex] = usePropControl(
     propOptionsIndex,
     'index',
+    externalIndex,
     true,
   );
 
-  const [controlIndexItem, propsIndexItem] = usePropControl(
+  const [controlIndexItem, propsIndexItem, stateIndexItem] = usePropControl(
     propOptionsCursor,
     'index item',
+    externalIndexItem,
   );
 
   const listRef = useRef<HTMLElement>(null);
@@ -1504,9 +1730,15 @@ export const ListIndexDemo: FunctionComponent = () => {
     <Component
       stretch
       controls={[controlRoot, controlHeader, controlIndex, controlIndexItem]}
-      id="list-index"
+      id={id}
       log={log}
       title="List (Index)"
+      stateUrl={useCreateStateUrl(id, [
+        stateRoot,
+        stateHeader,
+        stateIndex,
+        stateIndexItem,
+      ])}
     >
       <Plain>
         <List.Root
@@ -1580,18 +1812,24 @@ const messages = [
  * (`Text`), with swipe actions.
  */
 export const ListMailDemo: FunctionComponent = () => {
+  const id = 'list-mail';
+
   const [log, addLog] = useLog();
+
+  const [externalRoot, externalText] = useProvidedState(id);
   const [archived, setArchived] = useState<readonly string[]>([]);
 
-  const [controlRoot, propsRoot] = usePropControl(
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRootPlain,
     'root',
+    externalRoot,
     true,
   );
 
-  const [controlText, propsText] = usePropControl(
+  const [controlText, propsText, stateText] = usePropControl(
     propOptionsText,
     'text',
+    externalText,
     true,
   );
 
@@ -1599,8 +1837,9 @@ export const ListMailDemo: FunctionComponent = () => {
     <Component
       stretch
       controls={[controlRoot, controlText]}
-      id="list-mail"
+      id={id}
       log={log}
+      stateUrl={useCreateStateUrl(id, [stateRoot, stateText])}
       title="List (Mail)"
     >
       <List.Root {...propsRoot}>

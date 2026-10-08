@@ -163,28 +163,51 @@ export const fontWeight = (weight: number | string): string => css`
   stroke-width: max(0, (${weight} - 400) / 326);
 `;
 
+/** A frame at 60 Hz, in ms: what `edgeScrollDelta`'s speed is per. */
+const frameDuration = 1000 / 60;
+
 /**
  * How far to scroll in a frame while a pointer drags near an end of a
  * scrolling area (as text selections scroll): within `edge` of its start
- * (`-`) or end (`+`), faster closer to it, at most `speed` at or beyond it.
+ * (`-`) or end (`+`), faster closer to it, at most `speed` (per 60 Hz frame)
+ * at or beyond it; for the frame's `elapsed` ms, so as fast at any frame
+ * rate (see `frameElapsed`).
  *
  * @param position the pointer's position along the area
  * @param start the area's start edge, along the same axis
  * @param end the area's end edge
+ * @param elapsed the time since the last frame
  */
 export const edgeScrollDelta = (
   position: number,
   start: number,
   end: number,
+  elapsed = frameDuration,
   edge = 48,
   speed = 16,
 ): number => {
   const towardsStart = Math.min(1, (start + edge - position) / edge);
   const towardsEnd = Math.min(1, (position - end + edge) / edge);
+  // At most a few frames' worth (e.g. after the page was hidden).
+  const frames = Math.min(elapsed, 4 * frameDuration) / frameDuration;
 
-  if (towardsStart > 0) return -towardsStart * speed;
-  if (towardsEnd > 0) return towardsEnd * speed;
+  if (towardsStart > 0) return -towardsStart * speed * frames;
+  if (towardsEnd > 0) return towardsEnd * speed * frames;
   return 0;
+};
+
+/**
+ * Measures the time between animation frames (for `edgeScrollDelta`): call
+ * with each frame's timestamp.
+ */
+export const frameElapsed = (): ((time: number) => number) => {
+  let last: number | undefined;
+
+  return (time: number) => {
+    const elapsed = last === undefined ? frameDuration : time - last;
+    last = time;
+    return elapsed;
+  };
 };
 
 const ReserveLayer = styled('span')`
@@ -389,4 +412,165 @@ export const usePointerDrag = <T extends HTMLElement, State>(
     onPointerMove,
     onPointerUp,
   };
+};
+
+/**
+ * SF Symbols' `chevron.up.chevron.down` (􀆏), as SVG strokes at the current
+ * font size (pop-up buttons).
+ */
+export const UpDownChevrons: FunctionComponent = () => (
+  <svg
+    aria-hidden="true"
+    fill="none"
+    height="0.94em"
+    stroke="currentcolor"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="1.6"
+    viewBox="0 0 10 16"
+    width="0.59em"
+  >
+    <path d="M2 6l3-3.5L8 6M2 10l3 3.5L8 10" />
+  </svg>
+);
+
+// The pill: absolutely positioned in its parent (scrolling with its
+// content), behind the items (below them, in the popup's stacking context:
+// glass makes one), its place and size set by `MovingHighlight`.
+// How long the moving highlight stays between items (see `MovingHighlight`).
+const hideDelay = 100;
+
+// (&&: over its container's rules for its children, e.g. a menu's fading
+// items, whichever goober inserted first.)
+const Highlight = styled('span', forwardRef)`
+  && {
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    background-color: var(--styled-glass-selection);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 100ms;
+  }
+
+  /* Moving (with a pointer hovering the items): quick, so it keeps up with
+     the pointer at normal speeds. Otherwise (touch, keys) it jumps. */
+  @media (hover: hover) {
+    && {
+      transition-duration: 80ms;
+      transition-property: translate, width, height, border-radius, opacity;
+      transition-timing-function: ease-out;
+    }
+  }
+`;
+
+/**
+ * The selection of a popup's highlighted item (the first of `selectors`
+ * found, in order, e.g. `[data-highlighted]`), as one pill moving from item to item (iOS) instead
+ * of each item showing its own. Rendered last in the items' container (in
+ * a stacking context), it takes the item's place, size and corners (those
+ * of its `::before`, where the items draw their selection otherwise); it
+ * fades out in place when none is highlighted, and in where one is.
+ */
+export const MovingHighlight: FunctionComponent<{
+  selectors: readonly string[];
+}> = ({ selectors }) => {
+  const key = selectors.join('\n');
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useLayoutEffect(() => {
+    const { current: highlight } = ref;
+    const container = highlight?.parentElement;
+    if (!highlight || !container) return undefined;
+    let shown = false;
+    // Between items (e.g. over a separator), it stays a moment: the next
+    // highlighted item moves it there.
+    let hiding: ReturnType<typeof setTimeout> | undefined;
+
+    // Instantly while its items scroll (it scrolls with them).
+    const update = (instant = false) => {
+      const item = key
+        .split('\n')
+        .map((selector) => container.querySelector<HTMLElement>(selector))
+        .find(Boolean);
+      if (!item) {
+        if (!shown || hiding !== undefined) return;
+        hiding = setTimeout(() => {
+          hiding = undefined;
+          shown = false;
+          highlight.style.opacity = '0';
+        }, hideDelay);
+        return;
+      }
+      clearTimeout(hiding);
+      hiding = undefined;
+
+      // Relative to its containing block: the container (scrolled), or the
+      // nearest positioned ancestor (its place following the scroll). In
+      // layout px: popups scale while they open (or a submenu over them).
+      const parent =
+        highlight.offsetParent instanceof HTMLElement
+          ? highlight.offsetParent
+          : container;
+      const scrolled = parent === container ? container : undefined;
+      const box = parent.getBoundingClientRect();
+      const rect = item.getBoundingClientRect();
+      const scaleX = parent.offsetWidth ? box.width / parent.offsetWidth : 1;
+      const scaleY = parent.offsetHeight ? box.height / parent.offsetHeight : 1;
+      const x = (rect.left - box.left) / scaleX - parent.clientLeft;
+      const y = (rect.top - box.top) / scaleY - parent.clientTop;
+      const place = {
+        borderRadius: getComputedStyle(item, '::before').borderRadius,
+        height: `${String(rect.height / scaleY)}px`,
+        translate: `${String(x + (scrolled?.scrollLeft ?? 0))}px ${String(y + (scrolled?.scrollTop ?? 0))}px`,
+        width: `${String(rect.width / scaleX)}px`,
+      };
+      // Appearing (or scrolling): in place, not moving there.
+      if (shown && !instant) {
+        Object.assign(highlight.style, place);
+      } else {
+        highlight.style.transitionProperty = 'opacity';
+        Object.assign(highlight.style, place);
+        highlight.getBoundingClientRect();
+        highlight.style.removeProperty('transition-property');
+      }
+      shown = true;
+      highlight.style.opacity = '1';
+    };
+
+    update();
+    const observer = new MutationObserver(() => update());
+    observer.observe(container, {
+      attributeFilter: ['data-highlighted', 'data-popup-open'],
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
+    const resizeObserver = new ResizeObserver(() => update());
+    resizeObserver.observe(container);
+    const onScroll = () => update(true);
+    container.addEventListener('scroll', onScroll, { passive: true });
+    // Measured again once the popup (or its items) stopped moving.
+    const onSettle = () => update();
+    const popup = container.closest<HTMLElement>('[role=menu]') ?? container;
+    popup.addEventListener('transitionend', onSettle);
+    popup.addEventListener('animationend', onSettle);
+    return () => {
+      clearTimeout(hiding);
+      container.removeEventListener('scroll', onScroll);
+      popup.removeEventListener('transitionend', onSettle);
+      popup.removeEventListener('animationend', onSettle);
+      observer.disconnect();
+      resizeObserver.disconnect();
+    };
+  }, [key]);
+
+  return (
+    <Highlight
+      ref={ref}
+      aria-hidden="true"
+      data-moving-highlight=""
+    />
+  );
 };

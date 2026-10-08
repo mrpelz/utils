@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
+import { sfChevronUpChevronDown } from '@bradleyhodges/sfsymbols/sfChevronUpChevronDown';
 import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
 
@@ -12,8 +13,14 @@ export const propOptionsContent = {
     undefined,
     new MappedProp(<SFSymbol icon={sfHeartFill} />, '[heart.fill]'),
     new MappedProp(<SFSymbol icon={sfPlus} />, '[plus]'),
+    new MappedProp(
+      <SFSymbol icon={sfChevronUpChevronDown} />,
+      '[chevron.up.chevron.down]',
+    ),
   ] as const,
   label: ['Button', undefined, 'Long button label'] as const,
+  // A pop-up button: the label, then the symbol.
+  order: ['symbolFirst', 'labelFirst'] as const,
 } as const;
 
 export const propOptionsRoot = {
