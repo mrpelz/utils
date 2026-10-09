@@ -9,8 +9,12 @@ import {
 } from 'react';
 
 import { EditMenu, Menu } from '../../components/index.js';
+import {
+  propOptionsPopup as propOptionsMenuPopup,
+  propOptionsPositioner as propOptionsMenuPositioner,
+} from '../menu/props.js';
 import { useLog } from '../utils/log.js';
-import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
+import { Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
@@ -188,13 +192,13 @@ export const EditMenuDemo: FunctionComponent = () => {
     propsSubmenuPositioner,
     stateSubmenuPositioner,
   ] = usePropControl(
-    propOptionsPositioner,
+    propOptionsMenuPositioner,
     'more positioner',
     externalSubmenuPositioner,
   );
 
   const [controlSubmenuPopup, propsSubmenuPopup, stateSubmenuPopup] =
-    usePropControl(commonPropOptions, 'more popup', externalSubmenuPopup);
+    usePropControl(propOptionsMenuPopup, 'more popup', externalSubmenuPopup);
 
   const { onOpenChange, open, ...rootProps } = propsRoot;
 

@@ -39,6 +39,13 @@ export const getPropOptionsItem = (
       '[log ref]',
     ),
   ] as const,
+  onSecondaryClick: [
+    undefined,
+    new MappedProp(
+      () => addLog(`${value} secondary click`),
+      '[log secondary click]',
+    ),
+  ] as const,
 });
 
 export const getPropOptionsRoot = (addLog: AddLog) => ({

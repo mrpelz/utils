@@ -1,10 +1,12 @@
 import { Menu as BaseMenu } from '@base-ui/react/menu';
+import type { BaseUIEvent } from '@base-ui/react/types';
 import { Properties } from 'csstype';
 import { styled } from 'goober';
 import {
   createContext,
   forwardRef,
   FunctionComponent,
+  MouseEvent as ReactMouseEvent,
   PointerEvent,
   ReactNode,
   Ref,
@@ -17,11 +19,14 @@ import {
 import { glassMedium } from './glass.js';
 import {
   css,
+  draggingAttribute,
   edgeScrollDelta,
   fontWeight,
   frameElapsed,
   MovingHighlight,
+  SecondaryClickProps,
   useForwardedRef,
+  useSecondaryClick,
 } from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Menus”: “Menu - iPhone”, “Menu - iPad -
@@ -249,6 +254,11 @@ const menuAt = (x: number, y: number) =>
 
 const pixels = (value: string) => Number.parseFloat(value) || 0;
 
+// Keeps a touch from scrolling (dragging over menus).
+const keepScroll = (event: TouchEvent) => {
+  if (event.cancelable) event.preventDefault();
+};
+
 // Keeps a (trusted) click from its target.
 const keepTrustedClick = (click: MouseEvent) => {
   if (!click.isTrusted) return;
@@ -286,6 +296,12 @@ export const dragOverItems = (
   let finger: Finger | undefined;
   // The menu the finger was last over, which it scrolls beyond its ends.
   let menu: HTMLElement | undefined;
+  document.documentElement.setAttribute(draggingAttribute, '');
+  // No scrolling while dragging (e.g. from a trigger held: see `Trigger`).
+  document.addEventListener('touchmove', keepScroll, {
+    capture: true,
+    passive: false,
+  });
 
   const update = () => {
     if (!finger) return;
@@ -369,6 +385,8 @@ export const dragOverItems = (
     for (const type of [...types, ...boundaryTypes]) {
       document.removeEventListener(type, listener, { capture: true });
     }
+    document.documentElement.removeAttribute(draggingAttribute);
+    document.removeEventListener('touchmove', keepScroll, { capture: true });
     if (pointerEvent.type !== 'pointerup') return;
 
     // The touch's own click (on the element touched, if released there) is
@@ -393,13 +411,58 @@ export const dragOverItems = (
   }
 };
 
-// Touch: no scrolling from the trigger, so it can be dragged from.
-type TriggerProps = Omit<BaseMenu.Trigger.Props, 'ref'>;
+type TriggerProps = Omit<BaseMenu.Trigger.Props, 'ref'> &
+  SecondaryClickProps & {
+    /**
+     * What opens the menu: a click (default), or a secondary click (a right
+     * click, or a touch held, then dragged on to the items; see
+     * `useSecondaryClick`), a click then being the trigger's own (e.g. a
+     * back button's, its menu the history; UIKit `UIButton.menu` without
+     * `showsMenuAsPrimaryAction`, or a context menu).
+     */
+    openOn?: 'click' | 'secondaryClick';
+  };
 
+// Touch: no scrolling from the trigger, so it can be dragged from (opening
+// on a click; otherwise, until held).
 // (Its ref type doesn't match `forwardRef`'s, as with other Base UI triggers.)
-const StyledTrigger = styled(BaseMenu.Trigger, forwardRef)`
-  touch-action: none;
-` as unknown as FunctionComponent<TriggerProps & { ref?: Ref<HTMLElement> }>;
+const StyledTrigger = styled(BaseMenu.Trigger, forwardRef)<{
+  openOn?: TriggerProps['openOn'];
+}>`
+  touch-action: ${({ openOn }) =>
+    openOn === 'secondaryClick' ? 'manipulation' : 'none'};
+` as unknown as FunctionComponent<
+  Omit<TriggerProps, 'onSecondaryClick'> & { ref?: Ref<HTMLElement> }
+>;
+
+/**
+ * Opens a menu by its trigger (`trigger`) as Base UI does on a mouse down;
+ * a touch (`pointerId`) then drags over its items (see `dragOverItems`).
+ */
+const openByTrigger = (trigger: HTMLElement, pointerId?: number) => {
+  const document = trigger.ownerDocument;
+  if (trigger.getAttribute('aria-expanded') !== 'true') {
+    trigger.dispatchEvent(
+      new MouseEvent('mousedown', {
+        bubbles: true,
+        button: 0,
+        cancelable: true,
+        view: document.defaultView,
+      }),
+    );
+  }
+  if (pointerId === undefined) return;
+
+  // Touch captures the pointer to the trigger; the menu's items are
+  // hit-tested instead.
+  if (trigger.hasPointerCapture(pointerId)) {
+    trigger.releasePointerCapture(pointerId);
+  }
+  dragOverItems(document, pointerId);
+};
+
+/** Opening by a secondary click: the trigger's own mouse down (internal). */
+let openingBySecondaryClick = false;
 
 /**
  * Opens the menu as Base UI's trigger does, but on touch already on touch
@@ -411,45 +474,68 @@ const StyledTrigger = styled(BaseMenu.Trigger, forwardRef)`
  * menu that scrolls, the finger scrolls it (as the tab bar's lens does).
  */
 const Trigger = forwardRef<HTMLElement, TriggerProps>(
-  ({ onPointerDown, ...props }, ref) => (
-    <StyledTrigger
-      ref={ref}
-      {...props}
-      onPointerDown={(event: PointerEvent<HTMLElement>) => {
-        (
-          onPointerDown as
-            ((event: PointerEvent<HTMLElement>) => void) | undefined
-        )?.(event);
-        if (event.pointerType !== 'touch' || event.defaultPrevented) return;
+  ({ onClick, onMouseDown, openOn, ...props }, ref) => {
+    const secondary = openOn === 'secondaryClick';
+    type Handler<E> = ((event: E) => void) | undefined;
+    // A secondary click (or a handler for it) opens the menu.
+    const triggerProps = useSecondaryClick({
+      ...props,
+      onSecondaryClick: secondary
+        ? (event: ReactMouseEvent<HTMLElement>) => {
+            props.onSecondaryClick?.(event);
+            openingBySecondaryClick = true;
+            try {
+              // A touch held (a `contextmenu` pointer event): dragged on.
+              const { nativeEvent } = event as { nativeEvent?: Event };
+              const native = nativeEvent ?? (event as unknown as Event);
+              openByTrigger(
+                event.currentTarget,
+                native instanceof globalThis.PointerEvent &&
+                  native.pointerType === 'touch'
+                  ? native.pointerId
+                  : undefined,
+              );
+            } finally {
+              openingBySecondaryClick = false;
+            }
+          }
+        : props.onSecondaryClick,
+    });
 
-        const trigger = event.currentTarget;
-        const document = trigger.ownerDocument;
-        const { pointerId } = event;
+    return (
+      <StyledTrigger
+        ref={ref}
+        {...triggerProps}
+        openOn={openOn}
+        // A click is the trigger's own (Base UI opens on mouse down, or on
+        // a click by keys).
+        onClick={(event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => {
+          (onClick as Handler<typeof event>)?.(event);
+          if (secondary) event.preventBaseUIHandler();
+        }}
+        onMouseDown={(event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => {
+          (onMouseDown as Handler<typeof event>)?.(event);
+          if (secondary && !openingBySecondaryClick) {
+            event.preventBaseUIHandler();
+          }
+        }}
+        onPointerDown={(event: PointerEvent<HTMLElement>) => {
+          // Its own, and the secondary click's.
+          (
+            (triggerProps as { onPointerDown?: unknown })
+              .onPointerDown as Handler<typeof event>
+          )?.(event);
+          if (secondary) return;
+          if (event.pointerType !== 'touch' || event.defaultPrevented) return;
 
-        // No emulated mouse events after the touch: Base UI opens and closes
-        // a menu on mouse down.
-        event.preventDefault();
-        // Touch captures the pointer to the trigger; the menu's items are
-        // hit-tested instead.
-        if (trigger.hasPointerCapture(pointerId)) {
-          trigger.releasePointerCapture(pointerId);
-        }
-        // Opens on touch down, as on iOS, by the mouse down Base UI expects.
-        if (trigger.getAttribute('aria-expanded') !== 'true') {
-          trigger.dispatchEvent(
-            new MouseEvent('mousedown', {
-              bubbles: true,
-              button: 0,
-              cancelable: true,
-              view: document.defaultView,
-            }),
-          );
-        }
-
-        dragOverItems(document, pointerId);
-      }}
-    />
-  ),
+          // No emulated mouse events after the touch: Base UI opens and
+          // closes a menu on mouse down. Opens on touch down, as on iOS.
+          event.preventDefault();
+          openByTrigger(event.currentTarget, event.pointerId);
+        }}
+      />
+    );
+  },
 );
 
 /**

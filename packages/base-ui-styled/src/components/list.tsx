@@ -1,5 +1,3 @@
-import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
-import { Radio as BaseRadio } from '@base-ui/react/radio';
 import { useRender } from '@base-ui/react/use-render';
 import { Properties } from 'csstype';
 import { keyframes, styled } from 'goober';
@@ -18,14 +16,24 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
+import {
+  Check,
+  Checkbox as CheckboxBase,
+  CheckboxRootProps,
+  editCircle,
+  Radio as RadioBase,
+  RadioRootProps,
+} from './checkbox.js';
 import { textStyle } from './typography.js';
 import {
   css,
   edgeScrollDelta,
   fontWeight,
   frameElapsed,
+  SecondaryClickProps,
   useForwardedRef,
   usePointerDrag,
+  useSecondaryClick,
 } from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Lists and tables”: “Row” Height=Regular/Tall,
@@ -110,10 +118,13 @@ const part = 'data-list-part';
 type IntrinsicTag = keyof React.JSX.IntrinsicElements;
 
 /** Props of a part rendering `Tag`, replaceable via `render` (Base UI). */
+// Button-like parts (buttons, rows) take a secondary click (see
+// `useSecondaryClick`).
 type PartProps<Tag extends IntrinsicTag> = Omit<
   useRender.ComponentProps<Tag>,
   'ref'
->;
+> &
+  (Tag extends 'button' | 'li' ? SecondaryClickProps : unknown);
 
 /**
  * A part: an element marked as the part `name` (internal, for the list's
@@ -126,7 +137,10 @@ const partElement = <Tag extends IntrinsicTag, Omitted extends string = never>(
   defaults: Record<string, unknown> = {},
 ) =>
   forwardRef<HTMLElement, PartProps<Tag> & { [Key in Omitted]?: unknown }>(
-    ({ render, ...props }, ref) => {
+    (partProps, ref) => {
+      const { render, ...props } = useSecondaryClick(
+        partProps as SecondaryClickProps & typeof partProps,
+      );
       const elementProps: Record<string, unknown> = { ...props };
       for (const key of omitted) delete elementProps[key];
 
@@ -179,22 +193,6 @@ const Chevron = () => (
 );
 
 // Figma PNG: 15.2 × 14.5px of ink at 17px (590).
-const Check = () => (
-  <svg
-    aria-hidden="true"
-    fill="none"
-    height="1em"
-    stroke="currentcolor"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="2"
-    viewBox="0 0 17 17"
-    width="1em"
-  >
-    <path d="M2 9l4.5 5L15.2 1.5" />
-  </svg>
-);
-
 const Lines = () => (
   <svg
     aria-hidden="true"
@@ -712,7 +710,8 @@ const StyledRow = styled(partElement('div', 'row'), forwardRef)`
 
   /* Fields (see Field, Root rendering the row): the label as the title, in
      Body, the control filling the rest of the row (the label's column as
-     wide as it), the clear button 8px after it, messages below. */
+     wide as it, its value at the end), the clear button 8px after it,
+     messages below. */
   &:has(> [data-text-field-part='control']) {
     grid-template-columns: auto auto minmax(0, max-content) minmax(0, 1fr);
     grid-template-rows: auto auto auto;
@@ -740,6 +739,13 @@ const StyledRow = styled(partElement('div', 'row'), forwardRef)`
     &:not(:has(> [data-text-field-part='label']))
       > [data-text-field-part='control'] {
       grid-column: 3 / 5;
+    }
+
+    /* After an inline label, the value at the row's end (UIKit forms,
+       Settings). */
+    &:has(> [data-text-field-part='label'])
+      > input[data-text-field-part='control'] {
+      text-align: end;
     }
 
     & > [data-text-field-part='clear'] {
@@ -1132,7 +1138,8 @@ const revealRanges = (container: HTMLElement, side: Side, lead: number) => {
  * Overswiping (the row's content moved `offset` px towards its inline end,
  * negative: its start, past its actions): the others follow the row, the
  * outermost action's shape fills the space up to them, from the edge (see
- * `stretchAction`), the others fading until it's armed. Up to then, the
+ * `stretchAction`), the others fading until it's armed; on across the
+ * whole row, it pushes them out. Up to then, the
  * actions stay in place by themselves (see `Pin`) and scale in with the
  * scroll (see `StyledSwipeAction`).
  */
@@ -1167,23 +1174,33 @@ const placeRow = (
     const outermost = outermostAction(container, side);
     const rowOnLeft = (side === 'trailing') === (direction === 1);
     const towardsRow = rowOnLeft ? -1 : 1;
-    const arming = Math.min(
-      extra / (armDistance(item, container, side, width) - width),
-      1,
-    );
+    const arm = armDistance(item, container, side, width);
+    const arming = Math.min(extra / (arm - width), 1);
+    // Past the armed place, on across the whole row (see `snapPlaces`): the
+    // outermost action takes the others' room too (up to 16px from the
+    // row's end, as from the edge), pushing them out, fading.
+    const full = item.clientWidth;
+    const armed = Math.min(2 * arm - width, full);
+    const pushing =
+      extra > 0 && full > armed
+        ? Math.min(Math.max((revealed - armed) / (full - armed), 0), 1)
+        : 0;
+    const pushed =
+      pushing * Math.max(0, width - (outermost?.offsetWidth ?? 0) - 2 * 16);
 
     for (const button of container.children) {
       if (!(button instanceof HTMLElement)) continue;
 
       if (button === outermost) {
-        stretchAction(button, extra, towardsRow, transition);
+        stretchAction(button, extra + pushed, towardsRow, transition);
         continue;
       }
       button.style.setProperty(
         '--styled-list-action-arming',
-        String(1 - (1 - actionFade) * arming),
+        String((1 - (1 - actionFade) * arming) * (1 - pushing)),
       );
-      button.style.translate = extra > 0 ? `${towardsRow * extra}px` : '';
+      button.style.translate =
+        extra > 0 ? `${towardsRow * (extra + pushed)}px` : '';
     }
   }
 };
@@ -1268,7 +1285,8 @@ const Pin = styled('div', forwardRef)`
 /** The layer a row's swipe actions are rendered in (see `Pin`). */
 const PinContext = createContext<HTMLElement | null>(null);
 
-// Where a swipeable row snaps (see `Item`), in the track.
+// Where a swipeable row snaps (see `Item`), in the track. Closed, it stops
+// even when flung: closing one side doesn't open the other.
 const Snap = styled('span', forwardRef)`
   position: absolute;
   top: 0;
@@ -1276,14 +1294,24 @@ const Snap = styled('span', forwardRef)`
   height: 1px;
   pointer-events: none;
   scroll-snap-align: start;
+
+  &[data-closed] {
+    scroll-snap-stop: always;
+  }
 `;
 
-/** The snap points of a swipeable row (see `Item`). */
+/**
+ * The snap points of a swipeable row (see `Item`): closed, open, armed
+ * (twice the arming distance past the actions, so released past that
+ * distance, it snaps there or on), and overswiped (across the whole row).
+ */
 const snapPoints = [
   'closed',
   'leading',
+  'leadingArmed',
   'leadingOverswipe',
   'trailing',
+  'trailingArmed',
   'trailingOverswipe',
 ] as const;
 
@@ -1293,11 +1321,46 @@ type SnapPoint = (typeof snapPoints)[number];
 type Swipe = {
   /** How far the row moves to arm overswiping. */
   arms: Partial<Record<Side, number>>;
-  /** How far the row moves at most (overswiping: past the actions). */
+  /** How far the row moves at most (overswiping: across the whole row). */
   extents: Partial<Record<Side, number>>;
   /** The actions' widths. */
   widths: Partial<Record<Side, number>>;
 };
+
+/**
+ * Where a row snaps armed: twice the arming distance from its place, past
+ * its actions (or across the whole row, if less, see `snapPlaces`).
+ */
+const armedPlace = (swipe: Swipe, side: Side) =>
+  Math.min(
+    2 * (swipe.arms[side] ?? 0) - (swipe.widths[side] ?? 0),
+    swipe.extents[side] ?? 0,
+  );
+
+/** Where a row snaps (see `snapPoints`), in its track (its content at rest at `lead`). */
+const snapPlaces = (
+  swipe: Swipe,
+  lead: number,
+  overswipes: (side: Side) => boolean,
+) => {
+  const places: Partial<Record<SnapPoint, number>> = { closed: lead };
+  for (const side of sides) {
+    const { [side]: width } = swipe.widths;
+    if (width === undefined) continue;
+    const sign = side === 'leading' ? -1 : 1;
+    places[side] = lead + sign * width;
+    if (!overswipes(side)) continue;
+    const extent = swipe.extents[side] ?? 0;
+    const armed = armedPlace(swipe, side);
+    if (armed < extent) places[`${side}Armed`] = lead + sign * armed;
+    places[`${side}Overswipe`] = lead + sign * extent;
+  }
+
+  return places;
+};
+
+/** Whether the browser fires `scrollend` (else: a pause in scrolling). */
+const scrollEnds = typeof window !== 'undefined' && 'onscrollend' in window;
 
 /** A mouse drag swiping a row (see `Item`). */
 type Drag = {
@@ -1318,487 +1381,572 @@ type Drag = {
  *
  * With swipe actions, it scrolls sideways natively (touch, trackpads,
  * wheels, with their inertia; dragged with a mouse, as it moves), snapping
- * closed, open, or overswiped (as far as twice the distance arming it:
- * snapping there, it's armed); the overswipe triggers only once the scroll
- * comes to rest there, so scrolling back disarms it.
+ * closed, open, or overswiped: across the whole row, the outermost action
+ * filling it (armed, it no longer snaps open). The overswipe triggers only
+ * once the scroll comes to rest there, so scrolling back disarms it.
  */
-const Item = forwardRef<HTMLElement, ListItemProps>(
-  (
-    {
-      children,
-      onBlurCapture,
-      onClickCapture,
-      onLostPointerCapture,
-      onPointerCancel,
-      onPointerDown,
-      onPointerMove,
-      onPointerUp,
-      style,
-      ...props
-    },
-    ref,
-  ) => {
-    const itemRef = useForwardedRef<HTMLElement>(ref);
-    const actionsRef = useRef<Partial<Record<Side, HTMLElement>>>({});
-    const overswipeRef = useRef<Partial<Record<Side, Overswipe>>>({});
-    const snapsRef = useRef<Partial<Record<SnapPoint, HTMLElement | null>>>({});
-    const swipeRef = useRef<Swipe>({ arms: {}, extents: {}, widths: {} });
-    const dragRef = useRef<Drag | null>(null);
-    const pressRef = useRef<{ pointerId: number; x: number; y: number } | null>(
-      null,
+const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
+  const {
+    children,
+    onBlurCapture,
+    onClickCapture,
+    onLostPointerCapture,
+    onPointerCancel,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    style,
+    ...props
+  } = useSecondaryClick(itemProps);
+  const itemRef = useForwardedRef<HTMLElement>(ref);
+  const actionsRef = useRef<Partial<Record<Side, HTMLElement>>>({});
+  const overswipeRef = useRef<Partial<Record<Side, Overswipe>>>({});
+  const snapsRef = useRef<Partial<Record<SnapPoint, HTMLElement | null>>>({});
+  const swipeRef = useRef<Swipe>({ arms: {}, extents: {}, widths: {} });
+  const placesRef = useRef<Partial<Record<SnapPoint, number>>>({});
+  // Closing (scrolling back, e.g. from across the row): not arming.
+  const closingRef = useRef(false);
+  // A touch is down on the row (it isn't at rest yet).
+  const touchingRef = useRef(false);
+  // Swiped (touch, a mouse drag; not scrolled), until at rest again.
+  const swipingRef = useRef(false);
+  // Open, at rest there (see `overswipable`).
+  const restingOpenRef = useRef(false);
+  const dragRef = useRef<Drag | null>(null);
+  const pressRef = useRef<{ pointerId: number; x: number; y: number } | null>(
+    null,
+  );
+  const openSideRef = useRef<Side | undefined>(undefined);
+  const suppressClickRef = useRef(false);
+  const settleRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  const outsideRef = useRef<((event: Event) => void) | undefined>(undefined);
+  const [swipeable, setSwipeable] = useState(false);
+  const [pin, setPin] = useState<HTMLElement | null>(null);
+
+  const overswipes = (side: Side) => Boolean(overswipeRef.current[side]);
+
+  // The track's room before the row (the leading side's extent).
+  const lead = () => swipeRef.current.extents.leading ?? 0;
+
+  // The row's offset (towards its inline end), from the scroll position.
+  const offsetOf = (item: HTMLElement) =>
+    isRtl(item) ? item.scrollLeft + lead() : lead() - item.scrollLeft;
+
+  // Overswiping a side: swiped (touch, a mouse drag) in one go; scrolled
+  // (wheels, trackpads), only once it's open at rest (the scroll opening it
+  // stops there).
+  const overswipable = (side: Side) =>
+    swipingRef.current ||
+    (openSideRef.current === side && restingOpenRef.current);
+  const overswipesNow = (side: Side) => overswipes(side) && overswipable(side);
+
+  // The snap points (see `snapPlaces`). Open, the other side's actions
+  // don't open (scrolled past closed, the row snaps back closed): only from
+  // closed; overswiped, only as above. (They change at rest, or as a touch
+  // starts, only: changed while scrolling, browsers snap at once.)
+  const showSnaps = () => {
+    const { current: openSide } = openSideRef;
+    for (const point of snapPoints) {
+      const snap = snapsRef.current[point];
+      if (!snap) continue;
+      const side: Side = point.startsWith('leading') ? 'leading' : 'trailing';
+      const overswiping =
+        point.endsWith('Armed') || point.endsWith('Overswipe');
+      snap.hidden =
+        placesRef.current[point] === undefined ||
+        (openSide !== undefined && point !== 'closed' && side !== openSide) ||
+        (overswiping && !overswipable(side));
+    }
+  };
+
+  const scrollTo = (offset: number, smooth: boolean) => {
+    const { current: item } = itemRef;
+    if (!item) return;
+    const rtl = isRtl(item);
+    const left = rtl ? offset - lead() : lead() - offset;
+    item.scrollTo({ behavior: smooth ? 'smooth' : 'instant', left });
+  };
+
+  // Measures the actions (and the row) for the track's room and snap
+  // points, keeping the row where it is (closed, or open).
+  const measure = () => {
+    const { current: item } = itemRef;
+    if (!item) return;
+    const swipe: Swipe = { arms: {}, extents: {}, widths: {} };
+    for (const side of sides) {
+      const { [side]: container } = actionsRef.current;
+      if (!container) continue;
+      const width = container.offsetWidth;
+      const arm = armDistance(item, container, side, width);
+      swipe.widths[side] = width;
+      swipe.arms[side] = arm;
+      // Overswiping across the whole row.
+      swipe.extents[side] = overswipes(side) ? item.clientWidth : width;
+    }
+    swipeRef.current = swipe;
+    item.style.setProperty('--styled-list-swipe-lead', `${String(lead())}px`);
+    item.style.setProperty(
+      '--styled-list-swipe-trail',
+      `${String(swipe.extents.trailing ?? 0)}px`,
     );
-    const openSideRef = useRef<Side | undefined>(undefined);
-    const suppressClickRef = useRef(false);
-    const settleRef = useRef<ReturnType<typeof setTimeout> | undefined>(
-      undefined,
-    );
-    const outsideRef = useRef<((event: Event) => void) | undefined>(undefined);
-    const [swipeable, setSwipeable] = useState(false);
-    const [pin, setPin] = useState<HTMLElement | null>(null);
 
-    const overswipes = (side: Side) => Boolean(overswipeRef.current[side]);
+    const places = snapPlaces(swipe, lead(), overswipes);
+    placesRef.current = places;
+    for (const side of sides) {
+      const { [side]: container } = actionsRef.current;
+      if (container) revealRanges(container, side, lead());
+    }
 
-    // The track's room before the row (the leading side's extent).
-    const lead = () => swipeRef.current.extents.leading ?? 0;
+    for (const point of snapPoints) {
+      const snap = snapsRef.current[point];
+      if (!snap) continue;
+      const place = places[point];
+      snap.hidden = place === undefined;
+      snap.style.insetInlineStart = `${String(place ?? 0)}px`;
+    }
 
-    // The row's offset (towards its inline end), from the scroll position.
-    const offsetOf = (item: HTMLElement) =>
-      isRtl(item) ? item.scrollLeft + lead() : lead() - item.scrollLeft;
+    const { current: side } = openSideRef;
+    const offset = side
+      ? (side === 'leading' ? 1 : -1) * (swipe.widths[side] ?? 0)
+      : 0;
+    scrollTo(offset, false);
+  };
+  const measureRef = useRef(measure);
+  useLayoutEffect(() => {
+    measureRef.current = measure;
+  });
 
-    const scrollTo = (offset: number, smooth: boolean) => {
-      const { current: item } = itemRef;
-      if (!item) return;
-      const rtl = isRtl(item);
-      const left = rtl ? offset - lead() : lead() - offset;
-      item.scrollTo({ behavior: smooth ? 'smooth' : 'instant', left });
-    };
+  // Back in place: no longer a capsule, its actions reset.
+  const resetRow = (item: HTMLElement) => {
+    delete item.dataset.swipe;
+    for (const button of item.querySelectorAll<HTMLElement>('[data-armed]')) {
+      delete button.dataset.armed;
+    }
+    for (const shape of item.querySelectorAll<HTMLElement>(
+      `[${CSS.escape(part)}='swipe-action-shape']`,
+    )) {
+      shape.style.removeProperty('width');
+    }
+    item.style.removeProperty('clip-path');
+  };
 
-    // Measures the actions (and the row) for the track's room and snap
-    // points, keeping the row where it is (closed, or open).
-    const measure = () => {
-      const { current: item } = itemRef;
-      if (!item) return;
-      const swipe: Swipe = { arms: {}, extents: {}, widths: {} };
-      for (const side of sides) {
-        const { [side]: container } = actionsRef.current;
-        if (!container) continue;
-        const width = container.offsetWidth;
-        const arm = armDistance(item, container, side, width);
-        swipe.widths[side] = width;
-        swipe.arms[side] = arm;
-        // Snapping overswiped past the arming distance, open before it.
-        swipe.extents[side] = overswipes(side) ? 2 * arm - width : width;
-      }
-      swipeRef.current = swipe;
-      item.style.setProperty('--styled-list-swipe-lead', `${String(lead())}px`);
-      item.style.setProperty(
-        '--styled-list-swipe-trail',
-        `${String(swipe.extents.trailing ?? 0)}px`,
-      );
-
-      const places: Record<SnapPoint, number | undefined> = {
-        closed: lead(),
-        leading:
-          swipe.widths.leading === undefined
-            ? undefined
-            : lead() - swipe.widths.leading,
-        leadingOverswipe: overswipes('leading') ? 0 : undefined,
-        trailing:
-          swipe.widths.trailing === undefined
-            ? undefined
-            : lead() + swipe.widths.trailing,
-        trailingOverswipe: overswipes('trailing')
-          ? lead() + (swipe.extents.trailing ?? 0)
-          : undefined,
-      };
-      for (const side of sides) {
-        const { [side]: container } = actionsRef.current;
-        if (container) revealRanges(container, side, lead());
-      }
-
-      for (const point of snapPoints) {
-        const snap = snapsRef.current[point];
-        if (!snap) continue;
-        const place = places[point];
-        snap.hidden = place === undefined;
-        snap.style.insetInlineStart = `${String(place ?? 0)}px`;
-      }
-
-      const { current: side } = openSideRef;
-      const offset = side
-        ? (side === 'leading' ? 1 : -1) * (swipe.widths[side] ?? 0)
-        : 0;
-      scrollTo(offset, false);
-    };
-    const measureRef = useRef(measure);
-    useLayoutEffect(() => {
-      measureRef.current = measure;
-    });
-
-    // Back in place: no longer a capsule, its actions reset.
-    const resetRow = (item: HTMLElement) => {
-      delete item.dataset.swipe;
-      for (const button of item.querySelectorAll<HTMLElement>('[data-armed]')) {
-        delete button.dataset.armed;
-      }
-      for (const shape of item.querySelectorAll<HTMLElement>(
-        `[${CSS.escape(part)}='swipe-action-shape']`,
-      )) {
-        shape.style.removeProperty('width');
-      }
-      item.style.removeProperty('clip-path');
-    };
-
-    const context = useMemo<ItemContextValue>(() => {
-      const value: ItemContextValue = {
-        close: () => {
-          if (outsideRef.current) {
-            document.removeEventListener('pointerdown', outsideRef.current, {
-              capture: true,
-            });
-            outsideRef.current = undefined;
-          }
-          if (closeOpenItem === value.close) closeOpenItem = undefined;
-          openSideRef.current = undefined;
-          scrollTo(0, true);
-        },
-        open: (side) => {
-          const { current: item } = itemRef;
-          const width = swipeRef.current.widths[side];
-          if (!item || width === undefined) return;
-
-          if (closeOpenItem !== value.close) closeOpenItem?.();
-          closeOpenItem = value.close;
-          openSideRef.current = side;
-          scrollTo((side === 'leading' ? 1 : -1) * width, true);
-
-          if (outsideRef.current) return;
-          outsideRef.current = (event) => {
-            if (event.target instanceof Node && item.contains(event.target)) {
-              return;
-            }
-            value.close();
-          };
-          document.addEventListener('pointerdown', outsideRef.current, {
-            capture: true,
-          });
-        },
-        setActions: (side, element, overswipe = false) => {
-          overswipeRef.current[side] = overswipe;
-          if (element) {
-            actionsRef.current[side] = element;
-          } else {
-            delete actionsRef.current[side];
-          }
-          setSwipeable(
-            Boolean(actionsRef.current.leading ?? actionsRef.current.trailing),
-          );
-          measureRef.current();
-        },
-      };
-
-      return value;
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- once
-    }, [itemRef]);
-
-    useEffect(
-      () => () => {
-        if (closeOpenItem === context.close) closeOpenItem = undefined;
+  const context = useMemo<ItemContextValue>(() => {
+    const value: ItemContextValue = {
+      close: () => {
         if (outsideRef.current) {
           document.removeEventListener('pointerdown', outsideRef.current, {
             capture: true,
           });
+          outsideRef.current = undefined;
         }
-        clearTimeout(settleRef.current);
-      },
-      [context],
-    );
-
-    const suppressClick = () => {
-      suppressClickRef.current = true;
-      setTimeout(() => {
-        suppressClickRef.current = false;
-      });
-    };
-
-    // Overswiped (at rest there): the outermost action is triggered (and
-    // closes the row), or the handler.
-    const trigger = (side: Side) => {
-      const { [side]: container } = actionsRef.current;
-      const { [side]: action } = overswipeRef.current;
-      if (typeof action === 'function') {
-        action();
-        context.close();
-        return;
-      }
-      if (container) outermostAction(container, side)?.click();
-    };
-
-    // The scroll at rest: overswiped (triggering), open or closed.
-    const settle = () => {
-      const { current: item } = itemRef;
-      if (!item || dragRef.current?.moved) return;
-      const offset = offsetOf(item);
-      const side: Side = offset > 0 ? 'leading' : 'trailing';
-      const distance = Math.abs(offset);
-      const { [side]: width = 0 } = swipeRef.current.widths;
-      const { [side]: extent = 0 } = swipeRef.current.extents;
-
-      if (distance < 1) {
+        if (closeOpenItem === value.close) closeOpenItem = undefined;
         openSideRef.current = undefined;
-        if (closeOpenItem === context.close) closeOpenItem = undefined;
-        resetRow(item);
-        return;
-      }
-      if (overswipes(side) && distance >= extent - 1) {
-        trigger(side);
-        return;
-      }
-      if (Math.abs(distance - width) < 1 && openSideRef.current !== side) {
-        context.open(side);
-      }
+        restingOpenRef.current = false;
+        closingRef.current = true;
+        // (Its snap points change once closed, see `settle`.)
+        scrollTo(0, true);
+      },
+      open: (side) => {
+        const { current: item } = itemRef;
+        const width = swipeRef.current.widths[side];
+        if (!item || width === undefined) return;
+
+        if (closeOpenItem !== value.close) closeOpenItem?.();
+        closeOpenItem = value.close;
+        if (openSideRef.current !== side) restingOpenRef.current = false;
+        openSideRef.current = side;
+        showSnaps();
+        scrollTo((side === 'leading' ? 1 : -1) * width, true);
+
+        if (outsideRef.current) return;
+        outsideRef.current = (event) => {
+          if (event.target instanceof Node && item.contains(event.target)) {
+            return;
+          }
+          value.close();
+        };
+        document.addEventListener('pointerdown', outsideRef.current, {
+          capture: true,
+        });
+      },
+      setActions: (side, element, overswipe = false) => {
+        overswipeRef.current[side] = overswipe;
+        if (element) {
+          actionsRef.current[side] = element;
+        } else {
+          delete actionsRef.current[side];
+        }
+        setSwipeable(
+          Boolean(actionsRef.current.leading ?? actionsRef.current.trailing),
+        );
+        measureRef.current();
+      },
     };
 
-    // Scrolled (by any means): the row's actions follow, overswiping arms
-    // past its distance.
-    const onScroll = () => {
-      const { current: item } = itemRef;
-      if (!item) return;
-      const offset = offsetOf(item);
-      const side: Side = offset > 0 ? 'leading' : 'trailing';
-      if (Math.abs(offset) >= 1) {
-        item.dataset.swipe = side;
-        if (closeOpenItem && closeOpenItem !== context.close) closeOpenItem();
-      }
-      placeRow(item, actionsRef.current, offset, false, overswipes);
+    return value;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once
+  }, [itemRef]);
 
-      const { [side]: arm = Infinity } = swipeRef.current.arms;
-      const armed = overswipes(side) && Math.abs(offset) > arm;
-      for (const key of sides) {
-        const { [key]: actions } = actionsRef.current;
-        const action = actions && outermostAction(actions, key);
-        action?.toggleAttribute('data-armed', armed && key === side);
+  useEffect(
+    () => () => {
+      if (closeOpenItem === context.close) closeOpenItem = undefined;
+      if (outsideRef.current) {
+        document.removeEventListener('pointerdown', outsideRef.current, {
+          capture: true,
+        });
       }
-
       clearTimeout(settleRef.current);
-      settleRef.current = setTimeout(settle, scrollEndDelay);
-    };
+    },
+    [context],
+  );
 
-    useLayoutEffect(() => {
-      const { current: item } = itemRef;
-      if (!item || !swipeable) return undefined;
-      measureRef.current();
-      const observer = new ResizeObserver(() => measureRef.current());
-      observer.observe(item);
-      for (const side of sides) {
-        const { [side]: container } = actionsRef.current;
-        if (container) observer.observe(container);
-      }
-      return () => observer.disconnect();
-    }, [itemRef, swipeable]);
-
-    const release = () => {
-      if (itemRef.current) delete itemRef.current.dataset.pressed;
-    };
-
-    const handlePointerDown = (event: PointerEvent<HTMLElement>) => {
-      (onPointerDown as Handler<typeof event>)?.(event);
-
-      const { current: item } = itemRef;
-      const { current: actions } = actionsRef;
-      if (event.button !== 0 || !item) return;
-
-      const { target } = event;
-      const control =
-        target instanceof Element ? target.closest(ownControl) : null;
-      if (props.onClick && !(control && item.contains(control))) {
-        item.dataset.pressed = '';
-      }
-      if (!swipeable) return;
-      if (
-        sides.some((side) =>
-          actions[side]?.contains(event.target as Node | null),
-        )
-      ) {
-        return;
-      }
-      pressRef.current = {
-        pointerId: event.pointerId,
-        x: event.clientX,
-        y: event.clientY,
-      };
-      // Touch scrolls natively; a mouse drags the scroll position.
-      if (event.pointerType !== 'mouse' || isOwnGesture(item, event)) return;
-      dragRef.current = {
-        base: offsetOf(item),
-        moved: false,
-        pointerId: event.pointerId,
-        scroll: item.scrollLeft,
-        time: performance.now(),
-        x: event.clientX,
-        y: event.clientY,
-      };
-    };
-
-    const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
-      (onPointerMove as Handler<typeof event>)?.(event);
-
-      const { current: drag } = dragRef;
-      const { current: item } = itemRef;
-      if (!item || drag?.pointerId !== event.pointerId) return;
-
-      const dx = event.clientX - drag.x;
-      if (!drag.moved) {
-        const vertical = Math.abs(event.clientY - drag.y);
-        if (vertical > swipeThreshold && vertical > Math.abs(dx)) {
-          dragRef.current = null;
-          return;
-        }
-        if (Math.abs(dx) < swipeThreshold) return;
-
-        drag.moved = true;
-        release();
-        item.setPointerCapture(event.pointerId);
-        item.style.scrollSnapType = 'none';
-      }
-
-      // The content follows the pointer.
-      item.scrollLeft = drag.scroll - dx;
-    };
-
-    // A mouse drag released: overswiped (armed), opened (past half its
-    // actions, or quickly towards them) or closed, scrolling there.
-    const endDrag = (drag: Drag, cancelled: boolean) => {
-      const { current: item } = itemRef;
-      if (!item) return;
-      item.style.removeProperty('scroll-snap-type');
-      const offset = offsetOf(item);
-      const side: Side = offset > 0 ? 'leading' : 'trailing';
-      const distance = Math.abs(offset);
-      const { [side]: width } = swipeRef.current.widths;
-      const { [side]: arm = Infinity } = swipeRef.current.arms;
-
-      // Triggered before suppressing the release's click.
-      if (!cancelled && overswipes(side) && distance > arm) {
-        trigger(side);
-        suppressClick();
-        return;
-      }
-      suppressClick();
-      if (cancelled || width === undefined || distance < 1) {
-        context.close();
-        return;
-      }
-      const moved = offset - drag.base;
-      const quick = performance.now() - drag.time < 300;
-      const towards = side === 'leading' ? moved > 10 : moved < -10;
-      if (quick ? towards : distance > width / 2) {
-        context.open(side);
-      } else {
-        context.close();
-      }
-    };
-
-    const finish = (event: PointerEvent<HTMLElement>, cancelled: boolean) => {
-      const { current: press } = pressRef;
-      const { current: drag } = dragRef;
-      if (press?.pointerId === event.pointerId) pressRef.current = null;
-      if (drag?.pointerId === event.pointerId) {
-        dragRef.current = null;
-        if (drag.moved) {
-          endDrag(drag, cancelled);
-          return;
-        }
-      }
-      if (press?.pointerId !== event.pointerId) return;
-
-      // A tap on an open row closes it.
-      const moved = Math.hypot(
-        event.clientX - press.x,
-        event.clientY - press.y,
-      );
-      if (!cancelled && moved < swipeThreshold && openSideRef.current) {
-        context.close();
-        suppressClick();
-      }
-    };
-
-    const handleBlurCapture = (event: FocusEvent<HTMLElement>) => {
-      (onBlurCapture as Handler<typeof event>)?.(event);
-
-      const { current: item } = itemRef;
-      if (!openSideRef.current || !item) return;
-
-      const { relatedTarget } = event;
-      if (relatedTarget instanceof Node && item.contains(relatedTarget)) {
-        return;
-      }
-
-      context.close();
-    };
-
-    const handleClickCapture = (event: MouseEvent<HTMLElement>) => {
-      (onClickCapture as Handler<typeof event>)?.(event);
-      if (!suppressClickRef.current) return;
-
+  const suppressClick = () => {
+    suppressClickRef.current = true;
+    setTimeout(() => {
       suppressClickRef.current = false;
-      event.preventDefault();
-      event.stopPropagation();
-    };
+    });
+  };
 
-    return (
-      <ItemContext.Provider value={context}>
-        <StyledItem
-          ref={itemRef}
-          data-swipeable={swipeable ? '' : undefined}
-          style={style}
-          {...props}
-          onBlurCapture={handleBlurCapture}
-          onClickCapture={handleClickCapture}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onScroll={swipeable ? onScroll : undefined}
-          onLostPointerCapture={(event: PointerEvent<HTMLElement>) => {
-            (onLostPointerCapture as Handler<typeof event>)?.(event);
-            // Only the row's own capture: taking it over from the touched
-            // element (implicitly captured) makes that lose its capture.
-            if (event.target !== event.currentTarget) return;
-            finish(event, false);
-          }}
-          onPointerCancel={(event: PointerEvent<HTMLElement>) => {
-            (onPointerCancel as Handler<typeof event>)?.(event);
-            release();
-            finish(event, true);
-          }}
-          onPointerUp={(event: PointerEvent<HTMLElement>) => {
-            (onPointerUp as Handler<typeof event>)?.(event);
-            release();
-            finish(event, false);
-          }}
-        >
-          <Track>
-            <Pin ref={setPin} />
-            {swipeable
-              ? snapPoints.map((point) => (
-                  <Snap
-                    key={point}
-                    ref={(element: HTMLElement | null) => {
-                      snapsRef.current[point] = element;
-                    }}
-                    hidden
-                    aria-hidden="true"
-                  />
-                ))
-              : null}
-            <PinContext.Provider value={pin}>
-              <StyledRow>{children}</StyledRow>
-            </PinContext.Provider>
-          </Track>
-        </StyledItem>
-      </ItemContext.Provider>
-    );
-  },
-);
+  // Overswiped (at rest there): the outermost action is triggered (and
+  // closes the row), or the handler.
+  const trigger = (side: Side) => {
+    const { [side]: container } = actionsRef.current;
+    const { [side]: action } = overswipeRef.current;
+    if (typeof action === 'function') {
+      action();
+      context.close();
+      return;
+    }
+    if (container) outermostAction(container, side)?.click();
+  };
+
+  // The scroll at rest (not touched): overswiped (armed, or across the
+  // whole row: triggering there), open or closed.
+  const settle = () => {
+    const { current: item } = itemRef;
+    if (!item || dragRef.current?.moved || touchingRef.current) return;
+    item.style.removeProperty('scroll-snap-type');
+    const offset = offsetOf(item);
+    const side: Side = offset > 0 ? 'leading' : 'trailing';
+    const distance = Math.abs(offset);
+    const { [side]: width = 0 } = swipeRef.current.widths;
+    const { [side]: extent = 0 } = swipeRef.current.extents;
+    const { [side]: arm = Infinity } = swipeRef.current.arms;
+
+    closingRef.current = false;
+    if (distance < 1) {
+      swipingRef.current = false;
+      restingOpenRef.current = false;
+      openSideRef.current = undefined;
+      showSnaps();
+      if (closeOpenItem === context.close) closeOpenItem = undefined;
+      resetRow(item);
+      return;
+    }
+    if (overswipesNow(side) && distance > arm) {
+      // Held between snap points (no `scrollend`): not yet.
+      if (distance < armedPlace(swipeRef.current, side) - 1) return;
+      // Across the whole row first (settling there again).
+      if (distance < extent - 1) {
+        scrollTo((side === 'leading' ? 1 : -1) * extent, true);
+        return;
+      }
+      trigger(side);
+      return;
+    }
+    swipingRef.current = false;
+    if (Math.abs(distance - width) < 1) {
+      if (openSideRef.current !== side) context.open(side);
+      restingOpenRef.current = true;
+    }
+    showSnaps();
+  };
+
+  // Scrolled (by any means): the row's actions follow, overswiping arms
+  // past its distance.
+  const onScroll = () => {
+    const { current: item } = itemRef;
+    if (!item) return;
+    const offset = offsetOf(item);
+    const side: Side = offset > 0 ? 'leading' : 'trailing';
+    if (Math.abs(offset) >= 1) {
+      item.dataset.swipe = side;
+      if (closeOpenItem && closeOpenItem !== context.close) closeOpenItem();
+    }
+    placeRow(item, actionsRef.current, offset, false, overswipesNow);
+
+    const { [side]: arm = Infinity } = swipeRef.current.arms;
+    const armed =
+      !closingRef.current && overswipesNow(side) && Math.abs(offset) > arm;
+    for (const key of sides) {
+      const { [key]: actions } = actionsRef.current;
+      const action = actions && outermostAction(actions, key);
+      action?.toggleAttribute('data-armed', armed && key === side);
+    }
+
+    if (scrollEnds) return;
+    clearTimeout(settleRef.current);
+    settleRef.current = setTimeout(settle, scrollEndDelay);
+  };
+
+  // At rest: once scrolling ends (and a touch is lifted).
+  const settleNowRef = useRef(settle);
+  const showSnapsRef = useRef(showSnaps);
+  useLayoutEffect(() => {
+    settleNowRef.current = settle;
+    showSnapsRef.current = showSnaps;
+  });
+  useEffect(() => {
+    const { current: item } = itemRef;
+    if (!item || !swipeable) return undefined;
+    const onScrollEnd = () => settleNowRef.current();
+    const onTouchStart = () => {
+      touchingRef.current = true;
+      // Swiped: overswiping in one go (see `overswipable`).
+      swipingRef.current = true;
+      showSnapsRef.current();
+    };
+    const onTouchEnd = (event: TouchEvent) => {
+      if (event.touches.length > 0) return;
+      touchingRef.current = false;
+      clearTimeout(settleRef.current);
+      settleRef.current = setTimeout(onScrollEnd, scrollEndDelay);
+    };
+    item.addEventListener('scrollend', onScrollEnd);
+    item.addEventListener('touchstart', onTouchStart, { passive: true });
+    item.addEventListener('touchend', onTouchEnd);
+    item.addEventListener('touchcancel', onTouchEnd);
+    return () => {
+      item.removeEventListener('scrollend', onScrollEnd);
+      item.removeEventListener('touchstart', onTouchStart);
+      item.removeEventListener('touchend', onTouchEnd);
+      item.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, [itemRef, swipeable]);
+
+  useLayoutEffect(() => {
+    const { current: item } = itemRef;
+    if (!item || !swipeable) return undefined;
+    measureRef.current();
+    const observer = new ResizeObserver(() => measureRef.current());
+    observer.observe(item);
+    for (const side of sides) {
+      const { [side]: container } = actionsRef.current;
+      if (container) observer.observe(container);
+    }
+    return () => observer.disconnect();
+  }, [itemRef, swipeable]);
+
+  const release = () => {
+    if (itemRef.current) delete itemRef.current.dataset.pressed;
+  };
+
+  const handlePointerDown = (event: PointerEvent<HTMLElement>) => {
+    (onPointerDown as Handler<typeof event>)?.(event);
+
+    const { current: item } = itemRef;
+    const { current: actions } = actionsRef;
+    if (event.button !== 0 || !item) return;
+
+    const { target } = event;
+    const control =
+      target instanceof Element ? target.closest(ownControl) : null;
+    if (props.onClick && !(control && item.contains(control))) {
+      item.dataset.pressed = '';
+    }
+    if (!swipeable) return;
+    if (
+      sides.some((side) => actions[side]?.contains(event.target as Node | null))
+    ) {
+      return;
+    }
+    pressRef.current = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+    };
+    // Touch scrolls natively; a mouse drags the scroll position.
+    if (event.pointerType !== 'mouse' || isOwnGesture(item, event)) return;
+    dragRef.current = {
+      base: offsetOf(item),
+      moved: false,
+      pointerId: event.pointerId,
+      scroll: item.scrollLeft,
+      time: performance.now(),
+      x: event.clientX,
+      y: event.clientY,
+    };
+  };
+
+  const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
+    (onPointerMove as Handler<typeof event>)?.(event);
+
+    const { current: drag } = dragRef;
+    const { current: item } = itemRef;
+    if (!item || drag?.pointerId !== event.pointerId) return;
+
+    const dx = event.clientX - drag.x;
+    if (!drag.moved) {
+      const vertical = Math.abs(event.clientY - drag.y);
+      if (vertical > swipeThreshold && vertical > Math.abs(dx)) {
+        dragRef.current = null;
+        return;
+      }
+      if (Math.abs(dx) < swipeThreshold) return;
+
+      drag.moved = true;
+      // Swiped: overswiping in one go (see `overswipable`).
+      swipingRef.current = true;
+      release();
+      item.setPointerCapture(event.pointerId);
+      item.style.scrollSnapType = 'none';
+      showSnaps();
+    }
+
+    // The content follows the pointer.
+    item.scrollLeft = drag.scroll - dx;
+  };
+
+  // A mouse drag released: overswiped (armed), opened (past half its
+  // actions, or quickly towards them) or closed, scrolling there.
+  const endDrag = (drag: Drag, cancelled: boolean) => {
+    const { current: item } = itemRef;
+    if (!item) return;
+    const offset = offsetOf(item);
+    const side: Side = offset > 0 ? 'leading' : 'trailing';
+    const distance = Math.abs(offset);
+    const { [side]: width } = swipeRef.current.widths;
+    const { [side]: arm = Infinity } = swipeRef.current.arms;
+
+    suppressClick();
+    // Open, the other side doesn't (see `showSnaps`).
+    const locked =
+      openSideRef.current !== undefined && openSideRef.current !== side;
+    // Across the whole row, triggering there (see `settle`): not snapping
+    // until then (which would start where it is).
+    if (!locked && !cancelled && overswipesNow(side) && distance > arm) {
+      const { [side]: extent = 0 } = swipeRef.current.extents;
+      scrollTo((side === 'leading' ? 1 : -1) * extent, true);
+      return;
+    }
+    // Not overswiped: no longer, before snapping again (which would snap to
+    // where it's dragged, as far as overswiped).
+    swipingRef.current = false;
+    showSnaps();
+    item.style.removeProperty('scroll-snap-type');
+    if (locked || cancelled || width === undefined || distance < 1) {
+      context.close();
+      return;
+    }
+    const moved = offset - drag.base;
+    const quick = performance.now() - drag.time < 300;
+    const towards = side === 'leading' ? moved > 10 : moved < -10;
+    if (quick ? towards : distance > width / 2) {
+      context.open(side);
+    } else {
+      context.close();
+    }
+  };
+
+  const finish = (event: PointerEvent<HTMLElement>, cancelled: boolean) => {
+    const { current: press } = pressRef;
+    const { current: drag } = dragRef;
+    if (press?.pointerId === event.pointerId) pressRef.current = null;
+    if (drag?.pointerId === event.pointerId) {
+      dragRef.current = null;
+      if (drag.moved) {
+        endDrag(drag, cancelled);
+        return;
+      }
+    }
+    if (press?.pointerId !== event.pointerId) return;
+
+    // A tap on an open row closes it.
+    const moved = Math.hypot(event.clientX - press.x, event.clientY - press.y);
+    if (!cancelled && moved < swipeThreshold && openSideRef.current) {
+      context.close();
+      suppressClick();
+    }
+  };
+
+  const handleBlurCapture = (event: FocusEvent<HTMLElement>) => {
+    (onBlurCapture as Handler<typeof event>)?.(event);
+
+    const { current: item } = itemRef;
+    if (!openSideRef.current || !item) return;
+
+    const { relatedTarget } = event;
+    if (relatedTarget instanceof Node && item.contains(relatedTarget)) {
+      return;
+    }
+
+    context.close();
+  };
+
+  const handleClickCapture = (event: MouseEvent<HTMLElement>) => {
+    (onClickCapture as Handler<typeof event>)?.(event);
+    if (!suppressClickRef.current) return;
+
+    suppressClickRef.current = false;
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  return (
+    <ItemContext.Provider value={context}>
+      <StyledItem
+        ref={itemRef}
+        data-swipeable={swipeable ? '' : undefined}
+        style={style}
+        {...props}
+        onBlurCapture={handleBlurCapture}
+        onClickCapture={handleClickCapture}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onScroll={swipeable ? onScroll : undefined}
+        onLostPointerCapture={(event: PointerEvent<HTMLElement>) => {
+          (onLostPointerCapture as Handler<typeof event>)?.(event);
+          // Only the row's own capture: taking it over from the touched
+          // element (implicitly captured) makes that lose its capture.
+          if (event.target !== event.currentTarget) return;
+          finish(event, false);
+        }}
+        onPointerCancel={(event: PointerEvent<HTMLElement>) => {
+          (onPointerCancel as Handler<typeof event>)?.(event);
+          release();
+          finish(event, true);
+        }}
+        onPointerUp={(event: PointerEvent<HTMLElement>) => {
+          (onPointerUp as Handler<typeof event>)?.(event);
+          release();
+          finish(event, false);
+        }}
+      >
+        <Track>
+          <Pin ref={setPin} />
+          {swipeable
+            ? snapPoints.map((point) => (
+                <Snap
+                  key={point}
+                  ref={(element: HTMLElement | null) => {
+                    snapsRef.current[point] = element;
+                  }}
+                  hidden
+                  aria-hidden="true"
+                  data-closed={point === 'closed' ? '' : undefined}
+                />
+              ))
+            : null}
+          <PinContext.Provider value={pin}>
+            <StyledRow>{children}</StyledRow>
+          </PinContext.Provider>
+        </Track>
+      </StyledItem>
+    </ItemContext.Provider>
+  );
+});
 
 /** How long an expandable row opens or closes (as swiping). */
 const expandDuration = 300;
@@ -2231,91 +2379,26 @@ const Button = styled(
   }
 `;
 
-// Figma “_Edit Buttons”: 22px circles.
-const editCircle = css`
-  display: grid;
-  width: 22px;
-  height: 22px;
-  box-sizing: border-box;
-  border-radius: 50%;
-  color: #fff;
-  font-size: 14.5px;
-  ${fontWeight(590)}
-  place-items: center;
-`;
-
-const selectCircle = css`
-  ${editCircle}
-
-  border: 1.5px solid var(--color-ios-system-gray3);
-
-  &[data-checked] {
-    border-color: transparent;
-    background-color: var(--color-ios-primary);
-  }
-
-  &[data-disabled] {
-    opacity: 0.5;
-  }
-`;
-
-const selectCursor = ({ disabled }: { disabled?: boolean }) =>
-  cursor(disabled ? 'not-allowed' : 'pointer');
-
-const StyledCheckbox = styled(BaseCheckbox.Root, forwardRef)`
-  ${selectCircle}
-  ${selectCursor}
-`;
-
-const CheckboxIndicator = styled(BaseCheckbox.Indicator, forwardRef)`
-  display: contents;
-`;
-
-/** Figma State=Selected/Unselected: a Base UI checkbox (selecting rows). */
-const Checkbox = forwardRef<HTMLElement, Omit<BaseCheckbox.Root.Props, 'ref'>>(
-  ({ children, ...props }, ref) => (
-    <StyledCheckbox
-      ref={ref}
-      {...{ [part]: 'edit' }}
-      {...props}
-    >
-      {children ?? (
-        <CheckboxIndicator>
-          <Check />
-        </CheckboxIndicator>
-      )}
-    </StyledCheckbox>
-  ),
-);
-
-const StyledRadio = styled(BaseRadio.Root, forwardRef)`
-  ${selectCircle}
-  ${selectCursor}
-`;
-
-const RadioIndicator = styled(BaseRadio.Indicator, forwardRef)`
-  display: contents;
-`;
+/** Figma State=Selected/Unselected: a checkbox (selecting rows). */
+const Checkbox = forwardRef<HTMLElement, CheckboxRootProps>((props, ref) => (
+  <CheckboxBase.Root
+    ref={ref}
+    {...{ [part]: 'edit' }}
+    {...props}
+  />
+));
 
 /**
- * A Base UI radio (selecting one row), as `Checkbox`; its group is a Base UI
- * `RadioGroup` (e.g. rendering a `Group`).
+ * A radio (selecting one row), as `Checkbox`; its group is a `RadioGroup`
+ * (e.g. rendering a `Group`).
  */
-const Radio = forwardRef<HTMLElement, Omit<BaseRadio.Root.Props, 'ref'>>(
-  ({ children, ...props }, ref) => (
-    <StyledRadio
-      ref={ref}
-      {...{ [part]: 'edit' }}
-      {...props}
-    >
-      {children ?? (
-        <RadioIndicator>
-          <Check />
-        </RadioIndicator>
-      )}
-    </StyledRadio>
-  ),
-);
+const Radio = forwardRef<HTMLElement, RadioRootProps>((props, ref) => (
+  <RadioBase.Root
+    ref={ref}
+    {...{ [part]: 'edit' }}
+    {...props}
+  />
+));
 
 export type ListEditButtonProps = PartProps<'button'> & {
   /** UIKit `UITableViewCell.EditingStyle` (default: `delete`). */

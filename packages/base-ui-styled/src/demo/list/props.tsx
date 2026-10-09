@@ -214,10 +214,17 @@ export const propOptionsIndex = {
 export const logClick = (addLog: AddLog, name: string) =>
   new MappedProp(() => addLog(`${name} clicked`), '[log click]');
 
+export const logSecondaryClick = (addLog: AddLog, name: string) =>
+  new MappedProp(
+    () => addLog(`${name} secondary click`),
+    '[log secondary click]',
+  );
+
 export const getPropOptionsItemFirst = (addLog: AddLog) => ({
   ...commonPropOptions,
   cursor: cursorOptions,
   onClick: [undefined, logClick(addLog, 'item')] as const,
+  onSecondaryClick: [undefined, logSecondaryClick(addLog, 'item')] as const,
 });
 
 export const getPropOptionsTitleFirst = (addLog: AddLog) => ({
@@ -248,6 +255,7 @@ export const getPropOptionsAction = (addLog: AddLog) => ({
   cursor: cursorOptions,
   disabled: [undefined, false, true] as const,
   onClick: [logClick(addLog, 'action'), undefined] as const,
+  onSecondaryClick: [undefined, logSecondaryClick(addLog, 'action')] as const,
 });
 
 export const getPropOptionsButton = (addLog: AddLog) => ({
@@ -256,6 +264,7 @@ export const getPropOptionsButton = (addLog: AddLog) => ({
   destructive: [undefined, false, true] as const,
   disabled: [undefined, false, true] as const,
   onClick: [logClick(addLog, 'button'), undefined] as const,
+  onSecondaryClick: [undefined, logSecondaryClick(addLog, 'button')] as const,
 });
 
 export const getPropOptionsEditButton = (addLog: AddLog) => ({
@@ -264,6 +273,10 @@ export const getPropOptionsEditButton = (addLog: AddLog) => ({
   disabled: [undefined, false, true] as const,
   editingStyle: [undefined, 'delete', 'insert'] as const,
   onClick: [logClick(addLog, 'edit button'), undefined] as const,
+  onSecondaryClick: [
+    undefined,
+    logSecondaryClick(addLog, 'edit button'),
+  ] as const,
 });
 
 export const getPropOptionsSwipeActionOutermost = (addLog: AddLog) => ({
@@ -279,6 +292,10 @@ export const getPropOptionsSwipeActionOutermost = (addLog: AddLog) => ({
     'var(--color-ios-system-teal)',
   ] as const,
   onClick: [logClick(addLog, 'swipe action'), undefined] as const,
+  onSecondaryClick: [
+    undefined,
+    logSecondaryClick(addLog, 'swipe action'),
+  ] as const,
 });
 
 export const propOptionsExpandable = {

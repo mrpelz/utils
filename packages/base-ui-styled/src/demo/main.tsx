@@ -9,6 +9,8 @@ import {
   TimePickerDemo,
 } from './date-picker/main.js';
 import { EditMenuDemo } from './edit-menu/main.js';
+import { FormDemo } from './form/main.js';
+import { HeaderDemo } from './header/main.js';
 import {
   ListDemo,
   ListEditDemo,
@@ -38,7 +40,6 @@ import {
   ToolbarSymbolsDemo,
   ToolbarTextDemo,
 } from './toolbar/main.js';
-import { ToolbarTopDemo } from './toolbar-top/main.js';
 import { TypographyDemo, TypographyMatrixDemo } from './typography/main.js';
 import { OptionsProvider, useOptions } from './utils/options-context.js';
 import { DemoStyles } from './utils/styles.js';
@@ -77,6 +78,7 @@ export const Demo: FunctionComponent = () => {
       <SliderDemo />
       <StepperDemo />
       <TextFieldDemo />
+      <FormDemo />
       <RollDemo />
       <DatePickerDemo />
       <TimePickerDemo />
@@ -88,7 +90,7 @@ export const Demo: FunctionComponent = () => {
       <ToolbarPageDotsDemo />
       <ToolbarSymbolsDemo />
       <ToolbarTextDemo />
-      <ToolbarTopDemo />
+      <HeaderDemo />
       <PageControlDemo />
       <MenuOpenDemo />
       <MenuDemo />

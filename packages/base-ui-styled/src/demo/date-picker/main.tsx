@@ -1,26 +1,17 @@
 import { FunctionComponent, useMemo } from 'react';
 
-import {
-  DatePicker,
-  DatePickerMode,
-  DateRange,
-} from '../../components/index.js';
+import { DatePickerMode } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
-import { Component, usePropControl } from '../utils/main.js';
+import { Component } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
-import {
-  getFooters,
-  getPropOptionsContent,
-  getPropOptionsDatePicker,
-  withRangeMessage,
-} from './props.js';
+import { useDatePickerDemo } from './compose.js';
+import { getPropOptionsDatePicker } from './props.js';
 
 // Figma's example: April 20, 2025, 9:41 (a range: to April 24).
 const example = new Date(2025, 3, 20, 9, 41);
-const exampleRange: DateRange = { end: new Date(2025, 3, 24), start: example };
 
 type Preset = { id: string; mode: DatePickerMode; title: string };
 
@@ -34,66 +25,27 @@ const DatePickerDemoBase: FunctionComponent<{ preset: Preset }> = ({
 }) => {
   const [log, addLog] = useLog();
 
-  const [externalContent, externalControl] = useProvidedState(preset.id);
-
-  const [controlContent, content, stateContent, RemounterContent] =
-    usePropControl(
-      useMemo(() => getPropOptionsContent(preset.mode), [preset.mode]),
-      '[content]',
-      externalContent,
-      true,
-    );
-  // The calendar's footer, composed (see `footers`); by default, the
-  // picker's own.
-  const footer =
-    'footer' in content && content.footer
-      ? getFooters(preset.mode)[content.footer]
-      : undefined;
-  const range = 'range' in content && content.range;
-
-  const [control, props, stateControl, Remounter] = usePropControl(
-    useMemo(
-      () => getPropOptionsDatePicker(preset.mode, addLog),
-      [addLog, preset.mode],
-    ),
-    'date picker',
-    externalControl,
-    true,
+  const { controls, Remounter, render, states } = useDatePickerDemo(
+    useProvidedState(preset.id),
+    preset.mode,
+    {
+      picker: useMemo(
+        () => getPropOptionsDatePicker(preset.mode, addLog),
+        [addLog, preset.mode],
+      ),
+    },
   );
-  // Ranges' only (dates only, see `getPropOptionsDatePicker`).
-  const { isRangeDisabled, ...pickerProps } = props as typeof props & {
-    isRangeDisabled?: (start: Date, end: Date) => boolean;
-  };
 
   return (
     <Component
       center
-      // Ranges are of dates only, footers of calendars: not in the time's.
-      controls={preset.mode === 'time' ? [control] : [controlContent, control]}
+      controls={controls}
       id={preset.id}
       log={log}
-      stateUrl={useCreateStateUrl(preset.id, [stateContent, stateControl])}
+      stateUrl={useCreateStateUrl(preset.id, states)}
       title={preset.title}
     >
-      <RemounterContent>
-        <Remounter>
-          {range ? (
-            <DatePicker
-              range
-              defaultValue={exampleRange}
-              footer={withRangeMessage(footer, isRangeDisabled)}
-              isRangeDisabled={isRangeDisabled}
-              {...pickerProps}
-            />
-          ) : (
-            <DatePicker
-              defaultValue={example}
-              footer={footer}
-              {...pickerProps}
-            />
-          )}
-        </Remounter>
-      </RemounterContent>
+      <Remounter>{render({ defaultValue: example })}</Remounter>
     </Component>
   );
 };

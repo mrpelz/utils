@@ -31,19 +31,21 @@ import { css, fontWeight } from './utils.js';
 // “Symbol Primary”), its content white.
 //
 // Titles (Figma “Title”, “Title and Subtitle”): Body Emphasized, centered
-// in the bar; with a subtitle, 15px (590) over 12px (510) in the secondary
-// label color. Large titles sit below a top bar (see `Header`).
+// in the bar; with a subtitle, over 12px (510) in the secondary label
+// color. Large titles sit below a top bar (see `Header`).
 //
 // Deviations:
 // - The bar's middle is centered in it while the sides fit (as iOS's
 //   titles; Figma: the title absolutely centered): the sides share the free
 //   space equally; a title aligned to the start (or anything taking the
 //   free space) takes all of it instead.
-// - Pressed, a capsule of several buttons turns into a glass lens as glass
-//   buttons do (see `Button`), the pressed button showing the selection
-//   (Figma: no pressed state).
+// - Pressed, a capsule of several buttons turns into a glass lens as the tab
+//   bar's groups do (scaled up by 1.05, measured on iOS 26), the pressed
+//   button showing the selection (Figma: no pressed state).
 // - The bottom bar's padding is Figma's (4px 16px 36px, the home
 //   indicator's 34px included), not the safe area's.
+// - With a subtitle, the title stays in 17px (Figma: 15px), as iOS 26's
+//   (user: not smaller than the rows' text).
 
 type Placement = 'bottom' | 'top';
 
@@ -185,8 +187,8 @@ const StyledGroup = styled<typeof BaseToolbar.Group, BaseToolbar.Group.Props & {
 
   &:has(:active) {
     --styled-glass-pressed: 1;
-    --styled-glass-scale: var(--glass-ios-lens-scale);
-    --styled-toolbar-content-scale: var(--glass-ios-lens-content-scale);
+    --styled-glass-scale: 1.05;
+    --styled-toolbar-content-scale: 1.05;
   }
 `;
 
@@ -213,16 +215,34 @@ const Group = forwardRef<HTMLDivElement, ToolbarGroupProps>(
   ),
 );
 
+const isClassic = (variant: ButtonRootProps['variant']) =>
+  variant !== undefined && variant !== 'glass' && variant !== 'glass-prominent';
+
 // Figma “Symbol”, “Text”: 36px (symbols: circles, as their 17px glyph and
 // the padding are narrower), the content vibrant (blended with the glass),
 // scaled with the capsule's lens; pressed among several, the selection.
-// Over the button's own styles (doubled).
+// As `Button` as far as that goes in a capsule: tinted, destructive, a
+// classic variant (its own colors and fill; glass ones are the capsule's),
+// a circle, filling the capsule's free space. Over the button's own styles
+// (doubled).
 // eslint-disable-next-line prettier/prettier
 const StyledButton = styled<typeof Button.Root, ButtonRootProps>(Button.Root, forwardRef)`
+  ${({ variant }) =>
+    isClassic(variant)
+      ? undefined
+      : css`
+          && {
+            --styled-button-color: var(--styled-toolbar-content);
+            --styled-button-color-disabled: var(
+              --styled-toolbar-content-disabled
+            );
+            --styled-button-background-pressed: var(--styled-glass-selection);
+
+            mix-blend-mode: var(--styled-toolbar-content-blend);
+          }
+        `}
+
   && {
-    --styled-button-color: var(--styled-toolbar-content);
-    --styled-button-color-disabled: var(--styled-toolbar-content-disabled);
-    --styled-button-background-pressed: var(--styled-glass-selection);
     --styled-button-size: 36px;
     --styled-button-symbol-font-size: 17px;
     --styled-button-symbol-font-weight: 510;
@@ -235,26 +255,22 @@ const StyledButton = styled<typeof Button.Root, ButtonRootProps>(Button.Root, fo
     ${fontWeight(510)}
     letter-spacing: 0;
     line-height: 20px;
-    mix-blend-mode: var(--styled-toolbar-content-blend);
     scale: var(--styled-toolbar-content-scale, none);
     transition-duration: var(--glass-ios-lens-duration);
     transition-property: background-color, scale;
   }
-`;
 
-// A button of its own: a glass `Button` (Figma “_Button - Bottom”, “_Buttons
-// - Top”), as high as the bar's capsules, its content as theirs; text 12px
-// from its ends (Figma: 6px around a “Text” frame of 6px padding).
-// eslint-disable-next-line prettier/prettier
-const StyledGlassButton = styled<typeof Button.Root, ButtonRootProps>(Button.Root, forwardRef)`
-  && {
-    --styled-button-size: var(--styled-toolbar-group-height);
-    --styled-button-symbol-font-size: 17px;
-    --styled-button-symbol-font-weight: 510;
-    --styled-button-symbol-line-height: 20px;
+  /* Tinted (or destructive): its content in the tint, unblended. */
+  ${({ destructive, tint, variant }) =>
+    (destructive || tint) && !isClassic(variant)
+      ? css`
+          && {
+            --styled-button-color: var(--styled-button-tint);
 
-    padding-inline: 12px;
-  }
+            mix-blend-mode: normal;
+          }
+        `
+      : undefined}
 
   ${({ shape }) =>
     shape === 'circle'
@@ -266,25 +282,74 @@ const StyledGlassButton = styled<typeof Button.Root, ButtonRootProps>(Button.Roo
       : undefined}
 `;
 
+// A button of its own: a `Button`, by default a glass one (Figma “_Button -
+// Bottom”, “_Buttons - Top”), as high as the bar's capsules, its content as
+// theirs; text 12px from its ends (Figma: 6px around a “Text” frame of 6px
+// padding). Other variants are as `Button`'s.
+// eslint-disable-next-line prettier/prettier
+const StyledGlassButton = styled<typeof Button.Root, ButtonRootProps>(Button.Root, forwardRef)`
+  ${({ shape, variant }) =>
+    variant === 'glass' || variant === 'glass-prominent'
+      ? css`
+          && {
+            --styled-button-size: var(--styled-toolbar-group-height);
+            --styled-button-symbol-font-size: 17px;
+            --styled-button-symbol-font-weight: 510;
+            --styled-button-symbol-line-height: 20px;
+
+            padding-inline: ${shape === 'circle' ? '0' : '12px'};
+          }
+        `
+      : undefined}
+`;
+
 export type ToolbarButtonProps = Omit<BaseToolbar.Button.Props, 'ref'> &
-  Pick<ButtonRootProps, 'cursor' | 'destructive'> & {
+  Pick<
+    ButtonRootProps,
+    | 'context'
+    | 'cursor'
+    | 'destructive'
+    | 'fill'
+    | 'onSecondaryClick'
+    | 'shape'
+    | 'size'
+    | 'tint'
+    | 'variant'
+  > & {
     /**
      * Of its own (not in a `Group`): tinted glass (Figma “Text - Primary”,
-     * “Symbol Primary”).
+     * “Symbol Primary”; `variant="glass-prominent"`).
      */
     prominent?: boolean;
-    /** Of its own: a circle (a symbol), or a capsule (default). */
-    shape?: 'capsule' | 'circle';
   };
 
 /**
  * A toolbar button (`Button.Root`, with `Button.Symbol` or `Button.Label`
  * content), in the toolbar's keyboard navigation: in a `Group`, one of its
- * buttons; otherwise a glass `Button` of its own.
+ * buttons (in the capsule's style: as `Button`, as far as that goes; not
+ * its `size`, `context`, nor glass variants, which are the capsule's);
+ * otherwise a `Button` of its own (by default, glass).
  */
 const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
-  ({ cursor, destructive, prominent, render, shape, ...props }, ref) => {
+  (
+    {
+      context,
+      cursor,
+      destructive,
+      fill,
+      onSecondaryClick,
+      prominent,
+      render,
+      shape,
+      size,
+      tint,
+      variant,
+      ...props
+    },
+    ref,
+  ) => {
     const inGroup = useContext(GroupContext);
+    const shared = { cursor, destructive, onSecondaryClick, tint };
 
     return (
       <BaseToolbar.Button
@@ -295,15 +360,19 @@ const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
           render ??
           (inGroup ? (
             <StyledButton
-              cursor={cursor}
-              destructive={destructive}
+              {...shared}
+              fill={fill}
+              shape={shape}
+              variant={isClassic(variant) ? variant : undefined}
             />
           ) : (
             <StyledGlassButton
-              cursor={cursor}
-              destructive={destructive}
+              {...shared}
+              context={context}
+              fill={fill}
               shape={shape}
-              variant={prominent ? 'glass-prominent' : 'glass'}
+              size={size}
+              variant={variant ?? (prominent ? 'glass-prominent' : 'glass')}
             />
           ))
         }
@@ -353,12 +422,11 @@ const Title = styled<typeof TitlePart, ToolbarTitleProps>(TitlePart, forwardRef)
     text-overflow: ellipsis;
   }
 
-  /* Title and Subtitle (Figma Style=Title 2 Line). */
+  /* Title and Subtitle (Figma Style=Title 2 Line; its title in 17px, as
+     iOS 26's, never smaller than the rows' text). */
   &:has(> [${part}='subtitle']) {
-    padding-top: 6px;
-    font-size: 15px;
-    letter-spacing: -0.23px;
-    line-height: 18px;
+    padding-top: 4px;
+    line-height: 20px;
   }
 
   ${({ alignStart }) =>

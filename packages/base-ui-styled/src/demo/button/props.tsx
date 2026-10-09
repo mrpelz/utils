@@ -40,6 +40,12 @@ export const propOptionsRoot = {
   size: [undefined, 'small', 'medium', 'large'] as const,
   shape: [undefined, 'capsule', 'circle', 'roundedRectangle'] as const,
   destructive: [undefined, false, true] as const,
+  tint: [
+    undefined,
+    'var(--color-ios-system-yellow)',
+    'var(--color-ios-system-gray)',
+    '#000',
+  ] as const,
   fill: [undefined, false, true] as const,
   context: [undefined, 'bright', 'dim'] as const,
 };
@@ -54,5 +60,12 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
   onClick: [
     new MappedProp(() => addLog('button has been clicked'), '[log click]'),
     undefined,
+  ] as const,
+  onSecondaryClick: [
+    undefined,
+    new MappedProp(
+      () => addLog('button secondary click'),
+      '[log secondary click]',
+    ),
   ] as const,
 });

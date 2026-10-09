@@ -4,12 +4,13 @@ import { Fragment, FunctionComponent, useMemo } from 'react';
 
 import { Button, ButtonRootProps } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
-import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
+import { Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
 import { SFSymbol } from '../utils/symbol.js';
+import { useButtonDemo } from './compose.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -21,75 +22,26 @@ export const ButtonDemo: FunctionComponent = () => {
 
   const [log, addLog] = useLog();
 
-  const [externalContent, externalRoot, externalSymbol, externalLabel] =
-    useProvidedState(id);
-
-  const [controlContent, content, stateContent] = usePropControl(
-    propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+  const { children, controls, propsRoot, Remounter, states } = useButtonDemo(
+    useProvidedState(id),
+    {
+      content: propOptionsContent,
+      root: useMemo(() => getPropOptionsRoot(addLog), [addLog]),
+    },
   );
-
-  const [controlRoot, propsRoot, stateRoot, Remounter] = usePropControl(
-    useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
-    true,
-  );
-
-  const [controlSymbol, propsSymbol, stateSymbol] = usePropControl(
-    commonPropOptions,
-    'symbol',
-    externalSymbol,
-  );
-
-  const [controlLabel, propsLabel, stateLabel] = usePropControl(
-    commonPropOptions,
-    'label',
-    externalLabel,
-  );
-
-  // Composed in either order: a pop-up button's label comes first, its
-  // symbol (e.g. chevron.up.chevron.down) after it.
-  const symbol =
-    content.symbol === undefined ? null : (
-      <Button.Symbol {...propsSymbol}>{content.symbol}</Button.Symbol>
-    );
-  const label =
-    content.label === undefined ? null : (
-      <Button.Label {...propsLabel}>{content.label}</Button.Label>
-    );
 
   return (
     <Component
       center
       baseUiId="button"
-      controls={[controlContent, controlRoot, controlSymbol, controlLabel]}
+      controls={controls}
       id={id}
       log={log}
+      stateUrl={useCreateStateUrl(id, states)}
       title="Button"
-      stateUrl={useCreateStateUrl(id, [
-        stateContent,
-        stateRoot,
-        stateSymbol,
-        stateLabel,
-      ])}
     >
       <Remounter>
-        <Button.Root {...propsRoot}>
-          {content.order === 'labelFirst' ? (
-            <>
-              {label}
-              {symbol}
-            </>
-          ) : (
-            <>
-              {symbol}
-              {label}
-            </>
-          )}
-        </Button.Root>
+        <Button.Root {...propsRoot}>{children}</Button.Root>
       </Remounter>
     </Component>
   );

@@ -5,8 +5,23 @@ import { styled } from 'goober';
 import { FunctionComponent, useMemo } from 'react';
 
 import { Button, ContextualMenu } from '../../components/index.js';
-import { useLog } from '../utils/log.js';
-import { Component, usePropControl } from '../utils/main.js';
+import { buttonControlCount, useButtonDemo } from '../button/compose.js';
+import {
+  getPropOptionsRoot as getPropOptionsButtonRoot,
+  propOptionsContent as propOptionsButtonContent,
+} from '../button/props.js';
+import {
+  getPropOptionsItem as getPropOptionsMenuItem,
+  propOptionsItemDestructive as propOptionsMenuItemDestructive,
+  propOptionsPopup as propOptionsMenuPopup,
+} from '../menu/props.js';
+import { AddLog, useLog } from '../utils/log.js';
+import {
+  commonPropOptions,
+  Component,
+  MappedProp,
+  usePropControl,
+} from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
@@ -35,6 +50,42 @@ const Photo = styled('div')`
   place-items: center;
 `;
 
+// The trigger: a button (its demo's props), “Photo” with a photo symbol,
+// bordered first; its clicks are the trigger's.
+const triggerContent = {
+  ...propOptionsButtonContent,
+  label: ['Photo', 'Image', undefined] as const,
+  symbol: [
+    new MappedProp(<SFSymbol icon={sfPhoto} />, '[photo]'),
+    undefined,
+  ] as const,
+};
+
+const getTriggerRoot = (addLog: AddLog) => {
+  const root = getPropOptionsButtonRoot(addLog);
+  return {
+    ...root,
+    variant: [
+      'bordered',
+      'bordered-prominent',
+      'bordered-secondary',
+      'borderless',
+      'glass',
+      'glass-prominent',
+    ] as const,
+    onClick: [undefined, ...root.onClick.filter(Boolean)] as const,
+  };
+};
+
+// The share item: the menu demo's item's props, its clicks logged as it.
+const getShareItem = (addLog: AddLog) => ({
+  ...getPropOptionsMenuItem(addLog),
+  onClick: [
+    new MappedProp(() => addLog('Share clicked'), '[log click]'),
+    undefined,
+  ] as const,
+});
+
 /**
  * A contextual menu (UIKit `UIContextMenuInteraction`): opening, the
  * trigger lifts (as far as the menu needs to fit below it), turning into a
@@ -51,7 +102,57 @@ export const ContextualMenuDemo: FunctionComponent = () => {
     externalTrigger,
     externalPreview,
     externalPositioner,
+    ...externalComposed
   ] = useProvidedState(id);
+
+  // Composed: the trigger's button, the menu's parts (their demos' props).
+  const triggerButton = useButtonDemo(
+    externalComposed.slice(0, buttonControlCount),
+    {
+      content: triggerContent,
+      prefix: 'trigger button: ',
+      root: useMemo(() => getTriggerRoot(addLog), [addLog]),
+    },
+  );
+  const [
+    externalPopup,
+    externalItem,
+    externalDestructiveItem,
+    externalSeparator,
+    externalIcon,
+    externalLabel,
+  ] = externalComposed.slice(buttonControlCount);
+  const [controlPopup, propsPopup, statePopup] = usePropControl(
+    propOptionsMenuPopup,
+    'popup',
+    externalPopup,
+  );
+  const [controlItem, propsItem, stateItem] = usePropControl(
+    useMemo(() => getShareItem(addLog), [addLog]),
+    'item (share)',
+    externalItem,
+  );
+  const [controlDestructiveItem, propsDestructiveItem, stateDestructiveItem] =
+    usePropControl(
+      propOptionsMenuItemDestructive,
+      'item (delete)',
+      externalDestructiveItem,
+    );
+  const [controlSeparator, propsSeparator, stateSeparator] = usePropControl(
+    commonPropOptions,
+    'separator',
+    externalSeparator,
+  );
+  const [controlIcon, propsIcon, stateIcon] = usePropControl(
+    commonPropOptions,
+    'icon',
+    externalIcon,
+  );
+  const [controlLabel, propsLabel, stateLabel] = usePropControl(
+    commonPropOptions,
+    'label',
+    externalLabel,
+  );
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
@@ -97,8 +198,15 @@ export const ContextualMenuDemo: FunctionComponent = () => {
         controlContent,
         controlRoot,
         controlTrigger,
+        ...triggerButton.controls,
         controlPreview,
         controlPositioner,
+        controlPopup,
+        controlItem,
+        controlDestructiveItem,
+        controlSeparator,
+        controlIcon,
+        controlLabel,
       ]}
       stateUrl={useCreateStateUrl(id, [
         stateContent,
@@ -106,18 +214,22 @@ export const ContextualMenuDemo: FunctionComponent = () => {
         stateTrigger,
         statePreview,
         statePositioner,
+        ...triggerButton.states,
+        statePopup,
+        stateItem,
+        stateDestructiveItem,
+        stateSeparator,
+        stateIcon,
+        stateLabel,
       ])}
     >
       <RemounterRoot>
         <ContextualMenu.Root {...propsRoot}>
           <ContextualMenu.Trigger
             {...propsTrigger}
-            render={<Button.Root variant="bordered" />}
+            render={<Button.Root {...triggerButton.propsRoot} />}
           >
-            <Button.Symbol>
-              <SFSymbol icon={sfPhoto} />
-            </Button.Symbol>
-            <Button.Label>Photo</Button.Label>
+            {triggerButton.children}
           </ContextualMenu.Trigger>
           {content.preview ? (
             <ContextualMenu.Preview {...propsPreview}>
@@ -129,19 +241,21 @@ export const ContextualMenuDemo: FunctionComponent = () => {
           <ContextualMenu.Portal>
             {content.backdrop ? <ContextualMenu.Backdrop /> : null}
             <ContextualMenu.Positioner {...propsPositioner}>
-              <ContextualMenu.Popup>
-                <ContextualMenu.Item onClick={action('Share')}>
-                  <ContextualMenu.Label>Share</ContextualMenu.Label>
-                  <ContextualMenu.Icon>
+              <ContextualMenu.Popup {...propsPopup}>
+                <ContextualMenu.Item {...propsItem}>
+                  <ContextualMenu.Label {...propsLabel}>
+                    Share
+                  </ContextualMenu.Label>
+                  <ContextualMenu.Icon {...propsIcon}>
                     <SFSymbol icon={sfSquareAndArrowUp} />
                   </ContextualMenu.Icon>
                 </ContextualMenu.Item>
                 <ContextualMenu.Item onClick={action('Copy')}>
                   <ContextualMenu.Label>Copy</ContextualMenu.Label>
                 </ContextualMenu.Item>
-                <ContextualMenu.Separator />
+                <ContextualMenu.Separator {...propsSeparator} />
                 <ContextualMenu.Item
-                  destructive
+                  {...propsDestructiveItem}
                   onClick={action('Delete')}
                 >
                   <ContextualMenu.Label>Delete</ContextualMenu.Label>

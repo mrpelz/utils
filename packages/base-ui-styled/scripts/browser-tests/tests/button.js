@@ -3,6 +3,8 @@
 
 import assert from 'node:assert/strict';
 
+import { mapped, rightClick, sleep, withTouch } from '../lib.js';
+
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
@@ -107,6 +109,51 @@ export const tests = [
       const [width, rest, offset] = await measure();
       assert.ok(width > hugging + 200, `${hugging}px → ${width}px`);
       assert.deepEqual([rest, offset], [0, 0]);
+    },
+  },
+  {
+    name: 'button: a right click, or a touch held, is a secondary click (its click not following)',
+    run: async (page) => {
+      await page.open('button', 'light', {
+        state: [
+          null,
+          {
+            $rest: true,
+            onSecondaryClick: mapped('[log secondary click]'),
+          },
+        ],
+      });
+      const { height, width, x, y } = await page.rect('button');
+      /** @type {[number, number]} */
+      const center = [x + width / 2, y + height / 2];
+      const count = async (/** @type {string} */ text) => {
+        const log = await page.log();
+        return log.split(text).length - 1;
+      };
+
+      await rightClick(page, center);
+      await sleep(100);
+      assert.equal(await count('secondary click'), 1, 'right click');
+      assert.equal(await count('clicked'), 0);
+
+      await withTouch(page, async (touch) => {
+        await touch('touchStart', ...center);
+        await sleep(700);
+        await touch('touchEnd');
+      });
+      await sleep(200);
+      assert.equal(await count('secondary click'), 2, 'held');
+      assert.equal(await count('clicked'), 0, 'no click after');
+
+      // A tap: a click.
+      await withTouch(page, async (touch) => {
+        await touch('touchStart', ...center);
+        await sleep(100);
+        await touch('touchEnd');
+      });
+      await sleep(200);
+      assert.equal(await count('secondary click'), 2, 'tapped');
+      assert.equal(await count('clicked'), 1);
     },
   },
 ];

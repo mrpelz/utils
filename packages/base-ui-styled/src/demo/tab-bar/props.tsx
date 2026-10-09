@@ -50,7 +50,10 @@ export const labelOptions = (initial?: string) => [
   ...(initial ? [undefined] : []),
 ];
 
-export const getPropOptionsTab = ({ label, symbol }: TabPreset) => ({
+export const getPropOptionsTab = (
+  { label, symbol }: TabPreset,
+  addLog: AddLog,
+) => ({
   ...commonPropOptions,
   // Content, not `TabBar.Tab` props.
   symbol: symbolOptions(symbol),
@@ -60,6 +63,13 @@ export const getPropOptionsTab = ({ label, symbol }: TabPreset) => ({
   visibleWhenCollapsed: [undefined, false, true] as const,
   disabled: [undefined, false, true] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
+  onSecondaryClick: [
+    undefined,
+    new MappedProp(
+      () => addLog('tab secondary click'),
+      '[log secondary click]',
+    ),
+  ] as const,
 });
 
 export const propOptionsList = {
@@ -165,7 +175,10 @@ export const propOptionsPanel = {
 export const defaultTab: TabPreset = { label: 'Label', symbol: 'heart.fill' };
 
 // Only there to type unused slots; every slot has options.
-export const fallbackTabOptions = getPropOptionsTab(defaultTab);
+export const fallbackTabOptions = getPropOptionsTab(
+  defaultTab,
+  () => undefined,
+);
 export const defaultSecondaryTab: TabPreset = { symbol: 'magnifyingglass' };
 
 export const primaryValues = Array.from(
@@ -192,7 +205,7 @@ export type Preset = {
 };
 
 /** The demo's options, as a preset starts them. */
-export const getPresetOptions = (preset: Preset) => ({
+export const getPresetOptions = (preset: Preset, addLog: AddLog) => ({
   content: {
     tabs: [
       preset.primary.length,
@@ -223,10 +236,10 @@ export const getPresetOptions = (preset: Preset) => ({
     ],
   },
   primary: primaryValues.map((_, index) =>
-    getPropOptionsTab(preset.primary[index] ?? defaultTab),
+    getPropOptionsTab(preset.primary[index] ?? defaultTab, addLog),
   ),
   secondary: secondaryValues.map((_, index) =>
-    getPropOptionsTab(preset.secondary?.[index] ?? defaultSecondaryTab),
+    getPropOptionsTab(preset.secondary?.[index] ?? defaultSecondaryTab, addLog),
   ),
 });
 

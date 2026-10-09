@@ -73,12 +73,25 @@ export const propOptionsSubmenuTrigger = {
   delay: [undefined, 0, 500] as const,
 };
 
-export const propOptionsTrigger = {
+// With `openOn="secondaryClick"`, a click is the trigger's own (logged).
+export const getPropOptionsTrigger = (addLog: AddLog) => ({
   ...commonPropOptions,
   disabled: [undefined, false, true] as const,
   openOnHover: [undefined, false, true] as const,
   delay: [undefined, 0, 500] as const,
-};
+  openOn: [undefined, 'click', 'secondaryClick'] as const,
+  onClick: [
+    new MappedProp(() => addLog('trigger clicked'), '[log click]'),
+    undefined,
+  ] as const,
+  onSecondaryClick: [
+    undefined,
+    new MappedProp(
+      () => addLog('trigger secondary click'),
+      '[log secondary click]',
+    ),
+  ] as const,
+});
 
 export const propOptionsItemDisabled = {
   ...propOptionsItem,

@@ -532,6 +532,25 @@ export class Page {
  */
 
 /**
+ * Right-clicks at a point (a secondary click: `contextmenu` on mouse down).
+ *
+ * @param {Page} page
+ * @param {[number, number]} point
+ */
+export const rightClick = async (page, [x, y]) => {
+  for (const type of /** @type {const} */ (['mousePressed', 'mouseReleased'])) {
+    await page.browser.send('Input.dispatchMouseEvent', {
+      button: 'right',
+      buttons: type === 'mousePressed' ? 2 : 0,
+      clickCount: 1,
+      type,
+      x,
+      y,
+    });
+  }
+};
+
+/**
  * Runs `action` with touch input (`Input.dispatchTouchEvent`) enabled.
  *
  * @param {Page} page

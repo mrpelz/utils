@@ -116,9 +116,24 @@ type StyledBarProps = ToolbarRootProps & {
 
 // eslint-disable-next-line prettier/prettier
 const StyledBar = styled<typeof Toolbar.Root, StyledBarProps>(Toolbar.Root, forwardRef)`
+  /* In a navigation's transition (see \`Navigation\`): held in place while
+     its page moves, its content fading (glass by its fade, the title by a
+     filter, as it's animated by the scroll, buttons' content by its
+     opacity); none of it at rest. */
+  --styled-glass-fade: var(--styled-navigation-shown, 1);
+
   position: sticky;
   z-index: 10;
   top: 0;
+  translate: var(--styled-navigation-counter, none);
+
+  & [data-toolbar-part='title'] {
+    filter: var(--styled-navigation-filter, none);
+  }
+
+  & [data-button-part] {
+    opacity: var(--styled-navigation-shown, 1);
+  }
 
   /* The scroll edge effect, once content is scrolled under the bar. */
   &::before {

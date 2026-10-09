@@ -105,9 +105,9 @@ const ToolbarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
     <Toolbar.Button
       key={label}
       aria-label={label}
-      shape="circle"
       onClick={() => addLog(`${label} clicked`)}
       {...props}
+      shape={props?.shape ?? 'circle'}
     >
       <Button.Symbol>
         <SFSymbol icon={icon} />

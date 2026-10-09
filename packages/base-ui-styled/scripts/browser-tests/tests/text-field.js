@@ -44,9 +44,20 @@ const type = async (page, text) => {
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'text field: in a list row, the label is the title, the control fills the row',
+    name: 'text field: in a list row, the label is the title, the control fills the row (its value at the end)',
     run: async (page) => {
       await page.open('list-form');
+      // Not editing: the control reaches the row's end (no clear button).
+      const end = await page.evaluate(`(() => {
+        const row = ${field(0)};
+        const control = row.querySelector('[data-text-field-part=control]');
+        return [Math.round(row.getBoundingClientRect().right - control.getBoundingClientRect().right), getComputedStyle(control).textAlign];
+      })()`);
+      assert.deepEqual(end, [16, 'end']);
+
+      // Editing: the clear button after it.
+      await page.click(await center(page, 0, 'control'));
+      await sleep(100);
       const geometry = await page.evaluate(`(() => {
         const row = ${field(0)};
         const box = row.getBoundingClientRect();
@@ -84,7 +95,8 @@ export const tests = [
     name: 'text field: the clear button shows while focused and filled, and empties the field',
     run: async (page) => {
       await page.open('list-form');
-      const clear = `getComputedStyle(${field(2)}.querySelector('[data-text-field-part=clear]')).visibility`;
+      // (In a list row, it takes no room while hidden.)
+      const clear = `getComputedStyle(${field(2)}.querySelector('[data-text-field-part=clear]')).display === 'none' ? 'hidden' : 'visible'`;
       assert.equal(await page.evaluate(clear), 'hidden');
 
       await page.click(await center(page, 2, 'control'));

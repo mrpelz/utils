@@ -4,7 +4,7 @@ import {
 } from '@base-ui/react/button';
 import { Properties } from 'csstype';
 import { styled } from 'goober';
-import { forwardRef } from 'react';
+import { ComponentProps, forwardRef, FunctionComponent } from 'react';
 
 import {
   GlassBackground,
@@ -12,36 +12,48 @@ import {
   glassContext,
   glassLensGlow,
 } from './glass.js';
-import { css, fontWeight, wrap } from './utils.js';
+import {
+  css,
+  fontWeight,
+  SecondaryClickProps,
+  useSecondaryClick,
+  wrap,
+} from './utils.js';
 
-export type ButtonRootProps = BaseButtonProps & {
-  /** Brightness behind glass variants (default: follows the color scheme). */
-  context?: GlassContext;
-  cursor?: Properties['cursor'];
-  /** Figma “Destructive”: tints the button red. */
-  destructive?: boolean;
-  /**
-   * Grows to fill the available width (a block, or a flex item sharing a
-   * row's free space), its content centered (Figma: hugging its content).
-   */
-  fill?: boolean;
-  /**
-   * `circle` is square with a round shape, for symbol-only buttons;
-   * `roundedRectangle` has 6px corners (large: 12px; Figma “Date and time -
-   * Collapsed”, large borderless buttons).
-   */
-  shape?: 'capsule' | 'circle' | 'roundedRectangle';
-  /** Figma “Size” (not applicable to glass variants, which have one size). */
-  size?: 'large' | 'medium' | 'small';
-  /** Figma “Style”, and “Button - Liquid Glass” with “Tinted”. */
-  variant?:
-    | 'bordered'
-    | 'bordered-prominent'
-    | 'bordered-secondary'
-    | 'borderless'
-    | 'glass'
-    | 'glass-prominent';
-};
+export type ButtonRootProps = BaseButtonProps &
+  SecondaryClickProps & {
+    /** Brightness behind glass variants (default: follows the color scheme). */
+    context?: GlassContext;
+    cursor?: Properties['cursor'];
+    /** Figma “Destructive”: tints the button red. */
+    destructive?: boolean;
+    /**
+     * Grows to fill the available width (a block, or a flex item sharing a
+     * row's free space), its content centered (Figma: hugging its content).
+     */
+    fill?: boolean;
+    /**
+     * `circle` is square with a round shape, for symbol-only buttons;
+     * `roundedRectangle` has 6px corners (large: 12px; Figma “Date and time -
+     * Collapsed”, large borderless buttons).
+     */
+    shape?: 'capsule' | 'circle' | 'roundedRectangle';
+    /** Figma “Size” (not applicable to glass variants, which have one size). */
+    size?: 'large' | 'medium' | 'small';
+    /**
+     * The button's color (labels, fills, tinted glass; UIKit `tintColor`,
+     * e.g. Notes' yellow; default: the primary color). `destructive` wins.
+     */
+    tint?: string;
+    /** Figma “Style”, and “Button - Liquid Glass” with “Tinted”. */
+    variant?:
+      | 'bordered'
+      | 'bordered-prominent'
+      | 'bordered-secondary'
+      | 'borderless'
+      | 'glass'
+      | 'glass-prominent';
+  };
 
 /** The button's tint color at the given opacity. */
 const tintAlpha = (alpha: number) =>
@@ -70,7 +82,7 @@ const isGlass = (variant: ButtonRootProps['variant']) =>
 const StyledRoot = styled<typeof BaseButton, ButtonRootProps>(BaseButton, forwardRef)`
   --styled-cursor: attr(
     cursor type(\<custom-ident\>),
-    ${({ onClick }) => (onClick ? 'pointer' : 'not-allowed')}
+    ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')}
   );
   --styled-button-tint: var(--color-ios-primary);
   --styled-button-background: transparent;
@@ -126,6 +138,13 @@ const StyledRoot = styled<typeof BaseButton, ButtonRootProps>(BaseButton, forwar
           display: flex;
           width: 100%;
           flex: 1 1 auto;
+        `
+      : undefined}
+  ${({ tint }) =>
+    tint
+      ? css`
+          --styled-button-tint: ${tint};
+          --styled-glass-tint: ${tint};
         `
       : undefined}
   ${({ destructive }) =>
@@ -304,10 +323,11 @@ const Content = styled('span')`
   transition-property: scale;
 `;
 
-// Glass variants draw their material behind the content.
-const Root = wrap(StyledRoot, (props: ButtonRootProps) => ({
+// Glass variants draw their material behind the content. (Typed loosely:
+// Base UI's `ref` type, a union with its own callbacks, takes no forwarded
+// ref.)
+const ContentRoot = wrap(StyledRoot, (props: ButtonRootProps) => ({
   ...props,
-  ...(!props.onClick && props.disabled === undefined && { disabled: true }),
   ...(isGlass(props.variant) && {
     children: (
       <>
@@ -319,10 +339,30 @@ const Root = wrap(StyledRoot, (props: ButtonRootProps) => ({
       </>
     ),
   }),
-}));
+})) as FunctionComponent<Record<string, unknown>>;
+
+// Without a click handler (nor a secondary one), disabled, unless it
+// submits or resets its form.
+const Root = forwardRef<unknown, Omit<ButtonRootProps, 'ref'>>((props, ref) => {
+  const pressable =
+    Boolean(props.onClick ?? props.onSecondaryClick) ||
+    props.type === 'submit' ||
+    props.type === 'reset';
+  const rootProps = useSecondaryClick({
+    ...props,
+    ...(!pressable && props.disabled === undefined && { disabled: true }),
+  });
+
+  return (
+    <ContentRoot
+      ref={ref}
+      {...rootProps}
+    />
+  );
+}) as FunctionComponent<ButtonRootProps>;
 
 // Figma “Symbol”: the glyph, in the label's typography (glass: its own).
-const ButtonSymbol = styled('span', forwardRef)`
+const StyledSymbol = styled('span', forwardRef)`
   display: inline-flex;
   min-height: 1lh;
   align-items: center;
@@ -333,11 +373,32 @@ const ButtonSymbol = styled('span', forwardRef)`
 `;
 
 // Figma “Label”, truncated when the button is narrower than its content.
-const Label = styled('span', forwardRef)`
+const StyledLabel = styled('span', forwardRef)`
   overflow: hidden;
   min-width: 0;
   text-overflow: ellipsis;
 `;
+
+// (Marked, e.g. for fading a bar's content, see `Header`.)
+const ButtonSymbol = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
+  (props, ref) => (
+    <StyledSymbol
+      ref={ref}
+      data-button-part="symbol"
+      {...props}
+    />
+  ),
+);
+
+const Label = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
+  (props, ref) => (
+    <StyledLabel
+      ref={ref}
+      data-button-part="label"
+      {...props}
+    />
+  ),
+);
 
 export const Button = {
   Root,

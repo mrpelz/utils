@@ -5,7 +5,15 @@ import { styled } from 'goober';
 import { forwardRef } from 'react';
 
 import { glassContext } from './glass.js';
-import { colorScheme, css, fontWeight, usePointerDrag, wrap } from './utils.js';
+import {
+  colorScheme,
+  css,
+  fontWeight,
+  SecondaryClickProps,
+  usePointerDrag,
+  withSecondaryClick,
+  wrap,
+} from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Segmented control”, light and dark
 // appearance), with Figma colors mapped to UIKit semantic colors where they
@@ -270,9 +278,10 @@ const Root = forwardRef<HTMLDivElement, SegmentedRootProps>(
   },
 );
 
-export type SegmentedItemProps = BaseRadio.Root.Props & {
-  cursor?: Properties['cursor'];
-};
+export type SegmentedItemProps = BaseRadio.Root.Props &
+  SecondaryClickProps & {
+    cursor?: Properties['cursor'];
+  };
 
 // eslint-disable-next-line prettier/prettier
 const StyledItem = styled<typeof BaseRadio.Root, SegmentedItemProps>(BaseRadio.Root, forwardRef)`
@@ -371,7 +380,7 @@ const LabelReserve = styled('span')`
   visibility: hidden;
 `;
 
-const Item = wrap(
+const LabelledItem = wrap(
   StyledItem,
   ({ children, ...props }: SegmentedItemProps): SegmentedItemProps => ({
     ...props,
@@ -383,6 +392,8 @@ const Item = wrap(
     ),
   }),
 );
+
+const Item = withSecondaryClick(LabelledItem);
 
 // Framework7 supports up to 10 buttons. Each rule matches when at least
 // `count` items precede the highlight (or the checked item); rules with more

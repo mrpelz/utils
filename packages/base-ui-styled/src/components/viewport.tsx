@@ -1,5 +1,6 @@
 import { styled } from 'goober';
 import {
+  ComponentProps,
   createContext,
   forwardRef,
   FunctionComponent,
@@ -13,6 +14,8 @@ import {
   useState,
 } from 'react';
 
+import { css } from './utils.js';
+
 // The viewport, for app logic (the Visual Viewport API):
 //
 // - The visual viewport (`Provider`, `useVisualViewport`): its size, offset
@@ -24,8 +27,14 @@ import {
 //   scrolled in (past a threshold, so jitter doesn't flip it), and whether
 //   it's at its top or bottom; e.g. to collapse a tab bar while scrolling
 //   down.
-// - Bars (`Top`, `Bottom`): fixed to the visual viewport's top or bottom:
-//   above the keyboard (e.g. a message field).
+// - Anchors (`Anchor`; `Top`, `Bottom`): floating above the content at an
+//   edge of the visual viewport: top (e.g. a toolbar), bottom (e.g. a tab
+//   bar, or a message field pushed up by the keyboard), leading or trailing
+//   (e.g. a compact sidebar swiping in).
+// - The content layer (`Content`): the viewport's scroll container,
+//   resized by the keyboard (or overlaid).
+// - Anchors and content keep the safe area insets clear (as padding): all,
+//   by dimension (block, inline), or none.
 
 /** The visual viewport, and the keyboard's height (0 without one). */
 export type VisualViewportState = {
@@ -259,31 +268,208 @@ export const useScrollDirection = (): Omit<ViewportScrollEvent, 'position'> => {
   return state;
 };
 
-// Fixed to the visual viewport (see the custom properties above), within
-// the safe area (unless the keyboard covers it).
-const Top = styled('div', forwardRef)`
-  position: fixed;
-  z-index: 10;
-  top: var(--styled-viewport-top, 0);
-  box-sizing: border-box;
-  padding-top: env(safe-area-inset-top);
-  inset-inline: 0;
+/** The edge of the viewport an anchor floats at. */
+export type ViewportEdge = 'bottom' | 'leading' | 'top' | 'trailing';
+
+/**
+ * The safe area insets kept clear (as padding): all, those of the block
+ * (top, bottom) or inline (left, right) dimension only, or none.
+ */
+export type ViewportSafeArea = 'all' | 'block' | 'inline' | 'none';
+
+export type ViewportAnchorProps = ComponentProps<'div'> & {
+  /** The edge it floats at (e.g. top: a toolbar; bottom: a tab bar). */
+  edge: ViewportEdge;
+  /**
+   * At the bottom edge: pushed up by the on-screen keyboard (default, e.g.
+   * a message field), or covered by it (e.g. a tab bar).
+   */
+  keyboard?: 'cover' | 'push';
+  /** The safe area insets kept clear (default: `all`). */
+  safeArea?: ViewportSafeArea;
+};
+
+export type ViewportContentProps = ComponentProps<'div'> & {
+  /**
+   * With the on-screen keyboard: resized to what's above it (default, so
+   * its end scrolls into view), or overlaid by it.
+   */
+  keyboard?: 'overlay' | 'resize';
+  /** The safe area insets kept clear (default: `all`). */
+  safeArea?: ViewportSafeArea;
+};
+
+const keyboardInset = 'var(--styled-viewport-keyboard-inset, 0px)';
+
+// A safe area inset (`side`), as padding, if its dimension is kept clear;
+// at the bottom, less what the keyboard covers (`keyboard`).
+const inset = (
+  side: 'bottom' | 'left' | 'right' | 'top',
+  safeArea: ViewportSafeArea,
+  keyboard = false,
+) => {
+  const dimension = side === 'top' || side === 'bottom' ? 'block' : 'inline';
+  if (safeArea !== 'all' && safeArea !== dimension) return '0px';
+  const env = `env(safe-area-inset-${side}, 0px)`;
+  return keyboard ? `max(0px, ${env} - ${keyboardInset})` : env;
+};
+
+// Insets of a box filling the visual viewport (anchors at the sides, the
+// content layer): with the keyboard, down to its top (`resize`), or to the
+// layout viewport's bottom.
+const fill = (resize: boolean) => css`
+  top: ${resize ? 'var(--styled-viewport-top, 0px)' : '0px'};
+  bottom: ${resize ? keyboardInset : '0px'};
 `;
 
-const Bottom = styled('div', forwardRef)`
+const paddings = (
+  safeArea: ViewportSafeArea,
+  sides: readonly ('bottom' | 'left' | 'right' | 'top')[],
+  keyboard = false,
+) =>
+  sides
+    .map(
+      (side) =>
+        `padding-${side}: ${inset(side, safeArea, keyboard && side === 'bottom')};`,
+    )
+    .join('\n');
+
+const anchorStyles = (
+  edge: ViewportEdge,
+  keyboard: 'cover' | 'push',
+  safeArea: ViewportSafeArea,
+) => {
+  switch (edge) {
+    case 'top': {
+      return css`
+        top: var(--styled-viewport-top, 0);
+        inset-inline: 0;
+        ${paddings(safeArea, ['top', 'left', 'right'])}
+      `;
+    }
+    case 'bottom': {
+      const push = keyboard === 'push';
+      return css`
+        bottom: ${push ? keyboardInset : '0px'};
+        inset-inline: 0;
+        ${paddings(safeArea, ['bottom', 'left', 'right'], push)}
+      `;
+    }
+    default: {
+      // Leading: the left in left-to-right, the right in right-to-left.
+      const [start, end] =
+        edge === 'leading' ? ['left', 'right'] : ['right', 'left'];
+      return css`
+        ${fill(true)}
+        ${start}: 0;
+        ${paddings(safeArea, ['top', 'bottom', start as 'left'], true)}
+
+        &:dir(rtl) {
+          ${start}: auto;
+          ${end}: 0;
+
+          padding-${start}: 0;
+          ${paddings(safeArea, [end as 'left'])}
+        }
+      `;
+    }
+  }
+};
+
+type StyledAnchorProps = {
+  anchorEdge: ViewportEdge;
+  anchorKeyboard: 'cover' | 'push';
+  anchorSafeArea: ViewportSafeArea;
+};
+
+const StyledAnchor = styled('div', forwardRef)<StyledAnchorProps>`
   position: fixed;
   z-index: 10;
-  bottom: var(--styled-viewport-keyboard-inset, 0);
   box-sizing: border-box;
-  padding-bottom: max(
-    0px,
-    env(safe-area-inset-bottom) - var(--styled-viewport-keyboard-inset, 0px)
-  );
-  inset-inline: 0;
+  ${({ anchorEdge, anchorKeyboard, anchorSafeArea }) =>
+    anchorStyles(anchorEdge, anchorKeyboard, anchorSafeArea)}
 `;
+
+/**
+ * Floats above the content (and its scroll container) at an edge of the
+ * visual viewport (see the custom properties above): a bar at the top or
+ * bottom, a (compact) sidebar at the leading or trailing edge; its safe
+ * area insets kept clear (as padding).
+ */
+const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
+  ({ edge, keyboard = 'push', safeArea = 'all', ...props }, ref) => (
+    <StyledAnchor
+      ref={ref}
+      anchorEdge={edge}
+      anchorKeyboard={keyboard}
+      anchorSafeArea={safeArea}
+      {...props}
+    />
+  ),
+);
+
+type StyledContentProps = {
+  contentKeyboard: 'overlay' | 'resize';
+  contentSafeArea: ViewportSafeArea;
+};
+
+const StyledContent = styled('div', forwardRef)<StyledContentProps>`
+  position: fixed;
+  overflow: auto;
+  box-sizing: border-box;
+  inset-inline: 0;
+  overscroll-behavior: contain;
+  ${({ contentKeyboard }) => fill(contentKeyboard === 'resize')}
+  ${({ contentKeyboard, contentSafeArea }) =>
+    paddings(
+      contentSafeArea,
+      ['top', 'right', 'bottom', 'left'],
+      contentKeyboard === 'resize',
+    )}
+`;
+
+/**
+ * The content layer: filling the viewport, scrolling its content (track it
+ * with `Provider`'s `scroller`), below the anchors; its safe area insets
+ * kept clear (as padding).
+ */
+const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
+  ({ keyboard = 'resize', safeArea = 'all', ...props }, ref) => (
+    <StyledContent
+      ref={ref}
+      contentKeyboard={keyboard}
+      contentSafeArea={safeArea}
+      {...props}
+    />
+  ),
+);
+
+/** A bar at the top (an `Anchor`). */
+const Top = forwardRef<HTMLDivElement, Omit<ViewportAnchorProps, 'edge'>>(
+  (props, ref) => (
+    <Anchor
+      ref={ref}
+      edge="top"
+      {...props}
+    />
+  ),
+);
+
+/** A bar at the bottom, above the keyboard (an `Anchor`). */
+const Bottom = forwardRef<HTMLDivElement, Omit<ViewportAnchorProps, 'edge'>>(
+  (props, ref) => (
+    <Anchor
+      ref={ref}
+      edge="bottom"
+      {...props}
+    />
+  ),
+);
 
 export const Viewport = {
   Provider,
+  Anchor,
+  Content,
   Top,
   Bottom,
 };

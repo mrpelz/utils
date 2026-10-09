@@ -6,7 +6,12 @@ import { styled } from 'goober';
 import { forwardRef, FunctionComponent, useMemo, useRef } from 'react';
 
 import { Button, Menu } from '../../components/index.js';
-import { useLog } from '../utils/log.js';
+import { useButtonDemo } from '../button/compose.js';
+import {
+  getPropOptionsRoot as getPropOptionsButtonRoot,
+  propOptionsContent as propOptionsButtonContent,
+} from '../button/props.js';
+import { AddLog, useLog } from '../utils/log.js';
 import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
@@ -19,6 +24,7 @@ import {
   getPropOptionsRadioGroup,
   getPropOptionsRoot,
   getPropOptionsSubmenuRoot,
+  getPropOptionsTrigger,
   propOptionsContent,
   propOptionsIndicator,
   propOptionsItem,
@@ -29,10 +35,33 @@ import {
   propOptionsPositioner,
   propOptionsSubmenuTrigger,
   propOptionsToggleItem,
-  propOptionsTrigger,
 } from './props.js';
 
 const square = <SFSymbol icon={sfSquare} />;
+
+// The trigger: a button (all of its demo's options), by default glass,
+// labelled “Open Menu”.
+const triggerContent = {
+  ...propOptionsButtonContent,
+  label: ['Open Menu', 'Options', undefined] as const,
+};
+
+/** The trigger's button's root: glass first; its clicks are the trigger's. */
+const getTriggerRoot = (addLog: AddLog) => {
+  const root = getPropOptionsButtonRoot(addLog);
+  return {
+    ...root,
+    variant: [
+      'glass',
+      'glass-prominent',
+      'bordered',
+      'bordered-prominent',
+      'bordered-secondary',
+      'borderless',
+    ] as const,
+    onClick: [undefined, ...root.onClick.filter(Boolean)] as const,
+  };
+};
 
 // Keeps the trigger high in the stage, with room for the menu below it.
 const TriggerSpace = styled('div')`
@@ -74,7 +103,14 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
     externalLabel,
     externalSubtitle,
     externalShortcut,
+    ...externalButton
   ] = useProvidedState(preset.id);
+
+  const triggerButton = useButtonDemo(externalButton, {
+    content: triggerContent,
+    prefix: 'trigger button: ',
+    root: useMemo(() => getTriggerRoot(addLog), [addLog]),
+  });
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
@@ -94,7 +130,7 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
   );
 
   const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
-    propOptionsTrigger,
+    useMemo(() => getPropOptionsTrigger(addLog), [addLog]),
     'trigger',
     externalTrigger,
   );
@@ -263,6 +299,7 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
         controlContent,
         controlRoot,
         controlTrigger,
+        ...triggerButton.controls,
         controlPositioner,
         controlPopup,
         controlQuickActions,
@@ -312,6 +349,7 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
         stateLabel,
         stateSubtitle,
         stateShortcut,
+        ...triggerButton.states,
       ])}
     >
       <RemounterRoot>
@@ -319,9 +357,9 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
           <TriggerSpace>
             <Menu.Trigger
               {...propsTrigger}
-              render={<Button.Root variant="glass" />}
+              render={<Button.Root {...triggerButton.propsRoot} />}
             >
-              <Button.Label>Open Menu</Button.Label>
+              {triggerButton.children}
             </Menu.Trigger>
           </TriggerSpace>
           <Menu.Portal>

@@ -39,14 +39,18 @@ const StyledRoot = styled(BaseField.Root, forwardRef)`
     gap: 4px;
   }
 
-  /* The clear button, only while focused and filled (in a list row: in its
-     content) */
-  &:not([data-filled][data-focused]) > [${part}='clear'],
+  /* The clear button, only while focused and filled; in a list row (in its
+     content), taking no room until then, so a value aligned to the end
+     reaches it (UIKit: the value moves over for the button). */
+  &:not([data-filled][data-focused]) > [${part}='clear'] {
+    visibility: hidden;
+  }
+
   &[data-list-part]:not([data-filled][data-focused])
     > *
     > [data-list-part='row']
     > [${part}='clear'] {
-    visibility: hidden;
+    display: none;
   }
 `;
 
@@ -104,6 +108,38 @@ const StyledControl = styled(BaseField.Control, forwardRef)`
   &::placeholder {
     color: var(--color-ios-placeholder-text);
     opacity: 1;
+  }
+
+  /* Native parts iOS doesn't show, or the field draws itself: number
+     spinners (iOS: a keypad), search's decoration and cancel button (see
+     \`Clear\`). */
+  &[type='number'] {
+    appearance: textfield;
+  }
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button,
+  &::-webkit-search-decoration,
+  &::-webkit-search-cancel-button {
+    margin: 0;
+    appearance: none;
+  }
+
+  /* Dates and times: aligned as text (WebKit centers them). */
+  &::-webkit-date-and-time-value {
+    margin: 0;
+    text-align: inherit;
+  }
+
+  &::-webkit-datetime-edit {
+    padding: 0;
+  }
+
+  /* Autofilled: as typed, on the row (no browser fill, which is
+     \`!important\`: its color never transitions in). */
+  &:autofill {
+    -webkit-text-fill-color: var(--color-ios-label);
+    transition: background-color 0s 86400s;
   }
 
   /* As a textarea: three lines, growing with its text where supported */

@@ -3,7 +3,7 @@
 
 import assert from 'node:assert/strict';
 
-import { mapped, sleep, withTouch } from '../lib.js';
+import { mapped, rightClick, sleep, withTouch } from '../lib.js';
 
 /** @typedef {import('../lib.js').Page} Page */
 
@@ -58,6 +58,29 @@ const swipe = async (page, group, index, distance) => {
   ]);
   await page.drag(from, [from[0] + distance, from[1]], { duration: 600 });
   await sleep(500);
+};
+
+/**
+ * Waits for `condition` (e.g. an overswipe, which moves the row across the
+ * whole row first), at most `timeout` ms.
+ *
+ * @param {() => Promise<boolean>} condition
+ * @param {number} [timeout]
+ */
+const until = async (condition, timeout = 3000) => {
+  const end = Date.now() + timeout;
+  while (!(await condition()) && Date.now() < end) await sleep(50);
+};
+
+/**
+ * Whether the demo logged `text`.
+ *
+ * @param {Page} page
+ * @param {string} text
+ */
+const logged = async (page, text) => {
+  const log = await page.log();
+  return log.includes(text);
 };
 
 /**
@@ -541,7 +564,9 @@ export const tests = [
         shift: 0,
       });
 
-      for (let step = 6; step <= 12; step += 1) {
+      // Armed (past 304px), not yet pushing the others out (past twice
+      // that, less the actions: 430px).
+      for (let step = 6; step <= 10; step += 1) {
         await page.mouse('mouseMoved', from[0] + step * 40, from[1]);
         await sleep(30);
       }
@@ -593,7 +618,11 @@ export const tests = [
       await sleep(300);
 
       await page.mouse('mouseReleased', from[0] + 480, from[1]);
-      await sleep(500);
+      // Across the whole row, then triggered and closed.
+      await sleep(200);
+      const moving = await swipeState(page, 0, 0);
+      assert.ok(moving.offset > 480, 'moving across the row');
+      await until(async () => (await swipeSide(page, 0, 0)) === undefined);
 
       const log = await page.log();
       assert.match(log, /swipe action clicked/);
@@ -601,6 +630,7 @@ export const tests = [
 
       // Trailing, too: the outermost (last) action.
       await swipe(page, 0, 0, -400);
+      await until(() => logged(page, 'Done clicked'));
       assert.match(await page.log(), /Done clicked/);
 
       // Without overswipe, the actions just open.
@@ -626,6 +656,10 @@ export const tests = [
 
       // Past 5 actions (5 × 54 + 26 + 8px): deleted.
       await swipe(page, 0, 1, -420);
+      await until(async () => {
+        const left = await titles();
+        return left.length === 4;
+      });
       assert.deepEqual(await titles(), ['Mercury', 'Earth', 'Mars', 'Jupiter']);
     },
   },
@@ -652,6 +686,7 @@ export const tests = [
 
       // Past half the row (not 304px): deleted.
       await swipe(page, 0, 1, -Math.round(rowWidth / 2) - 30);
+      await until(async () => (await count()) === 4);
       assert.equal(await count(), 4);
     },
   },
@@ -695,26 +730,76 @@ export const tests = [
     },
   },
   {
-    name: 'list: scrolled sideways past the arming distance, a row overswipes once at rest',
+    name: 'list: closing a row by scrolling past closed does not open its other side',
+    run: async (page) => {
+      await page.open('list-swipe');
+      const { height, width, x, y } = await rowRect(page, 0, 1);
+      const at = { x: x + width / 2, y: y + height / 2 };
+      /** @param {number} deltaX @param {number} times */
+      const scroll = async (deltaX, times) => {
+        for (let step = 0; step < times; step += 1) {
+          await page.browser.send('Input.dispatchMouseEvent', {
+            deltaX,
+            deltaY: 0,
+            type: 'mouseWheel',
+            ...at,
+          });
+          await sleep(16);
+        }
+        await sleep(700);
+      };
+
+      await scroll(30, 6);
+      assert.equal(await swipeSide(page, 0, 1), 'trailing');
+      // Far back (past the leading actions' half): closed only.
+      await scroll(-60, 6);
+      assert.equal(await swipeSide(page, 0, 1), undefined, 'scrolled');
+
+      // Dragged, too.
+      await swipe(page, 0, 1, -150);
+      assert.equal(await swipeSide(page, 0, 1), 'trailing');
+      await swipe(page, 0, 1, 400);
+      assert.equal(await swipeSide(page, 0, 1), undefined, 'dragged');
+
+      // From closed, it opens.
+      await swipe(page, 0, 1, 150);
+      assert.equal(await swipeSide(page, 0, 1), 'leading');
+    },
+  },
+  {
+    name: 'list: scrolled sideways, a row stops open; scrolled on past the arming distance, it overswipes once at rest, closing',
     run: async (page) => {
       await page.open('list-swipe');
       const { height, width, x, y } = await rowRect(page, 0, 0);
       // (Synthetic wheel events have no phases: the browser doesn't latch
       // them to the row once the pointer leaves it, as with a trackpad, and
-      // snaps between them: a quick fling, far enough even at a low frame
-      // rate.)
+      // snaps between them: one event far enough.)
       const at = { x: x + width - 10, y: y + height / 2 };
-      for (let step = 0; step < 16; step += 1) {
-        await page.browser.send('Input.dispatchMouseEvent', {
-          deltaX: 60,
-          deltaY: 0,
-          type: 'mouseWheel',
-          ...at,
-        });
-        await sleep(16);
-      }
-      await sleep(700);
+      /** @param {number} deltaX @param {number} times */
+      const scroll = async (deltaX, times) => {
+        for (let step = 0; step < times; step += 1) {
+          await page.browser.send('Input.dispatchMouseEvent', {
+            deltaX,
+            deltaY: 0,
+            type: 'mouseWheel',
+            ...at,
+          });
+          await sleep(16);
+        }
+        await sleep(700);
+      };
+
+      // Scrolled (not swiped), a row stops open first: far as it goes.
+      await scroll(60, 16);
+      assert.equal(await swipeSide(page, 0, 0), 'trailing', 'open');
+      assert.doesNotMatch(await page.log(), /clicked/u, 'not at once');
+
+      // Scrolled on from open: overswiped, then closed.
+      await scroll(300, 1);
+      await until(() => logged(page, 'Done clicked'));
       assert.match(await page.log(), /Done clicked/u);
+      await until(async () => (await swipeSide(page, 0, 0)) === undefined);
+      assert.equal(await swipeSide(page, 0, 0), undefined, 'closed');
     },
   },
   {
@@ -741,6 +826,9 @@ export const tests = [
       await page.mouse('mouseMoved', from[0] - 330, from[1]);
       await sleep(100);
       assert.equal(await armed(), true, '330px');
+      // Held armed: nothing triggers until released.
+      await sleep(600);
+      assert.doesNotMatch(await page.log(), /clicked/u, 'held');
       await page.mouse('mouseMoved', from[0] - 200, from[1]);
       await sleep(100);
       await page.mouse('mouseReleased', from[0] - 200, from[1]);
@@ -763,7 +851,7 @@ export const tests = [
       }
       await sleep(300);
       await page.mouse('mouseReleased', from[0] + 480, from[1]);
-      await sleep(500);
+      await until(async () => (await swipeSide(page, 0, 0)) === undefined);
 
       const log = await page.log();
       assert.match(log, /overswiped/);
@@ -1361,6 +1449,35 @@ export const tests = [
         return Math.round(box.width - start - parseFloat(style.left) - parseFloat(style.width));
       })`);
       assert.deepEqual(ends, [16, 16]);
+    },
+  },
+  {
+    name: 'list: rows and their buttons take secondary clicks',
+    run: async (page) => {
+      const state = Array.from({ length: 17 }, () => null);
+      const onSecondaryClick = mapped('[log secondary click]');
+      await page.open('list-parts', 'light', {
+        state: Object.assign(state, {
+          // (Items, buttons.)
+          16: { $rest: true, onSecondaryClick },
+          6: { $rest: true, onSecondaryClick },
+        }),
+      });
+      /** @returns {Promise<[number, number]>} */
+      const centerOf = (/** @type {string} */ text) =>
+        page.evaluate(`(() => {
+          const element = [...document.querySelectorAll('[data-list-part=title], [data-list-part=button]')].find((part) => part.textContent === ${JSON.stringify(text)});
+          element.scrollIntoView({ block: 'center' });
+          const { height, width, x, y } = element.getBoundingClientRect();
+          return [x + width / 2, y + height / 2];
+        })()`);
+
+      await rightClick(page, await centerOf('Title'));
+      await sleep(100);
+      assert.match(await page.log(), /item secondary click/u);
+      await rightClick(page, await centerOf('Button'));
+      await sleep(100);
+      assert.match(await page.log(), /button secondary click/u);
     },
   },
   {

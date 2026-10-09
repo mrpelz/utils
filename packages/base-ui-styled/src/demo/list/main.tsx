@@ -4,7 +4,6 @@ import { sfAirplane } from '@bradleyhodges/sfsymbols/sfAirplane';
 import { sfArchiveboxFill } from '@bradleyhodges/sfsymbols/sfArchiveboxFill';
 import { sfBellFill } from '@bradleyhodges/sfsymbols/sfBellFill';
 import { sfCheckmarkCircleFill } from '@bradleyhodges/sfsymbols/sfCheckmarkCircleFill';
-import { sfChevronUpChevronDown } from '@bradleyhodges/sfsymbols/sfChevronUpChevronDown';
 import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
 import { sfEnvelopeFill } from '@bradleyhodges/sfsymbols/sfEnvelopeFill';
 import { sfEnvelopeOpenFill } from '@bradleyhodges/sfsymbols/sfEnvelopeOpenFill';
@@ -20,7 +19,6 @@ import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
 import { sfTagFill } from '@bradleyhodges/sfsymbols/sfTagFill';
 import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
 import { sfWifi } from '@bradleyhodges/sfsymbols/sfWifi';
-import { Properties } from 'csstype';
 import { styled } from 'goober';
 import {
   Fragment,
@@ -33,21 +31,46 @@ import {
 } from 'react';
 
 import {
-  Button,
   Calendar,
   DatePicker,
   DatePickerOpen,
   List,
-  Menu,
-  Segmented,
-  Slider,
-  Stepper,
-  Switch,
   TextField,
   TimeRoll,
 } from '../../components/index.js';
-import { useLog } from '../utils/log.js';
-import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
+import { getPropOptionsRoot as getPropOptionsButtonRoot } from '../button/props.js';
+import { useDatePickerDemo } from '../date-picker/compose.js';
+import { getPropOptionsDatePicker } from '../date-picker/props.js';
+import { popUpControlCount, usePopUpDemo } from '../menu/compose.js';
+import {
+  segmentedControlCount,
+  useSegmentedDemo,
+} from '../segmented/compose.js';
+import { getPropOptionsRoot as getPropOptionsSegmentedRoot } from '../segmented/props.js';
+import { useSliderDemo } from '../slider/compose.js';
+import {
+  getPropOptionsRoot as getPropOptionsSliderRoot,
+  propOptionsContent as propOptionsSliderContent,
+} from '../slider/props.js';
+import { stepperControlCount, useStepperDemo } from '../stepper/compose.js';
+import { getPropOptionsRoot as getPropOptionsStepperRoot } from '../stepper/props.js';
+import { switchControlCount, useSwitchDemo } from '../switch/compose.js';
+import { getPropOptionsRoot as getPropOptionsSwitchRoot } from '../switch/props.js';
+import {
+  textFieldControlCount,
+  useTextFieldDemo,
+} from '../text-field/compose.js';
+import {
+  getPropOptionsControl as getPropOptionsTextFieldControl,
+  propOptionsRoot as propOptionsTextFieldRoot,
+} from '../text-field/props.js';
+import { AddLog, useLog } from '../utils/log.js';
+import {
+  commonPropOptions,
+  Component,
+  MappedProp,
+  usePropControl,
+} from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
@@ -104,48 +127,144 @@ const trailingActions = [
 
 const selectionOptions = ['Automatic', 'Always', 'Never'] as const;
 
-type Selection = (typeof selectionOptions)[number];
+// The rows' controls, composed (see `ListDemo`): their demos' props, with
+// Settings' values: an orange switch, a gray pop-up button (as in lists),
+// the text size's S, M and L, a stepper of the quantity (its value the
+// row's detail), a slider between sun symbols.
+const getAirplaneModeRoot =
+  (addLog: AddLog) => (setPending: (pending: boolean) => void) => ({
+    ...getPropOptionsSwitchRoot(addLog, setPending),
+    tint: [
+      'var(--color-ios-system-orange)',
+      undefined,
+      'var(--color-ios-system-blue)',
+    ] as const,
+    onCheckedChange: [
+      new MappedProp(
+        (checked: boolean) => addLog(`airplane mode: ${checked}`),
+        '[log change]',
+      ),
+      undefined,
+    ] as const,
+  });
 
-/**
- * A pop-up button: a menu of the options, its trigger a button (the chosen
- * option's label, then chevron.up.chevron.down), closing on choosing.
- */
-const PopUp: FunctionComponent<{
-  cursor?: Properties['cursor'];
-  onValueChange: (value: Selection) => void;
-  value: Selection;
-}> = ({ cursor, onValueChange, value }) => (
-  <Menu.Root>
-    <Menu.Trigger render={<Button.Root cursor={cursor} />}>
-      <Button.Label>{value}</Button.Label>
-      <Button.Symbol>
-        <SFSymbol icon={sfChevronUpChevronDown} />
-      </Button.Symbol>
-    </Menu.Trigger>
-    <Menu.Portal>
-      <Menu.Positioner align="end">
-        <Menu.Popup>
-          <Menu.RadioGroup
-            value={value}
-            onValueChange={(next: unknown) => onValueChange(next as Selection)}
-          >
-            {selectionOptions.map((option) => (
-              <Menu.RadioItem
-                key={option}
-                // A pop-up closes on choosing (iOS).
-                closeOnClick
-                value={option}
-              >
-                <Menu.RadioItemIndicator />
-                <Menu.Label>{option}</Menu.Label>
-              </Menu.RadioItem>
-            ))}
-          </Menu.RadioGroup>
-        </Menu.Popup>
-      </Menu.Positioner>
-    </Menu.Portal>
-  </Menu.Root>
-);
+/** A pop-up's button in a list row: gray; its clicks are the trigger's. */
+const getPopUpButtonRoot = (addLog: AddLog) => {
+  const root = getPropOptionsButtonRoot(addLog);
+  return {
+    ...root,
+    tint: [
+      'var(--color-ios-secondary-label)',
+      undefined,
+      ...root.tint.slice(1),
+    ] as const,
+    onClick: [undefined, ...root.onClick.filter(Boolean)] as const,
+  };
+};
+
+const textSizeContent = {
+  count: [3, 2, 4, 5] as const,
+  label1: ['S'] as const,
+  label2: ['M'] as const,
+  label3: ['L'] as const,
+  label4: ['XL'] as const,
+  label5: ['XXL'] as const,
+};
+
+const getTextSizeRoot = (addLog: AddLog) => ({
+  ...getPropOptionsSegmentedRoot(addLog),
+  defaultValue: ['second', 'first', 'third', undefined] as const,
+  onValueChange: [
+    new MappedProp(
+      (value: unknown) => addLog(`text size: ${String(value)}`),
+      '[log change]',
+    ),
+    undefined,
+  ] as const,
+});
+
+// (Its value is the row's: no `defaultValue`.)
+const getQuantityRoot = (addLog: AddLog) => {
+  const { defaultValue: _row, ...root } = getPropOptionsStepperRoot(addLog);
+  return root;
+};
+
+const brightnessContent = {
+  ...propOptionsSliderContent,
+  thumbs: [1] as const,
+  ticks: [0, 6, 11] as const,
+  minSymbol: [
+    new MappedProp(<SFSymbol icon={sfSunMin} />, '[sun.min]'),
+    undefined,
+  ] as const,
+  maxSymbol: [
+    new MappedProp(<SFSymbol icon={sfSunMax} />, '[sun.max]'),
+    undefined,
+  ] as const,
+  label: [undefined, 'Brightness'] as const,
+};
+
+const getBrightnessRoot = (addLog: AddLog) => {
+  const { value: _range, ...root } = getPropOptionsSliderRoot(addLog);
+  return {
+    ...root,
+    defaultValue: [60, 0, 100] as const,
+    onValueCommitted: [
+      new MappedProp(
+        (value: number | readonly number[]) =>
+          addLog(`brightness: ${String(value)}`),
+        '[log commit]',
+      ),
+      undefined,
+    ] as const,
+  };
+};
+
+// Events' views: upcoming and past, controlling their groups (two items;
+// its value is the view's).
+const eventsViewContent = {
+  count: [2] as const,
+  label1: ['Upcoming'] as const,
+  label2: ['Past'] as const,
+  label3: [undefined] as const,
+  label4: [undefined] as const,
+  label5: [undefined] as const,
+};
+
+const getEventsViewRoot = (addLog: AddLog) => {
+  const {
+    defaultValue: _view,
+    onValueChange: _logged,
+    value: _shown,
+    ...root
+  } = getPropOptionsSegmentedRoot(addLog);
+  return root;
+};
+
+// The form's name field: Kate Bell's, required.
+const getNameControl = (addLog: AddLog) => ({
+  ...getPropOptionsTextFieldControl(addLog),
+  placeholder: ['Required', 'Name', undefined] as const,
+  defaultValue: ['Kate Bell', undefined] as const,
+  value: [undefined, 'Kate Bell'] as const,
+  autoComplete: ['name', 'off', undefined] as const,
+  onValueChange: [
+    new MappedProp((value: string) => addLog(`name: ${value}`), '[log change]'),
+    undefined,
+  ] as const,
+});
+
+// The start's picker: date and time, in expandable rows below (its value
+// and open picker the form's).
+const getStartsPicker = (addLog: AddLog) => {
+  const {
+    defaultOpen: _opened,
+    onOpenChange: _opening,
+    onValueChange: _logged,
+    ...picker
+  } = getPropOptionsDatePicker('dateAndTime', addLog);
+  return { ...picker, popover: [false, true] as const };
+};
 
 /**
  * Lists: a settings-like inset grouped list (Figma “Lists and tables”) with
@@ -165,6 +284,7 @@ export const ListDemo: FunctionComponent = () => {
     externalItem,
     externalCollapsible,
     externalTrigger,
+    ...externalComposed
   ] = useProvidedState(id);
 
   const [controlContent, content, stateContent] = usePropControl(
@@ -188,6 +308,70 @@ export const ListDemo: FunctionComponent = () => {
     true,
   );
 
+  const [selection, setSelection] =
+    useState<(typeof selectionOptions)[number]>('Automatic');
+  const [favorite, setFavorite] = useState(true);
+  const [quantity, setQuantity] = useState(1);
+
+  // Composed: the rows' controls (their demos' props, Settings' values).
+  // (Their states in turn, after the demo's own.)
+  const popUpAt = switchControlCount;
+  const segmentedAt = popUpAt + popUpControlCount;
+  const stepperAt = segmentedAt + segmentedControlCount;
+  const sliderAt = stepperAt + stepperControlCount;
+  const airplaneMode = useSwitchDemo(
+    externalComposed.slice(0, popUpAt),
+    {
+      prefix: 'airplane mode: ',
+      root: useMemo(() => getAirplaneModeRoot(addLog), [addLog]),
+    },
+    { 'aria-label': 'Airplane Mode' },
+  );
+  const previews = usePopUpDemo(
+    addLog,
+    externalComposed.slice(popUpAt, segmentedAt),
+    selectionOptions,
+    {
+      button: useMemo(() => getPopUpButtonRoot(addLog), [addLog]),
+      prefix: 'show previews: ',
+    },
+  );
+  const textSize = useSegmentedDemo(
+    addLog,
+    externalComposed.slice(segmentedAt, stepperAt),
+    {
+      content: textSizeContent,
+      prefix: 'text size: ',
+      root: useMemo(() => getTextSizeRoot(addLog), [addLog]),
+    },
+    { 'aria-label': 'Text Size' },
+  );
+  const quantityStepper = useStepperDemo(
+    externalComposed.slice(stepperAt, sliderAt),
+    {
+      prefix: 'quantity: ',
+      root: useMemo(() => getQuantityRoot(addLog), [addLog]),
+    },
+    {
+      label: 'Quantity',
+      onValueChange: (value: number | null) => {
+        addLog(`quantity: ${String(value)}`);
+        setQuantity(value ?? 0);
+      },
+      value: quantity,
+    },
+  );
+  const brightness = useSliderDemo(
+    addLog,
+    externalComposed.slice(sliderAt),
+    {
+      content: brightnessContent,
+      prefix: 'brightness: ',
+      root: useMemo(() => getBrightnessRoot(addLog), [addLog]),
+    },
+    { 'aria-label': 'Brightness' },
+  );
+
   const [
     controlCollapsible,
     propsCollapsible,
@@ -204,11 +388,6 @@ export const ListDemo: FunctionComponent = () => {
     'collapsible trigger (header)',
     externalTrigger,
   );
-
-  const [selection, setSelection] =
-    useState<(typeof selectionOptions)[number]>('Automatic');
-  const [favorite, setFavorite] = useState(true);
-  const [quantity, setQuantity] = useState(1);
 
   const image = (icon: Parameters<typeof SFSymbol>[0]['icon'], tint: string) =>
     content.image === 'none' ? null : (
@@ -234,6 +413,11 @@ export const ListDemo: FunctionComponent = () => {
         controlItem,
         controlCollapsible,
         controlTrigger,
+        ...airplaneMode.controls,
+        ...previews.controls,
+        ...textSize.controls,
+        ...quantityStepper.controls,
+        ...brightness.controls,
       ]}
       stateUrl={useCreateStateUrl(id, [
         stateContent,
@@ -241,6 +425,11 @@ export const ListDemo: FunctionComponent = () => {
         stateItem,
         stateCollapsible,
         stateTrigger,
+        ...airplaneMode.states,
+        ...previews.states,
+        ...textSize.states,
+        ...quantityStepper.states,
+        ...brightness.states,
       ])}
     >
       <List.Root {...propsRoot}>
@@ -265,15 +454,7 @@ export const ListDemo: FunctionComponent = () => {
             <List.Item {...propsItem}>
               {image(sfAirplane, 'var(--color-ios-system-orange)')}
               <List.Title>Airplane Mode</List.Title>
-              <Switch.Root
-                aria-label="Airplane Mode"
-                tint="var(--color-ios-system-orange)"
-                onCheckedChange={(checked) =>
-                  addLog(`airplane mode: ${checked}`)
-                }
-              >
-                <Switch.Thumb />
-              </Switch.Root>
+              {airplaneMode.element}
             </List.Item>
             <List.Item>
               {image(sfWifi, 'var(--color-ios-system-blue)')}
@@ -300,10 +481,7 @@ export const ListDemo: FunctionComponent = () => {
             <List.Item onClick={forwardClick('[aria-haspopup]')}>
               {image(sfPersonFill, 'var(--color-ios-system-gray)')}
               <List.Title>Show Previews</List.Title>
-              <PopUp
-                value={selection}
-                onValueChange={setSelection}
-              />
+              {previews.render(selection, setSelection)}
             </List.Item>
             <List.Item
               onClick={({ target }) => {
@@ -333,57 +511,14 @@ export const ListDemo: FunctionComponent = () => {
             </List.Item>
             <List.Item>
               <List.Title>Text Size</List.Title>
-              <Segmented.Root
-                aria-label="Text Size"
-                defaultValue="medium"
-                onValueChange={(value) => addLog(`text size: ${String(value)}`)}
-              >
-                <Segmented.Item value="small">S</Segmented.Item>
-                <Segmented.Item value="medium">M</Segmented.Item>
-                <Segmented.Item value="large">L</Segmented.Item>
-                <Segmented.Highlight />
-              </Segmented.Root>
+              {textSize.element}
             </List.Item>
             <List.Item>
               <List.Title>Quantity</List.Title>
               <List.Detail>{quantity}</List.Detail>
-              <Stepper.Root
-                max={10}
-                min={0}
-                value={quantity}
-                onValueChange={(value) => {
-                  addLog(`quantity: ${String(value)}`);
-                  setQuantity(value ?? 0);
-                }}
-              >
-                <Stepper.Group inputProps={{ 'aria-label': 'Quantity' }}>
-                  <Stepper.Decrement />
-                  <Stepper.Increment />
-                </Stepper.Group>
-              </Stepper.Root>
+              {quantityStepper.element}
             </List.Item>
-            <List.Item>
-              <Slider.Root
-                aria-label="Brightness"
-                defaultValue={60}
-                onValueCommitted={(value) =>
-                  addLog(`brightness: ${String(value)}`)
-                }
-              >
-                <Slider.Symbol edge="min">
-                  <SFSymbol icon={sfSunMin} />
-                </Slider.Symbol>
-                <Slider.Control>
-                  <Slider.Track>
-                    <Slider.Indicator />
-                    <Slider.Thumb />
-                  </Slider.Track>
-                </Slider.Control>
-                <Slider.Symbol edge="max">
-                  <SFSymbol icon={sfSunMax} />
-                </Slider.Symbol>
-              </Slider.Root>
-            </List.Item>
+            <List.Item>{brightness.element}</List.Item>
           </List.Group>
           <List.Footer>Footer text, aligned with the rows’ text.</List.Footer>
         </List.Section>
@@ -485,7 +620,8 @@ export const ListPartsDemo: FunctionComponent = () => {
     externalDrillIn,
     externalAccessory,
     externalCheckmark,
-    externalPopUp,
+    // (Formerly the pop-up's: its demo's states are at the end.)
+    _externalFormerPopUp,
     externalAction,
     externalButton,
     externalCheckbox,
@@ -501,6 +637,7 @@ export const ListPartsDemo: FunctionComponent = () => {
     externalFooter,
     externalBlock,
     externalExpandable,
+    ...externalPopUp
   ] = useProvidedState(id);
 
   const [controlContent, content, stateContent] = usePropControl(
@@ -574,11 +711,6 @@ export const ListPartsDemo: FunctionComponent = () => {
     commonPropOptions,
     'checkmark',
     externalCheckmark,
-  );
-  const [controlPopUp, propsPopUp, statePopUp] = usePropControl(
-    propOptionsCursor,
-    'pop-up',
-    externalPopUp,
   );
   const [controlAction, propsAction, stateAction] = usePropControl(
     useMemo(() => getPropOptionsAction(addLog), [addLog]),
@@ -666,6 +798,11 @@ export const ListPartsDemo: FunctionComponent = () => {
 
   const [selection, setSelection] =
     useState<(typeof selectionOptions)[number]>('Automatic');
+  // Composed: the pop-up (its button's and menu's demos' props).
+  const popUp = usePopUpDemo(addLog, externalPopUp, selectionOptions, {
+    button: useMemo(() => getPopUpButtonRoot(addLog), [addLog]),
+    prefix: 'pop-up: ',
+  });
 
   return (
     <Component
@@ -688,7 +825,7 @@ export const ListPartsDemo: FunctionComponent = () => {
         controlDrillIn,
         controlAccessory,
         controlCheckmark,
-        controlPopUp,
+        ...popUp.controls,
         controlAction,
         controlButton,
         controlCheckbox,
@@ -720,7 +857,8 @@ export const ListPartsDemo: FunctionComponent = () => {
         stateDrillIn,
         stateAccessory,
         stateCheckmark,
-        statePopUp,
+        // (Formerly the pop-up's.)
+        {},
         stateAction,
         stateButton,
         stateCheckbox,
@@ -736,6 +874,7 @@ export const ListPartsDemo: FunctionComponent = () => {
         stateFooter,
         stateBlock,
         stateExpandable,
+        ...popUp.states,
       ])}
     >
       <List.Root {...propsRoot}>
@@ -786,11 +925,7 @@ export const ListPartsDemo: FunctionComponent = () => {
             {/* Rows with a single control pass their clicks on to it. */}
             <List.Item onClick={forwardClick('[aria-haspopup]')}>
               <List.Title>Pop-up</List.Title>
-              <PopUp
-                {...propsPopUp}
-                value={selection}
-                onValueChange={setSelection}
-              />
+              {popUp.render(selection, setSelection)}
             </List.Item>
             <List.Item onClick={forwardClick('[data-list-part=action]')}>
               <List.Title>Action</List.Title>
@@ -1365,8 +1500,32 @@ export const ListSegmentedDemo: FunctionComponent = () => {
 
   const [log, addLog] = useLog();
 
-  const [externalRoot] = useProvidedState(id);
+  const [externalRoot, ...externalSegmented] = useProvidedState(id);
   const [view, setView] = useState<EventsView>('upcoming');
+
+  // Composed: the segmented control (its demo's props, the views' values).
+  const segmented = useSegmentedDemo(
+    addLog,
+    externalSegmented,
+    {
+      content: eventsViewContent,
+      itemProps: {
+        past: { 'aria-controls': 'list-segmented-past' },
+        upcoming: { 'aria-controls': 'list-segmented-upcoming' },
+      },
+      prefix: 'segmented: ',
+      root: useMemo(() => getEventsViewRoot(addLog), [addLog]),
+      values: ['upcoming', 'past'],
+    },
+    {
+      'aria-label': 'Events',
+      onValueChange: (value: unknown) => {
+        addLog(`view: ${String(value)}`);
+        setView(value as EventsView);
+      },
+      value: view,
+    },
+  );
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
@@ -1377,38 +1536,17 @@ export const ListSegmentedDemo: FunctionComponent = () => {
   return (
     <Component
       stretch
-      controls={[controlRoot]}
+      controls={[controlRoot, ...segmented.controls]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot])}
+      stateUrl={useCreateStateUrl(id, [stateRoot, ...segmented.states])}
       title="List (Segmented)"
     >
       <List.Root {...propsRoot}>
         <List.Section>
           {/* Aligned with the groups' edges, not the rows' text. */}
           <List.Block style={{ marginBlockEnd: 16, paddingInline: 0 }}>
-            <Segmented.Root
-              aria-label="Events"
-              value={view}
-              onValueChange={(value) => {
-                addLog(`view: ${String(value)}`);
-                setView(value as EventsView);
-              }}
-            >
-              <Segmented.Item
-                aria-controls="list-segmented-upcoming"
-                value="upcoming"
-              >
-                Upcoming
-              </Segmented.Item>
-              <Segmented.Item
-                aria-controls="list-segmented-past"
-                value="past"
-              >
-                Past
-              </Segmented.Item>
-              <Segmented.Highlight />
-            </Segmented.Root>
+            {segmented.element}
           </List.Block>
           {(Object.keys(events) as EventsView[]).map((key) => (
             <List.Group
@@ -1447,7 +1585,7 @@ export const ListFormDemo: FunctionComponent = () => {
 
   const [log, addLog] = useLog();
 
-  const [externalRoot] = useProvidedState(id);
+  const [externalRoot, ...externalComposed] = useProvidedState(id);
   const [starts, setStarts] = useState(() => new Date(2025, 3, 20, 9, 41));
   const [ends, setEnds] = useState(() => new Date(2025, 3, 21, 18, 0));
   // The open picker: of which row, the date's or the time's.
@@ -1461,14 +1599,37 @@ export const ListFormDemo: FunctionComponent = () => {
     externalRoot,
   );
 
+  // Composed: the name field, the start's picker (their demos' props).
+  const nameField = useTextFieldDemo(
+    addLog,
+    externalComposed.slice(0, textFieldControlCount),
+    {
+      control: useMemo(() => getNameControl(addLog), [addLog]),
+      prefix: 'name field: ',
+      root: propOptionsTextFieldRoot,
+    },
+  );
+  const startsPicker = useDatePickerDemo(
+    externalComposed.slice(textFieldControlCount),
+    'dateAndTime',
+    {
+      picker: useMemo(() => getStartsPicker(addLog), [addLog]),
+      prefix: 'starts: ',
+    },
+  );
+
   return (
     <Component
       stretch
-      controls={[controlRoot]}
+      controls={[controlRoot, ...nameField.controls, ...startsPicker.controls]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot])}
       title="List (Form)"
+      stateUrl={useCreateStateUrl(id, [
+        stateRoot,
+        ...nameField.states,
+        ...startsPicker.states,
+      ])}
     >
       <List.Root {...propsRoot}>
         <List.Section>
@@ -1476,15 +1637,19 @@ export const ListFormDemo: FunctionComponent = () => {
             <List.Title>Contact</List.Title>
           </List.Header>
           <List.Group>
-            <TextField.Root render={<List.Item />}>
-              <TextField.Label>Name</TextField.Label>
-              <TextField.Control
-                defaultValue="Kate Bell"
-                placeholder="Required"
-                onValueChange={(value) => addLog(`name: ${value}`)}
-              />
-              <TextField.Clear />
-            </TextField.Root>
+            <nameField.Remounter>
+              <TextField.Root
+                {...nameField.props.root}
+                render={<List.Item />}
+              >
+                <TextField.Label {...nameField.props.label}>
+                  Name
+                </TextField.Label>
+                <TextField.Control {...nameField.props.control} />
+                <TextField.Clear {...nameField.props.clear} />
+              </TextField.Root>
+            </nameField.Remounter>
+            {nameField.suggestions}
             <TextField.Root
               render={<List.Item />}
               validationMode="onBlur"
@@ -1534,16 +1699,30 @@ export const ListFormDemo: FunctionComponent = () => {
                 <Fragment key={key}>
                   <List.Item>
                     <List.Title>{title}</List.Title>
-                    <DatePicker
-                      mode="dateAndTime"
-                      open={opened}
-                      popover={false}
-                      value={date}
-                      onValueChange={change}
-                      onOpenChange={(next) =>
-                        setOpen(next ? [key, next] : null)
-                      }
-                    />
+                    {key === 'starts' ? (
+                      <startsPicker.Remounter>
+                        {startsPicker.render({
+                          mode: 'dateAndTime',
+                          onOpenChange: (next) =>
+                            setOpen(next ? [key, next] : null),
+                          onValueChange: change,
+                          open: opened,
+                          popover: false,
+                          value: date,
+                        })}
+                      </startsPicker.Remounter>
+                    ) : (
+                      <DatePicker
+                        mode="dateAndTime"
+                        open={opened}
+                        popover={false}
+                        value={date}
+                        onValueChange={change}
+                        onOpenChange={(next) =>
+                          setOpen(next ? [key, next] : null)
+                        }
+                      />
+                    )}
                   </List.Item>
                   <List.Expandable open={opened === 'date'}>
                     <Calendar

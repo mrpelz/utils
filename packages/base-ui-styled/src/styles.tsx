@@ -428,6 +428,14 @@ export const styles = css`
     initial-value: 0;
     syntax: '<length>';
   }
+
+  /* A navigation's transition between two pages (see \`Navigation\`): 0
+     the upper page shown, 1 the one under it. */
+  @property --styled-navigation-progress {
+    inherits: true;
+    initial-value: 0;
+    syntax: '<number>';
+  }
 `;
 
 const GlobalStyles = createGlobalStyle(styles) as unknown as FunctionComponent;

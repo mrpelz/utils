@@ -64,7 +64,10 @@ const TabBarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
     externalLabel,
     externalPanel,
   ] = useProvidedState(preset.id);
-  const options = useMemo(() => getPresetOptions(preset), [preset]);
+  const options = useMemo(
+    () => getPresetOptions(preset, addLog),
+    [addLog, preset],
+  );
   const [collapsedState, setCollapsed] = useState(false);
   // Clicks expanding the bar, for the handlers (see `createExpansion`).
   const [expansion] = useState(createExpansion);

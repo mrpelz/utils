@@ -3,7 +3,7 @@
 
 import assert from 'node:assert/strict';
 
-import { sleep, withTouch } from '../lib.js';
+import { rightClick, sleep, withTouch } from '../lib.js';
 
 /** @typedef {import('../lib.js').Page} Page */
 
@@ -151,6 +151,19 @@ export const tests = [
         await touch('touchMove', ...(await center(page, firstItem(0))));
         await sleep(100);
         assert.deepEqual(await highlighted(page), ['Share'], 'on an item');
+        // The selection moves along (also without hover, where it otherwise
+        // jumps: headless Chrome always hovers, so the drag's own rule).
+        assert.ok(
+          await page.evaluate(`(() => {
+            const pill = document.querySelector(${JSON.stringify('[role=menu] [data-moving-highlight]')});
+            return [...document.styleSheets].flatMap((sheet) => [...sheet.cssRules]).some((rule) =>
+              rule instanceof CSSStyleRule &&
+              rule.selectorText.includes(${JSON.stringify('data-styled-dragging-items')}) &&
+              pill.matches(rule.selectorText) &&
+              rule.style.transitionProperty.includes('translate'));
+          })()`),
+          'the selection moves while dragging',
+        );
 
         // Back on the trigger: nothing is.
         await touch('touchMove', triggerX, triggerY);
@@ -187,6 +200,13 @@ export const tests = [
         await touch('touchEnd');
         await sleep(500);
         assert.equal(await menuCount(page), 0, 'chosen, the menus close');
+        assert.equal(
+          await page.evaluate(
+            `document.documentElement.hasAttribute(${JSON.stringify('data-styled-dragging-items')})`,
+          ),
+          false,
+          'no longer dragging',
+        );
       });
     },
   },
@@ -673,6 +693,51 @@ export const tests = [
         return menu.contains(document.elementFromPoint(left + width / 2, top + height / 2));
       })()`);
       assert.equal(covered, true);
+    },
+  },
+  {
+    name: 'menu: a trigger opening on secondary clicks: a click is its own; a right click opens it, a touch held, too (dragged on to an item)',
+    run: async (page) => {
+      await page.open('menu', 'light', {
+        state: [null, null, { $rest: true, openOn: 'secondaryClick' }],
+      });
+      const trigger = await page.rect('button');
+      /** @type {[number, number]} */
+      const point = [
+        trigger.x + trigger.width / 2,
+        trigger.y + trigger.height / 2,
+      ];
+
+      await page.click(point);
+      await sleep(400);
+      assert.equal(await menuCount(page), 0, 'clicked');
+      assert.match(await page.log(), /trigger clicked/u);
+
+      await rightClick(page, point);
+      await sleep(500);
+      assert.equal(await menuCount(page), 1, 'right click');
+      await page.key('Escape');
+      await sleep(500);
+
+      await withTouch(page, async (touch) => {
+        await touch('touchStart', ...point);
+        await sleep(300);
+        assert.equal(await menuCount(page), 0, 'not on touch down');
+        await sleep(500);
+        assert.equal(await menuCount(page), 1, 'held');
+
+        const item = await center(
+          page,
+          `document.querySelector(${JSON.stringify('[role=menu] > [role^=menuitem]:not([data-disabled])')})`,
+        );
+        await touch('touchMove', item[0], item[1] - 4);
+        await touch('touchMove', ...item);
+        await sleep(200);
+        await touch('touchEnd');
+        await sleep(500);
+      });
+      assert.equal(await menuCount(page), 0, 'chosen');
+      assert.match(await page.log(), /item clicked/u);
     },
   },
 ];

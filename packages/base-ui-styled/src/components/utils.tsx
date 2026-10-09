@@ -2,6 +2,9 @@ import { styled } from 'goober';
 import {
   forwardRef,
   FunctionComponent,
+  MouseEvent as ReactMouseEvent,
+  MouseEventHandler,
+  PointerEvent as ReactPointerEvent,
   PointerEventHandler,
   ReactNode,
   Ref,
@@ -244,6 +247,163 @@ export const Reserve: FunctionComponent<{
   </>
 );
 
+/** How long a touch is held for a secondary click (iOS: a long press). */
+const longPressDuration = 500;
+/** How far (px) a long press may move (farther, it's a drag or a scroll). */
+const longPressSlop = 10;
+
+export type SecondaryClickProps = {
+  /**
+   * A secondary click: a right click (or Control-click: the `contextmenu`
+   * event, whose menu it replaces), or a touch held for 500ms (iOS: a long
+   * press; a `contextmenu` pointer event of the touch), whose click then
+   * doesn't follow. Not while disabled.
+   */
+  onSecondaryClick?: MouseEventHandler<HTMLElement>;
+};
+
+type SecondaryClickHandlers = {
+  disabled?: boolean;
+  onClickCapture?: MouseEventHandler<HTMLElement>;
+  onContextMenu?: MouseEventHandler<HTMLElement>;
+  onLostPointerCapture?: PointerEventHandler<HTMLElement>;
+  onPointerCancel?: PointerEventHandler<HTMLElement>;
+  onPointerDown?: PointerEventHandler<HTMLElement>;
+  onPointerMove?: PointerEventHandler<HTMLElement>;
+  onPointerUp?: PointerEventHandler<HTMLElement>;
+};
+
+/**
+ * Props with `onSecondaryClick` (see `SecondaryClickProps`) turned into
+ * event handlers (chaining the props' own), for a button-like element.
+ */
+export const useSecondaryClick = <Props extends SecondaryClickProps>(
+  props: Props,
+): Omit<Props, 'onSecondaryClick'> => {
+  const pressRef = useRef<
+    | {
+        pointerId: number;
+        timer: ReturnType<typeof setTimeout>;
+        x: number;
+        y: number;
+      }
+    | undefined
+  >(undefined);
+  // Whether a touch is held (its `contextmenu`, see `onPointerDown`).
+  const heldRef = useRef(false);
+  // Whether the current press made one (its click, and Android's context
+  // menu event, don't follow).
+  const firedRef = useRef(false);
+
+  const { onSecondaryClick, ...rest } = props;
+  if (!onSecondaryClick) return rest;
+
+  const handlers = rest as SecondaryClickHandlers;
+  const cancel = () => {
+    clearTimeout(pressRef.current?.timer);
+    pressRef.current = undefined;
+  };
+
+  return {
+    ...rest,
+    onClickCapture: (event: ReactMouseEvent<HTMLElement>) => {
+      handlers.onClickCapture?.(event);
+      if (!firedRef.current) return;
+      firedRef.current = false;
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    onContextMenu: (event: ReactMouseEvent<HTMLElement>) => {
+      handlers.onContextMenu?.(event);
+      if (handlers.disabled) return;
+      event.preventDefault();
+      if (firedRef.current) return;
+      // A touch held (Android's own `contextmenu`: instead of the timer's).
+      if (pressRef.current || heldRef.current) {
+        cancel();
+        firedRef.current = true;
+      }
+      onSecondaryClick(event);
+    },
+    // Taken over (e.g. by a drag of its container's).
+    onLostPointerCapture: (event: ReactPointerEvent<HTMLElement>) => {
+      handlers.onLostPointerCapture?.(event);
+      if (event.pointerId === pressRef.current?.pointerId) cancel();
+    },
+    onPointerCancel: (event: ReactPointerEvent<HTMLElement>) => {
+      handlers.onPointerCancel?.(event);
+      cancel();
+    },
+    onPointerDown: (event: ReactPointerEvent<HTMLElement>) => {
+      handlers.onPointerDown?.(event);
+      firedRef.current = false;
+      cancel();
+      if (handlers.disabled || event.pointerType !== 'touch') return;
+      if (!event.isPrimary) return;
+      const element = event.currentTarget;
+      const { clientX, clientY, pointerId } = event;
+      pressRef.current = {
+        pointerId,
+        // Held: a `contextmenu` of the touch, as a right click's.
+        timer: setTimeout(() => {
+          pressRef.current = undefined;
+          heldRef.current = true;
+          try {
+            element.dispatchEvent(
+              new PointerEvent('contextmenu', {
+                bubbles: true,
+                cancelable: true,
+                clientX,
+                clientY,
+                isPrimary: true,
+                pointerId,
+                pointerType: 'touch',
+                view: element.ownerDocument.defaultView,
+              }),
+            );
+          } finally {
+            heldRef.current = false;
+          }
+        }, longPressDuration),
+        x: clientX,
+        y: clientY,
+      };
+    },
+    onPointerMove: (event: ReactPointerEvent<HTMLElement>) => {
+      handlers.onPointerMove?.(event);
+      const { current: press } = pressRef;
+      if (press?.pointerId !== event.pointerId) return;
+      const moved = Math.hypot(
+        event.clientX - press.x,
+        event.clientY - press.y,
+      );
+      if (moved > longPressSlop) cancel();
+    },
+    onPointerUp: (event: ReactPointerEvent<HTMLElement>) => {
+      handlers.onPointerUp?.(event);
+      cancel();
+    },
+  } as Omit<Props, 'onSecondaryClick'>;
+};
+
+/**
+ * `Component`, taking `onSecondaryClick` (see `useSecondaryClick`). (Typed
+ * loosely inside: Base UI's `ref` types, unions with their own callbacks,
+ * take no forwarded ref.)
+ */
+export const withSecondaryClick = <Props extends SecondaryClickProps>(
+  Component: FunctionComponent<Props>,
+): FunctionComponent<Props> => {
+  const Loose = Component as FunctionComponent<Record<string, unknown>>;
+
+  return forwardRef<unknown, Omit<Props, 'ref'>>((props, ref) => (
+    <Loose
+      ref={ref}
+      {...useSecondaryClick(props)}
+    />
+  )) as FunctionComponent<Props>;
+};
+
 /**
  * Returns an internal ref object for a `forwardRef` component's element that
  * is also exposed through the forwarded ref.
@@ -440,6 +600,19 @@ export const UpDownChevrons: FunctionComponent = () => (
 // How long the moving highlight stays between items (see `MovingHighlight`).
 const hideDelay = 100;
 
+/**
+ * On the root element while a touch drags over menus' items (hovering them,
+ * see `dragOverItems`): the moving highlight follows it as it does a
+ * hovering pointer.
+ */
+export const draggingAttribute = 'data-styled-dragging-items';
+
+const movingHighlight = css`
+  transition-duration: 80ms;
+  transition-property: translate, width, height, border-radius, opacity;
+  transition-timing-function: ease-out;
+`;
+
 // (&&: over its container's rules for its children, e.g. a menu's fading
 // items, whichever goober inserted first.)
 const Highlight = styled('span', forwardRef)`
@@ -454,14 +627,17 @@ const Highlight = styled('span', forwardRef)`
     transition: opacity 100ms;
   }
 
-  /* Moving (with a pointer hovering the items): quick, so it keeps up with
-     the pointer at normal speeds. Otherwise (touch, keys) it jumps. */
+  /* Moving (with a pointer hovering the items, or a touch dragging over
+     them): quick, so it keeps up at normal speeds. Otherwise (keys) it
+     jumps. */
   @media (hover: hover) {
     && {
-      transition-duration: 80ms;
-      transition-property: translate, width, height, border-radius, opacity;
-      transition-timing-function: ease-out;
+      ${movingHighlight}
     }
+  }
+
+  &&:where(:root[${draggingAttribute}] *) {
+    ${movingHighlight}
   }
 `;
 

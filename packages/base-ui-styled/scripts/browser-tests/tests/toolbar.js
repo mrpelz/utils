@@ -65,46 +65,7 @@ export const tests = [
     },
   },
   {
-    name: 'toolbar: a top bar’s title is centered in it, or at its start; 44px buttons',
-    run: async (page) => {
-      await page.open('toolbar-top', 'light', {
-        state: [{ $rest: true, largeTitle: false, subtitle: 'Subtitle' }],
-      });
-      const title = () =>
-        page.evaluate(`(() => {
-          const bar = ${page.section}.querySelector('[role=toolbar]').getBoundingClientRect();
-          const title = ${page.section}.querySelector('[data-toolbar-part=title]');
-          const text = title.firstElementChild.getBoundingClientRect();
-          const subtitle = getComputedStyle(title.querySelector('[data-toolbar-part=subtitle]'));
-          return {
-            center: Math.round(text.left + text.width / 2 - (bar.left + bar.width / 2)),
-            fonts: [getComputedStyle(title).fontSize, subtitle.fontSize, subtitle.lineHeight],
-            left: Math.round(text.left - bar.left),
-          };
-        })()`);
-
-      const { buttons, groups } = await geometry(page);
-      // Back and done of their own, a capsule of two between.
-      assert.deepEqual(
-        [...groups, ...buttons.filter(([, width]) => width === 44)].map(
-          (box) => box[2],
-        ),
-        [44, 44, 44],
-      );
-      const centered = await title();
-      // One button at the start, three at the end: centered all the same.
-      assert.ok(Math.abs(centered.center) <= 1, `off by ${centered.center}`);
-      assert.deepEqual(centered.fonts, ['15px', '12px', '14px']);
-
-      // At the start: next to the back button (16 + 44 + 10).
-      await page.setState(2, { alignStart: true });
-      await sleep(200);
-      const start = await title();
-      assert.equal(start.left, 70);
-    },
-  },
-  {
-    name: 'toolbar: pressed, a glass button (or a capsule of several) turns into a lens; buttons click',
+    name: 'toolbar: pressed, a glass button turns into a lens (a capsule of several as the tab bar groups); buttons click',
     run: async (page) => {
       /** @param {string} selector */
       const press = async (selector) => {
@@ -131,9 +92,9 @@ export const tests = [
       assert.equal(await press('[data-toolbar-part=button]'), lens);
       assert.match(await page.log(), /button clicked/u);
 
-      // A capsule of several: as much.
+      // A capsule of several: less (1.05, as the tab bar's groups).
       await page.open('toolbar-symbols');
-      assert.equal(await press('[role=group]'), lens);
+      assert.equal(await press('[role=group]'), '1.05');
     },
   },
   {
@@ -211,9 +172,48 @@ export const tests = [
     },
   },
   {
-    name: 'toolbar (top): the bar sticks; the large title scrolls away under it, the bar’s title fading in',
+    name: 'toolbar: a top bar’s title is centered in it, or at its start; 44px buttons',
     run: async (page) => {
-      await page.open('toolbar-top');
+      await page.open('header', 'light', {
+        state: [{ $rest: true, largeTitle: false, subtitle: 'Subtitle' }],
+      });
+      const title = () =>
+        page.evaluate(`(() => {
+          const bar = ${page.section}.querySelector('[role=toolbar]').getBoundingClientRect();
+          const title = ${page.section}.querySelector('[data-toolbar-part=title]');
+          const text = title.firstElementChild.getBoundingClientRect();
+          const subtitle = getComputedStyle(title.querySelector('[data-toolbar-part=subtitle]'));
+          return {
+            center: Math.round(text.left + text.width / 2 - (bar.left + bar.width / 2)),
+            fonts: [getComputedStyle(title).fontSize, subtitle.fontSize, subtitle.lineHeight],
+            left: Math.round(text.left - bar.left),
+          };
+        })()`);
+
+      const { buttons, groups } = await geometry(page);
+      // Back and done of their own, a capsule of two between.
+      assert.deepEqual(
+        [...groups, ...buttons.filter(([, width]) => width === 44)].map(
+          (box) => box[2],
+        ),
+        [44, 44, 44],
+      );
+      const centered = await title();
+      // One button at the start, three at the end: centered all the same.
+      assert.ok(Math.abs(centered.center) <= 1, `off by ${centered.center}`);
+      assert.deepEqual(centered.fonts, ['17px', '12px', '14px']);
+
+      // At the start: next to the back button (16 + 44 + 10).
+      await page.setState(2, { alignStart: true });
+      await sleep(200);
+      const start = await title();
+      assert.equal(start.left, 70);
+    },
+  },
+  {
+    name: 'header: the bar sticks; the large title scrolls away under it, the bar’s title fading in',
+    run: async (page) => {
+      await page.open('header');
       const scroller = `[...${page.section}.querySelectorAll('div')].find((element) => getComputedStyle(element).overflowY === 'auto')`;
       const state = () =>
         page.evaluate(`(() => {
@@ -246,6 +246,43 @@ export const tests = [
         ),
         1,
       );
+    },
+  },
+  {
+    name: 'toolbar: buttons are Buttons (tint; of their own, any variant), in a capsule, too',
+    run: async (page) => {
+      const tint = 'rgb(255, 0, 0)';
+      /** The first button's color, background, and height. */
+      const first = () =>
+        page.evaluate(`(() => {
+          const button = ${page.section}.querySelector('[data-toolbar-part=button]');
+          const style = getComputedStyle(button);
+          return [style.color, style.backgroundColor, button.getBoundingClientRect().height];
+        })()`);
+
+      await page.open('toolbar-symbols', 'light', {
+        state: [null, null, null, { $rest: true, tint }],
+      });
+      const [grouped] = await first();
+      assert.equal(grouped, tint, 'in a capsule');
+
+      // A classic variant, in a capsule: its own fill.
+      await page.setState(3, { tint, variant: 'bordered-prominent' });
+      await sleep(100);
+      const [, filled] = await first();
+      assert.equal(filled, tint, 'filled in a capsule');
+
+      await page.open('toolbar', 'light', {
+        state: [
+          null,
+          null,
+          null,
+          { $rest: true, size: 'small', tint, variant: 'bordered-prominent' },
+        ],
+      });
+      const [, background, height] = await first();
+      assert.equal(background, tint, 'of its own');
+      assert.equal(height, 28, 'small');
     },
   },
 ];

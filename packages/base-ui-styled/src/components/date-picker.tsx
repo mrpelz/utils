@@ -10,6 +10,7 @@ import {
   MouseEvent,
   PointerEvent,
   ReactNode,
+  RefObject,
   useEffect,
   useId,
   useLayoutEffect,
@@ -215,6 +216,29 @@ export type DatePickerProps = CalendarProps & {
    * expandable list row: `Calendar`, `TimeRoll`).
    */
   popover?: boolean;
+  /**
+   * How the compact style's popover aligns to its buttons (default: their
+   * end in a list row, which they end, otherwise centered).
+   */
+  popoverAlign?: PopoverAlign;
+};
+
+export type PopoverAlign = 'center' | 'end' | 'start';
+
+/**
+ * A popover's alignment to its buttons (`ref`): `align`, or by default
+ * their end in a list row (as its value's), otherwise centered.
+ */
+const usePopoverAlign = (
+  ref: RefObject<HTMLElement | null>,
+  align: PopoverAlign | undefined,
+): PopoverAlign => {
+  const [inRow, setInRow] = useState(false);
+  useLayoutEffect(() => {
+    setInRow(Boolean(ref.current?.closest('[data-list-part=item]')));
+  }, [ref]);
+
+  return align ?? (inRow ? 'end' : 'center');
 };
 
 // Dates (local time).
@@ -1812,14 +1836,17 @@ const defaultFooter = (calendar: CalendarFooter) => (
 /** The compact style's time: its button, the roll in a popover. */
 const TimePopover: FunctionComponent<
   TimeRollProps & {
+    align?: PopoverAlign;
     disabled: boolean;
     label: string;
     onOpenChange: (open: boolean) => void;
     open: boolean;
     shape?: DatePickerProps['buttonShape'];
   }
-> = ({ disabled, label, onOpenChange, open, shape, ...props }) => {
+> = ({ align, disabled, label, onOpenChange, open, shape, ...props }) => {
   const popupRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const popoverAlign = usePopoverAlign(triggerRef, align);
 
   return (
     <BasePopover.Root
@@ -1827,6 +1854,7 @@ const TimePopover: FunctionComponent<
       onOpenChange={onOpenChange}
     >
       <BasePopover.Trigger
+        ref={triggerRef}
         aria-label="Time"
         disabled={disabled}
         render={<CollapsedButton shape={shape} />}
@@ -1835,6 +1863,7 @@ const TimePopover: FunctionComponent<
       </BasePopover.Trigger>
       <BasePopover.Portal>
         <BasePopover.Positioner
+          align={popoverAlign}
           collisionPadding={8}
           sideOffset={8}
         >
@@ -1875,6 +1904,7 @@ const dateLabelOf = (
  * popover for both).
  */
 const CalendarPopover: FunctionComponent<{
+  align?: PopoverAlign;
   children: (
     initialRoll: 'time' | undefined,
     onTimeShownChange: (shown: boolean) => void,
@@ -1886,6 +1916,7 @@ const CalendarPopover: FunctionComponent<{
   shape?: DatePickerProps['buttonShape'];
   timeLabel?: string;
 }> = ({
+  align,
   children,
   dateLabel,
   disabled,
@@ -1897,6 +1928,7 @@ const CalendarPopover: FunctionComponent<{
   const dateTriggerId = useId();
   const timeTriggerId = useId();
   const collapsedRef = useRef<HTMLDivElement>(null);
+  const popoverAlign = usePopoverAlign(collapsedRef, align);
   const hasTime = timeLabel !== undefined;
   // The time's button is the open one while the time's roll shows (however
   // it was opened, or shown), the date's otherwise.
@@ -1944,6 +1976,7 @@ const CalendarPopover: FunctionComponent<{
         ) : null}
         <BasePopover.Portal>
           <BasePopover.Positioner
+            align={popoverAlign}
             anchor={collapsedRef}
             collisionPadding={8}
             sideOffset={8}
@@ -2068,6 +2101,7 @@ const DatePicker: FunctionComponent<DatePickerProps> = (props) => {
     return (
       <Collapsed>
         <TimePopover
+          align={props.popoverAlign}
           disabled={disabled}
           hourCycle={hourCycle}
           label={timeLabel}
@@ -2084,6 +2118,7 @@ const DatePicker: FunctionComponent<DatePickerProps> = (props) => {
 
   return (
     <CalendarPopover
+      align={props.popoverAlign}
       dateLabel={dateLabel}
       disabled={disabled}
       open={open}

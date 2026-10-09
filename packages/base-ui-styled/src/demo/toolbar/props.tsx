@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
+import { propOptionsRoot as propOptionsButtonRoot } from '../button/props.js';
 import { AddLog } from '../utils/log.js';
 import { commonPropOptions, MappedProp } from '../utils/main.js';
 
@@ -33,22 +34,45 @@ export const propOptionsGroup = {
   disabled: [undefined, false, true] as const,
 };
 
-// A button of its own: also tinted (a group's are by their group).
+// A button of its own: a `Button` (its demo's options), also `prominent`
+// (tinted glass); in a group, what applies there.
 const propOptionsOwnButton = {
+  ...propOptionsButtonRoot,
   prominent: [undefined, false, true] as const,
 };
 
-/** A button's options; of its own (not in a group), also `prominent`. */
+// (Not `size`, `context`, nor glass variants: the capsule's.)
+const propOptionsGroupButton = {
+  disabled: propOptionsButtonRoot.disabled,
+  focusableWhenDisabled: propOptionsButtonRoot.focusableWhenDisabled,
+  variant: [
+    undefined,
+    'borderless',
+    'bordered',
+    'bordered-secondary',
+    'bordered-prominent',
+  ] as const,
+  shape: [undefined, 'capsule', 'circle'] as const,
+  destructive: propOptionsButtonRoot.destructive,
+  fill: propOptionsButtonRoot.fill,
+  tint: propOptionsButtonRoot.tint,
+};
+
+/** A button's options; of its own (not in a group), a `Button`'s. */
 export const getPropOptionsButton = (addLog: AddLog, own: boolean) => ({
   ...commonPropOptions,
-  ...(own && propOptionsOwnButton),
-  disabled: [undefined, false, true] as const,
-  focusableWhenDisabled: [undefined, false, true] as const,
-  destructive: [undefined, false, true] as const,
+  ...(own ? propOptionsOwnButton : propOptionsGroupButton),
   cursor: cursorOptions,
   onClick: [
     new MappedProp(() => addLog('button clicked'), '[log click]'),
     undefined,
+  ] as const,
+  onSecondaryClick: [
+    undefined,
+    new MappedProp(
+      () => addLog('button secondary click'),
+      '[log secondary click]',
+    ),
   ] as const,
 });
 

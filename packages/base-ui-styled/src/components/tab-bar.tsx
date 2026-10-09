@@ -26,8 +26,10 @@ import {
   edgeScrollDelta,
   fontWeight,
   frameElapsed,
+  SecondaryClickProps,
   useForwardedRef,
   usePointerDrag,
+  useSecondaryClick,
 } from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Tab Bar - iPhone”, BG Context Dim/Bright),
@@ -2048,26 +2050,27 @@ const Indicator = styled(BaseTabs.Indicator, forwardRef)`
   }
 `;
 
-export type TabBarTabProps = BaseTabs.Tab.Props & {
-  /**
-   * What the tab shows while its bar is collapsed. Never nothing: a tab with
-   * only a label shows its label, one with only a symbol its symbol.
-   * @default the group's `collapsedContent`, or the list's
-   */
-  collapsedContent?: CollapsedContent;
-  cursor?: Properties['cursor'];
-  /**
-   * `circle`: sized like a symbol-only tab; `capsule`: like a stacked tab.
-   * @default the group's shape, or by the tab's content
-   */
-  shape?: Shape;
-  /**
-   * Remains while the bar is collapsed, in its group (if the group does);
-   * tabs not marked collapse away. Several remaining tabs show the
-   * selection on the active one.
-   */
-  visibleWhenCollapsed?: boolean;
-};
+export type TabBarTabProps = BaseTabs.Tab.Props &
+  SecondaryClickProps & {
+    /**
+     * What the tab shows while its bar is collapsed. Never nothing: a tab with
+     * only a label shows its label, one with only a symbol its symbol.
+     * @default the group's `collapsedContent`, or the list's
+     */
+    collapsedContent?: CollapsedContent;
+    cursor?: Properties['cursor'];
+    /**
+     * `circle`: sized like a symbol-only tab; `capsule`: like a stacked tab.
+     * @default the group's shape, or by the tab's content
+     */
+    shape?: Shape;
+    /**
+     * Remains while the bar is collapsed, in its group (if the group does);
+     * tabs not marked collapse away. Several remaining tabs show the
+     * selection on the active one.
+     */
+    visibleWhenCollapsed?: boolean;
+  };
 
 // eslint-disable-next-line prettier/prettier
 const StyledTab = styled<typeof BaseTabs.Tab, Omit<TabBarTabProps, 'visibleWhenCollapsed'> & { collapsedVisibility?: CollapsedVisibility }>(BaseTabs.Tab, forwardRef)`
@@ -2210,34 +2213,34 @@ const StyledTab = styled<typeof BaseTabs.Tab, Omit<TabBarTabProps, 'visibleWhenC
   }
 `;
 
-const Tab = forwardRef<HTMLButtonElement, TabBarTabProps>(
-  ({ collapsedContent, shape, visibleWhenCollapsed, ...props }, ref) => {
-    const group = useContext(GroupContext);
-    const { markTab } = group;
-    const { collapsed } = useContext(ListContext);
+const Tab = forwardRef<HTMLButtonElement, TabBarTabProps>((tabProps, ref) => {
+  const { collapsedContent, shape, visibleWhenCollapsed, ...props } =
+    useSecondaryClick(tabProps);
+  const group = useContext(GroupContext);
+  const { markTab } = group;
+  const { collapsed } = useContext(ListContext);
 
-    useLayoutEffect(
-      () => (visibleWhenCollapsed ? markTab?.() : undefined),
-      [markTab, visibleWhenCollapsed],
-    );
+  useLayoutEffect(
+    () => (visibleWhenCollapsed ? markTab?.() : undefined),
+    [markTab, visibleWhenCollapsed],
+  );
 
-    // Only while collapsed, in a remaining group.
-    let collapsedVisibility: CollapsedVisibility | undefined;
-    if (collapsed && !group.away) {
-      collapsedVisibility = visibleWhenCollapsed ? 'shown' : 'away';
-    }
+  // Only while collapsed, in a remaining group.
+  let collapsedVisibility: CollapsedVisibility | undefined;
+  if (collapsed && !group.away) {
+    collapsedVisibility = visibleWhenCollapsed ? 'shown' : 'away';
+  }
 
-    return (
-      <StyledTab
-        ref={ref}
-        {...props}
-        collapsedContent={collapsed ? collapsedContent : undefined}
-        collapsedVisibility={collapsedVisibility}
-        shape={shape ?? group.shape}
-      />
-    );
-  },
-);
+  return (
+    <StyledTab
+      ref={ref}
+      {...props}
+      collapsedContent={collapsed ? collapsedContent : undefined}
+      collapsedVisibility={collapsedVisibility}
+      shape={shape ?? group.shape}
+    />
+  );
+});
 
 // A tab's content fading with its group's glass and the tab (collapsing
 // away): inside its blended parts (the blending stays with the glass), not

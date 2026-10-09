@@ -226,6 +226,7 @@ const propOptions = (mode: DatePickerMode) => ({
   pickerStyle: [undefined, 'compact', 'inline'] as const,
   buttonShape: [undefined, 'capsule', 'roundedRectangle'] as const,
   popover: [undefined, true, false] as const,
+  popoverAlign: [undefined, 'start', 'center', 'end'] as const,
   defaultOpen: [undefined, null, 'date', 'time'] as const,
   disabled: [undefined, false, true] as const,
   locale: [undefined, 'en-US', 'de-DE', 'fr-FR', 'ar-EG', 'ko-KR'] as const,
