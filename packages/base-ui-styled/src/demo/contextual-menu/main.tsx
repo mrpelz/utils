@@ -191,6 +191,7 @@ export const ContextualMenuDemo: FunctionComponent = () => {
   return (
     <Component
       center
+      baseUiId="menu"
       id={id}
       log={log}
       title="Contextual Menu"

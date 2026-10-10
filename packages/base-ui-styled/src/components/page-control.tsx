@@ -3,6 +3,7 @@ import {
   forwardRef,
   KeyboardEvent,
   MouseEvent,
+  PointerEvent,
   useContext,
   useState,
 } from 'react';
@@ -13,6 +14,7 @@ import {
   glassContext,
   InheritedGlassContext,
 } from './glass.js';
+import { tooltipSurface } from './tooltip.js';
 
 // Source: Apple iOS 26 Figma (“Toolbars”: “_Page control”, Dots 1 to 8+,
 // BG Context Dim/Bright): a glass capsule, 48px high, 24px from its ends,
@@ -24,10 +26,17 @@ import {
 // current dot goes to the previous or next page; an adjustable control
 // (arrow keys, Home and End).
 //
+// Its plain variant: Figma “Page Controls” (UIKit's, over content): a
+// capsule 24px high, 12px from its ends, the current page's dot in the
+// label color, the others in it at 30%, without glass.
+//
 // Deviations:
 // - The window of 8 dots moves when the current page would reach a
 //   shrunken dot (Figma: the window's states only), the dots resizing
 //   (200ms).
+// - Optionally, the current page (“3 of 8”) in a tooltip (see `Tooltip`)
+//   8px above it while it's hovered, pressed or focused by keyboard
+//   (`momentaryTooltip`).
 
 /** Pages shown as full dots at most (more: a window of `windowSize`). */
 const fullDots = 7;
@@ -48,10 +57,25 @@ export type PageControlProps = Omit<
   defaultValue?: number;
   /** Disables changing the page. */
   disabled?: boolean;
+  /**
+   * The current page as text (its accessible value, and its tooltip's).
+   * @default '3 of 8'
+   */
+  format?: (page: number, count: number) => string;
+  /**
+   * The current page (see `format`) in a tooltip above it while it's
+   * hovered, pressed or focused by keyboard.
+   */
+  momentaryTooltip?: boolean;
   /** Called with the page to go to (from 0). */
   onValueChange?: (page: number) => void;
   /** The current page (controlled; from 0). */
   value?: number;
+  /**
+   * On glass (e.g. in a `Toolbar`), or plain (over content).
+   * @default 'glass'
+   */
+  variant?: 'glass' | 'plain';
 };
 
 const StyledRoot = styled<'div', { context?: GlassContext }>('div', forwardRef)`
@@ -75,7 +99,61 @@ const StyledRoot = styled<'div', { context?: GlassContext }>('div', forwardRef)`
   &[aria-disabled='true'] {
     pointer-events: none;
   }
+
+  &[data-variant='plain'] {
+    --styled-glass-content: var(--color-ios-label);
+    --styled-glass-content-disabled: color-mix(
+      in srgb,
+      var(--color-ios-label) 30%,
+      transparent
+    );
+    --styled-glass-content-blend: normal;
+
+    min-height: 24px;
+    padding: 0 12px;
+  }
+
+  /* Its momentary tooltip (see Tooltip): while hovered (a pointer that
+     can), pressed or focused by keyboard. */
+  @media (hover: hover) {
+    &:hover > [data-page-control-part='tooltip'] {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  &[data-pressed] > [data-page-control-part='tooltip'] {
+    opacity: 1;
+    scale: 1;
+  }
+
+  &:focus-visible {
+    & > [data-page-control-part='tooltip'] {
+      opacity: 1;
+      scale: 1;
+    }
+  }
 `;
+
+const Tooltip = styled('span')`
+  ${tooltipSurface}
+
+  position: absolute;
+  z-index: 1;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  pointer-events: none;
+  scale: 0.85;
+  transition-duration: 150ms;
+  transition-property: opacity, scale;
+  translate: -50% 0;
+  white-space: nowrap;
+`;
+
+const defaultFormat = (page: number, count: number) =>
+  `${String(page + 1)} of ${String(count)}`;
 
 // A dot's slot (8px, or 6px for the outermost shrunken one) and its dot,
 // above the glass, blended with it as the glass' content.
@@ -150,7 +228,7 @@ const dotSize = (index: number, start: number, count: number) => {
 
 /**
  * A page control (UIKit `UIPageControl`): dots of pages, the current one
- * highlighted, on glass (e.g. in a `Toolbar`).
+ * highlighted, on glass (e.g. in a `Toolbar`), or plain.
  */
 export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
   (
@@ -160,16 +238,23 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       count,
       defaultValue = 0,
       disabled = false,
+      format = defaultFormat,
+      momentaryTooltip = false,
       onClick,
       onKeyDown,
+      onPointerCancel,
+      onPointerDown,
+      onPointerUp,
       onValueChange,
       value: valueProp,
+      variant = 'glass',
       ...props
     },
     ref,
   ) => {
     const inherited = useContext(InheritedGlassContext);
     const [state, setState] = useState(defaultValue);
+    const [pressed, setPressed] = useState(false);
     const pages = Math.max(0, Math.floor(count));
     const value = Math.min(Math.max(valueProp ?? state, 0), pages - 1);
     // The window's start, kept between renders (it only moves as needed).
@@ -212,6 +297,22 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       go(page);
     };
 
+    // Pressed (also by touch, which doesn't hover): its tooltip shown.
+    const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+      onPointerDown?.(event);
+      setPressed(true);
+    };
+    const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
+      onPointerUp?.(event);
+      setPressed(false);
+    };
+    const handlePointerCancel = (event: PointerEvent<HTMLDivElement>) => {
+      onPointerCancel?.(event);
+      setPressed(false);
+    };
+
+    const valueText = format(value, pages);
+
     const shown = Array.from(
       { length: Math.min(pages, pages > fullDots ? windowSize : pages) },
       (_, index) => nextStart + index,
@@ -225,15 +326,20 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
         aria-valuemax={pages}
         aria-valuemin={1}
         aria-valuenow={value + 1}
-        aria-valuetext={`${String(value + 1)} of ${String(pages)}`}
+        aria-valuetext={valueText}
         context={context ?? inherited}
+        data-pressed={pressed ? '' : undefined}
+        data-variant={variant}
         role="slider"
         tabIndex={disabled ? -1 : 0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
+        onPointerCancel={handlePointerCancel}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
         {...props}
       >
-        <GlassBackground kind="button" />
+        {variant === 'glass' ? <GlassBackground kind="button" /> : null}
         {shown.map((page) => (
           <Slot
             key={page}
@@ -244,6 +350,14 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
             <span />
           </Slot>
         ))}
+        {momentaryTooltip ? (
+          <Tooltip
+            aria-hidden="true"
+            data-page-control-part="tooltip"
+          >
+            {valueText}
+          </Tooltip>
+        ) : null}
       </StyledRoot>
     );
   },

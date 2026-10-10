@@ -1,4 +1,3 @@
-import { Popover as BasePopover } from '@base-ui/react/popover';
 import { styled } from 'goober';
 import {
   CSSProperties,
@@ -10,7 +9,6 @@ import {
   MouseEvent,
   PointerEvent,
   ReactNode,
-  RefObject,
   useEffect,
   useId,
   useLayoutEffect,
@@ -20,8 +18,7 @@ import {
 } from 'react';
 
 import { Button, ButtonRootProps } from './button.js';
-import { glassMedium } from './glass.js';
-import { popupTransition } from './menu.js';
+import { Popover, type PopoverAlign } from './popover.js';
 import { Roll, RollValue } from './roll.js';
 import { textStyle } from './typography.js';
 import { css, fontWeight } from './utils.js';
@@ -52,7 +49,7 @@ import { css, fontWeight } from './utils.js';
 // Deviations:
 // - The rolls take the days' place (iOS: the month and year roll does; the
 //   time's opens in a popover).
-// - The popover is the menus' glass (`glassMedium`, see `Menu`; Figma: the
+// - The popover is `Popover`'s (the menus' glass, see there; Figma: the
 //   “Regular” material, blur 50px), its corners 13px, as Figma's.
 // - The calendar's width (Figma: 370px) is a minimum: 7 × 44px days, 16px
 //   from the sides.
@@ -221,24 +218,6 @@ export type DatePickerProps = CalendarProps & {
    * end in a list row, which they end, otherwise centered).
    */
   popoverAlign?: PopoverAlign;
-};
-
-export type PopoverAlign = 'center' | 'end' | 'start';
-
-/**
- * A popover's alignment to its buttons (`ref`): `align`, or by default
- * their end in a list row (as its value's), otherwise centered.
- */
-const usePopoverAlign = (
-  ref: RefObject<HTMLElement | null>,
-  align: PopoverAlign | undefined,
-): PopoverAlign => {
-  const [inRow, setInRow] = useState(false);
-  useLayoutEffect(() => {
-    setInRow(Boolean(ref.current?.closest('[data-list-part=item]')));
-  }, [ref]);
-
-  return align ?? (inRow ? 'end' : 'center');
 };
 
 // Dates (local time).
@@ -1747,14 +1726,16 @@ const Collapsed = styled('div', forwardRef)`
   vertical-align: middle;
 `;
 
-// Figma “Style=Compact”: the inline style on glass, its corners 13px.
-const Popup = styled(BasePopover.Popup, forwardRef)`
-  ${glassMedium()}
-  ${popupTransition}
-
-  overflow: hidden;
-  border-radius: 13px;
-  outline: none;
+// Figma “Style=Compact”: the inline style in a popover, its content
+// clipped to its corners (not the popup: `overflow: hidden` would make it a
+// scroll container, its material reaching beyond it, scrolled sideways as a
+// day takes focus; and clip its glow).
+// eslint-disable-next-line prettier/prettier
+const Popup = styled<typeof Popover.Popup, Parameters<typeof Popover.Popup>[0]>(Popover.Popup, forwardRef)`
+  & > div {
+    overflow: clip;
+    border-radius: inherit;
+  }
 `;
 
 // The time's popover: the roll, 8px in.
@@ -1845,28 +1826,21 @@ const TimePopover: FunctionComponent<
   }
 > = ({ align, disabled, label, onOpenChange, open, shape, ...props }) => {
   const popupRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const popoverAlign = usePopoverAlign(triggerRef, align);
 
   return (
-    <BasePopover.Root
+    <Popover.Root
       open={open}
       onOpenChange={onOpenChange}
     >
-      <BasePopover.Trigger
-        ref={triggerRef}
+      <Popover.Trigger
         aria-label="Time"
         disabled={disabled}
         render={<CollapsedButton shape={shape} />}
       >
         {label}
-      </BasePopover.Trigger>
-      <BasePopover.Portal>
-        <BasePopover.Positioner
-          align={popoverAlign}
-          collisionPadding={8}
-          sideOffset={8}
-        >
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Positioner align={align}>
           <Popup
             ref={popupRef}
             aria-label="Time"
@@ -1878,9 +1852,9 @@ const TimePopover: FunctionComponent<
               <TimeRoll {...props} />
             </TimePopup>
           </Popup>
-        </BasePopover.Positioner>
-      </BasePopover.Portal>
-    </BasePopover.Root>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
   );
 };
 
@@ -1928,7 +1902,6 @@ const CalendarPopover: FunctionComponent<{
   const dateTriggerId = useId();
   const timeTriggerId = useId();
   const collapsedRef = useRef<HTMLDivElement>(null);
-  const popoverAlign = usePopoverAlign(collapsedRef, align);
   const hasTime = timeLabel !== undefined;
   // The time's button is the open one while the time's roll shows (however
   // it was opened, or shown), the date's otherwise.
@@ -1942,7 +1915,7 @@ const CalendarPopover: FunctionComponent<{
   // Positioned at both buttons together, whichever opened it.
   return (
     <Collapsed ref={collapsedRef}>
-      <BasePopover.Root
+      <Popover.Root
         open={open === 'date' || (hasTime && open === 'time')}
         triggerId={hasTime && timeShown ? timeTriggerId : dateTriggerId}
         onOpenChange={(next: boolean, { event }) => {
@@ -1955,16 +1928,16 @@ const CalendarPopover: FunctionComponent<{
           onOpenChange(next ? picker : null);
         }}
       >
-        <BasePopover.Trigger
+        <Popover.Trigger
           data-date-picker-trigger="date"
           disabled={disabled}
           id={dateTriggerId}
           render={<CollapsedButton shape={shape} />}
         >
           {dateLabel}
-        </BasePopover.Trigger>
+        </Popover.Trigger>
         {hasTime ? (
-          <BasePopover.Trigger
+          <Popover.Trigger
             aria-label="Time"
             data-date-picker-trigger="time"
             disabled={disabled}
@@ -1972,23 +1945,21 @@ const CalendarPopover: FunctionComponent<{
             render={<CollapsedButton shape={shape} />}
           >
             {timeLabel}
-          </BasePopover.Trigger>
+          </Popover.Trigger>
         ) : null}
-        <BasePopover.Portal>
-          <BasePopover.Positioner
-            align={popoverAlign}
+        <Popover.Portal>
+          <Popover.Positioner
+            align={align}
             anchor={collapsedRef}
-            collisionPadding={8}
-            sideOffset={8}
           >
             <Popup aria-label={hasTime ? 'Date and time' : 'Date'}>
               <Fragment key={open ?? 'closed'}>
                 {children(open === 'time' ? 'time' : undefined, setTimeShown)}
               </Fragment>
             </Popup>
-          </BasePopover.Positioner>
-        </BasePopover.Portal>
-      </BasePopover.Root>
+          </Popover.Positioner>
+        </Popover.Portal>
+      </Popover.Root>
     </Collapsed>
   );
 };

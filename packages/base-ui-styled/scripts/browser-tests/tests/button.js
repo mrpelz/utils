@@ -156,4 +156,18 @@ export const tests = [
       assert.equal(await count('clicked'), 1);
     },
   },
+  {
+    name: 'button: its text color over its variant’s (a prominent one’s tint)',
+    run: async (page) => {
+      for (const variant of ['bordered-prominent', 'glass-prominent']) {
+        await page.open('button', 'light', {
+          state: [null, { $rest: true, textColor: '#000', variant }],
+        });
+        const color = await page.evaluate(
+          `getComputedStyle(${page.section}.querySelector('button [data-button-part=label]')).color`,
+        );
+        assert.equal(color, 'rgb(0, 0, 0)', variant);
+      }
+    },
+  },
 ];

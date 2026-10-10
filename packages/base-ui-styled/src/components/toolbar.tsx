@@ -1,7 +1,7 @@
 import { Toolbar as BaseToolbar } from '@base-ui/react/toolbar';
 import { useRender } from '@base-ui/react/use-render';
 import { styled } from 'goober';
-import { createContext, forwardRef, useContext } from 'react';
+import { createContext, CSSProperties, forwardRef, useContext } from 'react';
 
 import { Button, ButtonRootProps } from './button.js';
 import {
@@ -47,13 +47,13 @@ import { css, fontWeight } from './utils.js';
 // - With a subtitle, the title stays in 17px (Figma: 15px), as iOS 26's
 //   (user: not smaller than the rows' text).
 
-type Placement = 'bottom' | 'top';
+type Placement = 'block-end' | 'block-start';
 
 /** Marks a toolbar's internal parts. */
 const part = 'data-toolbar-part';
 
 const placementVars: Record<Placement, string> = {
-  bottom: css`
+  'block-end': css`
     --styled-toolbar-group-height: 48px;
     --styled-toolbar-group-padding: 6px;
     --styled-toolbar-gap: 12px;
@@ -61,7 +61,7 @@ const placementVars: Record<Placement, string> = {
 
     padding: 4px 16px 36px;
   `,
-  top: css`
+  'block-start': css`
     --styled-toolbar-group-height: 44px;
     --styled-toolbar-group-padding: 4px;
     --styled-toolbar-gap: 10px;
@@ -80,7 +80,7 @@ export type ToolbarRootProps = Omit<BaseToolbar.Root.Props, 'ref'> & {
   context?: GlassContext;
   /**
    * Where the bar is: at the bottom, or at the top (a navigation bar).
-   * @default 'bottom'
+   * @default 'block-end'
    */
   placement?: Placement;
 };
@@ -94,7 +94,7 @@ const StyledRoot = styled<typeof BaseToolbar.Root, BaseToolbar.Root.Props & Omit
   align-items: center;
   gap: var(--styled-toolbar-gap);
 
-  ${({ placement = 'bottom' }) => placementVars[placement]}
+  ${({ placement = 'block-end' }) => placementVars[placement]}
 `;
 
 /** The bar (its glass context also for glass inside it). */
@@ -151,10 +151,24 @@ const Spacer = styled('div', forwardRef)`
 export type ToolbarGroupProps = Omit<BaseToolbar.Group.Props, 'ref'> & {
   /** A tinted capsule (Figma “Text - Primary”, “Symbol Primary”). */
   prominent?: boolean;
+  /**
+   * Its content's color (e.g. for a light `tint`; unblended).
+   * @default the glass' (tinted: white)
+   */
+  textColor?: string;
+  /**
+   * The tinted capsule's color (as a glass `Button`'s; given, the capsule
+   * is tinted).
+   * @default the app's tint
+   */
+  tint?: string;
 };
 
 // eslint-disable-next-line prettier/prettier
-const StyledGroup = styled<typeof BaseToolbar.Group, BaseToolbar.Group.Props & { prominent?: boolean }>(BaseToolbar.Group, forwardRef)`
+const StyledGroup = styled<typeof BaseToolbar.Group, BaseToolbar.Group.Props & { context?: GlassContext; prominent?: boolean; tinted?: boolean }>(BaseToolbar.Group, forwardRef)`
+  /* Its own tint: the glass context's variables made of it (their tint
+     resolved here, not at the toolbar's). */
+  ${({ context, tinted }) => (tinted ? glassContext(context) : '')}
   --styled-glass-outset: 0px;
   --styled-toolbar-content: var(--styled-glass-content);
   --styled-toolbar-content-blend: var(--styled-glass-content-blend);
@@ -200,19 +214,36 @@ const GroupContext = createContext(false);
  * button is a glass `Button` of its own (see `ToolbarButton`).
  */
 const Group = forwardRef<HTMLDivElement, ToolbarGroupProps>(
-  ({ children, prominent = false, ...props }, ref) => (
-    <StyledGroup
-      ref={ref}
-      prominent={prominent}
-      {...props}
-    >
-      <GlassBackground
-        kind="button"
-        tinted={prominent}
-      />
-      <GroupContext.Provider value>{children}</GroupContext.Provider>
-    </StyledGroup>
-  ),
+  ({ children, prominent, style, textColor, tint, ...props }, ref) => {
+    const tinted = prominent ?? tint !== undefined;
+    const context = useContext(InheritedGlassContext);
+
+    return (
+      <StyledGroup
+        ref={ref}
+        context={context}
+        prominent={tinted}
+        tinted={tint !== undefined}
+        style={
+          {
+            ...(style as CSSProperties | undefined),
+            ...(tint !== undefined && { '--styled-glass-tint': tint }),
+            ...(textColor !== undefined && {
+              '--styled-toolbar-content': textColor,
+              '--styled-toolbar-content-blend': 'normal',
+            }),
+          } as CSSProperties
+        }
+        {...props}
+      >
+        <GlassBackground
+          kind="button"
+          tinted={tinted}
+        />
+        <GroupContext.Provider value>{children}</GroupContext.Provider>
+      </StyledGroup>
+    );
+  },
 );
 
 const isClassic = (variant: ButtonRootProps['variant']) =>
@@ -349,6 +380,8 @@ const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
     ref,
   ) => {
     const inGroup = useContext(GroupContext);
+    // (Alone: the bar's glass context, unless its own.)
+    const inherited = useContext(InheritedGlassContext);
     const shared = { cursor, destructive, onSecondaryClick, tint };
 
     return (
@@ -368,7 +401,7 @@ const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
           ) : (
             <StyledGlassButton
               {...shared}
-              context={context}
+              context={context ?? inherited}
               fill={fill}
               shape={shape}
               size={size}
@@ -413,6 +446,8 @@ const Title = styled<typeof TitlePart, ToolbarTitleProps>(TitlePart, forwardRef)
   align-items: center;
   color: var(--color-ios-label);
   ${textStyle('body', { emphasized: true })}
+  /* Centered without sides, too (they take the free space otherwise). */
+  margin-inline: auto;
   text-align: center;
   white-space: nowrap;
 

@@ -40,8 +40,12 @@ export const propOptionsLegend = {
 
 export const getPropOptionsCheckboxGroup = (addLog: AddLog) => ({
   ...commonPropOptions,
-  defaultValue: [['messages'] as string[], undefined, [] as string[]],
-  value: [undefined, notificationValues] as const,
+  defaultValue: [
+    new MappedProp(['messages'], '[messages]'),
+    undefined,
+    new MappedProp<string[]>([], '[none]'),
+  ] as const,
+  value: [undefined, new MappedProp(notificationValues, '[all]')] as const,
   disabled: [undefined, false, true] as const,
   onValueChange: [
     new MappedProp(

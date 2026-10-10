@@ -110,7 +110,7 @@ export const useCreateStateUrl = (
   useMemo(() => {
     const url = new URL(location.href);
 
-    const fragment = createFragment({ id, raw: true, state: states });
+    const fragment = createFragment({ id, state: states });
     if (!fragment) return undefined;
 
     url.hash = fragment;

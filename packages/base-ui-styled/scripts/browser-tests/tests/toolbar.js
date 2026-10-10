@@ -3,7 +3,7 @@
 
 import assert from 'node:assert/strict';
 
-import { sleep } from '../lib.js';
+import { sleep, withTouch } from '../lib.js';
 
 /** @typedef {import('../lib.js').Page} Page */
 
@@ -115,6 +115,45 @@ export const tests = [
     },
   },
   {
+    name: 'toolbar: a group’s tint tints its capsule (its content white)',
+    run: async (page) => {
+      await page.open('toolbar-symbols');
+      /** The group's tint layers (if tinted), its tint, its content color. */
+      const group = () =>
+        page.evaluate(`(() => {
+          const group = ${page.section}.querySelector('[role=toolbar] [role=group]');
+          const tinted = [...group.children].some((layer) => layer.childElementCount === 4);
+          const style = getComputedStyle(group);
+          return [tinted, style.getPropertyValue('--styled-glass-tint').trim(), getComputedStyle(group.querySelector('button')).color];
+        })()`);
+      const [plain] = await group();
+      assert.equal(plain, false);
+      await page.setState(2, { tint: 'var(--color-ios-system-orange)' });
+      await sleep(200);
+      assert.deepEqual(await group(), [
+        true,
+        // (System orange, computed.)
+        'rgb(255 141 40)',
+        'rgb(255, 255, 255)',
+      ]);
+      // Its glass' rim in its tint too, not the toolbar's (blue).
+      const rim = String(
+        await page.evaluate(
+          `getComputedStyle(${page.section}.querySelector('[role=toolbar] [role=group]')).getPropertyValue('--styled-glass-shadow-tinted')`,
+        ),
+      );
+      const blue = /0,? 145,? 255/u;
+      assert.equal(blue.test(rim), false, rim);
+      assert.match(rim, /255,? 141,? 40/u);
+
+      // Its content's color over the tint.
+      await page.setState(2, { textColor: '#000' });
+      await sleep(200);
+      const dark = await group();
+      assert.equal(dark[2], 'rgb(0, 0, 0)');
+    },
+  },
+  {
     name: 'page control: dots match Figma; a window of 8 dots, shrinking at the ends',
     run: async (page) => {
       await page.open('page-control');
@@ -169,6 +208,83 @@ export const tests = [
         '8 of 12',
       );
       assert.match(await page.log(), /page change: 7/u);
+    },
+  },
+  {
+    name: 'page control: plain, it matches Figma “Page Controls” (light and dark)',
+    run: async (page) => {
+      for (const [scheme, label, other] of /** @type {const} */ ([
+        ['light', 'rgb(0, 0, 0)', 'color(srgb 0 0 0 / 0.3)'],
+        ['dark', 'rgb(255, 255, 255)', 'color(srgb 1 1 1 / 0.3)'],
+      ])) {
+        await page.open('page-control', scheme, {
+          state: [{ $rest: true, count: 2, variant: 'plain' }],
+        });
+        const plain = await page.evaluate(`(() => {
+          const control = ${page.section}.querySelector('[role=slider]');
+          const { height, width } = control.getBoundingClientRect();
+          const dots = [...control.querySelectorAll('[data-size] > span')].map((dot) => getComputedStyle(dot).backgroundColor);
+          return { dots, glass: control.querySelectorAll(':scope > :not([data-size])').length, size: [width, height] };
+        })()`);
+        // 48×24 (2 dots), the current dot's color, the other's at 30%.
+        assert.deepEqual(
+          plain,
+          {
+            dots: [label, other],
+            glass: 0,
+            size: [48, 24],
+          },
+          scheme,
+        );
+      }
+    },
+  },
+  {
+    name: 'page control: a momentary tooltip shows the current page while hovered, pressed or focused by keyboard',
+    run: async (page) => {
+      await page.open('page-control', 'light', {
+        state: [{ $rest: true, count: 8, momentaryTooltip: true }],
+      });
+      const shown = () =>
+        page.evaluate(`(() => {
+          const tooltip = ${page.section}.querySelector('[data-page-control-part=tooltip]');
+          return [Number(getComputedStyle(tooltip).opacity), tooltip.textContent];
+        })()`);
+      await page.mouse('mouseMoved', 1, 700);
+      await sleep(300);
+      assert.deepEqual(await shown(), [0, '1 of 8'], 'at rest');
+
+      const control = await page.rect('[role=slider]');
+      const center = [
+        control.x + control.width / 2,
+        control.y + control.height / 2,
+      ];
+      await page.mouse('mouseMoved', center[0], center[1]);
+      await sleep(300);
+      assert.deepEqual(await shown(), [1, '1 of 8'], 'hovered');
+
+      // Pressed by touch (no hover).
+      await page.mouse('mouseMoved', 1, 700);
+      await withTouch(page, async (touch) => {
+        await touch('touchStart', center[0], center[1]);
+        await sleep(300);
+        const [pressed] = await shown();
+        assert.equal(pressed, 1, 'pressed');
+        await touch('touchEnd');
+      });
+      await page.mouse('mouseMoved', 1, 700);
+      await page.evaluate('document.activeElement.blur()');
+      await sleep(300);
+      const [released] = await shown();
+      assert.equal(released, 0, 'released');
+
+      await page.evaluate(
+        `${page.section}.querySelector('[role=slider]').focus()`,
+      );
+      await page.key('ArrowRight');
+      await sleep(300);
+      // (The tap went to the next page.)
+      assert.deepEqual(await shown(), [1, '3 of 8'], 'focused by keyboard');
     },
   },
   {

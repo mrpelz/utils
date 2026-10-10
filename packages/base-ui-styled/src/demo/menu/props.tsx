@@ -19,10 +19,8 @@ export const propOptionsPositioner = {
   ...commonPropOptions,
   side: [
     undefined,
-    'top',
-    'right',
-    'bottom',
-    'left',
+    'block-start',
+    'block-end',
     'inline-start',
     'inline-end',
   ] as const,

@@ -1,4 +1,55 @@
+// Overlays & indicators
+export {
+  ActivityView,
+  type ActivityViewActionProps,
+  type ActivityViewPersonProps,
+} from './activity-view.js';
+export { ActionSheet, type ActionSheetActionProps } from './action-sheet.js';
+export {
+  Alert,
+  type AlertActionProps,
+  type AlertActionsProps,
+  type AlertActionVariant,
+} from './alert.js';
+export {
+  Popover,
+  type PopoverAlign,
+  type PopoverPositionerProps,
+} from './popover.js';
+export {
+  ActivityIndicator,
+  type ActivityIndicatorProps,
+  Progress,
+  type ProgressLabelProps,
+  type ProgressPlacement,
+  type ProgressRootProps,
+  type ProgressValueProps,
+} from './progress.js';
+export { Sheet, type SheetDetent, type SheetPopupProps } from './sheet.js';
+export {
+  Tooltip,
+  type TooltipPositionerProps,
+  type TooltipTriggerProps,
+} from './tooltip.js';
+
 // Buttons & inputs
+export {
+  Avatar,
+  type AvatarFallbackProps,
+  type AvatarGroupProps,
+  type AvatarRootProps,
+} from './avatar.js';
+export { Badge, type BadgeProps } from './badge.js';
+export {
+  ColorPicker,
+  type ColorPickerMode,
+  type ColorPickerPanelProps,
+  type ColorPickerRootProps,
+  type ColorWellProps,
+  defaultSavedColors,
+  formatColor,
+  parseColor,
+} from './color-picker.js';
 export { Button, type ButtonRootProps } from './button.js';
 export {
   Checkbox,
@@ -21,7 +72,6 @@ export {
   type DatePickerMode,
   type DatePickerOpen,
   type DatePickerProps,
-  type PopoverAlign,
   type DatePickerStyle,
   type DateRange,
   type DayHighlight,
@@ -90,7 +140,12 @@ export {
 } from './toolbar.js';
 
 // Pages and layout
-export { Layout, type LayoutColumnProps } from './layout.js';
+export {
+  Layout,
+  type LayoutColumnProps,
+  type LayoutRootProps,
+} from './layout.js';
+export { Sidebar } from './sidebar.js';
 export { Page, type PageRootProps } from './page.js';
 
 // Navigation

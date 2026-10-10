@@ -8,15 +8,20 @@ import { colorScheme, css } from './utils.js';
 // and selections). Tokens and their sources are in `styles.tsx`
 // (`--glass-ios-*`).
 
-/** Brightness of the content behind a glass surface. */
-export type GlassContext = 'bright' | 'dim';
+/**
+ * Brightness of the content behind a glass surface: a plain page (`bright`,
+ * `dim`; Figma's glass), or a background of the app's, e.g. a picture
+ * (`background-bright`, `background-dim`: floating over it).
+ */
+export type GlassContext =
+  'background-bright' | 'background-dim' | 'bright' | 'dim';
 
 const tint = 'var(--styled-glass-tint, var(--glass-ios-tint))';
 
 // Glass effect of tinted glass: Framework7 `fab-vars.less`
 // (`--f7-glass-shadow-fab`, light for bright, dark for dim), mixed with the
 // element's tint, so it's declared here instead of as a global token.
-const tintedShadow: Record<GlassContext, string> = {
+const tintedShadow: Record<'bright' | 'dim', string> = {
   bright: [
     'inset -3px -3px 0 -3.5px #fff',
     'inset 3px 3px 0 -3.5px #fff',
@@ -38,6 +43,10 @@ const tintedShadow: Record<GlassContext, string> = {
   ].join(', '),
 };
 
+/** Whether glass is over dim content (`dim`, `background-dim`). */
+export const isDim = (context: GlassContext): boolean =>
+  context === 'dim' || context === 'background-dim';
+
 const contextVars = (context: GlassContext) => css`
   --styled-glass-blur: var(--glass-ios-${context}-blur);
   --styled-glass-fill: var(--glass-ios-${context}-fill);
@@ -56,7 +65,7 @@ const contextVars = (context: GlassContext) => css`
   );
   --styled-glass-selection: var(--glass-ios-${context}-selection);
   --styled-glass-shadow: var(--glass-ios-${context}-shadow);
-  --styled-glass-shadow-tinted: ${tintedShadow[context]};
+  --styled-glass-shadow-tinted: ${tintedShadow[isDim(context) ? 'dim' : 'bright']};
   --styled-glass-lens: var(--glass-ios-${context}-lens);
   --styled-glass-lens-shadow: var(--glass-ios-${context}-lens-shadow);
 `;

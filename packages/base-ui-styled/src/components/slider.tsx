@@ -8,16 +8,19 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useLayoutEffect,
   useMemo,
+  useState,
 } from 'react';
 
 import { glassLensGlow } from './glass.js';
+import { tooltipSurface } from './tooltip.js';
 import { textStyle } from './typography.js';
 import { Reserve, wrap } from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Sliders”, light and dark appearance), with
 // Figma colors mapped to UIKit semantic colors: track `systemFill`, fill the
-// app tint (`--color-ios-primary`, i.e. `systemBlue`), ticks
+// tint (`tint`; default: the app's, `--color-ios-primary`), ticks
 // `quaternaryLabel`, symbols `secondaryLabel`; the knob (`#fff`) has no
 // semantic equivalent. The knob shadow matches Konsta UI `styles/base.css`
 // (`--shadow-ios-thumb`).
@@ -42,10 +45,20 @@ import { Reserve, wrap } from './utils.js';
 //   ring).
 // - `Slider.Value` (not in UIKit or Figma) is in the Body text style (the
 //   symbols: Body, emphasized), with tabular numerals, and reserves the width
-//   of its widest value.
+//   of its widest value. `Slider.Label` (neither) is in Body, in the label
+//   color. Both are where they are among the parts, or by `placement`:
+//   before or after them all, or on a line above or below (the label at its
+//   start, the value at its end); the value also in a tooltip (see
+//   `Tooltip`) above each thumb (beside it, vertically), its own value.
 
 export type SliderRootProps = BaseSlider.Root.Props & {
   cursor?: Properties['cursor'];
+  /**
+   * The fill's color, and the pressed knob's glow (UIKit
+   * `minimumTrackTintColor`).
+   * @default the app's tint
+   */
+  tint?: string;
 };
 
 // eslint-disable-next-line prettier/prettier
@@ -59,6 +72,7 @@ const StyledRoot = wrap(styled<typeof BaseSlider.Root, SliderRootProps>(BaseSlid
     --styled-slider-knob-width: 38px;
     --styled-slider-knob-height: 24px;
     --styled-slider-min-length: 280px;
+    --styled-slider-tint: ${({ tint }) => tint ?? 'var(--color-ios-primary)'};
 
     position: relative;
     display: flex;
@@ -83,9 +97,62 @@ const StyledRoot = wrap(styled<typeof BaseSlider.Root, SliderRootProps>(BaseSlid
     &[data-disabled] {
       opacity: 0.55;
     }
+
+    /* Placed (see Label, Value): before or after the parts, or on a line
+       above or below them (after a line break). */
+    & > [data-slider-placement='inline-start'] {
+      order: -1;
+    }
+
+    & > [data-slider-placement='inline-end'] {
+      order: 1;
+    }
+
+    & > [data-slider-placement='block-start'] {
+      order: -3;
+      margin-block-end: -6px;
+    }
+
+    & > [data-slider-placement='block-end'] {
+      order: 3;
+      margin-block-start: -6px;
+    }
+
+    /* (Separate, nested: goober mangles selector lists with parentheses,
+       and selectors continuing after them.) */
+    &:has(> [data-slider-placement='block-start']) {
+      flex-wrap: wrap;
+
+      &::before {
+        flex-basis: 100%;
+        order: -2;
+        content: '';
+      }
+    }
+
+    &:has(> [data-slider-placement='block-end']) {
+      flex-wrap: wrap;
+
+      &::after {
+        flex-basis: 100%;
+        order: 2;
+        content: '';
+      }
+    }
+
+    &
+      > [data-slider-placement='block-start']
+      + [data-slider-placement='block-start'],
+    &
+      > [data-slider-placement='block-end']
+      + [data-slider-placement='block-end'] {
+      margin-inline-start: auto;
+    }
   `,
   (props: SliderRootProps) => ({
     ...props,
+    // (Also for its ticks.)
+    'data-thumb-alignment': props.thumbAlignment ?? 'edge',
     thumbAlignment: props.thumbAlignment ?? 'edge',
   }),
 );
@@ -93,7 +160,14 @@ const StyledRoot = wrap(styled<typeof BaseSlider.Root, SliderRootProps>(BaseSlid
 type RootContextValue = Pick<
   BaseSlider.Root.Props,
   'format' | 'locale' | 'max' | 'min' | 'step'
->;
+> & {
+  // Its value in tooltips on its thumbs (see `Value`): always, or only
+  // while hovered or dragged (momentary).
+  setValueTooltip?: (shown: ValueTooltip) => void;
+  valueTooltip?: ValueTooltip;
+};
+
+type ValueTooltip = 'always' | 'momentary' | undefined;
 
 // Base UI's root context isn't public; `Slider.Value` needs the range and
 // format to find its widest values.
@@ -102,9 +176,10 @@ const RootContext = createContext<RootContextValue>({});
 const Root = forwardRef<HTMLDivElement, Omit<SliderRootProps, 'ref'>>(
   (props, ref) => {
     const { format, locale, max, min, step } = props;
+    const [valueTooltip, setValueTooltip] = useState<ValueTooltip>(undefined);
     const context = useMemo(
-      () => ({ format, locale, max, min, step }),
-      [format, locale, max, min, step],
+      () => ({ format, locale, max, min, setValueTooltip, step, valueTooltip }),
+      [format, locale, max, min, step, valueTooltip],
     );
 
     return (
@@ -150,7 +225,7 @@ const Track = styled(BaseSlider.Track, forwardRef)`
 
 const StyledIndicator = styled(BaseSlider.Indicator, forwardRef)`
   border-radius: inherit;
-  background-color: var(--color-ios-primary);
+  background-color: var(--styled-slider-tint);
 `;
 
 const toPercent = (value: number, min: number, max: number) =>
@@ -189,7 +264,7 @@ const Indicator = wrap(
 // The knob is drawn by `::after`, so only it scales while dragging: Base UI
 // measures the thumb's bounding box to position it, which has to stay the
 // resting size.
-const Thumb = styled(BaseSlider.Thumb, forwardRef)`
+const StyledThumb = styled(BaseSlider.Thumb, forwardRef)`
   z-index: 1;
   width: var(--styled-slider-knob-width);
   height: var(--styled-slider-knob-height);
@@ -201,7 +276,7 @@ const Thumb = styled(BaseSlider.Thumb, forwardRef)`
   }
 
   &::before {
-    ${glassLensGlow('var(--color-ios-primary)', '0')}
+    ${glassLensGlow('var(--styled-slider-tint)', '0')}
   }
 
   &::after {
@@ -221,8 +296,14 @@ const Thumb = styled(BaseSlider.Thumb, forwardRef)`
      knob (as List's), following its shape. */
   &:has(input:focus-visible) {
     &::after {
-      outline: 2px solid var(--color-ios-primary);
+      outline: 2px solid var(--styled-slider-tint);
       outline-offset: 2px;
+    }
+
+    /* (Its momentary tooltip, see ValueBubble.) */
+    & > [data-momentary] {
+      opacity: 1;
+      scale: 1;
     }
   }
 
@@ -242,38 +323,118 @@ const Thumb = styled(BaseSlider.Thumb, forwardRef)`
   }
 `;
 
-// Figma: inset 16px from the track's ends, so the ticks line up with the
-// knob's center at their values; round (Figma renders the ticks as circles,
-// the CSS export has no radius).
+// Its value in a tooltip (see `Value`), 8px above it (beside it,
+// vertically).
+const ValueBubble = styled('span')`
+  ${tooltipSurface}
+
+  position: absolute;
+  z-index: 1;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  font-variant-numeric: tabular-nums;
+  translate: -50% 0;
+  white-space: nowrap;
+
+  [data-orientation='vertical'] > & {
+    top: 50%;
+    bottom: auto;
+    left: calc(100% + 8px);
+    translate: 0 -50%;
+  }
+
+  /* Momentary: shown while the slider is hovered (a pointer that can), or
+     its knob dragged (also by touch) or focused by keyboard (see Thumb; not
+     while it stays focused after being dragged). */
+  &[data-momentary] {
+    opacity: 0;
+    scale: 0.85;
+    transition-duration: 150ms;
+    transition-property: opacity, scale;
+  }
+
+  @media (hover: hover) {
+    [data-thumb-alignment]:hover &[data-momentary] {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  [data-dragging] > &[data-momentary] {
+    opacity: 1;
+    scale: 1;
+  }
+`;
+
+const Thumb = forwardRef<HTMLDivElement, Omit<BaseSlider.Thumb.Props, 'ref'>>(
+  ({ children, index, ...props }, ref) => {
+    const { valueTooltip } = useContext(RootContext);
+
+    return (
+      <StyledThumb
+        ref={ref}
+        index={index}
+        {...props}
+      >
+        {children}
+        {valueTooltip ? (
+          <ValueBubble
+            aria-hidden="true"
+            data-momentary={valueTooltip === 'momentary' ? '' : undefined}
+          >
+            <BaseSlider.Value>
+              {(formattedValues) => formattedValues[index ?? 0]}
+            </BaseSlider.Value>
+          </ValueBubble>
+        ) : null}
+      </StyledThumb>
+    );
+  },
+);
+
+// Round (Figma renders the ticks as circles, the CSS export has no radius).
+// Where the fill ends at their values, across the whole track (Figma: inset
+// 16px, at the knob's center; but the fill shows through the knob while
+// it's dragged, user), whatever the thumb's alignment.
 const StyledTicks = styled('div', forwardRef)`
   position: absolute;
   top: calc(50% - 2px + 9px);
-  right: 16px;
-  left: 16px;
-  display: flex;
+  right: 0;
+  left: 0;
   height: 4px;
-  align-items: center;
-  justify-content: space-between;
   pointer-events: none;
 
   & > * {
+    position: absolute;
+    top: 0;
+    left: var(--styled-slider-tick);
     width: 4px;
     height: 4px;
-    flex: none;
     border-radius: 50%;
     background-color: var(--color-ios-quaternary-label);
+    translate: -50% 0;
   }
 
   [data-orientation='vertical'] > & {
     width: 4px;
     height: auto;
-    flex-direction: column;
-    inset: 16px auto 16px calc(50% - 2px + 9px);
+    inset: 0 auto 0 calc(50% - 2px + 9px);
+  }
+
+  /* (Vertical: the minimum at the bottom.) */
+  [data-orientation='vertical'] > & > * {
+    top: auto;
+    bottom: var(--styled-slider-tick);
+    left: 0;
+    translate: 0 50%;
   }
 `;
 
 export type SliderTicksProps = React.ComponentProps<'div'> & {
-  /** Number of ticks, usually `(max - min) / step + 1`. */
+  /**
+   * The values across the slider (usually `(max - min) / step + 1`); ticks
+   * mark those between its ends (not the ends themselves).
+   */
   count: number;
 };
 
@@ -285,8 +446,15 @@ const Ticks = forwardRef<HTMLDivElement, SliderTicksProps>(
       aria-hidden="true"
       {...props}
     >
-      {Array.from({ length: count }, (_, index) => (
-        <span key={index} />
+      {Array.from({ length: Math.max(0, count - 2) }, (_, index) => (
+        <span
+          key={index}
+          style={
+            {
+              '--styled-slider-tick': `${String(((index + 1) / (count - 1)) * 100)}%`,
+            } as React.CSSProperties
+          }
+        />
       ))}
     </StyledTicks>
   ),
@@ -364,7 +532,51 @@ const StyledValue = styled(BaseSlider.Value, forwardRef)`
   ${textStyle('body')}
   font-variant-numeric: tabular-nums;
   justify-items: end;
+
+  /* In tooltips (see Thumb): for assistive technology only. */
+  &[data-slider-placement='tooltip'],
+  &[data-slider-placement='momentary-tooltip'] {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 `;
+
+/** Where a label or value is (default: where it is among the parts). */
+export type SliderPlacement =
+  'block-end' | 'block-start' | 'inline-end' | 'inline-start';
+
+export type SliderLabelProps = Omit<BaseSlider.Label.Props, 'ref'> & {
+  placement?: SliderPlacement;
+};
+
+const StyledLabel = styled(BaseSlider.Label, forwardRef)`
+  flex: none;
+  color: var(--color-ios-label);
+  ${textStyle('body')}
+`;
+
+/** Its label (Base UI's), placed (see `SliderPlacement`). */
+const Label = forwardRef<HTMLDivElement, SliderLabelProps>(
+  ({ placement, ...props }, ref) => (
+    <StyledLabel
+      ref={ref}
+      data-slider-placement={placement}
+      {...props}
+    />
+  ),
+);
+
+export type SliderValueProps = Omit<BaseSlider.Value.Props, 'ref'> & {
+  /**
+   * Placed (see `SliderPlacement`), or in a tooltip on each thumb: always,
+   * or momentary (while hovered, or a knob dragged or focused).
+   */
+  placement?: SliderPlacement | 'momentary-tooltip' | 'tooltip';
+};
 
 type ValueRenderer = (
   formattedValues: readonly string[],
@@ -376,66 +588,78 @@ type ValueRenderer = (
  * `min` and `max` (by digits and fraction digits of `step`), so the slider
  * doesn't shift while it changes.
  */
-const Value = forwardRef<
-  HTMLOutputElement,
-  Omit<BaseSlider.Value.Props, 'ref'>
->(({ children, ...props }, ref) => {
-  const {
-    format,
-    locale,
-    max = 100,
-    min = 0,
-    step = 1,
-  } = useContext(RootContext);
+const Value = forwardRef<HTMLOutputElement, SliderValueProps>(
+  ({ children, placement, ...props }, ref) => {
+    const {
+      format,
+      locale,
+      max = 100,
+      min = 0,
+      setValueTooltip,
+      step = 1,
+    } = useContext(RootContext);
 
-  const render = useCallback<ValueRenderer>(
-    (formattedValues, values) =>
-      typeof children === 'function'
-        ? children(formattedValues, values)
-        : formattedValues.join(' – '),
-    [children],
-  );
+    // In tooltips on the thumbs (always, or momentary).
+    let tooltip: ValueTooltip;
+    if (placement === 'tooltip') tooltip = 'always';
+    else if (placement === 'momentary-tooltip') tooltip = 'momentary';
+    useLayoutEffect(() => {
+      if (!tooltip) return undefined;
+      setValueTooltip?.(tooltip);
+      return () => setValueTooltip?.(undefined);
+    }, [setValueTooltip, tooltip]);
 
-  const renderWithReserve = useCallback<ValueRenderer>(
-    (formattedValues, values) => {
-      const formatter = new Intl.NumberFormat(locale, format);
-      // Tabular numerals make width depend on sign, digits and fraction
-      // digits only: the extremes have the most digits, a step off them
-      // the fraction digits of `step`.
-      const extremes = [min, max, min + step, max - step].filter(
-        (value) => value >= min && value <= max,
-      );
+    const render = useCallback<ValueRenderer>(
+      (formattedValues, values) =>
+        typeof children === 'function'
+          ? children(formattedValues, values)
+          : formattedValues.join(' – '),
+      [children],
+    );
 
-      return (
-        <Reserve
-          reserve={extremes.map((extreme) => {
-            const reserveValues = values.map(() => extreme);
-            return render(
-              reserveValues.map((value) => formatter.format(value)),
-              reserveValues,
-            );
-          })}
-        >
-          {render(formattedValues, values)}
-        </Reserve>
-      );
-    },
-    [format, locale, max, min, render, step],
-  );
+    const renderWithReserve = useCallback<ValueRenderer>(
+      (formattedValues, values) => {
+        const formatter = new Intl.NumberFormat(locale, format);
+        // Tabular numerals make width depend on sign, digits and fraction
+        // digits only: the extremes have the most digits, a step off them
+        // the fraction digits of `step`.
+        const extremes = [min, max, min + step, max - step].filter(
+          (value) => value >= min && value <= max,
+        );
 
-  return (
-    <StyledValue
-      ref={ref}
-      {...props}
-    >
-      {renderWithReserve}
-    </StyledValue>
-  );
-});
+        return (
+          <Reserve
+            reserve={extremes.map((extreme) => {
+              const reserveValues = values.map(() => extreme);
+              return render(
+                reserveValues.map((value) => formatter.format(value)),
+                reserveValues,
+              );
+            })}
+          >
+            {render(formattedValues, values)}
+          </Reserve>
+        );
+      },
+      [format, locale, max, min, render, step],
+    );
+
+    return (
+      <StyledValue
+        ref={ref}
+        data-slider-placement={placement}
+        {...props}
+      >
+        {renderWithReserve}
+      </StyledValue>
+    );
+  },
+);
 
 export const Slider = {
   ...BaseSlider,
   Root,
+  Label,
   Value,
   Control,
   Track,

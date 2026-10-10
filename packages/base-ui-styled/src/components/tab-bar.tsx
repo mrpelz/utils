@@ -14,11 +14,13 @@ import {
   useState,
 } from 'react';
 
+import { badgeOnSymbol } from './badge.js';
 import {
   GlassBackground,
   GlassContext,
   glassContext,
   glassLensScale,
+  isDim,
 } from './glass.js';
 import {
   colorScheme,
@@ -111,6 +113,10 @@ const sizeVars: Record<Size, string> = {
     --styled-tabbar-overlap-factor: 1;
     --styled-tabbar-symbol-padding: 6px 8px 7px;
     --styled-tabbar-symbol-aspect-ratio: 1;
+
+    /* Badges on its tabs' symbols, at the labeled tabs' symbols' height (a
+       symbol-only tab's symbol is centered, lower; see Badge). */
+    --styled-tabbar-badge-top: 6px;
     --styled-tabbar-circle-padding: 6px 8px 7px;
     --styled-tabbar-pressed-group-scale: 1.05;
     --styled-tabbar-collapsed-tab-height: 40px;
@@ -162,7 +168,7 @@ const regularActiveColor = (context?: GlassContext) => {
     --styled-tabbar-active-color: #fff;
   `;
 
-  if (context) return context === 'dim' ? dim : bright;
+  if (context) return isDim(context) ? dim : bright;
 
   return colorScheme(bright, dim);
 };
@@ -215,14 +221,24 @@ const offsetIn = (element: HTMLElement, scroller: HTMLElement) => {
 };
 
 // How far a group's scroller scrolls by its tabs' layout (not by their
-// content, which grows beyond while pressed, see `pressGroup`).
-const scrollRange = (scroller: HTMLElement) =>
-  Math.max(
-    0,
-    ...[...scroller.children]
-      .filter(isTab)
-      .map((tab) => tab.offsetLeft + tab.offsetWidth),
-  ) - scroller.clientWidth;
+// content, which grows beyond while pressed, see `pressGroup`). By their
+// boxes (tabs aren't transformed, only their content), as `offsetLeft` and
+// `offsetWidth` round, together off by up to a pixel.
+const scrollRange = (scroller: HTMLElement) => {
+  const origin =
+    scroller.getBoundingClientRect().left +
+    scroller.clientLeft -
+    scroller.scrollLeft;
+
+  return (
+    Math.max(
+      0,
+      ...[...scroller.children]
+        .filter(isTab)
+        .map((tab) => tab.getBoundingClientRect().right - origin),
+    ) - scroller.clientWidth
+  );
+};
 
 // Only a group too narrow for its tabs clips them: others show their
 // content growing beyond while pressed.
@@ -352,13 +368,13 @@ export const collapsedSelection = <Value,>(
   }));
 };
 
-export type CollapsedPosition = 'center' | 'end' | 'start';
+export type CollapsedPosition = 'center' | 'inline-end' | 'inline-start';
 
 // The order of groups by their position, around the spacers (1 and 3).
 const collapsedOrder: Record<CollapsedPosition, number> = {
   center: 2,
-  end: 4,
-  start: 0,
+  'inline-end': 4,
+  'inline-start': 0,
 };
 
 /** Whether a group or a tab remains while collapsed, if marks decide it. */
@@ -462,6 +478,9 @@ const collapsedList = ({
   --styled-tabbar-collapsed-layout: 1;
   --styled-tabbar-label-overflow: clip;
   --styled-tabbar-label-min-width: 0;
+
+  /* (Its badges on their symbols: the remaining tabs alike.) */
+  --styled-tabbar-badge-top: initial;
   ${content ? collapsedContents[content] : ''}
 
   padding: calc(16px + var(--styled-tabbar-collapsed-inset))
@@ -952,23 +971,24 @@ type Box = { height: number; left: number; right: number; top: number };
 
 /**
  * The accessory's morph to its place above the groups (`collapsed` false) or
- * between them: from where it was (relative to the list) since `start`, and
- * the groups remaining while collapsed (all groups take pointer events again
- * while expanding). Expanding is the collapse played backwards: its
- * recorded `path` (by progress, relative to the list), or, if the collapse
- * didn't finish, from its place between the groups (`weight`: how far it
- * had got there) back to the place above them it collapsed from
- * (`expanded`).
+ * between them, from where it was (relative to the list), along with the
+ * groups' transitions: straight to its place as they'll have ended (see
+ * `atTransitionsEnd`), not following them on their way (e.g. towards a
+ * collapsing group's far edge, narrowing meanwhile); expanding, the same
+ * way back. Also the groups remaining while collapsed (all groups take
+ * pointer events again while expanding).
  */
 type AccessoryMorph = {
   collapsed: boolean;
-  expanded?: Box;
   frame?: number;
   from?: Box;
-  path?: { box: Box; progress: number }[];
   remaining: HTMLElement[];
-  start: number;
-  weight: number;
+  // Its place as the groups will be, as last measured (in a frame, by
+  // `document.timeline`'s time, as it's placed several times a frame).
+  target?: { box: Box; time: CSSNumberish | null };
+  // The transitions it morphs along (those running as it started, not
+  // later ones, e.g. once the groups have settled).
+  transitions?: CSSTransition[];
 };
 
 /** Boxes mixed, `fraction` of the way from `from` to `to`. */
@@ -982,32 +1002,53 @@ const mixBoxes = (from: Box, to: Box, fraction: number): Box => {
   };
 };
 
-/** The box on a recorded `path` at `progress` (interpolated). */
-const boxOnPath = (
-  path: NonNullable<AccessoryMorph['path']>,
-  progress: number,
-): Box | undefined => {
-  const after = path.findIndex((point) => point.progress >= progress);
-  const next = path[after];
-  const previous = path[after - 1];
-  if (!next) return path.at(-1)?.box;
-  if (!previous) return next.box;
-
-  const fraction =
-    (progress - previous.progress) / (next.progress - previous.progress || 1);
-  return mixBoxes(previous.box, next.box, fraction);
-};
-
 const accessoryMorphs = new WeakMap<HTMLElement, AccessoryMorph>();
 
-const lensDuration = (list: HTMLElement) => {
-  const value = getComputedStyle(list)
-    .getPropertyValue('--glass-ios-lens-duration')
-    .trim();
-  const number = Number.parseFloat(value);
-  if (!Number.isFinite(number)) return 0;
+/** The running CSS transitions of `element` and its descendants. */
+const runningTransitions = (element: HTMLElement) =>
+  element
+    .getAnimations({ subtree: true })
+    .filter(
+      (animation): animation is CSSTransition =>
+        animation instanceof CSSTransition && animation.playState === 'running',
+    );
 
-  return value.endsWith('ms') ? number : number * 1000;
+// Properties not affecting layout: their transitions aren't sought (see
+// `atTransitionsEnd`).
+const paintOnly =
+  /^(?:opacity|visibility|transform|translate|scale|rotate|filter|backdrop-filter|box-shadow|color|background.*|border-.*-color|outline.*|fill|stroke)$/u;
+
+// Just before their end (ms): still running (ended, they'd be removed),
+// their values all but their targets.
+const beforeEnd = 0.01;
+
+/**
+ * `measure`'s result as `transitions` will have ended: sought to just
+ * before their end, and back (synchronously: nothing renders in between, and
+ * they don't end).
+ */
+const atTransitionsEnd = <T,>(
+  transitions: CSSTransition[],
+  measure: () => T,
+): T => {
+  const layout = transitions.filter(
+    (transition) => !paintOnly.test(transition.transitionProperty),
+  );
+  const times = layout.map((transition) => transition.currentTime);
+  for (const transition of layout) {
+    const end = Number(transition.effect?.getComputedTiming().endTime);
+    if (Number.isFinite(end)) {
+      transition.currentTime = Math.max(0, end - beforeEnd);
+    }
+  }
+
+  try {
+    return measure();
+  } finally {
+    for (const [index, transition] of layout.entries()) {
+      transition.currentTime = times[index] ?? null;
+    }
+  }
 };
 
 // CSS `ease`, as the groups' transitions (approximately).
@@ -1029,10 +1070,28 @@ const accessoryBox = (list: HTMLElement, accessory: HTMLElement): Box => {
   };
 };
 
-/** How far a morph since `start` has got (0 to 1). */
-const morphProgress = (list: HTMLElement, start: number) => {
-  const duration = lensDuration(list);
-  return duration > 0 ? Math.min(1, (performance.now() - start) / duration) : 1;
+/**
+ * How far `transitions` have got (0 to 1, eased): the one ending last, by
+ * its own time (so slowed down with it, e.g. in the browser's developer
+ * tools).
+ */
+const transitionsProgress = (transitions: CSSTransition[]) => {
+  let latest = Number.NEGATIVE_INFINITY;
+  let progress = 1;
+  for (const transition of transitions) {
+    const timing = transition.effect?.getComputedTiming();
+    const end = Number(timing?.endTime);
+    if (!(end > latest)) continue;
+
+    latest = end;
+    const delay = Number(timing?.delay ?? 0);
+    const duration = Number(timing?.duration);
+    const time = Number(transition.currentTime);
+    progress =
+      duration > 0 ? Math.min(1, Math.max(0, (time - delay) / duration)) : 1;
+  }
+
+  return ease(progress);
 };
 
 /**
@@ -1071,48 +1130,12 @@ const morphAccessory = (list: HTMLElement, collapsed: boolean) => {
   if (morph?.collapsed === collapsed) return;
 
   const accessory = accessories.get(list);
-  // From where it is (also mid-morph); placed right away the first time.
-  const from = morph && accessory ? accessoryBox(list, accessory) : undefined;
-  const start = performance.now();
-  if (!morph) {
-    accessoryMorphs.set(list, {
-      collapsed,
-      path: collapsed ? [] : undefined,
-      remaining: [],
-      start,
-      weight: collapsed ? 1 : 0,
-    });
-    return;
-  }
-
-  const progress = morphProgress(list, morph.start);
-  const finished = progress >= 1;
-  accessoryMorphs.set(
-    list,
-    collapsed
-      ? {
-          ...morph,
-          collapsed,
-          // From above the groups: that place, to expand back to
-          // (interrupted while expanding, the earlier one).
-          expanded: finished || !morph.expanded ? from : morph.expanded,
-          from,
-          // Recorded, to play backwards.
-          path: [],
-          start,
-          weight: 1,
-        }
-      : {
-          ...morph,
-          collapsed,
-          from,
-          // The finished collapse, played backwards.
-          path: finished ? morph.path : undefined,
-          start,
-          // How far it had got between the groups.
-          weight: morph.weight * ease(progress),
-        },
-  );
+  accessoryMorphs.set(list, {
+    collapsed,
+    // From where it is (also mid-morph); placed right away the first time.
+    from: morph && accessory ? accessoryBox(list, accessory) : undefined,
+    remaining: morph?.remaining ?? [],
+  });
 };
 
 // A group's box without its spacing (see `StyledGroup`): its scroller's.
@@ -1169,40 +1192,11 @@ const relativeTo = (box: Box, rect: DOMRect): Box => ({
   top: box.top - rect.top,
 });
 
-/**
- * The accessory's place (relative to the list) at `progress` of its morph
- * (see `AccessoryMorph`): to the `target`, or, `expanding`, backwards.
- */
-const morphedPlace = (
-  morph: AccessoryMorph,
-  {
-    between,
-    expanding,
-    progress,
-    target,
-  }: { between: Box; expanding: boolean; progress: number; target: Box },
-): Box => {
-  if (expanding && morph.expanded) {
-    const recorded =
-      morph.path && morph.path.length > 1
-        ? boxOnPath(morph.path, 1 - progress)
-        : undefined;
-    return (
-      recorded ??
-      mixBoxes(morph.expanded, between, morph.weight * ease(1 - progress))
-    );
-  }
-
-  return morph.from ? mixBoxes(morph.from, target, ease(progress)) : target;
-};
-
 const placeAccessory = (list: HTMLElement): void => {
   const accessory = accessories.get(list);
   const morph: AccessoryMorph = accessoryMorphs.get(list) ?? {
     collapsed: false,
     remaining: [],
-    start: 0,
-    weight: 0,
   };
   if (!accessory) return;
 
@@ -1216,39 +1210,55 @@ const placeAccessory = (list: HTMLElement): void => {
     );
   }
 
-  const listRect = list.getBoundingClientRect();
-  const above = aboveGroups(groups.map((group) => contentRect(group)));
-  const between = betweenGroups(
-    list,
-    morph.remaining.length > 0 ? morph.remaining : groups,
-  );
-
   // State for its styles (see `StyledAccessory`).
   accessory.toggleAttribute('data-collapsed', morph.collapsed);
   const visibleIn = getComputedStyle(accessory)
     .getPropertyValue('--styled-tabbar-accessory-visible-in')
     .trim();
 
-  // From where it was, to its place as the groups are now; shown in one
-  // state only, at its place there.
+  // Its place as the groups are; shown in one state only, at its place
+  // there.
   const collapsedPlace =
     visibleIn === 'both' ? morph.collapsed : visibleIn === 'collapsed';
-  const target = collapsedPlace ? between : above;
-  const progress =
-    morph.from && visibleIn === 'both' ? morphProgress(list, morph.start) : 1;
-  const done = progress >= 1;
-  const place = morphedPlace(morph, {
-    between: relativeTo(between, listRect),
-    expanding: !morph.collapsed && !collapsedPlace && !done,
-    progress,
-    target: relativeTo(target, listRect),
-  });
+  const measure = () => {
+    const box = collapsedPlace
+      ? betweenGroups(
+          list,
+          morph.remaining.length > 0 ? morph.remaining : groups,
+        )
+      : aboveGroups(groups.map((group) => contentRect(group)));
+    return relativeTo(box, list.getBoundingClientRect());
+  };
 
-  // Collapsing: its path (once at its end), to play backwards when
-  // expanding.
-  if (morph.collapsed && morph.path?.at(-1)?.progress !== 1) {
-    morph.path?.push({ box: place, progress });
+  // Morphing: from where it was, to its place as the groups will be, as far
+  // as their transitions have got; once they've ended, done.
+  const running =
+    morph.from && visibleIn === 'both' ? runningTransitions(list) : [];
+  morph.transitions ??= running;
+  const transitions = morph.transitions.filter((transition) =>
+    running.includes(transition),
+  );
+  if (transitions.length === 0) {
+    delete morph.from;
+    delete morph.target;
+    delete morph.transitions;
   }
+
+  let place: Box;
+  if (morph.from) {
+    const time = document.timeline.currentTime;
+    if (morph.target?.time !== time) {
+      morph.target = { box: atTransitionsEnd(running, measure), time };
+    }
+    place = mixBoxes(
+      morph.from,
+      morph.target.box,
+      transitionsProgress(transitions),
+    );
+  } else {
+    place = measure();
+  }
+  const done = !morph.from;
 
   // Room above the list for its place above the groups (see StyledList).
   list.toggleAttribute('data-accessory-above', visibleIn !== 'collapsed');
@@ -1346,7 +1356,7 @@ type ListState = {
 
 const ListContext = createContext<ListState>({
   collapsed: false,
-  collapsedPosition: 'start',
+  collapsedPosition: 'inline-start',
   markedGroups: 0,
 });
 
@@ -1364,7 +1374,7 @@ export type TabBarListProps = BaseTabs.List.Props & {
   collapsedContent?: CollapsedContent;
   /**
    * Where the collapsed bar's tab is, along the bar.
-   * @default 'start'
+   * @default 'inline-start'
    */
   collapsedPosition?: CollapsedPosition;
   /**
@@ -1389,7 +1399,7 @@ const List = forwardRef<HTMLDivElement, TabBarListProps>(
     {
       children,
       collapsed = false,
-      collapsedPosition = 'start',
+      collapsedPosition = 'inline-start',
       onClickCapture,
       onLostPointerCapture,
       onPointerCancel,
@@ -2109,6 +2119,27 @@ const StyledTab = styled<typeof BaseTabs.Tab, Omit<TabBarTabProps, 'visibleWhenC
 
   @media (hover: hover) {
     cursor: var(--styled-cursor);
+  }
+
+  /* A badge on its symbol (see Badge). Its content other than its symbol
+     and label (e.g. a badge) fades with it (collapsing away), as they do
+     (see contentFade). */
+  & > :not([${part}='icon']):not([${part}='label']) {
+    opacity: calc(
+      var(--styled-glass-fade, 1) * var(--styled-tabbar-tab-fade, 1)
+    );
+    transition: opacity var(--glass-ios-lens-duration);
+  }
+
+  ${badgeOnSymbol(`[${part}='icon']`)}
+
+  /* (Over badgeOnSymbol's, a tripled class outranking its :has.) */
+  &&& > [data-badge='corner'] {
+    inset-block-start: calc(
+      var(--styled-tabbar-badge-top, anchor(start)) - var(
+          --styled-badge-symbol-y
+        )
+    );
   }
 
   /* Symbol only: a circle (iPhone) or a capsule hugging it (iPad) */

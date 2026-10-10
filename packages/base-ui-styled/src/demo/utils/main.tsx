@@ -58,6 +58,8 @@ const BASE_URL_DOC = 'https://base-ui.com/react/components';
 export const useId = (): string => useMemo(() => self.crypto.randomUUID(), []);
 
 export const isEqual = <A extends object, B extends A>(a: A, b: B): a is B => {
+  if (a === b) return true;
+
   for (const key of [objectKeys(a), objectKeys(b)].flat()) {
     if (!(key in a)) return false;
     if (!(key in b)) return false;
@@ -281,6 +283,8 @@ const PropSelector = <T extends PropMap>({
   );
 };
 
+const undefinedString = '$undefined';
+
 export const usePropControl = <T extends PropMap>(
   propMap: T,
   title?: string,
@@ -327,6 +331,10 @@ export const usePropControl = <T extends PropMap>(
         }
 
         if (value.startsWith('$')) {
+          if (value === undefinedString) {
+            return [key, undefined] as const;
+          }
+
           const mappedProp = propMap[key as keyof T]?.find((candidate) => {
             if (!(candidate instanceof MappedProp)) return false;
             if (candidate.label !== value.slice(1)) return false;
@@ -379,13 +387,17 @@ export const usePropControl = <T extends PropMap>(
   const toExternalState = useMemo(
     () =>
       Object.fromEntries(
-        Object.entries(state).map(
-          ([key, value]) =>
-            [
-              key,
-              value instanceof MappedProp ? `$${value.label}` : value,
-            ] as const,
-        ),
+        Object.entries(state).map(([key, value]) => {
+          if (value === undefined) {
+            return [key, undefinedString] as const;
+          }
+
+          if (value instanceof MappedProp) {
+            return [key, `$${value.label}`] as const;
+          }
+
+          return [key, value] as const;
+        }),
       ),
     [state],
   ) as object;
@@ -488,8 +500,26 @@ export const Component: FunctionComponent<{
                 href={stateUrl}
                 target="_blank"
               >
-                [new tab]
+                [{id}]
               </ComponentId>
+            ) : null}
+            {showId ? (
+              <>
+                <ComponentId onClick={() => setOptions({ id, raw: true })}>
+                  [raw]
+                </ComponentId>
+                <ComponentId
+                  onClick={() =>
+                    setOptions({
+                      id: undefined,
+                      raw: undefined,
+                      state: undefined,
+                    })
+                  }
+                >
+                  [x]
+                </ComponentId>
+              </>
             ) : null}
           </ComponentHeading>
           {baseUiId === undefined ? null : (
@@ -581,6 +611,22 @@ export const Component: FunctionComponent<{
       </Config>
     </Container>
   );
+};
+
+/**
+ * Remounters of several parts (see `usePropControl`), nested: their
+ * children remount when any of the parts' props change (e.g. a part's
+ * `defaultValue`, only read as it mounts).
+ */
+export const Remounters: FunctionComponent<
+  PropsWithChildren<{ remounters: FunctionComponent<PropsWithChildren>[] }>
+> = ({ children, remounters }) => {
+  let nested: ReactNode = children;
+  for (const Remounter of remounters.toReversed()) {
+    nested = <Remounter>{nested}</Remounter>;
+  }
+
+  return nested;
 };
 
 export const commonPropOptions = {

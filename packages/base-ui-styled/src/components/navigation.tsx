@@ -45,8 +45,12 @@ const duration = 350;
 const easing = 'cubic-bezier(0.2, 0.9, 0.3, 1)';
 /** Where a swipe back starts: within this far of the leading edge. */
 const edgeWidth = 20;
-/** A swipe back released this quick (px/ms) pops, however far. */
+/**
+ * A swipe back released this quick (px/ms, over its last 100ms) pops,
+ * however far.
+ */
 const flingVelocity = 0.3;
+const flingWindow = 100;
 /** How far the page under the top one is moved back (of its width). */
 const underOffset = 30;
 
@@ -175,9 +179,10 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
     );
     const swipeRef = useRef<
       | {
+          /** The latest moves (time, progress), for the release's speed. */
+          moves: [number, number][];
           pointerId: number;
           progress: number;
-          time: number;
           width: number;
           x: number;
         }
@@ -276,8 +281,14 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
       if (swipe?.pointerId !== event.pointerId) return;
       swipeRef.current = undefined;
 
-      const elapsed = Math.max(performance.now() - swipe.time, 1);
-      const velocity = (swipe.progress * swipe.width) / elapsed;
+      // Its speed as released: over the last moves (held still: none).
+      const now = performance.now();
+      const recent = swipe.moves.find(([time]) => now - time < flingWindow);
+      const first = recent;
+      const velocity = first
+        ? ((swipe.progress - first[1]) * swipe.width) /
+          Math.max(now - first[0], 1)
+        : 0;
       const top = keys.at(-1);
       if (
         event.type !== 'pointercancel' &&
@@ -335,8 +346,8 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
               event.currentTarget.setPointerCapture(event.pointerId);
               swipeRef.current = {
                 pointerId: event.pointerId,
+                moves: [[performance.now(), 0]],
                 progress: 0,
-                time: performance.now(),
                 width: root.clientWidth,
                 x: event.clientX,
               };
@@ -351,6 +362,10 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
                 getComputedStyle(root).direction === 'rtl' ? -1 : 1;
               const moved = (event.clientX - swipe.x) * direction;
               swipe.progress = Math.min(Math.max(moved / swipe.width, 0), 1);
+              swipe.moves = [
+                ...swipe.moves.slice(-8),
+                [performance.now(), swipe.progress],
+              ];
               setProgress(swipe.progress, false);
             }}
           />

@@ -12,7 +12,12 @@ import {
   propOptionsContent as propOptionsButtonContent,
 } from '../button/props.js';
 import { AddLog, useLog } from '../utils/log.js';
-import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
+import {
+  commonPropOptions,
+  Component,
+  Remounters,
+  usePropControl,
+} from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
@@ -175,14 +180,23 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
       externalDestructiveItem,
     );
 
-  const [controlCheckboxItem, propsCheckboxItem, stateCheckboxItem] =
-    usePropControl(
-      useMemo(() => getPropOptionsCheckboxItems(addLog), [addLog]),
-      'checkbox items',
-      externalCheckboxItem,
-    );
+  const [
+    controlCheckboxItem,
+    propsCheckboxItem,
+    stateCheckboxItem,
+    RemounterCheckboxItem,
+  ] = usePropControl(
+    useMemo(() => getPropOptionsCheckboxItems(addLog), [addLog]),
+    'checkbox items',
+    externalCheckboxItem,
+  );
 
-  const [controlRadioGroup, propsRadioGroup, stateRadioGroup] = usePropControl(
+  const [
+    controlRadioGroup,
+    propsRadioGroup,
+    stateRadioGroup,
+    RemounterRadioGroup,
+  ] = usePropControl(
     useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
     'radio group',
     externalRadioGroup,
@@ -218,12 +232,16 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
     externalGroupLabel,
   );
 
-  const [controlSubmenuRoot, propsSubmenuRoot, stateSubmenuRoot] =
-    usePropControl(
-      useMemo(() => getPropOptionsSubmenuRoot(addLog), [addLog]),
-      'submenu root',
-      externalSubmenuRoot,
-    );
+  const [
+    controlSubmenuRoot,
+    propsSubmenuRoot,
+    stateSubmenuRoot,
+    RemounterSubmenuRoot,
+  ] = usePropControl(
+    useMemo(() => getPropOptionsSubmenuRoot(addLog), [addLog]),
+    'submenu root',
+    externalSubmenuRoot,
+  );
 
   const [controlSubmenuTrigger, propsSubmenuTrigger, stateSubmenuTrigger] =
     usePropControl(
@@ -352,7 +370,15 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
         ...triggerButton.states,
       ])}
     >
-      <RemounterRoot>
+      {/* (Remounted as its parts' defaults change.) */}
+      <Remounters
+        remounters={[
+          RemounterRoot,
+          RemounterCheckboxItem,
+          RemounterRadioGroup,
+          RemounterSubmenuRoot,
+        ]}
+      >
         <Menu.Root {...propsRoot}>
           <TriggerSpace>
             <Menu.Trigger
@@ -498,7 +524,7 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
             </Menu.Positioner>
           </Menu.Portal>
         </Menu.Root>
-      </RemounterRoot>
+      </Remounters>
     </Component>
   );
 };
@@ -564,7 +590,7 @@ export const MenuOpenDemo: FunctionComponent = () => {
         <Menu.Portal>
           <Menu.Positioner
             anchor={anchorRef}
-            side="bottom"
+            side="block-end"
           >
             <Menu.Popup {...propsPopup}>
               <Menu.Item onClick={() => addLog('Copy clicked')}>

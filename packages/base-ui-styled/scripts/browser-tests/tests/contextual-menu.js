@@ -96,4 +96,67 @@ export const tests = [
       assert.ok(inside.left >= 8 - 1 && inside.right <= inside.width - 8 + 1);
     },
   },
+  {
+    name: 'contextual menu: too tall for the viewport, the preview and the menu scroll together (opened with the menu in view; wheel input over the menu too)',
+    run: async (page) => {
+      await page.browser.send('Emulation.setDeviceMetricsOverride', {
+        deviceScaleFactor: 1,
+        height: 360,
+        mobile: false,
+        width: 1400,
+      });
+      try {
+        await page.open('contextual-menu');
+        await pressTrigger(page);
+        const state = () =>
+          page.evaluate(`(() => {
+            const preview = document.querySelector(${JSON.stringify('[aria-label=Photo]')}).getBoundingClientRect();
+            const menu = document.querySelector(${JSON.stringify('[role=menu]')}).getBoundingClientRect();
+            const scroller = document.querySelector(${JSON.stringify('[data-contextual-menu-part=scroller]')});
+            return { menuBottom: Math.round(menu.bottom), menuTop: Math.round(menu.top), previewBottom: Math.round(preview.bottom), previewTop: Math.round(preview.top), scrollTop: scroller ? Math.round(scroller.scrollTop) : null };
+          })()`);
+
+        // Opened: the menu in view (8px from the bottom), the preview 8px
+        // above it, partly out of the viewport.
+        const opened = await state();
+        assert.ok(
+          opened.scrollTop !== null && opened.scrollTop > 0,
+          JSON.stringify(opened),
+        );
+        assert.equal(opened.menuBottom, 360 - 8, JSON.stringify(opened));
+        assert.equal(opened.menuTop - opened.previewBottom, 8);
+        assert.ok(opened.previewTop < 0, JSON.stringify(opened));
+
+        // Scrolled back: the preview in view (8px from the top), the menu
+        // (still 8px below it) partly out of it.
+        await page.evaluate(
+          `document.querySelector(${JSON.stringify('[data-contextual-menu-part=scroller]')}).scrollTop = 0`,
+        );
+        await sleep(300);
+        const back = await state();
+        assert.equal(back.previewTop, 8, JSON.stringify(back));
+        assert.equal(back.menuTop - back.previewBottom, 8);
+        assert.ok(back.menuBottom > 360, JSON.stringify(back));
+
+        // Wheel input over the menu scrolls them.
+        const menu = await page.rect('[role=menu]');
+        await page.browser.send('Input.dispatchMouseEvent', {
+          deltaX: 0,
+          deltaY: 100,
+          type: 'mouseWheel',
+          x: menu.x + menu.width / 2,
+          y: Math.min(menu.y + 20, 350),
+        });
+        await sleep(400);
+        const wheeled = await state();
+        assert.ok(
+          wheeled.scrollTop !== null && wheeled.scrollTop > 0,
+          JSON.stringify(wheeled),
+        );
+        assert.equal(wheeled.menuTop - wheeled.previewBottom, 8);
+      } finally {
+        await page.browser.send('Emulation.clearDeviceMetricsOverride');
+      }
+    },
+  },
 ];

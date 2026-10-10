@@ -9,6 +9,7 @@ import {
   getPropOptionsMaxSymbol,
   getPropOptionsMinSymbol,
   getPropOptionsThumb,
+  propOptionsLabel,
   propOptionsValue,
 } from './props.js';
 
@@ -87,7 +88,7 @@ export const useSliderDemo = <
     true,
   );
   const [controlLabel, propsLabel, stateLabel] = usePropControl(
-    commonPropOptions,
+    propOptionsLabel,
     `${prefix}label`,
     externalLabel,
   );

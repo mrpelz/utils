@@ -993,7 +993,7 @@ export const ListPartsDemo: FunctionComponent = () => {
               </List.Text>
               <List.SwipeActions
                 overswipe
-                side="leading"
+                side="inline-start"
               >
                 <List.SwipeAction
                   showLabel
@@ -1150,7 +1150,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
     );
 
   const swipeActions = (
-    side: 'leading' | 'trailing',
+    side: 'inline-end' | 'inline-start',
     actions: typeof leadingActions | typeof trailingActions,
     first: boolean,
     { shape, showLabel, text }: SwipeRow,
@@ -1164,7 +1164,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
         const props: Partial<typeof propsSwipeAction> =
           first && index === 0 ? propsSwipeAction : {};
         // The outermost, by side.
-        const outer = side === 'leading' ? 2 - index : index;
+        const outer = side === 'inline-start' ? 2 - index : index;
 
         return (
           <List.SwipeAction
@@ -1224,8 +1224,8 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 ) : null}
                 <List.Detail>Detail</List.Detail>
                 <List.DrillIn />
-                {swipeActions('leading', leadingActions, index === 0, row)}
-                {swipeActions('trailing', trailingActions, false, row)}
+                {swipeActions('inline-start', leadingActions, index === 0, row)}
+                {swipeActions('inline-end', trailingActions, false, row)}
               </List.Item>
             ))}
           </List.Group>
@@ -2043,7 +2043,7 @@ export const ListMailDemo: FunctionComponent = () => {
                   <List.Text {...propsText}>{preview}</List.Text>
                   <List.SwipeActions
                     overswipe
-                    side="leading"
+                    side="inline-start"
                   >
                     <List.SwipeAction
                       showLabel

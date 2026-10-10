@@ -23,7 +23,9 @@ import {
   edgeScrollDelta,
   fontWeight,
   frameElapsed,
+  LogicalSide,
   MovingHighlight,
+  positionerSide,
   SecondaryClickProps,
   useForwardedRef,
   useSecondaryClick,
@@ -582,51 +584,66 @@ const StyledPositioner = styled(BaseMenu.Positioner, forwardRef)`
   z-index: 100;
 `;
 
-const Positioner = forwardRef<
-  HTMLDivElement,
-  Omit<BaseMenu.Positioner.Props, 'ref'>
->((props, forwardedRef) => {
-  const { size, submenu } = useContext(MenuContext);
-  const ref = useForwardedRef(forwardedRef);
-  useCloseOutOfView(ref);
+export type MenuPositionerProps = Omit<
+  BaseMenu.Positioner.Props,
+  'ref' | 'side'
+> & {
+  /**
+   * Its side of its anchor (logical).
+   * @default 'block-end' (a submenu: 'inline-end')
+   */
+  side?: LogicalSide;
+};
 
-  const defaults = ((): Pick<
-    BaseMenu.Positioner.Props,
-    'align' | 'alignOffset' | 'side' | 'sideOffset'
-  > => {
-    if (submenu === 'horizontal') {
-      return { align: 'end', alignOffset: -4, side: 'bottom', sideOffset: 12 };
-    }
-    if (submenu && size === 'compact') {
-      return {
-        align: 'start',
-        alignOffset: -8,
-        side: 'bottom',
-        sideOffset: 0,
-      };
-    }
-    if (submenu) {
-      return {
-        align: 'start',
-        alignOffset: -10,
-        side: 'inline-end',
-        sideOffset: 8,
-      };
-    }
-    return { sideOffset: 8 };
-  })();
+const Positioner = forwardRef<HTMLDivElement, MenuPositionerProps>(
+  ({ side, ...props }, forwardedRef) => {
+    const { size, submenu } = useContext(MenuContext);
+    const ref = useForwardedRef(forwardedRef);
+    useCloseOutOfView(ref);
 
-  return (
-    <StyledPositioner
-      ref={ref}
-      {...props}
-      align={props.align ?? defaults.align}
-      alignOffset={props.alignOffset ?? defaults.alignOffset}
-      side={props.side ?? defaults.side}
-      sideOffset={props.sideOffset ?? defaults.sideOffset}
-    />
-  );
-});
+    const defaults = ((): Pick<
+      MenuPositionerProps,
+      'align' | 'alignOffset' | 'side' | 'sideOffset'
+    > => {
+      if (submenu === 'horizontal') {
+        return {
+          align: 'end',
+          alignOffset: -4,
+          side: 'block-end',
+          sideOffset: 12,
+        };
+      }
+      if (submenu && size === 'compact') {
+        return {
+          align: 'start',
+          alignOffset: -8,
+          side: 'block-end',
+          sideOffset: 0,
+        };
+      }
+      if (submenu) {
+        return {
+          align: 'start',
+          alignOffset: -10,
+          side: 'inline-end',
+          sideOffset: 8,
+        };
+      }
+      return { sideOffset: 8 };
+    })();
+
+    return (
+      <StyledPositioner
+        ref={ref}
+        {...props}
+        align={props.align ?? defaults.align}
+        alignOffset={props.alignOffset ?? defaults.alignOffset}
+        side={positionerSide(side ?? defaults.side)}
+        sideOffset={props.sideOffset ?? defaults.sideOffset}
+      />
+    );
+  },
+);
 
 /**
  * Opening and closing transition of a glass popup: it scales in from its
@@ -643,10 +660,13 @@ export const popupTransition = css`
     scale: 0;
   }
 
+  /* Closing without the opening's overshoot (past 0, the scale would turn
+     negative: the content flips). */
   &[data-ending-style] {
     opacity: 0;
     scale: 0;
     transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
   }
 `;
 
@@ -716,6 +736,13 @@ const highlightSelectors = ['[data-highlighted]', '[data-popup-open]'];
 const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
   ({ children, ...props }, ref) => {
     const { size, submenu } = useContext(MenuContext);
+    // Closed by keys, focus returns to its trigger; otherwise (a pointer:
+    // an item, outside) it doesn't (Chrome would ring it: the popup took
+    // focus by script, e.g. opened through a list row). Submenus: as Base
+    // UI does.
+    const finalFocus = submenu
+      ? undefined
+      : (closeType: string) => closeType === 'keyboard';
 
     return (
       <StyledPopup
@@ -724,6 +751,7 @@ const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
         overlay={submenu === 'vertical' && size === 'compact'}
         size={size}
         {...props}
+        finalFocus={props.finalFocus ?? finalFocus}
       >
         {children}
         {/* The selection, moving between items: the highlighted one, or

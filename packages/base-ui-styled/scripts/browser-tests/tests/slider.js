@@ -263,4 +263,151 @@ export const tests = [
       }
     },
   },
+  {
+    name: 'slider: its label and value placed at the start, end, above (its own line: the label at its start, the value at its end), or the value in tooltips on the thumbs',
+    run: async (page) => {
+      /** The label's, value's and control's boxes (left, top, right). */
+      const boxes = () =>
+        page.evaluate(`(() => {
+          const control = ${page.section}.querySelector('input[type=range]').closest('[data-orientation]').parentElement.parentElement;
+          const root = control.parentElement;
+          const box = (element) => { const { left, right, top } = element.getBoundingClientRect(); return [left, top, right].map(Math.round); };
+          return { control: box(control), label: box(root.querySelector('[data-slider-placement], div:first-child')), root: box(root), value: box(root.querySelector('output')) };
+        })()`);
+
+      await page.open('slider', 'light', {
+        state: [
+          { $rest: true, label: 'Volume', value: true },
+          null,
+          { placement: 'block-start' },
+          { $rest: true, placement: 'block-start' },
+        ],
+      });
+      const above = await boxes();
+      assert.ok(above.control[1] > above.label[1], 'below the label');
+      assert.equal(above.label[1], above.value[1], 'one line');
+      assert.equal(above.label[0], above.root[0], 'the label at its start');
+      assert.equal(above.value[2], above.root[2], 'the value at its end');
+
+      await page.setState(2, { placement: 'inline-end' });
+      await page.setState(3, { placement: 'inline-start' });
+      const sides = await boxes();
+      assert.equal(sides.value[0], sides.root[0], 'the value first');
+      assert.equal(sides.label[2], sides.root[2], 'the label last');
+      assert.equal(sides.value[1] < sides.control[1] + 28, true, 'one row');
+
+      // In tooltips: each thumb's own value, 8px above it, centered.
+      await page.open('slider', 'light', {
+        state: [
+          { $rest: true, thumbs: 2, value: true },
+          { $rest: true, defaultValue: mapped('[25, 75]') },
+          null,
+          { $rest: true, placement: 'tooltip' },
+        ],
+      });
+      await sleep(300);
+      const bubbles =
+        await page.evaluate(`[...${page.section}.querySelectorAll('input[type=range]')].map((input) => {
+        const thumb = input.parentElement.getBoundingClientRect();
+        const bubble = input.parentElement.querySelector('span[aria-hidden]');
+        const box = bubble.getBoundingClientRect();
+        return [bubble.textContent, Math.round(thumb.top - box.bottom), Math.round(box.left + box.width / 2 - (thumb.left + thumb.width / 2)), input.getAttribute('aria-valuenow')];
+      })`);
+      assert.equal(bubbles.length, 2);
+      for (const [text, gap, offset, value] of bubbles) {
+        assert.deepEqual([text, gap, Math.abs(offset) <= 1], [value, 8, true]);
+      }
+    },
+  },
+  {
+    name: 'slider: its tint fills it',
+    run: async (page) => {
+      await page.open('slider', 'light', {
+        state: [null, { $rest: true, tint: 'var(--color-ios-system-orange)' }],
+      });
+      const fill = await page.evaluate(`(() => {
+        const track = ${page.section}.querySelector('input[type=range]').closest('[data-orientation]').parentElement;
+        return getComputedStyle(track.firstElementChild).backgroundColor;
+      })()`);
+      assert.equal(fill, 'rgb(255, 141, 40)');
+    },
+  },
+  {
+    name: 'slider: ticks mark the values between its ends, where the fill ends at them (edge and center alignment)',
+    run: async (page) => {
+      for (const thumbAlignment of ['edge', 'center']) {
+        for (const value of [20, 80]) {
+          await page.open('slider', 'light', {
+            state: [
+              { $rest: true, ticks: 6 },
+              { $rest: true, defaultValue: value, step: 20, thumbAlignment },
+            ],
+          });
+          await sleep(300);
+          const { fill, ticks } = await page.evaluate(`(() => {
+            const input = ${page.section}.querySelector('input[type=range]');
+            const center = (element) => { const { left, width } = element.getBoundingClientRect(); return Math.round(left + width / 2); };
+            const track = input.parentElement.parentElement;
+            return { fill: Math.round(track.firstElementChild.getBoundingClientRect().right), ticks: [...track.querySelectorAll('[aria-hidden=true] > span')].map(center) };
+          })()`);
+          // 6 values (0 to 100 by 20): the 4 between the ends.
+          assert.equal(ticks.length, 4, thumbAlignment);
+          assert.ok(
+            ticks.includes(fill),
+            `${thumbAlignment} ${String(value)}: ${String(fill)} in ${ticks.join(', ')}`,
+          );
+        }
+      }
+    },
+  },
+  {
+    name: 'slider: a momentary tooltip shows its value while hovered or focused by keyboard, not while it stays focused after a drag',
+    run: async (page) => {
+      await page.open('slider', 'light', {
+        state: [
+          { $rest: true, value: true },
+          null,
+          null,
+          { $rest: true, placement: 'momentary-tooltip' },
+        ],
+      });
+      await sleep(300);
+      const shown = () =>
+        page.evaluate(
+          `Number(getComputedStyle(${page.section}.querySelector('input[type=range]').parentElement.querySelector('span[aria-hidden]')).opacity)`,
+        );
+      // (Away: below it.)
+      await page.mouse('mouseMoved', 1, 700);
+      await sleep(300);
+      assert.equal(await shown(), 0, 'at rest');
+      const knob = await page.rect('input[type=range]');
+      await page.mouse('mouseMoved', knob.x - 60, knob.y + knob.height / 2);
+      await sleep(300);
+      assert.equal(await shown(), 1, 'hovered');
+
+      // Dragged (it stays focused), then away.
+      await page.mouse(
+        'mousePressed',
+        knob.x + knob.width / 2,
+        knob.y + knob.height / 2,
+      );
+      await page.mouse(
+        'mouseMoved',
+        knob.x + knob.width / 2 + 20,
+        knob.y + knob.height / 2,
+      );
+      await page.mouse(
+        'mouseReleased',
+        knob.x + knob.width / 2 + 20,
+        knob.y + knob.height / 2,
+      );
+      await page.mouse('mouseMoved', 1, 700);
+      await sleep(300);
+      assert.equal(await shown(), 0, 'away, after a drag');
+
+      await press(page, 'ArrowRight');
+      await sleep(300);
+      assert.equal(await shown(), 1, 'focused by keyboard');
+    },
+  },
 ];

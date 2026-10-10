@@ -1,6 +1,15 @@
 import { Field as BaseField } from '@base-ui/react/field';
 import { styled } from 'goober';
-import { forwardRef, MouseEvent, PointerEvent, ReactNode, useId } from 'react';
+import {
+  ComponentProps,
+  forwardRef,
+  MouseEvent,
+  PointerEvent,
+  ReactNode,
+  useId,
+  useRef,
+  useState,
+} from 'react';
 
 import { textStyle } from './typography.js';
 import { css, fontWeight } from './utils.js';
@@ -43,6 +52,11 @@ const StyledRoot = styled(BaseField.Root, forwardRef)`
      content), taking no room until then, so a value aligned to the end
      reaches it (UIKit: the value moves over for the button). */
   &:not([data-filled][data-focused]) > [${part}='clear'] {
+    visibility: hidden;
+  }
+
+  /* (In a search field's capsule, see Search.) */
+  &:not([data-filled][data-focused]) > [${part}='search'] > [${part}='clear'] {
     visibility: hidden;
   }
 
@@ -324,8 +338,84 @@ const Clear = forwardRef<HTMLButtonElement, ClearProps>(
   },
 );
 
+// Figma “Search Field” (Sidebars, Toolbars): a capsule (36px high, on the
+// tertiary fill, 10px in) of a magnifier symbol (the secondary label
+// color), the field (Body, regular), and e.g. a dictation button; pressed
+// anywhere, it focuses the field (a label). In a sidebar (see `Sidebar`):
+// 44px high, on the secondary fill, 11px in, its parts 8px apart.
+const StyledSearch = styled('label', forwardRef)`
+  display: flex;
+  min-width: 0;
+  min-height: var(--styled-search-height, 36px);
+  box-sizing: border-box;
+  align-items: center;
+  padding: 0 var(--styled-search-padding, 10px);
+  border-radius: 100px;
+  background-color: var(
+    --styled-search-fill,
+    var(--color-ios-tertiary-system-fill)
+  );
+  color: var(--color-ios-secondary-label);
+  cursor: text;
+  font-size: var(--font-ios-body-size);
+  gap: var(--styled-search-gap, 6px);
+
+  & > input {
+    flex: 1 1 auto;
+    ${fontWeight(400)}
+  }
+
+  /* Focused by keyboard only (a text field matches :focus-visible however
+     it's focused; see Search). */
+  &[data-keyboard-focus] {
+    outline: 2px solid var(--color-ios-primary);
+    outline-offset: 2px;
+  }
+`;
+
+/**
+ * A search field's capsule (Figma “Search Field”): its symbol, a
+ * `TextField.Control` (e.g. `type="search"`), and its buttons.
+ */
+const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
+  ({ onBlur, onFocus, onPointerDown, ...props }, ref) => {
+    // Focused by a pointer (pressed first), or else by keyboard.
+    const pressed = useRef(false);
+    const [keyboard, setKeyboard] = useState(false);
+
+    return (
+      <StyledSearch
+        ref={ref}
+        data-keyboard-focus={keyboard ? '' : undefined}
+        data-text-field-part="search"
+        onBlur={(event) => {
+          onBlur?.(event);
+          const { relatedTarget } = event;
+          if (
+            !(relatedTarget instanceof Node) ||
+            !event.currentTarget.contains(relatedTarget)
+          ) {
+            setKeyboard(false);
+          }
+        }}
+        onFocus={(event) => {
+          onFocus?.(event);
+          setKeyboard(!pressed.current);
+          pressed.current = false;
+        }}
+        onPointerDown={(event) => {
+          onPointerDown?.(event);
+          pressed.current = true;
+        }}
+        {...props}
+      />
+    );
+  },
+);
+
 export const TextField = {
   ...BaseField,
+  Search,
   Root,
   Label,
   Control,

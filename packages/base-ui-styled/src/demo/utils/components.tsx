@@ -68,6 +68,7 @@ export const ComponentHeading = styled('h2')`
 
 export const ComponentId = styled('a')`
   color: #a1a1a1;
+  cursor: pointer;
   font-family: monospace;
   font-size: 0.875rem;
   font-weight: 400;

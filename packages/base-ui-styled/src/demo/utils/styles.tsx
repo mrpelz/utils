@@ -16,7 +16,7 @@ export const DemoStyles = createGlobalStyle`
     background-color: light-dark(white, #0a0a0a);
     color: light-dark(black, #fafafa);
     color-scheme: light dark;
-    font-family: -apple-system, system-ui, "SF UI Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: -apple-system, "SF Pro", system-ui, "SF UI Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
     scroll-snap-type: y mandatory;
   }
 

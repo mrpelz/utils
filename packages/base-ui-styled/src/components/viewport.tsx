@@ -269,7 +269,8 @@ export const useScrollDirection = (): Omit<ViewportScrollEvent, 'position'> => {
 };
 
 /** The edge of the viewport an anchor floats at. */
-export type ViewportEdge = 'bottom' | 'leading' | 'top' | 'trailing';
+export type ViewportEdge =
+  'block-end' | 'block-start' | 'inline-end' | 'inline-start';
 
 /**
  * The safe area insets kept clear (as padding): all, those of the block
@@ -278,10 +279,13 @@ export type ViewportEdge = 'bottom' | 'leading' | 'top' | 'trailing';
 export type ViewportSafeArea = 'all' | 'block' | 'inline' | 'none';
 
 export type ViewportAnchorProps = ComponentProps<'div'> & {
-  /** The edge it floats at (e.g. top: a toolbar; bottom: a tab bar). */
+  /**
+   * The edge it floats at (e.g. `block-start`: a toolbar; `block-end`: a tab
+   * bar).
+   */
   edge: ViewportEdge;
   /**
-   * At the bottom edge: pushed up by the on-screen keyboard (default, e.g.
+   * At the block end: pushed up by the on-screen keyboard (default, e.g.
    * a message field), or covered by it (e.g. a tab bar).
    */
   keyboard?: 'cover' | 'push';
@@ -340,14 +344,14 @@ const anchorStyles = (
   safeArea: ViewportSafeArea,
 ) => {
   switch (edge) {
-    case 'top': {
+    case 'block-start': {
       return css`
         top: var(--styled-viewport-top, 0);
         inset-inline: 0;
         ${paddings(safeArea, ['top', 'left', 'right'])}
       `;
     }
-    case 'bottom': {
+    case 'block-end': {
       const push = keyboard === 'push';
       return css`
         bottom: ${push ? keyboardInset : '0px'};
@@ -356,9 +360,10 @@ const anchorStyles = (
       `;
     }
     default: {
-      // Leading: the left in left-to-right, the right in right-to-left.
+      // The inline start: the left in left-to-right, the right in
+      // right-to-left.
       const [start, end] =
-        edge === 'leading' ? ['left', 'right'] : ['right', 'left'];
+        edge === 'inline-start' ? ['left', 'right'] : ['right', 'left'];
       return css`
         ${fill(true)}
         ${start}: 0;
@@ -444,23 +449,24 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
   ),
 );
 
-/** A bar at the top (an `Anchor`). */
-const Top = forwardRef<HTMLDivElement, Omit<ViewportAnchorProps, 'edge'>>(
-  (props, ref) => (
-    <Anchor
-      ref={ref}
-      edge="top"
-      {...props}
-    />
-  ),
-);
+/** A bar at the block start (the top; an `Anchor`). */
+const BlockStart = forwardRef<
+  HTMLDivElement,
+  Omit<ViewportAnchorProps, 'edge'>
+>((props, ref) => (
+  <Anchor
+    ref={ref}
+    edge="block-start"
+    {...props}
+  />
+));
 
-/** A bar at the bottom, above the keyboard (an `Anchor`). */
-const Bottom = forwardRef<HTMLDivElement, Omit<ViewportAnchorProps, 'edge'>>(
+/** A bar at the block end (the bottom), above the keyboard (an `Anchor`). */
+const BlockEnd = forwardRef<HTMLDivElement, Omit<ViewportAnchorProps, 'edge'>>(
   (props, ref) => (
     <Anchor
       ref={ref}
-      edge="bottom"
+      edge="block-end"
       {...props}
     />
   ),
@@ -470,6 +476,6 @@ export const Viewport = {
   Provider,
   Anchor,
   Content,
-  Top,
-  Bottom,
+  BlockStart,
+  BlockEnd,
 };

@@ -9,7 +9,13 @@ export const propOptionsContent = {
 
 export const propOptionsBar = {
   ...commonPropOptions,
-  context: [undefined, 'bright', 'dim'] as const,
+  context: [
+    undefined,
+    'bright',
+    'dim',
+    'background-bright',
+    'background-dim',
+  ] as const,
   disabled: [undefined, false, true] as const,
 };
 

@@ -306,7 +306,8 @@ export const tests = [
       const result = await page.evaluate(`(() => {
         const group = document.querySelector('[data-list-part=group]');
         const center = (element) => { const { bottom, top } = element.getBoundingClientRect(); return (top + bottom) / 2; };
-        const paths = (element) => [...element.querySelectorAll('path')].map((path) => path.getBoundingClientRect());
+        // (SF Symbols: their paths' geometry, drawn through a mask.)
+        const paths = (element) => [...element.querySelectorAll('path')].filter((path) => !path.closest('mask') || path.parentElement.tagName === 'mask').map((path) => { if (!path.closest('mask')) return path.getBoundingClientRect(); const { height, width, x, y } = path.getBBox(); const { a, d, e, f } = path.ownerSVGElement.getScreenCTM(); return new DOMRect(a * x + e, d * y + f, a * width, d * height); });
         const airplane = group.children[0];
         const check = paths(group.children[4].querySelector('[data-list-part=checkmark]'))[0];
         const button = paths(document.querySelector('[data-list-part=header] [data-list-part=accessory]'));
@@ -1481,6 +1482,32 @@ export const tests = [
     },
   },
   {
+    name: 'list: a pop-up button in a row is in the details’ text style, its symbol ending where the drill-in chevron does, 16px after its label',
+    run: async (page) => {
+      await page.open('list');
+      const fonts = await page.evaluate(`(() => {
+        const font = (element) => { const style = getComputedStyle(element); return [style.fontSize, style.lineHeight, style.letterSpacing]; };
+        return [font(document.querySelector('[aria-haspopup]')), font(document.querySelector('[data-list-part=detail]'))];
+      })()`);
+      assert.deepEqual(fonts[0], fonts[1]);
+
+      // From the rows' ends: the pop-up's symbol (its button's padding
+      // beyond), and a drill-in chevron.
+      const ends = await page.evaluate(`(() => {
+        const end = (element) => Math.round(element.closest('[data-list-part=row]').getBoundingClientRect().right - element.getBoundingClientRect().right);
+        return [end(document.querySelector('[aria-haspopup] [data-button-part=symbol]')), end(document.querySelector('[data-list-part=drill-in]'))];
+      })()`);
+      assert.equal(ends[0], ends[1], 'aligned');
+
+      // Its label and symbol 16px apart (as a detail and its chevron).
+      const gap = await page.evaluate(`(() => {
+        const popup = document.querySelector('[aria-haspopup]');
+        return Math.round(popup.querySelector('[data-button-part=symbol]').getBoundingClientRect().left - popup.querySelector('[data-button-part=label]').getBoundingClientRect().right);
+      })()`);
+      assert.equal(gap, 16);
+    },
+  },
+  {
     name: 'list: screenshots',
     run: async (page) => {
       for (const id of [
@@ -1496,6 +1523,45 @@ export const tests = [
           await page.screenshot(`${id}-${scheme}`);
         }
       }
+    },
+  },
+  {
+    name: 'list: a swipe action’s text color over its tint',
+    run: async (page) => {
+      await page.open('list-swipe', 'light', {
+        state: [null, null, { $rest: true, textColor: '#000' }],
+      });
+      const colors = await page.evaluate(
+        `[...${page.section}.querySelectorAll('[data-list-part=swipe-action]')].map((action) => getComputedStyle(action).color)`,
+      );
+      assert.ok(colors.includes('rgb(0, 0, 0)'), String(colors));
+      assert.ok(colors.includes('rgb(255, 255, 255)'), 'the others white');
+    },
+  },
+  {
+    name: 'list: a pop-up opened through its row and closed by a pointer leaves no focus ring on its button',
+    run: async (page) => {
+      await page.open('list');
+      await sleep(300);
+      const rowCenter = await page.evaluate(`(() => {
+        const { height, left, top } = document.querySelector(${JSON.stringify('[data-list-part=row] [aria-haspopup]')}).closest('[data-list-part=row]').getBoundingClientRect();
+        return [left + 60, top + height / 2];
+      })()`);
+      await page.click(/** @type {[number, number]} */ (rowCenter));
+      await sleep(600);
+      assert.ok(
+        await page.evaluate(
+          `Boolean(document.querySelector(${JSON.stringify('[role=menu]')}))`,
+        ),
+        'open',
+      );
+      // Outside.
+      await page.click([700, 790]);
+      await sleep(600);
+      const ringed = await page.evaluate(
+        `document.querySelector(${JSON.stringify('[data-list-part=row] [aria-haspopup]')}).matches(':focus-visible')`,
+      );
+      assert.equal(ringed, false);
     },
   },
 ];

@@ -4,8 +4,16 @@ import {
 } from '@base-ui/react/button';
 import { Properties } from 'csstype';
 import { styled } from 'goober';
-import { ComponentProps, forwardRef, FunctionComponent } from 'react';
+import {
+  Children,
+  ComponentProps,
+  forwardRef,
+  FunctionComponent,
+  isValidElement,
+  ReactNode,
+} from 'react';
 
+import { Badge, badgeOnSymbol } from './badge.js';
 import {
   GlassBackground,
   GlassContext,
@@ -41,6 +49,11 @@ export type ButtonRootProps = BaseButtonProps &
     /** Figma “Size” (not applicable to glass variants, which have one size). */
     size?: 'large' | 'medium' | 'small';
     /**
+     * Its text and symbols' color, over its variant's (e.g. for a light
+     * `tint` behind them; unblended on glass).
+     */
+    textColor?: string;
+    /**
      * The button's color (labels, fills, tinted glass; UIKit `tintColor`,
      * e.g. Notes' yellow; default: the primary color). `destructive` wins.
      */
@@ -54,6 +67,48 @@ export type ButtonRootProps = BaseButtonProps &
       | 'glass'
       | 'glass-prominent';
   };
+
+// A borderless button's text (without a size), as its context gives it
+// (`--styled-button-plain-*`, e.g. a list row's); otherwise Subheadline.
+// Also its end margin (e.g. a list row's, its content aligned with the row's
+// details, its padding beyond them), the gap of its label and symbol, and
+// the symbol's weight; its inline padding and pressed fill (e.g. a sidebar's
+// toolbar's).
+const plainText = css`
+  --styled-button-symbol-font-size: var(
+    --styled-button-plain-size,
+    var(--font-ios-subheadline-size)
+  );
+  --styled-button-symbol-line-height: var(
+    --styled-button-plain-line-height,
+    var(--font-ios-subheadline-line-height)
+  );
+  --styled-button-symbol-font-weight: var(
+    --styled-button-plain-symbol-weight,
+    400
+  );
+  --styled-button-background-pressed: var(
+    --styled-button-plain-background-pressed,
+    color-mix(
+      in srgb,
+      var(--styled-button-background),
+      var(--styled-button-color) 15%
+    )
+  );
+
+  font-size: var(--styled-button-plain-size, var(--font-ios-subheadline-size));
+  gap: var(--styled-button-plain-gap, 4px);
+  letter-spacing: var(
+    --styled-button-plain-tracking,
+    var(--font-ios-subheadline-tracking)
+  );
+  line-height: var(
+    --styled-button-plain-line-height,
+    var(--font-ios-subheadline-line-height)
+  );
+  margin-inline-end: var(--styled-button-plain-margin-end, 0);
+  padding-inline: var(--styled-button-plain-padding-inline, 14px);
+`;
 
 /** The button's tint color at the given opacity. */
 const tintAlpha = (alpha: number) =>
@@ -257,16 +312,30 @@ const StyledRoot = styled<typeof BaseButton, ButtonRootProps>(BaseButton, forwar
             destructive ? tintAlpha(50) : 'var(--color-ios-tertiary-label)'
           };
           --styled-button-radius: ${size === 'large' ? '12px' : '40px'};
+
+          /* Borderless, without a size: in its context's text style, if it
+             gives one (e.g. a list row's: Body, as its details). */
+          ${size === undefined ? plainText : ''}
         `;
       }
     }
   }}
+
+  /* (After the variants': over theirs.) */
+  ${({ textColor }) =>
+    textColor
+      ? css`
+          --styled-button-color: ${textColor};
+          --styled-button-blend: normal;
+        `
+      : undefined}
 
   ${({ shape, size }) => {
     switch (shape) {
       case 'circle': {
         return css`
           --styled-button-radius: 1000px;
+          --styled-button-plain-padding-inline: 0px;
 
           padding: 0;
         `;
@@ -305,6 +374,9 @@ const StyledRoot = styled<typeof BaseButton, ButtonRootProps>(BaseButton, forwar
     background-color: var(--styled-button-background-disabled);
     color: var(--styled-button-color-disabled);
   }
+
+  /* A badge on its symbol (see Badge). */
+  ${badgeOnSymbol('[data-button-part=symbol]')}
 `;
 
 // Figma “Text” frame of glass buttons: the content, drawn above the glass and
@@ -323,23 +395,31 @@ const Content = styled('span')`
   transition-property: scale;
 `;
 
-// Glass variants draw their material behind the content. (Typed loosely:
-// Base UI's `ref` type, a union with its own callbacks, takes no forwarded
-// ref.)
-const ContentRoot = wrap(StyledRoot, (props: ButtonRootProps) => ({
-  ...props,
-  ...(isGlass(props.variant) && {
+const isBadge = (child: ReactNode) =>
+  isValidElement(child) && (child as { type: unknown }).type === Badge;
+
+// Glass variants draw their material behind the content; badges stay out of
+// it (not blended with the glass, nor scaled). (Typed loosely: Base UI's
+// `ref` type, a union with its own callbacks, takes no forwarded ref.)
+const ContentRoot = wrap(StyledRoot, (props: ButtonRootProps) => {
+  if (!isGlass(props.variant)) return props;
+
+  const children = Children.toArray(props.children);
+
+  return {
+    ...props,
     children: (
       <>
         <GlassBackground
           kind="button"
           tinted={props.variant === 'glass-prominent'}
         />
-        <Content>{props.children}</Content>
+        <Content>{children.filter((child) => !isBadge(child))}</Content>
+        {children.filter((child) => isBadge(child))}
       </>
     ),
-  }),
-})) as FunctionComponent<Record<string, unknown>>;
+  };
+}) as FunctionComponent<Record<string, unknown>>;
 
 // Without a click handler (nor a secondary one), disabled, unless it
 // submits or resets its form.

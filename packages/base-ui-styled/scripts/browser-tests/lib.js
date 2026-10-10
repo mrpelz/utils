@@ -139,6 +139,9 @@ export const launchBrowser = async () => {
     [
       '--headless=new',
       '--disable-gpu',
+      // A mouse (headless Chrome on Linux has none: no hover, no fine
+      // pointer), as on macOS; hover and pointer types 2 and 4: hover, fine.
+      '--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4',
       '--hide-scrollbars',
       '--remote-debugging-port=0',
       `--user-data-dir=${userDataDirectory}`,

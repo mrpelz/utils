@@ -22,8 +22,14 @@ export const propOptionsContent = {
 
 export const propOptionsRoot = {
   ...commonPropOptions,
-  placement: [undefined, 'bottom', 'top'] as const,
-  context: [undefined, 'bright', 'dim'] as const,
+  placement: [undefined, 'block-end', 'block-start'] as const,
+  context: [
+    undefined,
+    'bright',
+    'dim',
+    'background-bright',
+    'background-dim',
+  ] as const,
   disabled: [undefined, false, true] as const,
   loopFocus: [undefined, false, true] as const,
 };
@@ -31,6 +37,18 @@ export const propOptionsRoot = {
 export const propOptionsGroup = {
   ...commonPropOptions,
   prominent: [undefined, false, true] as const,
+  // Over the tint: dark, light, or custom.
+  textColor: [
+    undefined,
+    '#000',
+    '#fff',
+    'var(--color-ios-system-yellow)',
+  ] as const,
+  tint: [
+    undefined,
+    'var(--color-ios-system-orange)',
+    'var(--color-ios-system-green)',
+  ] as const,
   disabled: [undefined, false, true] as const,
 };
 
@@ -81,7 +99,13 @@ export const getPropOptionsPageControl = (addLog: AddLog) => ({
   defaultValue: [undefined, 0, 2] as const,
   value: [undefined, 0, 1, 4] as const,
   disabled: [undefined, false, true] as const,
-  context: [undefined, 'bright', 'dim'] as const,
+  context: [
+    undefined,
+    'bright',
+    'dim',
+    'background-bright',
+    'background-dim',
+  ] as const,
   onValueChange: [
     new MappedProp(
       (page: number) => addLog(`page change: ${page}`),

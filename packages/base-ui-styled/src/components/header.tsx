@@ -145,6 +145,9 @@ const StyledBar = styled<typeof Toolbar.Root, StyledBarProps>(Toolbar.Root, forw
     backdrop-filter: blur(8px);
     content: '';
     inset: 0 0 -16px;
+
+    /* (Under a floating column too, see Layout and Page.) */
+    inset-inline-start: calc(var(--styled-layout-inset-start, 0px) * -1);
     mask-image: linear-gradient(#000 50%, transparent);
     pointer-events: none;
   }
@@ -171,7 +174,7 @@ const Bar = forwardRef<HTMLDivElement, HeaderBarProps>((props, ref) => {
     <StyledBar
       ref={ref}
       largeTitle={largeTitle}
-      placement="top"
+      placement="block-start"
       timeline={timeline}
       {...props}
     />

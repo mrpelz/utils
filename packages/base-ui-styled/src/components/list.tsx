@@ -3,6 +3,7 @@ import { Properties } from 'csstype';
 import { keyframes, styled } from 'goober';
 import {
   createContext,
+  CSSProperties,
   FocusEvent,
   forwardRef,
   MouseEvent,
@@ -26,6 +27,7 @@ import {
 } from './checkbox.js';
 import { textStyle } from './typography.js';
 import {
+  colorScheme,
   css,
   edgeScrollDelta,
   fontWeight,
@@ -109,7 +111,7 @@ import {
 // - Separators, chevrons and the checkmarks are drawn as CSS borders and SVG
 //   strokes (Figma: SF Symbols glyphs 􀆊, 􀆅, 􀅼, 􀅽, 􀌇, 􀆏).
 
-export type ListStyle = 'grouped' | 'insetGrouped' | 'plain';
+export type ListStyle = 'grouped' | 'insetGrouped' | 'plain' | 'sidebar';
 
 type Side = 'leading' | 'trailing';
 
@@ -241,6 +243,89 @@ const outlineBlock = [
 ].join(', ');
 
 const listStyles: Record<ListStyle, string> = {
+  // Figma “Sidebars” (“Sidebar Row”, in a `Sidebar`'s glass): groups
+  // without a shape of their own (nor a background), their rows capsules,
+  // 44px high (selected: on a fill, its symbol and title emphasized, in the
+  // tint), without separators; 10px in at the first level, 20px more per
+  // level, their trailing parts 16px from the end; symbols 34px wide, 4px
+  // from the title; sections 20px apart, their headers (“Section Header”)
+  // in Body, in the secondary label color, 12px in.
+  sidebar: css`
+    ${colorScheme(
+      `--styled-list-selected-background: var(--styled-sidebar-selection, rgb(0 0 0 / 7%));
+       --styled-select-circle-border: #bfbfbf;`,
+      `--styled-list-selected-background: var(--styled-sidebar-selection, rgb(255 255 255 / 12%));
+       --styled-select-circle-border: rgb(255 255 255 / 30%);`,
+    )}
+    --styled-list-background: transparent;
+    --styled-list-group-background: transparent;
+    --styled-list-inset: 0px;
+    --styled-list-radius: 0px;
+    --styled-list-item-radius: 100px;
+    --styled-list-section-spacing: 20px;
+    --styled-list-outline-shadow: none;
+    --styled-list-separator-opacity: 0;
+    --styled-list-row-min-height: 44px;
+    --styled-list-row-padding: 0 16px;
+    --styled-list-row-padding-start: 10px;
+    --styled-list-selected-title: var(--color-ios-primary);
+
+    /* Pressed: on the selection's fill too (user: Figma's pressed rows are
+       wrong; selected and pressed differ in their text only; the
+       sidebar's toolbar buttons pressed alike, see Sidebar). */
+    --styled-list-pressed-background: var(--styled-list-selected-background);
+
+    min-width: 0;
+
+    & [${part}='row'] > [${part}='image'][data-variant='symbol'] {
+      width: 34px;
+      color: var(--color-ios-label);
+      margin-inline-end: 4px;
+    }
+
+    & [data-selected] [${part}='row'] > [${part}='title'] {
+      color: var(--color-ios-primary);
+      ${fontWeight(590)}
+    }
+
+    & [data-selected] [${part}='row'] > [${part}='image'] {
+      color: var(--color-ios-primary);
+      ${fontWeight(590)}
+    }
+
+    & [${part}='header'] {
+      min-height: 44px;
+      align-items: center;
+      padding: 2px 12px 10px;
+    }
+
+    & [${part}='header'] > [${part}='title'] {
+      color: var(--color-ios-secondary-label);
+      ${textStyle('body')}
+      ${fontWeight(400)}
+    }
+
+    /* Its selection circles (Figma “Edit Button”): 8px before the symbol. */
+    & [${part}='row'] > [${part}='edit'] {
+      margin-inline: 0 8px;
+    }
+
+    /* Chevrons (Figma “Disclosure”: #999, 590, an 18px box 12px from the
+       row's end): gray, not the tint; headers' and rows' alike, aligned. */
+    & [${part}='disclosure'] {
+      color: var(--color-ios-secondary-label);
+    }
+
+    & [${part}='header'] > [${part}='disclosure'] {
+      min-width: 18px;
+      font-size: var(--font-ios-body-size);
+    }
+
+    & [${part}='row'] > [${part}='accessory']:has(> [${part}='disclosure']) {
+      min-width: 18px;
+      margin-inline-end: -4px;
+    }
+  `,
   grouped: css`
     --styled-list-background: var(--color-ios-system-grouped-background);
     --styled-list-group-background: var(
@@ -623,23 +708,44 @@ const ownControl =
 export type ListItemProps = PartProps<'li'> & {
   /** As `Button`: the cursor (default: `pointer` with a click handler). */
   cursor?: Properties['cursor'];
+  /** Its level in a hierarchy (indented 20px per level; e.g. a sidebar). */
+  level?: number;
+  /** Selected (e.g. a sidebar's current section): on a fill. */
+  selected?: boolean;
 };
 
 // The row's content: a grid of its parts (see above), with its separator;
 // in its item, offset by the item's leading swipe room (see `Item`).
 const StyledRow = styled(partElement('div', 'row'), forwardRef)`
-  --styled-list-min-height: 52px;
+  --styled-list-min-height: var(--styled-list-row-min-height, 52px);
+
+  /* Borderless buttons in rows (e.g. a pop-up's) in Body, as details; their
+     content ending where the details do (their padding beyond), their label
+     and symbol 16px apart (as a detail and its chevron, user), the symbol
+     light (user: thinner than regular). */
+  --styled-button-plain-size: var(--font-ios-body-size);
+  --styled-button-plain-line-height: var(--font-ios-body-line-height);
+  --styled-button-plain-tracking: var(--font-ios-body-tracking);
+  --styled-button-plain-margin-end: -14px;
+  --styled-button-plain-gap: 16px;
+  --styled-button-plain-symbol-weight: 300;
 
   position: relative;
   display: grid;
   min-height: var(--styled-list-min-height);
   box-sizing: border-box;
   align-content: center;
-  padding: 12px 16px;
+  padding: var(--styled-list-row-padding, 12px 16px);
   grid-auto-columns: auto;
   grid-auto-flow: column;
   grid-template-columns: auto auto minmax(0, 1fr);
   grid-template-rows: auto auto;
+
+  /* Indented by its level (see Item). */
+  padding-inline-start: calc(
+    var(--styled-list-row-padding-start, 16px) + var(--styled-list-level, 0) *
+      20px
+  );
 
   /* Figma Height=Tall (images keep their regular size) */
   &:has(> [${part}='subtitle']) {
@@ -864,11 +970,6 @@ const StyledRow = styled(partElement('div', 'row'), forwardRef)`
     width: auto;
   }
 
-  /* Figma Type=Disclosure */
-  & > [${part}='detail'] + [${part}='disclosure'] {
-    margin-inline-start: 12px;
-  }
-
   /* Figma “_Grabber” */
   & > [${part}='grabber'] {
     margin-inline-start: 12px;
@@ -884,6 +985,7 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)<ListItemProps>`
 
   position: relative;
   display: block;
+  border-radius: var(--styled-list-item-radius, 0);
   background-color: var(--styled-list-row-background, transparent);
 
   /* The pressed state is the row's (a title's hit area covers it). */
@@ -924,20 +1026,35 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)<ListItemProps>`
   /* While reordering, by their order on screen (see useReorder) */
   &:first-child:not([data-reorder-edge]),
   &[data-reorder-edge~='first'] {
-    border-start-end-radius: var(--styled-list-radius, 24px);
-    border-start-start-radius: var(--styled-list-radius, 24px);
+    border-start-end-radius: var(
+      --styled-list-item-radius,
+      var(--styled-list-radius, 24px)
+    );
+    border-start-start-radius: var(
+      --styled-list-item-radius,
+      var(--styled-list-radius, 24px)
+    );
 
     --styled-list-separator-opacity: 0;
   }
 
   &:last-child:not([data-reorder-edge]),
   &[data-reorder-edge~='last'] {
-    border-end-end-radius: var(--styled-list-radius, 24px);
-    border-end-start-radius: var(--styled-list-radius, 24px);
+    border-end-end-radius: var(
+      --styled-list-item-radius,
+      var(--styled-list-radius, 24px)
+    );
+    border-end-start-radius: var(
+      --styled-list-item-radius,
+      var(--styled-list-radius, 24px)
+    );
   }
 
   ${whilePressed} {
-    --styled-list-row-background: var(--color-ios-system-gray4);
+    --styled-list-row-background: var(
+      --styled-list-pressed-background,
+      var(--color-ios-system-gray4)
+    );
 
     transition-duration: 0ms;
 
@@ -963,6 +1080,24 @@ const StyledItem = styled(partElement('li', 'item'), forwardRef)<ListItemProps>`
   &[data-swipe] > * > [${part}='row'] {
     border-radius: ${swipeRadius}px;
     background-color: var(--color-ios-system-gray5);
+  }
+
+  /* Selected (see Item): on a fill (sidebars: its title in the tint), its
+     separators hidden. */
+  &[data-selected] {
+    --styled-list-row-background: var(
+      --styled-list-selected-background,
+      var(--color-ios-system-gray5)
+    );
+    --styled-list-separator-opacity: 0;
+  }
+
+  &[data-selected] + * {
+    --styled-list-separator-opacity: 0;
+  }
+
+  &[data-selected] [${part}='title'] {
+    color: var(--styled-list-selected-title, inherit);
   }
 
   /* An expandable row, closed (see Expandable): no height, nor separator. */
@@ -1395,6 +1530,8 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     onPointerDown,
     onPointerMove,
     onPointerUp,
+    level,
+    selected,
     style,
     ...props
   } = useSecondaryClick(itemProps);
@@ -1898,8 +2035,17 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     <ItemContext.Provider value={context}>
       <StyledItem
         ref={itemRef}
+        aria-current={selected ? 'true' : undefined}
+        data-selected={selected ? '' : undefined}
         data-swipeable={swipeable ? '' : undefined}
-        style={style}
+        style={
+          level === undefined
+            ? style
+            : ({
+                ...(style as CSSProperties | undefined),
+                '--styled-list-level': String(level),
+              } as CSSProperties)
+        }
         {...props}
         onBlurCapture={handleBlurCapture}
         onClickCapture={handleClickCapture}
@@ -2163,7 +2309,7 @@ const imageVariants: Record<Required<ListImageProps>['variant'], string> = {
 
 // Figma “_Images”: a symbol, or an image (`img`, `video`, `canvas` filling
 // it, or a symbol) in a rounded, circular or square frame.
-const Image = styled(
+const StyledImage = styled(
   partElement('span', 'image', ['variant']),
   forwardRef,
 )<ListImageProps>`
@@ -2181,6 +2327,15 @@ const Image = styled(
     object-fit: cover;
   }
 `;
+
+// (Its variant also as `data-variant`, e.g. for a sidebar's symbols.)
+const Image = forwardRef<HTMLElement, ListImageProps>((props, ref) => (
+  <StyledImage
+    ref={ref}
+    data-variant={props.variant ?? 'symbol'}
+    {...props}
+  />
+));
 
 // Figma “Symbol” and “Info”: a symbol in the tint color, pressable as a
 // link or button (`render`).
@@ -2466,8 +2621,11 @@ export type ListSwipeActionsProps = PartProps<'div'> & {
    * `performsFirstActionWithFullSwipe`).
    */
   overswipe?: boolean;
-  /** The row's side the actions are revealed on (default: `trailing`). */
-  side?: Side;
+  /**
+   * The row's side the actions are revealed on.
+   * @default 'inline-end'
+   */
+  side?: 'inline-end' | 'inline-start';
 };
 
 // Circles centered in the row, rounded rectangles 4px from its edges.
@@ -2486,7 +2644,7 @@ const StyledSwipeActions = styled(
   padding-block: 4px;
   pointer-events: none;
   ${({ side }) =>
-    side === 'leading'
+    side === 'inline-start'
       ? css`
           inset-inline-start: 0;
           padding-inline: 16px 10px;
@@ -2515,11 +2673,13 @@ const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
       onFocusCapture,
       onOverswipe,
       overswipe = false,
-      side = 'trailing',
+      side: sideProp = 'inline-end',
       ...props
     },
     ref,
   ) => {
+    // (Internally: leading, trailing.)
+    const side: Side = sideProp === 'inline-start' ? 'leading' : 'trailing';
     const item = useContext(ItemContext);
     const pin = useContext(PinContext);
     const elementRef = useForwardedRef<HTMLElement>(ref);
@@ -2550,7 +2710,7 @@ const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
     return createPortal(
       <StyledSwipeActions
         ref={elementRef}
-        side={side}
+        side={sideProp}
         {...props}
         onFocusCapture={(event: FocusEvent<HTMLElement>) => {
           (onFocusCapture as Handler<typeof event>)?.(event);
@@ -2576,6 +2736,8 @@ export type ListSwipeActionProps = PartProps<'button'> & {
    * room: for multi-line rows (`Text`).
    */
   showLabel?: boolean;
+  /** Text color (default: white), e.g. for a light `tint`. */
+  textColor?: string;
   /** Background color (default: `systemGray`). */
   tint?: string;
 };
@@ -2644,9 +2806,14 @@ const actionFadeStyle = css`
 `;
 
 const StyledSwipeAction = styled(
-  partElement('button', 'swipe-action', ['shape', 'showLabel', 'tint'], {
-    type: 'button',
-  }),
+  partElement(
+    'button',
+    'swipe-action',
+    ['shape', 'showLabel', 'textColor', 'tint'],
+    {
+      type: 'button',
+    },
+  ),
   forwardRef,
 )<Omit<ListSwipeActionProps, 'label'>>`
   /* Its label: 4px below the shape, 16px high */
@@ -2664,7 +2831,7 @@ const StyledSwipeAction = styled(
   box-sizing: border-box;
   flex-direction: column;
   align-items: center;
-  color: #fff;
+  color: ${({ textColor }) => textColor ?? '#fff'};
   padding-block-end: var(--styled-list-action-label-space, 0);
   ${cursor('pointer')}
   transform: scale(0);

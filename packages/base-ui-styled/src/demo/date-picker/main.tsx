@@ -39,6 +39,7 @@ const DatePickerDemoBase: FunctionComponent<{ preset: Preset }> = ({
   return (
     <Component
       center
+      baseUiId="popover"
       controls={controls}
       id={preset.id}
       log={log}

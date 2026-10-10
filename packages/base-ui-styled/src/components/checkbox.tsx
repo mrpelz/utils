@@ -86,7 +86,8 @@ const selectCircle = ({ disabled }: CursorProps) => css`
   position: relative;
   flex: none;
   padding: 0;
-  border: 1.5px solid var(--color-ios-system-gray3);
+  border: 1.5px solid
+    var(--styled-select-circle-border, var(--color-ios-system-gray3));
   margin: 0;
   appearance: none;
   background: none;

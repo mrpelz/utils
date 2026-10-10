@@ -235,7 +235,7 @@ export const ViewportDemo: FunctionComponent = () => {
         ) : null}
         {top ? (
           <Viewport.Anchor
-            edge="top"
+            edge="block-start"
             {...propsTop}
           >
             <Sample>Top</Sample>
@@ -243,7 +243,7 @@ export const ViewportDemo: FunctionComponent = () => {
         ) : null}
         {bottom ? (
           <Viewport.Anchor
-            edge="bottom"
+            edge="block-end"
             {...propsBottom}
           >
             <Sample>Bottom</Sample>
@@ -251,7 +251,7 @@ export const ViewportDemo: FunctionComponent = () => {
         ) : null}
         {leading ? (
           <Viewport.Anchor
-            edge="leading"
+            edge="inline-start"
             {...propsLeading}
           >
             <SideSample>Leading</SideSample>
@@ -259,18 +259,18 @@ export const ViewportDemo: FunctionComponent = () => {
         ) : null}
         {trailing ? (
           <Viewport.Anchor
-            edge="trailing"
+            edge="inline-end"
             {...propsTrailing}
           >
             <SideSample>Trailing</SideSample>
           </Viewport.Anchor>
         ) : null}
         {content.bottomBar ? (
-          <Viewport.Bottom>
+          <Viewport.BlockEnd>
             <Bar>
               <Field field={message} />
             </Bar>
-          </Viewport.Bottom>
+          </Viewport.BlockEnd>
         ) : null}
       </Viewport.Provider>
     </Component>

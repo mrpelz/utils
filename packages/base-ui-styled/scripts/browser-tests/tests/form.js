@@ -92,4 +92,28 @@ export const tests = [
       });
     },
   },
+  {
+    name: 'form: changed defaults show (their parts remount)',
+    run: async (page) => {
+      await page.open('form');
+      const checked = () =>
+        page.evaluate(
+          `[...document.querySelectorAll(${JSON.stringify('[role=checkbox]')})].map((box) => box.getAttribute('aria-checked'))`,
+        );
+      assert.deepEqual(await checked(), ['true', 'false', 'false']);
+      await page.setState(3, { defaultValue: '$[none]' });
+      await sleep(300);
+      assert.deepEqual(await checked(), ['false', 'false', 'false']);
+
+      await page.open('text-field');
+      await page.setState(2, { defaultValue: 'Kate Bell' });
+      await sleep(300);
+      assert.equal(
+        await page.evaluate(
+          `document.querySelector(${JSON.stringify('[data-text-field-part=control]')}).value`,
+        ),
+        'Kate Bell',
+      );
+    },
+  },
 ];

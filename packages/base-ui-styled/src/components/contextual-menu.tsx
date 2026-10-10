@@ -31,6 +31,11 @@ import { useForwardedRef } from './utils.js';
 // - Opened as Base UI menus are (a press; on touch already on touch down,
 //   see `MenuTrigger`), not by a long press.
 // - The preview takes no pointer events (iOS: pressing it commits).
+// - Too tall for the viewport together (e.g. a large preview), the preview
+//   (or trigger) and the menu scroll together: a transparent scroll
+//   container over the whole viewport (behind the menu, wheel input over
+//   the menu scrolling it too) moves them, opened scrolled to its end (the
+//   menu in view, the preview partly out of it, above).
 
 /** The gap between the lifted trigger and the menu, and the viewport. */
 const gap = 8;
@@ -52,7 +57,10 @@ type ContextualMenuContextValue = {
   lift: number;
   open: boolean;
   origin?: Box;
+  /** Too tall for the viewport: scrolled together (see `Root`). */
+  overflowing: boolean;
   preview: boolean;
+  scrollerRef: { current: HTMLDivElement | null };
   setAlign: (align: Align) => void;
   setPopupHeight: (height: number) => void;
   setPreviewSize: (size: { height: number; width: number } | undefined) => void;
@@ -63,21 +71,44 @@ const ContextualMenuContext = createContext<ContextualMenuContextValue>({
   align: 'center',
   lift: 0,
   open: false,
+  overflowing: false,
   preview: false,
+  scrollerRef: { current: null },
   setAlign: () => undefined,
   setPopupHeight: () => undefined,
   setPreviewSize: () => undefined,
   triggerRef: { current: null },
 });
 
+/** Where a box (`height`) would be for a menu below it to fit. */
+const fittingTop = (height: number, menu: number) =>
+  window.innerHeight - margin - menu - gap - height;
+
 /**
  * How far a box (`top`, `height`) lifts for a menu below it to fit, never
  * leaving the viewport (negative: moved down, e.g. scrolled partly above).
  */
-const liftFor = (top: number, height: number, menu: number) => {
-  const fitting = window.innerHeight - margin - menu - gap - height;
-  return top - Math.max(margin, Math.min(top, fitting));
-};
+const liftFor = (top: number, height: number, menu: number) =>
+  top - Math.max(margin, Math.min(top, fittingTop(height, menu)));
+
+/** How much a box (`height`) and the menu below it are too tall. */
+const overflowFor = (height: number, menu: number) =>
+  Math.max(0, margin - fittingTop(height, menu));
+
+// Too tall: over the whole viewport (above the backdrop, below the menu,
+// the preview taking no pointer events), transparent, scrolling them.
+const Scroller = styled('div', forwardRef)`
+  position: fixed;
+  z-index: 1;
+  overflow: hidden auto;
+  inset: 0;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
 
 /**
  * The lifted box for the trigger's (`trigger`): the preview's (from the
@@ -154,7 +185,23 @@ const Root = ({
   }, [open, origin]);
 
   const box = origin && boxOf(origin, previewSize, align, origin.rtl);
-  const lift = open && box ? liftFor(box.top, box.height, popupHeight) : 0;
+  // Too tall: scrolled (by `Scroller`, from 0 to the overflow), lifted
+  // further as it scrolls on; opened at its end (the menu in view).
+  const overflow =
+    open && box && popupHeight ? overflowFor(box.height, popupHeight) : 0;
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const [scrolled, setScrolled] = useState<number | undefined>(undefined);
+  if (!open && scrolled !== undefined) setScrolled(undefined);
+  const lift =
+    open && box
+      ? liftFor(box.top, box.height, popupHeight) +
+        Math.min(scrolled ?? overflow, overflow)
+      : 0;
+  useLayoutEffect(() => {
+    const { current: scroller } = scrollerRef;
+    if (!scroller || overflow === 0 || scrolled !== undefined) return;
+    scroller.scrollTop = overflow;
+  }, [overflow, scrolled]);
 
   const value = useMemo<ContextualMenuContextValue>(
     () => ({
@@ -180,17 +227,31 @@ const Root = ({
       lift,
       open,
       origin,
+      overflowing: overflow > 0,
       preview: previewSize !== undefined,
+      scrollerRef,
       setAlign,
       setPopupHeight,
       setPreviewSize,
       triggerRef,
     }),
-    [align, box, lift, open, origin, previewSize],
+    [align, box, lift, open, origin, overflow, previewSize],
   );
 
   return (
     <ContextualMenuContext.Provider value={value}>
+      {overflow > 0
+        ? createPortal(
+            <Scroller
+              ref={scrollerRef}
+              data-contextual-menu-part="scroller"
+              onScroll={(event) => setScrolled(event.currentTarget.scrollTop)}
+            >
+              <div style={{ height: window.innerHeight + overflow }} />
+            </Scroller>,
+            document.body,
+          )
+        : null}
       <Menu.Root
         {...props}
         open={open}
@@ -230,6 +291,11 @@ const StyledTrigger = styled('span', forwardRef)`
   &[data-previewed] > * {
     opacity: 0;
   }
+
+  /* Scrolled (too tall, see Root): following it at once. */
+  &[data-overflowing] > * {
+    transition-property: opacity;
+  }
 `;
 
 export type ContextualMenuTriggerProps = Omit<BaseMenu.Trigger.Props, 'ref'>;
@@ -240,7 +306,7 @@ export type ContextualMenuTriggerProps = Omit<BaseMenu.Trigger.Props, 'ref'>;
  */
 const Trigger = forwardRef<HTMLElement, ContextualMenuTriggerProps>(
   (props, forwardedRef) => {
-    const { lift, open, preview, triggerRef } = useContext(
+    const { lift, open, overflowing, preview, triggerRef } = useContext(
       ContextualMenuContext,
     );
     const ref = useForwardedRef(forwardedRef);
@@ -251,6 +317,7 @@ const Trigger = forwardRef<HTMLElement, ContextualMenuTriggerProps>(
           triggerRef.current = element;
         }}
         data-lifted={open ? '' : undefined}
+        data-overflowing={open && overflowing ? '' : undefined}
         data-previewed={open && preview ? '' : undefined}
         style={{ '--styled-contextual-lift': lift } as CSSProperties}
       >
@@ -283,6 +350,11 @@ const StyledPreview = styled('div', forwardRef)`
     opacity: 0;
     scale: 0.8;
   }
+
+  /* Scrolled (too tall, see Root): following it at once. */
+  &[data-overflowing] {
+    transition-property: scale, opacity;
+  }
 `;
 
 export type ContextualMenuPreviewProps = React.ComponentProps<'div'>;
@@ -294,9 +366,8 @@ export type ContextualMenuPreviewProps = React.ComponentProps<'div'>;
  */
 const Preview = forwardRef<HTMLDivElement, ContextualMenuPreviewProps>(
   ({ style, ...props }, forwardedRef) => {
-    const { align, box, lift, open, origin, setPreviewSize } = useContext(
-      ContextualMenuContext,
-    );
+    const { align, box, lift, open, origin, overflowing, setPreviewSize } =
+      useContext(ContextualMenuContext);
     const ref = useForwardedRef(forwardedRef);
 
     useLayoutEffect(() => {
@@ -321,6 +392,7 @@ const Preview = forwardRef<HTMLDivElement, ContextualMenuPreviewProps>(
     return createPortal(
       <StyledPreview
         ref={ref}
+        data-overflowing={overflowing ? '' : undefined}
         {...props}
         style={
           {
@@ -370,7 +442,7 @@ const Positioner = forwardRef<HTMLDivElement, ContextualMenuPositionerProps>(
         align="center"
         anchor={anchor}
         collisionAvoidance={{ align: 'shift', side: 'none' }}
-        side="bottom"
+        side="block-end"
         sideOffset={gap}
         {...props}
       />
@@ -380,10 +452,15 @@ const Positioner = forwardRef<HTMLDivElement, ContextualMenuPositionerProps>(
 
 export type ContextualMenuPopupProps = Omit<BaseMenu.Popup.Props, 'ref'>;
 
-/** The menu (its height decides how far the trigger lifts). */
+/**
+ * The menu (its height decides how far the trigger lifts; too tall for the
+ * viewport, it scrolls with it, see `Root`).
+ */
 const Popup = forwardRef<HTMLDivElement, ContextualMenuPopupProps>(
-  (props, forwardedRef) => {
-    const { setPopupHeight } = useContext(ContextualMenuContext);
+  ({ onWheel, style, ...props }, forwardedRef) => {
+    const { overflowing, scrollerRef, setPopupHeight } = useContext(
+      ContextualMenuContext,
+    );
     const ref = useForwardedRef(forwardedRef);
 
     useLayoutEffect(() => {
@@ -396,6 +473,20 @@ const Popup = forwardRef<HTMLDivElement, ContextualMenuPopupProps>(
     return (
       <Menu.Popup
         ref={ref}
+        // Scrolled with the preview: its whole height (not the space below
+        // it), wheel input over it scrolling them.
+        style={
+          overflowing
+            ? (state) => ({
+                ...(typeof style === 'function' ? style(state) : style),
+                maxHeight: 'none',
+              })
+            : style
+        }
+        onWheel={(event) => {
+          onWheel?.(event);
+          if (overflowing) scrollerRef.current?.scrollBy({ top: event.deltaY });
+        }}
         {...props}
       />
     );

@@ -34,7 +34,12 @@ import {
   propOptionsRoot as propOptionsTextFieldRoot,
 } from '../text-field/props.js';
 import { AddLog, useLog } from '../utils/log.js';
-import { Component, MappedProp, usePropControl } from '../utils/main.js';
+import {
+  Component,
+  MappedProp,
+  Remounters,
+  usePropControl,
+} from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
@@ -222,25 +227,31 @@ export const FormDemo: FunctionComponent = () => {
     'legend',
     externalLegend,
   );
-  const [controlCheckboxGroup, propsCheckboxGroup, stateCheckboxGroup] =
-    usePropControl(
-      useMemo(() => getPropOptionsCheckboxGroup(addLog), [addLog]),
-      'checkbox group',
-      externalCheckboxGroup,
-      true,
-    );
-  const [controlCheckbox, propsCheckbox, stateCheckbox] = usePropControl(
-    propOptionsCheckbox,
-    'checkbox (first)',
-    externalCheckbox,
+  const [
+    controlCheckboxGroup,
+    propsCheckboxGroup,
+    stateCheckboxGroup,
+    RemounterCheckboxGroup,
+  ] = usePropControl(
+    useMemo(() => getPropOptionsCheckboxGroup(addLog), [addLog]),
+    'checkbox group',
+    externalCheckboxGroup,
+    true,
   );
-  const [controlRadioGroup, propsRadioGroup, stateRadioGroup] = usePropControl(
+  const [controlCheckbox, propsCheckbox, stateCheckbox, RemounterCheckbox] =
+    usePropControl(propOptionsCheckbox, 'checkbox (first)', externalCheckbox);
+  const [
+    controlRadioGroup,
+    propsRadioGroup,
+    stateRadioGroup,
+    RemounterRadioGroup,
+  ] = usePropControl(
     useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
     'radio group',
     externalRadioGroup,
     true,
   );
-  const [controlRadio, propsRadio, stateRadio] = usePropControl(
+  const [controlRadio, propsRadio, stateRadio, RemounterRadio] = usePropControl(
     propOptionsRadio,
     'radio (first)',
     externalRadio,
@@ -349,61 +360,68 @@ export const FormDemo: FunctionComponent = () => {
             <Fieldset.Root>
               <Fieldset.Legend>Notifications</Fieldset.Legend>
               {/* Fields: their values are the form's (by name). */}
-              <Field.Root
-                name="notifications"
-                render={<FieldContents />}
+              {/* (Remounted as their defaults change.) */}
+              <Remounters
+                remounters={[RemounterCheckboxGroup, RemounterCheckbox]}
               >
-                <CheckboxGroup
-                  {...propsCheckboxGroup}
-                  allValues={notificationValues}
-                  render={<List.Group />}
+                <Field.Root
+                  name="notifications"
+                  render={<FieldContents />}
                 >
-                  {notificationValues.map((value, index) => (
-                    <List.Item
-                      key={value}
-                      onClick={forwardClick('[role=checkbox]')}
-                    >
-                      <List.Checkbox
-                        aria-label={value}
-                        value={value}
-                        {...(index === 0 ? propsCheckbox : {})}
-                      />
-                      <List.Title>
-                        {value.charAt(0).toUpperCase() + value.slice(1)}
-                      </List.Title>
-                    </List.Item>
-                  ))}
-                </CheckboxGroup>
-              </Field.Root>
+                  <CheckboxGroup
+                    {...propsCheckboxGroup}
+                    allValues={notificationValues}
+                    render={<List.Group />}
+                  >
+                    {notificationValues.map((value, index) => (
+                      <List.Item
+                        key={value}
+                        onClick={forwardClick('[role=checkbox]')}
+                      >
+                        <List.Checkbox
+                          aria-label={value}
+                          value={value}
+                          {...(index === 0 ? propsCheckbox : {})}
+                        />
+                        <List.Title>
+                          {value.charAt(0).toUpperCase() + value.slice(1)}
+                        </List.Title>
+                      </List.Item>
+                    ))}
+                  </CheckboxGroup>
+                </Field.Root>
+              </Remounters>
             </Fieldset.Root>
 
             <Fieldset.Root>
               <Fieldset.Legend>Appearance</Fieldset.Legend>
-              <Field.Root
-                name="appearance"
-                render={<FieldContents />}
-              >
-                <RadioGroup
-                  {...propsRadioGroup}
-                  render={<List.Group />}
+              <Remounters remounters={[RemounterRadioGroup, RemounterRadio]}>
+                <Field.Root
+                  name="appearance"
+                  render={<FieldContents />}
                 >
-                  {appearanceValues.map((value, index) => (
-                    <List.Item
-                      key={value}
-                      onClick={forwardClick('[role=radio]')}
-                    >
-                      <List.Radio
-                        aria-label={value}
-                        value={value}
-                        {...(index === 0 ? propsRadio : {})}
-                      />
-                      <List.Title>
-                        {value.charAt(0).toUpperCase() + value.slice(1)}
-                      </List.Title>
-                    </List.Item>
-                  ))}
-                </RadioGroup>
-              </Field.Root>
+                  <RadioGroup
+                    {...propsRadioGroup}
+                    render={<List.Group />}
+                  >
+                    {appearanceValues.map((value, index) => (
+                      <List.Item
+                        key={value}
+                        onClick={forwardClick('[role=radio]')}
+                      >
+                        <List.Radio
+                          aria-label={value}
+                          value={value}
+                          {...(index === 0 ? propsRadio : {})}
+                        />
+                        <List.Title>
+                          {value.charAt(0).toUpperCase() + value.slice(1)}
+                        </List.Title>
+                      </List.Item>
+                    ))}
+                  </RadioGroup>
+                </Field.Root>
+              </Remounters>
             </Fieldset.Root>
 
             <List.Section>

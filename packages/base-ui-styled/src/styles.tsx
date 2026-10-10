@@ -279,6 +279,71 @@ export const styles = css`
       0 0 25px 0 rgb(0 0 0 / 20%);
 
     /*
+     * Glass over a background of the app's (a picture, colors; not a plain
+     * page), bright or dim (user): bright's and dim's content, lenses and
+     * selections, but floating over it (not Figma's glass over white or
+     * black): a translucent fill, a thin light rim (brighter at its top
+     * start), and a soft shadow outside, without bright's white halo or
+     * dim's dark inner bands.
+     */
+    --glass-ios-background-bright-blur: rgb(0 0 0 / 4%);
+    --glass-ios-background-bright-fill: rgb(255 255 255 / 30%);
+    --glass-ios-background-bright-fill-filter: brightness(1.1);
+    --glass-ios-background-bright-content: var(--glass-ios-bright-content);
+    --glass-ios-background-bright-content-blend: var(
+      --glass-ios-bright-content-blend
+    );
+    --glass-ios-background-bright-content-disabled: var(
+      --glass-ios-bright-content-disabled
+    );
+    --glass-ios-background-bright-content-prominent: var(
+      --glass-ios-bright-content-prominent
+    );
+    --glass-ios-background-bright-content-prominent-blend: var(
+      --glass-ios-bright-content-prominent-blend
+    );
+    --glass-ios-background-bright-content-prominent-disabled: var(
+      --glass-ios-bright-content-prominent-disabled
+    );
+    --glass-ios-background-bright-selection: var(--glass-ios-bright-selection);
+    --glass-ios-background-bright-lens: var(--glass-ios-bright-lens);
+    --glass-ios-background-bright-lens-shadow: var(
+      --glass-ios-bright-lens-shadow
+    );
+    --glass-ios-background-bright-shadow:
+      inset 0 0 0 0.5px rgb(255 255 255 / 50%),
+      inset 1px 1px 0 -0.5px rgb(255 255 255 / 80%),
+      inset -1px -1px 0 -0.5px rgb(255 255 255 / 40%),
+      0 2px 12px rgb(0 0 0 / 12%);
+    --glass-ios-background-dim-blur: rgb(0 0 0 / 10%);
+    --glass-ios-background-dim-fill: rgb(0 0 0 / 20%);
+    --glass-ios-background-dim-fill-filter: brightness(0.8);
+    --glass-ios-background-dim-content: var(--glass-ios-dim-content);
+    --glass-ios-background-dim-content-blend: var(
+      --glass-ios-dim-content-blend
+    );
+    --glass-ios-background-dim-content-disabled: var(
+      --glass-ios-dim-content-disabled
+    );
+    --glass-ios-background-dim-content-prominent: var(
+      --glass-ios-dim-content-prominent
+    );
+    --glass-ios-background-dim-content-prominent-blend: var(
+      --glass-ios-dim-content-prominent-blend
+    );
+    --glass-ios-background-dim-content-prominent-disabled: var(
+      --glass-ios-dim-content-prominent-disabled
+    );
+    --glass-ios-background-dim-selection: var(--glass-ios-dim-selection);
+    --glass-ios-background-dim-lens: var(--glass-ios-dim-lens);
+    --glass-ios-background-dim-lens-shadow: var(--glass-ios-dim-lens-shadow);
+    --glass-ios-background-dim-shadow:
+      inset 0 0 0 0.5px rgb(255 255 255 / 25%),
+      inset 1px 1px 0 -0.5px rgb(255 255 255 / 50%),
+      inset -1px -1px 0 -0.5px rgb(255 255 255 / 20%),
+      0 2px 12px rgb(0 0 0 / 25%);
+
+    /*
      * iOS “Medium” glass material (menus, edit menus), by color scheme
      *
      * Source: Apple iOS 26 Figma (Menus: “Liquid Glass - Medium”, Mode=Light

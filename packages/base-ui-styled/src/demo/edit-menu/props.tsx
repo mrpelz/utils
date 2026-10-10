@@ -12,7 +12,7 @@ export const propOptionsContent = {
 
 export const propOptionsPositioner = {
   ...commonPropOptions,
-  side: [undefined, 'top', 'bottom'] as const,
+  side: [undefined, 'block-start', 'block-end'] as const,
   align: [undefined, 'start', 'center', 'end'] as const,
   sideOffset: [undefined, 0, 8, 16] as const,
   collisionPadding: [undefined, 0, 8, 32] as const,

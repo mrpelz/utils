@@ -71,10 +71,35 @@ export const propOptionsRoot = {
   thumbAlignment: [undefined, 'center', 'edge', 'edge-client-only'] as const,
   thumbCollisionBehavior: [undefined, 'push', 'swap', 'none'] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
+  tint: [
+    undefined,
+    'var(--color-ios-system-orange)',
+    'var(--color-ios-system-green)',
+  ] as const,
+};
+
+export const propOptionsLabel = {
+  ...commonPropOptions,
+  placement: [
+    undefined,
+    'inline-start',
+    'inline-end',
+    'block-start',
+    'block-end',
+  ] as const,
 };
 
 export const propOptionsValue = {
   ...commonPropOptions,
+  placement: [
+    undefined,
+    'inline-start',
+    'inline-end',
+    'block-start',
+    'block-end',
+    'tooltip',
+    'momentary-tooltip',
+  ] as const,
   children: [
     undefined,
     new MappedProp(

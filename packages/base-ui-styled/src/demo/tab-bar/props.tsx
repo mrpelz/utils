@@ -76,17 +76,33 @@ export const propOptionsList = {
   ...commonPropOptions,
   collapsed: [undefined, false, true] as const,
   collapsedContent: [undefined, 'symbol', 'label', 'symbolAndLabel'] as const,
-  collapsedPosition: [undefined, 'start', 'center', 'end'] as const,
+  collapsedPosition: [
+    undefined,
+    'inline-start',
+    'center',
+    'inline-end',
+  ] as const,
   activateOnFocus: [undefined, false, true] as const,
   loopFocus: [undefined, false, true] as const,
-  context: [undefined, 'bright', 'dim'] as const,
+  context: [
+    undefined,
+    'bright',
+    'dim',
+    'background-bright',
+    'background-dim',
+  ] as const,
 };
 
 export const propOptionsGroup = {
   ...commonPropOptions,
   shape: [undefined, 'capsule', 'circle'] as const,
   collapsedContent: [undefined, 'symbol', 'label', 'symbolAndLabel'] as const,
-  collapsedPosition: [undefined, 'start', 'center', 'end'] as const,
+  collapsedPosition: [
+    undefined,
+    'inline-start',
+    'center',
+    'inline-end',
+  ] as const,
   // Marked (see `remaining`); otherwise, the demo decides.
   visibleWhenCollapsed: [undefined, false, true] as const,
 };

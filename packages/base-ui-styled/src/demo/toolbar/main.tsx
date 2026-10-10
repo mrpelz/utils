@@ -90,12 +90,16 @@ const ToolbarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
   // `prominent` only of its own (see `getPropOptionsButton`).
   const propsButton = propsButtonControlled as ToolbarButtonProps;
 
-  const [controlPageControl, propsPageControl, statePageControl] =
-    usePropControl(
-      useMemo(() => getPropOptionsPageControl(addLog), [addLog]),
-      'page control',
-      externalPageControl,
-    );
+  const [
+    controlPageControl,
+    propsPageControl,
+    statePageControl,
+    RemounterPageControl,
+  ] = usePropControl(
+    useMemo(() => getPropOptionsPageControl(addLog), [addLog]),
+    'page control',
+    externalPageControl,
+  );
 
   const symbolButton = (
     icon: IconDefinition,
@@ -148,10 +152,12 @@ const ToolbarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
         <Toolbar.Leading>
           {symbolButton(sfFolder, 'Folders', propsButton)}
         </Toolbar.Leading>
-        <PageControl
-          count={pages}
-          {...propsPageControl}
-        />
+        <RemounterPageControl>
+          <PageControl
+            count={pages}
+            {...propsPageControl}
+          />
+        </RemounterPageControl>
         <Toolbar.Trailing>
           {symbolButton(sfSquareAndArrowUp, 'Share')}
         </Toolbar.Trailing>

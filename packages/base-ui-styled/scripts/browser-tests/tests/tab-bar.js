@@ -386,11 +386,11 @@ export const tests = [
       await sleep(300);
       const center = await measure();
       assert.ok(Math.abs(center.center) <= 1, `center offset ${center.center}`);
-      await page.setState(2, { collapsedPosition: 'end' });
+      await page.setState(2, { collapsedPosition: 'inline-end' });
       await sleep(500);
       const end = await measure();
       assert.equal(end.right, collapsed.left);
-      await page.setState(2, { collapsedPosition: 'start' });
+      await page.setState(2, { collapsedPosition: 'inline-start' });
       await sleep(500);
 
       // Expanding again: the selection fades in on the active tab, the glass
@@ -466,6 +466,19 @@ export const tests = [
           const visible = (element) => element && getComputedStyle(element).display !== 'none' && element.getBoundingClientRect().width > 0 && +getComputedStyle(element).opacity > 0;
           return [Math.round(width) + 'x' + Math.round(height), visible(label) ? 'label' : '', visible(icon) ? 'symbol' : ''].filter(Boolean).join(' ');
         })()`);
+      // A capsule of its label (and symbol, a gap between them) and padding:
+      // by their widths, as fonts render (e.g. SF Pro's differ on Linux).
+      /** @returns {Promise<string>} */
+      const capsule = () =>
+        page.evaluate(`(() => {
+          const tab = ${page.section}.querySelector('[role=tab]');
+          const label = tab.querySelector('[data-tab-bar-part=label]');
+          const icon = tab.querySelector('[data-tab-bar-part=icon]');
+          const { height, width } = tab.getBoundingClientRect();
+          const symbol = icon && getComputedStyle(icon).display !== 'none' && icon.getBoundingClientRect().width > 0 && +getComputedStyle(icon).opacity > 0;
+          const content = label.getBoundingClientRect().width + (symbol ? icon.getBoundingClientRect().width + parseFloat(getComputedStyle(tab).columnGap) : 0);
+          return (symbol ? 'symbol+' : '') + 'label+' + Math.round(width - content) + 'x' + Math.round(height);
+        })()`);
 
       // Labels clip (no ellipsis) while the bar collapses and expands.
       const truncated = `[...${page.section}.querySelectorAll('[data-tab-bar-part=label] > span:first-child')].filter((text) => text.scrollWidth > text.clientWidth + 0.5 && getComputedStyle(text).textOverflow === 'ellipsis' && Number(getComputedStyle(text.closest('[role=tab]')).opacity) > 0).length`;
@@ -476,21 +489,19 @@ export const tests = [
       assert.deepEqual([...new Set(collapsingFrames)], [0], 'collapsing');
       assert.equal(await shown(), '40x40 symbol');
 
-      for (const [content, expected] of /** @type {const} */ ([
-        ['label', /^7\dx40 label$/],
-        ['symbolAndLabel', /^1\d\dx40 label symbol$/],
-      ])) {
-        await page.setState(2, { collapsedContent: content });
-        await sleep(500);
-        assert.match(await shown(), expected, content);
-      }
+      await page.setState(2, { collapsedContent: 'label' });
+      await sleep(500);
+      assert.equal(await capsule(), 'label+36x40', 'label');
+      await page.setState(2, { collapsedContent: 'symbolAndLabel' });
+      await sleep(500);
+      assert.equal(await capsule(), 'symbol+label+36x40', 'symbolAndLabel');
 
       // A tab's own content wins over the list's.
       await page.setState(2, { collapsedContent: 'symbol' });
       // (The group's.)
       await page.setState(3, { collapsedContent: 'label' });
       await sleep(200);
-      assert.match(await shown(), /^7\dx40 label$/, 'own content');
+      assert.equal(await capsule(), 'label+36x40', 'own content');
       await page.setState(3, { collapsedContent: undefined });
 
       // Without a symbol: its label, in a capsule.
@@ -498,7 +509,7 @@ export const tests = [
       // (The 1st tab's, verbatim: no symbol.)
       await page.setState(5, { label: 'Label' }, { verbatim: true });
       await sleep(200);
-      assert.match(await shown(), /^7\dx40 label$/);
+      assert.equal(await capsule(), 'label+36x40');
 
       const expanding = page.sample(truncated, 600);
       await page.setState(2, { collapsed: false });
@@ -714,7 +725,11 @@ export const tests = [
           null,
           null,
           null,
-          { $rest: true, collapsedPosition: 'end', visibleWhenCollapsed: true },
+          {
+            $rest: true,
+            collapsedPosition: 'inline-end',
+            visibleWhenCollapsed: true,
+          },
         ],
       });
       // Collapsed once laid out (as it keeps its expanded width).
@@ -732,7 +747,7 @@ export const tests = [
       assert.equal(secondary.right, 39);
       await page.screenshot('tab-bar-collapsed-groups-apart');
 
-      await page.setState(14, { collapsedPosition: 'start' });
+      await page.setState(14, { collapsedPosition: 'inline-start' });
       await sleep(800);
       const [first, second] = await collapsedState(page);
       if (!first || !second) throw new Error('missing groups');
@@ -966,10 +981,13 @@ export const tests = [
       );
 
       // As in Music: the tab and search remain, the accessory between,
-      // moving there without jumps.
+      // moving there without jumps: no edge moving by more than a third of
+      // its way in one frame (an unanimated change: all of it), however far
+      // its way (by the fonts' widths) and however many frames (dropped,
+      // e.g. by a slow headless browser).
       await page.setState(3, { visibleWhenCollapsed: true });
       await page.setState(14, { visibleWhenCollapsed: true });
-      await page.setState(14, { collapsedPosition: 'end' });
+      await page.setState(14, { collapsedPosition: 'inline-end' });
       await page.setState(2, { collapsed: false });
       await sleep(900);
       /** @type {number[][]} */
@@ -982,14 +1000,23 @@ export const tests = [
       ]).then(([sampled]) => sampled);
       const moves = frames
         .slice(1)
-        .flatMap((frame, index) =>
+        .map((frame, index) =>
           frame.map((value, edge) =>
             Math.abs(value - (frames[index]?.[edge] ?? value)),
           ),
         );
+      const shares = [0, 1, 2].map((edge) => {
+        const edgeMoves = moves.map((move) => move[edge] ?? 0);
+        const way = edgeMoves.reduce((sum, move) => sum + move, 0);
+        return way > 0 ? Math.max(...edgeMoves) / way : 0;
+      });
       assert.ok(
-        Math.max(...moves) < 16,
-        `largest move per frame ${Math.max(...moves)}`,
+        moves.some((move) => move.some((value) => value > 0)),
+        'moving',
+      );
+      assert.ok(
+        Math.max(...shares) < 1 / 3,
+        `largest share of an edge's way in a frame ${Math.max(...shares)}`,
       );
 
       const collapsed = await measure();
@@ -1617,6 +1644,64 @@ export const tests = [
     },
   },
   {
+    name: 'tab bar: the accessory morphs straight, without narrowing in between, in step with the groups (also slowed down)',
+    run: async (page) => {
+      await openBar(page, SECONDARY, 'light', {
+        state: [{ $rest: true, accessory: 'both' }],
+      });
+      await sleep(300);
+      const width = `${page.section}.querySelector('[data-tab-bar-part=accessory]').getBoundingClientRect().width`;
+
+      // Its width changes one way only (collapsing: narrower, expanding:
+      // wider).
+      for (const collapsed of [true, false]) {
+        const sampled = page.sample(width, 600);
+        await page.setState(2, { collapsed });
+        /** @type {number[]} */
+        const widths = await sampled;
+        const steps = widths
+          .slice(1)
+          .map((value, index) => value - (widths[index] ?? value));
+        const backwards = steps.filter((step) =>
+          collapsed ? step > 0.5 : step < -0.5,
+        );
+        assert.deepEqual(
+          backwards,
+          [],
+          `${collapsed ? 'collapsing' : 'expanding'}: ${widths.map((value) => Math.round(value)).join(', ')}`,
+        );
+        assert.notEqual(widths[0], widths.at(-1), 'morphing');
+        await sleep(300);
+      }
+
+      // Slowed down (as in the browser's developer tools): with the groups,
+      // by their transitions' time.
+      const accessoryLeft = `${page.section}.querySelector('[data-tab-bar-part=accessory]').getBoundingClientRect().left`;
+      const before = Number(await page.evaluate(accessoryLeft));
+      await page.browser.send('Animation.enable');
+      await page.browser.send('Animation.setPlaybackRate', {
+        playbackRate: 0.1,
+      });
+      try {
+        await page.setState(2, { collapsed: true });
+        // A fifth of the (slowed down) time in: well short of a third of
+        // the way (its own clock would have ended it).
+        await sleep(600);
+        const early = Number(await page.evaluate(accessoryLeft));
+        await sleep(3000);
+        const after = Number(await page.evaluate(accessoryLeft));
+        assert.ok(
+          Math.abs(early - before) < Math.abs(after - before) / 3,
+          `${before} → ${early} → ${after}`,
+        );
+      } finally {
+        await page.browser.send('Animation.setPlaybackRate', {
+          playbackRate: 1,
+        });
+      }
+    },
+  },
+  {
     name: 'tab bar: the accessory expands along its collapse’s path, backwards',
     run: async (page) => {
       await openBar(page, SECONDARY, 'light', {
@@ -1634,16 +1719,43 @@ export const tests = [
         await sleep(300);
       }
 
-      // Every place expanding passes is on the collapse's path (within
-      // a frame's move).
+      // Every place expanding passes is on the collapse's path: on the
+      // lines between its frames (however far apart, e.g. dropped by a slow
+      // headless browser).
       const collapsing = paths.true ?? [];
       const expanding = paths.false ?? [];
+      /** The distance of `point` to the line from `from` to `to`. */
+      const toLine = (
+        /** @type {number[]} */ point,
+        /** @type {number[]} */ from,
+        /** @type {number[]} */ to,
+      ) => {
+        const along = to.map((value, index) => value - (from[index] ?? 0));
+        const length = along.reduce((sum, value) => sum + value ** 2, 0);
+        const share = length
+          ? Math.min(
+              1,
+              Math.max(
+                0,
+                point.reduce(
+                  (sum, value, index) =>
+                    sum + (value - (from[index] ?? 0)) * (along[index] ?? 0),
+                  0,
+                ) / length,
+              ),
+            )
+          : 0;
+        return Math.hypot(
+          ...point.map(
+            (value, index) =>
+              value - (from[index] ?? 0) - share * (along[index] ?? 0),
+          ),
+        );
+      };
       const off = expanding.map((point) =>
         Math.min(
-          ...collapsing.map((other) =>
-            Math.hypot(
-              ...point.map((value, index) => value - (other[index] ?? 0)),
-            ),
+          ...collapsing.map((from, index) =>
+            toLine(point, from, collapsing[index + 1] ?? from),
           ),
         ),
       );
@@ -1654,7 +1766,10 @@ export const tests = [
       // And the furthest it swings out sideways, both ways.
       const furthest = (/** @type {number[][]} */ path) =>
         Math.max(...path.map(([left]) => left ?? 0));
-      assert.ok(Math.abs(furthest(collapsing) - furthest(expanding)) < 3);
+      assert.ok(
+        Math.abs(furthest(collapsing) - furthest(expanding)) < 3,
+        `furthest ${furthest(collapsing)}, ${furthest(expanding)}; ${collapsing.map(([left = 0]) => Math.round(left)).join(' ')} / ${expanding.map(([left = 0]) => Math.round(left)).join(' ')}`,
+      );
     },
   },
   {

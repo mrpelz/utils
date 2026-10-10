@@ -149,6 +149,13 @@ export const getPropOptionsSwipeActionFirst = (addLog: AddLog) => ({
   label: [undefined, 'Custom'] as const,
   shape: [undefined, 'circle', 'roundedRectangle'] as const,
   showLabel: [undefined, false, true] as const,
+  // Over the tint: dark, light, or custom.
+  textColor: [
+    undefined,
+    '#000',
+    '#fff',
+    'var(--color-ios-system-yellow)',
+  ] as const,
   tint: [undefined, 'var(--color-ios-system-teal)', '#000'] as const,
   onClick: [
     new MappedProp(() => addLog('swipe action clicked'), '[log click]'),

@@ -116,6 +116,22 @@ export const css = String.raw;
 /** Color schemes that `colorSchemeAttribute` on the root element forces. */
 export type ColorScheme = 'dark' | 'light';
 
+/** A side, logical (as CSS'): the start or end, along the block or inline axis. */
+export type LogicalSide =
+  'block-end' | 'block-start' | 'inline-end' | 'inline-start';
+
+/**
+ * A logical side as a Base UI positioner's `side` (which maps inline sides
+ * itself, by the direction).
+ */
+export const positionerSide = (
+  side: LogicalSide | undefined,
+): 'bottom' | 'inline-end' | 'inline-start' | 'top' | undefined => {
+  if (side === 'block-start') return 'top';
+  if (side === 'block-end') return 'bottom';
+  return side;
+};
+
 /**
  * Attribute on the root element (`<html>`) that forces a color scheme
  * regardless of the browser's preference (see `Styles`).
@@ -163,7 +179,12 @@ export const fontWeight = (weight: number | string): string => css`
   font-weight: round(down, ${weight}, 100);
   stroke: currentcolor;
   stroke-linejoin: round;
-  stroke-width: max(0, (${weight} - 400) / 326);
+  stroke-width: max(0px, (${weight} - 400) / 326 * 1px);
+
+  /* Lighter than regular: symbols' edges taken off as much (see SFSymbol).
+     (Lengths, not numbers: engines may reject a number from a custom
+     property in stroke-width, which then inherits the symbol's own.) */
+  --styled-symbol-thinning: max(0px, (400 - ${weight}) / 326 * 1px);
 `;
 
 /** A frame at 60 Hz, in ms: what `edgeScrollDelta`'s speed is per. */

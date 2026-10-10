@@ -15,7 +15,13 @@ import {
   useCloseOutOfView,
   useRootActions,
 } from './menu.js';
-import { fontWeight, MovingHighlight, useForwardedRef } from './utils.js';
+import {
+  fontWeight,
+  LogicalSide,
+  MovingHighlight,
+  positionerSide,
+  useForwardedRef,
+} from './utils.js';
 
 // Source: Apple iOS 26 Figma (“Menus”: “Edit Menu”, “_Edit Menu Item”,
 // Mode=Light and Dark), with the destructive color mapped to `systemRed`;
@@ -100,22 +106,32 @@ const StyledPositioner = styled(BaseMenu.Positioner, forwardRef)`
   z-index: 100;
 `;
 
-const Positioner = forwardRef<
-  HTMLDivElement,
-  Omit<BaseMenu.Positioner.Props, 'ref'>
->((props, forwardedRef) => {
-  const ref = useForwardedRef(forwardedRef);
-  useCloseOutOfView(ref);
+export type EditMenuPositionerProps = Omit<
+  BaseMenu.Positioner.Props,
+  'ref' | 'side'
+> & {
+  /**
+   * Its side of its anchor (logical).
+   * @default 'block-start'
+   */
+  side?: LogicalSide;
+};
 
-  return (
-    <StyledPositioner
-      ref={ref}
-      {...props}
-      side={props.side ?? 'top'}
-      sideOffset={props.sideOffset ?? 8}
-    />
-  );
-});
+const Positioner = forwardRef<HTMLDivElement, EditMenuPositionerProps>(
+  ({ side = 'block-start', ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    useCloseOutOfView(ref);
+
+    return (
+      <StyledPositioner
+        ref={ref}
+        {...props}
+        side={positionerSide(side)}
+        sideOffset={props.sideOffset ?? 8}
+      />
+    );
+  },
+);
 
 // iOS 26 (measured): 42px high, actions from 20px, the “more” button 4px
 // from the end; at most as wide as the space Base UI's positioner finds.

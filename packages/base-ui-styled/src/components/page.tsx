@@ -8,7 +8,9 @@ import { ComponentProps, forwardRef } from 'react';
 // lists), on the page background (`grouped`: `systemGroupedBackground`, as
 // lists of style `insetGrouped` and `grouped` sit on; `plain`:
 // `systemBackground`). Track its scrolling with `Viewport.Provider`'s
-// `scroller`.
+// `scroller`. In a column clear of a floating one (see `Layout`), its
+// content is inset by that column's size, its background running beneath
+// it.
 
 export type PageRootProps = ComponentProps<'div'> & {
   /**
@@ -34,6 +36,7 @@ const StyledRoot = styled('div', forwardRef)<{
   background-color: ${({ pageBackground }) => backgrounds[pageBackground]};
   color: var(--color-ios-label);
   overscroll-behavior: contain;
+  padding-inline-start: var(--styled-layout-inset-start, 0);
   scrollbar-width: thin;
 `;
 

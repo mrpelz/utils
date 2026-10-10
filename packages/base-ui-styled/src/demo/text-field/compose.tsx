@@ -1,9 +1,19 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- demo hooks, typed by inference */
 
-import { ReactNode, useMemo } from 'react';
+import {
+  FunctionComponent,
+  PropsWithChildren,
+  ReactNode,
+  useMemo,
+} from 'react';
 
 import { AddLog } from '../utils/log.js';
-import { commonPropOptions, PropMap, usePropControl } from '../utils/main.js';
+import {
+  commonPropOptions,
+  PropMap,
+  Remounters,
+  usePropControl,
+} from '../utils/main.js';
 import {
   getPropOptionsClear,
   propOptionsError,
@@ -49,7 +59,7 @@ export const useTextFieldDemo = <Root extends PropMap, Control extends PropMap>(
     externalError,
   ] = externals;
 
-  const [controlRoot, propsRoot, stateRoot, Remounter] = usePropControl(
+  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
     root,
     `${prefix}root`,
     externalRoot,
@@ -60,12 +70,8 @@ export const useTextFieldDemo = <Root extends PropMap, Control extends PropMap>(
     `${prefix}label`,
     externalLabel,
   );
-  const [controlControl, propsControl, stateControl] = usePropControl(
-    control,
-    `${prefix}control`,
-    externalControl,
-    true,
-  );
+  const [controlControl, propsControl, stateControl, RemounterControl] =
+    usePropControl(control, `${prefix}control`, externalControl, true);
   const [controlClear, propsClear, stateClear] = usePropControl(
     useMemo(() => getPropOptionsClear(addLog), [addLog]),
     `${prefix}clear`,
@@ -81,6 +87,20 @@ export const useTextFieldDemo = <Root extends PropMap, Control extends PropMap>(
     propOptionsError,
     `${prefix}error`,
     externalError,
+  );
+
+  // Remounted as its root's or control's props change (e.g. the control's
+  // `defaultValue`, only read as it mounts).
+  const Remounter = useMemo<FunctionComponent<PropsWithChildren>>(
+    () =>
+      function TextFieldRemounter({ children }) {
+        return (
+          <Remounters remounters={[RemounterRoot, RemounterControl]}>
+            {children}
+          </Remounters>
+        );
+      },
+    [RemounterControl, RemounterRoot],
   );
 
   const suggestions: ReactNode = (
