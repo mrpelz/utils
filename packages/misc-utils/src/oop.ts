@@ -171,15 +171,15 @@ export const instanceMethods = (instance: Record<string, any>): string[] =>
   );
 
 export const isObject = (input: any): input is object => {
-  if (typeof input !== 'object') return false;
-  if (!input) return false;
+  if (typeof input !== 'object' || !input) return false;
 
   return true;
 };
 
 export const isPlainObject = (input: any): input is object => {
-  if (!isObject(input)) return false;
-  if (input.constructor.toString().startsWith('class')) return false;
+  if (!isObject(input) || input.constructor.toString().startsWith('class')) {
+    return false;
+  }
 
   return true;
 };

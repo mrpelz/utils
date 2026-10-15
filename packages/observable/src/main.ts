@@ -155,8 +155,12 @@ export class ReadOnlyProxyObservable<T, S = T> {
 export const isWritableObservable = <T>(
   input: AnyObservable<T>,
 ): input is AnyWritableObservable<T> => {
-  if (input instanceof ReadOnlyObservable) return false;
-  if (input instanceof ReadOnlyProxyObservable) return false;
+  if (
+    input instanceof ReadOnlyObservable ||
+    input instanceof ReadOnlyProxyObservable
+  ) {
+    return false;
+  }
 
   return true;
 };
@@ -253,10 +257,14 @@ export class ObservableGroup<T> extends Observable<T> {
 }
 
 export const isObservable = (input: any): input is AnyObservable<any> => {
-  if (input instanceof Observable) return true;
-  if (input instanceof ReadOnlyObservable) return true;
-  if (input instanceof ProxyObservable) return true;
-  if (input instanceof ReadOnlyProxyObservable) return true;
+  if (
+    input instanceof Observable ||
+    input instanceof ReadOnlyObservable ||
+    input instanceof ProxyObservable ||
+    input instanceof ReadOnlyProxyObservable
+  ) {
+    return true;
+  }
 
   return false;
 };
@@ -264,8 +272,12 @@ export const isObservable = (input: any): input is AnyObservable<any> => {
 export const isReadOnlyObservable = (
   input: any,
 ): input is AnyReadOnlyObservable<any> => {
-  if (input instanceof ReadOnlyObservable) return true;
-  if (input instanceof ReadOnlyProxyObservable) return true;
+  if (
+    input instanceof ReadOnlyObservable ||
+    input instanceof ReadOnlyProxyObservable
+  ) {
+    return true;
+  }
 
   return false;
 };

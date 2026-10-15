@@ -6,7 +6,5 @@ export const parse = (input: string): string | number | boolean => {
   if (input === 'false') return false;
 
   const number = Number(input);
-  if (!Number.isNaN(number) && !Array.isArray(input)) return number;
-
-  return input;
+  return !Number.isNaN(number) && !Array.isArray(input) ? number : input;
 };

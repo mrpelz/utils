@@ -237,9 +237,9 @@ export class ReadOnlyNullState<T = null> {
 export type AnyNullState<T> = NullState<T> | ReadOnlyNullState<T>;
 
 export const isNullState = (input: any): input is AnyNullState<any> => {
-  if (input instanceof NullState) return true;
-
-  if (input instanceof ReadOnlyNullState) return true;
+  if (input instanceof NullState || input instanceof ReadOnlyNullState) {
+    return true;
+  }
 
   return false;
 };

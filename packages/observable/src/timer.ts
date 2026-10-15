@@ -24,18 +24,13 @@ export class Timer extends NullState {
     });
 
     this.time = new Observable(time, (_, changed) => {
-      if (!changed) return;
-      if (!this.isActive.value) return;
+      if (!changed || !this.isActive.value) return;
 
       this.start();
     });
 
-    this.runoutTime = new ReadOnlyProxyObservable(
-      this._triggerTime,
-      (value) => {
-        if (value === null) return null;
-        return value + this.time.value;
-      },
+    this.runoutTime = new ReadOnlyProxyObservable(this._triggerTime, (value) =>
+      value === null ? null : value + this.time.value,
     );
   }
 
@@ -61,8 +56,7 @@ export class Timer extends NullState {
   }
 
   start(restart = true): void {
-    if (!this.time.value) return;
-    if (!this.isEnabled.value) return;
+    if (!this.time.value || !this.isEnabled.value) return;
     if (this._timeout && !restart) return;
 
     this.stop();

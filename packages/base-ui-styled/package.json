@@ -16,20 +16,24 @@
     "dist/**/*.{js,map,ts}"
   ],
   "overrides": {
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "5.4.3"
+    },
+    "eslint": "10.12.0",
     "react": "npm:@preact/compat",
     "react-dom": "npm:@preact/compat"
   },
   "dependencies": {
-    "@base-ui/react": "1.8.0",
+    "@base-ui/react": "1.9.0",
     "@mrpelz/misc-utils": "*",
     "goober": "2.1.19"
   },
   "devDependencies": {
-    "@mrpelz/boilerplate-preact": "16.4.0",
+    "@mrpelz/boilerplate-preact": "16.5.0",
     "csstype": "3.2.3",
     "eslint-plugin-react": "7.37.5",
     "fork-ts-checker-webpack-plugin": "9.1.0",
-    "postcss-styled-syntax": "0.7.2",
+    "postcss-styled-syntax": "0.7.3",
     "source-map-loader": "5.0.0"
   }
 }

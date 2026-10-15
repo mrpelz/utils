@@ -77,8 +77,6 @@ const PropOption = <T extends PropMap>({
   );
 
   if (isObject(value)) {
-    if (!(value instanceof PropLiteral)) return null;
-
     return null;
   }
 

@@ -213,11 +213,9 @@ export class StaticString extends StructMember<string> {
   }
 
   get value(): string {
-    if (this._padding !== StringPadding.NONE && this._unpad) {
-      return this.buffer.toString(this._encoding).replaceAll(this._fill, '');
-    }
-
-    return this.buffer.toString(this._encoding);
+    return this._padding !== StringPadding.NONE && this._unpad
+      ? this.buffer.toString(this._encoding).replaceAll(this._fill, '')
+      : this.buffer.toString(this._encoding);
   }
 
   set value(input: string) {
@@ -257,7 +255,7 @@ class IntegerStructMember<
     input: number,
     [min, max]: readonly [number, number],
   ): void {
-    if (!Number.isInteger(input)) throw new Error('input is not integer');
+    if (!Number.isInteger(input)) throw new RangeError('input is not integer');
 
     if (input < min) {
       throw new Error(`input below representable value (${min})`);
@@ -381,7 +379,7 @@ class FloatStructMember extends StructMember<number> {
   static readonly size = 4;
 
   protected static constraint(input: number): void {
-    if (!Number.isFinite(input)) throw new Error('input is not finite');
+    if (!Number.isFinite(input)) throw new RangeError('input is not finite');
 
     if (input < this.minValue) {
       throw new Error(`input below representable value (${this.minValue})`);
@@ -431,7 +429,7 @@ class DoubleStructMember extends StructMember<number> {
   static readonly size = 8;
 
   protected static constraint(input: number): void {
-    if (!Number.isFinite(input)) throw new Error('input is not finite');
+    if (!Number.isFinite(input)) throw new RangeError('input is not finite');
 
     if (input < this.minValue) {
       throw new Error(`input below representable value (${this.minValue})`);
