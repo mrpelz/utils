@@ -1,0 +1,71 @@
+/* Badge (see main.tsx). */
+@layer uikit-ish {
+  .uikit-badge {
+    /* On a corner: how far above its element, and from its end; on a symbol:
+       how far above it, and before its end. */
+    --uikit-badge-overhang: 6px;
+    --uikit-badge-inset: 14px;
+    --uikit-badge-symbol-x: 5px;
+    --uikit-badge-symbol-y: 4px;
+
+    display: inline-flex;
+    min-width: var(--uikit-badge-height, 24px);
+    height: var(--uikit-badge-height, 24px);
+    box-sizing: border-box;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    padding: var(--uikit-badge-padding, 2.5px 7px);
+    border-radius: 100px;
+    background-color: var(--uikit-badge-tint, var(--color-ios-system-red));
+    color: var(--uikit-badge-text-color, #fff);
+    font-size: var(--uikit-badge-font-size, 16px);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--uikit-badge-weight, 400);
+    letter-spacing: 0;
+    line-height: var(--uikit-badge-line-height, 19px);
+    pointer-events: none;
+    white-space: nowrap;
+
+    &:empty {
+      --uikit-badge-overhang: -2px;
+      --uikit-badge-inset: 12px;
+      --uikit-badge-symbol-x: 5px;
+      --uikit-badge-symbol-y: 5px;
+
+      width: 10px;
+      min-width: 0;
+      height: 10px;
+      padding: 0;
+    }
+
+    &[data-badge='corner'] {
+      position: absolute;
+      z-index: 1;
+      inset-block-start: calc(-1 * var(--uikit-badge-overhang));
+      inset-inline-start: calc(100% - var(--uikit-badge-inset));
+    }
+
+    &[data-badge='inline'] {
+      vertical-align: middle;
+    }
+
+    /* An inline dot (its baseline its bottom): its center half the cap height
+       above the baseline, as the text's. */
+    &[data-badge='inline']:empty {
+      vertical-align: calc(0.5cap - 5px);
+    }
+  }
+
+  /* On a symbol (in a `Symbol`): in Framework7's size there, starting
+     before its end, above it (see main.tsx). */
+  .uikit-symbol > .uikit-badge[data-badge='corner'] {
+    --uikit-badge-height: 16px;
+    --uikit-badge-font-size: 10px;
+    --uikit-badge-line-height: 12px;
+    --uikit-badge-weight: 590;
+    --uikit-badge-padding: 0 2px;
+    --uikit-badge-overhang: var(--uikit-badge-symbol-y);
+    --uikit-badge-inset: var(--uikit-badge-symbol-x);
+  }
+}

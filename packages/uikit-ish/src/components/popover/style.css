@@ -1,0 +1,160 @@
+/* Popover (see main.tsx). */
+@layer uikit-ish {
+  .uikit-popover-body {
+    overflow: auto;
+    max-height: inherit;
+    box-sizing: border-box;
+    border-radius: inherit;
+    overscroll-behavior: contain;
+  }
+
+  /* Its material (see main.tsx): its outlines' clip paths by its arrow's
+     side (`data-arrow`). */
+  .uikit-popover-popup {
+    --uikit-popover-rim: light-dark(rgb(0 0 0 / 12%), rgb(255 255 255 / 15%));
+    --uikit-popover-highlight: light-dark(rgb(255 255 255 / 60%), transparent);
+    --uikit-popover-glow: light-dark(rgb(0 0 0 / 20%), rgb(0 0 0 / 15%));
+
+    position: relative;
+    border-radius: 13px;
+    backdrop-filter: none;
+    background-color: transparent;
+    box-shadow: none;
+    color: var(--uikit-glass-content);
+    isolation: isolate;
+    outline: none;
+
+    /* Its backdrop blur. */
+    &::before {
+      position: absolute;
+      z-index: -1;
+      backdrop-filter: saturate(180%) blur(16px);
+      clip-path: var(--uikit-popover-outline);
+      content: '';
+      inset: -13px;
+    }
+
+    &[data-arrow='top']::before {
+      clip-path: var(--uikit-popover-outline-top);
+    }
+
+    &[data-arrow='right']::before {
+      clip-path: var(--uikit-popover-outline-right);
+    }
+
+    &[data-arrow='bottom']::before {
+      clip-path: var(--uikit-popover-outline-bottom);
+    }
+
+    &[data-arrow='left']::before {
+      clip-path: var(--uikit-popover-outline-left);
+    }
+  }
+
+  /* Its fill, rim and highlight, the glass' glow along them (13px: the
+     arrow's depth, room for the wedge). */
+  .uikit-popover-shape {
+    position: absolute;
+    z-index: -1;
+    filter: drop-shadow(0 0 25px var(--uikit-popover-glow));
+    inset: -13px;
+    pointer-events: none;
+
+    & > span {
+      position: absolute;
+      inset: 0;
+    }
+
+    & > [data-layer='fill'] {
+      background-color: var(--uikit-glass-background);
+      clip-path: var(--uikit-popover-outline);
+    }
+
+    /* Its rim (as the glass': an edge, 1px; light, a highlight inside it). */
+    & > [data-layer='rim'] {
+      background-color: var(--uikit-popover-rim);
+      clip-path: var(--uikit-popover-rim-outline);
+    }
+
+    & > [data-layer='highlight'] {
+      background-color: var(--uikit-popover-highlight);
+      clip-path: var(--uikit-popover-highlight-outline);
+    }
+
+    [data-arrow='top'] > & > [data-layer='fill'] {
+      clip-path: var(--uikit-popover-outline-top);
+    }
+
+    [data-arrow='right'] > & > [data-layer='fill'] {
+      clip-path: var(--uikit-popover-outline-right);
+    }
+
+    [data-arrow='bottom'] > & > [data-layer='fill'] {
+      clip-path: var(--uikit-popover-outline-bottom);
+    }
+
+    [data-arrow='left'] > & > [data-layer='fill'] {
+      clip-path: var(--uikit-popover-outline-left);
+    }
+
+    [data-arrow='top'] > & > [data-layer='rim'] {
+      clip-path: var(--uikit-popover-rim-outline-top);
+    }
+
+    [data-arrow='right'] > & > [data-layer='rim'] {
+      clip-path: var(--uikit-popover-rim-outline-right);
+    }
+
+    [data-arrow='bottom'] > & > [data-layer='rim'] {
+      clip-path: var(--uikit-popover-rim-outline-bottom);
+    }
+
+    [data-arrow='left'] > & > [data-layer='rim'] {
+      clip-path: var(--uikit-popover-rim-outline-left);
+    }
+
+    [data-arrow='top'] > & > [data-layer='highlight'] {
+      clip-path: var(--uikit-popover-highlight-outline-top);
+    }
+
+    [data-arrow='right'] > & > [data-layer='highlight'] {
+      clip-path: var(--uikit-popover-highlight-outline-right);
+    }
+
+    [data-arrow='bottom'] > & > [data-layer='highlight'] {
+      clip-path: var(--uikit-popover-highlight-outline-bottom);
+    }
+
+    [data-arrow='left'] > & > [data-layer='highlight'] {
+      clip-path: var(--uikit-popover-highlight-outline-left);
+    }
+  }
+
+  /* Its arrow: positioned by Base UI, drawn by the popup (56px: the wedge,
+     13px deep). */
+  .uikit-popover-arrow {
+    width: 56px;
+    height: 13px;
+    pointer-events: none;
+
+    &[data-arrow='bottom'] {
+      top: 100%;
+    }
+
+    &[data-arrow='top'] {
+      bottom: 100%;
+    }
+
+    &[data-arrow='right'] {
+      left: 100%;
+      width: 13px;
+      height: 56px;
+    }
+
+    &[data-arrow='left'] {
+      right: 100%;
+      width: 13px;
+      height: 56px;
+    }
+  }
+}

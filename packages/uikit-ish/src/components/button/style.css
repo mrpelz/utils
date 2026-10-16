@@ -1,0 +1,338 @@
+/* Button (see main.tsx). */
+@layer uikit-ish {
+  /*
+   * Source: Apple iOS 26 Figma (Button: Size, Style, Label Type, Enabled,
+   * Destructive; Button - Liquid Glass: Tinted, BG Context); see
+   * main.tsx. By its props as attributes: `data-fill`, `data-size`,
+   * `data-variant`, `data-destructive`, `data-shape` (in that order: later
+   * ones over earlier ones); `tint` and `textColor` as properties (inline).
+   */
+  .uikit-button-root {
+    --uikit-utils-cursor: attr(cursor type(<custom-ident>), pointer);
+    --uikit-button-tint: var(--color-ios-primary);
+    --uikit-button-background: transparent;
+    --uikit-button-background-disabled: var(--uikit-button-background);
+    --uikit-button-background-pressed: color-mix(
+      in srgb,
+      var(--uikit-button-background),
+      var(--uikit-button-color) 15%
+    );
+    --uikit-button-color: var(--uikit-button-tint);
+    --uikit-button-color-disabled: var(--color-ios-tertiary-label);
+    --uikit-button-blend: normal;
+    --uikit-button-radius: 1000px;
+    --uikit-button-size: 34px;
+    --uikit-button-icon-font-size: var(--font-ios-subheadline-size);
+    --uikit-button-font-weight: 400;
+    --uikit-button-icon-font-weight: 400;
+    --uikit-button-icon-line-height: var(--font-ios-subheadline-line-height);
+    --uikit-glass-outset: 0px;
+
+    position: relative;
+    display: inline-flex;
+    min-width: var(--uikit-button-size);
+    min-height: var(--uikit-button-size);
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 14px;
+    border: 0;
+    border-radius: var(--uikit-button-radius);
+    margin: 0;
+    appearance: none;
+    background-color: var(--uikit-button-background);
+    color: var(--uikit-button-color);
+    font-family: inherit;
+    font-size: var(--font-ios-subheadline-size);
+    font-variation-settings: 'wght' var(--uikit-button-font-weight);
+    font-weight: round(down, var(--uikit-button-font-weight), 100);
+    gap: 4px;
+    letter-spacing: var(--font-ios-subheadline-tracking);
+    line-height: var(--font-ios-subheadline-line-height);
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (var(--uikit-button-font-weight) - 400) / 326 * 1px);
+    text-align: center;
+    text-decoration: none;
+    text-transform: none;
+    transition-duration: 100ms;
+    transition-property: background-color;
+    user-select: none;
+    vertical-align: middle;
+    white-space: nowrap;
+
+    --uikit-symbol-thinning: max(
+      0px,
+      (400 - var(--uikit-button-font-weight)) / 326 * 1px
+    );
+
+    @media (hover: hover) {
+      cursor: var(--uikit-utils-cursor);
+    }
+
+    &[data-fill] {
+      display: flex;
+      width: 100%;
+      flex: 1 1 auto;
+    }
+
+    &[data-size='large'] {
+      --uikit-button-size: 50px;
+      --uikit-button-icon-font-size: var(--font-ios-body-size);
+      --uikit-button-icon-line-height: var(--font-ios-body-line-height);
+
+      padding: 14px 20px;
+      font-size: var(--font-ios-body-size);
+      letter-spacing: var(--font-ios-body-tracking);
+      line-height: var(--font-ios-body-line-height);
+    }
+
+    &[data-size='small'] {
+      --uikit-button-size: 28px;
+
+      padding: 4px 10px;
+      gap: 3px;
+    }
+
+    &[data-variant='bordered'],
+    &[data-variant='bordered-secondary'] {
+      --uikit-button-background: var(--color-ios-tertiary-system-fill);
+      --uikit-button-color: var(--uikit-button-tint);
+      --uikit-button-color-disabled: var(--color-ios-tertiary-label);
+    }
+
+    &[data-variant='bordered-secondary'] {
+      --uikit-button-color: var(--color-ios-label);
+    }
+
+    &[data-variant='bordered'][data-destructive],
+    &[data-variant='bordered-secondary'][data-destructive] {
+      --uikit-button-background: color-mix(
+        in srgb,
+        var(--uikit-button-tint) 14%,
+        transparent
+      );
+      --uikit-button-color: var(--uikit-button-tint);
+      --uikit-button-color-disabled: color-mix(
+        in srgb,
+        var(--uikit-button-tint) 50%,
+        transparent
+      );
+    }
+
+    &[data-variant='bordered-prominent'] {
+      --uikit-button-background: var(--uikit-button-tint);
+      --uikit-button-background-disabled: color-mix(
+        in srgb,
+        var(--uikit-button-tint) 20%,
+        transparent
+      );
+      --uikit-button-color: rgb(255 255 255);
+      --uikit-button-color-disabled: rgb(255 255 255 / 30%);
+    }
+
+    /* Glass: its content in the glass' content color (prominent: tinted),
+       pressed a lens (see Source), its tinted glow behind it. */
+    &[data-variant='glass'],
+    &[data-variant='glass-prominent'] {
+      --uikit-button-size: 48px;
+      --uikit-button-background-pressed: transparent;
+      --uikit-button-color: var(--uikit-glass-content);
+      --uikit-button-color-disabled: var(--uikit-glass-content-disabled);
+      --uikit-button-blend: var(--uikit-glass-content-blend);
+      --uikit-button-icon-font-size: 19px;
+      --uikit-button-font-weight: 510;
+      --uikit-button-icon-font-weight: 590;
+      --uikit-button-icon-line-height: 22px;
+
+      padding: 6px 20px;
+      font-feature-settings: 'ss16';
+      font-size: 17px;
+      gap: 4px;
+      letter-spacing: 0;
+      line-height: 20px;
+
+      &::before {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 1px;
+        height: 1px;
+        margin: -0.5px 0 0 -0.5px;
+        box-shadow: 0 0 40px 15px
+          color-mix(
+            in srgb,
+            var(--uikit-glass-tint, var(--glass-ios-tint)) 75%,
+            transparent
+          );
+        content: '';
+        opacity: var(--uikit-glass-pressed, 0);
+        transition-duration: var(--glass-ios-lens-duration);
+      }
+    }
+
+    &[data-variant='glass-prominent'] {
+      --uikit-button-color: var(--uikit-glass-content-prominent);
+      --uikit-button-color-disabled: var(
+        --uikit-glass-content-prominent-disabled
+      );
+      --uikit-button-blend: var(--uikit-glass-content-prominent-blend);
+    }
+
+    &[data-variant='borderless'] {
+      --uikit-button-radius: 40px;
+
+      &[data-destructive] {
+        --uikit-button-color-disabled: color-mix(
+          in srgb,
+          var(--uikit-button-tint) 50%,
+          transparent
+        );
+      }
+
+      &[data-size='large'] {
+        --uikit-button-radius: 12px;
+      }
+
+      /* Without a size: in its context's text style, if it gives one (e.g.
+         a list row's: Body, as its details; `--uikit-button-plain-*`),
+         otherwise Subheadline. Also its end margin (e.g. a list row's, its
+         content aligned with the row's details, its padding beyond them),
+         the gap of its label and symbol, and the symbol's weight; its
+         inline padding and pressed fill (e.g. a sidebar's toolbar's). */
+      &:not([data-size]) {
+        --uikit-button-icon-font-size: var(
+          --uikit-button-plain-size,
+          var(--font-ios-subheadline-size)
+        );
+        --uikit-button-icon-line-height: var(
+          --uikit-button-plain-line-height,
+          var(--font-ios-subheadline-line-height)
+        );
+        --uikit-button-icon-font-weight: var(
+          --uikit-button-plain-symbol-weight,
+          400
+        );
+        --uikit-button-background-pressed: var(
+          --uikit-button-plain-background-pressed,
+          color-mix(
+            in srgb,
+            var(--uikit-button-background),
+            var(--uikit-button-color) 15%
+          )
+        );
+
+        font-size: var(
+          --uikit-button-plain-size,
+          var(--font-ios-subheadline-size)
+        );
+        gap: var(--uikit-button-plain-gap, 4px);
+        letter-spacing: var(
+          --uikit-button-plain-tracking,
+          var(--font-ios-subheadline-tracking)
+        );
+        line-height: var(
+          --uikit-button-plain-line-height,
+          var(--font-ios-subheadline-line-height)
+        );
+        margin-inline-end: var(--uikit-button-plain-margin-end, 0);
+        padding-inline: var(--uikit-button-plain-padding-inline, 14px);
+      }
+    }
+
+    /* (Doubled: over the variants'.) */
+    &&[data-shape='circle'] {
+      --uikit-button-radius: 1000px;
+      --uikit-button-plain-padding-inline: 0px;
+
+      padding: 0;
+    }
+
+    &&[data-shape='roundedRectangle'] {
+      --uikit-button-radius: 6px;
+
+      &[data-size='large'] {
+        --uikit-button-radius: 12px;
+      }
+    }
+
+    /* Hit region: at least 44×44px, centered. */
+    &::after {
+      position: absolute;
+      content: '';
+      inset: min(0px, calc(50% - 22px));
+    }
+
+    &:active:not([data-disabled]) {
+      --uikit-glass-pressed: 1;
+      --uikit-glass-scale: var(--glass-ios-lens-scale);
+      --uikit-button-content-scale: var(--glass-ios-lens-content-scale);
+
+      background-color: var(--uikit-button-background-pressed);
+    }
+
+    &[data-disabled] {
+      --uikit-utils-cursor: attr(cursor type(<custom-ident>), not-allowed);
+
+      background-color: var(--uikit-button-background-disabled);
+      color: var(--uikit-button-color-disabled);
+    }
+  }
+
+  /* Blended and scaled as a whole; with symbols, its parts are (a symbol:
+     its glyph, see Symbol), so the symbols' badges are neither. */
+  .uikit-button-content {
+    --uikit-symbol-blend: var(--uikit-button-blend);
+    --uikit-symbol-scale: var(--uikit-button-content-scale, none);
+
+    position: relative;
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    gap: inherit;
+    mix-blend-mode: var(--uikit-symbol-blend);
+    scale: var(--uikit-symbol-scale);
+    transition-duration: var(--glass-ios-lens-duration);
+    transition-property: scale;
+
+    &:has(.uikit-symbol) {
+      mix-blend-mode: normal;
+      scale: none;
+
+      & > :not(:has(.uikit-symbol)) {
+        mix-blend-mode: var(--uikit-symbol-blend);
+        scale: var(--uikit-symbol-scale);
+        transition: scale var(--glass-ios-lens-duration);
+      }
+    }
+  }
+
+  .uikit-button-icon {
+    display: inline-flex;
+    min-height: 1lh;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--uikit-button-icon-font-size);
+    font-variation-settings: 'wght' var(--uikit-button-icon-font-weight);
+    font-weight: round(down, var(--uikit-button-icon-font-weight), 100);
+    line-height: var(--uikit-button-icon-line-height);
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(
+      0px,
+      (var(--uikit-button-icon-font-weight) - 400) / 326 * 1px
+    );
+
+    --uikit-symbol-thinning: max(
+      0px,
+      (400 - var(--uikit-button-icon-font-weight)) / 326 * 1px
+    );
+  }
+
+  .uikit-button-label {
+    overflow: hidden;
+    min-width: 0;
+    text-overflow: ellipsis;
+  }
+}

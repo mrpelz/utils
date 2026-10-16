@@ -1,0 +1,8 @@
+/* Page demo (see main.tsx). */
+
+/* The page as a phone's screen in the stage (a grid: its content stretched to its
+   height). */
+.page-demo-screen {
+  display: grid;
+  height: min(640px, 70vh);
+}

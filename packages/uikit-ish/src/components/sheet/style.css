@@ -1,0 +1,125 @@
+/* Sheet (see main.tsx). */
+@layer uikit-ish {
+  .uikit-sheet-backdrop {
+    --uikit-sheet-dim: light-dark(rgb(0 0 0 / 20%), rgb(0 0 0 / 48%));
+
+    position: fixed;
+    background-color: var(--uikit-sheet-dim);
+    inset: 0;
+    transition: opacity 350ms;
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      opacity: 0;
+    }
+  }
+
+  .uikit-sheet-popup {
+    position: fixed;
+    display: flex;
+    overflow: hidden;
+    box-sizing: border-box;
+    flex-direction: column;
+    color: var(--color-ios-label);
+    outline: none;
+    transition: translate 350ms cubic-bezier(0.2, 0.9, 0.3, 1);
+    translate: 0 var(--uikit-sheet-drag, 0);
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      translate: 0 100%;
+    }
+
+    &[data-dragging] {
+      transition: none;
+    }
+
+    &[data-detent='large'] {
+      border-radius: 38px 38px 0 0;
+      background-color: light-dark(
+        var(--color-ios-system-background),
+        var(--color-ios-secondary-system-background)
+      );
+      box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
+      inset: calc(10px + env(safe-area-inset-top)) 0 0;
+    }
+
+    &[data-detent='large']:has([data-list-part='root']) {
+      --uikit-list-container-background: transparent;
+      --uikit-list-container-group-background: var(
+        --color-ios-tertiary-system-background
+      );
+
+      background-color: var(--color-ios-secondary-system-background);
+    }
+
+    &[data-detent='medium'] {
+      right: 6px;
+      bottom: calc(6px + env(safe-area-inset-bottom));
+      left: 6px;
+      max-height: calc(100% - 64px);
+      border-radius: 34px;
+      color: var(--uikit-glass-content);
+    }
+
+    /* A form sheet (regular width). */
+    @media (width >= 768px) {
+      &&[data-detent] {
+        width: min(936px, calc(100% - 64px));
+        height: min(852px, calc(100% - 64px));
+        border-radius: 38px;
+        background-color: light-dark(
+          var(--color-ios-system-background),
+          var(--color-ios-secondary-system-background)
+        );
+        box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
+        color: var(--color-ios-label);
+        inset: 50% auto auto 50%;
+        translate: -50% calc(-50% + var(--uikit-sheet-drag, 0px));
+      }
+
+      &&[data-detent]:has([data-list-part='root']) {
+        --uikit-list-container-background: transparent;
+        --uikit-list-container-group-background: var(
+          --color-ios-tertiary-system-background
+        );
+
+        background-color: var(--color-ios-secondary-system-background);
+      }
+
+      &&[data-starting-style],
+      &&[data-ending-style] {
+        translate: -50% 100vh;
+      }
+    }
+  }
+
+  .uikit-sheet-header {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    align-items: stretch;
+    cursor: grab;
+    padding-block-end: 10px;
+    touch-action: none;
+    user-select: none;
+
+    &::before {
+      width: 36px;
+      height: 5px;
+      flex: none;
+      align-self: center;
+      border-radius: 100px;
+      background-color: #cfcfcf;
+      content: '';
+      margin-block: 5px 6px;
+    }
+  }
+
+  .uikit-sheet-content {
+    overflow: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+    overscroll-behavior: contain;
+  }
+}

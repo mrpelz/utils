@@ -27,3 +27,22 @@ publish:npm:npmjs:
     - npm config set "//registry.npmjs.org/:_authToken=${UTILS_PUBLISH_NPM_TOKEN}"
     - npm pkg set --workspaces "repository.url=${UTILS_PUBLISH_NPM_GIT_URL}"
     - npm stage publish --workspaces --access public --tag "${VERSION_TAG}"
+
+publish:pages:
+  stage: release
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+      when: on_success
+      variables:
+        PATH_PREFIX: "uikit-ish-latest"
+    - if: $CI_COMMIT_TAG
+      when: manual
+      variables:
+        PATH_PREFIX: "uikit-ish-pre-${CI_COMMIT_TAG_MESSAGE}"
+  variables:
+    PUBLIC_PATH: "/utils/${PATH_PREFIX}/"
+  script:
+    - make -s -C "packages/uikit-ish" sub_package="packages/uikit-ish" transform_build_demo
+  pages:
+    path_prefix: $PATH_PREFIX
+    publish: packages/uikit-ish/demo

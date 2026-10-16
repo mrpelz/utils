@@ -1,1 +1,0 @@
-../node_modules/@mrpelz/boilerplate-dom/scripts/watch-dev.sh

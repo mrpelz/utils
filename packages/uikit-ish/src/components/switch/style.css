@@ -1,0 +1,168 @@
+/* Switch (see main.tsx). */
+@layer uikit-ish {
+  .uikit-switch-on-label {
+    position: absolute;
+    display: grid;
+    width: calc(100% - var(--uikit-switch-knob-width) - 2px);
+    inset-block: 0;
+    inset-inline-start: 0;
+    opacity: calc(1 - var(--uikit-switch-pressed));
+    place-items: center;
+    pointer-events: none;
+    transition: opacity var(--glass-ios-lens-duration);
+
+    &::before {
+      width: 1px;
+      height: 9px;
+      box-sizing: border-box;
+      border-radius: 1px;
+      background-color: #fff;
+      content: '';
+    }
+  }
+
+  .uikit-switch-off-label {
+    position: absolute;
+    display: grid;
+    width: calc(100% - var(--uikit-switch-knob-width) - 2px);
+    inset-block: 0;
+    inset-inline-end: 0;
+    opacity: calc(1 - var(--uikit-switch-pressed));
+    place-items: center;
+    pointer-events: none;
+    transition: opacity var(--glass-ios-lens-duration);
+
+    &::before {
+      width: 9px;
+      height: 9px;
+      box-sizing: border-box;
+      border: 1px solid var(--color-ios-tertiary-label);
+      border-radius: 50%;
+      content: '';
+    }
+  }
+
+  .uikit-switch-root {
+    --uikit-utils-cursor: attr(cursor type(<custom-ident>), pointer);
+    --uikit-switch-min-width: 64px;
+    --uikit-switch-min-height: 28px;
+    --uikit-switch-knob-width: 39px;
+    --uikit-switch-knob-start: 2px;
+    --uikit-switch-pressed: 0;
+    --uikit-switch-on-color: var(--color-ios-system-green);
+    --uikit-switch-off-color: var(--color-ios-system-fill);
+
+    position: relative;
+    display: inline-block;
+    min-width: var(--uikit-switch-min-width);
+    min-height: var(--uikit-switch-min-height);
+    box-sizing: border-box;
+    align-self: center;
+    border-radius: 100px;
+    touch-action: pan-y;
+    user-select: none;
+    vertical-align: middle;
+
+    @media (hover: hover) {
+      cursor: var(--uikit-utils-cursor);
+    }
+
+    &::before {
+      position: absolute;
+      z-index: 0;
+      border-radius: inherit;
+      background-color: var(--uikit-switch-off-color);
+      content: '';
+      inset: 0;
+      transform: scale(calc(1 - 0.25 * var(--uikit-switch-pressed)));
+      transition-duration: var(--glass-ios-lens-duration);
+    }
+
+    &[data-checked] {
+      --uikit-switch-knob-start: calc(
+        100% - var(--uikit-switch-knob-width) - 2px
+      );
+
+      &::before {
+        background-color: var(--uikit-switch-on-color);
+      }
+    }
+
+    &:active {
+      --uikit-switch-pressed: 1;
+    }
+
+    &[data-disabled],
+    &[data-readonly] {
+      --uikit-switch-pressed: 0;
+    }
+
+    &[data-disabled] {
+      --uikit-utils-cursor: attr(cursor type(<custom-ident>), not-allowed);
+
+      opacity: 0.55;
+    }
+
+    /* Mixed: the knob centered, the track off (over checked, see above). */
+    &[data-indeterminate] {
+      --uikit-switch-knob-start: calc(50% - var(--uikit-switch-knob-width) / 2);
+
+      &::before {
+        background-color: var(--uikit-switch-off-color);
+      }
+
+      & > [data-switch-part='label'] {
+        opacity: 0;
+      }
+    }
+  }
+
+  .uikit-switch-thumb {
+    position: absolute;
+    z-index: 1;
+    top: 2px;
+    bottom: 2px;
+    display: block;
+    width: var(--uikit-switch-knob-width);
+    box-sizing: border-box;
+    border-radius: 100px;
+    background-color: color-mix(
+      in srgb,
+      #fff calc((1 - var(--uikit-switch-pressed)) * 100%),
+      transparent
+    );
+    inset-inline-start: var(--uikit-switch-knob-start);
+    transform: scale(
+      calc(1 + (var(--glass-ios-lens-scale) - 1) * var(--uikit-switch-pressed))
+    );
+    transform-origin: center;
+    transition-duration:
+      var(--uikit-switch-knob-move-duration, var(--glass-ios-lens-duration)),
+      var(--glass-ios-lens-duration), var(--glass-ios-lens-duration);
+    transition-property: inset-inline-start, background-color, transform;
+
+    &::before {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 1px;
+      height: 1px;
+      margin: -0.5px 0 0 -0.5px;
+      box-shadow: 0 0 40px 15px
+        color-mix(in srgb, var(--uikit-switch-on-color) 75%, transparent);
+      content: '';
+      opacity: var(--uikit-switch-pressed);
+      transition-duration: var(--glass-ios-lens-duration);
+    }
+
+    &::after {
+      position: absolute;
+      border-radius: inherit;
+      box-shadow: var(--glass-ios-lens-shadow);
+      content: '';
+      inset: 0;
+      opacity: var(--uikit-switch-pressed);
+      transition-duration: var(--glass-ios-lens-duration);
+    }
+  }
+}

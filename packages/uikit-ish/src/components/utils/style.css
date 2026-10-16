@@ -1,0 +1,77 @@
+/*
+ * Component styles: each component's CSS file (next to it, imported by it),
+ * its rules in this cascade layer (so an app's own styles override them).
+ * Each part of a component carries two markers with separate roles: a
+ * class `uikit-<component>-<part>` to style it (its own rules), and an
+ * attribute `data-<component>-part` to identify it in a component's
+ * structure (rules relating parts, e.g. `> [data-list-part=row]`), in
+ * scripts (`closest('[data-list-part=item]')`) and in tests. Props that
+ * style a component are attributes (`data-*`) or custom properties
+ * (inline).
+ *
+ * Recurring patterns:
+ *
+ * - Font weights, also between the static weights of the system font (SF
+ *   Pro 510, 590 in Figma): the exact weight on the variable weight axis
+ *   (`font-variation-settings: 'wght' W`), `font-weight` rounded down to a
+ *   static weight (`round(down, W, 100)`; fonts without the axis use that).
+ *   Chrome would otherwise match e.g. 510 to the next heavier static face
+ *   (Semibold), which the axis can't undo. SVG symbols inside (fill-only
+ *   paths at SF Symbols' export scale of 20 units per em, with visible
+ *   overflow) are stroked to match: SF Pro glyphs' strokes thicken by 1 unit
+ *   per 326 weight above Regular (`stroke-width: max(0px, (W - 400) / 326 *
+ *   1px)`); lighter than Regular, symbols' edges are taken off as much
+ *   (`--uikit-symbol-thinning`, see Symbol; lengths, not numbers:
+ *   engines may reject a number from a custom property in `stroke-width`).
+ * - Color schemes: colors as `light-dark(light, dark)`, by the root's
+ *   `color-scheme` (the user's preference, or forced by its
+ *   `data-color-scheme`, see styles.css). Other values (e.g. blend modes,
+ *   shadows): light declarations, the dark ones in
+ *   `@media (prefers-color-scheme: dark)`, and both again where
+ *   `data-color-scheme` forces either (`&:where(:root[…] *)`: the rule's
+ *   specificity kept, after the media query, so they win).
+ * - Cursors, as `Button`'s: a `cursor` attribute (prop), or a fallback
+ *   (`--uikit-utils-cursor: attr(cursor type(<custom-ident>), …)`), applied on
+ *   devices that hover.
+ */
+@layer uikit-ish;
+
+/* Utils (see main.tsx). */
+@layer uikit-ish {
+  .uikit-utils-reserve-layer {
+    grid-area: 1 / 1;
+    white-space: nowrap;
+  }
+
+  .uikit-utils-reserve-hidden {
+    visibility: hidden;
+  }
+
+  /* The moving selection (see MovingHighlight). (Doubled: over its
+     container's rules for its children, e.g. a menu's fading items.) */
+  .uikit-utils-highlight.uikit-utils-highlight {
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    background-color: var(--uikit-glass-selection);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 100ms;
+
+    /* Moving (with a pointer hovering the items, or a touch dragging over
+       them, see `draggingAttribute`): quick, so it keeps up at normal
+       speeds. Otherwise (keys) it jumps. */
+    @media (hover: hover) {
+      transition-duration: 80ms;
+      transition-property: translate, width, height, border-radius, opacity;
+      transition-timing-function: ease-out;
+    }
+
+    &:where(:root[data-dragging-items] *) {
+      transition-duration: 80ms;
+      transition-property: translate, width, height, border-radius, opacity;
+      transition-timing-function: ease-out;
+    }
+  }
+}

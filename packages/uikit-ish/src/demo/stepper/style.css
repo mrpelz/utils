@@ -1,0 +1,13 @@
+/* Stepper demo (see main.tsx). */
+
+/* The value next to the stepper (as apps show it, UIKit's stepper
+   doesn't). */
+.stepper-demo-row {
+  display: flex;
+  align-items: center;
+  color: var(--color-ios-label);
+  font-size: var(--font-ios-body-size);
+  font-variant-numeric: tabular-nums;
+  gap: 16px;
+  line-height: var(--font-ios-body-line-height);
+}

@@ -1,0 +1,6 @@
+/* Header demos (see main.tsx). */
+
+/* The page as a phone's screen in the stage. */
+.header-demo-screen {
+  height: min(640px, 70vh);
+}

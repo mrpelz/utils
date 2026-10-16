@@ -1,0 +1,446 @@
+/* Menu (see main.tsx). */
+@layer uikit-ish {
+  /* (Shared: edit-menu, popover, tooltip.) */
+  .uikit-popup-transition {
+    transform-origin: var(--transform-origin);
+    transition-duration: 400ms;
+    transition-property: opacity, scale;
+    transition-timing-function: cubic-bezier(0, 1, 0.2, 1.05);
+
+    &[data-starting-style] {
+      scale: 0;
+    }
+
+    /* Closing without the opening's overshoot (past 0, the scale would turn
+       negative: the content flips). */
+    &[data-ending-style] {
+      opacity: 0;
+      scale: 0;
+      transition-duration: 300ms;
+      transition-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+    }
+  }
+
+  .uikit-menu-positioner {
+    z-index: 100;
+  }
+
+  .uikit-menu-checkbox-item-indicator {
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    display: flex;
+    width: 24px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    translate: 0 -50%;
+  }
+
+  .uikit-menu-radio-item-indicator {
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    display: flex;
+    width: 24px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    translate: 0 -50%;
+  }
+
+  .uikit-menu-chevron {
+    display: flex;
+    width: 14px;
+    min-height: 20px;
+    align-items: center;
+    justify-content: center;
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    margin-inline-start: 4px;
+    transition: rotate 200ms;
+
+    [data-popup-open] > & {
+      rotate: var(--uikit-menu-chevron-open-rotation);
+    }
+  }
+
+  .uikit-menu-icon {
+    display: flex;
+    width: 28px;
+    min-height: var(--uikit-menu-icon-line-height);
+    align-items: center;
+    justify-content: center;
+    font-size: var(--uikit-menu-icon-size);
+    font-variation-settings: 'wght' 400;
+    font-weight: round(down, 400, 100);
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    line-height: var(--uikit-menu-icon-line-height);
+    margin-inline-end: 4px;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (400 - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
+  }
+
+  .uikit-menu-label {
+    padding: var(--uikit-menu-item-padding-block) 0;
+    font-size: var(--uikit-menu-label-size);
+    font-variation-settings: 'wght' 400;
+    font-weight: round(down, 400, 100);
+    grid-column: 2;
+    grid-row: 1;
+    letter-spacing: var(--uikit-menu-label-letter-spacing);
+    line-height: var(--uikit-menu-label-line-height);
+    padding-inline-start: 4px;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (400 - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
+  }
+
+  .uikit-menu-subtitle {
+    padding-bottom: var(--uikit-menu-item-padding-block);
+    margin-top: calc(2px - var(--uikit-menu-item-padding-block));
+    color: var(--uikit-glass-content-secondary);
+    font-size: 13px;
+    font-variation-settings: 'wght' 400;
+    font-weight: round(down, 400, 100);
+    grid-column: 2;
+    grid-row: 2;
+    line-height: var(--uikit-menu-subtitle-line-height);
+    padding-inline-start: 4px;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (400 - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
+  }
+
+  .uikit-menu-shortcut {
+    display: flex;
+    color: var(--uikit-glass-content-secondary);
+    font-family: inherit;
+    font-feature-settings: 'ss15';
+    font-size: 15px;
+    font-variation-settings: 'wght' 510;
+    font-weight: round(down, 510, 100);
+    gap: 1px;
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    line-height: 20px;
+    margin-inline-start: 4px;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (510 - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
+
+    & > span {
+      min-width: 14px;
+      text-align: center;
+    }
+  }
+
+  .uikit-menu-group-label {
+    padding: var(--uikit-menu-title-padding);
+    color: var(--uikit-glass-content-disabled);
+    font-size: var(--uikit-menu-title-size);
+    font-variation-settings: 'wght' 510;
+    font-weight: round(down, 510, 100);
+    letter-spacing: -0.08px;
+    line-height: 15px;
+    mix-blend-mode: var(--uikit-glass-content-blend);
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (510 - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
+  }
+
+  .uikit-menu-quick-actions {
+    display: flex;
+    flex: none;
+    gap: 6px;
+    margin-inline: calc(10px - var(--uikit-menu-inset));
+  }
+
+  /* Figma “Item” (all but quick actions), its selection (Figma “Selection”):
+     a pill. */
+  .uikit-menu-item {
+    &::before {
+      position: absolute;
+      border-radius: 100px;
+      background-color: var(--uikit-glass-selection);
+      content: '';
+      inset: 0;
+      opacity: 0;
+    }
+
+    position: relative;
+    display: grid;
+    box-sizing: border-box;
+    align-items: center;
+    padding: 0 8px;
+    color: var(--uikit-glass-content);
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    mix-blend-mode: var(--uikit-glass-content-blend);
+    outline: none;
+    padding-inline-start: calc(8px + var(--uikit-menu-toggle-space));
+    user-select: none;
+
+    /* Highlighted (or its submenu open), the popup's moving selection (see
+       Popup). Touch: the selection while pressed (no hover highlights). */
+    &:active:not([data-disabled]) {
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    &[data-disabled] {
+      --uikit-glass-content: var(--uikit-glass-content-disabled);
+      --uikit-glass-content-secondary: var(--uikit-glass-content-disabled);
+    }
+
+    &[data-destructive]:not([data-disabled]) {
+      --uikit-glass-content: var(--color-ios-system-red);
+
+      mix-blend-mode: normal;
+    }
+  }
+
+  .uikit-menu-link-item {
+    text-decoration: none;
+  }
+
+  /* (Shared: e.g. `EditMenu`'s.) An item doing something only with a click
+     handler (`data-clickable`), as `Button`: a `cursor` prop, or `pointer`,
+     `not-allowed` without one or while disabled. */
+  .uikit-menu-action-cursor {
+    --uikit-utils-cursor: attr(cursor type(<custom-ident>), not-allowed);
+
+    @media (hover: hover) {
+      cursor: var(--uikit-utils-cursor);
+    }
+
+    &[data-clickable]:not([data-disabled]) {
+      --uikit-utils-cursor: attr(cursor type(<custom-ident>), pointer);
+    }
+  }
+
+  /* (Shared.) An item always doing something (toggles,
+     links, submenu triggers): a `cursor` prop, or `pointer`, `not-allowed`
+     while disabled. */
+  .uikit-menu-toggle-cursor {
+    --uikit-utils-cursor: attr(cursor type(<custom-ident>), pointer);
+
+    @media (hover: hover) {
+      cursor: var(--uikit-utils-cursor);
+    }
+
+    &[data-disabled] {
+      --uikit-utils-cursor: attr(cursor type(<custom-ident>), not-allowed);
+    }
+  }
+
+  .uikit-menu-trigger {
+    touch-action: none;
+
+    &[data-open-on='secondaryClick'] {
+      touch-action: manipulation;
+    }
+  }
+
+  .uikit-menu-popup {
+    --uikit-menu-toggle-space: 0px;
+    --uikit-menu-padding-block: 10px;
+    --uikit-menu-radius-inline: calc(
+      var(--uikit-menu-pill) + var(--uikit-menu-inset)
+    );
+    --uikit-menu-radius-block: calc(
+      var(--uikit-menu-pill) + var(--uikit-menu-padding-block)
+    );
+
+    position: relative;
+    display: flex;
+    min-width: 238px;
+    max-height: var(--available-height);
+    box-sizing: border-box;
+    flex-direction: column;
+    padding: var(--uikit-menu-padding-block) var(--uikit-menu-inset);
+    border-radius: var(--uikit-menu-radius-inline) /
+      var(--uikit-menu-radius-block);
+    outline: none;
+    overflow-y: auto;
+
+    /* Its size's metrics (see Size); compact submenus' chevrons turn down
+       while open. */
+    &[data-size='compact'] {
+      --uikit-menu-inset: 8px;
+      --uikit-menu-item-padding-block: 10px;
+      --uikit-menu-icon-size: var(--font-ios-body-size);
+      --uikit-menu-icon-line-height: var(--font-ios-body-line-height);
+      --uikit-menu-label-size: 17px;
+      --uikit-menu-label-line-height: 20px;
+      --uikit-menu-label-letter-spacing: -0.43px;
+      --uikit-menu-subtitle-line-height: 18px;
+      --uikit-menu-separator-height: 21px;
+      --uikit-menu-separator-height-section: 21px;
+      --uikit-menu-separator-height-quick-actions: 21px;
+      --uikit-menu-pill: 20px;
+      --uikit-menu-title-padding: 4px 8px 10px;
+      --uikit-menu-title-size: 13px;
+      --uikit-menu-quick-padding: 6px 4px;
+      --uikit-menu-quick-gap: 4px;
+      --uikit-menu-quick-symbol-line-height: 22px;
+      --uikit-menu-chevron-open-rotation: 90deg;
+    }
+
+    &[data-size='regular'] {
+      --uikit-menu-inset: 8px;
+      --uikit-menu-item-padding-block: 9px;
+      --uikit-menu-icon-size: var(--font-ios-subheadline-size);
+      --uikit-menu-icon-line-height: var(--font-ios-subheadline-line-height);
+      --uikit-menu-label-size: 15px;
+      --uikit-menu-label-line-height: 18px;
+      --uikit-menu-label-letter-spacing: 0.2px;
+      --uikit-menu-subtitle-line-height: 16px;
+      --uikit-menu-separator-height: 16px;
+      --uikit-menu-separator-height-section: 17px;
+      --uikit-menu-separator-height-quick-actions: 21px;
+      --uikit-menu-pill: 18px;
+      --uikit-menu-title-padding: 5px 8px 7px;
+      --uikit-menu-title-size: 12px;
+      --uikit-menu-quick-padding: 9px 4px 6px;
+      --uikit-menu-quick-gap: 1px;
+      --uikit-menu-quick-symbol-line-height: 19px;
+      --uikit-menu-chevron-open-rotation: 0deg;
+    }
+
+    /* Covering its parent's items (see Popup): as wide as its popup, on its
+       glass (no background of its own to compound). */
+    &[data-overlay] {
+      min-width: max(238px, var(--anchor-width) + 2 * var(--uikit-menu-inset));
+      background-color: transparent;
+    }
+
+    &:has([role='menuitemcheckbox'], [role='menuitemradio']) {
+      --uikit-menu-toggle-space: 28px;
+    }
+
+    /* While a compact submenu covers it, all but its trigger fade (iOS). */
+    & > *,
+    & > [role='group'] > * {
+      transition: opacity 200ms;
+    }
+
+    &:has(> [data-submenu-overlay][data-popup-open]) > :not([data-popup-open]),
+    &:has(> [role='group'] > [data-submenu-overlay][data-popup-open])
+      > :not([role='group']),
+    &:has(> [role='group'] > [data-submenu-overlay][data-popup-open])
+      > [role='group']
+      > :not([data-popup-open]) {
+      opacity: 0.2;
+    }
+  }
+
+  .uikit-menu-separator {
+    display: flex;
+    height: var(--uikit-menu-separator-height);
+    flex: none;
+    align-items: center;
+    padding: 0 8px;
+
+    &:has(+ [role='group']) {
+      height: var(--uikit-menu-separator-height-section);
+    }
+
+    [data-menu-part='quick-actions'] + & {
+      height: var(--uikit-menu-separator-height-quick-actions);
+    }
+
+    &::before {
+      height: 1px;
+      flex: 1;
+      background-color: var(--uikit-glass-separator);
+      content: '';
+      mix-blend-mode: var(--uikit-glass-content-blend);
+    }
+  }
+
+  .uikit-menu-quick-action {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--uikit-menu-quick-padding);
+    border-radius: calc(var(--uikit-menu-radius-inline) - 10px) /
+      calc(var(--uikit-menu-radius-block) - 10px);
+    color: var(--uikit-glass-content);
+    gap: var(--uikit-menu-quick-gap);
+    mix-blend-mode: var(--uikit-glass-content-blend);
+    outline: none;
+    user-select: none;
+
+    &::before {
+      position: absolute;
+      border-radius: inherit;
+      background-color: var(--uikit-glass-selection);
+      content: '';
+      inset: 0;
+      opacity: 0;
+    }
+
+    /* Highlighted, the popup's moving selection (see Popup). Touch: the
+       selection while pressed (no hover highlights). */
+    &:active:not([data-disabled]) {
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    &[data-disabled] {
+      --uikit-glass-content: var(--uikit-glass-content-disabled);
+    }
+
+    &[data-destructive]:not([data-disabled]) {
+      --uikit-glass-content: var(--color-ios-system-red);
+
+      mix-blend-mode: normal;
+    }
+
+    & > [data-menu-part='icon'] {
+      width: auto;
+      height: var(--uikit-menu-quick-symbol-line-height);
+      min-height: 0;
+      margin: 0;
+      line-height: var(--uikit-menu-quick-symbol-line-height);
+    }
+
+    & > [data-menu-part='label'] {
+      overflow: hidden;
+      max-width: 100%;
+      padding: 0;
+      font-size: 12px;
+      font-variation-settings: 'wght' 510;
+      font-weight: round(down, 510, 100);
+      letter-spacing: normal;
+      line-height: 18px;
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(0px, (510 - 400) / 326 * 1px);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
+    }
+  }
+}
