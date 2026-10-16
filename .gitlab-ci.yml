@@ -34,13 +34,13 @@ publish:pages:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
       when: on_success
       variables:
-        VERSION_TAG: "latest"
+        PATH_PREFIX: "uikit-ish-latest"
     - if: $CI_COMMIT_TAG
       when: manual
       variables:
-        VERSION_TAG: "pre-${CI_COMMIT_TAG_MESSAGE}"
+        PATH_PREFIX: "uikit-ish-pre-${CI_COMMIT_TAG_MESSAGE}"
   script:
     - make -s -C "packages/uikit-ish" sub_package="packages/uikit-ish" transform_build_demo
   pages:
-    path_prefix: $VERSION_TAG
+    path_prefix: $PATH_PREFIX
     publish: packages/uikit-ish/demo
