@@ -7,11 +7,6 @@ import { commonPropOptions, MappedProp } from '../utils/main.js';
 
 export const propOptionsContent = {
   count: [3, 2, 4, 5] as const,
-  label1: ['Day'] as const,
-  label2: ['Week'] as const,
-  label3: ['Month'] as const,
-  label4: ['Year'] as const,
-  label5: ['All Time'] as const,
 } as const;
 
 export const propOptionsRoot = {

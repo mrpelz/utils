@@ -76,9 +76,7 @@ export const tests = [
   {
     name: 'viewport: bars at the visual viewport',
     run: async (page) => {
-      await page.open('viewport', 'light', {
-        state: [{ $rest: true, bottomBar: true }],
-      });
+      await page.open('viewport-bar');
       const bar = await page.evaluate(`(() => {
         const field = document.querySelector('[aria-label=Message]');
         let bar = field;
@@ -92,8 +90,8 @@ export const tests = [
     name: 'viewport: anchors at each edge, the content layer; the keyboard pushes (or covers) them',
     run: async (page) => {
       const shown = { $rest: true, shown: true };
-      await page.open('viewport', 'light', {
-        state: [null, shown, shown, shown, shown, shown],
+      await page.open('viewport-anchors', 'light', {
+        state: [shown, shown, shown, shown, shown],
       });
       /** @returns {Promise<{ bottom: number[], layer: number[], leading: number[], top: number[], trailing: number[] }>} */
       const boxes = () =>
@@ -129,8 +127,8 @@ export const tests = [
       assert.equal(keyboard.leading[3], 300, 'sides');
       assert.equal(keyboard.layer[3], 300, 'resized');
 
-      await page.setState(2, { keyboard: 'cover' });
-      await page.setState(5, { keyboard: 'overlay' });
+      await page.setState(1, { keyboard: 'cover' });
+      await page.setState(4, { keyboard: 'overlay' });
       await sleep(100);
       const covered = await boxes();
       assert.equal(covered.bottom[3], 0, 'covered');

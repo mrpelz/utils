@@ -124,7 +124,9 @@ export const tests = [
           const group = ${page.section}.querySelector('[role=toolbar] [role=group]');
           const tinted = [...group.children].some((layer) => layer.childElementCount === 4);
           const style = getComputedStyle(group);
-          return [tinted, style.getPropertyValue('--styled-glass-tint').trim(), getComputedStyle(group.querySelector('button')).color];
+          // (Colors computed: the build's CSS may write them otherwise.)
+          const color = (value) => { const probe = document.createElement('span'); probe.style.color = value; document.body.append(probe); const computed = getComputedStyle(probe).color; probe.remove(); return computed; };
+          return [tinted, color(style.getPropertyValue('--styled-glass-tint')), getComputedStyle(group.querySelector('button')).color];
         })()`);
       const [plain] = await group();
       assert.equal(plain, false);
@@ -132,8 +134,8 @@ export const tests = [
       await sleep(200);
       assert.deepEqual(await group(), [
         true,
-        // (System orange, computed.)
-        'rgb(255 141 40)',
+        // (System orange.)
+        'rgb(255, 141, 40)',
         'rgb(255, 255, 255)',
       ]);
       // Its glass' rim in its tint too, not the toolbar's (blue).
@@ -144,7 +146,8 @@ export const tests = [
       );
       const blue = /0,? 145,? 255/u;
       assert.equal(blue.test(rim), false, rim);
-      assert.match(rim, /255,? 141,? 40/u);
+      // (In either notation: the build's CSS may write it in hex.)
+      assert.match(rim, /255,? 141,? 40|#ff8d28/iu);
 
       // Its content's color over the tint.
       await page.setState(2, { textColor: '#000' });
@@ -255,10 +258,10 @@ export const tests = [
       assert.deepEqual(await shown(), [0, '1 of 8'], 'at rest');
 
       const control = await page.rect('[role=slider]');
-      const center = [
+      const center = /** @type {const} */ ([
         control.x + control.width / 2,
         control.y + control.height / 2,
-      ];
+      ]);
       await page.mouse('mouseMoved', center[0], center[1]);
       await sleep(300);
       assert.deepEqual(await shown(), [1, '1 of 8'], 'hovered');
@@ -290,9 +293,7 @@ export const tests = [
   {
     name: 'toolbar: a top bar’s title is centered in it, or at its start; 44px buttons',
     run: async (page) => {
-      await page.open('header', 'light', {
-        state: [{ $rest: true, largeTitle: false, subtitle: 'Subtitle' }],
-      });
+      await page.open('header-title');
       const title = () =>
         page.evaluate(`(() => {
           const bar = ${page.section}.querySelector('[role=toolbar]').getBoundingClientRect();
@@ -320,7 +321,7 @@ export const tests = [
       assert.deepEqual(centered.fonts, ['17px', '12px', '14px']);
 
       // At the start: next to the back button (16 + 44 + 10).
-      await page.setState(2, { alignStart: true });
+      await page.setState(1, { alignStart: true });
       await sleep(200);
       const start = await title();
       assert.equal(start.left, 70);
@@ -354,7 +355,7 @@ export const tests = [
       await scrollTo(0);
 
       // Without a large title, the bar's title shows.
-      await page.setState(0, { largeTitle: false });
+      await page.open('header-title');
       await sleep(200);
       assert.equal(
         await page.evaluate(
@@ -390,8 +391,6 @@ export const tests = [
 
       await page.open('toolbar', 'light', {
         state: [
-          null,
-          null,
           null,
           { $rest: true, size: 'small', tint, variant: 'bordered-prominent' },
         ],

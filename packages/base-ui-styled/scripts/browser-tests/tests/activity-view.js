@@ -17,14 +17,14 @@ export const tests = [
       const parts = await page.evaluate(`(() => {
         const size = (element) => { const { height, width } = element.getBoundingClientRect(); return [width, height].map(Math.round); };
         const thumbnail = document.querySelector('[data-activity-view-part=header] > div');
-        const people = [...document.querySelectorAll('[data-activity-view-part=people] > button')];
-        const actions = [...document.querySelectorAll('[data-activity-view-part=actions] > button')];
+        const people = [...document.querySelectorAll('[data-activity-view-part=people] > [role=listitem] > button')];
+        const actions = [...document.querySelectorAll('[data-activity-view-part=actions] > [role=listitem] > button')];
         return {
           action: size(actions[0].querySelector('[data-activity-view-part=action-symbol]')),
           actions: actions.map((action) => action.textContent),
           count: people[2].textContent,
           person: [size(people[0]), size(people[0].querySelector('[data-avatar-part=root]'))],
-          rows: [people, actions].map((row) => getComputedStyle(row[0].parentElement).overflowX),
+          rows: [people, actions].map((row) => getComputedStyle(row[0].parentElement.parentElement).overflowX),
           thumbnail: [size(thumbnail), getComputedStyle(thumbnail).borderRadius],
           title: getComputedStyle(document.querySelector('[data-activity-view-part=header] > div + div > div')).fontSize,
         };
@@ -47,7 +47,7 @@ export const tests = [
 
       for (const label of ['Ashley Kamin', 'Copy']) {
         const center = await page.evaluate(`(() => {
-          const button = [...document.querySelectorAll('[data-activity-view-part] > button')].find((element) => element.textContent.startsWith(${JSON.stringify(label)}));
+          const button = [...document.querySelectorAll('[data-activity-view-part] > [role=listitem] > button')].find((element) => element.textContent.startsWith(${JSON.stringify(label)}));
           const { height, width, x, y } = button.getBoundingClientRect();
           return [x + width / 2, y + height / 2];
         })()`);

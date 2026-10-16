@@ -4,17 +4,17 @@ import { sfChevronUpChevronDown } from '@bradleyhodges/sfsymbols/sfChevronUpChev
 import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
 
+import { Symbol } from '../../components/index.js';
 import { AddLog } from '../utils/log.js';
 import { commonPropOptions, MappedProp } from '../utils/main.js';
-import { SFSymbol } from '../utils/symbol.js';
 
 export const propOptionsContent = {
   symbol: [
     undefined,
-    new MappedProp(<SFSymbol icon={sfHeartFill} />, '[heart.fill]'),
-    new MappedProp(<SFSymbol icon={sfPlus} />, '[plus]'),
+    new MappedProp(<Symbol icon={sfHeartFill} />, '[heart.fill]'),
+    new MappedProp(<Symbol icon={sfPlus} />, '[plus]'),
     new MappedProp(
-      <SFSymbol icon={sfChevronUpChevronDown} />,
+      <Symbol icon={sfChevronUpChevronDown} />,
       '[chevron.up.chevron.down]',
     ),
   ] as const,

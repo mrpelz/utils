@@ -140,18 +140,20 @@ export const tests = [
       // Each spoke as far into its fade as its opacity: the brightest at the
       // top, fainter counterclockwise.
       await page.setState(2, { animating: false });
-      const opacities = await page.evaluate(`(() => {
+      const opacities = /** @type {number[]} */ (
+        await page.evaluate(`(() => {
         const [, root] = ${page.section}.querySelectorAll('[role=progressbar]');
         return [...root.querySelector('[aria-hidden]').children].map((spoke) => Number(getComputedStyle(spoke).opacity));
-      })()`);
-      const [top, ...rest] = opacities;
+      })()`)
+      );
+      const [top = 1, ...rest] = opacities;
       assert.ok(
         rest.every((opacity) => opacity < top),
         opacities.join(', '),
       );
       assert.ok(
         rest.every(
-          (opacity, index) => index === 0 || opacity > rest[index - 1],
+          (opacity, index) => index === 0 || opacity > (rest[index - 1] ?? 1),
         ),
         opacities.join(', '),
       );

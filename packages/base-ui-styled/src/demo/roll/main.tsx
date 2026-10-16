@@ -35,13 +35,12 @@ export const RollDemo: FunctionComponent = () => {
     'root',
     externalRoot,
   );
-  const [controlColumn, propsColumn, stateColumn, RemounterColumn] =
-    usePropControl(
-      useMemo(() => getPropOptionsColumn(addLog), [addLog]),
-      'column (hours)',
-      externalColumn,
-      true,
-    );
+  const [controlColumn, propsColumn, stateColumn, keyColumn] = usePropControl(
+    useMemo(() => getPropOptionsColumn(addLog), [addLog]),
+    'column (hours)',
+    externalColumn,
+    true,
+  );
   const [controlItem, propsItem, stateItem] = usePropControl(
     propOptionsItem,
     'item (hours: 12)',
@@ -68,20 +67,19 @@ export const RollDemo: FunctionComponent = () => {
       ])}
     >
       <Roll.Root {...propsRoot}>
-        <RemounterColumn>
-          <Roll.Column
-            aria-label="Hours"
-            {...propsColumn}
-          >
-            {hours.map((hour) => (
-              <Roll.Item
-                key={hour}
-                value={hour}
-                {...(hour === 12 ? propsItem : {})}
-              />
-            ))}
-          </Roll.Column>
-        </RemounterColumn>
+        <Roll.Column
+          key={keyColumn}
+          aria-label="Hours"
+          {...propsColumn}
+        >
+          {hours.map((hour) => (
+            <Roll.Item
+              key={hour}
+              value={hour}
+              {...(hour === 12 ? propsItem : {})}
+            />
+          ))}
+        </Roll.Column>
         <Roll.Separator
           aria-hidden="true"
           {...propsSeparator}

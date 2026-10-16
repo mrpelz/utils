@@ -13,6 +13,8 @@ import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
+export const dirDemo = path.resolve(dirBase, 'demo');
+
 // @ts-ignore
 /** @type {import('@mrpelz/boilerplate-dom/webpack.config.js').ConfigurationExtended} */
 const configDownstream = {
@@ -33,6 +35,7 @@ const configDownstream = {
   },
   output: {
     assetModuleFilename: 'assets/[name][ext]',
+    path: dirDemo,
     publicPath: '/',
   },
   resolve: {
@@ -49,7 +52,7 @@ const configDownstream = {
 /** @type {import('@mrpelz/boilerplate-dom/webpack.config.js').ConfigurationExtended} */
 const config = deepmerge(configUpstream, configDownstream);
 
-config.entry = path.resolve(dirSrc, 'demo.tsx');
+config.entry = path.resolve(dirSrc, 'demo/main.tsx');
 
 if (config.module) {
   config.module.rules = [
@@ -61,21 +64,7 @@ if (config.module) {
         {
           loader: 'ts-loader',
           options: {
-            configFile: path.resolve(dirBase, 'tsconfig.build.json'),
-            transpileOnly: true,
-          },
-        },
-      ],
-    },
-    {
-      exclude: /node_modules/,
-      include: path.resolve(dirSrc, 'workers'),
-      test: /\.ts$/i,
-      use: [
-        {
-          loader: 'ts-loader',
-          options: {
-            configFile: path.resolve(dirSrc, 'workers/tsconfig.build.json'),
+            configFile: path.resolve(dirBase, 'tsconfig.demo.json'),
             transpileOnly: true,
           },
         },

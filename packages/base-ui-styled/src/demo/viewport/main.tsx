@@ -1,5 +1,6 @@
-import { styled } from 'goober';
-import { FunctionComponent, useMemo, useRef } from 'react';
+import './style.css';
+
+import { FunctionComponent, useRef } from 'react';
 
 import {
   List,
@@ -9,119 +10,25 @@ import {
   useVisualViewport,
   Viewport,
 } from '../../components/index.js';
-import { useTextFieldDemo } from '../text-field/compose.js';
-import {
-  getPropOptionsControl,
-  propOptionsRoot as propOptionsTextFieldRoot,
-} from '../text-field/props.js';
-import { AddLog, useLog } from '../utils/log.js';
-import { Component, MappedProp, usePropControl } from '../utils/main.js';
+import { useLog } from '../utils/log.js';
+import { Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
 import {
   propOptionsBottom,
-  propOptionsContent,
   propOptionsLayer,
   propOptionsSide,
   propOptionsTop,
 } from './props.js';
 
-const Metrics = styled('dl')`
-  display: grid;
-  margin: 0;
-  color: var(--color-ios-label);
-  column-gap: 16px;
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
-  grid-template-columns: auto auto;
-
-  & > dd {
-    margin: 0;
-  }
-`;
-
-const Bar = styled('div')`
-  display: flex;
-  align-items: center;
-  padding: 8px 16px;
-  background-color: var(--color-ios-secondary-system-grouped-background);
-  box-shadow: 0 -0.5px var(--color-ios-separator);
-  gap: 8px;
-
-  & > :first-child {
-    flex: 1;
-  }
-`;
-
-// An anchor's sample content (a bar, or a sidebar), labelled.
-const Sample = styled('div')`
-  display: grid;
-  min-width: 44px;
-  min-height: 44px;
-  box-sizing: border-box;
-  padding: 12px 16px;
-  background-color: var(--color-ios-secondary-system-grouped-background);
-  box-shadow: 0 0 0 0.5px var(--color-ios-separator);
-  color: var(--color-ios-label);
-  font-size: 15px;
-  place-items: center;
-`;
-
-const SideSample = styled(Sample)`
-  width: 200px;
-  height: 100%;
-`;
-
-// The content layer's sample: long enough to scroll.
-const LayerSample = styled('div')`
-  min-height: 200vh;
-  padding: 16px;
-  background: linear-gradient(
-    var(--color-ios-system-grouped-background),
-    var(--color-ios-system-gray5)
-  );
-  color: var(--color-ios-label);
-`;
-
-// The message field: a text field (all of its demo's options, see
-// `ViewportDemo`).
-const Field: FunctionComponent<{
-  field: ReturnType<typeof useTextFieldDemo>;
-}> = ({ field }) => (
-  <List.Root>
-    <List.Group style={{ marginInline: 0 }}>
-      <field.Remounter>
-        <TextField.Root
-          {...field.props.root}
-          render={<List.Item />}
-        >
-          <TextField.Control
-            aria-label="Message"
-            {...field.props.control}
-          />
-          <TextField.Clear {...field.props.clear} />
-        </TextField.Root>
-      </field.Remounter>
-      {field.suggestions}
-    </List.Group>
-  </List.Root>
-);
-
-// The message field's control: the text field demo's props, a message's
-// values.
-const getMessageControl = (addLog: AddLog) => ({
-  ...getPropOptionsControl(addLog),
-  placeholder: ['Message', 'iMessage', undefined] as const,
-  type: ['text', 'search', undefined] as const,
-  enterKeyHint: ['send', 'enter', undefined] as const,
-  render: [undefined, new MappedProp(<textarea />, '[<textarea />]')] as const,
-});
-
-const Status: FunctionComponent<{ onScrollLog: (text: string) => void }> = ({
-  onScrollLog,
-}) => {
+// The viewport's hooks, inside its `Provider`: the visual viewport, the
+// keyboard's height, the page's scroll direction (e.g. for collapsing a tab
+// bar), and its turns.
+const ViewportStatus: FunctionComponent<{
+  onScrollLog: (text: string) => void;
+}> = ({ onScrollLog }) => {
   const visual = useVisualViewport();
   const { atBottom, atTop, direction } = useScrollDirection();
   const edge = atBottom ? 'bottom' : '–';
@@ -135,7 +42,7 @@ const Status: FunctionComponent<{ onScrollLog: (text: string) => void }> = ({
   });
 
   return (
-    <Metrics>
+    <dl className="viewport-demo-metrics">
       <dt>Visual viewport</dt>
       <dd>
         {Math.round(visual.width)} × {Math.round(visual.height)} at{' '}
@@ -147,57 +54,18 @@ const Status: FunctionComponent<{ onScrollLog: (text: string) => void }> = ({
       <dd>{direction ?? '–'}</dd>
       <dt>At</dt>
       <dd>{atTop ? 'top' : edge}</dd>
-    </Metrics>
+    </dl>
   );
 };
 
 /**
- * The viewport (`Viewport`): the visual viewport and the keyboard's height,
- * the page's scroll direction (e.g. for collapsing a tab bar), anchors at
- * each edge (a bar fixed above the keyboard), and a content layer.
+ * The viewport (`Viewport.Provider`): the visual viewport and the
+ * keyboard's height, and the page's scroll direction.
  */
 export const ViewportDemo: FunctionComponent = () => {
   const id = 'viewport';
+
   const [log, addLog] = useLog();
-
-  const [
-    externalContent,
-    externalTop,
-    externalBottom,
-    externalLeading,
-    externalTrailing,
-    externalLayer,
-    ...externalMessage
-  ] = useProvidedState(id);
-
-  const message = useTextFieldDemo(addLog, externalMessage, {
-    control: useMemo(() => getMessageControl(addLog), [addLog]),
-    prefix: 'message field: ',
-    root: propOptionsTextFieldRoot,
-  });
-
-  const [controlContent, content, stateContent] = usePropControl(
-    propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
-  );
-  const [controlTop, { shown: top, ...propsTop }, stateTop] = usePropControl(
-    propOptionsTop,
-    'anchor (top)',
-    externalTop,
-  );
-  const [controlBottom, { shown: bottom, ...propsBottom }, stateBottom] =
-    usePropControl(propOptionsBottom, 'anchor (bottom)', externalBottom);
-  const [controlLeading, { shown: leading, ...propsLeading }, stateLeading] =
-    usePropControl(propOptionsSide, 'anchor (leading)', externalLeading);
-  const [
-    controlTrailing,
-    { shown: trailing, ...propsTrailing },
-    stateTrailing,
-  ] = usePropControl(propOptionsSide, 'anchor (trailing)', externalTrailing);
-  const [controlLayer, { shown: layer, ...propsLayer }, stateLayer] =
-    usePropControl(propOptionsLayer, 'content layer', externalLayer);
 
   return (
     <Component
@@ -205,32 +73,119 @@ export const ViewportDemo: FunctionComponent = () => {
       id={id}
       log={log}
       title="Viewport"
+    >
+      <Viewport.Provider>
+        <ViewportStatus onScrollLog={addLog} />
+      </Viewport.Provider>
+    </Component>
+  );
+};
+
+/**
+ * A bar at the bottom of the visual viewport (`Viewport.BlockEnd`): above
+ * the keyboard while it's shown, e.g. a message field.
+ */
+export const ViewportBarDemo: FunctionComponent = () => {
+  const id = 'viewport-bar';
+
+  const [log, addLog] = useLog();
+
+  return (
+    <Component
+      center
+      id={id}
+      log={log}
+      title="Viewport (Bar)"
+    >
+      <Viewport.Provider>
+        <ViewportStatus onScrollLog={addLog} />
+        <Viewport.BlockEnd>
+          <div className="viewport-demo-bar">
+            <List.Root>
+              <List.Group style={{ marginInline: 0 }}>
+                <TextField.Root render={<List.Item />}>
+                  <TextField.Control
+                    aria-label="Message"
+                    enterKeyHint="send"
+                    placeholder="Message"
+                  />
+                  <TextField.Clear />
+                </TextField.Root>
+              </List.Group>
+            </List.Root>
+          </div>
+        </Viewport.BlockEnd>
+      </Viewport.Provider>
+    </Component>
+  );
+};
+
+/**
+ * Anchors at each edge of the visual viewport (`Viewport.Anchor`: bars at
+ * the top and bottom, sidebars at the sides), their safe areas kept clear,
+ * the keyboard pushing (or covering) them; and a content layer
+ * (`Viewport.Content`) below them.
+ */
+export const ViewportAnchorsDemo: FunctionComponent = () => {
+  const id = 'viewport-anchors';
+
+  const [log] = useLog();
+  const [
+    externalTop,
+    externalBottom,
+    externalLeading,
+    externalTrailing,
+    externalLayer,
+  ] = useProvidedState(id);
+
+  const [controlTop, { shown: top, ...propsTop }, stateTop] = usePropControl(
+    propOptionsTop,
+    'anchor (top)',
+    externalTop,
+    true,
+  );
+  const [controlBottom, { shown: bottom, ...propsBottom }, stateBottom] =
+    usePropControl(propOptionsBottom, 'anchor (bottom)', externalBottom, true);
+  const [controlLeading, { shown: leading, ...propsLeading }, stateLeading] =
+    usePropControl(propOptionsSide, 'anchor (leading)', externalLeading, true);
+  const [
+    controlTrailing,
+    { shown: trailing, ...propsTrailing },
+    stateTrailing,
+  ] = usePropControl(
+    propOptionsSide,
+    'anchor (trailing)',
+    externalTrailing,
+    true,
+  );
+  const [controlLayer, { shown: layer, ...propsLayer }, stateLayer] =
+    usePropControl(propOptionsLayer, 'content layer', externalLayer, true);
+
+  return (
+    <Component
+      center
+      id={id}
+      log={log}
+      title="Viewport (Anchors)"
       controls={[
-        controlContent,
         controlTop,
         controlBottom,
         controlLeading,
         controlTrailing,
         controlLayer,
-        ...message.controls,
       ]}
       stateUrl={useCreateStateUrl(id, [
-        stateContent,
         stateTop,
         stateBottom,
         stateLeading,
         stateTrailing,
         stateLayer,
-        ...message.states,
       ])}
     >
       <Viewport.Provider>
-        <Status onScrollLog={addLog} />
         {layer ? (
           <Viewport.Content {...propsLayer}>
-            <LayerSample>
-              <Field field={message} />
-            </LayerSample>
+            <div className="viewport-demo-layer">Content layer</div>
           </Viewport.Content>
         ) : null}
         {top ? (
@@ -238,7 +193,7 @@ export const ViewportDemo: FunctionComponent = () => {
             edge="block-start"
             {...propsTop}
           >
-            <Sample>Top</Sample>
+            <div className="viewport-demo-sample">Top</div>
           </Viewport.Anchor>
         ) : null}
         {bottom ? (
@@ -246,7 +201,7 @@ export const ViewportDemo: FunctionComponent = () => {
             edge="block-end"
             {...propsBottom}
           >
-            <Sample>Bottom</Sample>
+            <div className="viewport-demo-sample">Bottom</div>
           </Viewport.Anchor>
         ) : null}
         {leading ? (
@@ -254,7 +209,12 @@ export const ViewportDemo: FunctionComponent = () => {
             edge="inline-start"
             {...propsLeading}
           >
-            <SideSample>Leading</SideSample>
+            <div
+              className="viewport-demo-sample"
+              data-side=""
+            >
+              Leading
+            </div>
           </Viewport.Anchor>
         ) : null}
         {trailing ? (
@@ -262,15 +222,13 @@ export const ViewportDemo: FunctionComponent = () => {
             edge="inline-end"
             {...propsTrailing}
           >
-            <SideSample>Trailing</SideSample>
+            <div
+              className="viewport-demo-sample"
+              data-side=""
+            >
+              Trailing
+            </div>
           </Viewport.Anchor>
-        ) : null}
-        {content.bottomBar ? (
-          <Viewport.BlockEnd>
-            <Bar>
-              <Field field={message} />
-            </Bar>
-          </Viewport.BlockEnd>
         ) : null}
       </Viewport.Provider>
     </Component>

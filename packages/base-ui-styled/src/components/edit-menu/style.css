@@ -1,0 +1,190 @@
+/* Edit-menu (see main.tsx). */
+@layer base-ui-styled {
+  .bus-edit-menu-hidden-trigger {
+    position: absolute;
+    overflow: hidden;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .bus-edit-menu-positioner {
+    z-index: 100;
+  }
+
+  .bus-edit-menu-popup {
+    position: relative;
+    display: flex;
+    max-width: var(--available-width);
+    min-height: 42px;
+    box-sizing: border-box;
+    align-items: center;
+    padding: 0 4px;
+    border-radius: 100px;
+    outline: none;
+  }
+
+  .bus-edit-menu-actions {
+    --styled-edit-menu-fade: to right;
+    --styled-edit-menu-fade-start: 0px;
+    --styled-edit-menu-fade-end: 0px;
+    --styled-edit-menu-more: 0px;
+
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    padding-inline-end: var(--styled-edit-menu-more);
+
+    &:dir(rtl) {
+      --styled-edit-menu-fade: to left;
+    }
+
+    &:has(> * > [aria-haspopup='menu']) {
+      --styled-edit-menu-more: 34px;
+    }
+
+    &[data-before] {
+      --styled-edit-menu-fade-start: 16px;
+    }
+
+    &[data-after] {
+      --styled-edit-menu-fade-end: 16px;
+    }
+
+    &[data-overflowing] {
+      mask-image: linear-gradient(
+        var(--styled-edit-menu-fade),
+        transparent,
+        #000 var(--styled-edit-menu-fade-start),
+        #000
+          calc(
+            100% - var(--styled-edit-menu-more) -
+              var(--styled-edit-menu-fade-end)
+          ),
+        transparent calc(100% - var(--styled-edit-menu-more)),
+        #000 calc(100% - var(--styled-edit-menu-more))
+      );
+    }
+  }
+
+  .bus-edit-menu-scroller {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    align-items: center;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    touch-action: none;
+
+    [data-overflowing] > & {
+      overflow: auto hidden;
+    }
+  }
+
+  .bus-edit-menu-item {
+    position: relative;
+    display: flex;
+    min-height: 34px;
+    box-sizing: border-box;
+    flex: none;
+    align-items: center;
+    padding: 0 16px;
+    color: var(--styled-glass-content);
+    font-size: 14px;
+    font-variation-settings: 'wght' 400;
+    font-weight: round(down, 400, 100);
+    letter-spacing: -0.15px;
+    line-height: 18px;
+    mix-blend-mode: var(--styled-glass-content-blend);
+    outline: none;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (400 - 400) / 326 * 1px);
+    user-select: none;
+    white-space: nowrap;
+
+    --styled-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
+
+    &::before {
+      position: absolute;
+      border-radius: 100px;
+      background-color: var(--styled-glass-selection);
+      content: '';
+      inset: 0;
+      opacity: 0;
+    }
+
+    /* Highlighted, the scroller's moving selection (see Popup). Touch: the
+       selection while pressed (no hover highlights). */
+    &:active:not([data-disabled]) {
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    & + & {
+      margin-inline-start: 1px;
+    }
+
+    & + &::after {
+      position: absolute;
+      top: calc(50% - 8px);
+      left: -1px;
+      width: 1px;
+      height: 16px;
+      background-color: var(--styled-glass-divider);
+      content: '';
+      transition: opacity 200ms;
+    }
+
+    /* Hidden next to the highlighted action, as in Segmented. */
+    &[data-highlighted]::after,
+    &:active::after,
+    &[data-highlighted] + &::after,
+    &:active + &::after {
+      opacity: 0;
+    }
+
+    &[data-disabled] {
+      --styled-glass-content: var(--styled-glass-content-disabled);
+    }
+
+    &[data-destructive]:not([data-disabled]) {
+      --styled-glass-content: var(--color-ios-system-red);
+
+      mix-blend-mode: normal;
+    }
+
+    & > * {
+      position: relative;
+    }
+  }
+
+  .bus-edit-menu-more {
+    /* At the popup's end (see Actions) */
+    position: absolute;
+    top: calc(50% - 17px);
+    display: flex;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: var(--styled-glass-selection);
+    color: var(--styled-glass-content);
+    inset-inline-end: 4px;
+    mix-blend-mode: var(--styled-glass-content-blend);
+    outline: none;
+
+    &[data-highlighted],
+    &[data-popup-open],
+    &:active {
+      filter: brightness(0.95);
+    }
+
+    & > svg {
+      translate: 1px 0;
+    }
+  }
+}

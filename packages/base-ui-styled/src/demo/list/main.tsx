@@ -1,9 +1,12 @@
+import './style.css';
+
 import { Collapsible } from '@base-ui/react/collapsible';
 import { RadioGroup } from '@base-ui/react/radio-group';
 import { sfAirplane } from '@bradleyhodges/sfsymbols/sfAirplane';
 import { sfArchiveboxFill } from '@bradleyhodges/sfsymbols/sfArchiveboxFill';
 import { sfBellFill } from '@bradleyhodges/sfsymbols/sfBellFill';
 import { sfCheckmarkCircleFill } from '@bradleyhodges/sfsymbols/sfCheckmarkCircleFill';
+import { sfChevronUpChevronDown } from '@bradleyhodges/sfsymbols/sfChevronUpChevronDown';
 import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
 import { sfEnvelopeFill } from '@bradleyhodges/sfsymbols/sfEnvelopeFill';
 import { sfEnvelopeOpenFill } from '@bradleyhodges/sfsymbols/sfEnvelopeOpenFill';
@@ -19,65 +22,31 @@ import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
 import { sfTagFill } from '@bradleyhodges/sfsymbols/sfTagFill';
 import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
 import { sfWifi } from '@bradleyhodges/sfsymbols/sfWifi';
-import { styled } from 'goober';
-import {
-  Fragment,
-  FunctionComponent,
-  ReactNode,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { FunctionComponent, useMemo, useRef, useState } from 'react';
 
 import {
+  Button,
   Calendar,
   DatePicker,
   DatePickerOpen,
+  forwardClick,
   List,
+  Menu,
+  Segmented,
+  Slider,
+  Stepper,
+  Switch,
+  Symbol,
   TextField,
   TimeRoll,
 } from '../../components/index.js';
-import { getPropOptionsRoot as getPropOptionsButtonRoot } from '../button/props.js';
-import { useDatePickerDemo } from '../date-picker/compose.js';
-import { getPropOptionsDatePicker } from '../date-picker/props.js';
-import { popUpControlCount, usePopUpDemo } from '../menu/compose.js';
-import {
-  segmentedControlCount,
-  useSegmentedDemo,
-} from '../segmented/compose.js';
-import { getPropOptionsRoot as getPropOptionsSegmentedRoot } from '../segmented/props.js';
-import { useSliderDemo } from '../slider/compose.js';
-import {
-  getPropOptionsRoot as getPropOptionsSliderRoot,
-  propOptionsContent as propOptionsSliderContent,
-} from '../slider/props.js';
-import { stepperControlCount, useStepperDemo } from '../stepper/compose.js';
-import { getPropOptionsRoot as getPropOptionsStepperRoot } from '../stepper/props.js';
-import { switchControlCount, useSwitchDemo } from '../switch/compose.js';
-import { getPropOptionsRoot as getPropOptionsSwitchRoot } from '../switch/props.js';
-import {
-  textFieldControlCount,
-  useTextFieldDemo,
-} from '../text-field/compose.js';
-import {
-  getPropOptionsControl as getPropOptionsTextFieldControl,
-  propOptionsRoot as propOptionsTextFieldRoot,
-} from '../text-field/props.js';
-import { AddLog, useLog } from '../utils/log.js';
-import {
-  commonPropOptions,
-  Component,
-  MappedProp,
-  usePropControl,
-} from '../utils/main.js';
+import { useLog } from '../utils/log.js';
+import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
-import { SFSymbol } from '../utils/symbol.js';
 import {
-  forwardClick,
   getPropOptionsAccessory,
   getPropOptionsAction,
   getPropOptionsButton,
@@ -95,9 +64,7 @@ import {
   propOptionsBlock,
   propOptionsCheckbox,
   propOptionsCollapsible,
-  propOptionsContent,
   propOptionsCursor,
-  propOptionsEdit,
   propOptionsExpandable,
   propOptionsHeader,
   propOptionsImage,
@@ -111,188 +78,23 @@ import {
   propOptionsText,
 } from './props.js';
 
-// Figma “Row with Swipe Actions” colors: leading orange, gray, red;
-// trailing purple, indigo, green.
-const leadingActions = [
-  ['Pin', sfPinFill, 'var(--color-ios-system-orange)'],
-  ['Mute', sfBellFill, undefined],
-  ['Delete', sfTrashFill, 'var(--color-ios-system-red)'],
-] as const;
-
-const trailingActions = [
-  ['Tag', sfTagFill, 'var(--color-ios-system-purple)'],
-  ['Mail', sfEnvelopeFill, 'var(--color-ios-system-indigo)'],
-  ['Done', sfCheckmarkCircleFill, 'var(--color-ios-system-green)'],
-] as const;
-
-const selectionOptions = ['Automatic', 'Always', 'Never'] as const;
-
-// The rows' controls, composed (see `ListDemo`): their demos' props, with
-// Settings' values: an orange switch, a gray pop-up button (as in lists),
-// the text size's S, M and L, a stepper of the quantity (its value the
-// row's detail), a slider between sun symbols.
-const getAirplaneModeRoot =
-  (addLog: AddLog) => (setPending: (pending: boolean) => void) => ({
-    ...getPropOptionsSwitchRoot(addLog, setPending),
-    tint: [
-      'var(--color-ios-system-orange)',
-      undefined,
-      'var(--color-ios-system-blue)',
-    ] as const,
-    onCheckedChange: [
-      new MappedProp(
-        (checked: boolean) => addLog(`airplane mode: ${checked}`),
-        '[log change]',
-      ),
-      undefined,
-    ] as const,
-  });
-
-/** A pop-up's button in a list row: gray; its clicks are the trigger's. */
-const getPopUpButtonRoot = (addLog: AddLog) => {
-  const root = getPropOptionsButtonRoot(addLog);
-  return {
-    ...root,
-    tint: [
-      'var(--color-ios-secondary-label)',
-      undefined,
-      ...root.tint.slice(1),
-    ] as const,
-    onClick: [undefined, ...root.onClick.filter(Boolean)] as const,
-  };
-};
-
-const textSizeContent = {
-  count: [3, 2, 4, 5] as const,
-  label1: ['S'] as const,
-  label2: ['M'] as const,
-  label3: ['L'] as const,
-  label4: ['XL'] as const,
-  label5: ['XXL'] as const,
-};
-
-const getTextSizeRoot = (addLog: AddLog) => ({
-  ...getPropOptionsSegmentedRoot(addLog),
-  defaultValue: ['second', 'first', 'third', undefined] as const,
-  onValueChange: [
-    new MappedProp(
-      (value: unknown) => addLog(`text size: ${String(value)}`),
-      '[log change]',
-    ),
-    undefined,
-  ] as const,
-});
-
-// (Its value is the row's: no `defaultValue`.)
-const getQuantityRoot = (addLog: AddLog) => {
-  const { defaultValue: _row, ...root } = getPropOptionsStepperRoot(addLog);
-  return root;
-};
-
-const brightnessContent = {
-  ...propOptionsSliderContent,
-  thumbs: [1] as const,
-  ticks: [0, 6, 11] as const,
-  minSymbol: [
-    new MappedProp(<SFSymbol icon={sfSunMin} />, '[sun.min]'),
-    undefined,
-  ] as const,
-  maxSymbol: [
-    new MappedProp(<SFSymbol icon={sfSunMax} />, '[sun.max]'),
-    undefined,
-  ] as const,
-  label: [undefined, 'Brightness'] as const,
-};
-
-const getBrightnessRoot = (addLog: AddLog) => {
-  const { value: _range, ...root } = getPropOptionsSliderRoot(addLog);
-  return {
-    ...root,
-    defaultValue: [60, 0, 100] as const,
-    onValueCommitted: [
-      new MappedProp(
-        (value: number | readonly number[]) =>
-          addLog(`brightness: ${String(value)}`),
-        '[log commit]',
-      ),
-      undefined,
-    ] as const,
-  };
-};
-
-// Events' views: upcoming and past, controlling their groups (two items;
-// its value is the view's).
-const eventsViewContent = {
-  count: [2] as const,
-  label1: ['Upcoming'] as const,
-  label2: ['Past'] as const,
-  label3: [undefined] as const,
-  label4: [undefined] as const,
-  label5: [undefined] as const,
-};
-
-const getEventsViewRoot = (addLog: AddLog) => {
-  const {
-    defaultValue: _view,
-    onValueChange: _logged,
-    value: _shown,
-    ...root
-  } = getPropOptionsSegmentedRoot(addLog);
-  return root;
-};
-
-// The form's name field: Kate Bell's, required.
-const getNameControl = (addLog: AddLog) => ({
-  ...getPropOptionsTextFieldControl(addLog),
-  placeholder: ['Required', 'Name', undefined] as const,
-  defaultValue: ['Kate Bell', undefined] as const,
-  value: [undefined, 'Kate Bell'] as const,
-  autoComplete: ['name', 'off', undefined] as const,
-  onValueChange: [
-    new MappedProp((value: string) => addLog(`name: ${value}`), '[log change]'),
-    undefined,
-  ] as const,
-});
-
-// The start's picker: date and time, in expandable rows below (its value
-// and open picker the form's).
-const getStartsPicker = (addLog: AddLog) => {
-  const {
-    defaultOpen: _opened,
-    onOpenChange: _opening,
-    onValueChange: _logged,
-    ...picker
-  } = getPropOptionsDatePicker('dateAndTime', addLog);
-  return { ...picker, popover: [false, true] as const };
-};
-
 /**
  * Lists: a settings-like inset grouped list (Figma “Lists and tables”) with
- * a switch, drill-ins, a pop-up (a menu, its trigger a button), an info button, a segmented control,
- * a stepper and a slider, a collapsible section (Base UI Collapsible),
- * buttons and a content block. Rows with a control pass their clicks on to
- * it (`onClick`).
+ * a switch, drill-ins, a pop-up (a menu, its trigger a button), an info
+ * button, a segmented control, a stepper and a slider, a collapsible
+ * section (Base UI Collapsible), buttons and a content block. Rows with a
+ * control pass their clicks on to it (`forwardClick`).
  */
 export const ListDemo: FunctionComponent = () => {
   const id = 'list';
 
   const [log, addLog] = useLog();
+  const [externalRoot, externalItem, externalCollapsible, externalTrigger] =
+    useProvidedState(id);
 
-  const [
-    externalContent,
-    externalRoot,
-    externalItem,
-    externalCollapsible,
-    externalTrigger,
-    ...externalComposed
-  ] = useProvidedState(id);
-
-  const [controlContent, content, stateContent] = usePropControl(
-    propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
-  );
+  const [previews, setPreviews] = useState('Automatic');
+  const [favorite, setFavorite] = useState(true);
+  const [quantity, setQuantity] = useState(1);
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
@@ -300,164 +102,80 @@ export const ListDemo: FunctionComponent = () => {
     externalRoot,
     true,
   );
-
   const [controlItem, propsItem, stateItem] = usePropControl(
     propOptionsItemFirst,
     'item (1st)',
     externalItem,
     true,
   );
-
-  const [selection, setSelection] =
-    useState<(typeof selectionOptions)[number]>('Automatic');
-  const [favorite, setFavorite] = useState(true);
-  const [quantity, setQuantity] = useState(1);
-
-  // Composed: the rows' controls (their demos' props, Settings' values).
-  // (Their states in turn, after the demo's own.)
-  const popUpAt = switchControlCount;
-  const segmentedAt = popUpAt + popUpControlCount;
-  const stepperAt = segmentedAt + segmentedControlCount;
-  const sliderAt = stepperAt + stepperControlCount;
-  const airplaneMode = useSwitchDemo(
-    externalComposed.slice(0, popUpAt),
-    {
-      prefix: 'airplane mode: ',
-      root: useMemo(() => getAirplaneModeRoot(addLog), [addLog]),
-    },
-    { 'aria-label': 'Airplane Mode' },
-  );
-  const previews = usePopUpDemo(
-    addLog,
-    externalComposed.slice(popUpAt, segmentedAt),
-    selectionOptions,
-    {
-      button: useMemo(() => getPopUpButtonRoot(addLog), [addLog]),
-      prefix: 'show previews: ',
-    },
-  );
-  const textSize = useSegmentedDemo(
-    addLog,
-    externalComposed.slice(segmentedAt, stepperAt),
-    {
-      content: textSizeContent,
-      prefix: 'text size: ',
-      root: useMemo(() => getTextSizeRoot(addLog), [addLog]),
-    },
-    { 'aria-label': 'Text Size' },
-  );
-  const quantityStepper = useStepperDemo(
-    externalComposed.slice(stepperAt, sliderAt),
-    {
-      prefix: 'quantity: ',
-      root: useMemo(() => getQuantityRoot(addLog), [addLog]),
-    },
-    {
-      label: 'Quantity',
-      onValueChange: (value: number | null) => {
-        addLog(`quantity: ${String(value)}`);
-        setQuantity(value ?? 0);
-      },
-      value: quantity,
-    },
-  );
-  const brightness = useSliderDemo(
-    addLog,
-    externalComposed.slice(sliderAt),
-    {
-      content: brightnessContent,
-      prefix: 'brightness: ',
-      root: useMemo(() => getBrightnessRoot(addLog), [addLog]),
-    },
-    { 'aria-label': 'Brightness' },
-  );
-
   const [
     controlCollapsible,
     propsCollapsible,
     stateCollapsible,
-    RemounterCollapsible,
+    keyCollapsible,
   ] = usePropControl(
     useMemo(() => getPropOptionsCollapsible(addLog), [addLog]),
     'collapsible',
     externalCollapsible,
   );
-
   const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
     propOptionsCursor,
     'collapsible trigger (header)',
     externalTrigger,
   );
 
-  const image = (icon: Parameters<typeof SFSymbol>[0]['icon'], tint: string) =>
-    content.image === 'none' ? null : (
-      <List.Image
-        variant={content.image}
-        style={
-          content.image === 'rounded' ? { backgroundColor: tint } : undefined
-        }
-      >
-        <SFSymbol icon={icon} />
-      </List.Image>
-    );
-
   return (
     <Component
       stretch
+      controls={[controlRoot, controlItem, controlCollapsible, controlTrigger]}
       id={id}
       log={log}
       title="List"
-      controls={[
-        controlContent,
-        controlRoot,
-        controlItem,
-        controlCollapsible,
-        controlTrigger,
-        ...airplaneMode.controls,
-        ...previews.controls,
-        ...textSize.controls,
-        ...quantityStepper.controls,
-        ...brightness.controls,
-      ]}
       stateUrl={useCreateStateUrl(id, [
-        stateContent,
         stateRoot,
         stateItem,
         stateCollapsible,
         stateTrigger,
-        ...airplaneMode.states,
-        ...previews.states,
-        ...textSize.states,
-        ...quantityStepper.states,
-        ...brightness.states,
       ])}
     >
       <List.Root {...propsRoot}>
         <List.Section>
           <List.Header>
-            {content.supertitle ? (
-              <List.Supertitle>Supertitle</List.Supertitle>
-            ) : null}
             <List.Title render={<h3 />}>Header</List.Title>
-            {content.headerSubtitle ? (
-              <List.Subtitle>Subtitle</List.Subtitle>
-            ) : null}
             <List.Accessory
               aria-label="Edit"
               render={<button type="button" />}
               onClick={() => addLog('header button clicked')}
             >
-              <SFSymbol icon={sfSquareAndPencil} />
+              <Symbol icon={sfSquareAndPencil} />
             </List.Accessory>
           </List.Header>
           <List.Group>
             <List.Item {...propsItem}>
-              {image(sfAirplane, 'var(--color-ios-system-orange)')}
+              <List.Image
+                style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
+                variant="rounded"
+              >
+                <Symbol icon={sfAirplane} />
+              </List.Image>
               <List.Title>Airplane Mode</List.Title>
-              {airplaneMode.element}
+              <Switch.Root
+                aria-label="Airplane Mode"
+                tint="var(--color-ios-system-orange)"
+                onCheckedChange={(checked: boolean) =>
+                  addLog(`airplane mode: ${checked}`)
+                }
+              >
+                <Switch.Thumb />
+              </Switch.Root>
             </List.Item>
             <List.Item>
-              {image(sfWifi, 'var(--color-ios-system-blue)')}
+              <List.Image
+                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                variant="rounded"
+              >
+                <Symbol icon={sfWifi} />
+              </List.Image>
               <List.Title
                 render={<button />}
                 onClick={() => addLog('Wi-Fi clicked')}
@@ -468,7 +186,12 @@ export const ListDemo: FunctionComponent = () => {
               <List.DrillIn />
             </List.Item>
             <List.Item>
-              {image(sfBellFill, 'var(--color-ios-system-red)')}
+              <List.Image
+                style={{ backgroundColor: 'var(--color-ios-system-red)' }}
+                variant="rounded"
+              >
+                <Symbol icon={sfBellFill} />
+              </List.Image>
               <List.Title
                 render={<button />}
                 onClick={() => addLog('Notifications clicked')}
@@ -478,10 +201,63 @@ export const ListDemo: FunctionComponent = () => {
               <List.Subtitle>Banners, Sounds</List.Subtitle>
               <List.DrillIn />
             </List.Item>
+            {/* A pop-up button (see “Menu (Pop-up Button)”): gray, in a
+                row. */}
             <List.Item onClick={forwardClick('[aria-haspopup]')}>
-              {image(sfPersonFill, 'var(--color-ios-system-gray)')}
+              <List.Image
+                style={{ backgroundColor: 'var(--color-ios-system-gray)' }}
+                variant="rounded"
+              >
+                <Symbol icon={sfPersonFill} />
+              </List.Image>
               <List.Title>Show Previews</List.Title>
-              {previews.render(selection, setSelection)}
+              <Menu.Root>
+                <Menu.Trigger
+                  render={
+                    <Button.Root tint="var(--color-ios-secondary-label)" />
+                  }
+                >
+                  <Button.Label>{previews}</Button.Label>
+                  <Button.Icon>
+                    <Symbol icon={sfChevronUpChevronDown} />
+                  </Button.Icon>
+                </Menu.Trigger>
+                <Menu.Portal>
+                  <Menu.Positioner align="end">
+                    <Menu.Popup>
+                      <Menu.RadioGroup
+                        value={previews}
+                        onValueChange={(next: unknown) => {
+                          addLog(`show previews: ${String(next)}`);
+                          setPreviews(String(next));
+                        }}
+                      >
+                        <Menu.RadioItem
+                          closeOnClick
+                          value="Automatic"
+                        >
+                          <Menu.RadioItemIndicator />
+                          <Menu.Label>Automatic</Menu.Label>
+                        </Menu.RadioItem>
+                        <Menu.RadioItem
+                          closeOnClick
+                          value="Always"
+                        >
+                          <Menu.RadioItemIndicator />
+                          <Menu.Label>Always</Menu.Label>
+                        </Menu.RadioItem>
+                        <Menu.RadioItem
+                          closeOnClick
+                          value="Never"
+                        >
+                          <Menu.RadioItemIndicator />
+                          <Menu.Label>Never</Menu.Label>
+                        </Menu.RadioItem>
+                      </Menu.RadioGroup>
+                    </Menu.Popup>
+                  </Menu.Positioner>
+                </Menu.Portal>
+              </Menu.Root>
             </List.Item>
             <List.Item
               onClick={({ target }) => {
@@ -492,14 +268,19 @@ export const ListDemo: FunctionComponent = () => {
                 setFavorite(!favorite);
               }}
             >
-              {image(sfHeartFill, 'var(--color-ios-system-pink)')}
+              <List.Image
+                style={{ backgroundColor: 'var(--color-ios-system-pink)' }}
+                variant="rounded"
+              >
+                <Symbol icon={sfHeartFill} />
+              </List.Image>
               <List.Title>Favorite</List.Title>
               <List.Accessory
                 aria-label="Info"
                 render={<button type="button" />}
                 onClick={() => addLog('info clicked')}
               >
-                <SFSymbol icon={sfICircle} />
+                <Symbol icon={sfICircle} />
               </List.Accessory>
               {favorite ? <List.Checkmark /> : null}
             </List.Item>
@@ -511,51 +292,109 @@ export const ListDemo: FunctionComponent = () => {
             </List.Item>
             <List.Item>
               <List.Title>Text Size</List.Title>
-              {textSize.element}
+              <Segmented.Root
+                aria-label="Text Size"
+                defaultValue="M"
+                onValueChange={(value: unknown) =>
+                  addLog(`text size: ${String(value)}`)
+                }
+              >
+                <Segmented.Item value="S">S</Segmented.Item>
+                <Segmented.Item value="M">M</Segmented.Item>
+                <Segmented.Item value="L">L</Segmented.Item>
+                <Segmented.Highlight />
+              </Segmented.Root>
             </List.Item>
             <List.Item>
               <List.Title>Quantity</List.Title>
               <List.Detail>{quantity}</List.Detail>
-              {quantityStepper.element}
+              <Stepper.Root
+                value={quantity}
+                onValueChange={(value: number | null) => {
+                  addLog(`quantity: ${String(value)}`);
+                  setQuantity(value ?? 0);
+                }}
+              >
+                <Stepper.Group inputProps={{ 'aria-label': 'Quantity' }}>
+                  <Stepper.Decrement />
+                  <Stepper.Increment />
+                </Stepper.Group>
+              </Stepper.Root>
             </List.Item>
-            <List.Item>{brightness.element}</List.Item>
+            <List.Item>
+              <Slider.Root
+                aria-label="Brightness"
+                defaultValue={60}
+                onValueCommitted={(value: number | readonly number[]) =>
+                  addLog(`brightness: ${String(value)}`)
+                }
+              >
+                <Slider.Symbol edge="min">
+                  <Symbol icon={sfSunMin} />
+                </Slider.Symbol>
+                <Slider.Control>
+                  <Slider.Track>
+                    <Slider.Indicator />
+                    <Slider.Thumb />
+                  </Slider.Track>
+                </Slider.Control>
+                <Slider.Symbol edge="max">
+                  <Symbol icon={sfSunMax} />
+                </Slider.Symbol>
+              </Slider.Root>
+            </List.Item>
           </List.Group>
           <List.Footer>Footer text, aligned with the rows’ text.</List.Footer>
         </List.Section>
 
-        <RemounterCollapsible>
-          <Collapsible.Root
-            {...propsCollapsible}
-            render={<List.Section />}
+        <Collapsible.Root
+          key={keyCollapsible}
+          {...propsCollapsible}
+          render={<List.Section />}
+        >
+          <Collapsible.Trigger
+            nativeButton={false}
+            render={
+              <List.Header
+                prominence="nested"
+                {...propsTrigger}
+              />
+            }
           >
-            <Collapsible.Trigger
-              nativeButton={false}
-              render={
-                <List.Header
-                  prominence="nested"
-                  {...propsTrigger}
-                />
-              }
-            >
-              <List.Title>Collapsible</List.Title>
-              <List.Detail>{selection}</List.Detail>
-              <List.Disclosure />
-            </Collapsible.Trigger>
-            <Collapsible.Panel render={<List.Group />}>
-              {selectionOptions.map((option) => (
-                <List.Item key={option}>
-                  <List.Title
-                    render={<button />}
-                    onClick={() => setSelection(option)}
-                  >
-                    {option}
-                  </List.Title>
-                  {selection === option ? <List.Checkmark /> : null}
-                </List.Item>
-              ))}
-            </Collapsible.Panel>
-          </Collapsible.Root>
-        </RemounterCollapsible>
+            <List.Title>Collapsible</List.Title>
+            <List.Detail>{previews}</List.Detail>
+            <List.Disclosure />
+          </Collapsible.Trigger>
+          <Collapsible.Panel render={<List.Group />}>
+            <List.Item>
+              <List.Title
+                render={<button />}
+                onClick={() => setPreviews('Automatic')}
+              >
+                Automatic
+              </List.Title>
+              {previews === 'Automatic' ? <List.Checkmark /> : null}
+            </List.Item>
+            <List.Item>
+              <List.Title
+                render={<button />}
+                onClick={() => setPreviews('Always')}
+              >
+                Always
+              </List.Title>
+              {previews === 'Always' ? <List.Checkmark /> : null}
+            </List.Item>
+            <List.Item>
+              <List.Title
+                render={<button />}
+                onClick={() => setPreviews('Never')}
+              >
+                Never
+              </List.Title>
+              {previews === 'Never' ? <List.Checkmark /> : null}
+            </List.Item>
+          </Collapsible.Panel>
+        </Collapsible.Root>
 
         <List.Section>
           <List.Group>
@@ -596,15 +435,15 @@ export const ListDemo: FunctionComponent = () => {
 };
 
 /**
- * Every part of a list, once, each with its props: a header, rows of each
- * kind, swipe actions, a collapsible section, a footer and a block (the
- * index: see “List (Index)”, selection: “List (Editing)”).
+ * Every part of a list's rows, once, each with its props: a header, rows
+ * of each kind, swipe actions, a footer and a block (collapsible sections
+ * and expandable rows: see “List (Collapsible)”; the index: “List
+ * (Index)”; selection: “List (Editing: Select)”).
  */
 export const ListPartsDemo: FunctionComponent = () => {
   const id = 'list-parts';
 
   const [log, addLog] = useLog();
-
   const [
     externalContent,
     externalRoot,
@@ -620,8 +459,6 @@ export const ListPartsDemo: FunctionComponent = () => {
     externalDrillIn,
     externalAccessory,
     externalCheckmark,
-    // (Formerly the pop-up's: its demo's states are at the end.)
-    _externalFormerPopUp,
     externalAction,
     externalButton,
     externalCheckbox,
@@ -630,14 +467,8 @@ export const ListPartsDemo: FunctionComponent = () => {
     externalText,
     externalSwipeActions,
     externalSwipeAction,
-    externalCollapsible,
-    externalTrigger,
-    externalPanel,
-    externalDisclosure,
     externalFooter,
     externalBlock,
-    externalExpandable,
-    ...externalPopUp
   ] = useProvidedState(id);
 
   const [controlContent, content, stateContent] = usePropControl(
@@ -722,7 +553,7 @@ export const ListPartsDemo: FunctionComponent = () => {
     'button',
     externalButton,
   );
-  const [controlCheckbox, propsCheckbox, stateCheckbox, RemounterCheckbox] =
+  const [controlCheckbox, propsCheckbox, stateCheckbox, keyCheckbox] =
     usePropControl(propOptionsCheckbox, 'checkbox', externalCheckbox);
   const [controlEditButton, propsEditButton, stateEditButton] = usePropControl(
     useMemo(() => getPropOptionsEditButton(addLog), [addLog]),
@@ -752,31 +583,6 @@ export const ListPartsDemo: FunctionComponent = () => {
       'swipe action (outermost)',
       externalSwipeAction,
     );
-  const [
-    controlCollapsible,
-    propsCollapsible,
-    stateCollapsible,
-    RemounterCollapsible,
-  ] = usePropControl(
-    propOptionsCollapsible,
-    'collapsible',
-    externalCollapsible,
-  );
-  const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
-    propOptionsCursor,
-    'collapsible trigger (header)',
-    externalTrigger,
-  );
-  const [controlPanel, propsPanel, statePanel] = usePropControl(
-    propOptionsPanel,
-    'collapsible panel',
-    externalPanel,
-  );
-  const [controlDisclosure, propsDisclosure, stateDisclosure] = usePropControl(
-    commonPropOptions,
-    'disclosure',
-    externalDisclosure,
-  );
   const [controlFooter, propsFooter, stateFooter] = usePropControl(
     commonPropOptions,
     'footer',
@@ -787,22 +593,6 @@ export const ListPartsDemo: FunctionComponent = () => {
     'block',
     externalBlock,
   );
-  const [controlExpandable, propsExpandable, stateExpandable] = usePropControl(
-    propOptionsExpandable,
-    'expandable',
-    externalExpandable,
-  );
-  // The expandable row, toggled by the row above (unless its control says).
-  const [expanded, setExpanded] = useState(false);
-  const open = propsExpandable.open ?? expanded;
-
-  const [selection, setSelection] =
-    useState<(typeof selectionOptions)[number]>('Automatic');
-  // Composed: the pop-up (its button's and menu's demos' props).
-  const popUp = usePopUpDemo(addLog, externalPopUp, selectionOptions, {
-    button: useMemo(() => getPopUpButtonRoot(addLog), [addLog]),
-    prefix: 'pop-up: ',
-  });
 
   return (
     <Component
@@ -825,7 +615,6 @@ export const ListPartsDemo: FunctionComponent = () => {
         controlDrillIn,
         controlAccessory,
         controlCheckmark,
-        ...popUp.controls,
         controlAction,
         controlButton,
         controlCheckbox,
@@ -834,13 +623,8 @@ export const ListPartsDemo: FunctionComponent = () => {
         controlText,
         controlSwipeActions,
         controlSwipeAction,
-        controlCollapsible,
-        controlTrigger,
-        controlPanel,
-        controlDisclosure,
         controlFooter,
         controlBlock,
-        controlExpandable,
       ]}
       stateUrl={useCreateStateUrl(id, [
         stateContent,
@@ -857,8 +641,6 @@ export const ListPartsDemo: FunctionComponent = () => {
         stateDrillIn,
         stateAccessory,
         stateCheckmark,
-        // (Formerly the pop-up's.)
-        {},
         stateAction,
         stateButton,
         stateCheckbox,
@@ -867,14 +649,8 @@ export const ListPartsDemo: FunctionComponent = () => {
         stateText,
         stateSwipeActions,
         stateSwipeAction,
-        stateCollapsible,
-        stateTrigger,
-        statePanel,
-        stateDisclosure,
         stateFooter,
         stateBlock,
-        stateExpandable,
-        ...popUp.states,
       ])}
     >
       <List.Root {...propsRoot}>
@@ -892,7 +668,7 @@ export const ListPartsDemo: FunctionComponent = () => {
               render={<button type="button" />}
               onClick={() => addLog('header accessory clicked')}
             >
-              <SFSymbol icon={sfSquareAndPencil} />
+              <Symbol icon={sfSquareAndPencil} />
             </List.Accessory>
           </List.Header>
           <List.Group {...propsGroup}>
@@ -905,7 +681,7 @@ export const ListPartsDemo: FunctionComponent = () => {
                   ...propsImage.style,
                 }}
               >
-                <SFSymbol icon={sfWifi} />
+                <Symbol icon={sfWifi} />
               </List.Image>
               <List.Title {...propsTitle}>Title</List.Title>
               <List.Subtitle {...propsSubtitle}>Subtitle</List.Subtitle>
@@ -918,15 +694,11 @@ export const ListPartsDemo: FunctionComponent = () => {
                 aria-label="Info"
                 {...propsAccessory}
               >
-                <SFSymbol icon={sfICircle} />
+                <Symbol icon={sfICircle} />
               </List.Accessory>
               <List.Checkmark {...propsCheckmark} />
             </List.Item>
             {/* Rows with a single control pass their clicks on to it. */}
-            <List.Item onClick={forwardClick('[aria-haspopup]')}>
-              <List.Title>Pop-up</List.Title>
-              {popUp.render(selection, setSelection)}
-            </List.Item>
             <List.Item onClick={forwardClick('[data-list-part=action]')}>
               <List.Title>Action</List.Title>
               <List.Action {...propsAction}>Action</List.Action>
@@ -935,12 +707,11 @@ export const ListPartsDemo: FunctionComponent = () => {
               <List.Button {...propsButton}>Button</List.Button>
             </List.Item>
             <List.Item onClick={forwardClick('[role=checkbox]')}>
-              <RemounterCheckbox>
-                <List.Checkbox
-                  aria-label="Checkbox"
-                  {...propsCheckbox}
-                />
-              </RemounterCheckbox>
+              <List.Checkbox
+                key={keyCheckbox}
+                aria-label="Checkbox"
+                {...propsCheckbox}
+              />
               <List.Title>Checkbox, grabber</List.Title>
               <List.Grabber
                 aria-label="Reorder"
@@ -959,30 +730,13 @@ export const ListPartsDemo: FunctionComponent = () => {
                   tint="var(--color-ios-system-red)"
                   onClick={() => addLog('delete clicked')}
                 >
-                  <SFSymbol icon={sfTrashFill} />
+                  <Symbol icon={sfTrashFill} />
                 </List.SwipeAction>
               </List.SwipeActions>
             </List.Item>
-            <List.Item onClick={() => setExpanded(!open)}>
-              <List.Title>Expandable row</List.Title>
-              <List.Detail>{open ? 'Shown' : 'Hidden'}</List.Detail>
-              <List.Disclosure data-panel-open={open || undefined} />
-            </List.Item>
-            <List.Expandable
-              {...propsExpandable}
-              open={open}
-            >
-              <List.Image variant="rounded">
-                <SFSymbol icon={sfWifi} />
-              </List.Image>
-              <List.Title>Expanded</List.Title>
-              <List.Subtitle>
-                Shown below the row above, opening and closing in place.
-              </List.Subtitle>
-            </List.Expandable>
             <List.Item>
               <List.Image variant="circular">
-                <SFSymbol icon={sfPersonCropCircleFill} />
+                <Symbol icon={sfPersonCropCircleFill} />
               </List.Image>
               <List.Title>Swipe actions</List.Title>
               <List.Detail>09:41</List.Detail>
@@ -1001,7 +755,7 @@ export const ListPartsDemo: FunctionComponent = () => {
                   tint="var(--color-ios-system-blue)"
                   onClick={() => addLog('unread clicked')}
                 >
-                  <SFSymbol icon={sfEnvelopeOpenFill} />
+                  <Symbol icon={sfEnvelopeOpenFill} />
                 </List.SwipeAction>
               </List.SwipeActions>
               <List.SwipeActions {...propsSwipeActions}>
@@ -1010,7 +764,7 @@ export const ListPartsDemo: FunctionComponent = () => {
                   label="More"
                   onClick={() => addLog('more clicked')}
                 >
-                  <SFSymbol icon={sfEllipsis} />
+                  <Symbol icon={sfEllipsis} />
                 </List.SwipeAction>
                 <List.SwipeAction
                   showLabel
@@ -1018,10 +772,10 @@ export const ListPartsDemo: FunctionComponent = () => {
                   tint="var(--color-ios-system-orange)"
                   onClick={() => addLog('flag clicked')}
                 >
-                  <SFSymbol icon={sfFlagFill} />
+                  <Symbol icon={sfFlagFill} />
                 </List.SwipeAction>
                 <List.SwipeAction {...propsSwipeAction}>
-                  <SFSymbol icon={sfArchiveboxFill} />
+                  <Symbol icon={sfArchiveboxFill} />
                 </List.SwipeAction>
               </List.SwipeActions>
             </List.Item>
@@ -1030,43 +784,6 @@ export const ListPartsDemo: FunctionComponent = () => {
             Footer text, aligned with the rows’ text.
           </List.Footer>
         </List.Section>
-
-        <RemounterCollapsible>
-          <Collapsible.Root
-            {...propsCollapsible}
-            render={<List.Section />}
-          >
-            <Collapsible.Trigger
-              nativeButton={false}
-              render={
-                <List.Header
-                  prominence="nested"
-                  {...propsTrigger}
-                />
-              }
-            >
-              <List.Title>Collapsible</List.Title>
-              <List.Detail>{selection}</List.Detail>
-              <List.Disclosure {...propsDisclosure} />
-            </Collapsible.Trigger>
-            <Collapsible.Panel
-              {...propsPanel}
-              render={<List.Group />}
-            >
-              {selectionOptions.map((option) => (
-                <List.Item key={option}>
-                  <List.Title
-                    render={<button />}
-                    onClick={() => setSelection(option)}
-                  >
-                    {option}
-                  </List.Title>
-                  {selection === option ? <List.Checkmark /> : null}
-                </List.Item>
-              ))}
-            </Collapsible.Panel>
-          </Collapsible.Root>
-        </RemounterCollapsible>
 
         <List.Section>
           <List.Block {...propsBlock}>
@@ -1078,53 +795,180 @@ export const ListPartsDemo: FunctionComponent = () => {
   );
 };
 
-type SwipeRow = {
-  /** Multi-line (with `Text`). */
-  multiLine?: boolean;
-  name: string;
-  /** Each action's shape (by index), labels shown, text for symbols. */
-  shape?: (index: number) => 'circle' | 'roundedRectangle';
-  showLabel?: boolean;
-  subtitle?: boolean;
-  text?: boolean;
-};
+/**
+ * A collapsible section (Base UI `Collapsible`: its header the trigger, its
+ * group the panel), and an expandable row (`List.Expandable`, toggled by
+ * the row above it).
+ */
+export const ListCollapsibleDemo: FunctionComponent = () => {
+  const id = 'list-collapsible';
 
-const swipeRows: readonly SwipeRow[] = [
-  { name: 'Regular' },
-  { name: 'Tall', subtitle: true },
-  { multiLine: true, name: 'Multi-line', showLabel: true, subtitle: true },
-  {
-    multiLine: true,
-    name: 'Rounded rectangles',
-    shape: () => 'roundedRectangle',
-    showLabel: true,
-    subtitle: true,
-  },
-  // The outermost (Delete, Done) a rounded rectangle, the others circles.
-  {
-    name: 'Mixed',
-    shape: (index) => (index === 2 ? 'roundedRectangle' : 'circle'),
-    subtitle: true,
-  },
-  {
-    name: 'Text',
-    shape: () => 'roundedRectangle',
-    subtitle: true,
-    text: true,
-  },
-];
+  const [log, addLog] = useLog();
+  const [
+    externalCollapsible,
+    externalTrigger,
+    externalPanel,
+    externalDisclosure,
+    externalExpandable,
+  ] = useProvidedState(id);
+
+  const [selection, setSelection] = useState('Automatic');
+  // The expandable row, toggled by the row above (unless its control says).
+  const [expanded, setExpanded] = useState(false);
+
+  const [
+    controlCollapsible,
+    propsCollapsible,
+    stateCollapsible,
+    keyCollapsible,
+  ] = usePropControl(
+    propOptionsCollapsible,
+    'collapsible',
+    externalCollapsible,
+    true,
+  );
+  const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
+    propOptionsCursor,
+    'collapsible trigger (header)',
+    externalTrigger,
+  );
+  const [controlPanel, propsPanel, statePanel] = usePropControl(
+    propOptionsPanel,
+    'collapsible panel',
+    externalPanel,
+  );
+  const [controlDisclosure, propsDisclosure, stateDisclosure] = usePropControl(
+    commonPropOptions,
+    'disclosure',
+    externalDisclosure,
+  );
+  const [controlExpandable, propsExpandable, stateExpandable] = usePropControl(
+    propOptionsExpandable,
+    'expandable',
+    externalExpandable,
+    true,
+  );
+
+  const open = propsExpandable.open ?? expanded;
+
+  return (
+    <Component
+      stretch
+      id={id}
+      log={log}
+      title="List (Collapsible)"
+      controls={[
+        controlCollapsible,
+        controlTrigger,
+        controlPanel,
+        controlDisclosure,
+        controlExpandable,
+      ]}
+      stateUrl={useCreateStateUrl(id, [
+        stateCollapsible,
+        stateTrigger,
+        statePanel,
+        stateDisclosure,
+        stateExpandable,
+      ])}
+    >
+      <List.Root>
+        <Collapsible.Root
+          key={keyCollapsible}
+          {...propsCollapsible}
+          render={<List.Section />}
+        >
+          <Collapsible.Trigger
+            nativeButton={false}
+            render={
+              <List.Header
+                prominence="nested"
+                {...propsTrigger}
+              />
+            }
+          >
+            <List.Title>Collapsible</List.Title>
+            <List.Detail>{selection}</List.Detail>
+            <List.Disclosure {...propsDisclosure} />
+          </Collapsible.Trigger>
+          <Collapsible.Panel
+            {...propsPanel}
+            render={<List.Group />}
+          >
+            <List.Item>
+              <List.Title
+                render={<button />}
+                onClick={() => setSelection('Automatic')}
+              >
+                Automatic
+              </List.Title>
+              {selection === 'Automatic' ? <List.Checkmark /> : null}
+            </List.Item>
+            <List.Item>
+              <List.Title
+                render={<button />}
+                onClick={() => setSelection('Always')}
+              >
+                Always
+              </List.Title>
+              {selection === 'Always' ? <List.Checkmark /> : null}
+            </List.Item>
+            <List.Item>
+              <List.Title
+                render={<button />}
+                onClick={() => setSelection('Never')}
+              >
+                Never
+              </List.Title>
+              {selection === 'Never' ? <List.Checkmark /> : null}
+            </List.Item>
+          </Collapsible.Panel>
+        </Collapsible.Root>
+
+        <List.Section>
+          <List.Group>
+            <List.Item
+              onClick={() => {
+                addLog(`expanded: ${!open}`);
+                setExpanded(!open);
+              }}
+            >
+              <List.Title>Expandable row</List.Title>
+              <List.Detail>{open ? 'Shown' : 'Hidden'}</List.Detail>
+              <List.Disclosure data-panel-open={open || undefined} />
+            </List.Item>
+            <List.Expandable
+              {...propsExpandable}
+              open={open}
+            >
+              <List.Image variant="rounded">
+                <Symbol icon={sfWifi} />
+              </List.Image>
+              <List.Title>Expanded</List.Title>
+              <List.Subtitle>
+                Shown below the row above, opening and closing in place.
+              </List.Subtitle>
+            </List.Expandable>
+            <List.Item>
+              <List.Title>Below</List.Title>
+            </List.Item>
+          </List.Group>
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
 
 /**
  * Swipe actions (Figma “Row with Swipe Actions”): regular and tall rows
  * (circles), a multi-line row (labelled), rounded rectangles, both mixed,
- * and text instead of symbols; with actions on both sides, overswipeable
- * either way.
+ * and text instead of symbols; with actions on both sides (leading orange,
+ * gray, red; trailing purple, indigo, green), overswipeable either way.
  */
 export const ListSwipeDemo: FunctionComponent = () => {
   const id = 'list-swipe';
 
   const [log, addLog] = useLog();
-
   const [externalRoot, externalSwipeActions, externalSwipeAction] =
     useProvidedState(id);
 
@@ -1133,7 +977,6 @@ export const ListSwipeDemo: FunctionComponent = () => {
     'root',
     externalRoot,
   );
-
   const [controlSwipeActions, propsSwipeActions, stateSwipeActions] =
     usePropControl(
       useMemo(() => getPropOptionsSwipeActionsFirstLeading(addLog), [addLog]),
@@ -1141,47 +984,12 @@ export const ListSwipeDemo: FunctionComponent = () => {
       externalSwipeActions,
       true,
     );
-
   const [controlSwipeAction, propsSwipeAction, stateSwipeAction] =
     usePropControl(
       useMemo(() => getPropOptionsSwipeActionFirst(addLog), [addLog]),
       'swipe action (1st)',
       externalSwipeAction,
     );
-
-  const swipeActions = (
-    side: 'inline-end' | 'inline-start',
-    actions: typeof leadingActions | typeof trailingActions,
-    first: boolean,
-    { shape, showLabel, text }: SwipeRow,
-  ) => (
-    <List.SwipeActions
-      overswipe
-      side={side}
-      {...(first ? propsSwipeActions : {})}
-    >
-      {actions.map(([label, icon, tint], index) => {
-        const props: Partial<typeof propsSwipeAction> =
-          first && index === 0 ? propsSwipeAction : {};
-        // The outermost, by side.
-        const outer = side === 'inline-start' ? 2 - index : index;
-
-        return (
-          <List.SwipeAction
-            key={label}
-            shape={shape?.(outer)}
-            showLabel={showLabel}
-            onClick={() => addLog(`${label} clicked`)}
-            {...props}
-            label={props.label ?? label}
-            tint={props.tint ?? tint}
-          >
-            {text ? label : <SFSymbol icon={icon} />}
-          </List.SwipeAction>
-        );
-      })}
-    </List.SwipeActions>
-  );
 
   return (
     <Component
@@ -1199,35 +1007,436 @@ export const ListSwipeDemo: FunctionComponent = () => {
       <List.Root {...propsRoot}>
         <List.Section>
           <List.Group>
-            {swipeRows.map((row, index) => (
-              <List.Item key={row.name}>
-                <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
-                  variant="rounded"
+            <List.Item>
+              <List.Image
+                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                variant="rounded"
+              >
+                <Symbol icon={sfEnvelopeFill} />
+              </List.Image>
+              <List.Title
+                render={<button />}
+                onClick={() => addLog('Regular clicked')}
+              >
+                Regular
+              </List.Title>
+              <List.Detail>Detail</List.Detail>
+              <List.DrillIn />
+              <List.SwipeActions
+                side="inline-start"
+                {...propsSwipeActions}
+              >
+                <List.SwipeAction
+                  {...propsSwipeAction}
+                  label={propsSwipeAction.label ?? 'Pin'}
+                  tint={
+                    propsSwipeAction.tint ?? 'var(--color-ios-system-orange)'
+                  }
                 >
-                  <SFSymbol icon={sfEnvelopeFill} />
-                </List.Image>
-                <List.Title
-                  render={<button />}
-                  onClick={() => addLog(`${row.name} clicked`)}
+                  <Symbol icon={sfPinFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Mute"
+                  onClick={() => addLog('Mute clicked')}
                 >
-                  {row.name}
-                </List.Title>
-                {row.subtitle ? (
-                  <List.Subtitle>Swipe either way</List.Subtitle>
-                ) : null}
-                {row.multiLine ? (
-                  <List.Text>
-                    Swipe on past the actions to trigger the outermost one, on
-                    either side; let go before to keep them open.
-                  </List.Text>
-                ) : null}
-                <List.Detail>Detail</List.Detail>
-                <List.DrillIn />
-                {swipeActions('inline-start', leadingActions, index === 0, row)}
-                {swipeActions('inline-end', trailingActions, false, row)}
-              </List.Item>
-            ))}
+                  <Symbol icon={sfBellFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Delete"
+                  tint="var(--color-ios-system-red)"
+                  onClick={() => addLog('Delete clicked')}
+                >
+                  <Symbol icon={sfTrashFill} />
+                </List.SwipeAction>
+              </List.SwipeActions>
+              <List.SwipeActions overswipe>
+                <List.SwipeAction
+                  label="Tag"
+                  tint="var(--color-ios-system-purple)"
+                  onClick={() => addLog('Tag clicked')}
+                >
+                  <Symbol icon={sfTagFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Mail"
+                  tint="var(--color-ios-system-indigo)"
+                  onClick={() => addLog('Mail clicked')}
+                >
+                  <Symbol icon={sfEnvelopeFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Done"
+                  tint="var(--color-ios-system-green)"
+                  onClick={() => addLog('Done clicked')}
+                >
+                  <Symbol icon={sfCheckmarkCircleFill} />
+                </List.SwipeAction>
+              </List.SwipeActions>
+            </List.Item>
+            <List.Item>
+              <List.Image
+                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                variant="rounded"
+              >
+                <Symbol icon={sfEnvelopeFill} />
+              </List.Image>
+              <List.Title
+                render={<button />}
+                onClick={() => addLog('Tall clicked')}
+              >
+                Tall
+              </List.Title>
+              <List.Subtitle>Swipe either way</List.Subtitle>
+              <List.Detail>Detail</List.Detail>
+              <List.DrillIn />
+              <List.SwipeActions
+                overswipe
+                side="inline-start"
+              >
+                <List.SwipeAction
+                  label="Pin"
+                  tint="var(--color-ios-system-orange)"
+                  onClick={() => addLog('Pin clicked')}
+                >
+                  <Symbol icon={sfPinFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Mute"
+                  onClick={() => addLog('Mute clicked')}
+                >
+                  <Symbol icon={sfBellFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Delete"
+                  tint="var(--color-ios-system-red)"
+                  onClick={() => addLog('Delete clicked')}
+                >
+                  <Symbol icon={sfTrashFill} />
+                </List.SwipeAction>
+              </List.SwipeActions>
+              <List.SwipeActions overswipe>
+                <List.SwipeAction
+                  label="Tag"
+                  tint="var(--color-ios-system-purple)"
+                  onClick={() => addLog('Tag clicked')}
+                >
+                  <Symbol icon={sfTagFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Mail"
+                  tint="var(--color-ios-system-indigo)"
+                  onClick={() => addLog('Mail clicked')}
+                >
+                  <Symbol icon={sfEnvelopeFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Done"
+                  tint="var(--color-ios-system-green)"
+                  onClick={() => addLog('Done clicked')}
+                >
+                  <Symbol icon={sfCheckmarkCircleFill} />
+                </List.SwipeAction>
+              </List.SwipeActions>
+            </List.Item>
+            <List.Item>
+              <List.Image
+                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                variant="rounded"
+              >
+                <Symbol icon={sfEnvelopeFill} />
+              </List.Image>
+              <List.Title
+                render={<button />}
+                onClick={() => addLog('Multi-line clicked')}
+              >
+                Multi-line
+              </List.Title>
+              <List.Subtitle>Swipe either way</List.Subtitle>
+              <List.Text>
+                Swipe on past the actions to trigger the outermost one, on
+                either side; let go before to keep them open.
+              </List.Text>
+              <List.Detail>Detail</List.Detail>
+              <List.DrillIn />
+              <List.SwipeActions
+                overswipe
+                side="inline-start"
+              >
+                <List.SwipeAction
+                  showLabel
+                  label="Pin"
+                  tint="var(--color-ios-system-orange)"
+                  onClick={() => addLog('Pin clicked')}
+                >
+                  <Symbol icon={sfPinFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  showLabel
+                  label="Mute"
+                  onClick={() => addLog('Mute clicked')}
+                >
+                  <Symbol icon={sfBellFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  showLabel
+                  label="Delete"
+                  tint="var(--color-ios-system-red)"
+                  onClick={() => addLog('Delete clicked')}
+                >
+                  <Symbol icon={sfTrashFill} />
+                </List.SwipeAction>
+              </List.SwipeActions>
+              <List.SwipeActions overswipe>
+                <List.SwipeAction
+                  showLabel
+                  label="Tag"
+                  tint="var(--color-ios-system-purple)"
+                  onClick={() => addLog('Tag clicked')}
+                >
+                  <Symbol icon={sfTagFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  showLabel
+                  label="Mail"
+                  tint="var(--color-ios-system-indigo)"
+                  onClick={() => addLog('Mail clicked')}
+                >
+                  <Symbol icon={sfEnvelopeFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  showLabel
+                  label="Done"
+                  tint="var(--color-ios-system-green)"
+                  onClick={() => addLog('Done clicked')}
+                >
+                  <Symbol icon={sfCheckmarkCircleFill} />
+                </List.SwipeAction>
+              </List.SwipeActions>
+            </List.Item>
+            <List.Item>
+              <List.Image
+                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                variant="rounded"
+              >
+                <Symbol icon={sfEnvelopeFill} />
+              </List.Image>
+              <List.Title
+                render={<button />}
+                onClick={() => addLog('Rounded rectangles clicked')}
+              >
+                Rounded rectangles
+              </List.Title>
+              <List.Subtitle>Swipe either way</List.Subtitle>
+              <List.Text>
+                Swipe on past the actions to trigger the outermost one, on
+                either side; let go before to keep them open.
+              </List.Text>
+              <List.Detail>Detail</List.Detail>
+              <List.DrillIn />
+              <List.SwipeActions
+                overswipe
+                side="inline-start"
+              >
+                <List.SwipeAction
+                  showLabel
+                  label="Pin"
+                  shape="roundedRectangle"
+                  tint="var(--color-ios-system-orange)"
+                  onClick={() => addLog('Pin clicked')}
+                >
+                  <Symbol icon={sfPinFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  showLabel
+                  label="Mute"
+                  shape="roundedRectangle"
+                  onClick={() => addLog('Mute clicked')}
+                >
+                  <Symbol icon={sfBellFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  showLabel
+                  label="Delete"
+                  shape="roundedRectangle"
+                  tint="var(--color-ios-system-red)"
+                  onClick={() => addLog('Delete clicked')}
+                >
+                  <Symbol icon={sfTrashFill} />
+                </List.SwipeAction>
+              </List.SwipeActions>
+              <List.SwipeActions overswipe>
+                <List.SwipeAction
+                  showLabel
+                  label="Tag"
+                  shape="roundedRectangle"
+                  tint="var(--color-ios-system-purple)"
+                  onClick={() => addLog('Tag clicked')}
+                >
+                  <Symbol icon={sfTagFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  showLabel
+                  label="Mail"
+                  shape="roundedRectangle"
+                  tint="var(--color-ios-system-indigo)"
+                  onClick={() => addLog('Mail clicked')}
+                >
+                  <Symbol icon={sfEnvelopeFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  showLabel
+                  label="Done"
+                  shape="roundedRectangle"
+                  tint="var(--color-ios-system-green)"
+                  onClick={() => addLog('Done clicked')}
+                >
+                  <Symbol icon={sfCheckmarkCircleFill} />
+                </List.SwipeAction>
+              </List.SwipeActions>
+            </List.Item>
+            {/* The outermost (Pin, Done) rounded rectangles, the others circles. */}
+            <List.Item>
+              <List.Image
+                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                variant="rounded"
+              >
+                <Symbol icon={sfEnvelopeFill} />
+              </List.Image>
+              <List.Title
+                render={<button />}
+                onClick={() => addLog('Mixed clicked')}
+              >
+                Mixed
+              </List.Title>
+              <List.Subtitle>Swipe either way</List.Subtitle>
+              <List.Detail>Detail</List.Detail>
+              <List.DrillIn />
+              <List.SwipeActions
+                overswipe
+                side="inline-start"
+              >
+                <List.SwipeAction
+                  label="Pin"
+                  shape="roundedRectangle"
+                  tint="var(--color-ios-system-orange)"
+                  onClick={() => addLog('Pin clicked')}
+                >
+                  <Symbol icon={sfPinFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Mute"
+                  shape="circle"
+                  onClick={() => addLog('Mute clicked')}
+                >
+                  <Symbol icon={sfBellFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Delete"
+                  shape="circle"
+                  tint="var(--color-ios-system-red)"
+                  onClick={() => addLog('Delete clicked')}
+                >
+                  <Symbol icon={sfTrashFill} />
+                </List.SwipeAction>
+              </List.SwipeActions>
+              <List.SwipeActions overswipe>
+                <List.SwipeAction
+                  label="Tag"
+                  shape="circle"
+                  tint="var(--color-ios-system-purple)"
+                  onClick={() => addLog('Tag clicked')}
+                >
+                  <Symbol icon={sfTagFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Mail"
+                  shape="circle"
+                  tint="var(--color-ios-system-indigo)"
+                  onClick={() => addLog('Mail clicked')}
+                >
+                  <Symbol icon={sfEnvelopeFill} />
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Done"
+                  shape="roundedRectangle"
+                  tint="var(--color-ios-system-green)"
+                  onClick={() => addLog('Done clicked')}
+                >
+                  <Symbol icon={sfCheckmarkCircleFill} />
+                </List.SwipeAction>
+              </List.SwipeActions>
+            </List.Item>
+            <List.Item>
+              <List.Image
+                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                variant="rounded"
+              >
+                <Symbol icon={sfEnvelopeFill} />
+              </List.Image>
+              <List.Title
+                render={<button />}
+                onClick={() => addLog('Text clicked')}
+              >
+                Text
+              </List.Title>
+              <List.Subtitle>Swipe either way</List.Subtitle>
+              <List.Detail>Detail</List.Detail>
+              <List.DrillIn />
+              <List.SwipeActions
+                overswipe
+                side="inline-start"
+              >
+                <List.SwipeAction
+                  label="Pin"
+                  shape="roundedRectangle"
+                  tint="var(--color-ios-system-orange)"
+                  onClick={() => addLog('Pin clicked')}
+                >
+                  Pin
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Mute"
+                  shape="roundedRectangle"
+                  onClick={() => addLog('Mute clicked')}
+                >
+                  Mute
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Delete"
+                  shape="roundedRectangle"
+                  tint="var(--color-ios-system-red)"
+                  onClick={() => addLog('Delete clicked')}
+                >
+                  Delete
+                </List.SwipeAction>
+              </List.SwipeActions>
+              <List.SwipeActions overswipe>
+                <List.SwipeAction
+                  label="Tag"
+                  shape="roundedRectangle"
+                  tint="var(--color-ios-system-purple)"
+                  onClick={() => addLog('Tag clicked')}
+                >
+                  Tag
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Mail"
+                  shape="roundedRectangle"
+                  tint="var(--color-ios-system-indigo)"
+                  onClick={() => addLog('Mail clicked')}
+                >
+                  Mail
+                </List.SwipeAction>
+                <List.SwipeAction
+                  label="Done"
+                  shape="roundedRectangle"
+                  tint="var(--color-ios-system-green)"
+                  onClick={() => addLog('Done clicked')}
+                >
+                  Done
+                </List.SwipeAction>
+              </List.SwipeActions>
+            </List.Item>
           </List.Group>
           <List.Footer>
             Swipe a row to reveal its actions; swipe on past them to trigger the
@@ -1242,34 +1451,167 @@ export const ListSwipeDemo: FunctionComponent = () => {
 const planets = ['Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter'] as const;
 
 /**
- * Editing (UIKit `UITableView` editing): rows reorderable by their grabbers,
- * and, independently, a leading control: delete (opening the trailing
- * swipe actions), insert, or selecting several rows (checkboxes) or one (a
- * Base UI `RadioGroup` rendering the group, with radios).
+ * Editing (UIKit `UITableView` editing): rows reordered by their grabbers
+ * (the group's `onReorder`; the app reorders its rows), deleted by swiping.
  */
 export const ListEditDemo: FunctionComponent = () => {
   const id = 'list-edit';
 
   const [log, addLog] = useLog();
+  const [externalRoot, externalGrabber] = useProvidedState(id);
 
-  const [
-    externalContent,
-    externalRoot,
-    externalCheckbox,
-    externalRadioGroup,
-    externalRadio,
-    externalEditButton,
-    externalGrabber,
-  ] = useProvidedState(id);
   const [rows, setRows] = useState<readonly string[]>(planets);
-  const added = useRef(0);
 
-  const [controlContent, content, stateContent] = usePropControl(
-    propOptionsEdit,
-    '[content]',
-    externalContent,
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
+  );
+  const [controlGrabber, propsGrabber, stateGrabber] = usePropControl(
+    propOptionsCursor,
+    'grabber (1st)',
+    externalGrabber,
     true,
   );
+
+  return (
+    <Component
+      stretch
+      controls={[controlRoot, controlGrabber]}
+      id={id}
+      log={log}
+      stateUrl={useCreateStateUrl(id, [stateRoot, stateGrabber])}
+      title="List (Editing)"
+    >
+      <List.Root {...propsRoot}>
+        <List.Section>
+          <List.Header prominence="nested">
+            <List.Title>Planets</List.Title>
+            <List.Action onClick={() => setRows(planets)}>Reset</List.Action>
+          </List.Header>
+          <List.Group
+            onReorder={(from, to) => {
+              addLog(`reorder: ${from} → ${to}`);
+              setRows((current) => {
+                const next = [...current];
+                const [moved] = next.splice(from, 1);
+                if (moved) next.splice(to, 0, moved);
+                return next;
+              });
+            }}
+          >
+            {rows.map((name, index) => (
+              <List.Item key={name}>
+                <List.Title>{name}</List.Title>
+                <List.Grabber
+                  aria-label={`Reorder ${name}`}
+                  {...(index === 0 ? propsGrabber : {})}
+                />
+                <List.SwipeActions overswipe>
+                  <List.SwipeAction
+                    label="Delete"
+                    tint="var(--color-ios-system-red)"
+                    onClick={() => {
+                      addLog(`delete ${name}`);
+                      setRows((current) =>
+                        current.filter((row) => row !== name),
+                      );
+                    }}
+                  >
+                    <Symbol icon={sfTrashFill} />
+                  </List.SwipeAction>
+                </List.SwipeActions>
+              </List.Item>
+            ))}
+          </List.Group>
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
+
+/**
+ * Deleting rows (UIKit editing style `.delete`): each row's edit button
+ * opens its trailing swipe actions.
+ */
+export const ListEditDeleteDemo: FunctionComponent = () => {
+  const id = 'list-edit-delete';
+
+  const [log, addLog] = useLog();
+  const [externalRoot, externalEditButton] = useProvidedState(id);
+
+  const [rows, setRows] = useState<readonly string[]>(planets);
+
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
+  );
+  const [controlEditButton, propsEditButton, stateEditButton] = usePropControl(
+    useMemo(() => getPropOptionsEditButtonFirst(addLog), [addLog]),
+    'edit button (1st)',
+    externalEditButton,
+    true,
+  );
+
+  return (
+    <Component
+      stretch
+      controls={[controlRoot, controlEditButton]}
+      id={id}
+      log={log}
+      stateUrl={useCreateStateUrl(id, [stateRoot, stateEditButton])}
+      title="List (Editing: Delete)"
+    >
+      <List.Root {...propsRoot}>
+        <List.Section>
+          <List.Header prominence="nested">
+            <List.Title>Planets</List.Title>
+            <List.Action onClick={() => setRows(planets)}>Reset</List.Action>
+          </List.Header>
+          <List.Group>
+            {rows.map((name, index) => (
+              <List.Item key={name}>
+                <List.EditButton
+                  aria-label={`Delete ${name}`}
+                  {...(index === 0 ? propsEditButton : {})}
+                />
+                <List.Title>{name}</List.Title>
+                <List.SwipeActions overswipe>
+                  <List.SwipeAction
+                    label="Delete"
+                    tint="var(--color-ios-system-red)"
+                    onClick={() => {
+                      addLog(`delete ${name}`);
+                      setRows((current) =>
+                        current.filter((row) => row !== name),
+                      );
+                    }}
+                  >
+                    <Symbol icon={sfTrashFill} />
+                  </List.SwipeAction>
+                </List.SwipeActions>
+              </List.Item>
+            ))}
+          </List.Group>
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
+
+/**
+ * Deleting rows, with an insert row at the end (UIKit: editing style
+ * `.insert` on the last row).
+ */
+export const ListEditInsertDemo: FunctionComponent = () => {
+  const id = 'list-edit-insert';
+
+  const [log, addLog] = useLog();
+  const [externalRoot] = useProvidedState(id);
+
+  const [rows, setRows] = useState<readonly string[]>(planets);
+  const added = useRef(0);
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
@@ -1277,218 +1619,204 @@ export const ListEditDemo: FunctionComponent = () => {
     externalRoot,
   );
 
-  const [controlCheckbox, propsCheckbox, stateCheckbox, RemounterCheckbox] =
-    usePropControl(
-      useMemo(() => getPropOptionsCheckboxFirst(addLog), [addLog]),
-      'checkbox (1st)',
-      externalCheckbox,
-    );
-
-  const [
-    controlRadioGroup,
-    propsRadioGroup,
-    stateRadioGroup,
-    RemounterRadioGroup,
-  ] = usePropControl(
-    useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
-    'radio group',
-    externalRadioGroup,
-  );
-
-  const [controlRadio, propsRadio, stateRadio] = usePropControl(
-    propOptionsRadioFirst,
-    'radio (1st)',
-    externalRadio,
-  );
-
-  const [controlEditButton, propsEditButton, stateEditButton] = usePropControl(
-    useMemo(() => getPropOptionsEditButtonFirst(addLog), [addLog]),
-    'edit button (1st)',
-    externalEditButton,
-  );
-
-  const [controlGrabber, propsGrabber, stateGrabber] = usePropControl(
-    propOptionsCursor,
-    'grabber (1st)',
-    externalGrabber,
-  );
-
-  const prefix = (name: string, first: boolean) => {
-    switch (content.prefix) {
-      case 'multiple': {
-        return first ? (
-          <RemounterCheckbox>
-            <List.Checkbox
-              aria-label={name}
-              {...propsCheckbox}
-            />
-          </RemounterCheckbox>
-        ) : (
-          <List.Checkbox aria-label={name} />
-        );
-      }
-
-      case 'single': {
-        return (
-          <List.Radio
-            aria-label={name}
-            value={name}
-            {...(first ? propsRadio : {})}
-          />
-        );
-      }
-
-      case 'delete':
-      case 'delete + insert': {
-        return (
-          <List.EditButton
-            aria-label={`Delete ${name}`}
-            {...(first ? propsEditButton : {})}
-          />
-        );
-      }
-
-      case 'insert': {
-        return (
-          <List.EditButton
-            aria-label={`Insert after ${name}`}
-            editingStyle="insert"
-            onClick={() => {
-              added.current += 1;
-              const row = `New ${added.current}`;
-              addLog(`insert ${row}`);
-              setRows((current) =>
-                current.toSpliced(current.indexOf(name) + 1, 0, row),
-              );
-            }}
-            {...(first ? propsEditButton : {})}
-          />
-        );
-      }
-
-      default: {
-        return null;
-      }
-    }
-  };
-
-  const group = (
-    <List.Group
-      onReorder={(from, to) => {
-        addLog(`reorder: ${from} → ${to}`);
-        setRows((current) => {
-          const next = [...current];
-          const [moved] = next.splice(from, 1);
-          // Not past the insert row.
-          if (moved) next.splice(Math.min(to, next.length), 0, moved);
-          return next;
-        });
-      }}
-    >
-      {rows.map((name, index) => (
-        <List.Item key={name}>
-          {prefix(name, index === 0)}
-          <List.Title>{name}</List.Title>
-          {content.reorder ? (
-            <List.Grabber
-              aria-label={`Reorder ${name}`}
-              {...(index === 0 ? propsGrabber : {})}
-            />
-          ) : null}
-          <List.SwipeActions overswipe>
-            <List.SwipeAction
-              label="Delete"
-              tint="var(--color-ios-system-red)"
-              onClick={() => {
-                addLog(`delete ${name}`);
-                setRows((current) => current.filter((row) => row !== name));
-              }}
-            >
-              <SFSymbol icon={sfTrashFill} />
-            </List.SwipeAction>
-          </List.SwipeActions>
-        </List.Item>
-      ))}
-      {content.prefix === 'delete + insert' ? (
-        // UIKit: an insert row at the end, deleting the others.
-        <List.Item>
-          <List.EditButton
-            aria-label="Add Planet"
-            editingStyle="insert"
-            onClick={() => {
-              added.current += 1;
-              const row = `New ${added.current}`;
-              addLog(`insert ${row}`);
-              setRows((current) => [...current, row]);
-            }}
-          />
-          <List.Title>Add Planet</List.Title>
-        </List.Item>
-      ) : null}
-    </List.Group>
-  );
-
   return (
     <Component
       stretch
+      controls={controlRoot}
       id={id}
       log={log}
-      title="List (Editing)"
-      controls={[
-        controlContent,
-        controlRoot,
-        controlCheckbox,
-        controlRadioGroup,
-        controlRadio,
-        controlEditButton,
-        controlGrabber,
-      ]}
-      stateUrl={useCreateStateUrl(id, [
-        stateContent,
-        stateRoot,
-        stateCheckbox,
-        stateRadioGroup,
-        stateRadio,
-        stateEditButton,
-        stateGrabber,
-      ])}
+      stateUrl={useCreateStateUrl(id, [stateRoot])}
+      title="List (Editing: Insert)"
     >
       <List.Root {...propsRoot}>
         <List.Section>
           <List.Header prominence="nested">
             <List.Title>Planets</List.Title>
-            <List.Action
-              onClick={() => {
-                addLog('reset');
-                setRows(planets);
-              }}
-            >
-              Reset
-            </List.Action>
+            <List.Action onClick={() => setRows(planets)}>Reset</List.Action>
           </List.Header>
-          {content.prefix === 'single' ? (
-            <RemounterRadioGroup>
-              <RadioGroup
-                aria-label="Planet"
-                {...propsRadioGroup}
-                render={group}
+          <List.Group>
+            {rows.map((name) => (
+              <List.Item key={name}>
+                <List.EditButton aria-label={`Delete ${name}`} />
+                <List.Title>{name}</List.Title>
+                <List.SwipeActions overswipe>
+                  <List.SwipeAction
+                    label="Delete"
+                    tint="var(--color-ios-system-red)"
+                    onClick={() => {
+                      addLog(`delete ${name}`);
+                      setRows((current) =>
+                        current.filter((row) => row !== name),
+                      );
+                    }}
+                  >
+                    <Symbol icon={sfTrashFill} />
+                  </List.SwipeAction>
+                </List.SwipeActions>
+              </List.Item>
+            ))}
+            <List.Item>
+              <List.EditButton
+                aria-label="Add Planet"
+                editingStyle="insert"
+                onClick={() => {
+                  added.current += 1;
+                  const row = `New ${added.current}`;
+                  addLog(`insert ${row}`);
+                  setRows((current) => [...current, row]);
+                }}
               />
-            </RemounterRadioGroup>
-          ) : (
-            group
-          )}
+              <List.Title>Add Planet</List.Title>
+            </List.Item>
+          </List.Group>
         </List.Section>
       </List.Root>
     </Component>
   );
 };
 
-const events = {
-  past: ['Design Review', 'Team Lunch', 'Release 1.2'],
-  upcoming: ['Planning', 'Offsite', 'Release 1.3', 'Retrospective'],
-} as const;
+/** Selecting several rows: a checkbox before each (`List.Checkbox`). */
+export const ListEditSelectDemo: FunctionComponent = () => {
+  const id = 'list-edit-select';
 
-type EventsView = keyof typeof events;
+  const [log, addLog] = useLog();
+  const [externalRoot, externalCheckbox] = useProvidedState(id);
+
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
+  );
+  const [controlCheckbox, propsCheckbox, stateCheckbox, keyCheckbox] =
+    usePropControl(
+      useMemo(() => getPropOptionsCheckboxFirst(addLog), [addLog]),
+      'checkbox (1st)',
+      externalCheckbox,
+      true,
+    );
+
+  return (
+    <Component
+      stretch
+      controls={[controlRoot, controlCheckbox]}
+      id={id}
+      log={log}
+      stateUrl={useCreateStateUrl(id, [stateRoot, stateCheckbox])}
+      title="List (Editing: Select)"
+    >
+      <List.Root {...propsRoot}>
+        <List.Section>
+          <List.Header prominence="nested">
+            <List.Title>Planets</List.Title>
+          </List.Header>
+          <List.Group>
+            {planets.map((name, index) => (
+              <List.Item
+                key={name}
+                onClick={forwardClick('[role=checkbox]')}
+              >
+                {index === 0 ? (
+                  <List.Checkbox
+                    key={keyCheckbox}
+                    aria-label={name}
+                    {...propsCheckbox}
+                  />
+                ) : (
+                  <List.Checkbox aria-label={name} />
+                )}
+                <List.Title>{name}</List.Title>
+              </List.Item>
+            ))}
+          </List.Group>
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
+
+/**
+ * Selecting one row: a radio before each, the group a Base UI `RadioGroup`
+ * (rendering the list's group); still reorderable.
+ */
+export const ListEditSelectSingleDemo: FunctionComponent = () => {
+  const id = 'list-edit-select-single';
+
+  const [log, addLog] = useLog();
+  const [externalRoot, externalRadioGroup, externalRadio] =
+    useProvidedState(id);
+
+  const [rows, setRows] = useState<readonly string[]>(planets);
+
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
+  );
+  const [controlRadioGroup, propsRadioGroup, stateRadioGroup, keyRadioGroup] =
+    usePropControl(
+      useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
+      'radio group',
+      externalRadioGroup,
+      true,
+    );
+  const [controlRadio, propsRadio, stateRadio] = usePropControl(
+    propOptionsRadioFirst,
+    'radio (1st)',
+    externalRadio,
+  );
+
+  return (
+    <Component
+      stretch
+      controls={[controlRoot, controlRadioGroup, controlRadio]}
+      id={id}
+      log={log}
+      stateUrl={useCreateStateUrl(id, [stateRoot, stateRadioGroup, stateRadio])}
+      title="List (Editing: Select One)"
+    >
+      <List.Root {...propsRoot}>
+        <List.Section>
+          <List.Header prominence="nested">
+            <List.Title>Planets</List.Title>
+          </List.Header>
+          <RadioGroup
+            key={keyRadioGroup}
+            aria-label="Planet"
+            {...propsRadioGroup}
+            render={
+              <List.Group
+                onReorder={(from, to) => {
+                  addLog(`reorder: ${from} → ${to}`);
+                  setRows((current) => {
+                    const next = [...current];
+                    const [moved] = next.splice(from, 1);
+                    if (moved) next.splice(to, 0, moved);
+                    return next;
+                  });
+                }}
+              />
+            }
+          >
+            {rows.map((name, index) => (
+              <List.Item
+                key={name}
+                onClick={forwardClick('[role=radio]')}
+              >
+                <List.Radio
+                  aria-label={name}
+                  value={name}
+                  {...(index === 0 ? propsRadio : {})}
+                />
+                <List.Title>{name}</List.Title>
+                <List.Grabber aria-label={`Reorder ${name}`} />
+              </List.Item>
+            ))}
+          </RadioGroup>
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
 
 /**
  * A full-width segmented control switching between two groups of rows (as
@@ -1499,33 +1827,9 @@ export const ListSegmentedDemo: FunctionComponent = () => {
   const id = 'list-segmented';
 
   const [log, addLog] = useLog();
+  const [externalRoot] = useProvidedState(id);
 
-  const [externalRoot, ...externalSegmented] = useProvidedState(id);
-  const [view, setView] = useState<EventsView>('upcoming');
-
-  // Composed: the segmented control (its demo's props, the views' values).
-  const segmented = useSegmentedDemo(
-    addLog,
-    externalSegmented,
-    {
-      content: eventsViewContent,
-      itemProps: {
-        past: { 'aria-controls': 'list-segmented-past' },
-        upcoming: { 'aria-controls': 'list-segmented-upcoming' },
-      },
-      prefix: 'segmented: ',
-      root: useMemo(() => getEventsViewRoot(addLog), [addLog]),
-      values: ['upcoming', 'past'],
-    },
-    {
-      'aria-label': 'Events',
-      onValueChange: (value: unknown) => {
-        addLog(`view: ${String(value)}`);
-        setView(value as EventsView);
-      },
-      value: view,
-    },
-  );
+  const [view, setView] = useState('upcoming');
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
@@ -1536,26 +1840,46 @@ export const ListSegmentedDemo: FunctionComponent = () => {
   return (
     <Component
       stretch
-      controls={[controlRoot, ...segmented.controls]}
+      controls={controlRoot}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot, ...segmented.states])}
+      stateUrl={useCreateStateUrl(id, [stateRoot])}
       title="List (Segmented)"
     >
       <List.Root {...propsRoot}>
         <List.Section>
           {/* Aligned with the groups' edges, not the rows' text. */}
           <List.Block style={{ marginBlockEnd: 16, paddingInline: 0 }}>
-            {segmented.element}
-          </List.Block>
-          {(Object.keys(events) as EventsView[]).map((key) => (
-            <List.Group
-              key={key}
-              aria-label={key === 'upcoming' ? 'Upcoming' : 'Past'}
-              hidden={view !== key}
-              id={`list-segmented-${key}`}
+            <Segmented.Root
+              aria-label="Events"
+              value={view}
+              onValueChange={(value: unknown) => {
+                addLog(`view: ${String(value)}`);
+                setView(String(value));
+              }}
             >
-              {events[key].map((name) => (
+              <Segmented.Item
+                aria-controls="list-segmented-upcoming"
+                value="upcoming"
+              >
+                Upcoming
+              </Segmented.Item>
+              <Segmented.Item
+                aria-controls="list-segmented-past"
+                value="past"
+              >
+                Past
+              </Segmented.Item>
+              <Segmented.Highlight />
+            </Segmented.Root>
+          </List.Block>
+          <List.Group
+            aria-label="Upcoming"
+            hidden={view !== 'upcoming'}
+            id="list-segmented-upcoming"
+          >
+            {['Planning', 'Offsite', 'Release 1.3', 'Retrospective'].map(
+              (name) => (
                 <List.Item key={name}>
                   <List.Title
                     render={<button />}
@@ -1565,9 +1889,26 @@ export const ListSegmentedDemo: FunctionComponent = () => {
                   </List.Title>
                   <List.DrillIn />
                 </List.Item>
-              ))}
-            </List.Group>
-          ))}
+              ),
+            )}
+          </List.Group>
+          <List.Group
+            aria-label="Past"
+            hidden={view !== 'past'}
+            id="list-segmented-past"
+          >
+            {['Design Review', 'Team Lunch', 'Release 1.2'].map((name) => (
+              <List.Item key={name}>
+                <List.Title
+                  render={<button />}
+                  onClick={() => addLog(`${name} clicked`)}
+                >
+                  {name}
+                </List.Title>
+                <List.DrillIn />
+              </List.Item>
+            ))}
+          </List.Group>
         </List.Section>
       </List.Root>
     </Component>
@@ -1578,14 +1919,15 @@ export const ListSegmentedDemo: FunctionComponent = () => {
  * A form (Framework7 list inputs): fields as rows, with inline labels, a
  * clear button while editing, a placeholder-only row, validation (an email
  * field's error shows once it's left invalid), dates and times picked in
- * expandable rows (`List.Expandable`), and a textarea.
+ * expandable rows (`List.Expandable`, one picker at a time), and a
+ * textarea.
  */
 export const ListFormDemo: FunctionComponent = () => {
   const id = 'list-form';
 
   const [log, addLog] = useLog();
+  const [externalRoot] = useProvidedState(id);
 
-  const [externalRoot, ...externalComposed] = useProvidedState(id);
   const [starts, setStarts] = useState(() => new Date(2025, 3, 20, 9, 41));
   const [ends, setEnds] = useState(() => new Date(2025, 3, 21, 18, 0));
   // The open picker: of which row, the date's or the time's.
@@ -1599,37 +1941,17 @@ export const ListFormDemo: FunctionComponent = () => {
     externalRoot,
   );
 
-  // Composed: the name field, the start's picker (their demos' props).
-  const nameField = useTextFieldDemo(
-    addLog,
-    externalComposed.slice(0, textFieldControlCount),
-    {
-      control: useMemo(() => getNameControl(addLog), [addLog]),
-      prefix: 'name field: ',
-      root: propOptionsTextFieldRoot,
-    },
-  );
-  const startsPicker = useDatePickerDemo(
-    externalComposed.slice(textFieldControlCount),
-    'dateAndTime',
-    {
-      picker: useMemo(() => getStartsPicker(addLog), [addLog]),
-      prefix: 'starts: ',
-    },
-  );
+  const startsOpen = open?.[0] === 'starts' ? open[1] : null;
+  const endsOpen = open?.[0] === 'ends' ? open[1] : null;
 
   return (
     <Component
       stretch
-      controls={[controlRoot, ...nameField.controls, ...startsPicker.controls]}
+      controls={controlRoot}
       id={id}
       log={log}
+      stateUrl={useCreateStateUrl(id, [stateRoot])}
       title="List (Form)"
-      stateUrl={useCreateStateUrl(id, [
-        stateRoot,
-        ...nameField.states,
-        ...startsPicker.states,
-      ])}
     >
       <List.Root {...propsRoot}>
         <List.Section>
@@ -1637,19 +1959,16 @@ export const ListFormDemo: FunctionComponent = () => {
             <List.Title>Contact</List.Title>
           </List.Header>
           <List.Group>
-            <nameField.Remounter>
-              <TextField.Root
-                {...nameField.props.root}
-                render={<List.Item />}
-              >
-                <TextField.Label {...nameField.props.label}>
-                  Name
-                </TextField.Label>
-                <TextField.Control {...nameField.props.control} />
-                <TextField.Clear {...nameField.props.clear} />
-              </TextField.Root>
-            </nameField.Remounter>
-            {nameField.suggestions}
+            <TextField.Root render={<List.Item />}>
+              <TextField.Label>Name</TextField.Label>
+              <TextField.Control
+                autoComplete="name"
+                defaultValue="Kate Bell"
+                placeholder="Required"
+                onValueChange={(value: string) => addLog(`name: ${value}`)}
+              />
+              <TextField.Clear />
+            </TextField.Root>
             <TextField.Root
               render={<List.Item />}
               validationMode="onBlur"
@@ -1680,65 +1999,61 @@ export const ListFormDemo: FunctionComponent = () => {
           <List.Header prominence="nested">
             <List.Title>Event</List.Title>
           </List.Header>
+          {/* The date's and the time's buttons open their pickers in
+              expandable rows below (as iOS's Calendar). */}
           <List.Group>
-            {(
-              [
-                ['starts', 'Starts', starts, setStarts],
-                ['ends', 'Ends', ends, setEnds],
-              ] as const
-            ).map(([key, title, date, setDate]) => {
-              const change = (next: Date) => {
-                addLog(`${key}: ${next.toLocaleString()}`);
-                setDate(next);
-              };
-              const opened = open?.[0] === key ? open[1] : null;
-
-              // The date's and the time's buttons open their pickers in
-              // expandable rows below (as iOS's Calendar), one at a time.
-              return (
-                <Fragment key={key}>
-                  <List.Item>
-                    <List.Title>{title}</List.Title>
-                    {key === 'starts' ? (
-                      <startsPicker.Remounter>
-                        {startsPicker.render({
-                          mode: 'dateAndTime',
-                          onOpenChange: (next) =>
-                            setOpen(next ? [key, next] : null),
-                          onValueChange: change,
-                          open: opened,
-                          popover: false,
-                          value: date,
-                        })}
-                      </startsPicker.Remounter>
-                    ) : (
-                      <DatePicker
-                        mode="dateAndTime"
-                        open={opened}
-                        popover={false}
-                        value={date}
-                        onValueChange={change}
-                        onOpenChange={(next) =>
-                          setOpen(next ? [key, next] : null)
-                        }
-                      />
-                    )}
-                  </List.Item>
-                  <List.Expandable open={opened === 'date'}>
-                    <Calendar
-                      value={date}
-                      onValueChange={change}
-                    />
-                  </List.Expandable>
-                  <List.Expandable open={opened === 'time'}>
-                    <TimeRoll
-                      value={date}
-                      onValueChange={change}
-                    />
-                  </List.Expandable>
-                </Fragment>
-              );
-            })}
+            <List.Item>
+              <List.Title>Starts</List.Title>
+              <DatePicker
+                mode="dateAndTime"
+                open={startsOpen}
+                popover={false}
+                value={starts}
+                onOpenChange={(next) => setOpen(next ? ['starts', next] : null)}
+                onValueChange={(next: Date) => {
+                  addLog(`starts: ${next.toLocaleString()}`);
+                  setStarts(next);
+                }}
+              />
+            </List.Item>
+            <List.Expandable open={startsOpen === 'date'}>
+              <Calendar
+                value={starts}
+                onValueChange={setStarts}
+              />
+            </List.Expandable>
+            <List.Expandable open={startsOpen === 'time'}>
+              <TimeRoll
+                value={starts}
+                onValueChange={setStarts}
+              />
+            </List.Expandable>
+            <List.Item>
+              <List.Title>Ends</List.Title>
+              <DatePicker
+                mode="dateAndTime"
+                open={endsOpen}
+                popover={false}
+                value={ends}
+                onOpenChange={(next) => setOpen(next ? ['ends', next] : null)}
+                onValueChange={(next: Date) => {
+                  addLog(`ends: ${next.toLocaleString()}`);
+                  setEnds(next);
+                }}
+              />
+            </List.Item>
+            <List.Expandable open={endsOpen === 'date'}>
+              <Calendar
+                value={ends}
+                onValueChange={setEnds}
+              />
+            </List.Expandable>
+            <List.Expandable open={endsOpen === 'time'}>
+              <TimeRoll
+                value={ends}
+                onValueChange={setEnds}
+              />
+            </List.Expandable>
           </List.Group>
         </List.Section>
         <List.Section>
@@ -1761,62 +2076,28 @@ export const ListFormDemo: FunctionComponent = () => {
   );
 };
 
-const contacts = [
-  'Aaron',
-  'Abigail',
-  'Adrian',
-  'Bella',
-  'Benjamin',
-  'Chloe',
-  'Daniel',
-  'Dylan',
-  'Ella',
-  'Emma',
-  'Felix',
-  'Grace',
-  'Hannah',
-  'Henry',
-  'Isaac',
-  'Jack',
-  'Julia',
-  'Leo',
-  'Lily',
-  'Mia',
-  'Noah',
-  'Olivia',
-  'Oscar',
-  'Ruby',
-  'Samuel',
-  'Sophie',
-  'Theo',
-  'William',
-  'Zoe',
-];
-
-const letters = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'];
-
-// Keeps the index in view while the stage scrolls, centered, above the
-// sticky headers.
-const IndexSpace = styled('div')`
-  position: absolute;
-  z-index: 3;
-  inset-block: 0;
-  inset-inline-end: 0;
-`;
-
-// A line at the middle of the stage, the index centered on it (without a
-// height, it never reaches the end of its space and moves while scrolling).
-const StickyIndex = styled('div')`
-  position: sticky;
-  top: 50%;
-  display: flex;
-  height: 0;
-  align-items: center;
-`;
-
-const Plain = styled('div')`
-  position: relative;
-`;
+// Contacts by their initial (the index's sections).
+const contacts = {
+  A: ['Aaron', 'Abigail', 'Adrian'],
+  B: ['Bella', 'Benjamin'],
+  C: ['Chloe'],
+  D: ['Daniel', 'Dylan'],
+  E: ['Ella', 'Emma'],
+  F: ['Felix'],
+  G: ['Grace'],
+  H: ['Hannah', 'Henry'],
+  I: ['Isaac'],
+  J: ['Jack', 'Julia'],
+  L: ['Leo', 'Lily'],
+  M: ['Mia'],
+  N: ['Noah'],
+  O: ['Olivia', 'Oscar'],
+  R: ['Ruby'],
+  S: ['Samuel', 'Sophie'],
+  T: ['Theo'],
+  W: ['William'],
+  Z: ['Zoe'],
+};
 
 /**
  * An index list: a plain list with sticky section titles (Figma “Section
@@ -1826,9 +2107,10 @@ export const ListIndexDemo: FunctionComponent = () => {
   const id = 'list-index';
 
   const [log, addLog] = useLog();
-
   const [externalRoot, externalHeader, externalIndex, externalIndexItem] =
     useProvidedState(id);
+
+  const listRef = useRef<HTMLElement>(null);
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRootPlain,
@@ -1836,74 +2118,22 @@ export const ListIndexDemo: FunctionComponent = () => {
     externalRoot,
     true,
   );
-
   const [controlHeader, propsHeader, stateHeader] = usePropControl(
     commonPropOptions,
     'header',
     externalHeader,
   );
-
   const [controlIndex, propsIndex, stateIndex] = usePropControl(
     propOptionsIndex,
     'index',
     externalIndex,
     true,
   );
-
   const [controlIndexItem, propsIndexItem, stateIndexItem] = usePropControl(
     propOptionsCursor,
     'index item',
     externalIndexItem,
   );
-
-  const listRef = useRef<HTMLElement>(null);
-
-  const sections = useMemo(() => {
-    const result = new Map<string, string[]>();
-    for (const name of contacts) {
-      const letter = name.charAt(0);
-      result.set(letter, [...(result.get(letter) ?? []), name]);
-    }
-    return result;
-  }, []);
-
-  const jump = useCallback(
-    (letter: string) => {
-      addLog(`index: ${letter}`);
-
-      // The nearest section at or after the letter.
-      const target =
-        sections.keys().find((key) => key.localeCompare(letter) >= 0) ??
-        sections.keys().toArray().at(-1) ??
-        '';
-      const section = listRef.current?.querySelector(
-        `[data-letter="${CSS.escape(target)}"]`,
-      );
-      section?.scrollIntoView({ block: 'start' });
-    },
-    [addLog, sections],
-  );
-
-  const rows = (names: string[]): ReactNode =>
-    names.map((name) => (
-      <List.Item key={name}>
-        <List.Title
-          render={<button />}
-          onClick={() => addLog(`${name} clicked`)}
-        >
-          {name}
-        </List.Title>
-        <List.SwipeActions overswipe>
-          <List.SwipeAction
-            label="Delete"
-            tint="var(--color-ios-system-red)"
-            onClick={() => addLog(`delete ${name}`)}
-          >
-            <SFSymbol icon={sfTrashFill} />
-          </List.SwipeAction>
-        </List.SwipeActions>
-      </List.Item>
-    ));
 
   return (
     <Component
@@ -1919,12 +2149,12 @@ export const ListIndexDemo: FunctionComponent = () => {
         stateIndexItem,
       ])}
     >
-      <Plain>
+      <div className="list-demo-plain">
         <List.Root
           ref={listRef}
           {...propsRoot}
         >
-          {[...sections].map(([letter, names]) => (
+          {Object.entries(contacts).map(([letter, names]) => (
             <List.Section
               key={letter}
               data-letter={letter}
@@ -1935,29 +2165,61 @@ export const ListIndexDemo: FunctionComponent = () => {
               >
                 <List.Title>{letter}</List.Title>
               </List.Header>
-              <List.Group>{rows(names)}</List.Group>
+              <List.Group>
+                {names.map((name) => (
+                  <List.Item key={name}>
+                    <List.Title
+                      render={<button />}
+                      onClick={() => addLog(`${name} clicked`)}
+                    >
+                      {name}
+                    </List.Title>
+                    <List.SwipeActions overswipe>
+                      <List.SwipeAction
+                        label="Delete"
+                        tint="var(--color-ios-system-red)"
+                        onClick={() => addLog(`delete ${name}`)}
+                      >
+                        <Symbol icon={sfTrashFill} />
+                      </List.SwipeAction>
+                    </List.SwipeActions>
+                  </List.Item>
+                ))}
+              </List.Group>
             </List.Section>
           ))}
         </List.Root>
-        <IndexSpace>
-          <StickyIndex>
+        {/* Kept in view while the stage scrolls, centered, above the sticky
+            headers. */}
+        <div className="list-demo-index-space">
+          <div className="list-demo-index">
             <List.Index
               aria-label="Index"
               {...propsIndex}
             >
-              {letters.map((letter, index) => (
+              {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'].map((letter, index) => (
                 <List.IndexItem
                   key={letter}
-                  onClick={() => jump(letter)}
+                  onClick={() => {
+                    addLog(`index: ${letter}`);
+                    // The nearest section at or after the letter.
+                    const target =
+                      Object.keys(contacts).find(
+                        (key) => key.localeCompare(letter) >= 0,
+                      ) ?? 'Z';
+                    listRef.current
+                      ?.querySelector(`[data-letter="${CSS.escape(target)}"]`)
+                      ?.scrollIntoView({ block: 'start' });
+                  }}
                   {...(index === 0 ? propsIndexItem : {})}
                 >
                   {letter}
                 </List.IndexItem>
               ))}
             </List.Index>
-          </StickyIndex>
-        </IndexSpace>
-      </Plain>
+          </div>
+        </div>
+      </div>
     </Component>
   );
 };
@@ -2029,7 +2291,7 @@ export const ListMailDemo: FunctionComponent = () => {
               .map(({ date, from, preview, subject }) => (
                 <List.Item key={from}>
                   <List.Image variant="circular">
-                    <SFSymbol icon={sfPersonCropCircleFill} />
+                    <Symbol icon={sfPersonCropCircleFill} />
                   </List.Image>
                   <List.Title
                     render={<button />}
@@ -2051,7 +2313,7 @@ export const ListMailDemo: FunctionComponent = () => {
                       tint="var(--color-ios-system-blue)"
                       onClick={() => addLog(`unread ${from}`)}
                     >
-                      <SFSymbol icon={sfEnvelopeOpenFill} />
+                      <Symbol icon={sfEnvelopeOpenFill} />
                     </List.SwipeAction>
                   </List.SwipeActions>
                   <List.SwipeActions
@@ -2065,7 +2327,7 @@ export const ListMailDemo: FunctionComponent = () => {
                       label="More"
                       onClick={() => addLog(`more ${from}`)}
                     >
-                      <SFSymbol icon={sfEllipsis} />
+                      <Symbol icon={sfEllipsis} />
                     </List.SwipeAction>
                     <List.SwipeAction
                       showLabel
@@ -2073,7 +2335,7 @@ export const ListMailDemo: FunctionComponent = () => {
                       tint="var(--color-ios-system-orange)"
                       onClick={() => addLog(`flag ${from}`)}
                     >
-                      <SFSymbol icon={sfFlagFill} />
+                      <Symbol icon={sfFlagFill} />
                     </List.SwipeAction>
                     <List.SwipeAction
                       showLabel
@@ -2081,7 +2343,7 @@ export const ListMailDemo: FunctionComponent = () => {
                       tint="var(--color-ios-system-purple)"
                       onClick={() => addLog(`archived ${from}`)}
                     >
-                      <SFSymbol icon={sfArchiveboxFill} />
+                      <Symbol icon={sfArchiveboxFill} />
                     </List.SwipeAction>
                   </List.SwipeActions>
                 </List.Item>

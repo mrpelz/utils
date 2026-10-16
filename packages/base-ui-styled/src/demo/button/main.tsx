@@ -1,16 +1,15 @@
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
-import { styled } from 'goober';
-import { Fragment, FunctionComponent, useMemo } from 'react';
+import './style.css';
 
-import { Button, ButtonRootProps } from '../../components/index.js';
+import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
+import { Fragment, FunctionComponent, ReactNode, useMemo } from 'react';
+
+import { Button, ButtonRootProps, Symbol } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
-import { Component, usePropControl } from '../utils/main.js';
+import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
-import { SFSymbol } from '../utils/symbol.js';
-import { useButtonDemo } from './compose.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -21,28 +20,64 @@ export const ButtonDemo: FunctionComponent = () => {
   const id = 'button';
 
   const [log, addLog] = useLog();
+  const [externalContent, externalRoot, externalSymbol, externalLabel] =
+    useProvidedState(id);
 
-  const { children, controls, propsRoot, Remounter, states } = useButtonDemo(
-    useProvidedState(id),
-    {
-      content: propOptionsContent,
-      root: useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    },
+  const [controlContent, content, stateContent] = usePropControl(
+    propOptionsContent,
+    '[content]',
+    externalContent,
+    true,
   );
+  const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
+    useMemo(() => getPropOptionsRoot(addLog), [addLog]),
+    'root',
+    externalRoot,
+    true,
+  );
+  const [controlSymbol, propsSymbol, stateSymbol] = usePropControl(
+    commonPropOptions,
+    'symbol',
+    externalSymbol,
+  );
+  const [controlLabel, propsLabel, stateLabel] = usePropControl(
+    commonPropOptions,
+    'label',
+    externalLabel,
+  );
+
+  const symbol =
+    content.symbol === undefined ? null : (
+      <Button.Icon {...propsSymbol}>{content.symbol as ReactNode}</Button.Icon>
+    );
+  const label =
+    content.label === undefined ? null : (
+      <Button.Label {...propsLabel}>{content.label as ReactNode}</Button.Label>
+    );
 
   return (
     <Component
       center
       baseUiId="button"
-      controls={controls}
+      controls={[controlContent, controlRoot, controlSymbol, controlLabel]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, states)}
       title="Button"
+      stateUrl={useCreateStateUrl(id, [
+        stateContent,
+        stateRoot,
+        stateSymbol,
+        stateLabel,
+      ])}
     >
-      <Remounter>
-        <Button.Root {...propsRoot}>{children}</Button.Root>
-      </Remounter>
+      {/* A pop-up button: the label first, then the symbol. */}
+      <Button.Root
+        key={elementKey}
+        {...propsRoot}
+      >
+        {content.order === 'labelFirst' ? label : symbol}
+        {content.order === 'labelFirst' ? symbol : label}
+      </Button.Root>
     </Component>
   );
 };
@@ -73,19 +108,6 @@ const matrixColumns = [false, true].flatMap((disabled) =>
   matrixLabelTypes.map((labelType) => ({ disabled, labelType })),
 );
 
-const Matrix = styled('div')`
-  display: grid;
-  gap: 12px 16px;
-  grid-template-columns: repeat(${matrixColumns.length + 1}, max-content);
-  place-items: center start;
-`;
-
-const MatrixHeading = styled('span')`
-  color: #a1a1a1;
-  font-family: monospace;
-  font-size: 12px;
-`;
-
 // All Figma permutations (Style, Size, Label Type, Enabled) at once, with
 // Destructive and the glass context as controls.
 export const ButtonMatrixDemo: FunctionComponent = () => {
@@ -111,20 +133,23 @@ export const ButtonMatrixDemo: FunctionComponent = () => {
       stateUrl={useCreateStateUrl(id, [stateControl])}
       title="Button (Matrix)"
     >
-      <Matrix>
+      <div className="button-demo-matrix">
         <span />
         {matrixColumns.map(({ disabled, labelType }) => (
-          <MatrixHeading key={`${labelType}-${String(disabled)}`}>
+          <span
+            key={`${labelType}-${String(disabled)}`}
+            className="button-demo-heading"
+          >
             {labelType}
             {disabled ? ' (disabled)' : ''}
-          </MatrixHeading>
+          </span>
         ))}
         {matrixRows.map(({ size, variant }) => (
           <Fragment key={`${variant}-${size ?? ''}`}>
-            <MatrixHeading>
+            <span className="button-demo-heading">
               {variant}
               {size ? ` ${size}` : ''}
-            </MatrixHeading>
+            </span>
             {matrixColumns.map(({ disabled, labelType }) => (
               <Button.Root
                 key={`${labelType}-${String(disabled)}`}
@@ -137,9 +162,9 @@ export const ButtonMatrixDemo: FunctionComponent = () => {
                 onClick={() => addLog(`${variant} ${size ?? ''} clicked`)}
               >
                 {labelType === 'text' ? null : (
-                  <Button.Symbol>
-                    <SFSymbol icon={sfHeartFill} />
-                  </Button.Symbol>
+                  <Button.Icon>
+                    <Symbol icon={sfHeartFill} />
+                  </Button.Icon>
                 )}
                 {labelType === 'symbol' ? null : (
                   <Button.Label>Label</Button.Label>
@@ -148,7 +173,7 @@ export const ButtonMatrixDemo: FunctionComponent = () => {
             ))}
           </Fragment>
         ))}
-      </Matrix>
+      </div>
     </Component>
   );
 };

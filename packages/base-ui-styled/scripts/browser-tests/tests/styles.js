@@ -10,26 +10,28 @@ import { sleep } from '../lib.js';
 // component's own dark value (its highlight).
 const probe = (/** @type {string} */ section) => `(() => {
   const root = getComputedStyle(document.documentElement);
+  // (Colors computed: the build's CSS may write them otherwise.)
+  const color = (value) => { const probe = document.createElement('span'); probe.style.color = value; document.body.append(probe); const computed = getComputedStyle(probe).color; probe.remove(); return computed; };
   const group = ${section}.querySelector('[role=radiogroup]');
   const highlight = [...group.children].find((child) => getComputedStyle(child).backgroundColor === 'rgb(255, 255, 255)' || getComputedStyle(child).backgroundColor === 'rgb(108, 108, 113)');
   return {
     colorScheme: root.colorScheme,
-    glass: getComputedStyle(group).getPropertyValue('--styled-glass-content').trim(),
+    glass: color(getComputedStyle(group).getPropertyValue('--styled-glass-content')),
     highlight: highlight ? getComputedStyle(highlight).backgroundColor : undefined,
-    label: root.getPropertyValue('--color-ios-label').trim(),
+    label: color(root.getPropertyValue('--color-ios-label')),
   };
 })()`;
 
 const light = {
-  glass: '#404040',
+  glass: 'rgb(64, 64, 64)',
   highlight: 'rgb(255, 255, 255)',
-  label: 'rgb(0 0 0)',
+  label: 'rgb(0, 0, 0)',
 };
 
 const dark = {
-  glass: '#bfbfbf',
+  glass: 'rgb(191, 191, 191)',
   highlight: 'rgb(108, 108, 113)',
-  label: 'rgb(255 255 255)',
+  label: 'rgb(255, 255, 255)',
 };
 
 /** @type {import('../lib.js').Test[]} */

@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 
 import { ActivityIndicator, Progress } from '../../components/index.js';
-import { Component, Remounters, usePropControl } from '../utils/main.js';
+import { Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
@@ -30,7 +30,7 @@ export const ProgressDemo: FunctionComponent = () => {
     externalValue,
   ] = useProvidedState(id);
 
-  const [controlBar, propsBar, stateBar, RemounterBar] = usePropControl(
+  const [controlBar, propsBar, stateBar, keyBar] = usePropControl(
     propOptionsBar,
     'bar',
     externalBar,
@@ -42,7 +42,7 @@ export const ProgressDemo: FunctionComponent = () => {
     externalBarContent,
     true,
   );
-  const [controlIndicator, propsIndicator, stateIndicator, RemounterIndicator] =
+  const [controlIndicator, propsIndicator, stateIndicator, keyIndicator] =
     usePropControl(propOptionsIndicator, 'indicator', externalIndicator, true);
 
   const [controlLabel, propsLabel, stateLabel] = usePropControl(
@@ -88,28 +88,26 @@ export const ProgressDemo: FunctionComponent = () => {
           paddingBlock: 16,
         }}
       >
-        <Remounters remounters={[RemounterBar]}>
-          <Progress.Root
-            aria-label={label === undefined ? 'Progress' : undefined}
-            {...propsBar}
-          >
-            {label === undefined ? null : (
-              <Progress.Label {...propsLabel}>{label}</Progress.Label>
-            )}
-            {showValue ? <Progress.Value {...propsValue} /> : null}
-            <Progress.Track>
-              <Progress.Indicator />
-            </Progress.Track>
-          </Progress.Root>
-        </Remounters>
-        <RemounterIndicator>
-          <ActivityIndicator
-            aria-label={
-              propsIndicator.children === undefined ? 'Loading' : undefined
-            }
-            {...propsIndicator}
-          />
-        </RemounterIndicator>
+        <Progress.Root
+          key={`${keyBar}`}
+          aria-label={label === undefined ? 'Progress' : undefined}
+          {...propsBar}
+        >
+          {label === undefined ? null : (
+            <Progress.Label {...propsLabel}>{label}</Progress.Label>
+          )}
+          {showValue ? <Progress.Value {...propsValue} /> : null}
+          <Progress.Track>
+            <Progress.Indicator />
+          </Progress.Track>
+        </Progress.Root>
+        <ActivityIndicator
+          key={keyIndicator}
+          aria-label={
+            propsIndicator.children === undefined ? 'Loading' : undefined
+          }
+          {...propsIndicator}
+        />
       </div>
     </Component>
   );

@@ -978,9 +978,7 @@ export const tests = [
   {
     name: 'list: edit controls match Figma; delete opens the swipe actions',
     run: async (page) => {
-      await page.open('list-edit', 'light', {
-        state: [{ $rest: true, prefix: 'multiple' }],
-      });
+      await page.open('list-edit-select');
       const checkbox = await page.evaluate(`(() => {
         const item = ${row(0, 1)};
         const edit = item.querySelector('[data-list-part=edit]').getBoundingClientRect();
@@ -989,7 +987,7 @@ export const tests = [
       })()`);
       assert.deepEqual(checkbox, [22, 18, 17]);
 
-      await page.setState(0, { prefix: 'delete' });
+      await page.open('list-edit-delete');
       const { height, width, x, y } = await page.evaluate(`(() => {
         const button = ${row(0, 0)}.querySelector('[data-list-part=edit]');
         button.scrollIntoView({ block: 'center' });
@@ -1027,7 +1025,7 @@ export const tests = [
       };
 
       // Single (radios in a radio group): one at a time.
-      await page.setState(0, { prefix: 'single' });
+      await page.open('list-edit-select-single');
       await choose(2);
       await choose(3);
       assert.deepEqual(await state(), {
@@ -1036,8 +1034,7 @@ export const tests = [
       });
 
       // Multiple (checkboxes), without grabbers.
-      await page.setState(0, { prefix: 'multiple' });
-      await page.setState(0, { reorder: false });
+      await page.open('list-edit-select');
       await choose(0);
       await choose(2);
       assert.deepEqual(await state(), {
@@ -1370,22 +1367,20 @@ export const tests = [
   {
     name: 'list: a collapsible header is a button (cursor)',
     run: async (page) => {
-      await page.open('list-parts');
+      await page.open('list-collapsible');
       const cursor = () =>
         page.evaluate(
           `getComputedStyle(${page.section}.querySelector('[data-list-part=header][role=button]')).cursor`,
         );
       assert.equal(await cursor(), 'pointer');
-      await page.setState(24, { cursor: 'copy' });
+      await page.setState(1, { cursor: 'copy' });
       assert.equal(await cursor(), 'copy');
     },
   },
   {
     name: 'list: deleting rows, with an insert row at the end',
     run: async (page) => {
-      await page.open('list-edit', 'light', {
-        state: [{ $rest: true, prefix: 'delete + insert' }],
-      });
+      await page.open('list-edit-insert');
       const titles = () =>
         page.evaluate(
           `[...document.querySelector('[data-list-part=group]').children].map((item) => item.querySelector(${JSON.stringify('[data-list-part=title]')}).textContent)`,
@@ -1412,7 +1407,7 @@ export const tests = [
   {
     name: 'list: an expandable row opens and closes below its row',
     run: async (page) => {
-      await page.open('list-parts');
+      await page.open('list-collapsible');
       const state = () =>
         page.evaluate(`(() => {
           const row = document.querySelector(${JSON.stringify('[data-list-part=item]:has([data-list-part=row] > [data-list-part=disclosure])')});
@@ -1455,12 +1450,12 @@ export const tests = [
   {
     name: 'list: rows and their buttons take secondary clicks',
     run: async (page) => {
-      const state = Array.from({ length: 17 }, () => null);
+      const state = Array.from({ length: 16 }, () => null);
       const onSecondaryClick = mapped('[log secondary click]');
       await page.open('list-parts', 'light', {
         state: Object.assign(state, {
           // (Items, buttons.)
-          16: { $rest: true, onSecondaryClick },
+          15: { $rest: true, onSecondaryClick },
           6: { $rest: true, onSecondaryClick },
         }),
       });
@@ -1495,14 +1490,14 @@ export const tests = [
       // beyond), and a drill-in chevron.
       const ends = await page.evaluate(`(() => {
         const end = (element) => Math.round(element.closest('[data-list-part=row]').getBoundingClientRect().right - element.getBoundingClientRect().right);
-        return [end(document.querySelector('[aria-haspopup] [data-button-part=symbol]')), end(document.querySelector('[data-list-part=drill-in]'))];
+        return [end(document.querySelector('[aria-haspopup] [data-button-part=icon]')), end(document.querySelector('[data-list-part=drill-in]'))];
       })()`);
       assert.equal(ends[0], ends[1], 'aligned');
 
       // Its label and symbol 16px apart (as a detail and its chevron).
       const gap = await page.evaluate(`(() => {
         const popup = document.querySelector('[aria-haspopup]');
-        return Math.round(popup.querySelector('[data-button-part=symbol]').getBoundingClientRect().left - popup.querySelector('[data-button-part=label]').getBoundingClientRect().right);
+        return Math.round(popup.querySelector('[data-button-part=icon]').getBoundingClientRect().left - popup.querySelector('[data-button-part=label]').getBoundingClientRect().right);
       })()`);
       assert.equal(gap, 16);
     },

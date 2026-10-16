@@ -3,7 +3,7 @@
     "rootDir": ".",
     "tsBuildInfoFile": "dist/tsconfig.meta.tsbuildinfo"
   },
-  "exclude": ["dist/**/*", "node_modules/**/*", "packages/**/*", "src/**/*"],
+  "exclude": ["dist/**/*", "demo/**/*", "node_modules/**/*", "packages/**/*", "src/**/*"],
   "extends": "@mrpelz/boilerplate-preact/tsconfig.meta.json",
   "include": ["**/*.js", "**/*.mjs"]
 }

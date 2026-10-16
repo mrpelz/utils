@@ -44,7 +44,7 @@ export const tests = [
       });
       try {
         await page.open('edit-menu', 'light', {
-          state: [null, { $rest: true, open: true }],
+          state: [{ $rest: true, open: true }],
         });
         await sleep(500);
 
@@ -116,7 +116,7 @@ export const tests = [
     name: 'edit menu: with room, the capsule does not scroll',
     run: async (page) => {
       await page.open('edit-menu', 'light', {
-        state: [null, { $rest: true, open: true }],
+        state: [{ $rest: true, open: true }],
       });
       await sleep(500);
 
@@ -142,7 +142,7 @@ export const tests = [
       });
       try {
         await page.open('edit-menu', 'light', {
-          state: [null, { $rest: true, open: true }],
+          state: [{ $rest: true, open: true }],
         });
         await sleep(500);
 

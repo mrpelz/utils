@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react';
 
-import { ColorScheme } from '../../components/utils.js';
+import { ColorScheme } from '../../components/utils/main.js';
 
 type TOptionsContext = {
   colorScheme?: ColorScheme;

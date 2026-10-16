@@ -21,7 +21,7 @@ tmux \
 	set-option -p pane-border-format "jest (jest.config.json)" \; \
 	split-window -f -v -l 50% "make -s watch_stylelint" \; \
 	set-option -p pane-border-format "stylelint (stylelint.config.js)" \; \
-	split-window -h -l 66% "make -s watch_build" \; \
+	split-window -h -l 66% "make -s watch_build_demo" \; \
 	set-option -p pane-border-format "webpack (ts-loader with tsconfig.build.json, excludes test-files)" \; \
 	split-window -h -l 50% "make -s watch_config" \; \
 	set-option -p pane-border-format "tsc (tsconfig.meta.json, checks files outside \"src\")" \; \

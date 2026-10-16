@@ -1,4 +1,6 @@
 .DS_Store
+demo
 dist
 node_modules
 secrets.txt
+!src/*

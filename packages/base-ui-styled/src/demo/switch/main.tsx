@@ -1,34 +1,55 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
+import { Switch } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
-import { Component } from '../utils/main.js';
+import { Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
-import { useSwitchDemo } from './compose.js';
-import { getPropOptionsRoot } from './props.js';
+import { getPropOptionsRoot, propOptionsThumb } from './props.js';
 
 export const SwitchDemo: FunctionComponent = () => {
   const id = 'switch';
 
   const [log, addLog] = useLog();
+  const [externalRoot, externalThumb] = useProvidedState(id);
 
-  const { controls, element, states } = useSwitchDemo(useProvidedState(id), {
-    root: (setPending) => getPropOptionsRoot(addLog, setPending),
-  });
+  // Indeterminate for a while after each change (e.g. while an app saves
+  // the new state): see the root's `onCheckedChange` options.
+  const [pending, setPending] = useState(false);
+
+  const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
+    useMemo(() => getPropOptionsRoot(addLog, setPending), [addLog]),
+    'root',
+    externalRoot,
+    true,
+  );
+  const [controlThumb, propsThumb, stateThumb] = usePropControl(
+    propOptionsThumb,
+    'thumb',
+    externalThumb,
+  );
 
   return (
     <Component
       center
       baseUiId="switch"
-      controls={controls}
+      controls={[controlRoot, controlThumb]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, states)}
+      stateUrl={useCreateStateUrl(id, [stateRoot, stateThumb])}
       title="Switch"
     >
-      {element}
+      <Switch.Root
+        key={elementKey}
+        {...propsRoot}
+        indeterminate={
+          (propsRoot.indeterminate as boolean | undefined) ?? pending
+        }
+      >
+        <Switch.Thumb {...propsThumb} />
+      </Switch.Root>
     </Component>
   );
 };

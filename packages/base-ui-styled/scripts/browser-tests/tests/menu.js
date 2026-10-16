@@ -156,10 +156,15 @@ export const tests = [
         assert.ok(
           await page.evaluate(`(() => {
             const pill = document.querySelector(${JSON.stringify('[role=menu] [data-moving-highlight]')});
-            return [...document.styleSheets].flatMap((sheet) => [...sheet.cssRules]).some((rule) =>
-              rule instanceof CSSStyleRule &&
-              rule.selectorText.includes(${JSON.stringify('data-styled-dragging-items')}) &&
-              pill.matches(rule.selectorText) &&
+            // Style rules, also in layers and nested (their \`&\` resolved).
+            const rules = (list, parent) => [...list].flatMap((rule) => {
+              if (!(rule instanceof CSSStyleRule)) return rule.cssRules ? rules(rule.cssRules, parent) : [];
+              const selector = parent ? rule.selectorText.replaceAll('&', \`:is(\${parent})\`) : rule.selectorText;
+              return [{ rule, selector }, ...rules(rule.cssRules, selector)];
+            });
+            return [...document.styleSheets].flatMap((sheet) => rules(sheet.cssRules)).some(({ rule, selector }) =>
+              selector.includes(${JSON.stringify('data-styled-dragging-items')}) &&
+              pill.matches(selector) &&
               rule.style.transitionProperty.includes('translate'));
           })()`),
           'the selection moves while dragging',
@@ -303,16 +308,21 @@ export const tests = [
   {
     name: 'menu: checkbox items reserve a checkmark column in every item',
     run: async (page) => {
+      /** The first “Action” item's label, from the popup's start. */
+      const labelInset = () =>
+        page.evaluate(`(() => {
+          const popup = document.querySelector('[role=menu]');
+          const item = [...popup.querySelectorAll('[role^=menuitem]')].find((element) => element.textContent.startsWith('Action'));
+          return item.querySelector('[data-menu-part=label]').getBoundingClientRect().left - popup.getBoundingClientRect().left;
+        })()`);
       await page.open('menu');
       await openMenu(page);
-      const { labelInset: before } = await measure(page);
+      const before = await labelInset();
 
-      await page.open('menu', 'light', {
-        state: [{ $rest: true, toggles: 'checkbox' }],
-      });
+      await page.open('menu-toggles');
       await openMenu(page);
       await page.screenshot('menu-toggles');
-      const { labelInset: after } = await measure(page);
+      const after = await labelInset();
 
       assert.equal(after - before, 28);
     },
@@ -349,7 +359,7 @@ export const tests = [
     run: async (page) => {
       for (const scheme of /** @type {const} */ (['light', 'dark'])) {
         await page.open('edit-menu', scheme);
-        await page.setState(1, { open: true });
+        await page.setState(0, { open: true });
         await sleep(500);
         await page.screenshot(`edit-menu-${scheme}`);
 
@@ -431,15 +441,7 @@ export const tests = [
       );
 
       await page.open('menu', 'light', {
-        state: [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          { $rest: true, cursor: 'copy' },
-        ],
+        state: [null, null, null, null, { $rest: true, cursor: 'copy' }],
       });
       await openMenu(page);
       assert.equal(
@@ -583,7 +585,7 @@ export const tests = [
     name: 'edit menu: dividers next to the highlighted action are hidden',
     run: async (page) => {
       await page.open('edit-menu', 'light', {
-        state: [null, { $rest: true, open: true }],
+        state: [{ $rest: true, open: true }],
       });
       await sleep(500);
       const { height, width, x, y } = await page.evaluate(`(() => {
@@ -604,7 +606,7 @@ export const tests = [
     name: 'edit menu: its submenu is an iPad menu',
     run: async (page) => {
       await page.open('edit-menu', 'light', {
-        state: [null, { $rest: true, open: true }],
+        state: [{ $rest: true, open: true }],
       });
       await sleep(500);
       await page.evaluate(
@@ -662,7 +664,7 @@ export const tests = [
       await assertMoves(page, 'Copy', [1, 2], '[role=separator]');
 
       await page.open('edit-menu', 'light', {
-        state: [null, { $rest: true, open: true }],
+        state: [{ $rest: true, open: true }],
       });
       await sleep(500);
       /** @type {[number, number]} */
@@ -699,7 +701,7 @@ export const tests = [
     name: 'menu: a trigger opening on secondary clicks: a click is its own; a right click opens it, a touch held, too (dragged on to an item)',
     run: async (page) => {
       await page.open('menu', 'light', {
-        state: [null, null, { $rest: true, openOn: 'secondaryClick' }],
+        state: [null, { $rest: true, openOn: 'secondaryClick' }],
       });
       const trigger = await page.rect('button');
       /** @type {[number, number]} */

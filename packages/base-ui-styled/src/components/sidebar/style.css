@@ -1,0 +1,97 @@
+/* Sidebar (see main.tsx). */
+@layer base-ui-styled {
+  .bus-sidebar-toolbar {
+    --styled-button-plain-size: var(--font-ios-body-size);
+    --styled-button-plain-line-height: var(--font-ios-body-line-height);
+    --styled-button-plain-tracking: var(--font-ios-body-tracking);
+    --styled-button-plain-symbol-weight: 510;
+    --styled-button-plain-padding-inline: 8px;
+    --styled-button-plain-background-pressed: var(--styled-sidebar-selection);
+
+    display: flex;
+    min-height: 34px;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    margin-block-start: -3px;
+    margin-inline: -8px;
+    padding-block-end: 10px;
+  }
+
+  .bus-sidebar-toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .bus-sidebar-root {
+    /* Its selection's fill (selected and pressed rows, pressed toolbar
+       buttons; Figma: #ededed over its glass). Dark: floating (a light rim, a
+       glow outside; the glass' dark inner bands would make the large panel
+       look inset, user). */
+    --styled-sidebar-selection: rgb(0 0 0 / 7%);
+    --styled-search-fill: rgb(0 0 0 / 7%);
+
+    @media (prefers-color-scheme: dark) {
+      --styled-sidebar-selection: rgb(255 255 255 / 12%);
+      --styled-search-fill: rgb(255 255 255 / 12%);
+
+      box-shadow:
+        inset 0 0 0 1px rgb(255 255 255 / 15%),
+        0 0 25px rgb(0 0 0 / 30%);
+    }
+
+    &:where(:root[data-color-scheme='light'] *) {
+      --styled-sidebar-selection: rgb(0 0 0 / 7%);
+      --styled-search-fill: rgb(0 0 0 / 7%);
+
+      box-shadow: var(--styled-glass-shadow);
+    }
+
+    &:where(:root[data-color-scheme='dark'] *) {
+      --styled-sidebar-selection: rgb(255 255 255 / 12%);
+      --styled-search-fill: rgb(255 255 255 / 12%);
+
+      box-shadow:
+        inset 0 0 0 1px rgb(255 255 255 / 15%),
+        0 0 25px rgb(0 0 0 / 30%);
+    }
+
+    /* Its search field (see TextField.Search): Figma's fill blended with the
+       glass (plus-darker, plus-lighter in dark mode) as a flat color; its
+       symbol and placeholder in the glass' secondary content color (#999). */
+    --styled-search-height: 44px;
+    --styled-search-padding: 11px;
+    --styled-search-gap: 8px;
+
+    display: flex;
+    overflow: auto;
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+    flex-direction: column;
+    padding: 11px 16px 10px;
+    border-radius: 20px;
+    margin: var(--styled-sidebar-margin, 8px);
+    color: var(--color-ios-label);
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    & [data-text-field-part='search'] {
+      color: var(--styled-glass-content-secondary);
+    }
+
+    & [data-text-field-part='search'] input::placeholder {
+      color: var(--styled-glass-content-secondary);
+    }
+
+    /* Its list: no room after its last section. */
+    & > [data-list-part='root'] > :last-child {
+      margin-block-end: 0;
+    }
+  }
+}

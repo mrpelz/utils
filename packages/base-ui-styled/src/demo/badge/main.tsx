@@ -1,3 +1,5 @@
+import './style.css';
+
 import { sfBell } from '@bradleyhodges/sfsymbols/sfBell';
 import { sfClock } from '@bradleyhodges/sfsymbols/sfClock';
 import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
@@ -10,6 +12,7 @@ import {
   Button,
   collapsedSelection,
   List,
+  Symbol,
   TabBar,
 } from '../../components/index.js';
 import { Component, usePropControl } from '../utils/main.js';
@@ -17,54 +20,20 @@ import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
-import { SFSymbol } from '../utils/symbol.js';
 import { propOptionsContent, propOptionsRoot } from './props.js';
-
-type Symbol = Parameters<typeof SFSymbol>[0]['icon'];
-
-// The tab bar's groups of tabs (badged, or not).
-const tabGroups: {
-  badge: boolean;
-  label: string;
-  symbol: Symbol;
-  value: string;
-}[][] = [
-  [
-    {
-      badge: true,
-      label: 'Favorites',
-      symbol: sfHeartFill,
-      value: 'favorites',
-    },
-    { badge: false, label: 'Recents', symbol: sfClock, value: 'recents' },
-    {
-      badge: true,
-      label: 'Contacts',
-      symbol: sfPersonCropCircle,
-      value: 'contacts',
-    },
-  ],
-  [
-    {
-      badge: true,
-      label: 'Search',
-      symbol: sfMagnifyingglass,
-      value: 'search',
-    },
-  ],
-];
 
 /**
  * A badge (UIKit `badgeValue`, Figma “_Badge”): a count in a capsule (a
- * circle for a digit), or a dot; on the corner of a button, of a tab's
- * symbol, or inline (e.g. a list row's detail).
+ * circle for a digit), or a dot; on a symbol (a `Symbol`'s child: of a
+ * button, of tabs), or inline (e.g. a list row's detail).
  */
 export const BadgeDemo: FunctionComponent = () => {
   const id = 'badge';
 
   const [tab, setTab] = useState('favorites');
-  const selection = collapsedSelection(
-    tabGroups.map((tabs) => tabs.map(({ value }) => value)),
+  // Collapsed, the active tab and its group remain (as iOS's).
+  const [phone, search] = collapsedSelection(
+    [['favorites', 'recents', 'contacts'], ['search']],
     tab,
   );
 
@@ -91,16 +60,7 @@ export const BadgeDemo: FunctionComponent = () => {
       stateUrl={useCreateStateUrl(id, [stateRoot, stateContent])}
       title="Badge"
     >
-      <div
-        style={{
-          alignItems: 'center',
-          display: 'grid',
-          gap: 32,
-          justifyItems: 'center',
-          paddingBlock: 16,
-          width: 'min(402px, 100%)',
-        }}
-      >
+      <div className="badge-demo-stage">
         <Button.Root
           aria-label="Notifications"
           shape="circle"
@@ -108,46 +68,67 @@ export const BadgeDemo: FunctionComponent = () => {
           variant="glass"
           onClick={() => undefined}
         >
-          <Button.Symbol>
-            <SFSymbol icon={sfBell} />
-          </Button.Symbol>
-          <Badge {...propsRoot} />
+          <Button.Icon>
+            <Symbol icon={sfBell}>
+              <Badge {...propsRoot} />
+            </Symbol>
+          </Button.Icon>
         </Button.Root>
-        {/* Badges on all tabs but Recents; collapsed, the active tab and
-            its group remain (as iOS), the others collapsing away with
-            their badges. */}
+        {/* Badges on all tabs but Recents; collapsed, the others collapse
+            away with their badges. */}
         <TabBar.Root
           value={tab}
           onValueChange={(next: unknown) => setTab(next as string)}
         >
           <TabBar.List collapsed={propsContent.collapsed}>
-            {tabGroups.map((tabs, group) => (
-              <TabBar.Group
-                key={tabs[0]?.value}
-                visibleWhenCollapsed={selection[group]?.remains}
+            <TabBar.Group visibleWhenCollapsed={phone?.remains}>
+              <TabBar.Indicator />
+              <TabBar.Tab
+                value="favorites"
+                visibleWhenCollapsed={phone?.remains && phone.tab === 0}
               >
-                <TabBar.Indicator />
-                {tabs.map(({ badge, label, symbol, value }, index) => (
-                  <TabBar.Tab
-                    key={value}
-                    aria-label={tabs.length > 1 ? undefined : label}
-                    value={value}
-                    visibleWhenCollapsed={
-                      selection[group]?.remains &&
-                      selection[group].tab === index
-                    }
-                  >
-                    <TabBar.Icon>
-                      <SFSymbol icon={symbol} />
-                    </TabBar.Icon>
-                    {tabs.length > 1 ? (
-                      <TabBar.Label>{label}</TabBar.Label>
-                    ) : null}
-                    {badge ? <Badge {...propsRoot} /> : null}
-                  </TabBar.Tab>
-                ))}
-              </TabBar.Group>
-            ))}
+                <TabBar.Icon>
+                  <Symbol icon={sfHeartFill}>
+                    <Badge {...propsRoot} />
+                  </Symbol>
+                </TabBar.Icon>
+                <TabBar.Label>Favorites</TabBar.Label>
+              </TabBar.Tab>
+              <TabBar.Tab
+                value="recents"
+                visibleWhenCollapsed={phone?.remains && phone.tab === 1}
+              >
+                <TabBar.Icon>
+                  <Symbol icon={sfClock} />
+                </TabBar.Icon>
+                <TabBar.Label>Recents</TabBar.Label>
+              </TabBar.Tab>
+              <TabBar.Tab
+                value="contacts"
+                visibleWhenCollapsed={phone?.remains && phone.tab === 2}
+              >
+                <TabBar.Icon>
+                  <Symbol icon={sfPersonCropCircle}>
+                    <Badge {...propsRoot} />
+                  </Symbol>
+                </TabBar.Icon>
+                <TabBar.Label>Contacts</TabBar.Label>
+              </TabBar.Tab>
+            </TabBar.Group>
+            <TabBar.Group visibleWhenCollapsed={search?.remains}>
+              <TabBar.Indicator />
+              <TabBar.Tab
+                aria-label="Search"
+                value="search"
+                visibleWhenCollapsed={search?.remains}
+              >
+                <TabBar.Icon>
+                  <Symbol icon={sfMagnifyingglass}>
+                    <Badge {...propsRoot} />
+                  </Symbol>
+                </TabBar.Icon>
+              </TabBar.Tab>
+            </TabBar.Group>
           </TabBar.List>
         </TabBar.Root>
         <List.Root style={{ width: '100%' }}>

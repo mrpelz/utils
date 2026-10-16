@@ -89,7 +89,7 @@ const figma = {
  */
 const metrics = (page, size) =>
   page.evaluate(`(() => {
-    const [, sizes] = ${page.section}.querySelectorAll('[style*="--columns"]');
+    const sizes = ${page.section}.querySelector('.typography-demo-sizes');
     const headings = [...sizes.children].slice(0, 13).map((element) => element.textContent);
     const column = headings.indexOf(${JSON.stringify(size)});
     return [...sizes.children].filter((_, index) => index % 13 === column && index >= 13).map((element) => {
@@ -103,7 +103,7 @@ export const tests = [
   {
     name: 'typography: text styles match Figma at Dynamic Type sizes',
     run: async (page) => {
-      await page.open('typography-matrix');
+      await page.open('typography-sizes');
 
       for (const [size, expected] of Object.entries(figma)) {
         assert.deepEqual(await metrics(page, size), expected, size);
@@ -116,7 +116,7 @@ export const tests = [
       await page.open('typography-matrix');
 
       const weights = await page.evaluate(`(() => {
-        const [variants] = ${page.section}.querySelectorAll('[style*="--columns"]');
+        const variants = ${page.section}.querySelector('.typography-demo-variants');
         const cells = [...variants.children].slice(5);
         return ${JSON.stringify(styles)}.map((_, row) => {
           const [, regular, emphasized, italic] = cells.slice(row * 5, row * 5 + 5).map((element) => getComputedStyle(element));
@@ -143,8 +143,8 @@ export const tests = [
   {
     name: 'typography: all Dynamic Type sizes render',
     run: async (page) => {
-      await page.open('typography-matrix');
-      await page.screenshot('typography-matrix');
+      await page.open('typography-sizes');
+      await page.screenshot('typography-sizes');
 
       /** @type {string[]} */
       const bodies = [];

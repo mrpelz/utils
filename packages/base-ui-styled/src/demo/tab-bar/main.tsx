@@ -1,421 +1,985 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
+import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
+import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
+import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
 import { sfPlayFill } from '@bradleyhodges/sfsymbols/sfPlayFill';
-import { FunctionComponent, useLayoutEffect, useMemo, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   collapsedSelection,
+  Symbol,
   TabBar,
   useViewportScroll,
   Viewport,
 } from '../../components/index.js';
-import { useLog } from '../utils/log.js';
-import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
+import { AddLog, useLog } from '../utils/log.js';
+import { Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
-import { SFSymbol } from '../utils/symbol.js';
 import {
-  createExpansion,
-  fallbackTabOptions,
-  getPresetOptions,
-  getPropOptionsGroup,
-  getPropOptionsRoot,
-  Preset,
-  presetRegular,
-  presetSecondary,
-  presetTabBar,
-  primaryValues,
-  propOptionsIndicator,
-  propOptionsPanel,
-  secondaryValues,
+  getPropOptionsTab,
+  propOptionsAccessoryContent,
+  propOptionsContent,
+  propOptionsGroup,
+  propOptionsList,
+  propOptionsListRegular,
+  propOptionsRoot,
 } from './props.js';
 
-// Tabs, groups and their content are all configurable; the presets only set
-// what the controls start with.
-//
-// What the app does (here, the demo): whether the bar is collapsed (unless
-// the list's control says), and what remains while it is (see `remaining`).
-const TabBarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
-  const [log, addLog] = useLog();
+// The tab bars' tabs: `heart.fill` and a label (Figma: `star.fill`, not in
+// the symbols' catalogue), `tab-1` and on; search (`secondary-1`) in a group
+// of its own. What remains while collapsed is the app's (here, the demo's):
+// the tabs and groups marked by their controls, if any are; otherwise as
+// iOS (`collapsedSelection`): the active tab and its group.
 
+/**
+ * A tab bar (UIKit `UITabBar`, Figma “Tab Bar - iPhone”): a glass capsule of
+ * tabs, the selection sliding between them, a lens under the pointer;
+ * collapsed (the list's control), the active tab remains, and a click on
+ * the group expands the bar again.
+ */
+export const TabBarDemo: FunctionComponent = () => {
+  const id = 'tab-bar';
+
+  const [log, addLog] = useLog();
   const [
     externalContent,
     externalRoot,
     externalList,
     externalGroup,
-    externalIndicator,
     externalTab1,
     externalTab2,
     externalTab3,
-    externalTab4,
-    externalTab5,
-    externalTab6,
-    externalTab7,
-    externalTab8,
-    externalTab9,
-    externalSecondaryGroup,
-    externalSecondaryIndicator,
-    externalSecondaryTab1,
-    externalSecondaryTab2,
-    externalSecondaryTab3,
-    externalIcon,
-    externalLabel,
-    externalPanel,
-  ] = useProvidedState(preset.id);
-  const options = useMemo(
-    () => getPresetOptions(preset, addLog),
-    [addLog, preset],
-  );
-  const [collapsedState, setCollapsed] = useState(false);
-  // Clicks expanding the bar, for the handlers (see `createExpansion`).
-  const [expansion] = useState(createExpansion);
-  // The active tab's value, since the root's default value (see below).
-  const [active, setActive] = useState<{ since: unknown; value: unknown }>({
-    since: preset.defaultValue,
-    value: preset.defaultValue,
-  });
+  ] = useProvidedState(id);
+
+  const [value, setValue] = useState<unknown>('tab-1');
+  const [collapsed, setCollapsed] = useState(false);
 
   const [controlContent, content, stateContent] = usePropControl(
-    options.content,
+    propOptionsContent,
     '[content]',
     externalContent,
     true,
   );
-
-  // Collapsing while scrolling down, expanding while scrolling up.
-  useViewportScroll(({ atTop, direction }) => {
-    if (!content.collapseOnScroll) return;
-    setCollapsed(!atTop && direction === 'down');
-  });
-
-  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
-    useMemo(
-      () => getPropOptionsRoot(preset, addLog, setCollapsed, expansion),
-      [addLog, expansion, preset],
-    ),
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
     'root',
     externalRoot,
-    true,
   );
-
-  // The value, as the demo's state (also with the control's handler).
-  const { onValueChange, ...rootProps } = propsRoot;
-  const activeValue =
-    active.since === rootProps.defaultValue
-      ? active.value
-      : rootProps.defaultValue;
-  const shownValue = rootProps.value ?? activeValue;
-
   const [controlList, propsList, stateList] = usePropControl(
-    options.list,
+    propOptionsList,
     'list',
     externalList,
     true,
   );
-
-  const collapsed = propsList.collapsed ?? collapsedState;
-  useLayoutEffect(() => expansion.sync(collapsed));
-
-  const groupOptions = useMemo(
-    () => getPropOptionsGroup(setCollapsed, expansion),
-    [expansion],
-  );
-
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
-    groupOptions,
+    propOptionsGroup,
     'group',
     externalGroup,
   );
-
-  const [controlIndicator, propsIndicator, stateIndicator] = usePropControl(
-    propOptionsIndicator,
-    'indicator',
-    externalIndicator,
-  );
-
-  const tab1 = usePropControl(
-    options.primary[0] ?? fallbackTabOptions,
+  const tabOptions = useMemo(() => getPropOptionsTab(addLog), [addLog]);
+  const [controlTab1, propsTab1, stateTab1] = usePropControl(
+    tabOptions,
     '1st tab',
     externalTab1,
   );
-  const tab2 = usePropControl(
-    options.primary[1] ?? fallbackTabOptions,
+  const [controlTab2, propsTab2, stateTab2] = usePropControl(
+    tabOptions,
     '2nd tab',
     externalTab2,
   );
-  const tab3 = usePropControl(
-    options.primary[2] ?? fallbackTabOptions,
+  const [controlTab3, propsTab3, stateTab3] = usePropControl(
+    tabOptions,
     '3rd tab',
     externalTab3,
   );
-  const tab4 = usePropControl(
-    options.primary[3] ?? fallbackTabOptions,
-    '4th tab',
-    externalTab4,
-  );
-  const tab5 = usePropControl(
-    options.primary[4] ?? fallbackTabOptions,
-    '5th tab',
-    externalTab5,
-  );
-  const tab6 = usePropControl(
-    options.primary[5] ?? fallbackTabOptions,
-    '6th tab',
-    externalTab6,
-  );
-  const tab7 = usePropControl(
-    options.primary[6] ?? fallbackTabOptions,
-    '7th tab',
-    externalTab7,
-  );
-  const tab8 = usePropControl(
-    options.primary[7] ?? fallbackTabOptions,
-    '8th tab',
-    externalTab8,
-  );
-  const tab9 = usePropControl(
-    options.primary[8] ?? fallbackTabOptions,
-    '9th tab',
-    externalTab9,
-  );
 
-  const [controlSecondaryGroup, propsSecondaryGroup, stateSecondaryGroup] =
-    usePropControl(groupOptions, 'secondary group', externalSecondaryGroup);
-
-  const [
-    controlSecondaryIndicator,
-    propsSecondaryIndicator,
-    stateSecondaryIndicator,
-  ] = usePropControl(
-    propOptionsIndicator,
-    'secondary indicator',
-    externalSecondaryIndicator,
+  // What remains while collapsed (see above).
+  const [selection] = collapsedSelection(
+    [['tab-1', 'tab-2', 'tab-3', 'tab-4', 'tab-5']],
+    value,
   );
-
-  const secondaryTab1 = usePropControl(
-    options.secondary[0] ?? fallbackTabOptions,
-    '1st secondary tab',
-    externalSecondaryTab1,
-  );
-  const secondaryTab2 = usePropControl(
-    options.secondary[1] ?? fallbackTabOptions,
-    '2nd secondary tab',
-    externalSecondaryTab2,
-  );
-  const secondaryTab3 = usePropControl(
-    options.secondary[2] ?? fallbackTabOptions,
-    '3rd secondary tab',
-    externalSecondaryTab3,
-  );
-
-  const [controlIcon, propsIcon, stateIcon] = usePropControl(
-    commonPropOptions,
-    'icons',
-    externalIcon,
-  );
-
-  const [controlLabel, propsLabel, stateLabel] = usePropControl(
-    commonPropOptions,
-    'labels',
-    externalLabel,
-  );
-
-  const [controlPanel, propsPanel, statePanel] = usePropControl(
-    propOptionsPanel,
-    'panels',
-    externalPanel,
-  );
-
-  const primaryTabs = [tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9]
-    .slice(0, content.tabs)
-    .map(([control, props], index) => ({
-      control,
-      props,
-      value: primaryValues[index],
-    }));
-
-  const secondaryTabs = [secondaryTab1, secondaryTab2, secondaryTab3]
-    .slice(0, content.secondaryTabs)
-    .map(([control, props], index) => ({
-      control,
-      props,
-      value: secondaryValues[index],
-    }));
-
-  // What remains while collapsed: the groups and tabs marked by their
-  // controls, if any are (a group with marked tabs counts as marked); others
-  // as iOS (`collapsedSelection`): the active tab and its group.
-  const groups = [primaryTabs, secondaryTabs].filter((tabs) => tabs.length);
-  const selection = collapsedSelection(
-    groups.map((tabs) => tabs.map((tab) => tab.value)),
-    shownValue,
-  );
-  const groupProps = [propsGroup, propsSecondaryGroup];
-  const marked = groups.map(
-    (tabs, index) =>
-      Boolean(groupProps[index]?.visibleWhenCollapsed) ||
-      tabs.some((tab) => tab.props.visibleWhenCollapsed),
-  );
-  const remaining = (group: number, tab?: number) => {
-    const tabs = groups[group] ?? [];
-    const remains = Boolean(
-      marked.some(Boolean) ? marked[group] : selection[group]?.remains,
-    );
-    if (tab === undefined) return remains;
-    if (tabs.some(({ props }) => props.visibleWhenCollapsed)) {
-      return Boolean(tabs[tab]?.props.visibleWhenCollapsed);
-    }
-    return tab === selection[group]?.tab;
-  };
-
-  const renderTab = (
-    { props: { label, symbol, ...props }, value }: (typeof primaryTabs)[number],
-    group: number,
-    index: number,
-  ) => (
-    <TabBar.Tab
-      key={value}
-      value={value}
-      {...props}
-      visibleWhenCollapsed={remaining(group, index)}
-    >
-      {symbol === undefined ? null : (
-        <TabBar.Icon {...propsIcon}>{symbol}</TabBar.Icon>
-      )}
-      {label === undefined ? null : (
-        <TabBar.Label {...propsLabel}>{label}</TabBar.Label>
-      )}
-    </TabBar.Tab>
-  );
-
-  const panelValues = [...primaryTabs, ...secondaryTabs].map(
-    ({ value }) => value,
+  const tabsMarked = [propsTab1, propsTab2, propsTab3].some(
+    (props) => props.visibleWhenCollapsed,
   );
 
   return (
     <Component
       center
       baseUiId="tabs"
-      id={preset.id}
+      id={id}
       log={log}
-      title={preset.title}
+      title="Tab Bar"
       controls={[
         controlContent,
         controlRoot,
         controlList,
         controlGroup,
-        controlIndicator,
-        ...primaryTabs.map(({ control }) => control),
-        ...(secondaryTabs.length > 0
-          ? [
-              controlSecondaryGroup,
-              controlSecondaryIndicator,
-              ...secondaryTabs.map(({ control }) => control),
-            ]
-          : []),
-        controlIcon,
-        controlLabel,
-        controlPanel,
+        controlTab1,
+        controlTab2,
+        controlTab3,
       ]}
-      stateUrl={useCreateStateUrl(preset.id, [
+      stateUrl={useCreateStateUrl(id, [
         stateContent,
         stateRoot,
         stateList,
         stateGroup,
-        stateIndicator,
-        tab1[2],
-        tab2[2],
-        tab3[2],
-        tab4[2],
-        tab5[2],
-        tab6[2],
-        tab7[2],
-        tab8[2],
-        tab9[2],
-        stateSecondaryGroup,
-        stateSecondaryIndicator,
-        secondaryTab1[2],
-        secondaryTab2[2],
-        secondaryTab3[2],
-        stateIcon,
-        stateLabel,
-        statePanel,
+        stateTab1,
+        stateTab2,
+        stateTab3,
       ])}
     >
-      <RemounterRoot>
-        <TabBar.Root
-          {...rootProps}
-          onValueChange={(
-            next: unknown,
-            details: BaseTabs.Root.ChangeEventDetails,
-          ) => {
-            setActive({ since: rootProps.defaultValue, value: next });
-            onValueChange?.(next, details);
-          }}
+      <TabBar.Root
+        {...propsRoot}
+        value={value}
+        onValueChange={(
+          next: unknown,
+          { reason }: BaseTabs.Root.ChangeEventDetails,
+        ) => {
+          addLog(`value change: ${String(next)}/${reason}`);
+          setValue(next);
+        }}
+      >
+        <TabBar.List
+          {...propsList}
+          collapsed={propsList.collapsed ?? collapsed}
         >
-          {content.panels
-            ? panelValues.map((value) => (
-                <TabBar.Panel
-                  key={value}
-                  {...propsPanel}
-                  value={value}
-                >
-                  Panel: {value}
-                </TabBar.Panel>
-              ))
-            : null}
-          <TabBar.List
-            {...propsList}
-            collapsed={collapsed}
+          {/* A click on the collapsed group expands the bar. */}
+          <TabBar.Group
+            onClickCapture={() => setCollapsed(false)}
+            {...propsGroup}
+            visibleWhenCollapsed={propsGroup.visibleWhenCollapsed ?? true}
           >
-            <TabBar.Group
-              {...propsGroup}
-              visibleWhenCollapsed={remaining(0)}
+            <TabBar.Indicator />
+            <TabBar.Tab
+              value="tab-1"
+              {...propsTab1}
+              visibleWhenCollapsed={
+                tabsMarked
+                  ? Boolean(propsTab1.visibleWhenCollapsed)
+                  : selection?.tab === 0
+              }
             >
-              <TabBar.Indicator {...propsIndicator} />
-              {primaryTabs.map((tab, index) => renderTab(tab, 0, index))}
-            </TabBar.Group>
-            {secondaryTabs.length > 0 ? (
-              <TabBar.Group
-                {...propsSecondaryGroup}
-                visibleWhenCollapsed={remaining(1)}
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-2"
+              {...propsTab2}
+              visibleWhenCollapsed={
+                tabsMarked
+                  ? Boolean(propsTab2.visibleWhenCollapsed)
+                  : selection?.tab === 1
+              }
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            {content.tabs >= 3 ? (
+              <TabBar.Tab
+                value="tab-3"
+                {...propsTab3}
+                visibleWhenCollapsed={
+                  tabsMarked
+                    ? Boolean(propsTab3.visibleWhenCollapsed)
+                    : selection?.tab === 2
+                }
               >
-                <TabBar.Indicator {...propsSecondaryIndicator} />
-                {secondaryTabs.map((tab, index) => renderTab(tab, 1, index))}
-              </TabBar.Group>
+                <TabBar.Icon>
+                  <Symbol icon={sfHeartFill} />
+                </TabBar.Icon>
+                <TabBar.Label>Label</TabBar.Label>
+              </TabBar.Tab>
             ) : null}
-          </TabBar.List>
-          {content.accessory ? (
-            // A mini player, as in Music.
-            <TabBar.Accessory visibleIn={content.accessory}>
-              <span style={{ flex: 1 }}>Not Playing</span>
-              <SFSymbol icon={sfPlayFill} />
-              <SFSymbol icon={sfForwardFill} />
-            </TabBar.Accessory>
-          ) : null}
-        </TabBar.Root>
-      </RemounterRoot>
+            {content.tabs >= 4 ? (
+              <TabBar.Tab
+                value="tab-4"
+                visibleWhenCollapsed={!tabsMarked && selection?.tab === 3}
+              >
+                <TabBar.Icon>
+                  <Symbol icon={sfHeartFill} />
+                </TabBar.Icon>
+                <TabBar.Label>Label</TabBar.Label>
+              </TabBar.Tab>
+            ) : null}
+            {content.tabs >= 5 ? (
+              <TabBar.Tab
+                value="tab-5"
+                visibleWhenCollapsed={!tabsMarked && selection?.tab === 4}
+              >
+                <TabBar.Icon>
+                  <Symbol icon={sfHeartFill} />
+                </TabBar.Icon>
+                <TabBar.Label>Label</TabBar.Label>
+              </TabBar.Tab>
+            ) : null}
+          </TabBar.Group>
+        </TabBar.List>
+      </TabBar.Root>
     </Component>
   );
 };
 
-// The page's scroll, for `collapseOnScroll`.
-export const TabBarDemo: FunctionComponent = () => (
-  <Viewport.Provider>
-    <TabBarDemoBase preset={presetTabBar} />
-  </Viewport.Provider>
-);
+/**
+ * A tab bar with search in a group of its own (Figma “Tab Bar - iPhone”,
+ * Search): the app (here, the demo) collapses the bar on search, a click
+ * on a collapsed group expands it; the selection fades between groups.
+ */
+// eslint-disable-next-line complexity -- its tabs, written out
+export const TabBarSearchDemo: FunctionComponent = () => {
+  const id = 'tab-bar-search';
 
-export const TabBarSecondaryDemo: FunctionComponent = () => (
-  <Viewport.Provider>
-    <TabBarDemoBase preset={presetSecondary} />
-  </Viewport.Provider>
-);
+  const [log, addLog] = useLog();
+  const [
+    externalContent,
+    externalRoot,
+    externalList,
+    externalGroup,
+    externalTab1,
+    externalTab2,
+    externalTab3,
+    externalSearchGroup,
+    externalSearchTab,
+  ] = useProvidedState(id);
 
-export const TabBarRegularDemo: FunctionComponent = () => (
-  <Viewport.Provider>
-    <TabBarDemoBase preset={presetRegular} />
-  </Viewport.Provider>
-);
+  const [value, setValue] = useState<unknown>('tab-1');
+  const [collapsed, setCollapsed] = useState(false);
+
+  const [controlContent, content, stateContent] = usePropControl(
+    propOptionsContent,
+    '[content]',
+    externalContent,
+    true,
+  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
+  );
+  const [controlList, propsList, stateList] = usePropControl(
+    propOptionsList,
+    'list',
+    externalList,
+    true,
+  );
+  const [controlGroup, propsGroup, stateGroup] = usePropControl(
+    propOptionsGroup,
+    'group',
+    externalGroup,
+  );
+  const tabOptions = useMemo(() => getPropOptionsTab(addLog), [addLog]);
+  const [controlTab1, propsTab1, stateTab1] = usePropControl(
+    tabOptions,
+    '1st tab',
+    externalTab1,
+  );
+  const [controlTab2, propsTab2, stateTab2] = usePropControl(
+    tabOptions,
+    '2nd tab',
+    externalTab2,
+  );
+  const [controlTab3, propsTab3, stateTab3] = usePropControl(
+    tabOptions,
+    '3rd tab',
+    externalTab3,
+  );
+  const [controlSearchGroup, propsSearchGroup, stateSearchGroup] =
+    usePropControl(propOptionsGroup, 'search group', externalSearchGroup);
+  const [controlSearchTab, propsSearchTab, stateSearchTab] = usePropControl(
+    tabOptions,
+    'search tab',
+    externalSearchTab,
+  );
+
+  // What remains while collapsed (see above).
+  const [primary, search] = collapsedSelection(
+    [['tab-1', 'tab-2', 'tab-3', 'tab-4', 'tab-5'], ['secondary-1']],
+    value,
+  );
+  const tabsMarked = [propsTab1, propsTab2, propsTab3].some(
+    (props) => props.visibleWhenCollapsed,
+  );
+  const groupMarked = Boolean(propsGroup.visibleWhenCollapsed) || tabsMarked;
+  const searchMarked = Boolean(
+    propsSearchGroup.visibleWhenCollapsed ??
+    propsSearchTab.visibleWhenCollapsed,
+  );
+  const anyMarked = groupMarked || searchMarked;
+  const groupRemains = anyMarked ? groupMarked : Boolean(primary?.remains);
+  const searchRemains = anyMarked ? searchMarked : Boolean(search?.remains);
+
+  return (
+    <Component
+      center
+      baseUiId="tabs"
+      id={id}
+      log={log}
+      title="Tab Bar (Search)"
+      controls={[
+        controlContent,
+        controlRoot,
+        controlList,
+        controlGroup,
+        controlTab1,
+        controlTab2,
+        controlTab3,
+        controlSearchGroup,
+        controlSearchTab,
+      ]}
+      stateUrl={useCreateStateUrl(id, [
+        stateContent,
+        stateRoot,
+        stateList,
+        stateGroup,
+        stateTab1,
+        stateTab2,
+        stateTab3,
+        stateSearchGroup,
+        stateSearchTab,
+      ])}
+    >
+      <TabBar.Root
+        {...propsRoot}
+        value={value}
+        onValueChange={(
+          next: unknown,
+          { reason }: BaseTabs.Root.ChangeEventDetails,
+        ) => {
+          addLog(`value change: ${String(next)}/${reason}`);
+          setValue(next);
+          // Search collapses the bar.
+          if (next === 'secondary-1') setCollapsed(true);
+        }}
+      >
+        <TabBar.List
+          {...propsList}
+          collapsed={propsList.collapsed ?? collapsed}
+        >
+          {/* A click on a collapsed group expands the bar. */}
+          <TabBar.Group
+            onClickCapture={() => setCollapsed(false)}
+            {...propsGroup}
+            visibleWhenCollapsed={groupRemains}
+          >
+            <TabBar.Indicator />
+            <TabBar.Tab
+              value="tab-1"
+              {...propsTab1}
+              visibleWhenCollapsed={
+                tabsMarked
+                  ? Boolean(propsTab1.visibleWhenCollapsed)
+                  : primary?.tab === 0
+              }
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-2"
+              {...propsTab2}
+              visibleWhenCollapsed={
+                tabsMarked
+                  ? Boolean(propsTab2.visibleWhenCollapsed)
+                  : primary?.tab === 1
+              }
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            {content.tabs >= 3 ? (
+              <TabBar.Tab
+                value="tab-3"
+                {...propsTab3}
+                visibleWhenCollapsed={
+                  tabsMarked
+                    ? Boolean(propsTab3.visibleWhenCollapsed)
+                    : primary?.tab === 2
+                }
+              >
+                <TabBar.Icon>
+                  <Symbol icon={sfHeartFill} />
+                </TabBar.Icon>
+                <TabBar.Label>Label</TabBar.Label>
+              </TabBar.Tab>
+            ) : null}
+            {content.tabs >= 4 ? (
+              <TabBar.Tab
+                value="tab-4"
+                visibleWhenCollapsed={!tabsMarked && primary?.tab === 3}
+              >
+                <TabBar.Icon>
+                  <Symbol icon={sfHeartFill} />
+                </TabBar.Icon>
+                <TabBar.Label>Label</TabBar.Label>
+              </TabBar.Tab>
+            ) : null}
+            {content.tabs >= 5 ? (
+              <TabBar.Tab
+                value="tab-5"
+                visibleWhenCollapsed={!tabsMarked && primary?.tab === 4}
+              >
+                <TabBar.Icon>
+                  <Symbol icon={sfHeartFill} />
+                </TabBar.Icon>
+                <TabBar.Label>Label</TabBar.Label>
+              </TabBar.Tab>
+            ) : null}
+          </TabBar.Group>
+          <TabBar.Group
+            onClickCapture={() => setCollapsed(false)}
+            {...propsSearchGroup}
+            visibleWhenCollapsed={searchRemains}
+          >
+            <TabBar.Indicator />
+            <TabBar.Tab
+              aria-label="Search"
+              value="secondary-1"
+              {...propsSearchTab}
+              visibleWhenCollapsed={searchRemains}
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfMagnifyingglass} />
+              </TabBar.Icon>
+            </TabBar.Tab>
+          </TabBar.Group>
+        </TabBar.List>
+      </TabBar.Root>
+    </Component>
+  );
+};
+
+/**
+ * A tab bar's accessory (UIKit `bottomAccessory`, e.g. Music's mini player):
+ * above the groups, collapsed between them; in either state, or both
+ * (morphing between its places).
+ */
+export const TabBarAccessoryDemo: FunctionComponent = () => {
+  const id = 'tab-bar-accessory';
+
+  const [log, addLog] = useLog();
+  const [
+    externalContent,
+    externalRoot,
+    externalList,
+    externalGroup,
+    externalSearchGroup,
+  ] = useProvidedState(id);
+
+  const [value, setValue] = useState<unknown>('tab-1');
+
+  const [controlContent, content, stateContent] = usePropControl(
+    propOptionsAccessoryContent,
+    '[content]',
+    externalContent,
+    true,
+  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
+  );
+  const [controlList, propsList, stateList] = usePropControl(
+    propOptionsList,
+    'list',
+    externalList,
+    true,
+  );
+  const [controlGroup, propsGroup, stateGroup] = usePropControl(
+    propOptionsGroup,
+    'group',
+    externalGroup,
+  );
+  const [controlSearchGroup, propsSearchGroup, stateSearchGroup] =
+    usePropControl(propOptionsGroup, 'search group', externalSearchGroup);
+
+  // What remains while collapsed (see above).
+  const [primary, search] = collapsedSelection(
+    [['tab-1', 'tab-2', 'tab-3'], ['secondary-1']],
+    value,
+  );
+  const anyMarked = Boolean(
+    propsGroup.visibleWhenCollapsed ?? propsSearchGroup.visibleWhenCollapsed,
+  );
+
+  return (
+    <Component
+      center
+      baseUiId="tabs"
+      id={id}
+      log={log}
+      title="Tab Bar (Accessory)"
+      controls={[
+        controlContent,
+        controlRoot,
+        controlList,
+        controlGroup,
+        controlSearchGroup,
+      ]}
+      stateUrl={useCreateStateUrl(id, [
+        stateContent,
+        stateRoot,
+        stateList,
+        stateGroup,
+        stateSearchGroup,
+      ])}
+    >
+      <TabBar.Root
+        {...propsRoot}
+        value={value}
+        onValueChange={(
+          next: unknown,
+          { reason }: BaseTabs.Root.ChangeEventDetails,
+        ) => {
+          addLog(`value change: ${String(next)}/${reason}`);
+          setValue(next);
+        }}
+      >
+        <TabBar.List {...propsList}>
+          <TabBar.Group
+            {...propsGroup}
+            visibleWhenCollapsed={
+              anyMarked
+                ? Boolean(propsGroup.visibleWhenCollapsed)
+                : primary?.remains
+            }
+          >
+            <TabBar.Indicator />
+            <TabBar.Tab
+              value="tab-1"
+              visibleWhenCollapsed={primary?.tab === 0}
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-2"
+              visibleWhenCollapsed={primary?.tab === 1}
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-3"
+              visibleWhenCollapsed={primary?.tab === 2}
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+          </TabBar.Group>
+          <TabBar.Group
+            {...propsSearchGroup}
+            visibleWhenCollapsed={
+              anyMarked
+                ? Boolean(propsSearchGroup.visibleWhenCollapsed)
+                : search?.remains
+            }
+          >
+            <TabBar.Indicator />
+            <TabBar.Tab
+              aria-label="Search"
+              value="secondary-1"
+              visibleWhenCollapsed={search?.remains}
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfMagnifyingglass} />
+              </TabBar.Icon>
+            </TabBar.Tab>
+          </TabBar.Group>
+        </TabBar.List>
+        {content.accessory ? (
+          <TabBar.Accessory visibleIn={content.accessory}>
+            <span className="tab-bar-demo-accessory-title">Not Playing</span>
+            <Symbol icon={sfPlayFill} />
+            <Symbol icon={sfForwardFill} />
+          </TabBar.Accessory>
+        ) : null}
+      </TabBar.Root>
+    </Component>
+  );
+};
+
+// The bar, collapsing while the page scrolls down, expanding while it
+// scrolls up (`useViewportScroll`, inside the viewport's provider).
+const ScrollingTabBar: FunctionComponent<{ addLog: AddLog }> = ({ addLog }) => {
+  const [value, setValue] = useState<unknown>('tab-1');
+  const [collapsed, setCollapsed] = useState(false);
+
+  useViewportScroll(({ atTop, direction }) =>
+    setCollapsed(!atTop && direction === 'down'),
+  );
+
+  const [selection] = collapsedSelection([['tab-1', 'tab-2', 'tab-3']], value);
+
+  return (
+    <TabBar.Root
+      value={value}
+      onValueChange={(next: unknown) => {
+        addLog(`value change: ${String(next)}`);
+        setValue(next);
+      }}
+    >
+      <TabBar.List collapsed={collapsed}>
+        <TabBar.Group visibleWhenCollapsed>
+          <TabBar.Indicator />
+          <TabBar.Tab
+            value="tab-1"
+            visibleWhenCollapsed={selection?.tab === 0}
+          >
+            <TabBar.Icon>
+              <Symbol icon={sfHeartFill} />
+            </TabBar.Icon>
+            <TabBar.Label>Label</TabBar.Label>
+          </TabBar.Tab>
+          <TabBar.Tab
+            value="tab-2"
+            visibleWhenCollapsed={selection?.tab === 1}
+          >
+            <TabBar.Icon>
+              <Symbol icon={sfHeartFill} />
+            </TabBar.Icon>
+            <TabBar.Label>Label</TabBar.Label>
+          </TabBar.Tab>
+          <TabBar.Tab
+            value="tab-3"
+            visibleWhenCollapsed={selection?.tab === 2}
+          >
+            <TabBar.Icon>
+              <Symbol icon={sfHeartFill} />
+            </TabBar.Icon>
+            <TabBar.Label>Label</TabBar.Label>
+          </TabBar.Tab>
+        </TabBar.Group>
+      </TabBar.List>
+    </TabBar.Root>
+  );
+};
+
+/** A tab bar collapsing as the page scrolls down (as iOS's). */
+export const TabBarScrollDemo: FunctionComponent = () => {
+  const id = 'tab-bar-scroll';
+
+  const [log, addLog] = useLog();
+
+  return (
+    <Component
+      center
+      baseUiId="tabs"
+      id={id}
+      log={log}
+      title="Tab Bar (Collapsing on Scroll)"
+    >
+      <Viewport.Provider>
+        <ScrollingTabBar addLog={addLog} />
+      </Viewport.Provider>
+    </Component>
+  );
+};
+
+/**
+ * The iPad's tab bar (Figma “Tab Bar - iPad”, the list's `size` regular): a
+ * single group whose tabs only have labels, between a sidebar and a search
+ * tab that only have symbols.
+ */
+// eslint-disable-next-line complexity -- its tabs, written out
+export const TabBarRegularDemo: FunctionComponent = () => {
+  const id = 'tab-bar-regular';
+
+  const [log, addLog] = useLog();
+  // (Its list's control third, as the other tab bars'.)
+  const [externalRoot, externalGroup, externalList, externalTab1] =
+    useProvidedState(id);
+
+  const [value, setValue] = useState<unknown>('tab-2');
+  const [collapsed, setCollapsed] = useState(false);
+
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
+  );
+  const [controlList, propsList, stateList] = usePropControl(
+    propOptionsListRegular,
+    'list',
+    externalList,
+    true,
+  );
+  const [controlGroup, propsGroup, stateGroup] = usePropControl(
+    propOptionsGroup,
+    'group',
+    externalGroup,
+  );
+  const [controlTab1, propsTab1, stateTab1] = usePropControl(
+    useMemo(() => getPropOptionsTab(addLog), [addLog]),
+    '1st tab (sidebar)',
+    externalTab1,
+  );
+
+  // What remains while collapsed (see above).
+  const [selection] = collapsedSelection(
+    [Array.from({ length: 9 }, (_, index) => `tab-${index + 1}`)],
+    value,
+  );
+  const tabsMarked = Boolean(propsTab1.visibleWhenCollapsed);
+
+  return (
+    <Component
+      center
+      baseUiId="tabs"
+      controls={[controlRoot, controlGroup, controlList, controlTab1]}
+      id={id}
+      log={log}
+      title="Tab Bar (iPad)"
+      stateUrl={useCreateStateUrl(id, [
+        stateRoot,
+        stateGroup,
+        stateList,
+        stateTab1,
+      ])}
+    >
+      <TabBar.Root
+        {...propsRoot}
+        value={value}
+        onValueChange={(
+          next: unknown,
+          { reason }: BaseTabs.Root.ChangeEventDetails,
+        ) => {
+          addLog(`value change: ${String(next)}/${reason}`);
+          setValue(next);
+        }}
+      >
+        <TabBar.List
+          {...propsList}
+          collapsed={propsList.collapsed ?? collapsed}
+        >
+          <TabBar.Group
+            onClickCapture={() => setCollapsed(false)}
+            {...propsGroup}
+            visibleWhenCollapsed={propsGroup.visibleWhenCollapsed ?? true}
+          >
+            <TabBar.Indicator />
+            <TabBar.Tab
+              value="tab-1"
+              {...propsTab1}
+              visibleWhenCollapsed={
+                tabsMarked
+                  ? Boolean(propsTab1.visibleWhenCollapsed)
+                  : selection?.tab === 0
+              }
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfListBullet} />
+              </TabBar.Icon>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-2"
+              visibleWhenCollapsed={!tabsMarked && selection?.tab === 1}
+            >
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-3"
+              visibleWhenCollapsed={!tabsMarked && selection?.tab === 2}
+            >
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-4"
+              visibleWhenCollapsed={!tabsMarked && selection?.tab === 3}
+            >
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-5"
+              visibleWhenCollapsed={!tabsMarked && selection?.tab === 4}
+            >
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-6"
+              visibleWhenCollapsed={!tabsMarked && selection?.tab === 5}
+            >
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-7"
+              visibleWhenCollapsed={!tabsMarked && selection?.tab === 6}
+            >
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-8"
+              visibleWhenCollapsed={!tabsMarked && selection?.tab === 7}
+            >
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-9"
+              visibleWhenCollapsed={!tabsMarked && selection?.tab === 8}
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfMagnifyingglass} />
+              </TabBar.Icon>
+            </TabBar.Tab>
+          </TabBar.Group>
+        </TabBar.List>
+      </TabBar.Root>
+    </Component>
+  );
+};
+
+/** Tabs of different sizes: the third only a symbol (a circle). */
+export const TabBarMixedDemo: FunctionComponent = () => {
+  const id = 'tab-bar-mixed';
+
+  const [log, addLog] = useLog();
+
+  return (
+    <Component
+      center
+      baseUiId="tabs"
+      id={id}
+      log={log}
+      title="Tab Bar (Mixed Tabs)"
+    >
+      <TabBar.Root
+        defaultValue="tab-1"
+        onValueChange={(next: unknown) =>
+          addLog(`value change: ${String(next)}`)
+        }
+      >
+        <TabBar.List>
+          <TabBar.Group>
+            <TabBar.Indicator />
+            <TabBar.Tab value="tab-1">
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab value="tab-2">
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              aria-label="Favorites"
+              value="tab-3"
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+            </TabBar.Tab>
+          </TabBar.Group>
+        </TabBar.List>
+      </TabBar.Root>
+    </Component>
+  );
+};
+
+/**
+ * Tabs of each content: a label only, a symbol and a label, a symbol only
+ * (and search). Collapsed, the active tab remains, showing what it has (a
+ * tab never collapses to nothing): a label-only tab its label, in a
+ * capsule.
+ */
+export const TabBarContentDemo: FunctionComponent = () => {
+  const id = 'tab-bar-content';
+
+  const [log, addLog] = useLog();
+  const [externalList] = useProvidedState(id);
+
+  const [value, setValue] = useState<unknown>('tab-1');
+
+  const [controlList, propsList, stateList] = usePropControl(
+    propOptionsList,
+    'list',
+    externalList,
+    true,
+  );
+
+  // What remains while collapsed: the active tab and its group.
+  const [selection, search] = collapsedSelection(
+    [['tab-1', 'tab-2', 'tab-3'], ['secondary-1']],
+    value,
+  );
+
+  return (
+    <Component
+      center
+      baseUiId="tabs"
+      controls={controlList}
+      id={id}
+      log={log}
+      stateUrl={useCreateStateUrl(id, [stateList])}
+      title="Tab Bar (Tab Content)"
+    >
+      <TabBar.Root
+        value={value}
+        onValueChange={(next: unknown) => {
+          addLog(`value change: ${String(next)}`);
+          setValue(next);
+        }}
+      >
+        <TabBar.List {...propsList}>
+          <TabBar.Group visibleWhenCollapsed={selection?.remains}>
+            <TabBar.Indicator />
+            <TabBar.Tab
+              value="tab-1"
+              visibleWhenCollapsed={selection?.tab === 0}
+            >
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-2"
+              visibleWhenCollapsed={selection?.tab === 1}
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              aria-label="Favorites"
+              value="tab-3"
+              visibleWhenCollapsed={selection?.tab === 2}
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+            </TabBar.Tab>
+          </TabBar.Group>
+          <TabBar.Group visibleWhenCollapsed={search?.remains}>
+            <TabBar.Indicator />
+            <TabBar.Tab
+              aria-label="Search"
+              value="secondary-1"
+              visibleWhenCollapsed={search?.remains}
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfMagnifyingglass} />
+              </TabBar.Icon>
+            </TabBar.Tab>
+          </TabBar.Group>
+        </TabBar.List>
+      </TabBar.Root>
+    </Component>
+  );
+};

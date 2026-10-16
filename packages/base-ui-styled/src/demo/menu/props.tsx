@@ -5,16 +5,6 @@ import { Menu as BaseMenu } from '@base-ui/react/menu';
 import { AddLog } from '../utils/log.js';
 import { commonPropOptions, MappedProp } from '../utils/main.js';
 
-export const propOptionsContent = {
-  quickActions: [3, 0, 2] as const,
-  icons: [true, false] as const,
-  subtitles: [true, false] as const,
-  shortcuts: [true, false] as const,
-  sections: [true, false] as const,
-  submenu: [true, false] as const,
-  toggles: ['none', 'checkbox', 'radio'] as const,
-} as const;
-
 export const propOptionsPositioner = {
   ...commonPropOptions,
   side: [
@@ -138,16 +128,7 @@ export const getPropOptionsSubmenuRoot = (addLog: AddLog) => ({
   ] as const,
 });
 
-export const getPropOptionsRoot = (
-  size: 'compact' | 'regular' | undefined,
-  addLog: AddLog,
-) => ({
-  size: [
-    size,
-    ...([undefined, 'compact', 'regular'] as const).filter(
-      (option) => option !== size,
-    ),
-  ],
+export const getPropOptionsRoot = (addLog: AddLog) => ({
   defaultOpen: [undefined, false, true] as const,
   open: [undefined, true] as const,
   modal: [undefined, false, true] as const,

@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import './style.css';
+
 import { isObject, objectKeys } from '@mrpelz/misc-utils/oop';
 import {
   CSSProperties,
@@ -10,29 +12,13 @@ import {
   SetStateAction,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 
-import { ColorScheme } from '../../components/utils.js';
-import {
-  Button,
-  ComponentDocsLink,
-  ComponentHeader,
-  ComponentHeading,
-  ComponentId,
-  Config,
-  ConfigHeading,
-  ConfigInner,
-  Container,
-  Content,
-  PropContainer,
-  Stage,
-  StageBackground,
-  StageInner,
-} from './components.js';
+import { ColorScheme } from '../../components/utils/main.js';
+import { highlight, renderCode } from './code.js';
 import { setOptions, useOptions } from './options-context.js';
 import { useLocalStorage } from './use-local-storage.js';
 
@@ -273,12 +259,13 @@ const PropSelector = <T extends PropMap>({
           />
         ))}
       </datalist>
-      <Button
+      <button
+        className="demo-button"
         disabled={!isModified}
         onClick={() => resetState()}
       >
         ×
-      </Button>
+      </button>
     </>
   );
 };
@@ -290,15 +277,45 @@ export const usePropControl = <T extends PropMap>(
   title?: string,
   externalState?: unknown,
   open?: boolean,
-): [ReactNode, ControlledProps<T>, object, FunctionComponent] => {
+): [ReactNode, ControlledProps<T>, object, string] => {
+  // With a `style` prop: an outline option (in a color of its own, by its
+  // title), toggled by its checkbox, so the part can be told apart.
+  const outline = useMemo(
+    () =>
+      'style' in propMap
+        ? new MappedProp<CSSProperties>(
+            {
+              outline: `2px dashed hsl(${String(
+                [...(title ?? '')].reduce(
+                  (hash, character) =>
+                    (hash * 31 + (character.codePointAt(0) ?? 0)) % 360,
+                  0,
+                ),
+              )} 90% 50%)`,
+              outlineOffset: '2px',
+            },
+            '[outline]',
+          )
+        : undefined,
+    [propMap, title],
+  );
+
   const propMapSorted = useMemo(
     () =>
       Object.fromEntries(
         Object.keys(propMap)
           .toSorted()
-          .map((key) => [key, propMap[key]] as const),
-      ) as T,
-    [propMap],
+          .map(
+            (key) =>
+              [
+                key,
+                key === 'style' && outline
+                  ? [...(propMap[key] ?? []), outline]
+                  : propMap[key],
+              ] as const,
+          ),
+      ) as unknown as T,
+    [outline, propMap],
   );
 
   const initialState = useMemo(
@@ -335,12 +352,14 @@ export const usePropControl = <T extends PropMap>(
             return [key, undefined] as const;
           }
 
-          const mappedProp = propMap[key as keyof T]?.find((candidate) => {
-            if (!(candidate instanceof MappedProp)) return false;
-            if (candidate.label !== value.slice(1)) return false;
+          const mappedProp = propMapSorted[key as keyof T]?.find(
+            (candidate) => {
+              if (!(candidate instanceof MappedProp)) return false;
+              if (candidate.label !== value.slice(1)) return false;
 
-            return true;
-          }) as MappedProp<unknown> | undefined;
+              return true;
+            },
+          ) as MappedProp<unknown> | undefined;
 
           return [key, mappedProp] as const;
         }
@@ -350,7 +369,7 @@ export const usePropControl = <T extends PropMap>(
     ) as {
       [P in keyof T]: T[P][number];
     };
-  }, [externalState, initialState, propMap]);
+  }, [externalState, initialState, propMapSorted]);
 
   const [state, setState] = useState(fromExternalState ?? initialState);
 
@@ -384,6 +403,8 @@ export const usePropControl = <T extends PropMap>(
     [state],
   ) as ControlledProps<T>;
 
+  const outlined = outline !== undefined && state.style === outline;
+
   const toExternalState = useMemo(
     () =>
       Object.fromEntries(
@@ -402,23 +423,37 @@ export const usePropControl = <T extends PropMap>(
     [state],
   ) as object;
 
-  const [mount, setMount] = useState(true);
-  useLayoutEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMount(false);
-    queueMicrotask(() => setMount(true));
-  }, [mappedState]);
-
-  const Remounter = useCallback<FunctionComponent>(
-    ({ children }) => (mount ? children : null),
-    [mount],
-  );
+  // A key for the controlled element: changing with its props, so it
+  // mounts anew (e.g. for a `defaultValue`, only read as it mounts).
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- new with the props
+  const elementKey = useMemo(() => crypto.randomUUID(), [mappedState]);
 
   return [
-    <ConfigInner key={0}>
+    <section
+      key={0}
+      className="demo-config demo-config-section"
+    >
       <details open={open ?? !title}>
-        <ConfigHeading>{title ?? 'Props'}</ConfigHeading>
-        <PropContainer>
+        <summary className="demo-config-heading">
+          {title ?? 'Props'}
+          {outline ? (
+            <label className="demo-outline-toggle">
+              <input
+                checked={outlined}
+                name="outline"
+                type="checkbox"
+                onChange={() =>
+                  setState((state_) => ({
+                    ...state_,
+                    style: outlined ? initialState.style : outline,
+                  }))
+                }
+              />
+              outline
+            </label>
+          ) : null}
+        </summary>
+        <div className="demo-props">
           {Object.entries(propMapSorted).map(([key, values]) => (
             <PropSelector<T>
               key={key}
@@ -429,18 +464,19 @@ export const usePropControl = <T extends PropMap>(
               values={values}
             />
           ))}
-        </PropContainer>
-        <Button
+        </div>
+        <button
+          className="demo-button"
           disabled={!isModified}
           onClick={resetState}
         >
           Reset
-        </Button>
+        </button>
       </details>
-    </ConfigInner>,
+    </section>,
     mappedState,
     toExternalState,
-    Remounter,
+    elementKey,
   ] as const;
 };
 
@@ -478,6 +514,13 @@ export const Component: FunctionComponent<{
     `${id}.backdrop`,
     backdrop,
   );
+  const [codeOpen, setCodeOpen] = useLocalStorage(`${id}.code`, false);
+  // (After rendering: rendering to a string resets Preact's hooks state.)
+  const [code, setCode] = useState('');
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCode(codeOpen && !raw ? renderCode(children) : '');
+  }, [children, codeOpen, raw]);
 
   const isHidden = useMemo(() => {
     if (showId === undefined) return false;
@@ -490,25 +533,33 @@ export const Component: FunctionComponent<{
   if (raw) return children;
 
   return (
-    <Container>
-      <Content>
-        <ComponentHeader>
-          <ComponentHeading>
+    <div className="demo-container">
+      <section className="demo-content">
+        <header className="demo-header">
+          <h2 className="demo-heading">
             {title}
             {stateUrl ? (
-              <ComponentId
+              <a
+                className="demo-id"
                 href={stateUrl}
+                rel="noreferrer"
                 target="_blank"
               >
                 [{id}]
-              </ComponentId>
+              </a>
             ) : null}
             {showId ? (
               <>
-                <ComponentId onClick={() => setOptions({ id, raw: true })}>
+                <a
+                  className="demo-id"
+                  href={`${stateUrl}&raw=true`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
                   [raw]
-                </ComponentId>
-                <ComponentId
+                </a>
+                <a
+                  className="demo-id"
                   onClick={() =>
                     setOptions({
                       id: undefined,
@@ -518,34 +569,36 @@ export const Component: FunctionComponent<{
                   }
                 >
                   [x]
-                </ComponentId>
+                </a>
               </>
             ) : null}
-          </ComponentHeading>
+          </h2>
           {baseUiId === undefined ? null : (
-            <ComponentDocsLink
+            <a
+              className="demo-docs-link"
               href={`${BASE_URL_DOC}/${baseUiId}`}
               rel="noreferrer"
               target="_blank"
             >
               base-ui.com/react/components/{baseUiId}
-            </ComponentDocsLink>
+            </a>
           )}
-        </ComponentHeader>
-        <Stage>
-          {stageBackground ? <StageBackground /> : null}
-          <StageInner
-            center={isCentered}
-            drawBackdrop={hasBackdrop}
-            stretch={isStretched}
+        </header>
+        <div className="demo-stage">
+          {stageBackground ? <div className="demo-stage-background" /> : null}
+          <div
+            className="demo-stage-inner"
+            data-backdrop={hasBackdrop ? '' : undefined}
+            data-center={isCentered ? '' : undefined}
+            data-stretch={isStretched ? '' : undefined}
           >
             {children}
-          </StageInner>
-        </Stage>
-      </Content>
-      <Config>
-        <ConfigInner>
-          <ConfigHeading>Config</ConfigHeading>
+          </div>
+        </div>
+      </section>
+      <aside className="demo-config">
+        <section className="demo-config demo-config-section">
+          <summary className="demo-config-heading">Config</summary>
           <label style={{ display: 'block' }}>
             Color Scheme{' '}
             <select
@@ -605,28 +658,31 @@ export const Component: FunctionComponent<{
             />
             Stretch
           </label>
-        </ConfigInner>
+        </section>
         {controls}
+        <section className="demo-config demo-config-section">
+          <details
+            open={codeOpen}
+            onToggle={({ currentTarget }) =>
+              setCodeOpen((currentTarget as HTMLDetailsElement).open)
+            }
+          >
+            <summary className="demo-config-heading">Code</summary>
+            <pre className="demo-code">{highlight(code)}</pre>
+            <button
+              className="demo-button"
+              onClick={() => {
+                navigator.clipboard.writeText(code).catch(() => undefined);
+              }}
+            >
+              Copy
+            </button>
+          </details>
+        </section>
         {log}
-      </Config>
-    </Container>
+      </aside>
+    </div>
   );
-};
-
-/**
- * Remounters of several parts (see `usePropControl`), nested: their
- * children remount when any of the parts' props change (e.g. a part's
- * `defaultValue`, only read as it mounts).
- */
-export const Remounters: FunctionComponent<
-  PropsWithChildren<{ remounters: FunctionComponent<PropsWithChildren>[] }>
-> = ({ children, remounters }) => {
-  let nested: ReactNode = children;
-  for (const Remounter of remounters.toReversed()) {
-    nested = <Remounter>{nested}</Remounter>;
-  }
-
-  return nested;
 };
 
 export const commonPropOptions = {

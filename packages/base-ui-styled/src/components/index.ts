@@ -3,19 +3,22 @@ export {
   ActivityView,
   type ActivityViewActionProps,
   type ActivityViewPersonProps,
-} from './activity-view.js';
-export { ActionSheet, type ActionSheetActionProps } from './action-sheet.js';
+} from './activity-view/main.js';
+export {
+  ActionSheet,
+  type ActionSheetActionProps,
+} from './action-sheet/main.js';
 export {
   Alert,
   type AlertActionProps,
   type AlertActionsProps,
   type AlertActionVariant,
-} from './alert.js';
+} from './alert/main.js';
 export {
   Popover,
   type PopoverAlign,
   type PopoverPositionerProps,
-} from './popover.js';
+} from './popover/main.js';
 export {
   ActivityIndicator,
   type ActivityIndicatorProps,
@@ -24,13 +27,13 @@ export {
   type ProgressPlacement,
   type ProgressRootProps,
   type ProgressValueProps,
-} from './progress.js';
-export { Sheet, type SheetDetent, type SheetPopupProps } from './sheet.js';
+} from './progress/main.js';
+export { Sheet, type SheetDetent, type SheetPopupProps } from './sheet/main.js';
 export {
   Tooltip,
   type TooltipPositionerProps,
   type TooltipTriggerProps,
-} from './tooltip.js';
+} from './tooltip/main.js';
 
 // Buttons & inputs
 export {
@@ -38,10 +41,11 @@ export {
   type AvatarFallbackProps,
   type AvatarGroupProps,
   type AvatarRootProps,
-} from './avatar.js';
-export { Badge, type BadgeProps } from './badge.js';
+} from './avatar/main.js';
+export { Badge, type BadgeProps } from './badge/main.js';
 export {
   ColorPicker,
+  type ColorPickerEyedropperProps,
   type ColorPickerMode,
   type ColorPickerPanelProps,
   type ColorPickerRootProps,
@@ -49,8 +53,8 @@ export {
   defaultSavedColors,
   formatColor,
   parseColor,
-} from './color-picker.js';
-export { Button, type ButtonRootProps } from './button.js';
+} from './color-picker/main.js';
+export { Button, type ButtonRootProps } from './button/main.js';
 export {
   Checkbox,
   CheckboxGroup,
@@ -58,7 +62,7 @@ export {
   Radio,
   RadioGroup,
   type RadioRootProps,
-} from './checkbox.js';
+} from './checkbox/main.js';
 export {
   Calendar,
   CalendarButton,
@@ -79,22 +83,23 @@ export {
   type HourCycle,
   TimeRoll,
   type TimeRollProps,
-} from './date-picker.js';
-export { Fieldset, type FieldsetLegendProps, Form } from './form.js';
-export { TextField } from './text-field.js';
+} from './date-picker/main.js';
+export { Fieldset, type FieldsetLegendProps, Form } from './form/main.js';
+export { TextField } from './text-field/main.js';
 export {
   Roll,
   type RollColumnProps,
   type RollItemProps,
   type RollValue,
-} from './roll.js';
-export { Segmented } from './segmented.js';
-export { Slider } from './slider.js';
-export { Stepper } from './stepper.js';
-export { Switch } from './switch.js';
+} from './roll/main.js';
+export { Segmented } from './segmented/main.js';
+export { Slider } from './slider/main.js';
+export { Stepper } from './stepper/main.js';
+export { Switch } from './switch/main.js';
 
 // Lists
 export {
+  forwardClick,
   List,
   type ListBlockProps,
   type ListButtonProps,
@@ -108,7 +113,7 @@ export {
   type ListStyle,
   type ListSwipeActionProps,
   type ListSwipeActionsProps,
-} from './list.js';
+} from './list/main.js';
 
 // Menus
 export {
@@ -118,9 +123,13 @@ export {
   type ContextualMenuPreviewProps,
   type ContextualMenuRootProps,
   type ContextualMenuTriggerProps,
-} from './contextual-menu.js';
-export { EditMenu } from './edit-menu.js';
-export { Menu, type MenuRootProps } from './menu.js';
+} from './contextual-menu/main.js';
+export {
+  EditMenu,
+  type SelectionAnchor,
+  useSelectionAnchor,
+} from './edit-menu/main.js';
+export { Menu, type MenuRootProps } from './menu/main.js';
 
 // Bars
 export {
@@ -128,8 +137,8 @@ export {
   type HeaderBarProps,
   type HeaderLargeTitleProps,
   type HeaderRootProps,
-} from './header.js';
-export { PageControl, type PageControlProps } from './page-control.js';
+} from './header/main.js';
+export { PageControl, type PageControlProps } from './page-control/main.js';
 export {
   Toolbar,
   type ToolbarButtonProps,
@@ -137,19 +146,19 @@ export {
   type ToolbarRootProps,
   type ToolbarSideProps,
   type ToolbarTitleProps,
-} from './toolbar.js';
+} from './toolbar/main.js';
 
 // Pages and layout
 export {
   Layout,
   type LayoutColumnProps,
   type LayoutRootProps,
-} from './layout.js';
-export { Sidebar } from './sidebar.js';
-export { Page, type PageRootProps } from './page.js';
+} from './layout/main.js';
+export { Sidebar } from './sidebar/main.js';
+export { Page, type PageRootProps } from './page/main.js';
 
 // Navigation
-export { Navigation, type NavigationRootProps } from './navigation.js';
+export { Navigation, type NavigationRootProps } from './navigation/main.js';
 export {
   type AccessoryVisibility,
   type CollapsedContent,
@@ -157,7 +166,7 @@ export {
   type CollapsedPosition,
   collapsedSelection,
   TabBar,
-} from './tab-bar.js';
+} from './tab-bar/main.js';
 
 // Viewport
 export {
@@ -172,15 +181,14 @@ export {
   type ViewportSafeArea,
   type ViewportScrollEvent,
   type VisualViewportState,
-} from './viewport.js';
+} from './viewport/main.js';
 
 // Typography
+export { Symbol, type SymbolProps } from './symbol/main.js';
 export {
   type DynamicTypeSize,
-  dynamicTypeSize,
   type TextColor,
   type TextStyle,
-  textStyle,
   Typography,
   type TypographyProps,
-} from './typography.js';
+} from './typography/main.js';

@@ -1,0 +1,9 @@
+/* Date picker demos (see main.tsx). */
+
+/* The footer's jump buttons, wrapping at its end. */
+.date-picker-demo-jumps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}

@@ -5,12 +5,12 @@ import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
 import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
 import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
 import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
-import { IconDefinition } from '@bradleyhodges/sfsymbols-react/types';
-import { FunctionComponent, ReactNode, useMemo } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import {
   Button,
   PageControl,
+  Symbol,
   Toolbar,
   ToolbarButtonProps,
 } from '../../components/index.js';
@@ -20,168 +20,368 @@ import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
-import { SFSymbol } from '../utils/symbol.js';
 import {
   getPropOptionsButton,
   getPropOptionsPageControl,
-  Layout,
-  propOptionsContent,
   propOptionsGroup,
+  propOptionsPageDotsContent,
   propOptionsRoot,
+  propOptionsSymbolsContent,
 } from './props.js';
 
-const symbols = [
-  sfFolder,
-  sfFlag,
-  sfArchivebox,
-  sfArrowshapeTurnUpLeft,
-  sfSquareAndPencil,
-  sfTrash,
-];
-
-type Preset = { id: string; layout: Layout; title: string };
-
 /**
- * A toolbar (UIKit `UIToolbar`, Figma “Toolbar - Bottom”) in one of its
- * layouts: glass buttons at its sides, page dots between them, or a capsule
- * of buttons. The button control applies to the first button.
+ * A toolbar (UIKit `UIToolbar`, Figma “Toolbar - Bottom”, Type=Buttons):
+ * three glass buttons at each side.
  */
-const ToolbarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
-  const { id, layout } = preset;
+export const ToolbarDemo: FunctionComponent = () => {
+  const id = 'toolbar';
+
   const [log, addLog] = useLog();
+  const [externalRoot, externalButton] = useProvidedState(id);
 
-  const [
-    externalContent,
-    externalRoot,
-    externalGroup,
-    externalButton,
-    externalPageControl,
-  ] = useProvidedState(id);
-
-  const [controlContent, content, stateContent] = usePropControl(
-    propOptionsContent[layout],
-    '[content]',
-    externalContent,
-    true,
-  );
-
-  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
+  const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     propOptionsRoot,
     'root',
     externalRoot,
     true,
   );
-
-  const [controlGroup, propsGroup, stateGroup] = usePropControl(
-    propOptionsGroup,
-    'group',
-    externalGroup,
-  );
-
-  // Of its own in all but the symbols' capsule.
-  const [controlButton, propsButtonControlled, stateButton] = usePropControl(
-    useMemo(
-      () => getPropOptionsButton(addLog, layout !== 'symbols'),
-      [addLog, layout],
-    ),
+  const [controlButton, buttonProps, stateButton] = usePropControl(
+    useMemo(() => getPropOptionsButton(addLog, true), [addLog]),
     'button (first)',
     externalButton,
   );
-  // `prominent` only of its own (see `getPropOptionsButton`).
-  const propsButton = propsButtonControlled as ToolbarButtonProps;
+  // (Of its own: `prominent`, too.)
+  const propsButton = buttonProps as ToolbarButtonProps;
 
+  return (
+    <Component
+      stretch
+      baseUiId="toolbar"
+      controls={[controlRoot, controlButton]}
+      id={id}
+      log={log}
+      stateUrl={useCreateStateUrl(id, [stateRoot, stateButton])}
+      title="Toolbar"
+    >
+      <Toolbar.Root
+        key={elementKey}
+        {...propsRoot}
+      >
+        <Toolbar.Leading>
+          <Toolbar.Button
+            aria-label="Action 1"
+            {...propsButton}
+            shape={propsButton.shape ?? 'circle'}
+          >
+            <Button.Icon>
+              <Symbol icon={sfFolder} />
+            </Button.Icon>
+          </Toolbar.Button>
+          <Toolbar.Button
+            aria-label="Action 2"
+            shape="circle"
+            onClick={() => addLog('Action 2 clicked')}
+          >
+            <Button.Icon>
+              <Symbol icon={sfFlag} />
+            </Button.Icon>
+          </Toolbar.Button>
+          <Toolbar.Button
+            aria-label="Action 3"
+            shape="circle"
+            onClick={() => addLog('Action 3 clicked')}
+          >
+            <Button.Icon>
+              <Symbol icon={sfArchivebox} />
+            </Button.Icon>
+          </Toolbar.Button>
+        </Toolbar.Leading>
+        <Toolbar.Trailing>
+          <Toolbar.Button
+            aria-label="Action 4"
+            shape="circle"
+            onClick={() => addLog('Action 4 clicked')}
+          >
+            <Button.Icon>
+              <Symbol icon={sfArrowshapeTurnUpLeft} />
+            </Button.Icon>
+          </Toolbar.Button>
+          <Toolbar.Button
+            aria-label="Action 5"
+            shape="circle"
+            onClick={() => addLog('Action 5 clicked')}
+          >
+            <Button.Icon>
+              <Symbol icon={sfSquareAndPencil} />
+            </Button.Icon>
+          </Toolbar.Button>
+          <Toolbar.Button
+            aria-label="Action 6"
+            shape="circle"
+            onClick={() => addLog('Action 6 clicked')}
+          >
+            <Button.Icon>
+              <Symbol icon={sfTrash} />
+            </Button.Icon>
+          </Toolbar.Button>
+        </Toolbar.Trailing>
+      </Toolbar.Root>
+    </Component>
+  );
+};
+
+/** A toolbar with page dots between its buttons (Type=Buttons + Page Dots). */
+export const ToolbarPageDotsDemo: FunctionComponent = () => {
+  const id = 'toolbar-page-dots';
+
+  const [log, addLog] = useLog();
+  const [externalContent, externalRoot, externalButton, externalPageControl] =
+    useProvidedState(id);
+
+  const [controlContent, content, stateContent] = usePropControl(
+    propOptionsPageDotsContent,
+    '[content]',
+    externalContent,
+    true,
+  );
+  const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
+    true,
+  );
+  const [controlButton, buttonProps, stateButton] = usePropControl(
+    useMemo(() => getPropOptionsButton(addLog, true), [addLog]),
+    'button (first)',
+    externalButton,
+  );
+  // (Of its own: `prominent`, too.)
+  const propsButton = buttonProps as ToolbarButtonProps;
   const [
     controlPageControl,
     propsPageControl,
     statePageControl,
-    RemounterPageControl,
+    keyPageControl,
   ] = usePropControl(
     useMemo(() => getPropOptionsPageControl(addLog), [addLog]),
     'page control',
     externalPageControl,
   );
 
-  const symbolButton = (
-    icon: IconDefinition,
-    label: string,
-    props?: ToolbarButtonProps,
-  ) => (
-    <Toolbar.Button
-      key={label}
-      aria-label={label}
-      onClick={() => addLog(`${label} clicked`)}
-      {...props}
-      shape={props?.shape ?? 'circle'}
+  return (
+    <Component
+      stretch
+      baseUiId="toolbar"
+      id={id}
+      log={log}
+      title="Toolbar (Page Dots)"
+      controls={[
+        controlContent,
+        controlRoot,
+        controlButton,
+        controlPageControl,
+      ]}
+      stateUrl={useCreateStateUrl(id, [
+        stateContent,
+        stateRoot,
+        stateButton,
+        statePageControl,
+      ])}
     >
-      <Button.Symbol>
-        <SFSymbol icon={icon} />
-      </Button.Symbol>
-    </Toolbar.Button>
+      <Toolbar.Root
+        key={elementKey}
+        {...propsRoot}
+      >
+        <Toolbar.Leading>
+          <Toolbar.Button
+            aria-label="Folders"
+            {...propsButton}
+            shape={propsButton.shape ?? 'circle'}
+          >
+            <Button.Icon>
+              <Symbol icon={sfFolder} />
+            </Button.Icon>
+          </Toolbar.Button>
+        </Toolbar.Leading>
+        <PageControl
+          key={keyPageControl}
+          count={content.pages}
+          {...propsPageControl}
+        />
+        <Toolbar.Trailing>
+          <Toolbar.Button
+            aria-label="Share"
+            shape="circle"
+            onClick={() => addLog('Share clicked')}
+          >
+            <Button.Icon>
+              <Symbol icon={sfSquareAndArrowUp} />
+            </Button.Icon>
+          </Toolbar.Button>
+        </Toolbar.Trailing>
+      </Toolbar.Root>
+    </Component>
+  );
+};
+
+/** A capsule of 2 to 6 symbols (Figma “_Button - Bottom”). */
+export const ToolbarSymbolsDemo: FunctionComponent = () => {
+  const id = 'toolbar-symbols';
+
+  const [log, addLog] = useLog();
+  const [externalContent, externalRoot, externalGroup, externalButton] =
+    useProvidedState(id);
+
+  const [controlContent, content, stateContent] = usePropControl(
+    propOptionsSymbolsContent,
+    '[content]',
+    externalContent,
+    true,
+  );
+  const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
+    true,
+  );
+  const [controlGroup, propsGroup, stateGroup] = usePropControl(
+    propOptionsGroup,
+    'group',
+    externalGroup,
+    true,
+  );
+  // (In the capsule: what applies there.)
+  const [controlButton, propsButton, stateButton] = usePropControl(
+    useMemo(() => getPropOptionsButton(addLog, false), [addLog]),
+    'button (first)',
+    externalButton,
   );
 
-  const { pages = 5, symbols: count = 3 } = content as {
-    pages?: number;
-    symbols?: number;
-  };
+  return (
+    <Component
+      stretch
+      baseUiId="toolbar"
+      controls={[controlContent, controlRoot, controlGroup, controlButton]}
+      id={id}
+      log={log}
+      title="Toolbar (Symbols)"
+      stateUrl={useCreateStateUrl(id, [
+        stateContent,
+        stateRoot,
+        stateGroup,
+        stateButton,
+      ])}
+    >
+      <Toolbar.Root
+        key={elementKey}
+        {...propsRoot}
+      >
+        <Toolbar.Trailing>
+          <Toolbar.Group {...propsGroup}>
+            <Toolbar.Button
+              aria-label="Action 1"
+              {...propsButton}
+              shape={propsButton.shape ?? 'circle'}
+            >
+              <Button.Icon>
+                <Symbol icon={sfFolder} />
+              </Button.Icon>
+            </Toolbar.Button>
+            <Toolbar.Button
+              aria-label="Action 2"
+              shape="circle"
+              onClick={() => addLog('Action 2 clicked')}
+            >
+              <Button.Icon>
+                <Symbol icon={sfFlag} />
+              </Button.Icon>
+            </Toolbar.Button>
+            {content.symbols >= 3 ? (
+              <Toolbar.Button
+                aria-label="Action 3"
+                shape="circle"
+                onClick={() => addLog('Action 3 clicked')}
+              >
+                <Button.Icon>
+                  <Symbol icon={sfArchivebox} />
+                </Button.Icon>
+              </Toolbar.Button>
+            ) : null}
+            {content.symbols >= 4 ? (
+              <Toolbar.Button
+                aria-label="Action 4"
+                shape="circle"
+                onClick={() => addLog('Action 4 clicked')}
+              >
+                <Button.Icon>
+                  <Symbol icon={sfArrowshapeTurnUpLeft} />
+                </Button.Icon>
+              </Toolbar.Button>
+            ) : null}
+            {content.symbols >= 5 ? (
+              <Toolbar.Button
+                aria-label="Action 5"
+                shape="circle"
+                onClick={() => addLog('Action 5 clicked')}
+              >
+                <Button.Icon>
+                  <Symbol icon={sfSquareAndPencil} />
+                </Button.Icon>
+              </Toolbar.Button>
+            ) : null}
+            {content.symbols >= 6 ? (
+              <Toolbar.Button
+                aria-label="Action 6"
+                shape="circle"
+                onClick={() => addLog('Action 6 clicked')}
+              >
+                <Button.Icon>
+                  <Symbol icon={sfTrash} />
+                </Button.Icon>
+              </Toolbar.Button>
+            ) : null}
+          </Toolbar.Group>
+        </Toolbar.Trailing>
+      </Toolbar.Root>
+    </Component>
+  );
+};
 
-  const layouts: Record<Layout, () => ReactNode> = {
-    // Figma Type=Buttons: three glass buttons at each side.
-    buttons: () => (
-      <>
-        <Toolbar.Leading>
-          {symbols
-            .slice(0, 3)
-            .map((icon, index) =>
-              symbolButton(
-                icon,
-                `Action ${index + 1}`,
-                index === 0 ? propsButton : undefined,
-              ),
-            )}
-        </Toolbar.Leading>
-        <Toolbar.Trailing>
-          {symbols
-            .slice(3)
-            .map((icon, index) => symbolButton(icon, `Action ${index + 4}`))}
-        </Toolbar.Trailing>
-      </>
-    ),
-    // Figma Type=Buttons + Page Dots.
-    pageDots: () => (
-      <>
-        <Toolbar.Leading>
-          {symbolButton(sfFolder, 'Folders', propsButton)}
-        </Toolbar.Leading>
-        <RemounterPageControl>
-          <PageControl
-            count={pages}
-            {...propsPageControl}
-          />
-        </RemounterPageControl>
-        <Toolbar.Trailing>
-          {symbolButton(sfSquareAndArrowUp, 'Share')}
-        </Toolbar.Trailing>
-      </>
-    ),
-    // Figma “_Button - Bottom”, 2 to 6 Symbols: one capsule.
-    symbols: () => (
-      <Toolbar.Trailing>
-        <Toolbar.Group {...propsGroup}>
-          {symbols
-            .slice(0, count)
-            .map((icon, index) =>
-              symbolButton(
-                icon,
-                `Action ${index + 1}`,
-                index === 0 ? propsButton : undefined,
-              ),
-            )}
-        </Toolbar.Group>
-      </Toolbar.Trailing>
-    ),
-    // Figma Text and Text - Primary.
-    text: () => (
-      <>
+/** Text buttons (Figma Text and Text - Primary). */
+export const ToolbarTextDemo: FunctionComponent = () => {
+  const id = 'toolbar-text';
+
+  const [log, addLog] = useLog();
+  const [externalRoot, externalButton] = useProvidedState(id);
+
+  const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
+    propOptionsRoot,
+    'root',
+    externalRoot,
+    true,
+  );
+  const [controlButton, buttonProps, stateButton] = usePropControl(
+    useMemo(() => getPropOptionsButton(addLog, true), [addLog]),
+    'button (first)',
+    externalButton,
+  );
+  // (Of its own: `prominent`, too.)
+  const propsButton = buttonProps as ToolbarButtonProps;
+
+  return (
+    <Component
+      stretch
+      baseUiId="toolbar"
+      controls={[controlRoot, controlButton]}
+      id={id}
+      log={log}
+      stateUrl={useCreateStateUrl(id, [stateRoot, stateButton])}
+      title="Toolbar (Text)"
+    >
+      <Toolbar.Root
+        key={elementKey}
+        {...propsRoot}
+      >
         <Toolbar.Leading>
           <Toolbar.Button {...propsButton}>
             <Button.Label>Edit</Button.Label>
@@ -195,73 +395,7 @@ const ToolbarDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
             <Button.Label>Done</Button.Label>
           </Toolbar.Button>
         </Toolbar.Trailing>
-      </>
-    ),
-  };
-
-  // Controls only for the parts the layout has.
-  const parts = {
-    group: layout === 'symbols',
-    pageControl: layout === 'pageDots',
-  };
-
-  return (
-    <Component
-      stretch
-      baseUiId="toolbar"
-      id={id}
-      log={log}
-      title={preset.title}
-      controls={[
-        controlContent,
-        controlRoot,
-        parts.group ? controlGroup : null,
-        controlButton,
-        parts.pageControl ? controlPageControl : null,
-      ]}
-      stateUrl={useCreateStateUrl(id, [
-        stateContent,
-        stateRoot,
-        stateGroup,
-        stateButton,
-        statePageControl,
-      ])}
-    >
-      <RemounterRoot>
-        <Toolbar.Root {...propsRoot}>{layouts[layout]()}</Toolbar.Root>
-      </RemounterRoot>
+      </Toolbar.Root>
     </Component>
   );
 };
-
-export const ToolbarDemo: FunctionComponent = () => (
-  <ToolbarDemoBase
-    preset={{ id: 'toolbar', layout: 'buttons', title: 'Toolbar' }}
-  />
-);
-
-export const ToolbarPageDotsDemo: FunctionComponent = () => (
-  <ToolbarDemoBase
-    preset={{
-      id: 'toolbar-page-dots',
-      layout: 'pageDots',
-      title: 'Toolbar (Page Dots)',
-    }}
-  />
-);
-
-export const ToolbarSymbolsDemo: FunctionComponent = () => (
-  <ToolbarDemoBase
-    preset={{
-      id: 'toolbar-symbols',
-      layout: 'symbols',
-      title: 'Toolbar (Symbols)',
-    }}
-  />
-);
-
-export const ToolbarTextDemo: FunctionComponent = () => (
-  <ToolbarDemoBase
-    preset={{ id: 'toolbar-text', layout: 'text', title: 'Toolbar (Text)' }}
-  />
-);

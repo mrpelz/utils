@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 
 import { Avatar, Badge } from '../../components/index.js';
-import { Component, Remounters, usePropControl } from '../utils/main.js';
+import { Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
@@ -33,7 +33,7 @@ export const AvatarDemo: FunctionComponent = () => {
     'root',
     externalRoot,
   );
-  const [controlImage, propsImage, stateImage, RemounterImage] = usePropControl(
+  const [controlImage, propsImage, stateImage, keyImage] = usePropControl(
     propOptionsImage,
     'image',
     externalImage,
@@ -61,22 +61,23 @@ export const AvatarDemo: FunctionComponent = () => {
       title="Avatar"
     >
       <div style={{ padding: 16 }}>
-        <Remounters remounters={[RemounterImage]}>
-          {content.people === 1 ? (
-            <Avatar.Root {...propsRoot}>
-              <Avatar.Image {...propsImage} />
-              <Avatar.Fallback>{content.initials}</Avatar.Fallback>
-              {badge}
-            </Avatar.Root>
-          ) : (
-            <Avatar.Group size={propsRoot.size}>
-              {Array.from({ length: content.people }, (_, index) =>
-                person(index),
-              )}
-              {badge}
-            </Avatar.Group>
-          )}
-        </Remounters>
+        {content.people === 1 ? (
+          <Avatar.Root
+            key={keyImage}
+            {...propsRoot}
+          >
+            <Avatar.Image {...propsImage} />
+            <Avatar.Fallback>{content.initials}</Avatar.Fallback>
+            {badge}
+          </Avatar.Root>
+        ) : (
+          <Avatar.Group size={propsRoot.size}>
+            {Array.from({ length: content.people }, (_, index) =>
+              person(index),
+            )}
+            {badge}
+          </Avatar.Group>
+        )}
       </div>
     </Component>
   );

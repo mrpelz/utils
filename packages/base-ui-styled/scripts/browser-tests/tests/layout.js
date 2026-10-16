@@ -134,7 +134,7 @@ export const tests = [
       await sleep(300);
       const sized = await layout();
       assert.deepEqual([sized.sidebar[2], sized.inset], [280, '280px']);
-      await page.setState(1, { floating: false });
+      await page.setState(2, { floating: false });
       await sleep(300);
       const split = await layout();
       assert.deepEqual(
@@ -198,13 +198,16 @@ export const tests = [
   {
     name: 'layout (compact), sidebar (compact): a drawer swiped in from its edge (either side), closed by choosing a row; floating, without a background of its own',
     run: async (page) => {
-      for (const [id, choice, background] of /** @type {const} */ ([
-        ['layout-compact', 'Drafts', 'rgb(255, 255, 255)'],
-        ['sidebar-compact', 'Favorites', 'rgba(0, 0, 0, 0)'],
+      // (The drawer's control: after the root's and the sidebar column's;
+      // the sidebar demo's content first.)
+      for (const [id, choice, background, at] of /** @type {const} */ ([
+        ['layout-compact', 'Drafts', 'rgb(255, 255, 255)', 2],
+        ['sidebar-compact', 'Favorites', 'rgba(0, 0, 0, 0)', 3],
       ])) {
         for (const drawer of ['inline-start', 'inline-end']) {
+          const state = Array.from({ length: at + 1 }, () => null);
           await page.open(id, 'light', {
-            state: [null, null, null, { $rest: true, drawer }],
+            state: Object.assign(state, { [at]: { $rest: true, drawer } }),
           });
           await sleep(300);
           const box = () =>
@@ -266,19 +269,54 @@ export const tests = [
     },
   },
   {
-    name: 'sidebar (compact): its trigger in the bar over the picture is glass floating over it (background-bright, background-dim), inherited from the bar',
+    name: 'sidebar (compact): its trigger’s glass adapts to what is behind it (the picture: dim, in either scheme; a white page: bright)',
     run: async (page) => {
-      for (const [scheme, fill] of /** @type {const} */ ([
-        ['light', 'rgb(255 255 255 / 30%)'],
-        ['dark', 'rgb(0 0 0 / 20%)'],
-      ])) {
+      // (Colors computed: the build's CSS may write them otherwise.)
+      const fill = () =>
+        page.evaluate(`(() => {
+          const color = (value) => { const probe = document.createElement('span'); probe.style.color = value; document.body.append(probe); const computed = getComputedStyle(probe).color; probe.remove(); return computed; };
+          return color(getComputedStyle(document.querySelector(${JSON.stringify('[aria-label="Show Sidebar"]')})).getPropertyValue('--styled-glass-fill'));
+        })()`);
+      for (const scheme of /** @type {const} */ (['light', 'dark'])) {
         await page.open('sidebar-compact', scheme);
         await sleep(300);
-        const glass = await page.evaluate(
-          `getComputedStyle(document.querySelector(${JSON.stringify('[aria-label="Show Sidebar"]')})).getPropertyValue('--styled-glass-fill').trim()`,
-        );
-        assert.equal(glass, fill, scheme);
+        assert.equal(await fill(), 'rgba(0, 0, 0, 0.2)', scheme);
       }
+      await page.open('sidebar-compact', 'light', {
+        state: [{ $rest: true, background: 'none' }],
+      });
+      await sleep(300);
+      assert.equal(await fill(), 'rgba(255, 255, 255, 0.3)', 'white page');
+    },
+  },
+  {
+    name: 'glass: opaque with reduced transparency or increased contrast',
+    run: async (page) => {
+      for (const [name, value] of /** @type {const} */ ([
+        ['prefers-reduced-transparency', 'reduce'],
+        ['prefers-contrast', 'more'],
+      ])) {
+        await page.open('sidebar-compact', 'light');
+        await page.browser.send('Emulation.setEmulatedMedia', {
+          features: [
+            { name: 'prefers-color-scheme', value: 'light' },
+            { name, value },
+          ],
+        });
+        await sleep(300);
+        const fills = await page.evaluate(`(() => {
+          const style = getComputedStyle(document.documentElement);
+          // (Colors computed: the build's CSS may write them otherwise.)
+          const color = (value) => { const probe = document.createElement('span'); probe.style.color = value; document.body.append(probe); const computed = getComputedStyle(probe).color; probe.remove(); return computed; };
+          return ['--glass-ios-bright-fill', '--glass-ios-background-dim-fill', '--glass-ios-medium-light-background'].map((token) => color(style.getPropertyValue(token)));
+        })()`);
+        assert.deepEqual(
+          fills,
+          ['rgb(247, 247, 247)', 'rgb(28, 28, 30)', 'rgb(246, 246, 246)'],
+          name,
+        );
+      }
+      await page.browser.send('Emulation.setEmulatedMedia', { features: [] });
     },
   },
   {

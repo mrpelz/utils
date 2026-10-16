@@ -48,7 +48,7 @@ const configDownstream = {
   },
   settings: {
     react: {
-      version: '16.0',
+      version: '17.0',
     },
   },
 };
@@ -57,7 +57,7 @@ const configDownstream = {
 export const config = deepmerge(configUpstream, configDownstream);
 config.files = ['src/**/*.{js,jsx,ts,tsx}'];
 
-if (config.rules?.['prettier/prettier']) {
+if (config.rules) {
   config.rules['prettier/prettier'] = [
     'error',
     {
@@ -68,7 +68,19 @@ if (config.rules?.['prettier/prettier']) {
       usePrettierrc: false,
     },
   ];
+
+  config.rules['@typescript-eslint/no-unused-vars'] = [
+    'warn',
+    {
+      ignoreRestSiblings: true,
+    },
+  ];
 }
 
 /** @type {import('eslint').Linter.Config[]} */
-export default [configMeta, config];
+export default [
+  deepmerge(configMeta, {
+    ignores: ['demo/**/*'],
+  }),
+  config,
+];

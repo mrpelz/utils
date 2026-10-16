@@ -1,14 +1,13 @@
 import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
 import { FunctionComponent, useMemo } from 'react';
 
-import { Button, List, Popover } from '../../components/index.js';
+import { Button, List, Popover, Symbol } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
-import { Component, Remounters, usePropControl } from '../utils/main.js';
+import { Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
-import { SFSymbol } from '../utils/symbol.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -28,7 +27,7 @@ export const PopoverDemo: FunctionComponent = () => {
   const [externalRoot, externalPositioner, externalContent] =
     useProvidedState(id);
 
-  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
+  const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
     'root',
     externalRoot,
@@ -91,21 +90,22 @@ export const PopoverDemo: FunctionComponent = () => {
           width: 'min(402px, 100%)',
         }}
       >
-        <Remounters remounters={[RemounterRoot]}>
-          <Popover.Root {...propsRoot}>
-            <Popover.Trigger
-              render={
-                <Button.Root
-                  size="large"
-                  variant="bordered"
-                />
-              }
-            >
-              <Button.Label>Show Popover</Button.Label>
-            </Popover.Trigger>
-            {panel}
-          </Popover.Root>
-        </Remounters>
+        <Popover.Root
+          key={`${keyRoot}`}
+          {...propsRoot}
+        >
+          <Popover.Trigger
+            render={
+              <Button.Root
+                size="large"
+                variant="bordered"
+              />
+            }
+          >
+            <Button.Label>Show Popover</Button.Label>
+          </Popover.Trigger>
+          {panel}
+        </Popover.Root>
         <List.Root style={{ width: '100%' }}>
           <List.Section>
             <List.Group>
@@ -121,9 +121,9 @@ export const PopoverDemo: FunctionComponent = () => {
                       />
                     }
                   >
-                    <Button.Symbol>
-                      <SFSymbol icon={sfICircle} />
-                    </Button.Symbol>
+                    <Button.Icon>
+                      <Symbol icon={sfICircle} />
+                    </Button.Icon>
                   </Popover.Trigger>
                   {panel}
                 </Popover.Root>

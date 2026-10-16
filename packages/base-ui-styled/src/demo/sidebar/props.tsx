@@ -9,17 +9,15 @@ export const propOptionsContent = {
   // The content's page background (transparent: the layout's background
   // shows through).
   pageBackground: ['transparent', 'plain', 'grouped'] as const,
-  // Selecting rows (Figma “Edit Button”: their selection circles).
-  editing: [false, true] as const,
 };
 
 export const propOptionsRoot = {
   ...commonPropOptions,
-  floating: [true, false] as const,
 };
 
 export const getPropOptionsSidebarColumn = (addLog: AddLog) => ({
   ...commonPropOptions,
+  floating: [true, false] as const,
   defaultSize: [336, 280, 400] as const,
   minSize: [280, undefined, 320] as const,
   maxSize: [480, undefined, 400] as const,

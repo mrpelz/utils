@@ -1,0 +1,12 @@
+/* Edit menu demo (see main.tsx). */
+
+/* Text to select (the page's isn't, see demo/utils/style.css). */
+.edit-menu-demo-text {
+  max-width: 320px;
+  margin: 80px 0 0;
+  font-size: 17px;
+  line-height: 22px;
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-user-select: text;
+  user-select: text;
+}

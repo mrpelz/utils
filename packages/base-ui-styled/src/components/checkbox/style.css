@@ -1,0 +1,73 @@
+/* Checkbox (see main.tsx). */
+@layer base-ui-styled {
+  /* (Shared: list.) */
+  .bus-checkbox-edit-circle {
+    display: grid;
+    width: 22px;
+    height: 22px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 14.5px;
+    font-variation-settings: 'wght' 590;
+    font-weight: round(down, 590, 100);
+    place-items: center;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (590 - 400) / 326 * 1px);
+
+    --styled-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
+  }
+
+  /* Figma State=Selected/Unselected (mixed: as selected). */
+  .bus-checkbox-select-circle {
+    position: relative;
+    flex: none;
+    padding: 0;
+    border: 1.5px solid
+      var(--styled-select-circle-border, var(--color-ios-system-gray3));
+    margin: 0;
+    appearance: none;
+    background: none;
+    outline-offset: 2px;
+
+    --styled-cursor: attr(cursor type(<custom-ident>), pointer);
+
+    @media (hover: hover) {
+      cursor: var(--styled-cursor);
+    }
+
+    /* Hit region: 44×44px, centered. */
+    &::after {
+      position: absolute;
+      content: '';
+      inset: -12.5px;
+    }
+
+    &[data-checked],
+    &[data-indeterminate] {
+      border-color: transparent;
+      background-color: var(--color-ios-primary);
+    }
+
+    &[data-disabled] {
+      --styled-cursor: attr(cursor type(<custom-ident>), not-allowed);
+
+      opacity: 0.5;
+    }
+
+    /* The glyph (checked: the checkmark, mixed: the dash). */
+    & > * {
+      display: contents;
+    }
+
+    & [data-glyph='dash'],
+    &[data-indeterminate] [data-glyph='check'] {
+      display: none;
+    }
+
+    &[data-indeterminate] [data-glyph='dash'] {
+      display: block;
+    }
+  }
+}

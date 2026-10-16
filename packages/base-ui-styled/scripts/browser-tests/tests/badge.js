@@ -7,9 +7,10 @@ import { sleep } from '../lib.js';
 /** @typedef {import('../lib.js').Page} Page */
 
 /**
- * The demo's badges (on the button, the tabs, inline): their boxes relative
- * to their symbols (from the symbol's end to the badge's start, from its
- * top), styles, and the inline one's center from its row's.
+ * The demo's badges (on the button's and the tabs' symbols, inline): their
+ * boxes relative to their symbols (their `Symbol`s: from the symbol's end to
+ * the badge's start, from its top), styles, and the inline one's center from
+ * its row's.
  *
  * @param {Page} page
  */
@@ -25,12 +26,11 @@ const badges = (page) =>
     const row = inline.closest('[data-list-part=row]').getBoundingClientRect();
     const dot = inline.getBoundingClientRect();
     return {
-      button: relative(button, button.parentElement.querySelector('[data-button-part=symbol]')),
-      favorites: relative(favorites, favorites.parentElement.querySelector('[data-tab-bar-part=icon]')),
+      button: relative(button, button.parentElement),
+      favorites: relative(favorites, favorites.parentElement),
       inline: [getComputedStyle(inline).position, Math.round(dot.height), style(inline)],
       inlineCenter: Math.round(dot.top + dot.height / 2 - (row.top + row.height / 2)),
-      // The tabs' badges: at the same height.
-      level: Math.round(search.getBoundingClientRect().top - favorites.getBoundingClientRect().top),
+      search: relative(search, search.parentElement),
       style: style(button),
     };
   })()`);
@@ -57,7 +57,8 @@ export const tests = [
         top: -4,
         width: 16,
       });
-      assert.equal(digit.level, 0, 'tabs’ badges level');
+      // A symbol-only tab's too (its symbol centered, lower).
+      assert.deepEqual(digit.search, digit.favorites, 'search');
       assert.deepEqual(digit.style, [
         'rgb(255, 56, 60)',
         'rgb(255, 255, 255)',
@@ -104,8 +105,8 @@ export const tests = [
       await sleep(600);
       await sleep(400);
       const collapsed = await page.evaluate(`(() => {
-        const [favorites, contacts, search] = ${page.section}.querySelectorAll('[role=tab] > [data-badge]');
-        const icon = favorites.parentElement.querySelector('[data-tab-bar-part=icon]').getBoundingClientRect();
+        const [favorites, contacts, search] = ${page.section}.querySelectorAll('[role=tab] [data-badge]');
+        const icon = favorites.parentElement.getBoundingClientRect();
         const box = favorites.getBoundingClientRect();
         return { contacts: Number(getComputedStyle(contacts).opacity), favorites: [Math.round(icon.right - box.left), Math.round(box.top - icon.top), Number(getComputedStyle(favorites).opacity)], search: Number(getComputedStyle(search).opacity) };
       })()`);
@@ -128,7 +129,7 @@ export const tests = [
       await page.setState(1, { collapsed: true });
       await sleep(1000);
       const shown = await page.evaluate(
-        `[...${page.section}.querySelectorAll('[role=tab] > [data-badge]')].map((badge) => [Number(getComputedStyle(badge).opacity), getComputedStyle(badge).visibility])`,
+        `[...${page.section}.querySelectorAll('[role=tab] [data-badge]')].map((badge) => [Number(getComputedStyle(badge).opacity), getComputedStyle(badge).visibility])`,
       );
       assert.deepEqual(shown, [
         [0, 'hidden'],

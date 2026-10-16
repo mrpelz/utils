@@ -1,1 +1,2 @@
-// eslint-disable-next-line unicorn/no-empty-file
+export type * from './components/index.js';
+export * from './components/index.js';

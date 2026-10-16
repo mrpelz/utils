@@ -28,7 +28,10 @@
     },
     "eslint": "10.12.0",
     "react": "npm:@preact/compat",
-    "react-dom": "npm:@preact/compat"
+    "react-dom": "npm:@preact/compat",
+    "serialize-javascript": "7.1.2",
+    "stylelint": "17.16.0",
+    "stylelint-order": "8.1.2"
   },
   "devDependencies": {
     "@mrpelz/boilerplate-common": "16.5.0"

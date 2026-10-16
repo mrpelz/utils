@@ -6,7 +6,6 @@ BASE_FILE := $(shell npm ls --parseable --silent "@mrpelz/boilerplate-preact" 2>
 
 include $(BASE_FILE)/Makefile
 
-STYLELINT := stylelint "src/**/*.{css,jsx,tsx}"
 PACKAGE_LOCK_LINT_ARGS := $(PACKAGE_LOCK_LINT_ARGS) git.i.wurstsalat.cloud
 
 GIT_BRANCH := $(shell git symbolic-ref --short HEAD)
@@ -16,6 +15,8 @@ MITM_URL := https://$(MITM_SLUG).localhost
 
 .PHONY: .PHONY \
 	check_browser \
+	transform_build_demo \
+	util_clear_demo \
 	util_mitmproxy \
 	watch_dev_proxy
 
@@ -24,6 +25,27 @@ MITM_URL := https://$(MITM_SLUG).localhost
 # (--changed: only the tests affected by uncommitted changes)
 check_browser:
 	node scripts/browser-tests/run.js $(ARGS)
+
+transform: \
+	transform_package_json \
+	transform_lint \
+	transform_stylelint \
+	transform_build \
+	transform_build_demo
+
+transform_build:
+	tsc --project tsconfig.build.json
+	scripts/copy-css.sh
+
+transform_build_demo:
+	$(WEBPACK)
+
+transform_prod_demo: \
+	util_clear_demo \
+	transform_build_demo
+
+util_clear_demo:
+	rm -rf demo/{*,.*}
 
 util_mitmproxy:
 	clear; \
@@ -34,6 +56,12 @@ util_mitmproxy:
 	@echo \
 
 	mitmweb --no-web-open-browser --set termlog_verbosity=error --set web_password="$(MITM_SLUG)" --mode "reverse:http://localhost:3000@443";
+
+watch_build:
+	tsc --project tsconfig.build.json --watch
+
+watch_build_demo: util_clear_demo
+	$(WEBPACK) serve
 
 watch_dev_proxy:
 	scripts/watch-dev-proxy.sh

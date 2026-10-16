@@ -1,0 +1,111 @@
+/* Page-control (see main.tsx). */
+@layer base-ui-styled {
+  .bus-page-control-tooltip {
+    position: absolute;
+    z-index: 1;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    font-variant-numeric: tabular-nums;
+    opacity: 0;
+    pointer-events: none;
+    scale: 0.85;
+    transition-duration: 150ms;
+    transition-property: opacity, scale;
+    translate: -50% 0;
+    white-space: nowrap;
+  }
+
+  .bus-page-control-slot {
+    position: relative;
+    display: flex;
+    width: 8px;
+    height: 8px;
+    align-items: center;
+    justify-content: center;
+    transition: width 200ms;
+
+    &[data-size='4'] {
+      width: 6px;
+    }
+
+    & > span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50px;
+      background-color: var(--styled-glass-content-disabled);
+      mix-blend-mode: var(--styled-glass-content-blend);
+      transition-duration: 200ms;
+      transition-property: width, height, background-color;
+    }
+
+    &[data-size='6'] > span {
+      width: 6px;
+      height: 6px;
+    }
+
+    &[data-size='4'] > span {
+      width: 4px;
+      height: 4px;
+    }
+
+    &[data-current] > span {
+      background-color: var(--styled-glass-content);
+    }
+  }
+
+  .bus-page-control-root {
+    --styled-glass-outset: 0px;
+
+    position: relative;
+    display: inline-flex;
+    min-height: 48px;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    border-radius: 100px;
+    gap: 8px;
+    outline-offset: 2px;
+    touch-action: manipulation;
+    user-select: none;
+    vertical-align: middle;
+
+    &[aria-disabled='true'] {
+      pointer-events: none;
+    }
+
+    &[data-variant='plain'] {
+      --styled-glass-content: var(--color-ios-label);
+      --styled-glass-content-disabled: color-mix(
+        in srgb,
+        var(--color-ios-label) 30%,
+        transparent
+      );
+      --styled-glass-content-blend: normal;
+
+      min-height: 24px;
+      padding: 0 12px;
+    }
+
+    /* Its momentary tooltip (see Tooltip): while hovered (a pointer that
+       can), pressed or focused by keyboard. */
+    @media (hover: hover) {
+      &:hover > [data-page-control-part='tooltip'] {
+        opacity: 1;
+        scale: 1;
+      }
+    }
+
+    &[data-pressed] > [data-page-control-part='tooltip'] {
+      opacity: 1;
+      scale: 1;
+    }
+
+    &:focus-visible {
+      & > [data-page-control-part='tooltip'] {
+        opacity: 1;
+        scale: 1;
+      }
+    }
+  }
+}

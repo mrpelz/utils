@@ -3,10 +3,6 @@
 import { AddLog } from '../utils/log.js';
 import { commonPropOptions, MappedProp } from '../utils/main.js';
 
-export const notificationValues = ['messages', 'mentions', 'reminders'];
-
-export const appearanceValues = ['light', 'dark', 'automatic'] as const;
-
 export const getPropOptionsForm = (addLog: AddLog) => ({
   ...commonPropOptions,
   validationMode: [undefined, 'onSubmit', 'onBlur', 'onChange'] as const,
@@ -45,7 +41,10 @@ export const getPropOptionsCheckboxGroup = (addLog: AddLog) => ({
     undefined,
     new MappedProp<string[]>([], '[none]'),
   ] as const,
-  value: [undefined, new MappedProp(notificationValues, '[all]')] as const,
+  value: [
+    undefined,
+    new MappedProp(['messages', 'mentions', 'reminders'], '[all]'),
+  ] as const,
   disabled: [undefined, false, true] as const,
   onValueChange: [
     new MappedProp(

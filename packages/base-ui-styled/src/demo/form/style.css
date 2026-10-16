@@ -1,0 +1,6 @@
+/* Form demo (see main.tsx). */
+
+/* A field around a group of rows, without a box of its own. */
+.form-demo-field-contents {
+  display: contents;
+}

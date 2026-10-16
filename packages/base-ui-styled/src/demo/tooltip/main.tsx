@@ -1,14 +1,13 @@
 import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
 import { FunctionComponent, useMemo } from 'react';
 
-import { Button, Tooltip } from '../../components/index.js';
+import { Button, Symbol, Tooltip } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
-import { Component, Remounters, usePropControl } from '../utils/main.js';
+import { Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
-import { SFSymbol } from '../utils/symbol.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -28,7 +27,7 @@ export const TooltipDemo: FunctionComponent = () => {
   const [externalRoot, externalTrigger, externalPositioner, externalContent] =
     useProvidedState(id);
 
-  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
+  const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
     'root',
     externalRoot,
@@ -72,31 +71,32 @@ export const TooltipDemo: FunctionComponent = () => {
       ])}
     >
       <div style={{ paddingBlock: 64 }}>
-        <Remounters remounters={[RemounterRoot]}>
-          <Tooltip.Root {...propsRoot}>
-            <Tooltip.Trigger
-              aria-label="Share"
-              {...propsTrigger}
-              render={
-                <Button.Root
-                  shape="circle"
-                  size="large"
-                  variant="glass"
-                  onClick={() => addLog('click')}
-                />
-              }
-            >
-              <Button.Symbol>
-                <SFSymbol icon={sfSquareAndArrowUp} />
-              </Button.Symbol>
-            </Tooltip.Trigger>
-            <Tooltip.Portal>
-              <Tooltip.Positioner {...propsPositioner}>
-                <Tooltip.Popup>{propsContent.text}</Tooltip.Popup>
-              </Tooltip.Positioner>
-            </Tooltip.Portal>
-          </Tooltip.Root>
-        </Remounters>
+        <Tooltip.Root
+          key={`${keyRoot}`}
+          {...propsRoot}
+        >
+          <Tooltip.Trigger
+            aria-label="Share"
+            {...propsTrigger}
+            render={
+              <Button.Root
+                shape="circle"
+                size="large"
+                variant="glass"
+                onClick={() => addLog('click')}
+              />
+            }
+          >
+            <Button.Icon>
+              <Symbol icon={sfSquareAndArrowUp} />
+            </Button.Icon>
+          </Tooltip.Trigger>
+          <Tooltip.Portal>
+            <Tooltip.Positioner {...propsPositioner}>
+              <Tooltip.Popup>{propsContent.text}</Tooltip.Popup>
+            </Tooltip.Positioner>
+          </Tooltip.Portal>
+        </Tooltip.Root>
       </div>
     </Component>
   );

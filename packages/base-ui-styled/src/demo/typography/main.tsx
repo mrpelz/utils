@@ -1,4 +1,5 @@
-import { styled } from 'goober';
+import './style.css';
+
 import { Fragment, FunctionComponent } from 'react';
 
 import { Typography } from '../../components/index.js';
@@ -11,6 +12,7 @@ import {
   dynamicTypeSizes,
   propOptionsContent,
   propOptionsMatrix,
+  propOptionsSizes,
   propOptionsTypography,
   textStyles,
 } from './props.js';
@@ -47,25 +49,6 @@ export const TypographyDemo: FunctionComponent = () => {
   );
 };
 
-const Matrix = styled('div')`
-  display: grid;
-  gap: 12px 24px;
-  grid-template-columns: repeat(var(--columns), max-content);
-  place-items: baseline start;
-`;
-
-const Matrices = styled('div')`
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
-`;
-
-const MatrixHeading = styled('span')`
-  color: #a1a1a1;
-  font-family: monospace;
-  font-size: 12px;
-`;
-
 const variants = [
   { emphasized: false, italic: false, name: 'regular' },
   { emphasized: true, italic: false, name: 'emphasized' },
@@ -73,8 +56,8 @@ const variants = [
   { emphasized: true, italic: true, name: 'emphasized italic' },
 ] as const;
 
-// Figma “Text styles” (the variants, in a label color) and “Dynamic Type”
-// (the sizes), with the color and size as controls.
+// Figma “Text styles”: the variants (in a label color, at a Dynamic Type
+// size, both as controls).
 export const TypographyMatrixDemo: FunctionComponent = () => {
   const id = 'typography-matrix';
 
@@ -94,52 +77,85 @@ export const TypographyMatrixDemo: FunctionComponent = () => {
       stateUrl={useCreateStateUrl(id, [stateControl])}
       title="Typography (Matrix)"
     >
-      <Matrices>
-        <Matrix style={{ '--columns': variants.length + 1 }}>
-          <span />
-          {variants.map(({ name }) => (
-            <MatrixHeading key={name}>{name}</MatrixHeading>
-          ))}
-          {textStyles.map(([textStyle, name]) => (
-            <Fragment key={textStyle}>
-              <MatrixHeading>{textStyle}</MatrixHeading>
-              {variants.map((variant) => (
-                <Typography
-                  key={variant.name}
-                  color={color}
-                  dynamicTypeSize={dynamicTypeSize}
-                  emphasized={variant.emphasized}
-                  italic={variant.italic}
-                  textStyle={textStyle}
-                >
-                  {name}
-                </Typography>
-              ))}
-            </Fragment>
-          ))}
-        </Matrix>
-        <Matrix style={{ '--columns': dynamicTypeSizes.length + 1 }}>
-          <span />
-          {dynamicTypeSizes.map((size) => (
-            <MatrixHeading key={size}>{size}</MatrixHeading>
-          ))}
-          {textStyles.map(([textStyle, name]) => (
-            <Fragment key={textStyle}>
-              <MatrixHeading>{textStyle}</MatrixHeading>
-              {dynamicTypeSizes.map((size) => (
-                <Typography
-                  key={size}
-                  color={color}
-                  dynamicTypeSize={size}
-                  textStyle={textStyle}
-                >
-                  {name}
-                </Typography>
-              ))}
-            </Fragment>
-          ))}
-        </Matrix>
-      </Matrices>
+      <div className="typography-demo-matrix typography-demo-variants">
+        <span />
+        {variants.map(({ name }) => (
+          <span
+            key={name}
+            className="typography-demo-heading"
+          >
+            {name}
+          </span>
+        ))}
+        {textStyles.map(([textStyle, name]) => (
+          <Fragment key={textStyle}>
+            <span className="typography-demo-heading">{textStyle}</span>
+            {variants.map((variant) => (
+              <Typography
+                key={variant.name}
+                color={color}
+                dynamicTypeSize={dynamicTypeSize}
+                emphasized={variant.emphasized}
+                italic={variant.italic}
+                textStyle={textStyle}
+              >
+                {name}
+              </Typography>
+            ))}
+          </Fragment>
+        ))}
+      </div>
+    </Component>
+  );
+};
+
+// Figma “Dynamic Type”: the text styles at each size (in a label color, as
+// a control).
+export const TypographySizesDemo: FunctionComponent = () => {
+  const id = 'typography-sizes';
+
+  const [externalControl] = useProvidedState(id);
+
+  const [control, { color }, stateControl] = usePropControl(
+    propOptionsSizes,
+    'sizes',
+    externalControl,
+    true,
+  );
+
+  return (
+    <Component
+      controls={control}
+      id={id}
+      stateUrl={useCreateStateUrl(id, [stateControl])}
+      title="Typography (Dynamic Type)"
+    >
+      <div className="typography-demo-matrix typography-demo-sizes">
+        <span />
+        {dynamicTypeSizes.map((size) => (
+          <span
+            key={size}
+            className="typography-demo-heading"
+          >
+            {size}
+          </span>
+        ))}
+        {textStyles.map(([textStyle, name]) => (
+          <Fragment key={textStyle}>
+            <span className="typography-demo-heading">{textStyle}</span>
+            {dynamicTypeSizes.map((size) => (
+              <Typography
+                key={size}
+                color={color}
+                dynamicTypeSize={size}
+                textStyle={textStyle}
+              >
+                {name}
+              </Typography>
+            ))}
+          </Fragment>
+        ))}
+      </div>
     </Component>
   );
 };

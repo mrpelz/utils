@@ -8,28 +8,28 @@ import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
 import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
 import { sfTortoiseFill } from '@bradleyhodges/sfsymbols/sfTortoiseFill';
 
+import { Symbol } from '../../components/index.js';
 import { AddLog } from '../utils/log.js';
 import { commonPropOptions, MappedProp } from '../utils/main.js';
-import { SFSymbol } from '../utils/symbol.js';
 
 export const propOptionsContent = {
   thumbs: [1, 2] as const,
   ticks: [0, 6, 11] as const,
   minSymbol: [
     undefined,
-    new MappedProp(<SFSymbol icon={sfTortoiseFill} />, '[tortoise.fill]'),
-    new MappedProp(<SFSymbol icon={sfSpeakerFill} />, '[speaker.fill]'),
-    new MappedProp(<SFSymbol icon={sfSunMin} />, '[sun.min]'),
+    new MappedProp(<Symbol icon={sfTortoiseFill} />, '[tortoise.fill]'),
+    new MappedProp(<Symbol icon={sfSpeakerFill} />, '[speaker.fill]'),
+    new MappedProp(<Symbol icon={sfSunMin} />, '[sun.min]'),
     'A',
   ] as const,
   maxSymbol: [
     undefined,
-    new MappedProp(<SFSymbol icon={sfHareFill} />, '[hare.fill]'),
+    new MappedProp(<Symbol icon={sfHareFill} />, '[hare.fill]'),
     new MappedProp(
-      <SFSymbol icon={sfSpeakerWave3Fill} />,
+      <Symbol icon={sfSpeakerWave3Fill} />,
       '[speaker.wave.3.fill]',
     ),
-    new MappedProp(<SFSymbol icon={sfSunMax} />, '[sun.max]'),
+    new MappedProp(<Symbol icon={sfSunMax} />, '[sun.max]'),
     'A',
   ] as const,
   label: [undefined, 'Volume'] as const,

@@ -1,0 +1,727 @@
+/* Typography (see main.tsx). */
+@layer base-ui-styled {
+  /* A text style (data-text-style; Body by default), its weight (or the
+     emphasized one, data-emphasized), italic or not, in a label color
+     (data-color), at a Dynamic Type size (data-dynamic-type-size: its
+     tokens, for its content too). */
+  .bus-typography {
+    margin: 0;
+    font-size: var(--font-ios-body-size);
+    font-style: normal;
+    font-variation-settings: 'wght' var(--font-ios-body-weight);
+    font-weight: round(down, var(--font-ios-body-weight), 100);
+    letter-spacing: var(--font-ios-body-tracking);
+    line-height: var(--font-ios-body-line-height);
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
+
+    --styled-symbol-thinning: max(
+      0px,
+      (400 - var(--font-ios-body-weight)) / 326 * 1px
+    );
+
+    &[data-text-style='callout'] {
+      font-size: var(--font-ios-callout-size);
+      font-variation-settings: 'wght' var(--font-ios-callout-weight);
+      font-weight: round(down, var(--font-ios-callout-weight), 100);
+      letter-spacing: var(--font-ios-callout-tracking);
+      line-height: var(--font-ios-callout-line-height);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(
+        0px,
+        (var(--font-ios-callout-weight) - 400) / 326 * 1px
+      );
+
+      --styled-symbol-thinning: max(
+        0px,
+        (400 - var(--font-ios-callout-weight)) / 326 * 1px
+      );
+    }
+
+    &[data-text-style='caption1'] {
+      font-size: var(--font-ios-caption1-size);
+      font-variation-settings: 'wght' var(--font-ios-caption1-weight);
+      font-weight: round(down, var(--font-ios-caption1-weight), 100);
+      letter-spacing: var(--font-ios-caption1-tracking);
+      line-height: var(--font-ios-caption1-line-height);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(
+        0px,
+        (var(--font-ios-caption1-weight) - 400) / 326 * 1px
+      );
+
+      --styled-symbol-thinning: max(
+        0px,
+        (400 - var(--font-ios-caption1-weight)) / 326 * 1px
+      );
+    }
+
+    &[data-text-style='caption2'] {
+      font-size: var(--font-ios-caption2-size);
+      font-variation-settings: 'wght' var(--font-ios-caption2-weight);
+      font-weight: round(down, var(--font-ios-caption2-weight), 100);
+      letter-spacing: var(--font-ios-caption2-tracking);
+      line-height: var(--font-ios-caption2-line-height);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(
+        0px,
+        (var(--font-ios-caption2-weight) - 400) / 326 * 1px
+      );
+
+      --styled-symbol-thinning: max(
+        0px,
+        (400 - var(--font-ios-caption2-weight)) / 326 * 1px
+      );
+    }
+
+    &[data-text-style='footnote'] {
+      font-size: var(--font-ios-footnote-size);
+      font-variation-settings: 'wght' var(--font-ios-footnote-weight);
+      font-weight: round(down, var(--font-ios-footnote-weight), 100);
+      letter-spacing: var(--font-ios-footnote-tracking);
+      line-height: var(--font-ios-footnote-line-height);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(
+        0px,
+        (var(--font-ios-footnote-weight) - 400) / 326 * 1px
+      );
+
+      --styled-symbol-thinning: max(
+        0px,
+        (400 - var(--font-ios-footnote-weight)) / 326 * 1px
+      );
+    }
+
+    &[data-text-style='headline'] {
+      font-size: var(--font-ios-headline-size);
+      font-variation-settings: 'wght' var(--font-ios-headline-weight);
+      font-weight: round(down, var(--font-ios-headline-weight), 100);
+      letter-spacing: var(--font-ios-headline-tracking);
+      line-height: var(--font-ios-headline-line-height);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(
+        0px,
+        (var(--font-ios-headline-weight) - 400) / 326 * 1px
+      );
+
+      --styled-symbol-thinning: max(
+        0px,
+        (400 - var(--font-ios-headline-weight)) / 326 * 1px
+      );
+    }
+
+    &[data-text-style='largeTitle'] {
+      font-size: var(--font-ios-large-title-size);
+      font-variation-settings: 'wght' var(--font-ios-large-title-weight);
+      font-weight: round(down, var(--font-ios-large-title-weight), 100);
+      letter-spacing: var(--font-ios-large-title-tracking);
+      line-height: var(--font-ios-large-title-line-height);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(
+        0px,
+        (var(--font-ios-large-title-weight) - 400) / 326 * 1px
+      );
+
+      --styled-symbol-thinning: max(
+        0px,
+        (400 - var(--font-ios-large-title-weight)) / 326 * 1px
+      );
+    }
+
+    &[data-text-style='subheadline'] {
+      font-size: var(--font-ios-subheadline-size);
+      font-variation-settings: 'wght' var(--font-ios-subheadline-weight);
+      font-weight: round(down, var(--font-ios-subheadline-weight), 100);
+      letter-spacing: var(--font-ios-subheadline-tracking);
+      line-height: var(--font-ios-subheadline-line-height);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(
+        0px,
+        (var(--font-ios-subheadline-weight) - 400) / 326 * 1px
+      );
+
+      --styled-symbol-thinning: max(
+        0px,
+        (400 - var(--font-ios-subheadline-weight)) / 326 * 1px
+      );
+    }
+
+    &[data-text-style='title1'] {
+      font-size: var(--font-ios-title1-size);
+      font-variation-settings: 'wght' var(--font-ios-title1-weight);
+      font-weight: round(down, var(--font-ios-title1-weight), 100);
+      letter-spacing: var(--font-ios-title1-tracking);
+      line-height: var(--font-ios-title1-line-height);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(0px, (var(--font-ios-title1-weight) - 400) / 326 * 1px);
+
+      --styled-symbol-thinning: max(
+        0px,
+        (400 - var(--font-ios-title1-weight)) / 326 * 1px
+      );
+    }
+
+    &[data-text-style='title2'] {
+      font-size: var(--font-ios-title2-size);
+      font-variation-settings: 'wght' var(--font-ios-title2-weight);
+      font-weight: round(down, var(--font-ios-title2-weight), 100);
+      letter-spacing: var(--font-ios-title2-tracking);
+      line-height: var(--font-ios-title2-line-height);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(0px, (var(--font-ios-title2-weight) - 400) / 326 * 1px);
+
+      --styled-symbol-thinning: max(
+        0px,
+        (400 - var(--font-ios-title2-weight)) / 326 * 1px
+      );
+    }
+
+    &[data-text-style='title3'] {
+      font-size: var(--font-ios-title3-size);
+      font-variation-settings: 'wght' var(--font-ios-title3-weight);
+      font-weight: round(down, var(--font-ios-title3-weight), 100);
+      letter-spacing: var(--font-ios-title3-tracking);
+      line-height: var(--font-ios-title3-line-height);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(0px, (var(--font-ios-title3-weight) - 400) / 326 * 1px);
+
+      --styled-symbol-thinning: max(
+        0px,
+        (400 - var(--font-ios-title3-weight)) / 326 * 1px
+      );
+    }
+
+    &[data-emphasized] {
+      --styled-typography-emphasized: var(--font-ios-body-weight-emphasized);
+
+      font-variation-settings: 'wght' var(--styled-typography-emphasized);
+      font-weight: round(down, var(--styled-typography-emphasized), 100);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(
+        0px,
+        (var(--styled-typography-emphasized) - 400) / 326 * 1px
+      );
+
+      --styled-symbol-thinning: max(
+        0px,
+        (400 - var(--styled-typography-emphasized)) / 326 * 1px
+      );
+    }
+
+    &[data-text-style='callout'][data-emphasized] {
+      --styled-typography-emphasized: var(--font-ios-callout-weight-emphasized);
+    }
+
+    &[data-text-style='caption1'][data-emphasized] {
+      --styled-typography-emphasized: var(
+        --font-ios-caption1-weight-emphasized
+      );
+    }
+
+    &[data-text-style='caption2'][data-emphasized] {
+      --styled-typography-emphasized: var(
+        --font-ios-caption2-weight-emphasized
+      );
+    }
+
+    &[data-text-style='footnote'][data-emphasized] {
+      --styled-typography-emphasized: var(
+        --font-ios-footnote-weight-emphasized
+      );
+    }
+
+    &[data-text-style='headline'][data-emphasized] {
+      --styled-typography-emphasized: var(
+        --font-ios-headline-weight-emphasized
+      );
+    }
+
+    &[data-text-style='largeTitle'][data-emphasized] {
+      --styled-typography-emphasized: var(
+        --font-ios-large-title-weight-emphasized
+      );
+    }
+
+    &[data-text-style='subheadline'][data-emphasized] {
+      --styled-typography-emphasized: var(
+        --font-ios-subheadline-weight-emphasized
+      );
+    }
+
+    &[data-text-style='title1'][data-emphasized] {
+      --styled-typography-emphasized: var(--font-ios-title1-weight-emphasized);
+    }
+
+    &[data-text-style='title2'][data-emphasized] {
+      --styled-typography-emphasized: var(--font-ios-title2-weight-emphasized);
+    }
+
+    &[data-text-style='title3'][data-emphasized] {
+      --styled-typography-emphasized: var(--font-ios-title3-weight-emphasized);
+    }
+
+    &[data-italic] {
+      font-style: italic;
+    }
+
+    &[data-color='primary'] {
+      color: var(--color-ios-label);
+    }
+
+    &[data-color='secondary'] {
+      color: var(--color-ios-secondary-label);
+    }
+
+    &[data-color='tertiary'] {
+      color: var(--color-ios-tertiary-label);
+    }
+
+    &[data-color='quaternary'] {
+      color: var(--color-ios-quaternary-label);
+    }
+
+    &[data-dynamic-type-size='xSmall'] {
+      --font-ios-large-title-size: 31px;
+      --font-ios-large-title-line-height: 38px;
+      --font-ios-large-title-tracking: 0.37px;
+      --font-ios-title1-size: 25px;
+      --font-ios-title1-line-height: 31px;
+      --font-ios-title1-tracking: 0.15px;
+      --font-ios-title2-size: 19px;
+      --font-ios-title2-line-height: 23px;
+      --font-ios-title2-tracking: -0.45px;
+      --font-ios-title3-size: 17px;
+      --font-ios-title3-line-height: 22px;
+      --font-ios-title3-tracking: -0.43px;
+      --font-ios-headline-size: 14px;
+      --font-ios-headline-line-height: 19px;
+      --font-ios-headline-tracking: -0.15px;
+      --font-ios-body-size: 14px;
+      --font-ios-body-line-height: 19px;
+      --font-ios-body-tracking: -0.15px;
+      --font-ios-callout-size: 13px;
+      --font-ios-callout-line-height: 18px;
+      --font-ios-callout-tracking: -0.08px;
+      --font-ios-subheadline-size: 12px;
+      --font-ios-subheadline-line-height: 16px;
+      --font-ios-subheadline-tracking: 0px;
+      --font-ios-footnote-size: 12px;
+      --font-ios-footnote-line-height: 16px;
+      --font-ios-footnote-tracking: 0px;
+      --font-ios-caption1-size: 11px;
+      --font-ios-caption1-line-height: 13px;
+      --font-ios-caption1-tracking: 0.06px;
+      --font-ios-caption2-size: 11px;
+      --font-ios-caption2-line-height: 13px;
+      --font-ios-caption2-tracking: 0.06px;
+    }
+
+    &[data-dynamic-type-size='small'] {
+      --font-ios-large-title-size: 32px;
+      --font-ios-large-title-line-height: 39px;
+      --font-ios-large-title-tracking: 0.41px;
+      --font-ios-title1-size: 26px;
+      --font-ios-title1-line-height: 32px;
+      --font-ios-title1-tracking: 0.22px;
+      --font-ios-title2-size: 20px;
+      --font-ios-title2-line-height: 24px;
+      --font-ios-title2-tracking: -0.45px;
+      --font-ios-title3-size: 18px;
+      --font-ios-title3-line-height: 23px;
+      --font-ios-title3-tracking: -0.44px;
+      --font-ios-headline-size: 15px;
+      --font-ios-headline-line-height: 20px;
+      --font-ios-headline-tracking: -0.23px;
+      --font-ios-body-size: 15px;
+      --font-ios-body-line-height: 20px;
+      --font-ios-body-tracking: -0.23px;
+      --font-ios-callout-size: 14px;
+      --font-ios-callout-line-height: 19px;
+      --font-ios-callout-tracking: -0.15px;
+      --font-ios-subheadline-size: 13px;
+      --font-ios-subheadline-line-height: 18px;
+      --font-ios-subheadline-tracking: -0.08px;
+      --font-ios-footnote-size: 12px;
+      --font-ios-footnote-line-height: 16px;
+      --font-ios-footnote-tracking: 0px;
+      --font-ios-caption1-size: 11px;
+      --font-ios-caption1-line-height: 13px;
+      --font-ios-caption1-tracking: 0.06px;
+      --font-ios-caption2-size: 11px;
+      --font-ios-caption2-line-height: 13px;
+      --font-ios-caption2-tracking: 0.06px;
+    }
+
+    &[data-dynamic-type-size='medium'] {
+      --font-ios-large-title-size: 33px;
+      --font-ios-large-title-line-height: 40px;
+      --font-ios-large-title-tracking: 0.4px;
+      --font-ios-title1-size: 27px;
+      --font-ios-title1-line-height: 33px;
+      --font-ios-title1-tracking: 0.29px;
+      --font-ios-title2-size: 21px;
+      --font-ios-title2-line-height: 28px;
+      --font-ios-title2-tracking: -0.36px;
+      --font-ios-title3-size: 19px;
+      --font-ios-title3-line-height: 24px;
+      --font-ios-title3-tracking: -0.45px;
+      --font-ios-headline-size: 16px;
+      --font-ios-headline-line-height: 21px;
+      --font-ios-headline-tracking: -0.31px;
+      --font-ios-body-size: 16px;
+      --font-ios-body-line-height: 21px;
+      --font-ios-body-tracking: -0.31px;
+      --font-ios-callout-size: 15px;
+      --font-ios-callout-line-height: 20px;
+      --font-ios-callout-tracking: -0.23px;
+      --font-ios-subheadline-size: 14px;
+      --font-ios-subheadline-line-height: 19px;
+      --font-ios-subheadline-tracking: -0.15px;
+      --font-ios-footnote-size: 12px;
+      --font-ios-footnote-line-height: 16px;
+      --font-ios-footnote-tracking: 0px;
+      --font-ios-caption1-size: 11px;
+      --font-ios-caption1-line-height: 13px;
+      --font-ios-caption1-tracking: 0.06px;
+      --font-ios-caption2-size: 11px;
+      --font-ios-caption2-line-height: 13px;
+      --font-ios-caption2-tracking: 0.06px;
+    }
+
+    &[data-dynamic-type-size='large'] {
+      --font-ios-large-title-size: 34px;
+      --font-ios-large-title-line-height: 41px;
+      --font-ios-large-title-tracking: 0.4px;
+      --font-ios-title1-size: 28px;
+      --font-ios-title1-line-height: 34px;
+      --font-ios-title1-tracking: 0.38px;
+      --font-ios-title2-size: 22px;
+      --font-ios-title2-line-height: 28px;
+      --font-ios-title2-tracking: -0.26px;
+      --font-ios-title3-size: 20px;
+      --font-ios-title3-line-height: 25px;
+      --font-ios-title3-tracking: -0.45px;
+      --font-ios-headline-size: 17px;
+      --font-ios-headline-line-height: 22px;
+      --font-ios-headline-tracking: -0.43px;
+      --font-ios-body-size: 17px;
+      --font-ios-body-line-height: 22px;
+      --font-ios-body-tracking: -0.43px;
+      --font-ios-callout-size: 16px;
+      --font-ios-callout-line-height: 21px;
+      --font-ios-callout-tracking: -0.31px;
+      --font-ios-subheadline-size: 15px;
+      --font-ios-subheadline-line-height: 20px;
+      --font-ios-subheadline-tracking: -0.23px;
+      --font-ios-footnote-size: 13px;
+      --font-ios-footnote-line-height: 18px;
+      --font-ios-footnote-tracking: -0.08px;
+      --font-ios-caption1-size: 12px;
+      --font-ios-caption1-line-height: 16px;
+      --font-ios-caption1-tracking: 0px;
+      --font-ios-caption2-size: 11px;
+      --font-ios-caption2-line-height: 13px;
+      --font-ios-caption2-tracking: 0.06px;
+    }
+
+    &[data-dynamic-type-size='xLarge'] {
+      --font-ios-large-title-size: 36px;
+      --font-ios-large-title-line-height: 43px;
+      --font-ios-large-title-tracking: 0.37px;
+      --font-ios-title1-size: 30px;
+      --font-ios-title1-line-height: 36px;
+      --font-ios-title1-tracking: 0.4px;
+      --font-ios-title2-size: 24px;
+      --font-ios-title2-line-height: 30px;
+      --font-ios-title2-tracking: 0.07px;
+      --font-ios-title3-size: 22px;
+      --font-ios-title3-line-height: 28px;
+      --font-ios-title3-tracking: 0px;
+      --font-ios-headline-size: 19px;
+      --font-ios-headline-line-height: 24px;
+      --font-ios-headline-tracking: -0.45px;
+      --font-ios-body-size: 19px;
+      --font-ios-body-line-height: 24px;
+      --font-ios-body-tracking: -0.45px;
+      --font-ios-callout-size: 18px;
+      --font-ios-callout-line-height: 23px;
+      --font-ios-callout-tracking: -0.44px;
+      --font-ios-subheadline-size: 17px;
+      --font-ios-subheadline-line-height: 22px;
+      --font-ios-subheadline-tracking: -0.43px;
+      --font-ios-footnote-size: 15px;
+      --font-ios-footnote-line-height: 20px;
+      --font-ios-footnote-tracking: -0.23px;
+      --font-ios-caption1-size: 14px;
+      --font-ios-caption1-line-height: 19px;
+      --font-ios-caption1-tracking: -0.15px;
+      --font-ios-caption2-size: 13px;
+      --font-ios-caption2-line-height: 18px;
+      --font-ios-caption2-tracking: -0.08px;
+    }
+
+    &[data-dynamic-type-size='xxLarge'] {
+      --font-ios-large-title-size: 38px;
+      --font-ios-large-title-line-height: 46px;
+      --font-ios-large-title-tracking: 0.37px;
+      --font-ios-title1-size: 32px;
+      --font-ios-title1-line-height: 39px;
+      --font-ios-title1-tracking: 0.41px;
+      --font-ios-title2-size: 26px;
+      --font-ios-title2-line-height: 32px;
+      --font-ios-title2-tracking: 0.22px;
+      --font-ios-title3-size: 24px;
+      --font-ios-title3-line-height: 30px;
+      --font-ios-title3-tracking: 0.07px;
+      --font-ios-headline-size: 21px;
+      --font-ios-headline-line-height: 26px;
+      --font-ios-headline-tracking: -0.36px;
+      --font-ios-body-size: 21px;
+      --font-ios-body-line-height: 26px;
+      --font-ios-body-tracking: -0.36px;
+      --font-ios-callout-size: 20px;
+      --font-ios-callout-line-height: 24px;
+      --font-ios-callout-tracking: -0.45px;
+      --font-ios-subheadline-size: 19px;
+      --font-ios-subheadline-line-height: 24px;
+      --font-ios-subheadline-tracking: -0.45px;
+      --font-ios-footnote-size: 17px;
+      --font-ios-footnote-line-height: 22px;
+      --font-ios-footnote-tracking: -0.43px;
+      --font-ios-caption1-size: 16px;
+      --font-ios-caption1-line-height: 21px;
+      --font-ios-caption1-tracking: -0.31px;
+      --font-ios-caption2-size: 15px;
+      --font-ios-caption2-line-height: 20px;
+      --font-ios-caption2-tracking: -0.23px;
+    }
+
+    &[data-dynamic-type-size='xxxLarge'] {
+      --font-ios-large-title-size: 40px;
+      --font-ios-large-title-line-height: 48px;
+      --font-ios-large-title-tracking: 0.37px;
+      --font-ios-title1-size: 34px;
+      --font-ios-title1-line-height: 41px;
+      --font-ios-title1-tracking: 0.4px;
+      --font-ios-title2-size: 28px;
+      --font-ios-title2-line-height: 34px;
+      --font-ios-title2-tracking: 0.38px;
+      --font-ios-title3-size: 26px;
+      --font-ios-title3-line-height: 32px;
+      --font-ios-title3-tracking: 0.22px;
+      --font-ios-headline-size: 23px;
+      --font-ios-headline-line-height: 29px;
+      --font-ios-headline-tracking: -0.1px;
+      --font-ios-body-size: 23px;
+      --font-ios-body-line-height: 29px;
+      --font-ios-body-tracking: -0.1px;
+      --font-ios-callout-size: 22px;
+      --font-ios-callout-line-height: 28px;
+      --font-ios-callout-tracking: -0.26px;
+      --font-ios-subheadline-size: 21px;
+      --font-ios-subheadline-line-height: 28px;
+      --font-ios-subheadline-tracking: -0.36px;
+      --font-ios-footnote-size: 19px;
+      --font-ios-footnote-line-height: 24px;
+      --font-ios-footnote-tracking: -0.45px;
+      --font-ios-caption1-size: 18px;
+      --font-ios-caption1-line-height: 23px;
+      --font-ios-caption1-tracking: -0.44px;
+      --font-ios-caption2-size: 17px;
+      --font-ios-caption2-line-height: 22px;
+      --font-ios-caption2-tracking: -0.43px;
+    }
+
+    &[data-dynamic-type-size='ax1'] {
+      --font-ios-large-title-size: 44px;
+      --font-ios-large-title-line-height: 52px;
+      --font-ios-large-title-tracking: 0px;
+      --font-ios-title1-size: 38px;
+      --font-ios-title1-line-height: 46px;
+      --font-ios-title1-tracking: 0px;
+      --font-ios-title2-size: 34px;
+      --font-ios-title2-line-height: 41px;
+      --font-ios-title2-tracking: 0px;
+      --font-ios-title3-size: 31px;
+      --font-ios-title3-line-height: 38px;
+      --font-ios-title3-tracking: 0px;
+      --font-ios-headline-size: 28px;
+      --font-ios-headline-line-height: 34px;
+      --font-ios-headline-tracking: 0px;
+      --font-ios-body-size: 28px;
+      --font-ios-body-line-height: 34px;
+      --font-ios-body-tracking: 0px;
+      --font-ios-callout-size: 26px;
+      --font-ios-callout-line-height: 32px;
+      --font-ios-callout-tracking: 0px;
+      --font-ios-subheadline-size: 25px;
+      --font-ios-subheadline-line-height: 31px;
+      --font-ios-subheadline-tracking: 0px;
+      --font-ios-footnote-size: 23px;
+      --font-ios-footnote-line-height: 29px;
+      --font-ios-footnote-tracking: 0px;
+      --font-ios-caption1-size: 22px;
+      --font-ios-caption1-line-height: 28px;
+      --font-ios-caption1-tracking: 0px;
+      --font-ios-caption2-size: 20px;
+      --font-ios-caption2-line-height: 25px;
+      --font-ios-caption2-tracking: 0px;
+    }
+
+    &[data-dynamic-type-size='ax2'] {
+      --font-ios-large-title-size: 48px;
+      --font-ios-large-title-line-height: 57px;
+      --font-ios-large-title-tracking: 0px;
+      --font-ios-title1-size: 43px;
+      --font-ios-title1-line-height: 51px;
+      --font-ios-title1-tracking: 0px;
+      --font-ios-title2-size: 43px;
+      --font-ios-title2-line-height: 51px;
+      --font-ios-title2-tracking: 0px;
+      --font-ios-title3-size: 37px;
+      --font-ios-title3-line-height: 44px;
+      --font-ios-title3-tracking: 0px;
+      --font-ios-headline-size: 33px;
+      --font-ios-headline-line-height: 40px;
+      --font-ios-headline-tracking: 0px;
+      --font-ios-body-size: 33px;
+      --font-ios-body-line-height: 40px;
+      --font-ios-body-tracking: 0px;
+      --font-ios-callout-size: 32px;
+      --font-ios-callout-line-height: 39px;
+      --font-ios-callout-tracking: 0px;
+      --font-ios-subheadline-size: 30px;
+      --font-ios-subheadline-line-height: 37px;
+      --font-ios-subheadline-tracking: 0px;
+      --font-ios-footnote-size: 27px;
+      --font-ios-footnote-line-height: 33px;
+      --font-ios-footnote-tracking: 0px;
+      --font-ios-caption1-size: 26px;
+      --font-ios-caption1-line-height: 32px;
+      --font-ios-caption1-tracking: 0px;
+      --font-ios-caption2-size: 24px;
+      --font-ios-caption2-line-height: 30px;
+      --font-ios-caption2-tracking: 0px;
+    }
+
+    &[data-dynamic-type-size='ax3'] {
+      --font-ios-large-title-size: 52px;
+      --font-ios-large-title-line-height: 61px;
+      --font-ios-large-title-tracking: 0px;
+      --font-ios-title1-size: 48px;
+      --font-ios-title1-line-height: 57px;
+      --font-ios-title1-tracking: 0px;
+      --font-ios-title2-size: 44px;
+      --font-ios-title2-line-height: 52px;
+      --font-ios-title2-tracking: 0px;
+      --font-ios-title3-size: 43px;
+      --font-ios-title3-line-height: 51px;
+      --font-ios-title3-tracking: 0px;
+      --font-ios-headline-size: 40px;
+      --font-ios-headline-line-height: 48px;
+      --font-ios-headline-tracking: 0px;
+      --font-ios-body-size: 40px;
+      --font-ios-body-line-height: 48px;
+      --font-ios-body-tracking: 0px;
+      --font-ios-callout-size: 38px;
+      --font-ios-callout-line-height: 46px;
+      --font-ios-callout-tracking: 0px;
+      --font-ios-subheadline-size: 36px;
+      --font-ios-subheadline-line-height: 43px;
+      --font-ios-subheadline-tracking: 0px;
+      --font-ios-footnote-size: 33px;
+      --font-ios-footnote-line-height: 40px;
+      --font-ios-footnote-tracking: 0px;
+      --font-ios-caption1-size: 32px;
+      --font-ios-caption1-line-height: 39px;
+      --font-ios-caption1-tracking: 0px;
+      --font-ios-caption2-size: 29px;
+      --font-ios-caption2-line-height: 35px;
+      --font-ios-caption2-tracking: 0px;
+    }
+
+    &[data-dynamic-type-size='ax4'] {
+      --font-ios-large-title-size: 56px;
+      --font-ios-large-title-line-height: 66px;
+      --font-ios-large-title-tracking: 0px;
+      --font-ios-title1-size: 53px;
+      --font-ios-title1-line-height: 62px;
+      --font-ios-title1-tracking: 0px;
+      --font-ios-title2-size: 50px;
+      --font-ios-title2-line-height: 59px;
+      --font-ios-title2-tracking: 0px;
+      --font-ios-title3-size: 43px;
+      --font-ios-title3-line-height: 51px;
+      --font-ios-title3-tracking: 0px;
+      --font-ios-headline-size: 47px;
+      --font-ios-headline-line-height: 56px;
+      --font-ios-headline-tracking: 0px;
+      --font-ios-body-size: 47px;
+      --font-ios-body-line-height: 56px;
+      --font-ios-body-tracking: 0px;
+      --font-ios-callout-size: 44px;
+      --font-ios-callout-line-height: 52px;
+      --font-ios-callout-tracking: 0px;
+      --font-ios-subheadline-size: 42px;
+      --font-ios-subheadline-line-height: 50px;
+      --font-ios-subheadline-tracking: 0px;
+      --font-ios-footnote-size: 38px;
+      --font-ios-footnote-line-height: 46px;
+      --font-ios-footnote-tracking: 0px;
+      --font-ios-caption1-size: 37px;
+      --font-ios-caption1-line-height: 44px;
+      --font-ios-caption1-tracking: 0px;
+      --font-ios-caption2-size: 34px;
+      --font-ios-caption2-line-height: 41px;
+      --font-ios-caption2-tracking: 0px;
+    }
+
+    &[data-dynamic-type-size='ax5'] {
+      --font-ios-large-title-size: 60px;
+      --font-ios-large-title-line-height: 70px;
+      --font-ios-large-title-tracking: 0px;
+      --font-ios-title1-size: 58px;
+      --font-ios-title1-line-height: 68px;
+      --font-ios-title1-tracking: 0px;
+      --font-ios-title2-size: 56px;
+      --font-ios-title2-line-height: 66px;
+      --font-ios-title2-tracking: 0px;
+      --font-ios-title3-size: 55px;
+      --font-ios-title3-line-height: 65px;
+      --font-ios-title3-tracking: 0px;
+      --font-ios-headline-size: 53px;
+      --font-ios-headline-line-height: 62px;
+      --font-ios-headline-tracking: 0px;
+      --font-ios-body-size: 53px;
+      --font-ios-body-line-height: 62px;
+      --font-ios-body-tracking: 0px;
+      --font-ios-callout-size: 51px;
+      --font-ios-callout-line-height: 60px;
+      --font-ios-callout-tracking: 0px;
+      --font-ios-subheadline-size: 49px;
+      --font-ios-subheadline-line-height: 58px;
+      --font-ios-subheadline-tracking: 0px;
+      --font-ios-footnote-size: 44px;
+      --font-ios-footnote-line-height: 52px;
+      --font-ios-footnote-tracking: 0px;
+      --font-ios-caption1-size: 43px;
+      --font-ios-caption1-line-height: 51px;
+      --font-ios-caption1-tracking: 0px;
+      --font-ios-caption2-size: 40px;
+      --font-ios-caption2-line-height: 48px;
+      --font-ios-caption2-tracking: 0px;
+    }
+  }
+}

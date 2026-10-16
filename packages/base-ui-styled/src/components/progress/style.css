@@ -1,0 +1,263 @@
+/* Progress (see main.tsx). */
+@layer base-ui-styled {
+  .bus-progress-root {
+    position: relative;
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    anchor-scope: --styled-progress-fill;
+    color: var(--color-ios-secondary-label);
+    font-size: var(--font-ios-subheadline-size);
+    font-style: normal;
+    font-variation-settings: 'wght' var(--font-ios-subheadline-weight);
+    font-weight: round(down, var(--font-ios-subheadline-weight), 100);
+    gap: 6px 8px;
+    letter-spacing: var(--font-ios-subheadline-tracking);
+    line-height: var(--font-ios-subheadline-line-height);
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(
+      0px,
+      (var(--font-ios-subheadline-weight) - 400) / 326 * 1px
+    );
+
+    --styled-symbol-thinning: max(
+      0px,
+      (400 - var(--font-ios-subheadline-weight)) / 326 * 1px
+    );
+
+    /* Its label and value (see Label, Value): above the track (by default;
+       on a line of their own, the label at its start, the value at its end),
+       below it, or before or after it. */
+    & > [data-progress-placement='block-start'] {
+      order: -3;
+    }
+
+    & > [data-progress-placement='inline-start'] {
+      order: -1;
+    }
+
+    & > [data-progress-placement='inline-end'] {
+      order: 1;
+    }
+
+    & > [data-progress-placement='block-end'] {
+      order: 3;
+    }
+
+    &
+      > [data-progress-placement='block-start']
+      + [data-progress-placement='block-start'],
+    &
+      > [data-progress-placement='block-end']
+      + [data-progress-placement='block-end'] {
+      margin-inline-start: auto;
+    }
+
+    &:has(> [data-progress-placement='block-start'])::before {
+      flex-basis: 100%;
+      order: -2;
+      content: '';
+      margin-block-end: -6px;
+    }
+
+    /* Focused by keyboard (with a momentary tooltip, see Value): a ring in
+       the tint around the track, its tooltip shown. */
+    &:focus-visible {
+      outline: none;
+
+      & > [data-progress-placement='momentary-tooltip'] {
+        opacity: 1;
+        scale: 1;
+      }
+
+      & > [data-progress-part='track'] {
+        outline: 2px solid
+          var(--styled-progress-tint, var(--color-ios-system-blue));
+        outline-offset: 2px;
+      }
+    }
+
+    &:has(> [data-progress-placement='block-end']) {
+      &::after {
+        flex-basis: 100%;
+        order: 2;
+        content: '';
+        margin-block-end: -6px;
+      }
+    }
+  }
+
+  .bus-progress-track {
+    position: relative;
+    overflow: hidden;
+    min-width: var(--styled-progress-min-length, 280px);
+    height: 6px;
+    flex: 1 1 0;
+    border-radius: 3px;
+    background-color: var(--color-ios-system-fill);
+    container-type: inline-size;
+  }
+
+  .bus-progress-label {
+    min-width: 0;
+  }
+
+  .bus-progress-value {
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+
+    /* In a tooltip (see Tooltip) centered on the fill's end, 8px above it. */
+    &[data-progress-placement='tooltip'],
+    &[data-progress-placement='momentary-tooltip'] {
+      position: absolute;
+      z-index: 1;
+      bottom: calc(anchor(top) + 8px);
+      left: anchor(right);
+      position-anchor: --styled-progress-fill;
+      translate: -50% 0;
+      white-space: nowrap;
+    }
+
+    /* Momentary: shown while the bar is hovered (or focused by keyboard, see
+       Root). */
+    &[data-progress-placement='momentary-tooltip'] {
+      opacity: 0;
+      scale: 0.85;
+      transition-duration: 150ms;
+      transition-property: opacity, scale;
+    }
+
+    [role='progressbar']:hover
+      > &[data-progress-placement='momentary-tooltip'] {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  .bus-progress-activity-indicator {
+    --styled-activity-size: 30px;
+    --styled-activity-spoke-width: 4px;
+    --styled-activity-spoke-length: 10px;
+
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-ios-secondary-label);
+    font-size: var(--font-ios-body-size);
+    font-style: normal;
+    font-variation-settings: 'wght' var(--font-ios-body-weight);
+    font-weight: round(down, var(--font-ios-body-weight), 100);
+    gap: 8px;
+    letter-spacing: var(--font-ios-body-tracking);
+    line-height: var(--font-ios-body-line-height);
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
+    vertical-align: middle;
+
+    --styled-symbol-thinning: max(
+      0px,
+      (400 - var(--font-ios-body-weight)) / 326 * 1px
+    );
+
+    &[data-size='small'] {
+      --styled-activity-size: 22px;
+      --styled-activity-spoke-width: 3px;
+      --styled-activity-spoke-length: 7px;
+
+      gap: 4px;
+    }
+  }
+
+  @keyframes bus-progress-slide {
+    from {
+      translate: -100% 0;
+    }
+
+    to {
+      translate: 100cqw 0;
+    }
+  }
+
+  /* A spoke at a time, clockwise. */
+  @keyframes bus-progress-spin {
+    to {
+      rotate: 1turn;
+    }
+  }
+
+  /* Fading: each spoke from the brightest to the faintest, a turn long. */
+  @keyframes bus-progress-fade {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0.15;
+    }
+  }
+
+  .bus-progress-indicator {
+    display: block;
+    min-width: 6px;
+    height: 100%;
+    border-radius: 3px;
+    anchor-name: --styled-progress-fill;
+    background-color: var(--styled-progress-tint, var(--color-ios-system-blue));
+    transition: width 200ms;
+
+    [data-indeterminate] > & {
+      width: 30%;
+      animation: bus-progress-slide 1.2s ease-in-out infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+
+  .bus-progress-spinner {
+    position: relative;
+    width: var(--styled-activity-size);
+    height: var(--styled-activity-size);
+    flex: none;
+    animation: bus-progress-spin var(--styled-activity-duration, 1s) steps(8)
+      infinite;
+
+    & > span {
+      position: absolute;
+      top: 0;
+      left: calc(50% - var(--styled-activity-spoke-width) / 2);
+      width: var(--styled-activity-spoke-width);
+      height: var(--styled-activity-spoke-length);
+      border-radius: calc(var(--styled-activity-spoke-width) / 2);
+      background-color: var(--styled-activity-color, currentcolor);
+      transform-origin: 50% calc(var(--styled-activity-size) / 2);
+    }
+
+    [data-movement='rotate'] > & {
+      animation-timing-function: linear;
+    }
+
+    /* Fading: the spokes in place, each as far into its fade as its opacity
+       (its phase: a share of a turn behind the brightest). */
+    [data-movement='fade'] > & {
+      animation: none;
+    }
+
+    [data-movement='fade'] > & > span {
+      animation: bus-progress-fade var(--styled-activity-duration, 1s) linear
+        infinite;
+      animation-delay: calc(
+        var(--styled-activity-duration, 1s) * var(--styled-activity-phase) * -1
+      );
+    }
+
+    [data-stopped] > &,
+    [data-stopped] > & > span {
+      animation-play-state: paused;
+    }
+  }
+}

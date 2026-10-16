@@ -1,0 +1,178 @@
+/* Popover (see main.tsx). */
+@layer base-ui-styled {
+  .bus-popover-body {
+    overflow: auto;
+    max-height: inherit;
+    box-sizing: border-box;
+    border-radius: inherit;
+    overscroll-behavior: contain;
+  }
+
+  /* Its material (see main.tsx): its outlines' clip paths by its arrow's
+     side (`data-arrow`). */
+  .bus-popover-popup {
+    --styled-popover-rim: rgb(0 0 0 / 12%);
+    --styled-popover-highlight: rgb(255 255 255 / 60%);
+    --styled-popover-glow: rgb(0 0 0 / 20%);
+
+    position: relative;
+    border-radius: 13px;
+    backdrop-filter: none;
+    background-color: transparent;
+    box-shadow: none;
+    color: var(--styled-glass-content);
+    isolation: isolate;
+    outline: none;
+
+    @media (prefers-color-scheme: dark) {
+      --styled-popover-rim: rgb(255 255 255 / 15%);
+      --styled-popover-highlight: transparent;
+      --styled-popover-glow: rgb(0 0 0 / 15%);
+    }
+
+    &:where(:root[data-color-scheme='light'] *) {
+      --styled-popover-rim: rgb(0 0 0 / 12%);
+      --styled-popover-highlight: rgb(255 255 255 / 60%);
+      --styled-popover-glow: rgb(0 0 0 / 20%);
+    }
+
+    &:where(:root[data-color-scheme='dark'] *) {
+      --styled-popover-rim: rgb(255 255 255 / 15%);
+      --styled-popover-highlight: transparent;
+      --styled-popover-glow: rgb(0 0 0 / 15%);
+    }
+
+    /* Its backdrop blur. */
+    &::before {
+      position: absolute;
+      z-index: -1;
+      backdrop-filter: saturate(180%) blur(16px);
+      clip-path: var(--styled-popover-outline);
+      content: '';
+      inset: -13px;
+    }
+
+    &[data-arrow='top']::before {
+      clip-path: var(--styled-popover-outline-top);
+    }
+
+    &[data-arrow='right']::before {
+      clip-path: var(--styled-popover-outline-right);
+    }
+
+    &[data-arrow='bottom']::before {
+      clip-path: var(--styled-popover-outline-bottom);
+    }
+
+    &[data-arrow='left']::before {
+      clip-path: var(--styled-popover-outline-left);
+    }
+  }
+
+  /* Its fill, rim and highlight, the glass' glow along them (13px: the
+     arrow's depth, room for the wedge). */
+  .bus-popover-shape {
+    position: absolute;
+    z-index: -1;
+    filter: drop-shadow(0 0 25px var(--styled-popover-glow));
+    inset: -13px;
+    pointer-events: none;
+
+    & > span {
+      position: absolute;
+      inset: 0;
+    }
+
+    & > [data-layer='fill'] {
+      background-color: var(--styled-glass-background);
+      clip-path: var(--styled-popover-outline);
+    }
+
+    /* Its rim (as the glass': an edge, 1px; light, a highlight inside it). */
+    & > [data-layer='rim'] {
+      background-color: var(--styled-popover-rim);
+      clip-path: var(--styled-popover-rim-outline);
+    }
+
+    & > [data-layer='highlight'] {
+      background-color: var(--styled-popover-highlight);
+      clip-path: var(--styled-popover-highlight-outline);
+    }
+
+    [data-arrow='top'] > & > [data-layer='fill'] {
+      clip-path: var(--styled-popover-outline-top);
+    }
+
+    [data-arrow='right'] > & > [data-layer='fill'] {
+      clip-path: var(--styled-popover-outline-right);
+    }
+
+    [data-arrow='bottom'] > & > [data-layer='fill'] {
+      clip-path: var(--styled-popover-outline-bottom);
+    }
+
+    [data-arrow='left'] > & > [data-layer='fill'] {
+      clip-path: var(--styled-popover-outline-left);
+    }
+
+    [data-arrow='top'] > & > [data-layer='rim'] {
+      clip-path: var(--styled-popover-rim-outline-top);
+    }
+
+    [data-arrow='right'] > & > [data-layer='rim'] {
+      clip-path: var(--styled-popover-rim-outline-right);
+    }
+
+    [data-arrow='bottom'] > & > [data-layer='rim'] {
+      clip-path: var(--styled-popover-rim-outline-bottom);
+    }
+
+    [data-arrow='left'] > & > [data-layer='rim'] {
+      clip-path: var(--styled-popover-rim-outline-left);
+    }
+
+    [data-arrow='top'] > & > [data-layer='highlight'] {
+      clip-path: var(--styled-popover-highlight-outline-top);
+    }
+
+    [data-arrow='right'] > & > [data-layer='highlight'] {
+      clip-path: var(--styled-popover-highlight-outline-right);
+    }
+
+    [data-arrow='bottom'] > & > [data-layer='highlight'] {
+      clip-path: var(--styled-popover-highlight-outline-bottom);
+    }
+
+    [data-arrow='left'] > & > [data-layer='highlight'] {
+      clip-path: var(--styled-popover-highlight-outline-left);
+    }
+  }
+
+  /* Its arrow: positioned by Base UI, drawn by the popup (56px: the wedge,
+     13px deep). */
+  .bus-popover-arrow {
+    width: 56px;
+    height: 13px;
+    pointer-events: none;
+
+    &[data-arrow='bottom'] {
+      top: 100%;
+    }
+
+    &[data-arrow='top'] {
+      bottom: 100%;
+    }
+
+    &[data-arrow='right'] {
+      left: 100%;
+      width: 13px;
+      height: 56px;
+    }
+
+    &[data-arrow='left'] {
+      right: 100%;
+      width: 13px;
+      height: 56px;
+    }
+  }
+}

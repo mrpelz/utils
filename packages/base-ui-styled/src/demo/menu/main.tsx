@@ -1,28 +1,19 @@
+import './style.css';
+
+import { sfChevronUpChevronDown } from '@bradleyhodges/sfsymbols/sfChevronUpChevronDown';
 import { sfLockFill } from '@bradleyhodges/sfsymbols/sfLockFill';
 import { sfPinFill } from '@bradleyhodges/sfsymbols/sfPinFill';
 import { sfSquare } from '@bradleyhodges/sfsymbols/sfSquare';
 import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { styled } from 'goober';
-import { forwardRef, FunctionComponent, useMemo, useRef } from 'react';
+import { FunctionComponent, useMemo, useRef, useState } from 'react';
 
-import { Button, Menu } from '../../components/index.js';
-import { useButtonDemo } from '../button/compose.js';
-import {
-  getPropOptionsRoot as getPropOptionsButtonRoot,
-  propOptionsContent as propOptionsButtonContent,
-} from '../button/props.js';
-import { AddLog, useLog } from '../utils/log.js';
-import {
-  commonPropOptions,
-  Component,
-  Remounters,
-  usePropControl,
-} from '../utils/main.js';
+import { Button, Menu, Symbol } from '../../components/index.js';
+import { useLog } from '../utils/log.js';
+import { Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
-import { SFSymbol } from '../utils/symbol.js';
 import {
   getPropOptionsCheckboxItems,
   getPropOptionsItem,
@@ -30,7 +21,6 @@ import {
   getPropOptionsRoot,
   getPropOptionsSubmenuRoot,
   getPropOptionsTrigger,
-  propOptionsContent,
   propOptionsIndicator,
   propOptionsItem,
   propOptionsItemDestructive,
@@ -42,214 +32,86 @@ import {
   propOptionsToggleItem,
 } from './props.js';
 
-const square = <SFSymbol icon={sfSquare} />;
+/**
+ * A menu (Base UI Menu, Figma “Menu”): its trigger a `Button` (`render`),
+ * quick actions, items (with symbols, shortcuts, a subtitle), sections and
+ * a submenu.
+ */
+export const MenuDemo: FunctionComponent = () => {
+  const id = 'menu';
 
-// The trigger: a button (all of its demo's options), by default glass,
-// labelled “Open Menu”.
-const triggerContent = {
-  ...propOptionsButtonContent,
-  label: ['Open Menu', 'Options', undefined] as const,
-};
-
-/** The trigger's button's root: glass first; its clicks are the trigger's. */
-const getTriggerRoot = (addLog: AddLog) => {
-  const root = getPropOptionsButtonRoot(addLog);
-  return {
-    ...root,
-    variant: [
-      'glass',
-      'glass-prominent',
-      'bordered',
-      'bordered-prominent',
-      'bordered-secondary',
-      'borderless',
-    ] as const,
-    onClick: [undefined, ...root.onClick.filter(Boolean)] as const,
-  };
-};
-
-// Keeps the trigger high in the stage, with room for the menu below it.
-const TriggerSpace = styled('div')`
-  margin-bottom: 560px;
-`;
-
-type Preset = {
-  id: string;
-  size?: 'compact' | 'regular';
-  title: string;
-};
-
-const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
   const [log, addLog] = useLog();
-
   const [
-    externalContent,
     externalRoot,
     externalTrigger,
     externalPositioner,
     externalPopup,
-    externalQuickActions,
     externalQuickAction,
     externalItem,
     externalDisabledItem,
     externalDestructiveItem,
-    externalCheckboxItem,
-    externalRadioGroup,
-    externalRadioItem,
-    externalIndicator,
-    externalSeparator,
-    externalGroup,
-    externalGroupLabel,
     externalSubmenuRoot,
     externalSubmenuTrigger,
     externalSubmenuPositioner,
     externalSubmenuPopup,
-    externalIcon,
-    externalLabel,
-    externalSubtitle,
-    externalShortcut,
-    ...externalButton
-  ] = useProvidedState(preset.id);
+  ] = useProvidedState(id);
 
-  const triggerButton = useButtonDemo(externalButton, {
-    content: triggerContent,
-    prefix: 'trigger button: ',
-    root: useMemo(() => getTriggerRoot(addLog), [addLog]),
-  });
-
-  const [controlContent, content, stateContent] = usePropControl(
-    propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
-  );
-
-  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
-    useMemo(
-      () => getPropOptionsRoot(preset.size, addLog),
-      [addLog, preset.size],
-    ),
+  const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
+    useMemo(() => getPropOptionsRoot(addLog), [addLog]),
     'root',
     externalRoot,
     true,
   );
-
   const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
     useMemo(() => getPropOptionsTrigger(addLog), [addLog]),
     'trigger',
     externalTrigger,
   );
-
   const [controlPositioner, propsPositioner, statePositioner] = usePropControl(
     propOptionsPositioner,
     'positioner',
     externalPositioner,
   );
-
   const [controlPopup, propsPopup, statePopup] = usePropControl(
     propOptionsPopup,
     'popup',
     externalPopup,
   );
-
-  const [controlQuickActions, propsQuickActions, stateQuickActions] =
-    usePropControl(commonPropOptions, 'quick actions', externalQuickActions);
-
   const [controlQuickAction, propsQuickAction, stateQuickAction] =
     usePropControl(propOptionsItem, 'quick action (1st)', externalQuickAction);
-
-  const itemOptions = useMemo(() => getPropOptionsItem(addLog), [addLog]);
-
   const [controlItem, propsItem, stateItem] = usePropControl(
-    itemOptions,
+    useMemo(() => getPropOptionsItem(addLog), [addLog]),
     'item (1st)',
     externalItem,
   );
-
   const [controlDisabledItem, propsDisabledItem, stateDisabledItem] =
     usePropControl(
       propOptionsItemDisabled,
       'item (disabled)',
       externalDisabledItem,
     );
-
   const [controlDestructiveItem, propsDestructiveItem, stateDestructiveItem] =
     usePropControl(
       propOptionsItemDestructive,
       'item (destructive)',
       externalDestructiveItem,
     );
-
-  const [
-    controlCheckboxItem,
-    propsCheckboxItem,
-    stateCheckboxItem,
-    RemounterCheckboxItem,
-  ] = usePropControl(
-    useMemo(() => getPropOptionsCheckboxItems(addLog), [addLog]),
-    'checkbox items',
-    externalCheckboxItem,
-  );
-
-  const [
-    controlRadioGroup,
-    propsRadioGroup,
-    stateRadioGroup,
-    RemounterRadioGroup,
-  ] = usePropControl(
-    useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
-    'radio group',
-    externalRadioGroup,
-  );
-
-  const [controlRadioItem, propsRadioItem, stateRadioItem] = usePropControl(
-    propOptionsToggleItem,
-    'radio items',
-    externalRadioItem,
-  );
-
-  const [controlIndicator, propsIndicator, stateIndicator] = usePropControl(
-    propOptionsIndicator,
-    'indicators',
-    externalIndicator,
-  );
-
-  const [controlSeparator, propsSeparator, stateSeparator] = usePropControl(
-    commonPropOptions,
-    'separators',
-    externalSeparator,
-  );
-
-  const [controlGroup, propsGroup, stateGroup] = usePropControl(
-    commonPropOptions,
-    'groups',
-    externalGroup,
-  );
-
-  const [controlGroupLabel, propsGroupLabel, stateGroupLabel] = usePropControl(
-    commonPropOptions,
-    'group labels',
-    externalGroupLabel,
-  );
-
   const [
     controlSubmenuRoot,
     propsSubmenuRoot,
     stateSubmenuRoot,
-    RemounterSubmenuRoot,
+    keySubmenuRoot,
   ] = usePropControl(
     useMemo(() => getPropOptionsSubmenuRoot(addLog), [addLog]),
     'submenu root',
     externalSubmenuRoot,
   );
-
   const [controlSubmenuTrigger, propsSubmenuTrigger, stateSubmenuTrigger] =
     usePropControl(
       propOptionsSubmenuTrigger,
       'submenu trigger',
       externalSubmenuTrigger,
     );
-
   const [
     controlSubmenuPositioner,
     propsSubmenuPositioner,
@@ -259,291 +121,629 @@ const MenuDemoBase: FunctionComponent<{ preset: Preset }> = ({ preset }) => {
     'submenu positioner',
     externalSubmenuPositioner,
   );
-
   const [controlSubmenuPopup, propsSubmenuPopup, stateSubmenuPopup] =
     usePropControl(propOptionsPopup, 'submenu popup', externalSubmenuPopup);
-
-  const [controlIcon, propsIcon, stateIcon] = usePropControl(
-    commonPropOptions,
-    'icons',
-    externalIcon,
-  );
-
-  const [controlLabel, propsLabel, stateLabel] = usePropControl(
-    commonPropOptions,
-    'labels',
-    externalLabel,
-  );
-
-  const [controlSubtitle, propsSubtitle, stateSubtitle] = usePropControl(
-    commonPropOptions,
-    'subtitles',
-    externalSubtitle,
-  );
-
-  const [controlShortcut, propsShortcut, stateShortcut] = usePropControl(
-    commonPropOptions,
-    'shortcuts',
-    externalShortcut,
-  );
-
-  const icon = content.icons ? (
-    <Menu.Icon {...propsIcon}>{square}</Menu.Icon>
-  ) : null;
-
-  const label = (text: string) => (
-    <Menu.Label {...propsLabel}>{text}</Menu.Label>
-  );
-
-  const shortcut = (keys: string) =>
-    content.shortcuts ? (
-      <Menu.Shortcut {...propsShortcut}>{keys}</Menu.Shortcut>
-    ) : null;
-
-  const quickActions = [
-    { icon: sfSquareAndArrowUp, label: 'Share' },
-    { icon: sfPinFill, label: 'Pin' },
-    { destructive: true, icon: sfLockFill, label: 'Lock' },
-  ].slice(0, content.quickActions);
 
   return (
     <Component
       center
       baseUiId="menu"
-      id={preset.id}
+      id={id}
       log={log}
-      title={preset.title}
+      title="Menu"
       controls={[
-        controlContent,
         controlRoot,
         controlTrigger,
-        ...triggerButton.controls,
         controlPositioner,
         controlPopup,
-        controlQuickActions,
         controlQuickAction,
         controlItem,
         controlDisabledItem,
         controlDestructiveItem,
-        controlCheckboxItem,
-        controlRadioGroup,
-        controlRadioItem,
-        controlIndicator,
-        controlSeparator,
-        controlGroup,
-        controlGroupLabel,
         controlSubmenuRoot,
         controlSubmenuTrigger,
         controlSubmenuPositioner,
         controlSubmenuPopup,
-        controlIcon,
-        controlLabel,
-        controlSubtitle,
-        controlShortcut,
       ]}
-      stateUrl={useCreateStateUrl(preset.id, [
-        stateContent,
+      stateUrl={useCreateStateUrl(id, [
         stateRoot,
         stateTrigger,
         statePositioner,
         statePopup,
-        stateQuickActions,
         stateQuickAction,
         stateItem,
         stateDisabledItem,
         stateDestructiveItem,
-        stateCheckboxItem,
-        stateRadioGroup,
-        stateRadioItem,
-        stateIndicator,
-        stateSeparator,
-        stateGroup,
-        stateGroupLabel,
         stateSubmenuRoot,
         stateSubmenuTrigger,
         stateSubmenuPositioner,
         stateSubmenuPopup,
-        stateIcon,
-        stateLabel,
-        stateSubtitle,
-        stateShortcut,
-        ...triggerButton.states,
       ])}
     >
-      {/* (Remounted as its parts' defaults change.) */}
-      <Remounters
-        remounters={[
-          RemounterRoot,
-          RemounterCheckboxItem,
-          RemounterRadioGroup,
-          RemounterSubmenuRoot,
-        ]}
+      <Menu.Root
+        key={`${keyRoot}-${keySubmenuRoot}`}
+        {...propsRoot}
       >
-        <Menu.Root {...propsRoot}>
-          <TriggerSpace>
-            <Menu.Trigger
-              {...propsTrigger}
-              render={<Button.Root {...triggerButton.propsRoot} />}
-            >
-              {triggerButton.children}
-            </Menu.Trigger>
-          </TriggerSpace>
-          <Menu.Portal>
-            <Menu.Positioner {...propsPositioner}>
-              <Menu.Popup {...propsPopup}>
-                {quickActions.length > 0 ? (
-                  <>
-                    <Menu.QuickActions {...propsQuickActions}>
-                      {quickActions.map(
-                        ({ destructive, icon: symbol, label: text }, index) => (
-                          <Menu.QuickAction
-                            key={text}
-                            destructive={destructive}
-                            {...(index === 0 ? propsQuickAction : {})}
-                          >
-                            <Menu.Icon {...propsIcon}>
-                              <SFSymbol icon={symbol} />
-                            </Menu.Icon>
-                            {label(text)}
-                          </Menu.QuickAction>
-                        ),
-                      )}
-                    </Menu.QuickActions>
-                    <Menu.Separator {...propsSeparator} />
-                  </>
-                ) : null}
+        <div className="menu-demo-trigger-space">
+          <Menu.Trigger
+            {...propsTrigger}
+            render={<Button.Root variant="glass" />}
+          >
+            <Button.Label>Open Menu</Button.Label>
+          </Menu.Trigger>
+        </div>
+        <Menu.Portal>
+          <Menu.Positioner {...propsPositioner}>
+            <Menu.Popup {...propsPopup}>
+              <Menu.QuickActions>
+                <Menu.QuickAction {...propsQuickAction}>
+                  <Menu.Icon>
+                    <Symbol icon={sfSquareAndArrowUp} />
+                  </Menu.Icon>
+                  <Menu.Label>Share</Menu.Label>
+                </Menu.QuickAction>
+                <Menu.QuickAction>
+                  <Menu.Icon>
+                    <Symbol icon={sfPinFill} />
+                  </Menu.Icon>
+                  <Menu.Label>Pin</Menu.Label>
+                </Menu.QuickAction>
+                <Menu.QuickAction destructive>
+                  <Menu.Icon>
+                    <Symbol icon={sfLockFill} />
+                  </Menu.Icon>
+                  <Menu.Label>Lock</Menu.Label>
+                </Menu.QuickAction>
+              </Menu.QuickActions>
+              <Menu.Separator />
 
-                <Menu.Item {...propsItem}>
-                  {icon}
-                  {label('Action')}
-                  {shortcut('⌘A')}
-                </Menu.Item>
-                <Menu.Item {...propsDisabledItem}>
-                  {icon}
-                  {label('Disabled Action')}
-                  {shortcut('⇧⌘A')}
-                </Menu.Item>
-                <Menu.Item {...propsDestructiveItem}>
-                  {icon}
-                  {label('Delete')}
-                </Menu.Item>
+              <Menu.Item {...propsItem}>
+                <Menu.Icon>
+                  <Symbol icon={sfSquare} />
+                </Menu.Icon>
+                <Menu.Label>Action</Menu.Label>
+                <Menu.Shortcut>⌘A</Menu.Shortcut>
+              </Menu.Item>
+              <Menu.Item {...propsDisabledItem}>
+                <Menu.Icon>
+                  <Symbol icon={sfSquare} />
+                </Menu.Icon>
+                <Menu.Label>Disabled Action</Menu.Label>
+                <Menu.Shortcut>⇧⌘A</Menu.Shortcut>
+              </Menu.Item>
+              <Menu.Item {...propsDestructiveItem}>
+                <Menu.Icon>
+                  <Symbol icon={sfSquare} />
+                </Menu.Icon>
+                <Menu.Label>Delete</Menu.Label>
+              </Menu.Item>
 
-                <Menu.Separator {...propsSeparator} />
+              <Menu.Separator />
 
-                <Menu.Item {...propsItem}>
-                  {icon}
-                  {label('Action')}
-                  {content.subtitles ? (
-                    <Menu.Subtitle {...propsSubtitle}>Subtitle</Menu.Subtitle>
-                  ) : null}
-                </Menu.Item>
+              <Menu.Item onClick={() => addLog('subtitled item clicked')}>
+                <Menu.Icon>
+                  <Symbol icon={sfSquare} />
+                </Menu.Icon>
+                <Menu.Label>Action</Menu.Label>
+                <Menu.Subtitle>Subtitle</Menu.Subtitle>
+              </Menu.Item>
 
-                {content.toggles === 'checkbox' ? (
-                  <>
-                    <Menu.Separator {...propsSeparator} />
-                    {['Checkbox', 'Another Checkbox'].map((text, index) => (
-                      <Menu.CheckboxItem
-                        key={text}
-                        {...propsCheckboxItem}
-                        {...(index === 0 ? {} : { defaultChecked: false })}
-                      >
-                        <Menu.CheckboxItemIndicator {...propsIndicator} />
-                        {icon}
-                        {label(text)}
-                      </Menu.CheckboxItem>
-                    ))}
-                  </>
-                ) : null}
-
-                {content.toggles === 'radio' ? (
-                  <>
-                    <Menu.Separator {...propsSeparator} />
-                    <Menu.RadioGroup {...propsRadioGroup}>
-                      {['first', 'second', 'third'].map((value) => (
-                        <Menu.RadioItem
-                          key={value}
-                          value={value}
-                          {...propsRadioItem}
+              <Menu.Separator />
+              <Menu.Group>
+                <Menu.GroupLabel>Section Title</Menu.GroupLabel>
+                <Menu.SubmenuRoot {...propsSubmenuRoot}>
+                  <Menu.SubmenuTrigger {...propsSubmenuTrigger}>
+                    <Menu.Icon>
+                      <Symbol icon={sfSquare} />
+                    </Menu.Icon>
+                    <Menu.Label>Submenu</Menu.Label>
+                  </Menu.SubmenuTrigger>
+                  <Menu.Portal>
+                    <Menu.Positioner {...propsSubmenuPositioner}>
+                      <Menu.Popup {...propsSubmenuPopup}>
+                        <Menu.Item
+                          onClick={() => addLog('submenu item clicked')}
                         >
-                          <Menu.RadioItemIndicator {...propsIndicator} />
-                          {icon}
-                          {label(`Option ${value}`)}
-                        </Menu.RadioItem>
-                      ))}
-                    </Menu.RadioGroup>
-                  </>
-                ) : null}
-
-                {content.sections ? (
-                  <>
-                    <Menu.Separator {...propsSeparator} />
-                    <Menu.Group {...propsGroup}>
-                      <Menu.GroupLabel {...propsGroupLabel}>
-                        Section Title
-                      </Menu.GroupLabel>
-                      {content.submenu ? (
-                        <Menu.SubmenuRoot {...propsSubmenuRoot}>
-                          <Menu.SubmenuTrigger {...propsSubmenuTrigger}>
-                            {icon}
-                            {label('Submenu')}
-                          </Menu.SubmenuTrigger>
-                          <Menu.Portal>
-                            <Menu.Positioner {...propsSubmenuPositioner}>
-                              <Menu.Popup {...propsSubmenuPopup}>
-                                <Menu.Item {...propsItem}>
-                                  {icon}
-                                  {label('Submenu Action')}
-                                </Menu.Item>
-                                <Menu.Item {...propsItem}>
-                                  {icon}
-                                  {label('Another Action')}
-                                </Menu.Item>
-                              </Menu.Popup>
-                            </Menu.Positioner>
-                          </Menu.Portal>
-                        </Menu.SubmenuRoot>
-                      ) : null}
-                      <Menu.Item {...propsItem}>
-                        {icon}
-                        {label('Action with a long label')}
-                      </Menu.Item>
-                    </Menu.Group>
-                    <Menu.Separator {...propsSeparator} />
-                    <Menu.Group {...propsGroup}>
-                      <Menu.GroupLabel {...propsGroupLabel}>
-                        Section Title
-                      </Menu.GroupLabel>
-                      <Menu.Item {...propsItem}>
-                        {icon}
-                        {label('Action')}
-                      </Menu.Item>
-                    </Menu.Group>
-                  </>
-                ) : null}
-              </Menu.Popup>
-            </Menu.Positioner>
-          </Menu.Portal>
-        </Menu.Root>
-      </Remounters>
+                          <Menu.Icon>
+                            <Symbol icon={sfSquare} />
+                          </Menu.Icon>
+                          <Menu.Label>Submenu Action</Menu.Label>
+                        </Menu.Item>
+                        <Menu.Item
+                          onClick={() => addLog('submenu item clicked')}
+                        >
+                          <Menu.Icon>
+                            <Symbol icon={sfSquare} />
+                          </Menu.Icon>
+                          <Menu.Label>Another Action</Menu.Label>
+                        </Menu.Item>
+                      </Menu.Popup>
+                    </Menu.Positioner>
+                  </Menu.Portal>
+                </Menu.SubmenuRoot>
+                <Menu.Item onClick={() => addLog('item clicked')}>
+                  <Menu.Icon>
+                    <Symbol icon={sfSquare} />
+                  </Menu.Icon>
+                  <Menu.Label>Action with a long label</Menu.Label>
+                </Menu.Item>
+              </Menu.Group>
+              <Menu.Separator />
+              <Menu.Group>
+                <Menu.GroupLabel>Section Title</Menu.GroupLabel>
+                <Menu.Item onClick={() => addLog('item clicked')}>
+                  <Menu.Icon>
+                    <Symbol icon={sfSquare} />
+                  </Menu.Icon>
+                  <Menu.Label>Action</Menu.Label>
+                </Menu.Item>
+              </Menu.Group>
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </Menu.Root>
     </Component>
   );
 };
 
-export const MenuDemo: FunctionComponent = () => (
-  <MenuDemoBase preset={{ id: 'menu', title: 'Menu' }} />
-);
+/** The menu in the regular size (iPad): submenus open beside it. */
+export const MenuRegularDemo: FunctionComponent = () => {
+  const id = 'menu-regular';
 
-export const MenuRegularDemo: FunctionComponent = () => (
-  <MenuDemoBase
-    preset={{ id: 'menu-regular', size: 'regular', title: 'Menu (iPad)' }}
-  />
-);
+  const [log, addLog] = useLog();
+  const [
+    externalRoot,
+    externalTrigger,
+    externalPositioner,
+    externalPopup,
+    externalQuickAction,
+    externalItem,
+    externalDisabledItem,
+    externalDestructiveItem,
+    externalSubmenuRoot,
+    externalSubmenuTrigger,
+    externalSubmenuPositioner,
+    externalSubmenuPopup,
+  ] = useProvidedState(id);
 
-// Where the open menu sits in the stage (no trigger: an empty anchor).
-const Anchor = styled('span', forwardRef)`
-  display: block;
-  margin-bottom: 320px;
-`;
+  const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
+    useMemo(() => getPropOptionsRoot(addLog), [addLog]),
+    'root',
+    externalRoot,
+    true,
+  );
+  const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
+    useMemo(() => getPropOptionsTrigger(addLog), [addLog]),
+    'trigger',
+    externalTrigger,
+  );
+  const [controlPositioner, propsPositioner, statePositioner] = usePropControl(
+    propOptionsPositioner,
+    'positioner',
+    externalPositioner,
+  );
+  const [controlPopup, propsPopup, statePopup] = usePropControl(
+    propOptionsPopup,
+    'popup',
+    externalPopup,
+  );
+  const [controlQuickAction, propsQuickAction, stateQuickAction] =
+    usePropControl(propOptionsItem, 'quick action (1st)', externalQuickAction);
+  const [controlItem, propsItem, stateItem] = usePropControl(
+    useMemo(() => getPropOptionsItem(addLog), [addLog]),
+    'item (1st)',
+    externalItem,
+  );
+  const [controlDisabledItem, propsDisabledItem, stateDisabledItem] =
+    usePropControl(
+      propOptionsItemDisabled,
+      'item (disabled)',
+      externalDisabledItem,
+    );
+  const [controlDestructiveItem, propsDestructiveItem, stateDestructiveItem] =
+    usePropControl(
+      propOptionsItemDestructive,
+      'item (destructive)',
+      externalDestructiveItem,
+    );
+  const [
+    controlSubmenuRoot,
+    propsSubmenuRoot,
+    stateSubmenuRoot,
+    keySubmenuRoot,
+  ] = usePropControl(
+    useMemo(() => getPropOptionsSubmenuRoot(addLog), [addLog]),
+    'submenu root',
+    externalSubmenuRoot,
+  );
+  const [controlSubmenuTrigger, propsSubmenuTrigger, stateSubmenuTrigger] =
+    usePropControl(
+      propOptionsSubmenuTrigger,
+      'submenu trigger',
+      externalSubmenuTrigger,
+    );
+  const [
+    controlSubmenuPositioner,
+    propsSubmenuPositioner,
+    stateSubmenuPositioner,
+  ] = usePropControl(
+    propOptionsPositioner,
+    'submenu positioner',
+    externalSubmenuPositioner,
+  );
+  const [controlSubmenuPopup, propsSubmenuPopup, stateSubmenuPopup] =
+    usePropControl(propOptionsPopup, 'submenu popup', externalSubmenuPopup);
+
+  return (
+    <Component
+      center
+      baseUiId="menu"
+      id={id}
+      log={log}
+      title="Menu (iPad)"
+      controls={[
+        controlRoot,
+        controlTrigger,
+        controlPositioner,
+        controlPopup,
+        controlQuickAction,
+        controlItem,
+        controlDisabledItem,
+        controlDestructiveItem,
+        controlSubmenuRoot,
+        controlSubmenuTrigger,
+        controlSubmenuPositioner,
+        controlSubmenuPopup,
+      ]}
+      stateUrl={useCreateStateUrl(id, [
+        stateRoot,
+        stateTrigger,
+        statePositioner,
+        statePopup,
+        stateQuickAction,
+        stateItem,
+        stateDisabledItem,
+        stateDestructiveItem,
+        stateSubmenuRoot,
+        stateSubmenuTrigger,
+        stateSubmenuPositioner,
+        stateSubmenuPopup,
+      ])}
+    >
+      <Menu.Root
+        key={`${keyRoot}-${keySubmenuRoot}`}
+        {...propsRoot}
+        size="regular"
+      >
+        <div className="menu-demo-trigger-space">
+          <Menu.Trigger
+            {...propsTrigger}
+            render={<Button.Root variant="glass" />}
+          >
+            <Button.Label>Open Menu</Button.Label>
+          </Menu.Trigger>
+        </div>
+        <Menu.Portal>
+          <Menu.Positioner {...propsPositioner}>
+            <Menu.Popup {...propsPopup}>
+              <Menu.QuickActions>
+                <Menu.QuickAction {...propsQuickAction}>
+                  <Menu.Icon>
+                    <Symbol icon={sfSquareAndArrowUp} />
+                  </Menu.Icon>
+                  <Menu.Label>Share</Menu.Label>
+                </Menu.QuickAction>
+                <Menu.QuickAction>
+                  <Menu.Icon>
+                    <Symbol icon={sfPinFill} />
+                  </Menu.Icon>
+                  <Menu.Label>Pin</Menu.Label>
+                </Menu.QuickAction>
+                <Menu.QuickAction destructive>
+                  <Menu.Icon>
+                    <Symbol icon={sfLockFill} />
+                  </Menu.Icon>
+                  <Menu.Label>Lock</Menu.Label>
+                </Menu.QuickAction>
+              </Menu.QuickActions>
+              <Menu.Separator />
+
+              <Menu.Item {...propsItem}>
+                <Menu.Icon>
+                  <Symbol icon={sfSquare} />
+                </Menu.Icon>
+                <Menu.Label>Action</Menu.Label>
+                <Menu.Shortcut>⌘A</Menu.Shortcut>
+              </Menu.Item>
+              <Menu.Item {...propsDisabledItem}>
+                <Menu.Icon>
+                  <Symbol icon={sfSquare} />
+                </Menu.Icon>
+                <Menu.Label>Disabled Action</Menu.Label>
+                <Menu.Shortcut>⇧⌘A</Menu.Shortcut>
+              </Menu.Item>
+              <Menu.Item {...propsDestructiveItem}>
+                <Menu.Icon>
+                  <Symbol icon={sfSquare} />
+                </Menu.Icon>
+                <Menu.Label>Delete</Menu.Label>
+              </Menu.Item>
+
+              <Menu.Separator />
+
+              <Menu.Item onClick={() => addLog('subtitled item clicked')}>
+                <Menu.Icon>
+                  <Symbol icon={sfSquare} />
+                </Menu.Icon>
+                <Menu.Label>Action</Menu.Label>
+                <Menu.Subtitle>Subtitle</Menu.Subtitle>
+              </Menu.Item>
+
+              <Menu.Separator />
+              <Menu.Group>
+                <Menu.GroupLabel>Section Title</Menu.GroupLabel>
+                <Menu.SubmenuRoot {...propsSubmenuRoot}>
+                  <Menu.SubmenuTrigger {...propsSubmenuTrigger}>
+                    <Menu.Icon>
+                      <Symbol icon={sfSquare} />
+                    </Menu.Icon>
+                    <Menu.Label>Submenu</Menu.Label>
+                  </Menu.SubmenuTrigger>
+                  <Menu.Portal>
+                    <Menu.Positioner {...propsSubmenuPositioner}>
+                      <Menu.Popup {...propsSubmenuPopup}>
+                        <Menu.Item
+                          onClick={() => addLog('submenu item clicked')}
+                        >
+                          <Menu.Icon>
+                            <Symbol icon={sfSquare} />
+                          </Menu.Icon>
+                          <Menu.Label>Submenu Action</Menu.Label>
+                        </Menu.Item>
+                        <Menu.Item
+                          onClick={() => addLog('submenu item clicked')}
+                        >
+                          <Menu.Icon>
+                            <Symbol icon={sfSquare} />
+                          </Menu.Icon>
+                          <Menu.Label>Another Action</Menu.Label>
+                        </Menu.Item>
+                      </Menu.Popup>
+                    </Menu.Positioner>
+                  </Menu.Portal>
+                </Menu.SubmenuRoot>
+                <Menu.Item onClick={() => addLog('item clicked')}>
+                  <Menu.Icon>
+                    <Symbol icon={sfSquare} />
+                  </Menu.Icon>
+                  <Menu.Label>Action with a long label</Menu.Label>
+                </Menu.Item>
+              </Menu.Group>
+              <Menu.Separator />
+              <Menu.Group>
+                <Menu.GroupLabel>Section Title</Menu.GroupLabel>
+                <Menu.Item onClick={() => addLog('item clicked')}>
+                  <Menu.Icon>
+                    <Symbol icon={sfSquare} />
+                  </Menu.Icon>
+                  <Menu.Label>Action</Menu.Label>
+                </Menu.Item>
+              </Menu.Group>
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </Menu.Root>
+    </Component>
+  );
+};
+
+/** Checkbox items, and a radio group: a checkmark column in every item. */
+export const MenuTogglesDemo: FunctionComponent = () => {
+  const id = 'menu-toggles';
+
+  const [log, addLog] = useLog();
+  const [
+    externalRoot,
+    externalCheckboxItem,
+    externalRadioGroup,
+    externalRadioItem,
+    externalIndicator,
+  ] = useProvidedState(id);
+
+  const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
+    useMemo(() => getPropOptionsRoot(addLog), [addLog]),
+    'root',
+    externalRoot,
+    true,
+  );
+  const [
+    controlCheckboxItem,
+    propsCheckboxItem,
+    stateCheckboxItem,
+    keyCheckboxItem,
+  ] = usePropControl(
+    useMemo(() => getPropOptionsCheckboxItems(addLog), [addLog]),
+    'checkbox item (1st)',
+    externalCheckboxItem,
+  );
+  const [controlRadioGroup, propsRadioGroup, stateRadioGroup, keyRadioGroup] =
+    usePropControl(
+      useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
+      'radio group',
+      externalRadioGroup,
+    );
+  const [controlRadioItem, propsRadioItem, stateRadioItem] = usePropControl(
+    propOptionsToggleItem,
+    'radio item (1st)',
+    externalRadioItem,
+  );
+  const [controlIndicator, propsIndicator, stateIndicator] = usePropControl(
+    propOptionsIndicator,
+    'indicator (1st)',
+    externalIndicator,
+  );
+
+  return (
+    <Component
+      center
+      baseUiId="menu"
+      id={id}
+      log={log}
+      title="Menu (Toggles)"
+      controls={[
+        controlRoot,
+        controlCheckboxItem,
+        controlRadioGroup,
+        controlRadioItem,
+        controlIndicator,
+      ]}
+      stateUrl={useCreateStateUrl(id, [
+        stateRoot,
+        stateCheckboxItem,
+        stateRadioGroup,
+        stateRadioItem,
+        stateIndicator,
+      ])}
+    >
+      <Menu.Root
+        key={`${keyRoot}-${keyCheckboxItem}-${keyRadioGroup}`}
+        {...propsRoot}
+      >
+        <div className="menu-demo-trigger-space">
+          <Menu.Trigger render={<Button.Root variant="glass" />}>
+            <Button.Label>Open Menu</Button.Label>
+          </Menu.Trigger>
+        </div>
+        <Menu.Portal>
+          <Menu.Positioner>
+            <Menu.Popup>
+              <Menu.Item onClick={() => addLog('item clicked')}>
+                <Menu.Icon>
+                  <Symbol icon={sfSquare} />
+                </Menu.Icon>
+                <Menu.Label>Action</Menu.Label>
+              </Menu.Item>
+
+              <Menu.Separator />
+              <Menu.CheckboxItem {...propsCheckboxItem}>
+                <Menu.CheckboxItemIndicator {...propsIndicator} />
+                <Menu.Icon>
+                  <Symbol icon={sfSquare} />
+                </Menu.Icon>
+                <Menu.Label>Checkbox</Menu.Label>
+              </Menu.CheckboxItem>
+              <Menu.CheckboxItem defaultChecked={false}>
+                <Menu.CheckboxItemIndicator />
+                <Menu.Icon>
+                  <Symbol icon={sfSquare} />
+                </Menu.Icon>
+                <Menu.Label>Another Checkbox</Menu.Label>
+              </Menu.CheckboxItem>
+
+              <Menu.Separator />
+              <Menu.RadioGroup {...propsRadioGroup}>
+                <Menu.RadioItem
+                  value="first"
+                  {...propsRadioItem}
+                >
+                  <Menu.RadioItemIndicator />
+                  <Menu.Icon>
+                    <Symbol icon={sfSquare} />
+                  </Menu.Icon>
+                  <Menu.Label>Option first</Menu.Label>
+                </Menu.RadioItem>
+                <Menu.RadioItem value="second">
+                  <Menu.RadioItemIndicator />
+                  <Menu.Icon>
+                    <Symbol icon={sfSquare} />
+                  </Menu.Icon>
+                  <Menu.Label>Option second</Menu.Label>
+                </Menu.RadioItem>
+                <Menu.RadioItem value="third">
+                  <Menu.RadioItemIndicator />
+                  <Menu.Icon>
+                    <Symbol icon={sfSquare} />
+                  </Menu.Icon>
+                  <Menu.Label>Option third</Menu.Label>
+                </Menu.RadioItem>
+              </Menu.RadioGroup>
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </Menu.Root>
+    </Component>
+  );
+};
+
+/**
+ * A pop-up button (UIKit `UIButton` with a menu, e.g. in a list row): a
+ * `Button` with the chosen option's label, then chevron.up.chevron.down,
+ * opening a menu of options; choosing one closes it.
+ */
+export const MenuPopUpDemo: FunctionComponent = () => {
+  const id = 'menu-pop-up';
+
+  const [log, addLog] = useLog();
+
+  const [value, setValue] = useState('Daily');
+
+  return (
+    <Component
+      center
+      baseUiId="menu"
+      id={id}
+      log={log}
+      title="Menu (Pop-up Button)"
+    >
+      <div className="menu-demo-trigger-space">
+        <Menu.Root>
+          <Menu.Trigger render={<Button.Root variant="bordered" />}>
+            <Button.Label>{value}</Button.Label>
+            <Button.Icon>
+              <Symbol icon={sfChevronUpChevronDown} />
+            </Button.Icon>
+          </Menu.Trigger>
+          <Menu.Portal>
+            <Menu.Positioner align="end">
+              <Menu.Popup>
+                <Menu.RadioGroup
+                  value={value}
+                  onValueChange={(next: unknown) => {
+                    addLog(`value change: ${String(next)}`);
+                    setValue(String(next));
+                  }}
+                >
+                  {/* A pop-up closes on choosing (iOS). */}
+                  <Menu.RadioItem
+                    closeOnClick
+                    value="Daily"
+                  >
+                    <Menu.RadioItemIndicator />
+                    <Menu.Label>Daily</Menu.Label>
+                  </Menu.RadioItem>
+                  <Menu.RadioItem
+                    closeOnClick
+                    value="Weekly"
+                  >
+                    <Menu.RadioItemIndicator />
+                    <Menu.Label>Weekly</Menu.Label>
+                  </Menu.RadioItem>
+                  <Menu.RadioItem
+                    closeOnClick
+                    value="Monthly"
+                  >
+                    <Menu.RadioItemIndicator />
+                    <Menu.Label>Monthly</Menu.Label>
+                  </Menu.RadioItem>
+                </Menu.RadioGroup>
+              </Menu.Popup>
+            </Menu.Positioner>
+          </Menu.Portal>
+        </Menu.Root>
+      </div>
+    </Component>
+  );
+};
 
 /**
  * The menu on its own, open: `Menu` is just the menu; a trigger (usually
@@ -580,7 +780,10 @@ export const MenuOpenDemo: FunctionComponent = () => {
       stateUrl={useCreateStateUrl(id, [stateRoot, statePopup])}
       title="Menu (Open)"
     >
-      <Anchor ref={anchorRef} />
+      <span
+        ref={anchorRef}
+        className="menu-demo-anchor"
+      />
       {/* Always open. */}
       <Menu.Root
         {...propsRoot}
@@ -599,7 +802,7 @@ export const MenuOpenDemo: FunctionComponent = () => {
               <Menu.Item onClick={() => addLog('Share clicked')}>
                 <Menu.Label>Share</Menu.Label>
                 <Menu.Icon>
-                  <SFSymbol icon={sfSquareAndArrowUp} />
+                  <Symbol icon={sfSquareAndArrowUp} />
                 </Menu.Icon>
               </Menu.Item>
               <Menu.Separator />

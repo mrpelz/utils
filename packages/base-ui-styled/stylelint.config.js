@@ -11,12 +11,6 @@ export default {
       'stylelint.config.js',
     ),
   ],
-  overrides: [
-    {
-      customSyntax: 'postcss-styled-syntax',
-      files: ['src/**/*.{jsx,tsx}'],
-    },
-  ],
   rules: {
     'nesting-selector-no-missing-scoping-root': null,
   },

@@ -3,15 +3,6 @@
 import { AddLog } from '../utils/log.js';
 import { commonPropOptions, MappedProp } from '../utils/main.js';
 
-export const propOptionsContent = {
-  columns: [3, 2] as const,
-} as const;
-
-// Compact (an iPhone): two columns by default.
-export const propOptionsContentCompact = {
-  columns: [2, 3] as const,
-} as const;
-
 // Compact: the sidebar column as a drawer.
 export const propOptionsDrawer = {
   ...commonPropOptions,

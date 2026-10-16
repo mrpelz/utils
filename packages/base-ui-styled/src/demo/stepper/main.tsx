@@ -1,26 +1,16 @@
+import './style.css';
+
 import { NumberField as BaseNumberField } from '@base-ui/react/number-field';
-import { styled } from 'goober';
 import { FunctionComponent, useMemo, useState } from 'react';
 
+import { Stepper } from '../../components/index.js';
 import { useLog } from '../utils/log.js';
-import { Component } from '../utils/main.js';
+import { commonPropOptions, Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
-import { useStepperDemo } from './compose.js';
-import { getPropOptionsRoot } from './props.js';
-
-// The value next to the stepper (as apps show it, UIKit's stepper doesn't).
-const Row = styled('div')`
-  display: flex;
-  align-items: center;
-  color: var(--color-ios-label);
-  font-size: var(--font-ios-body-size);
-  font-variant-numeric: tabular-nums;
-  gap: 16px;
-  line-height: var(--font-ios-body-line-height);
-`;
+import { getPropOptionsRoot, propOptionsHalf } from './props.js';
 
 /**
  * A stepper (UIKit `UIStepper`, a Base UI number field): its value is shown
@@ -30,38 +20,70 @@ export const StepperDemo: FunctionComponent = () => {
   const id = 'stepper';
 
   const [log, addLog] = useLog();
+  const [externalRoot, externalGroup, externalDecrement, externalIncrement] =
+    useProvidedState(id);
 
   const [value, setValue] = useState<number | null>(5);
 
-  const { controls, element, states } = useStepperDemo(
-    useProvidedState(id),
-    { root: useMemo(() => getPropOptionsRoot(addLog), [addLog]) },
-    {
-      label: 'Quantity',
-      onValueChange: (
-        next: number | null,
-        { reason }: BaseNumberField.Root.ChangeEventDetails,
-      ) => {
-        addLog(`value change: ${String(next)}/${reason}`);
-        setValue(next);
-      },
-    },
+  const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
+    useMemo(() => getPropOptionsRoot(addLog), [addLog]),
+    'root',
+    externalRoot,
+    true,
+  );
+  const [controlGroup, propsGroup, stateGroup] = usePropControl(
+    commonPropOptions,
+    'group',
+    externalGroup,
+  );
+  const [controlDecrement, propsDecrement, stateDecrement] = usePropControl(
+    propOptionsHalf,
+    'decrement',
+    externalDecrement,
+  );
+  const [controlIncrement, propsIncrement, stateIncrement] = usePropControl(
+    propOptionsHalf,
+    'increment',
+    externalIncrement,
   );
 
   return (
     <Component
       center
       baseUiId="number-field"
-      controls={controls}
+      controls={[controlRoot, controlGroup, controlDecrement, controlIncrement]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, states)}
       title="Stepper"
+      stateUrl={useCreateStateUrl(id, [
+        stateRoot,
+        stateGroup,
+        stateDecrement,
+        stateIncrement,
+      ])}
     >
-      <Row>
+      <div className="stepper-demo-row">
         <output>{value ?? '–'}</output>
-        {element}
-      </Row>
+        <Stepper.Root
+          key={elementKey}
+          {...propsRoot}
+          onValueChange={(
+            next: number | null,
+            { reason }: BaseNumberField.Root.ChangeEventDetails,
+          ) => {
+            addLog(`value change: ${String(next)}/${reason}`);
+            setValue(next);
+          }}
+        >
+          <Stepper.Group
+            inputProps={{ 'aria-label': 'Quantity' }}
+            {...propsGroup}
+          >
+            <Stepper.Decrement {...propsDecrement} />
+            <Stepper.Increment {...propsIncrement} />
+          </Stepper.Group>
+        </Stepper.Root>
+      </div>
     </Component>
   );
 };

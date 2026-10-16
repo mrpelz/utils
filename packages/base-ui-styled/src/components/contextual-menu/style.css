@@ -1,0 +1,80 @@
+/* Contextual-menu (see main.tsx). */
+@layer base-ui-styled {
+  .bus-contextual-menu-scroller {
+    position: fixed;
+    z-index: 1;
+    overflow: hidden auto;
+    inset: 0;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .bus-contextual-menu-trigger {
+    display: inline-flex;
+
+    & > * {
+      transition-duration: 300ms;
+      transition-property: translate, opacity;
+      transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+      translate: 0 calc(var(--styled-contextual-lift, 0) * -1px);
+    }
+
+    &[data-lifted] {
+      position: relative;
+      z-index: 1;
+    }
+
+    &[data-previewed] > * {
+      opacity: 0;
+    }
+
+    /* Scrolled (too tall, see Root): following it at once. */
+    &[data-overflowing] > * {
+      transition-property: opacity;
+    }
+  }
+
+  .bus-contextual-menu-backdrop {
+    position: fixed;
+    backdrop-filter: blur(12px);
+    background-color: rgb(0 0 0 / 15%);
+    inset: 0;
+    transition: opacity 300ms;
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      opacity: 0;
+    }
+  }
+
+  /* Over the page and the backdrop, at the lifted place; scaling in from the
+     trigger's top. (Max sizes: 2 × `margin`, see main.tsx.) */
+  .bus-contextual-menu-preview {
+    position: fixed;
+    z-index: 1;
+    max-width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+
+    /* Shown as the trigger is pressed: the release is the trigger's (Base UI
+       cancels opening a menu released elsewhere). */
+    pointer-events: none;
+    transition-duration: 300ms;
+    transition-property: translate, scale, opacity;
+    transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+    translate: 0 calc(var(--styled-contextual-lift, 0) * -1px);
+
+    @starting-style {
+      opacity: 0;
+      scale: 0.8;
+    }
+
+    /* Scrolled (too tall, see Root): following it at once. */
+    &[data-overflowing] {
+      transition-property: scale, opacity;
+    }
+  }
+}

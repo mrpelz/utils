@@ -66,7 +66,7 @@ export const tests = [
     name: 'date picker: the inline calendar matches Figma',
     run: async (page) => {
       await page.open('date-picker', 'light', {
-        state: [null, { $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
+        state: [{ $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
       });
 
       const measured = await page.evaluate(`(() => {
@@ -101,7 +101,7 @@ export const tests = [
     name: 'date picker: selects days, shows other months, moves by keyboard',
     run: async (page) => {
       await page.open('date-picker', 'light', {
-        state: [null, { $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
+        state: [{ $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
       });
 
       await clickDay(page, '23');
@@ -136,7 +136,7 @@ export const tests = [
     name: 'date picker: compact, the date opens the calendar in a popover',
     run: async (page) => {
       await page.open('date-picker', 'light', {
-        state: [null, { $rest: true, locale: 'en-US' }],
+        state: [{ $rest: true, locale: 'en-US' }],
       });
       const button = await page.rect('button');
       assert.equal(
@@ -171,14 +171,14 @@ export const tests = [
     name: 'date picker: the week starts by the locale; limits disable days and months',
     run: async (page) => {
       await page.open('date-picker', 'light', {
-        state: [null, { $rest: true, locale: 'de-DE', pickerStyle: 'inline' }],
+        state: [{ $rest: true, locale: 'de-DE', pickerStyle: 'inline' }],
       });
       const first = await page.evaluate(
         `document.querySelector(${JSON.stringify('abbr')}).title`,
       );
       assert.equal(first, 'Montag');
 
-      await page.setState(1, { min: mapped('[April 10, 2025]') });
+      await page.setState(0, { min: mapped('[April 10, 2025]') });
       const limits = await page.evaluate(`(() => {
         const days = [...document.querySelectorAll('[aria-pressed]')];
         return [days.find((day) => day.textContent === '9').disabled, days.find((day) => day.textContent === '10').disabled, document.querySelector('[aria-label="Previous month"]').disabled];
@@ -237,7 +237,7 @@ export const tests = [
     name: 'date picker: the title opens a month and year roll',
     run: async (page) => {
       await page.open('date-picker', 'light', {
-        state: [null, { $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
+        state: [{ $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
       });
 
       const title = await page.rect('h2 button');
@@ -300,7 +300,6 @@ export const tests = [
     run: async (page) => {
       await page.open('date-picker', 'light', {
         state: [
-          null,
           {
             $rest: true,
             locale: 'en-US',
@@ -340,8 +339,8 @@ export const tests = [
 
       // Compact: the time's button opens the roll in a popover; 24 hours in
       // German, the buttons equally high.
-      await page.setState(1, { pickerStyle: 'compact' });
-      await page.setState(1, { locale: 'de-DE' });
+      await page.setState(0, { pickerStyle: 'compact' });
+      await page.setState(0, { locale: 'de-DE' });
       const heights = await page.evaluate(
         `[...${page.section}.querySelectorAll('button')].filter((button) => !button.closest('[role=dialog]')).map((button) => button.getBoundingClientRect().height)`,
       );
@@ -373,11 +372,8 @@ export const tests = [
   {
     name: 'date picker: ranges, and capsule buttons',
     run: async (page) => {
-      await page.open('date-picker', 'light', {
-        state: [
-          { $rest: true, range: true },
-          { $rest: true, buttonShape: 'capsule', locale: 'en-US' },
-        ],
+      await page.open('date-picker-range', 'light', {
+        state: [{ $rest: true, buttonShape: 'capsule', locale: 'en-US' }],
       });
 
       const button = await page.rect('button');
@@ -430,7 +426,6 @@ export const tests = [
     run: async (page) => {
       await page.open('date-and-time-picker', 'light', {
         state: [
-          null,
           {
             $rest: true,
             firstDayOfWeek: 1,
@@ -470,11 +465,8 @@ export const tests = [
   {
     name: 'date picker: a range is dragged into existence',
     run: async (page) => {
-      await page.open('date-picker', 'light', {
-        state: [
-          { $rest: true, range: true },
-          { $rest: true, locale: 'en-US', pickerStyle: 'inline' },
-        ],
+      await page.open('date-picker-range', 'light', {
+        state: [{ $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
       });
 
       /** @param {string} text */
@@ -505,7 +497,7 @@ export const tests = [
     name: 'date picker: the year roll keeps its years; a month of more weeks grows smoothly',
     run: async (page) => {
       await page.open('date-picker', 'light', {
-        state: [null, { $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
+        state: [{ $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
       });
 
       // March 2025 has 6 weeks, April 5: the days' height transitions.
@@ -550,11 +542,8 @@ export const tests = [
   {
     name: 'date picker: a range dragged below the days goes on into the next month',
     run: async (page) => {
-      await page.open('date-picker', 'light', {
-        state: [
-          { $rest: true, range: true },
-          { $rest: true, locale: 'en-US', pickerStyle: 'inline' },
-        ],
+      await page.open('date-picker-range', 'light', {
+        state: [{ $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
       });
 
       /** @type {[number, number]} */
@@ -625,7 +614,7 @@ export const tests = [
     name: 'date picker: months slide in from the side they are on',
     run: async (page) => {
       await page.open('date-picker', 'light', {
-        state: [null, { $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
+        state: [{ $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
       });
       const next = await page.rect('[aria-label="Next month"]');
       const sampling = page.sample(
@@ -654,11 +643,8 @@ export const tests = [
   {
     name: 'date picker: dragged straight down off the last week, or past the last day, the range goes on',
     run: async (page) => {
-      await page.open('date-picker', 'light', {
-        state: [
-          { $rest: true, range: true },
-          { $rest: true, locale: 'en-US', pickerStyle: 'inline' },
-        ],
+      await page.open('date-picker-range', 'light', {
+        state: [{ $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
       });
 
       /** @param {string} text @returns {Promise<[number, number]>} */
@@ -714,9 +700,8 @@ export const tests = [
   {
     name: 'date picker: adjacent months’ days, grayed out; over-dragged to the side, a range goes on',
     run: async (page) => {
-      await page.open('date-picker', 'light', {
+      await page.open('date-picker-range', 'light', {
         state: [
-          { $rest: true, range: true },
           {
             $rest: true,
             locale: 'en-US',
@@ -768,7 +753,7 @@ export const tests = [
     name: 'date picker: capsules by default; highlights as dots, text or circles, tinted',
     run: async (page) => {
       await page.open('date-picker', 'light', {
-        state: [null, { $rest: true, locale: 'en-US' }],
+        state: [{ $rest: true, locale: 'en-US' }],
       });
       assert.equal(
         await page.evaluate(
@@ -777,8 +762,8 @@ export const tests = [
         '1000px',
       );
 
-      await page.setState(1, { pickerStyle: 'inline' });
-      await page.setState(1, {
+      await page.setState(0, { pickerStyle: 'inline' });
+      await page.setState(0, {
         highlighted: mapped(
           '[3rd: red dot, 14th: orange text, 25th: green circle]',
         ),
@@ -803,7 +788,6 @@ export const tests = [
     run: async (page) => {
       await page.open('date-picker', 'light', {
         state: [
-          null,
           {
             $rest: true,
             locale: 'en-US',
@@ -831,7 +815,7 @@ export const tests = [
   {
     name: 'date picker: date and time open one popover at both buttons; the time row can be left out (footer)',
     run: async (page) => {
-      await page.open('date-and-time-picker', 'light', {
+      await page.open('date-picker-footer', 'light', {
         state: [null, { $rest: true, locale: 'en-US' }],
       });
       /** @param {string} selector */
@@ -878,7 +862,6 @@ export const tests = [
     run: async (page) => {
       await page.open('date-picker', 'light', {
         state: [
-          null,
           {
             $rest: true,
             highlighted: mapped(
@@ -920,7 +903,6 @@ export const tests = [
     run: async (page) => {
       await page.open('date-picker', 'light', {
         state: [
-          null,
           {
             $rest: true,
             highlighted: mapped(
@@ -963,7 +945,7 @@ export const tests = [
   {
     name: 'date picker: footers composed: buttons jumping to dates from the selection',
     run: async (page) => {
-      await page.open('date-and-time-picker', 'light', {
+      await page.open('date-picker-footer', 'light', {
         state: [
           { $rest: true, footer: 'timeRowAndJumps' },
           { $rest: true, locale: 'en-US', pickerStyle: 'inline' },
@@ -1009,9 +991,8 @@ export const tests = [
   {
     name: 'date picker: ranges don’t cross disabled days, nor ranges isRangeDisabled rejects (again in other months)',
     run: async (page) => {
-      await page.open('date-picker', 'light', {
+      await page.open('date-picker-range', 'light', {
         state: [
-          { $rest: true, range: true },
           {
             $rest: true,
             isDateDisabled: mapped('[the 15th to 18th]'),
@@ -1041,7 +1022,7 @@ export const tests = [
       );
 
       // At most a week, either way (remounted: the example range again).
-      await page.setState(1, {
+      await page.setState(0, {
         isRangeDisabled: mapped('[longer than a week]'),
       });
       await sleep(300);
@@ -1049,7 +1030,7 @@ export const tests = [
       assert.deepEqual(await disabled(), [...days(1, 18), ...days(29, 30)]);
 
       // Not across months: called again for the next month's days.
-      await page.setState(1, { isRangeDisabled: mapped('[across months]') });
+      await page.setState(0, { isRangeDisabled: mapped('[across months]') });
       await sleep(300);
       await clickDay(page, '22');
       assert.deepEqual(await disabled(), days(1, 18));
@@ -1063,7 +1044,7 @@ export const tests = [
     name: 'date picker: date and time: the time’s buttons are active while the time shows',
     run: async (page) => {
       await page.open('date-and-time-picker', 'light', {
-        state: [null, { $rest: true, locale: 'en-US' }],
+        state: [{ $rest: true, locale: 'en-US' }],
       });
       // In the stage, or (the popover's) the document.
       /** @param {string} selector */
@@ -1130,9 +1111,8 @@ export const tests = [
   {
     name: 'date picker: footer messages of range rules: what can be picked, an error while the end is missing',
     run: async (page) => {
-      await page.open('date-picker', 'light', {
+      await page.open('date-picker-range', 'light', {
         state: [
-          { $rest: true, range: true },
           {
             $rest: true,
             isRangeDisabled: mapped('[at least three days]'),

@@ -21,7 +21,7 @@ export const PageControlDemo: FunctionComponent = () => {
 
   const [externalRoot] = useProvidedState(id);
 
-  const [controlRoot, propsRoot, stateRoot, RemounterRoot] = usePropControl(
+  const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
     'root',
     externalRoot,
@@ -37,9 +37,10 @@ export const PageControlDemo: FunctionComponent = () => {
       stateUrl={useCreateStateUrl(id, [stateRoot])}
       title="Page Control"
     >
-      <RemounterRoot>
-        <PageControl {...propsRoot} />
-      </RemounterRoot>
+      <PageControl
+        key={keyRoot}
+        {...propsRoot}
+      />
     </Component>
   );
 };

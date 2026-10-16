@@ -5,11 +5,6 @@ import { Menu as BaseMenu } from '@base-ui/react/menu';
 import { AddLog } from '../utils/log.js';
 import { commonPropOptions, MappedProp } from '../utils/main.js';
 
-export const propOptionsContent = {
-  actions: [6, 1, 2, 3, 4, 5] as const,
-  more: [true, false] as const,
-} as const;
-
 export const propOptionsPositioner = {
   ...commonPropOptions,
   side: [undefined, 'block-start', 'block-end'] as const,

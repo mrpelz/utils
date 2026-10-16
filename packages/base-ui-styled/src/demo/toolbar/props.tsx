@@ -6,19 +6,11 @@ import { commonPropOptions, MappedProp } from '../utils/main.js';
 
 export const cursorOptions = [undefined, 'auto', 'pointer', 'copy'] as const;
 
-/**
- * The demos' layouts (Figma “Toolbar - Bottom” types): buttons at both
- * sides; with page dots between; one capsule of symbols; text buttons.
- */
-export type Layout = 'buttons' | 'pageDots' | 'symbols' | 'text';
+/** The page dots demo's content: its pages. */
+export const propOptionsPageDotsContent = { pages: [5, 3, 12] as const };
 
-/** Each layout's content (only what it shows). */
-export const propOptionsContent = {
-  buttons: {},
-  pageDots: { pages: [5, 3, 12] as const },
-  symbols: { symbols: [3, 2, 4, 5, 6] as const },
-  text: {},
-} as const satisfies Record<Layout, object>;
+/** The symbols demo's content: its capsule's buttons. */
+export const propOptionsSymbolsContent = { symbols: [3, 2, 4, 5, 6] as const };
 
 export const propOptionsRoot = {
   ...commonPropOptions,

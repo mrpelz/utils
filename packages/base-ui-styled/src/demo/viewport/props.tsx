@@ -2,10 +2,6 @@ const safeAreas = [undefined, 'all', 'block', 'inline', 'none'] as const;
 
 // Each anchor (and the content layer) is off by default: they float over
 // the whole page.
-export const propOptionsContent = {
-  bottomBar: [false, true] as const,
-} as const;
-
 export const propOptionsTop = {
   shown: [false, true] as const,
   safeArea: safeAreas,

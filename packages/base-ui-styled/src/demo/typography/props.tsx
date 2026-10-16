@@ -54,3 +54,7 @@ export const propOptionsMatrix = {
     ...dynamicTypeSizes.filter((size) => size !== 'large'),
   ] as const,
 };
+
+export const propOptionsSizes = {
+  color: ['primary', 'secondary', 'tertiary', 'quaternary'] as const,
+};

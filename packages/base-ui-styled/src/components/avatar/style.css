@@ -1,0 +1,83 @@
+/* Avatar (see main.tsx). */
+@layer base-ui-styled {
+  .bus-avatar-root {
+    position: relative;
+    display: inline-grid;
+    width: var(--styled-avatar-size, 70px);
+    height: var(--styled-avatar-size, 70px);
+    flex: none;
+    vertical-align: middle;
+
+    & > img,
+    & > [data-avatar-part='fallback'] {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      grid-area: 1 / 1;
+    }
+
+    & > img {
+      object-fit: cover;
+    }
+  }
+
+  .bus-avatar-fallback {
+    display: grid;
+    background: linear-gradient(#a5abb8, #858994);
+    color: #fff;
+    font-size: calc(var(--styled-avatar-size, 70px) * 0.4);
+    font-variation-settings: 'wght' 590;
+    font-weight: round(down, 590, 100);
+    letter-spacing: 0;
+    line-height: 1;
+    place-items: center;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (590 - 400) / 326 * 1px);
+    user-select: none;
+
+    --styled-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
+  }
+
+  .bus-avatar-group {
+    --styled-avatar-group-size: var(--styled-avatar-size, 70px);
+
+    position: relative;
+    display: inline-block;
+    width: var(--styled-avatar-group-size);
+    height: var(--styled-avatar-group-size);
+    flex: none;
+    border-radius: 50%;
+    background-color: var(--color-ios-system-fill);
+    vertical-align: middle;
+
+    & > :nth-child(-n + 3 of [data-avatar-part='root']) {
+      position: absolute;
+    }
+
+    & > :nth-child(1 of [data-avatar-part='root']) {
+      --styled-avatar-size: calc(var(--styled-avatar-group-size) * 0.533);
+
+      top: calc(var(--styled-avatar-group-size) * 0.129);
+      left: calc(var(--styled-avatar-group-size) * 0.129);
+    }
+
+    & > :nth-child(2 of [data-avatar-part='root']) {
+      --styled-avatar-size: calc(var(--styled-avatar-group-size) * 0.314);
+
+      right: calc(var(--styled-avatar-group-size) * 0.14);
+      bottom: calc(var(--styled-avatar-group-size) * 0.14);
+    }
+
+    & > :nth-child(3 of [data-avatar-part='root']) {
+      --styled-avatar-size: calc(var(--styled-avatar-group-size) * 0.257);
+
+      top: calc(var(--styled-avatar-group-size) * 0.16);
+      right: calc(var(--styled-avatar-group-size) * 0.12);
+    }
+
+    & > :nth-child(n + 4 of [data-avatar-part='root']) {
+      display: none;
+    }
+  }
+}

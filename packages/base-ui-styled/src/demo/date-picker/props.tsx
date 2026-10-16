@@ -1,14 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
-import { styled } from 'goober';
-import { FunctionComponent, ReactNode } from 'react';
-
 import {
-  CalendarButton,
-  CalendarFooter,
-  CalendarMessage,
-  CalendarRow,
-  CalendarTimeRow,
   DatePickerMode,
   DatePickerOpen,
   DateRange,
@@ -45,120 +37,10 @@ const severalHighlights = new Map<number, readonly DayHighlight[]>([
   ],
 ]);
 
-// Footers composed below the calendar (see `CalendarProps` `footer`): the
-// Time row, buttons jumping to dates (computed from the selection), or both.
-type Footer = (calendar: CalendarFooter) => ReactNode;
-
-/** The date a jump starts from: the selected one, or the range's end. */
-const baseOf = (value: CalendarFooter['value']) => {
-  if (value instanceof Date) return value;
-  return value?.end ?? value?.start ?? new Date();
+/** The footer demo's content: the calendar's footer (see main.tsx). */
+export const propOptionsFooterContent = {
+  footer: [undefined, 'none', 'timeRow', 'jumps', 'timeRowAndJumps'] as const,
 };
-
-const addDays = (date: Date, days: number) =>
-  new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
-
-type Jump = readonly [string, (value: CalendarFooter['value']) => Date];
-
-const inAWeek: Jump = ['In a week', (value) => addDays(baseOf(value), 7)];
-const nextMonth: Jump = [
-  'Next month',
-  (value) => {
-    const base = baseOf(value);
-    return new Date(base.getFullYear(), base.getMonth() + 1, 1);
-  },
-];
-const today: Jump = ['Today', () => new Date()];
-// With its time, too (see `withTime`).
-const now: Jump = ['Now', () => new Date()];
-
-/** Jumps taking the date's time, too (others keep the selected time). */
-const withTime = new Set<Jump>([now]);
-
-const JumpGroup = styled('span')`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 6px;
-`;
-
-const JumpButtons: FunctionComponent<{
-  calendar: CalendarFooter;
-  jumps: readonly Jump[];
-}> = ({ calendar, jumps }) => (
-  <CalendarRow>
-    <span aria-hidden="true">Jump to</span>
-    <JumpGroup>
-      {jumps.map((jump) => {
-        const [label, to] = jump;
-
-        return (
-          <CalendarButton
-            key={label}
-            disabled={calendar.disabled}
-            shape={calendar.buttonShape}
-            onClick={() =>
-              calendar.select(to(calendar.value), withTime.has(jump))
-            }
-          >
-            {label}
-          </CalendarButton>
-        );
-      })}
-    </JumpGroup>
-  </CalendarRow>
-);
-
-const dateJumps = [inAWeek, nextMonth, today] as const;
-const dateAndTimeJumps = [...dateJumps, now] as const;
-
-/** Footers of a date-only calendar. */
-const dateFooters = {
-  none: () => null,
-  oneJump: (calendar) => (
-    <JumpButtons
-      calendar={calendar}
-      jumps={[inAWeek]}
-    />
-  ),
-  severalJumps: (calendar) => (
-    <JumpButtons
-      calendar={calendar}
-      jumps={dateJumps}
-    />
-  ),
-} satisfies Record<string, Footer>;
-
-/** Footers of a calendar with a time: jumps to now, and the Time row. */
-const dateAndTimeFooters = {
-  ...dateFooters,
-  severalJumps: (calendar) => (
-    <JumpButtons
-      calendar={calendar}
-      jumps={dateAndTimeJumps}
-    />
-  ),
-  timeRow: (calendar) => <CalendarTimeRow calendar={calendar} />,
-  timeRowAndJumps: (calendar) => (
-    <>
-      <CalendarTimeRow calendar={calendar} />
-      <JumpButtons
-        calendar={calendar}
-        jumps={dateAndTimeJumps}
-      />
-    </>
-  ),
-} satisfies Record<string, Footer>;
-
-/** The footers fitting the mode's calendar. */
-export const getFooters = (mode: DatePickerMode): Record<string, Footer> =>
-  mode === 'dateAndTime' ? dateAndTimeFooters : dateFooters;
-
-/** The demo's content: a range (dates only), and the calendar's footer. */
-export const getPropOptionsContent = (mode: DatePickerMode) => ({
-  ...(mode === 'date' && { range: [false, true] as const }),
-  footer: [undefined, ...Object.keys(getFooters(mode))],
-});
 
 const day = 24 * 60 * 60 * 1000;
 
@@ -187,31 +69,6 @@ export const rangeMessages = new Map<RangeRule, RangeMessage>([
     },
   ],
 ]);
-
-/** A range rule's message, in the footer below any other rows. */
-export const withRangeMessage = (
-  footer: Footer | undefined,
-  rule: RangeRule | undefined,
-): Footer | undefined => {
-  const message = rule && rangeMessages.get(rule);
-  if (!message) return footer;
-
-  return (calendar) => {
-    const { value } = calendar;
-    const pending =
-      value !== null && !(value instanceof Date) && value.end === null;
-    const error = pending ? message.error : undefined;
-
-    return (
-      <>
-        {footer?.(calendar)}
-        <CalendarMessage variant={error ? 'error' : 'info'}>
-          {error ?? message.info}
-        </CalendarMessage>
-      </>
-    );
-  };
-};
 
 export const weekdayOptions = [undefined, 0, 1, 2, 3, 4, 5, 6] as const;
 
@@ -276,18 +133,6 @@ const propOptions = (mode: DatePickerMode) => ({
       '[the 15th to 18th]',
     ),
   ] as const,
-  // Ranges only (see `[content]`).
-  ...(mode === 'date' && {
-    isRangeDisabled: [
-      undefined,
-      new MappedProp(longerThanAWeek, '[longer than a week]'),
-      new MappedProp(shorterThanThreeDays, '[at least three days]'),
-      new MappedProp(
-        (start: Date, end: Date) => start.getMonth() !== end.getMonth(),
-        '[across months]',
-      ),
-    ] as const,
-  }),
   min: [
     undefined,
     new MappedProp(new Date(2025, 3, 10), '[April 10, 2025]'),
@@ -322,5 +167,19 @@ export const getPropOptionsDatePicker = (
       '[log open change]',
     ),
     undefined,
+  ] as const,
+});
+
+/** A range picker's (dates only): its rules, too. */
+export const getPropOptionsRangePicker = (addLog: AddLog) => ({
+  ...getPropOptionsDatePicker('date', addLog),
+  isRangeDisabled: [
+    undefined,
+    new MappedProp(longerThanAWeek, '[longer than a week]'),
+    new MappedProp(shorterThanThreeDays, '[at least three days]'),
+    new MappedProp(
+      (start: Date, end: Date) => start.getMonth() !== end.getMonth(),
+      '[across months]',
+    ),
   ] as const,
 });

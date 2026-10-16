@@ -1,13 +1,6 @@
 import { ComponentChild as ReactNode } from 'preact';
 import { useCallback, useRef } from 'react-dom';
 
-import {
-  Button,
-  ConfigHeading,
-  ConfigInner,
-  LogContainer,
-} from './components.js';
-
 /** Adds a line to a demo's log. */
 export type AddLog = (value: string) => void;
 
@@ -46,17 +39,21 @@ export const useLog = (): [ReactNode, AddLog] => {
   }, []);
 
   const log = (
-    <ConfigInner>
-      <ConfigHeading>Log</ConfigHeading>
-      <LogContainer ref={logContainerRef} />
-      <Button
+    <section className="demo-config demo-config-section">
+      <summary className="demo-config-heading">Log</summary>
+      <section
+        ref={logContainerRef}
+        className="demo-log"
+      />
+      <button
         ref={buttonRef}
         disabled
+        className="demo-button"
         onClick={resetLogs}
       >
         Clear
-      </Button>
-    </ConfigInner>
+      </button>
+    </section>
   );
 
   return [log, addLog] as const;

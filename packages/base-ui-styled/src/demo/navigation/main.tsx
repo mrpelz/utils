@@ -1,11 +1,7 @@
+import './style.css';
+
 import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import {
-  CSSProperties,
-  FunctionComponent,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react';
+import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -14,16 +10,15 @@ import {
   Navigation,
   Page,
   Segmented,
+  Symbol,
   Toolbar,
 } from '../../components/index.js';
-import { screenHeight } from '../page/main.js';
 import { useLog } from '../utils/log.js';
 import { Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
-import { SFSymbol } from '../utils/symbol.js';
 import { getPropOptionsRoot } from './props.js';
 
 /** The demo's pages: their titles and the pages they drill into. */
@@ -94,7 +89,7 @@ export const NavigationDemo: FunctionComponent = () => {
       {/* The stacks, as a tab bar's: switched at once. */}
       <Segmented.Root
         aria-label="Stack"
-        style={{ marginBlockEnd: 16 }}
+        className="navigation-demo-stacks"
         value={stack}
         onValueChange={(value) => {
           addLog(`stack: ${String(value)}`);
@@ -105,65 +100,64 @@ export const NavigationDemo: FunctionComponent = () => {
         <Segmented.Item value="mail">Mail</Segmented.Item>
         <Segmented.Highlight />
       </Segmented.Root>
-      <Navigation.Root
-        {...propsRoot}
-        style={{ height: screenHeight, ...(propsRoot.style as CSSProperties) }}
-      >
-        {keys.map((key, depth) => {
-          const page = pages[key] ?? { children: [], title: key };
-          const back = depth > 0 ? pages[keys[depth - 1] ?? '']?.title : null;
+      <div className="navigation-demo-screen">
+        <Navigation.Root {...propsRoot}>
+          {keys.map((key, depth) => {
+            const page = pages[key] ?? { children: [], title: key };
+            const back = depth > 0 ? pages[keys[depth - 1] ?? '']?.title : null;
 
-          return (
-            <Page.Root key={key}>
-              <Header.Root>
-                <Header.Bar>
-                  {back ? (
-                    <Toolbar.Leading>
-                      <Toolbar.Button
-                        aria-label={back}
-                        shape="circle"
-                        onClick={pop}
-                      >
-                        <Button.Symbol>
-                          <SFSymbol icon={sfChevronBackward} />
-                        </Button.Symbol>
-                      </Toolbar.Button>
-                    </Toolbar.Leading>
-                  ) : null}
-                  <Toolbar.Title>
-                    <span>{page.title}</span>
-                  </Toolbar.Title>
-                </Header.Bar>
-                <Header.LargeTitle>
-                  <span>{page.title}</span>
-                </Header.LargeTitle>
-              </Header.Root>
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    {page.children.map((child) => (
-                      <List.Item key={child}>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => push(child)}
+            return (
+              <Page.Root key={key}>
+                <Header.Root>
+                  <Header.Bar>
+                    {back ? (
+                      <Toolbar.Leading>
+                        <Toolbar.Button
+                          aria-label={back}
+                          shape="circle"
+                          onClick={pop}
                         >
-                          {pages[child]?.title ?? child}
-                        </List.Title>
-                        <List.DrillIn />
-                      </List.Item>
-                    ))}
-                    {Array.from({ length: 12 }, (_, index) => (
-                      <List.Item key={index}>
-                        <List.Title>Row {index + 1}</List.Title>
-                      </List.Item>
-                    ))}
-                  </List.Group>
-                </List.Section>
-              </List.Root>
-            </Page.Root>
-          );
-        })}
-      </Navigation.Root>
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Toolbar.Button>
+                      </Toolbar.Leading>
+                    ) : null}
+                    <Toolbar.Title>
+                      <span>{page.title}</span>
+                    </Toolbar.Title>
+                  </Header.Bar>
+                  <Header.LargeTitle>
+                    <span>{page.title}</span>
+                  </Header.LargeTitle>
+                </Header.Root>
+                <List.Root>
+                  <List.Section>
+                    <List.Group>
+                      {page.children.map((child) => (
+                        <List.Item key={child}>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => push(child)}
+                          >
+                            {pages[child]?.title ?? child}
+                          </List.Title>
+                          <List.DrillIn />
+                        </List.Item>
+                      ))}
+                      {Array.from({ length: 12 }, (_, index) => (
+                        <List.Item key={index}>
+                          <List.Title>Row {index + 1}</List.Title>
+                        </List.Item>
+                      ))}
+                    </List.Group>
+                  </List.Section>
+                </List.Root>
+              </Page.Root>
+            );
+          })}
+        </Navigation.Root>
+      </div>
     </Component>
   );
 };
