@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-ternary */
 import './style.css';
 
 import {

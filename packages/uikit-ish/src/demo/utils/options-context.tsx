@@ -94,13 +94,10 @@ export const useOptions = (): TOptionsContext => useContext(OptionsContext);
 export const useProvidedState = (demoId: string): unknown[] => {
   const { id, state } = useOptions();
 
-  return useMemo(() => {
-    if (id === demoId && state) {
-      return state;
-    }
-
-    return [];
-  }, [demoId, id, state]);
+  return useMemo(
+    () => (id === demoId && state ? state : []),
+    [demoId, id, state],
+  );
 };
 
 export const useCreateStateUrl = (

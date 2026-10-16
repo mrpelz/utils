@@ -288,7 +288,7 @@ export class Page {
     if (this.state.length > 0) {
       fragment.set(
         'state',
-        JSON.stringify(Array.from(this.state, (entry) => entry ?? null)),
+        JSON.stringify(Array.from(this.state, (entry = null) => entry)),
       );
     }
     return fragment.toString();

@@ -452,8 +452,13 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
             (triggerProps as { onPointerDown?: unknown })
               .onPointerDown as Handler<typeof event>
           )?.(event);
-          if (secondary) return;
-          if (event.pointerType !== 'touch' || event.defaultPrevented) return;
+          if (
+            secondary ||
+            event.pointerType !== 'touch' ||
+            event.defaultPrevented
+          ) {
+            return;
+          }
 
           // No emulated mouse events after the touch: Base UI opens and
           // closes a menu on mouse down. Opens on touch down, as on iOS.

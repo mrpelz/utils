@@ -100,7 +100,7 @@ const matrixRows = matrixVariants.flatMap<{
   variant: ButtonRootProps['variant'];
 }>((variant) =>
   variant === 'glass' || variant === 'glass-prominent'
-    ? [{ size: undefined, variant }]
+    ? { size: undefined, variant }
     : matrixSizes.map((size) => ({ size, variant })),
 );
 

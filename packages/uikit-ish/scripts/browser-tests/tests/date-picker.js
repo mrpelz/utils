@@ -648,6 +648,7 @@ export const tests = [
       });
 
       /** @param {string} text @returns {Promise<[number, number]>} */
+      // eslint-disable-next-line unicorn/no-unnecessary-parameters
       const center = (text) =>
         page.evaluate(`(() => {
           const day = [...document.querySelectorAll(${JSON.stringify('[aria-pressed]:not([inert] *)')})].find((element) => element.textContent === ${JSON.stringify(text)});

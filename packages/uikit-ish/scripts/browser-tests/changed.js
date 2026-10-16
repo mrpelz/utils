@@ -72,10 +72,9 @@ const affectedComponents = async (packageDirectory, files) => {
     const source = await read(packageDirectory, `src/components/${file}`);
     imports.set(
       file.replace(sourceFile, ''),
-      source
-        .matchAll(/from '\.\/(?<module>[\w-]+)\.js'/gu)
-        .map(({ groups }) => groups?.module ?? '')
-        .toArray(),
+      Array.from(source.matchAll(/from '\.\/(?<module>[\w-]+)\.js'/gu)).map(
+        ({ groups }) => groups?.module ?? '',
+      ),
     );
   }
 
@@ -85,11 +84,15 @@ const affectedComponents = async (packageDirectory, files) => {
   for (let grown = true; grown;) {
     grown = false;
     for (const [name, dependencies] of imports) {
-      if (components.has(name)) continue;
-      if (dependencies.some((dependency) => components.has(dependency))) {
-        components.add(name);
-        grown = true;
+      if (
+        components.has(name) ||
+        dependencies.every((dependency) => !components.has(dependency))
+      ) {
+        continue;
       }
+
+      components.add(name);
+      grown = true;
     }
   }
 
@@ -106,13 +109,15 @@ const affectedComponents = async (packageDirectory, files) => {
 const exportsOf = async (packageDirectory, components) => {
   const index = await read(packageDirectory, 'src/components/index.ts');
 
-  return index
-    .matchAll(/export \{(?<names>[^}]*)\} from '\.\/(?<module>[\w-]+)\.js'/gu)
+  return Array.from(
+    index.matchAll(
+      /export \{(?<names>[^}]*)\} from '\.\/(?<module>[\w-]+)\.js'/gu,
+    ),
+  )
     .filter(({ groups }) => components.has(groups?.module ?? ''))
     .flatMap(({ groups }) => (groups?.names ?? '').split(','))
     .map((name) => name.replace(/^\s*type\s+/u, '').trim())
-    .filter(Boolean)
-    .toArray();
+    .filter(Boolean);
 };
 
 /**
@@ -181,9 +186,9 @@ export const affectedTests = async (
   const tests = new Set();
   for (const file of await readdir(testsDirectory)) {
     const source = await readFile(path.join(testsDirectory, file), 'utf8');
-    const opened = source
-      .matchAll(/(?:page\.open\(|const \w+ = )'(?<id>[\w-]+)'/gu)
-      .map(({ groups }) => groups?.id ?? '');
+    const opened = Array.from(
+      source.matchAll(/(?:page\.open\(|const \w+ = )'(?<id>[\w-]+)'/gu),
+    ).map(({ groups }) => groups?.id ?? '');
     if (
       files.includes(`scripts/browser-tests/tests/${file}`) ||
       opened.some((id) => ids.has(id))

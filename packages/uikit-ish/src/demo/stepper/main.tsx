@@ -23,7 +23,7 @@ export const StepperDemo: FunctionComponent = () => {
   const [externalRoot, externalGroup, externalDecrement, externalIncrement] =
     useProvidedState(id);
 
-  const [value, setValue] = useState<number | null>(5);
+  const [value = '–', setValue] = useState<number | null>(5);
 
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
@@ -63,7 +63,7 @@ export const StepperDemo: FunctionComponent = () => {
       ])}
     >
       <div className="stepper-demo-row">
-        <output>{value ?? '–'}</output>
+        <output>{value}</output>
         <Stepper.Root
           key={elementKey}
           {...propsRoot}

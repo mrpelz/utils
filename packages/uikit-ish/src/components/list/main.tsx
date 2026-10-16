@@ -1212,8 +1212,8 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     if (props.onClick && !(control && item.contains(control))) {
       item.dataset.pressed = '';
     }
-    if (!swipeable) return;
     if (
+      !swipeable ||
       sides.some((side) => actions[side]?.contains(event.target as Node | null))
     ) {
       return;
@@ -1462,6 +1462,7 @@ const Expandable = forwardRef<HTMLElement, ListExpandableProps>(
       // From its height as it is, to the other state's. Opening, it's
       // measured open; closing, it closes once the animation finishes (its
       // content shrinking at once, a scroll container could scroll back).
+      // eslint-disable-next-line unicorn/no-unnecessary-parameters
       const box = (element: HTMLElement) => {
         const style = getComputedStyle(element);
         return {

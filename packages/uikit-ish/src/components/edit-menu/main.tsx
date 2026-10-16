@@ -250,8 +250,13 @@ const useTouchDrag = (popupRef: { current: HTMLDivElement | null }) => {
     const document = popup.ownerDocument;
 
     const onPointerDown = (event: globalThis.PointerEvent) => {
-      if (event.pointerType !== 'touch' || !event.isPrimary) return;
-      if (!inMenu(event.target)) return;
+      if (
+        event.pointerType !== 'touch' ||
+        !event.isPrimary ||
+        !inMenu(event.target)
+      ) {
+        return;
+      }
 
       event.preventDefault();
       if (event.target instanceof Element) {

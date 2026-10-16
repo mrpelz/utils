@@ -257,7 +257,7 @@ export const tests = [
         page.mouse('mouseReleased', ...last),
       );
       const visible = samples.flatMap(([group]) =>
-        group && group.opacity > 0.05 ? [group.left] : [],
+        group && group.opacity > 0.05 ? group.left : [],
       );
 
       // Released (unscaled) on the tab's center, a few pixels from where its
@@ -1753,7 +1753,7 @@ export const tests = [
       );
       // And the furthest it swings out sideways, both ways.
       const furthest = (/** @type {number[][]} */ path) =>
-        Math.max(...path.map(([left]) => left ?? 0));
+        Math.max(...path.map(([left = 0]) => left));
       assert.ok(
         Math.abs(furthest(collapsing) - furthest(expanding)) < 3,
         `furthest ${furthest(collapsing)}, ${furthest(expanding)}; ${collapsing.map(([left = 0]) => Math.round(left)).join(' ')} / ${expanding.map(([left = 0]) => Math.round(left)).join(' ')}`,

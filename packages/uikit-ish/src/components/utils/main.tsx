@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-ternary */
 import './style.css';
 
 import type { Signalish } from 'preact';
@@ -46,8 +47,7 @@ export const mergeClassNames = (
     if (!className?.length) continue;
 
     for (const singleCSSClass of className.split(' ')) {
-      if (singleCSSClass.length === 0) continue;
-      if (result.has(singleCSSClass)) continue;
+      if (singleCSSClass.length === 0 || result.has(singleCSSClass)) continue;
 
       result.add(singleCSSClass);
     }
@@ -270,8 +270,13 @@ export const useSecondaryClick = <Props extends SecondaryClickProps>(
       handlers.onPointerDown?.(event);
       firedRef.current = false;
       cancel();
-      if (handlers.disabled || event.pointerType !== 'touch') return;
-      if (!event.isPrimary) return;
+      if (
+        handlers.disabled ||
+        event.pointerType !== 'touch' ||
+        !event.isPrimary
+      ) {
+        return;
+      }
       const element = event.currentTarget;
       const { clientX, clientY, pointerId } = event;
       pressRef.current = {
@@ -341,11 +346,11 @@ export const withSecondaryClick = <Props extends SecondaryClickProps>(
  * is also exposed through the forwarded ref.
  */
 export const useForwardedRef = <T,>(
-  forwardedRef: Ref<T> | undefined,
+  forwardedRef: Ref<T> | undefined = null,
 ): { current: T | null } => {
   const ref = useRef<T | null>(null);
 
-  useImperativeHandle(forwardedRef ?? null, () => ref.current as T, []);
+  useImperativeHandle(forwardedRef, () => ref.current as T, []);
 
   return ref;
 };

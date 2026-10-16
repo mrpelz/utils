@@ -12,8 +12,8 @@ export const propOptionsRoot = {
   validate: [
     undefined,
     new MappedProp(
-      (value: unknown) =>
-        String(value ?? '').length >= 3 ? null : 'At least 3 characters.',
+      (value: unknown = '') =>
+        String(value).length >= 3 ? null : 'At least 3 characters.',
       '[at least 3 characters]',
     ),
   ] as const,

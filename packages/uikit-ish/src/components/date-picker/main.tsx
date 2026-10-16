@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-ternary */
 import '../button/style.css';
 import '../popover/style.css';
 import '../roll/style.css';
@@ -823,8 +824,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   // previous) month, and on, the range following to its first (last) day.
   const turnPage = (edge: number) => {
     const { current: dragging } = drag;
-    if (!dragging) return;
-    if (edge === dragging.edge) return;
+    if (!dragging || edge === dragging.edge) return;
     clearTimeout(dragging.timer);
     dragging.edge = edge;
     if (edge === 0) return;

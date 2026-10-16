@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-ternary */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import './style.css';
 
@@ -47,10 +48,11 @@ export const isEqual = <A extends object, B extends A>(a: A, b: B): a is B => {
   if (a === b) return true;
 
   for (const key of [objectKeys(a), objectKeys(b)].flat()) {
-    if (!(key in a)) return false;
-    if (!(key in b)) return false;
-
-    if (a[key as keyof A] !== (b[key as keyof B] as unknown as A[keyof A])) {
+    if (
+      !(key in a) ||
+      !(key in b) ||
+      a[key as keyof A] !== (b[key as keyof B] as unknown as A[keyof A])
+    ) {
       return false;
     }
   }
@@ -149,9 +151,13 @@ const PropSelector = <T extends PropMap>({
         }
 
         for (const value_ of values) {
-          if (!isObject(value_)) continue;
-          if (!((value_ as any) instanceof MappedProp)) continue;
-          if (value_.label !== input.value) continue;
+          if (
+            !isObject(value_) ||
+            !((value_ as any) instanceof MappedProp) ||
+            value_.label !== input.value
+          ) {
+            continue;
+          }
 
           handleSet(value_);
           input.blur();
@@ -354,8 +360,12 @@ export const usePropControl = <T extends PropMap>(
 
           const mappedProp = propMapSorted[key as keyof T]?.find(
             (candidate) => {
-              if (!(candidate instanceof MappedProp)) return false;
-              if (candidate.label !== value.slice(1)) return false;
+              if (
+                !(candidate instanceof MappedProp) ||
+                candidate.label !== value.slice(1)
+              ) {
+                return false;
+              }
 
               return true;
             },
@@ -504,7 +514,7 @@ export const Component: FunctionComponent<{
   stretch = false,
   title,
 }) => {
-  const { colorScheme, id: showId, raw, stageBackground } = useOptions();
+  const { colorScheme = '', id: showId, raw, stageBackground } = useOptions();
   const [isCentered, setIsCentered] = useLocalStorage(`${id}.center`, center);
   const [isStretched, setIsStretched] = useLocalStorage(
     `${id}.stretch`,
@@ -523,8 +533,7 @@ export const Component: FunctionComponent<{
   }, [children, codeOpen, raw]);
 
   const isHidden = useMemo(() => {
-    if (showId === undefined) return false;
-    if (showId === id) return false;
+    if (showId === undefined || showId === id) return false;
 
     return true;
   }, [id, showId]);
@@ -603,7 +612,7 @@ export const Component: FunctionComponent<{
             Color Scheme{' '}
             <select
               name="colorScheme"
-              value={colorScheme ?? ''}
+              value={colorScheme}
               onChange={({ currentTarget }) =>
                 setOptions({
                   colorScheme:
@@ -622,11 +631,9 @@ export const Component: FunctionComponent<{
               name="stageBackground"
               type="checkbox"
               onClick={() =>
-                setOptions(
-                  stageBackground
-                    ? { stageBackground: false }
-                    : { stageBackground: undefined },
-                )
+                setOptions({
+                  stageBackground: stageBackground ? false : undefined,
+                })
               }
             />
             Stage Background

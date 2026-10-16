@@ -113,8 +113,9 @@ const luminanceBehind = (element: Element) => {
       if (value !== undefined) values.push(value);
     }
   }
-  if (values.length === 0) return undefined;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
+  return values.length === 0
+    ? undefined
+    : values.reduce((sum, value) => sum + value, 0) / values.length;
 };
 
 /**

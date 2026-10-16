@@ -30,7 +30,7 @@ const ViewportStatus: FunctionComponent<{
   onScrollLog: (text: string) => void;
 }> = ({ onScrollLog }) => {
   const visual = useVisualViewport();
-  const { atBottom, atTop, direction } = useScrollDirection();
+  const { atBottom, atTop, direction = '–' } = useScrollDirection();
   const edge = atBottom ? 'bottom' : '–';
   const last = useRef<string | undefined>(undefined);
 
@@ -51,7 +51,7 @@ const ViewportStatus: FunctionComponent<{
       <dt>Keyboard</dt>
       <dd>{visual.keyboardInset}px</dd>
       <dt>Scrolling</dt>
-      <dd>{direction ?? '–'}</dd>
+      <dd>{direction}</dd>
       <dt>At</dt>
       <dd>{atTop ? 'top' : edge}</dd>
     </dl>

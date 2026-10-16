@@ -1019,7 +1019,7 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
       collapsed = false,
       collapsedContent,
       collapsedPosition = 'inline-start',
-      context: glassContext,
+      context: glassContext = 'auto',
       onClickCapture,
       onLostPointerCapture,
       onPointerCancel,
@@ -1204,8 +1204,7 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
       };
 
       const onTransitionRun = () => {
-        if (frame !== undefined) return;
-        if (!accessories.has(list)) return;
+        if (frame !== undefined || !accessories.has(list)) return;
 
         const step = () => {
           placeAccessory(list);
@@ -1327,7 +1326,7 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
           data-collapsed={collapsed ? '' : undefined}
           data-collapsed-content={collapsed ? collapsedContent : undefined}
           data-expanding={expanding ? '' : undefined}
-          data-glass-context={glassContext ?? 'auto'}
+          data-glass-context={glassContext}
           data-size={size}
           data-spaced={markedGroups > 1 ? '' : undefined}
           data-wide={wide ? '' : undefined}
@@ -1606,7 +1605,14 @@ const Label = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
  */
 const Accessory = forwardRef<HTMLDivElement, TabBarAccessoryProps>(
   (
-    { className, children, context, style, visibleIn = 'both', ...props },
+    {
+      className,
+      children,
+      context = 'auto',
+      style,
+      visibleIn = 'both',
+      ...props
+    },
     forwardedRef,
   ) => {
     const ref = useForwardedRef(forwardedRef);
@@ -1622,7 +1628,7 @@ const Accessory = forwardRef<HTMLDivElement, TabBarAccessoryProps>(
     return (
       <div
         ref={ref}
-        data-glass-context={context ?? 'auto'}
+        data-glass-context={context}
         data-tab-bar-part="accessory"
         data-visible-in={visibleIn}
         {...props}

@@ -74,6 +74,7 @@ export type {
 // - Saved colors are deleted by their menu (a secondary click: right click,
 //   long press).
 
+// eslint-disable-next-line unicorn/no-unnecessary-parameters
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
 
@@ -105,6 +106,7 @@ export const formatColor = ({ a, b, g, r }: Rgba): string =>
   `#${toHex(r)}${toHex(g)}${toHex(b)}${a < 1 ? toHex(a * 255) : ''}`.toUpperCase();
 
 // HSL (hue 0–360, saturation and lightness 0–1), for the spectrum.
+// eslint-disable-next-line unicorn/no-unnecessary-parameters
 const fromHsl = (h: number, s: number, l: number) => {
   const k = (n: number) => (n + h / 30) % 12;
   const amount = s * Math.min(l, 1 - l);

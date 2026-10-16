@@ -23,6 +23,7 @@ const row = (group, index) =>
  * @param {number} group
  * @param {number} index
  */
+// eslint-disable-next-line unicorn/no-unnecessary-parameters
 const rowContent = (group, index) =>
   `${row(group, index)}.querySelector('[data-list-part=row]')`;
 
@@ -50,6 +51,7 @@ const rowRect = (page, group, index) =>
  * @param {number} index
  * @param {number} distance
  */
+// eslint-disable-next-line unicorn/no-unnecessary-parameters
 const swipe = async (page, group, index, distance) => {
   const { height, width, x, y } = await rowRect(page, group, index);
   const from = /** @type {[number, number]} */ ([
@@ -67,6 +69,7 @@ const swipe = async (page, group, index, distance) => {
  * @param {() => Promise<boolean>} condition
  * @param {number} [timeout]
  */
+// eslint-disable-next-line unicorn/no-unnecessary-parameters
 const until = async (condition, timeout = 3000) => {
   const end = Date.now() + timeout;
   while (!(await condition()) && Date.now() < end) await sleep(50);
@@ -78,6 +81,7 @@ const until = async (condition, timeout = 3000) => {
  * @param {Page} page
  * @param {string} text
  */
+// eslint-disable-next-line unicorn/no-unnecessary-parameters
 const logged = async (page, text) => {
   const log = await page.log();
   return log.includes(text);
@@ -112,6 +116,7 @@ const swipeState = (page, group, index) =>
  * @param {number} group
  * @param {number} index
  */
+// eslint-disable-next-line unicorn/no-unnecessary-parameters
 const swipeSide = async (page, group, index) => {
   const state = await swipeState(page, group, index);
   return state.swipe;
@@ -737,6 +742,7 @@ export const tests = [
       const { height, width, x, y } = await rowRect(page, 0, 1);
       const at = { x: x + width / 2, y: y + height / 2 };
       /** @param {number} deltaX @param {number} times */
+      // eslint-disable-next-line unicorn/no-unnecessary-parameters
       const scroll = async (deltaX, times) => {
         for (let step = 0; step < times; step += 1) {
           await page.browser.send('Input.dispatchMouseEvent', {

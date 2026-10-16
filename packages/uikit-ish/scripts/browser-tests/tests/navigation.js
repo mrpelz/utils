@@ -25,6 +25,7 @@ const frames = (page) =>
  * @param {Page} page
  * @param {string} text
  */
+// eslint-disable-next-line unicorn/no-unnecessary-parameters
 const drillInto = async (page, text) => {
   /** @type {[number, number]} */
   const center = await page.evaluate(`(() => {
