@@ -1,0 +1,112 @@
+/* Viewport (see main.tsx). */
+@layer uikit-ish {
+  /* The safe area insets kept clear (`data-safe-area`), as padding; at the
+     bottom, less what the keyboard covers (where it's kept clear of). */
+  .uikit-viewport-anchor,
+  .uikit-viewport-content {
+    --uikit-viewport-safe-top: env(safe-area-inset-top, 0px);
+    --uikit-viewport-safe-right: env(safe-area-inset-right, 0px);
+    --uikit-viewport-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --uikit-viewport-safe-left: env(safe-area-inset-left, 0px);
+    --uikit-viewport-safe-bottom-keyboard: max(
+      0px,
+      var(--uikit-viewport-safe-bottom) -
+        var(--uikit-viewport-keyboard-inset, 0px)
+    );
+
+    position: fixed;
+    box-sizing: border-box;
+
+    &[data-safe-area='block'],
+    &[data-safe-area='none'] {
+      --uikit-viewport-safe-right: 0px;
+      --uikit-viewport-safe-left: 0px;
+    }
+
+    &[data-safe-area='inline'],
+    &[data-safe-area='none'] {
+      --uikit-viewport-safe-top: 0px;
+      --uikit-viewport-safe-bottom: 0px;
+    }
+  }
+
+  /* At an edge (`data-edge`): bars at the top and bottom (pushed up by the
+     keyboard, `data-keyboard='push'`), sidebars at the sides, down to the
+     keyboard's top. */
+  .uikit-viewport-anchor {
+    z-index: 10;
+
+    &[data-edge='block-start'] {
+      top: var(--uikit-viewport-top, 0);
+      padding-top: var(--uikit-viewport-safe-top);
+      inset-inline: 0;
+      padding-inline: var(--uikit-viewport-safe-left)
+        var(--uikit-viewport-safe-right);
+    }
+
+    &[data-edge='block-end'] {
+      bottom: 0;
+      padding-bottom: var(--uikit-viewport-safe-bottom);
+      inset-inline: 0;
+      padding-inline: var(--uikit-viewport-safe-left)
+        var(--uikit-viewport-safe-right);
+
+      &[data-keyboard='push'] {
+        bottom: var(--uikit-viewport-keyboard-inset, 0);
+        padding-bottom: var(--uikit-viewport-safe-bottom-keyboard);
+      }
+    }
+
+    &[data-edge='inline-start'],
+    &[data-edge='inline-end'] {
+      top: var(--uikit-viewport-top, 0);
+      bottom: var(--uikit-viewport-keyboard-inset, 0);
+      padding-top: var(--uikit-viewport-safe-top);
+      padding-bottom: var(--uikit-viewport-safe-bottom-keyboard);
+    }
+
+    /* The inline start: the left in left-to-right, the right in
+       right-to-left. */
+    &[data-edge='inline-start'] {
+      left: 0;
+      padding-left: var(--uikit-viewport-safe-left);
+
+      &:dir(rtl) {
+        right: 0;
+        left: auto;
+        padding-right: var(--uikit-viewport-safe-right);
+        padding-left: 0;
+      }
+    }
+
+    &[data-edge='inline-end'] {
+      right: 0;
+      padding-right: var(--uikit-viewport-safe-right);
+
+      &:dir(rtl) {
+        right: auto;
+        left: 0;
+        padding-right: 0;
+        padding-left: var(--uikit-viewport-safe-left);
+      }
+    }
+  }
+
+  /* The content layer: filling the visual viewport; with the keyboard
+     (`data-keyboard='resize'`), down to its top. */
+  .uikit-viewport-content {
+    top: 0;
+    bottom: 0;
+    overflow: auto;
+    padding: var(--uikit-viewport-safe-top) var(--uikit-viewport-safe-right)
+      var(--uikit-viewport-safe-bottom) var(--uikit-viewport-safe-left);
+    inset-inline: 0;
+    overscroll-behavior: contain;
+
+    &[data-keyboard='resize'] {
+      top: var(--uikit-viewport-top, 0);
+      bottom: var(--uikit-viewport-keyboard-inset, 0);
+      padding-bottom: var(--uikit-viewport-safe-bottom-keyboard);
+    }
+  }
+}

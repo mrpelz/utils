@@ -1,0 +1,13 @@
+/* Checkbox demo (see main.tsx). */
+
+/* The radios with their labels, one below the other. */
+.checkbox-demo-group {
+  display: grid;
+  gap: 16px;
+}
+
+.checkbox-demo-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

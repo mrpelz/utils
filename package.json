@@ -16,11 +16,11 @@
     "dist/**/*.{js,map,ts}"
   ],
   "workspaces": [
-    "packages/base-ui-styled",
     "packages/misc-utils",
     "packages/modifiable-date",
     "packages/observable",
-    "packages/struct"
+    "packages/struct",
+    "packages/uikit-ish"
   ],
   "overrides": {
     "@istanbuljs/load-nyc-config": {

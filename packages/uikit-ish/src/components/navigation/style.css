@@ -1,0 +1,83 @@
+/* Navigation (see main.tsx). */
+@layer uikit-ish {
+  .uikit-navigation-root {
+    --uikit-navigation-direction: 1;
+
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    isolation: isolate;
+
+    &:dir(rtl) {
+      --uikit-navigation-direction: -1;
+    }
+  }
+
+  .uikit-navigation-frame {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    inset: 0;
+
+    & > * {
+      min-height: 0;
+      flex: 1 1 auto;
+    }
+
+    &[data-navigation-role='hidden'] {
+      visibility: hidden;
+    }
+
+    &[data-navigation-role='top'] {
+      --uikit-navigation-x: calc(
+        var(--uikit-navigation-progress) * 100% *
+          var(--uikit-navigation-direction)
+      );
+      --uikit-navigation-shown: calc(1 - var(--uikit-navigation-progress));
+
+      z-index: 1;
+      box-shadow: 0 0 24px
+        rgb(0 0 0 / calc(16% * var(--uikit-navigation-shown)));
+    }
+
+    /* Moved back 30% of its width under the top page. */
+    &[data-navigation-role='under'] {
+      --uikit-navigation-x: calc(
+        (1 - var(--uikit-navigation-progress)) * -30% *
+          var(--uikit-navigation-direction)
+      );
+      --uikit-navigation-shown: var(--uikit-navigation-progress);
+
+      &::after {
+        position: absolute;
+        background-color: rgb(
+          0 0 0 / calc(10% * (1 - var(--uikit-navigation-progress)))
+        );
+        content: '';
+        inset: 0;
+        pointer-events: none;
+      }
+    }
+
+    &[data-navigation-role='top'],
+    &[data-navigation-role='under'] {
+      --uikit-navigation-counter: calc(-1 * var(--uikit-navigation-x)) 0;
+      --uikit-navigation-filter: opacity(var(--uikit-navigation-shown));
+
+      pointer-events: none;
+      translate: var(--uikit-navigation-x) 0;
+    }
+  }
+
+  /* Where a swipe back starts: within 20px of the leading edge. */
+  .uikit-navigation-edge {
+    position: absolute;
+    z-index: 2;
+    width: 20px;
+    inset-block: 0;
+    inset-inline-start: 0;
+    touch-action: none;
+  }
+}

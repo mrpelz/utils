@@ -1,8 +1,0 @@
-/* Action-sheet (see main.tsx). */
-@layer base-ui-styled {
-  .bus-action-sheet-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-}

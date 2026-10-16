@@ -1,0 +1,209 @@
+/* Activity-view (see main.tsx). */
+@layer uikit-ish {
+  .uikit-activity-view-header {
+    display: flex;
+    align-items: flex-start;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .uikit-activity-view-thumbnail {
+    overflow: hidden;
+    width: 64px;
+    height: 64px;
+    box-sizing: border-box;
+    flex: none;
+    border: 0.5px solid rgb(0 0 0 / 15%);
+    border-radius: 16px;
+    margin-block-start: 14px;
+
+    & > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .uikit-activity-view-heading {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding-block: 12px 2px;
+  }
+
+  .uikit-activity-view-title {
+    color: var(--color-ios-label);
+    font-size: 15px;
+    font-variation-settings: 'wght' 510;
+    font-weight: round(down, 510, 100);
+    letter-spacing: -0.23px;
+    line-height: 20px;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (510 - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
+
+    & + [data-activity-view-part='subtitle'] {
+      margin-block-start: -11px;
+    }
+  }
+
+  .uikit-activity-view-subtitle {
+    color: var(--color-ios-secondary-label);
+    font-size: var(--font-ios-footnote-size);
+    font-style: normal;
+    font-variation-settings: 'wght' var(--font-ios-footnote-weight);
+    font-weight: round(down, var(--font-ios-footnote-weight), 100);
+    letter-spacing: var(--font-ios-footnote-tracking);
+    line-height: var(--font-ios-footnote-line-height);
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (var(--font-ios-footnote-weight) - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(
+      0px,
+      (400 - var(--font-ios-footnote-weight)) / 326 * 1px
+    );
+  }
+
+  .uikit-activity-view-message {
+    color: var(--color-ios-secondary-label);
+    font-size: var(--font-ios-footnote-size);
+    font-style: normal;
+    font-variation-settings: 'wght' var(--font-ios-footnote-weight);
+    font-weight: round(down, var(--font-ios-footnote-weight), 100);
+    letter-spacing: var(--font-ios-footnote-tracking);
+    line-height: var(--font-ios-footnote-line-height);
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (var(--font-ios-footnote-weight) - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(
+      0px,
+      (400 - var(--font-ios-footnote-weight)) / 326 * 1px
+    );
+  }
+
+  .uikit-activity-view-row {
+    display: flex;
+    overflow: auto hidden;
+    padding: 14px 24px 20px;
+    gap: 14px;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .uikit-activity-view-name {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    font-size: 12px;
+    letter-spacing: 0.06px;
+    -webkit-line-clamp: 2;
+    line-height: 15px;
+
+    /* With a count (a group's): on one line, truncated. */
+    &[data-counted] {
+      display: block;
+      max-width: 100%;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .uikit-activity-view-count {
+    color: var(--color-ios-secondary-label);
+    font-size: 12px;
+    letter-spacing: 0.06px;
+    line-height: 15px;
+    margin-block-start: -5px;
+  }
+
+  .uikit-activity-view-separator {
+    height: 0;
+    border: 0;
+    margin: 0 16px;
+    border-block-start: 0.5px solid var(--color-ios-separator);
+  }
+
+  /* A list item: only its button laid out (in the row). */
+  .uikit-activity-view-list-item {
+    display: contents;
+  }
+
+  /* A person or an action: 78px wide, its picture above its name. */
+  .uikit-activity-view-item {
+    display: flex;
+    width: 78px;
+    flex: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    border: 0;
+    margin: 0;
+    background: none;
+    color: var(--color-ios-label);
+    cursor: pointer;
+    font-family: inherit;
+    gap: 5px;
+    outline-offset: 2px;
+    text-align: center;
+  }
+
+  .uikit-activity-view-action {
+    gap: 7px;
+
+    & > [data-activity-view-part='action-symbol'] {
+      display: grid;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background-color: var(--color-ios-tertiary-system-fill);
+      font-size: 25px;
+      font-variation-settings: 'wght' 300;
+      font-weight: round(down, 300, 100);
+      place-items: center;
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(0px, (300 - 400) / 326 * 1px);
+
+      --uikit-symbol-thinning: max(0px, (400 - 300) / 326 * 1px);
+    }
+
+    &:active > [data-activity-view-part='action-symbol'] {
+      filter: brightness(0.9);
+    }
+
+    & > span:last-child {
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      font-size: var(--font-ios-footnote-size);
+      font-style: normal;
+      font-variation-settings: 'wght' var(--font-ios-footnote-weight);
+      font-weight: round(down, var(--font-ios-footnote-weight), 100);
+      letter-spacing: var(--font-ios-footnote-tracking);
+      -webkit-line-clamp: 2;
+      line-height: 15px;
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(
+        0px,
+        (var(--font-ios-footnote-weight) - 400) / 326 * 1px
+      );
+
+      --uikit-symbol-thinning: max(
+        0px,
+        (400 - var(--font-ios-footnote-weight)) / 326 * 1px
+      );
+    }
+  }
+}

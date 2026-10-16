@@ -1,0 +1,230 @@
+/* Text-field (see main.tsx). */
+@layer uikit-ish {
+  .uikit-text-field-root {
+    &:not([data-list-part]) {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* The clear button, only while focused and filled; in a list row (in its
+       content), taking no room until then, so a value aligned to the end
+       reaches it (UIKit: the value moves over for the button). */
+    &:not([data-filled][data-focused]) > [data-text-field-part='clear'] {
+      visibility: hidden;
+    }
+
+    /* (In a search field's capsule, see Search.) */
+    &:not([data-filled][data-focused])
+      > [data-text-field-part='search']
+      > [data-text-field-part='clear'] {
+      visibility: hidden;
+    }
+
+    &[data-list-part]:not([data-filled][data-focused])
+      > *
+      > [data-list-part='row']
+      > [data-text-field-part='clear'] {
+      display: none;
+    }
+  }
+
+  .uikit-text-field-label {
+    color: var(--color-ios-secondary-label);
+    font-size: var(--font-ios-subheadline-size);
+    font-style: normal;
+    font-variation-settings: 'wght' var(--font-ios-subheadline-weight);
+    font-weight: round(down, var(--font-ios-subheadline-weight), 100);
+    letter-spacing: var(--font-ios-subheadline-tracking);
+    line-height: var(--font-ios-subheadline-line-height);
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(
+      0px,
+      (var(--font-ios-subheadline-weight) - 400) / 326 * 1px
+    );
+
+    --uikit-symbol-thinning: max(
+      0px,
+      (400 - var(--font-ios-subheadline-weight)) / 326 * 1px
+    );
+
+    &[data-disabled] {
+      opacity: 0.55;
+    }
+  }
+
+  .uikit-text-field-control {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0;
+    border: 0;
+    margin: 0;
+    appearance: none;
+    background: none;
+    caret-color: var(--color-ios-primary);
+    color: var(--color-ios-label);
+    font-family: inherit;
+    font-size: var(--font-ios-body-size);
+    font-variation-settings: 'wght' 510;
+    font-weight: round(down, 510, 100);
+    letter-spacing: var(--font-ios-body-tracking);
+    line-height: 20px;
+    outline: none;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (510 - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
+
+    &::placeholder {
+      color: var(--color-ios-placeholder-text);
+      opacity: 1;
+    }
+
+    /* Native parts iOS doesn't show, or the field draws itself: number
+       spinners (iOS: a keypad), search's decoration and cancel button (see
+       `Clear`). */
+    &[type='number'] {
+      appearance: textfield;
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button,
+    &::-webkit-search-decoration,
+    &::-webkit-search-cancel-button {
+      margin: 0;
+      appearance: none;
+    }
+
+    /* Dates and times: aligned as text (WebKit centers them). */
+    &::-webkit-date-and-time-value {
+      margin: 0;
+      text-align: inherit;
+    }
+
+    &::-webkit-datetime-edit {
+      padding: 0;
+    }
+
+    /* Autofilled: as typed, on the row (no browser fill, which is
+       `!important`: its color never transitions in). */
+    &:autofill {
+      -webkit-text-fill-color: var(--color-ios-label);
+      transition: background-color 0s 86400s;
+    }
+
+    /* As a textarea: three lines, growing with its text where supported */
+    textarea& {
+      min-height: calc(3 * 20px);
+      field-sizing: content;
+      resize: none;
+    }
+
+    &[data-invalid] {
+      color: var(--color-ios-system-red);
+    }
+
+    &[data-disabled] {
+      opacity: 0.55;
+    }
+  }
+
+  .uikit-text-field-description {
+    margin: 0;
+    color: var(--color-ios-secondary-label);
+    font-size: var(--font-ios-caption1-size);
+    font-style: normal;
+    font-variation-settings: 'wght' var(--font-ios-caption1-weight);
+    font-weight: round(down, var(--font-ios-caption1-weight), 100);
+    letter-spacing: var(--font-ios-caption1-tracking);
+    line-height: var(--font-ios-caption1-line-height);
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (var(--font-ios-caption1-weight) - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(
+      0px,
+      (400 - var(--font-ios-caption1-weight)) / 326 * 1px
+    );
+  }
+
+  .uikit-text-field-error {
+    margin: 0;
+    color: var(--color-ios-system-red);
+    font-size: var(--font-ios-caption1-size);
+    font-style: normal;
+    font-variation-settings: 'wght' var(--font-ios-caption1-weight);
+    font-weight: round(down, var(--font-ios-caption1-weight), 100);
+    letter-spacing: var(--font-ios-caption1-tracking);
+    line-height: var(--font-ios-caption1-line-height);
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (var(--font-ios-caption1-weight) - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(
+      0px,
+      (400 - var(--font-ios-caption1-weight)) / 326 * 1px
+    );
+  }
+
+  .uikit-text-field-clear {
+    position: relative;
+    display: grid;
+    padding: 0;
+    border: 0;
+    margin: 0;
+    appearance: none;
+    background: none;
+    color: var(--color-ios-tertiary-label);
+    cursor: pointer;
+    place-items: center;
+    -webkit-tap-highlight-color: transparent;
+
+    &::before {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      content: '';
+      inset: 50% auto auto 50%;
+      translate: -50% -50%;
+    }
+  }
+
+  .uikit-text-field-search {
+    display: flex;
+    min-width: 0;
+    min-height: var(--uikit-text-field-search-height, 36px);
+    box-sizing: border-box;
+    align-items: center;
+    padding: 0 var(--uikit-text-field-search-padding, 10px);
+    border-radius: 100px;
+    background-color: var(
+      --uikit-text-field-search-fill,
+      var(--color-ios-tertiary-system-fill)
+    );
+    color: var(--color-ios-secondary-label);
+    cursor: text;
+    font-size: var(--font-ios-body-size);
+    gap: var(--uikit-text-field-search-gap, 6px);
+
+    & > input {
+      flex: 1 1 auto;
+      font-variation-settings: 'wght' 400;
+      font-weight: round(down, 400, 100);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(0px, (400 - 400) / 326 * 1px);
+
+      --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
+    }
+
+    /* Focused by keyboard only (a text field matches :focus-visible however
+       it's focused; see Search). */
+    &[data-keyboard-focus] {
+      outline: 2px solid var(--color-ios-primary);
+      outline-offset: 2px;
+    }
+  }
+}

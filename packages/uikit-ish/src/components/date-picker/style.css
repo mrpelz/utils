@@ -1,0 +1,446 @@
+/* Date-picker (see main.tsx). */
+@layer uikit-ish {
+  .uikit-date-picker-collapsed-button {
+    && {
+      padding: 6px 11px;
+      font-size: var(--font-ios-body-size);
+      font-style: normal;
+      font-variant-numeric: tabular-nums;
+      font-variation-settings: 'wght' var(--font-ios-body-weight);
+      font-weight: round(down, var(--font-ios-body-weight), 100);
+      letter-spacing: var(--font-ios-body-tracking);
+      line-height: var(--font-ios-body-line-height);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
+      -webkit-tap-highlight-color: transparent;
+
+      --uikit-symbol-thinning: max(
+        0px,
+        (400 - var(--font-ios-body-weight)) / 326 * 1px
+      );
+    }
+
+    &&[data-popup-open],
+    &&[aria-expanded='true'] {
+      --uikit-button-color: var(--color-ios-primary);
+    }
+  }
+
+  .uikit-date-picker-panel {
+    display: flex;
+    min-width: calc(7 * 44px + 2 * 16px);
+    flex-direction: column;
+    color: var(--color-ios-label);
+    padding-block: 6px;
+  }
+
+  .uikit-date-picker-header {
+    position: relative;
+    display: flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: 16px;
+  }
+
+  .uikit-date-picker-month-title {
+    margin: 0;
+    font-size: var(--font-ios-body-size);
+    font-style: normal;
+    font-variation-settings: 'wght' 590;
+    font-weight: round(down, 590, 100);
+    letter-spacing: var(--font-ios-body-tracking);
+    line-height: var(--font-ios-body-line-height);
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (590 - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
+  }
+
+  .uikit-date-picker-title-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    border: 0;
+    margin: 0;
+    appearance: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    gap: 6px;
+    letter-spacing: inherit;
+    -webkit-tap-highlight-color: transparent;
+
+    @media (hover: hover) {
+      cursor: pointer;
+    }
+
+    & > svg {
+      color: var(--color-ios-primary);
+      transition: rotate 200ms;
+    }
+
+    &:dir(rtl) > svg {
+      scale: -1 1;
+    }
+
+    &[aria-expanded='true'] {
+      color: var(--color-ios-primary);
+
+      & > svg {
+        rotate: 90deg;
+      }
+    }
+
+    &[aria-expanded='true']:dir(rtl) > svg {
+      rotate: -90deg;
+    }
+  }
+
+  .uikit-date-picker-arrows {
+    display: flex;
+    align-items: center;
+    margin-inline-end: -4px;
+
+    &[hidden] {
+      display: flex;
+      visibility: hidden;
+    }
+  }
+
+  .uikit-date-picker-arrow {
+    && {
+      width: 40px;
+      height: 40px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    &&:dir(rtl) > svg {
+      scale: -1 1;
+    }
+  }
+
+  .uikit-date-picker-body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    &[data-rolled] > :not([data-date-picker-part='roll']) {
+      visibility: hidden;
+    }
+  }
+
+  .uikit-date-picker-overlay {
+    position: absolute;
+    display: grid;
+    align-content: center;
+    inset: 0;
+    padding-inline: 8px;
+  }
+
+  .uikit-date-picker-weekdays {
+    display: grid;
+    min-height: 20px;
+    color: var(--color-ios-tertiary-label);
+    font-size: 13px;
+    font-variation-settings: 'wght' 590;
+    font-weight: round(down, 590, 100);
+    grid-template-columns: repeat(7, minmax(44px, 1fr));
+    line-height: 18px;
+    padding-inline: 16px;
+    place-items: center;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (590 - 400) / 326 * 1px);
+    text-transform: uppercase;
+
+    --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
+
+    & > abbr {
+      text-decoration: none;
+    }
+
+    & > [data-weekday-highlighted] {
+      color: var(--color-ios-secondary-label);
+    }
+  }
+
+  .uikit-date-picker-pages {
+    position: relative;
+  }
+
+  .uikit-date-picker-leaving-page {
+    position: absolute;
+    top: 0;
+    inset-inline: 0;
+    pointer-events: none;
+  }
+
+  .uikit-date-picker-weeks {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(44px, 1fr));
+    padding-block-start: 3px;
+    padding-inline: 16px;
+    row-gap: 7px;
+
+    /* Ranges are dragged (see CalendarPanel), not scrolled. */
+    &[data-range-drag] {
+      touch-action: none;
+    }
+  }
+
+  .uikit-date-picker-separator {
+    height: 11px;
+    box-sizing: border-box;
+    border-block-end: 0.5px solid var(--color-ios-separator);
+    margin-inline: 16px;
+  }
+
+  .uikit-date-picker-time-row {
+    display: flex;
+    min-height: 52px;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--font-ios-body-size);
+    font-style: normal;
+    font-variation-settings: 'wght' var(--font-ios-body-weight);
+    font-weight: round(down, var(--font-ios-body-weight), 100);
+    gap: 16px;
+    letter-spacing: var(--font-ios-body-tracking);
+    line-height: var(--font-ios-body-line-height);
+    padding-inline: 16px;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(
+      0px,
+      (400 - var(--font-ios-body-weight)) / 326 * 1px
+    );
+  }
+
+  .uikit-date-picker-collapsed {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    vertical-align: middle;
+  }
+
+  .uikit-date-picker-popup {
+    & > div {
+      overflow: clip;
+      border-radius: inherit;
+    }
+  }
+
+  .uikit-date-picker-time-popup {
+    min-width: 200px;
+    padding: 8px;
+  }
+
+  .uikit-date-picker-day {
+    position: relative;
+    display: grid;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    margin: 0;
+    appearance: none;
+    background: none;
+    color: var(--color-ios-label);
+    font-family: inherit;
+    font-size: var(--font-ios-title3-size);
+    font-style: normal;
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: 'wght' var(--font-ios-title3-weight);
+    font-weight: round(down, var(--font-ios-title3-weight), 100);
+    isolation: isolate;
+    letter-spacing: var(--font-ios-title3-tracking);
+    line-height: var(--font-ios-title3-line-height);
+    outline: none;
+    place-items: center;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (var(--font-ios-title3-weight) - 400) / 326 * 1px);
+    -webkit-tap-highlight-color: transparent;
+
+    --uikit-symbol-thinning: max(
+      0px,
+      (400 - var(--font-ios-title3-weight)) / 326 * 1px
+    );
+
+    @media (hover: hover) {
+      cursor: pointer;
+    }
+
+    &::before {
+      position: absolute;
+      z-index: -1;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      margin: auto;
+      content: '';
+      inset: 0;
+    }
+
+    &:focus-visible::before {
+      outline: 2px solid var(--color-ios-primary);
+      outline-offset: 2px;
+    }
+
+    &[aria-current='date'] {
+      color: var(--color-ios-primary);
+    }
+
+    &[aria-pressed='true'] {
+      color: var(--color-ios-primary);
+      font-size: 24px;
+      font-variation-settings: 'wght' 510;
+      font-weight: round(down, 510, 100);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(0px, (510 - 400) / 326 * 1px);
+
+      --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
+
+      &::before {
+        background-color: color-mix(
+          in srgb,
+          var(--color-ios-primary) 12%,
+          transparent
+        );
+      }
+    }
+
+    &[data-range='middle'] {
+      background-color: color-mix(
+        in srgb,
+        var(--color-ios-primary) 12%,
+        transparent
+      );
+      font-size: var(--font-ios-title3-size);
+      font-variation-settings: 'wght' 400;
+      font-weight: round(down, 400, 100);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(0px, (400 - 400) / 326 * 1px);
+
+      --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
+
+      &::before {
+        background: none;
+      }
+    }
+
+    &[data-range='start'],
+    &[data-range='end'],
+    &[data-range='single'] {
+      color: #fff;
+
+      &::before {
+        background-color: var(--color-ios-primary);
+      }
+    }
+
+    &[data-range='start'] {
+      background: linear-gradient(
+        to var(--uikit-date-picker-end, right),
+        transparent 50%,
+        color-mix(in srgb, var(--color-ios-primary) 12%, transparent) 50%
+      );
+    }
+
+    &[data-range='end'] {
+      background: linear-gradient(
+        to var(--uikit-date-picker-end, right),
+        color-mix(in srgb, var(--color-ios-primary) 12%, transparent) 50%,
+        transparent 50%
+      );
+    }
+
+    &:dir(rtl) {
+      --uikit-date-picker-end: left;
+    }
+
+    /* The adjacent months' days (see showAdjacentMonths) */
+    &[data-outside]:not([aria-pressed='true'], [data-range]) {
+      color: var(--color-ios-tertiary-label);
+    }
+
+    /* Highlighted weekdays (e.g. the weekend) */
+    &[data-weekday-highlighted]:enabled:not([aria-pressed='true']) {
+      color: var(--color-ios-secondary-label);
+    }
+
+    /* Highlighted days (see DayHighlight): dots below the date (Framework7
+       events, side by side), the date in the tint, or a circle behind it; not
+       selected ones' text and circles. */
+    & > [data-date-picker-part='dots'] {
+      position: absolute;
+      bottom: 5px;
+      display: flex;
+      justify-content: center;
+      gap: 2px;
+      inset-inline: 0;
+      pointer-events: none;
+
+      & > * {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background-color: currentcolor;
+        opacity: 0.6;
+      }
+    }
+
+    &[data-highlight-text]:not([aria-pressed='true']) {
+      color: var(--uikit-date-picker-text, var(--color-ios-primary));
+    }
+
+    &[data-highlight-circle]:not([aria-pressed='true']) {
+      &::before {
+        background-color: color-mix(
+          in srgb,
+          var(--uikit-date-picker-circle, var(--color-ios-primary)) 20%,
+          transparent
+        );
+      }
+    }
+
+    &:disabled {
+      color: var(--color-ios-tertiary-label);
+
+      @media (hover: hover) {
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .uikit-date-picker-message {
+    padding: 12px 16px;
+    margin: 0;
+    color: var(--color-ios-secondary-label);
+    font-size: var(--font-ios-footnote-size);
+    font-style: normal;
+    font-variation-settings: 'wght' var(--font-ios-footnote-weight);
+    font-weight: round(down, var(--font-ios-footnote-weight), 100);
+    letter-spacing: var(--font-ios-footnote-tracking);
+    line-height: var(--font-ios-footnote-line-height);
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (var(--font-ios-footnote-weight) - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(
+      0px,
+      (400 - var(--font-ios-footnote-weight)) / 326 * 1px
+    );
+
+    &[data-variant='error'] {
+      color: var(--color-ios-system-red);
+    }
+  }
+}

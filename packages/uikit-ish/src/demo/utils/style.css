@@ -1,0 +1,293 @@
+/*
+ * Demo page styles, in a layer under the components' (declared first, so
+ * the components' styles win, as they would over an app's base styles).
+ */
+@layer demo, uikit-ish;
+
+@layer demo {
+  * {
+    box-sizing: border-box;
+    -webkit-touch-callout: none;
+    /* stylelint-disable-next-line property-no-vendor-prefix */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  :root {
+    background-color: light-dark(white, #0a0a0a);
+    color: light-dark(black, #fafafa);
+    color-scheme: light dark;
+    font-family:
+      -apple-system, 'SF Pro', system-ui, 'SF UI Text', 'Helvetica Neue',
+      Helvetica, Arial, sans-serif;
+    scroll-snap-type: y mandatory;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  /* The demo page's frame (see main.tsx): each demo, its stage and its
+     config column (controls, code, log). */
+  .demo-container {
+    position: relative;
+    display: grid;
+    width: 100svw;
+    min-height: 100svh;
+    padding: 1rem;
+    gap: 1rem;
+    grid-auto-columns: 1fr;
+    grid-template: 'content config' 1fr / 1fr 25em;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    scroll-snap-type: y mandatory;
+
+    @media screen and (width <= 768px) {
+      grid-template: 'content' 'config';
+      scroll-snap-align: unset;
+      scroll-snap-stop: normal;
+      scroll-snap-type: none;
+    }
+  }
+
+  /* Sticky, so a stacking context: it needs the page background, or glass
+     in it blends with nothing (rendering gray and unblurred). */
+  .demo-content {
+    position: sticky;
+    top: 0;
+    display: grid;
+    height: 100svh;
+    padding: 1rem;
+    margin: calc(1rem * -1);
+    background-color: light-dark(white, #0a0a0a);
+    gap: 1rem;
+    grid-area: content;
+    grid-template: 'head' auto 'stage' 1fr / 1fr;
+
+    @media screen and (width <= 768px) {
+      position: static;
+      height: auto;
+    }
+  }
+
+  .demo-header {
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    display: block;
+    width: stretch;
+    padding: 1rem;
+    margin: calc(1rem * -1);
+    background-color: light-dark(white, #0a0a0a);
+    grid-area: head;
+
+    @media screen and (width <= 768px) {
+      position: static;
+    }
+  }
+
+  .demo-heading {
+    margin: 0 0 0.25rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .demo-id {
+    color: #a1a1a1;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 0.875rem;
+    font-weight: 400;
+    margin-inline-start: 0.5rem;
+    text-decoration: underline;
+  }
+
+  .demo-docs-link {
+    display: inline-block;
+    color: #a1a1a1;
+    font-size: 0.875rem;
+  }
+
+  /* Snaps to snap points of demos having them (plain lists' sections). */
+  .demo-stage {
+    position: relative;
+    display: grid;
+    overflow: auto;
+    min-height: 100svh;
+    align-items: center;
+    grid-area: stage;
+    scroll-snap-stop: always;
+
+    @media screen and (width <= 768px) {
+      min-height: 150svh;
+      margin: calc(1rem * -1);
+      margin-block-start: 0;
+      scroll-snap-stop: normal;
+    }
+  }
+
+  .demo-stage-background {
+    position: absolute;
+    z-index: -1;
+    background-image: radial-gradient(circle, #a1a1a1 0.5px, transparent 0.5px);
+    background-position: center center;
+    background-repeat: repeat;
+    background-size: 9px 9px;
+    inset: 0;
+    mask-image: radial-gradient(
+      ellipse at center,
+      rgb(0 0 0) 0%,
+      rgb(0 0 0 / 0%) 90%
+    );
+    mask-repeat: no-repeat;
+  }
+
+  /* The demo's own element: hugging it (or stretched), maybe centered, on
+     an opaque backdrop. */
+  .demo-stage-inner {
+    position: relative;
+    display: block;
+    width: fit-content;
+
+    &[data-stretch] {
+      width: 100%;
+    }
+
+    &[data-center] {
+      margin: 0 auto;
+    }
+
+    &::before {
+      position: absolute;
+      z-index: -1;
+      display: block;
+      background-color: light-dark(white, #0a0a0a);
+      inset: 0;
+    }
+
+    &[data-backdrop]::before {
+      content: '';
+    }
+  }
+
+  /* (Its sections can shrink: the code's longest line would widen it.) */
+  .demo-config {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    min-width: 0;
+    min-height: 100svh;
+    flex-direction: column;
+    border: 1px dashed #404040;
+    background-color: light-dark(white, #0a0a0a);
+    color: light-dark(black, #a1a1a1);
+    font-family: monospace;
+    font-size: 0.875rem;
+    grid-area: config;
+
+    &[hidden] {
+      display: none;
+    }
+
+    @media screen and (width <= 768px) {
+      padding: 1rem;
+      margin: calc(1rem * -1);
+      margin-block: 0;
+    }
+  }
+
+  .demo-config-section {
+    min-height: auto;
+    padding: 0.5rem;
+    border-right: none;
+    border-left: none;
+
+    & + &,
+    &:first-child {
+      border-top: none;
+    }
+
+    &:last-child {
+      flex-grow: 1;
+      border-bottom: none;
+    }
+
+    @media screen and (width <= 768px) {
+      margin: 0;
+      margin-inline: calc(1rem * -1);
+    }
+  }
+
+  .demo-config-heading {
+    position: sticky;
+    top: 0;
+    padding: 0.5rem;
+    margin: calc(0.5rem * -1);
+    margin-bottom: 0.25rem;
+    background-color: light-dark(white, #0a0a0a);
+    cursor: pointer;
+
+    @media screen and (width <= 768px) {
+      position: static;
+    }
+  }
+
+  /* Its inputs fill the column, shrinking with it. */
+  .demo-props {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: auto minmax(0, 1fr) min-content;
+    margin-block: 1rem;
+
+    & > input {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+  .demo-log {
+    display: block;
+    flex-grow: 1;
+    margin-block: 1rem;
+  }
+
+  .demo-code {
+    max-width: 100%;
+    font-size: 0.75rem;
+    margin-block: 0.5rem;
+    overflow-x: auto;
+    user-select: text;
+    white-space: pre;
+
+    & > * {
+      user-select: text;
+    }
+
+    & [data-token='tag'] {
+      color: light-dark(#0b6bcb, #6cb6ff);
+    }
+
+    & [data-token='attribute'] {
+      color: light-dark(#8a3ffc, #d2a8ff);
+    }
+
+    & [data-token='string'] {
+      color: light-dark(#0a7d32, #7ee787);
+    }
+
+    & [data-token='expression'] {
+      color: light-dark(#b35900, #ffa657);
+    }
+  }
+
+  /* In a section's heading (also while it's collapsed). */
+  .demo-outline-toggle {
+    float: right;
+    font-weight: 400;
+    margin-inline-start: 0.5rem;
+  }
+
+  .demo-button {
+    align-self: self-start;
+  }
+}

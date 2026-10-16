@@ -1,0 +1,9 @@
+/* Form (see main.tsx). */
+@layer uikit-ish {
+  .uikit-form-fieldset-element {
+    padding: 0;
+    border: 0;
+    margin-inline: 0;
+    min-inline-size: 0;
+  }
+}

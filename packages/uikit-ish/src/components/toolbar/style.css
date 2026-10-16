@@ -1,0 +1,210 @@
+/* Toolbar (see main.tsx). */
+@layer uikit-ish {
+  .uikit-toolbar-leading {
+    display: flex;
+    min-width: max-content;
+    flex: 1 1 0;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--uikit-toolbar-gap);
+  }
+
+  .uikit-toolbar-trailing {
+    display: flex;
+    min-width: max-content;
+    flex: 1 1 0;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--uikit-toolbar-gap);
+  }
+
+  .uikit-toolbar-spacer {
+    flex: 1 1 0;
+  }
+
+  .uikit-toolbar-subtitle {
+    color: var(--color-ios-secondary-label);
+    font-size: 12px;
+    font-variation-settings: 'wght' 510;
+    font-weight: round(down, 510, 100);
+    letter-spacing: 0;
+    line-height: 14px;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(0px, (510 - 400) / 326 * 1px);
+
+    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
+  }
+
+  .uikit-toolbar-root {
+    display: flex;
+    box-sizing: border-box;
+    align-items: center;
+    gap: var(--uikit-toolbar-gap);
+
+    &[data-placement='block-end'] {
+      --uikit-toolbar-group-height: 48px;
+      --uikit-toolbar-group-padding: 6px;
+      --uikit-toolbar-gap: 12px;
+      --uikit-toolbar-text-padding: 6px;
+
+      padding: 4px 16px 36px;
+    }
+
+    &[data-placement='block-start'] {
+      --uikit-toolbar-group-height: 44px;
+      --uikit-toolbar-group-padding: 4px;
+      --uikit-toolbar-gap: 10px;
+      --uikit-toolbar-text-padding: 8px;
+
+      min-height: 54px;
+      padding: 0 16px 10px;
+    }
+  }
+
+  .uikit-toolbar-group {
+    --uikit-glass-outset: 0px;
+    --uikit-toolbar-content: var(--uikit-glass-content);
+    --uikit-toolbar-content-blend: var(--uikit-glass-content-blend);
+    --uikit-toolbar-content-disabled: var(--uikit-glass-content-disabled);
+
+    position: relative;
+    display: flex;
+    min-width: var(--uikit-toolbar-group-height);
+    min-height: var(--uikit-toolbar-group-height);
+    box-sizing: border-box;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--uikit-toolbar-group-padding);
+    border-radius: 100px;
+    gap: 12px;
+
+    &[data-prominent] {
+      --uikit-toolbar-content: var(--uikit-glass-content-prominent);
+      --uikit-toolbar-content-blend: var(--uikit-glass-content-prominent-blend);
+      --uikit-toolbar-content-disabled: var(
+        --uikit-glass-content-prominent-disabled
+      );
+    }
+
+    &:has(:active) {
+      --uikit-glass-pressed: 1;
+      --uikit-glass-scale: 1.05;
+      --uikit-toolbar-content-scale: 1.05;
+    }
+  }
+
+  .uikit-toolbar-button {
+    &&& {
+      --uikit-button-size: 36px;
+      --uikit-button-icon-font-size: 17px;
+      --uikit-button-icon-font-weight: 510;
+      --uikit-button-icon-line-height: 20px;
+
+      padding: 0 var(--uikit-toolbar-text-padding);
+      border-radius: 100px;
+      font-feature-settings: 'ss16';
+      font-size: 17px;
+      font-variation-settings: 'wght' 510;
+      font-weight: round(down, 510, 100);
+      letter-spacing: 0;
+      line-height: 20px;
+      scale: var(--uikit-toolbar-content-scale, none);
+      stroke: currentcolor;
+      stroke-linejoin: round;
+      stroke-width: max(0px, (510 - 400) / 326 * 1px);
+      transition-duration: var(--glass-ios-lens-duration);
+      transition-property: background-color, scale;
+
+      --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
+    }
+
+    /* Not of a classic variant: the capsule's content colors, the selection
+       pressed. */
+    &&&:not([data-toolbar-classic]) {
+      --uikit-button-color: var(--uikit-toolbar-content);
+      --uikit-button-color-disabled: var(--uikit-toolbar-content-disabled);
+      --uikit-button-background-pressed: var(--uikit-glass-selection);
+
+      mix-blend-mode: var(--uikit-toolbar-content-blend);
+    }
+
+    /* Tinted (or destructive): its content in the tint, unblended. */
+    &&&[data-toolbar-tinted] {
+      --uikit-button-color: var(--uikit-button-tint);
+
+      mix-blend-mode: normal;
+    }
+
+    &&&[data-shape='circle'] {
+      padding: 0;
+    }
+  }
+
+  .uikit-toolbar-glass-button {
+    &&&:is([data-variant='glass'], [data-variant='glass-prominent']) {
+      --uikit-button-size: var(--uikit-toolbar-group-height);
+      --uikit-button-icon-font-size: 17px;
+      --uikit-button-icon-font-weight: 510;
+      --uikit-button-icon-line-height: 20px;
+
+      padding-inline: 12px;
+
+      &[data-shape='circle'] {
+        padding-inline: 0;
+      }
+    }
+  }
+
+  .uikit-toolbar-title {
+    display: flex;
+    overflow: hidden;
+    min-width: 0;
+    flex: 0 1 auto;
+    flex-direction: column;
+    align-items: center;
+    color: var(--color-ios-label);
+    font-size: var(--font-ios-body-size);
+    font-style: normal;
+    font-variation-settings: 'wght' var(--font-ios-body-weight-emphasized);
+    font-weight: round(down, var(--font-ios-body-weight-emphasized), 100);
+    letter-spacing: var(--font-ios-body-tracking);
+    line-height: var(--font-ios-body-line-height);
+
+    /* Centered without sides, too (they take the free space otherwise). */
+    margin-inline: auto;
+    stroke: currentcolor;
+    stroke-linejoin: round;
+    stroke-width: max(
+      0px,
+      (var(--font-ios-body-weight-emphasized) - 400) / 326 * 1px
+    );
+    text-align: center;
+    white-space: nowrap;
+
+    --uikit-symbol-thinning: max(
+      0px,
+      (400 - var(--font-ios-body-weight-emphasized)) / 326 * 1px
+    );
+
+    & > * {
+      overflow: hidden;
+      max-width: 100%;
+      text-overflow: ellipsis;
+    }
+
+    /* Title and Subtitle (Figma Style=Title 2 Line; its title in 17px, as
+       iOS 26's, never smaller than the rows' text). */
+    &:has(> [data-toolbar-part='subtitle']) {
+      padding-top: 4px;
+      line-height: 20px;
+    }
+
+    &[data-align-start] {
+      flex: 999 1 auto;
+      align-items: flex-start;
+      text-align: start;
+    }
+  }
+}

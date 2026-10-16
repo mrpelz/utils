@@ -1,0 +1,57 @@
+{
+  "name": "@mrpelz/uikit-ish",
+  "version": "7.6.1",
+  "repository": {
+    "type": "git",
+    "url": "https://git.i.wurstsalat.cloud/mrpelz/utils.git",
+    "directory": "packages/uikit-ish"
+  },
+  "license": "UNLICENSED",
+  "author": "Lennart Pelz <mail@mrpelz.de>",
+  "type": "module",
+  "main": "dist/main.js",
+  "module": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "files": [
+    "dist/**/*.{css,js,map,ts}"
+  ],
+  "overrides": {
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "5.4.3"
+    },
+    "eslint": "10.12.0",
+    "react": "npm:@preact/compat",
+    "react-dom": "npm:@preact/compat",
+    "serialize-javascript": "7.1.2",
+    "stylelint": "17.16.0",
+    "stylelint-order": "8.1.2"
+  },
+  "dependencies": {
+    "@base-ui/react": "1.9.0"
+  },
+  "devDependencies": {
+    "@bradleyhodges/sfsymbols": "8.1.3",
+    "@bradleyhodges/sfsymbols-types": "8.1.3",
+    "@mrpelz/boilerplate-preact": "16.5.0",
+    "@mrpelz/misc-utils": "*",
+    "@types/node": "26.6.5",
+    "@types/webpack-env": "1.18.8",
+    "csstype": "3.2.3",
+    "eslint-plugin-react": "7.37.5",
+    "fork-ts-checker-webpack-plugin": "9.1.0",
+    "preact-render-to-string": "6.8.1",
+    "source-map-loader": "5.0.0"
+  },
+  "peerDependencies": {
+    "@bradleyhodges/sfsymbols": ">=8.1.3",
+    "@bradleyhodges/sfsymbols-types": ">=8.1.3"
+  },
+  "peerDependenciesMeta": {
+    "@bradleyhodges/sfsymbols": {
+      "optional": true
+    },
+    "@bradleyhodges/sfsymbols-types": {
+      "optional": true
+    }
+  }
+}

@@ -1,9 +1,0 @@
-/* Form (see main.tsx). */
-@layer base-ui-styled {
-  .bus-form-fieldset-element {
-    padding: 0;
-    border: 0;
-    margin-inline: 0;
-    min-inline-size: 0;
-  }
-}

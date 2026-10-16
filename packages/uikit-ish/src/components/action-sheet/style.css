@@ -1,0 +1,8 @@
+/* Action-sheet (see main.tsx). */
+@layer uikit-ish {
+  .uikit-action-sheet-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
