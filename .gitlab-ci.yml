@@ -42,4 +42,5 @@ publish:pages:
   script:
     - make -s -C "packages/uikit-ish" sub_package="packages/uikit-ish" transform_build_demo
   pages:
+    path_prefix: $VERSION_TAG
     publish: packages/uikit-ish/demo
