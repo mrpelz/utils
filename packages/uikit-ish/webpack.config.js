@@ -13,6 +13,8 @@ import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
+const { PUBLIC_PATH: publicPath = '/' } = process.env;
+
 export const dirDemo = path.resolve(dirBase, 'demo');
 
 // @ts-ignore
@@ -36,7 +38,7 @@ const configDownstream = {
   output: {
     assetModuleFilename: 'assets/[name][ext]',
     path: dirDemo,
-    publicPath: '/',
+    publicPath,
   },
   resolve: {
     alias: {
