@@ -1,0 +1,141 @@
+import { FunctionComponent } from 'react';
+
+import { Switch } from '../../components/index.js';
+import { Component, usePropControl } from '../utils/main.js';
+import {
+  useCreateStateUrl,
+  useProvidedState,
+} from '../utils/options-context.js';
+import { KeyPropsTable, pickRows } from '../utils/props-table.js';
+import { switchRootRows } from './docs.js';
+import { propOptionsOverview } from './props.js';
+
+/** The switch on its own, with a few of its props. */
+const LiveView: FunctionComponent = () => {
+  const id = 'switch-overview';
+  const [external] = useProvidedState(id);
+  const [control, props, state, elementKey] = usePropControl(
+    propOptionsOverview,
+    'Switch.Root',
+    external,
+    true,
+  );
+
+  return (
+    <Component
+      center
+      inline
+      controls={[control]}
+      id={id}
+      stateUrl={useCreateStateUrl(id, [state])}
+      title="Switch"
+    >
+      <Switch.Root
+        key={elementKey}
+        aria-label="Example"
+        {...props}
+      >
+        <Switch.Thumb />
+      </Switch.Root>
+    </Component>
+  );
+};
+
+/** `/switch`: what a switch is for, and its props. */
+export const SwitchOverview: FunctionComponent = () => (
+  <>
+    <p className="demo-lead">
+      A switch turns one setting on or off (UIKit <code>UISwitch</code>, the
+      HIG’s “toggle”). The change takes effect at once: there’s nothing to save
+      or confirm.
+    </p>
+    <LiveView />
+
+    <h2>When to use it</h2>
+    <ul>
+      <li>
+        For a setting with two states that applies immediately, e.g. Airplane
+        Mode or a notification category.
+      </li>
+      <li>
+        Labeled by what it turns on (a row’s title, or <code>aria-label</code>),
+        never by “on” or “off”: its position says that.
+      </li>
+    </ul>
+
+    <h2>When to use something else</h2>
+    <ul>
+      <li>
+        Selecting items (rows to delete, people to invite): a{' '}
+        <a href="checkbox">Checkbox</a>, iOS’s selection circle.
+      </li>
+      <li>
+        Two named options, or more than two: a <a href="segmented">Segmented</a>{' '}
+        control.
+      </li>
+      <li>
+        Starting something (Connect, Sign Out): a <a href="button">Button</a>,
+        as a switch states a setting, it doesn’t perform an action.
+      </li>
+    </ul>
+
+    <h2>Key props</h2>
+    <p>
+      The props most switches set; every part’s props are on{' '}
+      <a href="switch/parts">Parts</a>.
+    </p>
+    <KeyPropsTable
+      parts={[
+        [
+          'Switch.Root',
+          pickRows(
+            switchRootRows,
+            'checked',
+            'defaultChecked',
+            'onCheckedChange',
+            'disabled',
+            'indeterminate',
+            'tint',
+            'name',
+          ),
+        ],
+      ]}
+    />
+
+    <h2>Accessibility</h2>
+    <ul>
+      <li>
+        The root has the <code>switch</code> role and <code>aria-checked</code>;
+        a hidden checkbox input beside it carries its value for forms.
+      </li>
+      <li>
+        Give it an accessible name: <code>aria-label</code>, or{' '}
+        <code>aria-labelledby</code> pointing at the visible label (e.g. its
+        list row’s title). Name it by what it turns on, never “on” or “off”.
+      </li>
+      <li>
+        Keyboard: Tab focuses it (the browser’s focus ring shows), Space or
+        Enter toggles it.
+      </li>
+      <li>
+        Its state isn’t told by color alone if you set <code>onOffLabels</code>{' '}
+        (“I” and “O” on the track, iOS’s “On/Off Labels” setting); the library
+        doesn’t read that setting itself.
+      </li>
+      <li>
+        Its animations (knob, lens) don’t follow{' '}
+        <code>prefers-reduced-motion</code>.
+      </li>
+    </ul>
+
+    <h2>Behavior</h2>
+    <ul>
+      <li>
+        A click or tap toggles it. The knob can also be dragged: the state flips
+        as it crosses the middle; a quick release that didn’t get there still
+        toggles, as a tap.
+      </li>
+      <li>Pressed, the knob turns into a glass lens.</li>
+    </ul>
+  </>
+);

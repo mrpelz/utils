@@ -39,6 +39,24 @@ export const propOptionsList = {
   ] as const,
 };
 
+/** The guide pages' content: how many of Phone's tabs (see phone.tsx). */
+export const propOptionsPhoneContent = {
+  tabs: [4, 2, 3] as const,
+};
+
+/** The overview's few: its look and states, not its plumbing. */
+export const propOptionsOverviewList = {
+  collapsed: [false, true] as const,
+  collapsedContent: [undefined, 'symbol', 'label', 'symbolAndLabel'] as const,
+  collapsedPosition: [
+    undefined,
+    'inline-start',
+    'center',
+    'inline-end',
+  ] as const,
+  size: [undefined, 'regular'] as const,
+};
+
 /** The iPad's list (regular first). */
 export const propOptionsListRegular = {
   ...propOptionsList,
@@ -74,3 +92,25 @@ export const getPropOptionsTab = (addLog: AddLog) => ({
     ),
   ] as const,
 });
+
+/** Parts taking only styling (`TabBar.Indicator`, `.Icon`, `.Label`). */
+export const propOptionsStyling = {
+  ...commonPropOptions,
+};
+
+export const propOptionsPanel = {
+  ...commonPropOptions,
+  keepMounted: [undefined, false, true] as const,
+};
+
+export const propOptionsAccessory = {
+  ...commonPropOptions,
+  visibleIn: [undefined, 'both', 'expanded', 'collapsed'] as const,
+  context: [
+    undefined,
+    'bright',
+    'dim',
+    'background-bright',
+    'background-dim',
+  ] as const,
+};

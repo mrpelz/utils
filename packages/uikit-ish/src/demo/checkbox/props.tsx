@@ -44,3 +44,29 @@ export const propOptionsRadio = {
   disabled: [undefined, false, true] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
 };
+
+/** The overview's few: a selection circle's states. */
+export const propOptionsOverview = {
+  defaultChecked: [true, false] as const,
+  indeterminate: [undefined, true] as const,
+  disabled: [undefined, true] as const,
+};
+
+/** `Checkbox.Indicator`, `Radio.Indicator`. */
+export const propOptionsIndicator = {
+  ...commonPropOptions,
+  keepMounted: [undefined, false, true] as const,
+};
+
+export const getPropOptionsCheckboxGroup = (addLog: AddLog) => ({
+  ...commonPropOptions,
+  defaultValue: [['email'] as string[], undefined, [] as string[]] as const,
+  disabled: [undefined, false, true] as const,
+  onValueChange: [
+    new MappedProp(
+      (value: string[]) => addLog(`value change: ${value.join(', ')}`),
+      '[log change]',
+    ),
+    undefined,
+  ] as const,
+});

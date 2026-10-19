@@ -22,6 +22,19 @@ const propOptionsRoot = {
   ] as const,
 };
 
+/** The overview's few: its look and states, not its plumbing. */
+export const propOptionsOverview = {
+  defaultChecked: [true, false] as const,
+  disabled: [undefined, true] as const,
+  indeterminate: [undefined, true] as const,
+  onOffLabels: [undefined, true] as const,
+  tint: [
+    undefined,
+    'var(--color-ios-system-blue)',
+    'var(--color-ios-system-orange)',
+  ] as const,
+};
+
 export const propOptionsThumb = {
   ...commonPropOptions,
 };

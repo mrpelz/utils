@@ -9,6 +9,10 @@ import {
 import configUpstream from '@mrpelz/boilerplate-preact/webpack.config.js';
 import { deepmerge } from 'deepmerge-ts';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+import {
+  ModifySourcePlugin,
+  ReplaceOperation,
+} from 'modify-source-webpack-plugin';
 import webpack from 'webpack';
 
 const { PUBLIC_PATH: publicPath = '/' } = process.env;
@@ -19,11 +23,30 @@ export const dirDemo = path.resolve(dirBase, 'demo/ssg');
 /** @type {import('@mrpelz/boilerplate-dom/webpack.config.js').ConfigurationExtended} */
 const configDownstream = {
   devServer: undefined,
+  experiments: {
+    outputModule: true,
+  },
+  externalsPresets: {
+    node: true,
+  },
+  externalsType: 'module',
+  node: {
+    __dirname: false,
+    __filename: false,
+  },
   optimization: {
     minimize: false,
   },
   output: {
     assetModuleFilename: 'assets/[name].[hash][ext]',
+    chunkFilename: '[name].js',
+    chunkFormat: 'module',
+    chunkLoading: 'import',
+    filename: 'main.js',
+    library: {
+      type: 'module',
+    },
+    module: true,
     path: dirDemo,
     publicPath,
   },
@@ -35,7 +58,6 @@ const configDownstream = {
     },
     conditionNames: ['import'],
   },
-  target: 'node',
 };
 
 // @ts-ignore
@@ -77,7 +99,7 @@ if (config.module) {
       generator: {
         emit: false,
       },
-      test: /\.(?:png|jpe?g|gif)$/i,
+      test: /\.(?:png|jpe?g|gif|ttf)$/i,
       type: 'asset/resource',
     },
   ];
@@ -85,9 +107,30 @@ if (config.module) {
 
 config.plugins = [
   // @ts-ignore
-  new ForkTsCheckerWebpackPlugin(),
+  new ModifySourcePlugin({
+    rules: [
+      {
+        operations: [
+          new ReplaceOperation(
+            'once',
+            // eslint-disable-next-line unicorn/prefer-string-raw
+            String.raw`/** {publicPath} */ '<publicPath>'`,
+            `'${publicPath}'`,
+          ),
+        ],
+        test: new RegExp(`^${path.resolve(dirSrc, 'demo/env.ts')}$`),
+      },
+    ],
+  }),
+  // Client-only, never imported while prerendering (from effects): Monaco
+  // (src/demo/utils/code-view.tsx) and Mermaid (src/demo/hig-guide/parts.tsx),
+  // left out entirely.
   // @ts-ignore
-  new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
+  new webpack.IgnorePlugin({
+    resourceRegExp: /^(?:mermaid|monaco-editor\/.*)$/u,
+  }),
+  // @ts-ignore
+  new ForkTsCheckerWebpackPlugin(),
 ];
 
 // @ts-ignore

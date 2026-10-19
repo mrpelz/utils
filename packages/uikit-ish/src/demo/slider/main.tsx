@@ -44,33 +44,33 @@ export const SliderDemo: FunctionComponent = () => {
   );
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
+    'Slider.Root',
     externalRoot,
     true,
   );
   const [controlLabel, propsLabel, stateLabel] = usePropControl(
     propOptionsLabel,
-    'label',
+    'Slider.Label',
     externalLabel,
   );
   const [controlValue, propsValue, stateValue] = usePropControl(
     propOptionsValue,
-    'value',
+    'Slider.Value',
     externalValue,
   );
   const [controlControl, propsControl, stateControl] = usePropControl(
     commonPropOptions,
-    'control',
+    'Slider.Control',
     externalControl,
   );
   const [controlTrack, propsTrack, stateTrack] = usePropControl(
     commonPropOptions,
-    'track',
+    'Slider.Track',
     externalTrack,
   );
   const [controlIndicator, propsIndicator, stateIndicator] = usePropControl(
     commonPropOptions,
-    'indicator',
+    'Slider.Indicator',
     externalIndicator,
   );
   const propOptionsThumbWithLog = useMemo(
@@ -79,24 +79,28 @@ export const SliderDemo: FunctionComponent = () => {
   );
   const [controlThumbFirst, propsThumbFirst, stateThumbFirst] = usePropControl(
     propOptionsThumbWithLog,
-    '1st thumb',
+    'Slider.Thumb (1st)',
     externalThumbFirst,
   );
   const [controlThumbSecond, propsThumbSecond, stateThumbSecond] =
-    usePropControl(propOptionsThumbWithLog, '2nd thumb', externalThumbSecond);
+    usePropControl(
+      propOptionsThumbWithLog,
+      'Slider.Thumb (2nd)',
+      externalThumbSecond,
+    );
   const [controlTicks, propsTicks, stateTicks] = usePropControl(
     commonPropOptions,
-    'ticks',
+    'Slider.Ticks',
     externalTicks,
   );
   const [controlMinSymbol, propsMinSymbol, stateMinSymbol] = usePropControl(
     useMemo(() => getPropOptionsMinSymbol(addLog), [addLog]),
-    'min symbol',
+    'Slider.Symbol (min)',
     externalMinSymbol,
   );
   const [controlMaxSymbol, propsMaxSymbol, stateMaxSymbol] = usePropControl(
     useMemo(() => getPropOptionsMaxSymbol(addLog), [addLog]),
-    'max symbol',
+    'Slider.Symbol (max)',
     externalMaxSymbol,
   );
 

@@ -4,3 +4,22 @@
 .tab-bar-demo-accessory-title {
   flex: 1;
 }
+
+/* The parts' panels, above their bar. */
+.tab-bar-demo-panels {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+
+/* A phone's screen in the stage: its viewport's fixed layers (content,
+   anchors) within it (a transform makes it their containing block). */
+.tab-bar-demo-screen {
+  position: relative;
+  overflow: hidden;
+  width: 402px;
+  max-width: 100%;
+  height: min(640px, 70vh);
+  border-radius: 24px;
+  transform: translateZ(0);
+}

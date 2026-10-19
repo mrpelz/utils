@@ -9,13 +9,37 @@ export const propOptionsContent = {
   count: [3, 2, 4, 5] as const,
 } as const;
 
-export const propOptionsRoot = {
+/** The root's options, its values by the items' (first, second, third). */
+const propOptionsRoot = (values: readonly [string, string, string]) => ({
   ...commonPropOptions,
-  defaultValue: ['first', undefined, 'second'] as const,
-  value: [undefined, 'first', 'second', 'third'] as const,
+  defaultValue: [values[0], undefined, values[1]] as const,
+  value: [undefined, ...values] as const,
   disabled: [undefined, false, true] as const,
   readOnly: [undefined, false, true] as const,
+  required: [undefined, false, true] as const,
+  name: [undefined, 'period'] as const,
   hideSeparators: [undefined, false, true] as const,
+});
+
+/** The overview's few: its look and states, not its plumbing. */
+export const propOptionsOverviewRoot = {
+  defaultValue: ['day', 'week', undefined] as const,
+  disabled: [undefined, true] as const,
+  hideSeparators: [undefined, true] as const,
+};
+
+/** The guide pages' content: how many periods (see content.ts). */
+export const propOptionsPeriodsContent = {
+  count: [3, 2, 4, 5] as const,
+};
+
+export const propOptionsHighlight = {
+  ...commonPropOptions,
+};
+
+export const propOptionsIndicator = {
+  ...commonPropOptions,
+  keepMounted: [undefined, false, true] as const,
 };
 
 export const getPropOptionsItem = (
@@ -43,8 +67,11 @@ export const getPropOptionsItem = (
   ] as const,
 });
 
-export const getPropOptionsRoot = (addLog: AddLog) => ({
-  ...propOptionsRoot,
+export const getPropOptionsRoot = (
+  addLog: AddLog,
+  values: readonly [string, string, string] = ['first', 'second', 'third'],
+) => ({
+  ...propOptionsRoot(values),
   onValueChange: [
     new MappedProp(
       (value: unknown, { reason }: BaseRadioGroup.ChangeEventDetails) =>

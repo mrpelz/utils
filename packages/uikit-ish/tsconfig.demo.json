@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
-    "noEmit": false,
-    "removeComments": true
+    "noEmit": false
   },
   "exclude": ["**/*.test.ts", "src/main.ts", "src/demo-ssg.tsx"],
   "extends": "./tsconfig.json",

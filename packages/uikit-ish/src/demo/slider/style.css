@@ -1,0 +1,29 @@
+/* Slider guide pages (see composition.tsx). */
+
+/* A form's sliders, stacked, the submit button below them. */
+.slider-demo-form {
+  display: grid;
+  width: 402px;
+  max-width: 100%;
+  gap: 16px;
+  justify-items: start;
+
+  & > :not(button) {
+    justify-self: stretch;
+  }
+}
+
+/* A player: the position, the playback buttons, the volume. */
+.slider-demo-player {
+  display: grid;
+  width: 402px;
+  max-width: 100%;
+  gap: 8px;
+}
+
+.slider-demo-transport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}

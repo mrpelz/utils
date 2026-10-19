@@ -1,0 +1,868 @@
+import { sfArchiveboxFill } from '@bradleyhodges/sfsymbols/sfArchiveboxFill';
+import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
+import { sfCircleFill } from '@bradleyhodges/sfsymbols/sfCircleFill';
+import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
+import { sfEnvelopeBadgeFill } from '@bradleyhodges/sfsymbols/sfEnvelopeBadgeFill';
+import { sfEnvelopeOpenFill } from '@bradleyhodges/sfsymbols/sfEnvelopeOpenFill';
+import { sfFlagFill } from '@bradleyhodges/sfsymbols/sfFlagFill';
+import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
+import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
+import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
+import { FunctionComponent, useState } from 'react';
+
+import {
+  Button,
+  CheckboxGroup,
+  forwardClick,
+  Header,
+  List,
+  Navigation,
+  Page,
+  Segmented,
+  Slider,
+  Stepper,
+  Switch,
+  Symbol,
+  Toolbar,
+  Viewport,
+} from '../../components/index.js';
+import { GuideLink } from '../hig-guide/link.js';
+import { CodeView } from '../utils/code-view.js';
+import { useLog } from '../utils/log.js';
+import { Component } from '../utils/main.js';
+import {
+  contacts,
+  messages,
+  planets,
+  settings,
+  settingsPages,
+} from './content.js';
+
+/* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
+const settingsCode = `<Page.Root>
+  <Header.Root>
+    <Header.Bar>
+      <Toolbar.Title><span>Settings</span></Toolbar.Title>
+    </Header.Bar>
+    <Header.LargeTitle><span>Settings</span></Header.LargeTitle>
+  </Header.Root>
+  <List.Root>
+    <List.Section>
+      <List.Group>
+        <List.Item onClick={forwardClick('[role=switch]')}>
+          <List.Image style={{ backgroundColor: … }} variant="rounded">…</List.Image>
+          <List.Title>Airplane Mode</List.Title>
+          <Switch.Root aria-label="Airplane Mode"><Switch.Thumb /></Switch.Root>
+        </List.Item>
+        <List.Item>
+          <List.Image …>…</List.Image>
+          <List.Title render={<button type="button" />} onClick={…}>Wi-Fi</List.Title>
+          <List.Detail>Home</List.Detail>
+          <List.DrillIn />
+        </List.Item>
+      </List.Group>
+    </List.Section>
+    <List.Section>
+      <List.Header prominence="nested"><List.Title render={<h3 />}>Display</List.Title></List.Header>
+      <List.Group>
+        <List.Item>
+          <List.Title>Text Size</List.Title>
+          <Segmented.Root aria-label="Text Size" defaultValue="M">…</Segmented.Root>
+        </List.Item>
+        <List.Item>
+          <Slider.Root defaultValue={60}>…</Slider.Root>
+        </List.Item>
+        <List.Item>
+          <List.Title>Auto-Lock</List.Title>
+          <List.Detail>{minutes} min</List.Detail>
+          <Stepper.Root value={minutes} onValueChange={…}>…</Stepper.Root>
+        </List.Item>
+      </List.Group>
+      <List.Footer>…</List.Footer>
+    </List.Section>
+  </List.Root>
+</Page.Root>`;
+
+const drillInCode = `const [keys, setKeys] = useState(['settings']);
+const push = (key) => setKeys((current) => [...current, key]);
+const pop = () => setKeys((current) => current.slice(0, -1));
+
+<Navigation.Root onBack={pop}>
+  {keys.map((key, depth) => (
+    <Page.Root key={key}>
+      <Header.Root>
+        <Header.Bar>
+          {depth > 0 ? (
+            <Toolbar.Leading>
+              <Toolbar.Button aria-label="Back" shape="circle" onClick={pop}>…</Toolbar.Button>
+            </Toolbar.Leading>
+          ) : null}
+          <Toolbar.Title><span>{pages[key].title}</span></Toolbar.Title>
+        </Header.Bar>
+      </Header.Root>
+      <List.Root>
+        <List.Section>
+          <List.Group>
+            {pages[key].rows.map(([title, page, detail]) => (
+              <List.Item key={title}>
+                {page ? (
+                  <List.Title render={<button type="button" />} onClick={() => push(page)}>
+                    {title}
+                  </List.Title>
+                ) : (
+                  <List.Title>{title}</List.Title>
+                )}
+                {detail ? <List.Detail>{detail}</List.Detail> : null}
+                {page ? <List.DrillIn /> : null}
+              </List.Item>
+            ))}
+          </List.Group>
+        </List.Section>
+      </List.Root>
+    </Page.Root>
+  ))}
+</Navigation.Root>`;
+
+const editCode = `const [editing, setEditing] = useState(false);
+// The list's selection (guide G7: the toolbar reads it).
+const [selected, setSelected] = useState([]);
+
+<Viewport.Content>
+  <Page.Root>
+    <Header.Root>
+      <Header.Bar>
+        <Toolbar.Title><span>Planets</span></Toolbar.Title>
+        <Toolbar.Trailing>
+          <Toolbar.Button prominent={editing} onClick={() => setEditing(!editing)}>
+            <Button.Label>{editing ? 'Done' : 'Edit'}</Button.Label>
+          </Toolbar.Button>
+        </Toolbar.Trailing>
+      </Header.Bar>
+    </Header.Root>
+    {/* In edit mode, the checkboxes and grabbers slide in. */}
+    <List.Root editing={editing}>
+      <List.Section>
+        <CheckboxGroup
+          value={selected}
+          onValueChange={setSelected}
+          render={<List.Group onReorder={(from, to) => …} />}
+        >
+          {rows.map((name) => (
+            <List.Item
+              key={name}
+              onClick={editing ? forwardClick('[role=checkbox]') : undefined}
+            >
+              <List.Checkbox aria-label={name} value={name} />
+              <List.Title>{name}</List.Title>
+              <List.Grabber aria-label={\`Reorder \${name}\`} />
+              <List.SwipeActions overswipe>…</List.SwipeActions>
+            </List.Item>
+          ))}
+        </CheckboxGroup>
+      </List.Section>
+    </List.Root>
+  </Page.Root>
+</Viewport.Content>
+{editing ? (
+  <Viewport.BlockEnd>
+    <Toolbar.Root>
+      <Toolbar.Leading />
+      <Toolbar.Title><span>{selected.length} Selected</span></Toolbar.Title>
+      <Toolbar.Trailing>
+        <Toolbar.Button destructive disabled={selected.length === 0} onClick={…}>
+          <Button.Label>Delete</Button.Label>
+        </Toolbar.Button>
+      </Toolbar.Trailing>
+    </Toolbar.Root>
+  </Viewport.BlockEnd>
+) : null}`;
+
+const inboxCode = `<List.Root listStyle="plain">
+  <List.Section>
+    <List.Group>
+      <List.Item>
+        {/* Unread: a dot in the image's place. */}
+        <List.Image
+          aria-label="Unread"
+          role="img"
+          style={{ color: 'var(--color-ios-primary)', fontSize: '10px' }}
+        >
+          <Symbol icon={sfCircleFill} />
+        </List.Image>
+        <List.Title render={<button type="button" />} onClick={…}>Kate Bell</List.Title>
+        <List.Detail>09:41</List.Detail>
+        <List.DrillIn />
+        <List.Subtitle>Weekend photos</List.Subtitle>
+        <List.Text>Hi! The photos from the weekend …</List.Text>
+        <List.SwipeActions side="inline-start" overswipe>
+          <List.SwipeAction showLabel label="Read" tint="var(--color-ios-system-blue)" onClick={…}>
+            <Symbol icon={sfEnvelopeOpenFill} />
+          </List.SwipeAction>
+        </List.SwipeActions>
+        <List.SwipeActions onOverswipe={archive}>
+          <List.SwipeAction showLabel label="More" onClick={…}>…</List.SwipeAction>
+          <List.SwipeAction showLabel label="Flag" tint="var(--color-ios-system-orange)" onClick={…}>…</List.SwipeAction>
+          <List.SwipeAction showLabel label="Archive" tint="var(--color-ios-system-purple)" onClick={archive}>…</List.SwipeAction>
+        </List.SwipeActions>
+      </List.Item>
+    </List.Group>
+  </List.Section>
+</List.Root>`;
+
+const indexCode = `{/* The list and its index in one cell, as high as the index at least. */}
+<div style={{ display: 'grid', minHeight: '32rem' }}>
+  {/* The list fills it, scrolling on its own, without a scroll bar (an
+      overlay scroll bar would cover the index). */}
+  <div
+    id="contacts"
+    style={{
+      gridArea: '1 / 1',
+      height: 0,
+      minHeight: '100%',
+      overflow: 'auto',
+      scrollbarWidth: 'none',
+    }}
+  >
+    <List.Root listStyle="plain">
+      {Object.entries(contacts).map(([letter, names]) => (
+        <List.Section key={letter} id={\`contacts-\${letter}\`}>
+          <List.Header prominence="nested">
+            <List.Title>{letter}</List.Title>
+          </List.Header>
+          <List.Group>…</List.Group>
+        </List.Section>
+      ))}
+    </List.Root>
+  </div>
+  {/* At the list's edge, centered on its visible height. */}
+  <div
+    style={{
+      alignSelf: 'center',
+      gridArea: '1 / 1',
+      justifySelf: 'end',
+      position: 'relative',
+      zIndex: 3,
+    }}
+  >
+    <List.Index aria-label="Index">
+      {Object.keys(contacts).map((letter) => (
+        <List.IndexItem
+          key={letter}
+          onClick={() => {
+            // The section at the top of the list.
+            const list = document.querySelector('#contacts');
+            const section = document.querySelector(\`#contacts-\${letter}\`);
+            if (!list || !section) return;
+            list.scrollTo({
+              top: list.scrollTop + section.getBoundingClientRect().top - list.getBoundingClientRect().top,
+            });
+          }}
+        >
+          {letter}
+        </List.IndexItem>
+      ))}
+    </List.Index>
+  </div>
+</div>`;
+/* eslint-enable unicorn/no-incorrect-template-string-interpolation */
+
+/** A small dot in the tint, in the image's place (Mail's unread mark). */
+const unreadStyle = { color: 'var(--color-ios-primary)', fontSize: '10px' };
+
+/** Moves a row (the app's part of reordering, see `List.Group`). */
+const moved = (current: readonly string[], from: number, to: number) => {
+  const next = [...current];
+  const [row] = next.splice(from, 1);
+  if (row) next.splice(to, 0, row);
+  return next;
+};
+
+/** A settings page: switches, drill-ins, and controls in rows. */
+const SettingsScreen: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [minutes, setMinutes] = useState(5);
+
+  return (
+    <Component
+      center
+      inline
+      id="list-composition-settings"
+      log={log}
+      title="List as a settings page"
+    >
+      <Page.Root className="list-demo-screen">
+        <Header.Root>
+          <Header.Bar>
+            <Toolbar.Title>
+              <span>Settings</span>
+            </Toolbar.Title>
+          </Header.Bar>
+          <Header.LargeTitle>
+            <span>Settings</span>
+          </Header.LargeTitle>
+        </Header.Root>
+        <List.Root>
+          <List.Section>
+            <List.Group>
+              {settings.map(({ color, detail, icon, title }, index) =>
+                index === 0 ? (
+                  <List.Item
+                    key={title}
+                    onClick={forwardClick('[role=switch]')}
+                  >
+                    <List.Image
+                      style={{ backgroundColor: color }}
+                      variant="rounded"
+                    >
+                      <Symbol icon={icon} />
+                    </List.Image>
+                    <List.Title>{title}</List.Title>
+                    <Switch.Root
+                      aria-label={title}
+                      onCheckedChange={(checked: boolean) =>
+                        addLog(`${title}: ${String(checked)}`)
+                      }
+                    >
+                      <Switch.Thumb />
+                    </Switch.Root>
+                  </List.Item>
+                ) : (
+                  <List.Item key={title}>
+                    <List.Image
+                      style={{ backgroundColor: color }}
+                      variant="rounded"
+                    >
+                      <Symbol icon={icon} />
+                    </List.Image>
+                    <List.Title
+                      render={<button type="button" />}
+                      onClick={() => addLog(`${title} clicked`)}
+                    >
+                      {title}
+                    </List.Title>
+                    <List.Detail>{detail}</List.Detail>
+                    <List.DrillIn />
+                  </List.Item>
+                ),
+              )}
+            </List.Group>
+          </List.Section>
+          <List.Section>
+            <List.Header prominence="nested">
+              <List.Title render={<h3 />}>Display</List.Title>
+            </List.Header>
+            <List.Group>
+              <List.Item>
+                <List.Title>Text Size</List.Title>
+                <Segmented.Root
+                  aria-label="Text Size"
+                  defaultValue="M"
+                  onValueChange={(value: unknown) =>
+                    addLog(`text size: ${String(value)}`)
+                  }
+                >
+                  <Segmented.Item value="S">S</Segmented.Item>
+                  <Segmented.Item value="M">M</Segmented.Item>
+                  <Segmented.Item value="L">L</Segmented.Item>
+                  <Segmented.Highlight />
+                </Segmented.Root>
+              </List.Item>
+              <List.Item>
+                <Slider.Root
+                  defaultValue={60}
+                  onValueCommitted={(value: number | readonly number[]) =>
+                    addLog(`brightness: ${String(value)}`)
+                  }
+                >
+                  <Slider.Symbol edge="min">
+                    <Symbol icon={sfSunMin} />
+                  </Slider.Symbol>
+                  <Slider.Control>
+                    <Slider.Track>
+                      <Slider.Indicator />
+                      <Slider.Thumb aria-label="Brightness" />
+                    </Slider.Track>
+                  </Slider.Control>
+                  <Slider.Symbol edge="max">
+                    <Symbol icon={sfSunMax} />
+                  </Slider.Symbol>
+                </Slider.Root>
+              </List.Item>
+              <List.Item>
+                <List.Title>Auto-Lock</List.Title>
+                <List.Detail>{minutes} min</List.Detail>
+                <Stepper.Root
+                  max={10}
+                  min={1}
+                  value={minutes}
+                  onValueChange={(value: number | null) => {
+                    addLog(`auto-lock: ${String(value)}`);
+                    setMinutes(value ?? 1);
+                  }}
+                >
+                  <Stepper.Group inputProps={{ 'aria-label': 'Auto-Lock' }}>
+                    <Stepper.Decrement />
+                    <Stepper.Increment />
+                  </Stepper.Group>
+                </Stepper.Root>
+              </List.Item>
+            </List.Group>
+            <List.Footer>
+              Settings take effect at once, without a Done button.
+            </List.Footer>
+          </List.Section>
+        </List.Root>
+      </Page.Root>
+    </Component>
+  );
+};
+
+/** Settings' pages, drilled into by their rows, in a navigation. */
+const DrillIn: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [keys, setKeys] = useState<readonly string[]>(['settings']);
+  const push = (key: string) => {
+    addLog(`push: ${key}`);
+    setKeys((current) => [...current, key]);
+  };
+  const pop = () => {
+    addLog('pop');
+    setKeys((current) => current.slice(0, -1));
+  };
+
+  return (
+    <Component
+      center
+      inline
+      id="list-composition-drill-in"
+      log={log}
+      title="List drilling into pages"
+    >
+      <div className="list-demo-screen list-demo-navigation">
+        <Navigation.Root onBack={pop}>
+          {keys.map((key, depth) => {
+            const page = settingsPages[key];
+            if (!page) return null;
+
+            return (
+              <Page.Root key={key}>
+                <Header.Root>
+                  <Header.Bar>
+                    {depth > 0 ? (
+                      <Toolbar.Leading>
+                        <Toolbar.Button
+                          aria-label="Back"
+                          shape="circle"
+                          onClick={pop}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Toolbar.Button>
+                      </Toolbar.Leading>
+                    ) : null}
+                    <Toolbar.Title>
+                      <span>{page.title}</span>
+                    </Toolbar.Title>
+                    {depth > 0 ? <Toolbar.Trailing /> : null}
+                  </Header.Bar>
+                </Header.Root>
+                <List.Root>
+                  <List.Section>
+                    <List.Group>
+                      {page.rows.map(([title, target, detail]) => (
+                        <List.Item key={title}>
+                          {target ? (
+                            <List.Title
+                              render={<button type="button" />}
+                              onClick={() => push(target)}
+                            >
+                              {title}
+                            </List.Title>
+                          ) : (
+                            <List.Title>{title}</List.Title>
+                          )}
+                          {detail ? <List.Detail>{detail}</List.Detail> : null}
+                          {target ? <List.DrillIn /> : null}
+                        </List.Item>
+                      ))}
+                    </List.Group>
+                  </List.Section>
+                </List.Root>
+              </Page.Root>
+            );
+          })}
+        </Navigation.Root>
+      </div>
+    </Component>
+  );
+};
+
+/** Planets, edited: selected, reordered, deleted from a toolbar. */
+const EditMode: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [rows, setRows] = useState<readonly string[]>(planets);
+  const [editing, setEditing] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const remove = (names: readonly string[]) => {
+    addLog(`delete: ${names.join(', ')}`);
+    setRows((current) => current.filter((row) => !names.includes(row)));
+    setSelected((current) => current.filter((row) => !names.includes(row)));
+  };
+
+  return (
+    <Component
+      center
+      inline
+      id="list-composition-edit"
+      log={log}
+      title="List in edit mode"
+    >
+      {/* (A phone's screen: its fixed layers within, see style.css.) */}
+      <div className="list-demo-screen">
+        <Viewport.Content>
+          <Page.Root>
+            <Header.Root>
+              <Header.Bar>
+                <Toolbar.Leading>
+                  <Toolbar.Button
+                    onClick={() => {
+                      addLog('reset');
+                      setRows(planets);
+                    }}
+                  >
+                    <Button.Label>Reset</Button.Label>
+                  </Toolbar.Button>
+                </Toolbar.Leading>
+                <Toolbar.Title>
+                  <span>Planets</span>
+                </Toolbar.Title>
+                <Toolbar.Trailing>
+                  <Toolbar.Button
+                    prominent={editing}
+                    onClick={() => {
+                      addLog(editing ? 'done' : 'edit');
+                      setEditing(!editing);
+                      setSelected([]);
+                    }}
+                  >
+                    <Button.Label>{editing ? 'Done' : 'Edit'}</Button.Label>
+                  </Toolbar.Button>
+                </Toolbar.Trailing>
+              </Header.Bar>
+            </Header.Root>
+            <List.Root editing={editing}>
+              <List.Section>
+                <CheckboxGroup
+                  value={selected}
+                  render={
+                    <List.Group
+                      onReorder={(from: number, to: number) => {
+                        addLog(`reorder: ${String(from)} → ${String(to)}`);
+                        setRows((current) => moved(current, from, to));
+                      }}
+                    />
+                  }
+                  onValueChange={(value: string[]) => setSelected(value)}
+                >
+                  {rows.map((name) => (
+                    <List.Item
+                      key={name}
+                      onClick={
+                        editing ? forwardClick('[role=checkbox]') : undefined
+                      }
+                    >
+                      <List.Checkbox
+                        aria-label={name}
+                        value={name}
+                      />
+                      <List.Title>{name}</List.Title>
+                      <List.Grabber aria-label={`Reorder ${name}`} />
+                      <List.SwipeActions overswipe>
+                        <List.SwipeAction
+                          label="Delete"
+                          tint="var(--color-ios-system-red)"
+                          onClick={() => remove([name])}
+                        >
+                          <Symbol icon={sfTrashFill} />
+                        </List.SwipeAction>
+                      </List.SwipeActions>
+                    </List.Item>
+                  ))}
+                </CheckboxGroup>
+              </List.Section>
+            </List.Root>
+          </Page.Root>
+        </Viewport.Content>
+        {editing ? (
+          <Viewport.BlockEnd>
+            <Toolbar.Root>
+              <Toolbar.Leading />
+              <Toolbar.Title>
+                <span>{selected.length} Selected</span>
+              </Toolbar.Title>
+              <Toolbar.Trailing>
+                <Toolbar.Button
+                  destructive
+                  disabled={selected.length === 0}
+                  onClick={() => remove(selected)}
+                >
+                  <Button.Label>Delete</Button.Label>
+                </Toolbar.Button>
+              </Toolbar.Trailing>
+            </Toolbar.Root>
+          </Viewport.BlockEnd>
+        ) : null}
+      </div>
+    </Component>
+  );
+};
+
+/** An inbox: unread dots, previews, swipe actions both ways. */
+const Inbox: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [archived, setArchived] = useState<readonly string[]>([]);
+  const [read, setRead] = useState<readonly string[]>([]);
+  const archive = (from: string) => {
+    addLog(`archive: ${from}`);
+    setArchived((current) => [...current, from]);
+  };
+  const toggleRead = (from: string) => {
+    addLog(`${read.includes(from) ? 'unread' : 'read'}: ${from}`);
+    setRead((current) =>
+      current.includes(from)
+        ? current.filter((name) => name !== from)
+        : [...current, from],
+    );
+  };
+
+  return (
+    <Component
+      inline
+      stretch
+      id="list-composition-inbox"
+      log={log}
+      title="List as an inbox"
+    >
+      <List.Root listStyle="plain">
+        <List.Section>
+          <List.Group>
+            {messages
+              .filter(({ from }) => !archived.includes(from))
+              .map(({ date, from, preview, subject }) => (
+                <List.Item key={from}>
+                  {read.includes(from) ? (
+                    <List.Image style={unreadStyle} />
+                  ) : (
+                    <List.Image
+                      aria-label="Unread"
+                      role="img"
+                      style={unreadStyle}
+                    >
+                      <Symbol icon={sfCircleFill} />
+                    </List.Image>
+                  )}
+                  <List.Title
+                    render={<button type="button" />}
+                    onClick={() => {
+                      addLog(`open: ${from}`);
+                      if (!read.includes(from)) toggleRead(from);
+                    }}
+                  >
+                    {from}
+                  </List.Title>
+                  <List.Detail>{date}</List.Detail>
+                  <List.DrillIn />
+                  <List.Subtitle>{subject}</List.Subtitle>
+                  <List.Text>{preview}</List.Text>
+                  <List.SwipeActions
+                    overswipe
+                    side="inline-start"
+                  >
+                    <List.SwipeAction
+                      showLabel
+                      label={read.includes(from) ? 'Unread' : 'Read'}
+                      tint="var(--color-ios-system-blue)"
+                      onClick={() => toggleRead(from)}
+                    >
+                      <Symbol
+                        icon={
+                          read.includes(from)
+                            ? sfEnvelopeBadgeFill
+                            : sfEnvelopeOpenFill
+                        }
+                      />
+                    </List.SwipeAction>
+                  </List.SwipeActions>
+                  <List.SwipeActions onOverswipe={() => archive(from)}>
+                    <List.SwipeAction
+                      showLabel
+                      label="More"
+                      onClick={() => addLog(`more: ${from}`)}
+                    >
+                      <Symbol icon={sfEllipsis} />
+                    </List.SwipeAction>
+                    <List.SwipeAction
+                      showLabel
+                      label="Flag"
+                      tint="var(--color-ios-system-orange)"
+                      onClick={() => addLog(`flag: ${from}`)}
+                    >
+                      <Symbol icon={sfFlagFill} />
+                    </List.SwipeAction>
+                    <List.SwipeAction
+                      showLabel
+                      label="Archive"
+                      tint="var(--color-ios-system-purple)"
+                      onClick={() => archive(from)}
+                    >
+                      <Symbol icon={sfArchiveboxFill} />
+                    </List.SwipeAction>
+                  </List.SwipeActions>
+                </List.Item>
+              ))}
+          </List.Group>
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
+
+/** Contacts by letter, with an index beside them. */
+const Contacts: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+
+  return (
+    <Component
+      inline
+      stretch
+      id="list-composition-index"
+      log={log}
+      title="List with an index"
+    >
+      <div className="list-demo-plain">
+        <div
+          className="list-demo-scroll"
+          id="contacts"
+        >
+          <List.Root listStyle="plain">
+            {Object.entries(contacts).map(([letter, names]) => (
+              <List.Section
+                key={letter}
+                id={`contacts-${letter}`}
+              >
+                <List.Header prominence="nested">
+                  <List.Title>{letter}</List.Title>
+                </List.Header>
+                <List.Group>
+                  {names.map((name) => (
+                    <List.Item key={name}>
+                      <List.Title
+                        render={<button type="button" />}
+                        onClick={() => addLog(`open: ${name}`)}
+                      >
+                        {name}
+                      </List.Title>
+                    </List.Item>
+                  ))}
+                </List.Group>
+              </List.Section>
+            ))}
+          </List.Root>
+        </div>
+        <div className="list-demo-index">
+          <List.Index aria-label="Index">
+            {Object.keys(contacts).map((letter) => (
+              <List.IndexItem
+                key={letter}
+                onClick={() => {
+                  addLog(`index: ${letter}`);
+                  const list = document.querySelector('#contacts');
+                  const section = document.querySelector(`#contacts-${letter}`);
+                  if (!list || !section) return;
+                  // The section at the top of the list (its own scroll
+                  // container; the page stays).
+                  list.scrollTo({
+                    top:
+                      list.scrollTop +
+                      section.getBoundingClientRect().top -
+                      list.getBoundingClientRect().top,
+                  });
+                }}
+              >
+                {letter}
+              </List.IndexItem>
+            ))}
+          </List.Index>
+        </div>
+      </div>
+    </Component>
+  );
+};
+
+/** `/list/composition`: lists in pages, navigations, edit modes, inboxes. */
+export const ListComposition: FunctionComponent = () => (
+  <>
+    <h2>A settings page</h2>
+    <p>
+      As iOS’s Settings: an inset grouped list in a <a href="page">Page</a>,
+      under its <a href="header">Header</a>. Rows hold the settings’ controls as
+      trailing parts (a <a href="switch">Switch</a>, a{' '}
+      <a href="segmented">Segmented</a> control, a <a href="stepper">Stepper</a>
+      ), or a whole row (a <a href="slider">Slider</a> between its symbols);
+      others drill in (a button title, a detail, a chevron). A row with a switch
+      passes its clicks on to it. Settings take effect at once (guide{' '}
+      <GuideLink to="commit-model">§8.2, commit model</GuideLink>).
+    </p>
+    <CodeView code={settingsCode} />
+    <SettingsScreen />
+
+    <h2>Drilling into pages</h2>
+    <p>
+      Rows whose title is a button, with a <code>List.DrillIn</code>, push a
+      page in a <a href="navigation">Navigation</a>: the app keeps the stack (
+      keyed pages), the navigation transitions between them, and a swipe from
+      the leading edge pops (<code>onBack</code>). Rows with a detail and no
+      chevron only show a value.
+    </p>
+    <CodeView code={drillInCode} />
+    <DrillIn />
+
+    <h2>Edit mode and a toolbar</h2>
+    <p>
+      Edit (in the navigation bar) puts the list in edit mode (
+      <code>List.Root</code> <code>editing</code>): each row’s{' '}
+      <code>List.Checkbox</code> slides in from its leading edge, its{' '}
+      <code>List.Grabber</code> from its trailing edge, the row’s content making
+      room; Done slides them out again. The list owns the selection: a{' '}
+      <a href="checkbox">CheckboxGroup</a> rendering the group holds it, and the
+      bottom toolbar (in the <a href="viewport">Viewport</a>’s block end) reads
+      it, to delete the selected rows (guide{' '}
+      <GuideLink to="rule-g7">G7</GuideLink>). Rows still swipe to delete one.
+    </p>
+    <CodeView code={editCode} />
+    <EditMode />
+
+    <h2>An inbox</h2>
+    <p>
+      As Mail: a plain list of media rows (a <code>List.Text</code> preview
+      below the subject), an unread dot in the image’s place, swipe actions on
+      both sides with their labels shown; swiping on past the trailing ones
+      archives the message (<code>onOverswipe</code>), and the app removes it.
+    </p>
+    <CodeView code={inboxCode} />
+    <Inbox />
+    <h3>With an index</h3>
+    <p>
+      As Contacts: a plain list in sections by letter (sticky section titles),
+      and a <code>List.Index</code> beside it; pressing or scrubbing over a
+      letter clicks it, and the app scrolls its list to the section, so dragging
+      across the letters scrolls through the list. Placing the index is the
+      page’s: here, at the list’s edge, centered on its visible height. The list
+      scrolls on its own, without a scroll bar (an overlay scroll bar would
+      cover the index).
+    </p>
+    <CodeView code={indexCode} />
+    <Contacts />
+  </>
+);

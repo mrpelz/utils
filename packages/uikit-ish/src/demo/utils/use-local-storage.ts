@@ -1,50 +1,80 @@
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
-import { useSafeJSONStringify } from './use-safe-json-stringify.js';
+/** Changed by a `useLocalStorage` (its key the detail): the others follow. */
+const changeEvent = 'demo-local-storage';
 
-export const useGetLocalStorage = (key: string): string | undefined =>
-  useMemo(() => {
-    try {
-      return localStorage.getItem(key) ?? undefined;
-    } catch {
-      return undefined;
-    }
-  }, [key]);
-
-export const useSetLocalStorage = (key: string, value?: string): void => {
-  useEffect(() => {
-    try {
-      if (value === undefined) {
-        localStorage.removeItem(key);
-        return;
-      }
-
-      localStorage.setItem(key, value);
-    } catch {
-      // noop
-    }
-  }, [key, value]);
+const read = <T>(key: string, defaultValue: T): T => {
+  try {
+    const value = localStorage.getItem(key);
+    return value === null ? defaultValue : (JSON.parse(value) as T);
+  } catch {
+    return defaultValue;
+  }
 };
 
+/**
+ * A value persisted in local storage under `key`, shared by every use of
+ * the key (e.g. demos of a component on different pages, or in other
+ * tabs): set in one, they all follow. Unset, it's `defaultValue` (each
+ * use's own): mounting stores nothing, and setting the default removes it.
+ */
 export const useLocalStorage = <T>(
   key: string,
   defaultValue: T,
 ): [T, Dispatch<SetStateAction<T>>] => {
-  const persisted_ = useGetLocalStorage(key);
-  const persisted = useMemo(() => {
-    if (persisted_ === undefined) return undefined;
+  const [value, setState] = useState(() => read(key, defaultValue));
 
-    try {
-      return JSON.parse(persisted_);
-    } catch {
-      return undefined;
-    }
-  }, [persisted_]) as T;
+  // (The default as of the first render: a demo's default is constant.)
+  const defaultRef = useRef(defaultValue);
 
-  const [value, setValue] = useState<T>(persisted ?? defaultValue);
+  useEffect(() => {
+    const update = () => setState(read(key, defaultRef.current));
+    update();
 
-  const value_ = useSafeJSONStringify(value);
-  useSetLocalStorage(key, value === defaultValue ? undefined : value_);
+    const onChange = (event: Event) => {
+      if (event instanceof CustomEvent && event.detail !== key) return;
+      if (event instanceof StorageEvent && event.key !== key) return;
+      update();
+    };
+    addEventListener(changeEvent, onChange);
+    addEventListener('storage', onChange);
+
+    return () => {
+      removeEventListener(changeEvent, onChange);
+      removeEventListener('storage', onChange);
+    };
+  }, [key]);
+
+  const setValue = useCallback<Dispatch<SetStateAction<T>>>(
+    (next) => {
+      const resolved =
+        typeof next === 'function'
+          ? (next as (previous: T) => T)(read(key, defaultRef.current))
+          : next;
+      try {
+        // Back at the default: nothing stored (as never set).
+        const stored = JSON.stringify(resolved);
+        if (stored === JSON.stringify(defaultRef.current)) {
+          localStorage.removeItem(key);
+        } else {
+          localStorage.setItem(key, stored);
+        }
+      } catch {
+        // (Unavailable: this use alone keeps it.)
+        setState(resolved);
+        return;
+      }
+      dispatchEvent(new CustomEvent(changeEvent, { detail: key }));
+    },
+    [key],
+  );
 
   return [value, setValue];
 };

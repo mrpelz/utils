@@ -8,10 +8,12 @@ import {
   createContext,
   FocusEvent,
   forwardRef,
+  FunctionComponent,
   MouseEvent,
   PointerEvent,
   useContext,
   useEffect,
+  useId,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -37,12 +39,14 @@ import {
 } from '../utils/main.js';
 import type {
   Drag,
+  ExpandableContextValue,
   Handler,
   ItemContextValue,
   ListBlockProps,
   ListButtonProps,
   ListEditButtonProps,
   ListExpandableProps,
+  ListExpandableRootProps,
   ListGroupProps,
   ListHeaderProps,
   ListImageProps,
@@ -64,6 +68,7 @@ export type {
   ListButtonProps,
   ListEditButtonProps,
   ListExpandableProps,
+  ListExpandableRootProps,
   ListGroupProps,
   ListHeaderProps,
   ListImageProps,
@@ -101,7 +106,9 @@ export type {
 //   its symbol moves to the row's end, its label hides (150ms)
 // - reordering rows by their grabbers (`sortable.js`, see `useReorder`),
 //   independent of the leading edit controls (`Checkbox`, `Radio`,
-//   `EditButton`)
+//   `EditButton`); entering and leaving edit mode (`Root` `editing`; UIKit
+//   `setEditing(_:animated:)`), they slide in and out from the rows' edges
+//   (300ms), the rows' content making room
 // - media rows, as in Mail (`.media-list`: a `Text` part)
 // - the Content Block (`Block`)
 //
@@ -202,10 +209,11 @@ const Sign = ({ plus }: { plus: boolean }) => (
 
 /** A list (UIKit `UITableView`): sections of rows, headers and footers. */
 const Root = forwardRef<HTMLElement, ListRootProps>(
-  ({ className, listStyle, outline, render, ...props }, ref) =>
+  ({ className, editing, listStyle, outline, render, ...props }, ref) =>
     useRender({
       defaultTagName: 'div',
       props: {
+        'data-editing': editing === undefined ? undefined : String(editing),
         'data-list-part': 'root',
         'data-list-style': listStyle,
         'data-outline': outline ? '' : undefined,
@@ -1439,8 +1447,76 @@ const expandDuration = 300;
  * place, e.g. an inline `Calendar` or `TimeRoll` below a row with a
  * `DatePicker` (without popovers, as iOS's Calendar). Closed, it's inert.
  */
+// Uncontrolled (or controlled) expandable rows: `ExpandableRoot` holds the
+// state (no element of its own, so its rows stay a group's children), its
+// `ExpandableTrigger` (e.g. the row's title, `render`) toggles it, its
+// `Expandable` shows it.
+const ExpandableContext = createContext<ExpandableContextValue | undefined>(
+  undefined,
+);
+
+/** An expandable row's state, for its trigger and the row (no element). */
+const ExpandableRoot: FunctionComponent<ListExpandableRootProps> = ({
+  children,
+  defaultOpen = false,
+  onOpenChange,
+  open: openProp,
+}) => {
+  const id = useId();
+  const [uncontrolled, setUncontrolled] = useState(defaultOpen);
+  const open = openProp ?? uncontrolled;
+  const context = useMemo<ExpandableContextValue>(
+    () => ({
+      id,
+      open,
+      setOpen: (next, event) => {
+        onOpenChange?.(next, event);
+        if (openProp === undefined) setUncontrolled(next);
+      },
+    }),
+    [id, onOpenChange, open, openProp],
+  );
+
+  return (
+    <ExpandableContext.Provider value={context}>
+      {children}
+    </ExpandableContext.Provider>
+  );
+};
+
+/**
+ * Toggles its `ExpandableRoot`'s row: a button (e.g. rendered by a row's
+ * `Title`, making the row pressable), with `aria-expanded` and
+ * `aria-controls`.
+ */
+const ExpandableTrigger = forwardRef<HTMLElement, PartProps<'button'>>(
+  ({ onClick, render, ...props }, ref) => {
+    const expandable = useContext(ExpandableContext);
+
+    return useRender({
+      defaultTagName: 'button',
+      props: {
+        'aria-controls': expandable?.id,
+        'aria-expanded': expandable?.open ?? false,
+        'data-list-part': 'expandable-trigger',
+        type: 'button',
+        ...props,
+        onClick: (event: MouseEvent<HTMLElement>) => {
+          (onClick as Handler<typeof event>)?.(event);
+          if (event.defaultPrevented || !expandable) return;
+          expandable.setOpen(!expandable.open, event);
+        },
+      },
+      ref,
+      render,
+    });
+  },
+);
+
 const Expandable = forwardRef<HTMLElement, ListExpandableProps>(
-  ({ open = false, ...props }, ref) => {
+  ({ id, open: openProp, ...props }, ref) => {
+    const expandable = useContext(ExpandableContext);
+    const open = openProp ?? expandable?.open ?? false;
     const itemRef = useForwardedRef<HTMLElement>(ref);
     const shown = useRef<boolean | undefined>(undefined);
 
@@ -1511,6 +1587,7 @@ const Expandable = forwardRef<HTMLElement, ListExpandableProps>(
     return (
       <Item
         ref={itemRef}
+        id={id ?? expandable?.id}
         {...props}
       />
     );
@@ -1664,11 +1741,16 @@ const DrillIn = forwardRef<HTMLElement, PartProps<'span'>>(
 // Figma “Disclosure” (rows: 17px, headers: 19px, 590, in the tint color),
 // turned down while open (e.g. in a Base UI `Collapsible.Trigger`).
 const Disclosure = forwardRef<HTMLElement, PartProps<'span'>>(
-  ({ children, className, render, ...props }, ref) =>
-    useRender({
+  ({ children, className, render, ...props }, ref) => {
+    // Turned down while its row's expandable row is open (see
+    // `ExpandableRoot`).
+    const expandable = useContext(ExpandableContext);
+
+    return useRender({
       defaultTagName: 'span',
       props: {
         'data-list-part': 'disclosure',
+        'data-panel-open': expandable?.open ? '' : undefined,
         className: cn('uikit-list-disclosure', className),
         'aria-hidden': 'true',
         children: children ?? <Chevron />,
@@ -1676,7 +1758,8 @@ const Disclosure = forwardRef<HTMLElement, PartProps<'span'>>(
       },
       ref,
       render,
-    }),
+    });
+  },
 );
 
 // Figma “_Grabber” (􀌇, 17px, 400).
@@ -1685,7 +1768,7 @@ const Disclosure = forwardRef<HTMLElement, PartProps<'span'>>(
  * `onReorder`); focused, arrow keys move the row.
  */
 const Grabber = forwardRef<HTMLElement, PartProps<'span'>>(
-  ({ children, className, render, ...props }, ref) =>
+  ({ children, className, onClick, render, ...props }, ref) =>
     useRender({
       defaultTagName: 'span',
       props: {
@@ -1694,6 +1777,13 @@ const Grabber = forwardRef<HTMLElement, PartProps<'span'>>(
         tabIndex: 0,
         children: children ?? <Lines />,
         ...props,
+        // The click ending a drag (captured by the grabber, see `useReorder`)
+        // stays with it: its row doesn't act on it (e.g. pass it on to its
+        // checkbox, see `forwardClick`).
+        onClick: (event: MouseEvent<HTMLElement>) => {
+          (onClick as Handler<typeof event>)?.(event);
+          event.stopPropagation();
+        },
       },
       ref,
       render,
@@ -2043,6 +2133,8 @@ const Index = forwardRef<HTMLElement, ListIndexProps>(
         end: () => undefined,
         move: (index, state, event) => scrub(index, state, event.clientY),
         start: (index, event) => {
+          // No text selection while scrubbing (from the mouse's default).
+          event.preventDefault();
           const state: Scrub = {};
           scrub(index, state, event.clientY);
 
@@ -2108,6 +2200,8 @@ export const List = {
   Header,
   Group,
   Item,
+  ExpandableRoot,
+  ExpandableTrigger,
   Expandable,
   Footer,
   Block,

@@ -23,6 +23,13 @@
     scroll-snap-type: y mandatory;
   }
 
+  /* Pages of prose (see pages.tsx) don't snap, so leaving the demos' pages
+     (snapped to a demo) for one, it isn't re-snapped (to its end, the demo
+     gone) after scrolling to its top. */
+  :root:has(.demo-page) {
+    scroll-snap-type: none;
+  }
+
   body {
     margin: 0;
   }
@@ -113,7 +120,9 @@
     position: relative;
     display: grid;
     overflow: auto;
-    min-height: 100svh;
+
+    /* (Filling the frame below its header, not a viewport's height.) */
+    min-height: 0;
     align-items: center;
     grid-area: stage;
     scroll-snap-stop: always;
@@ -176,7 +185,9 @@
     z-index: 1;
     display: flex;
     min-width: 0;
-    min-height: 100svh;
+
+    /* (The viewport's height within the frame's padding.) */
+    min-height: calc(100svh - 2rem);
     flex-direction: column;
     border: 1px dashed #404040;
     background-color: light-dark(white, #0a0a0a);
@@ -251,34 +262,26 @@
     margin-block: 1rem;
   }
 
+  /* Code (see CodeView): Monaco, or its text until it's loaded. */
   .demo-code {
     max-width: 100%;
-    font-size: 0.75rem;
     margin-block: 0.5rem;
-    overflow-x: auto;
-    user-select: text;
-    white-space: pre;
-
-    & > * {
-      user-select: text;
-    }
-
-    & [data-token='tag'] {
-      color: light-dark(#0b6bcb, #6cb6ff);
-    }
-
-    & [data-token='attribute'] {
-      color: light-dark(#8a3ffc, #d2a8ff);
-    }
-
-    & [data-token='string'] {
-      color: light-dark(#0a7d32, #7ee787);
-    }
-
-    & [data-token='expression'] {
-      color: light-dark(#b35900, #ffa657);
-    }
   }
+
+  .demo-code-editor {
+    overflow: hidden;
+  }
+
+  /* (As Monaco's editor, see CodeView: replaced at the same height.) */
+  .demo-code-fallback {
+    margin: 0;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 18px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
 
   /* In a section's heading (also while it's collapsed). */
   .demo-outline-toggle {
@@ -289,5 +292,309 @@
 
   .demo-button {
     align-self: self-start;
+  }
+
+  /* Inline (a page's live view, see Component): in the page's flow, sized
+     by its content, the stage at least a phone's height's half. */
+  .demo-container[data-inline] {
+    width: auto;
+    min-height: auto;
+    padding: 1rem;
+    border: 1px dashed #404040;
+    margin-block: 1.5rem;
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
+    scroll-snap-type: none;
+
+    /* (A stacking context of its own, as it is sticky otherwise: the stage
+       background and backdrop, at z-index -1, above its background.) */
+    & .demo-content {
+      position: static;
+      height: auto;
+      grid-template: 'stage' 1fr / 1fr;
+      isolation: isolate;
+    }
+
+    & .demo-header[hidden] {
+      display: none;
+    }
+
+    & .demo-stage {
+      min-height: 22rem;
+    }
+
+    /* Its log scrolls in place (the page around it would reflow). */
+    & .demo-log {
+      overflow: scroll;
+      height: 10rem;
+      flex-grow: 0;
+    }
+
+    /* So does its code (Monaco scrolls within the capped height; the
+       page's own code samples, outside frames, keep their full height). */
+    & .demo-config .demo-code-editor,
+    & .demo-config .demo-code-fallback {
+      max-height: 40rem;
+    }
+
+    & .demo-config .demo-code-fallback {
+      overflow: auto;
+    }
+
+    & .demo-config {
+      min-height: auto;
+      border: none;
+      border-inline-start: 1px dashed #404040;
+
+      @media screen and (width <= 768px) {
+        border-block-start: 1px dashed #404040;
+        border-inline-start: none;
+      }
+    }
+  }
+
+  /* A page of the guide (see pages.tsx): the index, a component's overview
+     and parts, in a readable measure. */
+  .demo-page {
+    max-width: 64rem;
+    padding: 2rem 1rem 4rem;
+    margin-inline: auto;
+  }
+
+  .demo-page-nav {
+    color: #a1a1a1;
+    font-family: monospace;
+    font-size: 0.875rem;
+
+    & a {
+      color: inherit;
+    }
+  }
+
+  .demo-page-title {
+    margin: 0.5rem 0 1rem;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .demo-page-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px dashed #404040;
+    font-family: monospace;
+    font-size: 0.875rem;
+    gap: 1rem;
+
+    & a {
+      color: inherit;
+    }
+
+    & a[aria-current='page'] {
+      font-weight: 700;
+      text-decoration: none;
+    }
+  }
+
+  .demo-page-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-inline-start: auto;
+
+    & a {
+      color: #a1a1a1;
+    }
+  }
+
+  /* Text people read (and select, unlike the rest of the demo). */
+  .demo-prose {
+    font-size: 1rem;
+    line-height: 1.5;
+
+    &,
+    & * {
+      user-select: text;
+    }
+
+    & h2 {
+      margin: 2.5rem 0 0.75rem;
+      font-size: 1.375rem;
+    }
+
+    & h3 {
+      margin: 1.5rem 0 0.5rem;
+      font-size: 1.125rem;
+    }
+
+    & p,
+    & ul {
+      max-width: 42rem;
+    }
+
+    & code {
+      padding: 0.1em 0.3em;
+      border-radius: 4px;
+      background-color: light-dark(#f0f0f0, #262626);
+      font-size: 0.875em;
+    }
+
+    & a {
+      color: inherit;
+    }
+
+    /* (Its tables' cells bordered as the demos' frames.) */
+    & table {
+      border-collapse: collapse;
+      margin-block: 1rem;
+    }
+
+    & th,
+    & td {
+      padding: 0.5rem 0.75rem;
+      border: 1px dashed #404040;
+      text-align: start;
+      vertical-align: top;
+    }
+
+    & thead th {
+      font-family: monospace;
+      font-size: 0.875rem;
+    }
+  }
+
+  /* A component's props: their names not wrapped; types (e.g. long unions)
+     wrapped at their spaces, the description taking the most room. */
+  .demo-props-table td:first-child code,
+  .demo-key-props-table td:nth-child(2) code {
+    white-space: nowrap;
+  }
+
+  .demo-props-table td:nth-last-child(3) {
+    min-width: 8rem;
+  }
+
+  .demo-props-table td:last-child {
+    width: 50%;
+    min-width: 14rem;
+  }
+
+  /* Diagrams drawn in text (see hig-guide/parts.tsx), as written. */
+  .demo-diagram {
+    max-width: 100%;
+    padding: 0.75rem;
+    border: 1px dashed #404040;
+    font-size: 0.75rem;
+    line-height: 1.25;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .demo-mermaid {
+    margin: 1rem 0;
+    overflow-x: auto;
+
+    & svg {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+
+  /* A heading's link to itself, shown as it's hovered. */
+  .demo-anchor {
+    color: #a1a1a1;
+    font-weight: 400;
+    opacity: 0;
+    text-decoration: none;
+
+    :is(h2, h3, h4):hover > & {
+      opacity: 1;
+    }
+  }
+
+  .demo-prose blockquote {
+    border-inline-start: 2px solid #a1a1a1;
+    margin-inline: 0;
+    padding-inline-start: 1rem;
+  }
+
+  .demo-lead {
+    font-size: 1.25rem;
+    line-height: 1.4;
+  }
+
+  /* The index's links to the guide and the page of all demos: boxes as
+     wide as two cards. */
+  .demo-index-links {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    margin-block: 2rem;
+
+    & a {
+      display: grid;
+      padding: 1rem 1.25rem;
+      border: 2px solid currentcolor;
+      border-radius: 12px;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    & strong {
+      font-size: 1.25rem;
+      text-decoration: underline;
+    }
+
+    & span {
+      color: light-dark(#404040, #a1a1a1);
+    }
+  }
+
+  /* The index: categories of components, as cards. */
+  .demo-index-category {
+    margin-block: 2.5rem;
+  }
+
+  .demo-index-cards {
+    display: grid;
+    padding: 0;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    list-style: none;
+  }
+
+  .demo-index-card {
+    display: grid;
+    padding: 1rem;
+    border: 1px dashed #404040;
+    gap: 0.5rem;
+    grid-template-rows: auto 1fr auto;
+
+    & h3 {
+      margin: 0;
+    }
+
+    & p {
+      margin: 0;
+      color: light-dark(#404040, #a1a1a1);
+    }
+  }
+
+  .demo-index-card-links {
+    display: flex;
+    flex-wrap: wrap;
+    font-family: monospace;
+    font-size: 0.875rem;
+    gap: 0.25rem 1rem;
+  }
+
+  /* (A full-page demo's header, as a page's: breadcrumb, title, tabs.) */
+  .demo-header > .demo-page-nav + .demo-heading {
+    margin-top: 0.25rem;
+  }
+
+  .demo-header > .demo-page-tabs {
+    padding-bottom: 0.5rem;
+    margin-top: 0.5rem;
   }
 }

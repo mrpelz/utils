@@ -15,13 +15,11 @@ type TOptionsContext = {
   colorScheme?: ColorScheme;
   id?: string;
   raw: boolean;
-  stageBackground: boolean;
   state?: unknown[];
 };
 
 const optionsDefaults: TOptionsContext = {
   raw: false,
-  stageBackground: true,
 };
 
 const createFragment = (options: Partial<TOptionsContext>) => {

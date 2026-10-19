@@ -36,38 +36,38 @@ export const SegmentedDemo: FunctionComponent = () => {
   );
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
+    'Segmented.Root',
     externalRoot,
     true,
   );
   const [controlItemFirst, propsItemFirst, stateItemFirst] = usePropControl(
     useMemo(() => getPropOptionsItem('first', addLog), [addLog]),
-    '1st item',
+    'Segmented.Item (1st)',
     externalItemFirst,
   );
   const [controlItemSecond, propsItemSecond, stateItemSecond] = usePropControl(
     useMemo(() => getPropOptionsItem('second', addLog), [addLog]),
-    '2nd item',
+    'Segmented.Item (2nd)',
     externalItemSecond,
   );
   const [controlItemThird, propsItemThird, stateItemThird] = usePropControl(
     useMemo(() => getPropOptionsItem('third', addLog), [addLog]),
-    '3rd item',
+    'Segmented.Item (3rd)',
     externalItemThird,
   );
   const [controlItemFourth, propsItemFourth, stateItemFourth] = usePropControl(
     useMemo(() => getPropOptionsItem('fourth', addLog), [addLog]),
-    '4th item',
+    'Segmented.Item (4th)',
     externalItemFourth,
   );
   const [controlItemFifth, propsItemFifth, stateItemFifth] = usePropControl(
     useMemo(() => getPropOptionsItem('fifth', addLog), [addLog]),
-    '5th item',
+    'Segmented.Item (5th)',
     externalItemFifth,
   );
   const [controlHighlight, propsHighlight, stateHighlight] = usePropControl(
     commonPropOptions,
-    'highlight',
+    'Segmented.Highlight',
     externalHighlight,
   );
 

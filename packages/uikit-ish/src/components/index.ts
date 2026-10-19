@@ -118,6 +118,7 @@ export {
   type ListButtonProps,
   type ListEditButtonProps,
   type ListExpandableProps,
+  type ListExpandableRootProps,
   type ListHeaderProps,
   type ListImageProps,
   type ListIndexProps,

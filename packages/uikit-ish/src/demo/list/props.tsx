@@ -293,3 +293,72 @@ export const propOptionsExpandable = {
   ...commonPropOptions,
   open: [undefined, false, true] as const,
 };
+
+/** The overview's list: its style. */
+export const propOptionsOverviewRoot = {
+  listStyle: ['insetGrouped', 'grouped', 'plain', 'sidebar'] as const,
+};
+
+/** The overview's rows: which parts they show. */
+export const propOptionsOverviewContent = {
+  image: ['rounded', 'none', 'circular', 'symbol'] as const,
+  subtitle: [false, true] as const,
+  detail: [true, false] as const,
+  trailing: ['drillIn', 'switch', 'checkmark', 'none'] as const,
+};
+
+export const propOptionsRootAll = {
+  ...propOptionsRoot,
+  editing: [false, true, undefined] as const,
+  listStyle: [
+    undefined,
+    'insetGrouped',
+    'grouped',
+    'plain',
+    'sidebar',
+  ] as const,
+};
+
+export const getPropOptionsGroup = (addLog: AddLog) => ({
+  ...commonPropOptions,
+  onReorder: [
+    new MappedProp(
+      (from: number, to: number) => addLog(`reorder: ${from} → ${to}`),
+      '[log reorder]',
+    ),
+    undefined,
+  ] as const,
+});
+
+export const getPropOptionsItem = (addLog: AddLog) => ({
+  ...getPropOptionsItemFirst(addLog),
+  selected: [undefined, false, true] as const,
+  level: [undefined, 0, 1, 2] as const,
+});
+
+export const getPropOptionsExpandableRoot = (addLog: AddLog) => ({
+  defaultOpen: [true, false, undefined] as const,
+  open: [undefined, false, true] as const,
+  onOpenChange: [
+    new MappedProp(
+      (open: boolean) => addLog(`open change: ${String(open)}`),
+      '[log change]',
+    ),
+    undefined,
+  ] as const,
+});
+
+export const getPropOptionsExpandableTrigger = (addLog: AddLog) => ({
+  ...propOptionsCursor,
+  onClick: [undefined, logClick(addLog, 'trigger')] as const,
+  onSecondaryClick: [undefined, logSecondaryClick(addLog, 'trigger')] as const,
+});
+
+export const getPropOptionsIndexItem = (addLog: AddLog) => ({
+  ...propOptionsCursor,
+  onClick: [undefined, logClick(addLog, 'index item')] as const,
+  onSecondaryClick: [
+    undefined,
+    logSecondaryClick(addLog, 'index item'),
+  ] as const,
+});

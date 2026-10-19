@@ -21,13 +21,13 @@ export const SwitchDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog, setPending), [addLog]),
-    'root',
+    'Switch.Root',
     externalRoot,
     true,
   );
   const [controlThumb, propsThumb, stateThumb] = usePropControl(
     propOptionsThumb,
-    'thumb',
+    'Switch.Thumb',
     externalThumb,
   );
 

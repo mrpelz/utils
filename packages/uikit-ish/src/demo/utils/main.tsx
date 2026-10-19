@@ -19,7 +19,9 @@ import {
 } from 'react';
 
 import { ColorScheme } from '../../components/utils/main.js';
-import { highlight, renderCode } from './code.js';
+import { renderCode } from './code.js';
+import { CodeView } from './code-view.js';
+import { Breadcrumb, Tabs, useEntry } from './entry.js';
 import { setOptions, useOptions } from './options-context.js';
 import { useLocalStorage } from './use-local-storage.js';
 
@@ -283,27 +285,20 @@ export const usePropControl = <T extends PropMap>(
   title?: string,
   externalState?: unknown,
   open?: boolean,
+  /** Outlined by default (e.g. the part a section is about). */
+  outlined = false,
 ): [ReactNode, ControlledProps<T>, object, string] => {
-  // With a `style` prop: an outline option (in a color of its own, by its
-  // title), toggled by its checkbox, so the part can be told apart.
+  // With a `style` prop: an outline option, toggled by its checkbox, so
+  // the part can be seen (red, as every demo's).
   const outline = useMemo(
     () =>
       'style' in propMap
         ? new MappedProp<CSSProperties>(
-            {
-              outline: `2px dashed hsl(${String(
-                [...(title ?? '')].reduce(
-                  (hash, character) =>
-                    (hash * 31 + (character.codePointAt(0) ?? 0)) % 360,
-                  0,
-                ),
-              )} 90% 50%)`,
-              outlineOffset: '2px',
-            },
+            { outline: '2px dashed red', outlineOffset: '2px' },
             '[outline]',
           )
         : undefined,
-    [propMap, title],
+    [propMap],
   );
 
   const propMapSorted = useMemo(
@@ -328,12 +323,16 @@ export const usePropControl = <T extends PropMap>(
     () =>
       Object.fromEntries(
         Object.entries(propMapSorted).map(
-          ([key, [firstValue]]) => [key, firstValue] as const,
+          ([key, [firstValue]]) =>
+            [
+              key,
+              key === 'style' && outlined && outline ? outline : firstValue,
+            ] as const,
         ),
       ) as {
         [P in keyof T]: T[P][0];
       },
-    [propMapSorted],
+    [outline, outlined, propMapSorted],
   );
 
   const fromExternalState = useMemo(() => {
@@ -413,7 +412,7 @@ export const usePropControl = <T extends PropMap>(
     [state],
   ) as ControlledProps<T>;
 
-  const outlined = outline !== undefined && state.style === outline;
+  const isOutlined = outline !== undefined && state.style === outline;
 
   const toExternalState = useMemo(
     () =>
@@ -449,13 +448,13 @@ export const usePropControl = <T extends PropMap>(
           {outline ? (
             <label className="demo-outline-toggle">
               <input
-                checked={outlined}
+                checked={isOutlined}
                 name="outline"
                 type="checkbox"
                 onChange={() =>
                   setState((state_) => ({
                     ...state_,
-                    style: outlined ? initialState.style : outline,
+                    style: isOutlined ? undefined : outline,
                   }))
                 }
               />
@@ -490,6 +489,89 @@ export const usePropControl = <T extends PropMap>(
   ] as const;
 };
 
+/**
+ * A full-page demo's header (as a page's: where it is, its title, its
+ * component's pages); hidden inline.
+ */
+const DemoHeader: FunctionComponent<{
+  baseUiId?: string;
+  hidden: boolean;
+  id: string;
+  showId?: string;
+  stateUrl?: string;
+  title: string;
+}> = ({ baseUiId, hidden, id, showId, stateUrl, title }) => {
+  const entry = useEntry();
+
+  return (
+    <header
+      className="demo-header"
+      hidden={hidden}
+    >
+      {entry ? (
+        <Breadcrumb
+          withComponent
+          entry={entry}
+        />
+      ) : null}
+      <h2 className="demo-heading">
+        {title}
+        {stateUrl ? (
+          <a
+            className="demo-id"
+            href={stateUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            [{id}]
+          </a>
+        ) : null}
+        {showId ? (
+          <>
+            <a
+              className="demo-id"
+              href={`${stateUrl}&raw=true`}
+              rel="noreferrer"
+              target="_blank"
+            >
+              [raw]
+            </a>
+            <a
+              className="demo-id"
+              onClick={() =>
+                setOptions({
+                  id: undefined,
+                  raw: undefined,
+                  state: undefined,
+                })
+              }
+            >
+              [x]
+            </a>
+          </>
+        ) : null}
+      </h2>
+      {entry ? (
+        <Tabs
+          baseUiId={baseUiId}
+          entry={entry}
+          tab="all"
+        />
+      ) : null}
+      {!entry && baseUiId !== undefined ? (
+        <a
+          className="demo-docs-link"
+          href={`${BASE_URL_DOC}/${baseUiId}`}
+          rel="noreferrer"
+          target="_blank"
+        >
+          base-ui.com/react/components/{baseUiId}
+        </a>
+      ) : null}
+    </header>
+  );
+};
+
 export const Component: FunctionComponent<{
   backdrop?: boolean;
   /** Base UI component the demo is built on, for the docs link (if any). */
@@ -498,6 +580,11 @@ export const Component: FunctionComponent<{
   controls?: ReactNode;
   /** Unique demo id, used for selecting demos (`#id=…`) and storing config. */
   id: string;
+  /**
+   * In a page's flow (e.g. a component's overview), as a section's live
+   * view: sized by its content, without a heading of its own.
+   */
+  inline?: boolean;
   log?: ReactNode;
   stateUrl?: string;
   stretch?: boolean;
@@ -509,22 +596,34 @@ export const Component: FunctionComponent<{
   children,
   controls,
   id,
+  inline = false,
   log,
   stateUrl,
   stretch = false,
   title,
 }) => {
-  const { colorScheme = '', id: showId, raw, stageBackground } = useOptions();
-  const [isCentered, setIsCentered] = useLocalStorage(`${id}.center`, center);
+  const { colorScheme = '', id: showId, raw } = useOptions();
+  // Its settings: its component's, shared by the component's demos on all
+  // its pages (see entry.tsx); a demo's own outside of one.
+  const entry = useEntry();
+  const settings = entry?.id ?? id;
+  const [stageBackground, setStageBackground] = useLocalStorage(
+    `${settings}.stageBackground`,
+    true,
+  );
+  const [isCentered, setIsCentered] = useLocalStorage(
+    `${settings}.center`,
+    center,
+  );
   const [isStretched, setIsStretched] = useLocalStorage(
-    `${id}.stretch`,
+    `${settings}.stretch`,
     stretch,
   );
   const [hasBackdrop, setHasBackdrop] = useLocalStorage(
-    `${id}.backdrop`,
+    `${settings}.backdrop`,
     backdrop,
   );
-  const [codeOpen, setCodeOpen] = useLocalStorage(`${id}.code`, false);
+  const [codeOpen, setCodeOpen] = useLocalStorage(`${settings}.code`, false);
   // (After rendering: rendering to a string resets Preact's hooks state.)
   const [code, setCode] = useState('');
   useEffect(() => {
@@ -542,57 +641,19 @@ export const Component: FunctionComponent<{
   if (raw) return children;
 
   return (
-    <div className="demo-container">
+    <div
+      className="demo-container"
+      data-inline={inline ? '' : undefined}
+    >
       <section className="demo-content">
-        <header className="demo-header">
-          <h2 className="demo-heading">
-            {title}
-            {stateUrl ? (
-              <a
-                className="demo-id"
-                href={stateUrl}
-                rel="noreferrer"
-                target="_blank"
-              >
-                [{id}]
-              </a>
-            ) : null}
-            {showId ? (
-              <>
-                <a
-                  className="demo-id"
-                  href={`${stateUrl}&raw=true`}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  [raw]
-                </a>
-                <a
-                  className="demo-id"
-                  onClick={() =>
-                    setOptions({
-                      id: undefined,
-                      raw: undefined,
-                      state: undefined,
-                    })
-                  }
-                >
-                  [x]
-                </a>
-              </>
-            ) : null}
-          </h2>
-          {baseUiId === undefined ? null : (
-            <a
-              className="demo-docs-link"
-              href={`${BASE_URL_DOC}/${baseUiId}`}
-              rel="noreferrer"
-              target="_blank"
-            >
-              base-ui.com/react/components/{baseUiId}
-            </a>
-          )}
-        </header>
+        <DemoHeader
+          baseUiId={baseUiId}
+          hidden={inline}
+          id={id}
+          showId={showId}
+          stateUrl={stateUrl}
+          title={title}
+        />
         <div className="demo-stage">
           {stageBackground ? <div className="demo-stage-background" /> : null}
           <div
@@ -628,20 +689,16 @@ export const Component: FunctionComponent<{
           <label style={{ display: 'block' }}>
             <input
               checked={stageBackground}
-              name="stageBackground"
+              name={`${settings}.stageBackground`}
               type="checkbox"
-              onClick={() =>
-                setOptions({
-                  stageBackground: stageBackground ? false : undefined,
-                })
-              }
+              onClick={() => setStageBackground(!stageBackground)}
             />
             Stage Background
           </label>
           <label style={{ display: 'block' }}>
             <input
               checked={hasBackdrop}
-              name={`${id}.backdrop`}
+              name={`${settings}.backdrop`}
               type="checkbox"
               onClick={() => setHasBackdrop(!hasBackdrop)}
             />
@@ -650,7 +707,7 @@ export const Component: FunctionComponent<{
           <label style={{ display: 'block' }}>
             <input
               checked={isCentered}
-              name={`${id}.center`}
+              name={`${settings}.center`}
               type="checkbox"
               onClick={() => setIsCentered(!isCentered)}
             />
@@ -659,7 +716,7 @@ export const Component: FunctionComponent<{
           <label style={{ display: 'block' }}>
             <input
               checked={isStretched}
-              name={`${id}.stretch`}
+              name={`${settings}.stretch`}
               type="checkbox"
               onClick={() => setIsStretched(!isStretched)}
             />
@@ -675,15 +732,7 @@ export const Component: FunctionComponent<{
             }
           >
             <summary className="demo-config-heading">Code</summary>
-            <pre className="demo-code">{highlight(code)}</pre>
-            <button
-              className="demo-button"
-              onClick={() => {
-                navigator.clipboard.writeText(code).catch(() => undefined);
-              }}
-            >
-              Copy
-            </button>
+            {codeOpen ? <CodeView code={code} /> : null}
           </details>
         </section>
         {log}

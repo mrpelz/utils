@@ -1,26 +1,46 @@
 /* List demos (see main.tsx). */
 
-/* The index list: positioned, for its index. */
+/* An indexed list and its index, in one cell: at least 32rem high, or as
+   high as the index (the list fills it, scrolling on its own). */
 .list-demo-plain {
-  position: relative;
+  display: grid;
+  min-height: 32rem;
 }
 
-/* Keeps the index in view while the stage scrolls, centered, above the
-   sticky headers. */
-.list-demo-index-space {
-  position: absolute;
-  z-index: 3;
-  inset-block: 0;
-  inset-inline-end: 0;
-}
-
-/* A line at the middle of the stage, the index centered on it (without a
-   height, it never reaches the end of its space and moves while
-   scrolling). */
-.list-demo-index {
-  position: sticky;
-  top: 50%;
-  display: flex;
+/* The list, scrolling on its own, without a scroll bar (an overlay scroll
+   bar would cover the index at its edge). */
+.list-demo-scroll {
+  overflow: auto;
   height: 0;
+  min-height: 100%;
+  grid-area: 1 / 1;
+  scrollbar-width: none;
+}
+
+/* The index at the list's edge, over it, centered on its visible height
+   (not scrolling with it), above the sticky headers. */
+.list-demo-index {
+  position: relative;
+  z-index: 3;
+  display: flex;
   align-items: center;
+  grid-area: 1 / 1;
+  place-self: center end;
+}
+
+/* A phone's screen in the stage: a page scrolling in it, or a viewport's
+   fixed layers within it (a transform makes it their containing block). */
+.list-demo-screen {
+  position: relative;
+  overflow: hidden;
+  width: 402px;
+  max-width: 100%;
+  height: min(640px, 70vh);
+  border-radius: 24px;
+  transform: translateZ(0);
+}
+
+/* A navigation's pages, stretched to the screen's height. */
+.list-demo-navigation {
+  display: grid;
 }

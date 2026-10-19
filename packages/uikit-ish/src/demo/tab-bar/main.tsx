@@ -1,3 +1,5 @@
+import './style.css';
+
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
 import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
@@ -13,7 +15,7 @@ import {
   useViewportScroll,
   Viewport,
 } from '../../components/index.js';
-import { AddLog, useLog } from '../utils/log.js';
+import { useLog } from '../utils/log.js';
 import { Component, usePropControl } from '../utils/main.js';
 import {
   useCreateStateUrl,
@@ -66,34 +68,34 @@ export const TabBarDemo: FunctionComponent = () => {
   );
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'TabBar.Root',
     externalRoot,
   );
   const [controlList, propsList, stateList] = usePropControl(
     propOptionsList,
-    'list',
+    'TabBar.List',
     externalList,
     true,
   );
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
     propOptionsGroup,
-    'group',
+    'TabBar.Group',
     externalGroup,
   );
   const tabOptions = useMemo(() => getPropOptionsTab(addLog), [addLog]);
   const [controlTab1, propsTab1, stateTab1] = usePropControl(
     tabOptions,
-    '1st tab',
+    'TabBar.Tab (1st)',
     externalTab1,
   );
   const [controlTab2, propsTab2, stateTab2] = usePropControl(
     tabOptions,
-    '2nd tab',
+    'TabBar.Tab (2nd)',
     externalTab2,
   );
   const [controlTab3, propsTab3, stateTab3] = usePropControl(
     tabOptions,
-    '3rd tab',
+    'TabBar.Tab (3rd)',
     externalTab3,
   );
 
@@ -260,41 +262,45 @@ export const TabBarSearchDemo: FunctionComponent = () => {
   );
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'TabBar.Root',
     externalRoot,
   );
   const [controlList, propsList, stateList] = usePropControl(
     propOptionsList,
-    'list',
+    'TabBar.List',
     externalList,
     true,
   );
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
     propOptionsGroup,
-    'group',
+    'TabBar.Group',
     externalGroup,
   );
   const tabOptions = useMemo(() => getPropOptionsTab(addLog), [addLog]);
   const [controlTab1, propsTab1, stateTab1] = usePropControl(
     tabOptions,
-    '1st tab',
+    'TabBar.Tab (1st)',
     externalTab1,
   );
   const [controlTab2, propsTab2, stateTab2] = usePropControl(
     tabOptions,
-    '2nd tab',
+    'TabBar.Tab (2nd)',
     externalTab2,
   );
   const [controlTab3, propsTab3, stateTab3] = usePropControl(
     tabOptions,
-    '3rd tab',
+    'TabBar.Tab (3rd)',
     externalTab3,
   );
   const [controlSearchGroup, propsSearchGroup, stateSearchGroup] =
-    usePropControl(propOptionsGroup, 'search group', externalSearchGroup);
+    usePropControl(
+      propOptionsGroup,
+      'TabBar.Group (search)',
+      externalSearchGroup,
+    );
   const [controlSearchTab, propsSearchTab, stateSearchTab] = usePropControl(
     tabOptions,
-    'search tab',
+    'TabBar.Tab (search)',
     externalSearchTab,
   );
 
@@ -486,22 +492,26 @@ export const TabBarAccessoryDemo: FunctionComponent = () => {
   );
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'TabBar.Root',
     externalRoot,
   );
   const [controlList, propsList, stateList] = usePropControl(
     propOptionsList,
-    'list',
+    'TabBar.List',
     externalList,
     true,
   );
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
     propOptionsGroup,
-    'group',
+    'TabBar.Group',
     externalGroup,
   );
   const [controlSearchGroup, propsSearchGroup, stateSearchGroup] =
-    usePropControl(propOptionsGroup, 'search group', externalSearchGroup);
+    usePropControl(
+      propOptionsGroup,
+      'TabBar.Group (search)',
+      externalSearchGroup,
+    );
 
   // What remains while collapsed (see above).
   const [primary, search] = collapsedSelection(
@@ -615,9 +625,15 @@ export const TabBarAccessoryDemo: FunctionComponent = () => {
   );
 };
 
-// The bar, collapsing while the page scrolls down, expanding while it
-// scrolls up (`useViewportScroll`, inside the viewport's provider).
-const ScrollingTabBar: FunctionComponent<{ addLog: AddLog }> = ({ addLog }) => {
+/**
+ * A tab bar collapsing as the page scrolls down (as iOS's), expanding as it
+ * scrolls up (`useViewportScroll`): inside the viewport's provider (see
+ * `TabBarScrollDemo`), so its code is the bar's own.
+ */
+const ScrollDemo: FunctionComponent = () => {
+  const id = 'tab-bar-scroll';
+
+  const [log, addLog] = useLog();
   const [value, setValue] = useState<unknown>('tab-1');
   const [collapsed, setCollapsed] = useState(false);
 
@@ -628,56 +644,6 @@ const ScrollingTabBar: FunctionComponent<{ addLog: AddLog }> = ({ addLog }) => {
   const [selection] = collapsedSelection([['tab-1', 'tab-2', 'tab-3']], value);
 
   return (
-    <TabBar.Root
-      value={value}
-      onValueChange={(next: unknown) => {
-        addLog(`value change: ${String(next)}`);
-        setValue(next);
-      }}
-    >
-      <TabBar.List collapsed={collapsed}>
-        <TabBar.Group visibleWhenCollapsed>
-          <TabBar.Indicator />
-          <TabBar.Tab
-            value="tab-1"
-            visibleWhenCollapsed={selection?.tab === 0}
-          >
-            <TabBar.Icon>
-              <Symbol icon={sfHeartFill} />
-            </TabBar.Icon>
-            <TabBar.Label>Label</TabBar.Label>
-          </TabBar.Tab>
-          <TabBar.Tab
-            value="tab-2"
-            visibleWhenCollapsed={selection?.tab === 1}
-          >
-            <TabBar.Icon>
-              <Symbol icon={sfHeartFill} />
-            </TabBar.Icon>
-            <TabBar.Label>Label</TabBar.Label>
-          </TabBar.Tab>
-          <TabBar.Tab
-            value="tab-3"
-            visibleWhenCollapsed={selection?.tab === 2}
-          >
-            <TabBar.Icon>
-              <Symbol icon={sfHeartFill} />
-            </TabBar.Icon>
-            <TabBar.Label>Label</TabBar.Label>
-          </TabBar.Tab>
-        </TabBar.Group>
-      </TabBar.List>
-    </TabBar.Root>
-  );
-};
-
-/** A tab bar collapsing as the page scrolls down (as iOS's). */
-export const TabBarScrollDemo: FunctionComponent = () => {
-  const id = 'tab-bar-scroll';
-
-  const [log, addLog] = useLog();
-
-  return (
     <Component
       center
       baseUiId="tabs"
@@ -685,12 +651,56 @@ export const TabBarScrollDemo: FunctionComponent = () => {
       log={log}
       title="Tab Bar (Collapsing on Scroll)"
     >
-      <Viewport.Provider>
-        <ScrollingTabBar addLog={addLog} />
-      </Viewport.Provider>
+      <TabBar.Root
+        value={value}
+        onValueChange={(next: unknown) => {
+          addLog(`value change: ${String(next)}`);
+          setValue(next);
+        }}
+      >
+        <TabBar.List collapsed={collapsed}>
+          <TabBar.Group visibleWhenCollapsed>
+            <TabBar.Indicator />
+            <TabBar.Tab
+              value="tab-1"
+              visibleWhenCollapsed={selection?.tab === 0}
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-2"
+              visibleWhenCollapsed={selection?.tab === 1}
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              value="tab-3"
+              visibleWhenCollapsed={selection?.tab === 2}
+            >
+              <TabBar.Icon>
+                <Symbol icon={sfHeartFill} />
+              </TabBar.Icon>
+              <TabBar.Label>Label</TabBar.Label>
+            </TabBar.Tab>
+          </TabBar.Group>
+        </TabBar.List>
+      </TabBar.Root>
     </Component>
   );
 };
+
+/** `ScrollDemo`, tracking the document's scrolling. */
+export const TabBarScrollDemo: FunctionComponent = () => (
+  <Viewport.Provider>
+    <ScrollDemo />
+  </Viewport.Provider>
+);
 
 /**
  * The iPad's tab bar (Figma “Tab Bar - iPad”, the list's `size` regular): a
@@ -711,23 +721,23 @@ export const TabBarRegularDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'TabBar.Root',
     externalRoot,
   );
   const [controlList, propsList, stateList] = usePropControl(
     propOptionsListRegular,
-    'list',
+    'TabBar.List',
     externalList,
     true,
   );
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
     propOptionsGroup,
-    'group',
+    'TabBar.Group',
     externalGroup,
   );
   const [controlTab1, propsTab1, stateTab1] = usePropControl(
     useMemo(() => getPropOptionsTab(addLog), [addLog]),
-    '1st tab (sidebar)',
+    'TabBar.Tab (1st, sidebar)',
     externalTab1,
   );
 
@@ -910,7 +920,7 @@ export const TabBarContentDemo: FunctionComponent = () => {
 
   const [controlList, propsList, stateList] = usePropControl(
     propOptionsList,
-    'list',
+    'TabBar.List',
     externalList,
     true,
   );

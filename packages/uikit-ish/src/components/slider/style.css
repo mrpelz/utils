@@ -195,7 +195,7 @@
     --uikit-slider-bar-size: 6px;
     --uikit-slider-knob-width: 38px;
     --uikit-slider-knob-height: 24px;
-    --uikit-slider-min-length: 280px;
+    --uikit-slider-min-length: 120px;
     --uikit-slider-tint: var(--color-ios-primary);
 
     position: relative;

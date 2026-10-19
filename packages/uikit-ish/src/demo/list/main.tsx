@@ -46,6 +46,7 @@ import {
   useCreateStateUrl,
   useProvidedState,
 } from '../utils/options-context.js';
+import { contacts, messages, planets } from './content.js';
 import {
   getPropOptionsAccessory,
   getPropOptionsAction,
@@ -98,13 +99,13 @@ export const ListDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'List.Root',
     externalRoot,
     true,
   );
   const [controlItem, propsItem, stateItem] = usePropControl(
     propOptionsItemFirst,
-    'item (1st)',
+    'List.Item (1st)',
     externalItem,
     true,
   );
@@ -115,12 +116,12 @@ export const ListDemo: FunctionComponent = () => {
     keyCollapsible,
   ] = usePropControl(
     useMemo(() => getPropOptionsCollapsible(addLog), [addLog]),
-    'collapsible',
+    'Collapsible.Root',
     externalCollapsible,
   );
   const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
     propOptionsCursor,
-    'collapsible trigger (header)',
+    'Collapsible.Trigger (List.Header)',
     externalTrigger,
   );
 
@@ -323,7 +324,6 @@ export const ListDemo: FunctionComponent = () => {
             </List.Item>
             <List.Item>
               <Slider.Root
-                aria-label="Brightness"
                 defaultValue={60}
                 onValueCommitted={(value: number | readonly number[]) =>
                   addLog(`brightness: ${String(value)}`)
@@ -335,7 +335,7 @@ export const ListDemo: FunctionComponent = () => {
                 <Slider.Control>
                   <Slider.Track>
                     <Slider.Indicator />
-                    <Slider.Thumb />
+                    <Slider.Thumb aria-label="Brightness" />
                   </Slider.Track>
                 </Slider.Control>
                 <Slider.Symbol edge="max">
@@ -479,118 +479,118 @@ export const ListPartsDemo: FunctionComponent = () => {
   );
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'List.Root',
     externalRoot,
   );
   const [controlSection, propsSection, stateSection] = usePropControl(
     commonPropOptions,
-    'section',
+    'List.Section',
     externalSection,
   );
   const [controlHeader, propsHeader, stateHeader] = usePropControl(
     propOptionsHeader,
-    'header',
+    'List.Header',
     externalHeader,
     true,
   );
   const [controlSupertitle, propsSupertitle, stateSupertitle] = usePropControl(
     commonPropOptions,
-    'supertitle',
+    'List.Supertitle',
     externalSupertitle,
   );
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
     commonPropOptions,
-    'group',
+    'List.Group',
     externalGroup,
   );
   const [controlItem, propsItem, stateItem] = usePropControl(
     useMemo(() => getPropOptionsItemFirst(addLog), [addLog]),
-    'item (1st)',
+    'List.Item (1st)',
     externalItem,
   );
   const [controlImage, propsImage, stateImage] = usePropControl(
     propOptionsImage,
-    'image',
+    'List.Image',
     externalImage,
   );
   const [controlTitle, propsTitle, stateTitle] = usePropControl(
     useMemo(() => getPropOptionsTitleFirst(addLog), [addLog]),
-    'title (1st)',
+    'List.Title (1st)',
     externalTitle,
   );
   const [controlSubtitle, propsSubtitle, stateSubtitle] = usePropControl(
     commonPropOptions,
-    'subtitle',
+    'List.Subtitle',
     externalSubtitle,
   );
   const [controlDetail, propsDetail, stateDetail] = usePropControl(
     commonPropOptions,
-    'detail',
+    'List.Detail',
     externalDetail,
   );
   const [controlDrillIn, propsDrillIn, stateDrillIn] = usePropControl(
     commonPropOptions,
-    'drill-in',
+    'List.DrillIn',
     externalDrillIn,
   );
   const [controlAccessory, propsAccessory, stateAccessory] = usePropControl(
     useMemo(() => getPropOptionsAccessory(addLog), [addLog]),
-    'accessory',
+    'List.Accessory',
     externalAccessory,
   );
   const [controlCheckmark, propsCheckmark, stateCheckmark] = usePropControl(
     commonPropOptions,
-    'checkmark',
+    'List.Checkmark',
     externalCheckmark,
   );
   const [controlAction, propsAction, stateAction] = usePropControl(
     useMemo(() => getPropOptionsAction(addLog), [addLog]),
-    'action',
+    'List.Action',
     externalAction,
   );
   const [controlButton, propsButton, stateButton] = usePropControl(
     useMemo(() => getPropOptionsButton(addLog), [addLog]),
-    'button',
+    'List.Button',
     externalButton,
   );
   const [controlCheckbox, propsCheckbox, stateCheckbox, keyCheckbox] =
-    usePropControl(propOptionsCheckbox, 'checkbox', externalCheckbox);
+    usePropControl(propOptionsCheckbox, 'List.Checkbox', externalCheckbox);
   const [controlEditButton, propsEditButton, stateEditButton] = usePropControl(
     useMemo(() => getPropOptionsEditButton(addLog), [addLog]),
-    'edit button',
+    'List.EditButton',
     externalEditButton,
   );
   const [controlGrabber, propsGrabber, stateGrabber] = usePropControl(
     propOptionsCursor,
-    'grabber',
+    'List.Grabber',
     externalGrabber,
   );
   const [controlText, propsText, stateText] = usePropControl(
     propOptionsText,
-    'text',
+    'List.Text',
     externalText,
   );
   const [controlSwipeActions, propsSwipeActions, stateSwipeActions] =
     usePropControl(
       useMemo(() => getPropOptionsSwipeActionsTrailing(addLog), [addLog]),
-      'swipe actions (trailing)',
+      'List.SwipeActions (trailing)',
       externalSwipeActions,
       true,
     );
   const [controlSwipeAction, propsSwipeAction, stateSwipeAction] =
     usePropControl(
       useMemo(() => getPropOptionsSwipeActionOutermost(addLog), [addLog]),
-      'swipe action (outermost)',
+      'List.SwipeAction (outermost)',
       externalSwipeAction,
     );
   const [controlFooter, propsFooter, stateFooter] = usePropControl(
     commonPropOptions,
-    'footer',
+    'List.Footer',
     externalFooter,
   );
   const [controlBlock, propsBlock, stateBlock] = usePropControl(
     propOptionsBlock,
-    'block',
+    'List.Block',
     externalBlock,
   );
 
@@ -798,7 +798,7 @@ export const ListPartsDemo: FunctionComponent = () => {
 /**
  * A collapsible section (Base UI `Collapsible`: its header the trigger, its
  * group the panel), and an expandable row (`List.Expandable`, toggled by
- * the row above it).
+ * the row above it: `List.ExpandableRoot`, its title the trigger).
  */
 export const ListCollapsibleDemo: FunctionComponent = () => {
   const id = 'list-collapsible';
@@ -813,8 +813,6 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
   ] = useProvidedState(id);
 
   const [selection, setSelection] = useState('Automatic');
-  // The expandable row, toggled by the row above (unless its control says).
-  const [expanded, setExpanded] = useState(false);
 
   const [
     controlCollapsible,
@@ -823,33 +821,31 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
     keyCollapsible,
   ] = usePropControl(
     propOptionsCollapsible,
-    'collapsible',
+    'Collapsible.Root',
     externalCollapsible,
     true,
   );
   const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
     propOptionsCursor,
-    'collapsible trigger (header)',
+    'Collapsible.Trigger (List.Header)',
     externalTrigger,
   );
   const [controlPanel, propsPanel, statePanel] = usePropControl(
     propOptionsPanel,
-    'collapsible panel',
+    'Collapsible.Panel (List.Group)',
     externalPanel,
   );
   const [controlDisclosure, propsDisclosure, stateDisclosure] = usePropControl(
     commonPropOptions,
-    'disclosure',
+    'List.Disclosure',
     externalDisclosure,
   );
   const [controlExpandable, propsExpandable, stateExpandable] = usePropControl(
     propOptionsExpandable,
-    'expandable',
+    'List.Expandable',
     externalExpandable,
     true,
   );
-
-  const open = propsExpandable.open ?? expanded;
 
   return (
     <Component
@@ -927,28 +923,25 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
 
         <List.Section>
           <List.Group>
-            <List.Item
-              onClick={() => {
-                addLog(`expanded: ${!open}`);
-                setExpanded(!open);
-              }}
+            <List.ExpandableRoot
+              onOpenChange={(next: boolean) => addLog(`expanded: ${next}`)}
             >
-              <List.Title>Expandable row</List.Title>
-              <List.Detail>{open ? 'Shown' : 'Hidden'}</List.Detail>
-              <List.Disclosure data-panel-open={open || undefined} />
-            </List.Item>
-            <List.Expandable
-              {...propsExpandable}
-              open={open}
-            >
-              <List.Image variant="rounded">
-                <Symbol icon={sfWifi} />
-              </List.Image>
-              <List.Title>Expanded</List.Title>
-              <List.Subtitle>
-                Shown below the row above, opening and closing in place.
-              </List.Subtitle>
-            </List.Expandable>
+              <List.Item>
+                <List.Title render={<List.ExpandableTrigger />}>
+                  Expandable row
+                </List.Title>
+                <List.Disclosure />
+              </List.Item>
+              <List.Expandable {...propsExpandable}>
+                <List.Image variant="rounded">
+                  <Symbol icon={sfWifi} />
+                </List.Image>
+                <List.Title>Expanded</List.Title>
+                <List.Subtitle>
+                  Shown below the row above, opening and closing in place.
+                </List.Subtitle>
+              </List.Expandable>
+            </List.ExpandableRoot>
             <List.Item>
               <List.Title>Below</List.Title>
             </List.Item>
@@ -974,20 +967,20 @@ export const ListSwipeDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'List.Root',
     externalRoot,
   );
   const [controlSwipeActions, propsSwipeActions, stateSwipeActions] =
     usePropControl(
       useMemo(() => getPropOptionsSwipeActionsFirstLeading(addLog), [addLog]),
-      'swipe actions (1st, leading)',
+      'List.SwipeActions (1st, leading)',
       externalSwipeActions,
       true,
     );
   const [controlSwipeAction, propsSwipeAction, stateSwipeAction] =
     usePropControl(
       useMemo(() => getPropOptionsSwipeActionFirst(addLog), [addLog]),
-      'swipe action (1st)',
+      'List.SwipeAction (1st)',
       externalSwipeAction,
     );
 
@@ -1449,8 +1442,6 @@ export const ListSwipeDemo: FunctionComponent = () => {
   );
 };
 
-const planets = ['Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter'] as const;
-
 /**
  * Editing (UIKit `UITableView` editing): rows reordered by their grabbers
  * (the group's `onReorder`; the app reorders its rows), deleted by swiping.
@@ -1465,12 +1456,12 @@ export const ListEditDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'List.Root',
     externalRoot,
   );
   const [controlGrabber, propsGrabber, stateGrabber] = usePropControl(
     propOptionsCursor,
-    'grabber (1st)',
+    'List.Grabber (1st)',
     externalGrabber,
     true,
   );
@@ -1545,12 +1536,12 @@ export const ListEditDeleteDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'List.Root',
     externalRoot,
   );
   const [controlEditButton, propsEditButton, stateEditButton] = usePropControl(
     useMemo(() => getPropOptionsEditButtonFirst(addLog), [addLog]),
-    'edit button (1st)',
+    'List.EditButton (1st)',
     externalEditButton,
     true,
   );
@@ -1616,7 +1607,7 @@ export const ListEditInsertDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'List.Root',
     externalRoot,
   );
 
@@ -1685,13 +1676,13 @@ export const ListEditSelectDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'List.Root',
     externalRoot,
   );
   const [controlCheckbox, propsCheckbox, stateCheckbox, keyCheckbox] =
     usePropControl(
       useMemo(() => getPropOptionsCheckboxFirst(addLog), [addLog]),
-      'checkbox (1st)',
+      'List.Checkbox (1st)',
       externalCheckbox,
       true,
     );
@@ -1750,19 +1741,19 @@ export const ListEditSelectSingleDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'List.Root',
     externalRoot,
   );
   const [controlRadioGroup, propsRadioGroup, stateRadioGroup, keyRadioGroup] =
     usePropControl(
       useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
-      'radio group',
+      'RadioGroup (List.Group)',
       externalRadioGroup,
       true,
     );
   const [controlRadio, propsRadio, stateRadio] = usePropControl(
     propOptionsRadioFirst,
-    'radio (1st)',
+    'List.Radio (1st)',
     externalRadio,
   );
 
@@ -1834,7 +1825,7 @@ export const ListSegmentedDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'List.Root',
     externalRoot,
   );
 
@@ -1938,7 +1929,7 @@ export const ListFormDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
-    'root',
+    'List.Root',
     externalRoot,
   );
 
@@ -2078,27 +2069,6 @@ export const ListFormDemo: FunctionComponent = () => {
 };
 
 // Contacts by their initial (the index's sections).
-const contacts = {
-  A: ['Aaron', 'Abigail', 'Adrian'],
-  B: ['Bella', 'Benjamin'],
-  C: ['Chloe'],
-  D: ['Daniel', 'Dylan'],
-  E: ['Ella', 'Emma'],
-  F: ['Felix'],
-  G: ['Grace'],
-  H: ['Hannah', 'Henry'],
-  I: ['Isaac'],
-  J: ['Jack', 'Julia'],
-  L: ['Leo', 'Lily'],
-  M: ['Mia'],
-  N: ['Noah'],
-  O: ['Olivia', 'Oscar'],
-  R: ['Ruby'],
-  S: ['Samuel', 'Sophie'],
-  T: ['Theo'],
-  W: ['William'],
-  Z: ['Zoe'],
-};
 
 /**
  * An index list: a plain list with sticky section titles (Figma “Section
@@ -2111,28 +2081,28 @@ export const ListIndexDemo: FunctionComponent = () => {
   const [externalRoot, externalHeader, externalIndex, externalIndexItem] =
     useProvidedState(id);
 
-  const listRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRootPlain,
-    'root',
+    'List.Root',
     externalRoot,
     true,
   );
   const [controlHeader, propsHeader, stateHeader] = usePropControl(
     commonPropOptions,
-    'header',
+    'List.Header',
     externalHeader,
   );
   const [controlIndex, propsIndex, stateIndex] = usePropControl(
     propOptionsIndex,
-    'index',
+    'List.Index',
     externalIndex,
     true,
   );
   const [controlIndexItem, propsIndexItem, stateIndexItem] = usePropControl(
     propOptionsCursor,
-    'index item',
+    'List.IndexItem (1st)',
     externalIndexItem,
   );
 
@@ -2151,102 +2121,89 @@ export const ListIndexDemo: FunctionComponent = () => {
       ])}
     >
       <div className="list-demo-plain">
-        <List.Root
+        <div
           ref={listRef}
-          {...propsRoot}
+          className="list-demo-scroll"
         >
-          {Object.entries(contacts).map(([letter, names]) => (
-            <List.Section
-              key={letter}
-              data-letter={letter}
-            >
-              <List.Header
-                prominence="nested"
-                {...propsHeader}
+          <List.Root {...propsRoot}>
+            {Object.entries(contacts).map(([letter, names]) => (
+              <List.Section
+                key={letter}
+                data-letter={letter}
               >
-                <List.Title>{letter}</List.Title>
-              </List.Header>
-              <List.Group>
-                {names.map((name) => (
-                  <List.Item key={name}>
-                    <List.Title
-                      render={<button />}
-                      onClick={() => addLog(`${name} clicked`)}
-                    >
-                      {name}
-                    </List.Title>
-                    <List.SwipeActions overswipe>
-                      <List.SwipeAction
-                        label="Delete"
-                        tint="var(--color-ios-system-red)"
-                        onClick={() => addLog(`delete ${name}`)}
-                      >
-                        <Symbol icon={sfTrashFill} />
-                      </List.SwipeAction>
-                    </List.SwipeActions>
-                  </List.Item>
-                ))}
-              </List.Group>
-            </List.Section>
-          ))}
-        </List.Root>
-        {/* Kept in view while the stage scrolls, centered, above the sticky
-            headers. */}
-        <div className="list-demo-index-space">
-          <div className="list-demo-index">
-            <List.Index
-              aria-label="Index"
-              {...propsIndex}
-            >
-              {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'].map((letter, index) => (
-                <List.IndexItem
-                  key={letter}
-                  onClick={() => {
-                    addLog(`index: ${letter}`);
-                    // The nearest section at or after the letter.
-                    const target =
-                      Object.keys(contacts).find(
-                        (key) => key.localeCompare(letter) >= 0,
-                      ) ?? 'Z';
-                    listRef.current
-                      ?.querySelector(`[data-letter="${CSS.escape(target)}"]`)
-                      ?.scrollIntoView({ block: 'start' });
-                  }}
-                  {...(index === 0 ? propsIndexItem : {})}
+                <List.Header
+                  prominence="nested"
+                  {...propsHeader}
                 >
-                  {letter}
-                </List.IndexItem>
-              ))}
-            </List.Index>
-          </div>
+                  <List.Title>{letter}</List.Title>
+                </List.Header>
+                <List.Group>
+                  {names.map((name) => (
+                    <List.Item key={name}>
+                      <List.Title
+                        render={<button />}
+                        onClick={() => addLog(`${name} clicked`)}
+                      >
+                        {name}
+                      </List.Title>
+                      <List.SwipeActions overswipe>
+                        <List.SwipeAction
+                          label="Delete"
+                          tint="var(--color-ios-system-red)"
+                          onClick={() => addLog(`delete ${name}`)}
+                        >
+                          <Symbol icon={sfTrashFill} />
+                        </List.SwipeAction>
+                      </List.SwipeActions>
+                    </List.Item>
+                  ))}
+                </List.Group>
+              </List.Section>
+            ))}
+          </List.Root>
+        </div>
+        {/* At the list's edge, centered on its visible height (not
+            scrolling with it), above the sticky headers. */}
+        <div className="list-demo-index">
+          <List.Index
+            aria-label="Index"
+            {...propsIndex}
+          >
+            {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'].map((letter, index) => (
+              <List.IndexItem
+                key={letter}
+                onClick={() => {
+                  addLog(`index: ${letter}`);
+                  // The nearest section at or after the letter.
+                  const target =
+                    Object.keys(contacts).find(
+                      (key) => key.localeCompare(letter) >= 0,
+                    ) ?? 'Z';
+                  const { current: list } = listRef;
+                  const section = list?.querySelector(
+                    `[data-letter="${CSS.escape(target)}"]`,
+                  );
+                  if (!list || !section) return;
+                  // The section at the top of the list (its own scroll
+                  // container; the page stays).
+                  list.scrollTo({
+                    top:
+                      list.scrollTop +
+                      section.getBoundingClientRect().top -
+                      list.getBoundingClientRect().top,
+                  });
+                }}
+                {...(index === 0 ? propsIndexItem : {})}
+              >
+                {letter}
+              </List.IndexItem>
+            ))}
+          </List.Index>
         </div>
       </div>
     </Component>
   );
 };
-
-const messages = [
-  {
-    date: '09:41',
-    from: 'Kate Bell',
-    preview:
-      'Hi! The photos from the weekend are finally in the shared album, have a look when you get a chance. Some of them turned out really well.',
-    subject: 'Weekend photos',
-  },
-  {
-    date: 'Yesterday',
-    from: 'John Appleseed',
-    preview:
-      'Attached is the agenda for Thursday. Let me know if anything is missing before I send it to everyone else.',
-    subject: 'Agenda for Thursday',
-  },
-  {
-    date: 'Monday',
-    from: 'Anna Haro',
-    preview: 'Thanks, see you there!',
-    subject: 'Re: Dinner',
-  },
-] as const;
 
 /**
  * Mail-style rows (Framework7 media list): a plain list whose rows have a
@@ -2263,14 +2220,14 @@ export const ListMailDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRootPlain,
-    'root',
+    'List.Root',
     externalRoot,
     true,
   );
 
   const [controlText, propsText, stateText] = usePropControl(
     propOptionsText,
-    'text',
+    'List.Text',
     externalText,
     true,
   );

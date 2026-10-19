@@ -1,6 +1,6 @@
 import type { useRender } from '@base-ui/react/use-render';
 import type { Properties } from 'csstype';
-import type { JSX } from 'react';
+import type { JSX, MouseEvent, ReactNode } from 'react';
 
 import type { SecondaryClickProps } from '../utils/main.js';
 
@@ -20,6 +20,13 @@ export type PartProps<Tag extends IntrinsicTag> = Omit<
   (Tag extends 'button' | 'li' ? SecondaryClickProps : unknown);
 
 export type ListRootProps = PartProps<'div'> & {
+  /**
+   * In edit mode (UIKit `isEditing`): its rows' edit controls (`Checkbox`,
+   * `Radio`, `EditButton`) and grabbers are shown, sliding in from the rows'
+   * edges as it changes; out of it (`false`), they're collapsed and hidden.
+   * Without it, they're always shown.
+   */
+  editing?: boolean;
   /**
    * UIKit `UITableView.Style`.
    * @default 'insetGrouped'
@@ -100,9 +107,29 @@ export type Drag = {
 export type ListExpandableProps = ListItemProps & {
   /**
    * Shown; changing, its height and padding transition.
-   * @default false
+   * @default its `ExpandableRoot`'s state, or `false`
    */
   open?: boolean;
+};
+
+export type ListExpandableRootProps = {
+  children?: ReactNode;
+  /**
+   * Initially open (uncontrolled; toggled by its `ExpandableTrigger`).
+   * @default false
+   */
+  defaultOpen?: boolean;
+  /** Called when its trigger opens or closes it. */
+  onOpenChange?: (open: boolean, event: MouseEvent<HTMLElement>) => void;
+  /** Open (controlled, with `onOpenChange`). */
+  open?: boolean;
+};
+
+export type ExpandableContextValue = {
+  /** The expandable row's id (its trigger's `aria-controls`). */
+  id: string;
+  open: boolean;
+  setOpen: (open: boolean, event: MouseEvent<HTMLElement>) => void;
 };
 
 export type ListTextProps = PartProps<'span'> & {

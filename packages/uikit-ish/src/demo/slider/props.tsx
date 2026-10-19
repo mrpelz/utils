@@ -189,3 +189,14 @@ export const getPropOptionsThumb = (addLog: AddLog) => ({
     ),
   ] as const,
 });
+
+/** The overview's look: the ends' symbols (see content.ts), and ticks. */
+export const propOptionsOverviewContent = {
+  symbols: ['brightness', 'speed', undefined] as const,
+  ticks: [0, 6, 11] as const,
+};
+
+export const propOptionsTicks = {
+  ...commonPropOptions,
+  count: [11, 6, 3] as const,
+};

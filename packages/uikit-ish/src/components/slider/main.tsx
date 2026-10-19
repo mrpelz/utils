@@ -54,7 +54,8 @@ export type {
 //   which alone scales while dragging (Base UI measures the thumb's box for
 //   positioning); only its `transform`, `background-color` and `box-shadow`
 //   transition (Konsta UI `--transition-ios-range-thumb`).
-// - The control's length (Figma example: 280px) is a minimum.
+// - The control's length grows to fill the root (Figma example: 280px), at
+//   least 120px (so it fits a list row between symbols on an iPhone).
 // - The pressed state is driven by Base UI's `data-dragging`.
 // - Vertical sliders put the minimum symbol at the bottom.
 // - The fill is derived from the value (Base UI couples it to the thumb's

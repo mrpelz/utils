@@ -116,31 +116,3 @@ export const renderCode = (node: ReactNode): string => {
     return String(error);
   }
 };
-
-// Syntax highlighting: tags, attribute names, strings, expressions.
-const tokens =
-  /(?<tag><\/?[\w.-]+|\/?>)|(?<attribute>[\w-]+)(?==)|(?<string>"[^"]*")|(?<expression>\{[^\n]*?\})/gu;
-
-/** The code, its tokens in spans (`data-token`: their kind). */
-export const highlight = (code: string): ReactNode[] => {
-  const parts: ReactNode[] = [];
-  let last = 0;
-  for (const match of code.matchAll(tokens)) {
-    const kind = Object.entries(match.groups ?? {}).find(
-      ([, value]) => value !== undefined,
-    )?.[0];
-    if (kind === undefined) continue;
-    parts.push(
-      code.slice(last, match.index),
-      <span
-        key={match.index}
-        data-token={kind}
-      >
-        {match[0]}
-      </span>,
-    );
-    last = match.index + match[0].length;
-  }
-  parts.push(code.slice(last));
-  return parts;
-};
