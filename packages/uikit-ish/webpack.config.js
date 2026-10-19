@@ -33,7 +33,7 @@ const configDownstream = {
       reconnect: true,
       webSocketURL: 'auto://0.0.0.0:0/ws',
     },
-    historyApiFallback: true,
+    historyApiFallback: { index: `${publicPath}index.html` },
     host: '::1',
     hot: webpackServe,
     liveReload: false,

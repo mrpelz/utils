@@ -1,5 +1,5 @@
 import { ErrorBoundary, LocationProvider, Route, Router } from 'preact-iso';
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import * as components from '../components/index.js';
 import { useColorScheme, useTouchActive } from '../styles.js';
@@ -35,8 +35,20 @@ const TouchActive: FunctionComponent = () => {
   return null;
 };
 
+const usePath = (input: string) =>
+  useMemo(
+    () =>
+      publicPath === '/'
+        ? input
+        : `/${[publicPath.split('/'), input.split('/')]
+            .flat()
+            .filter((segment) => segment.length)
+            .join('/')}`,
+    [input],
+  );
+
 export const Demo: FunctionComponent = () => (
-  <LocationProvider scope={publicPath === '/' ? undefined : publicPath}>
+  <LocationProvider>
     <OptionsProvider>
       <ErrorBoundary>
         <ColorScheme />
@@ -44,35 +56,35 @@ export const Demo: FunctionComponent = () => (
         <Router>
           <Route
             component={IndexPage}
-            path="/"
+            path={usePath('/')}
           />
           <Route
             component={AllDemosPage}
-            path="/all"
+            path={usePath('/all')}
           />
           <Route
             component={HigGuidePage}
-            path="/hig-guide"
+            path={usePath('/hig-guide')}
           />
           <Route
             component={OverviewPage}
-            path="/:id"
+            path={usePath('/:id')}
           />
           <Route
             component={PartsPage}
-            path="/:id/parts"
+            path={usePath('/:id/parts')}
           />
           <Route
             component={CompositionPage}
-            path="/:id/composition"
+            path={usePath('/:id/composition')}
           />
           <Route
             component={InformationArchitecturePage}
-            path="/:id/information-architecture"
+            path={usePath('/:id/information-architecture')}
           />
           <Route
             component={ComponentDemosPage}
-            path="/:id/all"
+            path={usePath('/:id/all')}
           />
           <Route
             default
