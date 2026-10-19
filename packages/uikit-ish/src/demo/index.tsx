@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 
 import * as components from '../components/index.js';
-import { useColorScheme, useTouchActive } from '../styles.js';
+import { useTouchActive } from '../styles.js';
 import { ActionSheetDemo } from './action-sheet/main.js';
 import {
   ActivityViewDemo,
@@ -87,7 +87,7 @@ import {
   TypographySizesDemo,
 } from './typography/main.js';
 import { nameComponents } from './utils/code.js';
-import { OptionsProvider, useOptions } from './utils/options-context.js';
+import { Component } from './utils/main.js';
 import {
   ViewportAnchorsDemo,
   ViewportBarDemo,
@@ -97,21 +97,18 @@ import {
 // (Named for the code shown, see `renderCode`.)
 nameComponents(components);
 
-// The forced color scheme (demo option), as the library's `Styles` does.
-const ColorScheme: FunctionComponent = () => {
-  useColorScheme(useOptions().colorScheme);
-
-  return null;
-};
-
-export const Demo: FunctionComponent = () => {
+export const DemoIndex: FunctionComponent = () => {
   // Pressed states on touch (iOS Safari), as the library's `Styles` does.
   useTouchActive();
 
   return (
-    <OptionsProvider>
-      <ColorScheme />
-
+    <>
+      <Component
+        id="404"
+        title="404"
+      >
+        <a href="404">404</a>
+      </Component>
       <ViewportDemo />
       <ViewportBarDemo />
       <ViewportAnchorsDemo />
@@ -187,6 +184,6 @@ export const Demo: FunctionComponent = () => {
       <MenuPopUpDemo />
       <ContextualMenuDemo />
       <EditMenuDemo />
-    </OptionsProvider>
+    </>
   );
 };

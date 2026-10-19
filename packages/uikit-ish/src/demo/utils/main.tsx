@@ -42,7 +42,7 @@ export type ControlledProps<T extends PropMap> = {
 
 const BASE_URL_DOC = 'https://base-ui.com/react/components';
 
-export const useId = (): string => useMemo(() => self.crypto.randomUUID(), []);
+export const useId = (): string => useMemo(() => crypto.randomUUID(), []);
 
 export const isEqual = <A extends object, B extends A>(a: A, b: B): a is B => {
   if (a === b) return true;

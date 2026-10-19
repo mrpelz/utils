@@ -12,6 +12,7 @@ import { deepmerge } from 'deepmerge-ts';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import webpack from 'webpack';
 
 const { PUBLIC_PATH: publicPath = '/' } = process.env;
 
@@ -54,7 +55,7 @@ const configDownstream = {
 /** @type {import('@mrpelz/boilerplate-dom/webpack.config.js').ConfigurationExtended} */
 const config = deepmerge(configUpstream, configDownstream);
 
-config.entry = path.resolve(dirSrc, 'demo/main.tsx');
+config.entry = path.resolve(dirSrc, 'demo.tsx');
 
 if (config.module) {
   config.module.rules = [
@@ -98,6 +99,8 @@ config.plugins = [
   new MiniCssExtractPlugin(),
   // @ts-ignore
   new ForkTsCheckerWebpackPlugin(),
+  // @ts-ignore
+  new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
 ];
 
 // @ts-ignore
