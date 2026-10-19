@@ -11,6 +11,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { KeyPropsTable, pickRows } from '../utils/props-table.js';
+import { Contents, type Section } from '../utils/sections.js';
 import {
   tabBarAccessoryRows,
   tabBarGroupRows,
@@ -102,9 +103,19 @@ const LiveView: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['when-to-use-it', 'When to use it'],
+  ['when-to-use-something-else', 'When to use something else'],
+  ['key-props', 'Key props'],
+  ['accessibility', 'Accessibility'],
+  ['behavior', 'Behavior'],
+];
+
 /** `/tab-bar`: what a tab bar is for, and its props. */
 export const TabBarOverview: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       A tab bar switches between an app’s top-level sections (UIKit{' '}
       <code>UITabBar</code>): a glass capsule of tabs floating at the bottom of
@@ -115,7 +126,7 @@ export const TabBarOverview: FunctionComponent = () => (
     </p>
     <LiveView />
 
-    <h2>When to use it</h2>
+    <h2 id="when-to-use-it">When to use it</h2>
     <ul>
       <li>
         For two to five top-level sections people switch between, each keeping
@@ -128,7 +139,7 @@ export const TabBarOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>When to use something else</h2>
+    <h2 id="when-to-use-something-else">When to use something else</h2>
     <ul>
       <li>
         Actions (Add, Compose, Share): a <a href="toolbar">Toolbar</a>, as a tab
@@ -146,7 +157,7 @@ export const TabBarOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Key props</h2>
+    <h2 id="key-props">Key props</h2>
     <p>
       The props most tab bars set, across their parts; every part’s props are on{' '}
       <a href="tab-bar/parts">Parts</a>.
@@ -168,7 +179,7 @@ export const TabBarOverview: FunctionComponent = () => (
       ]}
     />
 
-    <h2>Accessibility</h2>
+    <h2 id="accessibility">Accessibility</h2>
     <ul>
       <li>
         It’s Base UI’s Tabs: the list has the <code>tablist</code> role, each
@@ -202,7 +213,7 @@ export const TabBarOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Behavior</h2>
+    <h2 id="behavior">Behavior</h2>
     <ul>
       <li>
         Pressed, a glass lens appears under the pointer and follows it across

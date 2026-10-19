@@ -6,6 +6,7 @@ import { forwardClick, List, Switch, Symbol } from '../../components/index.js';
 import { CodeView } from '../utils/code-view.js';
 import { useLog } from '../utils/log.js';
 import { Component } from '../utils/main.js';
+import { Contents, type Section } from '../utils/sections.js';
 
 // A row's code (as Airplane Mode's in the list below).
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
@@ -84,10 +85,17 @@ const InAList: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['in-list-rows', 'In list rows'],
+  ['in-forms', 'In forms'],
+];
+
 /** `/switch/composition`: switches with other components. */
 export const SwitchComposition: FunctionComponent = () => (
   <>
-    <h2>In list rows</h2>
+    <Contents sections={sections} />
+    <h2 id="in-list-rows">In list rows</h2>
     <p>
       On iOS, switches live in the trailing slot of <a href="list">List</a>{' '}
       rows. Pass the row’s clicks on to its switch (
@@ -99,7 +107,7 @@ export const SwitchComposition: FunctionComponent = () => (
     <CodeView code={listRowCode} />
     <InAList />
 
-    <h2>In forms</h2>
+    <h2 id="in-forms">In forms</h2>
     <p>
       It renders a hidden checkbox input, so inside a <a href="form">Form</a>{' '}
       it’s submitted by its <code>name</code> (its <code>value</code> while on,

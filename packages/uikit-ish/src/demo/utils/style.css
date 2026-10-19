@@ -407,6 +407,27 @@
     }
   }
 
+  /* A page's sections, at its top (see Contents): a wrapping row of links,
+     as the tabs. */
+  .demo-contents {
+    font-family: monospace;
+    font-size: 0.875rem;
+    margin-block: 1rem 0;
+
+    & ul {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 0;
+      margin: 0;
+      gap: 0.25rem 1rem;
+      list-style: none;
+    }
+
+    & a {
+      color: inherit;
+    }
+  }
+
   /* Text people read (and select, unlike the rest of the demo). */
   .demo-prose {
     font-size: 1rem;

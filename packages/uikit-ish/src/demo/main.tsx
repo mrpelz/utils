@@ -47,13 +47,57 @@ const usePath = (input: string) =>
     [input],
   );
 
+// Anchor links (`list/parts#list-root`, `hig-guide#rule-g7`): the router
+// takes them over (not starting with `#`, because of the document's base) and
+// scrolls to the top on another page, not to their anchor; so the anchor's
+// element is scrolled to after it: on another page once it's rendered (the
+// router's `onRouteChange`), on the same page once the router pushed it.
+// Back and forward are left to the browser's scroll restoration.
+
+const scrollToAnchor = () => {
+  const id = decodeURIComponent(location.hash.slice(1));
+  if (!id) return;
+
+  document.querySelector(`#${CSS.escape(id)}`)?.scrollIntoView();
+};
+
+// An anchor link to another page was followed (until it's rendered).
+let anchorFollowed = false;
+
+if (typeof addEventListener === 'function') {
+  addEventListener('click', (event) => {
+    const link = event
+      .composedPath()
+      .find((target) => target instanceof HTMLAnchorElement);
+
+    if (!link?.hash || link.origin !== location.origin) return;
+
+    const { pathname } = location;
+    anchorFollowed = link.pathname !== pathname;
+
+    // (After the router's own handler, whether it took the link over.)
+    setTimeout(() => {
+      if (event.defaultPrevented && link.pathname === pathname) {
+        scrollToAnchor();
+      }
+    });
+  });
+}
+
+const onRouteChange = () => {
+  if (!anchorFollowed) return;
+  anchorFollowed = false;
+
+  scrollToAnchor();
+};
+
 export const Demo: FunctionComponent = () => (
   <LocationProvider>
     <OptionsProvider>
       <ErrorBoundary>
         <ColorScheme />
         <TouchActive />
-        <Router>
+        <Router onRouteChange={onRouteChange}>
           <Route
             component={IndexPage}
             path={usePath('/')}

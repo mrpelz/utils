@@ -8,6 +8,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { PropsTable } from '../utils/props-table.js';
+import { Contents, PartLink, type Section } from '../utils/sections.js';
 import { switchRootRows, switchThumbRows } from './docs.js';
 import { getPropOptionsRoot, propOptionsThumb } from './props.js';
 
@@ -78,25 +79,32 @@ const ThumbPart: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['switch-root', 'Switch.Root'],
+  ['switch-thumb', 'Switch.Thumb'],
+];
+
 /** `/switch/parts`: the root and its thumb. */
 export const SwitchParts: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       A switch is a root (the track, and the control people operate) holding its
       thumb (the knob). Both are always needed.
     </p>
     <ul>
       <li>
-        <code>Switch.Root</code>
+        <PartLink part="Switch.Root" />
         <ul>
           <li>
-            <code>Switch.Thumb</code>
+            <PartLink part="Switch.Thumb" />
           </li>
         </ul>
       </li>
     </ul>
 
-    <h2>
+    <h2 id="switch-root">
       <code>Switch.Root</code>
     </h2>
     <p>
@@ -113,7 +121,7 @@ export const SwitchParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={switchRootRows} />
 
-    <h2>
+    <h2 id="switch-thumb">
       <code>Switch.Thumb</code>
     </h2>
     <p>

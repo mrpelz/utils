@@ -21,6 +21,7 @@ import { GuideLink } from '../hig-guide/link.js';
 import { CodeView } from '../utils/code-view.js';
 import { AddLog, useLog } from '../utils/log.js';
 import { Component } from '../utils/main.js';
+import { Contents, type Section } from '../utils/sections.js';
 import { phoneTabs, phoneTabValues } from './tabs.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -505,10 +506,20 @@ const MiniPlayer: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['switching-an-app-s-sections', 'Switching an app’s sections'],
+  ['search', 'Search'],
+  ['badges-on-tabs', 'Badges on tabs'],
+  ['collapsing-on-scroll', 'Collapsing on scroll'],
+  ['a-mini-player', 'A mini player'],
+];
+
 /** `/tab-bar/composition`: tab bars in an app, and with other components. */
 export const TabBarComposition: FunctionComponent = () => (
   <>
-    <h2>Switching an app’s sections</h2>
+    <Contents sections={sections} />
+    <h2 id="switching-an-app-s-sections">Switching an app’s sections</h2>
     <p>
       A tab bar is Base UI’s Tabs: its root holds both the tabs and the
       sections’ panels, showing the active tab’s. As an app’s shell (guide{' '}
@@ -522,7 +533,7 @@ export const TabBarComposition: FunctionComponent = () => (
     <CodeView code={panelsCode} />
     <Panels />
 
-    <h2>Search</h2>
+    <h2 id="search">Search</h2>
     <p>
       Search takes a group of its own after the sections’ (iOS 26; guide{' '}
       <GuideLink to="rule-a11">A11</GuideLink>,{' '}
@@ -535,7 +546,7 @@ export const TabBarComposition: FunctionComponent = () => (
     <CodeView code={searchCode} />
     <Search />
 
-    <h2>Badges on tabs</h2>
+    <h2 id="badges-on-tabs">Badges on tabs</h2>
     <p>
       A section’s news (missed calls, new voicemail) goes on its tab, as a{' '}
       <a href="badge">Badge</a> inside the tab’s <a href="symbol">Symbol</a>:
@@ -546,7 +557,7 @@ export const TabBarComposition: FunctionComponent = () => (
     <CodeView code={badgeCode} />
     <Badges />
 
-    <h2>Collapsing on scroll</h2>
+    <h2 id="collapsing-on-scroll">Collapsing on scroll</h2>
     <p>
       As iOS’s tab bars minimize while the content scrolls down: inside a{' '}
       <a href="viewport">Viewport</a>’s provider, <code>useViewportScroll</code>{' '}
@@ -556,7 +567,7 @@ export const TabBarComposition: FunctionComponent = () => (
     <CodeView code={scrollCode} />
     <OnScroll />
 
-    <h2>A mini player</h2>
+    <h2 id="a-mini-player">A mini player</h2>
     <p>
       Content of the app’s attached to the bar, as Music’s mini player: a{' '}
       <code>TabBar.Accessory</code> after the list, above the groups, and

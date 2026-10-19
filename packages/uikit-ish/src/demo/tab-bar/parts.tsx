@@ -12,6 +12,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { PropsTable } from '../utils/props-table.js';
+import { Contents, PartLink, type Section } from '../utils/sections.js';
 import {
   tabBarAccessoryRows,
   tabBarGroupRows,
@@ -664,9 +665,23 @@ const AccessoryPart: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['tabbar-root', 'TabBar.Root'],
+  ['tabbar-list', 'TabBar.List'],
+  ['tabbar-group', 'TabBar.Group'],
+  ['tabbar-indicator', 'TabBar.Indicator'],
+  ['tabbar-tab', 'TabBar.Tab'],
+  ['tabbar-icon', 'TabBar.Icon'],
+  ['tabbar-label', 'TabBar.Label'],
+  ['tabbar-panel', 'TabBar.Panel'],
+  ['tabbar-accessory', 'TabBar.Accessory'],
+];
+
 /** `/tab-bar/parts`: the root, the bar, its groups and tabs, the accessory. */
 export const TabBarParts: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       A tab bar is a root (the tabs’ state) holding its list (the bar), which
       holds groups (glass capsules), each with its indicator (the selection) and
@@ -675,36 +690,37 @@ export const TabBarParts: FunctionComponent = () => (
     </p>
     <ul>
       <li>
-        <code>TabBar.Root</code>
+        <PartLink part="TabBar.Root" />
         <ul>
           <li>
-            <code>TabBar.Panel</code> (one per tab, optional)
+            <PartLink part="TabBar.Panel" /> (one per tab, optional)
           </li>
           <li>
-            <code>TabBar.List</code>
+            <PartLink part="TabBar.List" />
             <ul>
               <li>
-                <code>TabBar.Group</code> (one or more)
+                <PartLink part="TabBar.Group" /> (one or more)
                 <ul>
                   <li>
-                    <code>TabBar.Indicator</code> (first)
+                    <PartLink part="TabBar.Indicator" /> (first)
                   </li>
                   <li>
-                    <code>TabBar.Tab</code>: <code>TabBar.Icon</code>,{' '}
-                    <code>TabBar.Label</code>
+                    <PartLink part="TabBar.Tab" />:{' '}
+                    <PartLink part="TabBar.Icon" />,{' '}
+                    <PartLink part="TabBar.Label" />
                   </li>
                 </ul>
               </li>
             </ul>
           </li>
           <li>
-            <code>TabBar.Accessory</code> (optional)
+            <PartLink part="TabBar.Accessory" /> (optional)
           </li>
         </ul>
       </li>
     </ul>
 
-    <h2>
+    <h2 id="tabbar-root">
       <code>TabBar.Root</code>
     </h2>
     <p>
@@ -717,7 +733,7 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarRootRows} />
 
-    <h2>
+    <h2 id="tabbar-list">
       <code>TabBar.List</code>
     </h2>
     <p>
@@ -732,7 +748,7 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarListRows} />
 
-    <h2>
+    <h2 id="tabbar-group">
       <code>TabBar.Group</code>
     </h2>
     <p>
@@ -745,7 +761,7 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarGroupRows} />
 
-    <h2>
+    <h2 id="tabbar-indicator">
       <code>TabBar.Indicator</code>
     </h2>
     <p>
@@ -757,7 +773,7 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarIndicatorRows} />
 
-    <h2>
+    <h2 id="tabbar-tab">
       <code>TabBar.Tab</code>
     </h2>
     <p>
@@ -771,7 +787,7 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarTabRows} />
 
-    <h2>
+    <h2 id="tabbar-icon">
       <code>TabBar.Icon</code>
     </h2>
     <p>
@@ -782,7 +798,7 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarIconRows} />
 
-    <h2>
+    <h2 id="tabbar-label">
       <code>TabBar.Label</code>
     </h2>
     <p>
@@ -794,7 +810,7 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarLabelRows} />
 
-    <h2>
+    <h2 id="tabbar-panel">
       <code>TabBar.Panel</code>
     </h2>
     <p>
@@ -808,7 +824,7 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarPanelRows} />
 
-    <h2>
+    <h2 id="tabbar-accessory">
       <code>TabBar.Accessory</code>
     </h2>
     <p>

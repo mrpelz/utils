@@ -1,8 +1,16 @@
 import { FunctionComponent } from 'react';
 
 import { GuideLink } from '../hig-guide/link.js';
+import { Contents, type Section } from '../utils/sections.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
+
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['on-their-own-a-choice', 'On their own: a Choice'],
+  ['in-lists-a-collection-s-selection', 'In lists: a Collection’s selection'],
+  ['traits', 'Traits'],
+];
 
 /**
  * `/checkbox/information-architecture`: where selection circles sit, after
@@ -11,6 +19,7 @@ const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
  */
 export const CheckboxInformationArchitecture: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       Apple’s catalog has no iOS checkbox or radio button of its own: its{' '}
       <a
@@ -27,7 +36,7 @@ export const CheckboxInformationArchitecture: FunctionComponent = () => (
       things, by where they are.
     </p>
 
-    <h2>On their own: a Choice</h2>
+    <h2 id="on-their-own-a-choice">On their own: a Choice</h2>
     <p>
       A Choice selects one or many from a known set (guide,{' '}
       <GuideLink to="primitive-choice">§5</GuideLink>, which lists “radio groups
@@ -71,7 +80,9 @@ export const CheckboxInformationArchitecture: FunctionComponent = () => (
       few short options, the segmented control.
     </p>
 
-    <h2>In lists: a Collection’s selection</h2>
+    <h2 id="in-lists-a-collection-s-selection">
+      In lists: a Collection’s selection
+    </h2>
     <p>
       A Collection is a set of items with a data shape and a projection; one of
       its parameters is its selection: none, one or many (guide,{' '}
@@ -99,7 +110,7 @@ export const CheckboxInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Traits</h2>
+    <h2 id="traits">Traits</h2>
     <p>
       The guide’s trait matrix (<GuideLink to="trait-matrix">§4</GuideLink>) has
       no row for checkboxes or radios.

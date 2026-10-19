@@ -10,6 +10,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { PropsTable } from '../utils/props-table.js';
+import { Contents, PartLink, type Section } from '../utils/sections.js';
 import { periods } from './content.js';
 import {
   segmentedHighlightRows,
@@ -213,9 +214,18 @@ const IndicatorPart: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['segmented-root', 'Segmented.Root'],
+  ['segmented-item', 'Segmented.Item'],
+  ['segmented-highlight', 'Segmented.Highlight'],
+  ['segmented-indicator', 'Segmented.Indicator'],
+];
+
 /** `/segmented/parts`: the track, its items, the highlight. */
 export const SegmentedParts: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       A segmented control is a root (the track, holding the choice) with its
       items (the options) and, after them, the highlight (the selection). An
@@ -223,24 +233,24 @@ export const SegmentedParts: FunctionComponent = () => (
     </p>
     <ul>
       <li>
-        <code>Segmented.Root</code>
+        <PartLink part="Segmented.Root" />
         <ul>
           <li>
-            <code>Segmented.Item</code> (two or more)
+            <PartLink part="Segmented.Item" /> (two or more)
             <ul>
               <li>
-                <code>Segmented.Indicator</code> (optional)
+                <PartLink part="Segmented.Indicator" /> (optional)
               </li>
             </ul>
           </li>
           <li>
-            <code>Segmented.Highlight</code> (last)
+            <PartLink part="Segmented.Highlight" /> (last)
           </li>
         </ul>
       </li>
     </ul>
 
-    <h2>
+    <h2 id="segmented-root">
       <code>Segmented.Root</code>
     </h2>
     <p>
@@ -256,7 +266,7 @@ export const SegmentedParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={segmentedRootRows} />
 
-    <h2>
+    <h2 id="segmented-item">
       <code>Segmented.Item</code>
     </h2>
     <p>
@@ -269,7 +279,7 @@ export const SegmentedParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={segmentedItemRows} />
 
-    <h2>
+    <h2 id="segmented-highlight">
       <code>Segmented.Highlight</code>
     </h2>
     <p>
@@ -281,7 +291,7 @@ export const SegmentedParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={segmentedHighlightRows} />
 
-    <h2>
+    <h2 id="segmented-indicator">
       <code>Segmented.Indicator</code>
     </h2>
     <p>

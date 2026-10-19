@@ -1,8 +1,16 @@
 import { FunctionComponent } from 'react';
 
 import { GuideLink } from '../hig-guide/link.js';
+import { Contents, type Section } from '../utils/sections.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
+
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['primitive-choice', 'Primitive: Choice'],
+  ['traits', 'Traits'],
+  ['where-it-sits', 'Where it sits'],
+];
 
 /**
  * `/switch/information-architecture`: where a switch sits, after the
@@ -11,6 +19,7 @@ const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
  */
 export const SwitchInformationArchitecture: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       In Apple’s catalog, the switch is a{' '}
       <a
@@ -25,7 +34,7 @@ export const SwitchInformationArchitecture: FunctionComponent = () => (
       smallest <em>Choice</em>: one of two options, both visible at once.
     </p>
 
-    <h2>Primitive: Choice</h2>
+    <h2 id="primitive-choice">Primitive: Choice</h2>
     <p>
       A Choice selects one or many from a known set; its parameters are the
       number of options (N), the cardinality, whether they’re ordered, whether
@@ -70,7 +79,7 @@ export const SwitchInformationArchitecture: FunctionComponent = () => (
       settings.)
     </p>
 
-    <h2>Traits</h2>
+    <h2 id="traits">Traits</h2>
     <p>
       The toggle’s row of the guide’s trait matrix (
       <GuideLink to="trait-matrix">§4</GuideLink>):
@@ -112,7 +121,7 @@ export const SwitchInformationArchitecture: FunctionComponent = () => (
       (e.g. while a change is saved), which the matrix’s “one of 2” leaves out.
     </p>
 
-    <h2>Where it sits</h2>
+    <h2 id="where-it-sits">Where it sits</h2>
     <ul>
       <li>
         <strong>Layer:</strong> the content layer, scrolling with the page

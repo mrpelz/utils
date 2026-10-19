@@ -16,6 +16,7 @@ import {
   type Tab,
   Tabs,
 } from './utils/entry.js';
+import { PagePathContext } from './utils/sections.js';
 
 // (Links are relative to the document's base: the demo's public path.)
 
@@ -48,7 +49,6 @@ const ComponentShell: FunctionComponent<{
   tab: Exclude<Tab, 'all'>;
 }> = ({ children, entry, tab }) => {
   const info = entryInfo(entry);
-
   return (
     <EntryContext.Provider value={info}>
       <div className="demo-page">
@@ -58,7 +58,11 @@ const ComponentShell: FunctionComponent<{
           entry={info}
           tab={tab}
         />
-        <div className="demo-prose">{children}</div>
+        <PagePathContext.Provider
+          value={tab === 'overview' ? entry.id : `${entry.id}/${tab}`}
+        >
+          <div className="demo-prose">{children}</div>
+        </PagePathContext.Provider>
       </div>
     </EntryContext.Provider>
   );

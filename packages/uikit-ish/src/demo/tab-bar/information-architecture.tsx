@@ -1,8 +1,17 @@
 import { FunctionComponent } from 'react';
 
 import { GuideLink } from '../hig-guide/link.js';
+import { Contents, type Section } from '../utils/sections.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
+
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['primitives-region-choice', 'Primitives: Region + Choice'],
+  ['traits', 'Traits'],
+  ['where-it-sits', 'Where it sits'],
+  ['rules', 'Rules'],
+];
 
 /**
  * `/tab-bar/information-architecture`: where a tab bar sits, after the
@@ -11,6 +20,7 @@ const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
  */
 export const TabBarInformationArchitecture: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       In Apple’s catalog,{' '}
       <a
@@ -27,7 +37,7 @@ export const TabBarInformationArchitecture: FunctionComponent = () => (
       <GuideLink to="section-5-mapping">§5, mapping</GuideLink>).
     </p>
 
-    <h2>Primitives: Region + Choice</h2>
+    <h2 id="primitives-region-choice">Primitives: Region + Choice</h2>
     <p>
       A Region is an edge-anchored strip of a surface hosting commands, choices
       or navigation; its parameters are the edge, capacity, collapse and scroll
@@ -44,7 +54,7 @@ export const TabBarInformationArchitecture: FunctionComponent = () => (
       control, choosing navigates: the content below is the chosen section’s.
     </p>
 
-    <h2>Traits</h2>
+    <h2 id="traits">Traits</h2>
     <p>
       The tab bar’s row of the guide’s trait matrix (
       <GuideLink to="trait-matrix">§4</GuideLink>):
@@ -87,7 +97,7 @@ export const TabBarInformationArchitecture: FunctionComponent = () => (
       row leaves out.
     </p>
 
-    <h2>Where it sits</h2>
+    <h2 id="where-it-sits">Where it sits</h2>
     <ul>
       <li>
         <strong>Layer:</strong> the functional layer of Liquid Glass, floating
@@ -125,7 +135,7 @@ export const TabBarInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Rules</h2>
+    <h2 id="rules">Rules</h2>
     <ul>
       <li>
         <strong>It navigates, never acts</strong> (

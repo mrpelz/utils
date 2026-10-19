@@ -11,6 +11,8 @@ import {
 const changeEvent = 'demo-local-storage';
 
 const read = <T>(key: string, defaultValue: T): T => {
+  // (Server-side, the default.)
+  if (typeof localStorage === 'undefined') return defaultValue;
   try {
     const value = localStorage.getItem(key);
     return value === null ? defaultValue : (JSON.parse(value) as T);

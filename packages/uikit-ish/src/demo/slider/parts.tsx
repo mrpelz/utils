@@ -11,6 +11,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { PropsTable } from '../utils/props-table.js';
+import { Contents, PartLink, type Section } from '../utils/sections.js';
 import {
   sliderControlRows,
   sliderIndicatorRows,
@@ -462,9 +463,23 @@ const SymbolPart: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['slider-root', 'Slider.Root'],
+  ['slider-label', 'Slider.Label'],
+  ['slider-value', 'Slider.Value'],
+  ['slider-control', 'Slider.Control'],
+  ['slider-track', 'Slider.Track'],
+  ['slider-indicator', 'Slider.Indicator'],
+  ['slider-thumb', 'Slider.Thumb'],
+  ['slider-ticks', 'Slider.Ticks'],
+  ['slider-symbol', 'Slider.Symbol'],
+];
+
 /** `/slider/parts`: a slider's parts, from the root to its ends' symbols. */
 export const SliderParts: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       A slider is a <code>Slider.Root</code> holding the value; a{' '}
       <code>Slider.Control</code>, the area that takes presses and drags; in it,
@@ -475,44 +490,44 @@ export const SliderParts: FunctionComponent = () => (
     </p>
     <ul>
       <li>
-        <code>Slider.Root</code>
+        <PartLink part="Slider.Root" />
         <ul>
           <li>
-            <code>Slider.Label</code> (optional)
+            <PartLink part="Slider.Label" /> (optional)
           </li>
           <li>
-            <code>Slider.Value</code> (optional)
+            <PartLink part="Slider.Value" /> (optional)
           </li>
           <li>
-            <code>Slider.Symbol</code> (optional, at the minimum’s end)
+            <PartLink part="Slider.Symbol" /> (optional, at the minimum’s end)
           </li>
           <li>
-            <code>Slider.Control</code>
+            <PartLink part="Slider.Control" />
             <ul>
               <li>
-                <code>Slider.Track</code>
+                <PartLink part="Slider.Track" />
                 <ul>
                   <li>
-                    <code>Slider.Indicator</code>
+                    <PartLink part="Slider.Indicator" />
                   </li>
                   <li>
-                    <code>Slider.Ticks</code> (optional)
+                    <PartLink part="Slider.Ticks" /> (optional)
                   </li>
                   <li>
-                    <code>Slider.Thumb</code> (one, or two for a range)
+                    <PartLink part="Slider.Thumb" /> (one, or two for a range)
                   </li>
                 </ul>
               </li>
             </ul>
           </li>
           <li>
-            <code>Slider.Symbol</code> (optional, at the maximum’s end)
+            <PartLink part="Slider.Symbol" /> (optional, at the maximum’s end)
           </li>
         </ul>
       </li>
     </ul>
 
-    <h2>
+    <h2 id="slider-root">
       <code>Slider.Root</code>
     </h2>
     <p>
@@ -527,7 +542,7 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderRootRows} />
 
-    <h2>
+    <h2 id="slider-label">
       <code>Slider.Label</code>
     </h2>
     <p>
@@ -541,7 +556,7 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderLabelRows} />
 
-    <h2>
+    <h2 id="slider-value">
       <code>Slider.Value</code>
     </h2>
     <p>
@@ -554,7 +569,7 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderValueRows} />
 
-    <h2>
+    <h2 id="slider-control">
       <code>Slider.Control</code>
     </h2>
     <p>
@@ -565,7 +580,7 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderControlRows} />
 
-    <h2>
+    <h2 id="slider-track">
       <code>Slider.Track</code>
     </h2>
     <p>
@@ -576,7 +591,7 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderTrackRows} />
 
-    <h2>
+    <h2 id="slider-indicator">
       <code>Slider.Indicator</code>
     </h2>
     <p>
@@ -588,7 +603,7 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderIndicatorRows} />
 
-    <h2>
+    <h2 id="slider-thumb">
       <code>Slider.Thumb</code>
     </h2>
     <p>
@@ -600,7 +615,7 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderThumbRows} />
 
-    <h2>
+    <h2 id="slider-ticks">
       <code>Slider.Ticks</code>
     </h2>
     <p>
@@ -613,7 +628,7 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderTicksRows} />
 
-    <h2>
+    <h2 id="slider-symbol">
       <code>Slider.Symbol</code>
     </h2>
     <p>

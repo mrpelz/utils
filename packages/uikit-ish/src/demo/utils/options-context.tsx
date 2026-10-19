@@ -103,6 +103,9 @@ export const useCreateStateUrl = (
   states: unknown[],
 ): string | undefined =>
   useMemo(() => {
+    // (Server-side, none: preact-iso's prerendering stubs `location` as
+    // `http://localhost/…`.)
+    if (typeof window === 'undefined') return undefined;
     const url = new URL(location.href);
 
     const fragment = createFragment({ id, state: states });

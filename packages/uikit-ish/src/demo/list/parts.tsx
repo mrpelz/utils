@@ -18,6 +18,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { PropsTable } from '../utils/props-table.js';
+import { Contents, PartLink, type Section } from '../utils/sections.js';
 import { contacts, messages, planets, settings } from './content.js';
 import {
   listAccessoryRows,
@@ -1562,9 +1563,44 @@ const IndexItemPart: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['list-root', 'List.Root'],
+  ['list-section', 'List.Section'],
+  ['list-header', 'List.Header'],
+  ['list-group', 'List.Group'],
+  ['list-item', 'List.Item'],
+  ['list-expandableroot', 'List.ExpandableRoot'],
+  ['list-expandabletrigger', 'List.ExpandableTrigger'],
+  ['list-expandable', 'List.Expandable'],
+  ['list-footer', 'List.Footer'],
+  ['list-block', 'List.Block'],
+  ['list-title', 'List.Title'],
+  ['list-subtitle', 'List.Subtitle'],
+  ['list-supertitle', 'List.Supertitle'],
+  ['list-text', 'List.Text'],
+  ['list-detail', 'List.Detail'],
+  ['list-image', 'List.Image'],
+  ['list-accessory', 'List.Accessory'],
+  ['list-checkmark', 'List.Checkmark'],
+  ['list-drillin', 'List.DrillIn'],
+  ['list-disclosure', 'List.Disclosure'],
+  ['list-grabber', 'List.Grabber'],
+  ['list-action', 'List.Action'],
+  ['list-button', 'List.Button'],
+  ['list-checkbox', 'List.Checkbox'],
+  ['list-radio', 'List.Radio'],
+  ['list-editbutton', 'List.EditButton'],
+  ['list-swipeactions', 'List.SwipeActions'],
+  ['list-swipeaction', 'List.SwipeAction'],
+  ['list-index', 'List.Index'],
+  ['list-indexitem', 'List.IndexItem'],
+];
+
 /** `/list/parts`: a list's parts, from the root to its rows' parts. */
 export const ListParts: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       A list is a <code>List.Root</code> of sections; a section is a header, a
       group of rows (or a block of text), and a footer. A row is a grid of
@@ -1573,47 +1609,59 @@ export const ListParts: FunctionComponent = () => (
     </p>
     <ul>
       <li>
-        <code>List.Root</code>
+        <PartLink part="List.Root" />
         <ul>
           <li>
-            <code>List.Section</code> (one or more)
+            <PartLink part="List.Section" /> (one or more)
             <ul>
               <li>
-                <code>List.Header</code> (optional):{' '}
-                <code>List.Supertitle</code>, <code>List.Title</code>,{' '}
-                <code>List.Subtitle</code>, <code>List.Accessory</code>,{' '}
-                <code>List.Action</code>, <code>List.Disclosure</code>
+                <PartLink part="List.Header" /> (optional):{' '}
+                <PartLink part="List.Supertitle" />,{' '}
+                <PartLink part="List.Title" />,{' '}
+                <PartLink part="List.Subtitle" />,{' '}
+                <PartLink part="List.Accessory" />,{' '}
+                <PartLink part="List.Action" />,{' '}
+                <PartLink part="List.Disclosure" />
               </li>
               <li>
-                <code>List.Group</code>, or <code>List.Block</code>
+                <PartLink part="List.Group" />, or{' '}
+                <PartLink part="List.Block" />
                 <ul>
                   <li>
-                    <code>List.Item</code> (or <code>List.Expandable</code>, in
-                    a <code>List.ExpandableRoot</code> with the row whose{' '}
-                    <code>List.ExpandableTrigger</code> toggles it; one or more)
+                    <PartLink part="List.Item" /> (or{' '}
+                    <PartLink part="List.Expandable" />, in a{' '}
+                    <PartLink part="List.ExpandableRoot" /> with the row whose{' '}
+                    <PartLink part="List.ExpandableTrigger" /> toggles it; one
+                    or more)
                     <ul>
                       <li>
-                        Leading (optional): <code>List.Checkbox</code>,{' '}
-                        <code>List.Radio</code> or <code>List.EditButton</code>;{' '}
-                        <code>List.Image</code>
+                        Leading (optional): <PartLink part="List.Checkbox" />,{' '}
+                        <PartLink part="List.Radio" /> or{' '}
+                        <PartLink part="List.EditButton" />;{' '}
+                        <PartLink part="List.Image" />
                       </li>
                       <li>
-                        <code>List.Title</code> (or <code>List.Button</code>),{' '}
-                        <code>List.Subtitle</code> (optional),{' '}
-                        <code>List.Text</code> (optional)
+                        <PartLink part="List.Title" /> (or{' '}
+                        <PartLink part="List.Button" />
+                        ), <PartLink part="List.Subtitle" /> (optional),{' '}
+                        <PartLink part="List.Text" /> (optional)
                       </li>
                       <li>
-                        Trailing (optional): <code>List.Detail</code>,{' '}
-                        <code>List.Accessory</code>, <code>List.Action</code>,{' '}
-                        <code>List.Checkmark</code>, <code>List.DrillIn</code>,{' '}
-                        <code>List.Disclosure</code>, <code>List.Grabber</code>,
-                        or a control (e.g. a Switch)
+                        Trailing (optional): <PartLink part="List.Detail" />,{' '}
+                        <PartLink part="List.Accessory" />,{' '}
+                        <PartLink part="List.Action" />,{' '}
+                        <PartLink part="List.Checkmark" />,{' '}
+                        <PartLink part="List.DrillIn" />,{' '}
+                        <PartLink part="List.Disclosure" />,{' '}
+                        <PartLink part="List.Grabber" />, or a control (e.g. a
+                        Switch)
                       </li>
                       <li>
-                        <code>List.SwipeActions</code> (optional, one per side)
+                        <PartLink part="List.SwipeActions" /> (optional, one per
+                        side)
                         <ul>
                           <li>
-                            <code>List.SwipeAction</code> (one or more)
+                            <PartLink part="List.SwipeAction" /> (one or more)
                           </li>
                         </ul>
                       </li>
@@ -1622,23 +1670,23 @@ export const ListParts: FunctionComponent = () => (
                 </ul>
               </li>
               <li>
-                <code>List.Footer</code> (optional)
+                <PartLink part="List.Footer" /> (optional)
               </li>
             </ul>
           </li>
         </ul>
       </li>
       <li>
-        <code>List.Index</code> (optional, beside a plain list)
+        <PartLink part="List.Index" /> (optional, beside a plain list)
         <ul>
           <li>
-            <code>List.IndexItem</code> (one per letter)
+            <PartLink part="List.IndexItem" /> (one per letter)
           </li>
         </ul>
       </li>
     </ul>
 
-    <h2>
+    <h2 id="list-root">
       <code>List.Root</code>
     </h2>
     <p>
@@ -1651,7 +1699,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listRootRows} />
 
-    <h2>
+    <h2 id="list-section">
       <code>List.Section</code>
     </h2>
     <p>
@@ -1663,7 +1711,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listSectionRows} />
 
-    <h2>
+    <h2 id="list-header">
       <code>List.Header</code>
     </h2>
     <p>
@@ -1677,7 +1725,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listHeaderRows} />
 
-    <h2>
+    <h2 id="list-group">
       <code>List.Group</code>
     </h2>
     <p>
@@ -1690,7 +1738,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listGroupRows} />
 
-    <h2>
+    <h2 id="list-item">
       <code>List.Item</code>
     </h2>
     <p>
@@ -1704,7 +1752,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listItemRows} />
 
-    <h2>
+    <h2 id="list-expandableroot">
       <code>List.ExpandableRoot</code>
     </h2>
     <p>
@@ -1717,7 +1765,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listExpandableRootRows} />
 
-    <h2>
+    <h2 id="list-expandabletrigger">
       <code>List.ExpandableTrigger</code>
     </h2>
     <p>
@@ -1729,7 +1777,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listExpandableTriggerRows} />
 
-    <h2>
+    <h2 id="list-expandable">
       <code>List.Expandable</code>
     </h2>
     <p>
@@ -1742,7 +1790,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listExpandableRows} />
 
-    <h2>
+    <h2 id="list-footer">
       <code>List.Footer</code>
     </h2>
     <p>
@@ -1753,7 +1801,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listFooterRows} />
 
-    <h2>
+    <h2 id="list-block">
       <code>List.Block</code>
     </h2>
     <p>
@@ -1764,7 +1812,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listBlockRows} />
 
-    <h2>
+    <h2 id="list-title">
       <code>List.Title</code>
     </h2>
     <p>
@@ -1776,7 +1824,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listTitleRows} />
 
-    <h2>
+    <h2 id="list-subtitle">
       <code>List.Subtitle</code>
     </h2>
     <p>
@@ -1787,7 +1835,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listSubtitleRows} />
 
-    <h2>
+    <h2 id="list-supertitle">
       <code>List.Supertitle</code>
     </h2>
     <p>A line above a header’s title.</p>
@@ -1795,7 +1843,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listSupertitleRows} />
 
-    <h2>
+    <h2 id="list-text">
       <code>List.Text</code>
     </h2>
     <p>
@@ -1806,7 +1854,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listTextRows} />
 
-    <h2>
+    <h2 id="list-detail">
       <code>List.Detail</code>
     </h2>
     <p>
@@ -1816,7 +1864,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listDetailRows} />
 
-    <h2>
+    <h2 id="list-image">
       <code>List.Image</code>
     </h2>
     <p>
@@ -1827,7 +1875,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listImageRows} />
 
-    <h2>
+    <h2 id="list-accessory">
       <code>List.Accessory</code>
     </h2>
     <p>
@@ -1838,7 +1886,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listAccessoryRows} />
 
-    <h2>
+    <h2 id="list-checkmark">
       <code>List.Checkmark</code>
     </h2>
     <p>
@@ -1849,7 +1897,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listCheckmarkRows} />
 
-    <h2>
+    <h2 id="list-drillin">
       <code>List.DrillIn</code>
     </h2>
     <p>
@@ -1860,7 +1908,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listDrillInRows} />
 
-    <h2>
+    <h2 id="list-disclosure">
       <code>List.Disclosure</code>
     </h2>
     <p>
@@ -1872,7 +1920,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listDisclosureRows} />
 
-    <h2>
+    <h2 id="list-grabber">
       <code>List.Grabber</code>
     </h2>
     <p>
@@ -1883,7 +1931,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listGrabberRows} />
 
-    <h2>
+    <h2 id="list-action">
       <code>List.Action</code>
     </h2>
     <p>
@@ -1894,7 +1942,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listActionRows} />
 
-    <h2>
+    <h2 id="list-button">
       <code>List.Button</code>
     </h2>
     <p>
@@ -1905,7 +1953,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listButtonRows} />
 
-    <h2>
+    <h2 id="list-checkbox">
       <code>List.Checkbox</code>
     </h2>
     <p>
@@ -1917,7 +1965,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listCheckboxRows} />
 
-    <h2>
+    <h2 id="list-radio">
       <code>List.Radio</code>
     </h2>
     <p>
@@ -1929,7 +1977,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listRadioRows} />
 
-    <h2>
+    <h2 id="list-editbutton">
       <code>List.EditButton</code>
     </h2>
     <p>
@@ -1940,7 +1988,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listEditButtonRows} />
 
-    <h2>
+    <h2 id="list-swipeactions">
       <code>List.SwipeActions</code>
     </h2>
     <p>
@@ -1951,7 +1999,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listSwipeActionsRows} />
 
-    <h2>
+    <h2 id="list-swipeaction">
       <code>List.SwipeAction</code>
     </h2>
     <p>
@@ -1963,7 +2011,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listSwipeActionRows} />
 
-    <h2>
+    <h2 id="list-index">
       <code>List.Index</code>
     </h2>
     <p>
@@ -1975,7 +2023,7 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listIndexRows} />
 
-    <h2>
+    <h2 id="list-indexitem">
       <code>List.IndexItem</code>
     </h2>
     <p>

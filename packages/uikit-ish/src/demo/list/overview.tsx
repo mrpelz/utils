@@ -9,6 +9,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { KeyPropsTable, pickRows } from '../utils/props-table.js';
+import { Contents, type Section } from '../utils/sections.js';
 import { settings } from './content.js';
 import {
   listGroupRows,
@@ -122,9 +123,19 @@ const LiveView: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['when-to-use-it', 'When to use it'],
+  ['when-to-use-something-else', 'When to use something else'],
+  ['key-props', 'Key props'],
+  ['accessibility', 'Accessibility'],
+  ['behavior', 'Behavior'],
+];
+
 /** `/list`: what a list is for, and its key props. */
 export const ListOverview: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       A list shows rows of data in sections (UIKit <code>UITableView</code>):
       each section a group of rows, with an optional header and footer. Rows are
@@ -134,7 +145,7 @@ export const ListOverview: FunctionComponent = () => (
     </p>
     <LiveView />
 
-    <h2>When to use it</h2>
+    <h2 id="when-to-use-it">When to use it</h2>
     <ul>
       <li>
         Settings and forms: rows holding a switch, a detail, a control, or
@@ -151,7 +162,7 @@ export const ListOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>When to use something else</h2>
+    <h2 id="when-to-use-something-else">When to use something else</h2>
     <ul>
       <li>
         A few options shown side by side: a <a href="segmented">Segmented</a>{' '}
@@ -167,7 +178,7 @@ export const ListOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Key props</h2>
+    <h2 id="key-props">Key props</h2>
     <p>
       The props most lists set, across their parts; every part’s props are on{' '}
       <a href="list/parts">Parts</a>.
@@ -187,7 +198,7 @@ export const ListOverview: FunctionComponent = () => (
       ]}
     />
 
-    <h2>Accessibility</h2>
+    <h2 id="accessibility">Accessibility</h2>
     <ul>
       <li>
         A group is a <code>ul</code> (the <code>list</code> role), its rows{' '}
@@ -236,7 +247,7 @@ export const ListOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Behavior</h2>
+    <h2 id="behavior">Behavior</h2>
     <ul>
       <li>
         A row is pressable when its <code>Title</code> (or a{' '}

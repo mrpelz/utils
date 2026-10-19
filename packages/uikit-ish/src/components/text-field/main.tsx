@@ -182,7 +182,7 @@ const Clear = forwardRef<HTMLButtonElement, ClearProps>(
               cx="8.5"
               cy="8.5"
               fill="currentcolor"
-              mask={`url(#${CSS.escape(mask)})`}
+              mask={`url(#${typeof CSS === 'object' ? CSS.escape(mask) : mask})`}
               r="8.5"
             />
           </svg>

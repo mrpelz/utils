@@ -30,6 +30,7 @@ import { GuideLink } from '../hig-guide/link.js';
 import { CodeView } from '../utils/code-view.js';
 import { useLog } from '../utils/log.js';
 import { Component } from '../utils/main.js';
+import { Contents, type Section } from '../utils/sections.js';
 import {
   contacts,
   messages,
@@ -800,10 +801,20 @@ const Contacts: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['a-settings-page', 'A settings page'],
+  ['drilling-into-pages', 'Drilling into pages'],
+  ['edit-mode-and-a-toolbar', 'Edit mode and a toolbar'],
+  ['an-inbox', 'An inbox'],
+  ['an-indexed-list', 'An indexed list'],
+];
+
 /** `/list/composition`: lists in pages, navigations, edit modes, inboxes. */
 export const ListComposition: FunctionComponent = () => (
   <>
-    <h2>A settings page</h2>
+    <Contents sections={sections} />
+    <h2 id="a-settings-page">A settings page</h2>
     <p>
       As iOS’s Settings: an inset grouped list in a <a href="page">Page</a>,
       under its <a href="header">Header</a>. Rows hold the settings’ controls as
@@ -817,7 +828,7 @@ export const ListComposition: FunctionComponent = () => (
     <CodeView code={settingsCode} />
     <SettingsScreen />
 
-    <h2>Drilling into pages</h2>
+    <h2 id="drilling-into-pages">Drilling into pages</h2>
     <p>
       Rows whose title is a button, with a <code>List.DrillIn</code>, push a
       page in a <a href="navigation">Navigation</a>: the app keeps the stack (
@@ -828,7 +839,7 @@ export const ListComposition: FunctionComponent = () => (
     <CodeView code={drillInCode} />
     <DrillIn />
 
-    <h2>Edit mode and a toolbar</h2>
+    <h2 id="edit-mode-and-a-toolbar">Edit mode and a toolbar</h2>
     <p>
       Edit (in the navigation bar) puts the list in edit mode (
       <code>List.Root</code> <code>editing</code>): each row’s{' '}
@@ -843,7 +854,7 @@ export const ListComposition: FunctionComponent = () => (
     <CodeView code={editCode} />
     <EditMode />
 
-    <h2>An inbox</h2>
+    <h2 id="an-inbox">An inbox</h2>
     <p>
       As Mail: a plain list of media rows (a <code>List.Text</code> preview
       below the subject), an unread dot in the image’s place, swipe actions on
@@ -852,7 +863,7 @@ export const ListComposition: FunctionComponent = () => (
     </p>
     <CodeView code={inboxCode} />
     <Inbox />
-    <h3>With an index</h3>
+    <h2 id="an-indexed-list">An indexed list</h2>
     <p>
       As Contacts: a plain list in sections by letter (sticky section titles),
       and a <code>List.Index</code> beside it; pressing or scrubbing over a

@@ -18,6 +18,7 @@ import { GuideLink } from '../hig-guide/link.js';
 import { CodeView } from '../utils/code-view.js';
 import { AddLog, useLog } from '../utils/log.js';
 import { Component } from '../utils/main.js';
+import { Contents, type Section } from '../utils/sections.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 const contentCode = `const [period, setPeriod] = useState('day');
@@ -254,10 +255,19 @@ const InToolbar: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['switching-a-view-s-content', 'Switching a view’s content'],
+  ['in-a-navigation-bar', 'In a navigation bar'],
+  ['in-a-toolbar', 'In a toolbar'],
+  ['in-forms', 'In forms'],
+];
+
 /** `/segmented/composition`: segmented controls in content and bars. */
 export const SegmentedComposition: FunctionComponent = () => (
   <>
-    <h2>Switching a view’s content</h2>
+    <Contents sections={sections} />
+    <h2 id="switching-a-view-s-content">Switching a view’s content</h2>
     <p>
       Above the content it filters or rearranges, e.g. a chart’s period, its
       figures below changing with it (Segmented controls “when used to switch
@@ -268,7 +278,7 @@ export const SegmentedComposition: FunctionComponent = () => (
     <CodeView code={contentCode} />
     <ContentViews />
 
-    <h2>In a navigation bar</h2>
+    <h2 id="in-a-navigation-bar">In a navigation bar</h2>
     <p>
       In place of the title, filtering the page’s list (as Phone’s Recents: All,
       Missed): inside the <a href="header">Header</a>’s bar, on its glass.
@@ -276,7 +286,7 @@ export const SegmentedComposition: FunctionComponent = () => (
     <CodeView code={headerCode} />
     <InHeader />
 
-    <h2>In a toolbar</h2>
+    <h2 id="in-a-toolbar">In a toolbar</h2>
     <p>
       Between a bottom <a href="toolbar">Toolbar</a>’s buttons, choosing how the
       content is shown (as Maps’ modes), while the buttons act on it (guide{' '}
@@ -286,7 +296,7 @@ export const SegmentedComposition: FunctionComponent = () => (
     <CodeView code={toolbarCode} />
     <InToolbar />
 
-    <h2>In forms</h2>
+    <h2 id="in-forms">In forms</h2>
     <p>
       It’s a radio group with hidden radio inputs, so inside a{' '}
       <a href="form">Form</a> it’s submitted by the root’s <code>name</code>{' '}

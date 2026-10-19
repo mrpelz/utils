@@ -25,6 +25,7 @@ import { GuideLink } from '../hig-guide/link.js';
 import { CodeView } from '../utils/code-view.js';
 import { useLog } from '../utils/log.js';
 import { Component } from '../utils/main.js';
+import { Contents, type Section } from '../utils/sections.js';
 import { time } from './content.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -449,10 +450,19 @@ const Media: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['in-a-settings-list', 'In a settings list'],
+  ['a-range', 'A range'],
+  ['labels-and-forms', 'Labels and forms'],
+  ['in-a-player', 'In a player'],
+];
+
 /** `/slider/composition`: sliders in lists, forms and a player. */
 export const SliderComposition: FunctionComponent = () => (
   <>
-    <h2>In a settings list</h2>
+    <Contents sections={sections} />
+    <h2 id="in-a-settings-list">In a settings list</h2>
     <p>
       As iOS’s Display &amp; Brightness: a slider fills a{' '}
       <a href="list">List</a> row of its own, between its ends’ symbols, the
@@ -465,7 +475,7 @@ export const SliderComposition: FunctionComponent = () => (
     <CodeView code={settingsCode} />
     <SettingsRow />
 
-    <h2>A range</h2>
+    <h2 id="a-range">A range</h2>
     <p>
       Two thumbs (<code>index</code> 0 and 1) on a value of two numbers, e.g. a
       price filter’s from–to, each named for its end. Here, they keep two steps
@@ -477,7 +487,7 @@ export const SliderComposition: FunctionComponent = () => (
     <CodeView code={rangeCode} />
     <Range />
 
-    <h2>Labels and forms</h2>
+    <h2 id="labels-and-forms">Labels and forms</h2>
     <p>
       A <code>Slider.Label</code> names the inputs (no <code>aria-label</code>{' '}
       needed); with <code>Slider.Value</code>, above the track (
@@ -489,7 +499,7 @@ export const SliderComposition: FunctionComponent = () => (
     <CodeView code={formCode} />
     <InAForm />
 
-    <h2>In a player</h2>
+    <h2 id="in-a-player">In a player</h2>
     <p>
       A playback position: the app moves the controlled <code>value</code> as it
       plays, but not while the knob is dragged (<code>onValueChange</code>’s{' '}

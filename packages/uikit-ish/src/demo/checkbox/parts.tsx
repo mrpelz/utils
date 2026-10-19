@@ -16,6 +16,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { PropsTable } from '../utils/props-table.js';
+import { Contents, PartLink, type Section } from '../utils/sections.js';
 import {
   checkboxGroupRows,
   checkboxIndicatorRows,
@@ -306,9 +307,20 @@ const RadioGroupPart: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['checkbox-root', 'Checkbox.Root'],
+  ['checkbox-indicator', 'Checkbox.Indicator'],
+  ['radio-root', 'Radio.Root'],
+  ['radio-indicator', 'Radio.Indicator'],
+  ['checkboxgroup', 'CheckboxGroup'],
+  ['radiogroup', 'RadioGroup'],
+];
+
 /** `/checkbox/parts`: checkboxes, radios, their indicators and groups. */
 export const CheckboxParts: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       A selection circle is a <code>Checkbox.Root</code> or a{' '}
       <code>Radio.Root</code>, showing its indicator (a checkmark, or a dash
@@ -318,37 +330,39 @@ export const CheckboxParts: FunctionComponent = () => (
     </p>
     <ul>
       <li>
-        <code>Checkbox.Root</code>
+        <PartLink part="Checkbox.Root" />
         <ul>
           <li>
-            <code>Checkbox.Indicator</code> (by default: a checkmark and a dash)
+            <PartLink part="Checkbox.Indicator" /> (by default: a checkmark and
+            a dash)
           </li>
         </ul>
       </li>
       <li>
-        <code>RadioGroup</code>
+        <PartLink part="RadioGroup" />
         <ul>
           <li>
-            <code>Radio.Root</code> (two or more)
+            <PartLink part="Radio.Root" /> (two or more)
             <ul>
               <li>
-                <code>Radio.Indicator</code> (by default: a checkmark)
+                <PartLink part="Radio.Indicator" /> (by default: a checkmark)
               </li>
             </ul>
           </li>
         </ul>
       </li>
       <li>
-        <code>CheckboxGroup</code> (optional)
+        <PartLink part="CheckboxGroup" /> (optional)
         <ul>
           <li>
-            <code>Checkbox.Root</code> (a <code>parent</code>, and children)
+            <PartLink part="Checkbox.Root" /> (a <code>parent</code>, and
+            children)
           </li>
         </ul>
       </li>
     </ul>
 
-    <h2>
+    <h2 id="checkbox-root">
       <code>Checkbox.Root</code>
     </h2>
     <p>
@@ -363,7 +377,7 @@ export const CheckboxParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={checkboxRootRows} />
 
-    <h2>
+    <h2 id="checkbox-indicator">
       <code>Checkbox.Indicator</code>
     </h2>
     <p>
@@ -375,7 +389,7 @@ export const CheckboxParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={checkboxIndicatorRows} />
 
-    <h2>
+    <h2 id="radio-root">
       <code>Radio.Root</code>
     </h2>
     <p>
@@ -387,7 +401,7 @@ export const CheckboxParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={radioRootRows} />
 
-    <h2>
+    <h2 id="radio-indicator">
       <code>Radio.Indicator</code>
     </h2>
     <p>
@@ -398,7 +412,7 @@ export const CheckboxParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={radioIndicatorRows} />
 
-    <h2>
+    <h2 id="checkboxgroup">
       <code>CheckboxGroup</code>
     </h2>
     <p>
@@ -411,7 +425,7 @@ export const CheckboxParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={checkboxGroupRows} />
 
-    <h2>
+    <h2 id="radiogroup">
       <code>RadioGroup</code>
     </h2>
     <p>

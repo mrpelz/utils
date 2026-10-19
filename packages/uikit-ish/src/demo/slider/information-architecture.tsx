@@ -1,8 +1,17 @@
 import { FunctionComponent } from 'react';
 
 import { GuideLink } from '../hig-guide/link.js';
+import { Contents, type Section } from '../utils/sections.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
+
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['primitive-value-input', 'Primitive: Value input'],
+  ['the-indicator-continuum', 'The indicator continuum'],
+  ['traits', 'Traits'],
+  ['where-it-sits', 'Where it sits'],
+];
 
 /**
  * `/slider/information-architecture`: where a slider sits, after the
@@ -11,6 +20,7 @@ const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
  */
 export const SliderInformationArchitecture: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       In Apple’s catalog,{' '}
       <a
@@ -27,7 +37,7 @@ export const SliderInformationArchitecture: FunctionComponent = () => (
       conceptually an editable <em>Indicator</em>.
     </p>
 
-    <h2>Primitive: Value input</h2>
+    <h2 id="primitive-value-input">Primitive: Value input</h2>
     <p>
       A Value input sets a typed value that isn’t a pick from a set; its
       parameters are the value’s type (a number, a range, a color, a date…), its
@@ -51,7 +61,7 @@ export const SliderInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>The indicator continuum</h2>
+    <h2 id="the-indicator-continuum">The indicator continuum</h2>
     <p>
       The guide places sliders at the editable end of the indicators: a quantity
       on a scale, where only “editable?” changes (
@@ -61,7 +71,7 @@ export const SliderInformationArchitecture: FunctionComponent = () => (
       <a href="progress">Progress</a>: the same track and fill, without a knob.
     </p>
 
-    <h2>Traits</h2>
+    <h2 id="traits">Traits</h2>
     <p>
       The slider’s row of the guide’s trait matrix (
       <GuideLink to="trait-matrix">§4</GuideLink>):
@@ -99,7 +109,7 @@ export const SliderInformationArchitecture: FunctionComponent = () => (
       </tbody>
     </table>
 
-    <h2>Where it sits</h2>
+    <h2 id="where-it-sits">Where it sits</h2>
     <ul>
       <li>
         <strong>In an Item:</strong> Items contain a Value input (guide,{' '}

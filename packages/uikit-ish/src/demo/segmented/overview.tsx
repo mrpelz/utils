@@ -10,6 +10,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { KeyPropsTable, pickRows } from '../utils/props-table.js';
+import { Contents, type Section } from '../utils/sections.js';
 import { periods } from './content.js';
 import { segmentedItemRows, segmentedRootRows } from './docs.js';
 import { propOptionsOverviewRoot, propOptionsPeriodsContent } from './props.js';
@@ -64,9 +65,19 @@ const LiveView: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['when-to-use-it', 'When to use it'],
+  ['when-to-use-something-else', 'When to use something else'],
+  ['key-props', 'Key props'],
+  ['accessibility', 'Accessibility'],
+  ['behavior', 'Behavior'],
+];
+
 /** `/segmented`: what a segmented control is for, and its props. */
 export const SegmentedOverview: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       A segmented control chooses one of a few options, all shown side by side
       on a track (UIKit <code>UISegmentedControl</code>): e.g. a chart’s period,
@@ -75,7 +86,7 @@ export const SegmentedOverview: FunctionComponent = () => (
     </p>
     <LiveView />
 
-    <h2>When to use it</h2>
+    <h2 id="when-to-use-it">When to use it</h2>
     <ul>
       <li>
         For two to five options of the same kind, short enough to show at once
@@ -88,7 +99,7 @@ export const SegmentedOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>When to use something else</h2>
+    <h2 id="when-to-use-something-else">When to use something else</h2>
     <ul>
       <li>
         A setting that’s on or off: a <a href="switch">Switch</a>.
@@ -107,7 +118,7 @@ export const SegmentedOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Key props</h2>
+    <h2 id="key-props">Key props</h2>
     <p>
       The props most segmented controls set, across their parts; every part’s
       props are on <a href="segmented/parts">Parts</a>.
@@ -130,7 +141,7 @@ export const SegmentedOverview: FunctionComponent = () => (
       ]}
     />
 
-    <h2>Accessibility</h2>
+    <h2 id="accessibility">Accessibility</h2>
     <ul>
       <li>
         It’s Base UI’s radio group: the root has the <code>radiogroup</code>{' '}
@@ -157,7 +168,7 @@ export const SegmentedOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Behavior</h2>
+    <h2 id="behavior">Behavior</h2>
     <ul>
       <li>
         A click or tap chooses an item. Pressed, the selection turns into a

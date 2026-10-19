@@ -5,8 +5,11 @@ import { useOptions } from './options-context.js';
 /** Whether the page is dark: forced (demo option), or by preference. */
 export const useDark = (): boolean => {
   const { colorScheme } = useOptions();
+  // (Server-side, without a preference: light.)
   const [prefersDark, setPrefersDark] = useState(
-    () => matchMedia('(prefers-color-scheme: dark)').matches,
+    () =>
+      typeof matchMedia === 'function' &&
+      matchMedia('(prefers-color-scheme: dark)').matches,
   );
 
   useEffect(() => {

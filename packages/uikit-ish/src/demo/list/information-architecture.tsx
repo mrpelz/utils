@@ -1,8 +1,17 @@
 import { FunctionComponent } from 'react';
 
 import { GuideLink } from '../hig-guide/link.js';
+import { Contents, type Section } from '../utils/sections.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
+
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['primitive-collection', 'Primitive: Collection'],
+  ['its-parts-as-primitives', 'Its parts as primitives'],
+  ['traits', 'Traits'],
+  ['where-it-sits', 'Where it sits'],
+];
 
 /**
  * `/list/information-architecture`: where a list sits, after the
@@ -11,6 +20,7 @@ const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
  */
 export const ListInformationArchitecture: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       In Apple’s catalog,{' '}
       <a
@@ -27,7 +37,7 @@ export const ListInformationArchitecture: FunctionComponent = () => (
       sectioned, rows), its sections <em>Groups</em>, its rows <em>Items</em>.
     </p>
 
-    <h2>Primitive: Collection</h2>
+    <h2 id="primitive-collection">Primitive: Collection</h2>
     <p>
       A Collection is a set of items with a data shape and a projection; its
       parameters are the shape (flat, sectioned, tree), the projection (rows,
@@ -57,7 +67,7 @@ export const ListInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Its parts as primitives</h2>
+    <h2 id="its-parts-as-primitives">Its parts as primitives</h2>
     <ul>
       <li>
         <strong>Group:</strong> a section bundles its rows, optionally
@@ -81,7 +91,7 @@ export const ListInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Traits</h2>
+    <h2 id="traits">Traits</h2>
     <p>
       The row of “Lists and tables” in the guide’s trait matrix (
       <GuideLink to="trait-matrix">§4</GuideLink>):
@@ -119,7 +129,7 @@ export const ListInformationArchitecture: FunctionComponent = () => (
       </tbody>
     </table>
 
-    <h2>Where it sits</h2>
+    <h2 id="where-it-sits">Where it sits</h2>
     <ul>
       <li>
         <strong>Containment:</strong> a Surface holds a Collection; a Collection

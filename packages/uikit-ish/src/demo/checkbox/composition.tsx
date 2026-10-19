@@ -16,6 +16,7 @@ import { GuideLink } from '../hig-guide/link.js';
 import { CodeView } from '../utils/code-view.js';
 import { useLog } from '../utils/log.js';
 import { Component } from '../utils/main.js';
+import { Contents, type Section } from '../utils/sections.js';
 
 const rowsCode = `<List.Group>
   <List.Item onClick={forwardClick('[role=checkbox]')}>
@@ -291,10 +292,19 @@ const InAForm: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['selecting-list-rows', 'Selecting list rows'],
+  ['choosing-one-row', 'Choosing one row'],
+  ['selecting-all', 'Selecting all'],
+  ['labels-and-forms', 'Labels and forms'],
+];
+
 /** `/checkbox/composition`: selection circles in lists and forms. */
 export const CheckboxComposition: FunctionComponent = () => (
   <>
-    <h2>Selecting list rows</h2>
+    <Contents sections={sections} />
+    <h2 id="selecting-list-rows">Selecting list rows</h2>
     <p>
       Where iOS shows them: before a <a href="list">List</a>’s rows, as{' '}
       <code>List.Checkbox</code> (a <code>Checkbox.Root</code> placed as the
@@ -306,7 +316,7 @@ export const CheckboxComposition: FunctionComponent = () => (
     <CodeView code={rowsCode} />
     <SelectingRows />
 
-    <h2>Choosing one row</h2>
+    <h2 id="choosing-one-row">Choosing one row</h2>
     <p>
       A <code>RadioGroup</code> rendering the list’s group (<code>render</code>
       ), a <code>List.Radio</code> before each row: one row chosen at a time,
@@ -315,7 +325,7 @@ export const CheckboxComposition: FunctionComponent = () => (
     <CodeView code={oneRowCode} />
     <ChoosingOneRow />
 
-    <h2>Selecting all</h2>
+    <h2 id="selecting-all">Selecting all</h2>
     <p>
       A <code>CheckboxGroup</code> (rendering the list’s group) holds the names
       of the selected rows; given all of them (<code>allValues</code>), a{' '}
@@ -325,7 +335,7 @@ export const CheckboxComposition: FunctionComponent = () => (
     <CodeView code={allCode} />
     <SelectAll />
 
-    <h2>Labels and forms</h2>
+    <h2 id="labels-and-forms">Labels and forms</h2>
     <p>
       Outside lists, wrap a circle and its text in a <code>{'<label>'}</code>:
       the text then ticks it, and names it. In a <a href="form">Form</a>, Base

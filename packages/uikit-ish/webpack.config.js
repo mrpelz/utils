@@ -37,6 +37,10 @@ const configDownstream = {
     host: '::1',
     hot: webpackServe,
     liveReload: false,
+    static: {
+      directory: dirDemo,
+      publicPath,
+    },
   },
   optimization: {
     minimize: !webpackServe,

@@ -10,6 +10,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { KeyPropsTable, pickRows } from '../utils/props-table.js';
+import { Contents, type Section } from '../utils/sections.js';
 import { symbolPairs } from './content.js';
 import {
   sliderLabelRows,
@@ -75,9 +76,19 @@ const LiveView: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['when-to-use-it', 'When to use it'],
+  ['when-to-use-something-else', 'When to use something else'],
+  ['key-props', 'Key props'],
+  ['accessibility', 'Accessibility'],
+  ['behavior', 'Behavior'],
+];
+
 /** `/slider`: what a slider is for, and its key props. */
 export const SliderOverview: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       A slider sets a value between a minimum and a maximum by dragging its knob
       along a track (UIKit <code>UISlider</code>); the track fills with the tint
@@ -86,7 +97,7 @@ export const SliderOverview: FunctionComponent = () => (
     </p>
     <LiveView />
 
-    <h2>When to use it</h2>
+    <h2 id="when-to-use-it">When to use it</h2>
     <ul>
       <li>
         For a value on a continuous scale, where the approximate position
@@ -103,7 +114,7 @@ export const SliderOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>When to use something else</h2>
+    <h2 id="when-to-use-something-else">When to use something else</h2>
     <ul>
       <li>
         An exact number, changed a step at a time: a{' '}
@@ -125,7 +136,7 @@ export const SliderOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Key props</h2>
+    <h2 id="key-props">Key props</h2>
     <p>
       The props most sliders set, across their parts; every part’s props are on{' '}
       <a href="slider/parts">Parts</a>.
@@ -157,7 +168,7 @@ export const SliderOverview: FunctionComponent = () => (
       ]}
     />
 
-    <h2>Accessibility</h2>
+    <h2 id="accessibility">Accessibility</h2>
     <ul>
       <li>
         Each knob holds a visually hidden native range input (the{' '}
@@ -193,7 +204,7 @@ export const SliderOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Behavior</h2>
+    <h2 id="behavior">Behavior</h2>
     <ul>
       <li>
         Dragging the knob, or pressing the track, moves the value; pressed, the

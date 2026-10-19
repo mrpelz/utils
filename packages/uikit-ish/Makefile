@@ -49,6 +49,7 @@ transform_build_demo_csr:
 
 transform_build_demo_ssg:
 	$(WEBPACK) --config webpack-ssg.config.js
+	node "demo/ssg/main.js"
 
 transform_prod_demo: \
 	util_clear_demo \

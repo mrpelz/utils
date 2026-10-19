@@ -10,6 +10,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { KeyPropsTable, pickRows } from '../utils/props-table.js';
+import { Contents, type Section } from '../utils/sections.js';
 import {
   checkboxGroupRows,
   checkboxRootRows,
@@ -53,9 +54,19 @@ const LiveView: FunctionComponent = () => {
   );
 };
 
+/** The page's sections (its headings' ids), listed at its top. */
+const sections: readonly Section[] = [
+  ['when-to-use-it', 'When to use it'],
+  ['when-to-use-something-else', 'When to use something else'],
+  ['key-props', 'Key props'],
+  ['accessibility', 'Accessibility'],
+  ['behavior', 'Behavior'],
+];
+
 /** `/checkbox`: what selection circles are for, and their key props. */
 export const CheckboxOverview: FunctionComponent = () => (
   <>
+    <Contents sections={sections} />
     <p className="demo-lead">
       iOS has no checkboxes or radio buttons of its own: it selects items with
       selection circles, as rows while editing a list (UIKit’s editing
@@ -65,7 +76,7 @@ export const CheckboxOverview: FunctionComponent = () => (
     </p>
     <LiveView />
 
-    <h2>When to use it</h2>
+    <h2 id="when-to-use-it">When to use it</h2>
     <ul>
       <li>
         Selecting items to act on together (rows to delete or move, people to
@@ -81,7 +92,7 @@ export const CheckboxOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>When to use something else</h2>
+    <h2 id="when-to-use-something-else">When to use something else</h2>
     <ul>
       <li>
         A setting that takes effect at once: a <a href="switch">Switch</a>.
@@ -96,7 +107,7 @@ export const CheckboxOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Key props</h2>
+    <h2 id="key-props">Key props</h2>
     <p>
       The props most selection circles set, across the parts; every part’s props
       are on <a href="checkbox/parts">Parts</a>.
@@ -141,7 +152,7 @@ export const CheckboxOverview: FunctionComponent = () => (
       ]}
     />
 
-    <h2>Accessibility</h2>
+    <h2 id="accessibility">Accessibility</h2>
     <ul>
       <li>
         A checkbox is a <code>span</code> with the <code>checkbox</code> role
@@ -167,7 +178,7 @@ export const CheckboxOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2>Behavior</h2>
+    <h2 id="behavior">Behavior</h2>
     <ul>
       <li>
         A click or tap ticks or unticks a checkbox, and chooses a radio; the hit
