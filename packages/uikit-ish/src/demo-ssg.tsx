@@ -30,9 +30,10 @@ if (!template.includes(BODY)) {
 const handled = new Set<string>();
 
 const render = async (location: string) => {
-  const prefixedLocation = path.join(publicPath, location, './');
+  const suffixedLocation = path.join(location, './');
+  const prefixedLocation = path.join(publicPath, suffixedLocation);
 
-  const outputDir = path.join(demoDir, '.', prefixedLocation);
+  const outputDir = path.join(demoDir, '.', suffixedLocation);
   if (handled.has(outputDir)) return undefined;
 
   handled.add(outputDir);
@@ -41,7 +42,7 @@ const render = async (location: string) => {
   const { html, links } = await prerender(<Demo />);
 
   console.log(
-    `✅ prerendered "${location}" (prefixed: "${prefixedLocation}")\n  for "${outputDir}"\n  discovered ${links?.size ?? 0} link(s)`,
+    `✅ prerendered "${suffixedLocation}" (prefixed: "${prefixedLocation}")\n  for "${outputDir}"\n  discovered ${links?.size ?? 0} link(s)`,
   );
 
   if (!existsSync(outputDir)) {
