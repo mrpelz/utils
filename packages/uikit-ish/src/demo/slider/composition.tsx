@@ -21,11 +21,11 @@ import {
   Switch,
   Symbol,
 } from '../../components/index.js';
+import { CodeView } from '../frame/code-view.js';
+import { Component } from '../frame/component.js';
+import { useLog } from '../frame/log.js';
+import { Contents, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
-import { CodeView } from '../utils/code-view.js';
-import { useLog } from '../utils/log.js';
-import { Component } from '../utils/main.js';
-import { Contents, type Section } from '../utils/sections.js';
 import { time } from './content.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */

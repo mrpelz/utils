@@ -1,11 +1,9 @@
 import { FunctionComponent } from 'react';
 
 import { ActivityIndicator, Progress } from '../../components/index.js';
-import { Component, usePropControl } from '../utils/main.js';
-import {
-  useCreateStateUrl,
-  useProvidedState,
-} from '../utils/options-context.js';
+import { Component } from '../frame/component.js';
+import { usePropControl } from '../frame/prop-control.js';
+import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
 import {
   propOptionsBar,
   propOptionsBarContent,

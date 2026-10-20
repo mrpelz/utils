@@ -2,15 +2,13 @@ import { Slider as BaseSlider } from '@base-ui/react/slider';
 import { FunctionComponent } from 'react';
 
 import { Slider, Symbol } from '../../components/index.js';
+import { Component } from '../frame/component.js';
+import { useLog } from '../frame/log.js';
+import { usePropControl } from '../frame/prop-control.js';
+import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { KeyPropsTable, pickRows } from '../guide/props-table.js';
+import { Contents, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
-import { useLog } from '../utils/log.js';
-import { Component, usePropControl } from '../utils/main.js';
-import {
-  useCreateStateUrl,
-  useProvidedState,
-} from '../utils/options-context.js';
-import { KeyPropsTable, pickRows } from '../utils/props-table.js';
-import { Contents, type Section } from '../utils/sections.js';
 import { symbolPairs } from './content.js';
 import {
   sliderLabelRows,

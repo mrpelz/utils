@@ -198,6 +198,62 @@ export const tests = [
     },
   },
   {
+    name: 'edit menu: clicking “more” keeps the selection; moving from its submenu back to an action keeps the menu',
+    run: async (page) => {
+      await page.open('edit-menu');
+      const { height, width, x, y } = await page.rect('p');
+      await page.drag([x + 10, y + 8], [x + width - 10, y + height / 2]);
+      await sleep(1200);
+
+      /** @param {string} selector */
+      const center = (selector) =>
+        /** @type {Promise<[number, number]>} */ (
+          page.evaluate(`(() => {
+            const { height, width, x, y } = document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();
+            return [x + width / 2, y + height / 2];
+          })()`)
+        );
+      /** @param {[number, number]} point (hovering: no button pressed) */
+      const hover = ([pointX, pointY]) =>
+        page.browser.send('Input.dispatchMouseEvent', {
+          button: 'none',
+          buttons: 0,
+          type: 'mouseMoved',
+          x: pointX,
+          y: pointY,
+        });
+      const menus = () =>
+        page.evaluate(
+          `document.querySelectorAll(${JSON.stringify('[role=menu]')}).length`,
+        );
+
+      const more = await center('[data-edit-menu-part=more]');
+      await hover(more);
+      await page.click(more);
+      await sleep(800);
+      assert.equal(await menus(), 2, 'submenu open');
+      const selection = await page.evaluate('String(document.getSelection())');
+      assert.ok(selection.length > 20, 'selection kept');
+
+      // Into the submenu (straight down from “more”), then back to an action.
+      const action = await center('[data-edit-menu-part=item]');
+      const submenuItem = await center(
+        '[role=menu]:not(:has([data-edit-menu-part])) [role=menuitem]',
+      );
+      for (const point of [
+        [more[0], submenuItem[1]],
+        submenuItem,
+        [submenuItem[0], action[1]],
+        action,
+      ]) {
+        await hover(/** @type {[number, number]} */ (point));
+        await sleep(150);
+      }
+      await sleep(800);
+      assert.equal(await menus(), 1, 'the edit menu stays, its submenu closed');
+    },
+  },
+  {
     name: 'edit menu: pressing outside closes it, also where the selection stays',
     run: async (page) => {
       await page.open('edit-menu');
@@ -213,7 +269,12 @@ export const tests = [
       await sleep(800);
       assert.equal(await page.evaluate(menus), 1, 'open');
 
-      // The stage can't be selected: the selection stays, the menu closes.
+      // Where nothing can be selected (made so here: all but the text), the
+      // selection stays as the press lands: the menu closes all the same.
+      await page.evaluate(`(() => {
+        document.documentElement.style.userSelect = 'none';
+        ${page.section}.querySelector('p').style.userSelect = 'text';
+      })()`);
       await page.click([x + width / 2, y + height + 60]);
       await sleep(600);
       assert.equal(await page.evaluate(menus), 0, 'closed');

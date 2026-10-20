@@ -5,7 +5,7 @@ import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp'
 import { sfTrayFill } from '@bradleyhodges/sfsymbols/sfTrayFill';
 
 import { Badge } from '../../components/index.js';
-import { commonPropOptions, MappedProp } from '../utils/main.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 export const propOptionsSymbol = {
   ...commonPropOptions,

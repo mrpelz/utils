@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
 import { RollValue } from '../../components/index.js';
-import { AddLog } from '../utils/log.js';
-import { commonPropOptions, MappedProp } from '../utils/main.js';
+import { AddLog } from '../frame/log.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 export const hours = Array.from({ length: 24 }, (_, hour) => hour);
 export const minutes = Array.from({ length: 60 }, (_, minute) => minute);
@@ -48,4 +48,4 @@ export const propOptionsItem = {
 export {
   commonPropOptions as propOptionsRoot,
   commonPropOptions as propOptionsSeparator,
-} from '../utils/main.js';
+} from '../frame/prop-control.js';

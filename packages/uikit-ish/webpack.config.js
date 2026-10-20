@@ -124,7 +124,7 @@ config.plugins = [
   }),
   // @ts-ignore
   new MiniCssExtractPlugin(),
-  // Monaco (see src/demo/utils/code-view.tsx): its editor and worker, with
+  // Monaco (see src/demo/frame/code-view.tsx): its editor and worker, with
   // the TypeScript (and JSX) tokenizer only, as code is only shown.
   // @ts-ignore
   new MonacoWebpackPlugin({

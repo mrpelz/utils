@@ -5,8 +5,8 @@ import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
 
 import { Symbol } from '../../components/index.js';
-import { AddLog } from '../utils/log.js';
-import { commonPropOptions, MappedProp } from '../utils/main.js';
+import { AddLog } from '../frame/log.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 export const propOptionsContent = {
   symbol: [

@@ -1,0 +1,33 @@
+/*
+ * Demo page styles, in a layer under the components' (declared first, so
+ * the components' styles win, as they would over an app's base styles).
+ */
+@layer demo, uikit-ish;
+
+@layer demo {
+  * {
+    box-sizing: border-box;
+    -webkit-touch-callout: none;
+  }
+
+  :root {
+    background-color: light-dark(white, #0a0a0a);
+    color: light-dark(black, #fafafa);
+    color-scheme: light dark;
+    font-family:
+      -apple-system, 'SF Pro', system-ui, 'SF UI Text', 'Helvetica Neue',
+      Helvetica, Arial, sans-serif;
+    scroll-snap-type: y mandatory;
+  }
+
+  /* Pages of prose (see guide/pages.tsx) don't snap, so leaving the demos' pages
+     (snapped to a demo) for one, it isn't re-snapped (to its end, the demo
+     gone) after scrolling to its top. */
+  :root:has(.demo-page) {
+    scroll-snap-type: none;
+  }
+
+  body {
+    margin: 0;
+  }
+}

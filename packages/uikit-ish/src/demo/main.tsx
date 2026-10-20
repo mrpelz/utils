@@ -5,7 +5,8 @@ import * as components from '../components/index.js';
 import { ColorScheme as TColorScheme } from '../components/utils/main.js';
 import { useColorScheme, useTouchActive } from '../styles.js';
 import { publicPath } from './env.js';
-import { HigGuidePage } from './hig-guide/main.js';
+import { nameComponents } from './frame/render-code.js';
+import { OptionsProvider } from './frame/state.js';
 import {
   AllDemosPage,
   ComponentDemosPage,
@@ -15,10 +16,9 @@ import {
   NotFound,
   OverviewPage,
   PartsPage,
-} from './pages.js';
-import { nameComponents } from './utils/code.js';
-import { OptionsProvider } from './utils/options-context.js';
-import { useLocalStorage } from './utils/use-local-storage.js';
+} from './guide/pages.js';
+import { HigGuidePage } from './hig-guide/main.js';
+import { useLocalStorage } from './shared/use-local-storage.js';
 
 // (Named for the code shown, see `renderCode`.)
 nameComponents(components);

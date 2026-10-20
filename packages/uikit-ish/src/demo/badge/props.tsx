@@ -1,4 +1,4 @@
-import { commonPropOptions } from '../utils/main.js';
+import { commonPropOptions } from '../frame/prop-control.js';
 
 export const propOptionsRoot = {
   ...commonPropOptions,

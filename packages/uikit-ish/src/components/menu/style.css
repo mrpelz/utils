@@ -192,8 +192,6 @@
     mix-blend-mode: var(--uikit-glass-content-blend);
     outline: none;
     padding-inline-start: calc(8px + var(--uikit-menu-toggle-space));
-    -webkit-user-select: none;
-    user-select: none;
 
     /* Highlighted (or its submenu open), the popup's moving selection (see
        Popup). Touch: the selection while pressed (no hover highlights). */
@@ -278,6 +276,11 @@
       var(--uikit-menu-radius-block);
     outline: none;
     overflow-y: auto;
+
+    /* (A press anywhere in it, e.g. between items, keeps a selection: an
+       edit menu's submenu stays open.) */
+    -webkit-user-select: none;
+    user-select: none;
 
     /* Its size's metrics (see Size); compact submenus' chevrons turn down
        while open. */
@@ -389,8 +392,6 @@
     gap: var(--uikit-menu-quick-gap);
     mix-blend-mode: var(--uikit-glass-content-blend);
     outline: none;
-    -webkit-user-select: none;
-    user-select: none;
 
     &::before {
       position: absolute;

@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 
+import { Contents, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
-import { Contents, type Section } from '../utils/sections.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
 

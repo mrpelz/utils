@@ -3,8 +3,8 @@
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 
-import { AddLog } from '../utils/log.js';
-import { commonPropOptions, MappedProp } from '../utils/main.js';
+import { AddLog } from '../frame/log.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 export const getPropOptionsCheckbox = (addLog: AddLog) => ({
   ...commonPropOptions,

@@ -13,9 +13,8 @@
   }
 }
 
-/* The page as a phone's screen in the stage. */
+/* The page as a phone's screen in the stage, as high as its content. */
 .segmented-demo-screen {
   width: 402px;
   max-width: 100%;
-  height: min(520px, 60vh);
 }

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
 import { propOptionsRoot as propOptionsButtonRoot } from '../button/props.js';
-import { AddLog } from '../utils/log.js';
-import { commonPropOptions, MappedProp } from '../utils/main.js';
+import { AddLog } from '../frame/log.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 export const cursorOptions = [undefined, 'auto', 'pointer', 'copy'] as const;
 

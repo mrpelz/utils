@@ -26,11 +26,11 @@ import {
   Toolbar,
   Viewport,
 } from '../../components/index.js';
+import { CodeView } from '../frame/code-view.js';
+import { Component } from '../frame/component.js';
+import { useLog } from '../frame/log.js';
+import { Contents, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
-import { CodeView } from '../utils/code-view.js';
-import { useLog } from '../utils/log.js';
-import { Component } from '../utils/main.js';
-import { Contents, type Section } from '../utils/sections.js';
 import {
   contacts,
   messages,
@@ -291,129 +291,132 @@ const SettingsScreen: FunctionComponent = () => {
       log={log}
       title="List as a settings page"
     >
-      <Page.Root className="list-demo-screen">
-        <Header.Root>
-          <Header.Bar>
-            <Toolbar.Title>
+      {/* (A phone's screen, as high as its page, see style.css.) */}
+      <div className="list-demo-screen">
+        <Page.Root>
+          <Header.Root>
+            <Header.Bar>
+              <Toolbar.Title>
+                <span>Settings</span>
+              </Toolbar.Title>
+            </Header.Bar>
+            <Header.LargeTitle>
               <span>Settings</span>
-            </Toolbar.Title>
-          </Header.Bar>
-          <Header.LargeTitle>
-            <span>Settings</span>
-          </Header.LargeTitle>
-        </Header.Root>
-        <List.Root>
-          <List.Section>
-            <List.Group>
-              {settings.map(({ color, detail, icon, title }, index) =>
-                index === 0 ? (
-                  <List.Item
-                    key={title}
-                    onClick={forwardClick('[role=switch]')}
+            </Header.LargeTitle>
+          </Header.Root>
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {settings.map(({ color, detail, icon, title }, index) =>
+                  index === 0 ? (
+                    <List.Item
+                      key={title}
+                      onClick={forwardClick('[role=switch]')}
+                    >
+                      <List.Image
+                        style={{ backgroundColor: color }}
+                        variant="rounded"
+                      >
+                        <Symbol icon={icon} />
+                      </List.Image>
+                      <List.Title>{title}</List.Title>
+                      <Switch.Root
+                        aria-label={title}
+                        onCheckedChange={(checked: boolean) =>
+                          addLog(`${title}: ${String(checked)}`)
+                        }
+                      >
+                        <Switch.Thumb />
+                      </Switch.Root>
+                    </List.Item>
+                  ) : (
+                    <List.Item key={title}>
+                      <List.Image
+                        style={{ backgroundColor: color }}
+                        variant="rounded"
+                      >
+                        <Symbol icon={icon} />
+                      </List.Image>
+                      <List.Title
+                        render={<button type="button" />}
+                        onClick={() => addLog(`${title} clicked`)}
+                      >
+                        {title}
+                      </List.Title>
+                      <List.Detail>{detail}</List.Detail>
+                      <List.DrillIn />
+                    </List.Item>
+                  ),
+                )}
+              </List.Group>
+            </List.Section>
+            <List.Section>
+              <List.Header prominence="nested">
+                <List.Title render={<h3 />}>Display</List.Title>
+              </List.Header>
+              <List.Group>
+                <List.Item>
+                  <List.Title>Text Size</List.Title>
+                  <Segmented.Root
+                    aria-label="Text Size"
+                    defaultValue="M"
+                    onValueChange={(value: unknown) =>
+                      addLog(`text size: ${String(value)}`)
+                    }
                   >
-                    <List.Image
-                      style={{ backgroundColor: color }}
-                      variant="rounded"
-                    >
-                      <Symbol icon={icon} />
-                    </List.Image>
-                    <List.Title>{title}</List.Title>
-                    <Switch.Root
-                      aria-label={title}
-                      onCheckedChange={(checked: boolean) =>
-                        addLog(`${title}: ${String(checked)}`)
-                      }
-                    >
-                      <Switch.Thumb />
-                    </Switch.Root>
-                  </List.Item>
-                ) : (
-                  <List.Item key={title}>
-                    <List.Image
-                      style={{ backgroundColor: color }}
-                      variant="rounded"
-                    >
-                      <Symbol icon={icon} />
-                    </List.Image>
-                    <List.Title
-                      render={<button type="button" />}
-                      onClick={() => addLog(`${title} clicked`)}
-                    >
-                      {title}
-                    </List.Title>
-                    <List.Detail>{detail}</List.Detail>
-                    <List.DrillIn />
-                  </List.Item>
-                ),
-              )}
-            </List.Group>
-          </List.Section>
-          <List.Section>
-            <List.Header prominence="nested">
-              <List.Title render={<h3 />}>Display</List.Title>
-            </List.Header>
-            <List.Group>
-              <List.Item>
-                <List.Title>Text Size</List.Title>
-                <Segmented.Root
-                  aria-label="Text Size"
-                  defaultValue="M"
-                  onValueChange={(value: unknown) =>
-                    addLog(`text size: ${String(value)}`)
-                  }
-                >
-                  <Segmented.Item value="S">S</Segmented.Item>
-                  <Segmented.Item value="M">M</Segmented.Item>
-                  <Segmented.Item value="L">L</Segmented.Item>
-                  <Segmented.Highlight />
-                </Segmented.Root>
-              </List.Item>
-              <List.Item>
-                <Slider.Root
-                  defaultValue={60}
-                  onValueCommitted={(value: number | readonly number[]) =>
-                    addLog(`brightness: ${String(value)}`)
-                  }
-                >
-                  <Slider.Symbol edge="min">
-                    <Symbol icon={sfSunMin} />
-                  </Slider.Symbol>
-                  <Slider.Control>
-                    <Slider.Track>
-                      <Slider.Indicator />
-                      <Slider.Thumb aria-label="Brightness" />
-                    </Slider.Track>
-                  </Slider.Control>
-                  <Slider.Symbol edge="max">
-                    <Symbol icon={sfSunMax} />
-                  </Slider.Symbol>
-                </Slider.Root>
-              </List.Item>
-              <List.Item>
-                <List.Title>Auto-Lock</List.Title>
-                <List.Detail>{minutes} min</List.Detail>
-                <Stepper.Root
-                  max={10}
-                  min={1}
-                  value={minutes}
-                  onValueChange={(value: number | null) => {
-                    addLog(`auto-lock: ${String(value)}`);
-                    setMinutes(value ?? 1);
-                  }}
-                >
-                  <Stepper.Group inputProps={{ 'aria-label': 'Auto-Lock' }}>
-                    <Stepper.Decrement />
-                    <Stepper.Increment />
-                  </Stepper.Group>
-                </Stepper.Root>
-              </List.Item>
-            </List.Group>
-            <List.Footer>
-              Settings take effect at once, without a Done button.
-            </List.Footer>
-          </List.Section>
-        </List.Root>
-      </Page.Root>
+                    <Segmented.Item value="S">S</Segmented.Item>
+                    <Segmented.Item value="M">M</Segmented.Item>
+                    <Segmented.Item value="L">L</Segmented.Item>
+                    <Segmented.Highlight />
+                  </Segmented.Root>
+                </List.Item>
+                <List.Item>
+                  <Slider.Root
+                    defaultValue={60}
+                    onValueCommitted={(value: number | readonly number[]) =>
+                      addLog(`brightness: ${String(value)}`)
+                    }
+                  >
+                    <Slider.Symbol edge="min">
+                      <Symbol icon={sfSunMin} />
+                    </Slider.Symbol>
+                    <Slider.Control>
+                      <Slider.Track>
+                        <Slider.Indicator />
+                        <Slider.Thumb aria-label="Brightness" />
+                      </Slider.Track>
+                    </Slider.Control>
+                    <Slider.Symbol edge="max">
+                      <Symbol icon={sfSunMax} />
+                    </Slider.Symbol>
+                  </Slider.Root>
+                </List.Item>
+                <List.Item>
+                  <List.Title>Auto-Lock</List.Title>
+                  <List.Detail>{minutes} min</List.Detail>
+                  <Stepper.Root
+                    max={10}
+                    min={1}
+                    value={minutes}
+                    onValueChange={(value: number | null) => {
+                      addLog(`auto-lock: ${String(value)}`);
+                      setMinutes(value ?? 1);
+                    }}
+                  >
+                    <Stepper.Group inputProps={{ 'aria-label': 'Auto-Lock' }}>
+                      <Stepper.Decrement />
+                      <Stepper.Increment />
+                    </Stepper.Group>
+                  </Stepper.Root>
+                </List.Item>
+              </List.Group>
+              <List.Footer>
+                Settings take effect at once, without a Done button.
+              </List.Footer>
+            </List.Section>
+          </List.Root>
+        </Page.Root>
+      </div>
     </Component>
   );
 };
@@ -439,7 +442,7 @@ const DrillIn: FunctionComponent = () => {
       log={log}
       title="List drilling into pages"
     >
-      <div className="list-demo-screen list-demo-navigation">
+      <div className="list-demo-screen list-demo-window list-demo-navigation">
         <Navigation.Root onBack={pop}>
           {keys.map((key, depth) => {
             const page = settingsPages[key];
@@ -520,7 +523,7 @@ const EditMode: FunctionComponent = () => {
       title="List in edit mode"
     >
       {/* (A phone's screen: its fixed layers within, see style.css.) */}
-      <div className="list-demo-screen">
+      <div className="list-demo-screen list-demo-window">
         <Viewport.Content>
           <Page.Root>
             <Header.Root>

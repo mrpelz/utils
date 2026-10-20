@@ -6,17 +6,15 @@ import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useMemo } from 'react';
 
 import { Button, ContextualMenu, Symbol } from '../../components/index.js';
+import { Component } from '../frame/component.js';
+import { useLog } from '../frame/log.js';
+import { usePropControl } from '../frame/prop-control.js';
+import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsItem as getPropOptionsMenuItem,
   propOptionsItemDestructive as propOptionsMenuItemDestructive,
   propOptionsPopup as propOptionsMenuPopup,
 } from '../menu/props.js';
-import { useLog } from '../utils/log.js';
-import { Component, usePropControl } from '../utils/main.js';
-import {
-  useCreateStateUrl,
-  useProvidedState,
-} from '../utils/options-context.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,

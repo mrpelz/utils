@@ -7,16 +7,16 @@ import {
   catalogEntry,
   categories,
   type Category,
-} from './catalog.js';
-import { guideHref } from './hig-guide/link.js';
+} from '../catalog.js';
+import { guideHref } from '../hig-guide/link.js';
 import {
   Breadcrumb,
   EntryContext,
   type EntryInfo,
   type Tab,
   Tabs,
-} from './utils/entry.js';
-import { PagePathContext } from './utils/sections.js';
+} from './nav.js';
+import { PagePathContext } from './sections.js';
 
 // (Links are relative to the document's base: the demo's public path.)
 
@@ -32,7 +32,7 @@ const entryInfo = (entry: CatalogEntry): EntryInfo => ({
   title: entry.title,
 });
 
-/** A component's demos, its settings and headers its own (see entry.tsx). */
+/** A component's demos, its settings and headers its own (see nav.tsx). */
 const EntryDemos: FunctionComponent<{ entry: CatalogEntry }> = ({ entry }) => (
   <EntryContext.Provider value={entryInfo(entry)}>
     {entry.demos.map((Demo, index) => (

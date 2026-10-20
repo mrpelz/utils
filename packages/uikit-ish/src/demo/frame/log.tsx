@@ -1,11 +1,13 @@
 import { ComponentChild as ReactNode } from 'preact';
 import { useCallback, useRef } from 'react-dom';
 
+import { Tail } from './tail.js';
+
 /** Adds a line to a demo's log. */
 export type AddLog = (value: string) => void;
 
 export const useLog = (): [ReactNode, AddLog] => {
-  const logContainerRef = useRef<HTMLElement>(null);
+  const logContainerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const addLog = useCallback((value: string) => {
@@ -41,9 +43,10 @@ export const useLog = (): [ReactNode, AddLog] => {
   const log = (
     <section className="demo-config demo-config-section">
       <summary className="demo-config-heading">Log</summary>
-      <section
-        ref={logContainerRef}
+      {/* (Following its last line, see Tail.) */}
+      <Tail
         className="demo-log"
+        contentRef={logContainerRef}
       />
       <button
         ref={buttonRef}

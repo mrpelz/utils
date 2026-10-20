@@ -3,7 +3,7 @@ import {
   code,
   nativeButtonRow,
   PropRow,
-} from '../utils/props-table.js';
+} from '../guide/props-table.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).

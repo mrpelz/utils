@@ -3,8 +3,8 @@
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
 
 import { forwardClick } from '../../components/index.js';
-import { AddLog } from '../utils/log.js';
-import { commonPropOptions, MappedProp } from '../utils/main.js';
+import { AddLog } from '../frame/log.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 export const cursorOptions = [undefined, 'auto', 'pointer', 'copy'] as const;
 

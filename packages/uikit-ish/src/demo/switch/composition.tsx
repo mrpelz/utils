@@ -3,10 +3,10 @@ import { sfBellFill } from '@bradleyhodges/sfsymbols/sfBellFill';
 import { FunctionComponent } from 'react';
 
 import { forwardClick, List, Switch, Symbol } from '../../components/index.js';
-import { CodeView } from '../utils/code-view.js';
-import { useLog } from '../utils/log.js';
-import { Component } from '../utils/main.js';
-import { Contents, type Section } from '../utils/sections.js';
+import { CodeView } from '../frame/code-view.js';
+import { Component } from '../frame/component.js';
+import { useLog } from '../frame/log.js';
+import { Contents, type Section } from '../guide/sections.js';
 
 // A row's code (as Airplane Mode's in the list below).
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */

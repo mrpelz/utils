@@ -9,10 +9,7 @@ import {
   useState,
 } from 'react';
 
-import { ColorScheme } from '../../components/utils/main.js';
-
 type TOptionsContext = {
-  colorScheme?: ColorScheme;
   id?: string;
   raw: boolean;
   state?: unknown[];

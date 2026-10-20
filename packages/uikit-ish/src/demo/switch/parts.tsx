@@ -1,14 +1,12 @@
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import { Switch } from '../../components/index.js';
-import { useLog } from '../utils/log.js';
-import { Component, usePropControl } from '../utils/main.js';
-import {
-  useCreateStateUrl,
-  useProvidedState,
-} from '../utils/options-context.js';
-import { PropsTable } from '../utils/props-table.js';
-import { PartLink } from '../utils/sections.js';
+import { Component } from '../frame/component.js';
+import { useLog } from '../frame/log.js';
+import { usePropControl } from '../frame/prop-control.js';
+import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { PropsTable } from '../guide/props-table.js';
+import { PartLink } from '../guide/sections.js';
 import { switchRootRows, switchThumbRows } from './docs.js';
 import { getPropOptionsRoot, propOptionsThumb } from './props.js';
 

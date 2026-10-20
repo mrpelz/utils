@@ -6,8 +6,8 @@ import {
   DateRange,
   DayHighlight,
 } from '../../components/index.js';
-import { AddLog } from '../utils/log.js';
-import { MappedProp } from '../utils/main.js';
+import { AddLog } from '../frame/log.js';
+import { MappedProp } from '../frame/prop-control.js';
 
 // Highlights of some days, each in its own style and tint.
 const tintedHighlights = new Map<number, DayHighlight>([

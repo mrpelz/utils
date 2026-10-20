@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 
-import { useDark } from '../utils/use-dark.js';
+import { useDark } from '../shared/use-dark.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
 

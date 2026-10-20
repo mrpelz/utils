@@ -3,14 +3,12 @@ import { sfCheckmark } from '@bradleyhodges/sfsymbols/sfCheckmark';
 import { FunctionComponent, useMemo } from 'react';
 
 import { Segmented, Symbol } from '../../components/index.js';
-import { AddLog, useLog } from '../utils/log.js';
-import { Component, usePropControl } from '../utils/main.js';
-import {
-  useCreateStateUrl,
-  useProvidedState,
-} from '../utils/options-context.js';
-import { PropsTable } from '../utils/props-table.js';
-import { PartLink } from '../utils/sections.js';
+import { Component } from '../frame/component.js';
+import { AddLog, useLog } from '../frame/log.js';
+import { usePropControl } from '../frame/prop-control.js';
+import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { PropsTable } from '../guide/props-table.js';
+import { PartLink } from '../guide/sections.js';
 import { periods } from './content.js';
 import {
   segmentedHighlightRows,

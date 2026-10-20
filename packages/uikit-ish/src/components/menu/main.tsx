@@ -471,7 +471,7 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
 );
 
 /**
- * Closes the root menu when a positioner's anchor (Base UI:
+ * Closes the root menu when an open positioner's anchor (Base UI:
  * `data-anchor-hidden`) or the positioner itself leaves the viewport, as
  * UIKit menus close when their source view scrolls away (internal).
  */
@@ -484,7 +484,13 @@ export const useCloseOutOfView = (
     const { current: positioner } = positionerRef;
     if (!positioner) return undefined;
 
-    const close = () => actionsRef?.current?.close();
+    // Only while its own popup is open: a submenu's positioner, hidden as
+    // the submenu closes (e.g. the pointer moving back to its menu's
+    // items), doesn't close the root menu.
+    const close = () => {
+      if (!Object.hasOwn(positioner.dataset, 'open')) return;
+      actionsRef?.current?.close();
+    };
 
     const mutationObserver = new MutationObserver(() => {
       if (Object.hasOwn(positioner.dataset, 'anchorHidden')) close();

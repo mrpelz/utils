@@ -1,6 +1,6 @@
 import { createContext, FunctionComponent, ReactNode, useContext } from 'react';
 
-import { EntryContext } from './entry.js';
+import { EntryContext } from './nav.js';
 
 // Anchors on the guide pages: their sections (headings with ids) listed at
 // the top, and part names linking to their sections.

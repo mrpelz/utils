@@ -22,6 +22,11 @@
     padding: 0 4px;
     border-radius: 100px;
     outline: none;
+
+    /* (A press anywhere in it, e.g. the “more” button, keeps the selection
+       it's for: the menu stays open.) */
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   .uikit-edit-menu-actions {
@@ -99,8 +104,6 @@
     stroke: currentcolor;
     stroke-linejoin: round;
     stroke-width: max(0px, (400 - 400) / 326 * 1px);
-    -webkit-user-select: none;
-    user-select: none;
     white-space: nowrap;
 
     --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);

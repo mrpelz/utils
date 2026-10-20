@@ -1,5 +1,5 @@
 import { DynamicTypeSize, TextStyle } from '../../components/index.js';
-import { commonPropOptions } from '../utils/main.js';
+import { commonPropOptions } from '../frame/prop-control.js';
 
 export const textStyles: [TextStyle, string][] = [
   ['largeTitle', 'Large Title'],

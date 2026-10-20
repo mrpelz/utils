@@ -2,8 +2,8 @@
 
 import { Switch as BaseSwitch } from '@base-ui/react/switch';
 
-import { AddLog } from '../utils/log.js';
-import { commonPropOptions, MappedProp } from '../utils/main.js';
+import { AddLog } from '../frame/log.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 const propOptionsRoot = {
   ...commonPropOptions,

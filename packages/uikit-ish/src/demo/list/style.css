@@ -28,19 +28,25 @@
   place-self: center end;
 }
 
-/* A phone's screen in the stage: a page scrolling in it, or a viewport's
-   fixed layers within it (a transform makes it their containing block). */
+/* A phone's screen in the stage, as high as its page (in a page's flow,
+   nothing scrolls within it). */
 .list-demo-screen {
   position: relative;
   overflow: hidden;
   width: 402px;
   max-width: 100%;
-  height: min(640px, 70vh);
   border-radius: 24px;
+}
+
+/* A screen sized as a window, for what fills one: a viewport's fixed
+   layers (a transform makes it their containing block), its content layer
+   scrolling, or a navigation's stacked pages, each scrolling. */
+.list-demo-window {
+  height: min(640px, 70vh);
   transform: translateZ(0);
 }
 
-/* A navigation's pages, stretched to the screen's height. */
+/* A navigation's pages, in one cell. */
 .list-demo-navigation {
   display: grid;
 }

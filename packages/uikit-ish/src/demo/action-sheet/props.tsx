@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
-import { AddLog } from '../utils/log.js';
-import { MappedProp } from '../utils/main.js';
+import { AddLog } from '../frame/log.js';
+import { MappedProp } from '../frame/prop-control.js';
 
 export const getPropOptionsRoot = (addLog: AddLog) => ({
   defaultOpen: [undefined, false, true] as const,

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
-import { commonPropOptions, MappedProp } from '../utils/main.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 /** A placeholder photo (a gradient, a head and shoulders). */
 export const photo = (hue: number) =>

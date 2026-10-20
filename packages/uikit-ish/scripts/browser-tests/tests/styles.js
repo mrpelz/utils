@@ -70,20 +70,29 @@ export const tests = [
     name: 'styles: the demo option forces the color scheme',
     run: async (page) => {
       await page.open('segmented');
-      const option = `&colorScheme=${encodeURIComponent(JSON.stringify('dark'))}`;
-      await page.evaluate(`location.hash += ${JSON.stringify(option)}`);
+      // (Stored as the demo frame's option stores it, see useLocalStorage;
+      // removed after, as the storage outlasts the test.)
+      const key = JSON.stringify('colorScheme');
+      await page.evaluate(`(() => {
+        localStorage.setItem(${key}, JSON.stringify('dark'));
+        dispatchEvent(new CustomEvent('demo-local-storage', { detail: ${key} }));
+      })()`);
       await sleep(300);
 
-      assert.equal(
-        await page.evaluate('document.documentElement.dataset.colorScheme'),
-        'dark',
-      );
-      assert.deepEqual(
-        await page.evaluate(
-          'getComputedStyle(document.documentElement).backgroundColor',
-        ),
-        'rgb(10, 10, 10)',
-      );
+      try {
+        assert.equal(
+          await page.evaluate('document.documentElement.dataset.colorScheme'),
+          'dark',
+        );
+        assert.deepEqual(
+          await page.evaluate(
+            'getComputedStyle(document.documentElement).backgroundColor',
+          ),
+          'rgb(10, 10, 10)',
+        );
+      } finally {
+        await page.evaluate(`localStorage.removeItem(${key})`);
+      }
     },
   },
 ];

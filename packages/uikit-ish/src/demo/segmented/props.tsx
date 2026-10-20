@@ -2,8 +2,8 @@
 
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 
-import { AddLog } from '../utils/log.js';
-import { commonPropOptions, MappedProp } from '../utils/main.js';
+import { AddLog } from '../frame/log.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 export const propOptionsContent = {
   count: [3, 2, 4, 5] as const,

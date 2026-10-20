@@ -2,8 +2,8 @@
 
 import { Menu as BaseMenu } from '@base-ui/react/menu';
 
-import { AddLog } from '../utils/log.js';
-import { commonPropOptions, MappedProp } from '../utils/main.js';
+import { AddLog } from '../frame/log.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 export const propOptionsPositioner = {
   ...commonPropOptions,

@@ -9,8 +9,8 @@ import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
 import { sfTortoiseFill } from '@bradleyhodges/sfsymbols/sfTortoiseFill';
 
 import { Symbol } from '../../components/index.js';
-import { AddLog } from '../utils/log.js';
-import { commonPropOptions, MappedProp } from '../utils/main.js';
+import { AddLog } from '../frame/log.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 export const propOptionsContent = {
   thumbs: [1, 2] as const,

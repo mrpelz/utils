@@ -5,7 +5,7 @@ import {
   renderRows,
   secondaryClickRow,
   union,
-} from '../utils/props-table.js';
+} from '../guide/props-table.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).

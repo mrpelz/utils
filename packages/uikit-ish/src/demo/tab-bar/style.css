@@ -13,7 +13,8 @@
 }
 
 /* A phone's screen in the stage: its viewport's fixed layers (content,
-   anchors) within it (a transform makes it their containing block). */
+   anchors) within it (a transform makes it their containing block), sized
+   as a window, the content layer scrolling. */
 .tab-bar-demo-screen {
   position: relative;
   overflow: hidden;
