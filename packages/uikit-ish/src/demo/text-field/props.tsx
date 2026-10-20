@@ -142,3 +142,29 @@ export const getPropOptionsClear = (addLog: AddLog) => ({
     new MappedProp(() => addLog('clear clicked'), '[log click]'),
   ] as const,
 });
+
+/** The overview's content: a label, a description. */
+export const propOptionsOverviewContent = {
+  label: [true, false] as const,
+  description: [false, true] as const,
+};
+
+/** The overview's few: its states, not its plumbing. */
+export const propOptionsOverviewRoot = {
+  disabled: [undefined, true] as const,
+  invalid: [undefined, true] as const,
+};
+
+export const propOptionsOverviewControl = {
+  placeholder: ['Required', undefined] as const,
+  type: [undefined, 'email', 'tel', 'password', 'number'] as const,
+  defaultValue: [undefined, 'Kate Bell'] as const,
+};
+
+export const propOptionsPart = {
+  ...commonPropOptions,
+};
+
+/** The root's options as a list row (its `render` the row's). */
+const { render: _render, ...propOptionsRootRow } = propOptionsRoot;
+export const propOptionsGuideRoot = propOptionsRootRow;

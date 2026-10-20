@@ -88,3 +88,29 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
     ),
   ] as const,
 });
+
+/** The overview's content: a symbol, a label, or both. */
+export const propOptionsOverviewContent = {
+  symbol: [true, false] as const,
+  label: [true, false] as const,
+};
+
+/** The overview's few: its look, not its plumbing. */
+export const propOptionsOverviewRoot = {
+  variant: [
+    'bordered-prominent',
+    'borderless',
+    'bordered',
+    'bordered-secondary',
+    'glass',
+    'glass-prominent',
+  ] as const,
+  size: [undefined, 'small', 'medium', 'large'] as const,
+  shape: [undefined, 'capsule', 'circle', 'roundedRectangle'] as const,
+  destructive: [undefined, true] as const,
+  disabled: [undefined, true] as const,
+};
+
+export const propOptionsPart = {
+  ...commonPropOptions,
+};

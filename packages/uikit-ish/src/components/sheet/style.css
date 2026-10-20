@@ -62,23 +62,21 @@
       color: var(--uikit-glass-content);
     }
 
-    /* A form sheet (regular width). */
-    @media (width >= 768px) {
-      &&[data-detent] {
-        width: min(936px, calc(100% - 64px));
-        height: min(852px, calc(100% - 64px));
-        border-radius: 38px;
-        background-color: light-dark(
-          var(--color-ios-system-background),
-          var(--color-ios-secondary-system-background)
-        );
-        box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
-        color: var(--color-ios-label);
-        inset: 50% auto auto 50%;
-        translate: -50% calc(-50% + var(--uikit-sheet-drag, 0px));
-      }
+    /* A form sheet (not compact: a regular width, see main.tsx). */
+    &&:not([data-compact]) {
+      width: min(936px, calc(100% - 64px));
+      height: min(852px, calc(100% - 64px));
+      border-radius: 38px;
+      background-color: light-dark(
+        var(--color-ios-system-background),
+        var(--color-ios-secondary-system-background)
+      );
+      box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
+      color: var(--color-ios-label);
+      inset: 50% auto auto 50%;
+      translate: -50% calc(-50% + var(--uikit-sheet-drag, 0px));
 
-      &&[data-detent]:has([data-list-part='root']) {
+      &:has([data-list-part='root']) {
         --uikit-list-container-background: transparent;
         --uikit-list-container-group-background: var(
           --color-ios-tertiary-system-background
@@ -87,8 +85,8 @@
         background-color: var(--color-ios-secondary-system-background);
       }
 
-      &&[data-starting-style],
-      &&[data-ending-style] {
+      &[data-starting-style],
+      &[data-ending-style] {
         translate: -50% 100vh;
       }
     }

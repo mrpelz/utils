@@ -8,7 +8,14 @@ import {
 import { AlertDemo } from './alert/main.js';
 import { AvatarDemo } from './avatar/main.js';
 import { BadgeDemo } from './badge/main.js';
+import {
+  ButtonComposition,
+  buttonCompositionDemos,
+} from './button/composition.js';
+import { ButtonInformationArchitecture } from './button/information-architecture.js';
 import { ButtonDemo, ButtonMatrixDemo } from './button/main.js';
+import { ButtonOverview, buttonOverviewDemos } from './button/overview.js';
+import { ButtonParts, buttonPartsDemos } from './button/parts.js';
 import {
   CheckboxComposition,
   checkboxCompositionDemos,
@@ -104,7 +111,14 @@ import {
   segmentedOverviewDemos,
 } from './segmented/overview.js';
 import { SegmentedParts, segmentedPartsDemos } from './segmented/parts.js';
+import {
+  SheetComposition,
+  sheetCompositionDemos,
+} from './sheet/composition.js';
+import { SheetInformationArchitecture } from './sheet/information-architecture.js';
 import { SheetDemo } from './sheet/main.js';
+import { SheetOverview, sheetOverviewDemos } from './sheet/overview.js';
+import { SheetParts, sheetPartsDemos } from './sheet/parts.js';
 import {
   SidebarComposition,
   sidebarCompositionDemos,
@@ -151,7 +165,17 @@ import {
 } from './tab-bar/main.js';
 import { TabBarOverview, tabBarOverviewDemos } from './tab-bar/overview.js';
 import { TabBarParts, tabBarPartsDemos } from './tab-bar/parts.js';
+import {
+  TextFieldComposition,
+  textFieldCompositionDemos,
+} from './text-field/composition.js';
+import { TextFieldInformationArchitecture } from './text-field/information-architecture.js';
 import { TextFieldDemo } from './text-field/main.js';
+import {
+  TextFieldOverview,
+  textFieldOverviewDemos,
+} from './text-field/overview.js';
+import { TextFieldParts, textFieldPartsDemos } from './text-field/parts.js';
 import {
   ToolbarComposition,
   toolbarCompositionDemos,
@@ -315,10 +339,22 @@ export const catalog: readonly CatalogEntry[] = [
   {
     baseUiId: 'button',
     category: 'actions',
-    demos: [ButtonDemo, ButtonMatrixDemo],
+    demos: [
+      ButtonDemo,
+      ButtonMatrixDemo,
+      ...buttonOverviewDemos,
+      ...buttonPartsDemos,
+      ...buttonCompositionDemos,
+    ],
     framework7Id: 'button',
     higId: 'buttons',
     id: 'button',
+    Composition: ButtonComposition,
+    InformationArchitecture: ButtonInformationArchitecture,
+    Overview: ButtonOverview,
+    Parts: ButtonParts,
+    summary:
+      'Performs an action at once: a label, a symbol or both, borderless, on a fill or the tint, or Liquid Glass over content.',
     title: 'Button',
   },
   {
@@ -414,10 +450,21 @@ export const catalog: readonly CatalogEntry[] = [
   {
     baseUiId: 'field',
     category: 'choices',
-    demos: [TextFieldDemo],
+    demos: [
+      TextFieldDemo,
+      ...textFieldOverviewDemos,
+      ...textFieldPartsDemos,
+      ...textFieldCompositionDemos,
+    ],
     framework7Id: 'inputs',
     higId: 'text-fields',
     id: 'text-field',
+    Composition: TextFieldComposition,
+    InformationArchitecture: TextFieldInformationArchitecture,
+    Overview: TextFieldOverview,
+    Parts: TextFieldParts,
+    summary:
+      'Free text in a list row, on its own or in a search capsule: validated as the browser’s inputs are, its errors below it.',
     title: 'Text field',
   },
   {
@@ -675,10 +722,21 @@ export const catalog: readonly CatalogEntry[] = [
   {
     baseUiId: 'dialog',
     category: 'presentation',
-    demos: [SheetDemo],
+    demos: [
+      SheetDemo,
+      ...sheetOverviewDemos,
+      ...sheetPartsDemos,
+      ...sheetCompositionDemos,
+    ],
     framework7Id: 'sheet-modal',
     higId: 'sheets',
     id: 'sheet',
+    Composition: SheetComposition,
+    InformationArchitecture: SheetInformationArchitecture,
+    Overview: SheetOverview,
+    Parts: SheetParts,
+    summary:
+      'A focused task over the page: from the bottom on a phone, large or medium, a form sheet on a tablet; dismissed by its buttons or dragged down.',
     title: 'Sheet',
   },
   {

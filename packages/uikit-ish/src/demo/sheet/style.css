@@ -1,0 +1,40 @@
+/* Sheet demos (see the guide's views). */
+
+/* A phone's screen: a page with the sheet's trigger, the sheet within it (a
+   transform makes it the fixed sheet's containing block, see `container`). */
+.sheet-demo-phone,
+.sheet-demo-tablet {
+  display: flex;
+  overflow: hidden;
+  max-width: 100%;
+  height: min(640px, 70vh);
+  box-sizing: border-box;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 24px;
+  background-color: var(--color-ios-system-background);
+  box-shadow: 0 0 0 1px var(--color-ios-separator);
+  gap: 12px;
+  transform: translateZ(0);
+}
+
+.sheet-demo-phone {
+  width: 402px;
+}
+
+/* A tablet's screen (an iPad's width, at most the stage's). */
+.sheet-demo-tablet {
+  width: 820px;
+}
+
+/* A medium sheet's few rows: its content's height. */
+.sheet-demo-short {
+  padding-block-end: 16px;
+}
+
+/* A navigation as its content: filling it, its pages scrolling. */
+.sheet-demo-stack {
+  display: grid;
+  overflow: hidden;
+}

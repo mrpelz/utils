@@ -77,7 +77,7 @@ const LiveView: FunctionComponent = () => {
               </Toolbar.Leading>
               <Toolbar.Title>
                 <span>Contacts</span>
-                {content.subtitle && !content.largeTitle ? (
+                {content.subtitle ? (
                   <Toolbar.Subtitle>{names.length} people</Toolbar.Subtitle>
                 ) : null}
               </Toolbar.Title>

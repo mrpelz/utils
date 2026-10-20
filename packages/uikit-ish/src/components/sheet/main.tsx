@@ -2,7 +2,13 @@ import '../glass/style.css';
 import './style.css';
 
 import { Dialog as BaseDialog } from '@base-ui/react/dialog';
-import { ComponentProps, forwardRef, PointerEvent, useRef } from 'react';
+import {
+  ComponentProps,
+  forwardRef,
+  PointerEvent,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
 
 import { cn } from '../utils/main.js';
 import type { SheetPopupProps } from './props.js';
@@ -16,8 +22,9 @@ export type { SheetDetent, SheetPopupProps } from './props.js';
 //   corners 38px, its shadow 0 15px 75px at 18%;
 // - medium (Figma “Inspector - iPhone”): glass, 6px from the sides and the
 //   bottom, as high as its content, its corners 34px;
-// - in a regular width (iPad, from 768px), a form sheet (Figma “iPad”):
-//   opaque, centered, up to 936px by 852px, its corners 38px.
+// - in a regular width (iPad: the window from 768px, or not `compact`), a
+//   form sheet (Figma “iPad”): opaque, centered, up to 936px by 852px, its
+//   corners 38px.
 // Its header (Figma “Toolbar”): a grabber (36px by 5px, 5px from the top,
 // #cfcfcf) above the app's content (e.g. a `Toolbar`: Figma's 44px title
 // and controls). Base UI's `Dialog`: modal, dismissed by a press outside it
@@ -33,26 +40,54 @@ export type { SheetDetent, SheetPopupProps } from './props.js';
 // dark mode, #1c1c1e, its groups #2c2c2e), the list without its own (which
 // would end with it, the sheet's around it).
 
+// A regular width (iPad): the window's, from 768px.
+const regularQuery = '(width >= 768px)';
+
+const subscribeRegular = (onChange: () => void) => {
+  const query = matchMedia(regularQuery);
+  query.addEventListener('change', onChange);
+
+  return () => query.removeEventListener('change', onChange);
+};
+
+const useRegularWidth = () =>
+  useSyncExternalStore(
+    subscribeRegular,
+    () => matchMedia(regularQuery).matches,
+    () => false,
+  );
+
 /** The sheet, the page dimmed behind it. */
 const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
-  ({ className, detent = 'large', ...props }, ref) => (
-    <BaseDialog.Portal>
-      <BaseDialog.Backdrop
-        className="uikit-sheet-backdrop"
-        data-sheet-part="backdrop"
-      />
-      <BaseDialog.Popup
-        ref={ref}
-        data-detent={detent}
-        data-sheet-part="popup"
-        className={cn(
-          'uikit-sheet-popup',
-          detent === 'medium' ? cn('uikit-glass-medium', className) : className,
-        )}
-        {...props}
-      />
-    </BaseDialog.Portal>
-  ),
+  (
+    { className, compact: compactProp, container, detent = 'large', ...props },
+    ref,
+  ) => {
+    const regular = useRegularWidth();
+    const compact = compactProp ?? !regular;
+
+    return (
+      <BaseDialog.Portal container={container}>
+        <BaseDialog.Backdrop
+          className="uikit-sheet-backdrop"
+          data-sheet-part="backdrop"
+        />
+        <BaseDialog.Popup
+          ref={ref}
+          data-compact={compact ? '' : undefined}
+          data-detent={detent}
+          data-sheet-part="popup"
+          className={cn(
+            'uikit-sheet-popup',
+            compact && detent === 'medium'
+              ? cn('uikit-glass-medium', className)
+              : className,
+          )}
+          {...props}
+        />
+      </BaseDialog.Portal>
+    );
+  },
 );
 
 // Dragged this far (of its height) or flung this fast (px/ms), it's
@@ -108,9 +143,18 @@ const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
           endEvent.type === 'pointerup' &&
           (distance > popup.offsetHeight * dismissShare ||
             (speed > flingSpeed && distance > 0));
-        // Dismissed, it leaves from where it is; otherwise it springs back.
-        if (dismissed) closeRef.current?.click();
-        else popup.style.removeProperty('--uikit-sheet-drag');
+        // Dismissed, it leaves from where it is; otherwise it springs back,
+        // also when the app keeps it open (e.g. to confirm discarding, its
+        // `onOpenChange` ignoring the close).
+        if (!dismissed) {
+          popup.style.removeProperty('--uikit-sheet-drag');
+          return;
+        }
+        closeRef.current?.click();
+        requestAnimationFrame(() => {
+          if (Object.hasOwn(popup.dataset, 'endingStyle')) return;
+          popup.style.removeProperty('--uikit-sheet-drag');
+        });
       };
       header.addEventListener('pointermove', move);
       header.addEventListener('pointerup', end);

@@ -30,6 +30,7 @@ const largeTitleCode = `<Page.Root>
       {/* Hidden until the large title scrolls under the bar. */}
       <Toolbar.Title>
         <span>Contacts</span>
+        <Toolbar.Subtitle>29 people</Toolbar.Subtitle>
       </Toolbar.Title>
       <Toolbar.Trailing>
         <Toolbar.Button aria-label="New contact" shape="circle">…</Toolbar.Button>
@@ -116,7 +117,10 @@ const controlCode = `const [filter, setFilter] = useState('all');
 
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
-/** A page's large title (with a subtitle) scrolling away under its bar. */
+/**
+ * A page's large title (with a subtitle) scrolling away under its bar, the
+ * bar's title (with its subtitle) fading in.
+ */
 const LargeTitle: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
@@ -135,6 +139,7 @@ const LargeTitle: FunctionComponent = () => {
               <Toolbar.Leading />
               <Toolbar.Title>
                 <span>Contacts</span>
+                <Toolbar.Subtitle>{names.length} people</Toolbar.Subtitle>
               </Toolbar.Title>
               <Toolbar.Trailing>
                 <Toolbar.Button
@@ -392,6 +397,10 @@ export const HeaderComposition: FunctionComponent = () => (
       <li>
         The page’s title, large, with a subtitle; as it scrolls under the bar,
         the bar’s own title fades in.
+      </li>
+      <li>
+        The bar’s title with its subtitle too (Title and Subtitle, two lines):
+        both fade in together.
       </li>
       <li>
         Both sides in the bar (an empty <code>Toolbar.Leading</code> too), so

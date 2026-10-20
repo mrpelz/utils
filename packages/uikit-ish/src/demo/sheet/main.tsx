@@ -1,3 +1,5 @@
+import './style.css';
+
 import { sfArrowUp } from '@bradleyhodges/sfsymbols/sfArrowUp';
 import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent, useMemo } from 'react';
