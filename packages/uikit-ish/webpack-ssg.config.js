@@ -17,7 +17,7 @@ import webpack from 'webpack';
 
 const { PUBLIC_PATH: publicPath = '/' } = process.env;
 
-export const dirDemo = path.resolve(dirBase, 'demo/ssg');
+export const dirDemo = path.resolve(dirBase, 'demo/__ssg__');
 
 // @ts-ignore
 /** @type {import('@mrpelz/boilerplate-dom/webpack.config.js').ConfigurationExtended} */

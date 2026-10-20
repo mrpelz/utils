@@ -11,6 +11,8 @@ ESLINT_ARGS := $(ESLINT_ARGS) --ignore-pattern "demo/**/*"
 
 GIT_BRANCH := $(shell git symbolic-ref --short HEAD)
 
+SSG_DIR := demo/__ssg__
+
 MITM_SLUG := $(shell echo "$(PKG_NAME)/$(GIT_BRANCH)" | sed -r -e 's#@##g' -e 's#/#-#g' 2>/dev/null)
 MITM_URL := https://$(MITM_SLUG).localhost
 
@@ -49,7 +51,9 @@ transform_build_demo_csr:
 
 transform_build_demo_ssg:
 	$(WEBPACK) --config webpack-ssg.config.js
-	node "demo/ssg/main.js"
+	mv "demo/index.html" "demo/template.html"
+	node "$(SSG_DIR)/main.js"
+	rm -rf "$(SSG_DIR)"
 
 transform_prod_demo: \
 	util_clear_demo \

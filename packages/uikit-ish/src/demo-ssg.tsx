@@ -1,4 +1,5 @@
-/* eslint-disable no-await-in-loop */
+/* eslint-disable no-console */
+
 // eslint-disable-next-line spaced-comment
 /// <reference types="node" />
 
@@ -16,7 +17,7 @@ const BODY = '<body></body>';
 
 const demoDir = path.resolve(process.cwd(), 'demo');
 
-const templatePath = path.join(demoDir, 'index.html');
+const templatePath = path.join(demoDir, 'template.html');
 if (!existsSync(templatePath)) {
   exit(1);
 }
@@ -26,44 +27,58 @@ if (!template.includes(BODY)) {
   exit(1);
 }
 
-let links = new Set([publicPath]);
 const handled = new Set<string>();
 
-while (links.size > 0) {
-  const link = Array.from(links).at(0);
-  if (!link) break;
-  if (handled.has(link)) continue;
+const render = async (location: string) => {
+  const prefixedLocation = path.join(publicPath, location, './');
 
-  links.delete(link);
-  handled.add(link);
+  const outputDir = path.join(demoDir, '.', prefixedLocation);
+  if (handled.has(outputDir)) return undefined;
 
-  locationStub(link);
+  handled.add(outputDir);
 
-  const { html, links: discoveredLinks } = await prerender(<Demo />);
-  if (!discoveredLinks) continue;
+  locationStub(prefixedLocation);
+  const { html, links } = await prerender(<Demo />);
 
-  const discoveredLinksWithoutFragments = new Set<string>();
-  for (const discoveredLink of discoveredLinks) {
-    const discoveredLinkWithoutFragment = discoveredLink.replace(/#.*/, '');
-    if (!discoveredLinkWithoutFragment) continue;
+  console.log(
+    `✅ prerendered "${location}" (prefixed: "${prefixedLocation}")\n  for "${outputDir}"\n  discovered ${links?.size ?? 0} link(s)`,
+  );
 
-    discoveredLinksWithoutFragments.add(discoveredLinkWithoutFragment);
-  }
-
-  links = links.union(discoveredLinksWithoutFragments.difference(handled));
-
-  const linkDir = path.join(demoDir, link);
-  // eslint-disable-next-line no-console
-  console.log(link, linkDir);
-
-  if (!existsSync(linkDir)) {
-    await mkdir(linkDir, { recursive: true });
+  if (!existsSync(outputDir)) {
+    await mkdir(outputDir, { recursive: true });
   }
 
   // eslint-disable-next-line unicorn/no-unsafe-string-replacement
-  const templateContent = template.replace(BODY, `<body>${html}</body>`);
+  const output = template.replace(BODY, `<body>${html}</body>`);
+  const outputPath = path.join(outputDir, 'index.html');
 
-  await writeFile(path.join(linkDir, 'index.html'), templateContent, {
-    encoding: 'utf8',
-  });
-}
+  await writeFile(outputPath, output, { encoding: 'utf8' });
+
+  console.log(`💾 written "${outputPath}"`);
+
+  return links;
+};
+
+const stripFragments = (links: Set<string>) => {
+  const result = new Set<string>();
+
+  for (const link of links) {
+    const stripped = link.replace(/#.*/, '');
+    result.add(stripped);
+  }
+
+  return result;
+};
+
+const walk = async (location: string) => {
+  const links = await render(location);
+  if (!links) return;
+
+  const strippedLinks = stripFragments(links);
+
+  await Promise.allSettled(Array.from(strippedLinks).map((link) => walk(link)));
+};
+
+await walk('.');
+
+console.log(`✅ finished; prerendered ${handled.size} links`);
