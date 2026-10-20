@@ -31,8 +31,22 @@ import {
 } from './date-picker/main.js';
 import { EditMenuDemo } from './edit-menu/main.js';
 import { FormDemo } from './form/main.js';
+import {
+  HeaderComposition,
+  headerCompositionDemos,
+} from './header/composition.js';
+import { HeaderInformationArchitecture } from './header/information-architecture.js';
 import { HeaderDemo, HeaderTitleDemo } from './header/main.js';
+import { HeaderOverview, headerOverviewDemos } from './header/overview.js';
+import { HeaderParts, headerPartsDemos } from './header/parts.js';
+import {
+  LayoutComposition,
+  layoutCompositionDemos,
+} from './layout/composition.js';
+import { LayoutInformationArchitecture } from './layout/information-architecture.js';
 import { LayoutCompactDemo, LayoutDemo } from './layout/main.js';
+import { LayoutOverview, layoutOverviewDemos } from './layout/overview.js';
+import { LayoutParts, layoutPartsDemos } from './layout/parts.js';
 import { ListComposition, listCompositionDemos } from './list/composition.js';
 import { ListInformationArchitecture } from './list/information-architecture.js';
 import {
@@ -70,7 +84,11 @@ import {
   navigationOverviewDemos,
 } from './navigation/overview.js';
 import { NavigationParts, navigationPartsDemos } from './navigation/parts.js';
+import { PageComposition, pageCompositionDemos } from './page/composition.js';
+import { PageInformationArchitecture } from './page/information-architecture.js';
 import { PageDemo } from './page/main.js';
+import { PageOverview, pageOverviewDemos } from './page/overview.js';
+import { PageParts, pagePartsDemos } from './page/parts.js';
 import { PageControlDemo } from './page-control/main.js';
 import { PopoverDemo } from './popover/main.js';
 import { ProgressDemo } from './progress/main.js';
@@ -485,25 +503,60 @@ export const catalog: readonly CatalogEntry[] = [
   },
   {
     category: 'structure',
-    demos: [HeaderDemo, HeaderTitleDemo],
+    demos: [
+      HeaderDemo,
+      HeaderTitleDemo,
+      ...headerOverviewDemos,
+      ...headerPartsDemos,
+      ...headerCompositionDemos,
+    ],
     framework7Id: 'navbar',
     higId: 'toolbars',
     id: 'header',
+    Composition: HeaderComposition,
+    InformationArchitecture: HeaderInformationArchitecture,
+    Overview: HeaderOverview,
+    Parts: HeaderParts,
+    summary:
+      'A page’s header: a bar sticking to its top, a large title scrolling away beneath it as the bar’s own title fades in.',
     title: 'Header',
   },
   {
     category: 'structure',
-    demos: [PageDemo],
+    demos: [
+      PageDemo,
+      ...pageOverviewDemos,
+      ...pagePartsDemos,
+      ...pageCompositionDemos,
+    ],
     framework7Id: 'page',
     higId: 'layout',
     id: 'page',
+    Composition: PageComposition,
+    InformationArchitecture: PageInformationArchitecture,
+    Overview: PageOverview,
+    Parts: PageParts,
+    summary:
+      'What a screen shows: its content’s scroll container, filling its place, on the grouped or plain page background.',
     title: 'Page',
   },
   {
     category: 'structure',
-    demos: [LayoutDemo, LayoutCompactDemo],
+    demos: [
+      LayoutDemo,
+      LayoutCompactDemo,
+      ...layoutOverviewDemos,
+      ...layoutPartsDemos,
+      ...layoutCompositionDemos,
+    ],
     higId: 'split-views',
     id: 'layout',
+    Composition: LayoutComposition,
+    InformationArchitecture: LayoutInformationArchitecture,
+    Overview: LayoutOverview,
+    Parts: LayoutParts,
+    summary:
+      'Columns side by side (a sidebar, a list, a detail): sized, resizable or flexible, one floating; drawers on a phone.',
     title: 'Layout',
   },
   {

@@ -38,3 +38,34 @@ export const getPropOptionsColumn = (
     undefined,
   ] as const,
 });
+
+// The guide pages' views (see overview.tsx, parts.tsx): each part's props,
+// outlined by default (its own element's class name and style; it has no
+// `render`).
+const elementOptions = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+};
+
+export const propOptionsGuideRoot = {
+  ...elementOptions,
+  compact: [undefined, false, true] as const,
+};
+
+export const propOptionsGuideBackground = elementOptions;
+
+/** A column's options in the guide's views (see `getPropOptionsColumn`). */
+export const getPropOptionsGuideColumn = (
+  name: string,
+  defaultSize: number | undefined,
+  resizable: boolean,
+  addLog: AddLog,
+) => {
+  const { render: _render, ...options } = getPropOptionsColumn(
+    name,
+    defaultSize,
+    resizable,
+    addLog,
+  );
+  return options;
+};

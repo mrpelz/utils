@@ -54,3 +54,11 @@ export const propOptionsPart = {
   className: commonPropOptions.className,
   style: commonPropOptions.style,
 };
+
+/**
+ * The floating-or-a-drawer view's content: a phone's or a tablet's layout,
+ * or (unset) by the window's width.
+ */
+export const propOptionsAdaptiveContent = {
+  layout: [undefined, 'phone', 'tablet'] as const,
+};

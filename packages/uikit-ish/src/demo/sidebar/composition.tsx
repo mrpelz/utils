@@ -21,9 +21,12 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
+import { usePropControl } from '../frame/prop-control.js';
+import { useProvidedState } from '../frame/state.js';
 import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { rowTitles, sidebarSections } from './content.js';
+import { propOptionsAdaptiveContent } from './props.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 
@@ -599,9 +602,19 @@ const Editing: FunctionComponent = () => {
  * viewport, see `Adaptive`).
  */
 const AdaptiveView: FunctionComponent = () => {
+  const id = 'sidebar-composition-adaptive';
   const [log, addLog] = useLog();
+  const [externalContent] = useProvidedState(id);
+  const [controlContent, content, stateContent] = usePropControl(
+    propOptionsAdaptiveContent,
+    '[content]',
+    externalContent,
+    true,
+  );
   const { width } = useVisualViewport();
-  const compact = width < 768;
+  // (Unset, by the window's width; or as a phone's, or a tablet's.)
+  const compact =
+    content.layout === undefined ? width < 768 : content.layout === 'phone';
   const [selected, setSelected] = useState('inbox');
   const [open, setOpen] = useState(false);
 
@@ -609,8 +622,10 @@ const AdaptiveView: FunctionComponent = () => {
     <Component
       center
       inline
-      id="sidebar-composition-adaptive"
+      controls={[controlContent]}
+      id={id}
       log={log}
+      state={[stateContent]}
       title="Sidebar, floating or a drawer"
     >
       <div className={compact ? 'sidebar-demo-phone' : 'sidebar-demo-tablet'}>
@@ -830,7 +845,8 @@ export const SidebarComposition: FunctionComponent = () => (
       <li>
         The same column either way (<code>floating</code> and{' '}
         <code>drawer</code>, the layout’s <code>compact</code> deciding): resize
-        the window (or open this page on a phone) to switch.
+        the window (or open this page on a phone) to switch, or choose a layout
+        (its content’s <code>layout</code>).
       </li>
       <li>
         Compact, the sections as a stack’s root page instead: see{' '}

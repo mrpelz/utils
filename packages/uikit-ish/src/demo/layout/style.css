@@ -6,3 +6,49 @@
   display: grid;
   height: min(640px, 70vh);
 }
+
+/* A tablet's screen (the guide pages' views; an iPad's width, at most the
+   stage's). */
+.layout-demo-tablet {
+  display: grid;
+  overflow: hidden;
+  width: 820px;
+  max-width: 100%;
+  height: min(640px, 70vh);
+  border-radius: 24px;
+}
+
+/* A phone's screen: a compact layout, its drawers. */
+.layout-demo-phone {
+  display: grid;
+  overflow: hidden;
+  width: 402px;
+  max-width: 100%;
+  height: min(640px, 70vh);
+  border-radius: 24px;
+}
+
+/* The layout's background: a picture (here, of gradients). */
+.layout-demo-picture {
+  background:
+    radial-gradient(circle at 20% 30%, #ff9f0a, transparent 40%),
+    radial-gradient(circle at 75% 20%, #bf5af2, transparent 45%),
+    radial-gradient(circle at 60% 85%, #30d158, transparent 45%),
+    linear-gradient(135deg, #0a84ff, #5e5ce6);
+}
+
+/* A transparent page (its list's, too): the layout's background shows
+   through. */
+.layout-demo-transparent {
+  --uikit-list-container-background: transparent;
+
+  background-color: transparent;
+}
+
+/* A readout of the columns' sizes, below the screen. */
+.layout-demo-sizes {
+  margin: 16px 0 0;
+  color: var(--color-ios-label);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
