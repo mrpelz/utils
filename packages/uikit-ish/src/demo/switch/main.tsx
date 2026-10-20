@@ -4,7 +4,7 @@ import { Switch } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { getPropOptionsRoot, propOptionsThumb } from './props.js';
 
 export const SwitchDemo: FunctionComponent = () => {
@@ -36,7 +36,7 @@ export const SwitchDemo: FunctionComponent = () => {
       controls={[controlRoot, controlThumb]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot, stateThumb])}
+      state={[stateRoot, stateThumb]}
       title="Switch"
     >
       <Switch.Root

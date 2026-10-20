@@ -25,7 +25,7 @@ import { photo } from '../avatar/props.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { propOptionsContent } from './props.js';
 
 /**
@@ -52,7 +52,7 @@ export const ActivityViewDemo: FunctionComponent = () => {
       controls={controlContent}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateContent])}
+      state={[stateContent]}
       title="Activity View"
     >
       <Sheet.Root defaultOpen={content.defaultOpen}>
@@ -305,7 +305,7 @@ export const ActivityViewPopoverDemo: FunctionComponent = () => {
       controls={controlContent}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateContent])}
+      state={[stateContent]}
       title="Activity View (Popover)"
     >
       <Popover.Root defaultOpen={content.defaultOpen}>

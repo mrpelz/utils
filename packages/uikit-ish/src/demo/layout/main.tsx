@@ -16,7 +16,7 @@ import {
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsColumn,
   propOptionsDrawer,
@@ -75,13 +75,8 @@ export const LayoutDemo: FunctionComponent = () => {
       controls={[controlRoot, controlSidebar, controlList, controlDetail]}
       id={id}
       log={log}
+      state={[stateRoot, stateSidebar, stateList, stateDetail]}
       title="Layout"
-      stateUrl={useCreateStateUrl(id, [
-        stateRoot,
-        stateSidebar,
-        stateList,
-        stateDetail,
-      ])}
     >
       <div className="layout-demo-screen">
         <Layout.Root {...propsRoot}>
@@ -290,6 +285,7 @@ export const LayoutCompactDemo: FunctionComponent = () => {
       stretch
       id={id}
       log={log}
+      state={[stateRoot, stateSidebar, stateDrawer, stateList, stateDetail]}
       title="Layout (compact)"
       controls={[
         controlRoot,
@@ -298,13 +294,6 @@ export const LayoutCompactDemo: FunctionComponent = () => {
         controlList,
         controlDetail,
       ]}
-      stateUrl={useCreateStateUrl(id, [
-        stateRoot,
-        stateSidebar,
-        stateDrawer,
-        stateList,
-        stateDetail,
-      ])}
     >
       <div className="layout-demo-screen">
         <Layout.Root

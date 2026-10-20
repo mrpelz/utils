@@ -7,7 +7,7 @@ import { Stepper } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { commonPropOptions, usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { getPropOptionsRoot, propOptionsHalf } from './props.js';
 
 /**
@@ -52,13 +52,8 @@ export const StepperDemo: FunctionComponent = () => {
       controls={[controlRoot, controlGroup, controlDecrement, controlIncrement]}
       id={id}
       log={log}
+      state={[stateRoot, stateGroup, stateDecrement, stateIncrement]}
       title="Stepper"
-      stateUrl={useCreateStateUrl(id, [
-        stateRoot,
-        stateGroup,
-        stateDecrement,
-        stateIncrement,
-      ])}
     >
       <div className="stepper-demo-row">
         <output>{value}</output>

@@ -5,9 +5,9 @@ import { Checkbox } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   checkboxGroupRows,
@@ -36,7 +36,7 @@ const LiveView: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Checkbox"
     >
       <Checkbox.Root
@@ -81,7 +81,12 @@ export const CheckboxOverview: FunctionComponent = () => (
     </ul>
     <LiveView />
 
-    <h2 id="when-to-use-it">When to use it</h2>
+    <Heading
+      id="when-to-use-it"
+      level={2}
+    >
+      When to use it
+    </Heading>
     <ul>
       <li>
         Selecting items to act on together (rows to delete or move, people to
@@ -97,7 +102,12 @@ export const CheckboxOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="when-to-use-something-else">When to use something else</h2>
+    <Heading
+      id="when-to-use-something-else"
+      level={2}
+    >
+      When to use something else
+    </Heading>
     <ul>
       <li>
         A setting that takes effect at once: a <a href="switch">Switch</a>.
@@ -112,7 +122,12 @@ export const CheckboxOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="key-props">Key props</h2>
+    <Heading
+      id="key-props"
+      level={2}
+    >
+      Key props
+    </Heading>
     <ul>
       <li>The props most selection circles set, across the parts.</li>
       <li>
@@ -159,7 +174,12 @@ export const CheckboxOverview: FunctionComponent = () => (
       ]}
     />
 
-    <h2 id="accessibility">Accessibility</h2>
+    <Heading
+      id="accessibility"
+      level={2}
+    >
+      Accessibility
+    </Heading>
     <ul>
       <li>
         A checkbox is a <code>span</code> with the <code>checkbox</code> role
@@ -185,7 +205,12 @@ export const CheckboxOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="behavior">Behavior</h2>
+    <Heading
+      id="behavior"
+      level={2}
+    >
+      Behavior
+    </Heading>
     <ul>
       <li>
         A click or tap ticks or unticks a checkbox, and chooses a radio; the hit
@@ -200,3 +225,6 @@ export const CheckboxOverview: FunctionComponent = () => (
     </ul>
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const checkboxOverviewDemos = [LiveView];

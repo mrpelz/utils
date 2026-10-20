@@ -4,7 +4,7 @@ import { Roll } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   fruits,
   getPropOptionsColumn,
@@ -56,13 +56,8 @@ export const RollDemo: FunctionComponent = () => {
       controls={[controlRoot, controlColumn, controlItem, controlSeparator]}
       id={id}
       log={log}
+      state={[stateRoot, stateColumn, stateItem, stateSeparator]}
       title="Roll"
-      stateUrl={useCreateStateUrl(id, [
-        stateRoot,
-        stateColumn,
-        stateItem,
-        stateSeparator,
-      ])}
     >
       <Roll.Root {...propsRoot}>
         <Roll.Column

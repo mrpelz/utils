@@ -6,9 +6,9 @@ import { Segmented, Symbol } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { AddLog, useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { PropsTable } from '../guide/props-table.js';
-import { PartLink } from '../guide/sections.js';
+import { Heading, PartLink } from '../guide/sections.js';
 import { periods } from './content.js';
 import {
   segmentedHighlightRows,
@@ -57,7 +57,7 @@ const RootPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Segmented.Root"
     >
       <Segmented.Root
@@ -99,7 +99,7 @@ const ItemPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Segmented.Item"
     >
       <Segmented.Root
@@ -143,7 +143,7 @@ const HighlightPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Segmented.Highlight"
     >
       <Segmented.Root
@@ -186,7 +186,7 @@ const IndicatorPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Segmented.Indicator"
     >
       <Segmented.Root
@@ -240,9 +240,12 @@ export const SegmentedParts: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="segmented-root">
+    <Heading
+      id="segmented-root"
+      level={2}
+    >
       <code>Segmented.Root</code>
-    </h2>
+    </Heading>
     <ul>
       <li>Base UI’s radio group, as the track.</li>
       <li>
@@ -264,9 +267,12 @@ export const SegmentedParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={segmentedRootRows} />
 
-    <h2 id="segmented-item">
+    <Heading
+      id="segmented-item"
+      level={2}
+    >
       <code>Segmented.Item</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         An option, by its <code>value</code>; its children its label.
@@ -286,9 +292,12 @@ export const SegmentedParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={segmentedItemRows} />
 
-    <h2 id="segmented-highlight">
+    <Heading
+      id="segmented-highlight"
+      level={2}
+    >
       <code>Segmented.Highlight</code>
-    </h2>
+    </Heading>
     <ul>
       <li>The selection, after the items.</li>
       <li>On the chosen item, sliding between them.</li>
@@ -302,9 +311,12 @@ export const SegmentedParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={segmentedHighlightRows} />
 
-    <h2 id="segmented-indicator">
+    <Heading
+      id="segmented-indicator"
+      level={2}
+    >
       <code>Segmented.Indicator</code>
-    </h2>
+    </Heading>
     <ul>
       <li>Base UI’s radio indicator, unstyled, inside an item.</li>
       <li>
@@ -318,3 +330,11 @@ export const SegmentedParts: FunctionComponent = () => (
     <PropsTable rows={segmentedIndicatorRows} />
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const segmentedPartsDemos = [
+  RootPart,
+  ItemPart,
+  HighlightPart,
+  IndicatorPart,
+];

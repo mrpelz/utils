@@ -15,7 +15,7 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const rowsCode = `<List.Group>
@@ -304,7 +304,12 @@ const sections: readonly Section[] = [
 export const CheckboxComposition: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <h2 id="selecting-list-rows">Selecting list rows</h2>
+    <Heading
+      id="selecting-list-rows"
+      level={2}
+    >
+      Selecting list rows
+    </Heading>
     <ul>
       <li>
         Where iOS shows them: before a <a href="list">List</a>’s rows, as{' '}
@@ -324,7 +329,12 @@ export const CheckboxComposition: FunctionComponent = () => (
     <CodeView code={rowsCode} />
     <SelectingRows />
 
-    <h2 id="choosing-one-row">Choosing one row</h2>
+    <Heading
+      id="choosing-one-row"
+      level={2}
+    >
+      Choosing one row
+    </Heading>
     <ul>
       <li>
         A <code>RadioGroup</code> rendering the list’s group (
@@ -335,7 +345,12 @@ export const CheckboxComposition: FunctionComponent = () => (
     <CodeView code={oneRowCode} />
     <ChoosingOneRow />
 
-    <h2 id="selecting-all">Selecting all</h2>
+    <Heading
+      id="selecting-all"
+      level={2}
+    >
+      Selecting all
+    </Heading>
     <ul>
       <li>
         A <code>CheckboxGroup</code> (rendering the list’s group) holds the
@@ -350,7 +365,12 @@ export const CheckboxComposition: FunctionComponent = () => (
     <CodeView code={allCode} />
     <SelectAll />
 
-    <h2 id="labels-and-forms">Labels and forms</h2>
+    <Heading
+      id="labels-and-forms"
+      level={2}
+    >
+      Labels and forms
+    </Heading>
     <ul>
       <li>
         Outside lists: a <code>{'<label>'}</code> around a circle and its text;
@@ -370,3 +390,11 @@ export const CheckboxComposition: FunctionComponent = () => (
     <InAForm />
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const checkboxCompositionDemos = [
+  SelectingRows,
+  ChoosingOneRow,
+  SelectAll,
+  InAForm,
+];

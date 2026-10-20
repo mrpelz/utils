@@ -3,7 +3,7 @@ import { FunctionComponent } from 'react';
 import { Avatar, Badge } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   photo,
   propOptionsContent,
@@ -55,7 +55,7 @@ export const AvatarDemo: FunctionComponent = () => {
       baseUiId="avatar"
       controls={[controlContent, controlRoot, controlImage]}
       id={id}
-      stateUrl={useCreateStateUrl(id, [stateContent, stateRoot, stateImage])}
+      state={[stateContent, stateRoot, stateImage]}
       title="Avatar"
     >
       <div style={{ padding: 16 }}>

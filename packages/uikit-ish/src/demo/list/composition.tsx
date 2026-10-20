@@ -29,7 +29,7 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   contacts,
@@ -817,7 +817,12 @@ const sections: readonly Section[] = [
 export const ListComposition: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <h2 id="a-settings-page">A settings page</h2>
+    <Heading
+      id="a-settings-page"
+      level={2}
+    >
+      A settings page
+    </Heading>
     <ul>
       <li>
         As iOS’s Settings: an inset grouped list in a <a href="page">Page</a>,
@@ -839,7 +844,12 @@ export const ListComposition: FunctionComponent = () => (
     <CodeView code={settingsCode} />
     <SettingsScreen />
 
-    <h2 id="drilling-into-pages">Drilling into pages</h2>
+    <Heading
+      id="drilling-into-pages"
+      level={2}
+    >
+      Drilling into pages
+    </Heading>
     <ul>
       <li>
         Rows with a button title and a <code>List.DrillIn</code> push a page in
@@ -857,7 +867,12 @@ export const ListComposition: FunctionComponent = () => (
     <CodeView code={drillInCode} />
     <DrillIn />
 
-    <h2 id="edit-mode-and-a-toolbar">Edit mode and a toolbar</h2>
+    <Heading
+      id="edit-mode-and-a-toolbar"
+      level={2}
+    >
+      Edit mode and a toolbar
+    </Heading>
     <ul>
       <li>
         Edit (in the navigation bar): edit mode (<code>List.Root</code>{' '}
@@ -882,7 +897,12 @@ export const ListComposition: FunctionComponent = () => (
     <CodeView code={editCode} />
     <EditMode />
 
-    <h2 id="an-inbox">An inbox</h2>
+    <Heading
+      id="an-inbox"
+      level={2}
+    >
+      An inbox
+    </Heading>
     <ul>
       <li>
         As Mail: a plain list of media rows, a <code>List.Text</code> preview
@@ -897,7 +917,12 @@ export const ListComposition: FunctionComponent = () => (
     </ul>
     <CodeView code={inboxCode} />
     <Inbox />
-    <h2 id="an-indexed-list">An indexed list</h2>
+    <Heading
+      id="an-indexed-list"
+      level={2}
+    >
+      An indexed list
+    </Heading>
     <ul>
       <li>
         As Contacts: a plain list in sections by letter (sticky section titles),
@@ -920,3 +945,12 @@ export const ListComposition: FunctionComponent = () => (
     <Contacts />
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const listCompositionDemos = [
+  SettingsScreen,
+  DrillIn,
+  EditMode,
+  Inbox,
+  Contacts,
+];

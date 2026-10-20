@@ -7,7 +7,7 @@ import { Button, ButtonRootProps, Symbol } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { commonPropOptions, usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -60,13 +60,8 @@ export const ButtonDemo: FunctionComponent = () => {
       controls={[controlContent, controlRoot, controlSymbol, controlLabel]}
       id={id}
       log={log}
+      state={[stateContent, stateRoot, stateSymbol, stateLabel]}
       title="Button"
-      stateUrl={useCreateStateUrl(id, [
-        stateContent,
-        stateRoot,
-        stateSymbol,
-        stateLabel,
-      ])}
     >
       {/* A pop-up button: the label first, then the symbol. */}
       <Button.Root
@@ -128,7 +123,7 @@ export const ButtonMatrixDemo: FunctionComponent = () => {
       controls={control}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateControl])}
+      state={[stateControl]}
       title="Button (Matrix)"
     >
       <div className="button-demo-matrix">

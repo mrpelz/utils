@@ -13,7 +13,7 @@ import {
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   propOptionsBottom,
   propOptionsLayer,
@@ -164,6 +164,7 @@ export const ViewportAnchorsDemo: FunctionComponent = () => {
       center
       id={id}
       log={log}
+      state={[stateTop, stateBottom, stateLeading, stateTrailing, stateLayer]}
       title="Viewport (Anchors)"
       controls={[
         controlTop,
@@ -172,13 +173,6 @@ export const ViewportAnchorsDemo: FunctionComponent = () => {
         controlTrailing,
         controlLayer,
       ]}
-      stateUrl={useCreateStateUrl(id, [
-        stateTop,
-        stateBottom,
-        stateLeading,
-        stateTrailing,
-        stateLayer,
-      ])}
     >
       <Viewport.Provider>
         {layer ? (

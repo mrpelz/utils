@@ -14,9 +14,9 @@ import { forwardClick, List, Symbol } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { commonPropOptions, usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { PropsTable } from '../guide/props-table.js';
-import { PartLink } from '../guide/sections.js';
+import { Heading, PartLink } from '../guide/sections.js';
 import { contacts, messages, planets, settings } from './content.js';
 import {
   listAccessoryRows,
@@ -108,7 +108,7 @@ const RootPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Root"
     >
       <List.Root {...props}>
@@ -151,7 +151,7 @@ const SectionPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Section"
     >
       <List.Root>
@@ -193,7 +193,7 @@ const HeaderPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Header"
     >
       <List.Root>
@@ -242,7 +242,7 @@ const GroupPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Group"
     >
       <List.Root>
@@ -287,7 +287,7 @@ const ItemPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Item"
     >
       <List.Root>
@@ -327,7 +327,7 @@ const ExpandableRootPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.ExpandableRoot"
     >
       <List.Root>
@@ -379,7 +379,7 @@ const ExpandableTriggerPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.ExpandableTrigger"
     >
       <List.Root>
@@ -424,7 +424,7 @@ const ExpandablePart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Expandable"
     >
       <List.Root>
@@ -474,7 +474,7 @@ const FooterPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Footer"
     >
       <List.Root>
@@ -515,7 +515,7 @@ const BlockPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Block"
     >
       <List.Root>
@@ -556,7 +556,7 @@ const TitlePart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Title"
     >
       <List.Root>
@@ -601,7 +601,7 @@ const SubtitlePart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Subtitle"
     >
       <List.Root>
@@ -642,7 +642,7 @@ const SupertitlePart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Supertitle"
     >
       <List.Root>
@@ -685,7 +685,7 @@ const TextPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Text"
     >
       <List.Root listStyle="plain">
@@ -732,7 +732,7 @@ const DetailPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Detail"
     >
       <List.Root>
@@ -773,7 +773,7 @@ const ImagePart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Image"
     >
       <List.Root>
@@ -818,7 +818,7 @@ const AccessoryPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Accessory"
     >
       <List.Root>
@@ -867,7 +867,7 @@ const CheckmarkPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Checkmark"
     >
       <List.Root>
@@ -914,7 +914,7 @@ const DrillInPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.DrillIn"
     >
       <List.Root>
@@ -959,7 +959,7 @@ const DisclosurePart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Disclosure"
     >
       <List.Root>
@@ -1010,7 +1010,7 @@ const GrabberPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Grabber"
     >
       <List.Root>
@@ -1057,7 +1057,7 @@ const ActionPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Action"
     >
       <List.Root>
@@ -1099,7 +1099,7 @@ const ButtonPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Button"
     >
       <List.Root>
@@ -1143,7 +1143,7 @@ const CheckboxPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Checkbox"
     >
       <List.Root>
@@ -1193,7 +1193,7 @@ const RadioPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Radio"
     >
       <List.Root>
@@ -1246,7 +1246,7 @@ const EditButtonPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.EditButton"
     >
       <List.Root>
@@ -1297,7 +1297,7 @@ const SwipeActionsPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.SwipeActions"
     >
       <List.Root>
@@ -1350,7 +1350,7 @@ const SwipeActionPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.SwipeAction"
     >
       <List.Root listStyle="plain">
@@ -1417,7 +1417,7 @@ const IndexPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.Index"
     >
       <div className="list-demo-plain">
@@ -1500,7 +1500,7 @@ const IndexItemPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="List.IndexItem"
     >
       <div className="list-demo-plain">
@@ -1656,9 +1656,12 @@ export const ListParts: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="list-root">
+    <Heading
+      id="list-root"
+      level={2}
+    >
       <code>List.Root</code>
-    </h2>
+    </Heading>
     <ul>
       <li>The list.</li>
       <li>
@@ -1678,9 +1681,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listRootRows} />
 
-    <h2 id="list-section">
+    <Heading
+      id="list-section"
+      level={2}
+    >
       <code>List.Section</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A section (a <code>section</code>).
@@ -1695,9 +1701,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listSectionRows} />
 
-    <h2 id="list-header">
+    <Heading
+      id="list-header"
+      level={2}
+    >
       <code>List.Header</code>
-    </h2>
+    </Heading>
     <ul>
       <li>A section’s header.</li>
       <li>
@@ -1714,9 +1723,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listHeaderRows} />
 
-    <h2 id="list-group">
+    <Heading
+      id="list-group"
+      level={2}
+    >
       <code>List.Group</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A section’s rows (a <code>ul</code>), on the rows’ background.
@@ -1731,9 +1743,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listGroupRows} />
 
-    <h2 id="list-item">
+    <Heading
+      id="list-item"
+      level={2}
+    >
       <code>List.Item</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A row (an <code>li</code>): a grid of its parts, with a separator.
@@ -1752,9 +1767,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listItemRows} />
 
-    <h2 id="list-expandableroot">
+    <Heading
+      id="list-expandableroot"
+      level={2}
+    >
       <code>List.ExpandableRoot</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         An expandable row’s state: <code>defaultOpen</code>, or{' '}
@@ -1772,9 +1790,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listExpandableRootRows} />
 
-    <h2 id="list-expandabletrigger">
+    <Heading
+      id="list-expandabletrigger"
+      level={2}
+    >
       <code>List.ExpandableTrigger</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A button toggling its root’s row: <code>aria-expanded</code>,{' '}
@@ -1786,9 +1807,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listExpandableTriggerRows} />
 
-    <h2 id="list-expandable">
+    <Heading
+      id="list-expandable"
+      level={2}
+    >
       <code>List.Expandable</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A row shown or not, opening and closing in place, e.g. an inline picker
@@ -1805,9 +1829,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listExpandableRows} />
 
-    <h2 id="list-footer">
+    <Heading
+      id="list-footer"
+      level={2}
+    >
       <code>List.Footer</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A section’s footer: text below its group (or block), aligned with the
@@ -1818,9 +1845,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listFooterRows} />
 
-    <h2 id="list-block">
+    <Heading
+      id="list-block"
+      level={2}
+    >
       <code>List.Block</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         Text in a section instead of rows (Framework7’s content block), aligned
@@ -1834,9 +1864,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listBlockRows} />
 
-    <h2 id="list-title">
+    <Heading
+      id="list-title"
+      level={2}
+    >
       <code>List.Title</code>
-    </h2>
+    </Heading>
     <ul>
       <li>A row’s (or header’s) title, in Body.</li>
       <li>
@@ -1848,9 +1881,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listTitleRows} />
 
-    <h2 id="list-subtitle">
+    <Heading
+      id="list-subtitle"
+      level={2}
+    >
       <code>List.Subtitle</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A second line below the title: in a row (making it tall), or a header.
@@ -1860,9 +1896,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listSubtitleRows} />
 
-    <h2 id="list-supertitle">
+    <Heading
+      id="list-supertitle"
+      level={2}
+    >
       <code>List.Supertitle</code>
-    </h2>
+    </Heading>
     <ul>
       <li>A line above a header’s title.</li>
     </ul>
@@ -1870,9 +1909,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listSupertitleRows} />
 
-    <h2 id="list-text">
+    <Heading
+      id="list-text"
+      level={2}
+    >
       <code>List.Text</code>
-    </h2>
+    </Heading>
     <ul>
       <li>Body text below a row’s title and subtitle: a media row (Mail).</li>
       <li>
@@ -1883,9 +1925,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listTextRows} />
 
-    <h2 id="list-detail">
+    <Heading
+      id="list-detail"
+      level={2}
+    >
       <code>List.Detail</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A trailing value in the secondary color, e.g. a setting’s current value.
@@ -1895,9 +1940,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listDetailRows} />
 
-    <h2 id="list-image">
+    <Heading
+      id="list-image"
+      level={2}
+    >
       <code>List.Image</code>
-    </h2>
+    </Heading>
     <ul>
       <li>A leading image, one line high.</li>
       <li>
@@ -1909,9 +1957,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listImageRows} />
 
-    <h2 id="list-accessory">
+    <Heading
+      id="list-accessory"
+      level={2}
+    >
       <code>List.Accessory</code>
-    </h2>
+    </Heading>
     <ul>
       <li>A trailing symbol in the tint color.</li>
       <li>
@@ -1923,9 +1974,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listAccessoryRows} />
 
-    <h2 id="list-checkmark">
+    <Heading
+      id="list-checkmark"
+      level={2}
+    >
       <code>List.Checkmark</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A trailing checkmark in the tint color: the chosen row of a list of
@@ -1936,9 +1990,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listCheckmarkRows} />
 
-    <h2 id="list-drillin">
+    <Heading
+      id="list-drillin"
+      level={2}
+    >
       <code>List.DrillIn</code>
-    </h2>
+    </Heading>
     <ul>
       <li>A trailing chevron: the row opens a page (drills in).</li>
       <li>Hidden from assistive technology.</li>
@@ -1947,9 +2004,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listDrillInRows} />
 
-    <h2 id="list-disclosure">
+    <Heading
+      id="list-disclosure"
+      level={2}
+    >
       <code>List.Disclosure</code>
-    </h2>
+    </Heading>
     <ul>
       <li>A chevron in the tint color, turned down while open.</li>
       <li>
@@ -1962,9 +2022,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listDisclosureRows} />
 
-    <h2 id="list-grabber">
+    <Heading
+      id="list-grabber"
+      level={2}
+    >
       <code>List.Grabber</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A trailing handle dragging its row to reorder its group (see{' '}
@@ -1976,9 +2039,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listGrabberRows} />
 
-    <h2 id="list-action">
+    <Heading
+      id="list-action"
+      level={2}
+    >
       <code>List.Action</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         Text in the tint color as a button: trailing in a header (e.g. See All)
@@ -1989,9 +2055,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listActionRows} />
 
-    <h2 id="list-button">
+    <Heading
+      id="list-button"
+      level={2}
+    >
       <code>List.Button</code>
-    </h2>
+    </Heading>
     <ul>
       <li>A row that’s a button: the whole row pressable.</li>
       <li>
@@ -2002,9 +2071,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listButtonRows} />
 
-    <h2 id="list-checkbox">
+    <Heading
+      id="list-checkbox"
+      level={2}
+    >
       <code>List.Checkbox</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A <a href="checkbox">Checkbox</a> as a row’s leading edit control:
@@ -2018,9 +2090,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listCheckboxRows} />
 
-    <h2 id="list-radio">
+    <Heading
+      id="list-radio"
+      level={2}
+    >
       <code>List.Radio</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A <a href="checkbox">Radio</a> as a row’s leading edit control: choosing
@@ -2035,9 +2110,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listRadioRows} />
 
-    <h2 id="list-editbutton">
+    <Heading
+      id="list-editbutton"
+      level={2}
+    >
       <code>List.EditButton</code>
-    </h2>
+    </Heading>
     <ul>
       <li>A leading delete (or insert) button.</li>
       <li>
@@ -2049,9 +2127,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listEditButtonRows} />
 
-    <h2 id="list-swipeactions">
+    <Heading
+      id="list-swipeactions"
+      level={2}
+    >
       <code>List.SwipeActions</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A row’s actions on one side, revealed by swiping it (or by focusing
@@ -2065,9 +2146,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listSwipeActionsRows} />
 
-    <h2 id="list-swipeaction">
+    <Heading
+      id="list-swipeaction"
+      level={2}
+    >
       <code>List.SwipeAction</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         An action: a symbol (or short text) in a circle or rounded rectangle, in
@@ -2083,9 +2167,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listSwipeActionRows} />
 
-    <h2 id="list-index">
+    <Heading
+      id="list-index"
+      level={2}
+    >
       <code>List.Index</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         An index (a <code>nav</code>) of letters in the tint color, beside a
@@ -2098,9 +2185,12 @@ export const ListParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={listIndexRows} />
 
-    <h2 id="list-indexitem">
+    <Heading
+      id="list-indexitem"
+      level={2}
+    >
       <code>List.IndexItem</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A letter of the index (a button): its click scrolls the app’s list to
@@ -2112,3 +2202,37 @@ export const ListParts: FunctionComponent = () => (
     <PropsTable rows={listIndexItemRows} />
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const listPartsDemos = [
+  RootPart,
+  SectionPart,
+  HeaderPart,
+  GroupPart,
+  ItemPart,
+  ExpandableRootPart,
+  ExpandableTriggerPart,
+  ExpandablePart,
+  FooterPart,
+  BlockPart,
+  TitlePart,
+  SubtitlePart,
+  SupertitlePart,
+  TextPart,
+  DetailPart,
+  ImagePart,
+  AccessoryPart,
+  CheckmarkPart,
+  DrillInPart,
+  DisclosurePart,
+  GrabberPart,
+  ActionPart,
+  ButtonPart,
+  CheckboxPart,
+  RadioPart,
+  EditButtonPart,
+  SwipeActionsPart,
+  SwipeActionPart,
+  IndexPart,
+  IndexItemPart,
+];

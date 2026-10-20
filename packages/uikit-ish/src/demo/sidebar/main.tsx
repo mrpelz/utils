@@ -35,7 +35,7 @@ import {
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsSidebarColumn,
   propOptionsContent,
@@ -112,13 +112,13 @@ export const SidebarDemo: FunctionComponent = () => {
         controlSidebar,
         controlContentColumn,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateContent,
         stateRoot,
         stateColumn,
         stateSidebar,
         stateContentColumn,
-      ])}
+      ]}
     >
       <div className="sidebar-demo-screen">
         <Layout.Root
@@ -585,14 +585,14 @@ export const SidebarCompactDemo: FunctionComponent = () => {
         controlSidebar,
         controlContentColumn,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateContent,
         stateRoot,
         stateColumn,
         stateDrawer,
         stateSidebar,
         stateContentColumn,
-      ])}
+      ]}
     >
       <div className="sidebar-demo-screen">
         <Layout.Root

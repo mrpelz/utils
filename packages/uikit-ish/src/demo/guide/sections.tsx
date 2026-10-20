@@ -18,6 +18,29 @@ export type Section = readonly [id: string, title: ReactNode];
 /** The current page's path (for its anchors' links; see `ComponentShell`). */
 export const PagePathContext = createContext('');
 
+/** A section's heading, anchored (`id`), with a link to itself. */
+export const Heading: FunctionComponent<{
+  children: ReactNode;
+  id: string;
+  level: 2 | 3 | 4;
+}> = ({ children, id, level }) => {
+  const path = useContext(PagePathContext);
+  const Tag = `h${String(level)}` as 'h2';
+
+  return (
+    <Tag id={id}>
+      {children}{' '}
+      <a
+        aria-label="Link to this section"
+        className="demo-anchor"
+        href={`${path}#${id}`}
+      >
+        #
+      </a>
+    </Tag>
+  );
+};
+
 /** A page's sections, listed at its top, linking to their headings. */
 export const Contents: FunctionComponent<{
   sections: readonly Section[];

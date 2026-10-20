@@ -3,7 +3,7 @@ import { FunctionComponent } from 'react';
 import { ActivityIndicator, Progress } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   propOptionsBar,
   propOptionsBarContent,
@@ -69,13 +69,13 @@ export const ProgressDemo: FunctionComponent = () => {
         controlLabel,
         controlValue,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateBar,
         stateBarContent,
         stateIndicator,
         stateLabel,
         stateValue,
-      ])}
+      ]}
     >
       <div
         style={{

@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'react';
 
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -45,7 +45,12 @@ export const ListInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="primitive-collection">Primitive: Collection</h2>
+    <Heading
+      id="primitive-collection"
+      level={2}
+    >
+      Primitive: Collection
+    </Heading>
     <ul>
       <li>
         Collection: a set of items with a data shape and a projection (guide,{' '}
@@ -79,7 +84,12 @@ export const ListInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="its-parts-as-primitives">Its parts as primitives</h2>
+    <Heading
+      id="its-parts-as-primitives"
+      level={2}
+    >
+      Its parts as primitives
+    </Heading>
     <ul>
       <li>
         <strong>Group:</strong> a section bundles its rows, optionally
@@ -103,7 +113,12 @@ export const ListInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="traits">Traits</h2>
+    <Heading
+      id="traits"
+      level={2}
+    >
+      Traits
+    </Heading>
     <ul>
       <li>
         The row of “Lists and tables” in the guide’s trait matrix (
@@ -143,7 +158,12 @@ export const ListInformationArchitecture: FunctionComponent = () => (
       </tbody>
     </table>
 
-    <h2 id="where-it-sits">Where it sits</h2>
+    <Heading
+      id="where-it-sits"
+      level={2}
+    >
+      Where it sits
+    </Heading>
     <ul>
       <li>
         <strong>Containment:</strong> a Surface holds a Collection; a Collection

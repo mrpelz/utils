@@ -17,7 +17,7 @@ import {
 } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { propOptionsContent, propOptionsRoot } from './props.js';
 
 /**
@@ -55,7 +55,7 @@ export const BadgeDemo: FunctionComponent = () => {
       center
       controls={[controlRoot, controlContent]}
       id={id}
-      stateUrl={useCreateStateUrl(id, [stateRoot, stateContent])}
+      state={[stateRoot, stateContent]}
       title="Badge"
     >
       <div className="badge-demo-stage">

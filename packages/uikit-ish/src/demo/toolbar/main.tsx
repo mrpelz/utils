@@ -17,7 +17,7 @@ import {
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsButton,
   getPropOptionsPageControl,
@@ -58,7 +58,7 @@ export const ToolbarDemo: FunctionComponent = () => {
       controls={[controlRoot, controlButton]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot, stateButton])}
+      state={[stateRoot, stateButton]}
       title="Toolbar"
     >
       <Toolbar.Root
@@ -172,6 +172,7 @@ export const ToolbarPageDotsDemo: FunctionComponent = () => {
       baseUiId="toolbar"
       id={id}
       log={log}
+      state={[stateContent, stateRoot, stateButton, statePageControl]}
       title="Toolbar (Page Dots)"
       controls={[
         controlContent,
@@ -179,12 +180,6 @@ export const ToolbarPageDotsDemo: FunctionComponent = () => {
         controlButton,
         controlPageControl,
       ]}
-      stateUrl={useCreateStateUrl(id, [
-        stateContent,
-        stateRoot,
-        stateButton,
-        statePageControl,
-      ])}
     >
       <Toolbar.Root
         key={elementKey}
@@ -262,13 +257,8 @@ export const ToolbarSymbolsDemo: FunctionComponent = () => {
       controls={[controlContent, controlRoot, controlGroup, controlButton]}
       id={id}
       log={log}
+      state={[stateContent, stateRoot, stateGroup, stateButton]}
       title="Toolbar (Symbols)"
-      stateUrl={useCreateStateUrl(id, [
-        stateContent,
-        stateRoot,
-        stateGroup,
-        stateButton,
-      ])}
     >
       <Toolbar.Root
         key={elementKey}
@@ -373,7 +363,7 @@ export const ToolbarTextDemo: FunctionComponent = () => {
       controls={[controlRoot, controlButton]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot, stateButton])}
+      state={[stateRoot, stateButton]}
       title="Toolbar (Text)"
     >
       <Toolbar.Root

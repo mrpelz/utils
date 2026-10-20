@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'react';
 
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -44,7 +44,12 @@ export const SliderInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="primitive-value-input">Primitive: Value input</h2>
+    <Heading
+      id="primitive-value-input"
+      level={2}
+    >
+      Primitive: Value input
+    </Heading>
     <ul>
       <li>
         Value input: sets a typed value that isn’t a pick from a set (guide,{' '}
@@ -72,7 +77,12 @@ export const SliderInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="the-indicator-continuum">The indicator continuum</h2>
+    <Heading
+      id="the-indicator-continuum"
+      level={2}
+    >
+      The indicator continuum
+    </Heading>
     <ul>
       <li>
         The guide: sliders at the editable end of the indicators, a quantity on
@@ -89,7 +99,12 @@ export const SliderInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="traits">Traits</h2>
+    <Heading
+      id="traits"
+      level={2}
+    >
+      Traits
+    </Heading>
     <ul>
       <li>
         The slider’s row of the guide’s trait matrix (
@@ -129,7 +144,12 @@ export const SliderInformationArchitecture: FunctionComponent = () => (
       </tbody>
     </table>
 
-    <h2 id="where-it-sits">Where it sits</h2>
+    <Heading
+      id="where-it-sits"
+      level={2}
+    >
+      Where it sits
+    </Heading>
     <ul>
       <li>
         <strong>In an Item:</strong> Items contain a Value input (guide,{' '}

@@ -11,7 +11,7 @@ import { Button, Menu, Symbol } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsCheckboxItems,
   getPropOptionsItem,
@@ -143,7 +143,7 @@ export const MenuDemo: FunctionComponent = () => {
         controlSubmenuPositioner,
         controlSubmenuPopup,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateRoot,
         stateTrigger,
         statePositioner,
@@ -156,7 +156,7 @@ export const MenuDemo: FunctionComponent = () => {
         stateSubmenuTrigger,
         stateSubmenuPositioner,
         stateSubmenuPopup,
-      ])}
+      ]}
     >
       <Menu.Root
         key={`${keyRoot}-${keySubmenuRoot}`}
@@ -393,7 +393,7 @@ export const MenuRegularDemo: FunctionComponent = () => {
         controlSubmenuPositioner,
         controlSubmenuPopup,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateRoot,
         stateTrigger,
         statePositioner,
@@ -406,7 +406,7 @@ export const MenuRegularDemo: FunctionComponent = () => {
         stateSubmenuTrigger,
         stateSubmenuPositioner,
         stateSubmenuPopup,
-      ])}
+      ]}
     >
       <Menu.Root
         key={`${keyRoot}-${keySubmenuRoot}`}
@@ -595,13 +595,13 @@ export const MenuTogglesDemo: FunctionComponent = () => {
         controlRadioItem,
         controlIndicator,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateRoot,
         stateCheckboxItem,
         stateRadioGroup,
         stateRadioItem,
         stateIndicator,
-      ])}
+      ]}
     >
       <Menu.Root
         key={`${keyRoot}-${keyCheckboxItem}-${keyRadioGroup}`}
@@ -775,7 +775,7 @@ export const MenuOpenDemo: FunctionComponent = () => {
       controls={[controlRoot, controlPopup]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot, statePopup])}
+      state={[stateRoot, statePopup]}
       title="Menu (Open)"
     >
       <span

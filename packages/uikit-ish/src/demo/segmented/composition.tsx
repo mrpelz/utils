@@ -17,7 +17,7 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { AddLog, useLog } from '../frame/log.js';
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -267,7 +267,12 @@ const sections: readonly Section[] = [
 export const SegmentedComposition: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <h2 id="switching-a-view-s-content">Switching a view’s content</h2>
+    <Heading
+      id="switching-a-view-s-content"
+      level={2}
+    >
+      Switching a view’s content
+    </Heading>
     <ul>
       <li>
         Above the content it filters or rearranges, e.g. a chart’s period, its
@@ -285,7 +290,12 @@ export const SegmentedComposition: FunctionComponent = () => (
     <CodeView code={contentCode} />
     <ContentViews />
 
-    <h2 id="in-a-navigation-bar">In a navigation bar</h2>
+    <Heading
+      id="in-a-navigation-bar"
+      level={2}
+    >
+      In a navigation bar
+    </Heading>
     <ul>
       <li>
         In place of the title, filtering the page’s list (Phone’s Recents: All,
@@ -298,7 +308,12 @@ export const SegmentedComposition: FunctionComponent = () => (
     <CodeView code={headerCode} />
     <InHeader />
 
-    <h2 id="in-a-toolbar">In a toolbar</h2>
+    <Heading
+      id="in-a-toolbar"
+      level={2}
+    >
+      In a toolbar
+    </Heading>
     <ul>
       <li>
         Between a bottom <a href="toolbar">Toolbar</a>’s buttons: choosing how
@@ -312,7 +327,12 @@ export const SegmentedComposition: FunctionComponent = () => (
     <CodeView code={toolbarCode} />
     <InToolbar />
 
-    <h2 id="in-forms">In forms</h2>
+    <Heading
+      id="in-forms"
+      level={2}
+    >
+      In forms
+    </Heading>
     <ul>
       <li>
         A radio group with hidden radio inputs: in a <a href="form">Form</a>,
@@ -325,3 +345,6 @@ export const SegmentedComposition: FunctionComponent = () => (
     </ul>
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const segmentedCompositionDemos = [ContentViews, InHeader, InToolbar];

@@ -688,13 +688,18 @@ const placeRow = (
       .map((property) => `${property} ${animate ? swipeDuration : 0}ms`)
       .join(', ');
 
-  // Rounded at the side the content leaves (changing with the side only).
-  const clipPath = rowPath(
-    item.offsetWidth,
-    item.offsetHeight,
-    offset * direction,
-  );
-  if (item.style.clipPath !== clipPath) item.style.clipPath = clipPath;
+  // Rounded at the side the content leaves (changing with the side only); at
+  // rest, none (the row's own corners, e.g. pressed, see `resetRow`).
+  if (offset === 0) {
+    item.style.removeProperty('clip-path');
+  } else {
+    const clipPath = rowPath(
+      item.offsetWidth,
+      item.offsetHeight,
+      offset * direction,
+    );
+    if (item.style.clipPath !== clipPath) item.style.clipPath = clipPath;
+  }
 
   for (const side of sides) {
     const container = actions[side];

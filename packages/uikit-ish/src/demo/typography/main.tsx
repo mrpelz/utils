@@ -5,7 +5,7 @@ import { Fragment, FunctionComponent } from 'react';
 import { Typography } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   dynamicTypeSizes,
   propOptionsContent,
@@ -39,7 +39,7 @@ export const TypographyDemo: FunctionComponent = () => {
       center
       controls={[controlContent, control]}
       id={id}
-      stateUrl={useCreateStateUrl(id, [stateContent, stateControl])}
+      state={[stateContent, stateControl]}
       title="Typography"
     >
       <Typography {...props}>{content.text}</Typography>
@@ -72,7 +72,7 @@ export const TypographyMatrixDemo: FunctionComponent = () => {
     <Component
       controls={control}
       id={id}
-      stateUrl={useCreateStateUrl(id, [stateControl])}
+      state={[stateControl]}
       title="Typography (Matrix)"
     >
       <div className="typography-demo-matrix typography-demo-variants">
@@ -125,7 +125,7 @@ export const TypographySizesDemo: FunctionComponent = () => {
     <Component
       controls={control}
       id={id}
-      stateUrl={useCreateStateUrl(id, [stateControl])}
+      state={[stateControl]}
       title="Typography (Dynamic Type)"
     >
       <div className="typography-demo-matrix typography-demo-sizes">

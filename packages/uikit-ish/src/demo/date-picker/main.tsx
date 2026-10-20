@@ -13,7 +13,7 @@ import {
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsDatePicker,
   getPropOptionsRangePicker,
@@ -48,7 +48,7 @@ export const DatePickerDemo: FunctionComponent = () => {
       controls={controlPicker}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [statePicker])}
+      state={[statePicker]}
       title="Date Picker"
     >
       <DatePicker
@@ -89,7 +89,7 @@ export const DatePickerRangeDemo: FunctionComponent = () => {
       controls={controlPicker}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [statePicker])}
+      state={[statePicker]}
       title="Date Picker (Range)"
     >
       <DatePicker
@@ -141,7 +141,7 @@ export const TimePickerDemo: FunctionComponent = () => {
       controls={controlPicker}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [statePicker])}
+      state={[statePicker]}
       title="Date Picker (Time)"
     >
       <DatePicker
@@ -174,7 +174,7 @@ export const DateAndTimePickerDemo: FunctionComponent = () => {
       controls={controlPicker}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [statePicker])}
+      state={[statePicker]}
       title="Date Picker (Date and Time)"
     >
       <DatePicker
@@ -221,7 +221,7 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
       controls={[controlContent, controlPicker]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateContent, statePicker])}
+      state={[stateContent, statePicker]}
       title="Date Picker (Footer)"
     >
       <DatePicker

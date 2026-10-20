@@ -4,7 +4,7 @@ import { Alert, Button } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { getPropOptionsRoot, propOptionsContent } from './props.js';
 
 /**
@@ -40,7 +40,7 @@ export const AlertDemo: FunctionComponent = () => {
       controls={[controlRoot, controlContent]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot, stateContent])}
+      state={[stateRoot, stateContent]}
       title="Alert"
     >
       <Alert.Root

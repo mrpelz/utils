@@ -9,9 +9,9 @@ import {
 } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { names } from './content.js';
 import {
   viewportAnchorRows,
@@ -62,7 +62,7 @@ const LiveViewFrame: FunctionComponent<{
       inline
       controls={[controlContent, controlStart, controlEnd]}
       id={id}
-      stateUrl={useCreateStateUrl(id, [stateContent, stateStart, stateEnd])}
+      state={[stateContent, stateStart, stateEnd]}
       title="Viewport"
     >
       <div className="viewport-demo-screen">
@@ -162,7 +162,12 @@ export const ViewportOverview: FunctionComponent = () => (
     </ul>
     <LiveView />
 
-    <h2 id="when-to-use-it">When to use it</h2>
+    <Heading
+      id="when-to-use-it"
+      level={2}
+    >
+      When to use it
+    </Heading>
     <ul>
       <li>
         An app’s shell: its pages in <code>Viewport.Content</code>, its bars (a
@@ -181,7 +186,12 @@ export const ViewportOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="when-to-use-something-else">When to use something else</h2>
+    <Heading
+      id="when-to-use-something-else"
+      level={2}
+    >
+      When to use something else
+    </Heading>
     <ul>
       <li>
         A page’s own bars, scrolling with it (a navigation bar with a large
@@ -198,7 +208,12 @@ export const ViewportOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="key-props">Key props</h2>
+    <Heading
+      id="key-props"
+      level={2}
+    >
+      Key props
+    </Heading>
     <ul>
       <li>The props most viewports set, across their parts.</li>
       <li>
@@ -222,7 +237,12 @@ export const ViewportOverview: FunctionComponent = () => (
       ]}
     />
 
-    <h2 id="accessibility">Accessibility</h2>
+    <Heading
+      id="accessibility"
+      level={2}
+    >
+      Accessibility
+    </Heading>
     <ul>
       <li>
         Its parts are <code>div</code>s without roles: what’s in them brings its
@@ -241,7 +261,12 @@ export const ViewportOverview: FunctionComponent = () => (
       <li>It has no animations of its own.</li>
     </ul>
 
-    <h2 id="behavior">Behavior</h2>
+    <Heading
+      id="behavior"
+      level={2}
+    >
+      Behavior
+    </Heading>
     <ul>
       <li>
         <code>Viewport.Provider</code> tracks the visual viewport (once per
@@ -260,7 +285,10 @@ export const ViewportOverview: FunctionComponent = () => (
         Anchors and the content layer are <code>position: fixed</code>: to the
         window, or to an ancestor with a <code>transform</code> (as this page’s
         phone screens). Anchors (<code>z-index</code> 10) float above the
-        content layer; they don’t inset it.
+        content layer; they don’t inset it. Anchors are layers of their own (
+        <code>transform</code>, so Safari paints them above the scrolling
+        content layer): within one, fixed elements are placed relative to it
+        (overlays are portaled out).
       </li>
       <li>
         At the bottom, an anchor moves up with the keyboard (
@@ -287,3 +315,6 @@ export const ViewportOverview: FunctionComponent = () => (
     </ul>
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const viewportOverviewDemos = [LiveView];

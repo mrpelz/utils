@@ -16,7 +16,7 @@ import {
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { getPropOptionsRoot } from './props.js';
 
 /** The demo's pages: their titles and the pages they drill into. */
@@ -81,7 +81,7 @@ export const NavigationDemo: FunctionComponent = () => {
       controls={[controlRoot]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot])}
+      state={[stateRoot]}
       title="Navigation"
     >
       {/* The stacks, as a tab bar's: switched at once. */}

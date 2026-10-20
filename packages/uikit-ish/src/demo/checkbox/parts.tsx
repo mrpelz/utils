@@ -12,9 +12,9 @@ import {
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { PropsTable } from '../guide/props-table.js';
-import { PartLink } from '../guide/sections.js';
+import { Heading, PartLink } from '../guide/sections.js';
 import {
   checkboxGroupRows,
   checkboxIndicatorRows,
@@ -63,7 +63,7 @@ const CheckboxRootPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Checkbox.Root"
     >
       <Checkbox.Root
@@ -95,7 +95,7 @@ const CheckboxIndicatorPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Checkbox.Indicator"
     >
       <Checkbox.Root
@@ -131,7 +131,7 @@ const RadioRootPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Radio.Root"
     >
       <RadioGroup
@@ -181,7 +181,7 @@ const RadioIndicatorPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Radio.Indicator"
     >
       <RadioGroup
@@ -232,7 +232,7 @@ const CheckboxGroupPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="CheckboxGroup"
     >
       <CheckboxGroup
@@ -281,7 +281,7 @@ const RadioGroupPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="RadioGroup"
     >
       <RadioGroup
@@ -355,9 +355,12 @@ export const CheckboxParts: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="checkbox-root">
+    <Heading
+      id="checkbox-root"
+      level={2}
+    >
       <code>Checkbox.Root</code>
-    </h2>
+    </Heading>
     <ul>
       <li>Base UI’s checkbox, as a selection circle.</li>
       <li>
@@ -382,9 +385,12 @@ export const CheckboxParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={checkboxRootRows} />
 
-    <h2 id="checkbox-indicator">
+    <Heading
+      id="checkbox-indicator"
+      level={2}
+    >
       <code>Checkbox.Indicator</code>
-    </h2>
+    </Heading>
     <ul>
       <li>What the circle shows while ticked or mixed.</li>
       <li>Default (no children): the checkmark and the dash.</li>
@@ -394,9 +400,12 @@ export const CheckboxParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={checkboxIndicatorRows} />
 
-    <h2 id="radio-root">
+    <Heading
+      id="radio-root"
+      level={2}
+    >
       <code>Radio.Root</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         Base UI’s radio, as a selection circle, by its <code>value</code>, in a{' '}
@@ -411,9 +420,12 @@ export const CheckboxParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={radioRootRows} />
 
-    <h2 id="radio-indicator">
+    <Heading
+      id="radio-indicator"
+      level={2}
+    >
       <code>Radio.Indicator</code>
-    </h2>
+    </Heading>
     <ul>
       <li>What the radio shows while chosen.</li>
       <li>Default: the checkmark. As the root’s child: its own content.</li>
@@ -422,9 +434,12 @@ export const CheckboxParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={radioIndicatorRows} />
 
-    <h2 id="checkboxgroup">
+    <Heading
+      id="checkboxgroup"
+      level={2}
+    >
       <code>CheckboxGroup</code>
-    </h2>
+    </Heading>
     <ul>
       <li>Base UI’s, as is.</li>
       <li>
@@ -440,9 +455,12 @@ export const CheckboxParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={checkboxGroupRows} />
 
-    <h2 id="radiogroup">
+    <Heading
+      id="radiogroup"
+      level={2}
+    >
       <code>RadioGroup</code>
-    </h2>
+    </Heading>
     <ul>
       <li>Base UI’s, as is.</li>
       <li>Radios sharing one value: the chosen radio’s.</li>
@@ -459,3 +477,13 @@ export const CheckboxParts: FunctionComponent = () => (
     <PropsTable rows={radioGroupRows} />
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const checkboxPartsDemos = [
+  CheckboxRootPart,
+  CheckboxIndicatorPart,
+  RadioRootPart,
+  RadioIndicatorPart,
+  CheckboxGroupPart,
+  RadioGroupPart,
+];

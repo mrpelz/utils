@@ -43,7 +43,7 @@ import {
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { commonPropOptions, usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { contacts, messages, planets } from './content.js';
 import {
   getPropOptionsAccessory,
@@ -129,13 +129,8 @@ export const ListDemo: FunctionComponent = () => {
       controls={[controlRoot, controlItem, controlCollapsible, controlTrigger]}
       id={id}
       log={log}
+      state={[stateRoot, stateItem, stateCollapsible, stateTrigger]}
       title="List"
-      stateUrl={useCreateStateUrl(id, [
-        stateRoot,
-        stateItem,
-        stateCollapsible,
-        stateTrigger,
-      ])}
     >
       <List.Root {...propsRoot}>
         <List.Section>
@@ -624,7 +619,7 @@ export const ListPartsDemo: FunctionComponent = () => {
         controlFooter,
         controlBlock,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateContent,
         stateRoot,
         stateSection,
@@ -649,7 +644,7 @@ export const ListPartsDemo: FunctionComponent = () => {
         stateSwipeAction,
         stateFooter,
         stateBlock,
-      ])}
+      ]}
     >
       <List.Root {...propsRoot}>
         <List.Section {...propsSection}>
@@ -858,13 +853,13 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
         controlDisclosure,
         controlExpandable,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateCollapsible,
         stateTrigger,
         statePanel,
         stateDisclosure,
         stateExpandable,
-      ])}
+      ]}
     >
       <List.Root>
         <Collapsible.Root
@@ -988,12 +983,8 @@ export const ListSwipeDemo: FunctionComponent = () => {
       controls={[controlRoot, controlSwipeActions, controlSwipeAction]}
       id={id}
       log={log}
+      state={[stateRoot, stateSwipeActions, stateSwipeAction]}
       title="List (Swipe Actions)"
-      stateUrl={useCreateStateUrl(id, [
-        stateRoot,
-        stateSwipeActions,
-        stateSwipeAction,
-      ])}
     >
       <List.Root {...propsRoot}>
         <List.Section>
@@ -1470,7 +1461,7 @@ export const ListEditDemo: FunctionComponent = () => {
       controls={[controlRoot, controlGrabber]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot, stateGrabber])}
+      state={[stateRoot, stateGrabber]}
       title="List (Editing)"
     >
       <List.Root {...propsRoot}>
@@ -1550,7 +1541,7 @@ export const ListEditDeleteDemo: FunctionComponent = () => {
       controls={[controlRoot, controlEditButton]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot, stateEditButton])}
+      state={[stateRoot, stateEditButton]}
       title="List (Editing: Delete)"
     >
       <List.Root {...propsRoot}>
@@ -1615,7 +1606,7 @@ export const ListEditInsertDemo: FunctionComponent = () => {
       controls={controlRoot}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot])}
+      state={[stateRoot]}
       title="List (Editing: Insert)"
     >
       <List.Root {...propsRoot}>
@@ -1691,7 +1682,7 @@ export const ListEditSelectDemo: FunctionComponent = () => {
       controls={[controlRoot, controlCheckbox]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot, stateCheckbox])}
+      state={[stateRoot, stateCheckbox]}
       title="List (Editing: Select)"
     >
       <List.Root {...propsRoot}>
@@ -1761,7 +1752,7 @@ export const ListEditSelectSingleDemo: FunctionComponent = () => {
       controls={[controlRoot, controlRadioGroup, controlRadio]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot, stateRadioGroup, stateRadio])}
+      state={[stateRoot, stateRadioGroup, stateRadio]}
       title="List (Editing: Select One)"
     >
       <List.Root {...propsRoot}>
@@ -1833,7 +1824,7 @@ export const ListSegmentedDemo: FunctionComponent = () => {
       controls={controlRoot}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot])}
+      state={[stateRoot]}
       title="List (Segmented)"
     >
       <List.Root {...propsRoot}>
@@ -1940,7 +1931,7 @@ export const ListFormDemo: FunctionComponent = () => {
       controls={controlRoot}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot])}
+      state={[stateRoot]}
       title="List (Form)"
     >
       <List.Root {...propsRoot}>
@@ -2110,13 +2101,8 @@ export const ListIndexDemo: FunctionComponent = () => {
       controls={[controlRoot, controlHeader, controlIndex, controlIndexItem]}
       id={id}
       log={log}
+      state={[stateRoot, stateHeader, stateIndex, stateIndexItem]}
       title="List (Index)"
-      stateUrl={useCreateStateUrl(id, [
-        stateRoot,
-        stateHeader,
-        stateIndex,
-        stateIndexItem,
-      ])}
     >
       <div className="list-demo-plain">
         <div
@@ -2236,7 +2222,7 @@ export const ListMailDemo: FunctionComponent = () => {
       controls={[controlRoot, controlText]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot, stateText])}
+      state={[stateRoot, stateText]}
       title="List (Mail)"
     >
       <List.Root {...propsRoot}>

@@ -24,7 +24,7 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { time } from './content.js';
 
@@ -462,7 +462,12 @@ const sections: readonly Section[] = [
 export const SliderComposition: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <h2 id="in-a-settings-list">In a settings list</h2>
+    <Heading
+      id="in-a-settings-list"
+      level={2}
+    >
+      In a settings list
+    </Heading>
     <ul>
       <li>
         As iOS’s Display &amp; Brightness: a slider filling a{' '}
@@ -480,7 +485,12 @@ export const SliderComposition: FunctionComponent = () => (
     <CodeView code={settingsCode} />
     <SettingsRow />
 
-    <h2 id="a-range">A range</h2>
+    <Heading
+      id="a-range"
+      level={2}
+    >
+      A range
+    </Heading>
     <ul>
       <li>
         Two thumbs (<code>index</code> 0 and 1) on a value of two numbers, e.g.
@@ -501,7 +511,12 @@ export const SliderComposition: FunctionComponent = () => (
     <CodeView code={rangeCode} />
     <Range />
 
-    <h2 id="labels-and-forms">Labels and forms</h2>
+    <Heading
+      id="labels-and-forms"
+      level={2}
+    >
+      Labels and forms
+    </Heading>
     <ul>
       <li>
         A <code>Slider.Label</code> names the inputs (no <code>aria-label</code>{' '}
@@ -523,7 +538,12 @@ export const SliderComposition: FunctionComponent = () => (
     <CodeView code={formCode} />
     <InAForm />
 
-    <h2 id="in-a-player">In a player</h2>
+    <Heading
+      id="in-a-player"
+      level={2}
+    >
+      In a player
+    </Heading>
     <ul>
       <li>
         A playback position: the app moves the controlled <code>value</code> as
@@ -553,3 +573,6 @@ export const SliderComposition: FunctionComponent = () => (
     <Media />
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const sliderCompositionDemos = [SettingsRow, Range, InAForm, Media];

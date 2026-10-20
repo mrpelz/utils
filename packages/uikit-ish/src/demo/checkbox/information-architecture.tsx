@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'react';
 
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -45,7 +45,12 @@ export const CheckboxInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="on-their-own-a-choice">On their own: a Choice</h2>
+    <Heading
+      id="on-their-own-a-choice"
+      level={2}
+    >
+      On their own: a Choice
+    </Heading>
     <ul>
       <li>
         Choice: one or many from a known set (guide,{' '}
@@ -97,9 +102,12 @@ export const CheckboxInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="in-lists-a-collection-s-selection">
+    <Heading
+      id="in-lists-a-collection-s-selection"
+      level={2}
+    >
       In lists: a Collection’s selection
-    </h2>
+    </Heading>
     <ul>
       <li>
         Collection: a set of items with a data shape and a projection (guide,{' '}
@@ -131,7 +139,12 @@ export const CheckboxInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="traits">Traits</h2>
+    <Heading
+      id="traits"
+      level={2}
+    >
+      Traits
+    </Heading>
     <ul>
       <li>
         No row in the guide’s trait matrix (

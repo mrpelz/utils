@@ -859,8 +859,10 @@
       --uikit-list-separator-opacity: 0;
     }
 
-    /* While reordering, by their order on screen (see useReorder) */
-    &:first-child:not([data-reorder-edge]),
+    /* The first and last rows shown (closed expandable rows aside, see
+       Expandable); while reordering, by their order on screen (see
+       useReorder). */
+    &:nth-child(1 of :not([data-closed])):not([data-reorder-edge]),
     &[data-reorder-edge~='first'] {
       border-start-end-radius: var(
         --uikit-list-item-radius,
@@ -874,7 +876,7 @@
       --uikit-list-separator-opacity: 0;
     }
 
-    &:last-child:not([data-reorder-edge]),
+    &:nth-last-child(1 of :not([data-closed])):not([data-reorder-edge]),
     &[data-reorder-edge~='last'] {
       border-end-end-radius: var(
         --uikit-list-item-radius,

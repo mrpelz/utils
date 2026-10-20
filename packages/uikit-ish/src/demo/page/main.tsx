@@ -6,7 +6,7 @@ import { Header, List, Page, Toolbar } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { propOptionsContent, propOptionsRoot } from './props.js';
 
 /**
@@ -39,7 +39,7 @@ export const PageDemo: FunctionComponent = () => {
       controls={[controlContent, controlRoot]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateContent, stateRoot])}
+      state={[stateContent, stateRoot]}
       title="Page"
     >
       <div className="page-demo-screen">

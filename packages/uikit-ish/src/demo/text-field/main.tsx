@@ -4,7 +4,7 @@ import { List, TextField } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { commonPropOptions, usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsClear,
   getPropOptionsControl,
@@ -76,14 +76,14 @@ export const TextFieldDemo: FunctionComponent = () => {
         controlDescription,
         controlError,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateRoot,
         stateLabel,
         stateControl,
         stateClear,
         stateDescription,
         stateError,
-      ])}
+      ]}
     >
       <List.Root>
         <List.Section>
@@ -103,14 +103,14 @@ export const TextFieldDemo: FunctionComponent = () => {
                 Please enter a name.
               </TextField.Error>
             </TextField.Root>
-            {/* The suggestions of the control's `list` option. */}
-            <datalist id={suggestionsId}>
-              <option value="Kate Bell" />
-              <option value="John Appleseed" />
-              <option value="Anna Haro" />
-            </datalist>
           </List.Group>
         </List.Section>
+        {/* The suggestions of the control's `list` option. */}
+        <datalist id={suggestionsId}>
+          <option value="Kate Bell" />
+          <option value="John Appleseed" />
+          <option value="Anna Haro" />
+        </datalist>
       </List.Root>
     </Component>
   );

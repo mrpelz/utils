@@ -4,9 +4,9 @@ import { Switch } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { PropsTable } from '../guide/props-table.js';
-import { PartLink } from '../guide/sections.js';
+import { Heading, PartLink } from '../guide/sections.js';
 import { switchRootRows, switchThumbRows } from './docs.js';
 import { getPropOptionsRoot, propOptionsThumb } from './props.js';
 
@@ -31,7 +31,7 @@ const RootPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Switch.Root"
     >
       <Switch.Root
@@ -64,7 +64,7 @@ const ThumbPart: FunctionComponent = () => {
       inline
       controls={[control]}
       id={id}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Switch.Thumb"
     >
       <Switch.Root
@@ -96,9 +96,12 @@ export const SwitchParts: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="switch-root">
+    <Heading
+      id="switch-root"
+      level={2}
+    >
       <code>Switch.Root</code>
-    </h2>
+    </Heading>
     <ul>
       <li>The control and its track.</li>
       <li>
@@ -125,9 +128,12 @@ export const SwitchParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={switchRootRows} />
 
-    <h2 id="switch-thumb">
+    <Heading
+      id="switch-thumb"
+      level={2}
+    >
       <code>Switch.Thumb</code>
-    </h2>
+    </Heading>
     <ul>
       <li>The knob, inside the root.</li>
       <li>Moves with the state, and with the pointer while dragged.</li>
@@ -142,3 +148,6 @@ export const SwitchParts: FunctionComponent = () => (
     <PropsTable rows={switchThumbRows} />
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const switchPartsDemos = [RootPart, ThumbPart];

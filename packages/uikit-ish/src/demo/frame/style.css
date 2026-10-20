@@ -268,18 +268,48 @@
     margin-inline-start: 0.5rem;
   }
 
+  /* The frame's buttons (Copy, Clear, Reset) and links as buttons
+     (Fullscreen), alike: as its config column (dashed, gray, monospace). */
   .demo-button {
+    display: inline-block;
     align-self: self-start;
+    padding: 2px 8px;
+    border: 1px dashed #404040;
+    border-radius: 0;
+    appearance: none;
+    background: none;
+    color: light-dark(black, #a1a1a1);
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 0.875rem;
+    line-height: normal;
+    text-decoration: none;
+
+    &:disabled {
+      color: #a1a1a1;
+      cursor: default;
+      opacity: 0.5;
+    }
   }
 
-  /* Inline (a page's live view, see Component): in the page's flow, sized
-     by its content, the stage at least a phone's height's half. */
+  /* (Below a code view, as below an inline demo, see .demo-inline.) */
+  .demo-code > .demo-button {
+    margin-top: 0.5rem;
+  }
+
+  .demo-inline {
+    margin-block: 1.5rem;
+
+    & > .demo-button {
+      margin-top: 0.5rem;
+    }
+  }
+
   .demo-container[data-inline] {
     width: auto;
     min-height: auto;
     padding: 1rem;
     border: 1px dashed #404040;
-    margin-block: 1.5rem;
     scroll-snap-align: none;
     scroll-snap-stop: normal;
     scroll-snap-type: none;

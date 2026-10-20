@@ -4,7 +4,7 @@ import { ActionSheet, Button } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { getPropOptionsRoot } from './props.js';
 
 const actions = ['Action 2', 'Action 3', 'Action 4'];
@@ -34,7 +34,7 @@ export const ActionSheetDemo: FunctionComponent = () => {
       controls={[controlRoot]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot])}
+      state={[stateRoot]}
       title="Action Sheet"
     >
       <ActionSheet.Root

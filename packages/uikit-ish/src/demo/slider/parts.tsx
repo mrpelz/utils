@@ -7,9 +7,9 @@ import { Slider, Symbol } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { AddLog, useLog } from '../frame/log.js';
 import { commonPropOptions, usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { PropsTable } from '../guide/props-table.js';
-import { PartLink } from '../guide/sections.js';
+import { Heading, PartLink } from '../guide/sections.js';
 import {
   sliderControlRows,
   sliderIndicatorRows,
@@ -65,7 +65,7 @@ const RootPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Slider.Root"
     >
       <Slider.Root
@@ -119,7 +119,7 @@ const LabelPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Slider.Label"
     >
       <Slider.Root
@@ -159,7 +159,7 @@ const ValuePart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Slider.Value"
     >
       <Slider.Root
@@ -200,7 +200,7 @@ const ControlPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Slider.Control"
     >
       <Slider.Root
@@ -245,7 +245,7 @@ const TrackPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Slider.Track"
     >
       <Slider.Root
@@ -290,7 +290,7 @@ const IndicatorPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Slider.Indicator"
     >
       <Slider.Root
@@ -335,7 +335,7 @@ const ThumbPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Slider.Thumb"
     >
       <Slider.Root
@@ -388,7 +388,7 @@ const TicksPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Slider.Ticks"
     >
       <Slider.Root
@@ -437,7 +437,7 @@ const SymbolPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Slider.Symbol"
     >
       <Slider.Root
@@ -520,9 +520,12 @@ export const SliderParts: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="slider-root">
+    <Heading
+      id="slider-root"
+      level={2}
+    >
       <code>Slider.Root</code>
-    </h2>
+    </Heading>
     <ul>
       <li>Base UI’s slider root.</li>
       <li>
@@ -545,9 +548,12 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderRootRows} />
 
-    <h2 id="slider-label">
+    <Heading
+      id="slider-label"
+      level={2}
+    >
       <code>Slider.Label</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         Base UI’s label: names the slider’s inputs (<code>aria-labelledby</code>
@@ -563,9 +569,12 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderLabelRows} />
 
-    <h2 id="slider-value">
+    <Heading
+      id="slider-value"
+      level={2}
+    >
       <code>Slider.Value</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         Base UI’s value (an <code>output</code>): the formatted value, or what
@@ -581,9 +590,12 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderValueRows} />
 
-    <h2 id="slider-control">
+    <Heading
+      id="slider-control"
+      level={2}
+    >
       <code>Slider.Control</code>
-    </h2>
+    </Heading>
     <ul>
       <li>Base UI’s control: the area taking presses and drags.</li>
       <li>
@@ -594,9 +606,12 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderControlRows} />
 
-    <h2 id="slider-track">
+    <Heading
+      id="slider-track"
+      level={2}
+    >
       <code>Slider.Track</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         Base UI’s track: the 6px bar, in a fill color (UIKit’s{' '}
@@ -608,9 +623,12 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderTrackRows} />
 
-    <h2 id="slider-indicator">
+    <Heading
+      id="slider-indicator"
+      level={2}
+    >
       <code>Slider.Indicator</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         Base UI’s indicator: the fill in the tint, from the minimum to the value
@@ -622,9 +640,12 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderIndicatorRows} />
 
-    <h2 id="slider-thumb">
+    <Heading
+      id="slider-thumb"
+      level={2}
+    >
       <code>Slider.Thumb</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         Base UI’s thumb: the knob, holding the hidden range input that gets
@@ -639,9 +660,12 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderThumbRows} />
 
-    <h2 id="slider-ticks">
+    <Heading
+      id="slider-ticks"
+      level={2}
+    >
       <code>Slider.Ticks</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         Tick marks (iOS 26) inside the track, one per each of the{' '}
@@ -656,9 +680,12 @@ export const SliderParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={sliderTicksRows} />
 
-    <h2 id="slider-symbol">
+    <Heading
+      id="slider-symbol"
+      level={2}
+    >
       <code>Slider.Symbol</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A symbol (or text) for an end (UIKit <code>minimumValueImage</code>,{' '}
@@ -671,3 +698,16 @@ export const SliderParts: FunctionComponent = () => (
     <PropsTable rows={sliderSymbolRows} />
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const sliderPartsDemos = [
+  RootPart,
+  LabelPart,
+  ValuePart,
+  ControlPart,
+  TrackPart,
+  IndicatorPart,
+  ThumbPart,
+  TicksPart,
+  SymbolPart,
+];

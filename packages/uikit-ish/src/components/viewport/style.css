@@ -36,6 +36,12 @@
   .uikit-viewport-anchor {
     z-index: 10;
 
+    /* A layer of its own: Safari paints a composited scroller's content (the
+       content layer's) above uncomposited later siblings, their z-index
+       notwithstanding (e.g. within a transformed ancestor, where fixed is
+       not composited as such). */
+    transform: translateZ(0);
+
     &[data-edge='block-start'] {
       top: var(--uikit-viewport-top, 0);
       padding-top: var(--uikit-viewport-safe-top);

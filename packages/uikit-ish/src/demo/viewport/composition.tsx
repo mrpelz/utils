@@ -4,6 +4,7 @@ import { FunctionComponent, RefObject, useRef, useState } from 'react';
 import {
   Button,
   CheckboxGroup,
+  collapsedSelection,
   forwardClick,
   List,
   Symbol,
@@ -16,10 +17,10 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { messages } from '../list/content.js';
-import { phoneTabs } from '../tab-bar/tabs.js';
+import { phoneTabs, phoneTabValues } from '../tab-bar/tabs.js';
 import { names } from './content.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -46,18 +47,16 @@ const messageCode = `<Viewport.Provider>
   {/* Pushed up by the keyboard (keyboard="push", the default). */}
   <Viewport.BlockEnd>
     <div className="message-bar">
-      <List.Root>
-        <List.Group style={{ marginInline: 0 }}>
-          <TextField.Root render={<List.Item />}>
-            <TextField.Control
-              aria-label="Message"
-              enterKeyHint="send"
-              placeholder="Message"
-            />
-            <TextField.Clear />
-          </TextField.Root>
-        </List.Group>
-      </List.Root>
+      <TextField.Root>
+        <TextField.Search>
+          <TextField.Control
+            aria-label="Message"
+            enterKeyHint="send"
+            placeholder="Message"
+          />
+          <TextField.Clear />
+        </TextField.Search>
+      </TextField.Root>
     </div>
   </Viewport.BlockEnd>
 </Viewport.Provider>`;
@@ -71,13 +70,29 @@ const collapseCode = `const contentRef = useRef<HTMLDivElement>(null);
 
 // In App (inside the provider):
 const { atTop, direction } = useScrollDirection();
+const [value, setValue] = useState('contacts');
+// Collapsed, its selected tab remains.
+const [sections] = collapsedSelection([tabValues], value);
 
-<Viewport.Content ref={contentRef}>…</Viewport.Content>
-<Viewport.BlockEnd keyboard="cover">
-  <TabBar.List collapsed={!atTop && direction === 'down'}>
-    …
-  </TabBar.List>
-</Viewport.BlockEnd>`;
+<TabBar.Root value={value} onValueChange={setValue}>
+  <Viewport.Content ref={contentRef}>…</Viewport.Content>
+  <Viewport.BlockEnd keyboard="cover">
+    <TabBar.List collapsed={!atTop && direction === 'down'}>
+      <TabBar.Group visibleWhenCollapsed>
+        <TabBar.Indicator />
+        {tabs.map(([tab, label, icon], index) => (
+          <TabBar.Tab
+            key={tab}
+            value={tab}
+            visibleWhenCollapsed={sections?.tab === index}
+          >
+            …
+          </TabBar.Tab>
+        ))}
+      </TabBar.Group>
+    </TabBar.List>
+  </Viewport.BlockEnd>
+</TabBar.Root>`;
 
 const toolbarCode = `const [selected, setSelected] = useState<string[]>([]);
 
@@ -214,23 +229,21 @@ const Message: FunctionComponent = () => {
         </Viewport.Content>
         <Viewport.BlockEnd>
           <div className="viewport-demo-bar">
-            <List.Root>
-              <List.Group style={{ marginInline: 0 }}>
-                <TextField.Root render={<List.Item />}>
-                  <TextField.Control
-                    aria-label="Message"
-                    enterKeyHint="send"
-                    placeholder="Message"
-                    onKeyDown={(event) => {
-                      if (event.key !== 'Enter') return;
-                      addLog(`send: ${event.currentTarget.value}`);
-                      event.currentTarget.value = '';
-                    }}
-                  />
-                  <TextField.Clear />
-                </TextField.Root>
-              </List.Group>
-            </List.Root>
+            <TextField.Root>
+              <TextField.Search>
+                <TextField.Control
+                  aria-label="Message"
+                  enterKeyHint="send"
+                  placeholder="Message"
+                  onKeyDown={(event) => {
+                    if (event.key !== 'Enter') return;
+                    addLog(`send: ${event.currentTarget.value}`);
+                    event.currentTarget.value = '';
+                  }}
+                />
+                <TextField.Clear />
+              </TextField.Search>
+            </TextField.Root>
           </div>
         </Viewport.BlockEnd>
       </div>
@@ -246,6 +259,9 @@ const CollapseView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
 }> = ({ contentRef }) => {
   const { atTop, direction } = useScrollDirection();
+  const [value, setValue] = useState('contacts');
+  // Collapsed, its selected tab remains.
+  const [sections] = collapsedSelection([phoneTabValues], value);
 
   return (
     <Component
@@ -255,7 +271,10 @@ const CollapseView: FunctionComponent<{
       title="Viewport collapsing a tab bar"
     >
       <div className="viewport-demo-screen">
-        <TabBar.Root defaultValue="contacts">
+        <TabBar.Root
+          value={value}
+          onValueChange={setValue}
+        >
           <Viewport.Content ref={contentRef}>
             <TabBar.Panel value="contacts">
               <List.Root className="viewport-demo-list">
@@ -273,12 +292,13 @@ const CollapseView: FunctionComponent<{
           </Viewport.Content>
           <Viewport.BlockEnd keyboard="cover">
             <TabBar.List collapsed={!atTop && direction === 'down'}>
-              <TabBar.Group>
+              <TabBar.Group visibleWhenCollapsed>
                 <TabBar.Indicator />
-                {phoneTabs.map(([tab, label, icon]) => (
+                {phoneTabs.map(([tab, label, icon], index) => (
                   <TabBar.Tab
                     key={tab}
                     value={tab}
+                    visibleWhenCollapsed={sections?.tab === index}
                   >
                     <TabBar.Icon>
                       <Symbol icon={icon} />
@@ -399,7 +419,12 @@ export const ViewportComposition: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="an-app-shell-with-a-tab-bar">An app shell with a tab bar</h2>
+    <Heading
+      id="an-app-shell-with-a-tab-bar"
+      level={2}
+    >
+      An app shell with a tab bar
+    </Heading>
     <ul>
       <li>
         An app’s shell (guide <GuideLink to="shell-a">§7.4, shell A</GuideLink>
@@ -418,9 +443,12 @@ export const ViewportComposition: FunctionComponent = () => (
     <CodeView code={shellCode} />
     <Shell />
 
-    <h2 id="a-message-field-over-the-keyboard">
+    <Heading
+      id="a-message-field-over-the-keyboard"
+      level={2}
+    >
       A message field over the keyboard
-    </h2>
+    </Heading>
     <ul>
       <li>
         A message field at the bottom, pushed up by the keyboard (
@@ -434,7 +462,12 @@ export const ViewportComposition: FunctionComponent = () => (
     <CodeView code={messageCode} />
     <Message />
 
-    <h2 id="a-bar-collapsing-on-scroll">A bar collapsing on scroll</h2>
+    <Heading
+      id="a-bar-collapsing-on-scroll"
+      level={2}
+    >
+      A bar collapsing on scroll
+    </Heading>
     <ul>
       <li>
         The provider tracking the content layer (<code>scroller</code>, its
@@ -453,7 +486,12 @@ export const ViewportComposition: FunctionComponent = () => (
     <CodeView code={collapseCode} />
     <Collapse />
 
-    <h2 id="a-bottom-toolbar-over-a-list">A bottom toolbar over a list</h2>
+    <Heading
+      id="a-bottom-toolbar-over-a-list"
+      level={2}
+    >
+      A bottom toolbar over a list
+    </Heading>
     <ul>
       <li>
         A toolbar at the bottom acting on the list’s selection (guide{' '}
@@ -472,3 +510,6 @@ export const ViewportComposition: FunctionComponent = () => (
     <Selection />
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const viewportCompositionDemos = [Shell, Message, Collapse, Selection];

@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'react';
 
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -39,7 +39,12 @@ export const SwitchInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="primitive-choice">Primitive: Choice</h2>
+    <Heading
+      id="primitive-choice"
+      level={2}
+    >
+      Primitive: Choice
+    </Heading>
     <ul>
       <li>
         Choice: one or many from a known set (guide,{' '}
@@ -92,7 +97,12 @@ export const SwitchInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="traits">Traits</h2>
+    <Heading
+      id="traits"
+      level={2}
+    >
+      Traits
+    </Heading>
     <ul>
       <li>
         The toggle’s row of the guide’s trait matrix (
@@ -138,7 +148,12 @@ export const SwitchInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="where-it-sits">Where it sits</h2>
+    <Heading
+      id="where-it-sits"
+      level={2}
+    >
+      Where it sits
+    </Heading>
     <ul>
       <li>
         <strong>Layer:</strong> the content layer, scrolling with the page

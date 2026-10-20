@@ -20,7 +20,7 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { AddLog, useLog } from '../frame/log.js';
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { phoneTabs, phoneTabValues } from './tabs.js';
 
@@ -519,7 +519,12 @@ const sections: readonly Section[] = [
 export const TabBarComposition: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <h2 id="switching-an-app-s-sections">Switching an app’s sections</h2>
+    <Heading
+      id="switching-an-app-s-sections"
+      level={2}
+    >
+      Switching an app’s sections
+    </Heading>
     <ul>
       <li>
         Base UI’s Tabs: the root holds the tabs and the sections’ panels,
@@ -543,7 +548,12 @@ export const TabBarComposition: FunctionComponent = () => (
     <CodeView code={panelsCode} />
     <Panels />
 
-    <h2 id="search">Search</h2>
+    <Heading
+      id="search"
+      level={2}
+    >
+      Search
+    </Heading>
     <ul>
       <li>
         Search: a group of its own after the sections’ (iOS 26; guide{' '}
@@ -561,7 +571,12 @@ export const TabBarComposition: FunctionComponent = () => (
     <CodeView code={searchCode} />
     <Search />
 
-    <h2 id="badges-on-tabs">Badges on tabs</h2>
+    <Heading
+      id="badges-on-tabs"
+      level={2}
+    >
+      Badges on tabs
+    </Heading>
     <ul>
       <li>
         A section’s news (missed calls, new voicemail): a{' '}
@@ -578,7 +593,12 @@ export const TabBarComposition: FunctionComponent = () => (
     <CodeView code={badgeCode} />
     <Badges />
 
-    <h2 id="collapsing-on-scroll">Collapsing on scroll</h2>
+    <Heading
+      id="collapsing-on-scroll"
+      level={2}
+    >
+      Collapsing on scroll
+    </Heading>
     <ul>
       <li>iOS’s tab bars minimize while the content scrolls down.</li>
       <li>
@@ -591,7 +611,12 @@ export const TabBarComposition: FunctionComponent = () => (
     <CodeView code={scrollCode} />
     <OnScroll />
 
-    <h2 id="a-mini-player">A mini player</h2>
+    <Heading
+      id="a-mini-player"
+      level={2}
+    >
+      A mini player
+    </Heading>
     <ul>
       <li>
         App content attached to the bar (Music’s mini player): a{' '}
@@ -610,3 +635,12 @@ export const TabBarComposition: FunctionComponent = () => (
     <MiniPlayer />
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const tabBarCompositionDemos = [
+  Panels,
+  Search,
+  Badges,
+  OnScroll,
+  MiniPlayer,
+];

@@ -181,6 +181,11 @@
     :is(h2, h3, h4):hover > & {
       opacity: 1;
     }
+
+    /* (Shown always without hover, e.g. on a phone.) */
+    @media (hover: none) {
+      opacity: 1;
+    }
   }
 
   .demo-prose blockquote {

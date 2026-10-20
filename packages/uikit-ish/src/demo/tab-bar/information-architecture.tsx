@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'react';
 
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -42,7 +42,12 @@ export const TabBarInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="primitives-region-choice">Primitives: Region + Choice</h2>
+    <Heading
+      id="primitives-region-choice"
+      level={2}
+    >
+      Primitives: Region + Choice
+    </Heading>
     <ul>
       <li>
         Region: an edge-anchored strip of a surface, hosting commands, choices
@@ -72,7 +77,12 @@ export const TabBarInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="traits">Traits</h2>
+    <Heading
+      id="traits"
+      level={2}
+    >
+      Traits
+    </Heading>
     <ul>
       <li>
         The tab bar’s row of the guide’s trait matrix (
@@ -118,7 +128,12 @@ export const TabBarInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="where-it-sits">Where it sits</h2>
+    <Heading
+      id="where-it-sits"
+      level={2}
+    >
+      Where it sits
+    </Heading>
     <ul>
       <li>
         <strong>Layer:</strong> the functional layer of Liquid Glass, floating
@@ -156,7 +171,12 @@ export const TabBarInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="rules">Rules</h2>
+    <Heading
+      id="rules"
+      level={2}
+    >
+      Rules
+    </Heading>
     <ul>
       <li>
         <strong>It navigates, never acts</strong> (

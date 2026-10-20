@@ -6,7 +6,7 @@ import { EditMenu, Menu, useSelectionAnchor } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   propOptionsPopup as propOptionsMenuPopup,
   propOptionsPositioner as propOptionsMenuPositioner,
@@ -97,7 +97,7 @@ export const EditMenuDemo: FunctionComponent = () => {
         controlSubmenuPositioner,
         controlSubmenuPopup,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateRoot,
         statePositioner,
         statePopup,
@@ -105,7 +105,7 @@ export const EditMenuDemo: FunctionComponent = () => {
         stateMore,
         stateSubmenuPositioner,
         stateSubmenuPopup,
-      ])}
+      ]}
     >
       <EditMenu.Root
         key={elementKey}

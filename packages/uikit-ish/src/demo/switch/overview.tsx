@@ -3,9 +3,9 @@ import { FunctionComponent } from 'react';
 import { Switch } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { switchRootRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 
@@ -26,7 +26,7 @@ const LiveView: FunctionComponent = () => {
       inline
       controls={[control]}
       id={id}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Switch"
     >
       <Switch.Root
@@ -61,7 +61,12 @@ export const SwitchOverview: FunctionComponent = () => (
     </ul>
     <LiveView />
 
-    <h2 id="when-to-use-it">When to use it</h2>
+    <Heading
+      id="when-to-use-it"
+      level={2}
+    >
+      When to use it
+    </Heading>
     <ul>
       <li>
         For a setting with two states that applies immediately, e.g. Airplane
@@ -73,7 +78,12 @@ export const SwitchOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="when-to-use-something-else">When to use something else</h2>
+    <Heading
+      id="when-to-use-something-else"
+      level={2}
+    >
+      When to use something else
+    </Heading>
     <ul>
       <li>
         Selecting items (rows to delete, people to invite): a{' '}
@@ -89,7 +99,12 @@ export const SwitchOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="key-props">Key props</h2>
+    <Heading
+      id="key-props"
+      level={2}
+    >
+      Key props
+    </Heading>
     <ul>
       <li>The props most switches set.</li>
       <li>
@@ -114,7 +129,12 @@ export const SwitchOverview: FunctionComponent = () => (
       ]}
     />
 
-    <h2 id="accessibility">Accessibility</h2>
+    <Heading
+      id="accessibility"
+      level={2}
+    >
+      Accessibility
+    </Heading>
     <ul>
       <li>
         The root has the <code>switch</code> role and <code>aria-checked</code>;
@@ -140,7 +160,12 @@ export const SwitchOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="behavior">Behavior</h2>
+    <Heading
+      id="behavior"
+      level={2}
+    >
+      Behavior
+    </Heading>
     <ul>
       <li>
         A click or tap toggles it. The knob can also be dragged: the state flips
@@ -151,3 +176,6 @@ export const SwitchOverview: FunctionComponent = () => (
     </ul>
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const switchOverviewDemos = [LiveView];

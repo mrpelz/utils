@@ -9,11 +9,17 @@ import { AlertDemo } from './alert/main.js';
 import { AvatarDemo } from './avatar/main.js';
 import { BadgeDemo } from './badge/main.js';
 import { ButtonDemo, ButtonMatrixDemo } from './button/main.js';
-import { CheckboxComposition } from './checkbox/composition.js';
+import {
+  CheckboxComposition,
+  checkboxCompositionDemos,
+} from './checkbox/composition.js';
 import { CheckboxInformationArchitecture } from './checkbox/information-architecture.js';
 import { CheckboxDemo, CheckboxRadioDemo } from './checkbox/main.js';
-import { CheckboxOverview } from './checkbox/overview.js';
-import { CheckboxParts } from './checkbox/parts.js';
+import {
+  CheckboxOverview,
+  checkboxOverviewDemos,
+} from './checkbox/overview.js';
+import { CheckboxParts, checkboxPartsDemos } from './checkbox/parts.js';
 import { ColorPickerDemo } from './color-picker/main.js';
 import { ContextualMenuDemo } from './contextual-menu/main.js';
 import {
@@ -27,7 +33,7 @@ import { EditMenuDemo } from './edit-menu/main.js';
 import { FormDemo } from './form/main.js';
 import { HeaderDemo, HeaderTitleDemo } from './header/main.js';
 import { LayoutCompactDemo, LayoutDemo } from './layout/main.js';
-import { ListComposition } from './list/composition.js';
+import { ListComposition, listCompositionDemos } from './list/composition.js';
 import { ListInformationArchitecture } from './list/information-architecture.js';
 import {
   ListCollapsibleDemo,
@@ -44,8 +50,8 @@ import {
   ListSegmentedDemo,
   ListSwipeDemo,
 } from './list/main.js';
-import { ListOverview } from './list/overview.js';
-import { ListParts } from './list/parts.js';
+import { ListOverview, listOverviewDemos } from './list/overview.js';
+import { ListParts, listPartsDemos } from './list/parts.js';
 import {
   MenuDemo,
   MenuOpenDemo,
@@ -59,30 +65,45 @@ import { PageControlDemo } from './page-control/main.js';
 import { PopoverDemo } from './popover/main.js';
 import { ProgressDemo } from './progress/main.js';
 import { RollDemo } from './roll/main.js';
-import { SegmentedComposition } from './segmented/composition.js';
+import {
+  SegmentedComposition,
+  segmentedCompositionDemos,
+} from './segmented/composition.js';
 import { SegmentedInformationArchitecture } from './segmented/information-architecture.js';
 import { SegmentedDemo } from './segmented/main.js';
-import { SegmentedOverview } from './segmented/overview.js';
-import { SegmentedParts } from './segmented/parts.js';
+import {
+  SegmentedOverview,
+  segmentedOverviewDemos,
+} from './segmented/overview.js';
+import { SegmentedParts, segmentedPartsDemos } from './segmented/parts.js';
 import { SheetDemo } from './sheet/main.js';
 import {
   SidebarCompactDemo,
   SidebarDemo,
   SidebarEditingDemo,
 } from './sidebar/main.js';
-import { SliderComposition } from './slider/composition.js';
+import {
+  SliderComposition,
+  sliderCompositionDemos,
+} from './slider/composition.js';
 import { SliderInformationArchitecture } from './slider/information-architecture.js';
 import { SliderDemo } from './slider/main.js';
-import { SliderOverview } from './slider/overview.js';
-import { SliderParts } from './slider/parts.js';
+import { SliderOverview, sliderOverviewDemos } from './slider/overview.js';
+import { SliderParts, sliderPartsDemos } from './slider/parts.js';
 import { StepperDemo } from './stepper/main.js';
-import { SwitchComposition } from './switch/composition.js';
+import {
+  SwitchComposition,
+  switchCompositionDemos,
+} from './switch/composition.js';
 import { SwitchInformationArchitecture } from './switch/information-architecture.js';
 import { SwitchDemo } from './switch/main.js';
-import { SwitchOverview } from './switch/overview.js';
-import { SwitchParts } from './switch/parts.js';
+import { SwitchOverview, switchOverviewDemos } from './switch/overview.js';
+import { SwitchParts, switchPartsDemos } from './switch/parts.js';
 import { SymbolDemo } from './symbol/main.js';
-import { TabBarComposition } from './tab-bar/composition.js';
+import {
+  TabBarComposition,
+  tabBarCompositionDemos,
+} from './tab-bar/composition.js';
 import { TabBarInformationArchitecture } from './tab-bar/information-architecture.js';
 import {
   TabBarAccessoryDemo,
@@ -93,8 +114,8 @@ import {
   TabBarScrollDemo,
   TabBarSearchDemo,
 } from './tab-bar/main.js';
-import { TabBarOverview } from './tab-bar/overview.js';
-import { TabBarParts } from './tab-bar/parts.js';
+import { TabBarOverview, tabBarOverviewDemos } from './tab-bar/overview.js';
+import { TabBarParts, tabBarPartsDemos } from './tab-bar/parts.js';
 import { TextFieldDemo } from './text-field/main.js';
 import {
   ToolbarDemo,
@@ -108,15 +129,21 @@ import {
   TypographyMatrixDemo,
   TypographySizesDemo,
 } from './typography/main.js';
-import { ViewportComposition } from './viewport/composition.js';
+import {
+  ViewportComposition,
+  viewportCompositionDemos,
+} from './viewport/composition.js';
 import { ViewportInformationArchitecture } from './viewport/information-architecture.js';
 import {
   ViewportAnchorsDemo,
   ViewportBarDemo,
   ViewportDemo,
 } from './viewport/main.js';
-import { ViewportOverview } from './viewport/overview.js';
-import { ViewportParts } from './viewport/parts.js';
+import {
+  ViewportOverview,
+  viewportOverviewDemos,
+} from './viewport/overview.js';
+import { ViewportParts, viewportPartsDemos } from './viewport/parts.js';
 
 /**
  * The index's groups: by what a component is for, after a re-slicing of
@@ -187,7 +214,14 @@ export type CatalogEntry = {
 export const catalog: readonly CatalogEntry[] = [
   {
     category: 'structure',
-    demos: [ViewportDemo, ViewportBarDemo, ViewportAnchorsDemo],
+    demos: [
+      ViewportDemo,
+      ViewportBarDemo,
+      ViewportAnchorsDemo,
+      ...viewportOverviewDemos,
+      ...viewportPartsDemos,
+      ...viewportCompositionDemos,
+    ],
     higId: 'layout',
     id: 'viewport',
     Composition: ViewportComposition,
@@ -214,6 +248,9 @@ export const catalog: readonly CatalogEntry[] = [
       ListMailDemo,
       ListSegmentedDemo,
       ListFormDemo,
+      ...listOverviewDemos,
+      ...listPartsDemos,
+      ...listCompositionDemos,
     ],
     framework7Id: 'list-view',
     higId: 'lists-and-tables',
@@ -245,7 +282,12 @@ export const catalog: readonly CatalogEntry[] = [
   {
     baseUiId: 'radio',
     category: 'choices',
-    demos: [SegmentedDemo],
+    demos: [
+      SegmentedDemo,
+      ...segmentedOverviewDemos,
+      ...segmentedPartsDemos,
+      ...segmentedCompositionDemos,
+    ],
     framework7Id: 'segmented',
     higId: 'segmented-controls',
     id: 'segmented',
@@ -260,7 +302,12 @@ export const catalog: readonly CatalogEntry[] = [
   {
     baseUiId: 'switch',
     category: 'choices',
-    demos: [SwitchDemo],
+    demos: [
+      SwitchDemo,
+      ...switchOverviewDemos,
+      ...switchPartsDemos,
+      ...switchCompositionDemos,
+    ],
     framework7Id: 'toggle',
     higId: 'toggles',
     id: 'switch',
@@ -275,7 +322,13 @@ export const catalog: readonly CatalogEntry[] = [
   {
     baseUiId: 'checkbox',
     category: 'choices',
-    demos: [CheckboxDemo, CheckboxRadioDemo],
+    demos: [
+      CheckboxDemo,
+      CheckboxRadioDemo,
+      ...checkboxOverviewDemos,
+      ...checkboxPartsDemos,
+      ...checkboxCompositionDemos,
+    ],
     framework7Id: 'checkbox',
     higId: 'toggles',
     id: 'checkbox',
@@ -290,7 +343,12 @@ export const catalog: readonly CatalogEntry[] = [
   {
     baseUiId: 'slider',
     category: 'choices',
-    demos: [SliderDemo],
+    demos: [
+      SliderDemo,
+      ...sliderOverviewDemos,
+      ...sliderPartsDemos,
+      ...sliderCompositionDemos,
+    ],
     framework7Id: 'range-slider',
     higId: 'sliders',
     id: 'slider',
@@ -363,6 +421,9 @@ export const catalog: readonly CatalogEntry[] = [
       TabBarAccessoryDemo,
       TabBarScrollDemo,
       TabBarRegularDemo,
+      ...tabBarOverviewDemos,
+      ...tabBarPartsDemos,
+      ...tabBarCompositionDemos,
     ],
     framework7Id: 'toolbar-tabbar',
     higId: 'tab-bars',

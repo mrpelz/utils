@@ -13,7 +13,7 @@ import {
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsPanel,
   getPropOptionsRoot,
@@ -111,13 +111,8 @@ export const ColorPickerDemo: FunctionComponent = () => {
       controls={[controlContent, controlRoot, controlPanel, controlWell]}
       id={id}
       log={log}
+      state={[stateContent, stateRoot, statePanel, stateWell]}
       title="Color Picker"
-      stateUrl={useCreateStateUrl(id, [
-        stateContent,
-        stateRoot,
-        statePanel,
-        stateWell,
-      ])}
     >
       {content.container === 'sheet' ? (
         <Sheet.Root defaultOpen={content.defaultOpen}>

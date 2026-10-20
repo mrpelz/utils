@@ -5,7 +5,7 @@ import { Button, List, Popover, Symbol } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -71,12 +71,8 @@ export const PopoverDemo: FunctionComponent = () => {
       controls={[controlRoot, controlPositioner, controlContent]}
       id={id}
       log={log}
+      state={[stateRoot, statePositioner, stateContent]}
       title="Popover"
-      stateUrl={useCreateStateUrl(id, [
-        stateRoot,
-        statePositioner,
-        stateContent,
-      ])}
     >
       <div
         style={{

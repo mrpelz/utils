@@ -3,7 +3,7 @@ import { FunctionComponent } from 'react';
 import { Symbol } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { propOptionsContent, propOptionsSymbol } from './props.js';
 
 /**
@@ -33,7 +33,7 @@ export const SymbolDemo: FunctionComponent = () => {
       center
       controls={[controlSymbol, controlContent]}
       id={id}
-      stateUrl={useCreateStateUrl(id, [stateSymbol, stateContent])}
+      state={[stateSymbol, stateContent]}
       title="Symbol"
     >
       <span style={{ color: content.color, fontSize: content.fontSize }}>

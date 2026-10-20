@@ -12,6 +12,8 @@ const unwrap = (node: ReactNode): ReactNode => {
 
   const element = node as ReactElement<Record<string, unknown>>;
   const { children, ...props } = element.props;
+  // (Preact's compat copies an element's `className` to `class`: written once.)
+  if ('className' in props) delete props.class;
 
   // (Elements in props, too, e.g. `render`.) Their names marked (see
   // `attributeHook`): rendering would rename some as HTML attributes

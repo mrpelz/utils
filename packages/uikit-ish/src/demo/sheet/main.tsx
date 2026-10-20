@@ -12,7 +12,7 @@ import {
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { getPropOptionsRoot, propOptionsPopup } from './props.js';
 
 /**
@@ -46,7 +46,7 @@ export const SheetDemo: FunctionComponent = () => {
       controls={[controlRoot, controlPopup]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateRoot, statePopup])}
+      state={[stateRoot, statePopup]}
       title="Sheet"
     >
       <Sheet.Root

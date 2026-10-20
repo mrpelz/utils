@@ -4,7 +4,7 @@ import { Slider } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { commonPropOptions, usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsMaxSymbol,
   getPropOptionsMinSymbol,
@@ -123,7 +123,7 @@ export const SliderDemo: FunctionComponent = () => {
         controlMinSymbol,
         controlMaxSymbol,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateContent,
         stateRoot,
         stateLabel,
@@ -136,7 +136,7 @@ export const SliderDemo: FunctionComponent = () => {
         stateTicks,
         stateMinSymbol,
         stateMaxSymbol,
-      ])}
+      ]}
     >
       <Slider.Root
         key={elementKey}

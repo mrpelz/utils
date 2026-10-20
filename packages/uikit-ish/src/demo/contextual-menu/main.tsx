@@ -9,7 +9,7 @@ import { Button, ContextualMenu, Symbol } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsItem as getPropOptionsMenuItem,
   propOptionsItemDestructive as propOptionsMenuItemDestructive,
@@ -104,7 +104,7 @@ export const ContextualMenuDemo: FunctionComponent = () => {
         controlItem,
         controlDestructiveItem,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateContent,
         stateRoot,
         stateTrigger,
@@ -113,7 +113,7 @@ export const ContextualMenuDemo: FunctionComponent = () => {
         statePopup,
         stateItem,
         stateDestructiveItem,
-      ])}
+      ]}
     >
       <ContextualMenu.Root
         key={elementKey}

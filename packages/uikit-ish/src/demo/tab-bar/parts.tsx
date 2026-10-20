@@ -8,9 +8,9 @@ import { collapsedSelection, Symbol, TabBar } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { AddLog, useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { PropsTable } from '../guide/props-table.js';
-import { PartLink } from '../guide/sections.js';
+import { Heading, PartLink } from '../guide/sections.js';
 import {
   tabBarAccessoryRows,
   tabBarGroupRows,
@@ -76,7 +76,7 @@ const RootPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="TabBar.Root"
     >
       <TabBar.Root
@@ -140,7 +140,7 @@ const ListPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="TabBar.List"
     >
       <TabBar.Root
@@ -208,7 +208,7 @@ const GroupPart: FunctionComponent = () => {
       controls={[control, controlList]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state, stateList])}
+      state={[state, stateList]}
       title="TabBar.Group"
     >
       <TabBar.Root
@@ -277,7 +277,7 @@ const IndicatorPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="TabBar.Indicator"
     >
       <TabBar.Root
@@ -345,7 +345,7 @@ const TabPart: FunctionComponent = () => {
       controls={[control, controlList]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state, stateList])}
+      state={[state, stateList]}
       title="TabBar.Tab"
     >
       <TabBar.Root
@@ -409,7 +409,7 @@ const IconPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="TabBar.Icon"
     >
       <TabBar.Root
@@ -472,7 +472,7 @@ const LabelPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="TabBar.Label"
     >
       <TabBar.Root
@@ -537,7 +537,7 @@ const PanelPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="TabBar.Panel"
     >
       <TabBar.Root
@@ -616,7 +616,7 @@ const AccessoryPart: FunctionComponent = () => {
       controls={[control, controlList]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state, stateList])}
+      state={[state, stateList]}
       title="TabBar.Accessory"
     >
       <TabBar.Root
@@ -710,9 +710,12 @@ export const TabBarParts: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="tabbar-root">
+    <Heading
+      id="tabbar-root"
+      level={2}
+    >
       <code>TabBar.Root</code>
-    </h2>
+    </Heading>
     <ul>
       <li>Base UI’s Tabs root.</li>
       <li>
@@ -729,9 +732,12 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarRootRows} />
 
-    <h2 id="tabbar-list">
+    <Heading
+      id="tabbar-list"
+      level={2}
+    >
       <code>TabBar.List</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         The bar, with the <code>tablist</code> role.
@@ -756,9 +762,12 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarListRows} />
 
-    <h2 id="tabbar-group">
+    <Heading
+      id="tabbar-group"
+      level={2}
+    >
       <code>TabBar.Group</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A glass capsule of tabs in the list (here: the sections’, and search’s
@@ -776,9 +785,12 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarGroupRows} />
 
-    <h2 id="tabbar-indicator">
+    <Heading
+      id="tabbar-indicator"
+      level={2}
+    >
       <code>TabBar.Indicator</code>
-    </h2>
+    </Heading>
     <ul>
       <li>The selection, first in each group.</li>
       <li>On the group’s active tab, sliding between its tabs.</li>
@@ -788,9 +800,12 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarIndicatorRows} />
 
-    <h2 id="tabbar-tab">
+    <Heading
+      id="tabbar-tab"
+      level={2}
+    >
       <code>TabBar.Tab</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A tab, by its <code>value</code>.
@@ -813,9 +828,12 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarTabRows} />
 
-    <h2 id="tabbar-icon">
+    <Heading
+      id="tabbar-icon"
+      level={2}
+    >
       <code>TabBar.Icon</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A tab’s symbol (e.g. a <code>Symbol</code>, with its badge).
@@ -826,9 +844,12 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarIconRows} />
 
-    <h2 id="tabbar-label">
+    <Heading
+      id="tabbar-label"
+      level={2}
+    >
       <code>TabBar.Label</code>
-    </h2>
+    </Heading>
     <ul>
       <li>A tab’s label, sized by the list’s size.</li>
       <li>
@@ -841,9 +862,12 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarLabelRows} />
 
-    <h2 id="tabbar-panel">
+    <Heading
+      id="tabbar-panel"
+      level={2}
+    >
       <code>TabBar.Panel</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         A section’s content (Base UI’s, unstyled), shown while the tab of its{' '}
@@ -860,9 +884,12 @@ export const TabBarParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={tabBarPanelRows} />
 
-    <h2 id="tabbar-accessory">
+    <Heading
+      id="tabbar-accessory"
+      level={2}
+    >
       <code>TabBar.Accessory</code>
-    </h2>
+    </Heading>
     <ul>
       <li>App content in a glass capsule, after the list.</li>
       <li>
@@ -878,3 +905,16 @@ export const TabBarParts: FunctionComponent = () => (
     <PropsTable rows={tabBarAccessoryRows} />
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const tabBarPartsDemos = [
+  RootPart,
+  ListPart,
+  GroupPart,
+  IndicatorPart,
+  TabPart,
+  IconPart,
+  LabelPart,
+  PanelPart,
+  AccessoryPart,
+];

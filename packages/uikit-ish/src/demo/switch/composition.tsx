@@ -6,7 +6,7 @@ import { forwardClick, List, Switch, Symbol } from '../../components/index.js';
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 
 // A row's code (as Airplane Mode's in the list below).
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
@@ -95,7 +95,12 @@ const sections: readonly Section[] = [
 export const SwitchComposition: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <h2 id="in-list-rows">In list rows</h2>
+    <Heading
+      id="in-list-rows"
+      level={2}
+    >
+      In list rows
+    </Heading>
     <ul>
       <li>
         On iOS: in the trailing slot of <a href="list">List</a> rows.
@@ -112,7 +117,12 @@ export const SwitchComposition: FunctionComponent = () => (
     <CodeView code={listRowCode} />
     <InAList />
 
-    <h2 id="in-forms">In forms</h2>
+    <Heading
+      id="in-forms"
+      level={2}
+    >
+      In forms
+    </Heading>
     <ul>
       <li>
         Renders a hidden checkbox input: in a <a href="form">Form</a>, submitted
@@ -125,3 +135,6 @@ export const SwitchComposition: FunctionComponent = () => (
     </ul>
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const switchCompositionDemos = [InAList];

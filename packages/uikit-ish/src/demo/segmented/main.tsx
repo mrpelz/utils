@@ -4,7 +4,7 @@ import { Segmented } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { commonPropOptions, usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsItem,
   getPropOptionsRoot,
@@ -88,7 +88,7 @@ export const SegmentedDemo: FunctionComponent = () => {
         controlItemFifth,
         controlHighlight,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateContent,
         stateRoot,
         stateItemFirst,
@@ -97,7 +97,7 @@ export const SegmentedDemo: FunctionComponent = () => {
         stateItemFourth,
         stateItemFifth,
         stateHighlight,
-      ])}
+      ]}
     >
       <Segmented.Root
         key={elementKey}

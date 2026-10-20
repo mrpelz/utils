@@ -17,7 +17,7 @@ import {
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsCheckboxGroup,
   getPropOptionsForm,
@@ -108,7 +108,7 @@ export const FormDemo: FunctionComponent = () => {
         controlRadioGroup,
         controlRadio,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateForm,
         stateFieldset,
         stateLegend,
@@ -116,7 +116,7 @@ export const FormDemo: FunctionComponent = () => {
         stateCheckbox,
         stateRadioGroup,
         stateRadio,
-      ])}
+      ]}
     >
       <Form
         key={keyForm}

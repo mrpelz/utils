@@ -11,9 +11,9 @@ import {
 import { Component } from '../frame/component.js';
 import { AddLog, useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { PropsTable } from '../guide/props-table.js';
-import { PartLink } from '../guide/sections.js';
+import { Heading, PartLink } from '../guide/sections.js';
 import { names } from './content.js';
 import {
   useScrollDirectionRows,
@@ -54,7 +54,7 @@ const ProviderPartFrame: FunctionComponent<{
       inline
       controls={[control]}
       id={id}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Viewport.Provider"
     >
       <div className="viewport-demo-screen">
@@ -131,7 +131,7 @@ const ContentPart: FunctionComponent = () => {
       inline
       controls={[control]}
       id={id}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Viewport.Content"
     >
       <div className="viewport-demo-screen">
@@ -172,7 +172,7 @@ const AnchorPart: FunctionComponent = () => {
       inline
       controls={[control]}
       id={id}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Viewport.Anchor"
     >
       <div className="viewport-demo-screen">
@@ -220,7 +220,7 @@ const BlockStartPart: FunctionComponent = () => {
       inline
       controls={[control]}
       id={id}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Viewport.BlockStart"
     >
       <div className="viewport-demo-screen">
@@ -267,7 +267,7 @@ const BlockEndPart: FunctionComponent = () => {
       inline
       controls={[control]}
       id={id}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Viewport.BlockEnd"
     >
       <div className="viewport-demo-screen">
@@ -499,9 +499,12 @@ export const ViewportParts: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="viewport-provider">
+    <Heading
+      id="viewport-provider"
+      level={2}
+    >
       <code>Viewport.Provider</code>
-    </h2>
+    </Heading>
     <ul>
       <li>Renders no element: a context, around the app.</li>
       <li>
@@ -520,9 +523,12 @@ export const ViewportParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={viewportProviderRows} />
 
-    <h2 id="viewport-content">
+    <Heading
+      id="viewport-content"
+      level={2}
+    >
       <code>Viewport.Content</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         The content layer: filling the viewport, scrolling its content, beneath
@@ -544,9 +550,12 @@ export const ViewportParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={viewportContentRows} />
 
-    <h2 id="viewport-anchor">
+    <Heading
+      id="viewport-anchor"
+      level={2}
+    >
       <code>Viewport.Anchor</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         Floats above the content layer at an <code>edge</code>: the top or
@@ -569,9 +578,12 @@ export const ViewportParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={viewportAnchorRows} />
 
-    <h2 id="viewport-blockstart">
+    <Heading
+      id="viewport-blockstart"
+      level={2}
+    >
       <code>Viewport.BlockStart</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         An anchor at the top (<code>edge</code> <code>block-start</code>), e.g.
@@ -582,9 +594,12 @@ export const ViewportParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={viewportBlockStartRows} />
 
-    <h2 id="viewport-blockend">
+    <Heading
+      id="viewport-blockend"
+      level={2}
+    >
       <code>Viewport.BlockEnd</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         An anchor at the bottom (<code>edge</code> <code>block-end</code>), e.g.
@@ -596,9 +611,12 @@ export const ViewportParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={viewportBlockEndRows} />
 
-    <h2 id="usevisualviewport">
+    <Heading
+      id="usevisualviewport"
+      level={2}
+    >
       <code>useVisualViewport</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         The visual viewport: its size, its offset, the keyboard’s height;
@@ -613,9 +631,12 @@ export const ViewportParts: FunctionComponent = () => (
     <h3>Returns</h3>
     <PropsTable rows={useVisualViewportRows} />
 
-    <h2 id="useviewportscroll">
+    <Heading
+      id="useviewportscroll"
+      level={2}
+    >
       <code>useViewportScroll</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         Calls its listener on every scroll of the tracked scroll container,
@@ -632,9 +653,12 @@ export const ViewportParts: FunctionComponent = () => (
     <h3>The listener’s event</h3>
     <PropsTable rows={viewportScrollEventRows} />
 
-    <h2 id="usescrolldirection">
+    <Heading
+      id="usescrolldirection"
+      level={2}
+    >
       <code>useScrollDirection</code>
-    </h2>
+    </Heading>
     <ul>
       <li>
         The direction scrolled in and the edges; re-rendering as they change
@@ -649,3 +673,15 @@ export const ViewportParts: FunctionComponent = () => (
     <PropsTable rows={useScrollDirectionRows} />
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const viewportPartsDemos = [
+  ProviderPart,
+  ContentPart,
+  AnchorPart,
+  BlockStartPart,
+  BlockEndPart,
+  UseVisualViewportPart,
+  UseViewportScrollPart,
+  UseScrollDirectionPart,
+];

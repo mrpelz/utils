@@ -6,7 +6,7 @@ import { Checkbox, Radio, RadioGroup } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsCheckbox,
   getPropOptionsRadioGroup,
@@ -37,7 +37,7 @@ export const CheckboxDemo: FunctionComponent = () => {
       controls={[control]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [state])}
+      state={[state]}
       title="Checkbox"
     >
       <Checkbox.Root
@@ -75,7 +75,7 @@ export const CheckboxRadioDemo: FunctionComponent = () => {
       controls={[controlGroup, controlRadio]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateGroup, stateRadio])}
+      state={[stateGroup, stateRadio]}
       title="Checkbox (Radio)"
     >
       <RadioGroup

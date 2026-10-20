@@ -1,6 +1,7 @@
 import {
   FunctionComponent,
   ReactNode,
+  useContext,
   useEffect,
   useMemo,
   useState,
@@ -8,10 +9,11 @@ import {
 
 import { ColorScheme } from '../../components/utils/main.js';
 import { Breadcrumb, Tabs, useEntry } from '../guide/nav.js';
+import { PagePathContext } from '../guide/sections.js';
 import { useLocalStorage } from '../shared/use-local-storage.js';
 import { CodeView } from './code-view.js';
 import { renderCode } from './render-code.js';
-import { setOptions, useOptions } from './state.js';
+import { useCreateStateUrl, useOptions } from './state.js';
 
 // A demo's frame: its stage, its header (full-page) and its config
 // column (settings, prop controls, code, log); inline, a page's live view.
@@ -23,13 +25,14 @@ const BASE_URL_DOC = 'https://base-ui.com/react/components';
  * component's pages); hidden inline.
  */
 const DemoHeader: FunctionComponent<{
+  back?: boolean;
   baseUiId?: string;
   hidden: boolean;
   id: string;
   showId?: string;
   stateUrl?: string;
   title: string;
-}> = ({ baseUiId, hidden, id, showId, stateUrl, title }) => {
+}> = ({ back, baseUiId, hidden, id, showId, stateUrl, title }) => {
   const entry = useEntry();
 
   return (
@@ -56,28 +59,22 @@ const DemoHeader: FunctionComponent<{
           </a>
         ) : null}
         {showId ? (
-          <>
-            <a
-              className="demo-id"
-              href={`${stateUrl}&raw=true`}
-              rel="noreferrer"
-              target="_blank"
-            >
-              [raw]
-            </a>
-            <a
-              className="demo-id"
-              onClick={() =>
-                setOptions({
-                  id: undefined,
-                  raw: undefined,
-                  state: undefined,
-                })
-              }
-            >
-              [x]
-            </a>
-          </>
+          <a
+            className="demo-id"
+            href={`${stateUrl}&raw=true`}
+            rel="noreferrer"
+            target="_blank"
+          >
+            [raw]
+          </a>
+        ) : null}
+        {back ? (
+          <a
+            className="demo-id"
+            onClick={() => close()}
+          >
+            [back]
+          </a>
         ) : null}
       </h2>
       {entry ? (
@@ -110,12 +107,15 @@ export const Component: FunctionComponent<{
   /** Unique demo id, used for selecting demos (`#id=…`) and storing config. */
   id: string;
   /**
-   * In a page's flow (e.g. a component's overview), as a section's live
-   * view: sized by its content, without a heading of its own.
+   * In a guide page's flow (e.g. a component's overview), as a section's
+   * live view: sized by its content, without a heading of its own, with a
+   * link opening it on its component's page of demos (where it's a demo as
+   * any) in a tab of its own.
    */
   inline?: boolean;
   log?: ReactNode;
-  stateUrl?: string;
+  /** Its prop controls' state, for its URL (see `useCreateStateUrl`). */
+  state?: unknown[];
   stretch?: boolean;
   title: string;
 }> = ({
@@ -127,14 +127,24 @@ export const Component: FunctionComponent<{
   id,
   inline = false,
   log,
-  stateUrl,
+  state,
   stretch = false,
   title,
 }) => {
-  const { id: showId, raw } = useOptions();
+  const { back, id: showId, raw } = useOptions();
   // Its settings: its component's, shared by the component's demos on all
   // its pages (see guide/nav.tsx); a demo's own outside of one.
   const entry = useEntry();
+  // (Inline on a guide page only, see guide/pages.tsx.)
+  const pagePath = useContext(PagePathContext);
+  const isInline = inline && pagePath !== '';
+  const stateUrl = useCreateStateUrl(id, state);
+  const fullscreenUrl = useCreateStateUrl(
+    id,
+    state,
+    `${entry?.id ?? ''}/all`,
+    true,
+  );
   const settings = entry?.id ?? id;
   const [colorScheme, setColorScheme] = useLocalStorage<
     ColorScheme | undefined
@@ -172,15 +182,16 @@ export const Component: FunctionComponent<{
   if (isHidden) return null;
   if (raw) return children;
 
-  return (
+  const container = (
     <div
       className="demo-container"
-      data-inline={inline ? '' : undefined}
+      data-inline={isInline ? '' : undefined}
     >
       <section className="demo-content">
         <DemoHeader
+          back={back}
           baseUiId={baseUiId}
-          hidden={inline}
+          hidden={isInline}
           id={id}
           showId={showId}
           stateUrl={stateUrl}
@@ -269,5 +280,23 @@ export const Component: FunctionComponent<{
         {log}
       </aside>
     </div>
+  );
+
+  // Inline, with a link to it on its component's page of demos below it (as
+  // a code view's Copy button).
+  return isInline ? (
+    <div className="demo-inline">
+      {container}
+      <a
+        className="demo-button"
+        href={fullscreenUrl}
+        rel="noreferrer"
+        target="_blank"
+      >
+        Fullscreen
+      </a>
+    </div>
+  ) : (
+    container
   );
 };

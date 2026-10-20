@@ -17,7 +17,7 @@ import {
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { commonPropOptions, usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   propOptionsBar,
   propOptionsLargeTitle,
@@ -59,7 +59,7 @@ export const HeaderDemo: FunctionComponent = () => {
       controls={[controlBar, controlTitle, controlLargeTitle]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateBar, stateTitle, stateLargeTitle])}
+      state={[stateBar, stateTitle, stateLargeTitle]}
       title="Header"
     >
       <Page.Root className="header-demo-screen">
@@ -166,7 +166,7 @@ export const HeaderTitleDemo: FunctionComponent = () => {
       controls={[controlBar, controlTitle, controlSubtitle]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateBar, stateTitle, stateSubtitle])}
+      state={[stateBar, stateTitle, stateSubtitle]}
       title="Header (Title)"
     >
       <Page.Root className="header-demo-screen">

@@ -18,7 +18,7 @@ import {
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsTab,
   propOptionsAccessoryContent,
@@ -122,7 +122,7 @@ export const TabBarDemo: FunctionComponent = () => {
         controlTab2,
         controlTab3,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateContent,
         stateRoot,
         stateList,
@@ -130,7 +130,7 @@ export const TabBarDemo: FunctionComponent = () => {
         stateTab1,
         stateTab2,
         stateTab3,
-      ])}
+      ]}
     >
       <TabBar.Root
         {...propsRoot}
@@ -337,7 +337,7 @@ export const TabBarSearchDemo: FunctionComponent = () => {
         controlSearchGroup,
         controlSearchTab,
       ]}
-      stateUrl={useCreateStateUrl(id, [
+      state={[
         stateContent,
         stateRoot,
         stateList,
@@ -347,7 +347,7 @@ export const TabBarSearchDemo: FunctionComponent = () => {
         stateTab3,
         stateSearchGroup,
         stateSearchTab,
-      ])}
+      ]}
     >
       <TabBar.Root
         {...propsRoot}
@@ -526,6 +526,7 @@ export const TabBarAccessoryDemo: FunctionComponent = () => {
       baseUiId="tabs"
       id={id}
       log={log}
+      state={[stateContent, stateRoot, stateList, stateGroup, stateSearchGroup]}
       title="Tab Bar (Accessory)"
       controls={[
         controlContent,
@@ -534,13 +535,6 @@ export const TabBarAccessoryDemo: FunctionComponent = () => {
         controlGroup,
         controlSearchGroup,
       ]}
-      stateUrl={useCreateStateUrl(id, [
-        stateContent,
-        stateRoot,
-        stateList,
-        stateGroup,
-        stateSearchGroup,
-      ])}
     >
       <TabBar.Root
         {...propsRoot}
@@ -753,13 +747,8 @@ export const TabBarRegularDemo: FunctionComponent = () => {
       controls={[controlRoot, controlGroup, controlList, controlTab1]}
       id={id}
       log={log}
+      state={[stateRoot, stateGroup, stateList, stateTab1]}
       title="Tab Bar (iPad)"
-      stateUrl={useCreateStateUrl(id, [
-        stateRoot,
-        stateGroup,
-        stateList,
-        stateTab1,
-      ])}
     >
       <TabBar.Root
         {...propsRoot}
@@ -936,7 +925,7 @@ export const TabBarContentDemo: FunctionComponent = () => {
       controls={controlList}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateList])}
+      state={[stateList]}
       title="Tab Bar (Tab Content)"
     >
       <TabBar.Root

@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'react';
 
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -49,7 +49,12 @@ export const ViewportInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="the-window-as-layers">The window as layers</h2>
+    <Heading
+      id="the-window-as-layers"
+      level={2}
+    >
+      The window as layers
+    </Heading>
     <ul>
       <li>
         The guide’s layers (<GuideLink to="layers">§2</GuideLink>): content
@@ -65,7 +70,12 @@ export const ViewportInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="anchors-as-regions">Anchors as Regions</h2>
+    <Heading
+      id="anchors-as-regions"
+      level={2}
+    >
+      Anchors as Regions
+    </Heading>
     <ul>
       <li>
         Region: an edge-anchored strip of a surface, hosting commands, choices
@@ -83,7 +93,12 @@ export const ViewportInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="where-it-sits">Where it sits</h2>
+    <Heading
+      id="where-it-sits"
+      level={2}
+    >
+      Where it sits
+    </Heading>
     <ul>
       <li>
         <strong>Containment:</strong> a Surface holds Regions and a Collection
@@ -103,7 +118,12 @@ export const ViewportInformationArchitecture: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="what-the-guide-doesnt-cover">What the guide doesn’t cover</h2>
+    <Heading
+      id="what-the-guide-doesnt-cover"
+      level={2}
+    >
+      What the guide doesn’t cover
+    </Heading>
     <ul>
       <li>
         The visual viewport and the on-screen keyboard’s effect on layout (the

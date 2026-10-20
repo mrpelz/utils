@@ -5,7 +5,7 @@ import { Button, Symbol, Tooltip } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -54,6 +54,7 @@ export const TooltipDemo: FunctionComponent = () => {
       baseUiId="tooltip"
       id={id}
       log={log}
+      state={[stateRoot, stateTrigger, statePositioner, stateContent]}
       title="Tooltip"
       controls={[
         controlRoot,
@@ -61,12 +62,6 @@ export const TooltipDemo: FunctionComponent = () => {
         controlPositioner,
         controlContent,
       ]}
-      stateUrl={useCreateStateUrl(id, [
-        stateRoot,
-        stateTrigger,
-        statePositioner,
-        stateContent,
-      ])}
     >
       <div style={{ paddingBlock: 64 }}>
         <Tooltip.Root

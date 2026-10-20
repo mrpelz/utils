@@ -6,9 +6,9 @@ import { collapsedSelection, Symbol, TabBar } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
-import { useCreateStateUrl, useProvidedState } from '../frame/state.js';
+import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, type Section } from '../guide/sections.js';
+import { Contents, Heading, type Section } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   tabBarAccessoryRows,
@@ -53,7 +53,7 @@ const LiveView: FunctionComponent = () => {
       controls={[controlContent, controlList]}
       id={id}
       log={log}
-      stateUrl={useCreateStateUrl(id, [stateContent, stateList])}
+      state={[stateContent, stateList]}
       title="Tab bar"
     >
       <TabBar.Root
@@ -132,7 +132,12 @@ export const TabBarOverview: FunctionComponent = () => (
     </ul>
     <LiveView />
 
-    <h2 id="when-to-use-it">When to use it</h2>
+    <Heading
+      id="when-to-use-it"
+      level={2}
+    >
+      When to use it
+    </Heading>
     <ul>
       <li>
         For two to five top-level sections people switch between, each keeping
@@ -145,7 +150,12 @@ export const TabBarOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="when-to-use-something-else">When to use something else</h2>
+    <Heading
+      id="when-to-use-something-else"
+      level={2}
+    >
+      When to use something else
+    </Heading>
     <ul>
       <li>
         Actions (Add, Compose, Share): a <a href="toolbar">Toolbar</a>, as a tab
@@ -163,7 +173,12 @@ export const TabBarOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="key-props">Key props</h2>
+    <Heading
+      id="key-props"
+      level={2}
+    >
+      Key props
+    </Heading>
     <ul>
       <li>The props most tab bars set, across their parts.</li>
       <li>
@@ -187,7 +202,12 @@ export const TabBarOverview: FunctionComponent = () => (
       ]}
     />
 
-    <h2 id="accessibility">Accessibility</h2>
+    <Heading
+      id="accessibility"
+      level={2}
+    >
+      Accessibility
+    </Heading>
     <ul>
       <li>
         It’s Base UI’s Tabs: the list has the <code>tablist</code> role, each
@@ -221,7 +241,12 @@ export const TabBarOverview: FunctionComponent = () => (
       </li>
     </ul>
 
-    <h2 id="behavior">Behavior</h2>
+    <Heading
+      id="behavior"
+      level={2}
+    >
+      Behavior
+    </Heading>
     <ul>
       <li>
         Pressed, a glass lens appears under the pointer and follows it across
@@ -244,3 +269,6 @@ export const TabBarOverview: FunctionComponent = () => (
     </ul>
   </>
 );
+
+/** Its live views, also on the component's page of demos (and `/all`). */
+export const tabBarOverviewDemos = [LiveView];
