@@ -25,6 +25,24 @@
     }
   }
 
+  /* The demos' pages are client only (see shared/client-only.tsx): its
+     shell takes no box of its own. */
+  .demo-client-only {
+    display: contents;
+  }
+
+  /* A demo's slot away from the screen (see shared/virtual-list.tsx): a
+     snap point, as the demo's frame is while it's mounted. */
+  .demo-virtual-slot[data-snap] {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+
+    @media screen and (width <= 768px) {
+      scroll-snap-align: unset;
+      scroll-snap-stop: normal;
+    }
+  }
+
   /* Sticky, so a stacking context: it needs the page background, or glass
      in it blends with nothing (rendering gray and unblurred). */
   .demo-content {

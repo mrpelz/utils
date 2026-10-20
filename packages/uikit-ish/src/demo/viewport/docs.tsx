@@ -158,3 +158,129 @@ export const viewportScrollEventRows: readonly PropRow[] = [
 /** `useScrollDirection()`: what it returns. */
 export const useScrollDirectionRows: readonly PropRow[] =
   viewportScrollEventRows.filter(([name]) => name !== 'position');
+
+const elementRefRow: PropRow = [
+  'ref',
+  'RefObject<Element | null>',
+  undefined,
+  'The element (as first mounted: a later element in the ref isn’t observed).',
+];
+
+const scrollerRow: PropRow = [
+  'options.scroller',
+  'RefObject<HTMLElement | null>',
+  'the viewport',
+  'The scroll container whose box (inside its borders and scroll bars) is the visible area; otherwise the layout viewport. No provider needed.',
+];
+
+/** `useElementVisibility(ref, options)`: its arguments. */
+export const useElementVisibilityRows: readonly PropRow[] = [
+  elementRefRow,
+  [
+    'options.threshold',
+    'number',
+    code('0'),
+    'How much of the element (0–1) must be visible to count; 0: any of it, even an edge.',
+  ],
+  [
+    'options.rootMargin',
+    'string',
+    code(union('0px')),
+    <>
+      Grows (or, negative, shrinks) the visible area, as CSS margins (e.g.{' '}
+      <code>&apos;100% 0px&apos;</code>: a screen above and below, to prepare
+      what’s about to scroll in).
+    </>,
+  ],
+  scrollerRow,
+];
+
+/** `useElementVisibility()`: what it returns. */
+export const useElementVisibilityReturnRows: readonly PropRow[] = [
+  [
+    '(return)',
+    'boolean',
+    code('false'),
+    <>
+      Whether the element is visible (an <code>IntersectionObserver</code>’s
+      report: re-rendering only as it changes); <code>false</code> until it
+      reports, and on the server.
+    </>,
+  ],
+];
+
+/** `useElementGeometry(ref, options)`: its arguments. */
+export const useElementGeometryRows: readonly PropRow[] = [
+  elementRefRow,
+  scrollerRow,
+];
+
+/** `useElementGeometry()`: what it returns (`ElementGeometry`). */
+export const elementGeometryRows: readonly PropRow[] = [
+  [
+    'top',
+    'number',
+    undefined,
+    'From the visible area’s top edge to the element’s (px): positive while the element’s edge is inside the area, negative once past it.',
+  ],
+  [
+    'right',
+    'number',
+    undefined,
+    'From the visible area’s right edge to the element’s (px), as top.',
+  ],
+  [
+    'bottom',
+    'number',
+    undefined,
+    'From the visible area’s bottom edge to the element’s (px), as top.',
+  ],
+  [
+    'left',
+    'number',
+    undefined,
+    'From the visible area’s left edge to the element’s (px), as top.',
+  ],
+  ['width', 'number', undefined, 'The element’s width (px, its border box).'],
+  ['height', 'number', undefined, 'The element’s height (px, its border box).'],
+  [
+    'visibleWidth',
+    'number',
+    undefined,
+    'How much of its width is visible (px).',
+  ],
+  [
+    'visibleHeight',
+    'number',
+    undefined,
+    'How much of its height is visible (px).',
+  ],
+  [
+    'visibleWidthRatio',
+    'number',
+    undefined,
+    'How much of its width is visible (0–1).',
+  ],
+  [
+    'visibleHeightRatio',
+    'number',
+    undefined,
+    'How much of its height is visible (0–1).',
+  ],
+  [
+    'visibleRatio',
+    'number',
+    undefined,
+    'How much of its area is visible (0–1).',
+  ],
+  [
+    '(return)',
+    'ElementGeometry | undefined',
+    undefined,
+    <>
+      Measured once a frame while it (or anything around it) scrolls or resizes,
+      only while it’s visible, once more as it leaves; <code>undefined</code>{' '}
+      until measured, and on the server.
+    </>,
+  ],
+];

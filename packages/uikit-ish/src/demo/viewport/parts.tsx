@@ -1,8 +1,16 @@
-import { FunctionComponent, ReactNode, RefObject, useRef } from 'react';
+import {
+  FunctionComponent,
+  ReactNode,
+  RefObject,
+  useEffect,
+  useRef,
+} from 'react';
 
 import {
   List,
   Toolbar,
+  useElementGeometry,
+  useElementVisibility,
   useScrollDirection,
   useViewportScroll,
   useVisualViewport,
@@ -16,6 +24,10 @@ import { PropsTable } from '../guide/props-table.js';
 import { Heading, PartLink } from '../guide/sections.js';
 import { names } from './content.js';
 import {
+  elementGeometryRows,
+  useElementGeometryRows,
+  useElementVisibilityReturnRows,
+  useElementVisibilityRows,
   useScrollDirectionRows,
   useViewportScrollRows,
   useVisualViewportRows,
@@ -31,6 +43,8 @@ import {
   propOptionsBlockEnd,
   propOptionsBlockStart,
   propOptionsContent,
+  propOptionsElementGeometry,
+  propOptionsElementVisibility,
   propOptionsProvider,
 } from './props.js';
 
@@ -444,6 +458,133 @@ const UseScrollDirectionPart: FunctionComponent = () => {
   );
 };
 
+/** A length, rounded (or none yet). */
+const px = (value?: number) =>
+  value === undefined ? '—' : `${String(Math.round(value))}px`;
+
+/** A share, as a percentage (or none yet). */
+const percent = (value?: number) =>
+  value === undefined ? '—' : `${String(Math.round(value * 100))}%`;
+
+/**
+ * `useElementVisibility`: a card in a box scrolling both ways, colored
+ * while visible (by its options: the box, or the window).
+ */
+const UseElementVisibilityPart: FunctionComponent = () => {
+  const id = 'viewport-parts-use-element-visibility';
+  const [log, addLog] = useLog();
+  const box = useRef<HTMLDivElement>(null);
+  const card = useRef<HTMLDivElement>(null);
+  const [external] = useProvidedState(id);
+  const [control, options, state] = usePropControl(
+    propOptionsElementVisibility,
+    'options',
+    external,
+    true,
+  );
+  const visible = useElementVisibility(card, {
+    rootMargin: options.rootMargin,
+    scroller: options.scroller === 'box' ? box : undefined,
+    threshold: options.threshold,
+  });
+
+  useEffect(() => addLog(`visible: ${String(visible)}`), [addLog, visible]);
+
+  return (
+    <Component
+      center
+      inline
+      controls={[control]}
+      id={id}
+      log={log}
+      state={[state]}
+      title="useElementVisibility"
+    >
+      <div
+        ref={box}
+        className="viewport-demo-box"
+      >
+        <div className="viewport-demo-area">
+          <div
+            ref={card}
+            className="viewport-demo-card"
+            data-visible={visible ? '' : undefined}
+          >
+            {visible ? 'Visible' : 'Hidden'}
+          </div>
+        </div>
+      </div>
+    </Component>
+  );
+};
+
+/**
+ * `useElementGeometry`: a card in a box scrolling both ways, its distances
+ * to the visible area's edges and how much of it shows.
+ */
+const UseElementGeometryPart: FunctionComponent = () => {
+  const id = 'viewport-parts-use-element-geometry';
+  const box = useRef<HTMLDivElement>(null);
+  const card = useRef<HTMLDivElement>(null);
+  const [external] = useProvidedState(id);
+  const [control, options, state] = usePropControl(
+    propOptionsElementGeometry,
+    'options',
+    external,
+    true,
+  );
+  const geometry = useElementGeometry(card, {
+    scroller: options.scroller === 'box' ? box : undefined,
+  });
+
+  return (
+    <Component
+      center
+      inline
+      controls={[control]}
+      id={id}
+      state={[state]}
+      title="useElementGeometry"
+    >
+      <div
+        ref={box}
+        className="viewport-demo-box"
+      >
+        <div className="viewport-demo-area">
+          <div
+            ref={card}
+            className="viewport-demo-card"
+            style={{ opacity: 0.25 + 0.75 * (geometry?.visibleRatio ?? 0) }}
+          >
+            {percent(geometry?.visibleRatio)}
+          </div>
+        </div>
+      </div>
+      <dl className="viewport-demo-metrics">
+        <dt>top, bottom</dt>
+        <dd>
+          {px(geometry?.top)}, {px(geometry?.bottom)}
+        </dd>
+        <dt>left, right</dt>
+        <dd>
+          {px(geometry?.left)}, {px(geometry?.right)}
+        </dd>
+        <dt>visible width × height</dt>
+        <dd>
+          {px(geometry?.visibleWidth)} × {px(geometry?.visibleHeight)}
+        </dd>
+        <dt>visible width, height ratio</dt>
+        <dd>
+          {percent(geometry?.visibleWidthRatio)},{' '}
+          {percent(geometry?.visibleHeightRatio)}
+        </dd>
+        <dt>visibleRatio</dt>
+        <dd>{percent(geometry?.visibleRatio)}</dd>
+      </dl>
+    </Component>
+  );
+};
+
 /** `/viewport/parts`: the provider, the layers, and the hooks. */
 export const ViewportParts: FunctionComponent = () => (
   <>
@@ -457,7 +598,10 @@ export const ViewportParts: FunctionComponent = () => (
         Anchors: bars floating at an edge (<code>BlockStart</code>,{' '}
         <code>BlockEnd</code>: the top and the bottom).
       </li>
-      <li>Hooks: what the provider tracks, inside it.</li>
+      <li>
+        Hooks: what the provider tracks, inside it; and an element’s visibility
+        and geometry, anywhere.
+      </li>
       <li>
         The views’ phone screens contain the fixed layers (a{' '}
         <code>transform</code>); in an app, they’re the window’s.
@@ -492,6 +636,17 @@ export const ViewportParts: FunctionComponent = () => (
               </li>
               <li>
                 <PartLink part="useScrollDirection" />
+              </li>
+            </ul>
+          </li>
+          <li>
+            Hooks (anywhere, no provider needed):
+            <ul>
+              <li>
+                <PartLink part="useElementVisibility" />
+              </li>
+              <li>
+                <PartLink part="useElementGeometry" />
               </li>
             </ul>
           </li>
@@ -671,6 +826,61 @@ export const ViewportParts: FunctionComponent = () => (
     <UseScrollDirectionPart />
     <h3>Returns</h3>
     <PropsTable rows={useScrollDirectionRows} />
+
+    <Heading
+      id="useelementvisibility"
+      level={2}
+    >
+      <code>useElementVisibility</code>
+    </Heading>
+    <ul>
+      <li>
+        Whether an element is in the visible area (an{' '}
+        <code>IntersectionObserver</code>): the viewport, or a scroll container
+        (<code>scroller</code>); re-rendering only as it changes.
+      </li>
+      <li>
+        <code>threshold</code>: how much of it must show;{' '}
+        <code>rootMargin</code>: the area grown or shrunk (e.g. to mount what’s
+        about to scroll in).
+      </li>
+      <li>
+        Here: scroll the box (or the page, with the window as the area); the
+        card colored while visible, each change logged.
+      </li>
+    </ul>
+    <UseElementVisibilityPart />
+    <h3>Arguments</h3>
+    <PropsTable rows={useElementVisibilityRows} />
+    <h3>Returns</h3>
+    <PropsTable rows={useElementVisibilityReturnRows} />
+
+    <Heading
+      id="useelementgeometry"
+      level={2}
+    >
+      <code>useElementGeometry</code>
+    </Heading>
+    <ul>
+      <li>
+        Where an element is in the visible area: its edges’ distances to the
+        area’s, how much of it shows (px, and its share).
+      </li>
+      <li>
+        Measured once a frame while anything scrolls or resizes, and only while
+        it’s visible (an <code>useElementVisibility</code> of its own); once
+        more as it leaves.
+      </li>
+      <li>
+        Here: scroll the box both ways, half the card out of it; the card as
+        opaque as it’s visible.
+      </li>
+    </ul>
+    <UseElementGeometryPart />
+    <h3>Arguments</h3>
+    <PropsTable rows={useElementGeometryRows} />
+    <h3>Returns</h3>
+    <PropsTable rows={elementGeometryRows} />
   </>
 );
 
@@ -684,4 +894,6 @@ export const viewportPartsDemos = [
   UseVisualViewportPart,
   UseViewportScrollPart,
   UseScrollDirectionPart,
+  UseElementVisibilityPart,
+  UseElementGeometryPart,
 ];

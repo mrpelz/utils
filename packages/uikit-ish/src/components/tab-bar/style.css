@@ -2,6 +2,13 @@
 /* stylelint-disable no-descending-specificity -- (Overrides by repeated
    classes: see the collapsed styles.) */
 @layer uikit-ish {
+  /* Its own formatting context: containing its list's margin (the room for
+     an accessory above the groups, see List) in any container, not only as
+     a flex or grid item. */
+  .uikit-tab-bar-root {
+    display: flow-root;
+  }
+
   .uikit-tab-bar-tabs {
     position: relative;
     display: flex;

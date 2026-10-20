@@ -77,3 +77,60 @@ export type ViewportContentProps = ComponentProps<'div'> & {
    */
   safeArea?: ViewportSafeArea;
 };
+
+export type ElementVisibilityOptions = {
+  /**
+   * Grows (or shrinks) the area counted as visible, as CSS margins (e.g.
+   * `'100% 0px'`: a screen above and below).
+   * @default '0px'
+   */
+  rootMargin?: string;
+  /**
+   * The scroll container whose box is the visible area.
+   * @default the viewport (the layout viewport)
+   */
+  scroller?: RefObject<HTMLElement | null>;
+  /**
+   * How much of the element (0–1) must be visible to count (0: any of it,
+   * even an edge).
+   * @default 0
+   */
+  threshold?: number;
+};
+
+export type ElementGeometryOptions = {
+  /**
+   * The scroll container whose box is the visible area.
+   * @default the viewport (the layout viewport)
+   */
+  scroller?: RefObject<HTMLElement | null>;
+};
+
+/**
+ * Where an element is in the visible area (px; distances positive while
+ * the element's edge is inside the area's, negative past it).
+ */
+export type ElementGeometry = {
+  /** From the area's bottom edge to the element's. */
+  bottom: number;
+  /** The element's height. */
+  height: number;
+  /** From the area's left edge to the element's. */
+  left: number;
+  /** From the area's right edge to the element's. */
+  right: number;
+  /** From the area's top edge to the element's. */
+  top: number;
+  /** How much of the element's height is visible. */
+  visibleHeight: number;
+  /** How much of the element's height is visible (0–1). */
+  visibleHeightRatio: number;
+  /** How much of the element's area is visible (0–1). */
+  visibleRatio: number;
+  /** How much of the element's width is visible. */
+  visibleWidth: number;
+  /** How much of the element's width is visible (0–1). */
+  visibleWidthRatio: number;
+  /** The element's width. */
+  width: number;
+};

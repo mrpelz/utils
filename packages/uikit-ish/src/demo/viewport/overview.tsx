@@ -156,6 +156,12 @@ export const ViewportOverview: FunctionComponent = () => (
         scrolling down.
       </li>
       <li>
+        Hooks for an element in the visible area (the viewport, or a scroll
+        container): whether it’s visible, and where (its edges’ distances, how
+        much of it shows); see{' '}
+        <a href="viewport/parts#useelementvisibility">Parts</a>.
+      </li>
+      <li>
         This library’s own; no Base UI component, no UIKit counterpart (UIKit: a
         window’s safe area and keyboard layout guides).
       </li>
@@ -268,6 +274,12 @@ export const ViewportOverview: FunctionComponent = () => (
       Behavior
     </Heading>
     <ul>
+      <li>
+        <code>useElementVisibility</code> (an <code>IntersectionObserver</code>)
+        and <code>useElementGeometry</code> (measured once a frame while it
+        scrolls or resizes, only while visible) need no provider: their area is
+        the layout viewport, or their <code>scroller</code>’s box.
+      </li>
       <li>
         <code>Viewport.Provider</code> tracks the visual viewport (once per
         frame, as it resizes or scrolls): as custom properties on the root

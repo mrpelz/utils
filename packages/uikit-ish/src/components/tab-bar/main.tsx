@@ -980,26 +980,29 @@ const RootContext = createContext<RootState>({});
  * Base UI's `Tabs.Root`, also providing the anchor its `TabBar.Accessory`
  * is positioned at (the `TabBar.List`).
  */
-const Root = forwardRef<HTMLDivElement, TabBarRootProps>((props, ref) => {
-  const id = useId();
-  const [link] = useState(createAccessoryLink);
-  const context = useMemo(
-    () => ({
-      ...link,
-      anchor: `--uikit-tab-bar-${id.replaceAll(/[^\w-]/gu, '')}`,
-    }),
-    [id, link],
-  );
+const Root = forwardRef<HTMLDivElement, TabBarRootProps>(
+  ({ className, ...props }, ref) => {
+    const id = useId();
+    const [link] = useState(createAccessoryLink);
+    const context = useMemo(
+      () => ({
+        ...link,
+        anchor: `--uikit-tab-bar-${id.replaceAll(/[^\w-]/gu, '')}`,
+      }),
+      [id, link],
+    );
 
-  return (
-    <RootContext.Provider value={context}>
-      <BaseTabs.Root
-        ref={ref}
-        {...props}
-      />
-    </RootContext.Provider>
-  );
-});
+    return (
+      <RootContext.Provider value={context}>
+        <BaseTabs.Root
+          ref={ref}
+          {...props}
+          className={cn('uikit-tab-bar-root', className)}
+        />
+      </RootContext.Provider>
+    );
+  },
+);
 
 const ListContext = createContext<ListState>({
   collapsed: false,

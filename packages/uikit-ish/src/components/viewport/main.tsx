@@ -4,6 +4,7 @@ import {
   createContext,
   forwardRef,
   FunctionComponent,
+  RefObject,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -14,6 +15,9 @@ import {
 
 import { cn } from '../utils/main.js';
 import type {
+  ElementGeometry,
+  ElementGeometryOptions,
+  ElementVisibilityOptions,
   Listener,
   ViewportAnchorProps,
   ViewportContentProps,
@@ -23,6 +27,9 @@ import type {
 } from './props.js';
 
 export type {
+  ElementGeometry,
+  ElementGeometryOptions,
+  ElementVisibilityOptions,
   ViewportAnchorProps,
   ViewportContentProps,
   ViewportEdge,
@@ -51,6 +58,10 @@ export type {
 //   resized by the keyboard (or overlaid).
 // - Anchors and content keep the safe area insets clear (as padding): all,
 //   by dimension (block, inline), or none.
+// - An element's visibility (`useElementVisibility`, an
+//   `IntersectionObserver`) and its geometry in the visible area
+//   (`useElementGeometry`: its edges' distances, how much of it shows), in
+//   the viewport or a scroll container (`scroller`); no `Provider` needed.
 
 /** The latest scroll, and its listeners. */
 const createScrollStore = () => {
@@ -248,6 +259,151 @@ export const useScrollDirection = (): Omit<ViewportScrollEvent, 'position'> => {
   );
 
   return state;
+};
+
+/**
+ * Whether the element (`ref`'s, as first mounted) is in the visible area:
+ * the viewport, or `scroller`'s box (an `IntersectionObserver`; `false`
+ * until it reports, and on the server).
+ */
+export const useElementVisibility = (
+  ref: RefObject<Element | null>,
+  {
+    rootMargin = '0px',
+    scroller,
+    threshold = 0,
+  }: ElementVisibilityOptions = {},
+): boolean => {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return undefined;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries.at(-1);
+        if (!entry) return;
+        setVisible(
+          entry.isIntersecting && entry.intersectionRatio >= threshold,
+        );
+      },
+      { root: scroller?.current ?? null, rootMargin, threshold },
+    );
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [ref, rootMargin, scroller, threshold]);
+
+  return visible;
+};
+
+/** The visible area's edges (client coordinates): the scroller's box, inside its borders and scroll bars, or the layout viewport's. */
+const readArea = (scroller: HTMLElement | null) => {
+  if (!scroller) {
+    const { clientHeight, clientWidth } = document.documentElement;
+    return { bottom: clientHeight, left: 0, right: clientWidth, top: 0 };
+  }
+  const box = scroller.getBoundingClientRect();
+  const left = box.left + scroller.clientLeft;
+  const top = box.top + scroller.clientTop;
+  return {
+    bottom: top + scroller.clientHeight,
+    left,
+    right: left + scroller.clientWidth,
+    top,
+  };
+};
+
+const share = (part: number, whole: number) => (whole > 0 ? part / whole : 0);
+
+const readGeometry = (
+  element: Element,
+  scroller: HTMLElement | null,
+): ElementGeometry => {
+  const box = element.getBoundingClientRect();
+  const area = readArea(scroller);
+  const visibleWidth = Math.max(
+    0,
+    Math.min(box.right, area.right) - Math.max(box.left, area.left),
+  );
+  const visibleHeight = Math.max(
+    0,
+    Math.min(box.bottom, area.bottom) - Math.max(box.top, area.top),
+  );
+
+  return {
+    bottom: area.bottom - box.bottom,
+    height: box.height,
+    left: box.left - area.left,
+    right: area.right - box.right,
+    top: box.top - area.top,
+    visibleHeight,
+    visibleHeightRatio: share(visibleHeight, box.height),
+    visibleRatio: share(visibleWidth * visibleHeight, box.width * box.height),
+    visibleWidth,
+    visibleWidthRatio: share(visibleWidth, box.width),
+    width: box.width,
+  };
+};
+
+const sameGeometry = (a: ElementGeometry, b: ElementGeometry) =>
+  (Object.keys(a) as (keyof ElementGeometry)[]).every(
+    (key) => a[key] === b[key],
+  );
+
+/**
+ * Where the element (`ref`'s, as first mounted) is in the visible area (the
+ * viewport, or `scroller`'s box): its edges' distances to the area's, how
+ * much of it shows. Measured once per frame while it scrolls or resizes,
+ * and only while it's visible (once more as it leaves); `undefined` until
+ * measured, and on the server.
+ */
+export const useElementGeometry = (
+  ref: RefObject<Element | null>,
+  { scroller }: ElementGeometryOptions = {},
+): ElementGeometry | undefined => {
+  const visible = useElementVisibility(ref, { scroller });
+  const [geometry, setGeometry] = useState<ElementGeometry>();
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return undefined;
+
+    const update = () => {
+      const next = readGeometry(element, scroller?.current ?? null);
+      setGeometry((current) =>
+        current && sameGeometry(current, next) ? current : next,
+      );
+    };
+    // (Visible or not: where it is now, e.g. having just left.)
+    update();
+    if (!visible) return undefined;
+
+    let frame = 0;
+    const schedule = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        update();
+      });
+    };
+    // (Scrolls of any container moving it: they don't bubble, so captured.)
+    addEventListener('scroll', schedule, { capture: true, passive: true });
+    addEventListener('resize', schedule, { passive: true });
+    const resizes = new ResizeObserver(schedule);
+    resizes.observe(element);
+    if (scroller?.current) resizes.observe(scroller.current);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      removeEventListener('scroll', schedule, { capture: true });
+      removeEventListener('resize', schedule);
+      resizes.disconnect();
+    };
+  }, [ref, scroller, visible]);
+
+  return geometry;
 };
 
 /**

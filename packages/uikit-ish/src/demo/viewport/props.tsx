@@ -77,3 +77,18 @@ export const propOptionsBlockEnd = {
   keyboard: [undefined, 'push', 'cover'] as const,
   safeArea: safeAreas,
 };
+
+/**
+ * `useElementVisibility`'s options (`scroller`: the view's box, or none: the
+ * viewport).
+ */
+export const propOptionsElementVisibility = {
+  scroller: ['box', 'viewport'] as const,
+  threshold: [0, 0.5, 1] as const,
+  rootMargin: ['0px', '-40px', '40px'] as const,
+};
+
+/** `useElementGeometry`'s options (as above). */
+export const propOptionsElementGeometry = {
+  scroller: ['box', 'viewport'] as const,
+};

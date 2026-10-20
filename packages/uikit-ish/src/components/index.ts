@@ -202,6 +202,11 @@ export {
 
 // Viewport
 export {
+  type ElementGeometry,
+  type ElementGeometryOptions,
+  type ElementVisibilityOptions,
+  useElementGeometry,
+  useElementVisibility,
   useScrollDirection,
   useViewportScroll,
   useVisualViewport,

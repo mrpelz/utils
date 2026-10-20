@@ -8,7 +8,10 @@ import {
   categories,
   type Category,
 } from '../catalog.js';
+import { useOptions } from '../frame/state.js';
 import { guideHref } from '../hig-guide/link.js';
+import { ClientOnly } from '../shared/client-only.js';
+import { VirtualList } from '../shared/virtual-list.js';
 import {
   Breadcrumb,
   EntryContext,
@@ -32,14 +35,35 @@ const entryInfo = (entry: CatalogEntry): EntryInfo => ({
   title: entry.title,
 });
 
-/** A component's demos, its settings and headers its own (see nav.tsx). */
-const EntryDemos: FunctionComponent<{ entry: CatalogEntry }> = ({ entry }) => (
-  <EntryContext.Provider value={entryInfo(entry)}>
-    {entry.demos.map((Demo, index) => (
-      <Demo key={index} />
-    ))}
-  </EntryContext.Provider>
-);
+/**
+ * Components' demos, one after another, each with its component's settings
+ * and headers (see nav.tsx); client only (see `ClientOnly`: prerendered, an
+ * empty shell), mounted while near the screen (see `VirtualList`).
+ */
+const EntryDemos: FunctionComponent<{ entries: readonly CatalogEntry[] }> = ({
+  entries,
+}) => {
+  const { raw } = useOptions();
+
+  return (
+    <ClientOnly>
+      <VirtualList
+        snap={!raw}
+        items={entries.flatMap((entry) => {
+          const info = entryInfo(entry);
+          return entry.demos.map((Demo, index) => (
+            <EntryContext.Provider
+              key={index}
+              value={info}
+            >
+              <Demo />
+            </EntryContext.Provider>
+          ));
+        })}
+      />
+    </ClientOnly>
+  );
+};
 
 /** A component's page of prose (overview, parts). */
 const ComponentShell: FunctionComponent<{
@@ -144,19 +168,12 @@ export const InformationArchitecturePage: FunctionComponent = () => (
 /** `/:id/all`: the component's comprehensive demos (headed each). */
 export const ComponentDemosPage: FunctionComponent = () => {
   const entry = useCatalogEntry();
-  return entry ? <EntryDemos entry={entry} /> : <NotFound />;
+  return entry ? <EntryDemos entries={[entry]} /> : <NotFound />;
 };
 
 /** `/all`: every demo, one after another (also what the tests open). */
 export const AllDemosPage: FunctionComponent = () => (
-  <>
-    {catalog.map((entry) => (
-      <EntryDemos
-        key={entry.id}
-        entry={entry}
-      />
-    ))}
-  </>
+  <EntryDemos entries={catalog} />
 );
 
 /** `/`: the components by category, each with its summary. */
