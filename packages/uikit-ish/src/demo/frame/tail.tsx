@@ -25,14 +25,32 @@ export const Tail: FunctionComponent<{
     const { current: element } = ref;
     if (!element) return undefined;
 
+    // Whether it's at its end, as of before the content changes (scroll
+    // anchoring then moves it away). Reversed: scrolled away from the end,
+    // its position is negative.
+    let following = true;
+    // While it scrolls back to its end itself (smoothly), not scrolled away.
+    let returning = false;
+
+    const onScroll = () => {
+      const atEnd = element.scrollTop >= -5;
+      if (atEnd) returning = false;
+      if (!returning) following = atEnd;
+    };
+
     const observer = new MutationObserver(() => {
-      // (Reversed: scrolled away from the end, its position is negative.)
-      if (element.scrollTop < -5) return;
+      if (!following || element.scrollTop === 0) return;
+      returning = true;
       element.scrollTo({ behavior: 'smooth', top: 0 });
     });
+
+    element.addEventListener('scroll', onScroll, { passive: true });
     observer.observe(element, { childList: true, subtree: true });
 
-    return () => observer.disconnect();
+    return () => {
+      element.removeEventListener('scroll', onScroll);
+      observer.disconnect();
+    };
   }, []);
 
   return (
