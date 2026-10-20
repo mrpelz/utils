@@ -116,14 +116,22 @@ const sections: readonly Section[] = [
 export const TabBarOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <p className="demo-lead">
-      A tab bar switches between an app’s top-level sections (UIKit{' '}
-      <code>UITabBar</code>): a glass capsule of tabs floating at the bottom of
-      the window, the selection sliding to the tab chosen. It can collapse to
-      its active tab (UIKit <code>tabBarMinimizeBehavior</code>), and carry an
-      accessory, such as a mini player. It’s Base UI’s Tabs, so it controls the
-      sections’ panels.
-    </p>
+    <ul className="demo-lead">
+      <li>
+        Switches between an app’s top-level sections (UIKit{' '}
+        <code>UITabBar</code>).
+      </li>
+      <li>
+        A glass capsule of tabs, floating at the window’s bottom; the selection
+        slides to the tab chosen.
+      </li>
+      <li>
+        Can collapse to its active tab (UIKit{' '}
+        <code>tabBarMinimizeBehavior</code>).
+      </li>
+      <li>Can carry an accessory, e.g. a mini player.</li>
+      <li>Base UI’s Tabs: controls the sections’ panels.</li>
+    </ul>
     <LiveView />
 
     <h2 id="when-to-use-it">When to use it</h2>
@@ -158,10 +166,12 @@ export const TabBarOverview: FunctionComponent = () => (
     </ul>
 
     <h2 id="key-props">Key props</h2>
-    <p>
-      The props most tab bars set, across their parts; every part’s props are on{' '}
-      <a href="tab-bar/parts">Parts</a>.
-    </p>
+    <ul>
+      <li>The props most tab bars set, across their parts.</li>
+      <li>
+        All parts’ props: <a href="tab-bar/parts">Parts</a>.
+      </li>
+    </ul>
     <KeyPropsTable
       parts={[
         [

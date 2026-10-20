@@ -16,7 +16,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { PropsTable } from '../utils/props-table.js';
-import { Contents, PartLink, type Section } from '../utils/sections.js';
+import { PartLink } from '../utils/sections.js';
 import {
   checkboxGroupRows,
   checkboxIndicatorRows,
@@ -307,27 +307,22 @@ const RadioGroupPart: FunctionComponent = () => {
   );
 };
 
-/** The page's sections (its headings' ids), listed at its top. */
-const sections: readonly Section[] = [
-  ['checkbox-root', 'Checkbox.Root'],
-  ['checkbox-indicator', 'Checkbox.Indicator'],
-  ['radio-root', 'Radio.Root'],
-  ['radio-indicator', 'Radio.Indicator'],
-  ['checkboxgroup', 'CheckboxGroup'],
-  ['radiogroup', 'RadioGroup'],
-];
-
 /** `/checkbox/parts`: checkboxes, radios, their indicators and groups. */
 export const CheckboxParts: FunctionComponent = () => (
   <>
-    <Contents sections={sections} />
-    <p className="demo-lead">
-      A selection circle is a <code>Checkbox.Root</code> or a{' '}
-      <code>Radio.Root</code>, showing its indicator (a checkmark, or a dash
-      while mixed) while ticked. Radios share a value in a{' '}
-      <code>RadioGroup</code>; checkboxes can share one in a{' '}
-      <code>CheckboxGroup</code>, with a parent checkbox for all of them.
-    </p>
+    <ul className="demo-lead">
+      <li>
+        A <code>Checkbox.Root</code> or a <code>Radio.Root</code>, showing its
+        indicator (a checkmark, or a dash while mixed) while ticked.
+      </li>
+      <li>
+        Radios share a value in a <code>RadioGroup</code>.
+      </li>
+      <li>
+        Checkboxes can share one in a <code>CheckboxGroup</code>, with a parent
+        checkbox for all.
+      </li>
+    </ul>
     <ul>
       <li>
         <PartLink part="Checkbox.Root" />
@@ -365,14 +360,26 @@ export const CheckboxParts: FunctionComponent = () => (
     <h2 id="checkbox-root">
       <code>Checkbox.Root</code>
     </h2>
-    <p>
-      Base UI’s checkbox, as a selection circle: ticked or not (
-      <code>checked</code> or <code>defaultChecked</code>,{' '}
-      <code>onCheckedChange</code>), mixed (<code>indeterminate</code>, a dash),{' '}
-      <code>disabled</code> or <code>readOnly</code>; it submits with a form
-      through a hidden input (<code>name</code>, <code>value</code>). It renders
-      a <code>span</code>.
-    </p>
+    <ul>
+      <li>Base UI’s checkbox, as a selection circle.</li>
+      <li>
+        Ticked or not: <code>checked</code> or <code>defaultChecked</code>,{' '}
+        <code>onCheckedChange</code>.
+      </li>
+      <li>
+        Mixed: <code>indeterminate</code> (a dash).
+      </li>
+      <li>
+        Can be <code>disabled</code> or <code>readOnly</code>.
+      </li>
+      <li>
+        Submits with a form through a hidden input: <code>name</code>,{' '}
+        <code>value</code>.
+      </li>
+      <li>
+        Renders a <code>span</code>.
+      </li>
+    </ul>
     <CheckboxRootPart />
     <h3>Props</h3>
     <PropsTable rows={checkboxRootRows} />
@@ -380,11 +387,11 @@ export const CheckboxParts: FunctionComponent = () => (
     <h2 id="checkbox-indicator">
       <code>Checkbox.Indicator</code>
     </h2>
-    <p>
-      What the circle shows while ticked or mixed: by default (without
-      children), the checkmark and the dash. Given as the root’s child, it
-      replaces them with its own content, here a heart.
-    </p>
+    <ul>
+      <li>What the circle shows while ticked or mixed.</li>
+      <li>Default (no children): the checkmark and the dash.</li>
+      <li>As the root’s child: its own content instead (here, a heart).</li>
+    </ul>
     <CheckboxIndicatorPart />
     <h3>Props</h3>
     <PropsTable rows={checkboxIndicatorRows} />
@@ -392,11 +399,16 @@ export const CheckboxParts: FunctionComponent = () => (
     <h2 id="radio-root">
       <code>Radio.Root</code>
     </h2>
-    <p>
-      Base UI’s radio, as a selection circle, by its <code>value</code>, in a{' '}
-      <code>RadioGroup</code>: chosen while the group’s value is its own; can be{' '}
-      <code>disabled</code> or <code>readOnly</code>.
-    </p>
+    <ul>
+      <li>
+        Base UI’s radio, as a selection circle, by its <code>value</code>, in a{' '}
+        <code>RadioGroup</code>.
+      </li>
+      <li>Chosen while the group’s value is its own.</li>
+      <li>
+        Can be <code>disabled</code> or <code>readOnly</code>.
+      </li>
+    </ul>
     <RadioRootPart />
     <h3>Props</h3>
     <PropsTable rows={radioRootRows} />
@@ -404,10 +416,10 @@ export const CheckboxParts: FunctionComponent = () => (
     <h2 id="radio-indicator">
       <code>Radio.Indicator</code>
     </h2>
-    <p>
-      What the radio shows while chosen: by default, the checkmark; given as the
-      root’s child, its own content.
-    </p>
+    <ul>
+      <li>What the radio shows while chosen.</li>
+      <li>Default: the checkmark. As the root’s child: its own content.</li>
+    </ul>
     <RadioIndicatorPart />
     <h3>Props</h3>
     <PropsTable rows={radioIndicatorRows} />
@@ -415,12 +427,17 @@ export const CheckboxParts: FunctionComponent = () => (
     <h2 id="checkboxgroup">
       <code>CheckboxGroup</code>
     </h2>
-    <p>
-      Base UI’s, as is: checkboxes sharing one value, the names (
-      <code>value</code>s) of those ticked. With <code>allValues</code>, a
-      checkbox marked <code>parent</code> ticks or unticks all of them, and is
-      mixed while only some are ticked.
-    </p>
+    <ul>
+      <li>Base UI’s, as is.</li>
+      <li>
+        Checkboxes sharing one value: the names (<code>value</code>s) of those
+        ticked.
+      </li>
+      <li>
+        With <code>allValues</code>: a <code>parent</code> checkbox ticks or
+        unticks all, mixed while only some are ticked.
+      </li>
+    </ul>
     <CheckboxGroupPart />
     <h3>Props</h3>
     <PropsTable rows={checkboxGroupRows} />
@@ -428,11 +445,17 @@ export const CheckboxParts: FunctionComponent = () => (
     <h2 id="radiogroup">
       <code>RadioGroup</code>
     </h2>
-    <p>
-      Base UI’s, as is: radios sharing one value, the chosen radio’s; it submits
-      with a form by its <code>name</code>. It renders a <code>div</code> (or,
-      by <code>render</code>, e.g. a list’s group).
-    </p>
+    <ul>
+      <li>Base UI’s, as is.</li>
+      <li>Radios sharing one value: the chosen radio’s.</li>
+      <li>
+        Submits with a form by its <code>name</code>.
+      </li>
+      <li>
+        Renders a <code>div</code> (or, by <code>render</code>, e.g. a list’s
+        group).
+      </li>
+    </ul>
     <RadioGroupPart />
     <h3>Props</h3>
     <PropsTable rows={radioGroupRows} />

@@ -136,13 +136,17 @@ const sections: readonly Section[] = [
 export const ListOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <p className="demo-lead">
-      A list shows rows of data in sections (UIKit <code>UITableView</code>):
-      each section a group of rows, with an optional header and footer. Rows are
-      grids of parts: an edit control, an image, a title and subtitle, and
-      trailing parts (a detail, a chevron, a checkmark, a control). Rows can be
-      pressed, swiped for actions, reordered and selected.
-    </p>
+    <ul className="demo-lead">
+      <li>
+        Rows of data in sections (UIKit <code>UITableView</code>).
+      </li>
+      <li>A section: a group of rows, an optional header and footer.</li>
+      <li>
+        A row: a grid of parts (an edit control, an image, a title and subtitle,
+        trailing parts: a detail, a chevron, a checkmark, a control).
+      </li>
+      <li>Rows can be pressed, swiped for actions, reordered and selected.</li>
+    </ul>
     <LiveView />
 
     <h2 id="when-to-use-it">When to use it</h2>
@@ -179,10 +183,12 @@ export const ListOverview: FunctionComponent = () => (
     </ul>
 
     <h2 id="key-props">Key props</h2>
-    <p>
-      The props most lists set, across their parts; every part’s props are on{' '}
-      <a href="list/parts">Parts</a>.
-    </p>
+    <ul>
+      <li>The props most lists set, across their parts.</li>
+      <li>
+        All parts’ props: <a href="list/parts">Parts</a>.
+      </li>
+    </ul>
     <KeyPropsTable
       parts={[
         ['List.Root', pickRows(listRootRows, 'listStyle', 'editing')],

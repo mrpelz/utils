@@ -96,22 +96,32 @@ export const SwitchComposition: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <h2 id="in-list-rows">In list rows</h2>
-    <p>
-      On iOS, switches live in the trailing slot of <a href="list">List</a>{' '}
-      rows. Pass the row’s clicks on to its switch (
-      <code>forwardClick(&apos;[role=switch]&apos;)</code> as the row’s{' '}
-      <code>onClick</code>), so the whole row toggles it, as in Settings. Its{' '}
-      <code>tint</code> can take the color of the row’s image, as Airplane
-      Mode’s does:
-    </p>
+    <ul>
+      <li>
+        On iOS: in the trailing slot of <a href="list">List</a> rows.
+      </li>
+      <li>
+        The row passes its clicks on to the switch (
+        <code>forwardClick(&apos;[role=switch]&apos;)</code> as its{' '}
+        <code>onClick</code>): the whole row toggles it, as in Settings.
+      </li>
+      <li>
+        <code>tint</code> can take the row image’s color (Airplane Mode).
+      </li>
+    </ul>
     <CodeView code={listRowCode} />
     <InAList />
 
     <h2 id="in-forms">In forms</h2>
-    <p>
-      It renders a hidden checkbox input, so inside a <a href="form">Form</a>{' '}
-      it’s submitted by its <code>name</code> (its <code>value</code> while on,
-      its <code>uncheckedValue</code> while off), as a native checkbox would be.
-    </p>
+    <ul>
+      <li>
+        Renders a hidden checkbox input: in a <a href="form">Form</a>, submitted
+        by its <code>name</code>, as a native checkbox.
+      </li>
+      <li>
+        Value: <code>value</code> while on, <code>uncheckedValue</code> while
+        off.
+      </li>
+    </ul>
   </>
 );

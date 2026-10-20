@@ -89,12 +89,18 @@ const sections: readonly Section[] = [
 export const SliderOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <p className="demo-lead">
-      A slider sets a value between a minimum and a maximum by dragging its knob
-      along a track (UIKit <code>UISlider</code>); the track fills with the tint
-      up to the knob. Symbols at its ends can say what the ends mean, ticks can
-      mark its steps. It’s Base UI’s slider, with one knob, or two for a range.
-    </p>
+    <ul className="demo-lead">
+      <li>
+        Sets a value between a minimum and a maximum by dragging a knob along a
+        track (UIKit <code>UISlider</code>).
+      </li>
+      <li>The track fills with the tint up to the knob.</li>
+      <li>
+        Symbols at its ends can say what the ends mean; ticks can mark its
+        steps.
+      </li>
+      <li>Base UI’s slider: one knob, or two for a range.</li>
+    </ul>
     <LiveView />
 
     <h2 id="when-to-use-it">When to use it</h2>
@@ -137,10 +143,12 @@ export const SliderOverview: FunctionComponent = () => (
     </ul>
 
     <h2 id="key-props">Key props</h2>
-    <p>
-      The props most sliders set, across their parts; every part’s props are on{' '}
-      <a href="slider/parts">Parts</a>.
-    </p>
+    <ul>
+      <li>The props most sliders set, across their parts.</li>
+      <li>
+        All parts’ props: <a href="slider/parts">Parts</a>.
+      </li>
+    </ul>
     <KeyPropsTable
       parts={[
         [

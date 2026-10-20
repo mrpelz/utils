@@ -78,12 +78,15 @@ const sections: readonly Section[] = [
 export const SegmentedOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <p className="demo-lead">
-      A segmented control chooses one of a few options, all shown side by side
-      on a track (UIKit <code>UISegmentedControl</code>): e.g. a chart’s period,
-      or which of a list’s items to show. The chosen one is highlighted; it’s
-      Base UI’s radio group.
-    </p>
+    <ul className="demo-lead">
+      <li>
+        Chooses one of a few options, side by side on a track (UIKit{' '}
+        <code>UISegmentedControl</code>).
+      </li>
+      <li>E.g. a chart’s period, or which of a list’s items to show.</li>
+      <li>The chosen one highlighted.</li>
+      <li>Base UI’s radio group.</li>
+    </ul>
     <LiveView />
 
     <h2 id="when-to-use-it">When to use it</h2>
@@ -119,10 +122,12 @@ export const SegmentedOverview: FunctionComponent = () => (
     </ul>
 
     <h2 id="key-props">Key props</h2>
-    <p>
-      The props most segmented controls set, across their parts; every part’s
-      props are on <a href="segmented/parts">Parts</a>.
-    </p>
+    <ul>
+      <li>The props most segmented controls set, across their parts.</li>
+      <li>
+        All parts’ props: <a href="segmented/parts">Parts</a>.
+      </li>
+    </ul>
     <KeyPropsTable
       parts={[
         [

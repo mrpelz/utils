@@ -463,57 +463,92 @@ export const SliderComposition: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <h2 id="in-a-settings-list">In a settings list</h2>
-    <p>
-      As iOS’s Display &amp; Brightness: a slider fills a{' '}
-      <a href="list">List</a> row of its own, between its ends’ symbols, the
-      section’s header naming it. A setting takes effect at once (guide,{' '}
-      <GuideLink to="commit-model">§8.2, commit model</GuideLink>: immediate per
-      field), so the app follows <code>onValueChange</code>, beside other
-      settings that do, e.g. a <a href="switch">Switch</a>. The header doesn’t
-      label the input; the thumb is named itself:
-    </p>
+    <ul>
+      <li>
+        As iOS’s Display &amp; Brightness: a slider filling a{' '}
+        <a href="list">List</a> row of its own, between its ends’ symbols; the
+        section’s header names it.
+      </li>
+      <li>
+        Takes effect at once (guide,{' '}
+        <GuideLink to="commit-model">§8.2, commit model</GuideLink>: immediate
+        per field): the app follows <code>onValueChange</code>, as for other
+        settings (e.g. a <a href="switch">Switch</a>).
+      </li>
+      <li>The header doesn’t label the input: name the thumb itself.</li>
+    </ul>
     <CodeView code={settingsCode} />
     <SettingsRow />
 
     <h2 id="a-range">A range</h2>
-    <p>
-      Two thumbs (<code>index</code> 0 and 1) on a value of two numbers, e.g. a
-      price filter’s from–to, each named for its end. Here, they keep two steps
-      apart (<code>minStepsBetweenValues</code>) and can’t pass each other (
-      <code>thumbCollisionBehavior</code>); <code>Slider.Value</code> shows
-      both, formatted as a currency; their inputs’ <code>aria-valuetext</code>{' '}
-      say “€40 start range” and “€120 end range”.
-    </p>
+    <ul>
+      <li>
+        Two thumbs (<code>index</code> 0 and 1) on a value of two numbers, e.g.
+        a price filter’s from–to; each named for its end.
+      </li>
+      <li>
+        Two steps apart at least (<code>minStepsBetweenValues</code>); can’t
+        pass each other (<code>thumbCollisionBehavior</code>).
+      </li>
+      <li>
+        <code>Slider.Value</code> shows both, formatted as a currency.
+      </li>
+      <li>
+        Inputs’ <code>aria-valuetext</code>: “€40 start range”, “€120 end
+        range”.
+      </li>
+    </ul>
     <CodeView code={rangeCode} />
     <Range />
 
     <h2 id="labels-and-forms">Labels and forms</h2>
-    <p>
-      A <code>Slider.Label</code> names the inputs (no <code>aria-label</code>{' '}
-      needed); with <code>Slider.Value</code>, above the track (
-      <code>block-start</code>: the label at the line’s start, the value at its
-      end), or beside it. In a <a href="form">Form</a>, Base UI’s{' '}
-      <code>Field.Root</code> names each value; outside one, the root’s{' '}
-      <code>name</code> names its hidden input.
-    </p>
+    <ul>
+      <li>
+        A <code>Slider.Label</code> names the inputs (no <code>aria-label</code>{' '}
+        needed).
+      </li>
+      <li>
+        With <code>Slider.Value</code>: above the track (
+        <code>block-start</code>: label at the line’s start, value at its end),
+        or beside it.
+      </li>
+      <li>
+        In a <a href="form">Form</a>: Base UI’s <code>Field.Root</code> names
+        each value.
+      </li>
+      <li>
+        Outside one: the root’s <code>name</code> names its hidden input.
+      </li>
+    </ul>
     <CodeView code={formCode} />
     <InAForm />
 
     <h2 id="in-a-player">In a player</h2>
-    <p>
-      A playback position: the app moves the controlled <code>value</code> as it
-      plays, but not while the knob is dragged (<code>onValueChange</code>’s{' '}
-      <code>reason</code>), and seeks once it’s released (
-      <code>onValueCommitted</code>). Two values under the track show the
-      elapsed and the remaining time; the input’s <code>aria-valuetext</code>{' '}
-      says both (<code>getAriaValueText</code>). Below the playback{' '}
-      <a href="button">Buttons</a>, the volume.
-    </p>
-    <p>
-      Apple’s HIG says not to use a slider for audio volume on iOS, but the
-      system’s volume view (with its output device control); a web page has no
-      such view, and sets its own media’s volume.
-    </p>
+    <ul>
+      <li>
+        A playback position: the app moves the controlled <code>value</code> as
+        it plays.
+      </li>
+      <li>
+        Not while the knob is dragged (<code>onValueChange</code>’s{' '}
+        <code>reason</code>); seeks once it’s released (
+        <code>onValueCommitted</code>).
+      </li>
+      <li>
+        Under the track: elapsed and remaining time; the input’s{' '}
+        <code>aria-valuetext</code> says both (<code>getAriaValueText</code>).
+      </li>
+      <li>
+        Below the playback <a href="button">Buttons</a>: the volume.
+      </li>
+    </ul>
+    <ul>
+      <li>
+        HIG: on iOS, audio volume uses the system’s volume view (with its output
+        device control), not a slider.
+      </li>
+      <li>A web page has no such view; it sets its own media’s volume.</li>
+    </ul>
     <CodeView code={mediaCode} />
     <Media />
   </>

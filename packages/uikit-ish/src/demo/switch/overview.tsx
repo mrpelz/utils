@@ -55,11 +55,12 @@ const sections: readonly Section[] = [
 export const SwitchOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <p className="demo-lead">
-      A switch turns one setting on or off (UIKit <code>UISwitch</code>, the
-      HIG’s “toggle”). The change takes effect at once: there’s nothing to save
-      or confirm.
-    </p>
+    <ul className="demo-lead">
+      <li>
+        Turns one setting on or off (UIKit <code>UISwitch</code>, HIG “toggle”).
+      </li>
+      <li>Takes effect at once: nothing to save or confirm.</li>
+    </ul>
     <LiveView />
 
     <h2 id="when-to-use-it">When to use it</h2>
@@ -91,10 +92,12 @@ export const SwitchOverview: FunctionComponent = () => (
     </ul>
 
     <h2 id="key-props">Key props</h2>
-    <p>
-      The props most switches set; every part’s props are on{' '}
-      <a href="switch/parts">Parts</a>.
-    </p>
+    <ul>
+      <li>The props most switches set.</li>
+      <li>
+        All parts’ props: <a href="switch/parts">Parts</a>.
+      </li>
+    </ul>
     <KeyPropsTable
       parts={[
         [

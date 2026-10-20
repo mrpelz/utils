@@ -21,44 +21,64 @@ const sections: readonly Section[] = [
 export const TabBarInformationArchitecture: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <p className="demo-lead">
-      In Apple’s catalog,{' '}
-      <a
-        href={`${HIG}/tab-bars`}
-        rel="noreferrer"
-        target="_blank"
-      >
-        tab bars
-      </a>{' '}
-      are under “Navigation and search”. Re-sliced into primitives (after the{' '}
-      <GuideLink to="section-5">HIG composition guide</GuideLink>), a tab bar is
-      two of them: a <em>Region</em> at the window’s bottom edge, holding a
-      navigating <em>Choice</em> of the app’s sections (
-      <GuideLink to="section-5-mapping">§5, mapping</GuideLink>).
-    </p>
+    <ul className="demo-lead">
+      <li>
+        Apple’s catalog:{' '}
+        <a
+          href={`${HIG}/tab-bars`}
+          rel="noreferrer"
+          target="_blank"
+        >
+          tab bars
+        </a>
+        , under “Navigation and search”.
+      </li>
+      <li>
+        As primitives (
+        <GuideLink to="section-5">HIG composition guide</GuideLink>): a{' '}
+        <em>Region</em> at the window’s bottom edge, holding a navigating{' '}
+        <em>Choice</em> of the app’s sections (
+        <GuideLink to="section-5-mapping">§5, mapping</GuideLink>).
+      </li>
+    </ul>
 
     <h2 id="primitives-region-choice">Primitives: Region + Choice</h2>
-    <p>
-      A Region is an edge-anchored strip of a surface hosting commands, choices
-      or navigation; its parameters are the edge, capacity, collapse and scroll
-      behavior, and ownership (guide,{' '}
-      <GuideLink to="primitive-region">§5</GuideLink>). A tab bar is the bottom
-      Region of an app’s window, its capacity about three to six tabs, owned by
-      the app. Its collapse behavior is this library’s <code>collapsed</code>,
-      which the app sets (e.g. while scrolling down).
-    </p>
-    <p>
-      Its tabs are a Choice: one of a known set, all visible at once (guide,{' '}
-      <GuideLink to="primitive-choice">§5</GuideLink>, which counts “tab bars’
-      selection behavior” among the Choices). Unlike a toggle or a segmented
-      control, choosing navigates: the content below is the chosen section’s.
-    </p>
+    <ul>
+      <li>
+        Region: an edge-anchored strip of a surface, hosting commands, choices
+        or navigation (guide, <GuideLink to="primitive-region">§5</GuideLink>).
+      </li>
+      <li>
+        Parameters: edge, capacity, collapse and scroll behavior, ownership.
+      </li>
+      <li>
+        A tab bar: the bottom Region of an app’s window; about three to six
+        tabs; owned by the app.
+      </li>
+      <li>
+        Collapse: this library’s <code>collapsed</code>, set by the app (e.g.
+        while scrolling down).
+      </li>
+    </ul>
+    <ul>
+      <li>
+        Its tabs: a Choice, one of a known set, all visible (guide,{' '}
+        <GuideLink to="primitive-choice">§5</GuideLink>: “tab bars’ selection
+        behavior”).
+      </li>
+      <li>
+        Unlike a toggle or a segmented control, choosing navigates: the content
+        below is the chosen section’s.
+      </li>
+    </ul>
 
     <h2 id="traits">Traits</h2>
-    <p>
-      The tab bar’s row of the guide’s trait matrix (
-      <GuideLink to="trait-matrix">§4</GuideLink>):
-    </p>
+    <ul>
+      <li>
+        The tab bar’s row of the guide’s trait matrix (
+        <GuideLink to="trait-matrix">§4</GuideLink>).
+      </li>
+    </ul>
     <table>
       <tbody>
         <tr>
@@ -91,11 +111,12 @@ export const TabBarInformationArchitecture: FunctionComponent = () => (
         </tr>
       </tbody>
     </table>
-    <p>
-      This library’s groups add a second Choice to the Region: search, in a
-      group of its own beside the sections’ (as iOS 26’s), which the matrix’s
-      row leaves out.
-    </p>
+    <ul>
+      <li>
+        Not in the matrix’s row: a second Choice in the Region, search, in a
+        group of its own beside the sections’ (iOS 26).
+      </li>
+    </ul>
 
     <h2 id="where-it-sits">Where it sits</h2>
     <ul>
@@ -158,9 +179,11 @@ export const TabBarInformationArchitecture: FunctionComponent = () => (
         narrowest scope it describes (<GuideLink to="rule-g8">G8</GuideLink>).
       </li>
     </ul>
-    <p>
-      The accessory (UIKit’s <code>bottomAccessory</code>, e.g. a mini player)
-      isn’t covered by the guide.
-    </p>
+    <ul>
+      <li>
+        Not covered by the guide: the accessory (UIKit’s{' '}
+        <code>bottomAccessory</code>, e.g. a mini player).
+      </li>
+    </ul>
   </>
 );

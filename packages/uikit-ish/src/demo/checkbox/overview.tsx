@@ -67,13 +67,20 @@ const sections: readonly Section[] = [
 export const CheckboxOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <p className="demo-lead">
-      iOS has no checkboxes or radio buttons of its own: it selects items with
-      selection circles, as rows while editing a list (UIKit’s editing
-      selection). <code>Checkbox</code> and <code>Radio</code> are those
-      circles: Base UI’s checkbox and radio, unticked in a gray ring, ticked in
-      the tint with a checkmark, mixed with a dash.
-    </p>
+    <ul className="demo-lead">
+      <li>
+        iOS has no checkboxes or radio buttons: it selects items with selection
+        circles, e.g. rows while editing a list (UIKit’s editing selection).
+      </li>
+      <li>
+        <code>Checkbox</code> and <code>Radio</code>: those circles, Base UI’s
+        checkbox and radio.
+      </li>
+      <li>
+        Unticked: a gray ring. Ticked: the tint, with a checkmark. Mixed: a
+        dash.
+      </li>
+    </ul>
     <LiveView />
 
     <h2 id="when-to-use-it">When to use it</h2>
@@ -108,10 +115,12 @@ export const CheckboxOverview: FunctionComponent = () => (
     </ul>
 
     <h2 id="key-props">Key props</h2>
-    <p>
-      The props most selection circles set, across the parts; every part’s props
-      are on <a href="checkbox/parts">Parts</a>.
-    </p>
+    <ul>
+      <li>The props most selection circles set, across the parts.</li>
+      <li>
+        All parts’ props: <a href="checkbox/parts">Parts</a>.
+      </li>
+    </ul>
     <KeyPropsTable
       parts={[
         [

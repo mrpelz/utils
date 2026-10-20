@@ -192,6 +192,7 @@
     mix-blend-mode: var(--uikit-glass-content-blend);
     outline: none;
     padding-inline-start: calc(8px + var(--uikit-menu-toggle-space));
+    -webkit-user-select: none;
     user-select: none;
 
     /* Highlighted (or its submenu open), the popup's moving selection (see
@@ -388,6 +389,7 @@
     gap: var(--uikit-menu-quick-gap);
     mix-blend-mode: var(--uikit-glass-content-blend);
     outline: none;
+    -webkit-user-select: none;
     user-select: none;
 
     &::before {

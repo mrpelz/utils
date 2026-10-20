@@ -18,7 +18,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { PropsTable } from '../utils/props-table.js';
-import { Contents, PartLink, type Section } from '../utils/sections.js';
+import { PartLink } from '../utils/sections.js';
 import { contacts, messages, planets, settings } from './content.js';
 import {
   listAccessoryRows,
@@ -1563,50 +1563,22 @@ const IndexItemPart: FunctionComponent = () => {
   );
 };
 
-/** The page's sections (its headings' ids), listed at its top. */
-const sections: readonly Section[] = [
-  ['list-root', 'List.Root'],
-  ['list-section', 'List.Section'],
-  ['list-header', 'List.Header'],
-  ['list-group', 'List.Group'],
-  ['list-item', 'List.Item'],
-  ['list-expandableroot', 'List.ExpandableRoot'],
-  ['list-expandabletrigger', 'List.ExpandableTrigger'],
-  ['list-expandable', 'List.Expandable'],
-  ['list-footer', 'List.Footer'],
-  ['list-block', 'List.Block'],
-  ['list-title', 'List.Title'],
-  ['list-subtitle', 'List.Subtitle'],
-  ['list-supertitle', 'List.Supertitle'],
-  ['list-text', 'List.Text'],
-  ['list-detail', 'List.Detail'],
-  ['list-image', 'List.Image'],
-  ['list-accessory', 'List.Accessory'],
-  ['list-checkmark', 'List.Checkmark'],
-  ['list-drillin', 'List.DrillIn'],
-  ['list-disclosure', 'List.Disclosure'],
-  ['list-grabber', 'List.Grabber'],
-  ['list-action', 'List.Action'],
-  ['list-button', 'List.Button'],
-  ['list-checkbox', 'List.Checkbox'],
-  ['list-radio', 'List.Radio'],
-  ['list-editbutton', 'List.EditButton'],
-  ['list-swipeactions', 'List.SwipeActions'],
-  ['list-swipeaction', 'List.SwipeAction'],
-  ['list-index', 'List.Index'],
-  ['list-indexitem', 'List.IndexItem'],
-];
-
 /** `/list/parts`: a list's parts, from the root to its rows' parts. */
 export const ListParts: FunctionComponent = () => (
   <>
-    <Contents sections={sections} />
-    <p className="demo-lead">
-      A list is a <code>List.Root</code> of sections; a section is a header, a
-      group of rows (or a block of text), and a footer. A row is a grid of
-      parts: leading (an edit control, an image), its title (and subtitle,
-      text), and trailing parts; its swipe actions are revealed by swiping.
-    </p>
+    <ul className="demo-lead">
+      <li>
+        A <code>List.Root</code> of sections.
+      </li>
+      <li>
+        A section: a header, a group of rows (or a block of text), a footer.
+      </li>
+      <li>
+        A row: a grid of parts; leading (an edit control, an image), its title
+        (and subtitle, text), trailing parts.
+      </li>
+      <li>A row’s swipe actions: revealed by swiping.</li>
+    </ul>
     <ul>
       <li>
         <PartLink part="List.Root" />
@@ -1689,12 +1661,21 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-root">
       <code>List.Root</code>
     </h2>
-    <p>
-      The list: its style (<code>listStyle</code>; UIKit{' '}
-      <code>UITableView.Style</code>), for all its parts, whether its groups are
-      outlined, and whether it’s in edit mode (<code>editing</code>: its rows’
-      edit controls and grabbers slide in). It renders a <code>div</code>.
-    </p>
+    <ul>
+      <li>The list.</li>
+      <li>
+        Style, for all its parts: <code>listStyle</code> (UIKit{' '}
+        <code>UITableView.Style</code>).
+      </li>
+      <li>Whether its groups are outlined.</li>
+      <li>
+        Edit mode: <code>editing</code> (its rows’ edit controls and grabbers
+        slide in).
+      </li>
+      <li>
+        Renders a <code>div</code>.
+      </li>
+    </ul>
     <RootPart />
     <h3>Props</h3>
     <PropsTable rows={listRootRows} />
@@ -1702,11 +1683,16 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-section">
       <code>List.Section</code>
     </h2>
-    <p>
-      A section (a <code>section</code>): an optional <code>Header</code>, a{' '}
-      <code>Group</code> of rows (or a <code>Block</code>), an optional{' '}
-      <code>Footer</code>; 35px apart.
-    </p>
+    <ul>
+      <li>
+        A section (a <code>section</code>).
+      </li>
+      <li>
+        An optional <code>Header</code>, a <code>Group</code> of rows (or a{' '}
+        <code>Block</code>), an optional <code>Footer</code>.
+      </li>
+      <li>35px apart.</li>
+    </ul>
     <SectionPart />
     <h3>Props</h3>
     <PropsTable rows={listSectionRows} />
@@ -1714,13 +1700,18 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-header">
       <code>List.Header</code>
     </h2>
-    <p>
-      A section’s header: a title (a heading, by <code>render</code>),
-      optionally a supertitle, a subtitle, and trailing parts (an{' '}
-      <code>Accessory</code>, an <code>Action</code>). Its{' '}
-      <code>prominence</code>: prominent, nested (a plain list’s sticky section
-      title), or extra prominent.
-    </p>
+    <ul>
+      <li>A section’s header.</li>
+      <li>
+        A title (a heading, by <code>render</code>); optionally a supertitle, a
+        subtitle, trailing parts (an <code>Accessory</code>, an{' '}
+        <code>Action</code>).
+      </li>
+      <li>
+        <code>prominence</code>: prominent, nested (a plain list’s sticky
+        section title), extra prominent.
+      </li>
+    </ul>
     <HeaderPart />
     <h3>Props</h3>
     <PropsTable rows={listHeaderRows} />
@@ -1728,12 +1719,16 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-group">
       <code>List.Group</code>
     </h2>
-    <p>
-      A section’s rows (a <code>ul</code>), on the rows’ background: inset with
-      rounded corners, full width, or plain. Rows with a <code>Grabber</code>{' '}
-      reorder within it; it calls <code>onReorder</code>, and the app reorders
-      its rows.
-    </p>
+    <ul>
+      <li>
+        A section’s rows (a <code>ul</code>), on the rows’ background.
+      </li>
+      <li>Inset with rounded corners, full width, or plain.</li>
+      <li>
+        Rows with a <code>Grabber</code> reorder within it: it calls{' '}
+        <code>onReorder</code>; the app reorders its rows.
+      </li>
+    </ul>
     <GroupPart />
     <h3>Props</h3>
     <PropsTable rows={listGroupRows} />
@@ -1741,13 +1736,20 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-item">
       <code>List.Item</code>
     </h2>
-    <p>
-      A row (an <code>li</code>): a grid of its parts, at least 52px high (68px
-      with a subtitle), with a separator. It’s pressable through its title (or a{' '}
-      <code>Button</code>), or by its own <code>onClick</code> (e.g.{' '}
-      <code>forwardClick</code>); it can be <code>selected</code>, indented (
-      <code>level</code>), and swiped for its <code>SwipeActions</code>.
-    </p>
+    <ul>
+      <li>
+        A row (an <code>li</code>): a grid of its parts, with a separator.
+      </li>
+      <li>At least 52px high (68px with a subtitle).</li>
+      <li>
+        Pressable through its title (or a <code>Button</code>), or by its own{' '}
+        <code>onClick</code> (e.g. <code>forwardClick</code>).
+      </li>
+      <li>
+        Can be <code>selected</code>, indented (<code>level</code>), swiped for
+        its <code>SwipeActions</code>.
+      </li>
+    </ul>
     <ItemPart />
     <h3>Props</h3>
     <PropsTable rows={listItemRows} />
@@ -1755,12 +1757,19 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-expandableroot">
       <code>List.ExpandableRoot</code>
     </h2>
-    <p>
-      An expandable row’s state (<code>defaultOpen</code>, or <code>open</code>{' '}
-      and <code>onOpenChange</code>), around the row that toggles it and the{' '}
-      <code>Expandable</code>; it renders no element, so they stay its group’s
-      children. A <code>List.Disclosure</code> in it turns down while it’s open.
-    </p>
+    <ul>
+      <li>
+        An expandable row’s state: <code>defaultOpen</code>, or{' '}
+        <code>open</code> and <code>onOpenChange</code>.
+      </li>
+      <li>
+        Around the row toggling it and the <code>Expandable</code>.
+      </li>
+      <li>Renders no element: they stay its group’s children.</li>
+      <li>
+        A <code>List.Disclosure</code> in it turns down while open.
+      </li>
+    </ul>
     <ExpandableRootPart />
     <h3>Props</h3>
     <PropsTable rows={listExpandableRootRows} />
@@ -1768,11 +1777,13 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-expandabletrigger">
       <code>List.ExpandableTrigger</code>
     </h2>
-    <p>
-      A button toggling its root’s row, with <code>aria-expanded</code> and{' '}
-      <code>aria-controls</code>; rendered by the row’s title, it makes the row
-      pressable.
-    </p>
+    <ul>
+      <li>
+        A button toggling its root’s row: <code>aria-expanded</code>,{' '}
+        <code>aria-controls</code>.
+      </li>
+      <li>Rendered by the row’s title: makes the row pressable.</li>
+    </ul>
     <ExpandableTriggerPart />
     <h3>Props</h3>
     <PropsTable rows={listExpandableTriggerRows} />
@@ -1780,12 +1791,18 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-expandable">
       <code>List.Expandable</code>
     </h2>
-    <p>
-      A row shown or not, opening and closing in place: e.g. an inline picker
-      below the row that toggles it (as iOS’s Calendar). In an{' '}
-      <code>ExpandableRoot</code>, by its state; or by its own <code>open</code>
-      . Closed, it’s inert. It takes a row’s props, too.
-    </p>
+    <ul>
+      <li>
+        A row shown or not, opening and closing in place, e.g. an inline picker
+        below the row toggling it (iOS’s Calendar).
+      </li>
+      <li>
+        In an <code>ExpandableRoot</code>: by its state. Otherwise: by its own{' '}
+        <code>open</code>.
+      </li>
+      <li>Closed: inert.</li>
+      <li>Takes a row’s props, too.</li>
+    </ul>
     <ExpandablePart />
     <h3>Props</h3>
     <PropsTable rows={listExpandableRows} />
@@ -1793,10 +1810,12 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-footer">
       <code>List.Footer</code>
     </h2>
-    <p>
-      A section’s footer: text below its group (or block), aligned with the
-      rows’ text.
-    </p>
+    <ul>
+      <li>
+        A section’s footer: text below its group (or block), aligned with the
+        rows’ text.
+      </li>
+    </ul>
     <FooterPart />
     <h3>Props</h3>
     <PropsTable rows={listFooterRows} />
@@ -1804,10 +1823,15 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-block">
       <code>List.Block</code>
     </h2>
-    <p>
-      Text in a section instead of rows (Framework7’s content block), aligned
-      with the rows’ text; <code>strong</code>, on the rows’ background.
-    </p>
+    <ul>
+      <li>
+        Text in a section instead of rows (Framework7’s content block), aligned
+        with the rows’ text.
+      </li>
+      <li>
+        <code>strong</code>: on the rows’ background.
+      </li>
+    </ul>
     <BlockPart />
     <h3>Props</h3>
     <PropsTable rows={listBlockRows} />
@@ -1815,11 +1839,13 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-title">
       <code>List.Title</code>
     </h2>
-    <p>
-      A row’s (or header’s) title, in Body. As a button or link (
-      <code>render</code>), it makes the row pressable: its hit area covers the
-      row, beneath the trailing controls.
-    </p>
+    <ul>
+      <li>A row’s (or header’s) title, in Body.</li>
+      <li>
+        As a button or link (<code>render</code>): makes the row pressable; its
+        hit area covers the row, beneath the trailing controls.
+      </li>
+    </ul>
     <TitlePart />
     <h3>Props</h3>
     <PropsTable rows={listTitleRows} />
@@ -1827,10 +1853,11 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-subtitle">
       <code>List.Subtitle</code>
     </h2>
-    <p>
-      A second line below the title (in a row, making it tall; also in a
-      header).
-    </p>
+    <ul>
+      <li>
+        A second line below the title: in a row (making it tall), or a header.
+      </li>
+    </ul>
     <SubtitlePart />
     <h3>Props</h3>
     <PropsTable rows={listSubtitleRows} />
@@ -1838,7 +1865,9 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-supertitle">
       <code>List.Supertitle</code>
     </h2>
-    <p>A line above a header’s title.</p>
+    <ul>
+      <li>A line above a header’s title.</li>
+    </ul>
     <SupertitlePart />
     <h3>Props</h3>
     <PropsTable rows={listSupertitleRows} />
@@ -1846,10 +1875,12 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-text">
       <code>List.Text</code>
     </h2>
-    <p>
-      Body text below a row’s title and subtitle, making it a media row (as in
-      Mail): up to <code>lines</code> lines, ellipsized.
-    </p>
+    <ul>
+      <li>Body text below a row’s title and subtitle: a media row (Mail).</li>
+      <li>
+        Up to <code>lines</code> lines, ellipsized.
+      </li>
+    </ul>
     <TextPart />
     <h3>Props</h3>
     <PropsTable rows={listTextRows} />
@@ -1857,9 +1888,11 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-detail">
       <code>List.Detail</code>
     </h2>
-    <p>
-      A trailing value in the secondary color, e.g. a setting’s current value.
-    </p>
+    <ul>
+      <li>
+        A trailing value in the secondary color, e.g. a setting’s current value.
+      </li>
+    </ul>
     <DetailPart />
     <h3>Props</h3>
     <PropsTable rows={listDetailRows} />
@@ -1867,10 +1900,13 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-image">
       <code>List.Image</code>
     </h2>
-    <p>
-      A leading image: a symbol alone, or a symbol or picture in a rounded,
-      circular or filled frame (<code>variant</code>), one line high.
-    </p>
+    <ul>
+      <li>A leading image, one line high.</li>
+      <li>
+        A symbol alone, or a symbol or picture in a rounded, circular or filled
+        frame (<code>variant</code>).
+      </li>
+    </ul>
     <ImagePart />
     <h3>Props</h3>
     <PropsTable rows={listImageRows} />
@@ -1878,10 +1914,13 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-accessory">
       <code>List.Accessory</code>
     </h2>
-    <p>
-      A trailing symbol in the tint color; as a button (<code>render</code>),
-      pressable on its own, e.g. an info button.
-    </p>
+    <ul>
+      <li>A trailing symbol in the tint color.</li>
+      <li>
+        As a button (<code>render</code>): pressable on its own, e.g. an info
+        button.
+      </li>
+    </ul>
     <AccessoryPart />
     <h3>Props</h3>
     <PropsTable rows={listAccessoryRows} />
@@ -1889,10 +1928,12 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-checkmark">
       <code>List.Checkmark</code>
     </h2>
-    <p>
-      A trailing checkmark in the tint color: the chosen row of a list of
-      options (as iOS’s settings).
-    </p>
+    <ul>
+      <li>
+        A trailing checkmark in the tint color: the chosen row of a list of
+        options (iOS’s settings).
+      </li>
+    </ul>
     <CheckmarkPart />
     <h3>Props</h3>
     <PropsTable rows={listCheckmarkRows} />
@@ -1900,10 +1941,10 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-drillin">
       <code>List.DrillIn</code>
     </h2>
-    <p>
-      A trailing chevron: the row opens a page (drills in). Hidden from
-      assistive technology.
-    </p>
+    <ul>
+      <li>A trailing chevron: the row opens a page (drills in).</li>
+      <li>Hidden from assistive technology.</li>
+    </ul>
     <DrillInPart />
     <h3>Props</h3>
     <PropsTable rows={listDrillInRows} />
@@ -1911,11 +1952,14 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-disclosure">
       <code>List.Disclosure</code>
     </h2>
-    <p>
-      A chevron in the tint color, turned down while open: in a header (or row)
-      that’s a Base UI <code>Collapsible.Trigger</code>, its group the panel.
-      Hidden from assistive technology.
-    </p>
+    <ul>
+      <li>A chevron in the tint color, turned down while open.</li>
+      <li>
+        In a header (or row) that’s a Base UI <code>Collapsible.Trigger</code>;
+        its group the panel.
+      </li>
+      <li>Hidden from assistive technology.</li>
+    </ul>
     <DisclosurePart />
     <h3>Props</h3>
     <PropsTable rows={listDisclosureRows} />
@@ -1923,10 +1967,13 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-grabber">
       <code>List.Grabber</code>
     </h2>
-    <p>
-      A trailing handle that drags its row to reorder its group (see{' '}
-      <code>Group</code>); focused, arrow keys move the row by one.
-    </p>
+    <ul>
+      <li>
+        A trailing handle dragging its row to reorder its group (see{' '}
+        <code>Group</code>).
+      </li>
+      <li>Focused: arrow keys move the row by one.</li>
+    </ul>
     <GrabberPart />
     <h3>Props</h3>
     <PropsTable rows={listGrabberRows} />
@@ -1934,10 +1981,12 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-action">
       <code>List.Action</code>
     </h2>
-    <p>
-      Text in the tint color as a button: trailing in a header (e.g. See All) or
-      a row.
-    </p>
+    <ul>
+      <li>
+        Text in the tint color as a button: trailing in a header (e.g. See All)
+        or a row.
+      </li>
+    </ul>
     <ActionPart />
     <h3>Props</h3>
     <PropsTable rows={listActionRows} />
@@ -1945,10 +1994,12 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-button">
       <code>List.Button</code>
     </h2>
-    <p>
-      A row that’s a button: its title in the tint color (or red:{' '}
-      <code>destructive</code>), the whole row pressable.
-    </p>
+    <ul>
+      <li>A row that’s a button: the whole row pressable.</li>
+      <li>
+        Its title in the tint color, or red (<code>destructive</code>).
+      </li>
+    </ul>
     <ButtonPart />
     <h3>Props</h3>
     <PropsTable rows={listButtonRows} />
@@ -1956,11 +2007,15 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-checkbox">
       <code>List.Checkbox</code>
     </h2>
-    <p>
-      A <a href="checkbox">Checkbox</a> as a row’s leading edit control:
-      selecting several rows. Rows pass their clicks on to it (
-      <code>forwardClick</code>).
-    </p>
+    <ul>
+      <li>
+        A <a href="checkbox">Checkbox</a> as a row’s leading edit control:
+        selecting several rows.
+      </li>
+      <li>
+        Rows pass their clicks on to it (<code>forwardClick</code>).
+      </li>
+    </ul>
     <CheckboxPart />
     <h3>Props</h3>
     <PropsTable rows={listCheckboxRows} />
@@ -1968,11 +2023,16 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-radio">
       <code>List.Radio</code>
     </h2>
-    <p>
-      A <a href="checkbox">Radio</a> as a row’s leading edit control: choosing
-      one row, its group a Base UI <code>RadioGroup</code> rendering the{' '}
-      <code>Group</code>.
-    </p>
+    <ul>
+      <li>
+        A <a href="checkbox">Radio</a> as a row’s leading edit control: choosing
+        one row.
+      </li>
+      <li>
+        Its group: a Base UI <code>RadioGroup</code> rendering the{' '}
+        <code>Group</code>.
+      </li>
+    </ul>
     <RadioPart />
     <h3>Props</h3>
     <PropsTable rows={listRadioRows} />
@@ -1980,10 +2040,13 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-editbutton">
       <code>List.EditButton</code>
     </h2>
-    <p>
-      A leading delete (or insert) button; deleting opens the row’s trailing
-      swipe actions, unless its click handler prevents it.
-    </p>
+    <ul>
+      <li>A leading delete (or insert) button.</li>
+      <li>
+        Deleting opens the row’s trailing swipe actions, unless its click
+        handler prevents it.
+      </li>
+    </ul>
     <EditButtonPart />
     <h3>Props</h3>
     <PropsTable rows={listEditButtonRows} />
@@ -1991,10 +2054,15 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-swipeactions">
       <code>List.SwipeActions</code>
     </h2>
-    <p>
-      A row’s actions on one side, revealed by swiping it (or by focusing them);{' '}
-      <code>overswipe</code>: swiping on past them triggers the outermost.
-    </p>
+    <ul>
+      <li>
+        A row’s actions on one side, revealed by swiping it (or by focusing
+        them).
+      </li>
+      <li>
+        <code>overswipe</code>: swiping on past them triggers the outermost.
+      </li>
+    </ul>
     <SwipeActionsPart />
     <h3>Props</h3>
     <PropsTable rows={listSwipeActionsRows} />
@@ -2002,11 +2070,17 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-swipeaction">
       <code>List.SwipeAction</code>
     </h2>
-    <p>
-      An action: a symbol (or short text) in a circle or rounded rectangle, in
-      its <code>tint</code>, named by its <code>label</code> (shown below it
-      with <code>showLabel</code>); the actions close after a click.
-    </p>
+    <ul>
+      <li>
+        An action: a symbol (or short text) in a circle or rounded rectangle, in
+        its <code>tint</code>.
+      </li>
+      <li>
+        Named by its <code>label</code>; shown below it with{' '}
+        <code>showLabel</code>.
+      </li>
+      <li>The actions close after a click.</li>
+    </ul>
     <SwipeActionPart />
     <h3>Props</h3>
     <PropsTable rows={listSwipeActionRows} />
@@ -2014,11 +2088,14 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-index">
       <code>List.Index</code>
     </h2>
-    <p>
-      An index (a <code>nav</code>) of letters in the tint color, beside a plain
-      list: pressing or scrubbing over it clicks its items. Placing it (e.g. at
-      the page’s edge) is the page’s.
-    </p>
+    <ul>
+      <li>
+        An index (a <code>nav</code>) of letters in the tint color, beside a
+        plain list.
+      </li>
+      <li>Pressing or scrubbing over it clicks its items.</li>
+      <li>Placing it (e.g. at the page’s edge) is the page’s.</li>
+    </ul>
     <IndexPart />
     <h3>Props</h3>
     <PropsTable rows={listIndexRows} />
@@ -2026,10 +2103,12 @@ export const ListParts: FunctionComponent = () => (
     <h2 id="list-indexitem">
       <code>List.IndexItem</code>
     </h2>
-    <p>
-      A letter of the index (a button): its click scrolls the app’s list to the
-      section.
-    </p>
+    <ul>
+      <li>
+        A letter of the index (a button): its click scrolls the app’s list to
+        the section.
+      </li>
+    </ul>
     <IndexItemPart />
     <h3>Props</h3>
     <PropsTable rows={listIndexItemRows} />

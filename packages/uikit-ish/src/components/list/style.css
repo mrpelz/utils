@@ -828,6 +828,7 @@
     touch-action: pan-y;
     transition-duration: 300ms;
     transition-property: background-color;
+    -webkit-user-select: none;
     user-select: none;
 
     &[data-swipeable] {
@@ -1667,7 +1668,6 @@
     justify-content: center;
     gap: 0;
     touch-action: none;
-    /* stylelint-disable-next-line property-no-vendor-prefix */
     -webkit-user-select: none;
     user-select: none;
 
@@ -1699,9 +1699,6 @@
     );
     text-align: center;
     text-decoration: none;
-    /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-user-select: none;
-    user-select: none;
 
     --uikit-utils-cursor: attr(cursor type(<custom-ident>), pointer);
 

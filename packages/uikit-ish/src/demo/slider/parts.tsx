@@ -11,7 +11,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { PropsTable } from '../utils/props-table.js';
-import { Contents, PartLink, type Section } from '../utils/sections.js';
+import { PartLink } from '../utils/sections.js';
 import {
   sliderControlRows,
   sliderIndicatorRows,
@@ -463,31 +463,26 @@ const SymbolPart: FunctionComponent = () => {
   );
 };
 
-/** The page's sections (its headings' ids), listed at its top. */
-const sections: readonly Section[] = [
-  ['slider-root', 'Slider.Root'],
-  ['slider-label', 'Slider.Label'],
-  ['slider-value', 'Slider.Value'],
-  ['slider-control', 'Slider.Control'],
-  ['slider-track', 'Slider.Track'],
-  ['slider-indicator', 'Slider.Indicator'],
-  ['slider-thumb', 'Slider.Thumb'],
-  ['slider-ticks', 'Slider.Ticks'],
-  ['slider-symbol', 'Slider.Symbol'],
-];
-
 /** `/slider/parts`: a slider's parts, from the root to its ends' symbols. */
 export const SliderParts: FunctionComponent = () => (
   <>
-    <Contents sections={sections} />
-    <p className="demo-lead">
-      A slider is a <code>Slider.Root</code> holding the value; a{' '}
-      <code>Slider.Control</code>, the area that takes presses and drags; in it,
-      the <code>Slider.Track</code>, with its fill (
-      <code>Slider.Indicator</code>) and a knob (<code>Slider.Thumb</code>) for
-      each value. Around them, optionally: a label, the value, and the ends’
-      symbols; on the track, ticks.
-    </p>
+    <ul className="demo-lead">
+      <li>
+        <code>Slider.Root</code>: holds the value.
+      </li>
+      <li>
+        <code>Slider.Control</code>: the area taking presses and drags.
+      </li>
+      <li>
+        In it, <code>Slider.Track</code>: its fill (
+        <code>Slider.Indicator</code>) and a knob (<code>Slider.Thumb</code>)
+        per value.
+      </li>
+      <li>
+        Optional, around them: a label, the value, the ends’ symbols. On the
+        track: ticks.
+      </li>
+    </ul>
     <ul>
       <li>
         <PartLink part="Slider.Root" />
@@ -530,14 +525,24 @@ export const SliderParts: FunctionComponent = () => (
     <h2 id="slider-root">
       <code>Slider.Root</code>
     </h2>
-    <p>
-      Base UI’s slider root: the value (<code>value</code> or{' '}
-      <code>defaultValue</code>, a number, or an array of them for a range), its
-      bounds and steps (<code>min</code>, <code>max</code>, <code>step</code>,{' '}
-      <code>largeStep</code>), its formatting (<code>format</code>,{' '}
-      <code>locale</code>), and the fill’s <code>tint</code>. It lays out its
-      children in a row, the track taking the space left.
-    </p>
+    <ul>
+      <li>Base UI’s slider root.</li>
+      <li>
+        Value: <code>value</code> or <code>defaultValue</code> (a number, or an
+        array of them for a range).
+      </li>
+      <li>
+        Bounds and steps: <code>min</code>, <code>max</code>, <code>step</code>,{' '}
+        <code>largeStep</code>.
+      </li>
+      <li>
+        Formatting: <code>format</code>, <code>locale</code>.
+      </li>
+      <li>
+        The fill’s <code>tint</code>.
+      </li>
+      <li>Lays out its children in a row; the track takes the space left.</li>
+    </ul>
     <RootPart />
     <h3>Props</h3>
     <PropsTable rows={sliderRootRows} />
@@ -545,13 +550,17 @@ export const SliderParts: FunctionComponent = () => (
     <h2 id="slider-label">
       <code>Slider.Label</code>
     </h2>
-    <p>
-      Base UI’s label: it names the slider’s inputs (
-      <code>aria-labelledby</code>), so the knob needs no{' '}
-      <code>aria-label</code> of its own. In the Body text style, where it is
-      among the parts, or by <code>placement</code>: before or after them all,
-      or on a line above or below.
-    </p>
+    <ul>
+      <li>
+        Base UI’s label: names the slider’s inputs (<code>aria-labelledby</code>
+        ); the knob needs no <code>aria-label</code>.
+      </li>
+      <li>Body text style.</li>
+      <li>
+        Where it is among the parts, or by <code>placement</code>: before or
+        after them all, or on a line above or below.
+      </li>
+    </ul>
     <LabelPart />
     <h3>Props</h3>
     <PropsTable rows={sliderLabelRows} />
@@ -559,12 +568,17 @@ export const SliderParts: FunctionComponent = () => (
     <h2 id="slider-value">
       <code>Slider.Value</code>
     </h2>
-    <p>
-      Base UI’s value (an <code>output</code>): the formatted value, or what its
-      function child makes of it, in tabular numerals, as wide as its widest
-      value. Placed as the label is (at the line’s end above or below), or in a
-      tooltip on each knob, always or momentarily.
-    </p>
+    <ul>
+      <li>
+        Base UI’s value (an <code>output</code>): the formatted value, or what
+        its function child makes of it.
+      </li>
+      <li>Tabular numerals, as wide as its widest value.</li>
+      <li>
+        Placed as the label (at the line’s end, above or below), or in a tooltip
+        on each knob, always or momentarily.
+      </li>
+    </ul>
     <ValuePart />
     <h3>Props</h3>
     <PropsTable rows={sliderValueRows} />
@@ -572,10 +586,12 @@ export const SliderParts: FunctionComponent = () => (
     <h2 id="slider-control">
       <code>Slider.Control</code>
     </h2>
-    <p>
-      Base UI’s control: the area that takes presses and drags, as high as the
-      knob (28px), at least 120px long, growing to fill the root.
-    </p>
+    <ul>
+      <li>Base UI’s control: the area taking presses and drags.</li>
+      <li>
+        As high as the knob (28px), at least 120px long, filling the root.
+      </li>
+    </ul>
     <ControlPart />
     <h3>Props</h3>
     <PropsTable rows={sliderControlRows} />
@@ -583,10 +599,13 @@ export const SliderParts: FunctionComponent = () => (
     <h2 id="slider-track">
       <code>Slider.Track</code>
     </h2>
-    <p>
-      Base UI’s track: the 6px bar in a fill color (UIKit’s{' '}
-      <code>systemFill</code>), holding the fill, the ticks and the knobs.
-    </p>
+    <ul>
+      <li>
+        Base UI’s track: the 6px bar, in a fill color (UIKit’s{' '}
+        <code>systemFill</code>).
+      </li>
+      <li>Holds the fill, the ticks and the knobs.</li>
+    </ul>
     <TrackPart />
     <h3>Props</h3>
     <PropsTable rows={sliderTrackRows} />
@@ -594,11 +613,13 @@ export const SliderParts: FunctionComponent = () => (
     <h2 id="slider-indicator">
       <code>Slider.Indicator</code>
     </h2>
-    <p>
-      Base UI’s indicator: the fill in the tint, from the minimum to the value
-      (between the values, for a range). It’s placed by the value, so it spans
-      the whole track at the maximum.
-    </p>
+    <ul>
+      <li>
+        Base UI’s indicator: the fill in the tint, from the minimum to the value
+        (between the values, for a range).
+      </li>
+      <li>Placed by the value: spans the whole track at the maximum.</li>
+    </ul>
     <IndicatorPart />
     <h3>Props</h3>
     <PropsTable rows={sliderIndicatorRows} />
@@ -606,11 +627,16 @@ export const SliderParts: FunctionComponent = () => (
     <h2 id="slider-thumb">
       <code>Slider.Thumb</code>
     </h2>
-    <p>
-      Base UI’s thumb: the knob, holding the hidden range input that gets the
-      focus and the keys. A range has two, by <code>index</code>, each named (
-      <code>aria-label</code>) for what it sets.
-    </p>
+    <ul>
+      <li>
+        Base UI’s thumb: the knob, holding the hidden range input that gets
+        focus and keys.
+      </li>
+      <li>
+        A range: two, by <code>index</code>, each named (<code>aria-label</code>
+        ) for what it sets.
+      </li>
+    </ul>
     <ThumbPart />
     <h3>Props</h3>
     <PropsTable rows={sliderThumbRows} />
@@ -618,12 +644,16 @@ export const SliderParts: FunctionComponent = () => (
     <h2 id="slider-ticks">
       <code>Slider.Ticks</code>
     </h2>
-    <p>
-      Tick marks (iOS 26) inside the track, one for each of the{' '}
-      <code>count</code> values between the ends, where the fill ends at them;
-      match the root’s <code>step</code> to them. Hidden from assistive
-      technology.
-    </p>
+    <ul>
+      <li>
+        Tick marks (iOS 26) inside the track, one per each of the{' '}
+        <code>count</code> values between the ends.
+      </li>
+      <li>
+        Where the fill ends at them; match the root’s <code>step</code> to them.
+      </li>
+      <li>Hidden from assistive technology.</li>
+    </ul>
     <TicksPart />
     <h3>Props</h3>
     <PropsTable rows={sliderTicksRows} />
@@ -631,11 +661,13 @@ export const SliderParts: FunctionComponent = () => (
     <h2 id="slider-symbol">
       <code>Slider.Symbol</code>
     </h2>
-    <p>
-      A symbol (or text) for an end (UIKit <code>minimumValueImage</code>,{' '}
-      <code>maximumValueImage</code>), by its <code>edge</code>: clicking it
-      moves the knob to that end.
-    </p>
+    <ul>
+      <li>
+        A symbol (or text) for an end (UIKit <code>minimumValueImage</code>,{' '}
+        <code>maximumValueImage</code>), by its <code>edge</code>.
+      </li>
+      <li>Clicking it moves the knob to that end.</li>
+    </ul>
     <SymbolPart />
     <h3>Props</h3>
     <PropsTable rows={sliderSymbolRows} />

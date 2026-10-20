@@ -13,5 +13,10 @@ export default {
   ],
   rules: {
     'nesting-selector-no-missing-scoping-root': null,
+    // (Safari has only `-webkit-user-select`.)
+    'property-no-vendor-prefix': [
+      true,
+      { ignoreProperties: ['-webkit-user-select'] },
+    ],
   },
 };

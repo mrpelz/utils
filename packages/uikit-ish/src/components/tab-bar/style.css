@@ -171,7 +171,10 @@
     align-self: stretch;
     border-radius: inherit;
     gap: 12px;
-    padding-inline: 16px;
+
+    /* (Shrinking with the accessory: hidden, 0px wide, it overflows nothing,
+       e.g. a page on a phone.) */
+    padding-inline: min(16px, 50%);
     white-space: nowrap;
 
     & > * {
@@ -281,6 +284,7 @@
     transition-duration: var(--glass-ios-lens-duration);
     transition-property:
       width, min-width, min-height, padding, margin, gap, visibility;
+    -webkit-user-select: none;
     user-select: none;
 
     @media (hover: hover) {

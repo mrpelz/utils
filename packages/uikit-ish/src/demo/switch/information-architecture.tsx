@@ -20,28 +20,37 @@ const sections: readonly Section[] = [
 export const SwitchInformationArchitecture: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <p className="demo-lead">
-      In Apple’s catalog, the switch is a{' '}
-      <a
-        href={`${HIG}/toggles`}
-        rel="noreferrer"
-        target="_blank"
-      >
-        toggle
-      </a>
-      , under “Selection and input”. Re-sliced into primitives (after the{' '}
-      <GuideLink to="section-5">HIG composition guide</GuideLink>), it’s the
-      smallest <em>Choice</em>: one of two options, both visible at once.
-    </p>
+    <ul className="demo-lead">
+      <li>
+        Apple’s catalog: a{' '}
+        <a
+          href={`${HIG}/toggles`}
+          rel="noreferrer"
+          target="_blank"
+        >
+          toggle
+        </a>
+        , under “Selection and input”.
+      </li>
+      <li>
+        As a primitive (
+        <GuideLink to="section-5">HIG composition guide</GuideLink>): the
+        smallest <em>Choice</em>, one of two options, both visible.
+      </li>
+    </ul>
 
     <h2 id="primitive-choice">Primitive: Choice</h2>
-    <p>
-      A Choice selects one or many from a known set; its parameters are the
-      number of options (N), the cardinality, whether they’re ordered, whether
-      they’re all visible inline or collapsed, and whether free entry is allowed
-      (guide, <GuideLink to="primitive-choice">§5</GuideLink>). A toggle is the
-      Choice with N = 2, inline:
-    </p>
+    <ul>
+      <li>
+        Choice: one or many from a known set (guide,{' '}
+        <GuideLink to="primitive-choice">§5</GuideLink>).
+      </li>
+      <li>
+        Parameters: number of options (N), cardinality, ordered or not, inline
+        or collapsed, free entry or not.
+      </li>
+      <li>A toggle: N = 2, inline.</li>
+    </ul>
     <table>
       <thead>
         <tr>
@@ -72,18 +81,24 @@ export const SwitchInformationArchitecture: FunctionComponent = () => (
         </tr>
       </tbody>
     </table>
-    <p>
-      (The <GuideLink to="choice-family">choice family</GuideLink>, guide §5. In
-      this library, the checkbox is iOS’s selection circle (
-      <a href="checkbox">Checkbox</a>), for selecting items rather than
-      settings.)
-    </p>
+    <ul>
+      <li>
+        See the <GuideLink to="choice-family">choice family</GuideLink> (guide
+        §5).
+      </li>
+      <li>
+        This library’s checkbox is iOS’s selection circle (
+        <a href="checkbox">Checkbox</a>): for selecting items, not settings.
+      </li>
+    </ul>
 
     <h2 id="traits">Traits</h2>
-    <p>
-      The toggle’s row of the guide’s trait matrix (
-      <GuideLink to="trait-matrix">§4</GuideLink>):
-    </p>
+    <ul>
+      <li>
+        The toggle’s row of the guide’s trait matrix (
+        <GuideLink to="trait-matrix">§4</GuideLink>).
+      </li>
+    </ul>
     <table>
       <tbody>
         <tr>
@@ -116,10 +131,12 @@ export const SwitchInformationArchitecture: FunctionComponent = () => (
         </tr>
       </tbody>
     </table>
-    <p>
-      This switch also has <code>indeterminate</code>, a state between the two
-      (e.g. while a change is saved), which the matrix’s “one of 2” leaves out.
-    </p>
+    <ul>
+      <li>
+        Not in the matrix’s “one of 2”: <code>indeterminate</code>, a state
+        between the two (e.g. while a change is saved).
+      </li>
+    </ul>
 
     <h2 id="where-it-sits">Where it sits</h2>
     <ul>

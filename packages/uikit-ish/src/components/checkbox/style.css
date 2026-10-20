@@ -30,6 +30,8 @@
     appearance: none;
     background: none;
     outline-offset: 2px;
+    -webkit-user-select: none;
+    user-select: none;
 
     --uikit-utils-cursor: attr(cursor type(<custom-ident>), pointer);
 

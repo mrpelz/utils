@@ -126,30 +126,32 @@ export const nativeButtonRow = (button: boolean): PropRow => [
 export const PropsTable: FunctionComponent<{ rows: readonly PropRow[] }> = ({
   rows,
 }) => (
-  <table className="demo-props-table">
-    <thead>
-      <tr>
-        <th>Prop</th>
-        <th>Type</th>
-        <th>Default</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      {rows.map(([name, type, defaultValue, description]) => (
-        <tr key={name}>
-          <td>
-            <code>{name}</code>
-          </td>
-          <td>
-            <code>{type}</code>
-          </td>
-          <td>{defaultValue === undefined ? '—' : defaultValue}</td>
-          <td>{description}</td>
+  <div className="demo-table">
+    <table className="demo-props-table">
+      <thead>
+        <tr>
+          <th>Prop</th>
+          <th>Type</th>
+          <th>Default</th>
+          <th>Description</th>
         </tr>
-      ))}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {rows.map(([name, type, defaultValue, description]) => (
+          <tr key={name}>
+            <td>
+              <code>{name}</code>
+            </td>
+            <td>
+              <code>{type}</code>
+            </td>
+            <td>{defaultValue === undefined ? '—' : defaultValue}</td>
+            <td>{description}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 );
 
 /** Some of a part's rows, by their props' names (in the order given). */
@@ -171,34 +173,36 @@ export const pickRows = (
 export const KeyPropsTable: FunctionComponent<{
   parts: readonly (readonly [part: string, rows: readonly PropRow[]])[];
 }> = ({ parts }) => (
-  <table className="demo-props-table demo-key-props-table">
-    <thead>
-      <tr>
-        <th>Part</th>
-        <th>Prop</th>
-        <th>Type</th>
-        <th>Default</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      {parts.flatMap(([part, rows]) =>
-        rows.map(([name, type, defaultValue, description]) => (
-          <tr key={`${part}.${name}`}>
-            <td>
-              <code>{part}</code>
-            </td>
-            <td>
-              <code>{name}</code>
-            </td>
-            <td>
-              <code>{type}</code>
-            </td>
-            <td>{defaultValue === undefined ? '—' : defaultValue}</td>
-            <td>{description}</td>
-          </tr>
-        )),
-      )}
-    </tbody>
-  </table>
+  <div className="demo-table">
+    <table className="demo-props-table demo-key-props-table">
+      <thead>
+        <tr>
+          <th>Part</th>
+          <th>Prop</th>
+          <th>Type</th>
+          <th>Default</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {parts.flatMap(([part, rows]) =>
+          rows.map(([name, type, defaultValue, description]) => (
+            <tr key={`${part}.${name}`}>
+              <td>
+                <code>{part}</code>
+              </td>
+              <td>
+                <code>{name}</code>
+              </td>
+              <td>
+                <code>{type}</code>
+              </td>
+              <td>{defaultValue === undefined ? '—' : defaultValue}</td>
+              <td>{description}</td>
+            </tr>
+          )),
+        )}
+      </tbody>
+    </table>
+  </div>
 );

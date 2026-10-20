@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react';
 
-import { useOptions } from './options-context.js';
+import { ColorScheme } from '../../components/utils/main.js';
+import { useLocalStorage } from './use-local-storage.js';
 
 /** Whether the page is dark: forced (demo option), or by preference. */
 export const useDark = (): boolean => {
-  const { colorScheme } = useOptions();
+  const [colorScheme] = useLocalStorage<ColorScheme | undefined>(
+    'colorScheme',
+    undefined,
+  );
+
   // (Server-side, without a preference: light.)
   const [prefersDark, setPrefersDark] = useState(
     () =>

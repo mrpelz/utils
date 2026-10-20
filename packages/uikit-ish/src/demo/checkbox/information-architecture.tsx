@@ -20,29 +20,41 @@ const sections: readonly Section[] = [
 export const CheckboxInformationArchitecture: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <p className="demo-lead">
-      Apple’s catalog has no iOS checkbox or radio button of its own: its{' '}
-      <a
-        href={`${HIG}/toggles`}
-        rel="noreferrer"
-        target="_blank"
-      >
-        toggles
-      </a>{' '}
-      page, under “Selection and input”, covers checkboxes and radio buttons
-      under its macOS considerations. On iOS, selection circles mark the items
-      selected in a list while editing. Re-sliced into primitives (after the{' '}
-      <GuideLink to="section-5">HIG composition guide</GuideLink>), they’re two
-      things, by where they are.
-    </p>
+    <ul className="demo-lead">
+      <li>Apple’s catalog: no iOS checkbox or radio button.</li>
+      <li>
+        Its{' '}
+        <a
+          href={`${HIG}/toggles`}
+          rel="noreferrer"
+          target="_blank"
+        >
+          toggles
+        </a>{' '}
+        page (“Selection and input”) covers checkboxes and radio buttons for
+        macOS.
+      </li>
+      <li>
+        On iOS: selection circles mark the items selected in a list while
+        editing.
+      </li>
+      <li>
+        As primitives (
+        <GuideLink to="section-5">HIG composition guide</GuideLink>): two
+        things, by where they are.
+      </li>
+    </ul>
 
     <h2 id="on-their-own-a-choice">On their own: a Choice</h2>
-    <p>
-      A Choice selects one or many from a known set (guide,{' '}
-      <GuideLink to="primitive-choice">§5</GuideLink>, which lists “radio groups
-      and checkboxes” among the Choices). A checkbox is the Choice of two,
-      inline (ticked or not); radios the Choice of a few, inline, one at a time:
-    </p>
+    <ul>
+      <li>
+        Choice: one or many from a known set (guide,{' '}
+        <GuideLink to="primitive-choice">§5</GuideLink>: “radio groups and
+        checkboxes”).
+      </li>
+      <li>A checkbox: the Choice of two, inline (ticked or not).</li>
+      <li>Radios: the Choice of a few, inline, one at a time.</li>
+    </ul>
     <table>
       <thead>
         <tr>
@@ -74,23 +86,32 @@ export const CheckboxInformationArchitecture: FunctionComponent = () => (
         </tr>
       </tbody>
     </table>
-    <p>
-      (The <GuideLink to="choice-family">choice family</GuideLink>, guide §5.)
-      For a setting that takes effect at once, iOS uses the toggle; for one of a
-      few short options, the segmented control.
-    </p>
+    <ul>
+      <li>
+        See the <GuideLink to="choice-family">choice family</GuideLink> (guide
+        §5).
+      </li>
+      <li>
+        iOS instead: a toggle for a setting that takes effect at once; a
+        segmented control for one of a few short options.
+      </li>
+    </ul>
 
     <h2 id="in-lists-a-collection-s-selection">
       In lists: a Collection’s selection
     </h2>
-    <p>
-      A Collection is a set of items with a data shape and a projection; one of
-      its parameters is its selection: none, one or many (guide,{' '}
-      <GuideLink to="primitive-collection">§5</GuideLink>). Selection circles
-      before a list’s rows (<code>List.Checkbox</code>, <code>List.Radio</code>)
-      render that selection: many with checkboxes (a parent selecting all), one
-      with radios.
-    </p>
+    <ul>
+      <li>
+        Collection: a set of items with a data shape and a projection (guide,{' '}
+        <GuideLink to="primitive-collection">§5</GuideLink>).
+      </li>
+      <li>One of its parameters: selection (none, one, many).</li>
+      <li>
+        Selection circles before a list’s rows (<code>List.Checkbox</code>,{' '}
+        <code>List.Radio</code>) render it: many with checkboxes (a parent
+        selecting all), one with radios.
+      </li>
+    </ul>
     <ul>
       <li>
         <strong>The Collection owns the selection</strong>, Regions act on it (
@@ -111,9 +132,11 @@ export const CheckboxInformationArchitecture: FunctionComponent = () => (
     </ul>
 
     <h2 id="traits">Traits</h2>
-    <p>
-      The guide’s trait matrix (<GuideLink to="trait-matrix">§4</GuideLink>) has
-      no row for checkboxes or radios.
-    </p>
+    <ul>
+      <li>
+        No row in the guide’s trait matrix (
+        <GuideLink to="trait-matrix">§4</GuideLink>) for checkboxes or radios.
+      </li>
+    </ul>
   </>
 );

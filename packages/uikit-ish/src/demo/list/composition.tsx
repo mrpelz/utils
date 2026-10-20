@@ -815,64 +815,104 @@ export const ListComposition: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <h2 id="a-settings-page">A settings page</h2>
-    <p>
-      As iOS’s Settings: an inset grouped list in a <a href="page">Page</a>,
-      under its <a href="header">Header</a>. Rows hold the settings’ controls as
-      trailing parts (a <a href="switch">Switch</a>, a{' '}
-      <a href="segmented">Segmented</a> control, a <a href="stepper">Stepper</a>
-      ), or a whole row (a <a href="slider">Slider</a> between its symbols);
-      others drill in (a button title, a detail, a chevron). A row with a switch
-      passes its clicks on to it. Settings take effect at once (guide{' '}
-      <GuideLink to="commit-model">§8.2, commit model</GuideLink>).
-    </p>
+    <ul>
+      <li>
+        As iOS’s Settings: an inset grouped list in a <a href="page">Page</a>,
+        under its <a href="header">Header</a>.
+      </li>
+      <li>
+        Rows hold settings’ controls as trailing parts (a{' '}
+        <a href="switch">Switch</a>, a <a href="segmented">Segmented</a>{' '}
+        control, a <a href="stepper">Stepper</a>), or as the whole row (a{' '}
+        <a href="slider">Slider</a> between its symbols).
+      </li>
+      <li>Others drill in (a button title, a detail, a chevron).</li>
+      <li>A row with a switch passes its clicks on to it.</li>
+      <li>
+        Settings take effect at once (guide{' '}
+        <GuideLink to="commit-model">§8.2, commit model</GuideLink>).
+      </li>
+    </ul>
     <CodeView code={settingsCode} />
     <SettingsScreen />
 
     <h2 id="drilling-into-pages">Drilling into pages</h2>
-    <p>
-      Rows whose title is a button, with a <code>List.DrillIn</code>, push a
-      page in a <a href="navigation">Navigation</a>: the app keeps the stack (
-      keyed pages), the navigation transitions between them, and a swipe from
-      the leading edge pops (<code>onBack</code>). Rows with a detail and no
-      chevron only show a value.
-    </p>
+    <ul>
+      <li>
+        Rows with a button title and a <code>List.DrillIn</code> push a page in
+        a <a href="navigation">Navigation</a>.
+      </li>
+      <li>
+        The app keeps the stack (keyed pages); the navigation transitions
+        between them.
+      </li>
+      <li>
+        A swipe from the leading edge pops (<code>onBack</code>).
+      </li>
+      <li>Rows with a detail and no chevron only show a value.</li>
+    </ul>
     <CodeView code={drillInCode} />
     <DrillIn />
 
     <h2 id="edit-mode-and-a-toolbar">Edit mode and a toolbar</h2>
-    <p>
-      Edit (in the navigation bar) puts the list in edit mode (
-      <code>List.Root</code> <code>editing</code>): each row’s{' '}
-      <code>List.Checkbox</code> slides in from its leading edge, its{' '}
-      <code>List.Grabber</code> from its trailing edge, the row’s content making
-      room; Done slides them out again. The list owns the selection: a{' '}
-      <a href="checkbox">CheckboxGroup</a> rendering the group holds it, and the
-      bottom toolbar (in the <a href="viewport">Viewport</a>’s block end) reads
-      it, to delete the selected rows (guide{' '}
-      <GuideLink to="rule-g7">G7</GuideLink>). Rows still swipe to delete one.
-    </p>
+    <ul>
+      <li>
+        Edit (in the navigation bar): edit mode (<code>List.Root</code>{' '}
+        <code>editing</code>).
+      </li>
+      <li>
+        Each row’s <code>List.Checkbox</code> slides in from its leading edge,
+        its <code>List.Grabber</code> from its trailing edge; the content makes
+        room. Done slides them out.
+      </li>
+      <li>
+        The list owns the selection: a <a href="checkbox">CheckboxGroup</a>{' '}
+        rendering the group holds it.
+      </li>
+      <li>
+        The bottom toolbar (in the <a href="viewport">Viewport</a>’s block end)
+        reads it, to delete the selected rows (guide{' '}
+        <GuideLink to="rule-g7">G7</GuideLink>).
+      </li>
+      <li>Rows still swipe to delete one.</li>
+    </ul>
     <CodeView code={editCode} />
     <EditMode />
 
     <h2 id="an-inbox">An inbox</h2>
-    <p>
-      As Mail: a plain list of media rows (a <code>List.Text</code> preview
-      below the subject), an unread dot in the image’s place, swipe actions on
-      both sides with their labels shown; swiping on past the trailing ones
-      archives the message (<code>onOverswipe</code>), and the app removes it.
-    </p>
+    <ul>
+      <li>
+        As Mail: a plain list of media rows, a <code>List.Text</code> preview
+        below the subject.
+      </li>
+      <li>An unread dot in the image’s place.</li>
+      <li>Swipe actions on both sides, labels shown.</li>
+      <li>
+        Swiping on past the trailing ones archives the message (
+        <code>onOverswipe</code>); the app removes it.
+      </li>
+    </ul>
     <CodeView code={inboxCode} />
     <Inbox />
     <h2 id="an-indexed-list">An indexed list</h2>
-    <p>
-      As Contacts: a plain list in sections by letter (sticky section titles),
-      and a <code>List.Index</code> beside it; pressing or scrubbing over a
-      letter clicks it, and the app scrolls its list to the section, so dragging
-      across the letters scrolls through the list. Placing the index is the
-      page’s: here, at the list’s edge, centered on its visible height. The list
-      scrolls on its own, without a scroll bar (an overlay scroll bar would
-      cover the index).
-    </p>
+    <ul>
+      <li>
+        As Contacts: a plain list in sections by letter (sticky section titles),
+        a <code>List.Index</code> beside it.
+      </li>
+      <li>
+        Pressing or scrubbing over a letter clicks it; the app scrolls its list
+        to the section, so dragging across the letters scrolls through the list.
+      </li>
+      <li>
+        Placing the index is the page’s: here, at the list’s edge, centered on
+        its visible height.
+      </li>
+      <li>
+        The list scrolls on its own, without a scroll bar (an overlay scroll bar
+        would cover the index).
+      </li>
+    </ul>
     <CodeView code={indexCode} />
     <Contacts />
   </>

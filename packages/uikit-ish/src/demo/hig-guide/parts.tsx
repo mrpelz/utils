@@ -47,27 +47,29 @@ export const Table: FunctionComponent<{
   const [head = [], ...body] = rows;
 
   return (
-    <table id={id}>
-      <thead>
-        <tr>
-          {head.map((cell, index) => (
-            <th key={index}>{cell}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {body.map((row, index) => (
-          <tr
-            key={index}
-            id={rowIds[index]}
-          >
-            {row.map((cell, cellIndex) => (
-              <td key={cellIndex}>{cell}</td>
+    <div className="demo-table">
+      <table id={id}>
+        <thead>
+          <tr>
+            {head.map((cell, index) => (
+              <th key={index}>{cell}</th>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {body.map((row, index) => (
+            <tr
+              key={index}
+              id={rowIds[index]}
+            >
+              {row.map((cell, cellIndex) => (
+                <td key={cellIndex}>{cell}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 

@@ -60,6 +60,7 @@
     align-self: center;
     border-radius: 100px;
     touch-action: pan-y;
+    -webkit-user-select: none;
     user-select: none;
     vertical-align: middle;
 

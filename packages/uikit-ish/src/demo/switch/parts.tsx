@@ -8,7 +8,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { PropsTable } from '../utils/props-table.js';
-import { Contents, PartLink, type Section } from '../utils/sections.js';
+import { PartLink } from '../utils/sections.js';
 import { switchRootRows, switchThumbRows } from './docs.js';
 import { getPropOptionsRoot, propOptionsThumb } from './props.js';
 
@@ -79,20 +79,14 @@ const ThumbPart: FunctionComponent = () => {
   );
 };
 
-/** The page's sections (its headings' ids), listed at its top. */
-const sections: readonly Section[] = [
-  ['switch-root', 'Switch.Root'],
-  ['switch-thumb', 'Switch.Thumb'],
-];
-
 /** `/switch/parts`: the root and its thumb. */
 export const SwitchParts: FunctionComponent = () => (
   <>
-    <Contents sections={sections} />
-    <p className="demo-lead">
-      A switch is a root (the track, and the control people operate) holding its
-      thumb (the knob). Both are always needed.
-    </p>
+    <ul className="demo-lead">
+      <li>Root: the track, the control people operate.</li>
+      <li>Thumb: the knob.</li>
+      <li>Both always needed.</li>
+    </ul>
     <ul>
       <li>
         <PartLink part="Switch.Root" />
@@ -107,16 +101,28 @@ export const SwitchParts: FunctionComponent = () => (
     <h2 id="switch-root">
       <code>Switch.Root</code>
     </h2>
-    <p>
-      The control and its track: it holds the state (<code>checked</code> or{' '}
-      <code>defaultChecked</code>, <code>onCheckedChange</code>), can be{' '}
-      <code>disabled</code> or <code>readOnly</code>, and submits with a form (
-      <code>name</code>, <code>value</code>, through a hidden input it renders).
-      Its look: <code>tint</code> (the track while on), <code>onOffLabels</code>
-      , <code>indeterminate</code> and the <code>cursor</code>. It renders a{' '}
-      <code>span</code> with the <code>switch</code> role, so give it an
-      accessible name.
-    </p>
+    <ul>
+      <li>The control and its track.</li>
+      <li>
+        State: <code>checked</code> or <code>defaultChecked</code>,{' '}
+        <code>onCheckedChange</code>.
+      </li>
+      <li>
+        Can be <code>disabled</code> or <code>readOnly</code>.
+      </li>
+      <li>
+        Submits with a form: <code>name</code>, <code>value</code> (through a
+        hidden input it renders).
+      </li>
+      <li>
+        Look: <code>tint</code> (the track while on), <code>onOffLabels</code>,{' '}
+        <code>indeterminate</code>, <code>cursor</code>.
+      </li>
+      <li>
+        Renders a <code>span</code> with the <code>switch</code> role: give it
+        an accessible name.
+      </li>
+    </ul>
     <RootPart />
     <h3>Props</h3>
     <PropsTable rows={switchRootRows} />
@@ -124,12 +130,15 @@ export const SwitchParts: FunctionComponent = () => (
     <h2 id="switch-thumb">
       <code>Switch.Thumb</code>
     </h2>
-    <p>
-      The knob, inside the root: it moves with the state and the pointer while
-      dragged, and turns into a glass lens while pressed. It takes no props of
-      its own beyond styling (<code>className</code>, <code>style</code>,{' '}
-      <code>render</code>).
-    </p>
+    <ul>
+      <li>The knob, inside the root.</li>
+      <li>Moves with the state, and with the pointer while dragged.</li>
+      <li>Pressed: a glass lens.</li>
+      <li>
+        No props of its own beyond styling (<code>className</code>,{' '}
+        <code>style</code>, <code>render</code>).
+      </li>
+    </ul>
     <ThumbPart />
     <h3>Props</h3>
     <PropsTable rows={switchThumbRows} />

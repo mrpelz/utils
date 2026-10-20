@@ -305,44 +305,67 @@ export const CheckboxComposition: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <h2 id="selecting-list-rows">Selecting list rows</h2>
-    <p>
-      Where iOS shows them: before a <a href="list">List</a>’s rows, as{' '}
-      <code>List.Checkbox</code> (a <code>Checkbox.Root</code> placed as the
-      row’s leading edit control). The row passes its clicks on to it (
-      <code>forwardClick</code>), so the whole row selects; the list owns the
-      selection, and the actions on it go elsewhere, e.g. in a toolbar (guide{' '}
-      <GuideLink to="rule-g7">G7</GuideLink>). Name each by its row:
-    </p>
+    <ul>
+      <li>
+        Where iOS shows them: before a <a href="list">List</a>’s rows, as{' '}
+        <code>List.Checkbox</code> (a <code>Checkbox.Root</code> as the row’s
+        leading edit control).
+      </li>
+      <li>
+        The row passes its clicks on to it (<code>forwardClick</code>): the
+        whole row selects.
+      </li>
+      <li>
+        The list owns the selection; actions on it go elsewhere, e.g. a toolbar
+        (guide <GuideLink to="rule-g7">G7</GuideLink>).
+      </li>
+      <li>Name each by its row.</li>
+    </ul>
     <CodeView code={rowsCode} />
     <SelectingRows />
 
     <h2 id="choosing-one-row">Choosing one row</h2>
-    <p>
-      A <code>RadioGroup</code> rendering the list’s group (<code>render</code>
-      ), a <code>List.Radio</code> before each row: one row chosen at a time,
-      arrow keys moving between them.
-    </p>
+    <ul>
+      <li>
+        A <code>RadioGroup</code> rendering the list’s group (
+        <code>render</code>), a <code>List.Radio</code> before each row.
+      </li>
+      <li>One row chosen at a time; arrow keys move between them.</li>
+    </ul>
     <CodeView code={oneRowCode} />
     <ChoosingOneRow />
 
     <h2 id="selecting-all">Selecting all</h2>
-    <p>
-      A <code>CheckboxGroup</code> (rendering the list’s group) holds the names
-      of the selected rows; given all of them (<code>allValues</code>), a{' '}
-      <code>parent</code> checkbox selects or deselects them all, and is mixed
-      (a dash) while only some are selected.
-    </p>
+    <ul>
+      <li>
+        A <code>CheckboxGroup</code> (rendering the list’s group) holds the
+        selected rows’ names.
+      </li>
+      <li>
+        Given all of them (<code>allValues</code>), a <code>parent</code>{' '}
+        checkbox selects or deselects all.
+      </li>
+      <li>The parent is mixed (a dash) while only some are selected.</li>
+    </ul>
     <CodeView code={allCode} />
     <SelectAll />
 
     <h2 id="labels-and-forms">Labels and forms</h2>
-    <p>
-      Outside lists, wrap a circle and its text in a <code>{'<label>'}</code>:
-      the text then ticks it, and names it. In a <a href="form">Form</a>, Base
-      UI’s <code>Field.Root</code> names each value: the radio group’s chosen{' '}
-      <code>value</code>, the checkbox’s ticked state (or, outside a field, its
-      own <code>name</code> and <code>value</code>, through its hidden input).
-    </p>
+    <ul>
+      <li>
+        Outside lists: a <code>{'<label>'}</code> around a circle and its text;
+        the text ticks it and names it.
+      </li>
+      <li>
+        In a <a href="form">Form</a>: Base UI’s <code>Field.Root</code> names
+        each value (the radio group’s chosen <code>value</code>, the checkbox’s
+        ticked state).
+      </li>
+      <li>
+        Outside a field: the checkbox’s own <code>name</code> and{' '}
+        <code>value</code>, through its hidden input.
+      </li>
+    </ul>
     <CodeView code={formCode} />
     <InAForm />
   </>

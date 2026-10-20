@@ -2,6 +2,7 @@ import { ErrorBoundary, LocationProvider, Route, Router } from 'preact-iso';
 import { FunctionComponent, useMemo } from 'react';
 
 import * as components from '../components/index.js';
+import { ColorScheme as TColorScheme } from '../components/utils/main.js';
 import { useColorScheme, useTouchActive } from '../styles.js';
 import { publicPath } from './env.js';
 import { HigGuidePage } from './hig-guide/main.js';
@@ -16,14 +17,20 @@ import {
   PartsPage,
 } from './pages.js';
 import { nameComponents } from './utils/code.js';
-import { OptionsProvider, useOptions } from './utils/options-context.js';
+import { OptionsProvider } from './utils/options-context.js';
+import { useLocalStorage } from './utils/use-local-storage.js';
 
 // (Named for the code shown, see `renderCode`.)
 nameComponents(components);
 
 // The forced color scheme (demo option), as the library's `Styles` does.
 const ColorScheme: FunctionComponent = () => {
-  useColorScheme(useOptions().colorScheme);
+  const [colorScheme] = useLocalStorage<TColorScheme | undefined>(
+    'colorScheme',
+    undefined,
+  );
+
+  useColorScheme(colorScheme);
 
   return null;
 };
@@ -58,7 +65,9 @@ const scrollToAnchor = () => {
   const id = decodeURIComponent(location.hash.slice(1));
   if (!id) return;
 
-  document.querySelector(`#${CSS.escape(id)}`)?.scrollIntoView();
+  document
+    .querySelector(`#${CSS.escape(id)}`)
+    ?.scrollIntoView({ behavior: 'smooth' });
 };
 
 // An anchor link to another page was followed (until it's rendered).

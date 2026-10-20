@@ -520,61 +520,92 @@ export const TabBarComposition: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <h2 id="switching-an-app-s-sections">Switching an app’s sections</h2>
-    <p>
-      A tab bar is Base UI’s Tabs: its root holds both the tabs and the
-      sections’ panels, showing the active tab’s. As an app’s shell (guide{' '}
-      <GuideLink to="shell-a">§7.4, shell A</GuideLink>), each panel is a{' '}
-      <a href="page">Page</a> (<code>render</code>), scrolling on its own, in
-      the <a href="viewport">Viewport</a>’s content layer; the bar floats over
-      it, anchored at the bottom (<code>Viewport.BlockEnd</code>). Hidden panels
-      unmount (<code>keepMounted</code> keeps them, e.g. their scroll
-      positions):
-    </p>
+    <ul>
+      <li>
+        Base UI’s Tabs: the root holds the tabs and the sections’ panels,
+        showing the active tab’s.
+      </li>
+      <li>
+        As an app’s shell (guide{' '}
+        <GuideLink to="shell-a">§7.4, shell A</GuideLink>): each panel a{' '}
+        <a href="page">Page</a> (<code>render</code>), scrolling on its own, in
+        the <a href="viewport">Viewport</a>’s content layer.
+      </li>
+      <li>
+        The bar floats over it, anchored at the bottom (
+        <code>Viewport.BlockEnd</code>).
+      </li>
+      <li>
+        Hidden panels unmount; <code>keepMounted</code> keeps them (e.g. for
+        their scroll positions).
+      </li>
+    </ul>
     <CodeView code={panelsCode} />
     <Panels />
 
     <h2 id="search">Search</h2>
-    <p>
-      Search takes a group of its own after the sections’ (iOS 26; guide{' '}
-      <GuideLink to="rule-a11">A11</GuideLink>,{' '}
-      <GuideLink to="section-7-6">§7.6</GuideLink>). Choosing it collapses the
-      bar to the section last chosen, and the search field appears beside it: an
-      accessory shown only while collapsed (<code>visibleIn</code>), with a{' '}
-      <a href="text-field">TextField</a>’s search field. Choosing the section
-      again expands the bar.
-    </p>
+    <ul>
+      <li>
+        Search: a group of its own after the sections’ (iOS 26; guide{' '}
+        <GuideLink to="rule-a11">A11</GuideLink>,{' '}
+        <GuideLink to="section-7-6">§7.6</GuideLink>).
+      </li>
+      <li>Choosing it collapses the bar to the section last chosen.</li>
+      <li>
+        The search field appears beside it: an accessory shown only while
+        collapsed (<code>visibleIn</code>), holding a{' '}
+        <a href="text-field">TextField</a>’s search field.
+      </li>
+      <li>Choosing the section again expands the bar.</li>
+    </ul>
     <CodeView code={searchCode} />
     <Search />
 
     <h2 id="badges-on-tabs">Badges on tabs</h2>
-    <p>
-      A section’s news (missed calls, new voicemail) goes on its tab, as a{' '}
-      <a href="badge">Badge</a> inside the tab’s <a href="symbol">Symbol</a>:
-      placed on the glyph, staying solid while the symbol blends with the glass
-      (guide <GuideLink to="section-7-5">§7.5</GuideLink>: an activity badge on
-      a tab item).
-    </p>
+    <ul>
+      <li>
+        A section’s news (missed calls, new voicemail): a{' '}
+        <a href="badge">Badge</a> inside the tab’s <a href="symbol">Symbol</a>.
+      </li>
+      <li>
+        Placed on the glyph, solid while the symbol blends with the glass.
+      </li>
+      <li>
+        Guide <GuideLink to="section-7-5">§7.5</GuideLink>: an activity badge on
+        a tab item.
+      </li>
+    </ul>
     <CodeView code={badgeCode} />
     <Badges />
 
     <h2 id="collapsing-on-scroll">Collapsing on scroll</h2>
-    <p>
-      As iOS’s tab bars minimize while the content scrolls down: inside a{' '}
-      <a href="viewport">Viewport</a>’s provider, <code>useViewportScroll</code>{' '}
-      reports the scrolling’s direction (past a threshold) and whether it’s at
-      the top. Scroll this page to see it:
-    </p>
+    <ul>
+      <li>iOS’s tab bars minimize while the content scrolls down.</li>
+      <li>
+        Inside a <a href="viewport">Viewport</a>’s provider,{' '}
+        <code>useViewportScroll</code> reports the scroll direction (past a
+        threshold) and whether it’s at the top.
+      </li>
+      <li>Scroll this page to see it.</li>
+    </ul>
     <CodeView code={scrollCode} />
     <OnScroll />
 
     <h2 id="a-mini-player">A mini player</h2>
-    <p>
-      Content of the app’s attached to the bar, as Music’s mini player: a{' '}
-      <code>TabBar.Accessory</code> after the list, above the groups, and
-      between them while the bar is collapsed (here, by search). The active tab
-      ignores clicks (Base UI’s Tabs), so the search tab, clicked while
-      searching, sets the section last chosen itself, expanding the bar.
-    </p>
+    <ul>
+      <li>
+        App content attached to the bar (Music’s mini player): a{' '}
+        <code>TabBar.Accessory</code> after the list.
+      </li>
+      <li>
+        Above the groups; between them while the bar is collapsed (here, by
+        search).
+      </li>
+      <li>
+        The active tab ignores clicks (Base UI’s Tabs): the search tab, clicked
+        while searching, sets the section last chosen itself, expanding the bar.
+      </li>
+    </ul>
     <CodeView code={accessoryCode} />
     <MiniPlayer />
   </>

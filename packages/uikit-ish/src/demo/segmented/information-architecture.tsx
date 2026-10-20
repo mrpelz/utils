@@ -20,30 +20,39 @@ const sections: readonly Section[] = [
 export const SegmentedInformationArchitecture: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <p className="demo-lead">
-      In Apple’s catalog,{' '}
-      <a
-        href={`${HIG}/segmented-controls`}
-        rel="noreferrer"
-        target="_blank"
-      >
-        segmented controls
-      </a>{' '}
-      are under “Selection and input”. Re-sliced into primitives (after the{' '}
-      <GuideLink to="section-5">HIG composition guide</GuideLink>), a segmented
-      control is a <em>Choice</em>: a few options, all visible at once (
-      <GuideLink to="section-5-mapping">§5, mapping</GuideLink>: inline, N ≤ 5,
-      single or many).
-    </p>
+    <ul className="demo-lead">
+      <li>
+        Apple’s catalog:{' '}
+        <a
+          href={`${HIG}/segmented-controls`}
+          rel="noreferrer"
+          target="_blank"
+        >
+          segmented controls
+        </a>
+        , under “Selection and input”.
+      </li>
+      <li>
+        As a primitive (
+        <GuideLink to="section-5">HIG composition guide</GuideLink>): a{' '}
+        <em>Choice</em>, a few options, all visible (
+        <GuideLink to="section-5-mapping">§5, mapping</GuideLink>: inline, N ≤
+        5, single or many).
+      </li>
+    </ul>
 
     <h2 id="primitive-choice">Primitive: Choice</h2>
-    <p>
-      A Choice selects one or many from a known set; its parameters are the
-      number of options (N), the cardinality, whether they’re ordered, whether
-      they’re all visible inline or collapsed, and whether free entry is allowed
-      (guide, <GuideLink to="primitive-choice">§5</GuideLink>). The segmented
-      control is the inline Choice for a few options:
-    </p>
+    <ul>
+      <li>
+        Choice: one or many from a known set (guide,{' '}
+        <GuideLink to="primitive-choice">§5</GuideLink>).
+      </li>
+      <li>
+        Parameters: number of options (N), cardinality, ordered or not, inline
+        or collapsed, free entry or not.
+      </li>
+      <li>A segmented control: the inline Choice for a few options.</li>
+    </ul>
     <table>
       <thead>
         <tr>
@@ -74,18 +83,25 @@ export const SegmentedInformationArchitecture: FunctionComponent = () => (
         </tr>
       </tbody>
     </table>
-    <p>
-      (The <GuideLink to="choice-family">choice family</GuideLink>, guide §5.)
-      Past about five options, or with long ones, the same Choice collapses: a
-      pop-up button (<a href="menu">Menu</a>) or a picker (
-      <a href="roll">Roll</a>).
-    </p>
+    <ul>
+      <li>
+        See the <GuideLink to="choice-family">choice family</GuideLink> (guide
+        §5).
+      </li>
+      <li>
+        Past about five options, or long ones: the same Choice, collapsed, a
+        pop-up button (<a href="menu">Menu</a>) or a picker (
+        <a href="roll">Roll</a>).
+      </li>
+    </ul>
 
     <h2 id="traits">Traits</h2>
-    <p>
-      The segmented control’s row of the guide’s trait matrix (
-      <GuideLink to="trait-matrix">§4</GuideLink>):
-    </p>
+    <ul>
+      <li>
+        The segmented control’s row of the guide’s trait matrix (
+        <GuideLink to="trait-matrix">§4</GuideLink>).
+      </li>
+    </ul>
     <table>
       <tbody>
         <tr>
@@ -118,10 +134,12 @@ export const SegmentedInformationArchitecture: FunctionComponent = () => (
         </tr>
       </tbody>
     </table>
-    <p>
-      This library’s segmented control chooses one (it’s Base UI’s radio group);
-      the matrix’s “many” has no counterpart here.
-    </p>
+    <ul>
+      <li>
+        This library’s chooses one (Base UI’s radio group); no counterpart for
+        the matrix’s “many”.
+      </li>
+    </ul>
 
     <h2 id="where-it-sits">Where it sits</h2>
     <ul>

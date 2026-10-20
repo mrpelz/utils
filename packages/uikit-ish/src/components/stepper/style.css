@@ -63,6 +63,7 @@
     stroke-width: max(0px, (590 - 400) / 326 * 1px);
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    -webkit-user-select: none;
     user-select: none;
 
     --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);

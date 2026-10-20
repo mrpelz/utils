@@ -21,30 +21,41 @@ const sections: readonly Section[] = [
 export const SliderInformationArchitecture: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <p className="demo-lead">
-      In Apple’s catalog,{' '}
-      <a
-        href={`${HIG}/sliders`}
-        rel="noreferrer"
-        target="_blank"
-      >
-        sliders
-      </a>{' '}
-      are under “Selection and input”. Re-sliced into primitives (after the{' '}
-      <GuideLink to="section-5">HIG composition guide</GuideLink>), a slider is
-      a <em>Value input</em>: bounded, continuous (
-      <GuideLink to="section-5-mapping">§5, mapping</GuideLink>), and
-      conceptually an editable <em>Indicator</em>.
-    </p>
+    <ul className="demo-lead">
+      <li>
+        Apple’s catalog:{' '}
+        <a
+          href={`${HIG}/sliders`}
+          rel="noreferrer"
+          target="_blank"
+        >
+          sliders
+        </a>
+        , under “Selection and input”.
+      </li>
+      <li>
+        As a primitive (
+        <GuideLink to="section-5">HIG composition guide</GuideLink>): a{' '}
+        <em>Value input</em>, bounded, continuous (
+        <GuideLink to="section-5-mapping">§5, mapping</GuideLink>).
+      </li>
+      <li>
+        Conceptually an editable <em>Indicator</em>.
+      </li>
+    </ul>
 
     <h2 id="primitive-value-input">Primitive: Value input</h2>
-    <p>
-      A Value input sets a typed value that isn’t a pick from a set; its
-      parameters are the value’s type (a number, a range, a color, a date…), its
-      precision, and whether it’s continuous or discrete (guide,{' '}
-      <GuideLink to="primitive-value-input">§5</GuideLink>, which lists sliders
-      first among those it absorbs). Here:
-    </p>
+    <ul>
+      <li>
+        Value input: sets a typed value that isn’t a pick from a set (guide,{' '}
+        <GuideLink to="primitive-value-input">§5</GuideLink>, sliders listed
+        first).
+      </li>
+      <li>
+        Parameters: the value’s type (number, range, color, date…), precision,
+        continuous or discrete.
+      </li>
+    </ul>
     <ul>
       <li>
         <strong>Value type:</strong> a number (one thumb), or a range (two).
@@ -62,20 +73,29 @@ export const SliderInformationArchitecture: FunctionComponent = () => (
     </ul>
 
     <h2 id="the-indicator-continuum">The indicator continuum</h2>
-    <p>
-      The guide places sliders at the editable end of the indicators: a quantity
-      on a scale, where only “editable?” changes (
-      <GuideLink to="indicator-continuum">§5</GuideLink>; the Indicator,{' '}
-      <GuideLink to="primitive-indicator">§5</GuideLink>, absorbs sliders
-      “conceptually”). Its read-only neighbor here is{' '}
-      <a href="progress">Progress</a>: the same track and fill, without a knob.
-    </p>
+    <ul>
+      <li>
+        The guide: sliders at the editable end of the indicators, a quantity on
+        a scale, only “editable?” differing (
+        <GuideLink to="indicator-continuum">§5</GuideLink>).
+      </li>
+      <li>
+        The Indicator (<GuideLink to="primitive-indicator">§5</GuideLink>)
+        absorbs sliders “conceptually”.
+      </li>
+      <li>
+        Read-only neighbor: <a href="progress">Progress</a>, the same track and
+        fill, no knob.
+      </li>
+    </ul>
 
     <h2 id="traits">Traits</h2>
-    <p>
-      The slider’s row of the guide’s trait matrix (
-      <GuideLink to="trait-matrix">§4</GuideLink>):
-    </p>
+    <ul>
+      <li>
+        The slider’s row of the guide’s trait matrix (
+        <GuideLink to="trait-matrix">§4</GuideLink>).
+      </li>
+    </ul>
     <table>
       <tbody>
         <tr>

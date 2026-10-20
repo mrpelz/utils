@@ -12,7 +12,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { PropsTable } from '../utils/props-table.js';
-import { Contents, PartLink, type Section } from '../utils/sections.js';
+import { PartLink } from '../utils/sections.js';
 import {
   tabBarAccessoryRows,
   tabBarGroupRows,
@@ -665,29 +665,21 @@ const AccessoryPart: FunctionComponent = () => {
   );
 };
 
-/** The page's sections (its headings' ids), listed at its top. */
-const sections: readonly Section[] = [
-  ['tabbar-root', 'TabBar.Root'],
-  ['tabbar-list', 'TabBar.List'],
-  ['tabbar-group', 'TabBar.Group'],
-  ['tabbar-indicator', 'TabBar.Indicator'],
-  ['tabbar-tab', 'TabBar.Tab'],
-  ['tabbar-icon', 'TabBar.Icon'],
-  ['tabbar-label', 'TabBar.Label'],
-  ['tabbar-panel', 'TabBar.Panel'],
-  ['tabbar-accessory', 'TabBar.Accessory'],
-];
-
 /** `/tab-bar/parts`: the root, the bar, its groups and tabs, the accessory. */
 export const TabBarParts: FunctionComponent = () => (
   <>
-    <Contents sections={sections} />
-    <p className="demo-lead">
-      A tab bar is a root (the tabs’ state) holding its list (the bar), which
-      holds groups (glass capsules), each with its indicator (the selection) and
-      tabs (a symbol and a label each); the root can also hold the sections’
-      panels, and an accessory after the list.
-    </p>
+    <ul className="demo-lead">
+      <li>Root: the tabs’ state.</li>
+      <li>List: the bar, holding groups (glass capsules).</li>
+      <li>
+        Group: its indicator (the selection) and tabs (a symbol and a label
+        each).
+      </li>
+      <li>
+        The root can also hold the sections’ panels, and an accessory after the
+        list.
+      </li>
+    </ul>
     <ul>
       <li>
         <PartLink part="TabBar.Root" />
@@ -723,12 +715,18 @@ export const TabBarParts: FunctionComponent = () => (
     <h2 id="tabbar-root">
       <code>TabBar.Root</code>
     </h2>
-    <p>
-      Base UI’s Tabs root: it holds the active tab’s value (<code>value</code>{' '}
-      or <code>defaultValue</code>, <code>onValueChange</code>), shared by the
-      tabs and the panels, and links the list and its accessory. It renders a{' '}
-      <code>div</code> around them.
-    </p>
+    <ul>
+      <li>Base UI’s Tabs root.</li>
+      <li>
+        Holds the active tab’s value (<code>value</code> or{' '}
+        <code>defaultValue</code>, <code>onValueChange</code>), shared by tabs
+        and panels.
+      </li>
+      <li>Links the list and its accessory.</li>
+      <li>
+        Renders a <code>div</code> around them.
+      </li>
+    </ul>
     <RootPart />
     <h3>Props</h3>
     <PropsTable rows={tabBarRootRows} />
@@ -736,14 +734,26 @@ export const TabBarParts: FunctionComponent = () => (
     <h2 id="tabbar-list">
       <code>TabBar.List</code>
     </h2>
-    <p>
-      The bar, with the <code>tablist</code> role: its <code>size</code>{' '}
-      (iPhone’s <code>compact</code>, iPad’s <code>regular</code>), whether it’s{' '}
-      <code>collapsed</code> and how (<code>collapsedContent</code>,{' '}
-      <code>collapsedPosition</code>), the glass’ <code>context</code>, and
-      keyboard focus (<code>activateOnFocus</code>, <code>loopFocus</code>). It
-      renders the lens shown while a tab is pressed.
-    </p>
+    <ul>
+      <li>
+        The bar, with the <code>tablist</code> role.
+      </li>
+      <li>
+        <code>size</code>: iPhone’s <code>compact</code>, iPad’s{' '}
+        <code>regular</code>.
+      </li>
+      <li>
+        Collapsing: <code>collapsed</code>, <code>collapsedContent</code>,{' '}
+        <code>collapsedPosition</code>.
+      </li>
+      <li>
+        The glass’ <code>context</code>.
+      </li>
+      <li>
+        Keyboard focus: <code>activateOnFocus</code>, <code>loopFocus</code>.
+      </li>
+      <li>Renders the lens shown while a tab is pressed.</li>
+    </ul>
     <ListPart />
     <h3>Props</h3>
     <PropsTable rows={tabBarListRows} />
@@ -751,12 +761,19 @@ export const TabBarParts: FunctionComponent = () => (
     <h2 id="tabbar-group">
       <code>TabBar.Group</code>
     </h2>
-    <p>
-      A glass capsule of tabs in the list: here, the sections’, and search’s
-      beside it. Whether it remains while collapsed (
-      <code>visibleWhenCollapsed</code>), how and where, and its tabs’ default{' '}
-      <code>shape</code>.
-    </p>
+    <ul>
+      <li>
+        A glass capsule of tabs in the list (here: the sections’, and search’s
+        beside it).
+      </li>
+      <li>
+        Remaining while collapsed: <code>visibleWhenCollapsed</code>, how and
+        where.
+      </li>
+      <li>
+        Its tabs’ default <code>shape</code>.
+      </li>
+    </ul>
     <GroupPart />
     <h3>Props</h3>
     <PropsTable rows={tabBarGroupRows} />
@@ -764,11 +781,11 @@ export const TabBarParts: FunctionComponent = () => (
     <h2 id="tabbar-indicator">
       <code>TabBar.Indicator</code>
     </h2>
-    <p>
-      The selection, first in each group: positioned on the group’s active tab,
-      sliding between its tabs; hidden while a tab is pressed, as the lens takes
-      over.
-    </p>
+    <ul>
+      <li>The selection, first in each group.</li>
+      <li>On the group’s active tab, sliding between its tabs.</li>
+      <li>Hidden while a tab is pressed (the lens takes over).</li>
+    </ul>
     <IndicatorPart />
     <h3>Props</h3>
     <PropsTable rows={tabBarIndicatorRows} />
@@ -776,13 +793,24 @@ export const TabBarParts: FunctionComponent = () => (
     <h2 id="tabbar-tab">
       <code>TabBar.Tab</code>
     </h2>
-    <p>
-      A tab, by its <code>value</code>: can be <code>disabled</code>, remain
-      while collapsed (<code>visibleWhenCollapsed</code>), with its own{' '}
-      <code>collapsedContent</code> and <code>shape</code>, and take secondary
-      clicks (<code>onSecondaryClick</code>). Without a label, give it an{' '}
-      <code>aria-label</code> (as search’s).
-    </p>
+    <ul>
+      <li>
+        A tab, by its <code>value</code>.
+      </li>
+      <li>
+        Can be <code>disabled</code>.
+      </li>
+      <li>
+        Collapsing: <code>visibleWhenCollapsed</code>, its own{' '}
+        <code>collapsedContent</code> and <code>shape</code>.
+      </li>
+      <li>
+        Secondary clicks: <code>onSecondaryClick</code>.
+      </li>
+      <li>
+        Without a label: give it an <code>aria-label</code> (as search’s).
+      </li>
+    </ul>
     <TabPart />
     <h3>Props</h3>
     <PropsTable rows={tabBarTabRows} />
@@ -790,10 +818,12 @@ export const TabBarParts: FunctionComponent = () => (
     <h2 id="tabbar-icon">
       <code>TabBar.Icon</code>
     </h2>
-    <p>
-      A tab’s symbol (e.g. a <code>Symbol</code>, with its badge), sized by the
-      list’s size, bolder while active.
-    </p>
+    <ul>
+      <li>
+        A tab’s symbol (e.g. a <code>Symbol</code>, with its badge).
+      </li>
+      <li>Sized by the list’s size; bolder while active.</li>
+    </ul>
     <IconPart />
     <h3>Props</h3>
     <PropsTable rows={tabBarIconRows} />
@@ -801,11 +831,14 @@ export const TabBarParts: FunctionComponent = () => (
     <h2 id="tabbar-label">
       <code>TabBar.Label</code>
     </h2>
-    <p>
-      A tab’s label, sized by the list’s size. Its width is reserved for the
-      active style, so tabs don’t shift as the selection changes; it never
-      truncates (a group scrolls instead).
-    </p>
+    <ul>
+      <li>A tab’s label, sized by the list’s size.</li>
+      <li>
+        Width reserved for the active style: tabs don’t shift as the selection
+        changes.
+      </li>
+      <li>Never truncates (a group scrolls instead).</li>
+    </ul>
     <LabelPart />
     <h3>Props</h3>
     <PropsTable rows={tabBarLabelRows} />
@@ -813,13 +846,18 @@ export const TabBarParts: FunctionComponent = () => (
     <h2 id="tabbar-panel">
       <code>TabBar.Panel</code>
     </h2>
-    <p>
-      A section’s content (Base UI’s, unstyled), shown while the tab of its{' '}
-      <code>value</code> is active; hidden ones are unmounted, unless{' '}
-      <code>keepMounted</code>. See{' '}
-      <a href="tab-bar/composition">Composition</a> for panels as an app’s
-      pages.
-    </p>
+    <ul>
+      <li>
+        A section’s content (Base UI’s, unstyled), shown while the tab of its{' '}
+        <code>value</code> is active.
+      </li>
+      <li>
+        Hidden ones unmount, unless <code>keepMounted</code>.
+      </li>
+      <li>
+        Panels as an app’s pages: <a href="tab-bar/composition">Composition</a>.
+      </li>
+    </ul>
     <PanelPart />
     <h3>Props</h3>
     <PropsTable rows={tabBarPanelRows} />
@@ -827,12 +865,16 @@ export const TabBarParts: FunctionComponent = () => (
     <h2 id="tabbar-accessory">
       <code>TabBar.Accessory</code>
     </h2>
-    <p>
-      The app’s content in a glass capsule, after the list: above the groups, or
-      between them while the bar is collapsed (collapse it with{' '}
-      <code>TabBar.List</code>’s control); in both states, or one (
-      <code>visibleIn</code>).
-    </p>
+    <ul>
+      <li>App content in a glass capsule, after the list.</li>
+      <li>
+        Above the groups; between them while the bar is collapsed (collapse it
+        with <code>TabBar.List</code>’s control).
+      </li>
+      <li>
+        In both states, or one: <code>visibleIn</code>.
+      </li>
+    </ul>
     <AccessoryPart />
     <h3>Props</h3>
     <PropsTable rows={tabBarAccessoryRows} />

@@ -70,6 +70,7 @@
     text-transform: none;
     transform: translate3d(0, 0, 0);
     transition-duration: 100ms;
+    -webkit-user-select: none;
     user-select: none;
 
     --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);

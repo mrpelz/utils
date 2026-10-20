@@ -31,6 +31,7 @@
     stroke: currentcolor;
     stroke-linejoin: round;
     stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
+    -webkit-user-select: none;
     user-select: none;
 
     --uikit-symbol-thinning: max(

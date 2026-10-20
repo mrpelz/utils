@@ -102,6 +102,7 @@
     cursor: grab;
     padding-block-end: 10px;
     touch-action: none;
+    -webkit-user-select: none;
     user-select: none;
 
     &::before {

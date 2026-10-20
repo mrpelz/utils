@@ -15,8 +15,6 @@ export type EntryInfo = {
   hasComposition: boolean;
   /** Has an information architecture page (`/:id/information-architecture`). */
   hasInformationArchitecture: boolean;
-  /** Has an overview page (`/:id`). */
-  hasOverview: boolean;
   /** Has a parts page (`/:id/parts`). */
   hasParts: boolean;
   higId?: string;
@@ -46,9 +44,7 @@ export const Breadcrumb: FunctionComponent<{
     {withComponent ? (
       <>
         {' › '}
-        <a href={entry.hasOverview ? entry.id : `${entry.id}/all`}>
-          {entry.title}
-        </a>
+        <a href={entry.id}>{entry.title}</a>
       </>
     ) : null}
   </nav>
@@ -62,8 +58,8 @@ export const Tabs: FunctionComponent<{
   tab: Tab;
 }> = ({ baseUiId = undefined, entry, tab }) => {
   const docs = baseUiId ?? entry.baseUiId;
-  const tabs: [Tab, string, string][] = [];
-  if (entry.hasOverview) tabs.push(['overview', 'Overview', entry.id]);
+  // (Without an overview, its page is a placeholder pointing to the demos.)
+  const tabs: [Tab, string, string][] = [['overview', 'Overview', entry.id]];
   if (entry.hasParts) tabs.push(['parts', 'Parts', `${entry.id}/parts`]);
   if (entry.hasComposition) {
     tabs.push(['composition', 'Composition', `${entry.id}/composition`]);

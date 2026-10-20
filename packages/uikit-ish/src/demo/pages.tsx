@@ -26,7 +26,6 @@ const entryInfo = (entry: CatalogEntry): EntryInfo => ({
   framework7Id: entry.framework7Id,
   hasComposition: entry.Composition !== undefined,
   hasInformationArchitecture: entry.InformationArchitecture !== undefined,
-  hasOverview: entry.Overview !== undefined,
   hasParts: entry.Parts !== undefined,
   higId: entry.higId,
   id: entry.id,
@@ -203,9 +202,7 @@ export const IndexPage: FunctionComponent = () => (
                 className="demo-index-card"
               >
                 <h3>
-                  <a href={entry.Overview ? entry.id : `${entry.id}/all`}>
-                    {entry.title}
-                  </a>
+                  <a href={entry.id}>{entry.title}</a>
                 </h3>
                 <p>{entry.summary ?? ''}</p>
                 <span className="demo-index-card-links">

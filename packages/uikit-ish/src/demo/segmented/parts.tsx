@@ -10,7 +10,7 @@ import {
   useProvidedState,
 } from '../utils/options-context.js';
 import { PropsTable } from '../utils/props-table.js';
-import { Contents, PartLink, type Section } from '../utils/sections.js';
+import { PartLink } from '../utils/sections.js';
 import { periods } from './content.js';
 import {
   segmentedHighlightRows,
@@ -214,23 +214,15 @@ const IndicatorPart: FunctionComponent = () => {
   );
 };
 
-/** The page's sections (its headings' ids), listed at its top. */
-const sections: readonly Section[] = [
-  ['segmented-root', 'Segmented.Root'],
-  ['segmented-item', 'Segmented.Item'],
-  ['segmented-highlight', 'Segmented.Highlight'],
-  ['segmented-indicator', 'Segmented.Indicator'],
-];
-
 /** `/segmented/parts`: the track, its items, the highlight. */
 export const SegmentedParts: FunctionComponent = () => (
   <>
-    <Contents sections={sections} />
-    <p className="demo-lead">
-      A segmented control is a root (the track, holding the choice) with its
-      items (the options) and, after them, the highlight (the selection). An
-      item can hold an indicator, rendered while it’s chosen.
-    </p>
+    <ul className="demo-lead">
+      <li>Root: the track, holding the choice.</li>
+      <li>Items: the options.</li>
+      <li>Highlight, after them: the selection.</li>
+      <li>An item can hold an indicator, rendered while it’s chosen.</li>
+    </ul>
     <ul>
       <li>
         <PartLink part="Segmented.Root" />
@@ -253,15 +245,23 @@ export const SegmentedParts: FunctionComponent = () => (
     <h2 id="segmented-root">
       <code>Segmented.Root</code>
     </h2>
-    <p>
-      Base UI’s radio group, as the track: it holds the choice (
-      <code>value</code> or <code>defaultValue</code>,{' '}
-      <code>onValueChange</code>), can be <code>disabled</code> or{' '}
-      <code>readOnly</code>, submits with a form (<code>name</code>,{' '}
-      <code>required</code>), and hides its separators (
-      <code>hideSeparators</code>). It renders the lens shown while an item is
-      pressed.
-    </p>
+    <ul>
+      <li>Base UI’s radio group, as the track.</li>
+      <li>
+        Choice: <code>value</code> or <code>defaultValue</code>,{' '}
+        <code>onValueChange</code>.
+      </li>
+      <li>
+        Can be <code>disabled</code> or <code>readOnly</code>.
+      </li>
+      <li>
+        Submits with a form: <code>name</code>, <code>required</code>.
+      </li>
+      <li>
+        Separators: <code>hideSeparators</code>.
+      </li>
+      <li>Renders the lens shown while an item is pressed.</li>
+    </ul>
     <RootPart />
     <h3>Props</h3>
     <PropsTable rows={segmentedRootRows} />
@@ -269,12 +269,21 @@ export const SegmentedParts: FunctionComponent = () => (
     <h2 id="segmented-item">
       <code>Segmented.Item</code>
     </h2>
-    <p>
-      An option, by its <code>value</code>, its children its label: can be{' '}
-      <code>disabled</code> or <code>readOnly</code>, and take secondary clicks
-      (<code>onSecondaryClick</code>). Its width is reserved for the chosen
-      (bolder) label, so the control doesn’t change size.
-    </p>
+    <ul>
+      <li>
+        An option, by its <code>value</code>; its children its label.
+      </li>
+      <li>
+        Can be <code>disabled</code> or <code>readOnly</code>.
+      </li>
+      <li>
+        Secondary clicks: <code>onSecondaryClick</code>.
+      </li>
+      <li>
+        Width reserved for the chosen (bolder) label: the control doesn’t change
+        size.
+      </li>
+    </ul>
     <ItemPart />
     <h3>Props</h3>
     <PropsTable rows={segmentedItemRows} />
@@ -282,11 +291,15 @@ export const SegmentedParts: FunctionComponent = () => (
     <h2 id="segmented-highlight">
       <code>Segmented.Highlight</code>
     </h2>
-    <p>
-      The selection, after the items: on the chosen item, sliding between them,
-      hidden while none is chosen and while an item is pressed (as the lens
-      takes over). It takes only styling.
-    </p>
+    <ul>
+      <li>The selection, after the items.</li>
+      <li>On the chosen item, sliding between them.</li>
+      <li>
+        Hidden while none is chosen, and while an item is pressed (the lens
+        takes over).
+      </li>
+      <li>Takes only styling.</li>
+    </ul>
     <HighlightPart />
     <h3>Props</h3>
     <PropsTable rows={segmentedHighlightRows} />
@@ -294,11 +307,14 @@ export const SegmentedParts: FunctionComponent = () => (
     <h2 id="segmented-indicator">
       <code>Segmented.Indicator</code>
     </h2>
-    <p>
-      Base UI’s radio indicator, unstyled, inside an item: rendered while its
-      item is chosen (always, with <code>keepMounted</code>), e.g. for a mark
-      beside the label, as here. iOS’s segmented controls don’t use one.
-    </p>
+    <ul>
+      <li>Base UI’s radio indicator, unstyled, inside an item.</li>
+      <li>
+        Rendered while its item is chosen (always, with <code>keepMounted</code>
+        ), e.g. for a mark beside the label (here).
+      </li>
+      <li>Not used by iOS’s segmented controls.</li>
+    </ul>
     <IndicatorPart />
     <h3>Props</h3>
     <PropsTable rows={segmentedIndicatorRows} />

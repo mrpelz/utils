@@ -21,30 +21,42 @@ const sections: readonly Section[] = [
 export const ListInformationArchitecture: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <p className="demo-lead">
-      In Apple’s catalog,{' '}
-      <a
-        href={`${HIG}/lists-and-tables`}
-        rel="noreferrer"
-        target="_blank"
-      >
-        lists and tables
-      </a>{' '}
-      are under “Layout and organization”. Re-sliced into primitives (after the{' '}
-      <GuideLink to="section-5">HIG composition guide</GuideLink>), a list is a{' '}
-      <em>Collection</em> projected as rows (
-      <GuideLink to="section-5-mapping">§5, mapping</GuideLink>: flat or
-      sectioned, rows), its sections <em>Groups</em>, its rows <em>Items</em>.
-    </p>
+    <ul className="demo-lead">
+      <li>
+        Apple’s catalog:{' '}
+        <a
+          href={`${HIG}/lists-and-tables`}
+          rel="noreferrer"
+          target="_blank"
+        >
+          lists and tables
+        </a>
+        , under “Layout and organization”.
+      </li>
+      <li>
+        As primitives (
+        <GuideLink to="section-5">HIG composition guide</GuideLink>): a{' '}
+        <em>Collection</em> projected as rows (
+        <GuideLink to="section-5-mapping">§5, mapping</GuideLink>: flat or
+        sectioned, rows).
+      </li>
+      <li>
+        Its sections <em>Groups</em>, its rows <em>Items</em>.
+      </li>
+    </ul>
 
     <h2 id="primitive-collection">Primitive: Collection</h2>
-    <p>
-      A Collection is a set of items with a data shape and a projection; its
-      parameters are the shape (flat, sectioned, tree), the projection (rows,
-      grid, columns, breadcrumb, pages), the selection (none, one, many) and its
-      editability (reorder, delete) (guide,{' '}
-      <GuideLink to="primitive-collection">§5</GuideLink>). Here:
-    </p>
+    <ul>
+      <li>
+        Collection: a set of items with a data shape and a projection (guide,{' '}
+        <GuideLink to="primitive-collection">§5</GuideLink>).
+      </li>
+      <li>
+        Parameters: shape (flat, sectioned, tree), projection (rows, grid,
+        columns, breadcrumb, pages), selection (none, one, many), editability
+        (reorder, delete).
+      </li>
+    </ul>
     <ul>
       <li>
         <strong>Shape:</strong> sectioned (<code>List.Section</code>s); flat
@@ -92,10 +104,12 @@ export const ListInformationArchitecture: FunctionComponent = () => (
     </ul>
 
     <h2 id="traits">Traits</h2>
-    <p>
-      The row of “Lists and tables” in the guide’s trait matrix (
-      <GuideLink to="trait-matrix">§4</GuideLink>):
-    </p>
+    <ul>
+      <li>
+        The row of “Lists and tables” in the guide’s trait matrix (
+        <GuideLink to="trait-matrix">§4</GuideLink>).
+      </li>
+    </ul>
     <table>
       <tbody>
         <tr>

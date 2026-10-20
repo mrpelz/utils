@@ -57,6 +57,7 @@
     text-transform: none;
     transition-duration: 100ms;
     transition-property: background-color;
+    -webkit-user-select: none;
     user-select: none;
     vertical-align: middle;
     white-space: nowrap;

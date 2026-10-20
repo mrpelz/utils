@@ -602,11 +602,14 @@ export const Component: FunctionComponent<{
   stretch = false,
   title,
 }) => {
-  const { colorScheme = '', id: showId, raw } = useOptions();
+  const { id: showId, raw } = useOptions();
   // Its settings: its component's, shared by the component's demos on all
   // its pages (see entry.tsx); a demo's own outside of one.
   const entry = useEntry();
   const settings = entry?.id ?? id;
+  const [colorScheme, setColorScheme] = useLocalStorage<
+    ColorScheme | undefined
+  >('colorScheme', undefined);
   const [stageBackground, setStageBackground] = useLocalStorage(
     `${settings}.stageBackground`,
     true,
@@ -675,10 +678,9 @@ export const Component: FunctionComponent<{
               name="colorScheme"
               value={colorScheme}
               onChange={({ currentTarget }) =>
-                setOptions({
-                  colorScheme:
-                    (currentTarget.value as ColorScheme | '') || undefined,
-                })
+                setColorScheme(
+                  (currentTarget.value as ColorScheme) || undefined,
+                )
               }
             >
               <option value="">[auto]</option>

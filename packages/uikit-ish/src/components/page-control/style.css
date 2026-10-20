@@ -67,6 +67,7 @@
     gap: 8px;
     outline-offset: 2px;
     touch-action: manipulation;
+    -webkit-user-select: none;
     user-select: none;
     vertical-align: middle;
 
