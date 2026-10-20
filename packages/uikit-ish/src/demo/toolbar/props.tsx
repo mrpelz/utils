@@ -106,3 +106,55 @@ export const getPropOptionsPageControl = (addLog: AddLog) => ({
     undefined,
   ] as const,
 });
+
+// The guide pages' views (see overview.tsx, parts.tsx): each part's props,
+// outlined by default.
+
+/** The overview's bars: shown, and what they hold. */
+export const propOptionsOverviewTop = {
+  shown: [true, false] as const,
+  subtitle: [false, true] as const,
+  alignStart: [undefined, false, true] as const,
+};
+
+export const propOptionsOverviewBottom = {
+  shown: [true, false] as const,
+  title: [true, false] as const,
+  prominent: [undefined, false, true] as const,
+};
+
+export const propOptionsOverviewRoot = {
+  context: propOptionsRoot.context,
+  disabled: propOptionsRoot.disabled,
+};
+
+export const propOptionsSpacer = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+};
+
+export const propOptionsTitle = {
+  ...commonPropOptions,
+  alignStart: [undefined, false, true] as const,
+};
+
+export const propOptionsSeparator = {
+  ...commonPropOptions,
+  orientation: [undefined, 'vertical', 'horizontal'] as const,
+};
+
+export const propOptionsLink = {
+  ...commonPropOptions,
+  href: ['toolbar/parts#toolbar-link', undefined] as const,
+};
+
+export const propOptionsInput = {
+  ...commonPropOptions,
+  disabled: [undefined, false, true] as const,
+  focusableWhenDisabled: [undefined, false, true] as const,
+};
+
+export {
+  commonPropOptions as propOptionsSide,
+  commonPropOptions as propOptionsSubtitle,
+} from '../frame/prop-control.js';

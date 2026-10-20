@@ -98,6 +98,49 @@ const DemoHeader: FunctionComponent<{
   );
 };
 
+/**
+ * An inline demo (see `Component`) and, below it (as a code view's Copy
+ * button), a link to it on its component's page of demos, and its width:
+ * the page's, or the viewport's (shared by its component's inline demos).
+ */
+const InlineDemo: FunctionComponent<{
+  children: ReactNode;
+  fullscreenUrl?: string;
+  /** Its settings' key (see `Component`). */
+  settings: string;
+}> = ({ children, fullscreenUrl, settings }) => {
+  const [expanded, setExpanded] = useLocalStorage(
+    `${settings}.expanded`,
+    false,
+  );
+
+  return (
+    <div
+      className="demo-inline"
+      data-expanded={expanded ? '' : undefined}
+    >
+      {children}
+      <div className="demo-inline-actions">
+        <a
+          className="demo-button"
+          href={fullscreenUrl}
+          rel="noreferrer"
+          target="_blank"
+        >
+          Fullscreen
+        </a>
+        <button
+          className="demo-button"
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? 'Collapse' : 'Expand'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export const Component: FunctionComponent<{
   backdrop?: boolean;
   /** Base UI component the demo is built on, for the docs link (if any). */
@@ -282,20 +325,13 @@ export const Component: FunctionComponent<{
     </div>
   );
 
-  // Inline, with a link to it on its component's page of demos below it (as
-  // a code view's Copy button).
   return isInline ? (
-    <div className="demo-inline">
+    <InlineDemo
+      fullscreenUrl={fullscreenUrl}
+      settings={settings}
+    >
       {container}
-      <a
-        className="demo-button"
-        href={fullscreenUrl}
-        rel="noreferrer"
-        target="_blank"
-      >
-        Fullscreen
-      </a>
-    </div>
+    </InlineDemo>
   ) : (
     container
   );

@@ -1,3 +1,5 @@
+import './style.css';
+
 import { sfArchivebox } from '@bradleyhodges/sfsymbols/sfArchivebox';
 import { sfArrowshapeTurnUpLeft } from '@bradleyhodges/sfsymbols/sfArrowshapeTurnUpLeft';
 import { sfFlag } from '@bradleyhodges/sfsymbols/sfFlag';

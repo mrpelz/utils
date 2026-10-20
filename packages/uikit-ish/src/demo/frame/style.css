@@ -292,7 +292,7 @@
     }
   }
 
-  /* (Below a code view, as below an inline demo, see .demo-inline.) */
+  /* (Below a code view, as below an inline demo, see .demo-inline-actions.) */
   .demo-code > .demo-button {
     margin-top: 0.5rem;
   }
@@ -300,9 +300,18 @@
   .demo-inline {
     margin-block: 1.5rem;
 
-    & > .demo-button {
-      margin-top: 0.5rem;
+    /* Expanded: as wide as the viewport, 1rem from its edges (the page's
+       column centered in it). */
+    &[data-expanded] {
+      margin-inline: calc(50% - 50vw + 1rem);
     }
+  }
+
+  /* Its buttons, below it. */
+  .demo-inline-actions {
+    display: flex;
+    margin-top: 0.5rem;
+    gap: 0.5rem;
   }
 
   .demo-container[data-inline] {

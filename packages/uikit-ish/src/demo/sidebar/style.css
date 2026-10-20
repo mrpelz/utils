@@ -23,3 +23,35 @@
 
   background-color: transparent;
 }
+
+/* A tablet's screen (the guide pages' views; an iPad's width, at most the
+   stage's): a layout of the sidebar and the content. */
+.sidebar-demo-tablet {
+  display: grid;
+  overflow: hidden;
+  width: 820px;
+  max-width: 100%;
+  height: min(640px, 70vh);
+  border-radius: 24px;
+}
+
+/* A phone's screen: a compact layout, the sidebar its drawer. */
+.sidebar-demo-phone {
+  display: grid;
+  overflow: hidden;
+  width: 402px;
+  max-width: 100%;
+  height: min(640px, 70vh);
+  border-radius: 24px;
+}
+
+/* A sidebar of its own (a part's view): as wide as in a layout's column,
+   on the layout's picture. */
+.sidebar-demo-panel {
+  display: grid;
+  overflow: hidden;
+  width: 336px;
+  max-width: 100%;
+  height: min(560px, 70vh);
+  border-radius: 24px;
+}

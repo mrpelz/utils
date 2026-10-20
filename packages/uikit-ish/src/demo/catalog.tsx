@@ -59,7 +59,17 @@ import {
   MenuRegularDemo,
   MenuTogglesDemo,
 } from './menu/main.js';
+import {
+  NavigationComposition,
+  navigationCompositionDemos,
+} from './navigation/composition.js';
+import { NavigationInformationArchitecture } from './navigation/information-architecture.js';
 import { NavigationDemo } from './navigation/main.js';
+import {
+  NavigationOverview,
+  navigationOverviewDemos,
+} from './navigation/overview.js';
+import { NavigationParts, navigationPartsDemos } from './navigation/parts.js';
 import { PageDemo } from './page/main.js';
 import { PageControlDemo } from './page-control/main.js';
 import { PopoverDemo } from './popover/main.js';
@@ -78,10 +88,17 @@ import {
 import { SegmentedParts, segmentedPartsDemos } from './segmented/parts.js';
 import { SheetDemo } from './sheet/main.js';
 import {
+  SidebarComposition,
+  sidebarCompositionDemos,
+} from './sidebar/composition.js';
+import { SidebarInformationArchitecture } from './sidebar/information-architecture.js';
+import {
   SidebarCompactDemo,
   SidebarDemo,
   SidebarEditingDemo,
 } from './sidebar/main.js';
+import { SidebarOverview, sidebarOverviewDemos } from './sidebar/overview.js';
+import { SidebarParts, sidebarPartsDemos } from './sidebar/parts.js';
 import {
   SliderComposition,
   sliderCompositionDemos,
@@ -118,11 +135,18 @@ import { TabBarOverview, tabBarOverviewDemos } from './tab-bar/overview.js';
 import { TabBarParts, tabBarPartsDemos } from './tab-bar/parts.js';
 import { TextFieldDemo } from './text-field/main.js';
 import {
+  ToolbarComposition,
+  toolbarCompositionDemos,
+} from './toolbar/composition.js';
+import { ToolbarInformationArchitecture } from './toolbar/information-architecture.js';
+import {
   ToolbarDemo,
   ToolbarPageDotsDemo,
   ToolbarSymbolsDemo,
   ToolbarTextDemo,
 } from './toolbar/main.js';
+import { ToolbarOverview, toolbarOverviewDemos } from './toolbar/overview.js';
+import { ToolbarParts, toolbarPartsDemos } from './toolbar/parts.js';
 import { TooltipDemo } from './tooltip/main.js';
 import {
   TypographyDemo,
@@ -444,10 +468,19 @@ export const catalog: readonly CatalogEntry[] = [
       ToolbarPageDotsDemo,
       ToolbarSymbolsDemo,
       ToolbarTextDemo,
+      ...toolbarOverviewDemos,
+      ...toolbarPartsDemos,
+      ...toolbarCompositionDemos,
     ],
     framework7Id: 'toolbar-tabbar',
     higId: 'toolbars',
     id: 'toolbar',
+    Composition: ToolbarComposition,
+    InformationArchitecture: ToolbarInformationArchitecture,
+    Overview: ToolbarOverview,
+    Parts: ToolbarParts,
+    summary:
+      'A bar of commands for the current view: glass capsules of buttons at its ends, a title or a control between them; at the bottom, or at the top as a navigation bar.',
     title: 'Toolbar',
   },
   {
@@ -475,18 +508,42 @@ export const catalog: readonly CatalogEntry[] = [
   },
   {
     category: 'structure',
-    demos: [SidebarDemo, SidebarCompactDemo, SidebarEditingDemo],
+    demos: [
+      SidebarDemo,
+      SidebarCompactDemo,
+      SidebarEditingDemo,
+      ...sidebarOverviewDemos,
+      ...sidebarPartsDemos,
+      ...sidebarCompositionDemos,
+    ],
     framework7Id: 'panel',
     higId: 'sidebars',
     id: 'sidebar',
+    Composition: SidebarComposition,
+    InformationArchitecture: SidebarInformationArchitecture,
+    Overview: SidebarOverview,
+    Parts: SidebarParts,
+    summary:
+      'An app’s sections in a floating glass panel at its leading edge: a toolbar, a search field and a list; a drawer on a phone.',
     title: 'Sidebar',
   },
   {
     category: 'structure',
-    demos: [NavigationDemo],
+    demos: [
+      NavigationDemo,
+      ...navigationOverviewDemos,
+      ...navigationPartsDemos,
+      ...navigationCompositionDemos,
+    ],
     framework7Id: 'view',
     higId: 'navigation-and-search',
     id: 'navigation',
+    Composition: NavigationComposition,
+    InformationArchitecture: NavigationInformationArchitecture,
+    Overview: NavigationOverview,
+    Parts: NavigationParts,
+    summary:
+      'A stack of pages, drilled into and back out of: pushed over each other, popped by a back button or a swipe from the leading edge.',
     title: 'Navigation',
   },
   {

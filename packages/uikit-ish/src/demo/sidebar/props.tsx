@@ -46,3 +46,11 @@ export const propOptionsContentColumn = {
 export const propOptionsSidebar = {
   ...commonPropOptions,
 };
+
+// The guide pages' views (see overview.tsx, parts.tsx): each part's props,
+// outlined by default (its own element's class name and style; it has no
+// `render`).
+export const propOptionsPart = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+};

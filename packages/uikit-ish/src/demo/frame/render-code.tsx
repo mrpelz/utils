@@ -88,8 +88,9 @@ const attributeHook = (marked: string, value: unknown): false | string => {
     return `\n${indent}${attribute}={${value.iconName}}`;
   }
   if (isValidElement(value)) {
+    // (A copy already, see `unwrap`: its props marked once.)
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    const element = indented(renderCode(value), indent.repeat(2));
+    const element = indented(renderCopy(value), indent.repeat(2));
     return `\n${indent}${attribute}={\n${indent.repeat(2)}${element}\n${indent}}`;
   }
 
@@ -100,13 +101,10 @@ const attributeHook = (marked: string, value: unknown): false | string => {
   return `\n${indent}${attribute}={${indented(json, indent)}}`;
 };
 
-/**
- * The JSX of a demo's stage, as written (components as tags, not
- * rendered; demo-only wrappers left out), or why it can't be shown.
- */
-export const renderCode = (node: ReactNode): string => {
+// A tree's copy (see `unwrap`), rendered as JSX.
+const renderCopy = (node: ReactNode): string => {
   try {
-    return render((<>{unwrap(node)}</>) as unknown as VNode, {}, {
+    return render((<>{node}</>) as unknown as VNode, {}, {
       attributeHook,
       jsx: true,
       pretty: indent,
@@ -118,3 +116,9 @@ export const renderCode = (node: ReactNode): string => {
     return String(error);
   }
 };
+
+/**
+ * The JSX of a demo's stage, as written (components as tags, not
+ * rendered; demo-only wrappers left out), or why it can't be shown.
+ */
+export const renderCode = (node: ReactNode): string => renderCopy(unwrap(node));

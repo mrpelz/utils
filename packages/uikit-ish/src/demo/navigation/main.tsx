@@ -17,21 +17,8 @@ import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
 import { useProvidedState } from '../frame/state.js';
+import { pages } from './content.js';
 import { getPropOptionsRoot } from './props.js';
-
-/** The demo's pages: their titles and the pages they drill into. */
-const pages: Record<string, { children: string[]; title: string }> = {
-  about: { children: [], title: 'About' },
-  general: { children: ['about', 'update'], title: 'General' },
-  inbox: { children: ['message'], title: 'Inbox' },
-  location: { children: [], title: 'Location Services' },
-  mail: { children: ['inbox', 'sent'], title: 'Mailboxes' },
-  message: { children: [], title: 'Message' },
-  privacy: { children: ['location'], title: 'Privacy & Security' },
-  sent: { children: [], title: 'Sent' },
-  settings: { children: ['general', 'privacy'], title: 'Settings' },
-  update: { children: [], title: 'Software Update' },
-};
 
 type Stack = 'mail' | 'settings';
 
