@@ -108,11 +108,15 @@ import {
   TypographyMatrixDemo,
   TypographySizesDemo,
 } from './typography/main.js';
+import { ViewportComposition } from './viewport/composition.js';
+import { ViewportInformationArchitecture } from './viewport/information-architecture.js';
 import {
   ViewportAnchorsDemo,
   ViewportBarDemo,
   ViewportDemo,
 } from './viewport/main.js';
+import { ViewportOverview } from './viewport/overview.js';
+import { ViewportParts } from './viewport/parts.js';
 
 /**
  * The index's groups: by what a component is for, after a re-slicing of
@@ -184,7 +188,14 @@ export const catalog: readonly CatalogEntry[] = [
   {
     category: 'structure',
     demos: [ViewportDemo, ViewportBarDemo, ViewportAnchorsDemo],
+    higId: 'layout',
     id: 'viewport',
+    Composition: ViewportComposition,
+    InformationArchitecture: ViewportInformationArchitecture,
+    Overview: ViewportOverview,
+    Parts: ViewportParts,
+    summary:
+      'The app’s window as layers: a scrolling content layer, bars floating at its edges, kept clear of the safe areas and the keyboard.',
     title: 'Viewport',
   },
   {
