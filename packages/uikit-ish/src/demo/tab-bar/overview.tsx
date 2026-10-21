@@ -8,7 +8,12 @@ import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   tabBarAccessoryRows,
@@ -212,8 +217,12 @@ export const TabBarOverview: FunctionComponent = () => (
       <li>
         It’s Base UI’s Tabs: the list has the <code>tablist</code> role, each
         tab is a <code>button</code> with the <code>tab</code> role and{' '}
-        <code>aria-selected</code>. Panels (<code>TabBar.Panel</code>) have the{' '}
-        <code>tabpanel</code> role, are labelled by their tab (whose{' '}
+        <code>aria-selected</code>. Panels (
+        <PartLink
+          component="tab-bar"
+          part="TabBar.Panel"
+        />
+        ) have the <code>tabpanel</code> role, are labelled by their tab (whose{' '}
         <code>aria-controls</code> points at them), and are focusable.
       </li>
       <li>
@@ -263,8 +272,11 @@ export const TabBarOverview: FunctionComponent = () => (
       </li>
       <li>
         Collapsing and expanding are the app’s: e.g. on scrolling down and up (
-        <code>useViewportScroll</code>), or on search (see{' '}
-        <a href="tab-bar/composition">Composition</a>).
+        <PartLink
+          component="viewport"
+          part="useViewportScroll"
+        />
+        ), or on search (see <a href="tab-bar/composition">Composition</a>).
       </li>
     </ul>
   </>

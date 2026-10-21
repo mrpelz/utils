@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
+import type { PageControlChangeEventDetails } from '../../components/index.js';
 import { propOptionsRoot as propOptionsButtonRoot } from '../button/props.js';
 import { AddLog } from '../frame/log.js';
 import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
@@ -15,6 +16,7 @@ export const propOptionsSymbolsContent = { symbols: [3, 2, 4, 5, 6] as const };
 export const propOptionsRoot = {
   ...commonPropOptions,
   placement: [undefined, 'block-end', 'block-start'] as const,
+  orientation: [undefined, 'horizontal', 'vertical'] as const,
   context: [
     undefined,
     'bright',
@@ -100,7 +102,8 @@ export const getPropOptionsPageControl = (addLog: AddLog) => ({
   ] as const,
   onValueChange: [
     new MappedProp(
-      (page: number) => addLog(`page change: ${page}`),
+      (page: number, { reason }: PageControlChangeEventDetails) =>
+        addLog(`page change: ${page} (${reason})`),
       '[log change]',
     ),
     undefined,
@@ -150,6 +153,7 @@ export const propOptionsLink = {
 
 export const propOptionsInput = {
   ...commonPropOptions,
+  defaultValue: [undefined, 'Cupertino'] as const,
   disabled: [undefined, false, true] as const,
   focusableWhenDisabled: [undefined, false, true] as const,
 };

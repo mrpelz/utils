@@ -22,9 +22,9 @@ import {
   sliderValueRows,
 } from './docs.js';
 import {
+  getPropOptionsGuideThumb,
   getPropOptionsMinSymbol,
   getPropOptionsRoot,
-  getPropOptionsThumb,
   propOptionsLabel,
   propOptionsTicks,
   propOptionsValue,
@@ -320,7 +320,7 @@ const ThumbPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
-    useMemo(() => getPropOptionsThumb(addLog), [addLog]),
+    useMemo(() => getPropOptionsGuideThumb(addLog), [addLog]),
     'Slider.Thumb',
     external,
     true,
@@ -348,11 +348,7 @@ const ThumbPart: FunctionComponent = () => {
         <Slider.Control>
           <Slider.Track>
             <Slider.Indicator />
-            <Slider.Thumb
-              aria-label="Minimum brightness"
-              index={0}
-              {...props}
-            />
+            <Slider.Thumb {...props} />
             <Slider.Thumb
               aria-label="Maximum brightness"
               index={1}
@@ -466,15 +462,36 @@ export const SliderParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        <code>Slider.Root</code>: holds the value.
+        <PartLink
+          component="slider"
+          part="Slider.Root"
+        />
+        : holds the value.
       </li>
       <li>
-        <code>Slider.Control</code>: the area taking presses and drags.
+        <PartLink
+          component="slider"
+          part="Slider.Control"
+        />
+        : the area taking presses and drags.
       </li>
       <li>
-        In it, <code>Slider.Track</code>: its fill (
-        <code>Slider.Indicator</code>) and a knob (<code>Slider.Thumb</code>)
-        per value.
+        In it,{' '}
+        <PartLink
+          component="slider"
+          part="Slider.Track"
+        />
+        : its fill (
+        <PartLink
+          component="slider"
+          part="Slider.Indicator"
+        />
+        ) and a knob (
+        <PartLink
+          component="slider"
+          part="Slider.Thumb"
+        />
+        ) per value.
       </li>
       <li>
         Optional, around them: a label, the value, the ends’ symbols. On the
@@ -483,38 +500,74 @@ export const SliderParts: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        <PartLink part="Slider.Root" />
+        <PartLink
+          component="slider"
+          part="Slider.Root"
+        />
         <ul>
           <li>
-            <PartLink part="Slider.Label" /> (optional)
+            <PartLink
+              component="slider"
+              part="Slider.Label"
+            />{' '}
+            (optional)
           </li>
           <li>
-            <PartLink part="Slider.Value" /> (optional)
+            <PartLink
+              component="slider"
+              part="Slider.Value"
+            />{' '}
+            (optional)
           </li>
           <li>
-            <PartLink part="Slider.Symbol" /> (optional, at the minimum’s end)
+            <PartLink
+              component="slider"
+              part="Slider.Symbol"
+            />{' '}
+            (optional, at the minimum’s end)
           </li>
           <li>
-            <PartLink part="Slider.Control" />
+            <PartLink
+              component="slider"
+              part="Slider.Control"
+            />
             <ul>
               <li>
-                <PartLink part="Slider.Track" />
+                <PartLink
+                  component="slider"
+                  part="Slider.Track"
+                />
                 <ul>
                   <li>
-                    <PartLink part="Slider.Indicator" />
+                    <PartLink
+                      component="slider"
+                      part="Slider.Indicator"
+                    />
                   </li>
                   <li>
-                    <PartLink part="Slider.Ticks" /> (optional)
+                    <PartLink
+                      component="slider"
+                      part="Slider.Ticks"
+                    />{' '}
+                    (optional)
                   </li>
                   <li>
-                    <PartLink part="Slider.Thumb" /> (one, or two for a range)
+                    <PartLink
+                      component="slider"
+                      part="Slider.Thumb"
+                    />{' '}
+                    (one, or two for a range)
                   </li>
                 </ul>
               </li>
             </ul>
           </li>
           <li>
-            <PartLink part="Slider.Symbol" /> (optional, at the maximum’s end)
+            <PartLink
+              component="slider"
+              part="Slider.Symbol"
+            />{' '}
+            (optional, at the maximum’s end)
           </li>
         </ul>
       </li>

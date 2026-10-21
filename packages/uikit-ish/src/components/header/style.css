@@ -32,6 +32,12 @@
        effect reaching under it. */
     border-block-start: var(--uikit-page-safe-top, 0) solid transparent;
 
+    /* (54px high below it, as a toolbar's: its border not counted in, e.g.
+       without buttons, which would make it as high otherwise.) */
+    &&[data-placement='block-start'] {
+      min-height: calc(54px + var(--uikit-page-safe-top, 0px));
+    }
+
     /* The scroll edge effect, once content is scrolled under the bar. */
     &::before {
       position: absolute;

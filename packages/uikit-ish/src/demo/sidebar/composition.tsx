@@ -15,6 +15,7 @@ import {
   Symbol,
   TextField,
   Toolbar,
+  useCreateDrawerHandle,
   useVisualViewport,
   Viewport,
 } from '../../components/index.js';
@@ -22,8 +23,14 @@ import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
+import { codeLabel } from '../frame/render-code.js';
 import { useProvidedState } from '../frame/state.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { rowTitles, sidebarSections } from './content.js';
 import { propOptionsAdaptiveContent } from './props.js';
@@ -65,42 +72,37 @@ const selectingCode = `const [selected, setSelected] = useState('inbox');
   </Layout.Column>
 </Layout.Root>`;
 
-const drawerCode = `const [open, setOpen] = useState(false);
+const drawerCode = `// Its trigger, in the content's bar (outside the drawer).
+const sidebarDrawer = useCreateDrawerHandle();
 
 <Layout.Root compact>
-  <Layout.Column
-    floating
-    aria-label="Sidebar"
-    drawer="inline-start"
-    open={open}
-    onOpenChange={setOpen}
-  >
-    <Sidebar.Root aria-label="Mailboxes">
-      …
-      <List.Title
-        render={<button type="button" />}
-        onClick={() => {
-          setSelected('inbox');
-          setOpen(false);
-        }}
-      >
-        Inbox
-      </List.Title>
-      …
-    </Sidebar.Root>
-  </Layout.Column>
+  <Layout.Drawer handle={sidebarDrawer}>
+    <Layout.DrawerSwipeArea />
+    <Layout.Column floating aria-label="Sidebar">
+      <Sidebar.Root aria-label="Mailboxes">
+        …
+        {/* Chosen: its drawer closes. */}
+        <List.Title
+          render={<Layout.DrawerClose />}
+          onClick={() => setSelected('inbox')}
+        >
+          Inbox
+        </List.Title>
+        …
+      </Sidebar.Root>
+    </Layout.Column>
+  </Layout.Drawer>
   <Layout.Column>
     <Page.Root>
       <Header.Root>
         <Header.Bar>
           <Toolbar.Leading>
-            <Toolbar.Button
-              aria-label="Show Sidebar"
-              shape="circle"
-              onClick={() => setOpen(true)}
+            <Layout.DrawerTrigger
+              handle={sidebarDrawer}
+              render={<Toolbar.Button aria-label="Show Sidebar" shape="circle" />}
             >
               …
-            </Toolbar.Button>
+            </Layout.DrawerTrigger>
           </Toolbar.Leading>
           …
         </Header.Bar>
@@ -179,19 +181,17 @@ const [checked, setChecked] = useState<string[]>([]);
 const adaptiveCode = `// Inside a <Viewport.Provider> (the visual viewport, tracked).
 const { width } = useVisualViewport();
 const compact = width < 768;
+// Its trigger, in the content's bar (outside the drawer).
+const sidebarDrawer = useCreateDrawerHandle();
 
 <Layout.Root compact={compact}>
   {/* Regular: floating beside the content; compact: a drawer. */}
-  <Layout.Column
-    floating
-    aria-label="Sidebar"
-    defaultSize={300}
-    drawer="inline-start"
-    open={open}
-    onOpenChange={setOpen}
-  >
-    <Sidebar.Root aria-label="Mailboxes">…</Sidebar.Root>
-  </Layout.Column>
+  <Layout.Drawer handle={sidebarDrawer}>
+    <Layout.DrawerSwipeArea />
+    <Layout.Column floating aria-label="Sidebar" defaultSize={300}>
+      <Sidebar.Root aria-label="Mailboxes">…</Sidebar.Root>
+    </Layout.Column>
+  </Layout.Drawer>
   <Layout.Column clearFloating>
     <Page.Root>
       <Header.Root>
@@ -302,7 +302,8 @@ const Selecting: FunctionComponent = () => {
 const Drawer: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [selected, setSelected] = useState('inbox');
-  const [open, setOpen] = useState(false);
+  // Its trigger, in the content's bar (outside the drawer).
+  const sidebarDrawer = codeLabel(useCreateDrawerHandle(), 'sidebarDrawer');
 
   return (
     <Component
@@ -314,67 +315,73 @@ const Drawer: FunctionComponent = () => {
     >
       <div className="sidebar-demo-phone">
         <Layout.Root compact>
-          <Layout.Column
-            floating
-            aria-label="Sidebar"
-            drawer="inline-start"
-            open={open}
-            onOpenChange={(next: boolean) => {
-              addLog(`open: ${String(next)}`);
-              setOpen(next);
+          <Layout.Drawer
+            handle={sidebarDrawer}
+            onOpenChange={(next: boolean, { reason }) => {
+              addLog(`open: ${String(next)} (${reason})`);
             }}
           >
-            <Sidebar.Root aria-label="Mailboxes">
-              <List.Root listStyle="sidebar">
-                {sidebarSections.map(([title, rows]) => (
-                  <List.Section key={title}>
-                    <List.Header prominence="nested">
-                      <List.Title>{title}</List.Title>
-                    </List.Header>
-                    <List.Group>
-                      {rows.map(([value, rowTitle, icon, count]) => (
-                        <List.Item
-                          key={value}
-                          selected={selected === value}
-                        >
-                          <List.Image variant="symbol">
-                            <Symbol icon={icon} />
-                          </List.Image>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => {
-                              addLog(`select: ${value}`);
-                              setSelected(value);
-                              setOpen(false);
-                            }}
+            <Layout.DrawerSwipeArea />
+            <Layout.Column
+              floating
+              aria-label="Sidebar"
+            >
+              <Sidebar.Root aria-label="Mailboxes">
+                <List.Root listStyle="sidebar">
+                  {sidebarSections.map(([title, rows]) => (
+                    <List.Section key={title}>
+                      <List.Header prominence="nested">
+                        <List.Title>{title}</List.Title>
+                      </List.Header>
+                      <List.Group>
+                        {rows.map(([value, rowTitle, icon, count]) => (
+                          <List.Item
+                            key={value}
+                            selected={selected === value}
                           >
-                            {rowTitle}
-                          </List.Title>
-                          {count === undefined ? null : (
-                            <List.Detail>{count}</List.Detail>
-                          )}
-                        </List.Item>
-                      ))}
-                    </List.Group>
-                  </List.Section>
-                ))}
-              </List.Root>
-            </Sidebar.Root>
-          </Layout.Column>
+                            <List.Image variant="symbol">
+                              <Symbol icon={icon} />
+                            </List.Image>
+                            {/* (Chosen: its drawer closes.) */}
+                            <List.Title
+                              render={<Layout.DrawerClose />}
+                              onClick={() => {
+                                addLog(`select: ${value}`);
+                                setSelected(value);
+                              }}
+                            >
+                              {rowTitle}
+                            </List.Title>
+                            {count === undefined ? null : (
+                              <List.Detail>{count}</List.Detail>
+                            )}
+                          </List.Item>
+                        ))}
+                      </List.Group>
+                    </List.Section>
+                  ))}
+                </List.Root>
+              </Sidebar.Root>
+            </Layout.Column>
+          </Layout.Drawer>
           <Layout.Column>
             <Page.Root>
               <Header.Root>
                 <Header.Bar>
                   <Toolbar.Leading>
-                    <Toolbar.Button
-                      aria-label="Show Sidebar"
-                      shape="circle"
-                      onClick={() => setOpen(true)}
+                    <Layout.DrawerTrigger
+                      handle={sidebarDrawer}
+                      render={
+                        <Toolbar.Button
+                          aria-label="Show Sidebar"
+                          shape="circle"
+                        />
+                      }
                     >
                       <Button.Icon>
                         <Symbol icon={sfListBullet} />
                       </Button.Icon>
-                    </Toolbar.Button>
+                    </Layout.DrawerTrigger>
                   </Toolbar.Leading>
                   <Toolbar.Title>
                     <span>{rowTitles[selected]}</span>
@@ -616,7 +623,8 @@ const AdaptiveView: FunctionComponent = () => {
   const compact =
     content.layout === undefined ? width < 768 : content.layout === 'phone';
   const [selected, setSelected] = useState('inbox');
-  const [open, setOpen] = useState(false);
+  // Its trigger, in the content's bar (outside the drawer).
+  const adaptiveDrawer = codeLabel(useCreateDrawerHandle(), 'adaptiveDrawer');
 
   return (
     <Component
@@ -630,69 +638,75 @@ const AdaptiveView: FunctionComponent = () => {
     >
       <div className={compact ? 'sidebar-demo-phone' : 'sidebar-demo-tablet'}>
         <Layout.Root compact={compact}>
-          <Layout.Column
-            floating
-            aria-label="Sidebar"
-            defaultSize={300}
-            drawer="inline-start"
-            open={open}
-            onOpenChange={(next: boolean) => {
-              addLog(`open: ${String(next)}`);
-              setOpen(next);
+          <Layout.Drawer
+            handle={adaptiveDrawer}
+            onOpenChange={(next: boolean, { reason }) => {
+              addLog(`open: ${String(next)} (${reason})`);
             }}
           >
-            <Sidebar.Root aria-label="Mailboxes">
-              <List.Root listStyle="sidebar">
-                {sidebarSections.map(([title, rows]) => (
-                  <List.Section key={title}>
-                    <List.Header prominence="nested">
-                      <List.Title>{title}</List.Title>
-                    </List.Header>
-                    <List.Group>
-                      {rows.map(([value, rowTitle, icon, count]) => (
-                        <List.Item
-                          key={value}
-                          selected={selected === value}
-                        >
-                          <List.Image variant="symbol">
-                            <Symbol icon={icon} />
-                          </List.Image>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => {
-                              addLog(`select: ${value}`);
-                              setSelected(value);
-                              setOpen(false);
-                            }}
+            <Layout.DrawerSwipeArea />
+            <Layout.Column
+              floating
+              aria-label="Sidebar"
+              defaultSize={300}
+            >
+              <Sidebar.Root aria-label="Mailboxes">
+                <List.Root listStyle="sidebar">
+                  {sidebarSections.map(([title, rows]) => (
+                    <List.Section key={title}>
+                      <List.Header prominence="nested">
+                        <List.Title>{title}</List.Title>
+                      </List.Header>
+                      <List.Group>
+                        {rows.map(([value, rowTitle, icon, count]) => (
+                          <List.Item
+                            key={value}
+                            selected={selected === value}
                           >
-                            {rowTitle}
-                          </List.Title>
-                          {count === undefined ? null : (
-                            <List.Detail>{count}</List.Detail>
-                          )}
-                        </List.Item>
-                      ))}
-                    </List.Group>
-                  </List.Section>
-                ))}
-              </List.Root>
-            </Sidebar.Root>
-          </Layout.Column>
+                            <List.Image variant="symbol">
+                              <Symbol icon={icon} />
+                            </List.Image>
+                            {/* (Chosen: its drawer closes.) */}
+                            <List.Title
+                              render={<Layout.DrawerClose />}
+                              onClick={() => {
+                                addLog(`select: ${value}`);
+                                setSelected(value);
+                              }}
+                            >
+                              {rowTitle}
+                            </List.Title>
+                            {count === undefined ? null : (
+                              <List.Detail>{count}</List.Detail>
+                            )}
+                          </List.Item>
+                        ))}
+                      </List.Group>
+                    </List.Section>
+                  ))}
+                </List.Root>
+              </Sidebar.Root>
+            </Layout.Column>
+          </Layout.Drawer>
           <Layout.Column clearFloating>
             <Page.Root>
               <Header.Root>
                 <Header.Bar>
                   {compact ? (
                     <Toolbar.Leading>
-                      <Toolbar.Button
-                        aria-label="Show Sidebar"
-                        shape="circle"
-                        onClick={() => setOpen(true)}
+                      <Layout.DrawerTrigger
+                        handle={adaptiveDrawer}
+                        render={
+                          <Toolbar.Button
+                            aria-label="Show Sidebar"
+                            shape="circle"
+                          />
+                        }
                       >
                         <Button.Icon>
                           <Symbol icon={sfListBullet} />
                         </Button.Icon>
-                      </Toolbar.Button>
+                      </Layout.DrawerTrigger>
                     </Toolbar.Leading>
                   ) : null}
                   <Toolbar.Title>
@@ -786,13 +800,31 @@ export const SidebarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Compact (<code>Layout.Root compact</code>): the column a drawer from its
-        side, swiped in from that edge or opened by the page’s button; swiped
-        back, or the dimmed content pressed, to close.
+        Compact (<code>Layout.Root compact</code>): the column in a{' '}
+        <PartLink
+          component="layout"
+          part="Layout.Drawer"
+        />
+        , from its side; swiped in from that edge (
+        <PartLink
+          component="layout"
+          part="Layout.DrawerSwipeArea"
+        />
+        ) or opened by the page’s button (
+        <PartLink
+          component="layout"
+          part="Layout.DrawerTrigger"
+        />
+        , linked by a handle); swiped back, or the dimmed content pressed, to
+        close.
       </li>
       <li>
-        Closing as a row is chosen (<code>open</code>, controlled), its page
-        shown.
+        Closing as a row is chosen (its title a{' '}
+        <PartLink
+          component="layout"
+          part="Layout.DrawerClose"
+        />
+        ), its page shown.
       </li>
     </ul>
     <CodeView code={drawerCode} />
@@ -806,8 +838,13 @@ export const SidebarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its search field (<code>TextField.Search</code>, styled by the panel)
-        filtering its rows; sections without matches left out.
+        Its search field (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />
+        , styled by the panel) filtering its rows; sections without matches left
+        out.
       </li>
     </ul>
     <CodeView code={searchCode} />
@@ -822,8 +859,17 @@ export const SidebarComposition: FunctionComponent = () => (
     <ul>
       <li>
         Edit and Done in its toolbar; while editing, selection circles before
-        the rows’ symbols (<code>List.Checkbox</code> in a{' '}
-        <code>CheckboxGroup</code>), a row pressed anywhere toggling its circle.
+        the rows’ symbols (
+        <PartLink
+          component="list"
+          part="List.Checkbox"
+        />{' '}
+        in a{' '}
+        <PartLink
+          component="checkbox"
+          part="CheckboxGroup"
+        />
+        ), a row pressed anywhere toggling its circle.
       </li>
       <li>Delete for the checked rows, disabled while none are checked.</li>
     </ul>
@@ -838,15 +884,28 @@ export const SidebarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        By the window’s width (<code>useVisualViewport</code>, in a{' '}
-        <code>Viewport.Provider</code>; here below 768px): compact, a drawer
-        with the page’s button to open it; regular, floating beside the content.
+        By the window’s width (
+        <PartLink
+          component="viewport"
+          part="useVisualViewport"
+        />
+        , in a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />
+        ; here below 768px): compact, a drawer with the page’s button to open
+        it; regular, floating beside the content.
       </li>
       <li>
-        The same column either way (<code>floating</code> and{' '}
-        <code>drawer</code>, the layout’s <code>compact</code> deciding): resize
-        the window (or open this page on a phone) to switch, or choose a layout
-        (its content’s <code>layout</code>).
+        The same column either way (<code>floating</code>, in a{' '}
+        <PartLink
+          component="layout"
+          part="Layout.Drawer"
+        />
+        , the layout’s <code>compact</code> deciding): resize the window (or
+        open this page on a phone) to switch, or choose a layout (its content’s{' '}
+        <code>layout</code>).
       </li>
       <li>
         Compact, the sections as a stack’s root page instead: see{' '}

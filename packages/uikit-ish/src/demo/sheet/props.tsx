@@ -25,20 +25,59 @@ export const propOptionsOverviewContent = {
   layout: ['phone', 'tablet'] as const,
 };
 
+/** The overview's root: its modality, its dismissal. */
+export const propOptionsOverviewRoot = {
+  modal: [undefined, false, 'trap-focus'] as const,
+  disablePointerDismissal: [undefined, false, true] as const,
+};
+
 /** The overview's few: its detent, its dismissal. */
 export const propOptionsOverviewPopup = {
   detent: [undefined, 'large', 'medium'] as const,
 };
 
-export const propOptionsGuideRoot = {
+/** The root's options in the guide's view (its changes logged). */
+export const getPropOptionsGuideRoot = (addLog: AddLog) => ({
+  defaultOpen: [undefined, false, true] as const,
+  open: [undefined, false, true] as const,
   modal: [undefined, false, 'trap-focus'] as const,
   disablePointerDismissal: [undefined, false, true] as const,
-};
+  swipeDirection: [undefined, 'down', 'up', 'left', 'right'] as const,
+  snapPoints: [undefined, [0.5, 1] as number[]] as const,
+  defaultSnapPoint: [undefined, 0.5, 1] as const,
+  snapPoint: [undefined, 0.5, 1] as const,
+  snapToSequentialPoints: [undefined, false, true] as const,
+  onOpenChange: [
+    new MappedProp(
+      (open: boolean, { reason }: { reason: string }) =>
+        addLog(`open: ${String(open)} (${reason})`),
+      '[log change]',
+    ),
+    undefined,
+  ] as const,
+  onOpenChangeComplete: [
+    undefined,
+    new MappedProp(
+      (open: boolean) => addLog(`open complete: ${String(open)}`),
+      '[log change]',
+    ),
+  ] as const,
+  onSnapPointChange: [
+    undefined,
+    new MappedProp(
+      (snapPoint: number | string | null) =>
+        addLog(`snap point: ${String(snapPoint)}`),
+      '[log change]',
+    ),
+  ] as const,
+});
 
 export const propOptionsGuidePopup = {
   ...commonPropOptions,
   detent: [undefined, 'large', 'medium'] as const,
   compact: [true, false, undefined] as const,
+  initialFocus: [undefined, false, true] as const,
+  finalFocus: [undefined, false, true] as const,
 };
 
 export const propOptionsPart = {

@@ -5,12 +5,13 @@ import { sfLockFill } from '@bradleyhodges/sfsymbols/sfLockFill';
 import { sfPinFill } from '@bradleyhodges/sfsymbols/sfPinFill';
 import { sfSquare } from '@bradleyhodges/sfsymbols/sfSquare';
 import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { FunctionComponent, useMemo, useRef, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import { Button, Menu, Symbol } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
+import { useLabelledRef } from '../frame/render-code.js';
 import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsCheckboxItems,
@@ -751,7 +752,7 @@ export const MenuPopUpDemo: FunctionComponent = () => {
 export const MenuOpenDemo: FunctionComponent = () => {
   const id = 'menu-open';
   const [log, addLog] = useLog();
-  const anchorRef = useRef<HTMLSpanElement>(null);
+  const anchorRef = useLabelledRef<HTMLSpanElement>('anchorRef');
 
   const [externalRoot, externalPopup] = useProvidedState(id);
 

@@ -6,7 +6,12 @@ import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import {
   textFieldControlRows,
   textFieldErrorRows,
@@ -124,8 +129,12 @@ export const TextFieldOverview: FunctionComponent = () => (
         <a href="text-field/composition#in-a-form-list">Composition</a>).
       </li>
       <li>
-        Searching: a search field (<code>TextField.Search</code>), filtering
-        what’s shown.
+        Searching: a search field (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />
+        ), filtering what’s shown.
       </li>
       <li>Entry with suggestions: what people have typed before, contacts.</li>
     </ul>
@@ -201,8 +210,12 @@ export const TextFieldOverview: FunctionComponent = () => (
     <ul>
       <li>
         The control is a native <code>input</code> (or <code>textarea</code>),
-        named by its <code>TextField.Label</code>; without one (a placeholder
-        alone), give it an <code>aria-label</code>.
+        named by its{' '}
+        <PartLink
+          component="text-field"
+          part="TextField.Label"
+        />
+        ; without one (a placeholder alone), give it an <code>aria-label</code>.
       </li>
       <li>
         Its description and its error describe it (<code>aria-describedby</code>

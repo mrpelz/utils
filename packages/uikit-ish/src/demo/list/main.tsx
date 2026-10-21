@@ -2149,10 +2149,7 @@ export const ListIndexDemo: FunctionComponent = () => {
         {/* At the list's edge, centered on its visible height (not
             scrolling with it), above the sticky headers. */}
         <div className="list-demo-index">
-          <List.Index
-            aria-label="Index"
-            {...propsIndex}
-          >
+          <List.Index {...propsIndex}>
             {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'].map((letter, index) => (
               <List.IndexItem
                 key={letter}

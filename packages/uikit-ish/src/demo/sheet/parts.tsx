@@ -1,9 +1,16 @@
-import { FunctionComponent, useRef } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
-import { Button, List, Sheet, Toolbar } from '../../components/index.js';
+import {
+  Button,
+  List,
+  Sheet,
+  Toolbar,
+  useCreateSheetHandle,
+} from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
+import { codeLabel, useLabelledRef } from '../frame/render-code.js';
 import { useProvidedState } from '../frame/state.js';
 import { PropsTable } from '../guide/props-table.js';
 import { Heading, PartLink } from '../guide/sections.js';
@@ -12,6 +19,8 @@ import {
   sheetCloseRows,
   sheetContentRows,
   sheetDescriptionRows,
+  sheetHandleRows,
+  sheetHandleTypeRows,
   sheetHeaderRows,
   sheetPopupRows,
   sheetRootRows,
@@ -19,8 +28,8 @@ import {
   sheetTriggerRows,
 } from './docs.js';
 import {
+  getPropOptionsGuideRoot,
   propOptionsGuidePopup,
-  propOptionsGuideRoot,
   propOptionsPart,
 } from './props.js';
 
@@ -31,10 +40,10 @@ import {
 const RootPart: FunctionComponent = () => {
   const id = 'sheet-parts-root';
   const [log, addLog] = useLog();
-  const screen = useRef<HTMLDivElement>(null);
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
-    propOptionsGuideRoot,
+    useMemo(() => getPropOptionsGuideRoot(addLog), [addLog]),
     'Sheet.Root',
     external,
     true,
@@ -57,7 +66,6 @@ const RootPart: FunctionComponent = () => {
       >
         <Sheet.Root
           key={elementKey}
-          onOpenChange={(open: boolean) => addLog(`open: ${String(open)}`)}
           {...props}
         >
           <Sheet.Trigger
@@ -120,7 +128,7 @@ const RootPart: FunctionComponent = () => {
 const TriggerPart: FunctionComponent = () => {
   const id = 'sheet-parts-trigger';
   const [log, addLog] = useLog();
-  const screen = useRef<HTMLDivElement>(null);
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     propOptionsPart,
@@ -208,7 +216,7 @@ const TriggerPart: FunctionComponent = () => {
 const PopupPart: FunctionComponent = () => {
   const id = 'sheet-parts-popup';
   const [log, addLog] = useLog();
-  const screen = useRef<HTMLDivElement>(null);
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsGuidePopup,
@@ -296,7 +304,7 @@ const PopupPart: FunctionComponent = () => {
 const HeaderPart: FunctionComponent = () => {
   const id = 'sheet-parts-header';
   const [log, addLog] = useLog();
-  const screen = useRef<HTMLDivElement>(null);
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     propOptionsPart,
@@ -383,7 +391,7 @@ const HeaderPart: FunctionComponent = () => {
 const ContentPart: FunctionComponent = () => {
   const id = 'sheet-parts-content';
   const [log, addLog] = useLog();
-  const screen = useRef<HTMLDivElement>(null);
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     propOptionsPart,
@@ -470,7 +478,7 @@ const ContentPart: FunctionComponent = () => {
 const TitlePart: FunctionComponent = () => {
   const id = 'sheet-parts-title';
   const [log, addLog] = useLog();
-  const screen = useRef<HTMLDivElement>(null);
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     propOptionsPart,
@@ -562,7 +570,7 @@ const TitlePart: FunctionComponent = () => {
 const DescriptionPart: FunctionComponent = () => {
   const id = 'sheet-parts-description';
   const [log, addLog] = useLog();
-  const screen = useRef<HTMLDivElement>(null);
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     propOptionsPart,
@@ -649,7 +657,7 @@ const DescriptionPart: FunctionComponent = () => {
 const ClosePart: FunctionComponent = () => {
   const id = 'sheet-parts-close';
   const [log, addLog] = useLog();
-  const screen = useRef<HTMLDivElement>(null);
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     propOptionsPart,
@@ -735,6 +743,181 @@ const ClosePart: FunctionComponent = () => {
   );
 };
 
+// Its trigger and its button, outside the root: made once, here.
+const contactSheet = codeLabel(Sheet.createHandle(), 'contactSheet');
+
+/** `Sheet.createHandle`: a trigger outside the root, and an imperative open. */
+const CreateHandlePart: FunctionComponent = () => {
+  const id = 'sheet-parts-create-handle';
+  const [log, addLog] = useLog();
+  const screen = useLabelledRef<HTMLDivElement>('screen');
+
+  return (
+    <Component
+      center
+      inline
+      id={id}
+      log={log}
+      title="Sheet.createHandle"
+    >
+      <div
+        ref={screen}
+        className="sheet-demo-phone"
+      >
+        <Sheet.Trigger
+          handle={contactSheet}
+          render={
+            <Button.Root
+              size="large"
+              variant="bordered"
+            />
+          }
+        >
+          <Button.Label>Add Contact</Button.Label>
+        </Sheet.Trigger>
+        <Button.Root
+          variant="borderless"
+          onClick={() => contactSheet.open(null)}
+        >
+          <Button.Label>Open Imperatively</Button.Label>
+        </Button.Root>
+        <Sheet.Root
+          handle={contactSheet}
+          onOpenChange={(open: boolean, { reason }) =>
+            addLog(`open: ${String(open)} (${reason})`)
+          }
+        >
+          <Sheet.Popup
+            compact
+            container={screen}
+          >
+            <Sheet.Header>
+              <Toolbar.Root placement="block-start">
+                <Toolbar.Leading />
+                <Toolbar.Title>
+                  <Sheet.Title render={<span />}>Add Contact</Sheet.Title>
+                </Toolbar.Title>
+                <Toolbar.Trailing>
+                  <Sheet.Close render={<Toolbar.Button prominent />}>
+                    <Button.Label>Done</Button.Label>
+                  </Sheet.Close>
+                </Toolbar.Trailing>
+              </Toolbar.Root>
+            </Sheet.Header>
+            <Sheet.Content>
+              <List.Root>
+                <List.Section>
+                  <List.Group>
+                    {names.slice(0, 3).map((name) => (
+                      <List.Item key={name}>
+                        <List.Title>{name}</List.Title>
+                      </List.Item>
+                    ))}
+                  </List.Group>
+                </List.Section>
+              </List.Root>
+            </Sheet.Content>
+          </Sheet.Popup>
+        </Sheet.Root>
+      </div>
+    </Component>
+  );
+};
+
+/** `useCreateSheetHandle`: two triggers, one sheet, its title theirs. */
+const UseCreateSheetHandlePart: FunctionComponent = () => {
+  const id = 'sheet-parts-use-create-sheet-handle';
+  const [log, addLog] = useLog();
+  const screen = useLabelledRef<HTMLDivElement>('screen');
+  // Its triggers, outside the root, each with its payload: the title.
+  const addSheet = codeLabel(
+    useCreateSheetHandle<{ title: string }>(),
+    'addSheet',
+  );
+
+  return (
+    <Component
+      center
+      inline
+      id={id}
+      log={log}
+      title="useCreateSheetHandle"
+    >
+      <div
+        ref={screen}
+        className="sheet-demo-phone"
+      >
+        <Sheet.Trigger
+          handle={addSheet}
+          payload={{ title: 'Add Contact' }}
+          render={
+            <Button.Root
+              size="large"
+              variant="bordered"
+            />
+          }
+        >
+          <Button.Label>Add Contact</Button.Label>
+        </Sheet.Trigger>
+        <Sheet.Trigger
+          handle={addSheet}
+          payload={{ title: 'Add Group' }}
+          render={
+            <Button.Root
+              size="large"
+              variant="bordered"
+            />
+          }
+        >
+          <Button.Label>Add Group</Button.Label>
+        </Sheet.Trigger>
+        <Sheet.Root
+          handle={addSheet}
+          onOpenChange={(open: boolean, { reason }) =>
+            addLog(`open: ${String(open)} (${reason})`)
+          }
+        >
+          {({ payload }) => (
+            <Sheet.Popup
+              compact
+              container={screen}
+            >
+              <Sheet.Header>
+                <Toolbar.Root placement="block-start">
+                  <Toolbar.Leading />
+                  <Toolbar.Title>
+                    <Sheet.Title render={<span />}>
+                      {payload?.title}
+                    </Sheet.Title>
+                  </Toolbar.Title>
+                  <Toolbar.Trailing>
+                    <Sheet.Close render={<Toolbar.Button prominent />}>
+                      <Button.Label>Done</Button.Label>
+                    </Sheet.Close>
+                  </Toolbar.Trailing>
+                </Toolbar.Root>
+              </Sheet.Header>
+              <Sheet.Content>
+                <List.Root>
+                  <List.Section>
+                    <List.Group>
+                      {names.slice(0, 3).map((name) => (
+                        <List.Item key={name}>
+                          <List.Title>{name}</List.Title>
+                        </List.Item>
+                      ))}
+                    </List.Group>
+                  </List.Section>
+                </List.Root>
+              </Sheet.Content>
+            </Sheet.Popup>
+          )}
+        </Sheet.Root>
+      </div>
+    </Component>
+  );
+};
+
 /** `/sheet/parts`: its root, trigger, popup, header, content, and Base UI's. */
 export const SheetParts: FunctionComponent = () => (
   <>
@@ -744,32 +927,84 @@ export const SheetParts: FunctionComponent = () => (
         toolbar) above its content.
       </li>
       <li>
-        Base UI’s <code>Dialog</code>, its parts re-exported: its title,
-        description and close buttons; its portal and backdrop rendered by{' '}
-        <code>Sheet.Popup</code>.
+        Base UI’s <code>Drawer</code>, its parts re-exported: its title,
+        description and close buttons; its portal, backdrop and viewport
+        rendered by{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Popup"
+        />
+        .
       </li>
       <li>Press each view’s button to open its sheet.</li>
     </ul>
     <ul>
       <li>
-        <PartLink part="Sheet.Root" />
+        <PartLink
+          component="sheet"
+          part="Sheet.Root"
+        />
         <ul>
           <li>
-            <PartLink part="Sheet.Trigger" />
+            <PartLink
+              component="sheet"
+              part="Sheet.Trigger"
+            />
           </li>
           <li>
-            <PartLink part="Sheet.Popup" />
+            <PartLink
+              component="sheet"
+              part="Sheet.Popup"
+            />
             <ul>
               <li>
-                <PartLink part="Sheet.Header" /> (a toolbar:{' '}
-                <PartLink part="Sheet.Close" />, <PartLink part="Sheet.Title" />
+                <PartLink
+                  component="sheet"
+                  part="Sheet.Header"
+                />{' '}
+                (a toolbar:{' '}
+                <PartLink
+                  component="sheet"
+                  part="Sheet.Close"
+                />
+                ,{' '}
+                <PartLink
+                  component="sheet"
+                  part="Sheet.Title"
+                />
                 )
               </li>
               <li>
-                <PartLink part="Sheet.Content" /> (
-                <PartLink part="Sheet.Description" />, optional)
+                <PartLink
+                  component="sheet"
+                  part="Sheet.Content"
+                />{' '}
+                (
+                <PartLink
+                  component="sheet"
+                  part="Sheet.Description"
+                />
+                , optional)
               </li>
             </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        <PartLink
+          component="sheet"
+          part="Sheet.createHandle"
+        />{' '}
+        (a sheet’s handle, for its triggers outside it)
+        <ul>
+          <li>
+            <PartLink
+              component="sheet"
+              part="useCreateSheetHandle"
+            />{' '}
+            (the same, in a component)
           </li>
         </ul>
       </li>
@@ -828,7 +1063,8 @@ export const SheetParts: FunctionComponent = () => (
         it fills the screen, not the window).
       </li>
       <li>
-        Renders a <code>div</code> (a <code>dialog</code>), and its backdrop’s{' '}
+        Renders a <code>div</code> (a <code>dialog</code>) in its viewport’s{' '}
+        <code>div</code> (where it’s swiped), and its backdrop’s{' '}
         <code>div</code> before it.
       </li>
     </ul>
@@ -844,11 +1080,15 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its grabber (36px by 5px), above a toolbar of the app’s; dragged down
-        (but by its buttons), it closes the sheet.
+        Its grabber (36px by 5px), above a toolbar of the app’s. (The sheet is
+        swiped down by any of it, its content scrolled to its top.)
       </li>
       <li>
-        Renders a <code>div</code> (and a hidden close button, for its drag).
+        Without children, only the grabber, over the content (its own bars below
+        it).
+      </li>
+      <li>
+        Renders a <code>div</code>.
       </li>
     </ul>
     <HeaderPart />
@@ -927,6 +1167,105 @@ export const SheetParts: FunctionComponent = () => (
     <ClosePart />
     <h3>Props</h3>
     <PropsTable rows={sheetCloseRows} />
+
+    <Heading
+      id="sheet-createhandle"
+      level={2}
+    >
+      <code>Sheet.createHandle</code>
+    </Heading>
+    <ul>
+      <li>
+        A handle linking a sheet to its triggers outside its root, and opening
+        or closing it imperatively (Base UI’s <code>Drawer.createHandle</code>
+        ).
+      </li>
+      <li>
+        Made once, e.g. at a module’s top level (in a component:{' '}
+        <PartLink
+          component="sheet"
+          part="useCreateSheetHandle"
+        />
+        ).
+      </li>
+      <li>
+        Here: made at the module’s top level; a trigger before the root, and a
+        button opening it imperatively (its <code>open()</code>).
+      </li>
+    </ul>
+    <CreateHandlePart />
+    <h3>Type parameters</h3>
+    <PropsTable rows={sheetHandleTypeRows} />
+    <h3>Returns</h3>
+    <PropsTable rows={sheetHandleRows} />
+
+    <Heading
+      id="usecreatesheethandle"
+      level={2}
+    >
+      <code>useCreateSheetHandle</code>
+    </Heading>
+    <ul>
+      <li>
+        <PartLink
+          component="sheet"
+          part="Sheet.createHandle"
+        />{' '}
+        in a component: the same handle for the component’s lifetime.
+      </li>
+      <li>
+        Here: two triggers, one sheet; each passes its title (its{' '}
+        <code>payload</code>), the root’s children a function of it.
+      </li>
+    </ul>
+    <UseCreateSheetHandlePart />
+    <h3>Type parameters</h3>
+    <PropsTable rows={sheetHandleTypeRows} />
+    <h3>Returns</h3>
+    <PropsTable rows={sheetHandleRows} />
+
+    <Heading
+      id="base-ui-s-other-parts"
+      level={2}
+    >
+      Base UI’s other parts
+    </Heading>
+    <ul>
+      <li>
+        Re-exported as they are (unstyled; see{' '}
+        <a
+          href="https://base-ui.com/react/components/drawer"
+          rel="noreferrer"
+          target="_blank"
+        >
+          Base UI’s Drawer
+        </a>
+        ):
+      </li>
+      <li>
+        <code>Sheet.Portal</code>, <code>Sheet.Backdrop</code>,{' '}
+        <code>Sheet.Viewport</code>: rendered by{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Popup"
+        />{' '}
+        (its container, the dimmed page, where it’s swiped).
+      </li>
+      <li>
+        <code>Sheet.SwipeArea</code>: an area a sheet is swiped open from (iOS’
+        sheets aren’t: presented by the app).
+      </li>
+      <li>
+        <code>Sheet.Provider</code>, <code>Sheet.Indent</code>,{' '}
+        <code>Sheet.IndentBackground</code>: the page behind scaled back while a
+        sheet is open (iOS’ stacked look; not used here, see the overview’s
+        deviations).
+      </li>
+      <li>
+        <code>Sheet.VirtualKeyboardProvider</code>: a sheet with fields kept
+        above the software keyboard.
+      </li>
+    </ul>
   </>
 );
 
@@ -940,4 +1279,6 @@ export const sheetPartsDemos = [
   TitlePart,
   DescriptionPart,
   ClosePart,
+  CreateHandlePart,
+  UseCreateSheetHandlePart,
 ];

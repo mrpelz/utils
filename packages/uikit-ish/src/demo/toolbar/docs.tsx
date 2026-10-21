@@ -8,6 +8,7 @@ import {
   secondaryClickRow,
   union,
 } from '../guide/props-table.js';
+import { PartLink } from '../guide/sections.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -224,7 +225,11 @@ export const toolbarTitleRows: readonly PropRow[] = [
     undefined,
     <>
       The title (e.g. a <code>{'<span>'}</code>, truncated), and an optional{' '}
-      <code>Toolbar.Subtitle</code>.
+      <PartLink
+        component="toolbar"
+        part="Toolbar.Subtitle"
+      />
+      .
     </>,
   ],
   ...renderRows('div', 'HTMLElement'),

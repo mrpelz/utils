@@ -5,7 +5,12 @@ import { Component } from '../frame/component.js';
 import { usePropControl } from '../frame/prop-control.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { names } from '../viewport/content.js';
 import { pageRootRows } from './docs.js';
 import { propOptionsGuideRoot, propOptionsOverviewContent } from './props.js';
@@ -181,8 +186,12 @@ export const PageOverview: FunctionComponent = () => (
         its background running beneath it.
       </li>
       <li>
-        Its scrolling, tracked: a <code>Viewport.Provider</code>’s{' '}
-        <code>scroller</code> (its ref; see <a href="viewport">Viewport</a>).
+        Its scrolling, tracked: a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />
+        ’s <code>scroller</code> (its ref; see <a href="viewport">Viewport</a>).
       </li>
     </ul>
   </>

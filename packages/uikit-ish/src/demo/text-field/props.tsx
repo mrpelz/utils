@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
+import { List } from '../../components/index.js';
 import { AddLog } from '../frame/log.js';
 import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
@@ -138,6 +139,7 @@ export const propOptionsError = {
 export const getPropOptionsClear = (addLog: AddLog) => ({
   ...commonPropOptions,
   mode: [undefined, 'always', 'unlessEditing', 'whileEditing'] as const,
+  'aria-label': [undefined, 'Clear Name'] as const,
   onClick: [
     undefined,
     new MappedProp(() => addLog('clear clicked'), '[log click]'),
@@ -166,6 +168,23 @@ export const propOptionsPart = {
   ...commonPropOptions,
 };
 
-/** The root's options as a list row (its `render` the row's). */
-const { render: _render, ...propOptionsRootRow } = propOptionsRoot;
-export const propOptionsGuideRoot = propOptionsRootRow;
+/** The root's options as a list row (its `render` the row's, or none). */
+export const propOptionsGuideRoot = {
+  ...propOptionsRoot,
+  render: [
+    new MappedProp(<List.Item />, '[<List.Item />]'),
+    undefined,
+  ] as const,
+  dirty: [undefined, false, true] as const,
+  touched: [undefined, false, true] as const,
+};
+
+export const propOptionsGuideLabel = {
+  ...propOptionsPart,
+  nativeLabel: [undefined, false, true] as const,
+};
+
+export const propOptionsGuideSearch = {
+  ...propOptionsPart,
+  disabled: [undefined, false, true] as const,
+};

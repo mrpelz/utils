@@ -69,6 +69,8 @@ export const propOptionsAnchor = {
 
 export const propOptionsBlockStart = {
   ...elementOptions,
+  // (An anchor's, effective at the block end only.)
+  keyboard: [undefined, 'push', 'cover'] as const,
   safeArea: safeAreas,
 };
 
@@ -91,4 +93,15 @@ export const propOptionsElementVisibility = {
 /** `useElementGeometry`'s options (as above). */
 export const propOptionsElementGeometry = {
   scroller: ['box', 'viewport'] as const,
+};
+
+/** The input guards' hooks' arguments (see parts.tsx). */
+export const propOptionsInputZoom = {
+  enabled: [true, false] as const,
+};
+
+export const propOptionsFocusShift = {
+  // Its target: the view's fields' frame, or the document.
+  target: ['frame', 'document'] as const,
+  enabled: [true, false] as const,
 };

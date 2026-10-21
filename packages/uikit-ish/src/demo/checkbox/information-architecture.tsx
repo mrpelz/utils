@@ -1,6 +1,11 @@
 import { FunctionComponent } from 'react';
 
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -115,9 +120,18 @@ export const CheckboxInformationArchitecture: FunctionComponent = () => (
       </li>
       <li>One of its parameters: selection (none, one, many).</li>
       <li>
-        Selection circles before a list’s rows (<code>List.Checkbox</code>,{' '}
-        <code>List.Radio</code>) render it: many with checkboxes (a parent
-        selecting all), one with radios.
+        Selection circles before a list’s rows (
+        <PartLink
+          component="list"
+          part="List.Checkbox"
+        />
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.Radio"
+        />
+        ) render it: many with checkboxes (a parent selecting all), one with
+        radios.
       </li>
     </ul>
     <ul>
@@ -134,8 +148,16 @@ export const CheckboxInformationArchitecture: FunctionComponent = () => (
       <li>
         <strong>Containment:</strong> Items in Groups, Groups in a Collection (
         <GuideLink to="section-6-containment">§6</GuideLink>); here, a{' '}
-        <code>RadioGroup</code> or <code>CheckboxGroup</code> renders the list’s
-        group, its rows the Items.
+        <PartLink
+          component="checkbox"
+          part="RadioGroup"
+        />{' '}
+        or{' '}
+        <PartLink
+          component="checkbox"
+          part="CheckboxGroup"
+        />{' '}
+        renders the list’s group, its rows the Items.
       </li>
     </ul>
 

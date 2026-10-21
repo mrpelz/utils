@@ -23,6 +23,7 @@ export const propOptionsRoot = {
 export const propOptionsHeader = {
   ...commonPropOptions,
   prominence: [undefined, 'nested', 'prominent', 'extraProminent'] as const,
+  cursor: cursorOptions,
 };
 
 export const propOptionsImage = {
@@ -39,8 +40,13 @@ export const propOptionsCheckbox = {
   ...commonPropOptions,
   defaultChecked: [undefined, false, true] as const,
   checked: [undefined, false, true] as const,
+  indeterminate: [undefined, false, true] as const,
   disabled: [undefined, false, true] as const,
   readOnly: [undefined, false, true] as const,
+  required: [undefined, false, true] as const,
+  value: [undefined, 'selected'] as const,
+  uncheckedValue: [undefined, 'unselected'] as const,
+  parent: [undefined, true] as const,
   cursor: cursorOptions,
 };
 
@@ -110,6 +116,7 @@ export const propOptionsText = {
 
 export const getPropOptionsSwipeActionsTrailing = (addLog: AddLog) => ({
   ...commonPropOptions,
+  side: [undefined, 'inline-end', 'inline-start'] as const,
   overswipe: [true, false, undefined] as const,
   onOverswipe: [
     undefined,
@@ -198,6 +205,7 @@ export const propOptionsRootPlain = {
 
 export const propOptionsIndex = {
   ...commonPropOptions,
+  'aria-label': ['Index', 'Contacts by letter'] as const,
   size: [undefined, 'compact', 'regular'] as const,
 };
 
@@ -277,6 +285,13 @@ export const getPropOptionsSwipeActionOutermost = (addLog: AddLog) => ({
   label: ['Archive', 'Custom'] as const,
   shape: [undefined, 'circle', 'roundedRectangle'] as const,
   showLabel: [true, false, undefined] as const,
+  // Over the tint: dark, light, or custom.
+  textColor: [
+    undefined,
+    '#000',
+    '#fff',
+    'var(--color-ios-system-yellow)',
+  ] as const,
   tint: [
     'var(--color-ios-system-purple)',
     undefined,
@@ -293,6 +308,27 @@ export const propOptionsExpandable = {
   ...commonPropOptions,
   open: [undefined, false, true] as const,
 };
+
+/** `List.Expandable` in the guide's view: a row's props too, logged. */
+export const getPropOptionsGuideExpandable = (addLog: AddLog) => ({
+  ...propOptionsExpandable,
+  selected: [undefined, false, true] as const,
+  level: [undefined, 1, 2] as const,
+  cursor: cursorOptions,
+  onClick: [undefined, logClick(addLog, 'expandable')] as const,
+  onSecondaryClick: [
+    undefined,
+    logSecondaryClick(addLog, 'expandable'),
+  ] as const,
+});
+
+/** `List.Group` in the guide's view: reordering (`reorder`: its rows'). */
+export const getPropOptionsGuideGroup = (
+  reorder: (from: number, to: number) => void,
+) => ({
+  ...commonPropOptions,
+  onReorder: [new MappedProp(reorder, '[reorder]'), undefined] as const,
+});
 
 /** The overview's list: its style. */
 export const propOptionsOverviewRoot = {

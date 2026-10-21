@@ -17,7 +17,12 @@ import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { names } from '../viewport/content.js';
 import {
   toolbarButtonRows,
@@ -211,13 +216,21 @@ export const ToolbarOverview: FunctionComponent = () => (
     <ul>
       <li>
         Frequent commands for what a screen shows (compose, share, delete), at
-        the bottom: in <code>Viewport.BlockEnd</code> (see{' '}
-        <a href="viewport">Viewport</a>).
+        the bottom: in{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />{' '}
+        (see <a href="viewport">Viewport</a>).
       </li>
       <li>
         A navigation bar at the top: back, the title, a page’s actions (in a
-        page: <a href="header">Header</a>’s <code>Header.Bar</code>, a toolbar
-        at the top that sticks while the page scrolls).
+        page: <a href="header">Header</a>’s{' '}
+        <PartLink
+          component="header"
+          part="Header.Bar"
+        />
+        , a toolbar at the top that sticks while the page scrolls).
       </li>
       <li>
         Acting on a selection in edit mode (Select All, Move, Delete), or

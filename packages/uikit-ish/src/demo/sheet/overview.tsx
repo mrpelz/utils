@@ -1,18 +1,24 @@
-import { FunctionComponent, useRef } from 'react';
+import { FunctionComponent } from 'react';
 
 import { Button, List, Sheet, Toolbar } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
+import { useLabelledRef } from '../frame/render-code.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { names } from '../viewport/content.js';
 import { sheetPopupRows, sheetRootRows } from './docs.js';
 import {
-  propOptionsGuideRoot,
   propOptionsOverviewContent,
   propOptionsOverviewPopup,
+  propOptionsOverviewRoot,
 } from './props.js';
 
 /**
@@ -22,7 +28,7 @@ import {
 const LiveView: FunctionComponent = () => {
   const id = 'sheet-overview';
   const [log, addLog] = useLog();
-  const screen = useRef<HTMLDivElement>(null);
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const [externalContent, externalRoot, externalPopup] = useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsOverviewContent,
@@ -31,7 +37,7 @@ const LiveView: FunctionComponent = () => {
     true,
   );
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
-    propOptionsGuideRoot,
+    propOptionsOverviewRoot,
     'Sheet.Root',
     externalRoot,
     true,
@@ -139,12 +145,12 @@ export const SheetOverview: FunctionComponent = () => (
       <li>
         A focused task over the page (UIKit{' '}
         <code>UISheetPresentationController</code>; Base UI’s{' '}
-        <code>Dialog</code>): from the bottom on a phone, large or medium; a
+        <code>Drawer</code>): from the bottom on a phone, large or medium; a
         form sheet, centered, on a tablet.
       </li>
       <li>
         Modal, the page dimmed behind it; dismissed by its buttons, a press
-        outside it, Escape, or dragged down by its header.
+        outside it, Escape, or swiped down.
       </li>
     </ul>
     <LiveView />
@@ -227,8 +233,16 @@ export const SheetOverview: FunctionComponent = () => (
     <ul>
       <li>
         A <code>dialog</code> (modal: <code>aria-modal</code>), named by its{' '}
-        <code>Sheet.Title</code>, described by its{' '}
-        <code>Sheet.Description</code>.
+        <PartLink
+          component="sheet"
+          part="Sheet.Title"
+        />
+        , described by its{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Description"
+        />
+        .
       </li>
       <li>
         Opened, focus moves into it (by touch: to the sheet itself, not opening
@@ -236,12 +250,15 @@ export const SheetOverview: FunctionComponent = () => (
       </li>
       <li>
         Escape closes it; give it a button that does too (a{' '}
-        <code>Sheet.Close</code>): dragging its header is a pointer gesture
-        only.
+        <PartLink
+          component="sheet"
+          part="Sheet.Close"
+        />
+        ): swiping it is a pointer gesture only.
       </li>
       <li>The page behind it is inert and doesn’t scroll while it’s open.</li>
       <li>
-        Its slide and fade (350ms) don’t follow{' '}
+        Its slide and fade (500ms) don’t follow{' '}
         <code>prefers-reduced-motion</code>.
       </li>
     </ul>
@@ -274,7 +291,7 @@ export const SheetOverview: FunctionComponent = () => (
         elevated one.
       </li>
       <li>
-        Its detent is the app’s: dragging doesn’t switch medium and large
+        Its detent is the app’s: swiping doesn’t switch medium and large
         (UIKit’s does); the page behind doesn’t shrink back.
       </li>
     </ul>

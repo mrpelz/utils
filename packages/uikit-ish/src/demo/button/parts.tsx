@@ -128,13 +128,24 @@ export const ButtonParts: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        <PartLink part="Button.Root" />
+        <PartLink
+          component="button"
+          part="Button.Root"
+        />
         <ul>
           <li>
-            <PartLink part="Button.Icon" /> (optional)
+            <PartLink
+              component="button"
+              part="Button.Icon"
+            />{' '}
+            (optional)
           </li>
           <li>
-            <PartLink part="Button.Label" /> (optional)
+            <PartLink
+              component="button"
+              part="Button.Label"
+            />{' '}
+            (optional)
           </li>
         </ul>
       </li>

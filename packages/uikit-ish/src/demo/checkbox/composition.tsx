@@ -15,7 +15,12 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const rowsCode = `<List.Group>
@@ -313,8 +318,16 @@ export const CheckboxComposition: FunctionComponent = () => (
     <ul>
       <li>
         Where iOS shows them: before a <a href="list">List</a>’s rows, as{' '}
-        <code>List.Checkbox</code> (a <code>Checkbox.Root</code> as the row’s
-        leading edit control).
+        <PartLink
+          component="list"
+          part="List.Checkbox"
+        />{' '}
+        (a{' '}
+        <PartLink
+          component="checkbox"
+          part="Checkbox.Root"
+        />{' '}
+        as the row’s leading edit control).
       </li>
       <li>
         The row passes its clicks on to it (<code>forwardClick</code>): the
@@ -337,8 +350,17 @@ export const CheckboxComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <code>RadioGroup</code> rendering the list’s group (
-        <code>render</code>), a <code>List.Radio</code> before each row.
+        A{' '}
+        <PartLink
+          component="checkbox"
+          part="RadioGroup"
+        />{' '}
+        rendering the list’s group (<code>render</code>), a{' '}
+        <PartLink
+          component="list"
+          part="List.Radio"
+        />{' '}
+        before each row.
       </li>
       <li>One row chosen at a time; arrow keys move between them.</li>
     </ul>
@@ -353,8 +375,12 @@ export const CheckboxComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <code>CheckboxGroup</code> (rendering the list’s group) holds the
-        selected rows’ names.
+        A{' '}
+        <PartLink
+          component="checkbox"
+          part="CheckboxGroup"
+        />{' '}
+        (rendering the list’s group) holds the selected rows’ names.
       </li>
       <li>
         Given all of them (<code>allValues</code>), a <code>parent</code>{' '}

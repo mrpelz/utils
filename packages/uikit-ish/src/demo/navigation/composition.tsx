@@ -20,7 +20,12 @@ import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
 import { useProvidedState } from '../frame/state.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { pages, sections, type SectionValue } from './content.js';
 import { propOptionsAdaptiveContent } from './props.js';
@@ -208,17 +213,16 @@ const PerTab: FunctionComponent = () => {
                       <Header.Bar>
                         <Toolbar.Leading>
                           {depth > 0 ? (
-                            <Toolbar.Button
-                              shape="circle"
+                            <Navigation.Back
+                              render={<Toolbar.Button shape="circle" />}
                               aria-label={
                                 pages[stacks[section][depth - 1] ?? '']?.title
                               }
-                              onClick={() => pop(section)}
                             >
                               <Button.Icon>
                                 <Symbol icon={sfChevronBackward} />
                               </Button.Icon>
-                            </Toolbar.Button>
+                            </Navigation.Back>
                           ) : null}
                         </Toolbar.Leading>
                         <Toolbar.Title>
@@ -345,15 +349,14 @@ const WithSidebar: FunctionComponent = () => {
                     <Header.Bar>
                       <Toolbar.Leading>
                         {depth > 0 ? (
-                          <Toolbar.Button
+                          <Navigation.Back
                             aria-label={pages[keys[depth - 1] ?? '']?.title}
-                            shape="circle"
-                            onClick={pop}
+                            render={<Toolbar.Button shape="circle" />}
                           >
                             <Button.Icon>
                               <Symbol icon={sfChevronBackward} />
                             </Button.Icon>
-                          </Toolbar.Button>
+                          </Navigation.Back>
                         ) : null}
                       </Toolbar.Leading>
                       <Toolbar.Title>
@@ -418,15 +421,14 @@ const PopToRoot: FunctionComponent = () => {
                 <Header.Bar>
                   <Toolbar.Leading>
                     {depth > 0 ? (
-                      <Toolbar.Button
+                      <Navigation.Back
                         aria-label={pages[keys[depth - 1] ?? '']?.title}
-                        shape="circle"
-                        onClick={pop}
+                        render={<Toolbar.Button shape="circle" />}
                       >
                         <Button.Icon>
                           <Symbol icon={sfChevronBackward} />
                         </Button.Icon>
-                      </Toolbar.Button>
+                      </Navigation.Back>
                     ) : null}
                   </Toolbar.Leading>
                   <Toolbar.Title>
@@ -500,15 +502,14 @@ const LargeTitles: FunctionComponent = () => {
                 <Header.Bar>
                   <Toolbar.Leading>
                     {depth > 0 ? (
-                      <Toolbar.Button
+                      <Navigation.Back
                         aria-label={pages[keys[depth - 1] ?? '']?.title}
-                        shape="circle"
-                        onClick={pop}
+                        render={<Toolbar.Button shape="circle" />}
                       >
                         <Button.Icon>
                           <Symbol icon={sfChevronBackward} />
                         </Button.Icon>
-                      </Toolbar.Button>
+                      </Navigation.Back>
                     ) : null}
                   </Toolbar.Leading>
                   <Toolbar.Title>
@@ -649,19 +650,18 @@ const AdaptiveView: FunctionComponent = () => {
                   <Header.Root>
                     <Header.Bar>
                       <Toolbar.Leading>
-                        <Toolbar.Button
-                          shape="circle"
+                        <Navigation.Back
+                          render={<Toolbar.Button shape="circle" />}
                           aria-label={
                             depth === 1
                               ? 'Apps'
                               : pages[keys[depth - 1] ?? '']?.title
                           }
-                          onClick={pop}
                         >
                           <Button.Icon>
                             <Symbol icon={sfChevronBackward} />
                           </Button.Icon>
-                        </Toolbar.Button>
+                        </Navigation.Back>
                       </Toolbar.Leading>
                       <Toolbar.Title>
                         <span>{pages[key]?.title}</span>
@@ -732,15 +732,14 @@ const AdaptiveView: FunctionComponent = () => {
                       <Header.Bar>
                         <Toolbar.Leading>
                           {depth > 0 ? (
-                            <Toolbar.Button
+                            <Navigation.Back
                               aria-label={pages[stack[depth - 1] ?? '']?.title}
-                              shape="circle"
-                              onClick={pop}
+                              render={<Toolbar.Button shape="circle" />}
                             >
                               <Button.Icon>
                                 <Symbol icon={sfChevronBackward} />
                               </Button.Icon>
-                            </Toolbar.Button>
+                            </Navigation.Back>
                           ) : null}
                         </Toolbar.Leading>
                         <Toolbar.Title>
@@ -806,7 +805,11 @@ export const NavigationComposition: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Drilling in: a row’s title as a button, with a <code>List.DrillIn</code>{' '}
+        Drilling in: a row’s title as a button, with a{' '}
+        <PartLink
+          component="list"
+          part="List.DrillIn"
+        />{' '}
         chevron (see <a href="list/composition#drilling-into-pages">List</a>).
       </li>
     </ul>
@@ -821,7 +824,16 @@ export const NavigationComposition: FunctionComponent = () => (
       <li>
         Each tab its own stack (iOS’s tab bar apps, guide{' '}
         <GuideLink to="shell-a">shell A</GuideLink>): a{' '}
-        <code>TabBar.Panel</code> rendered as a <code>Navigation.Root</code>.
+        <PartLink
+          component="tab-bar"
+          part="TabBar.Panel"
+        />{' '}
+        rendered as a{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Root"
+        />
+        .
       </li>
       <li>
         Kept while another tab is shown: the stacks in the app’s state, the
@@ -877,8 +889,11 @@ export const NavigationComposition: FunctionComponent = () => (
     <ul>
       <li>
         iOS’s: the stack’s root page with a large title (
-        <code>Header.LargeTitle</code>), the pages pushed on it with the bar’s
-        title only.
+        <PartLink
+          component="header"
+          part="Header.LargeTitle"
+        />
+        ), the pages pushed on it with the bar’s title only.
       </li>
       <li>
         In a transition, each page’s header moves with it, its bar and large
@@ -896,10 +911,18 @@ export const NavigationComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        By the window’s width (<code>useVisualViewport</code>, in a{' '}
-        <code>Viewport.Provider</code>; here below 768px): compact, the sections
-        are the stack’s root page, drilled into; regular, a sidebar beside the
-        stack.
+        By the window’s width (
+        <PartLink
+          component="viewport"
+          part="useVisualViewport"
+        />
+        , in a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />
+        ; here below 768px): compact, the sections are the stack’s root page,
+        drilled into; regular, a sidebar beside the stack.
       </li>
       <li>
         The same state either way (the section, its stack): resize the window

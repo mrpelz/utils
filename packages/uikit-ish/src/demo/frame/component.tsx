@@ -208,7 +208,8 @@ export const Component: FunctionComponent<{
     `${settings}.backdrop`,
     backdrop,
   );
-  const [codeOpen, setCodeOpen] = useLocalStorage(`${settings}.code`, false);
+  // (Its own: closed at first, not kept, nor shared with other views.)
+  const [codeOpen, setCodeOpen] = useState(false);
   // (After rendering: rendering to a string resets Preact's hooks state.)
   const [code, setCode] = useState('');
   useEffect(() => {

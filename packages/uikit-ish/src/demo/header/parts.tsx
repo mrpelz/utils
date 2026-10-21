@@ -188,10 +188,17 @@ export const HeaderParts: FunctionComponent = () => (
         />
         <ul>
           <li>
-            <PartLink part="Header.Root" />
+            <PartLink
+              component="header"
+              part="Header.Root"
+            />
             <ul>
               <li>
-                <PartLink part="Header.Bar" /> (
+                <PartLink
+                  component="header"
+                  part="Header.Bar"
+                />{' '}
+                (
                 <PartLink
                   component="toolbar"
                   part="Toolbar.Leading"
@@ -209,7 +216,11 @@ export const HeaderParts: FunctionComponent = () => (
                 )
               </li>
               <li>
-                <PartLink part="Header.LargeTitle" /> (optional; with a{' '}
+                <PartLink
+                  component="header"
+                  part="Header.LargeTitle"
+                />{' '}
+                (optional; with a{' '}
                 <PartLink
                   component="toolbar"
                   part="Toolbar.Subtitle"
@@ -280,7 +291,12 @@ export const HeaderParts: FunctionComponent = () => (
         scrolling with the page; fading out as it goes under the bar.
       </li>
       <li>
-        A subtitle (<code>Toolbar.Subtitle</code>) below it in 15px.
+        A subtitle (
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Subtitle"
+        />
+        ) below it in 15px.
       </li>
       <li>
         Renders a <code>div</code> as a <code>heading</code> (level 1;{' '}

@@ -8,7 +8,7 @@ import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
 import { sfPersonCropCircleFill } from '@bradleyhodges/sfsymbols/sfPersonCropCircleFill';
 import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
 import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
-import { FunctionComponent, useMemo, useState } from 'react';
+import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 
 import { forwardClick, List, Symbol } from '../../components/index.js';
 import { Component } from '../frame/component.js';
@@ -58,6 +58,8 @@ import {
   getPropOptionsEditButton,
   getPropOptionsExpandableRoot,
   getPropOptionsExpandableTrigger,
+  getPropOptionsGuideExpandable,
+  getPropOptionsGuideGroup,
   getPropOptionsIndexItem,
   getPropOptionsItem,
   getPropOptionsSwipeActionOutermost,
@@ -65,7 +67,6 @@ import {
   getPropOptionsTitleFirst,
   propOptionsBlock,
   propOptionsCursor,
-  propOptionsExpandable,
   propOptionsHeader,
   propOptionsImage,
   propOptionsIndex,
@@ -79,6 +80,18 @@ import {
 // its code shows as it'd be used.
 
 const rows = planets.slice(0, 3);
+
+// The first row's parts' labels and values (theirs, or others).
+const propOptionsGrabber = {
+  ...propOptionsCursor,
+  'aria-label': [`Reorder ${rows[0] ?? ''}`, 'Move'] as const,
+  tabIndex: [undefined, -1, 0] as const,
+};
+const propOptionsRadio = {
+  ...propOptionsRadioFirst,
+  value: [rows[0] ?? '', 'Pluto'] as const,
+  required: [undefined, false, true] as const,
+};
 
 /** Moves a row (the app's part of reordering, see `List.Group`). */
 const moved = (current: readonly string[], from: number, to: number) => {
@@ -226,14 +239,21 @@ const GroupPart: FunctionComponent = () => {
   const id = 'list-parts-group';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
+  const [order, setOrder] = useState<readonly string[]>(rows);
+  const reorder = useCallback(
+    (from: number, to: number) => {
+      addLog(`reorder: ${String(from)} → ${String(to)}`);
+      setOrder((current) => moved(current, from, to));
+    },
+    [addLog],
+  );
   const [control, props, state] = usePropControl(
-    commonPropOptions,
+    useMemo(() => getPropOptionsGuideGroup(reorder), [reorder]),
     'List.Group',
     external,
     true,
     true,
   );
-  const [order, setOrder] = useState<readonly string[]>(rows);
 
   return (
     <Component
@@ -247,13 +267,7 @@ const GroupPart: FunctionComponent = () => {
     >
       <List.Root>
         <List.Section>
-          <List.Group
-            {...props}
-            onReorder={(from: number, to: number) => {
-              addLog(`reorder: ${String(from)} → ${String(to)}`);
-              setOrder((current) => moved(current, from, to));
-            }}
-          >
+          <List.Group {...props}>
             {order.map((name) => (
               <List.Item key={name}>
                 <List.Title>{name}</List.Title>
@@ -410,7 +424,7 @@ const ExpandablePart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
-    propOptionsExpandable,
+    useMemo(() => getPropOptionsGuideExpandable(addLog), [addLog]),
     'List.Expandable',
     external,
     true,
@@ -995,7 +1009,7 @@ const GrabberPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
-    propOptionsCursor,
+    propOptionsGrabber,
     'List.Grabber',
     external,
     true,
@@ -1024,10 +1038,11 @@ const GrabberPart: FunctionComponent = () => {
             {order.map((name, index) => (
               <List.Item key={name}>
                 <List.Title>{name}</List.Title>
-                <List.Grabber
-                  aria-label={`Reorder ${name}`}
-                  {...(index === 0 ? props : {})}
-                />
+                {index === 0 ? (
+                  <List.Grabber {...props} />
+                ) : (
+                  <List.Grabber aria-label={`Reorder ${name}`} />
+                )}
               </List.Item>
             ))}
           </List.Group>
@@ -1179,7 +1194,7 @@ const RadioPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
-    propOptionsRadioFirst,
+    propOptionsRadio,
     'List.Radio',
     external,
     true,
@@ -1211,11 +1226,17 @@ const RadioPart: FunctionComponent = () => {
                 key={name}
                 onClick={forwardClick('[role=radio]')}
               >
-                <List.Radio
-                  aria-label={name}
-                  value={name}
-                  {...(index === 0 ? props : {})}
-                />
+                {index === 0 ? (
+                  <List.Radio
+                    aria-label={name}
+                    {...props}
+                  />
+                ) : (
+                  <List.Radio
+                    aria-label={name}
+                    value={name}
+                  />
+                )}
                 <List.Title>{name}</List.Title>
               </List.Item>
             ))}
@@ -1232,7 +1253,13 @@ const EditButtonPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
-    useMemo(() => getPropOptionsEditButton(addLog), [addLog]),
+    useMemo(
+      () => ({
+        ...getPropOptionsEditButton(addLog),
+        'aria-label': [`Delete ${rows[0] ?? ''}`, 'Remove'] as const,
+      }),
+      [addLog],
+    ),
     'List.EditButton',
     external,
     true,
@@ -1254,10 +1281,11 @@ const EditButtonPart: FunctionComponent = () => {
           <List.Group>
             {rows.map((name, index) => (
               <List.Item key={name}>
-                <List.EditButton
-                  aria-label={`Delete ${name}`}
-                  {...(index === 0 ? props : {})}
-                />
+                {index === 0 ? (
+                  <List.EditButton {...props} />
+                ) : (
+                  <List.EditButton aria-label={`Delete ${name}`} />
+                )}
                 <List.Title>{name}</List.Title>
                 <List.SwipeActions>
                   <List.SwipeAction
@@ -1446,10 +1474,7 @@ const IndexPart: FunctionComponent = () => {
           </List.Root>
         </div>
         <div className="list-demo-index">
-          <List.Index
-            aria-label="Index"
-            {...props}
-          >
+          <List.Index {...props}>
             {Object.keys(contacts).map((letter) => (
               <List.IndexItem
                 key={letter}
@@ -1566,7 +1591,12 @@ export const ListParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        A <code>List.Root</code> of sections.
+        A{' '}
+        <PartLink
+          component="list"
+          part="List.Root"
+        />{' '}
+        of sections.
       </li>
       <li>
         A section: a header, a group of rows (or a block of text), a footer.
@@ -1579,59 +1609,182 @@ export const ListParts: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        <PartLink part="List.Root" />
+        <PartLink
+          component="list"
+          part="List.Root"
+        />
         <ul>
           <li>
-            <PartLink part="List.Section" /> (one or more)
+            <PartLink
+              component="list"
+              part="List.Section"
+            />{' '}
+            (one or more)
             <ul>
               <li>
-                <PartLink part="List.Header" /> (optional):{' '}
-                <PartLink part="List.Supertitle" />,{' '}
-                <PartLink part="List.Title" />,{' '}
-                <PartLink part="List.Subtitle" />,{' '}
-                <PartLink part="List.Accessory" />,{' '}
-                <PartLink part="List.Action" />,{' '}
-                <PartLink part="List.Disclosure" />
+                <PartLink
+                  component="list"
+                  part="List.Header"
+                />{' '}
+                (optional):{' '}
+                <PartLink
+                  component="list"
+                  part="List.Supertitle"
+                />
+                ,{' '}
+                <PartLink
+                  component="list"
+                  part="List.Title"
+                />
+                ,{' '}
+                <PartLink
+                  component="list"
+                  part="List.Subtitle"
+                />
+                ,{' '}
+                <PartLink
+                  component="list"
+                  part="List.Accessory"
+                />
+                ,{' '}
+                <PartLink
+                  component="list"
+                  part="List.Action"
+                />
+                ,{' '}
+                <PartLink
+                  component="list"
+                  part="List.Disclosure"
+                />
               </li>
               <li>
-                <PartLink part="List.Group" />, or{' '}
-                <PartLink part="List.Block" />
+                <PartLink
+                  component="list"
+                  part="List.Group"
+                />
+                , or{' '}
+                <PartLink
+                  component="list"
+                  part="List.Block"
+                />
                 <ul>
                   <li>
-                    <PartLink part="List.Item" /> (or{' '}
-                    <PartLink part="List.Expandable" />, in a{' '}
-                    <PartLink part="List.ExpandableRoot" /> with the row whose{' '}
-                    <PartLink part="List.ExpandableTrigger" /> toggles it; one
-                    or more)
+                    <PartLink
+                      component="list"
+                      part="List.Item"
+                    />{' '}
+                    (or{' '}
+                    <PartLink
+                      component="list"
+                      part="List.Expandable"
+                    />
+                    , in a{' '}
+                    <PartLink
+                      component="list"
+                      part="List.ExpandableRoot"
+                    />{' '}
+                    with the row whose{' '}
+                    <PartLink
+                      component="list"
+                      part="List.ExpandableTrigger"
+                    />{' '}
+                    toggles it; one or more)
                     <ul>
                       <li>
-                        Leading (optional): <PartLink part="List.Checkbox" />,{' '}
-                        <PartLink part="List.Radio" /> or{' '}
-                        <PartLink part="List.EditButton" />;{' '}
-                        <PartLink part="List.Image" />
+                        Leading (optional):{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Checkbox"
+                        />
+                        ,{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Radio"
+                        />{' '}
+                        or{' '}
+                        <PartLink
+                          component="list"
+                          part="List.EditButton"
+                        />
+                        ;{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Image"
+                        />
                       </li>
                       <li>
-                        <PartLink part="List.Title" /> (or{' '}
-                        <PartLink part="List.Button" />
-                        ), <PartLink part="List.Subtitle" /> (optional),{' '}
-                        <PartLink part="List.Text" /> (optional)
+                        <PartLink
+                          component="list"
+                          part="List.Title"
+                        />{' '}
+                        (or{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Button"
+                        />
+                        ),{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Subtitle"
+                        />{' '}
+                        (optional),{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Text"
+                        />{' '}
+                        (optional)
                       </li>
                       <li>
-                        Trailing (optional): <PartLink part="List.Detail" />,{' '}
-                        <PartLink part="List.Accessory" />,{' '}
-                        <PartLink part="List.Action" />,{' '}
-                        <PartLink part="List.Checkmark" />,{' '}
-                        <PartLink part="List.DrillIn" />,{' '}
-                        <PartLink part="List.Disclosure" />,{' '}
-                        <PartLink part="List.Grabber" />, or a control (e.g. a
-                        Switch)
+                        Trailing (optional):{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Detail"
+                        />
+                        ,{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Accessory"
+                        />
+                        ,{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Action"
+                        />
+                        ,{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Checkmark"
+                        />
+                        ,{' '}
+                        <PartLink
+                          component="list"
+                          part="List.DrillIn"
+                        />
+                        ,{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Disclosure"
+                        />
+                        ,{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Grabber"
+                        />
+                        , or a control (e.g. a Switch)
                       </li>
                       <li>
-                        <PartLink part="List.SwipeActions" /> (optional, one per
-                        side)
+                        <PartLink
+                          component="list"
+                          part="List.SwipeActions"
+                        />{' '}
+                        (optional, one per side)
                         <ul>
                           <li>
-                            <PartLink part="List.SwipeAction" /> (one or more)
+                            <PartLink
+                              component="list"
+                              part="List.SwipeAction"
+                            />{' '}
+                            (one or more)
                           </li>
                         </ul>
                       </li>
@@ -1640,17 +1793,29 @@ export const ListParts: FunctionComponent = () => (
                 </ul>
               </li>
               <li>
-                <PartLink part="List.Footer" /> (optional)
+                <PartLink
+                  component="list"
+                  part="List.Footer"
+                />{' '}
+                (optional)
               </li>
             </ul>
           </li>
         </ul>
       </li>
       <li>
-        <PartLink part="List.Index" /> (optional, beside a plain list)
+        <PartLink
+          component="list"
+          part="List.Index"
+        />{' '}
+        (optional, beside a plain list)
         <ul>
           <li>
-            <PartLink part="List.IndexItem" /> (one per letter)
+            <PartLink
+              component="list"
+              part="List.IndexItem"
+            />{' '}
+            (one per letter)
           </li>
         </ul>
       </li>
@@ -1783,7 +1948,12 @@ export const ListParts: FunctionComponent = () => (
       </li>
       <li>Renders no element: they stay its group’s children.</li>
       <li>
-        A <code>List.Disclosure</code> in it turns down while open.
+        A{' '}
+        <PartLink
+          component="list"
+          part="List.Disclosure"
+        />{' '}
+        in it turns down while open.
       </li>
     </ul>
     <ExpandableRootPart />
@@ -2102,8 +2272,12 @@ export const ListParts: FunctionComponent = () => (
         one row.
       </li>
       <li>
-        Its group: a Base UI <code>RadioGroup</code> rendering the{' '}
-        <code>Group</code>.
+        Its group: a Base UI{' '}
+        <PartLink
+          component="checkbox"
+          part="RadioGroup"
+        />{' '}
+        rendering the <code>Group</code>.
       </li>
     </ul>
     <RadioPart />

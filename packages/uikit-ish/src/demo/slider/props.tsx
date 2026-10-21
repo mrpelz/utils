@@ -68,6 +68,8 @@ export const propOptionsRoot = {
   ] as const,
   disabled: [undefined, false, true] as const,
   orientation: [undefined, 'horizontal', 'vertical'] as const,
+  // (Labelled by an element of the page's: its section's heading.)
+  'aria-labelledby': [undefined, 'slider-root'] as const,
   thumbAlignment: [undefined, 'center', 'edge', 'edge-client-only'] as const,
   thumbCollisionBehavior: [undefined, 'push', 'swap', 'none'] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
@@ -200,3 +202,26 @@ export const propOptionsTicks = {
   ...commonPropOptions,
   count: [11, 6, 3] as const,
 };
+
+/** The guide's thumb (the first of two): its labels, its index. */
+export const getPropOptionsGuideThumb = (addLog: AddLog) => ({
+  ...getPropOptionsThumb(addLog),
+  index: [0, undefined, 1] as const,
+  'aria-label': ['Minimum brightness', undefined] as const,
+  'aria-labelledby': [undefined, 'slider-thumb'] as const,
+  getAriaLabel: [
+    undefined,
+    new MappedProp(
+      (index: number) => `Brightness ${String(index + 1)}`,
+      '[Brightness 1]',
+    ),
+  ] as const,
+  'aria-valuetext': [undefined, 'a quarter'] as const,
+  getAriaValueText: [
+    undefined,
+    new MappedProp(
+      (formattedValue: string) => `${formattedValue} percent`,
+      '[25 percent]',
+    ),
+  ] as const,
+});

@@ -12,7 +12,12 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { names } from '../viewport/content.js';
 
@@ -405,8 +410,13 @@ export const TextFieldComposition: FunctionComponent = () => (
         <code>validate</code>: a message, or <code>null</code>).
       </li>
       <li>
-        One <code>TextField.Error</code> per reason (<code>match</code>); the
-        custom one’s text is <code>validate</code>’s message.
+        One{' '}
+        <PartLink
+          component="text-field"
+          part="TextField.Error"
+        />{' '}
+        per reason (<code>match</code>); the custom one’s text is{' '}
+        <code>validate</code>’s message.
       </li>
       <li>
         Checked on leaving a field (
@@ -431,7 +441,11 @@ export const TextFieldComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <code>TextField.Search</code>: the capsule, a magnifier, the control (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />
+        : the capsule, a magnifier, the control (
         <code>type=&quot;search&quot;</code>: iOS’s Search key), its clear
         button.
       </li>

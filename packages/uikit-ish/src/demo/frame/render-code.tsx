@@ -1,6 +1,14 @@
 import { VNode } from 'preact';
 import { render } from 'preact-render-to-string/jsx';
-import { createElement, isValidElement, ReactElement, ReactNode } from 'react';
+import {
+  createElement,
+  createRef,
+  isValidElement,
+  ReactElement,
+  ReactNode,
+  RefObject,
+  useState,
+} from 'react';
 
 // A copy of the tree (rendering marks its vnodes: never the live ones,
 // which would break the app's own rendering).
@@ -150,13 +158,52 @@ const indent = '  ';
 
 const indented = (text: string, by: string) => text.split('\n').join(`\n${by}`);
 
+// Objects shown by a label (e.g. their variable's name: a ref, a handle),
+// not their contents (see `codeLabel`).
+const codeLabels = new WeakMap<object, string>();
+
+/**
+ * `value`, labelled in the code shown (e.g. `codeLabel(handle, 'handle')`:
+ * written `handle={handle}`); returns it, so it can be labelled as it's
+ * made or passed.
+ */
+export const codeLabel = <T extends object>(value: T, label: string): T => {
+  codeLabels.set(value, label);
+  return value;
+};
+
+/** A ref, made once, labelled (see `codeLabel`): e.g. its variable's name. */
+export const useLabelledRef = <T,>(label: string): RefObject<T | null> => {
+  const [ref] = useState(() => codeLabel(createRef<T>(), label));
+
+  return ref;
+};
+
+// A ref (`{ current }`), unlabelled: shown as one.
+const isRef = (value: object) =>
+  Object.getPrototypeOf(value) === Object.prototype &&
+  Object.keys(value).length === 1 &&
+  'current' in value;
+
+// An instance of a class (not plain data), unlabelled: shown by its class.
+const className = (value: object) => {
+  const prototype: unknown = Object.getPrototypeOf(value);
+  if (prototype === Object.prototype || prototype === Array.prototype) {
+    return undefined;
+  }
+  return prototype === null
+    ? undefined
+    : (value.constructor as { name?: string } | undefined)?.name;
+};
+
 // An SF Symbol's definition (see `Symbol`): shown as its name.
 const isSymbol = (value: object): value is { iconName: string } =>
   'iconName' in value && 'svgPathData' in value;
 
 // Props as written (their names unmarked, see `unwrap`): unset and false
-// ones left out, handlers as arrows, symbols by name, elements as JSX,
-// other values as JSON.
+// ones left out, handlers as arrows, symbols by name, labelled objects (and
+// refs, class instances) by their labels, elements as JSX, other values as
+// JSON.
 const attributeHook = (marked: string, value: unknown): false | string => {
   if (!marked.startsWith(marker)) return false;
   const attribute = marked.slice(marker.length);
@@ -168,6 +215,13 @@ const attributeHook = (marked: string, value: unknown): false | string => {
   if (typeof value === 'function') return `\n${indent}${attribute}={() => {…}}`;
   if (typeof value === 'object' && isSymbol(value)) {
     return `\n${indent}${attribute}={${value.iconName}}`;
+  }
+  if (typeof value === 'object') {
+    const label =
+      codeLabels.get(value) ??
+      (isRef(value) ? 'ref' : undefined) ??
+      className(value);
+    if (label !== undefined) return `\n${indent}${attribute}={${label}}`;
   }
   if (isValidElement(value)) {
     // (A copy already, see `unwrap`: its props marked once.)

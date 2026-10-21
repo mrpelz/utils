@@ -173,15 +173,14 @@ const InAStack: FunctionComponent = () => {
                 <Header.Bar>
                   <Toolbar.Leading>
                     {depth > 0 ? (
-                      <Toolbar.Button
+                      <Navigation.Back
                         aria-label={pages[keys[depth - 1] ?? '']?.title}
-                        shape="circle"
-                        onClick={pop}
+                        render={<Toolbar.Button shape="circle" />}
                       >
                         <Button.Icon>
                           <Symbol icon={sfChevronBackward} />
                         </Button.Icon>
-                      </Toolbar.Button>
+                      </Navigation.Back>
                     ) : null}
                   </Toolbar.Leading>
                   <Toolbar.Title>

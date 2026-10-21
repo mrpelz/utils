@@ -20,6 +20,7 @@ import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsColumn,
   propOptionsDrawer,
+  propOptionsDrawerSwipeArea,
   propOptionsRoot,
 } from './props.js';
 
@@ -236,14 +237,16 @@ export const LayoutCompactDemo: FunctionComponent = () => {
     externalRoot,
     externalSidebar,
     externalDrawer,
+    externalSwipeArea,
     externalList,
     externalDetail,
   ] = useProvidedState(id);
 
   const [folder, setFolder] = useState('Inbox');
   const [message, setMessage] = useState('Message 1');
-  // The drawer (controlled, opened by the list's button).
-  const [open, setOpen] = useState<boolean | undefined>(undefined);
+  // The drawer (controlled: opened by the list's button, closing as a folder
+  // is chosen).
+  const [open, setOpen] = useState(false);
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRoot,
@@ -262,9 +265,14 @@ export const LayoutCompactDemo: FunctionComponent = () => {
     );
   const [controlDrawer, propsDrawer, stateDrawer, keyDrawer] = usePropControl(
     propOptionsDrawer,
-    'column (sidebar): drawer',
+    'drawer',
     externalDrawer,
     true,
+  );
+  const [controlSwipeArea, propsSwipeArea, stateSwipeArea] = usePropControl(
+    propOptionsDrawerSwipeArea,
+    'drawer swipe area',
+    externalSwipeArea,
   );
   const [controlList, propsList, stateList, keyList] = usePropControl(
     useMemo(() => getPropOptionsColumn('list', 320, true, addLog), [addLog]),
@@ -285,14 +293,22 @@ export const LayoutCompactDemo: FunctionComponent = () => {
       stretch
       id={id}
       log={log}
-      state={[stateRoot, stateSidebar, stateDrawer, stateList, stateDetail]}
       title="Layout (compact)"
       controls={[
         controlRoot,
         controlSidebar,
         controlDrawer,
+        controlSwipeArea,
         controlList,
         controlDetail,
+      ]}
+      state={[
+        stateRoot,
+        stateSidebar,
+        stateDrawer,
+        stateSwipeArea,
+        stateList,
+        stateDetail,
       ]}
     >
       <div className="layout-demo-screen">
@@ -300,100 +316,105 @@ export const LayoutCompactDemo: FunctionComponent = () => {
           {...propsRoot}
           compact
         >
-          <Layout.Column
-            key={`${keySidebar}-${keyDrawer}`}
-            {...propsSidebar}
+          <Layout.Drawer
+            key={keyDrawer}
             {...propsDrawer}
             open={open}
-            onOpenChange={(next: boolean) => {
-              addLog(`sidebar open: ${String(next)}`);
+            onOpenChange={(next: boolean, { reason }) => {
+              addLog(`sidebar open: ${String(next)} (${reason})`);
               setOpen(next);
             }}
           >
-            <Page.Root>
-              <Header.Root>
-                <Header.Bar>
-                  <Toolbar.Title>
-                    <span>Mailboxes</span>
-                  </Toolbar.Title>
-                </Header.Bar>
-              </Header.Root>
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfFolderFill} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => {
-                          addLog('folder: Inbox');
-                          setFolder('Inbox');
-                          // (The drawer closes.)
-                          setOpen(false);
-                        }}
-                      >
-                        Inbox
-                      </List.Title>
-                      {folder === 'Inbox' ? <List.Checkmark /> : null}
-                    </List.Item>
-                    <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfFolderFill} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => {
-                          addLog('folder: Drafts');
-                          setFolder('Drafts');
-                          // (The drawer closes.)
-                          setOpen(false);
-                        }}
-                      >
-                        Drafts
-                      </List.Title>
-                      {folder === 'Drafts' ? <List.Checkmark /> : null}
-                    </List.Item>
-                    <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfFolderFill} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => {
-                          addLog('folder: Sent');
-                          setFolder('Sent');
-                          // (The drawer closes.)
-                          setOpen(false);
-                        }}
-                      >
-                        Sent
-                      </List.Title>
-                      {folder === 'Sent' ? <List.Checkmark /> : null}
-                    </List.Item>
-                    <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfFolderFill} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => {
-                          addLog('folder: Archive');
-                          setFolder('Archive');
-                          // (The drawer closes.)
-                          setOpen(false);
-                        }}
-                      >
-                        Archive
-                      </List.Title>
-                      {folder === 'Archive' ? <List.Checkmark /> : null}
-                    </List.Item>
-                  </List.Group>
-                </List.Section>
-              </List.Root>
-            </Page.Root>
-          </Layout.Column>
+            <Layout.DrawerSwipeArea {...propsSwipeArea} />
+            <Layout.Column
+              key={keySidebar}
+              {...propsSidebar}
+            >
+              <Page.Root>
+                <Header.Root>
+                  <Header.Bar>
+                    <Toolbar.Title>
+                      <span>Mailboxes</span>
+                    </Toolbar.Title>
+                  </Header.Bar>
+                </Header.Root>
+                <List.Root>
+                  <List.Section>
+                    <List.Group>
+                      <List.Item>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfFolderFill} />
+                        </List.Image>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => {
+                            addLog('folder: Inbox');
+                            setFolder('Inbox');
+                            // (The drawer closes.)
+                            setOpen(false);
+                          }}
+                        >
+                          Inbox
+                        </List.Title>
+                        {folder === 'Inbox' ? <List.Checkmark /> : null}
+                      </List.Item>
+                      <List.Item>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfFolderFill} />
+                        </List.Image>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => {
+                            addLog('folder: Drafts');
+                            setFolder('Drafts');
+                            // (The drawer closes.)
+                            setOpen(false);
+                          }}
+                        >
+                          Drafts
+                        </List.Title>
+                        {folder === 'Drafts' ? <List.Checkmark /> : null}
+                      </List.Item>
+                      <List.Item>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfFolderFill} />
+                        </List.Image>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => {
+                            addLog('folder: Sent');
+                            setFolder('Sent');
+                            // (The drawer closes.)
+                            setOpen(false);
+                          }}
+                        >
+                          Sent
+                        </List.Title>
+                        {folder === 'Sent' ? <List.Checkmark /> : null}
+                      </List.Item>
+                      <List.Item>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfFolderFill} />
+                        </List.Image>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => {
+                            addLog('folder: Archive');
+                            setFolder('Archive');
+                            // (The drawer closes.)
+                            setOpen(false);
+                          }}
+                        >
+                          Archive
+                        </List.Title>
+                        {folder === 'Archive' ? <List.Checkmark /> : null}
+                      </List.Item>
+                    </List.Group>
+                  </List.Section>
+                </List.Root>
+              </Page.Root>
+            </Layout.Column>
+          </Layout.Drawer>
           <Layout.Column
             key={keyList}
             {...propsList}

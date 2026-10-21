@@ -5,6 +5,7 @@ import {
   PropRow,
   union,
 } from '../guide/props-table.js';
+import { PartLink } from '../guide/sections.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -111,12 +112,17 @@ export const sliderRootRows: readonly PropRow[] = [
     union('center', 'edge', 'edge-client-only'),
     code(union('edge')),
     <>
-      How the thumbs are aligned relative to <code>Slider.Control</code> when
-      the value is at <code>min</code> or <code>max</code>: <code>center</code>,
-      the thumb’s center at the control’s edge; <code>edge</code>, inset so its
-      edge is at the control’s edge; <code>edge-client-only</code>, as{' '}
-      <code>edge</code>, but rendered after hydration. (Base UI’s default is{' '}
-      <code>center</code>; iOS’s knob is inset.)
+      How the thumbs are aligned relative to{' '}
+      <PartLink
+        component="slider"
+        part="Slider.Control"
+      />{' '}
+      when the value is at <code>min</code> or <code>max</code>:{' '}
+      <code>center</code>, the thumb’s center at the control’s edge;{' '}
+      <code>edge</code>, inset so its edge is at the control’s edge;{' '}
+      <code>edge-client-only</code>, as <code>edge</code>, but rendered after
+      hydration. (Base UI’s default is <code>center</code>; iOS’s knob is
+      inset.)
     </>,
   ],
   [
@@ -136,8 +142,12 @@ export const sliderRootRows: readonly PropRow[] = [
     'Intl.NumberFormatOptions',
     undefined,
     <>
-      Options to format the value (for <code>Slider.Value</code> and the thumbs’{' '}
-      <code>aria-valuetext</code>).
+      Options to format the value (for{' '}
+      <PartLink
+        component="slider"
+        part="Slider.Value"
+      />{' '}
+      and the thumbs’ <code>aria-valuetext</code>).
     </>,
   ],
   [
@@ -165,7 +175,12 @@ export const sliderRootRows: readonly PropRow[] = [
     'aria-labelledby',
     'string',
     <>
-      a <code>Slider.Label</code>’s id
+      a{' '}
+      <PartLink
+        component="slider"
+        part="Slider.Label"
+      />
+      ’s id
     </>,
     'The ids of the elements labelling the slider: set on the root (a group) and on every thumb’s input.',
   ],

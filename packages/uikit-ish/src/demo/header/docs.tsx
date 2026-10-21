@@ -1,4 +1,5 @@
 import { code, PropRow, renderRows } from '../guide/props-table.js';
+import { PartLink } from '../guide/sections.js';
 import { toolbarRootRows } from '../toolbar/docs.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
@@ -10,10 +11,18 @@ export const headerRootRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Its <code>Header.Bar</code> and, optionally, its{' '}
-      <code>Header.LargeTitle</code> (and what scrolls with the title, e.g. a
-      search field). It renders no box of its own (
-      <code>display: contents</code>
+      Its{' '}
+      <PartLink
+        component="header"
+        part="Header.Bar"
+      />{' '}
+      and, optionally, its{' '}
+      <PartLink
+        component="header"
+        part="Header.LargeTitle"
+      />{' '}
+      (and what scrolls with the title, e.g. a search field). It renders no box
+      of its own (<code>display: contents</code>
       ), so the bar sticks to the top of the whole scroll container.
     </>,
   ],
@@ -26,9 +35,22 @@ export const headerBarRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      A toolbar’s content: <code>Toolbar.Leading</code> (e.g. back),{' '}
-      <code>Toolbar.Title</code> (fading in as a large title scrolls away),{' '}
-      <code>Toolbar.Trailing</code>.
+      A toolbar’s content:{' '}
+      <PartLink
+        component="toolbar"
+        part="Toolbar.Leading"
+      />{' '}
+      (e.g. back),{' '}
+      <PartLink
+        component="toolbar"
+        part="Toolbar.Title"
+      />{' '}
+      (fading in as a large title scrolls away),{' '}
+      <PartLink
+        component="toolbar"
+        part="Toolbar.Trailing"
+      />
+      .
     </>,
   ],
   ...toolbarRootRows.filter(([name]) => name !== 'placement'),
@@ -41,7 +63,11 @@ export const headerLargeTitleRows: readonly PropRow[] = [
     undefined,
     <>
       The title (e.g. a <code>{'<span>'}</code>), and an optional{' '}
-      <code>Toolbar.Subtitle</code> below it.
+      <PartLink
+        component="toolbar"
+        part="Toolbar.Subtitle"
+      />{' '}
+      below it.
     </>,
   ],
   [

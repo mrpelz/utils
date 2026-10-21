@@ -11,11 +11,18 @@ import {
   Sidebar,
   Symbol,
   Toolbar,
+  useCreateDrawerHandle,
 } from '../../components/index.js';
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import { codeLabel } from '../frame/render-code.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { rowTitles, sidebarSections } from '../sidebar/content.js';
 import { names } from '../viewport/content.js';
@@ -54,24 +61,47 @@ const resizableCode = `const [size, setSize] = useState(320);
   </Layout.Column>
 </Layout.Root>`;
 
-const inspectorCode = `<Layout.Root compact>
-  <Layout.Column
-    drawer="inline-start"
-    open={sidebarOpen}
-    onOpenChange={setSidebarOpen}
-  >
-    <Page.Root>…</Page.Root>
-  </Layout.Column>
+const inspectorCode = `// Their triggers, in the content's bar (outside the drawers).
+const mailboxesDrawer = useCreateDrawerHandle();
+const inspectorDrawer = useCreateDrawerHandle();
+
+<Layout.Root compact>
+  <Layout.Drawer handle={mailboxesDrawer} side="inline-start">
+    <Layout.DrawerSwipeArea />
+    <Layout.Column>
+      <Page.Root>
+        …
+        {/* Chosen: its drawer closes. */}
+        <List.Title
+          render={<Layout.DrawerClose />}
+          onClick={() => setMailbox('inbox')}
+        >
+          Inbox
+        </List.Title>
+        …
+      </Page.Root>
+    </Layout.Column>
+  </Layout.Drawer>
   <Layout.Column>
     <Page.Root>
       <Header.Root>
         <Header.Bar>
           <Toolbar.Leading>
-            <Toolbar.Button aria-label="Mailboxes" shape="circle" onClick={() => setSidebarOpen(true)}>…</Toolbar.Button>
+            <Layout.DrawerTrigger
+              handle={mailboxesDrawer}
+              render={<Toolbar.Button aria-label="Mailboxes" shape="circle" />}
+            >
+              …
+            </Layout.DrawerTrigger>
           </Toolbar.Leading>
           <Toolbar.Title>…</Toolbar.Title>
           <Toolbar.Trailing>
-            <Toolbar.Button aria-label="Info" shape="circle" onClick={() => setInspectorOpen(true)}>…</Toolbar.Button>
+            <Layout.DrawerTrigger
+              handle={inspectorDrawer}
+              render={<Toolbar.Button aria-label="Info" shape="circle" />}
+            >
+              …
+            </Layout.DrawerTrigger>
           </Toolbar.Trailing>
         </Header.Bar>
       </Header.Root>
@@ -79,13 +109,25 @@ const inspectorCode = `<Layout.Root compact>
     </Page.Root>
   </Layout.Column>
   {/* An inspector, from the trailing edge. */}
-  <Layout.Column
-    drawer="inline-end"
-    open={inspectorOpen}
-    onOpenChange={setInspectorOpen}
-  >
-    <Page.Root>…</Page.Root>
-  </Layout.Column>
+  <Layout.Drawer handle={inspectorDrawer} side="inline-end">
+    <Layout.DrawerSwipeArea />
+    <Layout.Column>
+      <Page.Root>
+        <Header.Root>
+          <Header.Bar>
+            <Toolbar.Leading />
+            <Toolbar.Title>…</Toolbar.Title>
+            <Toolbar.Trailing>
+              <Layout.DrawerClose render={<Toolbar.Button prominent />}>
+                <Button.Label>Done</Button.Label>
+              </Layout.DrawerClose>
+            </Toolbar.Trailing>
+          </Header.Bar>
+        </Header.Root>
+        …
+      </Page.Root>
+    </Layout.Column>
+  </Layout.Drawer>
 </Layout.Root>`;
 
 const backgroundCode = `<Layout.Root>
@@ -284,8 +326,9 @@ const Resizable: FunctionComponent = () => {
 const Inspector: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [mailbox, setMailbox] = useState('inbox');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [inspectorOpen, setInspectorOpen] = useState(false);
+  // Their triggers, in the content's bar (outside the drawers).
+  const mailboxesDrawer = codeLabel(useCreateDrawerHandle(), 'mailboxesDrawer');
+  const inspectorDrawer = codeLabel(useCreateDrawerHandle(), 'inspectorDrawer');
 
   return (
     <Component
@@ -297,80 +340,90 @@ const Inspector: FunctionComponent = () => {
     >
       <div className="layout-demo-phone">
         <Layout.Root compact>
-          <Layout.Column
-            drawer="inline-start"
-            open={sidebarOpen}
-            onOpenChange={(next: boolean) => {
-              addLog(`mailboxes open: ${String(next)}`);
-              setSidebarOpen(next);
+          <Layout.Drawer
+            handle={mailboxesDrawer}
+            side="inline-start"
+            onOpenChange={(next: boolean, { reason }) => {
+              addLog(`mailboxes open: ${String(next)} (${reason})`);
             }}
           >
-            <Page.Root>
-              <Header.Root>
-                <Header.Bar>
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
-                    <span>Mailboxes</span>
-                  </Toolbar.Title>
-                  <Toolbar.Trailing />
-                </Header.Bar>
-              </Header.Root>
-              <List.Root>
-                {sidebarSections.map(([title, rows]) => (
-                  <List.Section key={title}>
-                    <List.Group>
-                      {rows.map(([value, rowTitle, icon]) => (
-                        <List.Item key={value}>
-                          <List.Image variant="symbol">
-                            <Symbol icon={icon} />
-                          </List.Image>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => {
-                              addLog(`mailbox: ${value}`);
-                              setMailbox(value);
-                              setSidebarOpen(false);
-                            }}
-                          >
-                            {rowTitle}
-                          </List.Title>
-                          {mailbox === value ? <List.Checkmark /> : null}
-                        </List.Item>
-                      ))}
-                    </List.Group>
-                  </List.Section>
-                ))}
-              </List.Root>
-            </Page.Root>
-          </Layout.Column>
+            <Layout.DrawerSwipeArea />
+            <Layout.Column>
+              <Page.Root>
+                <Header.Root>
+                  <Header.Bar>
+                    <Toolbar.Leading />
+                    <Toolbar.Title>
+                      <span>Mailboxes</span>
+                    </Toolbar.Title>
+                    <Toolbar.Trailing />
+                  </Header.Bar>
+                </Header.Root>
+                <List.Root>
+                  {sidebarSections.map(([title, rows]) => (
+                    <List.Section key={title}>
+                      <List.Group>
+                        {rows.map(([value, rowTitle, icon]) => (
+                          <List.Item key={value}>
+                            <List.Image variant="symbol">
+                              <Symbol icon={icon} />
+                            </List.Image>
+                            {/* (Chosen: its drawer closes.) */}
+                            <List.Title
+                              render={<Layout.DrawerClose />}
+                              onClick={() => {
+                                addLog(`mailbox: ${value}`);
+                                setMailbox(value);
+                              }}
+                            >
+                              {rowTitle}
+                            </List.Title>
+                            {mailbox === value ? <List.Checkmark /> : null}
+                          </List.Item>
+                        ))}
+                      </List.Group>
+                    </List.Section>
+                  ))}
+                </List.Root>
+              </Page.Root>
+            </Layout.Column>
+          </Layout.Drawer>
           <Layout.Column>
             <Page.Root>
               <Header.Root>
                 <Header.Bar>
                   <Toolbar.Leading>
-                    <Toolbar.Button
-                      aria-label="Mailboxes"
-                      shape="circle"
-                      onClick={() => setSidebarOpen(true)}
+                    <Layout.DrawerTrigger
+                      handle={mailboxesDrawer}
+                      render={
+                        <Toolbar.Button
+                          aria-label="Mailboxes"
+                          shape="circle"
+                        />
+                      }
                     >
                       <Button.Icon>
                         <Symbol icon={sfListBullet} />
                       </Button.Icon>
-                    </Toolbar.Button>
+                    </Layout.DrawerTrigger>
                   </Toolbar.Leading>
                   <Toolbar.Title>
                     <span>{rowTitles[mailbox]}</span>
                   </Toolbar.Title>
                   <Toolbar.Trailing>
-                    <Toolbar.Button
-                      aria-label="Info"
-                      shape="circle"
-                      onClick={() => setInspectorOpen(true)}
+                    <Layout.DrawerTrigger
+                      handle={inspectorDrawer}
+                      render={
+                        <Toolbar.Button
+                          aria-label="Info"
+                          shape="circle"
+                        />
+                      }
                     >
                       <Button.Icon>
                         <Symbol icon={sfICircle} />
                       </Button.Icon>
-                    </Toolbar.Button>
+                    </Layout.DrawerTrigger>
                   </Toolbar.Trailing>
                 </Header.Bar>
               </Header.Root>
@@ -387,40 +440,46 @@ const Inspector: FunctionComponent = () => {
               </List.Root>
             </Page.Root>
           </Layout.Column>
-          <Layout.Column
-            drawer="inline-end"
-            open={inspectorOpen}
-            onOpenChange={(next: boolean) => {
-              addLog(`info open: ${String(next)}`);
-              setInspectorOpen(next);
+          <Layout.Drawer
+            handle={inspectorDrawer}
+            side="inline-end"
+            onOpenChange={(next: boolean, { reason }) => {
+              addLog(`info open: ${String(next)} (${reason})`);
             }}
           >
-            <Page.Root>
-              <Header.Root>
-                <Header.Bar>
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
-                    <span>Info</span>
-                  </Toolbar.Title>
-                  <Toolbar.Trailing />
-                </Header.Bar>
-              </Header.Root>
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    <List.Item>
-                      <List.Title>Mailbox</List.Title>
-                      <List.Detail>{rowTitles[mailbox]}</List.Detail>
-                    </List.Item>
-                    <List.Item>
-                      <List.Title>Messages</List.Title>
-                      <List.Detail>{names.length}</List.Detail>
-                    </List.Item>
-                  </List.Group>
-                </List.Section>
-              </List.Root>
-            </Page.Root>
-          </Layout.Column>
+            <Layout.DrawerSwipeArea />
+            <Layout.Column>
+              <Page.Root>
+                <Header.Root>
+                  <Header.Bar>
+                    <Toolbar.Leading />
+                    <Toolbar.Title>
+                      <span>Info</span>
+                    </Toolbar.Title>
+                    <Toolbar.Trailing>
+                      <Layout.DrawerClose render={<Toolbar.Button prominent />}>
+                        <Button.Label>Done</Button.Label>
+                      </Layout.DrawerClose>
+                    </Toolbar.Trailing>
+                  </Header.Bar>
+                </Header.Root>
+                <List.Root>
+                  <List.Section>
+                    <List.Group>
+                      <List.Item>
+                        <List.Title>Mailbox</List.Title>
+                        <List.Detail>{rowTitles[mailbox]}</List.Detail>
+                      </List.Item>
+                      <List.Item>
+                        <List.Title>Messages</List.Title>
+                        <List.Detail>{names.length}</List.Detail>
+                      </List.Item>
+                    </List.Group>
+                  </List.Section>
+                </List.Root>
+              </Page.Root>
+            </Layout.Column>
+          </Layout.Drawer>
         </Layout.Root>
       </div>
     </Component>
@@ -593,10 +652,27 @@ export const LayoutComposition: FunctionComponent = () => (
     <ul>
       <li>
         Compact: a drawer at each edge, the mailboxes from the leading one, an
-        inspector (Info) from the trailing one; each swiped in from its edge, or
-        opened by the bar’s buttons.
+        inspector (Info) from the trailing one; each swiped in from its edge (
+        <PartLink
+          component="layout"
+          part="Layout.DrawerSwipeArea"
+        />
+        ), or opened by the bar’s buttons (
+        <PartLink
+          component="layout"
+          part="Layout.DrawerTrigger"
+        />
+        , linked to its drawer by a handle).
       </li>
-      <li>Choosing a mailbox closes its drawer (controlled).</li>
+      <li>
+        Both uncontrolled, closed by their parts (
+        <PartLink
+          component="layout"
+          part="Layout.DrawerClose"
+        />
+        ): a mailbox chosen (its row’s title the close button), the inspector’s
+        Done.
+      </li>
     </ul>
     <CodeView code={inspectorCode} />
     <Inspector />
@@ -609,9 +685,13 @@ export const LayoutComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A picture behind the columns (<code>Layout.Background</code>), through a
-        floating sidebar’s glass and a transparent page (its list’s background
-        too).
+        A picture behind the columns (
+        <PartLink
+          component="layout"
+          part="Layout.Background"
+        />
+        ), through a floating sidebar’s glass and a transparent page (its list’s
+        background too).
       </li>
       <li>
         The bar’s glass by what’s behind it (

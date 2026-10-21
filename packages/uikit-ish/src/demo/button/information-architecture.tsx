@@ -1,6 +1,11 @@
 import { FunctionComponent } from 'react';
 
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -53,10 +58,18 @@ export const ButtonInformationArchitecture: FunctionComponent = () => (
         <GuideLink to="primitive-command">§5</GuideLink>).
       </li>
       <li>
-        Here: its name a <code>Button.Label</code> (or <code>aria-label</code>),
-        its symbol a <code>Button.Icon</code>, its enablement{' '}
-        <code>disabled</code> (or no <code>onClick</code>), its flag{' '}
-        <code>destructive</code>.
+        Here: its name a{' '}
+        <PartLink
+          component="button"
+          part="Button.Label"
+        />{' '}
+        (or <code>aria-label</code>), its symbol a{' '}
+        <PartLink
+          component="button"
+          part="Button.Icon"
+        />
+        , its enablement <code>disabled</code> (or no <code>onClick</code>), its
+        flag <code>destructive</code>.
       </li>
       <li>
         Its style is its prominence in a view, not its identity: the same

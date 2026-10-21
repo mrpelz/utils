@@ -29,7 +29,14 @@ export {
   type ProgressValueProps,
   type ActivityIndicatorMovement,
 } from './progress/main.js';
-export { Sheet, type SheetDetent, type SheetPopupProps } from './sheet/main.js';
+export {
+  Sheet,
+  type SheetContentProps,
+  type SheetDetent,
+  type SheetHandle,
+  type SheetPopupProps,
+  useCreateSheetHandle,
+} from './sheet/main.js';
 export {
   Tooltip,
   type TooltipPositionerProps,
@@ -160,7 +167,11 @@ export {
   type HeaderLargeTitleProps,
   type HeaderRootProps,
 } from './header/main.js';
-export { PageControl, type PageControlProps } from './page-control/main.js';
+export {
+  PageControl,
+  type PageControlChangeEventDetails,
+  type PageControlProps,
+} from './page-control/main.js';
 export {
   Toolbar,
   type ToolbarButtonProps,
@@ -174,7 +185,12 @@ export {
 export {
   Layout,
   type LayoutColumnProps,
+  type LayoutDrawerHandle,
+  type LayoutDrawerProps,
+  type LayoutDrawerSide,
+  type LayoutDrawerSwipeAreaProps,
   type LayoutRootProps,
+  useCreateDrawerHandle,
 } from './layout/main.js';
 export {
   Sidebar,
@@ -185,7 +201,12 @@ export {
 export { Page, type PageRootProps } from './page/main.js';
 
 // Navigation
-export { Navigation, type NavigationRootProps } from './navigation/main.js';
+export {
+  Navigation,
+  type NavigationBackEventDetails,
+  type NavigationBackProps,
+  type NavigationRootProps,
+} from './navigation/main.js';
 export {
   type AccessoryVisibility,
   type CollapsedContent,
@@ -205,8 +226,12 @@ export {
   type ElementGeometry,
   type ElementGeometryOptions,
   type ElementVisibilityOptions,
+  preventFocusShift,
+  preventInputZoom,
   useElementGeometry,
   useElementVisibility,
+  useFocusShiftPrevention,
+  useInputZoomPrevention,
   useScrollDirection,
   useViewportScroll,
   useVisualViewport,

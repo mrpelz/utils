@@ -20,7 +20,12 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { AddLog, useLog } from '../frame/log.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { phoneTabs, phoneTabValues } from './tabs.js';
 
@@ -538,7 +543,11 @@ export const TabBarComposition: FunctionComponent = () => (
       </li>
       <li>
         The bar floats over it, anchored at the bottom (
-        <code>Viewport.BlockEnd</code>).
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />
+        ).
       </li>
       <li>
         Hidden panels unmount; <code>keepMounted</code> keeps them (e.g. for
@@ -603,8 +612,12 @@ export const TabBarComposition: FunctionComponent = () => (
       <li>iOS’s tab bars minimize while the content scrolls down.</li>
       <li>
         Inside a <a href="viewport">Viewport</a>’s provider,{' '}
-        <code>useViewportScroll</code> reports the scroll direction (past a
-        threshold) and whether it’s at the top.
+        <PartLink
+          component="viewport"
+          part="useViewportScroll"
+        />{' '}
+        reports the scroll direction (past a threshold) and whether it’s at the
+        top.
       </li>
       <li>Scroll this page to see it.</li>
     </ul>
@@ -620,7 +633,11 @@ export const TabBarComposition: FunctionComponent = () => (
     <ul>
       <li>
         App content attached to the bar (Music’s mini player): a{' '}
-        <code>TabBar.Accessory</code> after the list.
+        <PartLink
+          component="tab-bar"
+          part="TabBar.Accessory"
+        />{' '}
+        after the list.
       </li>
       <li>
         Above the groups; between them while the bar is collapsed (here, by

@@ -85,10 +85,7 @@ export const CheckboxRadioDemo: FunctionComponent = () => {
       >
         <div className="checkbox-demo-group">
           <label className="checkbox-demo-option">
-            <Radio.Root
-              value="email"
-              {...propsRadio}
-            />
+            <Radio.Root {...propsRadio} />
             Email
           </label>
           <label className="checkbox-demo-option">

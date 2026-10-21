@@ -1,6 +1,11 @@
 import { FunctionComponent } from 'react';
 
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -72,8 +77,12 @@ export const SliderInformationArchitecture: FunctionComponent = () => (
       <li>
         <strong>Continuous or discrete:</strong> the guide maps sliders to
         continuous; with a coarse <code>step</code> and{' '}
-        <code>Slider.Ticks</code>, the same slider is discrete (as macOS’s
-        sliders with tick marks, in Apple’s HIG).
+        <PartLink
+          component="slider"
+          part="Slider.Ticks"
+        />
+        , the same slider is discrete (as macOS’s sliders with tick marks, in
+        Apple’s HIG).
       </li>
     </ul>
 

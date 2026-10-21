@@ -6,18 +6,19 @@ import {
   PropRow,
   union,
 } from '../guide/props-table.js';
+import { PartLink } from '../guide/sections.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
 
 export const sheetRootRows: readonly PropRow[] = [
-  ['open', 'boolean', undefined, 'Whether the dialog is currently open.'],
+  ['open', 'boolean', undefined, 'Whether the drawer is currently open.'],
   [
     'defaultOpen',
     'boolean',
     code('false'),
     <>
-      Whether the dialog is initially open. To render a controlled dialog, use
+      Whether the drawer is initially open. To render a controlled drawer, use
       the <code>open</code> prop instead.
     </>,
   ],
@@ -26,23 +27,66 @@ export const sheetRootRows: readonly PropRow[] = [
     '(open: boolean, eventDetails) => void',
     undefined,
     <>
-      Event handler called when the dialog is opened or closed (with Base UI’s
-      event details, e.g. the <code>reason</code>; dragged down: a{' '}
-      <code>Close</code>’s).
+      Event handler called when the drawer is opened or closed (with Base UI’s
+      event details, e.g. the <code>reason</code>: <code>swipe</code> when
+      swiped down; <code>eventDetails.cancel()</code> keeps it open).
     </>,
   ],
   [
     'onOpenChangeComplete',
     '(open: boolean) => void',
     undefined,
-    'Event handler called after any animations complete when the dialog is opened or closed.',
+    'Event handler called after any animations complete when the drawer is opened or closed.',
+  ],
+  [
+    'swipeDirection',
+    union('down', 'up', 'left', 'right'),
+    code(union('down')),
+    'The swipe direction used to dismiss the drawer (a sheet’s: down).',
+  ],
+  [
+    'snapPoints',
+    '(number | string)[]',
+    undefined,
+    <>
+      Snap points used to position the drawer: fractions of the viewport’s
+      height (0–1), pixels (above 1), or <code>px</code>/<code>rem</code>{' '}
+      strings. (A sheet’s heights are its <code>detent</code>s.)
+    </>,
+  ],
+  [
+    'defaultSnapPoint',
+    'number | string | null',
+    undefined,
+    'The initial snap point value when uncontrolled.',
+  ],
+  [
+    'snapPoint',
+    'number | string | null',
+    undefined,
+    <>
+      The currently active snap point. Use with <code>onSnapPointChange</code>{' '}
+      to control the snap point.
+    </>,
+  ],
+  [
+    'onSnapPointChange',
+    '(snapPoint: number | string | null, eventDetails) => void',
+    undefined,
+    'Callback fired when the snap point changes.',
+  ],
+  [
+    'snapToSequentialPoints',
+    'boolean',
+    code('false'),
+    'Disables velocity-based snap skipping so drag distance determines the next snap point.',
   ],
   [
     'modal',
     ['boolean', union('trap-focus')].join(' | '),
     code('true'),
     <>
-      Determines if the dialog enters a modal state when open: <code>true</code>
+      Determines if the drawer enters a modal state when open: <code>true</code>
       , focus is trapped, document page scroll is locked, and pointer
       interactions on outside elements are disabled; <code>false</code>, user
       interaction with the rest of the document is allowed;{' '}
@@ -55,9 +99,9 @@ export const sheetRootRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Whether to prevent the dialog from closing on outside presses (e.g. while
-      edited, iOS’s <code>isModalInPresentation</code>; dragging its header down
-      still closes it).
+      Whether to prevent the drawer from closing on outside presses (e.g. while
+      edited, iOS’s <code>isModalInPresentation</code>; swiping it down still
+      closes it, unless its <code>onOpenChange</code> cancels).
     </>,
   ],
   [
@@ -65,18 +109,19 @@ export const sheetRootRows: readonly PropRow[] = [
     'RefObject<{ unmount: () => void; close: () => void } | null>',
     undefined,
     <>
-      A ref to imperative actions: <code>close</code> closes the dialog;{' '}
+      A ref to imperative actions: <code>close</code> closes the drawer;{' '}
       <code>unmount</code> ends its closing phase after an externally controlled
       closing animation.
     </>,
   ],
   [
     'handle',
-    'DialogHandle<Payload>',
+    'SheetHandle<Payload>',
     undefined,
     <>
-      A handle to associate the dialog with a trigger (outside it). Can be
-      created with <code>Sheet.createHandle()</code>.
+      A handle to associate the drawer with a trigger (outside it), made by{' '}
+      <code>Sheet.createHandle()</code> (in a component:{' '}
+      <code>useCreateSheetHandle()</code>).
     </>,
   ],
   [
@@ -84,8 +129,8 @@ export const sheetRootRows: readonly PropRow[] = [
     'string | null',
     undefined,
     <>
-      ID of the trigger that the dialog is associated with (with{' '}
-      <code>open</code>, for a controlled dialog).
+      ID of the trigger that the drawer is associated with (with{' '}
+      <code>open</code>, for a controlled drawer).
     </>,
   ],
   [
@@ -93,8 +138,8 @@ export const sheetRootRows: readonly PropRow[] = [
     'string | null',
     undefined,
     <>
-      ID of the trigger that the dialog is associated with (with{' '}
-      <code>defaultOpen</code>, for an initially open dialog).
+      ID of the trigger that the drawer is associated with (with{' '}
+      <code>defaultOpen</code>, for an initially open drawer).
     </>,
   ],
   [
@@ -111,18 +156,19 @@ export const sheetRootRows: readonly PropRow[] = [
 export const sheetTriggerRows: readonly PropRow[] = [
   [
     'handle',
-    'DialogHandle<Payload>',
+    'SheetHandle<Payload>',
     undefined,
     <>
-      A handle to associate the trigger with a dialog. Can be created with{' '}
-      <code>Sheet.createHandle()</code>.
+      A handle to associate the trigger with a drawer (the trigger outside it),
+      made by <code>Sheet.createHandle()</code> (in a component:{' '}
+      <code>useCreateSheetHandle()</code>).
     </>,
   ],
   [
     'payload',
     'Payload',
     undefined,
-    'A payload to pass to the dialog when it is opened.',
+    'A payload to pass to the drawer when it is opened.',
   ],
   [
     'id',
@@ -168,16 +214,16 @@ export const sheetPopupRows: readonly PropRow[] = [
     <>
       <code>document.body</code>
     </>,
-    'Where its portal renders it (Base UI’s Dialog.Portal); fixed to it if it’s a containing block (e.g. transformed), as the views here. Clip it with overflow: clip, not hidden: focus moving into the sheet, still below it, would scroll it.',
+    'Where its portal renders it (Base UI’s Drawer.Portal); fixed to it if it’s a containing block (e.g. transformed), as the views here. Clip it with overflow: clip, not hidden: focus moving into the sheet, still below it, would scroll it.',
   ],
   [
     'initialFocus',
     'boolean | RefObject<HTMLElement | null> | ((openType) => …)',
     undefined,
     <>
-      Determines the element to focus when the dialog is opened. By default,
+      Determines the element to focus when the drawer is opened. By default,
       focus moves to the first tabbable element inside the popup, except when
-      the dialog is opened by touch — then the popup itself is focused to avoid
+      the drawer is opened by touch — then the popup itself is focused to avoid
       opening the virtual keyboard. <code>false</code>: do not move focus.
     </>,
   ],
@@ -186,7 +232,7 @@ export const sheetPopupRows: readonly PropRow[] = [
     'boolean | RefObject<HTMLElement | null> | ((closeType) => …)',
     undefined,
     <>
-      Determines the element to focus when the dialog is closed. By default: the
+      Determines the element to focus when the drawer is closed. By default: the
       trigger (or the previously focused element). <code>false</code>: do not
       move focus.
     </>,
@@ -196,7 +242,17 @@ export const sheetPopupRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      A <code>Sheet.Header</code> and a <code>Sheet.Content</code>.
+      A{' '}
+      <PartLink
+        component="sheet"
+        part="Sheet.Header"
+      />{' '}
+      and a{' '}
+      <PartLink
+        component="sheet"
+        part="Sheet.Content"
+      />
+      .
     </>,
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
@@ -265,4 +321,62 @@ export const sheetCloseRows: readonly PropRow[] = [
         ]
       : row,
   ),
+];
+
+/**
+ * `Sheet.createHandle<Payload>()`, `useCreateSheetHandle<Payload>()`: their
+ * type parameter (no arguments).
+ */
+export const sheetHandleTypeRows: readonly PropRow[] = [
+  [
+    'Payload',
+    'type parameter',
+    code('unknown'),
+    <>
+      What its triggers pass the sheet as they open it (their{' '}
+      <code>payload</code>; the root’s children as a function of it).
+    </>,
+  ],
+];
+
+/** `Sheet.createHandle()`, `useCreateSheetHandle()`: what they return. */
+export const sheetHandleRows: readonly PropRow[] = [
+  [
+    '(return)',
+    'SheetHandle<Payload>',
+    undefined,
+    <>
+      A handle (Base UI’s <code>Drawer.Handle</code>): passed to a{' '}
+      <PartLink
+        component="sheet"
+        part="Sheet.Root"
+      />{' '}
+      and its{' '}
+      <PartLink
+        component="sheet"
+        part="Sheet.Trigger"
+      />
+      s (their <code>handle</code>); from the hook, the same for the component’s
+      lifetime.
+    </>,
+  ],
+  [
+    '.isOpen',
+    'boolean',
+    undefined,
+    'Whether the sheet is currently open (false while no root is attached to the handle).',
+  ],
+  [
+    '.open(triggerId)',
+    '(triggerId: string | null) => void',
+    undefined,
+    'Opens the sheet, optionally associating it with a trigger (in an event handler or an effect).',
+  ],
+  [
+    '.openWithPayload(payload)',
+    '(payload: Payload) => void',
+    undefined,
+    'Opens the sheet with the given payload, without associating it with any trigger.',
+  ],
+  ['.close()', '() => void', undefined, 'Closes the sheet.'],
 ];

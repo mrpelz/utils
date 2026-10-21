@@ -2,6 +2,10 @@ import { ErrorBoundary, LocationProvider, Route, Router } from 'preact-iso';
 import { FunctionComponent, useMemo } from 'react';
 
 import * as components from '../components/index.js';
+import {
+  useFocusShiftPrevention,
+  useInputZoomPrevention,
+} from '../components/index.js';
 import { ColorScheme as TColorScheme } from '../components/utils/main.js';
 import { useColorScheme, useTouchActive } from '../styles.js';
 import { publicPath } from './env.js';
@@ -38,6 +42,19 @@ const ColorScheme: FunctionComponent = () => {
 // Pressed states on touch (iOS Safari), as the library's `Styles` does.
 const TouchActive: FunctionComponent = () => {
   useTouchActive();
+
+  return null;
+};
+
+// iOS: no zoom or layout shift as fields are focused, everywhere (the demos'
+// own controls too); `?guards=off` to compare without (see Viewport's
+// `useInputZoomPrevention`, `useFocusShiftPrevention`).
+const InputGuards: FunctionComponent = () => {
+  const enabled =
+    typeof location === 'undefined' ||
+    new URLSearchParams(location.search).get('guards') !== 'off';
+  useInputZoomPrevention(enabled);
+  useFocusShiftPrevention(undefined, enabled);
 
   return null;
 };
@@ -106,6 +123,7 @@ export const Demo: FunctionComponent = () => (
       <ErrorBoundary>
         <ColorScheme />
         <TouchActive />
+        <InputGuards />
         <Router onRouteChange={onRouteChange}>
           <Route
             component={IndexPage}

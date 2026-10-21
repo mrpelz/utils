@@ -23,18 +23,17 @@ const loadMonaco = () => {
 
 const theme = (dark: boolean) => (dark ? 'vs-dark' : 'vs');
 
-// Touches on the code don't reach Monaco's gestures (listening on the
-// document): they'd keep the page from scrolling (Monaco prevents their
-// moves), and the code scrolls natively instead (see CodeView).
-const keepTouch = (event: TouchEvent<HTMLDivElement>) =>
-  event.stopPropagation();
+/** A length in px from a computed style (`none`, or another unit: none). */
+const pixels = (value: string) =>
+  value.endsWith('px') ? Number.parseFloat(value) : Infinity;
 
 /**
  * Code shown in Monaco (read-only, TypeScript and JSX colorized), with a
- * button copying it. Monaco is as large as its content (its lines, its
- * longest one), within a native scroll container (capped by style.css,
- * e.g. in frames), so it never scrolls itself. Rendered on the client
- * only: until Monaco is there (and while prerendering), the plain text.
+ * button copying it. Monaco is as high as its content, at most its
+ * container's `max-height` (style.css, e.g. in frames), scrolling itself
+ * beyond (its find widget and sticky lines in place); at its ends, the
+ * wheel and swipes scroll the page on. Rendered on the client only: until
+ * Monaco is there (and while prerendering), the plain text.
  */
 export const CodeView: FunctionComponent<{ code: string }> = ({ code }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -70,22 +69,23 @@ export const CodeView: FunctionComponent<{ code: string }> = ({ code }) => {
           readOnly: true,
           renderLineHighlight: 'none',
           scrollBeyondLastLine: false,
-          scrollbar: {
-            alwaysConsumeMouseWheel: false,
-            horizontal: 'hidden',
-            vertical: 'hidden',
-          },
+          // (At its ends, the wheel scrolls the page on.)
+          scrollbar: { alwaysConsumeMouseWheel: false },
           theme: theme(initialRef.current.dark),
           // (UTF-8 in samples is intended, e.g. − and ×.)
           unicodeHighlight: { ambiguousCharacters: false },
           value: initialRef.current.code,
         });
 
-        // As large as its content (its lines, its longest one).
+        // As high as its content, at most its container's `max-height`.
         const fit = () => {
           if (!created) return;
-          container.style.height = `${String(created.getContentHeight())}px`;
-          container.style.width = `max(100%, ${String(created.getContentWidth())}px)`;
+          const { parentElement } = container;
+          const cap = parentElement
+            ? pixels(getComputedStyle(parentElement).maxHeight)
+            : Infinity;
+          const height = Math.min(created.getContentHeight(), cap);
+          container.style.height = `${String(height)}px`;
         };
         fit();
         created.onDidContentSizeChange(fit);
@@ -111,14 +111,28 @@ export const CodeView: FunctionComponent<{ code: string }> = ({ code }) => {
       .catch(() => undefined);
   }, [dark, editor]);
 
+  // A swipe at Monaco's end (as far as it scrolls that way): kept from its
+  // gestures (listening on the document, preventing the moves), so the page
+  // scrolls on.
+  const touchY = useRef(0);
+  const passAtEnds = (event: TouchEvent<HTMLDivElement>) => {
+    const y = event.touches[0]?.clientY ?? touchY.current;
+    const moved = touchY.current - y;
+    touchY.current = y;
+    if (!editor || event.type !== 'touchmove') return;
+    const top = editor.getScrollTop();
+    const end = editor.getScrollHeight() - editor.getLayoutInfo().height;
+    if ((moved < 0 && top <= 0) || (moved > 0 && top >= end - 1)) {
+      event.stopPropagation();
+    }
+  };
+
   return (
     <div className="demo-code">
       <div
         className="demo-code-editor"
-        onTouchCancel={keepTouch}
-        onTouchEnd={keepTouch}
-        onTouchMove={keepTouch}
-        onTouchStart={keepTouch}
+        onTouchMove={passAtEnds}
+        onTouchStart={passAtEnds}
       >
         <div ref={containerRef} />
       </div>

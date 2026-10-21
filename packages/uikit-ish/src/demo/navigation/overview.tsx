@@ -6,6 +6,7 @@ import {
   Header,
   List,
   Navigation,
+  type NavigationBackEventDetails,
   Page,
   Symbol,
   Toolbar,
@@ -15,7 +16,12 @@ import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { pages } from './content.js';
 import { navigationRootRows } from './docs.js';
 import { getPropOptionsGuideRoot } from './props.js';
@@ -32,10 +38,13 @@ const LiveView: FunctionComponent = () => {
     addLog(`push: ${key}`);
     setKeys((current) => [...current, key]);
   };
-  const pop = useCallback(() => {
-    addLog('pop');
-    setKeys((current) => current.slice(0, -1));
-  }, [addLog]);
+  const pop = useCallback(
+    ({ reason }: NavigationBackEventDetails) => {
+      addLog(`pop (${reason})`);
+      setKeys((current) => current.slice(0, -1));
+    },
+    [addLog],
+  );
 
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
@@ -63,15 +72,14 @@ const LiveView: FunctionComponent = () => {
                 <Header.Bar>
                   <Toolbar.Leading>
                     {depth > 0 ? (
-                      <Toolbar.Button
+                      <Navigation.Back
                         aria-label={pages[keys[depth - 1] ?? '']?.title}
-                        shape="circle"
-                        onClick={pop}
+                        render={<Toolbar.Button shape="circle" />}
                       >
                         <Button.Icon>
                           <Symbol icon={sfChevronBackward} />
                         </Button.Icon>
-                      </Toolbar.Button>
+                      </Navigation.Back>
                     ) : null}
                   </Toolbar.Leading>
                   <Toolbar.Title>
@@ -152,8 +160,12 @@ export const NavigationOverview: FunctionComponent = () => (
     <ul>
       <li>
         Hierarchical content, one level after another (Settings, Mail’s
-        mailboxes): rows drill in (<code>List.DrillIn</code>), a back button
-        returns.
+        mailboxes): rows drill in (
+        <PartLink
+          component="list"
+          part="List.DrillIn"
+        />
+        ), a back button returns.
       </li>
       <li>
         One stack per section of an app: per tab (a{' '}

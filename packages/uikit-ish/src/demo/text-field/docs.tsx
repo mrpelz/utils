@@ -5,6 +5,7 @@ import {
   PropRow,
   union,
 } from '../guide/props-table.js';
+import { PartLink } from '../guide/sections.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -15,7 +16,11 @@ const disabledRow: PropRow = [
   code('false'),
   <>
     Whether the component should ignore user interaction. Takes precedence over
-    the <code>disabled</code> prop on the <code>TextField.Control</code>{' '}
+    the <code>disabled</code> prop on the{' '}
+    <PartLink
+      component="text-field"
+      part="TextField.Control"
+    />{' '}
     component (its parts dimmed, 55%).
   </>,
 ];
@@ -28,7 +33,12 @@ export const textFieldRootRows: readonly PropRow[] = [
     undefined,
     <>
       Identifies the field when a form is submitted. Takes precedence over the{' '}
-      <code>name</code> prop on the <code>TextField.Control</code> component.
+      <code>name</code> prop on the{' '}
+      <PartLink
+        component="text-field"
+        part="TextField.Control"
+      />{' '}
+      component.
     </>,
   ],
   [
@@ -245,8 +255,16 @@ export const textFieldSearchRows: readonly PropRow[] = [
     undefined,
     <>
       Its content: a <a href="symbol">Symbol</a> (a magnifier), a{' '}
-      <code>TextField.Control</code>, a <code>TextField.Clear</code> (and e.g. a
-      dictation button).
+      <PartLink
+        component="text-field"
+        part="TextField.Control"
+      />
+      , a{' '}
+      <PartLink
+        component="text-field"
+        part="TextField.Clear"
+      />{' '}
+      (and e.g. a dictation button).
     </>,
   ],
   ...elementRows('label', 'HTMLLabelElement'),
@@ -268,8 +286,12 @@ export const textFieldItemRows: readonly PropRow[] = [
     code('false'),
     <>
       Whether the wrapped control should ignore user interaction. The{' '}
-      <code>disabled</code> prop on <code>TextField.Root</code> takes precedence
-      over this.
+      <code>disabled</code> prop on{' '}
+      <PartLink
+        component="text-field"
+        part="TextField.Root"
+      />{' '}
+      takes precedence over this.
     </>,
   ],
   ...baseUiRows('div', 'HTMLDivElement'),

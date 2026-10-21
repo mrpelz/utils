@@ -87,10 +87,16 @@ export const SwitchParts: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        <PartLink part="Switch.Root" />
+        <PartLink
+          component="switch"
+          part="Switch.Root"
+        />
         <ul>
           <li>
-            <PartLink part="Switch.Thumb" />
+            <PartLink
+              component="switch"
+              part="Switch.Thumb"
+            />
           </li>
         </ul>
       </li>

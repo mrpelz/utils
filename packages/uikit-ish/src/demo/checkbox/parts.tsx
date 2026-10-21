@@ -41,8 +41,6 @@ const contacts = [
   ['mail', 'Mail'],
 ] as const;
 
-const contactValues = contacts.map(([value]) => value);
-
 /** `Checkbox.Root`, outlined, with its props. */
 const CheckboxRootPart: FunctionComponent = () => {
   const id = 'checkbox-parts-checkbox-root';
@@ -237,7 +235,6 @@ const CheckboxGroupPart: FunctionComponent = () => {
     >
       <CheckboxGroup
         key={elementKey}
-        allValues={contactValues}
         aria-label="Notify by"
         {...props}
       >
@@ -310,46 +307,89 @@ export const CheckboxParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        A <code>Checkbox.Root</code> or a <code>Radio.Root</code>, showing its
-        indicator (a checkmark, or a dash while mixed) while ticked.
+        A{' '}
+        <PartLink
+          component="checkbox"
+          part="Checkbox.Root"
+        />{' '}
+        or a{' '}
+        <PartLink
+          component="checkbox"
+          part="Radio.Root"
+        />
+        , showing its indicator (a checkmark, or a dash while mixed) while
+        ticked.
       </li>
       <li>
-        Radios share a value in a <code>RadioGroup</code>.
+        Radios share a value in a{' '}
+        <PartLink
+          component="checkbox"
+          part="RadioGroup"
+        />
+        .
       </li>
       <li>
-        Checkboxes can share one in a <code>CheckboxGroup</code>, with a parent
-        checkbox for all.
+        Checkboxes can share one in a{' '}
+        <PartLink
+          component="checkbox"
+          part="CheckboxGroup"
+        />
+        , with a parent checkbox for all.
       </li>
     </ul>
     <ul>
       <li>
-        <PartLink part="Checkbox.Root" />
+        <PartLink
+          component="checkbox"
+          part="Checkbox.Root"
+        />
         <ul>
           <li>
-            <PartLink part="Checkbox.Indicator" /> (by default: a checkmark and
-            a dash)
+            <PartLink
+              component="checkbox"
+              part="Checkbox.Indicator"
+            />{' '}
+            (by default: a checkmark and a dash)
           </li>
         </ul>
       </li>
       <li>
-        <PartLink part="RadioGroup" />
+        <PartLink
+          component="checkbox"
+          part="RadioGroup"
+        />
         <ul>
           <li>
-            <PartLink part="Radio.Root" /> (two or more)
+            <PartLink
+              component="checkbox"
+              part="Radio.Root"
+            />{' '}
+            (two or more)
             <ul>
               <li>
-                <PartLink part="Radio.Indicator" /> (by default: a checkmark)
+                <PartLink
+                  component="checkbox"
+                  part="Radio.Indicator"
+                />{' '}
+                (by default: a checkmark)
               </li>
             </ul>
           </li>
         </ul>
       </li>
       <li>
-        <PartLink part="CheckboxGroup" /> (optional)
+        <PartLink
+          component="checkbox"
+          part="CheckboxGroup"
+        />{' '}
+        (optional)
         <ul>
           <li>
-            <PartLink part="Checkbox.Root" /> (a <code>parent</code>, and
-            children)
+            <PartLink
+              component="checkbox"
+              part="Checkbox.Root"
+            />{' '}
+            (a <code>parent</code>, and children)
           </li>
         </ul>
       </li>
@@ -409,7 +449,11 @@ export const CheckboxParts: FunctionComponent = () => (
     <ul>
       <li>
         Base UI’s radio, as a selection circle, by its <code>value</code>, in a{' '}
-        <code>RadioGroup</code>.
+        <PartLink
+          component="checkbox"
+          part="RadioGroup"
+        />
+        .
       </li>
       <li>Chosen while the group’s value is its own.</li>
       <li>

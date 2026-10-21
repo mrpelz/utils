@@ -1,21 +1,35 @@
 /* eslint-disable unicorn/prefer-ternary */
 import './style.css';
 
+import { useRender } from '@base-ui/react/use-render';
 import {
   Children,
+  createContext,
   forwardRef,
   isValidElement,
+  MouseEvent,
   PointerEvent,
   ReactElement,
+  useContext,
   useLayoutEffect,
   useRef,
   useState,
 } from 'react';
 
 import { cn, useForwardedRef } from '../utils/main.js';
-import type { NavigationRootProps, Role, Transition } from './props.js';
+import type {
+  NavigationBackEventDetails,
+  NavigationBackProps,
+  NavigationRootProps,
+  Role,
+  Transition,
+} from './props.js';
 
-export type { NavigationRootProps } from './props.js';
+export type {
+  NavigationBackEventDetails,
+  NavigationBackProps,
+  NavigationRootProps,
+} from './props.js';
 
 // Navigation (UIKit `UINavigationController`, after Framework7's views and
 // `router` transitions, without its routing): a stack of pages, the app's
@@ -32,7 +46,8 @@ export type { NavigationRootProps } from './props.js';
 // Swiping from the top page's leading edge (touch, or a mouse) pops it
 // interactively: released past half the width (or flung), `onBack` is
 // called for the app to pop its stack (the transition is done by then);
-// otherwise it settles back.
+// otherwise it settles back. A `Back` (e.g. a bar's back button) calls
+// `onBack` too, the app's pop transitioning as any.
 //
 // Pages under the top one stay mounted (their state and scroll positions
 // kept), hidden. A page's `Header` moves with its page, its bar too.
@@ -58,6 +73,11 @@ const isPrefix = (shorter: string[], longer: string[]) =>
 
 const sameKeys = (a: string[], b: string[]) =>
   a.length === b.length && a.every((key, index) => b[index] === key);
+
+type GoBack = (eventDetails: NavigationBackEventDetails) => void;
+
+/** Its stack, for its `Back`s: going back (the app's `onBack`), if it can. */
+const NavigationContext = createContext<{ back?: GoBack }>({});
 
 /** A navigation: the app's stack of pages (keyed children, see above). */
 const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
@@ -193,7 +213,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
       ) {
         animate(swipe.progress, 1, () => {
           swipedRef.current = top;
-          onBack?.();
+          onBack?.({ event, reason: 'swipe' });
           // Not popped by the app after all: back.
           timerRef.current = setTimeout(() => {
             if (swipedRef.current !== top) return;
@@ -206,80 +226,116 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
       animate(swipe.progress, 0, rest);
     };
 
+    const back =
+      onBack && keys.length > 1
+        ? (eventDetails: NavigationBackEventDetails) => onBack(eventDetails)
+        : undefined;
+
     return (
-      <div
-        ref={ref}
-        data-navigation-moving={transition ? '' : undefined}
-        data-navigation-part="root"
-        {...props}
-        className={cn('uikit-navigation-root', className)}
-      >
-        {shown.map((page, index) => {
-          const key = String(page.key);
-          const role = roleOf(key, index, shown.length);
-          return (
-            // A page's frame. In a transition (see `Root`), the upper page
-            // (`top`) and the one under it (`under`) move by the progress (0:
-            // the upper shown), their headers with them. At rest, none of it
-            // applies (no transforms, which would isolate glass' blending).
+      <NavigationContext.Provider value={{ back }}>
+        <div
+          ref={ref}
+          data-navigation-moving={transition ? '' : undefined}
+          data-navigation-part="root"
+          {...props}
+          className={cn('uikit-navigation-root', className)}
+        >
+          {shown.map((page, index) => {
+            const key = String(page.key);
+            const role = roleOf(key, index, shown.length);
+            return (
+              // A page's frame. In a transition (see `Root`), the upper page
+              // (`top`) and the one under it (`under`) move by the progress (0:
+              // the upper shown), their headers with them. At rest, none of it
+              // applies (no transforms, which would isolate glass' blending).
+              <div
+                key={key}
+                aria-hidden={role === 'current' ? undefined : true}
+                className="uikit-navigation-frame"
+                data-navigation-part="page"
+                data-navigation-role={role}
+                inert={role !== 'current'}
+              >
+                {page}
+              </div>
+            );
+          })}
+          {canSwipe || swipeRef.current ? (
+            // Where a swipe back starts: the leading edge, over the pages.
             <div
-              key={key}
-              aria-hidden={role === 'current' ? undefined : true}
-              className="uikit-navigation-frame"
-              data-navigation-part="page"
-              data-navigation-role={role}
-              inert={role !== 'current'}
-            >
-              {page}
-            </div>
-          );
-        })}
-        {canSwipe || swipeRef.current ? (
-          // Where a swipe back starts: the leading edge, over the pages.
-          <div
-            className="uikit-navigation-edge"
-            data-navigation-part="edge"
-            onLostPointerCapture={endSwipe}
-            onPointerCancel={endSwipe}
-            onPointerUp={endSwipe}
-            onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
-              const { current: root } = ref;
-              const top = keys.at(-1);
-              const under = keys.at(-2);
-              if (!root || !top || !under || event.button !== 0) return;
-              event.preventDefault();
-              event.currentTarget.setPointerCapture(event.pointerId);
-              swipeRef.current = {
-                pointerId: event.pointerId,
-                moves: [[performance.now(), 0]],
-                progress: 0,
-                width: root.clientWidth,
-                x: event.clientX,
-              };
-              setProgress(0, false);
-              setTransition({ top, under });
-            }}
-            onPointerMove={(event: PointerEvent<HTMLDivElement>) => {
-              const { current: swipe } = swipeRef;
-              const { current: root } = ref;
-              if (swipe?.pointerId !== event.pointerId || !root) return;
-              const direction =
-                getComputedStyle(root).direction === 'rtl' ? -1 : 1;
-              const moved = (event.clientX - swipe.x) * direction;
-              swipe.progress = Math.min(Math.max(moved / swipe.width, 0), 1);
-              swipe.moves = [
-                ...swipe.moves.slice(-8),
-                [performance.now(), swipe.progress],
-              ];
-              setProgress(swipe.progress, false);
-            }}
-          />
-        ) : null}
-      </div>
+              className="uikit-navigation-edge"
+              data-navigation-part="edge"
+              onLostPointerCapture={endSwipe}
+              onPointerCancel={endSwipe}
+              onPointerUp={endSwipe}
+              onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
+                const { current: root } = ref;
+                const top = keys.at(-1);
+                const under = keys.at(-2);
+                if (!root || !top || !under || event.button !== 0) return;
+                event.preventDefault();
+                event.currentTarget.setPointerCapture(event.pointerId);
+                swipeRef.current = {
+                  pointerId: event.pointerId,
+                  moves: [[performance.now(), 0]],
+                  progress: 0,
+                  width: root.clientWidth,
+                  x: event.clientX,
+                };
+                setProgress(0, false);
+                setTransition({ top, under });
+              }}
+              onPointerMove={(event: PointerEvent<HTMLDivElement>) => {
+                const { current: swipe } = swipeRef;
+                const { current: root } = ref;
+                if (swipe?.pointerId !== event.pointerId || !root) return;
+                const direction =
+                  getComputedStyle(root).direction === 'rtl' ? -1 : 1;
+                const moved = (event.clientX - swipe.x) * direction;
+                swipe.progress = Math.min(Math.max(moved / swipe.width, 0), 1);
+                swipe.moves = [
+                  ...swipe.moves.slice(-8),
+                  [performance.now(), swipe.progress],
+                ];
+                setProgress(swipe.progress, false);
+              }}
+            />
+          ) : null}
+        </div>
+      </NavigationContext.Provider>
     );
+  },
+);
+
+/**
+ * A button taking its navigation back (its `onBack`, the app popping its
+ * stack), e.g. a bar's back button (`render`: a `Toolbar.Button`); on the
+ * root page (nothing to go back to), disabled.
+ */
+const Back = forwardRef<HTMLButtonElement, NavigationBackProps>(
+  ({ disabled, onClick, render, ...props }, ref) => {
+    const { back } = useContext(NavigationContext);
+
+    return useRender({
+      defaultTagName: 'button',
+      props: {
+        'data-navigation-part': 'back',
+        disabled: disabled ?? !back,
+        type: 'button',
+        ...props,
+        onClick: (event: MouseEvent<HTMLButtonElement>) => {
+          onClick?.(event);
+          if (event.defaultPrevented) return;
+          back?.({ event, reason: 'back-press' });
+        },
+      },
+      ref,
+      render,
+    });
   },
 );
 
 export const Navigation = {
   Root,
+  Back,
 };

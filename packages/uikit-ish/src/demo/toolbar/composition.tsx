@@ -25,7 +25,12 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { messages } from '../list/content.js';
 import { names } from '../viewport/content.js';
@@ -476,9 +481,12 @@ export const ToolbarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <code>Header.Bar</code> is a toolbar at the top (
-        <code>placement=&quot;block-start&quot;</code>), sticking to the top of
-        its page’s scroll container.
+        <PartLink
+          component="header"
+          part="Header.Bar"
+        />{' '}
+        is a toolbar at the top (<code>placement=&quot;block-start&quot;</code>
+        ), sticking to the top of its page’s scroll container.
       </li>
       <li>
         Back at its start, the page’s title (a subtitle below it) centered, the
@@ -524,7 +532,11 @@ export const ToolbarComposition: FunctionComponent = () => (
     <ul>
       <li>
         iOS 26’s search at the bottom (Mail, Contacts): a{' '}
-        <a href="text-field">Text field</a>’s <code>TextField.Search</code>{' '}
+        <a href="text-field">Text field</a>’s{' '}
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />{' '}
         between a button at each end, taking the bar’s free space.
       </li>
       <li>
@@ -533,7 +545,11 @@ export const ToolbarComposition: FunctionComponent = () => (
       </li>
       <li>
         Pushed up by the on-screen keyboard with its bar (
-        <code>Viewport.BlockEnd</code>, <code>keyboard=&quot;push&quot;</code>
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />
+        , <code>keyboard=&quot;push&quot;</code>
         ).
       </li>
     </ul>

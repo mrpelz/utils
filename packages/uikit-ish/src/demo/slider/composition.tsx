@@ -24,7 +24,12 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { time } from './content.js';
 
@@ -501,7 +506,11 @@ export const SliderComposition: FunctionComponent = () => (
         pass each other (<code>thumbCollisionBehavior</code>).
       </li>
       <li>
-        <code>Slider.Value</code> shows both, formatted as a currency.
+        <PartLink
+          component="slider"
+          part="Slider.Value"
+        />{' '}
+        shows both, formatted as a currency.
       </li>
       <li>
         Inputs’ <code>aria-valuetext</code>: “€40 start range”, “€120 end
@@ -519,13 +528,21 @@ export const SliderComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <code>Slider.Label</code> names the inputs (no <code>aria-label</code>{' '}
-        needed).
+        A{' '}
+        <PartLink
+          component="slider"
+          part="Slider.Label"
+        />{' '}
+        names the inputs (no <code>aria-label</code> needed).
       </li>
       <li>
-        With <code>Slider.Value</code>: above the track (
-        <code>block-start</code>: label at the line’s start, value at its end),
-        or beside it.
+        With{' '}
+        <PartLink
+          component="slider"
+          part="Slider.Value"
+        />
+        : above the track (<code>block-start</code>: label at the line’s start,
+        value at its end), or beside it.
       </li>
       <li>
         In a <a href="form">Form</a>: Base UI’s <code>Field.Root</code> names

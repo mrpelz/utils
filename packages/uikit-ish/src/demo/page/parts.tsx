@@ -67,7 +67,10 @@ export const PageParts: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        <PartLink part="Page.Root" />
+        <PartLink
+          component="page"
+          part="Page.Root"
+        />
         <ul>
           <li>
             a <a href="header">Header</a> (optional)

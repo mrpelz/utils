@@ -223,18 +223,33 @@ export const SegmentedParts: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        <PartLink part="Segmented.Root" />
+        <PartLink
+          component="segmented"
+          part="Segmented.Root"
+        />
         <ul>
           <li>
-            <PartLink part="Segmented.Item" /> (two or more)
+            <PartLink
+              component="segmented"
+              part="Segmented.Item"
+            />{' '}
+            (two or more)
             <ul>
               <li>
-                <PartLink part="Segmented.Indicator" /> (optional)
+                <PartLink
+                  component="segmented"
+                  part="Segmented.Indicator"
+                />{' '}
+                (optional)
               </li>
             </ul>
           </li>
           <li>
-            <PartLink part="Segmented.Highlight" /> (last)
+            <PartLink
+              component="segmented"
+              part="Segmented.Highlight"
+            />{' '}
+            (last)
           </li>
         </ul>
       </li>

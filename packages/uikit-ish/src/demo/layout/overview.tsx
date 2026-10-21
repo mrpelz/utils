@@ -9,27 +9,40 @@ import {
   Page,
   Symbol,
   Toolbar,
+  useCreateDrawerHandle,
 } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
+import { codeLabel } from '../frame/render-code.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { rowTitles, sidebarSections } from '../sidebar/content.js';
 import { names } from '../viewport/content.js';
-import { layoutColumnRows, layoutRootRows } from './docs.js';
+import {
+  layoutColumnRows,
+  layoutDrawerRows,
+  layoutDrawerSwipeAreaRows,
+  layoutRootRows,
+} from './docs.js';
 import { getPropOptionsGuideColumn, propOptionsGuideRoot } from './props.js';
 
 /**
  * A tablet: a list column (resizable) beside the selected row's page;
- * compact (a phone), the list a drawer.
+ * compact (a phone), the list a drawer's.
  */
 const LiveView: FunctionComponent = () => {
   const id = 'layout-overview';
   const [log, addLog] = useLog();
   const [selected, setSelected] = useState('inbox');
-  const [open, setOpen] = useState(false);
+  // Its trigger, in the content's bar (outside the drawer).
+  const listDrawer = codeLabel(useCreateDrawerHandle(), 'listDrawer');
   const [externalRoot, externalColumn] = useProvidedState(id);
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsGuideRoot,
@@ -59,72 +72,78 @@ const LiveView: FunctionComponent = () => {
     >
       <div className={compact ? 'layout-demo-phone' : 'layout-demo-tablet'}>
         <Layout.Root {...propsRoot}>
-          <Layout.Column
-            key={keyColumn}
-            drawer="inline-start"
-            open={open}
-            onOpenChange={(next: boolean) => {
-              addLog(`open: ${String(next)}`);
-              setOpen(next);
+          <Layout.Drawer
+            handle={listDrawer}
+            onOpenChange={(next: boolean, { reason }) => {
+              addLog(`open: ${String(next)} (${reason})`);
             }}
-            {...propsColumn}
           >
-            <Page.Root>
-              <Header.Root>
-                <Header.Bar>
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
-                    <span>Mailboxes</span>
-                  </Toolbar.Title>
-                  <Toolbar.Trailing />
-                </Header.Bar>
-              </Header.Root>
-              <List.Root>
-                {sidebarSections.map(([title, rows]) => (
-                  <List.Section key={title}>
-                    <List.Header>
-                      <List.Title>{title}</List.Title>
-                    </List.Header>
-                    <List.Group>
-                      {rows.map(([value, rowTitle, icon]) => (
-                        <List.Item key={value}>
-                          <List.Image variant="symbol">
-                            <Symbol icon={icon} />
-                          </List.Image>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => {
-                              addLog(`select: ${value}`);
-                              setSelected(value);
-                              setOpen(false);
-                            }}
-                          >
-                            {rowTitle}
-                          </List.Title>
-                          {selected === value ? <List.Checkmark /> : null}
-                        </List.Item>
-                      ))}
-                    </List.Group>
-                  </List.Section>
-                ))}
-              </List.Root>
-            </Page.Root>
-          </Layout.Column>
+            <Layout.DrawerSwipeArea />
+            <Layout.Column
+              key={keyColumn}
+              {...propsColumn}
+            >
+              <Page.Root>
+                <Header.Root>
+                  <Header.Bar>
+                    <Toolbar.Leading />
+                    <Toolbar.Title>
+                      <span>Mailboxes</span>
+                    </Toolbar.Title>
+                    <Toolbar.Trailing />
+                  </Header.Bar>
+                </Header.Root>
+                <List.Root>
+                  {sidebarSections.map(([title, rows]) => (
+                    <List.Section key={title}>
+                      <List.Header>
+                        <List.Title>{title}</List.Title>
+                      </List.Header>
+                      <List.Group>
+                        {rows.map(([value, rowTitle, icon]) => (
+                          <List.Item key={value}>
+                            <List.Image variant="symbol">
+                              <Symbol icon={icon} />
+                            </List.Image>
+                            {/* (Chosen: its drawer closes.) */}
+                            <List.Title
+                              render={<Layout.DrawerClose />}
+                              onClick={() => {
+                                addLog(`select: ${value}`);
+                                setSelected(value);
+                              }}
+                            >
+                              {rowTitle}
+                            </List.Title>
+                            {selected === value ? <List.Checkmark /> : null}
+                          </List.Item>
+                        ))}
+                      </List.Group>
+                    </List.Section>
+                  ))}
+                </List.Root>
+              </Page.Root>
+            </Layout.Column>
+          </Layout.Drawer>
           <Layout.Column>
             <Page.Root>
               <Header.Root>
                 <Header.Bar>
                   <Toolbar.Leading>
                     {compact ? (
-                      <Toolbar.Button
-                        aria-label="Mailboxes"
-                        shape="circle"
-                        onClick={() => setOpen(true)}
+                      <Layout.DrawerTrigger
+                        handle={listDrawer}
+                        render={
+                          <Toolbar.Button
+                            aria-label="Mailboxes"
+                            shape="circle"
+                          />
+                        }
                       >
                         <Button.Icon>
                           <Symbol icon={sfListBullet} />
                         </Button.Icon>
-                      </Toolbar.Button>
+                      </Layout.DrawerTrigger>
                     ) : null}
                   </Toolbar.Leading>
                   <Toolbar.Title>
@@ -176,8 +195,8 @@ export const LayoutOverview: FunctionComponent = () => (
         others (a <a href="sidebar">Sidebar</a>).
       </li>
       <li>
-        Compact (a phone, the app’s choice): drawers swiped in from the edges.
-        This library’s own; no Base UI component.
+        Compact (a phone, the app’s choice): drawers swiped in from the edges
+        (Base UI’s <code>Drawer</code>).
       </li>
     </ul>
     <LiveView />
@@ -243,10 +262,23 @@ export const LayoutOverview: FunctionComponent = () => (
             'resizable',
             'floating',
             'clearFloating',
-            'drawer',
-            'swipeEdgeWidth',
-            'dismissOnOutsidePress',
           ),
+        ],
+        [
+          'Layout.Drawer',
+          pickRows(
+            layoutDrawerRows,
+            'side',
+            'defaultOpen',
+            'open',
+            'onOpenChange',
+            'handle',
+            'disablePointerDismissal',
+          ),
+        ],
+        [
+          'Layout.DrawerSwipeArea',
+          pickRows(layoutDrawerSwipeAreaRows, 'width', 'disabled'),
         ],
       ]}
     />
@@ -269,14 +301,17 @@ export const LayoutOverview: FunctionComponent = () => (
         resize it (10px; Shift: 50px), Home and End to its smallest and largest.
       </li>
       <li>
-        A closed drawer is hidden and <code>inert</code>. Opened, focus isn’t
-        moved into it, and Escape doesn’t close it: the app moves focus and
-        closes it (e.g. as a row is chosen); the dimmed content, pressed, closes
-        it too.
+        A drawer is Base UI’s <code>Drawer</code> (a dialog): opened, focus
+        moves into it and stays there (modal); Escape closes it, focus returning
+        to its trigger. A closed one is hidden.
       </li>
       <li>
-        Swiping a drawer in is a pointer gesture: a button opens it too (as
-        here, compact).
+        Swiping a drawer in is a pointer gesture: a{' '}
+        <PartLink
+          component="layout"
+          part="Layout.DrawerTrigger"
+        />{' '}
+        opens it too (as here, compact).
       </li>
       <li>
         Its drawers’ and dimming’s transitions (300ms) don’t follow{' '}
@@ -306,16 +341,39 @@ export const LayoutOverview: FunctionComponent = () => (
         page’s content by its size.
       </li>
       <li>
-        Compact: <code>drawer</code> columns over the others at their side (at
-        most 44px short of the layout’s width), hidden until opened: swiped in
-        from a strip at their edge (<code>swipeEdgeWidth</code>, 20px; 0: by the
-        app only), swiped back or the dimmed content pressed to close (
-        <code>dismissOnOutsidePress</code>); dragged a third of their width (or
-        flung), they switch.
+        Compact: a{' '}
+        <PartLink
+          component="layout"
+          part="Layout.Drawer"
+        />
+        ’s column over the others at its <code>side</code> (at most 44px short
+        of the layout’s width), hidden until opened: swiped in from its{' '}
+        <PartLink
+          component="layout"
+          part="Layout.DrawerSwipeArea"
+        />{' '}
+        (a strip at its edge, its <code>width</code> 20px; none: not swiped in)
+        or by a{' '}
+        <PartLink
+          component="layout"
+          part="Layout.DrawerTrigger"
+        />
+        ; swiped back, the dimmed content pressed (unless{' '}
+        <code>disablePointerDismissal</code>) or a{' '}
+        <PartLink
+          component="layout"
+          part="Layout.DrawerClose"
+        />{' '}
+        to close. Swiped, it follows the finger; let go past half its width (or
+        flung), it switches (Base UI’s rule).
       </li>
       <li>
-        Behind it all, a <code>Layout.Background</code> of the app’s, where
-        columns have none.
+        Behind it all, a{' '}
+        <PartLink
+          component="layout"
+          part="Layout.Background"
+        />{' '}
+        of the app’s, where columns have none.
       </li>
       <li>Mirrored right to left (drawers’ sides, dividers’ keys).</li>
     </ul>

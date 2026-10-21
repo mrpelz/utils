@@ -636,40 +636,84 @@ export const ToolbarParts: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        <PartLink part="Toolbar.Root" />
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Root"
+        />
         <ul>
           <li>
-            <PartLink part="Toolbar.Leading" />
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Leading"
+            />
             <ul>
               <li>
-                <PartLink part="Toolbar.Button" /> (of its own), or
+                <PartLink
+                  component="toolbar"
+                  part="Toolbar.Button"
+                />{' '}
+                (of its own), or
               </li>
               <li>
-                <PartLink part="Toolbar.Group" />
+                <PartLink
+                  component="toolbar"
+                  part="Toolbar.Group"
+                />
                 <ul>
                   <li>
-                    <PartLink part="Toolbar.Button" /> (several)
+                    <PartLink
+                      component="toolbar"
+                      part="Toolbar.Button"
+                    />{' '}
+                    (several)
                   </li>
                 </ul>
               </li>
             </ul>
           </li>
           <li>
-            <PartLink part="Toolbar.Title" /> (or a control, e.g.{' '}
-            <PartLink part="Toolbar.Input" />)
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Title"
+            />{' '}
+            (or a control, e.g.{' '}
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Input"
+            />
+            )
             <ul>
               <li>
-                <PartLink part="Toolbar.Subtitle" />
+                <PartLink
+                  component="toolbar"
+                  part="Toolbar.Subtitle"
+                />
               </li>
             </ul>
           </li>
           <li>
-            <PartLink part="Toolbar.Trailing" /> (as <code>Leading</code>)
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Trailing"
+            />{' '}
+            (as <code>Leading</code>)
           </li>
           <li>
-            Also: <PartLink part="Toolbar.Spacer" />,{' '}
-            <PartLink part="Toolbar.Separator" />,{' '}
-            <PartLink part="Toolbar.Link" />
+            Also:{' '}
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Spacer"
+            />
+            ,{' '}
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Separator"
+            />
+            ,{' '}
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Link"
+            />
           </li>
         </ul>
       </li>
@@ -683,8 +727,12 @@ export const ToolbarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The bar (Base UI’s <code>Toolbar.Root</code>, a <code>toolbar</code>): a
-        row, its parts 12px apart (top: 10px).
+        The bar (Base UI’s{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Root"
+        />
+        , a <code>toolbar</code>): a row, its parts 12px apart (top: 10px).
       </li>
       <li>
         <code>placement</code>: at the bottom (48px capsules, padded for the
@@ -780,8 +828,12 @@ export const ToolbarParts: FunctionComponent = () => (
         white (or <code>textColor</code>).
       </li>
       <li>
-        Renders a <code>div</code> (Base UI’s <code>Toolbar.Group</code>, a{' '}
-        <code>group</code>).
+        Renders a <code>div</code> (Base UI’s{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Group"
+        />
+        , a <code>group</code>).
       </li>
     </ul>
     <GroupPart />
@@ -797,7 +849,16 @@ export const ToolbarParts: FunctionComponent = () => (
     <ul>
       <li>
         A <a href="button">Button</a> in the toolbar’s keyboard navigation, with{' '}
-        <code>Button.Icon</code> or <code>Button.Label</code> content.
+        <PartLink
+          component="button"
+          part="Button.Icon"
+        />{' '}
+        or{' '}
+        <PartLink
+          component="button"
+          part="Button.Label"
+        />{' '}
+        content.
       </li>
       <li>
         Of its own: a glass button, as high as the bar’s capsules (a circle for
@@ -886,7 +947,11 @@ export const ToolbarParts: FunctionComponent = () => (
       </li>
       <li>
         No styles here: for a button’s look, render a{' '}
-        <code>Toolbar.Button</code> as a link (<code>render</code>,{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Button"
+        />{' '}
+        as a link (<code>render</code>,{' '}
         <code>nativeButton=&#123;false&#125;</code>).
       </li>
     </ul>
@@ -907,7 +972,11 @@ export const ToolbarParts: FunctionComponent = () => (
       </li>
       <li>
         No styles here: for iOS’s search field, a{' '}
-        <a href="text-field">Text field</a>’s <code>TextField.Search</code>{' '}
+        <a href="text-field">Text field</a>’s{' '}
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />{' '}
         between the sides (see <a href="toolbar/composition">Composition</a>).
       </li>
     </ul>

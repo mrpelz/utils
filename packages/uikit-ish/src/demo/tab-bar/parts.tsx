@@ -23,11 +23,12 @@ import {
   tabBarTabRows,
 } from './docs.js';
 import {
-  getPropOptionsTab,
+  getPropOptionsGuideTab,
   propOptionsAccessory,
   propOptionsGroup,
+  propOptionsGuideIndicator,
+  propOptionsGuidePanel,
   propOptionsList,
-  propOptionsPanel,
   propOptionsRoot,
   propOptionsStyling,
 } from './props.js';
@@ -262,7 +263,7 @@ const IndicatorPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
-    propOptionsStyling,
+    propOptionsGuideIndicator,
     'TabBar.Indicator',
     external,
     true,
@@ -325,7 +326,7 @@ const TabPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [external, externalList] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
-    useMemo(() => getPropOptionsTab(addLog), [addLog]),
+    useMemo(() => getPropOptionsGuideTab(addLog), [addLog]),
     'TabBar.Tab',
     external,
     true,
@@ -522,7 +523,7 @@ const PanelPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
-    propOptionsPanel,
+    propOptionsGuidePanel,
     'TabBar.Panel',
     external,
     true,
@@ -680,31 +681,64 @@ export const TabBarParts: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        <PartLink part="TabBar.Root" />
+        <PartLink
+          component="tab-bar"
+          part="TabBar.Root"
+        />
         <ul>
           <li>
-            <PartLink part="TabBar.Panel" /> (one per tab, optional)
+            <PartLink
+              component="tab-bar"
+              part="TabBar.Panel"
+            />{' '}
+            (one per tab, optional)
           </li>
           <li>
-            <PartLink part="TabBar.List" />
+            <PartLink
+              component="tab-bar"
+              part="TabBar.List"
+            />
             <ul>
               <li>
-                <PartLink part="TabBar.Group" /> (one or more)
+                <PartLink
+                  component="tab-bar"
+                  part="TabBar.Group"
+                />{' '}
+                (one or more)
                 <ul>
                   <li>
-                    <PartLink part="TabBar.Indicator" /> (first)
+                    <PartLink
+                      component="tab-bar"
+                      part="TabBar.Indicator"
+                    />{' '}
+                    (first)
                   </li>
                   <li>
-                    <PartLink part="TabBar.Tab" />:{' '}
-                    <PartLink part="TabBar.Icon" />,{' '}
-                    <PartLink part="TabBar.Label" />
+                    <PartLink
+                      component="tab-bar"
+                      part="TabBar.Tab"
+                    />
+                    :{' '}
+                    <PartLink
+                      component="tab-bar"
+                      part="TabBar.Icon"
+                    />
+                    ,{' '}
+                    <PartLink
+                      component="tab-bar"
+                      part="TabBar.Label"
+                    />
                   </li>
                 </ul>
               </li>
             </ul>
           </li>
           <li>
-            <PartLink part="TabBar.Accessory" /> (optional)
+            <PartLink
+              component="tab-bar"
+              part="TabBar.Accessory"
+            />{' '}
+            (optional)
           </li>
         </ul>
       </li>
@@ -894,7 +928,12 @@ export const TabBarParts: FunctionComponent = () => (
       <li>App content in a glass capsule, after the list.</li>
       <li>
         Above the groups; between them while the bar is collapsed (collapse it
-        with <code>TabBar.List</code>’s control).
+        with{' '}
+        <PartLink
+          component="tab-bar"
+          part="TabBar.List"
+        />
+        ’s control).
       </li>
       <li>
         In both states, or one: <code>visibleIn</code>.

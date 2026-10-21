@@ -1,4 +1,5 @@
 import { elementRows, PropRow } from '../guide/props-table.js';
+import { PartLink } from '../guide/sections.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -10,9 +11,16 @@ export const sidebarRootRows: readonly PropRow[] = [
     undefined,
     <>
       Its content, top to bottom, scrolling inside it: a{' '}
-      <code>Sidebar.Toolbar</code>, a search field (
-      <code>TextField.Search</code>), a list (
-      <code>List.Root listStyle=&quot;sidebar&quot;</code>).
+      <PartLink
+        component="sidebar"
+        part="Sidebar.Toolbar"
+      />
+      , a search field (
+      <PartLink
+        component="text-field"
+        part="TextField.Search"
+      />
+      ), a list (<code>List.Root listStyle=&quot;sidebar&quot;</code>).
     </>,
   ],
   [
@@ -35,7 +43,11 @@ export const sidebarToolbarRows: readonly PropRow[] = [
     <>
       Buttons at its two ends (borderless <a href="button">Button</a>s, in the
       glass’ content color): one at each end, or a{' '}
-      <code>Sidebar.ToolbarGroup</code>.
+      <PartLink
+        component="sidebar"
+        part="Sidebar.ToolbarGroup"
+      />
+      .
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),

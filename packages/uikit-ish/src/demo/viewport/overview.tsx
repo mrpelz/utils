@@ -1,4 +1,4 @@
-import { FunctionComponent, RefObject, useRef } from 'react';
+import { FunctionComponent, RefObject } from 'react';
 
 import {
   List,
@@ -9,9 +9,15 @@ import {
 } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { usePropControl } from '../frame/prop-control.js';
+import { useLabelledRef } from '../frame/render-code.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { names } from './content.js';
 import {
   viewportAnchorRows,
@@ -119,7 +125,7 @@ const LiveViewFrame: FunctionComponent<{
 
 /** `LiveViewFrame`, tracking its screen's content layer. */
 const LiveView: FunctionComponent = () => {
-  const contentRef = useRef<HTMLDivElement>(null);
+  const contentRef = useLabelledRef<HTMLDivElement>('contentRef');
 
   return (
     <Viewport.Provider scroller={contentRef}>
@@ -176,19 +182,48 @@ export const ViewportOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        An app’s shell: its pages in <code>Viewport.Content</code>, its bars (a
-        tab bar, a toolbar) in <code>Viewport.BlockEnd</code> or{' '}
-        <code>Viewport.BlockStart</code> (see{' '}
-        <a href="viewport/composition">Composition</a>).
+        An app’s shell: its pages in{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Content"
+        />
+        , its bars (a tab bar, a toolbar) in{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />{' '}
+        or{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockStart"
+        />{' '}
+        (see <a href="viewport/composition">Composition</a>).
       </li>
       <li>
         A field that stays above the on-screen keyboard (a message field):{' '}
-        <code>Viewport.BlockEnd</code>, pushed up by it.
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />
+        , pushed up by it.
       </li>
       <li>
         Reacting to scrolling (collapsing a tab bar, hiding a toolbar):{' '}
-        <code>Viewport.Provider</code>, with <code>useScrollDirection</code> or{' '}
-        <code>useViewportScroll</code>.
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />
+        , with{' '}
+        <PartLink
+          component="viewport"
+          part="useScrollDirection"
+        />{' '}
+        or{' '}
+        <PartLink
+          component="viewport"
+          part="useViewportScroll"
+        />
+        .
       </li>
     </ul>
 
@@ -205,7 +240,12 @@ export const ViewportOverview: FunctionComponent = () => (
       </li>
       <li>
         Columns side by side (a sidebar beside the content, on iPad): a{' '}
-        <a href="layout">Layout</a> (in <code>Viewport.Content</code>).
+        <a href="layout">Layout</a> (in{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Content"
+        />
+        ).
       </li>
       <li>
         Something over the content, for a moment (a sheet, a menu): an overlay (
@@ -275,19 +315,35 @@ export const ViewportOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <code>useElementVisibility</code> (an <code>IntersectionObserver</code>)
-        and <code>useElementGeometry</code> (measured once a frame while it
-        scrolls or resizes, only while visible) need no provider: their area is
-        the layout viewport, or their <code>scroller</code>’s box.
+        <PartLink
+          component="viewport"
+          part="useElementVisibility"
+        />{' '}
+        (an <code>IntersectionObserver</code>) and{' '}
+        <PartLink
+          component="viewport"
+          part="useElementGeometry"
+        />{' '}
+        (measured once a frame while it scrolls or resizes, only while visible)
+        need no provider: their area is the layout viewport, or their{' '}
+        <code>scroller</code>’s box.
       </li>
       <li>
-        <code>Viewport.Provider</code> tracks the visual viewport (once per
-        frame, as it resizes or scrolls): as custom properties on the root
-        element (<code>--uikit-viewport-width</code>, <code>-height</code>,{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />{' '}
+        tracks the visual viewport (once per frame, as it resizes or scrolls):
+        as custom properties on the root element (
+        <code>--uikit-viewport-width</code>, <code>-height</code>,{' '}
         <code>-top</code>, <code>-left</code>, <code>-keyboard-inset</code>),
         which the anchors and the content layer follow, and for{' '}
-        <code>useVisualViewport</code>. Without a provider, they stay at the
-        layout viewport’s edges, ignoring the keyboard.
+        <PartLink
+          component="viewport"
+          part="useVisualViewport"
+        />
+        . Without a provider, they stay at the layout viewport’s edges, ignoring
+        the keyboard.
       </li>
       <li>
         The keyboard’s height: what the visual viewport doesn’t show of the

@@ -7,7 +7,12 @@ import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { symbolPairs } from './content.js';
 import {
@@ -207,8 +212,12 @@ export const SliderOverview: FunctionComponent = () => (
         <code>getAriaValueText</code>, e.g. a time.
       </li>
       <li>
-        Name every knob: a <code>Slider.Label</code> labels the inputs (
-        <code>aria-labelledby</code>), or give each thumb an{' '}
+        Name every knob: a{' '}
+        <PartLink
+          component="slider"
+          part="Slider.Label"
+        />{' '}
+        labels the inputs (<code>aria-labelledby</code>), or give each thumb an{' '}
         <code>aria-label</code> (a range’s two need different names, e.g.
         Minimum and Maximum). An <code>aria-label</code> on the root names only
         the group, not the inputs.
@@ -221,8 +230,12 @@ export const SliderOverview: FunctionComponent = () => (
       <li>
         The ticks and the value tooltips are hidden from assistive technology,
         as are the glyphs of the ends’ <code>Symbol</code>s (text in a{' '}
-        <code>Slider.Symbol</code> is read). The symbols aren’t focusable:
-        clicking them is a pointer’s shortcut for Home and End.
+        <PartLink
+          component="slider"
+          part="Slider.Symbol"
+        />{' '}
+        is read). The symbols aren’t focusable: clicking them is a pointer’s
+        shortcut for Home and End.
       </li>
       <li>
         Its animations (the pressed knob’s lens, momentary tooltips) don’t
@@ -250,8 +263,12 @@ export const SliderOverview: FunctionComponent = () => (
         <code>edge</code>), and the fill spans the whole track at the maximum.
       </li>
       <li>
-        <code>Slider.Value</code> reserves the width of its widest value, so the
-        track doesn’t shift while the value changes.
+        <PartLink
+          component="slider"
+          part="Slider.Value"
+        />{' '}
+        reserves the width of its widest value, so the track doesn’t shift while
+        the value changes.
       </li>
     </ul>
   </>

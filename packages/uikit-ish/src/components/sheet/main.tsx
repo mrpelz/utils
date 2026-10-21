@@ -1,19 +1,27 @@
 import '../glass/style.css';
 import './style.css';
 
-import { Dialog as BaseDialog } from '@base-ui/react/dialog';
+import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import {
   ComponentProps,
   forwardRef,
-  PointerEvent,
-  useRef,
+  useState,
   useSyncExternalStore,
 } from 'react';
 
 import { cn } from '../utils/main.js';
-import type { SheetPopupProps } from './props.js';
+import type {
+  SheetContentProps,
+  SheetHandle,
+  SheetPopupProps,
+} from './props.js';
 
-export type { SheetDetent, SheetPopupProps } from './props.js';
+export type {
+  SheetContentProps,
+  SheetDetent,
+  SheetHandle,
+  SheetPopupProps,
+} from './props.js';
 
 // Source: Apple iOS 26 Figma (“Sheets”): over the page dimmed (black, 20%;
 // dark: 48%):
@@ -27,9 +35,10 @@ export type { SheetDetent, SheetPopupProps } from './props.js';
 //   corners 38px.
 // Its header (Figma “Toolbar”): a grabber (36px by 5px, 5px from the top,
 // #cfcfcf) above the app's content (e.g. a `Toolbar`: Figma's 44px title
-// and controls). Base UI's `Dialog`: modal, dismissed by a press outside it
-// (or Escape); dragged down by its header, far enough (a third of its
-// height) or flung, too, otherwise springing back.
+// and controls). Base UI's `Drawer` (a `Dialog` with gestures): modal,
+// dismissed by a press outside it (or Escape); swiped down (anywhere, its
+// content scrolled to its top), far enough or flung, too, otherwise
+// springing back.
 //
 // Deviations:
 // - The glass is the menus' (see `Menu`).
@@ -68,100 +77,37 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
     const compact = compactProp ?? !regular;
 
     return (
-      <BaseDialog.Portal container={container}>
-        <BaseDialog.Backdrop
+      <BaseDrawer.Portal container={container}>
+        <BaseDrawer.Backdrop
           className="uikit-sheet-backdrop"
           data-sheet-part="backdrop"
         />
-        <BaseDialog.Popup
-          ref={ref}
-          data-compact={compact ? '' : undefined}
-          data-detent={detent}
-          data-sheet-part="popup"
-          className={cn(
-            'uikit-sheet-popup',
-            compact && detent === 'medium'
-              ? cn('uikit-glass-medium', className)
-              : className,
-          )}
-          {...props}
-        />
-      </BaseDialog.Portal>
+        <BaseDrawer.Viewport
+          className="uikit-sheet-viewport"
+          data-sheet-part="viewport"
+        >
+          <BaseDrawer.Popup
+            ref={ref}
+            data-compact={compact ? '' : undefined}
+            data-detent={detent}
+            data-sheet-part="popup"
+            className={cn(
+              'uikit-sheet-popup',
+              compact && detent === 'medium'
+                ? cn('uikit-glass-medium', className)
+                : className,
+            )}
+            {...props}
+          />
+        </BaseDrawer.Viewport>
+      </BaseDrawer.Portal>
     );
   },
 );
 
-// Dragged this far (of its height) or flung this fast (px/ms), it's
-// dismissed.
-const dismissShare = 1 / 3;
-const flingSpeed = 0.5;
-
-/**
- * Its header: its grabber, above the app's content (e.g. a `Toolbar`);
- * dragging it down dismisses the sheet.
- */
+/** Its header: its grabber, above the app's content (e.g. a `Toolbar`). */
 const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
-  ({ className, children, onPointerDown, ...props }, ref) => {
-    const closeRef = useRef<HTMLButtonElement>(null);
-
-    const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-      onPointerDown?.(event);
-      // Not from its controls.
-      if (
-        event.defaultPrevented ||
-        event.button !== 0 ||
-        (event.target instanceof Element &&
-          event.target.closest('button, a, input, [role=button]'))
-      ) {
-        return;
-      }
-
-      const popup = event.currentTarget.closest<HTMLElement>('[data-detent]');
-      if (!popup) return;
-
-      const start = event.clientY;
-      let last = { time: event.timeStamp, y: start };
-      let speed = 0;
-      const header = event.currentTarget;
-      header.setPointerCapture(event.pointerId);
-      popup.toggleAttribute('data-dragging', true);
-
-      const move = (moveEvent: globalThis.PointerEvent) => {
-        const distance = Math.max(0, moveEvent.clientY - start);
-        const elapsed = moveEvent.timeStamp - last.time;
-        if (elapsed > 0) speed = (moveEvent.clientY - last.y) / elapsed;
-        last = { time: moveEvent.timeStamp, y: moveEvent.clientY };
-        popup.style.setProperty('--uikit-sheet-drag', `${String(distance)}px`);
-      };
-      const end = (endEvent: globalThis.PointerEvent) => {
-        header.removeEventListener('pointermove', move);
-        header.removeEventListener('pointerup', end);
-        header.removeEventListener('pointercancel', end);
-        delete popup.dataset.dragging;
-
-        const distance = Math.max(0, endEvent.clientY - start);
-        const dismissed =
-          endEvent.type === 'pointerup' &&
-          (distance > popup.offsetHeight * dismissShare ||
-            (speed > flingSpeed && distance > 0));
-        // Dismissed, it leaves from where it is; otherwise it springs back,
-        // also when the app keeps it open (e.g. to confirm discarding, its
-        // `onOpenChange` ignoring the close).
-        if (!dismissed) {
-          popup.style.removeProperty('--uikit-sheet-drag');
-          return;
-        }
-        closeRef.current?.click();
-        requestAnimationFrame(() => {
-          if (Object.hasOwn(popup.dataset, 'endingStyle')) return;
-          popup.style.removeProperty('--uikit-sheet-drag');
-        });
-      };
-      header.addEventListener('pointermove', move);
-      header.addEventListener('pointerup', end);
-      header.addEventListener('pointercancel', end);
-    };
-
+  ({ className, children, ...props }, ref) => {
     // Only the grabber: over the content (see style.css).
     const grabberOnly = children === undefined || children === null;
 
@@ -172,23 +118,20 @@ const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
         data-sheet-part="header"
         {...props}
         className={cn('uikit-sheet-header', className)}
-        onPointerDown={handlePointerDown}
       >
         {children}
-        <BaseDialog.Close
-          ref={closeRef}
-          hidden
-          tabIndex={-1}
-        />
       </div>
     );
   },
 );
 
-// Its content, scrolling.
-const Content = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
+/**
+ * Its content, scrolling (Base UI's `Drawer.Content`: its text selectable by
+ * a mouse without swiping the sheet).
+ */
+const Content = forwardRef<HTMLDivElement, SheetContentProps>(
   ({ className, ...props }, ref) => (
-    <div
+    <BaseDrawer.Content
       ref={ref}
       className={cn('uikit-sheet-content', className)}
       data-sheet-part="content"
@@ -198,13 +141,32 @@ const Content = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
 );
 
 /**
- * A sheet (UIKit `UISheetPresentationController`; Base UI's `Dialog`): a
+ * A handle linking a sheet (its `handle`) to its triggers outside it, and
+ * opening or closing it imperatively (Base UI's `Drawer.createHandle`):
+ * made once, e.g. at a module's top level (in a component:
+ * `useCreateSheetHandle`).
+ */
+const createHandle = <Payload = unknown,>(): SheetHandle<Payload> =>
+  BaseDrawer.createHandle<Payload>();
+
+/** `Sheet.createHandle`, in a component: made once, for its lifetime. */
+export const useCreateSheetHandle = <
+  Payload = unknown,
+>(): SheetHandle<Payload> => {
+  const [handle] = useState(() => createHandle<Payload>());
+
+  return handle;
+};
+
+/**
+ * A sheet (UIKit `UISheetPresentationController`; Base UI's `Drawer`): a
  * modal panel for a scoped task, from the bottom (large or medium), or a
  * form sheet in a regular width.
  */
 export const Sheet = {
-  ...BaseDialog,
+  ...BaseDrawer,
   Popup,
   Header,
   Content,
+  createHandle,
 };

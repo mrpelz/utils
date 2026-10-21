@@ -6,7 +6,12 @@ import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { settings } from './content.js';
 import {
@@ -185,8 +190,12 @@ export const ListOverview: FunctionComponent = () => (
         An app’s top-level sections on iPhone: a <a href="tab-bar">Tab bar</a>.
       </li>
       <li>
-        Text between rows, without rows: a <code>List.Block</code> in a section
-        (see <a href="list/parts">Parts</a>).
+        Text between rows, without rows: a{' '}
+        <PartLink
+          component="list"
+          part="List.Block"
+        />{' '}
+        in a section (see <a href="list/parts">Parts</a>).
       </li>
     </ul>
 
@@ -235,35 +244,74 @@ export const ListOverview: FunctionComponent = () => (
         <code>selected</code> row has <code>aria-current</code>.
       </li>
       <li>
-        Chevrons (<code>List.DrillIn</code>, <code>List.Disclosure</code>) are
-        hidden from assistive technology, and so is a{' '}
-        <code>List.Checkmark</code>: the chosen row of a list of options isn’t
-        conveyed by it.
+        Chevrons (
+        <PartLink
+          component="list"
+          part="List.DrillIn"
+        />
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.Disclosure"
+        />
+        ) are hidden from assistive technology, and so is a{' '}
+        <PartLink
+          component="list"
+          part="List.Checkmark"
+        />
+        : the chosen row of a list of options isn’t conveyed by it.
       </li>
       <li>
-        Edit controls: <code>List.Checkbox</code> and <code>List.Radio</code>{' '}
+        Edit controls:{' '}
+        <PartLink
+          component="list"
+          part="List.Checkbox"
+        />{' '}
+        and{' '}
+        <PartLink
+          component="list"
+          part="List.Radio"
+        />{' '}
         have the <code>checkbox</code> and <code>radio</code> roles,{' '}
-        <code>List.EditButton</code> is a button; name each by its row (
-        <code>aria-label</code>). A <code>List.Grabber</code> is focusable
-        (without a role), named by its <code>aria-label</code>; arrow keys move
-        its row.
+        <PartLink
+          component="list"
+          part="List.EditButton"
+        />{' '}
+        is a button; name each by its row (<code>aria-label</code>). A{' '}
+        <PartLink
+          component="list"
+          part="List.Grabber"
+        />{' '}
+        is focusable (without a role), named by its <code>aria-label</code>;
+        arrow keys move its row.
       </li>
       <li>
         Swipe actions are buttons in the tab order, named by their{' '}
         <code>label</code>; focusing one opens its row’s actions. A closed{' '}
-        <code>List.Expandable</code> is inert.
+        <PartLink
+          component="list"
+          part="List.Expandable"
+        />{' '}
+        is inert.
       </li>
       <li>
-        <code>List.Index</code> is a <code>nav</code> (name it), its letters
-        buttons.
+        <PartLink
+          component="list"
+          part="List.Index"
+        />{' '}
+        is a <code>nav</code> (name it), its letters buttons.
       </li>
       <li>
         A collapsible section’s header, as Base UI’s{' '}
         <code>Collapsible.Trigger</code>, is a button with{' '}
         <code>aria-expanded</code>. In Chrome, its name leaves out the{' '}
-        <code>List.Title</code> in it (the title is <code>draggable</code>{' '}
-        <code>false</code>, which Chrome skips when naming an element by its
-        content); give the header an <code>aria-label</code>.
+        <PartLink
+          component="list"
+          part="List.Title"
+        />{' '}
+        in it (the title is <code>draggable</code> <code>false</code>, which
+        Chrome skips when naming an element by its content); give the header an{' '}
+        <code>aria-label</code>.
       </li>
       <li>
         Its animations (swiping, reordering, expanding) don’t follow{' '}
@@ -280,10 +328,13 @@ export const ListOverview: FunctionComponent = () => (
     <ul>
       <li>
         A row is pressable when its <code>Title</code> (or a{' '}
-        <code>List.Button</code>) is a button or link: its hit area covers the
-        row, beneath the trailing controls; pressed, the row shows UIKit’s
-        selection gray. A row with a control passes its clicks on to it (
-        <code>forwardClick</code>).
+        <PartLink
+          component="list"
+          part="List.Button"
+        />
+        ) is a button or link: its hit area covers the row, beneath the trailing
+        controls; pressed, the row shows UIKit’s selection gray. A row with a
+        control passes its clicks on to it (<code>forwardClick</code>).
       </li>
       <li>
         Rows are at least 52px high, 68px with a subtitle, growing with wrapping

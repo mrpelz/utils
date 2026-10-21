@@ -19,8 +19,8 @@ import { getPropOptionsRoot, propOptionsPopup } from './props.js';
 
 /**
  * A sheet (UIKit `UISheetPresentationController`, Figma “Sheets”, Base UI's
- * `Dialog`): a scoped task from the bottom (large or medium), a form sheet
- * in a regular width; dragged down by its header to dismiss it.
+ * `Drawer`): a scoped task from the bottom (large or medium), a form sheet
+ * in a regular width; swiped down to dismiss it.
  */
 export const SheetDemo: FunctionComponent = () => {
   const id = 'sheet';
@@ -44,7 +44,7 @@ export const SheetDemo: FunctionComponent = () => {
   return (
     <Component
       center
-      baseUiId="dialog"
+      baseUiId="drawer"
       controls={[controlRoot, controlPopup]}
       id={id}
       log={log}

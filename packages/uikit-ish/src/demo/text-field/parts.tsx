@@ -23,7 +23,9 @@ import {
   getPropOptionsClear,
   getPropOptionsControl,
   propOptionsError,
+  propOptionsGuideLabel,
   propOptionsGuideRoot,
+  propOptionsGuideSearch,
   propOptionsPart,
   suggestionsId,
 } from './props.js';
@@ -54,7 +56,6 @@ const RootPart: FunctionComponent = () => {
           <List.Group>
             <TextField.Root
               key={elementKey}
-              render={<List.Item />}
               {...props}
             >
               <TextField.Label>Name</TextField.Label>
@@ -74,7 +75,7 @@ const LabelPart: FunctionComponent = () => {
   const id = 'text-field-parts-label';
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
-    propOptionsPart,
+    propOptionsGuideLabel,
     'TextField.Label',
     external,
     true,
@@ -278,7 +279,7 @@ const SearchPart: FunctionComponent = () => {
   const id = 'text-field-parts-search';
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
-    propOptionsPart,
+    propOptionsGuideSearch,
     'TextField.Search',
     external,
     true,
@@ -328,27 +329,57 @@ export const TextFieldParts: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        <PartLink part="TextField.Root" />
+        <PartLink
+          component="text-field"
+          part="TextField.Root"
+        />
         <ul>
           <li>
-            <PartLink part="TextField.Label" /> (optional)
+            <PartLink
+              component="text-field"
+              part="TextField.Label"
+            />{' '}
+            (optional)
           </li>
           <li>
-            <PartLink part="TextField.Control" />, or{' '}
-            <PartLink part="TextField.Search" /> around it
+            <PartLink
+              component="text-field"
+              part="TextField.Control"
+            />
+            , or{' '}
+            <PartLink
+              component="text-field"
+              part="TextField.Search"
+            />{' '}
+            around it
           </li>
           <li>
-            <PartLink part="TextField.Clear" /> (optional; in the search
-            capsule, after its control)
+            <PartLink
+              component="text-field"
+              part="TextField.Clear"
+            />{' '}
+            (optional; in the search capsule, after its control)
           </li>
           <li>
-            <PartLink part="TextField.Description" /> (optional)
+            <PartLink
+              component="text-field"
+              part="TextField.Description"
+            />{' '}
+            (optional)
           </li>
           <li>
-            <PartLink part="TextField.Error" /> (optional)
+            <PartLink
+              component="text-field"
+              part="TextField.Error"
+            />{' '}
+            (optional)
           </li>
           <li>
-            <PartLink part="TextField.Validity" /> (optional)
+            <PartLink
+              component="text-field"
+              part="TextField.Validity"
+            />{' '}
+            (optional)
           </li>
         </ul>
       </li>

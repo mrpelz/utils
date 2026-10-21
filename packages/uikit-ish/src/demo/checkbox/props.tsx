@@ -13,6 +13,10 @@ export const getPropOptionsCheckbox = (addLog: AddLog) => ({
   indeterminate: [undefined, false, true] as const,
   disabled: [undefined, false, true] as const,
   readOnly: [undefined, false, true] as const,
+  required: [undefined, false, true] as const,
+  value: [undefined, 'subscribe'] as const,
+  uncheckedValue: [undefined, 'unsubscribed'] as const,
+  parent: [undefined, true] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
   onCheckedChange: [
     new MappedProp(
@@ -27,8 +31,10 @@ export const getPropOptionsCheckbox = (addLog: AddLog) => ({
 export const getPropOptionsRadioGroup = (addLog: AddLog) => ({
   ...commonPropOptions,
   defaultValue: ['email', undefined, 'phone'] as const,
+  value: [undefined, 'phone'] as const,
   disabled: [undefined, false, true] as const,
   readOnly: [undefined, false, true] as const,
+  required: [undefined, false, true] as const,
   onValueChange: [
     new MappedProp(
       (value: unknown, { reason }: BaseRadioGroup.ChangeEventDetails) =>
@@ -41,7 +47,11 @@ export const getPropOptionsRadioGroup = (addLog: AddLog) => ({
 
 export const propOptionsRadio = {
   ...commonPropOptions,
+  // (The first option's: its own, or another.)
+  value: ['email', 'fax'] as const,
   disabled: [undefined, false, true] as const,
+  readOnly: [undefined, false, true] as const,
+  required: [undefined, false, true] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
 };
 
@@ -61,6 +71,11 @@ export const propOptionsIndicator = {
 export const getPropOptionsCheckboxGroup = (addLog: AddLog) => ({
   ...commonPropOptions,
   defaultValue: [['email'] as string[], undefined, [] as string[]] as const,
+  value: [undefined, ['email', 'phone'] as string[]] as const,
+  allValues: [
+    ['email', 'phone', 'mail'] as string[],
+    ['email', 'phone'] as string[],
+  ] as const,
   disabled: [undefined, false, true] as const,
   onValueChange: [
     new MappedProp(

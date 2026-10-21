@@ -4,6 +4,7 @@ import {
   nativeButtonRow,
   PropRow,
 } from '../guide/props-table.js';
+import { PartLink } from '../guide/sections.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -86,9 +87,13 @@ export const checkboxRootRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      The checkbox’s value. Identifies it within a <code>CheckboxGroup</code>,
-      falling back to <code>name</code> when omitted. When submitting a form, a
-      checked box submits <code>value</code>; with no <code>value</code>, it
+      The checkbox’s value. Identifies it within a{' '}
+      <PartLink
+        component="checkbox"
+        part="CheckboxGroup"
+      />
+      , falling back to <code>name</code> when omitted. When submitting a form,
+      a checked box submits <code>value</code>; with no <code>value</code>, it
       submits the native <code>on</code>.
     </>,
   ],
@@ -110,7 +115,12 @@ export const checkboxRootRows: readonly PropRow[] = [
     code('false'),
     <>
       Whether the checkbox controls a group of child checkboxes. Must be used in
-      a <code>CheckboxGroup</code>.
+      a{' '}
+      <PartLink
+        component="checkbox"
+        part="CheckboxGroup"
+      />
+      .
     </>,
   ],
   ['id', 'string', undefined, 'The id of the input element.'],

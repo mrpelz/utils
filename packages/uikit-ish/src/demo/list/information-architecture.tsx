@@ -1,6 +1,11 @@
 import { FunctionComponent } from 'react';
 
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -64,9 +69,13 @@ export const ListInformationArchitecture: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        <strong>Shape:</strong> sectioned (<code>List.Section</code>s); flat
-        with one section. Trees (outline views) aren’t built in: a row’s{' '}
-        <code>level</code> indents it, e.g. in a sidebar.
+        <strong>Shape:</strong> sectioned (
+        <PartLink
+          component="list"
+          part="List.Section"
+        />
+        s); flat with one section. Trees (outline views) aren’t built in: a
+        row’s <code>level</code> indents it, e.g. in a sidebar.
       </li>
       <li>
         <strong>Projection:</strong> rows; <code>listStyle</code> renders them
@@ -74,13 +83,34 @@ export const ListInformationArchitecture: FunctionComponent = () => (
       </li>
       <li>
         <strong>Selection:</strong> none (pressable rows act or drill in), one (
-        <code>List.Radio</code>s, or a <code>List.Checkmark</code> on the chosen
-        row), many (<code>List.Checkbox</code>es).
+        <PartLink
+          component="list"
+          part="List.Radio"
+        />
+        s, or a{' '}
+        <PartLink
+          component="list"
+          part="List.Checkmark"
+        />{' '}
+        on the chosen row), many (
+        <PartLink
+          component="list"
+          part="List.Checkbox"
+        />
+        es).
       </li>
       <li>
-        <strong>Editability:</strong> reordering (<code>List.Grabber</code>, the
-        group’s <code>onReorder</code>), deleting and inserting (
-        <code>List.EditButton</code>, swipe actions).
+        <strong>Editability:</strong> reordering (
+        <PartLink
+          component="list"
+          part="List.Grabber"
+        />
+        , the group’s <code>onReorder</code>), deleting and inserting (
+        <PartLink
+          component="list"
+          part="List.EditButton"
+        />
+        , swipe actions).
       </li>
     </ul>
 
@@ -95,14 +125,22 @@ export const ListInformationArchitecture: FunctionComponent = () => (
         <strong>Group:</strong> a section bundles its rows, optionally
         collapsible (guide, <GuideLink to="primitive-group">§5</GuideLink>,
         which lists list sections; here, a Base UI Collapsible with a{' '}
-        <code>List.Disclosure</code>).
+        <PartLink
+          component="list"
+          part="List.Disclosure"
+        />
+        ).
       </li>
       <li>
         <strong>Item:</strong> a row with fixed slots: leading visual, title,
         subtitle, trailing accessory, badge, inline control (guide,{' '}
         <GuideLink to="primitive-item">§5</GuideLink>, which lists table rows).
-        This library’s slots: an edit control and a <code>List.Image</code>;{' '}
-        <code>Title</code>, <code>Subtitle</code>, <code>Text</code>; trailing{' '}
+        This library’s slots: an edit control and a{' '}
+        <PartLink
+          component="list"
+          part="List.Image"
+        />
+        ; <code>Title</code>, <code>Subtitle</code>, <code>Text</code>; trailing{' '}
         <code>Detail</code>, <code>Accessory</code>, <code>Checkmark</code>,{' '}
         <code>DrillIn</code>, <code>Grabber</code> or a control.
       </li>
@@ -184,8 +222,11 @@ export const ListInformationArchitecture: FunctionComponent = () => (
         <strong>Navigation:</strong> drilling in is a Collection’s selection
         leading to the next Surface or column (guide,{' '}
         <GuideLink to="move-drill">§7.2, Drill</GuideLink>): a row with a{' '}
-        <code>List.DrillIn</code> pushing a page in a{' '}
-        <a href="navigation">Navigation</a>.
+        <PartLink
+          component="list"
+          part="List.DrillIn"
+        />{' '}
+        pushing a page in a <a href="navigation">Navigation</a>.
       </li>
       <li>
         <strong>Selection and actions:</strong> the list owns the selection;
@@ -202,7 +243,12 @@ export const ListInformationArchitecture: FunctionComponent = () => (
       <li>
         <strong>Status:</strong> status attaches to the narrowest scope it
         describes (<GuideLink to="rule-g8">G8</GuideLink>): an item’s, in its
-        trailing slot (e.g. a <code>List.Detail</code>).
+        trailing slot (e.g. a{' '}
+        <PartLink
+          component="list"
+          part="List.Detail"
+        />
+        ).
       </li>
     </ul>
   </>

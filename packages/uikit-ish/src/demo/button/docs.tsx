@@ -7,6 +7,7 @@ import {
   secondaryClickRow,
   union,
 } from '../guide/props-table.js';
+import { PartLink } from '../guide/sections.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -126,8 +127,17 @@ export const buttonRootRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Its content: a <code>Button.Icon</code>, a <code>Button.Label</code>, or
-      both (in their order).
+      Its content: a{' '}
+      <PartLink
+        component="button"
+        part="Button.Icon"
+      />
+      , a{' '}
+      <PartLink
+        component="button"
+        part="Button.Label"
+      />
+      , or both (in their order).
     </>,
   ],
   ...baseUiRows('button', 'HTMLButtonElement'),

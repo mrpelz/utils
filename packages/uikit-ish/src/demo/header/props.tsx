@@ -10,6 +10,8 @@ export const propOptionsBar = {
     'background-dim',
   ] as const,
   disabled: [undefined, false, true] as const,
+  loopFocus: [undefined, false, true] as const,
+  orientation: [undefined, 'horizontal', 'vertical'] as const,
 };
 
 export const propOptionsTitle = {
@@ -19,6 +21,7 @@ export const propOptionsTitle = {
 
 export const propOptionsLargeTitle = {
   ...commonPropOptions,
+  'aria-level': [undefined, 1, 2] as const,
 };
 
 // The guide pages' views (see overview.tsx, parts.tsx).

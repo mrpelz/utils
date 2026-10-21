@@ -33,9 +33,9 @@ export const getPropOptionsSidebarColumn = (addLog: AddLog) => ({
 
 // Compact: the sidebar column as a drawer.
 export const propOptionsDrawer = {
-  ...commonPropOptions,
-  drawer: ['inline-start', 'inline-end'] as const,
-  defaultOpen: [undefined, false, true] as const,
+  side: ['inline-start', 'inline-end'] as const,
+  disablePointerDismissal: [undefined, true] as const,
+  modal: [undefined, false, 'trap-focus'] as const,
 };
 
 export const propOptionsContentColumn = {
@@ -53,6 +53,11 @@ export const propOptionsSidebar = {
 export const propOptionsPart = {
   className: commonPropOptions.className,
   style: commonPropOptions.style,
+};
+
+export const propOptionsGuideRoot = {
+  ...propOptionsPart,
+  'aria-label': ['Mailboxes', 'Folders'] as const,
 };
 
 /**

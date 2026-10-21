@@ -15,6 +15,7 @@ export const propOptionsAccessoryContent = {
 
 export const propOptionsRoot = {
   ...commonPropOptions,
+  orientation: [undefined, 'horizontal', 'vertical'] as const,
 };
 
 export const propOptionsList = {
@@ -101,6 +102,24 @@ export const propOptionsStyling = {
 export const propOptionsPanel = {
   ...commonPropOptions,
   keepMounted: [undefined, false, true] as const,
+};
+
+// The guide's views (see parts.tsx): the first tab's (or its panel's) value
+// (its own, or another, unselecting it), the indicator's hydration.
+
+export const getPropOptionsGuideTab = (addLog: AddLog) => ({
+  ...getPropOptionsTab(addLog),
+  value: ['favorites', 'starred'] as const,
+});
+
+export const propOptionsGuidePanel = {
+  ...propOptionsPanel,
+  value: ['favorites', 'starred'] as const,
+};
+
+export const propOptionsGuideIndicator = {
+  ...propOptionsStyling,
+  renderBeforeHydration: [undefined, false, true] as const,
 };
 
 export const propOptionsAccessory = {

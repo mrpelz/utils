@@ -3,31 +3,43 @@ import {
   ReactNode,
   RefObject,
   useEffect,
+  useMemo,
   useRef,
+  useState,
 } from 'react';
 
 import {
+  type ElementGeometry,
   List,
   Toolbar,
   useElementGeometry,
   useElementVisibility,
+  useFocusShiftPrevention,
+  useInputZoomPrevention,
   useScrollDirection,
   useViewportScroll,
   useVisualViewport,
   Viewport,
 } from '../../components/index.js';
+import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { AddLog, useLog } from '../frame/log.js';
-import { usePropControl } from '../frame/prop-control.js';
+import { MappedProp, usePropControl } from '../frame/prop-control.js';
+import { useLabelledRef } from '../frame/render-code.js';
 import { useProvidedState } from '../frame/state.js';
 import { PropsTable } from '../guide/props-table.js';
 import { Heading, PartLink } from '../guide/sections.js';
 import { names } from './content.js';
 import {
   elementGeometryRows,
+  preventFocusShiftReturnRows,
+  preventFocusShiftRows,
+  preventInputZoomRows,
   useElementGeometryRows,
   useElementVisibilityReturnRows,
   useElementVisibilityRows,
+  useFocusShiftPreventionRows,
+  useInputZoomPreventionRows,
   useScrollDirectionRows,
   useViewportScrollRows,
   useVisualViewportRows,
@@ -45,8 +57,16 @@ import {
   propOptionsContent,
   propOptionsElementGeometry,
   propOptionsElementVisibility,
+  propOptionsFocusShift,
+  propOptionsInputZoom,
   propOptionsProvider,
 } from './props.js';
+
+const preventInputZoomCode = `// At the app's start: all its fields, while it runs.
+const release = preventInputZoom();`;
+
+const preventFocusShiftCode = `// The app's fields (in its root), until it's torn down.
+const remove = preventFocusShift(document.getElementById('app'));`;
 
 /**
  * `Viewport.Provider` (its props controlled around it, see `ProviderPart`):
@@ -104,20 +124,27 @@ const ProviderPartFrame: FunctionComponent<{
 
 /** `ProviderPartFrame` in its provider, tracking the screen's content. */
 const ProviderPart: FunctionComponent = () => {
-  const contentRef = useRef<HTMLDivElement>(null);
+  const contentRef = useLabelledRef<HTMLDivElement>('contentRef');
   const [external] = useProvidedState('viewport-parts-provider');
   const [control, props, state] = usePropControl(
-    propOptionsProvider,
+    useMemo(
+      () => ({
+        ...propOptionsProvider,
+        // The screen's content, or (unset) the document's.
+        scroller: [
+          new MappedProp(contentRef, '[the screen’s content]'),
+          undefined,
+        ] as const,
+      }),
+      [contentRef],
+    ),
     'Viewport.Provider',
     external,
     true,
   );
 
   return (
-    <Viewport.Provider
-      scroller={contentRef}
-      {...props}
-    >
+    <Viewport.Provider {...props}>
       <ProviderPartFrame
         contentRef={contentRef}
         control={control}
@@ -353,14 +380,13 @@ const UseViewportScrollView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
   log: ReactNode;
 }> = ({ addLog, contentRef, log }) => {
-  const last = useRef('');
+  const calls = useRef(0);
 
+  // (Every call logged: once per scroll event.)
   useViewportScroll(({ atBottom, atTop, direction, position }) => {
-    const changed = `${String(direction)} ${String(atTop)} ${String(atBottom)}`;
-    if (changed === last.current) return;
-    last.current = changed;
+    calls.current += 1;
     addLog(
-      `direction: ${String(direction)}, atTop: ${String(atTop)}, atBottom: ${String(atBottom)}, position: ${String(Math.round(position))}`,
+      `scroll #${String(calls.current)}: direction: ${String(direction)}, atTop: ${String(atTop)}, atBottom: ${String(atBottom)}, position: ${String(Math.round(position))}`,
     );
   });
 
@@ -393,7 +419,7 @@ const UseViewportScrollView: FunctionComponent<{
 
 /** `UseViewportScrollView`, in a provider tracking its screen's content. */
 const UseViewportScrollPart: FunctionComponent = () => {
-  const contentRef = useRef<HTMLDivElement>(null);
+  const contentRef = useLabelledRef<HTMLDivElement>('contentRef');
   const [log, addLog] = useLog();
 
   return (
@@ -449,7 +475,7 @@ const UseScrollDirectionView: FunctionComponent<{
 
 /** `UseScrollDirectionView`, in a provider tracking its screen's content. */
 const UseScrollDirectionPart: FunctionComponent = () => {
-  const contentRef = useRef<HTMLDivElement>(null);
+  const contentRef = useLabelledRef<HTMLDivElement>('contentRef');
 
   return (
     <Viewport.Provider scroller={contentRef}>
@@ -524,6 +550,7 @@ const UseElementVisibilityPart: FunctionComponent = () => {
  */
 const UseElementGeometryPart: FunctionComponent = () => {
   const id = 'viewport-parts-use-element-geometry';
+  const [log, addLog] = useLog();
   const box = useRef<HTMLDivElement>(null);
   const card = useRef<HTMLDivElement>(null);
   const [external] = useProvidedState(id);
@@ -533,9 +560,19 @@ const UseElementGeometryPart: FunctionComponent = () => {
     external,
     true,
   );
-  const geometry = useElementGeometry(card, {
-    scroller: options.scroller === 'box' ? box : undefined,
-  });
+  const [geometry, setGeometry] = useState<ElementGeometry>();
+  const calls = useRef(0);
+  useElementGeometry(
+    card,
+    (next: ElementGeometry) => {
+      calls.current += 1;
+      addLog(
+        `geometry #${String(calls.current)}: top ${px(next.top)}, visible ${percent(next.visibleRatio)}`,
+      );
+      setGeometry(next);
+    },
+    { scroller: options.scroller === 'box' ? box : undefined },
+  );
 
   return (
     <Component
@@ -543,6 +580,7 @@ const UseElementGeometryPart: FunctionComponent = () => {
       inline
       controls={[control]}
       id={id}
+      log={log}
       state={[state]}
       title="useElementGeometry"
     >
@@ -585,6 +623,139 @@ const UseElementGeometryPart: FunctionComponent = () => {
   );
 };
 
+/** The fields of the input guards' views: small fonts, a list, a text area. */
+const GuardFields: FunctionComponent = () => (
+  <>
+    <input
+      aria-label="12px"
+      className="viewport-demo-field"
+      placeholder="12px"
+      style={{ fontSize: 12 }}
+    />
+    <input
+      aria-label="15px"
+      className="viewport-demo-field"
+      placeholder="15px"
+      style={{ fontSize: 15 }}
+    />
+    <input
+      aria-label="17px"
+      className="viewport-demo-field"
+      placeholder="17px"
+      style={{ fontSize: 17 }}
+    />
+    <input
+      aria-label="Suggestions, 12px"
+      className="viewport-demo-field"
+      list="viewport-demo-suggestions"
+      placeholder="Suggestions, 12px"
+      style={{ fontSize: 12 }}
+    />
+    <datalist id="viewport-demo-suggestions">
+      <option value="Cupertino" />
+      <option value="San Francisco" />
+      <option value="Zurich" />
+    </datalist>
+    <textarea
+      aria-label="Text area, 12px"
+      className="viewport-demo-field"
+      placeholder="Text area, 12px"
+      style={{ fontSize: 12 }}
+    />
+  </>
+);
+
+/** Logs, once the keyboard is up, the page's zoom and scroll as a field is focused. */
+const logGuarded = (addLog: AddLog) => (event: FocusEvent) => {
+  const field = event.target;
+  if (!(field instanceof HTMLElement)) return;
+  setTimeout(() => {
+    const { visualViewport: visual } = globalThis;
+    const scale = visual ? visual.scale : 1;
+    const offsetTop = visual ? visual.offsetTop : 0;
+    addLog(
+      `${field.getAttribute('aria-label') ?? ''}: zoom ${scale.toFixed(2)}, page scrolled ${String(Math.round(scrollY))}px, visual viewport ${String(Math.round(offsetTop))}px down`,
+    );
+  }, 800);
+};
+
+/**
+ * `useInputZoomPrevention`: fields with small fonts (iOS zooms in on them,
+ * unguarded), their zoom logged as they're focused.
+ */
+const UseInputZoomPreventionPart: FunctionComponent = () => {
+  const id = 'viewport-parts-use-input-zoom-prevention';
+  const [log, addLog] = useLog();
+  const [external] = useProvidedState(id);
+  const [control, args, state] = usePropControl(
+    propOptionsInputZoom,
+    'arguments',
+    external,
+    true,
+  );
+  useInputZoomPrevention(args.enabled);
+
+  return (
+    <Component
+      center
+      inline
+      controls={[control]}
+      id={id}
+      log={log}
+      state={[state]}
+      title="useInputZoomPrevention"
+    >
+      <div
+        className="viewport-demo-fields"
+        onFocusCapture={logGuarded(addLog)}
+      >
+        <GuardFields />
+      </div>
+    </Component>
+  );
+};
+
+/**
+ * `useFocusShiftPrevention`: fields down to the bottom (iOS scrolls the
+ * page up to them as the keyboard opens, unguarded), the scroll logged.
+ */
+const UseFocusShiftPreventionPart: FunctionComponent = () => {
+  const id = 'viewport-parts-use-focus-shift-prevention';
+  const [log, addLog] = useLog();
+  const frame = useRef<HTMLDivElement>(null);
+  const [external] = useProvidedState(id);
+  const [control, args, state] = usePropControl(
+    propOptionsFocusShift,
+    'arguments',
+    external,
+    true,
+  );
+  useFocusShiftPrevention(
+    args.target === 'frame' ? frame : undefined,
+    args.enabled,
+  );
+
+  return (
+    <Component
+      center
+      inline
+      controls={[control]}
+      id={id}
+      log={log}
+      state={[state]}
+      title="useFocusShiftPrevention"
+    >
+      <div
+        ref={frame}
+        className="viewport-demo-fields viewport-demo-fields-tall"
+        onFocusCapture={logGuarded(addLog)}
+      >
+        <GuardFields />
+      </div>
+    </Component>
+  );
+};
+
 /** `/viewport/parts`: the provider, the layers, and the hooks. */
 export const ViewportParts: FunctionComponent = () => (
   <>
@@ -609,19 +780,36 @@ export const ViewportParts: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        <PartLink part="Viewport.Provider" /> (around the app)
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />{' '}
+        (around the app)
         <ul>
           <li>
-            <PartLink part="Viewport.Content" />
+            <PartLink
+              component="viewport"
+              part="Viewport.Content"
+            />
           </li>
           <li>
-            <PartLink part="Viewport.Anchor" /> (one per edge, optional), or:
+            <PartLink
+              component="viewport"
+              part="Viewport.Anchor"
+            />{' '}
+            (one per edge, optional), or:
             <ul>
               <li>
-                <PartLink part="Viewport.BlockStart" />
+                <PartLink
+                  component="viewport"
+                  part="Viewport.BlockStart"
+                />
               </li>
               <li>
-                <PartLink part="Viewport.BlockEnd" />
+                <PartLink
+                  component="viewport"
+                  part="Viewport.BlockEnd"
+                />
               </li>
             </ul>
           </li>
@@ -629,13 +817,22 @@ export const ViewportParts: FunctionComponent = () => (
             Hooks (anywhere inside):
             <ul>
               <li>
-                <PartLink part="useVisualViewport" />
+                <PartLink
+                  component="viewport"
+                  part="useVisualViewport"
+                />
               </li>
               <li>
-                <PartLink part="useViewportScroll" />
+                <PartLink
+                  component="viewport"
+                  part="useViewportScroll"
+                />
               </li>
               <li>
-                <PartLink part="useScrollDirection" />
+                <PartLink
+                  component="viewport"
+                  part="useScrollDirection"
+                />
               </li>
             </ul>
           </li>
@@ -643,10 +840,45 @@ export const ViewportParts: FunctionComponent = () => (
             Hooks (anywhere, no provider needed):
             <ul>
               <li>
-                <PartLink part="useElementVisibility" />
+                <PartLink
+                  component="viewport"
+                  part="useElementVisibility"
+                />
               </li>
               <li>
-                <PartLink part="useElementGeometry" />
+                <PartLink
+                  component="viewport"
+                  part="useElementGeometry"
+                />
+              </li>
+            </ul>
+          </li>
+          <li>
+            Input guards (iOS; anywhere, no provider needed):
+            <ul>
+              <li>
+                <PartLink
+                  component="viewport"
+                  part="preventInputZoom"
+                />{' '}
+                (and{' '}
+                <PartLink
+                  component="viewport"
+                  part="useInputZoomPrevention"
+                />
+                )
+              </li>
+              <li>
+                <PartLink
+                  component="viewport"
+                  part="preventFocusShift"
+                />{' '}
+                (and{' '}
+                <PartLink
+                  component="viewport"
+                  part="useFocusShiftPrevention"
+                />
+                )
               </li>
             </ul>
           </li>
@@ -664,13 +896,26 @@ export const ViewportParts: FunctionComponent = () => (
       <li>Renders no element: a context, around the app.</li>
       <li>
         Tracks the visual viewport (as custom properties on the root element,
-        which the layers follow, and for <code>useVisualViewport</code>).
+        which the layers follow, and for{' '}
+        <PartLink
+          component="viewport"
+          part="useVisualViewport"
+        />
+        ).
       </li>
       <li>
         Tracks a scroll container’s scrolling (the document’s, or{' '}
-        <code>scroller</code>), for <code>useViewportScroll</code> and{' '}
-        <code>useScrollDirection</code>; its direction changes past{' '}
-        <code>threshold</code>.
+        <code>scroller</code>), for{' '}
+        <PartLink
+          component="viewport"
+          part="useViewportScroll"
+        />{' '}
+        and{' '}
+        <PartLink
+          component="viewport"
+          part="useScrollDirection"
+        />
+        ; its direction changes past <code>threshold</code>.
       </li>
       <li>Here: tracking the screen’s content layer, the readout below it.</li>
     </ul>
@@ -798,8 +1043,8 @@ export const ViewportParts: FunctionComponent = () => (
         without re-rendering.
       </li>
       <li>
-        Inside a provider (outside one: never called). Here: logging the
-        screen’s content’s turns and edges.
+        Inside a provider (outside one: never called). Here: each call logged
+        (one per scroll event), with the content’s direction and edges.
       </li>
     </ul>
     <UseViewportScrollPart />
@@ -870,24 +1115,136 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Where an element is in the visible area: its edges’ distances to the
-        area’s, how much of it shows (px, and its share).
+        Calls its listener with where an element is in the visible area: its
+        edges’ distances to the area’s, how much of it shows (px, and its
+        share). Nothing re-renders unless the listener does (as{' '}
+        <PartLink
+          component="viewport"
+          part="useViewportScroll"
+        />
+        ’s).
       </li>
       <li>
         Measured once a frame while anything scrolls or resizes, and only while
-        it’s visible (an <code>useElementVisibility</code> of its own); once
-        more as it leaves.
+        it’s visible (an{' '}
+        <PartLink
+          component="viewport"
+          part="useElementVisibility"
+        />{' '}
+        of its own); once more as it leaves.
       </li>
       <li>
         Here: scroll the box both ways, half the card out of it; the card as
-        opaque as it’s visible.
+        opaque as it’s visible (its listener setting state), each call logged
+        (one per frame scrolled).
       </li>
     </ul>
     <UseElementGeometryPart />
     <h3>Arguments</h3>
     <PropsTable rows={useElementGeometryRows} />
-    <h3>Returns</h3>
+    <h3>Its listener’s geometry</h3>
     <PropsTable rows={elementGeometryRows} />
+
+    <Heading
+      id="preventinputzoom"
+      level={2}
+    >
+      <code>preventInputZoom</code>
+    </Heading>
+    <ul>
+      <li>
+        iOS zooms the page in as a text field with a font smaller than 16px is
+        focused: guarded, it doesn’t (the viewport’s <code>maximum-scale</code>{' '}
+        1, while held; iOS still lets the page be pinch-zoomed).
+      </li>
+      <li>
+        Held until its returned function lets go (by all its holders: the
+        viewport restored with the last). Elsewhere (no iOS), it does nothing (a{' '}
+        <code>maximum-scale</code> would stop pinch zoom there).
+      </li>
+      <li>
+        Once for the app (e.g. at its start), it covers all its fields: also
+        those it doesn’t render itself (here, the demos’ own controls).
+      </li>
+    </ul>
+    <CodeView code={preventInputZoomCode} />
+    <h3>Returns</h3>
+    <PropsTable rows={preventInputZoomRows} />
+
+    <Heading
+      id="useinputzoomprevention"
+      level={2}
+    >
+      <code>useInputZoomPrevention</code>
+    </Heading>
+    <ul>
+      <li>
+        <PartLink
+          component="viewport"
+          part="preventInputZoom"
+        />
+        , held while the component is mounted (and <code>enabled</code>).
+      </li>
+      <li>
+        Here: fields of 12, 15 and 17px, one with suggestions (a{' '}
+        <code>datalist</code>), a text area; each focus logs the page’s zoom.
+        This site holds it everywhere: open it with <code>?guards=off</code> to
+        compare, the toggle then the only holder.
+      </li>
+    </ul>
+    <UseInputZoomPreventionPart />
+    <h3>Arguments</h3>
+    <PropsTable rows={useInputZoomPreventionRows} />
+
+    <Heading
+      id="preventfocusshift"
+      level={2}
+    >
+      <code>preventFocusShift</code>
+    </Heading>
+    <ul>
+      <li>
+        iOS scrolls the page (its layout viewport) to a text field it focuses,
+        to keep it clear of the keyboard, shifting a fixed layout (e.g. a{' '}
+        <code>Viewport</code>’s bars). Guarded, a field touched in its target is
+        focused without scrolling (as the touch ends).
+      </li>
+      <li>
+        The touch’s click doesn’t follow, and the caret goes where the field
+        puts it (not where it was touched). Elsewhere, it does nothing.
+      </li>
+      <li>Until its returned function removes it.</li>
+    </ul>
+    <CodeView code={preventFocusShiftCode} />
+    <h3>Arguments</h3>
+    <PropsTable rows={preventFocusShiftRows} />
+    <h3>Returns</h3>
+    <PropsTable rows={preventFocusShiftReturnRows} />
+
+    <Heading
+      id="usefocusshiftprevention"
+      level={2}
+    >
+      <code>useFocusShiftPrevention</code>
+    </Heading>
+    <ul>
+      <li>
+        <PartLink
+          component="viewport"
+          part="preventFocusShift"
+        />{' '}
+        in its <code>target</code> (or the document), while the component is
+        mounted (and <code>enabled</code>).
+      </li>
+      <li>
+        Here: the fields, down to the frame’s bottom; each focus logs how far
+        the page (and the visual viewport) scrolled. With{' '}
+        <code>?guards=off</code>, as above.
+      </li>
+    </ul>
+    <UseFocusShiftPreventionPart />
+    <h3>Arguments</h3>
+    <PropsTable rows={useFocusShiftPreventionRows} />
   </>
 );
 
@@ -903,4 +1260,6 @@ export const viewportPartsDemos = [
   UseScrollDirectionPart,
   UseElementVisibilityPart,
   UseElementGeometryPart,
+  UseInputZoomPreventionPart,
+  UseFocusShiftPreventionPart,
 ];

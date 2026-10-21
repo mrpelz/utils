@@ -7,7 +7,12 @@ import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   checkboxGroupRows,
@@ -94,11 +99,20 @@ export const CheckboxOverview: FunctionComponent = () => (
       </li>
       <li>
         Choosing one item of a list (e.g. a default account): <code>Radio</code>
-        s in a <code>RadioGroup</code>.
+        s in a{' '}
+        <PartLink
+          component="checkbox"
+          part="RadioGroup"
+        />
+        .
       </li>
       <li>
         Selecting all of them at once: a parent checkbox in a{' '}
-        <code>CheckboxGroup</code>, mixed while only some are selected.
+        <PartLink
+          component="checkbox"
+          part="CheckboxGroup"
+        />
+        , mixed while only some are selected.
       </li>
     </ul>
 
@@ -118,7 +132,12 @@ export const CheckboxOverview: FunctionComponent = () => (
       </li>
       <li>
         A checkmark after the chosen row (iOS’s settings lists, e.g. a
-        language): <code>List.Checkmark</code> (see <a href="list">List</a>).
+        language):{' '}
+        <PartLink
+          component="list"
+          part="List.Checkmark"
+        />{' '}
+        (see <a href="list">List</a>).
       </li>
     </ul>
 
@@ -192,7 +211,11 @@ export const CheckboxOverview: FunctionComponent = () => (
         Name each circle: wrap it and its text in a <code>{'<label>'}</code>{' '}
         (clicking the text then ticks it, and it’s labelled by it), or give it
         an <code>aria-label</code> (e.g. the row’s title, as in lists). Name a{' '}
-        <code>RadioGroup</code> too.
+        <PartLink
+          component="checkbox"
+          part="RadioGroup"
+        />{' '}
+        too.
       </li>
       <li>
         Keyboard: Tab focuses a checkbox, Space ticks or unticks it (Enter

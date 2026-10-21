@@ -1,5 +1,5 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
-import { FunctionComponent, RefObject, useRef, useState } from 'react';
+import { FunctionComponent, RefObject, useState } from 'react';
 
 import {
   Button,
@@ -17,7 +17,13 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import { useLabelledRef } from '../frame/render-code.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { messages } from '../list/content.js';
 import { phoneTabs, phoneTabValues } from '../tab-bar/tabs.js';
@@ -317,7 +323,7 @@ const CollapseView: FunctionComponent<{
 
 /** `CollapseView`, in a provider tracking its screen's content layer. */
 const Collapse: FunctionComponent = () => {
-  const contentRef = useRef<HTMLDivElement>(null);
+  const contentRef = useLabelledRef<HTMLDivElement>('contentRef');
 
   return (
     <Viewport.Provider scroller={contentRef}>
@@ -452,7 +458,11 @@ export const ViewportComposition: FunctionComponent = () => (
     <ul>
       <li>
         A message field at the bottom, pushed up by the keyboard (
-        <code>Viewport.BlockEnd</code>’s default).
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />
+        ’s default).
       </li>
       <li>
         The content layer resized above the keyboard (its default): the last
@@ -474,9 +484,13 @@ export const ViewportComposition: FunctionComponent = () => (
         ref), not the document.
       </li>
       <li>
-        <code>useScrollDirection</code> collapses the tab bar while scrolling
-        down, past the top (guide <GuideLink to="section-10">§10</GuideLink>:
-        scroll position driving a Region’s behavior).
+        <PartLink
+          component="viewport"
+          part="useScrollDirection"
+        />{' '}
+        collapses the tab bar while scrolling down, past the top (guide{' '}
+        <GuideLink to="section-10">§10</GuideLink>: scroll position driving a
+        Region’s behavior).
       </li>
       <li>
         Tracking the document’s scrolling instead: see the{' '}

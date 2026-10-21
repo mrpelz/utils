@@ -1,5 +1,5 @@
 import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { FunctionComponent, useRef, useState } from 'react';
+import { FunctionComponent, useState } from 'react';
 
 import {
   ActionSheet,
@@ -16,7 +16,13 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import { useLabelledRef } from '../frame/render-code.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { pages } from '../navigation/content.js';
 import { names } from '../viewport/content.js';
@@ -49,7 +55,7 @@ const cancelDoneCode = `const [open, setOpen] = useState(false);
 const [confirming, setConfirming] = useState(false);
 const [name, setName] = useState('');
 const edited = name !== '';
-// Closing (Cancel, Escape, dragged down) while edited: confirm first.
+// Closing (Cancel, Escape, swiped down) while edited: confirm first.
 const close = () => (edited ? setConfirming(true) : setOpen(false));
 
 <Sheet.Root
@@ -127,7 +133,7 @@ const formSheetCode = `<Sheet.Popup compact={false} container={screen}>
 /** Two sheets: medium (a few rows), large (a list). */
 const Detents: FunctionComponent = () => {
   const [log, addLog] = useLog();
-  const screen = useRef<HTMLDivElement>(null);
+  const screen = useLabelledRef<HTMLDivElement>('screen');
 
   return (
     <Component
@@ -241,7 +247,7 @@ const Detents: FunctionComponent = () => {
 /** A form in a sheet: Cancel and Done, discarding edits confirmed. */
 const CancelDone: FunctionComponent = () => {
   const [log, addLog] = useLog();
-  const screen = useRef<HTMLDivElement>(null);
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const [open, setOpen] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [name, setName] = useState('');
@@ -356,7 +362,7 @@ const CancelDone: FunctionComponent = () => {
 /** A stack in a sheet: settings drilled into, Done on every page. */
 const NavigationInside: FunctionComponent = () => {
   const [log, addLog] = useLog();
-  const screen = useRef<HTMLDivElement>(null);
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const [keys, setKeys] = useState(['settings']);
   const push = (key: string) => {
     addLog(`push: ${key}`);
@@ -407,15 +413,14 @@ const NavigationInside: FunctionComponent = () => {
                       <Header.Bar>
                         <Toolbar.Leading>
                           {depth > 0 ? (
-                            <Toolbar.Button
+                            <Navigation.Back
                               aria-label={pages[keys[depth - 1] ?? '']?.title}
-                              shape="circle"
-                              onClick={pop}
+                              render={<Toolbar.Button shape="circle" />}
                             >
                               <Button.Icon>
                                 <Symbol icon={sfChevronBackward} />
                               </Button.Icon>
-                            </Toolbar.Button>
+                            </Navigation.Back>
                           ) : null}
                         </Toolbar.Leading>
                         <Toolbar.Title>
@@ -465,7 +470,7 @@ const NavigationInside: FunctionComponent = () => {
 /** A tablet's form sheet: centered over the page. */
 const FormSheet: FunctionComponent = () => {
   const [log, addLog] = useLog();
-  const screen = useRef<HTMLDivElement>(null);
+  const screen = useLabelledRef<HTMLDivElement>('screen');
 
   return (
     <Component
@@ -577,7 +582,7 @@ export const SheetComposition: FunctionComponent = () => (
         Large (the default): a task with a lot to show, the whole screen but its
         top.
       </li>
-      <li>The detent is the app’s: chosen per sheet, not by dragging.</li>
+      <li>The detent is the app’s: chosen per sheet, not by swiping.</li>
     </ul>
     <CodeView code={detentsCode} />
     <Detents />
@@ -594,14 +599,14 @@ export const SheetComposition: FunctionComponent = () => (
         trailing; Done disabled until there’s something to save.
       </li>
       <li>
-        Edited, closing it (Cancel, Escape, dragged down) asks first: an{' '}
+        Edited, closing it (Cancel, Escape, swiped down) asks first: an{' '}
         <a href="action-sheet">Action sheet</a>, Discard Changes or Keep
         Editing; a press outside it does nothing (
         <code>disablePointerDismissal</code>).
       </li>
       <li>
         Controlled (<code>open</code>): <code>onOpenChange</code> confirms
-        instead of closing; dragged down, kept open, the sheet springs back.
+        instead of closing; swiped down, kept open, the sheet springs back.
       </li>
       <li>
         A sheet is for a scoped task that keeps its parent in view (guide{' '}
@@ -625,8 +630,12 @@ export const SheetComposition: FunctionComponent = () => (
         content, each page with its bar (back, its title, Done).
       </li>
       <li>
-        Its header the grabber alone (<code>Sheet.Header</code> without
-        children): dragged down by it, it closes.
+        Its header the grabber alone (
+        <PartLink
+          component="sheet"
+          part="Sheet.Header"
+        />{' '}
+        without children), over the pages’ bars; swiped down, it closes.
       </li>
       <li>
         Closed, the stack is reset to its root (

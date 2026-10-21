@@ -17,7 +17,12 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { names } from '../viewport/content.js';
 
@@ -403,8 +408,12 @@ export const HeaderComposition: FunctionComponent = () => (
         both fade in together.
       </li>
       <li>
-        Both sides in the bar (an empty <code>Toolbar.Leading</code> too), so
-        its title is centered.
+        Both sides in the bar (an empty{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Leading"
+        />{' '}
+        too), so its title is centered.
       </li>
     </ul>
     <CodeView code={largeTitleCode} />
@@ -419,8 +428,12 @@ export const HeaderComposition: FunctionComponent = () => (
     <ul>
       <li>
         Mail’s and Contacts’: a <a href="text-field">Text field</a>’s{' '}
-        <code>TextField.Search</code> below the large title, in the header (it
-        scrolls away with the title), filtering the page.
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />{' '}
+        below the large title, in the header (it scrolls away with the title),
+        filtering the page.
       </li>
       <li>
         Search sits with the page’s Region (guide{' '}

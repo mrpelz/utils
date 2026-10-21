@@ -10,12 +10,32 @@
     z-index: 100;
     background-color: var(--uikit-sheet-dim);
     inset: 0;
+
+    /* Lighter as the sheet is swiped down. */
+    opacity: calc(1 - var(--drawer-swipe-progress, 0));
     transition: opacity 500ms cubic-bezier(0.32, 0.72, 0, 1);
 
     &[data-starting-style],
     &[data-ending-style] {
       opacity: 0;
     }
+
+    &[data-swiping] {
+      transition: none;
+    }
+
+    &[data-ending-style] {
+      transition-duration: calc(var(--drawer-swipe-strength, 1) * 500ms);
+    }
+  }
+
+  /* Where the sheet moves (filling the window, or its container), passing
+     presses through to what's outside the sheet. */
+  .uikit-sheet-viewport {
+    position: fixed;
+    z-index: 100;
+    inset: 0;
+    pointer-events: none;
   }
 
   .uikit-sheet-popup {
@@ -52,17 +72,30 @@
     flex-direction: column;
     color: var(--color-ios-label);
     outline: none;
+    pointer-events: auto;
 
-    /* Close to UIKit's presentation (a critically damped spring). */
-    transition: translate 500ms cubic-bezier(0.32, 0.72, 0, 1);
-    translate: 0 var(--uikit-sheet-drag, 0);
+    /* Close to UIKit's presentation (a critically damped spring); swiped,
+       following the finger (a transform: Base UI's own while it's swiped,
+       overriding this one). */
+    transform: translateY(
+      calc(
+        var(--drawer-snap-point-offset, 0px) +
+          var(--drawer-swipe-movement-y, 0px)
+      )
+    );
+    transition: transform 500ms cubic-bezier(0.32, 0.72, 0, 1);
 
     &[data-starting-style],
     &[data-ending-style] {
-      translate: 0 100%;
+      transform: translateY(100%);
     }
 
-    &[data-dragging] {
+    /* Let go (swiped): as fast as it was flung. */
+    &[data-ending-style] {
+      transition-duration: calc(var(--drawer-swipe-strength, 1) * 500ms);
+    }
+
+    &[data-swiping] {
       transition: none;
     }
 
@@ -112,7 +145,7 @@
       box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
       color: var(--color-ios-label);
       inset: 50% auto auto 50%;
-      translate: -50% calc(-50% + var(--uikit-sheet-drag, 0px));
+      translate: -50% -50%;
 
       &:has([data-list-part='root']) {
         --uikit-list-container-background: transparent;
@@ -122,7 +155,7 @@
 
       &[data-starting-style],
       &[data-ending-style] {
-        translate: -50% 100vh;
+        transform: translateY(100vh);
       }
     }
   }
@@ -132,9 +165,7 @@
     flex: none;
     flex-direction: column;
     align-items: stretch;
-    cursor: grab;
     padding-block-end: 10px;
-    touch-action: none;
     -webkit-user-select: none;
     user-select: none;
 

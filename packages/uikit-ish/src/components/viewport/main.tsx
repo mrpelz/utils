@@ -26,6 +26,12 @@ import type {
   VisualViewportState,
 } from './props.js';
 
+export {
+  preventFocusShift,
+  preventInputZoom,
+  useFocusShiftPrevention,
+  useInputZoomPrevention,
+} from './input.js';
 export type {
   ElementGeometry,
   ElementGeometryOptions,
@@ -347,35 +353,32 @@ const readGeometry = (
   };
 };
 
-const sameGeometry = (a: ElementGeometry, b: ElementGeometry) =>
-  (Object.keys(a) as (keyof ElementGeometry)[]).every(
-    (key) => a[key] === b[key],
-  );
-
 /**
- * Where the element (`ref`'s, as first mounted) is in the visible area (the
- * viewport, or `scroller`'s box): its edges' distances to the area's, how
- * much of it shows. Measured once per frame while it scrolls or resizes,
- * and only while it's visible (once more as it leaves); `undefined` until
- * measured, and on the server.
+ * Calls `listener` with where the element (`ref`'s, as first mounted) is in
+ * the visible area (the viewport, or `scroller`'s box): its edges'
+ * distances to the area's, how much of it shows. Measured once per frame
+ * while anything scrolls or resizes, and only while it's visible (once
+ * more as it leaves), and once as it mounts; the listener can change
+ * without resubscribing (as `useViewportScroll`'s), and nothing re-renders
+ * unless it does (e.g. setting state).
  */
 export const useElementGeometry = (
   ref: RefObject<Element | null>,
+  listener: (geometry: ElementGeometry) => void,
   { scroller }: ElementGeometryOptions = {},
-): ElementGeometry | undefined => {
+): void => {
   const visible = useElementVisibility(ref, { scroller });
-  const [geometry, setGeometry] = useState<ElementGeometry>();
+  const latest = useRef(listener);
+  useLayoutEffect(() => {
+    latest.current = listener;
+  });
 
   useEffect(() => {
     const element = ref.current;
     if (!element) return undefined;
 
-    const update = () => {
-      const next = readGeometry(element, scroller?.current ?? null);
-      setGeometry((current) =>
-        current && sameGeometry(current, next) ? current : next,
-      );
-    };
+    const update = () =>
+      latest.current(readGeometry(element, scroller?.current ?? null));
     // (Visible or not: where it is now, e.g. having just left.)
     update();
     if (!visible) return undefined;
@@ -402,8 +405,6 @@ export const useElementGeometry = (
       resizes.disconnect();
     };
   }, [ref, scroller, visible]);
-
-  return geometry;
 };
 
 /**

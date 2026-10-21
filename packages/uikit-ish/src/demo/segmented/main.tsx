@@ -103,41 +103,16 @@ export const SegmentedDemo: FunctionComponent = () => {
         key={elementKey}
         {...propsRoot}
       >
-        <Segmented.Item
-          value="first"
-          {...propsItemFirst}
-        >
-          Day
-        </Segmented.Item>
-        <Segmented.Item
-          value="second"
-          {...propsItemSecond}
-        >
-          Week
-        </Segmented.Item>
+        <Segmented.Item {...propsItemFirst}>Day</Segmented.Item>
+        <Segmented.Item {...propsItemSecond}>Week</Segmented.Item>
         {count >= 3 ? (
-          <Segmented.Item
-            value="third"
-            {...propsItemThird}
-          >
-            Month
-          </Segmented.Item>
+          <Segmented.Item {...propsItemThird}>Month</Segmented.Item>
         ) : null}
         {count >= 4 ? (
-          <Segmented.Item
-            value="fourth"
-            {...propsItemFourth}
-          >
-            Year
-          </Segmented.Item>
+          <Segmented.Item {...propsItemFourth}>Year</Segmented.Item>
         ) : null}
         {count >= 5 ? (
-          <Segmented.Item
-            value="fifth"
-            {...propsItemFifth}
-          >
-            All Time
-          </Segmented.Item>
+          <Segmented.Item {...propsItemFifth}>All Time</Segmented.Item>
         ) : null}
         <Segmented.Highlight {...propsHighlight} />
       </Segmented.Root>

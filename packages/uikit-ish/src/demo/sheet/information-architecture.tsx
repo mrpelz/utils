@@ -118,12 +118,12 @@ export const SheetInformationArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its detents (medium, large) and its drag to dismiss; confirming before
+        Its detents (medium, large) and its swipe to dismiss; confirming before
         discarding (UIKit’s <code>isModalInPresentation</code>).
       </li>
       <li>
         Focus: moved into it, trapped, returned to its trigger (Base UI’s{' '}
-        <code>Dialog</code>).
+        <code>Drawer</code>, a dialog).
       </li>
     </ul>
   </>

@@ -19,9 +19,15 @@ import {
   useGlassContext,
 } from '../glass/main.js';
 import { cn, useForwardedRef } from '../utils/main.js';
-import type { PageControlProps } from './props.js';
+import type {
+  PageControlChangeEventDetails,
+  PageControlProps,
+} from './props.js';
 
-export type { PageControlProps } from './props.js';
+export type {
+  PageControlChangeEventDetails,
+  PageControlProps,
+} from './props.js';
 
 // Source: Apple iOS 26 Figma (“Toolbars”: “_Page control”, Dots 1 to 8+,
 // BG Context Dim/Bright): a glass capsule, 48px high, 24px from its ends,
@@ -124,11 +130,12 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
     const nextStart = windowStart(start, value, pages);
     if (nextStart !== start) setStart(nextStart);
 
-    const go = (page: number) => {
+    // Uncontrolled: its own state; controlled, only the app's `value`.
+    const go = (page: number, eventDetails: PageControlChangeEventDetails) => {
       const next = Math.min(Math.max(page, 0), pages - 1);
       if (disabled || next === value) return;
-      setState(next);
-      onValueChange?.(next);
+      if (valueProp === undefined) setState(next);
+      onValueChange?.(next, eventDetails);
     };
 
     // Scrubbing: from where it was pressed, a page per dot (16px: a dot and
@@ -150,7 +157,7 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       const { left, width } = current.getBoundingClientRect();
       const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
       const after = event.clientX > left + width / 2;
-      go(value + (after === rtl ? -1 : 1));
+      go(value + (after === rtl ? -1 : 1), { event, reason: 'track-press' });
     };
 
     const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -167,7 +174,7 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       const page = moves[event.key];
       if (page === undefined) return;
       event.preventDefault();
-      go(page);
+      go(page, { event, reason: 'keyboard' });
     };
 
     // Pressed (also by touch, which doesn't hover): its tooltip shown.
@@ -187,7 +194,7 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       const dx = (event.clientX - from.x) * (rtl ? -1 : 1);
       if (!from.scrubbed && Math.abs(dx) < 4) return;
       from.scrubbed = true;
-      go(from.page + Math.round(dx / 16));
+      go(from.page + Math.round(dx / 16), { event, reason: 'drag' });
     };
     const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
       onPointerUp?.(event);

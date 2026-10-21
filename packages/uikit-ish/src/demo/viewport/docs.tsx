@@ -1,4 +1,5 @@
 import { code, elementRows, PropRow, union } from '../guide/props-table.js';
+import { PartLink } from '../guide/sections.js';
 
 // Every part's props, and the hooks' arguments and return values, for the
 // parts page (all) and the overview (its key ones).
@@ -31,9 +32,22 @@ export const viewportProviderRows: readonly PropRow[] = [
     'RefObject<HTMLElement | null>',
     'the document’s scrolling element',
     <>
-      The scroll container tracked (e.g. a <code>Viewport.Content</code>’s ref):
-      its direction and edges, for <code>useViewportScroll</code> and{' '}
-      <code>useScrollDirection</code>.
+      The scroll container tracked (e.g. a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Content"
+      />
+      ’s ref): its direction and edges, for{' '}
+      <PartLink
+        component="viewport"
+        part="useViewportScroll"
+      />{' '}
+      and{' '}
+      <PartLink
+        component="viewport"
+        part="useScrollDirection"
+      />
+      .
     </>,
   ],
   [
@@ -209,13 +223,19 @@ export const useElementVisibilityReturnRows: readonly PropRow[] = [
   ],
 ];
 
-/** `useElementGeometry(ref, options)`: its arguments. */
+/** `useElementGeometry(ref, listener, options)`: its arguments. */
 export const useElementGeometryRows: readonly PropRow[] = [
   elementRefRow,
+  [
+    'listener',
+    '(geometry: ElementGeometry) => void',
+    undefined,
+    'Called with the element’s geometry (below) as it’s measured: once per frame while anything scrolls or resizes (while it’s visible; once more as it leaves), and as it mounts. It can change without resubscribing; nothing re-renders unless it does (e.g. setting state).',
+  ],
   scrollerRow,
 ];
 
-/** `useElementGeometry()`: what it returns (`ElementGeometry`). */
+/** `useElementGeometry()`'s listener: what it's called with (`ElementGeometry`). */
 export const elementGeometryRows: readonly PropRow[] = [
   [
     'top',
@@ -283,4 +303,44 @@ export const elementGeometryRows: readonly PropRow[] = [
       until measured, and on the server.
     </>,
   ],
+];
+
+/** `preventInputZoom()`, `preventFocusShift()`: what they return. */
+const releaseRow: PropRow = [
+  '(return)',
+  '() => void',
+  undefined,
+  'Lets go of it (once; more calls do nothing).',
+];
+
+export const preventInputZoomRows: readonly PropRow[] = [releaseRow];
+
+export const useInputZoomPreventionRows: readonly PropRow[] = [
+  [
+    'enabled',
+    'boolean',
+    code('true'),
+    'Whether it holds the guard (while mounted).',
+  ],
+];
+
+export const preventFocusShiftRows: readonly PropRow[] = [
+  [
+    'target',
+    'Document | HTMLElement',
+    code('document'),
+    'Where touched text fields are focused without scrolling (its descendants).',
+  ],
+];
+
+export const preventFocusShiftReturnRows: readonly PropRow[] = [releaseRow];
+
+export const useFocusShiftPreventionRows: readonly PropRow[] = [
+  [
+    'target',
+    'RefObject<HTMLElement | null>',
+    'the document',
+    'Where touched text fields are focused without scrolling.',
+  ],
+  ['enabled', 'boolean', code('true'), 'Whether it guards (while mounted).'],
 ];

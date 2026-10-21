@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
+import type { PageControlChangeEventDetails } from '../../components/index.js';
 import { AddLog } from '../frame/log.js';
 import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
@@ -28,7 +29,8 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
   ] as const,
   onValueChange: [
     new MappedProp(
-      (page: number) => addLog(`page change: ${page}`),
+      (page: number, { reason }: PageControlChangeEventDetails) =>
+        addLog(`page change: ${page} (${reason})`),
       '[log change]',
     ),
     undefined,

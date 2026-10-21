@@ -1,6 +1,11 @@
 import { FunctionComponent } from 'react';
 
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -61,7 +66,11 @@ export const ViewportInformationArchitecture: FunctionComponent = () => (
         beneath, glass above it.
       </li>
       <li>
-        <code>Viewport.Content</code>: the content layer, scrolling.
+        <PartLink
+          component="viewport"
+          part="Viewport.Content"
+        />
+        : the content layer, scrolling.
       </li>
       <li>
         Anchors: where glass bars float, above it (guide{' '}
@@ -89,7 +98,12 @@ export const ViewportInformationArchitecture: FunctionComponent = () => (
       <li>
         An anchor places a Region (a tab bar, a toolbar) at its edge; what fills
         it decides the rest (e.g. a tab bar’s <code>collapsed</code>, set by the
-        app from <code>useScrollDirection</code>).
+        app from{' '}
+        <PartLink
+          component="viewport"
+          part="useScrollDirection"
+        />
+        ).
       </li>
     </ul>
 

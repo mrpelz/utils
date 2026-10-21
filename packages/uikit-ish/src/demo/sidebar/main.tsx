@@ -533,8 +533,9 @@ export const SidebarCompactDemo: FunctionComponent = () => {
   const [sortBy, setSortBy] = useState('Name');
   // Rows with nested ones, collapsed (by their disclosure).
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
-  // The drawer (controlled, opened by the content's button).
-  const [open, setOpen] = useState<boolean | undefined>(undefined);
+  // The drawer (controlled: opened by the content's button, closing as a row
+  // is chosen).
+  const [open, setOpen] = useState(false);
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
@@ -554,7 +555,7 @@ export const SidebarCompactDemo: FunctionComponent = () => {
   );
   const [controlDrawer, propsDrawer, stateDrawer, keyDrawer] = usePropControl(
     propOptionsDrawer,
-    'column (sidebar): drawer',
+    'drawer',
     externalDrawer,
     true,
   );
@@ -608,361 +609,365 @@ export const SidebarCompactDemo: FunctionComponent = () => {
               />
             </Layout.Background>
           ) : null}
-          <Layout.Column
-            aria-label="Sidebar"
-            {...propsColumn}
+          <Layout.Drawer
             {...propsDrawer}
             open={open}
-            onOpenChange={(next: boolean) => {
-              addLog(`sidebar open: ${String(next)}`);
+            onOpenChange={(next: boolean, { reason }) => {
+              addLog(`sidebar open: ${String(next)} (${reason})`);
               setOpen(next);
             }}
           >
-            <Sidebar.Root {...propsSidebar}>
-              <Sidebar.Toolbar>
-                <Button.Root
-                  tint="var(--uikit-glass-content)"
-                  variant="borderless"
-                  onClick={() => addLog('edit')}
-                >
-                  <Button.Label>Edit</Button.Label>
-                </Button.Root>
-                <Sidebar.ToolbarGroup>
+            <Layout.DrawerSwipeArea />
+            <Layout.Column
+              aria-label="Sidebar"
+              {...propsColumn}
+            >
+              <Sidebar.Root {...propsSidebar}>
+                <Sidebar.Toolbar>
                   <Button.Root
-                    aria-label="New Folder"
-                    shape="circle"
                     tint="var(--uikit-glass-content)"
                     variant="borderless"
-                    onClick={() => addLog('new folder')}
+                    onClick={() => addLog('edit')}
                   >
-                    <Button.Icon>
-                      <Symbol icon={sfFolderBadgePlus} />
-                    </Button.Icon>
+                    <Button.Label>Edit</Button.Label>
                   </Button.Root>
-                  <Button.Root
-                    aria-label="Compose"
-                    shape="circle"
-                    tint="var(--uikit-glass-content)"
-                    variant="borderless"
-                    onClick={() => addLog('compose')}
+                  <Sidebar.ToolbarGroup>
+                    <Button.Root
+                      aria-label="New Folder"
+                      shape="circle"
+                      tint="var(--uikit-glass-content)"
+                      variant="borderless"
+                      onClick={() => addLog('new folder')}
+                    >
+                      <Button.Icon>
+                        <Symbol icon={sfFolderBadgePlus} />
+                      </Button.Icon>
+                    </Button.Root>
+                    <Button.Root
+                      aria-label="Compose"
+                      shape="circle"
+                      tint="var(--uikit-glass-content)"
+                      variant="borderless"
+                      onClick={() => addLog('compose')}
+                    >
+                      <Button.Icon>
+                        <Symbol icon={sfSquareAndPencil} />
+                      </Button.Icon>
+                    </Button.Root>
+                  </Sidebar.ToolbarGroup>
+                </Sidebar.Toolbar>
+                <TextField.Root>
+                  <TextField.Search>
+                    <Symbol icon={sfMagnifyingglass} />
+                    <TextField.Control
+                      aria-label="Search"
+                      placeholder="Search"
+                      type="search"
+                    />
+                    <TextField.Clear />
+                  </TextField.Search>
+                </TextField.Root>
+                <List.Root listStyle="sidebar">
+                  <Collapsible.Root
+                    defaultOpen
+                    render={<List.Section />}
                   >
-                    <Button.Icon>
-                      <Symbol icon={sfSquareAndPencil} />
-                    </Button.Icon>
-                  </Button.Root>
-                </Sidebar.ToolbarGroup>
-              </Sidebar.Toolbar>
-              <TextField.Root>
-                <TextField.Search>
-                  <Symbol icon={sfMagnifyingglass} />
-                  <TextField.Control
-                    aria-label="Search"
-                    placeholder="Search"
-                    type="search"
-                  />
-                  <TextField.Clear />
-                </TextField.Search>
-              </TextField.Root>
-              <List.Root listStyle="sidebar">
-                <Collapsible.Root
-                  defaultOpen
-                  render={<List.Section />}
-                >
-                  <Collapsible.Trigger
-                    nativeButton={false}
-                    render={<List.Header prominence="nested" />}
+                    <Collapsible.Trigger
+                      nativeButton={false}
+                      render={<List.Header prominence="nested" />}
+                    >
+                      <List.Title>Library</List.Title>
+                      <List.Disclosure />
+                    </Collapsible.Trigger>
+                    <Collapsible.Panel render={<List.Group />}>
+                      <List.Item selected={selected === 'Inbox'}>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfTray} />
+                        </List.Image>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => {
+                            addLog('select: Inbox');
+                            setSelected('Inbox');
+                            // (The drawer closes.)
+                            setOpen(false);
+                          }}
+                        >
+                          Inbox
+                        </List.Title>
+                        <List.Detail>12</List.Detail>
+                      </List.Item>
+                      <List.Item selected={selected === 'Favorites'}>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfHeart} />
+                        </List.Image>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => {
+                            addLog('select: Favorites');
+                            setSelected('Favorites');
+                            // (The drawer closes.)
+                            setOpen(false);
+                          }}
+                        >
+                          Favorites
+                        </List.Title>
+                        <List.Detail>3</List.Detail>
+                      </List.Item>
+                      <List.Item selected={selected === 'Recents'}>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfClock} />
+                        </List.Image>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => {
+                            addLog('select: Recents');
+                            setSelected('Recents');
+                            // (The drawer closes.)
+                            setOpen(false);
+                          }}
+                        >
+                          Recents
+                        </List.Title>
+                      </List.Item>
+                    </Collapsible.Panel>
+                  </Collapsible.Root>
+                  <Collapsible.Root
+                    defaultOpen
+                    render={<List.Section />}
                   >
-                    <List.Title>Library</List.Title>
-                    <List.Disclosure />
-                  </Collapsible.Trigger>
-                  <Collapsible.Panel render={<List.Group />}>
-                    <List.Item selected={selected === 'Inbox'}>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfTray} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => {
-                          addLog('select: Inbox');
-                          setSelected('Inbox');
-                          // (The drawer closes.)
-                          setOpen(false);
-                        }}
-                      >
-                        Inbox
-                      </List.Title>
-                      <List.Detail>12</List.Detail>
-                    </List.Item>
-                    <List.Item selected={selected === 'Favorites'}>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfHeart} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => {
-                          addLog('select: Favorites');
-                          setSelected('Favorites');
-                          // (The drawer closes.)
-                          setOpen(false);
-                        }}
-                      >
-                        Favorites
-                      </List.Title>
-                      <List.Detail>3</List.Detail>
-                    </List.Item>
-                    <List.Item selected={selected === 'Recents'}>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfClock} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => {
-                          addLog('select: Recents');
-                          setSelected('Recents');
-                          // (The drawer closes.)
-                          setOpen(false);
-                        }}
-                      >
-                        Recents
-                      </List.Title>
-                    </List.Item>
-                  </Collapsible.Panel>
-                </Collapsible.Root>
-                <Collapsible.Root
-                  defaultOpen
-                  render={<List.Section />}
-                >
-                  <Collapsible.Trigger
-                    nativeButton={false}
-                    render={<List.Header prominence="nested" />}
-                  >
-                    <List.Title>Folders</List.Title>
-                    <List.Disclosure />
-                  </Collapsible.Trigger>
-                  <Collapsible.Panel render={<List.Group />}>
-                    <List.Item selected={selected === 'Projects'}>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfFolder} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => {
-                          addLog('select: Projects');
-                          setSelected('Projects');
-                          // (The drawer closes.)
-                          setOpen(false);
-                        }}
-                      >
-                        Projects
-                      </List.Title>
-                      <List.Detail>8</List.Detail>
-                      {/* (Its nested rows: shown, or collapsed.) */}
-                      <List.Accessory
-                        aria-expanded={!collapsed.has('Projects')}
-                        aria-label="Projects: nested"
-                        render={<button type="button" />}
-                        onClick={() => {
-                          const next = new Set(collapsed);
-                          if (!next.delete('Projects')) next.add('Projects');
-                          addLog(
-                            `Projects ${next.has('Projects') ? 'collapsed' : 'expanded'}`,
-                          );
-                          setCollapsed(next);
-                        }}
-                      >
-                        <List.Disclosure
-                          data-panel-open={
-                            collapsed.has('Projects') ? undefined : ''
-                          }
-                        />
-                      </List.Accessory>
-                    </List.Item>
-                    {collapsed.has('Projects') ? null : (
-                      <List.Item
-                        level={1}
-                        selected={selected === 'Design'}
-                      >
+                    <Collapsible.Trigger
+                      nativeButton={false}
+                      render={<List.Header prominence="nested" />}
+                    >
+                      <List.Title>Folders</List.Title>
+                      <List.Disclosure />
+                    </Collapsible.Trigger>
+                    <Collapsible.Panel render={<List.Group />}>
+                      <List.Item selected={selected === 'Projects'}>
                         <List.Image variant="symbol">
                           <Symbol icon={sfFolder} />
                         </List.Image>
                         <List.Title
                           render={<button type="button" />}
                           onClick={() => {
-                            addLog('select: Design');
-                            setSelected('Design');
+                            addLog('select: Projects');
+                            setSelected('Projects');
                             // (The drawer closes.)
                             setOpen(false);
                           }}
                         >
-                          Design
+                          Projects
                         </List.Title>
+                        <List.Detail>8</List.Detail>
                         {/* (Its nested rows: shown, or collapsed.) */}
                         <List.Accessory
-                          aria-expanded={!collapsed.has('Design')}
-                          aria-label="Design: nested"
+                          aria-expanded={!collapsed.has('Projects')}
+                          aria-label="Projects: nested"
                           render={<button type="button" />}
                           onClick={() => {
                             const next = new Set(collapsed);
-                            if (!next.delete('Design')) next.add('Design');
+                            if (!next.delete('Projects')) next.add('Projects');
                             addLog(
-                              `Design ${next.has('Design') ? 'collapsed' : 'expanded'}`,
+                              `Projects ${next.has('Projects') ? 'collapsed' : 'expanded'}`,
                             );
                             setCollapsed(next);
                           }}
                         >
                           <List.Disclosure
                             data-panel-open={
-                              collapsed.has('Design') ? undefined : ''
+                              collapsed.has('Projects') ? undefined : ''
                             }
                           />
                         </List.Accessory>
                       </List.Item>
-                    )}
-                    {collapsed.has('Projects') ||
-                    collapsed.has('Design') ? null : (
-                      <List.Item
-                        level={2}
-                        selected={selected === 'Drafts'}
-                      >
+                      {collapsed.has('Projects') ? null : (
+                        <List.Item
+                          level={1}
+                          selected={selected === 'Design'}
+                        >
+                          <List.Image variant="symbol">
+                            <Symbol icon={sfFolder} />
+                          </List.Image>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => {
+                              addLog('select: Design');
+                              setSelected('Design');
+                              // (The drawer closes.)
+                              setOpen(false);
+                            }}
+                          >
+                            Design
+                          </List.Title>
+                          {/* (Its nested rows: shown, or collapsed.) */}
+                          <List.Accessory
+                            aria-expanded={!collapsed.has('Design')}
+                            aria-label="Design: nested"
+                            render={<button type="button" />}
+                            onClick={() => {
+                              const next = new Set(collapsed);
+                              if (!next.delete('Design')) next.add('Design');
+                              addLog(
+                                `Design ${next.has('Design') ? 'collapsed' : 'expanded'}`,
+                              );
+                              setCollapsed(next);
+                            }}
+                          >
+                            <List.Disclosure
+                              data-panel-open={
+                                collapsed.has('Design') ? undefined : ''
+                              }
+                            />
+                          </List.Accessory>
+                        </List.Item>
+                      )}
+                      {collapsed.has('Projects') ||
+                      collapsed.has('Design') ? null : (
+                        <List.Item
+                          level={2}
+                          selected={selected === 'Drafts'}
+                        >
+                          <List.Image variant="symbol">
+                            <Symbol icon={sfDocument} />
+                          </List.Image>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => {
+                              addLog('select: Drafts');
+                              setSelected('Drafts');
+                              // (The drawer closes.)
+                              setOpen(false);
+                            }}
+                          >
+                            Drafts
+                          </List.Title>
+                          <List.Detail>2</List.Detail>
+                        </List.Item>
+                      )}
+                      {collapsed.has('Projects') ? null : (
+                        <List.Item
+                          level={1}
+                          selected={selected === 'Photos'}
+                        >
+                          <List.Image variant="symbol">
+                            <Symbol icon={sfPhoto} />
+                          </List.Image>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => {
+                              addLog('select: Photos');
+                              setSelected('Photos');
+                              // (The drawer closes.)
+                              setOpen(false);
+                            }}
+                          >
+                            Photos
+                          </List.Title>
+                        </List.Item>
+                      )}
+                      <List.Item selected={selected === 'Trash'}>
                         <List.Image variant="symbol">
-                          <Symbol icon={sfDocument} />
+                          <Symbol icon={sfTrash} />
                         </List.Image>
                         <List.Title
                           render={<button type="button" />}
                           onClick={() => {
-                            addLog('select: Drafts');
-                            setSelected('Drafts');
+                            addLog('select: Trash');
+                            setSelected('Trash');
                             // (The drawer closes.)
                             setOpen(false);
                           }}
                         >
-                          Drafts
-                        </List.Title>
-                        <List.Detail>2</List.Detail>
-                      </List.Item>
-                    )}
-                    {collapsed.has('Projects') ? null : (
-                      <List.Item
-                        level={1}
-                        selected={selected === 'Photos'}
-                      >
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfPhoto} />
-                        </List.Image>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => {
-                            addLog('select: Photos');
-                            setSelected('Photos');
-                            // (The drawer closes.)
-                            setOpen(false);
-                          }}
-                        >
-                          Photos
+                          Trash
                         </List.Title>
                       </List.Item>
-                    )}
-                    <List.Item selected={selected === 'Trash'}>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfTrash} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => {
-                          addLog('select: Trash');
-                          setSelected('Trash');
-                          // (The drawer closes.)
-                          setOpen(false);
-                        }}
-                      >
-                        Trash
-                      </List.Title>
-                    </List.Item>
-                  </Collapsible.Panel>
-                </Collapsible.Root>
-                {/* Rows with trailing controls: a switch, a checkmark
+                    </Collapsible.Panel>
+                  </Collapsible.Root>
+                  {/* Rows with trailing controls: a switch, a checkmark
                    (choosing), an info button. */}
-                <Collapsible.Root
-                  defaultOpen
-                  render={<List.Section />}
-                >
-                  <Collapsible.Trigger
-                    nativeButton={false}
-                    render={<List.Header prominence="nested" />}
+                  <Collapsible.Root
+                    defaultOpen
+                    render={<List.Section />}
                   >
-                    <List.Title>Options</List.Title>
-                    <List.Disclosure />
-                  </Collapsible.Trigger>
-                  <Collapsible.Panel render={<List.Group />}>
-                    <List.Item onClick={forwardClick('[role=switch]')}>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfEye} />
-                      </List.Image>
-                      <List.Title>Show Hidden</List.Title>
-                      <Switch.Root
-                        aria-label="Show Hidden"
-                        checked={showHidden}
-                        onCheckedChange={(next) => {
-                          addLog(`show hidden: ${String(next)}`);
-                          setShowHidden(next);
-                        }}
-                      >
-                        <Switch.Thumb />
-                      </Switch.Root>
-                    </List.Item>
-                    <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfTextformat} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => {
-                          addLog('sort by: Name');
-                          setSortBy('Name');
-                        }}
-                      >
-                        Sort by Name
-                      </List.Title>
-                      {sortBy === 'Name' ? <List.Checkmark /> : null}
-                    </List.Item>
-                    <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfCalendar} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => {
-                          addLog('sort by: Date');
-                          setSortBy('Date');
-                        }}
-                      >
-                        Sort by Date
-                      </List.Title>
-                      {sortBy === 'Date' ? <List.Checkmark /> : null}
-                    </List.Item>
-                    <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfPerson2} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => addLog('select: Shared')}
-                      >
-                        Shared
-                      </List.Title>
-                      <List.Accessory
-                        aria-label="Info"
-                        render={<button type="button" />}
-                        onClick={() => addLog('shared info')}
-                      >
-                        <Symbol icon={sfICircle} />
-                      </List.Accessory>
-                    </List.Item>
-                  </Collapsible.Panel>
-                </Collapsible.Root>
-              </List.Root>
-            </Sidebar.Root>
-          </Layout.Column>
+                    <Collapsible.Trigger
+                      nativeButton={false}
+                      render={<List.Header prominence="nested" />}
+                    >
+                      <List.Title>Options</List.Title>
+                      <List.Disclosure />
+                    </Collapsible.Trigger>
+                    <Collapsible.Panel render={<List.Group />}>
+                      <List.Item onClick={forwardClick('[role=switch]')}>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfEye} />
+                        </List.Image>
+                        <List.Title>Show Hidden</List.Title>
+                        <Switch.Root
+                          aria-label="Show Hidden"
+                          checked={showHidden}
+                          onCheckedChange={(next) => {
+                            addLog(`show hidden: ${String(next)}`);
+                            setShowHidden(next);
+                          }}
+                        >
+                          <Switch.Thumb />
+                        </Switch.Root>
+                      </List.Item>
+                      <List.Item>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfTextformat} />
+                        </List.Image>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => {
+                            addLog('sort by: Name');
+                            setSortBy('Name');
+                          }}
+                        >
+                          Sort by Name
+                        </List.Title>
+                        {sortBy === 'Name' ? <List.Checkmark /> : null}
+                      </List.Item>
+                      <List.Item>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfCalendar} />
+                        </List.Image>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => {
+                            addLog('sort by: Date');
+                            setSortBy('Date');
+                          }}
+                        >
+                          Sort by Date
+                        </List.Title>
+                        {sortBy === 'Date' ? <List.Checkmark /> : null}
+                      </List.Item>
+                      <List.Item>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfPerson2} />
+                        </List.Image>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => addLog('select: Shared')}
+                        >
+                          Shared
+                        </List.Title>
+                        <List.Accessory
+                          aria-label="Info"
+                          render={<button type="button" />}
+                          onClick={() => addLog('shared info')}
+                        >
+                          <Symbol icon={sfICircle} />
+                        </List.Accessory>
+                      </List.Item>
+                    </Collapsible.Panel>
+                  </Collapsible.Root>
+                </List.Root>
+              </Sidebar.Root>
+            </Layout.Column>
+          </Layout.Drawer>
           <Layout.Column {...propsContentColumn}>
             <Page.Root
               background={

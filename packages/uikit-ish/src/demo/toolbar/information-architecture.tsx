@@ -1,6 +1,11 @@
 import { FunctionComponent } from 'react';
 
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -82,7 +87,12 @@ export const ToolbarInformationArchitecture: FunctionComponent = () => (
         with a name and a symbol.
       </li>
       <li>
-        A capsule (<code>Toolbar.Group</code>): a Command set (guide,{' '}
+        A capsule (
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Group"
+        />
+        ): a Command set (guide,{' '}
         <GuideLink to="primitive-command-set">§5</GuideLink>), commands that
         belong together.
       </li>

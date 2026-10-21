@@ -8,6 +8,7 @@ import {
   Header,
   List,
   Navigation,
+  type NavigationBackEventDetails,
   Page,
   Segmented,
   Symbol,
@@ -46,13 +47,16 @@ export const NavigationDemo: FunctionComponent = () => {
       [stack]: [...current[stack], page],
     }));
   };
-  const pop = useCallback(() => {
-    addLog('pop');
-    setStacks((current) => ({
-      ...current,
-      [stack]: current[stack].slice(0, -1),
-    }));
-  }, [addLog, stack]);
+  const pop = useCallback(
+    ({ reason }: NavigationBackEventDetails) => {
+      addLog(`pop (${reason})`);
+      setStacks((current) => ({
+        ...current,
+        [stack]: current[stack].slice(0, -1),
+      }));
+    },
+    [addLog, stack],
+  );
 
   const [externalRoot] = useProvidedState(id);
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
@@ -97,15 +101,14 @@ export const NavigationDemo: FunctionComponent = () => {
                   <Header.Bar>
                     {back ? (
                       <Toolbar.Leading>
-                        <Toolbar.Button
+                        <Navigation.Back
                           aria-label={back}
-                          shape="circle"
-                          onClick={pop}
+                          render={<Toolbar.Button shape="circle" />}
                         >
                           <Button.Icon>
                             <Symbol icon={sfChevronBackward} />
                           </Button.Icon>
-                        </Toolbar.Button>
+                        </Navigation.Back>
                       </Toolbar.Leading>
                     ) : null}
                     <Toolbar.Title>

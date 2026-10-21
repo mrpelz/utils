@@ -29,7 +29,12 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   contacts,
@@ -95,7 +100,7 @@ const pop = () => setKeys((current) => current.slice(0, -1));
         <Header.Bar>
           {depth > 0 ? (
             <Toolbar.Leading>
-              <Toolbar.Button aria-label="Back" shape="circle" onClick={pop}>…</Toolbar.Button>
+              <Navigation.Back aria-label="Back" render={<Toolbar.Button shape="circle" />}>…</Navigation.Back>
             </Toolbar.Leading>
           ) : null}
           <Toolbar.Title><span>{pages[key].title}</span></Toolbar.Title>
@@ -454,15 +459,14 @@ const DrillIn: FunctionComponent = () => {
                   <Header.Bar>
                     {depth > 0 ? (
                       <Toolbar.Leading>
-                        <Toolbar.Button
+                        <Navigation.Back
                           aria-label="Back"
-                          shape="circle"
-                          onClick={pop}
+                          render={<Toolbar.Button shape="circle" />}
                         >
                           <Button.Icon>
                             <Symbol icon={sfChevronBackward} />
                           </Button.Icon>
-                        </Toolbar.Button>
+                        </Navigation.Back>
                       </Toolbar.Leading>
                     ) : null}
                     <Toolbar.Title>
@@ -852,8 +856,12 @@ export const ListComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Rows with a button title and a <code>List.DrillIn</code> push a page in
-        a <a href="navigation">Navigation</a>.
+        Rows with a button title and a{' '}
+        <PartLink
+          component="list"
+          part="List.DrillIn"
+        />{' '}
+        push a page in a <a href="navigation">Navigation</a>.
       </li>
       <li>
         The app keeps the stack (keyed pages); the navigation transitions
@@ -875,13 +883,25 @@ export const ListComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Edit (in the navigation bar): edit mode (<code>List.Root</code>{' '}
+        Edit (in the navigation bar): edit mode (
+        <PartLink
+          component="list"
+          part="List.Root"
+        />{' '}
         <code>editing</code>).
       </li>
       <li>
-        Each row’s <code>List.Checkbox</code> slides in from its leading edge,
-        its <code>List.Grabber</code> from its trailing edge; the content makes
-        room. Done slides them out.
+        Each row’s{' '}
+        <PartLink
+          component="list"
+          part="List.Checkbox"
+        />{' '}
+        slides in from its leading edge, its{' '}
+        <PartLink
+          component="list"
+          part="List.Grabber"
+        />{' '}
+        from its trailing edge; the content makes room. Done slides them out.
       </li>
       <li>
         The list owns the selection: a <a href="checkbox">CheckboxGroup</a>{' '}
@@ -905,8 +925,12 @@ export const ListComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As Mail: a plain list of media rows, a <code>List.Text</code> preview
-        below the subject.
+        As Mail: a plain list of media rows, a{' '}
+        <PartLink
+          component="list"
+          part="List.Text"
+        />{' '}
+        preview below the subject.
       </li>
       <li>An unread dot in the image’s place.</li>
       <li>Swipe actions on both sides, labels shown.</li>
@@ -926,7 +950,12 @@ export const ListComposition: FunctionComponent = () => (
     <ul>
       <li>
         As Contacts: a plain list in sections by letter (sticky section titles),
-        a <code>List.Index</code> beside it.
+        a{' '}
+        <PartLink
+          component="list"
+          part="List.Index"
+        />{' '}
+        beside it.
       </li>
       <li>
         Pressing or scrubbing over a letter clicks it; the app scrolls its list

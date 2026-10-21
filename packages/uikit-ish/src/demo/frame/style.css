@@ -113,6 +113,9 @@
     grid-area: stage;
     scroll-snap-stop: always;
 
+    /* (Its components' long presses theirs, not iOS' callout: inherited.) */
+    -webkit-touch-callout: none;
+
     /* (Edge to edge, not into the config below: it would cover the
        stage's end.) */
     @media screen and (width <= 768px) {
@@ -262,10 +265,10 @@
     margin-block: 0.5rem;
   }
 
-  /* Scrolling natively (Monaco within, at its content's size): at its ends,
-     a swipe or the wheel scrolls the page on. */
+  /* Monaco's (see CodeView): its height capped by its `max-height`, Monaco
+     scrolling itself beyond. */
   .demo-code-editor {
-    overflow: auto;
+    overflow: hidden;
   }
 
   /* (As Monaco's editor, see CodeView: replaced at the same height.) */

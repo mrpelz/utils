@@ -22,7 +22,7 @@ import {
   sidebarToolbarGroupRows,
   sidebarToolbarRows,
 } from './docs.js';
-import { propOptionsPart } from './props.js';
+import { propOptionsGuideRoot, propOptionsPart } from './props.js';
 
 /** `Sidebar.Root`, outlined: a toolbar, a search field, a list. */
 const RootPart: FunctionComponent = () => {
@@ -30,7 +30,7 @@ const RootPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
-    propOptionsPart,
+    propOptionsGuideRoot,
     'Sidebar.Root',
     external,
     true,
@@ -48,10 +48,7 @@ const RootPart: FunctionComponent = () => {
       title="Sidebar.Root"
     >
       <div className="sidebar-demo-panel sidebar-demo-picture">
-        <Sidebar.Root
-          aria-label="Mailboxes"
-          {...props}
-        >
+        <Sidebar.Root {...props}>
           <Sidebar.Toolbar>
             <Button.Root
               tint="var(--uikit-glass-content)"
@@ -280,10 +277,16 @@ export const SidebarParts: FunctionComponent = () => (
         (floating, or a drawer)
         <ul>
           <li>
-            <PartLink part="Sidebar.Root" />
+            <PartLink
+              component="sidebar"
+              part="Sidebar.Root"
+            />
             <ul>
               <li>
-                <PartLink part="Sidebar.Toolbar" />
+                <PartLink
+                  component="sidebar"
+                  part="Sidebar.Toolbar"
+                />
                 <ul>
                   <li>
                     <PartLink
@@ -293,7 +296,11 @@ export const SidebarParts: FunctionComponent = () => (
                     (borderless, at each end), or
                   </li>
                   <li>
-                    <PartLink part="Sidebar.ToolbarGroup" /> (several)
+                    <PartLink
+                      component="sidebar"
+                      part="Sidebar.ToolbarGroup"
+                    />{' '}
+                    (several)
                   </li>
                 </ul>
               </li>

@@ -47,8 +47,11 @@ export const getPropOptionsItem = (
   addLog: (message: string) => void,
 ) => ({
   ...commonPropOptions,
+  // (Its own, or another's.)
+  value: [value, 'year'] as const,
   disabled: [undefined, false, true] as const,
   readOnly: [undefined, false, true] as const,
+  required: [undefined, false, true] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
   inputRef: [
     undefined,
