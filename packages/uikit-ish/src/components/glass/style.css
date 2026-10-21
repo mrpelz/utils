@@ -129,6 +129,21 @@
   }
 
   /*
+   * The layers, behind their host's content in the host's own stacking
+   * context: they're composited (backdrop filters), and Safari otherwise
+   * relies on its overlap testing to draw the content after them, which
+   * misses content far down a scrolled document (e.g. a bar in an inline
+   * demo), leaving it under the glass, dimmed.
+   */
+  :where(:has(> [data-glass-part])) {
+    isolation: isolate;
+
+    & > [data-glass-part] {
+      z-index: -1;
+    }
+  }
+
+  /*
    * Glass contexts (see glassContext, useGlassContext): the brightness of
    * what's behind an element's glass, as `data-glass-context`, its
    * `--uikit-glass-*` properties for its glass and content; `auto` (or
