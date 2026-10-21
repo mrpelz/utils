@@ -125,6 +125,7 @@ export const ListDemo: FunctionComponent = () => {
 
   return (
     <Component
+      inputGuards
       stretch
       controls={[controlRoot, controlItem, controlCollapsible, controlTrigger]}
       id={id}

@@ -1188,8 +1188,8 @@ export const ViewportParts: FunctionComponent = () => (
       <li>
         Here: fields of 12, 15 and 17px, one with suggestions (a{' '}
         <code>datalist</code>), a text area; each focus logs the page’s zoom.
-        This site holds it everywhere: open it with <code>?guards=off</code> to
-        compare, the toggle then the only holder.
+        Every demo’s prop controls hold it too (while mounted, as their own
+        fields’ guard), so on this site the zoom stays off either way.
       </li>
     </ul>
     <UseInputZoomPreventionPart />
@@ -1238,8 +1238,8 @@ export const ViewportParts: FunctionComponent = () => (
       </li>
       <li>
         Here: the fields, down to the frame’s bottom; each focus logs how far
-        the page (and the visual viewport) scrolled. With{' '}
-        <code>?guards=off</code>, as above.
+        the page (and the visual viewport) scrolled. The only holder on this
+        page (other demos with fields hold their own).
       </li>
     </ul>
     <UseFocusShiftPreventionPart />

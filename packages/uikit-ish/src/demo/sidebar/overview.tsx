@@ -64,6 +64,7 @@ const LiveView: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       controls={[controlContent, controlColumn, controlContentColumn]}
       id={id}
       log={log}

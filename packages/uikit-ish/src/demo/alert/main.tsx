@@ -36,6 +36,7 @@ export const AlertDemo: FunctionComponent = () => {
   return (
     <Component
       center
+      inputGuards
       baseUiId="alert-dialog"
       controls={[controlRoot, controlContent]}
       id={id}

@@ -136,6 +136,7 @@ const Validation: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       id="text-field-composition-validation"
       log={log}
       title="Validation"
@@ -222,6 +223,7 @@ const SearchWithClear: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       id="text-field-composition-search"
       title="A search field"
     >
@@ -266,6 +268,7 @@ const InAFormList: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       id="text-field-composition-form"
       log={log}
       title="Fields in a form list"
@@ -346,6 +349,7 @@ const Suggestions: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       id="text-field-composition-suggestions"
       log={log}
       title="Suggestions"

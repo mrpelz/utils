@@ -44,6 +44,7 @@ export const DatePickerDemo: FunctionComponent = () => {
   return (
     <Component
       center
+      inputGuards
       baseUiId="popover"
       controls={controlPicker}
       id={id}
@@ -85,6 +86,7 @@ export const DatePickerRangeDemo: FunctionComponent = () => {
   return (
     <Component
       center
+      inputGuards
       baseUiId="popover"
       controls={controlPicker}
       id={id}
@@ -137,6 +139,7 @@ export const TimePickerDemo: FunctionComponent = () => {
   return (
     <Component
       center
+      inputGuards
       baseUiId="popover"
       controls={controlPicker}
       id={id}
@@ -170,6 +173,7 @@ export const DateAndTimePickerDemo: FunctionComponent = () => {
   return (
     <Component
       center
+      inputGuards
       baseUiId="popover"
       controls={controlPicker}
       id={id}
@@ -217,6 +221,7 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
   return (
     <Component
       center
+      inputGuards
       baseUiId="popover"
       controls={[controlContent, controlPicker]}
       id={id}

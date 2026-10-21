@@ -430,6 +430,7 @@ const Search: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       id="sidebar-composition-search"
       log={log}
       title="Sidebar with search"

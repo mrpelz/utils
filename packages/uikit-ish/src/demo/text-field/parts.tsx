@@ -46,6 +46,7 @@ const RootPart: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       controls={[control]}
       id={id}
       state={[state]}
@@ -86,6 +87,7 @@ const LabelPart: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       controls={[control]}
       id={id}
       state={[state]}
@@ -116,6 +118,7 @@ const ControlPart: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       controls={[control]}
       id={id}
       log={log}
@@ -163,6 +166,7 @@ const DescriptionPart: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       controls={[control]}
       id={id}
       state={[state]}
@@ -204,6 +208,7 @@ const ErrorPart: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       controls={[control]}
       id={id}
       state={[state]}
@@ -253,6 +258,7 @@ const ClearPart: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       controls={[control]}
       id={id}
       log={log}
@@ -290,6 +296,7 @@ const SearchPart: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       controls={[control]}
       id={id}
       state={[state]}

@@ -4,9 +4,14 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
+import {
+  useFocusShiftPrevention,
+  useInputZoomPrevention,
+} from '../../components/index.js';
 import { ColorScheme } from '../../components/utils/main.js';
 import { Breadcrumb, Tabs, useEntry } from '../guide/nav.js';
 import { PagePathContext } from '../guide/sections.js';
@@ -141,6 +146,32 @@ const InlineDemo: FunctionComponent<{
   );
 };
 
+/** The guards' hooks, above the code of a demo with `inputGuards`. */
+const inputGuardsCode = `useInputZoomPrevention();
+useFocusShiftPrevention();
+
+`;
+
+/**
+ * The iOS input guards of a shown demo's stage (with `inputGuards`:
+ * document-wide, as its code shows) and of its config (the prop controls':
+ * on every demo, so zoom is held wherever one is); the config's ref.
+ */
+const useGuards = (hidden: boolean, inputGuards: boolean, raw: boolean) => {
+  const ref = useRef<HTMLElement>(null);
+  const stage = !hidden && inputGuards;
+  const config = !hidden && !raw;
+  useInputZoomPrevention(stage || config);
+  useFocusShiftPrevention(undefined, stage);
+  useFocusShiftPrevention(ref, config);
+
+  return ref;
+};
+
+/** A demo's code: its stage's, below its guards' hooks (if it has them). */
+const demoCode = (children: ReactNode, inputGuards: boolean) =>
+  `${inputGuards ? inputGuardsCode : ''}${renderCode(children)}`;
+
 export const Component: FunctionComponent<{
   backdrop?: boolean;
   /** Base UI component the demo is built on, for the docs link (if any). */
@@ -156,6 +187,11 @@ export const Component: FunctionComponent<{
    * any) in a tab of its own.
    */
   inline?: boolean;
+  /**
+   * Its stage has text fields: guarded against iOS' zoom and focus shift
+   * (`useInputZoomPrevention`, `useFocusShiftPrevention`), shown in its code.
+   */
+  inputGuards?: boolean;
   log?: ReactNode;
   /** Its prop controls' state, for its URL (see `useCreateStateUrl`). */
   state?: unknown[];
@@ -169,6 +205,7 @@ export const Component: FunctionComponent<{
   controls,
   id,
   inline = false,
+  inputGuards = false,
   log,
   state,
   stretch = false,
@@ -214,14 +251,16 @@ export const Component: FunctionComponent<{
   const [code, setCode] = useState('');
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCode(codeOpen && !raw ? renderCode(children) : '');
-  }, [children, codeOpen, raw]);
+    setCode(codeOpen && !raw ? demoCode(children, inputGuards) : '');
+  }, [children, codeOpen, inputGuards, raw]);
 
   const isHidden = useMemo(() => {
     if (showId === undefined || showId === id) return false;
 
     return true;
   }, [id, showId]);
+
+  const config = useGuards(isHidden, inputGuards, raw);
 
   if (isHidden) return null;
   if (raw) return children;
@@ -253,7 +292,10 @@ export const Component: FunctionComponent<{
           </div>
         </div>
       </section>
-      <aside className="demo-config">
+      <aside
+        ref={config}
+        className="demo-config"
+      >
         <section className="demo-config demo-config-section">
           <summary className="demo-config-heading">Config</summary>
           <label style={{ display: 'block' }}>

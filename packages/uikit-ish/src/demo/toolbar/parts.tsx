@@ -582,6 +582,7 @@ const InputPart: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       controls={[control]}
       id={id}
       state={[state]}

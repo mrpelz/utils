@@ -65,6 +65,7 @@ export const TextFieldDemo: FunctionComponent = () => {
 
   return (
     <Component
+      inputGuards
       stretch
       baseUiId="field"
       id={id}

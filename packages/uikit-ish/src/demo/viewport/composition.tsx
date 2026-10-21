@@ -214,6 +214,7 @@ const Message: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       id="viewport-composition-message"
       log={log}
       title="Viewport with a message field"

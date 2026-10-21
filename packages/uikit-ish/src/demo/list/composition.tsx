@@ -292,6 +292,7 @@ const SettingsScreen: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       id="list-composition-settings"
       log={log}
       title="List as a settings page"

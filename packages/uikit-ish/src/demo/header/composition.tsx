@@ -191,6 +191,7 @@ const Search: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       id="header-composition-search"
       title="Header with a search field"
     >

@@ -325,6 +325,7 @@ const Search: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       id="toolbar-composition-search"
       log={log}
       title="Toolbar with a search field"

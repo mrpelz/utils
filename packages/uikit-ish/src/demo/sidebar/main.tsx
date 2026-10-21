@@ -101,6 +101,7 @@ export const SidebarDemo: FunctionComponent = () => {
 
   return (
     <Component
+      inputGuards
       stretch
       id={id}
       log={log}
@@ -574,6 +575,7 @@ export const SidebarCompactDemo: FunctionComponent = () => {
 
   return (
     <Component
+      inputGuards
       stretch
       id={id}
       log={log}
@@ -1046,6 +1048,7 @@ export const SidebarEditingDemo: FunctionComponent = () => {
 
   return (
     <Component
+      inputGuards
       stretch
       id={id}
       log={log}

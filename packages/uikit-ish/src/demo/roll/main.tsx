@@ -53,6 +53,7 @@ export const RollDemo: FunctionComponent = () => {
   return (
     <Component
       center
+      inputGuards
       controls={[controlRoot, controlColumn, controlItem, controlSeparator]}
       id={id}
       log={log}

@@ -91,6 +91,7 @@ export const ViewportBarDemo: FunctionComponent = () => {
   return (
     <Component
       center
+      inputGuards
       id={id}
       log={log}
       title="Viewport (Bar)"

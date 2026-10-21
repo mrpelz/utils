@@ -41,6 +41,7 @@ const RootPart: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       controls={[control]}
       id={id}
       log={log}

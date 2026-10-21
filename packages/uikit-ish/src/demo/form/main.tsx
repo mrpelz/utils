@@ -94,6 +94,7 @@ export const FormDemo: FunctionComponent = () => {
 
   return (
     <Component
+      inputGuards
       stretch
       baseUiId="form"
       id={id}

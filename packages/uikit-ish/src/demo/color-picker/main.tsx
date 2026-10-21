@@ -108,6 +108,7 @@ export const ColorPickerDemo: FunctionComponent = () => {
   return (
     <Component
       center
+      inputGuards
       controls={[controlContent, controlRoot, controlPanel, controlWell]}
       id={id}
       log={log}

@@ -48,6 +48,7 @@ export const StepperDemo: FunctionComponent = () => {
   return (
     <Component
       center
+      inputGuards
       baseUiId="number-field"
       controls={[controlRoot, controlGroup, controlDecrement, controlIncrement]}
       id={id}

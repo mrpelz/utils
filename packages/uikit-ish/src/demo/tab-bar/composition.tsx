@@ -282,6 +282,7 @@ const Search: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       id="tab-bar-composition-search"
       log={log}
       title="Tab bar with search"

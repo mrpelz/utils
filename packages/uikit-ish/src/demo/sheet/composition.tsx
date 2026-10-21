@@ -258,6 +258,7 @@ const CancelDone: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       id="sheet-composition-cancel-done"
       log={log}
       title="A sheet with Cancel and Done"
@@ -476,6 +477,7 @@ const FormSheet: FunctionComponent = () => {
     <Component
       center
       inline
+      inputGuards
       id="sheet-composition-form-sheet"
       log={log}
       title="A form sheet on a tablet"
