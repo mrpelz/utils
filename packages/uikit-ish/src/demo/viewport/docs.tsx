@@ -11,7 +11,8 @@ const safeAreaRow: PropRow = [
   <>
     The safe area insets kept clear (as padding): all, those of the block
     dimension (top, bottom) or the inline one (left, right) only, or none (CSS{' '}
-    <code>env(safe-area-inset-*)</code>).
+    <code>env(safe-area-inset-*)</code>). Its own background reaches the
+    screen’s edge, its content clear of them: the anchor is the surface.
   </>,
 ];
 
@@ -343,4 +344,17 @@ export const useFocusShiftPreventionRows: readonly PropRow[] = [
     'Where touched text fields are focused without scrolling.',
   ],
   ['enabled', 'boolean', code('true'), 'Whether it guards (while mounted).'],
+];
+
+export const useSizeClassReturnRows: readonly PropRow[] = [
+  [
+    '(returns)',
+    union('compact', 'regular'),
+    undefined,
+    <>
+      The window’s horizontal size class: <code>regular</code> from 768px (an
+      iPad’s window), <code>compact</code> below (a phone’s); before hydration
+      (server rendering), <code>compact</code>.
+    </>,
+  ],
 ];

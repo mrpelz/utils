@@ -17,6 +17,7 @@ import {
   useFocusShiftPrevention,
   useInputZoomPrevention,
   useScrollDirection,
+  useSizeClass,
   useViewportScroll,
   useVisualViewport,
   Viewport,
@@ -41,6 +42,7 @@ import {
   useFocusShiftPreventionRows,
   useInputZoomPreventionRows,
   useScrollDirectionRows,
+  useSizeClassReturnRows,
   useViewportScrollRows,
   useVisualViewportRows,
   viewportAnchorRows,
@@ -230,7 +232,12 @@ const AnchorPart: FunctionComponent = () => {
             </List.Section>
           </List.Root>
         </Viewport.Content>
-        <Viewport.Anchor {...props}>
+        {/* The anchor is the surface: its background to the screen's edge,
+            its content clear of the insets (its padding). */}
+        <Viewport.Anchor
+          {...props}
+          className={props.className ?? 'viewport-demo-surface'}
+        >
           <div
             className="viewport-demo-sample"
             data-side={side ? '' : undefined}
@@ -756,6 +763,26 @@ const UseFocusShiftPreventionPart: FunctionComponent = () => {
   );
 };
 
+/** `useSizeClass`: the window's size class, logged as it changes. */
+const UseSizeClassPart: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const sizeClass = useSizeClass();
+
+  useEffect(() => addLog(`size class: ${sizeClass}`), [addLog, sizeClass]);
+
+  return (
+    <Component
+      center
+      inline
+      id="viewport-parts-use-size-class"
+      log={log}
+      title="useSizeClass"
+    >
+      <output className="viewport-demo-size-class">{sizeClass}</output>
+    </Component>
+  );
+};
+
 /** `/viewport/parts`: the provider, the layers, and the hooks. */
 export const ViewportParts: FunctionComponent = () => (
   <>
@@ -849,6 +876,12 @@ export const ViewportParts: FunctionComponent = () => (
                 <PartLink
                   component="viewport"
                   part="useElementGeometry"
+                />
+              </li>
+              <li>
+                <PartLink
+                  component="viewport"
+                  part="useSizeClass"
                 />
               </li>
             </ul>
@@ -1146,6 +1179,32 @@ export const ViewportParts: FunctionComponent = () => (
     <PropsTable rows={elementGeometryRows} />
 
     <Heading
+      id="usesizeclass"
+      level={2}
+    >
+      <code>useSizeClass</code>
+    </Heading>
+    <ul>
+      <li>
+        The window’s horizontal size class (UIKit’s): <code>regular</code> from
+        768px, <code>compact</code> below; re-rendering as it changes.
+      </li>
+      <li>
+        For presentations by size: e.g. a sheet on <code>compact</code> (a
+        phone), a popover on <code>regular</code> (an iPad), as{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Popup"
+        />{' '}
+        decides <code>compact</code> by it.
+      </li>
+      <li>No provider needed.</li>
+    </ul>
+    <UseSizeClassPart />
+    <h3>Returns</h3>
+    <PropsTable rows={useSizeClassReturnRows} />
+
+    <Heading
       id="preventinputzoom"
       level={2}
     >
@@ -1260,6 +1319,7 @@ export const viewportPartsDemos = [
   UseScrollDirectionPart,
   UseElementVisibilityPart,
   UseElementGeometryPart,
+  UseSizeClassPart,
   UseInputZoomPreventionPart,
   UseFocusShiftPreventionPart,
 ];

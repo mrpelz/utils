@@ -1,4 +1,6 @@
-import { FunctionComponent, useMemo } from 'react';
+import './style.css';
+
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -28,6 +30,7 @@ import {
 const FormPart: FunctionComponent = () => {
   const id = 'form-parts-form';
   const [log, addLog] = useLog();
+  const [quantity, setQuantity] = useState<number | null>(1);
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsForm(addLog), [addLog]),
@@ -74,9 +77,13 @@ const FormPart: FunctionComponent = () => {
                 render={<List.Item />}
               >
                 <List.Title>Quantity</List.Title>
+                <List.Detail className="form-demo-value">
+                  {quantity ?? '–'}
+                </List.Detail>
                 <Stepper.Root
-                  defaultValue={1}
                   min={1}
+                  value={quantity}
+                  onValueChange={(next: number | null) => setQuantity(next)}
                 >
                   <Stepper.Group>
                     <Stepper.Input aria-label="Quantity" />
@@ -212,6 +219,7 @@ const FieldsetLegendPart: FunctionComponent = () => {
 const FieldPart: FunctionComponent = () => {
   const id = 'form-parts-field';
   const [log, addLog] = useLog();
+  const [quantity, setQuantity] = useState<number | null>(1);
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsField,
@@ -246,9 +254,13 @@ const FieldPart: FunctionComponent = () => {
                 {...props}
               >
                 <List.Title>Quantity</List.Title>
+                <List.Detail className="form-demo-value">
+                  {quantity ?? '–'}
+                </List.Detail>
                 <Stepper.Root
-                  defaultValue={1}
                   min={1}
+                  value={quantity}
+                  onValueChange={(next: number | null) => setQuantity(next)}
                 >
                   <Stepper.Group>
                     <Stepper.Input aria-label="Quantity" />

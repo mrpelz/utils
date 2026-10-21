@@ -107,9 +107,15 @@ export const propOptionsGuideWell = {
 };
 
 export const propOptionsContent = {
-  // In a popover (iPad), or a sheet (iPhone).
-  container: ['popover', 'sheet'] as const,
+  // In a popover (iPad), or a sheet (iPhone); by default, by the window's
+  // size class (see Viewport's `useSizeClass`).
+  container: [undefined, 'popover', 'sheet'] as const,
   defaultOpen: [false, true] as const,
+};
+
+/** The overview's and the list row's presentation (as `container`). */
+export const propOptionsPresentation = {
+  presentation: [undefined, 'popover', 'sheet'] as const,
 };
 
 /** The overview's few: the panel's view (its color the demo's). */

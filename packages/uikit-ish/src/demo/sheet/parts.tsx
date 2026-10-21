@@ -19,6 +19,7 @@ import {
   sheetCloseRows,
   sheetContentRows,
   sheetDescriptionRows,
+  sheetGrabberRows,
   sheetHandleRows,
   sheetHandleTypeRows,
   sheetHeaderRows,
@@ -29,6 +30,7 @@ import {
 } from './docs.js';
 import {
   getPropOptionsGuideRoot,
+  propOptionsGrabber,
   propOptionsGuidePopup,
   propOptionsHeader,
   propOptionsPart,
@@ -84,6 +86,7 @@ const RootPart: FunctionComponent = () => {
             container={screen}
           >
             <Sheet.Header>
+              <Sheet.Grabber />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading>
                   <Sheet.Close render={<Toolbar.Button />}>
@@ -172,6 +175,7 @@ const TriggerPart: FunctionComponent = () => {
             container={screen}
           >
             <Sheet.Header>
+              <Sheet.Grabber />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading>
                   <Sheet.Close render={<Toolbar.Button />}>
@@ -260,6 +264,7 @@ const PopupPart: FunctionComponent = () => {
             {...props}
           >
             <Sheet.Header>
+              <Sheet.Grabber />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading>
                   <Sheet.Close render={<Toolbar.Button />}>
@@ -347,6 +352,95 @@ const HeaderPart: FunctionComponent = () => {
             container={screen}
           >
             <Sheet.Header {...props}>
+              <Sheet.Grabber />
+              <Toolbar.Root placement="block-start">
+                <Toolbar.Leading>
+                  <Sheet.Close render={<Toolbar.Button />}>
+                    <Button.Label>Cancel</Button.Label>
+                  </Sheet.Close>
+                </Toolbar.Leading>
+                <Toolbar.Title>
+                  <Sheet.Title render={<span />}>Add Contact</Sheet.Title>
+                </Toolbar.Title>
+                <Toolbar.Trailing>
+                  <Sheet.Close render={<Toolbar.Button prominent />}>
+                    <Button.Label>Done</Button.Label>
+                  </Sheet.Close>
+                </Toolbar.Trailing>
+              </Toolbar.Root>
+            </Sheet.Header>
+            <Sheet.Content>
+              <List.Root>
+                <List.Section>
+                  <List.Group>
+                    {names.slice(0, 3).map((name) => (
+                      <List.Item key={name}>
+                        <List.Title>{name}</List.Title>
+                      </List.Item>
+                    ))}
+                  </List.Group>
+                  <List.Footer>
+                    <Sheet.Description>
+                      Saved to your contacts.
+                    </Sheet.Description>
+                  </List.Footer>
+                </List.Section>
+              </List.Root>
+            </Sheet.Content>
+          </Sheet.Popup>
+        </Sheet.Root>
+      </div>
+    </Component>
+  );
+};
+
+/** `Sheet.Grabber`: its grabber, outlined. */
+const GrabberPart: FunctionComponent = () => {
+  const id = 'sheet-parts-grabber';
+  const [log, addLog] = useLog();
+  const screen = useLabelledRef<HTMLDivElement>('screen');
+  const [external] = useProvidedState(id);
+  const [control, props, state] = usePropControl(
+    propOptionsGrabber,
+    'Sheet.Grabber',
+    external,
+    true,
+    true,
+  );
+
+  return (
+    <Component
+      center
+      inline
+      controls={[control]}
+      id={id}
+      log={log}
+      state={[state]}
+      title="Sheet.Grabber"
+    >
+      <div
+        ref={screen}
+        className="sheet-demo-phone"
+      >
+        <Sheet.Root
+          onOpenChange={(open: boolean) => addLog(`open: ${String(open)}`)}
+        >
+          <Sheet.Trigger
+            render={
+              <Button.Root
+                size="large"
+                variant="bordered"
+              />
+            }
+          >
+            <Button.Label>Add Contact</Button.Label>
+          </Sheet.Trigger>
+          <Sheet.Popup
+            compact
+            container={screen}
+          >
+            <Sheet.Header>
+              <Sheet.Grabber {...props} />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading>
                   <Sheet.Close render={<Toolbar.Button />}>
@@ -434,6 +528,7 @@ const ContentPart: FunctionComponent = () => {
             container={screen}
           >
             <Sheet.Header>
+              <Sheet.Grabber />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading>
                   <Sheet.Close render={<Toolbar.Button />}>
@@ -521,6 +616,7 @@ const TitlePart: FunctionComponent = () => {
             container={screen}
           >
             <Sheet.Header>
+              <Sheet.Grabber />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading>
                   <Sheet.Close render={<Toolbar.Button />}>
@@ -613,6 +709,7 @@ const DescriptionPart: FunctionComponent = () => {
             container={screen}
           >
             <Sheet.Header>
+              <Sheet.Grabber />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading>
                   <Sheet.Close render={<Toolbar.Button />}>
@@ -700,6 +797,7 @@ const ClosePart: FunctionComponent = () => {
             container={screen}
           >
             <Sheet.Header>
+              <Sheet.Grabber />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading>
                   <Sheet.Close render={<Toolbar.Button />}>
@@ -793,6 +891,7 @@ const CreateHandlePart: FunctionComponent = () => {
             container={screen}
           >
             <Sheet.Header>
+              <Sheet.Grabber />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading />
                 <Toolbar.Title>
@@ -884,6 +983,7 @@ const UseCreateSheetHandlePart: FunctionComponent = () => {
               container={screen}
             >
               <Sheet.Header>
+                <Sheet.Grabber />
                 <Toolbar.Root placement="block-start">
                   <Toolbar.Leading />
                   <Toolbar.Title>
@@ -963,7 +1063,12 @@ export const SheetParts: FunctionComponent = () => (
                   component="sheet"
                   part="Sheet.Header"
                 />{' '}
-                (a toolbar:{' '}
+                (
+                <PartLink
+                  component="sheet"
+                  part="Sheet.Grabber"
+                />
+                , optional; a toolbar:{' '}
                 <PartLink
                   component="sheet"
                   part="Sheet.Close"
@@ -1081,13 +1186,15 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its grabber (36px by 5px), above a toolbar of the app’s. (The sheet is
-        swiped down by any of it, its content scrolled to its top.)
+        Its grabber (
+        <PartLink
+          component="sheet"
+          part="Sheet.Grabber"
+        />
+        ), above a toolbar of the app’s. (The sheet is swiped down by any of it,
+        its content scrolled to its top.)
       </li>
-      <li>
-        Without children, only the grabber, over the content (its own bars below
-        it).
-      </li>
+      <li>With only a grabber, over the content (its own bars below it).</li>
       <li>
         Renders a <code>div</code>.
       </li>
@@ -1095,6 +1202,30 @@ export const SheetParts: FunctionComponent = () => (
     <HeaderPart />
     <h3>Props</h3>
     <PropsTable rows={sheetHeaderRows} />
+
+    <Heading
+      id="sheet-grabber"
+      level={2}
+    >
+      <code>Sheet.Grabber</code>
+    </Heading>
+    <ul>
+      <li>
+        The grabber (36px by 5px, 5px from the top), first in its header:
+        showing the sheet can be swiped (by any of it).
+      </li>
+      <li>Optional: left out, a cleaner top.</li>
+      <li>
+        Its <code>cursor</code>: <code>grab</code>, <code>grabbing</code> while
+        the sheet is swiped.
+      </li>
+      <li>
+        Renders a <code>div</code>, hidden from assistive tech.
+      </li>
+    </ul>
+    <GrabberPart />
+    <h3>Props</h3>
+    <PropsTable rows={sheetGrabberRows} />
 
     <Heading
       id="sheet-content"
@@ -1276,6 +1407,7 @@ export const sheetPartsDemos = [
   TriggerPart,
   PopupPart,
   HeaderPart,
+  GrabberPart,
   ContentPart,
   TitlePart,
   DescriptionPart,

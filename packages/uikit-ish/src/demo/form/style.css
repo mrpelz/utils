@@ -4,3 +4,9 @@
 .form-demo-field-contents {
   display: contents;
 }
+
+/* A stepper's value in its row's detail: its digits as wide as each
+   other, so it doesn't shift as it steps. */
+.form-demo-value {
+  font-variant-numeric: tabular-nums;
+}

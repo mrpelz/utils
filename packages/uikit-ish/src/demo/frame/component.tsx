@@ -146,6 +146,31 @@ const InlineDemo: FunctionComponent<{
   );
 };
 
+/** A demo's stage, by its frame's settings. */
+const Stage: FunctionComponent<{
+  backdrop: boolean;
+  background: boolean;
+  center: boolean;
+  children: ReactNode;
+  safeAreas: boolean;
+  stretch: boolean;
+}> = ({ backdrop, background, center, children, safeAreas, stretch }) => (
+  <div
+    className="demo-stage"
+    data-safe-areas={safeAreas ? '' : undefined}
+  >
+    {background ? <div className="demo-stage-background" /> : null}
+    <div
+      className="demo-stage-inner"
+      data-backdrop={backdrop ? '' : undefined}
+      data-center={center ? '' : undefined}
+      data-stretch={stretch ? '' : undefined}
+    >
+      {children}
+    </div>
+  </div>
+);
+
 /** The guards' hooks, above the code of a demo with `inputGuards`. */
 const inputGuardsCode = `useInputZoomPrevention();
 useFocusShiftPrevention();
@@ -245,6 +270,11 @@ export const Component: FunctionComponent<{
     `${settings}.backdrop`,
     backdrop,
   );
+  // Its devices' safe area insets, hatched (see shared/style.css).
+  const [safeAreas, setSafeAreas] = useLocalStorage(
+    `${settings}.safeAreas`,
+    false,
+  );
   // (Its own: closed at first, not kept, nor shared with other views.)
   const [codeOpen, setCodeOpen] = useState(false);
   // (After rendering: rendering to a string resets Preact's hooks state.)
@@ -280,17 +310,15 @@ export const Component: FunctionComponent<{
           stateUrl={stateUrl}
           title={title}
         />
-        <div className="demo-stage">
-          {stageBackground ? <div className="demo-stage-background" /> : null}
-          <div
-            className="demo-stage-inner"
-            data-backdrop={hasBackdrop ? '' : undefined}
-            data-center={isCentered ? '' : undefined}
-            data-stretch={isStretched ? '' : undefined}
-          >
-            {children}
-          </div>
-        </div>
+        <Stage
+          backdrop={hasBackdrop}
+          background={stageBackground}
+          center={isCentered}
+          safeAreas={safeAreas}
+          stretch={isStretched}
+        >
+          {children}
+        </Stage>
       </section>
       <aside
         ref={config}
@@ -349,6 +377,15 @@ export const Component: FunctionComponent<{
               onClick={() => setIsStretched(!isStretched)}
             />
             Stretch
+          </label>
+          <label style={{ display: 'block' }}>
+            <input
+              checked={safeAreas}
+              name={`${settings}.safeAreas`}
+              type="checkbox"
+              onClick={() => setSafeAreas(!safeAreas)}
+            />
+            Safe Areas
           </label>
         </section>
         {controls}

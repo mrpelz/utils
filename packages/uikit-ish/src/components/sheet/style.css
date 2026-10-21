@@ -1,5 +1,9 @@
 /* Sheet (see main.tsx). */
 @layer uikit-ish {
+  .uikit-sheet-portal {
+    display: contents;
+  }
+
   .uikit-sheet-backdrop {
     --uikit-sheet-dim: light-dark(rgb(0 0 0 / 20%), rgb(0 0 0 / 48%));
 
@@ -108,7 +112,24 @@
       --uikit-safe-area-inset-left: 0px;
     }
 
-    &:is([data-detent='medium'], :not([data-compact])) > * {
+    /* The screen's bottom inset, for its content (see below). */
+    --uikit-sheet-inset-bottom: var(--uikit-safe-area-inset-bottom, 0px);
+
+    /* Medium (6px from the bottom edge, over the home indicator as iOS's):
+       what's left of it; a form sheet: none. */
+    &[data-detent='medium'] > * {
+      --uikit-safe-area-inset-bottom: max(
+        0px,
+        var(--uikit-sheet-inset-bottom) - 6px
+      );
+    }
+
+    &:not([data-compact]) > * {
+      --uikit-safe-area-inset-bottom: 0px;
+    }
+
+    /* What's in its content (e.g. a page): none left (see the content). */
+    & .uikit-sheet-content > * {
       --uikit-safe-area-inset-bottom: 0px;
     }
 
@@ -129,7 +150,7 @@
 
     &[data-detent='medium'] {
       right: 6px;
-      bottom: calc(6px + var(--uikit-safe-area-inset-bottom, 0px));
+      bottom: 6px;
       left: 6px;
       max-height: calc(100% - 64px);
       border-radius: 34px;
@@ -169,22 +190,45 @@
     -webkit-user-select: none;
     user-select: none;
 
-    &::before {
-      width: 36px;
-      height: 5px;
-      flex: none;
-      align-self: center;
-      border-radius: 100px;
-      background-color: #cfcfcf;
-      content: '';
-      margin-block: 5px 6px;
+    /* Without a grabber: its content where it'd be with one (16px down). */
+    &:not(:has(> .uikit-sheet-grabber)) {
+      padding-block-start: 16px;
     }
 
-    &[data-grabber-only] {
+    /* Only a grabber: over the content (its own bars below it). */
+    &:has(> .uikit-sheet-grabber:only-child) {
       position: absolute;
       z-index: 1;
       inset: 0 0 auto;
       padding-block-end: 0;
+    }
+  }
+
+  /* The grabber, its cursor's area around it (12px wide, 5px and 6px
+     high). */
+  .uikit-sheet-grabber {
+    --uikit-utils-cursor: attr(cursor type(<custom-ident>), grab);
+
+    display: flex;
+    flex: none;
+    align-self: center;
+    padding: 5px 12px 6px;
+
+    /* The bar (its padding the cursor's area around it). */
+    &::before {
+      width: 36px;
+      height: 5px;
+      border-radius: 100px;
+      background-color: #cfcfcf;
+      content: '';
+    }
+
+    @media (hover: hover) {
+      cursor: var(--uikit-utils-cursor);
+
+      .uikit-sheet-popup[data-swiping] &:not([cursor]) {
+        cursor: grabbing;
+      }
     }
   }
 
@@ -194,10 +238,17 @@
     flex: 1 1 auto;
     overscroll-behavior: contain;
 
+    /* Its end scrolling clear of the home indicator (its background to the
+       edge; none left for what's in it, see the popup). */
+    padding-block-end: var(--uikit-safe-area-inset-bottom, 0);
+
     /* Its header only a grabber (its content's own bars, e.g. a
        navigation's): over the content, which starts at the sheet's top
        (nothing of those bars clipped), its bars below the grabber. */
-    .uikit-sheet-popup:has(> .uikit-sheet-header[data-grabber-only]) > & {
+    .uikit-sheet-popup:has(
+        > .uikit-sheet-header > .uikit-sheet-grabber:only-child
+      )
+      > & {
       --uikit-safe-area-inset-top: 16px;
     }
   }

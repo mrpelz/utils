@@ -1,3 +1,6 @@
+import '../sheet/style.css';
+import './style.css';
+
 import { FunctionComponent, useId, useState } from 'react';
 
 import {
@@ -17,6 +20,7 @@ import {
 } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
+import { useLabelledRef } from '../frame/render-code.js';
 import {
   Contents,
   Heading,
@@ -104,6 +108,7 @@ const ValidationAndServerErrors: FunctionComponent = () => {
 /** A new event in a sheet: Cancel, or Done submitting it. */
 const InASheetWithCancelDone: FunctionComponent = () => {
   const [log, addLog] = useLog();
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const [open, setOpen] = useState(false);
   const formId = useId();
 
@@ -116,83 +121,93 @@ const InASheetWithCancelDone: FunctionComponent = () => {
       log={log}
       title="Form in a sheet with Cancel and Done"
     >
-      <Sheet.Root
-        open={open}
-        onOpenChange={(next: boolean) => setOpen(next)}
+      <div
+        ref={screen}
+        className="sheet-demo-phone"
       >
-        <Sheet.Trigger
-          render={
-            <Button.Root
-              size="large"
-              variant="bordered"
-            />
-          }
+        <Sheet.Root
+          open={open}
+          onOpenChange={(next: boolean) => setOpen(next)}
         >
-          <Button.Label>New Event</Button.Label>
-        </Sheet.Trigger>
-        <Sheet.Popup detent="large">
-          <Sheet.Header>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
-                <Sheet.Close render={<Toolbar.Button />}>
-                  <Button.Label>Cancel</Button.Label>
-                </Sheet.Close>
-              </Toolbar.Leading>
-              <Toolbar.Title>
-                <Sheet.Title render={<span />}>New Event</Sheet.Title>
-              </Toolbar.Title>
-              <Toolbar.Trailing>
-                <Toolbar.Button
-                  prominent
-                  form={formId}
-                  type="submit"
-                >
-                  <Button.Label>Done</Button.Label>
-                </Toolbar.Button>
-              </Toolbar.Trailing>
-            </Toolbar.Root>
-          </Sheet.Header>
-          <Sheet.Content>
-            <Form
-              id={formId}
-              onFormSubmit={(values: Record<string, unknown>) => {
-                addLog(`submitted: ${JSON.stringify(values)}`);
-                setOpen(false);
-              }}
-            >
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    <TextField.Root
-                      name="title"
-                      render={<List.Item />}
-                    >
-                      <TextField.Control
-                        required
-                        aria-label="Title"
-                        placeholder="Title"
-                      />
-                      <TextField.Error match="valueMissing">
-                        Enter a title.
-                      </TextField.Error>
-                    </TextField.Root>
-                    <Field.Root
-                      name="starts"
-                      render={<List.Item />}
-                    >
-                      <List.Title>Starts</List.Title>
-                      <DatePicker.Root
-                        defaultValue={new Date(2025, 3, 20, 9, 41)}
-                        mode="dateAndTime"
-                      />
-                    </Field.Root>
-                  </List.Group>
-                </List.Section>
-              </List.Root>
-            </Form>
-          </Sheet.Content>
-        </Sheet.Popup>
-      </Sheet.Root>
+          <Sheet.Trigger
+            render={
+              <Button.Root
+                size="large"
+                variant="bordered"
+              />
+            }
+          >
+            <Button.Label>New Event</Button.Label>
+          </Sheet.Trigger>
+          <Sheet.Popup
+            compact
+            container={screen}
+            detent="large"
+          >
+            <Sheet.Header>
+              <Sheet.Grabber />
+              <Toolbar.Root placement="block-start">
+                <Toolbar.Leading>
+                  <Sheet.Close render={<Toolbar.Button />}>
+                    <Button.Label>Cancel</Button.Label>
+                  </Sheet.Close>
+                </Toolbar.Leading>
+                <Toolbar.Title>
+                  <Sheet.Title render={<span />}>New Event</Sheet.Title>
+                </Toolbar.Title>
+                <Toolbar.Trailing>
+                  <Toolbar.Button
+                    prominent
+                    form={formId}
+                    type="submit"
+                  >
+                    <Button.Label>Done</Button.Label>
+                  </Toolbar.Button>
+                </Toolbar.Trailing>
+              </Toolbar.Root>
+            </Sheet.Header>
+            <Sheet.Content>
+              <Form
+                id={formId}
+                onFormSubmit={(values: Record<string, unknown>) => {
+                  addLog(`submitted: ${JSON.stringify(values)}`);
+                  setOpen(false);
+                }}
+              >
+                <List.Root>
+                  <List.Section>
+                    <List.Group>
+                      <TextField.Root
+                        name="title"
+                        render={<List.Item />}
+                      >
+                        <TextField.Control
+                          required
+                          aria-label="Title"
+                          placeholder="Title"
+                        />
+                        <TextField.Error match="valueMissing">
+                          Enter a title.
+                        </TextField.Error>
+                      </TextField.Root>
+                      <Field.Root
+                        name="starts"
+                        render={<List.Item />}
+                      >
+                        <List.Title>Starts</List.Title>
+                        <DatePicker.Root
+                          defaultValue={new Date(2025, 3, 20, 9, 41)}
+                          mode="dateAndTime"
+                        />
+                      </Field.Root>
+                    </List.Group>
+                  </List.Section>
+                </List.Root>
+              </Form>
+            </Sheet.Content>
+          </Sheet.Popup>
+        </Sheet.Root>
+      </div>
     </Component>
   );
 };
@@ -268,6 +283,7 @@ const ASwitchRevealingAFieldset: FunctionComponent = () => {
 /** An order: a text field, a stepper, a slider, a date, a switch. */
 const MixedControls: FunctionComponent = () => {
   const [log, addLog] = useLog();
+  const [copies, setCopies] = useState<number | null>(1);
 
   return (
     <Component
@@ -300,9 +316,13 @@ const MixedControls: FunctionComponent = () => {
                 render={<List.Item />}
               >
                 <List.Title>Copies</List.Title>
+                <List.Detail className="form-demo-value">
+                  {copies ?? '–'}
+                </List.Detail>
                 <Stepper.Root
-                  defaultValue={1}
                   min={1}
+                  value={copies}
+                  onValueChange={(next: number | null) => setCopies(next)}
                 >
                   <Stepper.Group>
                     <Stepper.Input aria-label="Copies" />

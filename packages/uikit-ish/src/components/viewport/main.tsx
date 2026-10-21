@@ -11,6 +11,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react';
 
 import { cn } from '../utils/main.js';
@@ -19,6 +20,7 @@ import type {
   ElementGeometryOptions,
   ElementVisibilityOptions,
   Listener,
+  SizeClass,
   ViewportAnchorProps,
   ViewportContentProps,
   ViewportProviderProps,
@@ -41,6 +43,7 @@ export type {
   ViewportEdge,
   ViewportProviderProps,
   ViewportSafeArea,
+  SizeClass,
   ViewportScrollEvent,
   VisualViewportState,
 } from './props.js';
@@ -215,6 +218,28 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     </ViewportContext.Provider>
   );
 };
+
+// A regular width: the window's, from 768px.
+const regularQuery = '(width >= 768px)';
+
+const subscribeRegular = (onChange: () => void) => {
+  const query = matchMedia(regularQuery);
+  query.addEventListener('change', onChange);
+
+  return () => query.removeEventListener('change', onChange);
+};
+
+/**
+ * The window's horizontal size class (no `Provider` needed): e.g. a sheet
+ * on `compact` (a phone), a popover on `regular` (an iPad); `compact` before
+ * hydration (server rendering).
+ */
+export const useSizeClass = (): SizeClass =>
+  useSyncExternalStore(
+    subscribeRegular,
+    () => (matchMedia(regularQuery).matches ? 'regular' : 'compact'),
+    () => 'compact',
+  );
 
 /** The visual viewport and the keyboard's height (needs a `Provider`). */
 export const useVisualViewport = (): VisualViewportState => {

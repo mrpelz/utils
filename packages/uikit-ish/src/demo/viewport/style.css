@@ -21,14 +21,20 @@
 }
 
 /* An anchor's sample content (a bar, or a sidebar), labelled. */
+
+/* An anchor's surface: its background reaching the screen's edge (its
+   padding the safe area insets, its content clear of them). */
+.viewport-demo-surface {
+  background-color: var(--color-ios-secondary-system-grouped-background);
+  box-shadow: 0 0 0 0.5px var(--color-ios-separator);
+}
+
 .viewport-demo-sample {
   display: grid;
   min-width: 44px;
   min-height: 44px;
   box-sizing: border-box;
   padding: 12px 16px;
-  background-color: var(--color-ios-secondary-system-grouped-background);
-  box-shadow: 0 0 0 0.5px var(--color-ios-separator);
   color: var(--color-ios-label);
   font-size: 15px;
   place-items: center;
@@ -143,4 +149,10 @@
   background-color: var(--color-ios-secondary-system-background);
   color: var(--color-ios-label);
   font-family: inherit;
+}
+
+/* `useSizeClass`'s readout. */
+.viewport-demo-size-class {
+  color: var(--color-ios-label);
+  font-size: var(--font-ios-title2-size);
 }

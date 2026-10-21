@@ -1,5 +1,11 @@
 import type { ComponentProps, ReactNode, RefObject } from 'react';
 
+/**
+ * The window's horizontal size class (UIKit's): `regular` from 768px (an
+ * iPad's window, full or split), `compact` below (a phone's).
+ */
+export type SizeClass = 'compact' | 'regular';
+
 /** The visual viewport, and the keyboard's height (0 without one). */
 export type VisualViewportState = {
   height: number;

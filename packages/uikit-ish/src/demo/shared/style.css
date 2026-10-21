@@ -51,6 +51,12 @@
     ) {
     --uikit-safe-area-inset-top: 62px;
     --uikit-safe-area-inset-bottom: 34px;
+
+    /* Its chrome (see below). */
+    --demo-status-font-size: 17px;
+    --demo-status-line-height: 22px;
+    --demo-status-padding: 32px;
+    --demo-home-indicator: 134px;
   }
 
   :is(
@@ -63,5 +69,115 @@
     ) {
     --uikit-safe-area-inset-top: 24px;
     --uikit-safe-area-inset-bottom: 20px;
+    --demo-status-font-size: 13px;
+    --demo-status-line-height: 18px;
+    --demo-status-padding: 20px;
+    --demo-home-indicator: 200px;
   }
+
+  /*
+   * Devices' screens' chrome, over their content (as on iOS): the status
+   * bar's time in the top inset, the home indicator in the bottom one (so
+   * covered content shows). With the frame's Safe Areas setting, the insets
+   * hatched, too (`data-safe-areas` on the stage).
+   */
+  :where(
+      .header-demo-phone,
+      .header-demo-screen,
+      .layout-demo-phone,
+      .layout-demo-screen,
+      .navigation-demo-phone,
+      .navigation-demo-screen,
+      .page-demo-phone,
+      .page-demo-screen,
+      .sheet-demo-phone,
+      .sidebar-demo-phone,
+      .tab-bar-demo-screen,
+      .toolbar-demo-screen,
+      .viewport-demo-screen,
+      .layout-demo-tablet,
+      .navigation-demo-tablet,
+      .page-demo-tablet,
+      .sheet-demo-tablet,
+      .sidebar-demo-screen,
+      .sidebar-demo-tablet
+    ) {
+    position: relative;
+    isolation: isolate;
+  }
+
+  :is(
+      .header-demo-phone,
+      .header-demo-screen,
+      .layout-demo-phone,
+      .layout-demo-screen,
+      .navigation-demo-phone,
+      .navigation-demo-screen,
+      .page-demo-phone,
+      .page-demo-screen,
+      .sheet-demo-phone,
+      .sidebar-demo-phone,
+      .tab-bar-demo-screen,
+      .toolbar-demo-screen,
+      .viewport-demo-screen,
+      .layout-demo-tablet,
+      .navigation-demo-tablet,
+      .page-demo-tablet,
+      .sheet-demo-tablet,
+      .sidebar-demo-screen,
+      .sidebar-demo-tablet
+    ) {
+    &::before,
+    &::after {
+      position: absolute;
+      z-index: 1000;
+      box-sizing: border-box;
+      color: var(--color-ios-label);
+      inset-inline: 0;
+      pointer-events: none;
+    }
+
+    /* The status bar: its time at the start. */
+    &::before {
+      top: 0;
+      display: flex;
+      height: var(--uikit-safe-area-inset-top);
+      align-items: center;
+      content: '9:41';
+      font-size: 17px;
+      font-variation-settings: 'wght' 590;
+      font-weight: 500;
+      line-height: 22px;
+      padding-inline: 32px;
+    }
+
+    /* The home indicator: a pill (its ends circles, its middle a bar), 8px
+       from the bottom, centered. */
+    &::after {
+      bottom: 0;
+      height: var(--uikit-safe-area-inset-bottom);
+      background:
+        radial-gradient(circle at center, currentcolor 2.5px, transparent 2.5px)
+          calc(50% - var(--demo-home-indicator) / 2 + 2.5px) calc(100% - 8px) /
+          5px 5px no-repeat,
+        radial-gradient(circle at center, currentcolor 2.5px, transparent 2.5px)
+          calc(50% + var(--demo-home-indicator) / 2 - 2.5px) calc(100% - 8px) /
+          5px 5px no-repeat,
+        linear-gradient(currentcolor, currentcolor) center calc(100% - 8px) /
+          calc(var(--demo-home-indicator) - 5px) 5px no-repeat;
+      content: '';
+    }
+
+    /* The frame's Safe Areas setting: the insets hatched. */
+    .demo-stage[data-safe-areas] &::before,
+    .demo-stage[data-safe-areas] &::after {
+      background-color: transparent;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        rgb(255 59 48 / 25%) 0 4px,
+        transparent 4px 8px
+      );
+    }
+  }
+
 }

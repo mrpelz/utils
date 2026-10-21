@@ -32,6 +32,7 @@ export {
 export {
   Sheet,
   type SheetContentProps,
+  type SheetGrabberProps,
   type SheetDetent,
   type SheetHandle,
   type SheetPopupProps,
@@ -237,6 +238,7 @@ export {
   useFocusShiftPrevention,
   useInputZoomPrevention,
   useScrollDirection,
+  useSizeClass,
   useViewportScroll,
   useVisualViewport,
   Viewport,
@@ -245,6 +247,7 @@ export {
   type ViewportEdge,
   type ViewportProviderProps,
   type ViewportSafeArea,
+  type SizeClass,
   type ViewportScrollEvent,
   type VisualViewportState,
 } from './viewport/main.js';

@@ -38,7 +38,8 @@ const detentsCode = `const screen = useRef<HTMLDivElement>(null);
     </Sheet.Trigger>
     {/* As high as its content: a glass panel. */}
     <Sheet.Popup compact container={screen} detent="medium">
-      <Sheet.Header>…</Sheet.Header>
+      <Sheet.Header>
+        <Sheet.Grabber />…</Sheet.Header>
       <Sheet.Content>…</Sheet.Content>
     </Sheet.Popup>
   </Sheet.Root>
@@ -66,6 +67,7 @@ const close = () => (edited ? setConfirming(true) : setOpen(false));
   <Sheet.Trigger render={<Button.Root variant="bordered" />}>…</Sheet.Trigger>
   <Sheet.Popup>
     <Sheet.Header>
+      <Sheet.Grabber />
       <Toolbar.Root placement="block-start">
         <Toolbar.Leading>
           <Toolbar.Button onClick={close}>
@@ -100,7 +102,9 @@ const navigationCode = `const [keys, setKeys] = useState(['settings']);
 
 <Sheet.Popup>
   {/* Its grabber alone: each page has its own bar. */}
-  <Sheet.Header />
+  <Sheet.Header>
+    <Sheet.Grabber />
+  </Sheet.Header>
   <Sheet.Content>
     <Navigation.Root onBack={pop}>
       {keys.map((key, depth) => (
@@ -124,7 +128,8 @@ const navigationCode = `const [keys, setKeys] = useState(['settings']);
 </Sheet.Popup>`;
 
 const formSheetCode = `<Sheet.Popup compact={false} container={screen}>
-  <Sheet.Header>…</Sheet.Header>
+  <Sheet.Header>
+    <Sheet.Grabber />…</Sheet.Header>
   <Sheet.Content>…</Sheet.Content>
 </Sheet.Popup>`;
 
@@ -164,6 +169,7 @@ const Detents: FunctionComponent = () => {
             detent="medium"
           >
             <Sheet.Header>
+              <Sheet.Grabber />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading />
                 <Toolbar.Title>
@@ -212,6 +218,7 @@ const Detents: FunctionComponent = () => {
             container={screen}
           >
             <Sheet.Header>
+              <Sheet.Grabber />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading />
                 <Toolbar.Title>
@@ -287,6 +294,7 @@ const CancelDone: FunctionComponent = () => {
             container={screen}
           >
             <Sheet.Header>
+              <Sheet.Grabber />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading>
                   <Toolbar.Button onClick={close}>
@@ -360,6 +368,73 @@ const CancelDone: FunctionComponent = () => {
   );
 };
 
+/** A medium sheet of filters: its toolbar only, no grabber. */
+const WithoutAGrabber: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const screen = useLabelledRef<HTMLDivElement>('screen');
+
+  return (
+    <Component
+      center
+      inline
+      id="sheet-composition-without-grabber"
+      log={log}
+      title="A sheet without a grabber"
+    >
+      <div
+        ref={screen}
+        className="sheet-demo-phone"
+      >
+        <Sheet.Root
+          onOpenChange={(open: boolean) => addLog(`open: ${String(open)}`)}
+        >
+          <Sheet.Trigger
+            render={
+              <Button.Root
+                size="large"
+                variant="bordered"
+              />
+            }
+          >
+            <Button.Label>Filter</Button.Label>
+          </Sheet.Trigger>
+          <Sheet.Popup
+            compact
+            container={screen}
+            detent="medium"
+          >
+            <Sheet.Header>
+              <Toolbar.Root placement="block-start">
+                <Toolbar.Title>
+                  <Sheet.Title render={<span />}>Filter</Sheet.Title>
+                </Toolbar.Title>
+                <Toolbar.Trailing>
+                  <Sheet.Close render={<Toolbar.Button prominent />}>
+                    <Button.Label>Done</Button.Label>
+                  </Sheet.Close>
+                </Toolbar.Trailing>
+              </Toolbar.Root>
+            </Sheet.Header>
+            <Sheet.Content className="sheet-demo-short">
+              <List.Root>
+                <List.Section>
+                  <List.Group>
+                    {['Unread', 'Flagged', 'With Attachments'].map((name) => (
+                      <List.Item key={name}>
+                        <List.Title>{name}</List.Title>
+                      </List.Item>
+                    ))}
+                  </List.Group>
+                </List.Section>
+              </List.Root>
+            </Sheet.Content>
+          </Sheet.Popup>
+        </Sheet.Root>
+      </div>
+    </Component>
+  );
+};
+
 /** A stack in a sheet: settings drilled into, Done on every page. */
 const NavigationInside: FunctionComponent = () => {
   const [log, addLog] = useLog();
@@ -405,7 +480,9 @@ const NavigationInside: FunctionComponent = () => {
             compact
             container={screen}
           >
-            <Sheet.Header />
+            <Sheet.Header>
+              <Sheet.Grabber />
+            </Sheet.Header>
             <Sheet.Content className="sheet-demo-stack">
               <Navigation.Root onBack={pop}>
                 {keys.map((key, depth) => (
@@ -502,6 +579,7 @@ const FormSheet: FunctionComponent = () => {
             container={screen}
           >
             <Sheet.Header>
+              <Sheet.Grabber />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading>
                   <Sheet.Close render={<Toolbar.Button />}>
@@ -554,6 +632,7 @@ const FormSheet: FunctionComponent = () => {
 const sections: readonly Section[] = [
   ['medium-and-large', 'Medium and large'],
   ['cancel-and-done', 'Cancel and Done'],
+  ['without-a-grabber', 'Without a grabber'],
   ['a-navigation-inside', 'A navigation inside'],
   ['a-form-sheet-on-a-tablet', 'A form sheet on a tablet'],
 ];
@@ -621,6 +700,28 @@ export const SheetComposition: FunctionComponent = () => (
     <CancelDone />
 
     <Heading
+      id="without-a-grabber"
+      level={2}
+    >
+      Without a grabber
+    </Heading>
+    <ul>
+      <li>
+        The grabber (
+        <PartLink
+          component="sheet"
+          part="Sheet.Grabber"
+        />
+        ) is optional: left out, a cleaner top, the header only its toolbar.
+      </li>
+      <li>
+        The sheet is still swiped down (by any of it, its content scrolled to
+        its top), and closed by its Done.
+      </li>
+    </ul>
+    <WithoutAGrabber />
+
+    <Heading
       id="a-navigation-inside"
       level={2}
     >
@@ -676,6 +777,7 @@ export const SheetComposition: FunctionComponent = () => (
 export const sheetCompositionDemos = [
   Detents,
   CancelDone,
+  WithoutAGrabber,
   NavigationInside,
   FormSheet,
 ];

@@ -295,11 +295,28 @@ export const sheetHeaderRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Below its grabber: e.g. a <a href="toolbar">Toolbar</a> (its{' '}
+      Its grabber (
+      <PartLink
+        component="sheet"
+        part="Sheet.Grabber"
+      />
+      , optional), then e.g. a <a href="toolbar">Toolbar</a> (its{' '}
       <code>placement=&quot;block-start&quot;</code>), with its title and
-      buttons. Without: only the grabber, over the content (its own bars, e.g. a
+      buttons. Only a grabber: over the content (its own bars, e.g. a
       navigation’s, below it, as the content’s top safe area inset).
     </>,
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const sheetGrabberRows: readonly PropRow[] = [
+  [
+    'cursor',
+    'string (a CSS cursor)',
+    <>
+      <code>grab</code> (swiped: <code>grabbing</code>)
+    </>,
+    'The cursor (where the pointer hovers).',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];

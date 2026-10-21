@@ -1,3 +1,5 @@
+import '../sheet/style.css';
+
 import { sfEyedropper } from '@bradleyhodges/sfsymbols/sfEyedropper';
 import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent, useState } from 'react';
@@ -11,15 +13,20 @@ import {
   Sheet,
   Symbol,
   Toolbar,
+  useSizeClass,
 } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
+import { usePropControl } from '../frame/prop-control.js';
+import { useLabelledRef } from '../frame/render-code.js';
+import { useProvidedState } from '../frame/state.js';
 import {
   Contents,
   Heading,
   PartLink,
   type Section,
 } from '../guide/sections.js';
+import { propOptionsPresentation } from './props.js';
 
 /** The iPad pattern: a well opening the picker in a popover. */
 const InAPopover: FunctionComponent = () => {
@@ -91,6 +98,7 @@ const InAPopover: FunctionComponent = () => {
 /** The iPhone pattern: a well opening the picker in a sheet. */
 const InASheet: FunctionComponent = () => {
   const [log, addLog] = useLog();
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const [color, setColor] = useState('#007AFF');
 
   return (
@@ -102,95 +110,175 @@ const InASheet: FunctionComponent = () => {
       log={log}
       title="Color picker in a sheet"
     >
-      <Sheet.Root>
-        <Sheet.Trigger render={<ColorPicker.Well color={color} />} />
-        <Sheet.Popup detent="medium">
-          <Sheet.Header>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Title>
-                <span>Colors</span>
-              </Toolbar.Title>
-              <Toolbar.Trailing>
-                <Sheet.Close
-                  render={
-                    <Toolbar.Button
-                      aria-label="Close"
-                      shape="circle"
-                    />
-                  }
-                >
-                  <Button.Icon>
-                    <Symbol icon={sfXmark} />
-                  </Button.Icon>
-                </Sheet.Close>
-              </Toolbar.Trailing>
-            </Toolbar.Root>
-          </Sheet.Header>
-          <Sheet.Content>
-            <ColorPicker.Root
-              value={color}
-              onValueChange={(next: string) => {
-                addLog(`color: ${next}`);
-                setColor(next);
-              }}
-            >
-              <ColorPicker.Panel />
-            </ColorPicker.Root>
-          </Sheet.Content>
-        </Sheet.Popup>
-      </Sheet.Root>
+      <div
+        ref={screen}
+        className="sheet-demo-phone"
+      >
+        <Sheet.Root>
+          <Sheet.Trigger render={<ColorPicker.Well color={color} />} />
+          <Sheet.Popup
+            compact
+            container={screen}
+            detent="medium"
+          >
+            <Sheet.Header>
+              <Sheet.Grabber />
+              <Toolbar.Root placement="block-start">
+                <Toolbar.Title>
+                  <span>Colors</span>
+                </Toolbar.Title>
+                <Toolbar.Trailing>
+                  <Sheet.Close
+                    render={
+                      <Toolbar.Button
+                        aria-label="Close"
+                        shape="circle"
+                      />
+                    }
+                  >
+                    <Button.Icon>
+                      <Symbol icon={sfXmark} />
+                    </Button.Icon>
+                  </Sheet.Close>
+                </Toolbar.Trailing>
+              </Toolbar.Root>
+            </Sheet.Header>
+            <Sheet.Content>
+              <ColorPicker.Root
+                value={color}
+                onValueChange={(next: string) => {
+                  addLog(`color: ${next}`);
+                  setColor(next);
+                }}
+              >
+                <ColorPicker.Panel />
+              </ColorPicker.Root>
+            </Sheet.Content>
+          </Sheet.Popup>
+        </Sheet.Root>
+      </div>
     </Component>
   );
 };
 
-/** A settings row: its color in a well at its end. */
+/**
+ * A settings row: its color in a well at its end, opening the picker in a
+ * popover (a regular width) or a sheet (a compact one; or as set).
+ */
 const InAListRow: FunctionComponent = () => {
+  const id = 'color-picker-composition-list';
   const [log, addLog] = useLog();
+  const screen = useLabelledRef<HTMLDivElement>('screen');
+  const sizeClass = useSizeClass();
   const [tint, setTint] = useState('#FF9500');
+  const [external] = useProvidedState(id);
+  const [control, content, state] = usePropControl(
+    propOptionsPresentation,
+    '[content]',
+    external,
+    true,
+  );
+  const sheet =
+    (content.presentation ??
+      (sizeClass === 'compact' ? 'sheet' : 'popover')) === 'sheet';
 
   return (
     <Component
       center
       inline
       inputGuards
-      id="color-picker-composition-list"
+      controls={[control]}
+      id={id}
       log={log}
+      state={[state]}
       title="Color picker in a list row"
     >
-      <List.Root style={{ width: 'min(402px, 100%)' }}>
-        <List.Section>
-          <List.Group>
-            <List.Item>
-              <List.Title>Tint</List.Title>
-              <Popover.Root>
-                <Popover.Trigger
-                  render={
-                    <ColorPicker.Well
-                      aria-label="Tint"
-                      color={tint}
+      {sheet ? (
+        <div
+          ref={screen}
+          className="sheet-demo-phone"
+        >
+          <List.Root style={{ width: '100%' }}>
+            <List.Section>
+              <List.Group>
+                <List.Item>
+                  <List.Title>Tint</List.Title>
+                  <Sheet.Root>
+                    <Sheet.Trigger
+                      render={
+                        <ColorPicker.Well
+                          aria-label="Tint"
+                          color={tint}
+                        />
+                      }
                     />
-                  }
-                />
-                <Popover.Portal>
-                  <Popover.Positioner align="end">
-                    <Popover.Popup style={{ width: 'min(402px, 100vw)' }}>
-                      <ColorPicker.Root
-                        value={tint}
-                        onValueChange={(next: string) => {
-                          addLog(`tint: ${next}`);
-                          setTint(next);
-                        }}
-                      >
-                        <ColorPicker.Panel />
-                      </ColorPicker.Root>
-                    </Popover.Popup>
-                  </Popover.Positioner>
-                </Popover.Portal>
-              </Popover.Root>
-            </List.Item>
-          </List.Group>
-        </List.Section>
-      </List.Root>
+                    <Sheet.Popup
+                      compact
+                      container={screen}
+                      detent="medium"
+                    >
+                      <Sheet.Header>
+                        <Sheet.Grabber />
+                        <Toolbar.Root placement="block-start">
+                          <Toolbar.Title>
+                            <span>Tint</span>
+                          </Toolbar.Title>
+                        </Toolbar.Root>
+                      </Sheet.Header>
+                      <Sheet.Content>
+                        <ColorPicker.Root
+                          value={tint}
+                          onValueChange={(next: string) => {
+                            addLog(`tint: ${next}`);
+                            setTint(next);
+                          }}
+                        >
+                          <ColorPicker.Panel />
+                        </ColorPicker.Root>
+                      </Sheet.Content>
+                    </Sheet.Popup>
+                  </Sheet.Root>
+                </List.Item>
+              </List.Group>
+            </List.Section>
+          </List.Root>
+        </div>
+      ) : (
+        <List.Root style={{ width: 'min(402px, 100%)' }}>
+          <List.Section>
+            <List.Group>
+              <List.Item>
+                <List.Title>Tint</List.Title>
+                <Popover.Root>
+                  <Popover.Trigger
+                    render={
+                      <ColorPicker.Well
+                        aria-label="Tint"
+                        color={tint}
+                      />
+                    }
+                  />
+                  <Popover.Portal>
+                    <Popover.Positioner align="end">
+                      <Popover.Popup style={{ width: 'min(402px, 100vw)' }}>
+                        <ColorPicker.Root
+                          value={tint}
+                          onValueChange={(next: string) => {
+                            addLog(`tint: ${next}`);
+                            setTint(next);
+                          }}
+                        >
+                          <ColorPicker.Panel />
+                        </ColorPicker.Root>
+                      </Popover.Popup>
+                    </Popover.Positioner>
+                  </Popover.Portal>
+                </Popover.Root>
+              </List.Item>
+            </List.Group>
+          </List.Section>
+        </List.Root>
+      )}
     </Component>
   );
 };
@@ -315,7 +403,16 @@ export const ColorPickerComposition: FunctionComponent = () => (
     <ul>
       <li>
         A well at a <a href="list">List</a> row’s end (named by what it colors,
-        here “Tint”), its popover aligned to its end.
+        here “Tint”).
+      </li>
+      <li>
+        By the window’s size class (
+        <PartLink
+          component="viewport"
+          part="useSizeClass"
+        />
+        ): a popover aligned to the well’s end (regular), or a sheet (compact);
+        here also set (<code>[content]</code>).
       </li>
     </ul>
     <InAListRow />

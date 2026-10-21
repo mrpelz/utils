@@ -1,4 +1,6 @@
 import type { Drawer as BaseDrawer } from '@base-ui/react/drawer';
+import type { Properties } from 'csstype';
+import type { ComponentProps } from 'react';
 
 export type SheetDetent = 'large' | 'medium';
 
@@ -29,3 +31,12 @@ export type SheetContentProps = Omit<BaseDrawer.Content.Props, 'ref'>;
 
 /** A handle linking a sheet to its triggers outside it. */
 export type SheetHandle<Payload = unknown> = BaseDrawer.Handle<Payload>;
+
+export type SheetGrabberProps = ComponentProps<'div'> & {
+  /**
+   * The cursor (where the pointer hovers; while the sheet is swiped,
+   * `grabbing`).
+   * @default 'grab'
+   */
+  cursor?: Properties['cursor'];
+};

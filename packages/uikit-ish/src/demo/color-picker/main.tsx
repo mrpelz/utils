@@ -1,3 +1,5 @@
+import '../sheet/style.css';
+
 import { sfEyedropper } from '@bradleyhodges/sfsymbols/sfEyedropper';
 import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent, ReactNode, useMemo, useState } from 'react';
@@ -9,10 +11,12 @@ import {
   Sheet,
   Symbol,
   Toolbar,
+  useSizeClass,
 } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
+import { useLabelledRef } from '../frame/render-code.js';
 import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsPanel,
@@ -30,6 +34,8 @@ export const ColorPickerDemo: FunctionComponent = () => {
   const id = 'color-picker';
 
   const [log, addLog] = useLog();
+  const screen = useLabelledRef<HTMLDivElement>('screen');
+  const sizeClass = useSizeClass();
 
   const [externalContent, externalRoot, externalPanel, externalWell] =
     useProvidedState(id);
@@ -115,41 +121,52 @@ export const ColorPickerDemo: FunctionComponent = () => {
       state={[stateContent, stateRoot, statePanel, stateWell]}
       title="Color Picker"
     >
-      {content.container === 'sheet' ? (
-        <Sheet.Root defaultOpen={content.defaultOpen}>
-          <Sheet.Trigger render={well} />
-          <Sheet.Popup detent="medium">
-            <Sheet.Header>
-              {header(
-                <Sheet.Close
-                  render={
-                    <Toolbar.Button
-                      aria-label="Close"
-                      shape="circle"
-                    />
-                  }
+      {(content.container ??
+        (sizeClass === 'compact' ? 'sheet' : 'popover')) === 'sheet' ? (
+        <div
+          ref={screen}
+          className="sheet-demo-phone"
+        >
+          <Sheet.Root defaultOpen={content.defaultOpen}>
+            <Sheet.Trigger render={well} />
+            <Sheet.Popup
+              compact
+              container={screen}
+              detent="medium"
+            >
+              <Sheet.Header>
+                <Sheet.Grabber />
+                {header(
+                  <Sheet.Close
+                    render={
+                      <Toolbar.Button
+                        aria-label="Close"
+                        shape="circle"
+                      />
+                    }
+                  >
+                    {closeSymbol}
+                  </Sheet.Close>,
+                )}
+              </Sheet.Header>
+              <Sheet.Content>
+                <ColorPicker.Root
+                  key={keyRoot}
+                  {...propsRoot}
+                  onValueChange={(value, details) => {
+                    setColor(value);
+                    propsRoot.onValueChange?.(value, details);
+                  }}
                 >
-                  {closeSymbol}
-                </Sheet.Close>,
-              )}
-            </Sheet.Header>
-            <Sheet.Content>
-              <ColorPicker.Root
-                key={keyRoot}
-                {...propsRoot}
-                onValueChange={(value, details) => {
-                  setColor(value);
-                  propsRoot.onValueChange?.(value, details);
-                }}
-              >
-                <ColorPicker.Panel
-                  key={keyPanel}
-                  {...propsPanel}
-                />
-              </ColorPicker.Root>
-            </Sheet.Content>
-          </Sheet.Popup>
-        </Sheet.Root>
+                  <ColorPicker.Panel
+                    key={keyPanel}
+                    {...propsPanel}
+                  />
+                </ColorPicker.Root>
+              </Sheet.Content>
+            </Sheet.Popup>
+          </Sheet.Root>
+        </div>
       ) : (
         <Popover.Root defaultOpen={content.defaultOpen}>
           <Popover.Trigger render={well} />

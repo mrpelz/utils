@@ -20,9 +20,14 @@ export const propOptionsPopup = {
   detent: [undefined, 'large', 'medium'] as const,
 };
 
-/** The overview's screen: a phone's (compact), or a tablet's. */
+/**
+ * The overview's screen (a phone's: compact, or a tablet's), and where its
+ * sheet is portaled: into the screen (the demo frame), or the page's body
+ * (`global`: compact by the window, see Viewport's `useSizeClass`).
+ */
 export const propOptionsOverviewContent = {
   layout: ['phone', 'tablet'] as const,
+  portal: ['frame', 'global'] as const,
 };
 
 /** The overview's root: its modality, its dismissal. */
@@ -88,4 +93,11 @@ export const propOptionsPart = {
 export const propOptionsHeader = {
   className: commonPropOptions.className,
   style: commonPropOptions.style,
+};
+
+/** `Sheet.Grabber`: its own element (no `render`), its cursor. */
+export const propOptionsGrabber = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+  cursor: [undefined, 'grab', 'ns-resize', 'pointer'] as const,
 };

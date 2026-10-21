@@ -1,4 +1,6 @@
-import { FunctionComponent } from 'react';
+import './style.css';
+
+import { FunctionComponent, useState } from 'react';
 
 import {
   Button,
@@ -24,6 +26,7 @@ import { fieldsetLegendRows, fieldsetRootRows, formRows } from './docs.js';
 /** A short form: a fieldset of two fields, submitted. */
 const LiveView: FunctionComponent = () => {
   const [log, addLog] = useLog();
+  const [copies, setCopies] = useState<number | null>(1);
 
   return (
     <Component
@@ -62,9 +65,13 @@ const LiveView: FunctionComponent = () => {
                 render={<List.Item />}
               >
                 <List.Title>Copies</List.Title>
+                <List.Detail className="form-demo-value">
+                  {copies ?? '–'}
+                </List.Detail>
                 <Stepper.Root
-                  defaultValue={1}
                   min={1}
+                  value={copies}
+                  onValueChange={(next: number | null) => setCopies(next)}
                 >
                   <Stepper.Group>
                     <Stepper.Input aria-label="Copies" />

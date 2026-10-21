@@ -1,3 +1,5 @@
+import '../sheet/style.css';
+
 import { sfEyedropper } from '@bradleyhodges/sfsymbols/sfEyedropper';
 import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent, useState } from 'react';
@@ -6,12 +8,15 @@ import {
   Button,
   ColorPicker,
   Popover,
+  Sheet,
   Symbol,
   Toolbar,
+  useSizeClass,
 } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
+import { useLabelledRef } from '../frame/render-code.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
 import {
@@ -22,91 +27,164 @@ import {
 } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { colorPickerPanelRows, colorPickerRootRows } from './docs.js';
-import { propOptionsOverview } from './props.js';
+import { propOptionsOverview, propOptionsPresentation } from './props.js';
 
-/** A well (its color the app's), opening the picker in a popover. */
+/**
+ * A well (its color the app's), opening the picker: in a popover (a regular
+ * width), or a sheet (a compact one; or as set).
+ */
 const LiveView: FunctionComponent = () => {
   const id = 'color-picker-overview';
   const [log, addLog] = useLog();
+  const screen = useLabelledRef<HTMLDivElement>('screen');
+  const sizeClass = useSizeClass();
   const [color, setColor] = useState('#AF52DE');
-  const [external] = useProvidedState(id);
-  const [control, props, state, elementKey] = usePropControl(
-    propOptionsOverview,
-    'ColorPicker.Panel',
-    external,
+  const [externalContent, externalPanel] = useProvidedState(id);
+  const [controlContent, content, stateContent] = usePropControl(
+    propOptionsPresentation,
+    '[content]',
+    externalContent,
     true,
   );
+  const [controlPanel, propsPanel, statePanel, keyPanel] = usePropControl(
+    propOptionsOverview,
+    'ColorPicker.Panel',
+    externalPanel,
+  );
+  const sheet =
+    (content.presentation ??
+      (sizeClass === 'compact' ? 'sheet' : 'popover')) === 'sheet';
 
   return (
     <Component
       center
       inline
       inputGuards
-      controls={[control]}
+      controls={[controlContent, controlPanel]}
       id={id}
       log={log}
-      state={[state]}
+      state={[stateContent, statePanel]}
       title="Color picker"
     >
-      <Popover.Root>
-        <Popover.Trigger
-          render={
-            <ColorPicker.Well
-              color={color}
-              size="large"
-            />
-          }
-        />
-        <Popover.Portal>
-          <Popover.Positioner>
-            <Popover.Popup style={{ width: 'min(402px, 100vw)' }}>
-              <Popover.Arrow />
-              <ColorPicker.Root
-                value={color}
-                onValueChange={(next: string) => {
-                  addLog(`color: ${next}`);
-                  setColor(next);
-                }}
-              >
-                <ColorPicker.Header>
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Leading>
-                      <ColorPicker.Eyedropper
-                        render={<Toolbar.Button shape="circle" />}
-                      >
-                        <Button.Icon>
-                          <Symbol icon={sfEyedropper} />
-                        </Button.Icon>
-                      </ColorPicker.Eyedropper>
-                    </Toolbar.Leading>
-                    <Toolbar.Title>
-                      <span>Colors</span>
-                    </Toolbar.Title>
-                    <Toolbar.Trailing>
-                      <Popover.Close
-                        render={
-                          <Toolbar.Button
-                            aria-label="Close"
-                            shape="circle"
-                          />
-                        }
-                      >
-                        <Button.Icon>
-                          <Symbol icon={sfXmark} />
-                        </Button.Icon>
-                      </Popover.Close>
-                    </Toolbar.Trailing>
-                  </Toolbar.Root>
-                </ColorPicker.Header>
-                <ColorPicker.Panel
-                  key={elementKey}
-                  {...props}
+      {sheet ? (
+        <div
+          ref={screen}
+          className="sheet-demo-phone"
+        >
+          <Sheet.Root>
+            <Sheet.Trigger
+              render={
+                <ColorPicker.Well
+                  color={color}
+                  size="large"
                 />
-              </ColorPicker.Root>
-            </Popover.Popup>
-          </Popover.Positioner>
-        </Popover.Portal>
-      </Popover.Root>
+              }
+            />
+            <Sheet.Popup
+              compact
+              container={screen}
+              detent="medium"
+            >
+              <Sheet.Header>
+                <Sheet.Grabber />
+                <Toolbar.Root placement="block-start">
+                  <Toolbar.Title>
+                    <span>Colors</span>
+                  </Toolbar.Title>
+                  <Toolbar.Trailing>
+                    <Sheet.Close
+                      render={
+                        <Toolbar.Button
+                          aria-label="Close"
+                          shape="circle"
+                        />
+                      }
+                    >
+                      <Button.Icon>
+                        <Symbol icon={sfXmark} />
+                      </Button.Icon>
+                    </Sheet.Close>
+                  </Toolbar.Trailing>
+                </Toolbar.Root>
+              </Sheet.Header>
+              <Sheet.Content>
+                <ColorPicker.Root
+                  value={color}
+                  onValueChange={(next: string) => {
+                    addLog(`color: ${next}`);
+                    setColor(next);
+                  }}
+                >
+                  <ColorPicker.Panel
+                    key={keyPanel}
+                    {...propsPanel}
+                  />
+                </ColorPicker.Root>
+              </Sheet.Content>
+            </Sheet.Popup>
+          </Sheet.Root>
+        </div>
+      ) : (
+        <Popover.Root>
+          <Popover.Trigger
+            render={
+              <ColorPicker.Well
+                color={color}
+                size="large"
+              />
+            }
+          />
+          <Popover.Portal>
+            <Popover.Positioner>
+              <Popover.Popup style={{ width: 'min(402px, 100vw)' }}>
+                <Popover.Arrow />
+                <ColorPicker.Root
+                  value={color}
+                  onValueChange={(next: string) => {
+                    addLog(`color: ${next}`);
+                    setColor(next);
+                  }}
+                >
+                  <ColorPicker.Header>
+                    <Toolbar.Root placement="block-start">
+                      <Toolbar.Leading>
+                        <ColorPicker.Eyedropper
+                          render={<Toolbar.Button shape="circle" />}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfEyedropper} />
+                          </Button.Icon>
+                        </ColorPicker.Eyedropper>
+                      </Toolbar.Leading>
+                      <Toolbar.Title>
+                        <span>Colors</span>
+                      </Toolbar.Title>
+                      <Toolbar.Trailing>
+                        <Popover.Close
+                          render={
+                            <Toolbar.Button
+                              aria-label="Close"
+                              shape="circle"
+                            />
+                          }
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfXmark} />
+                          </Button.Icon>
+                        </Popover.Close>
+                      </Toolbar.Trailing>
+                    </Toolbar.Root>
+                  </ColorPicker.Header>
+                  <ColorPicker.Panel
+                    key={keyPanel}
+                    {...propsPanel}
+                  />
+                </ColorPicker.Root>
+              </Popover.Popup>
+            </Popover.Positioner>
+          </Popover.Portal>
+        </Popover.Root>
+      )}
     </Component>
   );
 };

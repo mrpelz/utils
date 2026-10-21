@@ -49,6 +49,7 @@ const LiveView: FunctionComponent = () => {
     true,
   );
   const tablet = content.layout === 'tablet';
+  const global = content.portal === 'global';
 
   return (
     <Component
@@ -80,11 +81,12 @@ const LiveView: FunctionComponent = () => {
             <Button.Label>Add Contact</Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
-            compact={!tablet}
-            container={screen}
+            compact={global ? undefined : !tablet}
+            container={global ? undefined : screen}
             {...propsPopup}
           >
             <Sheet.Header>
+              <Sheet.Grabber />
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading>
                   <Sheet.Close render={<Toolbar.Button />}>

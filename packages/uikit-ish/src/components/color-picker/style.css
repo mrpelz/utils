@@ -284,6 +284,12 @@
     flex-direction: column;
     padding: 0 16px 16px;
 
+    /* Without a header above it: as far from the top as the header's
+       content (16px). */
+    &:first-child {
+      padding-block-start: 16px;
+    }
+
     & > [role='radiogroup'] {
       margin-block-end: 24px;
     }
