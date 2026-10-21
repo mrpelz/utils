@@ -5,6 +5,9 @@
     align-items: flex-start;
     padding: 16px;
     gap: 16px;
+
+    /* Below a sheet's grabber (over it, see Sheet). */
+    padding-block-start: calc(16px + var(--uikit-safe-area-inset-top, 0px));
   }
 
   .uikit-activity-view-thumbnail {

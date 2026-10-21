@@ -11,7 +11,9 @@ export type SheetPopupProps = Omit<BaseDialog.Popup.Props, 'ref'> & {
   compact?: boolean;
   /**
    * Where its portal renders it (Base UI's `Dialog.Portal`), e.g. a
-   * frame of the app's, fixed to it if it's a containing block.
+   * frame of the app's, fixed to it if it's a containing block (and
+   * `overflow: clip`, not `hidden`: focus moving into the sheet, still
+   * below it, would scroll it).
    * @default document.body
    */
   container?: BaseDialog.Portal.Props['container'];

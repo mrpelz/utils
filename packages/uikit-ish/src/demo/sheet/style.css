@@ -1,11 +1,12 @@
 /* Sheet demos (see the guide's views). */
 
 /* A phone's screen: a page with the sheet's trigger, the sheet within it (a
-   transform makes it the fixed sheet's containing block, see `container`). */
+   transform makes it the fixed sheet's containing block, see `container`;
+   clipped, not hidden: focus moving into the sheet would scroll it). */
 .sheet-demo-phone,
 .sheet-demo-tablet {
   display: flex;
-  overflow: hidden;
+  overflow: clip;
   max-width: 100%;
   height: min(640px, 70vh);
   box-sizing: border-box;

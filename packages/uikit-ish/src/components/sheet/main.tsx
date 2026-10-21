@@ -162,9 +162,13 @@ const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
       header.addEventListener('pointercancel', end);
     };
 
+    // Only the grabber: over the content (see style.css).
+    const grabberOnly = children === undefined || children === null;
+
     return (
       <div
         ref={ref}
+        data-grabber-only={grabberOnly ? '' : undefined}
         data-sheet-part="header"
         {...props}
         className={cn('uikit-sheet-header', className)}

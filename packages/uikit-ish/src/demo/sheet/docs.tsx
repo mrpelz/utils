@@ -168,7 +168,7 @@ export const sheetPopupRows: readonly PropRow[] = [
     <>
       <code>document.body</code>
     </>,
-    'Where its portal renders it (Base UI’s Dialog.Portal); fixed to it if it’s a containing block (e.g. transformed), as the views here.',
+    'Where its portal renders it (Base UI’s Dialog.Portal); fixed to it if it’s a containing block (e.g. transformed), as the views here. Clip it with overflow: clip, not hidden: focus moving into the sheet, still below it, would scroll it.',
   ],
   [
     'initialFocus',
@@ -210,7 +210,8 @@ export const sheetHeaderRows: readonly PropRow[] = [
     <>
       Below its grabber: e.g. a <a href="toolbar">Toolbar</a> (its{' '}
       <code>placement=&quot;block-start&quot;</code>), with its title and
-      buttons.
+      buttons. Without: only the grabber, over the content (its own bars, e.g. a
+      navigation’s, below it, as the content’s top safe area inset).
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
