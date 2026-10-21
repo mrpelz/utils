@@ -34,7 +34,9 @@ export const propOptionsPeriodsContent = {
 };
 
 export const propOptionsHighlight = {
-  ...commonPropOptions,
+  // (Its own element: no `render`.)
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
 };
 
 export const propOptionsIndicator = {

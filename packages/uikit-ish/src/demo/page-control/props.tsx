@@ -5,7 +5,9 @@ import { AddLog } from '../frame/log.js';
 import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 export const getPropOptionsRoot = (addLog: AddLog) => ({
-  ...commonPropOptions,
+  // (Its own element: no `render`.)
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
   count: [5, 1, 3, 7, 8, 12, 30] as const,
   defaultValue: [undefined, 0, 2, 9] as const,
   value: [undefined, 0, 1, 4] as const,
@@ -17,6 +19,7 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
     'dim',
     'background-bright',
     'background-dim',
+    'adaptive',
   ] as const,
   momentaryTooltip: [undefined, false, true] as const,
   format: [
@@ -27,6 +30,7 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
       '[Page 3 of 8]',
     ),
   ] as const,
+  'aria-label': [undefined, 'Cities'] as const,
   onValueChange: [
     new MappedProp(
       (page: number, { reason }: PageControlChangeEventDetails) =>
@@ -36,3 +40,11 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
     undefined,
   ] as const,
 });
+
+/** The overview's few: its pages, its look, its tooltip. */
+export const propOptionsOverview = {
+  count: [5, 3, 12] as const,
+  variant: [undefined, 'plain'] as const,
+  momentaryTooltip: [undefined, true] as const,
+  disabled: [undefined, true] as const,
+};

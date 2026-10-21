@@ -19,8 +19,8 @@ import type { FocusHandler, HalfProps } from './props.js';
 //
 // A Base UI number field (UIKit `UIStepper`): `Group` is the capsule, with
 // `Decrement` and `Increment` halves; the value isn't shown (as UIKit's), but
-// held by a visually hidden input in the group, which keyboards focus (arrow
-// keys step) and assistive technology reads (a spin button).
+// held by the field's `Input`, visually hidden in the group, which keyboards
+// focus (arrow keys step) and assistive technology reads (a spin button).
 //
 // Deviations:
 // - The halves' size (46×32) is a minimum, not a fixed size.
@@ -32,67 +32,58 @@ import type { FocusHandler, HalfProps } from './props.js';
 //   it (Figma: none; as `Slider`'s knob).
 
 /**
- * The stepper's capsule; it holds the field's (hidden) input. Pressed, it's
- * marked as focused by a pointer (no focus ring) until a key is pressed or
- * focus leaves it.
+ * The stepper's capsule; it holds the field's `Input`. Pressed, it's marked
+ * as focused by a pointer (no focus ring) until a key is pressed or focus
+ * leaves it.
  */
 const Group = forwardRef<
   HTMLDivElement,
-  Omit<BaseNumberField.Group.Props, 'ref'> & {
-    /** Props of the hidden input (e.g. `aria-label`). */
-    inputProps?: Omit<BaseNumberField.Input.Props, 'ref'>;
-  }
->(
-  (
-    {
-      className,
-      children,
-      inputProps,
-      onBlur,
-      onKeyDown,
-      onPointerDown,
-      ...props
-    },
-    ref,
-  ) => (
-    // Figma “Stepper”: two halves side by side, a 1×24px separator between them
-    // (4px from the top), its corners 8px.
-    <BaseNumberField.Group
-      ref={ref}
-      {...props}
-      className={cn('uikit-stepper-group', className)}
-      data-stepper-part="group"
-      onBlur={(event: FocusEvent<HTMLDivElement>) => {
-        (onBlur as FocusHandler<typeof event>)?.(event);
-        const { currentTarget, relatedTarget } = event;
-        if (
-          relatedTarget instanceof Node &&
-          currentTarget.contains(relatedTarget)
-        ) {
-          return;
-        }
-        delete currentTarget.dataset.pointerFocus;
-      }}
-      onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-        (onKeyDown as FocusHandler<typeof event>)?.(event);
-        delete event.currentTarget.dataset.pointerFocus;
-      }}
-      onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
-        (onPointerDown as FocusHandler<typeof event>)?.(event);
-        event.currentTarget.dataset.pointerFocus = '';
-      }}
-    >
-      {/* The hidden input (the field's value, focus target and spin button).
-       */}
-      <BaseNumberField.Input
-        {...inputProps}
-        className={cn('uikit-stepper-hidden-input', inputProps?.className)}
-        data-stepper-part="hidden-input"
-      />
-      {children as ReactNode}
-    </BaseNumberField.Group>
-  ),
-);
+  Omit<BaseNumberField.Group.Props, 'ref'>
+>(({ className, onBlur, onKeyDown, onPointerDown, ...props }, ref) => (
+  // Figma “Stepper”: two halves side by side, a 1×24px separator between them
+  // (4px from the top), its corners 8px.
+  <BaseNumberField.Group
+    ref={ref}
+    {...props}
+    className={cn('uikit-stepper-group', className)}
+    data-stepper-part="group"
+    onBlur={(event: FocusEvent<HTMLDivElement>) => {
+      (onBlur as FocusHandler<typeof event>)?.(event);
+      const { currentTarget, relatedTarget } = event;
+      if (
+        relatedTarget instanceof Node &&
+        currentTarget.contains(relatedTarget)
+      ) {
+        return;
+      }
+      delete currentTarget.dataset.pointerFocus;
+    }}
+    onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+      (onKeyDown as FocusHandler<typeof event>)?.(event);
+      delete event.currentTarget.dataset.pointerFocus;
+    }}
+    onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
+      (onPointerDown as FocusHandler<typeof event>)?.(event);
+      event.currentTarget.dataset.pointerFocus = '';
+    }}
+  />
+));
+
+/**
+ * The field's input, in the group: visually hidden (UIKit shows no value),
+ * the focus target and spin button; name it (`aria-label`).
+ */
+const Input = forwardRef<
+  HTMLInputElement,
+  Omit<BaseNumberField.Input.Props, 'ref'>
+>(({ className, ...props }, ref) => (
+  <BaseNumberField.Input
+    ref={ref}
+    {...props}
+    className={cn('uikit-stepper-input', className)}
+    data-stepper-part="input"
+  />
+));
 
 // Figma PNG: 14px wide, 2px strokes (Headline at 590).
 const Sign = ({ plus }: { plus: boolean }) => (
@@ -144,6 +135,7 @@ const Increment = forwardRef<
 export const Stepper = {
   ...BaseNumberField,
   Group,
+  Input,
   Decrement,
   Increment,
 };

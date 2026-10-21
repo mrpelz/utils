@@ -314,7 +314,7 @@ export const sheetContentRows: readonly PropRow[] = [
       <a href="navigation">Navigation</a>.
     </>,
   ],
-  ...elementRows('div', 'HTMLDivElement'),
+  ...baseUiRows('div', 'HTMLDivElement'),
 ];
 
 export const sheetTitleRows: readonly PropRow[] = [

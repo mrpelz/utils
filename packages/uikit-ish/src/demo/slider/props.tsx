@@ -142,7 +142,9 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
 });
 
 export const getPropOptionsMinSymbol = (addLog: AddLog) => ({
-  ...commonPropOptions,
+  // (Its own element: no `render`.)
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
   edge: ['min', 'max'] as const,
   onClick: [
     undefined,
@@ -199,7 +201,9 @@ export const propOptionsOverviewContent = {
 };
 
 export const propOptionsTicks = {
-  ...commonPropOptions,
+  // (Its own element: no `render`.)
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
   count: [11, 6, 3] as const,
 };
 

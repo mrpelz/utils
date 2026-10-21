@@ -6,9 +6,14 @@ import { FunctionComponent, useMemo, useState } from 'react';
 import { Stepper } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { commonPropOptions, usePropControl } from '../frame/prop-control.js';
+import { usePropControl } from '../frame/prop-control.js';
 import { useProvidedState } from '../frame/state.js';
-import { getPropOptionsRoot, propOptionsHalf } from './props.js';
+import {
+  getPropOptionsRoot,
+  propOptionsGroup,
+  propOptionsHalf,
+  propOptionsInput,
+} from './props.js';
 
 /**
  * A stepper (UIKit `UIStepper`, a Base UI number field): its value is shown
@@ -18,8 +23,13 @@ export const StepperDemo: FunctionComponent = () => {
   const id = 'stepper';
 
   const [log, addLog] = useLog();
-  const [externalRoot, externalGroup, externalDecrement, externalIncrement] =
-    useProvidedState(id);
+  const [
+    externalRoot,
+    externalGroup,
+    externalInput,
+    externalDecrement,
+    externalIncrement,
+  ] = useProvidedState(id);
 
   const [value = '–', setValue] = useState<number | null>(5);
 
@@ -30,9 +40,14 @@ export const StepperDemo: FunctionComponent = () => {
     true,
   );
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
-    commonPropOptions,
+    propOptionsGroup,
     'group',
     externalGroup,
+  );
+  const [controlInput, propsInput, stateInput] = usePropControl(
+    propOptionsInput,
+    'input',
+    externalInput,
   );
   const [controlDecrement, propsDecrement, stateDecrement] = usePropControl(
     propOptionsHalf,
@@ -50,11 +65,23 @@ export const StepperDemo: FunctionComponent = () => {
       center
       inputGuards
       baseUiId="number-field"
-      controls={[controlRoot, controlGroup, controlDecrement, controlIncrement]}
       id={id}
       log={log}
-      state={[stateRoot, stateGroup, stateDecrement, stateIncrement]}
       title="Stepper"
+      controls={[
+        controlRoot,
+        controlGroup,
+        controlInput,
+        controlDecrement,
+        controlIncrement,
+      ]}
+      state={[
+        stateRoot,
+        stateGroup,
+        stateInput,
+        stateDecrement,
+        stateIncrement,
+      ]}
     >
       <div className="stepper-demo-row">
         <output>{value}</output>
@@ -69,10 +96,8 @@ export const StepperDemo: FunctionComponent = () => {
             setValue(next);
           }}
         >
-          <Stepper.Group
-            inputProps={{ 'aria-label': 'Quantity' }}
-            {...propsGroup}
-          >
+          <Stepper.Group {...propsGroup}>
+            <Stepper.Input {...propsInput} />
             <Stepper.Decrement {...propsDecrement} />
             <Stepper.Increment {...propsIncrement} />
           </Stepper.Group>

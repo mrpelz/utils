@@ -85,9 +85,9 @@ export const ColorPickerDemo: FunctionComponent = () => {
     <ColorPicker.Root
       key={keyRoot}
       {...propsRoot}
-      onValueChange={(value) => {
+      onValueChange={(value, details) => {
         setColor(value);
-        propsRoot.onValueChange?.(value);
+        propsRoot.onValueChange?.(value, details);
       }}
     >
       <ColorPicker.Header>{header(close)}</ColorPicker.Header>
@@ -137,9 +137,9 @@ export const ColorPickerDemo: FunctionComponent = () => {
               <ColorPicker.Root
                 key={keyRoot}
                 {...propsRoot}
-                onValueChange={(value) => {
+                onValueChange={(value, details) => {
                   setColor(value);
-                  propsRoot.onValueChange?.(value);
+                  propsRoot.onValueChange?.(value, details);
                 }}
               >
                 <ColorPicker.Panel

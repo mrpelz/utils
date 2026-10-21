@@ -137,7 +137,9 @@ export const propOptionsError = {
 };
 
 export const getPropOptionsClear = (addLog: AddLog) => ({
-  ...commonPropOptions,
+  // (Its own element: no `render`.)
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
   mode: [undefined, 'always', 'unlessEditing', 'whileEditing'] as const,
   'aria-label': [undefined, 'Clear Name'] as const,
   onClick: [

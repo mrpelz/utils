@@ -83,3 +83,9 @@ export const propOptionsGuidePopup = {
 export const propOptionsPart = {
   ...commonPropOptions,
 };
+
+/** `Sheet.Header`: its own element (no `render`). */
+export const propOptionsHeader = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+};

@@ -1,12 +1,12 @@
 import './style.css';
 
-import { Field } from '@base-ui/react/field';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   Button,
   CheckboxGroup,
   DatePicker,
+  Field,
   Fieldset,
   Form,
   forwardClick,
@@ -213,24 +213,20 @@ export const FormDemo: FunctionComponent = () => {
                 <TextField.Clear />
                 <TextField.Error>At least 8 characters.</TextField.Error>
               </TextField.Root>
-              {/* A date: the date picker (its value, as an ISO date, in a
-                    hidden control: the form's by name). */}
+              {/* A date: the date picker (its value, as an ISO date, in its
+                    hidden control: the field's by name). */}
               <Field.Root
                 name="birthday"
                 render={<List.Item />}
               >
                 <List.Title>Birthday</List.Title>
-                <DatePicker
+                <DatePicker.Root
                   max={new Date()}
                   value={birthday}
                   onValueChange={(next: Date) => {
                     addLog(`birthday: ${next.toLocaleDateString()}`);
                     setBirthday(next);
                   }}
-                />
-                <Field.Control
-                  type="hidden"
-                  value={birthday?.toLocaleDateString('sv-SE') ?? ''}
                 />
               </Field.Root>
             </List.Group>

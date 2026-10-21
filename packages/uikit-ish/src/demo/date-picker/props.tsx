@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
-import {
+import type {
+  DatePickerChangeEventDetails,
   DatePickerMode,
   DatePickerOpen,
+  DatePickerOpenChangeEventDetails,
   DateRange,
   DayHighlight,
 } from '../../components/index.js';
 import { AddLog } from '../frame/log.js';
-import { MappedProp } from '../frame/prop-control.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 // Highlights of some days, each in its own style and tint.
 const tintedHighlights = new Map<number, DayHighlight>([
@@ -72,22 +74,9 @@ export const rangeMessages = new Map<RangeRule, RangeMessage>([
 
 export const weekdayOptions = [undefined, 0, 1, 2, 3, 4, 5, 6] as const;
 
-const propOptions = (mode: DatePickerMode) => ({
-  mode: [
-    mode,
-    ...(['date', 'dateAndTime', 'time'] as const).filter(
-      (option) => option !== mode,
-    ),
-    undefined,
-  ],
-  pickerStyle: [undefined, 'compact', 'inline'] as const,
-  buttonShape: [undefined, 'capsule', 'roundedRectangle'] as const,
-  popover: [undefined, true, false] as const,
-  popoverAlign: [undefined, 'start', 'center', 'end'] as const,
-  defaultOpen: [undefined, null, 'date', 'time'] as const,
-  disabled: [undefined, false, true] as const,
+/** The calendar's own (also the picker's). */
+export const propOptionsCalendar = {
   locale: [undefined, 'en-US', 'de-DE', 'fr-FR', 'ar-EG', 'ko-KR'] as const,
-  hourCycle: [undefined, 'h12', 'h23'] as const,
   firstDayOfWeek: weekdayOptions,
   showAdjacentMonths: [undefined, false, true] as const,
   highlightedWeekdays: [
@@ -141,6 +130,25 @@ const propOptions = (mode: DatePickerMode) => ({
     undefined,
     new MappedProp(new Date(2025, 4, 15), '[May 15, 2025]'),
   ] as const,
+};
+
+const propOptions = (mode: DatePickerMode) => ({
+  mode: [
+    mode,
+    ...(['date', 'dateAndTime', 'time'] as const).filter(
+      (option) => option !== mode,
+    ),
+    undefined,
+  ],
+  pickerStyle: [undefined, 'compact', 'inline'] as const,
+  buttonShape: [undefined, 'capsule', 'roundedRectangle'] as const,
+  popover: [undefined, true, false] as const,
+  popoverAlign: [undefined, 'start', 'center', 'end'] as const,
+  defaultOpen: [undefined, null, 'date', 'time'] as const,
+  open: [undefined, null, 'date', 'time'] as const,
+  disabled: [undefined, false, true] as const,
+  hourCycle: [undefined, 'h12', 'h23'] as const,
+  ...propOptionsCalendar,
 });
 
 /** A value, for the log. */
@@ -154,16 +162,24 @@ export const getPropOptionsDatePicker = (
   addLog: AddLog,
 ) => ({
   ...propOptions(mode),
+  value: [
+    undefined,
+    new MappedProp(new Date(2025, 3, 22, 15, 30), '[April 22, 2025, 15:30]'),
+  ] as const,
   onValueChange: [
     new MappedProp(
-      (value: Date | DateRange) => addLog(`value change: ${describe(value)}`),
+      (value: Date | DateRange, { reason }: DatePickerChangeEventDetails) =>
+        addLog(`value change: ${describe(value)} (${reason})`),
       '[log change]',
     ),
     undefined,
   ] as const,
   onOpenChange: [
     new MappedProp(
-      (open: DatePickerOpen | null) => addLog(`open change: ${String(open)}`),
+      (
+        open: DatePickerOpen | null,
+        { reason }: DatePickerOpenChangeEventDetails,
+      ) => addLog(`open change: ${String(open)} (${reason})`),
       '[log open change]',
     ),
     undefined,
@@ -173,6 +189,13 @@ export const getPropOptionsDatePicker = (
 /** A range picker's (dates only): its rules, too. */
 export const getPropOptionsRangePicker = (addLog: AddLog) => ({
   ...getPropOptionsDatePicker('date', addLog),
+  value: [
+    undefined,
+    new MappedProp<DateRange>(
+      { end: new Date(2025, 3, 26), start: new Date(2025, 3, 22) },
+      '[April 22 to 26, 2025]',
+    ),
+  ] as const,
   isRangeDisabled: [
     undefined,
     new MappedProp(longerThanAWeek, '[longer than a week]'),
@@ -183,3 +206,67 @@ export const getPropOptionsRangePicker = (addLog: AddLog) => ({
     ),
   ] as const,
 });
+
+/** `DatePicker.Calendar`: its own, its value (a date, or a range), why. */
+export const getPropOptionsCalendar = (addLog: AddLog) => ({
+  ...propOptionsCalendar,
+  range: [undefined, true] as const,
+  value: [
+    undefined,
+    new MappedProp<Date | DateRange>(new Date(2025, 3, 22), '[April 22, 2025]'),
+    new MappedProp<Date | DateRange>(
+      { end: new Date(2025, 3, 26), start: new Date(2025, 3, 22) },
+      '[April 22 to 26 (with range)]',
+    ),
+  ] as const,
+  isRangeDisabled: [
+    undefined,
+    new MappedProp(longerThanAWeek, '[longer than a week]'),
+  ] as const,
+  label: [undefined, 'Check-in'] as const,
+  onValueChange: [
+    new MappedProp(
+      (value: Date | DateRange, { reason }: DatePickerChangeEventDetails) =>
+        addLog(`value change: ${describe(value)} (${reason})`),
+      '[log change]',
+    ),
+    undefined,
+  ] as const,
+});
+
+/** `DatePicker.TimeRoll` (its value the demo's). */
+export const propOptionsTimeRoll = {
+  hourCycle: [undefined, 'h12', 'h23'] as const,
+  locale: [undefined, 'en-US', 'de-DE', 'ko-KR'] as const,
+};
+
+/** `DatePicker.CalendarRow`, `DatePicker.CalendarMessage`: elements. */
+const propOptionsElement = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+};
+
+export const propOptionsCalendarRow = propOptionsElement;
+
+export const propOptionsCalendarButton = {
+  ...commonPropOptions,
+  shape: [undefined, 'capsule', 'roundedRectangle'] as const,
+  disabled: [undefined, false, true] as const,
+};
+
+export const propOptionsCalendarTimeRow = {
+  label: [undefined, 'Starts'] as const,
+};
+
+export const propOptionsCalendarMessage = {
+  ...propOptionsElement,
+  variant: [undefined, 'info', 'error'] as const,
+};
+
+/** The overview's few: what it picks, and how it shows. */
+export const propOptionsOverview = {
+  mode: [undefined, 'date', 'time', 'dateAndTime'] as const,
+  pickerStyle: [undefined, 'compact', 'inline'] as const,
+  buttonShape: [undefined, 'roundedRectangle'] as const,
+  disabled: [undefined, true] as const,
+};

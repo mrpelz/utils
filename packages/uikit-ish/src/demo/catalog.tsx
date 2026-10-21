@@ -27,8 +27,26 @@ import {
   checkboxOverviewDemos,
 } from './checkbox/overview.js';
 import { CheckboxParts, checkboxPartsDemos } from './checkbox/parts.js';
+import {
+  ColorPickerComposition,
+  colorPickerCompositionDemos,
+} from './color-picker/composition.js';
+import { ColorPickerInformationArchitecture } from './color-picker/information-architecture.js';
 import { ColorPickerDemo } from './color-picker/main.js';
+import {
+  ColorPickerOverview,
+  colorPickerOverviewDemos,
+} from './color-picker/overview.js';
+import {
+  ColorPickerParts,
+  colorPickerPartsDemos,
+} from './color-picker/parts.js';
 import { ContextualMenuDemo } from './contextual-menu/main.js';
+import {
+  DatePickerComposition,
+  datePickerCompositionDemos,
+} from './date-picker/composition.js';
+import { DatePickerInformationArchitecture } from './date-picker/information-architecture.js';
 import {
   DateAndTimePickerDemo,
   DatePickerDemo,
@@ -36,8 +54,17 @@ import {
   DatePickerRangeDemo,
   TimePickerDemo,
 } from './date-picker/main.js';
+import {
+  DatePickerOverview,
+  datePickerOverviewDemos,
+} from './date-picker/overview.js';
+import { DatePickerParts, datePickerPartsDemos } from './date-picker/parts.js';
 import { EditMenuDemo } from './edit-menu/main.js';
+import { FormComposition, formCompositionDemos } from './form/composition.js';
+import { FormInformationArchitecture } from './form/information-architecture.js';
 import { FormDemo } from './form/main.js';
+import { FormOverview, formOverviewDemos } from './form/overview.js';
+import { FormParts, formPartsDemos } from './form/parts.js';
 import {
   HeaderComposition,
   headerCompositionDemos,
@@ -96,10 +123,27 @@ import { PageInformationArchitecture } from './page/information-architecture.js'
 import { PageDemo } from './page/main.js';
 import { PageOverview, pageOverviewDemos } from './page/overview.js';
 import { PageParts, pagePartsDemos } from './page/parts.js';
+import {
+  PageControlComposition,
+  pageControlCompositionDemos,
+} from './page-control/composition.js';
+import { PageControlInformationArchitecture } from './page-control/information-architecture.js';
 import { PageControlDemo } from './page-control/main.js';
+import {
+  PageControlOverview,
+  pageControlOverviewDemos,
+} from './page-control/overview.js';
+import {
+  PageControlParts,
+  pageControlPartsDemos,
+} from './page-control/parts.js';
 import { PopoverDemo } from './popover/main.js';
 import { ProgressDemo } from './progress/main.js';
+import { RollComposition, rollCompositionDemos } from './roll/composition.js';
+import { RollInformationArchitecture } from './roll/information-architecture.js';
 import { RollDemo } from './roll/main.js';
+import { RollOverview, rollOverviewDemos } from './roll/overview.js';
+import { RollParts, rollPartsDemos } from './roll/parts.js';
 import {
   SegmentedComposition,
   segmentedCompositionDemos,
@@ -139,7 +183,14 @@ import { SliderInformationArchitecture } from './slider/information-architecture
 import { SliderDemo } from './slider/main.js';
 import { SliderOverview, sliderOverviewDemos } from './slider/overview.js';
 import { SliderParts, sliderPartsDemos } from './slider/parts.js';
+import {
+  StepperComposition,
+  stepperCompositionDemos,
+} from './stepper/composition.js';
+import { StepperInformationArchitecture } from './stepper/information-architecture.js';
 import { StepperDemo } from './stepper/main.js';
+import { StepperOverview, stepperOverviewDemos } from './stepper/overview.js';
+import { StepperParts, stepperPartsDemos } from './stepper/parts.js';
 import {
   SwitchComposition,
   switchCompositionDemos,
@@ -441,10 +492,21 @@ export const catalog: readonly CatalogEntry[] = [
   {
     baseUiId: 'number-field',
     category: 'choices',
-    demos: [StepperDemo],
+    demos: [
+      StepperDemo,
+      ...stepperOverviewDemos,
+      ...stepperPartsDemos,
+      ...stepperCompositionDemos,
+    ],
     framework7Id: 'stepper',
     higId: 'steppers',
     id: 'stepper',
+    Composition: StepperComposition,
+    InformationArchitecture: StepperInformationArchitecture,
+    Overview: StepperOverview,
+    Parts: StepperParts,
+    summary:
+      'Steps a number up or down, a press at a time, with “−” and “+” in a capsule; the app shows the value, e.g. in its list row.',
     title: 'Stepper',
   },
   {
@@ -470,18 +532,40 @@ export const catalog: readonly CatalogEntry[] = [
   {
     baseUiId: 'form',
     category: 'choices',
-    demos: [FormDemo],
+    demos: [
+      FormDemo,
+      ...formOverviewDemos,
+      ...formPartsDemos,
+      ...formCompositionDemos,
+    ],
     framework7Id: 'form',
     higId: 'entering-data',
     id: 'form',
+    Composition: FormComposition,
+    InformationArchitecture: FormInformationArchitecture,
+    Overview: FormOverview,
+    Parts: FormParts,
+    summary:
+      'Fields filled in and submitted together, as iOS lays them out: a list, its sections fieldsets, its rows fields; validated, their values by name.',
     title: 'Form',
   },
   {
     category: 'choices',
-    demos: [RollDemo],
+    demos: [
+      RollDemo,
+      ...rollOverviewDemos,
+      ...rollPartsDemos,
+      ...rollCompositionDemos,
+    ],
     framework7Id: 'picker',
     higId: 'pickers',
     id: 'roll',
+    Composition: RollComposition,
+    InformationArchitecture: RollInformationArchitecture,
+    Overview: RollOverview,
+    Parts: RollParts,
+    summary:
+      'A wheel of columns, each scrolled to select a row in the band across its center: the parts of a value side by side, e.g. a time’s hours and minutes.',
     title: 'Roll',
   },
   {
@@ -493,10 +577,19 @@ export const catalog: readonly CatalogEntry[] = [
       TimePickerDemo,
       DateAndTimePickerDemo,
       DatePickerFooterDemo,
+      ...datePickerOverviewDemos,
+      ...datePickerPartsDemos,
+      ...datePickerCompositionDemos,
     ],
     framework7Id: 'calendar',
     higId: 'pickers',
     id: 'date-picker',
+    Composition: DatePickerComposition,
+    InformationArchitecture: DatePickerInformationArchitecture,
+    Overview: DatePickerOverview,
+    Parts: DatePickerParts,
+    summary:
+      'Picks a date, a time or both, or a range of dates: compact buttons opening a calendar in a popover, or the calendar in place.',
     title: 'Date picker',
   },
   {
@@ -648,9 +741,20 @@ export const catalog: readonly CatalogEntry[] = [
   },
   {
     category: 'structure',
-    demos: [PageControlDemo],
+    demos: [
+      PageControlDemo,
+      ...pageControlOverviewDemos,
+      ...pageControlPartsDemos,
+      ...pageControlCompositionDemos,
+    ],
     higId: 'page-controls',
     id: 'page-control',
+    Composition: PageControlComposition,
+    InformationArchitecture: PageControlInformationArchitecture,
+    Overview: PageControlOverview,
+    Parts: PageControlParts,
+    summary:
+      'Dots for a row of pages, the current one highlighted: pressed beside it, or scrubbed across, it steps to the previous or next page.',
     title: 'Page control',
   },
   {
@@ -741,10 +845,21 @@ export const catalog: readonly CatalogEntry[] = [
   },
   {
     category: 'choices',
-    demos: [ColorPickerDemo],
+    demos: [
+      ColorPickerDemo,
+      ...colorPickerOverviewDemos,
+      ...colorPickerPartsDemos,
+      ...colorPickerCompositionDemos,
+    ],
     framework7Id: 'color-picker',
     higId: 'color-wells',
     id: 'color-picker',
+    Composition: ColorPickerComposition,
+    InformationArchitecture: ColorPickerInformationArchitecture,
+    Overview: ColorPickerOverview,
+    Parts: ColorPickerParts,
+    summary:
+      'Picks a color from a grid, a spectrum or sliders, with its opacity and saved colors; opened from a color well, in a popover or a sheet.',
     title: 'Color picker',
   },
   {

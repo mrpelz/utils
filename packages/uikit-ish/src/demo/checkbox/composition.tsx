@@ -1,4 +1,3 @@
-import { Field } from '@base-ui/react/field';
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import { FunctionComponent } from 'react';
 
@@ -6,6 +5,7 @@ import {
   Button,
   Checkbox,
   CheckboxGroup,
+  Field,
   Form,
   forwardClick,
   List,

@@ -26,7 +26,6 @@ import { FunctionComponent, useMemo, useRef, useState } from 'react';
 
 import {
   Button,
-  Calendar,
   DatePicker,
   DatePickerOpen,
   forwardClick,
@@ -38,7 +37,6 @@ import {
   Switch,
   Symbol,
   TextField,
-  TimeRoll,
 } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
@@ -310,7 +308,8 @@ export const ListDemo: FunctionComponent = () => {
                   setQuantity(value ?? 0);
                 }}
               >
-                <Stepper.Group inputProps={{ 'aria-label': 'Quantity' }}>
+                <Stepper.Group>
+                  <Stepper.Input aria-label="Quantity" />
                   <Stepper.Decrement />
                   <Stepper.Increment />
                 </Stepper.Group>
@@ -1986,7 +1985,7 @@ export const ListFormDemo: FunctionComponent = () => {
           <List.Group>
             <List.Item>
               <List.Title>Starts</List.Title>
-              <DatePicker
+              <DatePicker.Root
                 mode="dateAndTime"
                 open={startsOpen}
                 popover={false}
@@ -1999,20 +1998,20 @@ export const ListFormDemo: FunctionComponent = () => {
               />
             </List.Item>
             <List.Expandable open={startsOpen === 'date'}>
-              <Calendar
+              <DatePicker.Calendar
                 value={starts}
                 onValueChange={setStarts}
               />
             </List.Expandable>
             <List.Expandable open={startsOpen === 'time'}>
-              <TimeRoll
+              <DatePicker.TimeRoll
                 value={starts}
                 onValueChange={setStarts}
               />
             </List.Expandable>
             <List.Item>
               <List.Title>Ends</List.Title>
-              <DatePicker
+              <DatePicker.Root
                 mode="dateAndTime"
                 open={endsOpen}
                 popover={false}
@@ -2025,13 +2024,13 @@ export const ListFormDemo: FunctionComponent = () => {
               />
             </List.Item>
             <List.Expandable open={endsOpen === 'date'}>
-              <Calendar
+              <DatePicker.Calendar
                 value={ends}
                 onValueChange={setEnds}
               />
             </List.Expandable>
             <List.Expandable open={endsOpen === 'time'}>
-              <TimeRoll
+              <DatePicker.TimeRoll
                 value={ends}
                 onValueChange={setEnds}
               />

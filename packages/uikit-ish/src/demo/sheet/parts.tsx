@@ -30,6 +30,7 @@ import {
 import {
   getPropOptionsGuideRoot,
   propOptionsGuidePopup,
+  propOptionsHeader,
   propOptionsPart,
 } from './props.js';
 
@@ -307,7 +308,7 @@ const HeaderPart: FunctionComponent = () => {
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
-    propOptionsPart,
+    propOptionsHeader,
     'Sheet.Header',
     external,
     true,

@@ -8,6 +8,7 @@ export const propOptionsBar = {
     'dim',
     'background-bright',
     'background-dim',
+    'adaptive',
   ] as const,
   disabled: [undefined, false, true] as const,
   loopFocus: [undefined, false, true] as const,

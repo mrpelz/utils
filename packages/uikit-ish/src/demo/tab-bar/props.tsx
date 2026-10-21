@@ -65,7 +65,9 @@ export const propOptionsListRegular = {
 };
 
 export const propOptionsGroup = {
-  ...commonPropOptions,
+  // (Its own element: no `render`.)
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
   shape: [undefined, 'capsule', 'circle'] as const,
   collapsedContent: [undefined, 'symbol', 'label', 'symbolAndLabel'] as const,
   collapsedPosition: [
@@ -96,7 +98,9 @@ export const getPropOptionsTab = (addLog: AddLog) => ({
 
 /** Parts taking only styling (`TabBar.Indicator`, `.Icon`, `.Label`). */
 export const propOptionsStyling = {
-  ...commonPropOptions,
+  // (Its own element: no `render`.)
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
 };
 
 export const propOptionsPanel = {
@@ -118,12 +122,14 @@ export const propOptionsGuidePanel = {
 };
 
 export const propOptionsGuideIndicator = {
-  ...propOptionsStyling,
+  ...commonPropOptions,
   renderBeforeHydration: [undefined, false, true] as const,
 };
 
 export const propOptionsAccessory = {
-  ...commonPropOptions,
+  // (Its own element: no `render`.)
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
   visibleIn: [undefined, 'both', 'expanded', 'collapsed'] as const,
   context: [
     undefined,

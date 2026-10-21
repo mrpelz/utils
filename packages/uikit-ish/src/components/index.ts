@@ -53,10 +53,12 @@ export {
 export { Badge, type BadgeProps } from './badge/main.js';
 export {
   ColorPicker,
+  type ColorPickerChangeEventDetails,
   type ColorPickerEyedropperProps,
   type ColorPickerMode,
   type ColorPickerPanelProps,
   type ColorPickerRootProps,
+  type ColorPickerSavedColorsChangeEventDetails,
   type ColorWellProps,
   defaultSavedColors,
   formatColor,
@@ -72,30 +74,32 @@ export {
   type RadioRootProps,
 } from './checkbox/main.js';
 export {
-  Calendar,
-  CalendarButton,
   type CalendarFooter,
-  CalendarMessage,
   type CalendarMessageProps,
   type CalendarProps,
-  CalendarRow,
-  CalendarTimeRow,
   DatePicker,
+  type DatePickerChangeEventDetails,
   type DatePickerMode,
   type DatePickerOpen,
+  type DatePickerOpenChangeEventDetails,
   type DatePickerProps,
   type DatePickerStyle,
   type DateRange,
   type DayHighlight,
   type DayHighlights,
   type HourCycle,
-  TimeRoll,
   type TimeRollProps,
 } from './date-picker/main.js';
-export { Fieldset, type FieldsetLegendProps, Form } from './form/main.js';
+export {
+  Field,
+  Fieldset,
+  type FieldsetLegendProps,
+  Form,
+} from './form/main.js';
 export { TextField } from './text-field/main.js';
 export {
   Roll,
+  type RollChangeEventDetails,
   type RollColumnProps,
   type RollItemProps,
   type RollValue,

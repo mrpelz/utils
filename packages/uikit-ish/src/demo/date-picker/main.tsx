@@ -2,14 +2,7 @@ import './style.css';
 
 import { FunctionComponent, useMemo } from 'react';
 
-import {
-  CalendarButton,
-  CalendarFooter,
-  CalendarMessage,
-  CalendarRow,
-  CalendarTimeRow,
-  DatePicker,
-} from '../../components/index.js';
+import { CalendarFooter, DatePicker } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
@@ -52,7 +45,7 @@ export const DatePickerDemo: FunctionComponent = () => {
       state={[statePicker]}
       title="Date Picker"
     >
-      <DatePicker
+      <DatePicker.Root
         key={elementKey}
         defaultValue={example}
         {...propsPicker}
@@ -94,7 +87,7 @@ export const DatePickerRangeDemo: FunctionComponent = () => {
       state={[statePicker]}
       title="Date Picker (Range)"
     >
-      <DatePicker
+      <DatePicker.Root
         key={elementKey}
         range
         defaultValue={{ end: new Date(2025, 3, 24), start: example }}
@@ -109,9 +102,11 @@ export const DatePickerRangeDemo: FunctionComponent = () => {
                     : undefined;
 
                 return (
-                  <CalendarMessage variant={error ? 'error' : 'info'}>
+                  <DatePicker.CalendarMessage
+                    variant={error ? 'error' : 'info'}
+                  >
                     {error ?? message.info}
-                  </CalendarMessage>
+                  </DatePicker.CalendarMessage>
                 );
               }
             : undefined
@@ -147,7 +142,7 @@ export const TimePickerDemo: FunctionComponent = () => {
       state={[statePicker]}
       title="Date Picker (Time)"
     >
-      <DatePicker
+      <DatePicker.Root
         key={elementKey}
         defaultValue={example}
         {...propsPicker}
@@ -181,7 +176,7 @@ export const DateAndTimePickerDemo: FunctionComponent = () => {
       state={[statePicker]}
       title="Date Picker (Date and Time)"
     >
-      <DatePicker
+      <DatePicker.Root
         key={elementKey}
         defaultValue={example}
         {...propsPicker}
@@ -229,7 +224,7 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
       state={[stateContent, statePicker]}
       title="Date Picker (Footer)"
     >
-      <DatePicker
+      <DatePicker.Root
         key={elementKey}
         defaultValue={example}
         footer={
@@ -242,12 +237,14 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
 
                 return (
                   <>
-                    {timeRow ? <CalendarTimeRow calendar={calendar} /> : null}
+                    {timeRow ? (
+                      <DatePicker.CalendarTimeRow calendar={calendar} />
+                    ) : null}
                     {jumps ? (
-                      <CalendarRow>
+                      <DatePicker.CalendarRow>
                         <span aria-hidden="true">Jump to</span>
                         <span className="date-picker-demo-jumps">
-                          <CalendarButton
+                          <DatePicker.CalendarButton
                             disabled={calendar.disabled}
                             shape={calendar.buttonShape}
                             onClick={() =>
@@ -262,8 +259,8 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
                             }
                           >
                             In a week
-                          </CalendarButton>
-                          <CalendarButton
+                          </DatePicker.CalendarButton>
+                          <DatePicker.CalendarButton
                             disabled={calendar.disabled}
                             shape={calendar.buttonShape}
                             onClick={() =>
@@ -278,23 +275,23 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
                             }
                           >
                             Next month
-                          </CalendarButton>
-                          <CalendarButton
+                          </DatePicker.CalendarButton>
+                          <DatePicker.CalendarButton
                             disabled={calendar.disabled}
                             shape={calendar.buttonShape}
                             onClick={() => calendar.select(new Date(), false)}
                           >
                             Today
-                          </CalendarButton>
-                          <CalendarButton
+                          </DatePicker.CalendarButton>
+                          <DatePicker.CalendarButton
                             disabled={calendar.disabled}
                             shape={calendar.buttonShape}
                             onClick={() => calendar.select(new Date(), true)}
                           >
                             Now
-                          </CalendarButton>
+                          </DatePicker.CalendarButton>
                         </span>
-                      </CalendarRow>
+                      </DatePicker.CalendarRow>
                     ) : null}
                   </>
                 );

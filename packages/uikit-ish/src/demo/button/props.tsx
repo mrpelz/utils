@@ -60,6 +60,7 @@ export const propOptionsRoot = {
     'dim',
     'background-bright',
     'background-dim',
+    'adaptive',
   ] as const,
 };
 
@@ -112,5 +113,7 @@ export const propOptionsOverviewRoot = {
 };
 
 export const propOptionsPart = {
-  ...commonPropOptions,
+  // (Its own element: no `render`.)
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
 };

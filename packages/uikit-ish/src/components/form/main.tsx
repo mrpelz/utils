@@ -1,6 +1,7 @@
 import '../list/style.css';
 import './style.css';
 
+import { Field as BaseField } from '@base-ui/react/field';
 import { Fieldset as BaseFieldset } from '@base-ui/react/fieldset';
 import { Form as BaseForm } from '@base-ui/react/form';
 import { forwardRef } from 'react';
@@ -66,3 +67,11 @@ export const Fieldset = {
  * (e.g. a server's) on them; `onFormSubmit` gets the values.
  */
 export const Form = BaseForm;
+
+/**
+ * Base UI's field (as it is): a form's field by its `name` (`Root`),
+ * its label, control, description, error, validity; e.g. around a control
+ * that isn't a text field (a stepper, a date picker) in a list row
+ * (`render={<List.Item />}`).
+ */
+export const Field = BaseField;

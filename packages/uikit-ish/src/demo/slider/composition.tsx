@@ -1,6 +1,5 @@
 import './style.css';
 
-import { Field } from '@base-ui/react/field';
 import { Slider as BaseSlider } from '@base-ui/react/slider';
 import { sfBackwardFill } from '@bradleyhodges/sfsymbols/sfBackwardFill';
 import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
@@ -14,6 +13,7 @@ import { FunctionComponent, useEffect, useState } from 'react';
 
 import {
   Button,
+  Field,
   Form,
   forwardClick,
   List,

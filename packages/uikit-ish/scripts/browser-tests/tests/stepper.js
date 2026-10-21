@@ -103,4 +103,63 @@ export const tests = [
       );
     },
   },
+  {
+    name: 'stepper: its value shown by the app and its input’s text share a format; Home and End go to its limits',
+    run: async (page) => {
+      await page.open('stepper-composition-value');
+      const input = `${page.section}.querySelector('[data-stepper-part=input]')`;
+      const shown = () =>
+        page.evaluate(
+          `[${page.section}.querySelector('output').textContent, ${input}.value]`,
+        );
+      assert.deepEqual(await shown(), ['100%', '100%']);
+
+      await page.evaluate(
+        `${page.section}.querySelectorAll('[role=group] button')[1].click()`,
+      );
+      await sleep(200);
+      assert.deepEqual(await shown(), ['125%', '125%'], 'a step of 0.25');
+
+      await page.evaluate(`${input}.focus()`);
+      await page.key('End');
+      await sleep(100);
+      assert.deepEqual(await shown(), ['200%', '200%'], 'End: max');
+      await page.key('Home');
+      await sleep(100);
+      assert.deepEqual(await shown(), ['50%', '50%'], 'Home: min');
+    },
+  },
+  {
+    name: 'stepper: in a form, in Base UI’s field, its value is submitted by name',
+    run: async (page) => {
+      await page.open('stepper-composition-form');
+      await page.evaluate(
+        `${page.section}.querySelectorAll('[role=group] button')[1].click()`,
+      );
+      await sleep(200);
+      await page.evaluate(
+        `${page.section}.querySelector('button[type=submit]').click()`,
+      );
+      await sleep(300);
+      assert.match(await page.log(), /submitted: \{"quantity":2\}/u);
+    },
+  },
+  {
+    name: 'stepper: its halves are out of the tab order (its input is the stop)',
+    run: async (page) => {
+      await page.open('stepper-parts-root');
+      assert.deepEqual(
+        await page.evaluate(
+          `[...${page.section}.querySelectorAll('[role=group] button')].map((button) => button.tabIndex)`,
+        ),
+        [-1, -1],
+      );
+      assert.equal(
+        await page.evaluate(
+          `${page.section}.querySelector('[data-stepper-part=input]').getAttribute('aria-label')`,
+        ),
+        'Quantity',
+      );
+    },
+  },
 ];

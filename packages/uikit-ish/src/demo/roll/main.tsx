@@ -63,7 +63,6 @@ export const RollDemo: FunctionComponent = () => {
       <Roll.Root {...propsRoot}>
         <Roll.Column
           key={keyColumn}
-          aria-label="Hours"
           {...propsColumn}
         >
           {hours.map((hour) => (

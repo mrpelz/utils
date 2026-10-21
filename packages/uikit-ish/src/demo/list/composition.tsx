@@ -409,7 +409,8 @@ const SettingsScreen: FunctionComponent = () => {
                       setMinutes(value ?? 1);
                     }}
                   >
-                    <Stepper.Group inputProps={{ 'aria-label': 'Auto-Lock' }}>
+                    <Stepper.Group>
+                      <Stepper.Input aria-label="Auto-Lock" />
                       <Stepper.Decrement />
                       <Stepper.Increment />
                     </Stepper.Group>

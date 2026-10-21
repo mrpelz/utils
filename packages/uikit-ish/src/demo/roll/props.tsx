@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
-import { RollValue } from '../../components/index.js';
+import type {
+  RollChangeEventDetails,
+  RollValue,
+} from '../../components/index.js';
 import { AddLog } from '../frame/log.js';
 import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
@@ -16,36 +19,52 @@ export const fruits = [
   'Grape',
 ] as const;
 
+/** Its parts' own elements (no `render`). */
+const propOptionsElement = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+};
+
 export const getPropOptionsColumn = (addLog: AddLog) => ({
-  ...commonPropOptions,
+  ...propOptionsElement,
   defaultValue: [9, 0, 12, 23, undefined] as const,
   value: [undefined, 9, 17] as const,
   align: [undefined, 'start', 'center', 'end'] as const,
   disabled: [undefined, false, true] as const,
   editable: [true, false, undefined] as const,
   loop: [undefined, false, true] as const,
+  'aria-label': ['Hours', 'Start hour'] as const,
   onValueChange: [
     new MappedProp(
-      (value: RollValue) => addLog(`hours: ${String(value)}`),
+      (value: RollValue, { reason }: RollChangeEventDetails) =>
+        addLog(`hours: ${String(value)} (${reason})`),
       '[log change]',
     ),
     undefined,
   ] as const,
   onHighlightChange: [
     new MappedProp(
-      (value: RollValue) => addLog(`hours highlighted: ${String(value)}`),
+      (value: RollValue, { reason }: RollChangeEventDetails) =>
+        addLog(`hours highlighted: ${String(value)} (${reason})`),
       '[log highlight]',
     ),
     undefined,
   ] as const,
 });
 
+/** The overview's few: its column's behavior. */
+export const propOptionsOverview = {
+  editable: [undefined, true] as const,
+  loop: [undefined, true] as const,
+  align: [undefined, 'start', 'end'] as const,
+  disabled: [undefined, true] as const,
+};
+
 export const propOptionsItem = {
-  ...commonPropOptions,
+  ...propOptionsElement,
   disabled: [undefined, false, true] as const,
 };
 
-export {
-  commonPropOptions as propOptionsRoot,
-  commonPropOptions as propOptionsSeparator,
-} from '../frame/prop-control.js';
+export const propOptionsRoot = propOptionsElement;
+
+export const propOptionsSeparator = propOptionsElement;

@@ -1,3 +1,4 @@
+import type { Popover as BasePopover } from '@base-ui/react/popover';
 import type { ComponentProps, ReactNode } from 'react';
 
 import type { PopoverAlign } from '../popover/main.js';
@@ -25,14 +26,36 @@ export type DayHighlight = {
 export type DayHighlights =
   boolean | DayHighlight | null | readonly DayHighlight[] | undefined;
 
+/**
+ * Why the value changed, and the event that changed it: a day pressed (or
+ * chosen by keyboard), a range dragged, the time's roll, or the footer's
+ * `select`.
+ */
+export type DatePickerChangeEventDetails = {
+  event: Event;
+  reason: 'day-press' | 'drag' | 'footer' | 'time';
+};
+
+/**
+ * Why a picker opened or closed (Base UI's popover's reasons; without
+ * popovers, `trigger-press`), and the event.
+ */
+export type DatePickerOpenChangeEventDetails = {
+  event: Event;
+  reason: BasePopover.Root.ChangeEventReason;
+};
+
 /** A range of days: its start, and its end (`null` while picking it). */
 export type DateRange = { end: Date | null; start: Date };
 
 export type SingleValue = {
   /** The initially selected date (uncontrolled). */
   defaultValue?: Date | null;
-  /** Called with the newly selected date. */
-  onValueChange?: (date: Date) => void;
+  /** Called with the newly selected date, and why. */
+  onValueChange?: (
+    date: Date,
+    eventDetails: DatePickerChangeEventDetails,
+  ) => void;
   /** Picks a single date (default). */
   range?: false;
   /** The selected date (controlled). */
@@ -52,16 +75,19 @@ export type RangeValue = {
   isRangeDisabled?: (start: Date, end: Date) => boolean;
   /**
    * Called with the newly selected range: a start (its end `null`), then
-   * the range.
+   * the range; and why.
    */
-  onValueChange?: (range: DateRange) => void;
+  onValueChange?: (
+    range: DateRange,
+    eventDetails: DatePickerChangeEventDetails,
+  ) => void;
   /** Picks a range of days: a start, then an end (dates only). */
   range: true;
   /** The selected range (controlled). */
   value?: DateRange | null;
 };
 
-/** Props of the calendar (also of `DatePicker`'s). */
+/** Props of the calendar (also of `DatePicker.Root`'s). */
 export type CalendarProps = {
   /**
    * The week's first day (0: Sunday … 6: Saturday).
@@ -69,12 +95,17 @@ export type CalendarProps = {
    */
   firstDayOfWeek?: number;
   /**
-   * Rows below the calendar, after a separator (e.g. `CalendarTimeRow`, or
-   * `CalendarRow`s of `CalendarButton`s jumping to dates), composed from the
+   * Rows below the calendar, after a separator (e.g. `DatePicker.CalendarTimeRow`, or
+   * `DatePicker.CalendarRow`s of `DatePicker.CalendarButton`s jumping to dates), composed from the
    * calendar's state and actions (see `CalendarFooter`); with a time, by
-   * default `CalendarTimeRow` (none: `() => null`).
+   * default `DatePicker.CalendarTimeRow` (none: `() => null`).
    */
   footer?: (calendar: CalendarFooter) => ReactNode;
+  /**
+   * Identifies the form that owns its hidden control (see `name`), when
+   * it's outside the form.
+   */
+  form?: string;
   /**
    * Days highlighted (e.g. with events; Framework7 `events`): `true` (a dot
    * below), how (see `DayHighlight`), or several highlights (dots side by
@@ -99,6 +130,13 @@ export type CalendarProps = {
   /** The earliest selectable day. */
   min?: Date;
   /**
+   * Its value's name in a form: submitted by a hidden control (as an
+   * input's: a date `YYYY-MM-DD`, a time `HH:MM`, both `YYYY-MM-DDTHH:MM`,
+   * a range `start/end`, empty until its end is picked). In a Base UI
+   * `Field`, the field's name applies.
+   */
+  name?: string;
+  /**
    * Shows the adjacent months' days filling the first and last weeks, grayed
    * out (Framework7 `calendarDayPrev`/`Next`; UIKit: none); pressed, they
    * show their month.
@@ -108,7 +146,7 @@ export type CalendarProps = {
 
 /** The calendar's state and actions, for its `footer`. */
 export type CalendarFooter = {
-  /** The shape of the picker's collapsed buttons (see `DatePicker`). */
+  /** The shape of the picker's collapsed buttons (see `DatePicker.Root`). */
   buttonShape?: 'capsule' | 'roundedRectangle';
   /** Whether the picker is disabled. */
   disabled: boolean;
@@ -158,8 +196,14 @@ export type DatePickerProps = CalendarProps & {
    * @default 'date'
    */
   mode?: DatePickerMode;
-  /** Called when the compact style's buttons open or close a picker. */
-  onOpenChange?: (open: DatePickerOpen | null) => void;
+  /**
+   * Called when the compact style's picker opens or closes (its buttons,
+   * or, in a popover, pressing outside it, Escape, …), and why.
+   */
+  onOpenChange?: (
+    open: DatePickerOpen | null,
+    eventDetails: DatePickerOpenChangeEventDetails,
+  ) => void;
   /** The open picker of the compact style (controlled). */
   open?: DatePickerOpen | null;
   /**
@@ -170,7 +214,7 @@ export type DatePickerProps = CalendarProps & {
   /**
    * The compact style's buttons open their pickers in popovers (default);
    * without, they only toggle `open`, for the app to show them (e.g. in an
-   * expandable list row: `Calendar`, `TimeRoll`).
+   * expandable list row: `DatePicker.Calendar`, `DatePicker.TimeRoll`).
    */
   popover?: boolean;
   /**
@@ -188,8 +232,11 @@ export type TimeRollProps = {
   hourCycle?: HourCycle;
   /** Locale of numerals, the hour cycle and the day period. */
   locale?: string;
-  /** Called with the date at the newly selected time. */
-  onValueChange: (date: Date) => void;
+  /** Called with the date at the newly selected time (`reason`: `time`). */
+  onValueChange: (
+    date: Date,
+    eventDetails: DatePickerChangeEventDetails,
+  ) => void;
   /**
    * The date whose time is shown.
    * @default now
@@ -198,13 +245,19 @@ export type TimeRollProps = {
 };
 
 export type CalendarInternalProps = CalendarProps & {
+  /**
+   * Renders its value's hidden control (internal: not the picker's
+   * calendar, the picker renders its own).
+   * @default true
+   */
+  formControl?: boolean;
   hourCycle?: HourCycle;
-  /** The roll shown at first (internal, see `DatePicker`). */
+  /** The roll shown at first (internal, see `DatePicker.Root`). */
   initialRoll?: 'monthYear' | 'time';
   label?: string;
-  /** Called as the time's roll shows or hides (internal, see `DatePicker`). */
+  /** Called as the time's roll shows or hides (internal, see `DatePicker.Root`). */
   onTimeShownChange?: (shown: boolean) => void;
-  /** The picker's time (internal, see `DatePicker`): for the footer. */
+  /** The picker's time (internal, see `DatePicker.Root`): for the footer. */
   time?: {
     disabled: boolean;
     shape?: DatePickerProps['buttonShape'];

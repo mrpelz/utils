@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
+import { List } from '../../components/index.js';
 import { AddLog } from '../frame/log.js';
 import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
@@ -85,4 +86,18 @@ export const propOptionsRadio = {
   disabled: [undefined, false, true] as const,
   readOnly: [undefined, false, true] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
+};
+
+/** `Field.Root` (around a stepper): its name and state. */
+export const propOptionsField = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+  // (Its row.)
+  render: [
+    new MappedProp(<List.Item />, '[<List.Item />]'),
+    undefined,
+  ] as const,
+  name: ['quantity', 'amount'] as const,
+  disabled: [undefined, false, true] as const,
+  validationMode: [undefined, 'onSubmit', 'onBlur', 'onChange'] as const,
 };

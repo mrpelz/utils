@@ -1,6 +1,6 @@
 /* Stepper (see main.tsx). */
 @layer uikit-ish {
-  .uikit-stepper-hidden-input {
+  .uikit-stepper-input {
     position: absolute;
     overflow: hidden;
     width: 1px;
