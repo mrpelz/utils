@@ -108,8 +108,14 @@ export const textFieldRootRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} A <code>{'<List.Item />'}</code>: the field as a list row
-            (its label the row’s title).
+            {row[3]} A{' '}
+            <PartLink
+              component="list"
+              part="List.Item"
+            >
+              {'<List.Item />'}
+            </PartLink>
+            : the field as a list row (its label the row’s title).
           </>,
         ]
       : row,

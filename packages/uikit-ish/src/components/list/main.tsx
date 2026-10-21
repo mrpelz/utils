@@ -914,8 +914,13 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
   // The snap points (see `snapPlaces`). Open, the other side's actions
   // don't open (scrolled past closed, the row snaps back closed): only from
   // closed; overswiped, only as above. (They change at rest, or as a touch
-  // starts, only: changed while scrolling, browsers snap at once.)
+  // starts, only: changed while scrolling, browsers snap at once.) Safari
+  // snaps to the point at the same place in their order once they change
+  // (e.g. armed, shown before closed as a touch starts), so the row is put
+  // back where it was.
   const showSnaps = () => {
+    const { current: item } = itemRef;
+    const scrollLeft = item?.scrollLeft;
     const { current: openSide } = openSideRef;
     for (const point of snapPoints) {
       const snap = snapsRef.current[point];
@@ -927,6 +932,9 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         placesRef.current[point] === undefined ||
         (openSide !== undefined && point !== 'closed' && side !== openSide) ||
         (overswiping && !overswipable(side));
+    }
+    if (item && scrollLeft !== undefined && item.scrollLeft !== scrollLeft) {
+      item.scrollLeft = scrollLeft;
     }
   };
 

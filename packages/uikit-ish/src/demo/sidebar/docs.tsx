@@ -20,7 +20,14 @@ export const sidebarRootRows: readonly PropRow[] = [
         component="text-field"
         part="TextField.Search"
       />
-      ), a list (<code>List.Root listStyle=&quot;sidebar&quot;</code>).
+      ), a list (
+      <PartLink
+        component="list"
+        part="List.Root"
+      >
+        List.Root listStyle=&quot;sidebar&quot;
+      </PartLink>
+      ).
     </>,
   ],
   [

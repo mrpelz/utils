@@ -75,7 +75,13 @@ export const navigationBackRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <code>{'<Toolbar.Button shape="circle" />'}</code>{' '}
+            {row[3]} E.g. a{' '}
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Button"
+            >
+              {'<Toolbar.Button shape="circle" />'}
+            </PartLink>{' '}
             in its page’s bar.
           </>,
         ]

@@ -405,8 +405,14 @@ export const TextFieldParts: FunctionComponent = () => (
         <code>validationMode</code>).
       </li>
       <li>
-        <code>render={'{<List.Item />}'}</code>: a list row (its label the row’s
-        title, its value at the row’s end); otherwise its parts stacked.
+        <PartLink
+          component="list"
+          part="List.Item"
+        >
+          {'render={<List.Item />}'}
+        </PartLink>
+        : a list row (its label the row’s title, its value at the row’s end);
+        otherwise its parts stacked.
       </li>
       <li>
         Renders a <code>div</code>.

@@ -779,8 +779,14 @@ export const SidebarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The selected row (<code>List.Item selected</code>) picks the content
-        column’s page; the app holds the selection (guide{' '}
+        The selected row (
+        <PartLink
+          component="list"
+          part="List.Item"
+        >
+          List.Item selected
+        </PartLink>
+        ) picks the content column’s page; the app holds the selection (guide{' '}
         <GuideLink to="rule-g7">G7</GuideLink>: the list owns it, the content
         reads it).
       </li>
@@ -801,7 +807,14 @@ export const SidebarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Compact (<code>Layout.Root compact</code>): the column in a{' '}
+        Compact (
+        <PartLink
+          component="layout"
+          part="Layout.Root"
+        >
+          Layout.Root compact
+        </PartLink>
+        ): the column in a{' '}
         <PartLink
           component="layout"
           part="Layout.Drawer"

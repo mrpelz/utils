@@ -120,8 +120,20 @@ export const sheetRootRows: readonly PropRow[] = [
     undefined,
     <>
       A handle to associate the drawer with a trigger (outside it), made by{' '}
-      <code>Sheet.createHandle()</code> (in a component:{' '}
-      <code>useCreateSheetHandle()</code>).
+      <PartLink
+        component="sheet"
+        part="Sheet.createHandle"
+      >
+        Sheet.createHandle()
+      </PartLink>{' '}
+      (in a component:{' '}
+      <PartLink
+        component="sheet"
+        part="useCreateSheetHandle"
+      >
+        useCreateSheetHandle()
+      </PartLink>
+      ).
     </>,
   ],
   [
@@ -160,8 +172,21 @@ export const sheetTriggerRows: readonly PropRow[] = [
     undefined,
     <>
       A handle to associate the trigger with a drawer (the trigger outside it),
-      made by <code>Sheet.createHandle()</code> (in a component:{' '}
-      <code>useCreateSheetHandle()</code>).
+      made by{' '}
+      <PartLink
+        component="sheet"
+        part="Sheet.createHandle"
+      >
+        Sheet.createHandle()
+      </PartLink>{' '}
+      (in a component:{' '}
+      <PartLink
+        component="sheet"
+        part="useCreateSheetHandle"
+      >
+        useCreateSheetHandle()
+      </PartLink>
+      ).
     </>,
   ],
   [
@@ -188,7 +213,13 @@ export const sheetTriggerRows: readonly PropRow[] = [
           row[2],
           <>
             {row[3]} E.g. a <a href="button">Button</a>’s{' '}
-            <code>{'<Button.Root />'}</code>.
+            <PartLink
+              component="button"
+              part="Button.Root"
+            >
+              {'<Button.Root />'}
+            </PartLink>
+            .
           </>,
         ]
       : row,
@@ -315,8 +346,14 @@ export const sheetCloseRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <code>{'<Toolbar.Button />'}</code> (Cancel, Done,
-            its close symbol).
+            {row[3]} E.g. a{' '}
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Button"
+            >
+              {'<Toolbar.Button />'}
+            </PartLink>{' '}
+            (Cancel, Done, its close symbol).
           </>,
         ]
       : row,

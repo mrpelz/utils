@@ -944,7 +944,13 @@ export const LayoutParts: FunctionComponent = () => (
       <li>
         A button opening its drawer: in it, or (as in a bar of the content’s)
         linked to it by a <code>handle</code> (
-        <code>useCreateDrawerHandle()</code>).
+        <PartLink
+          component="layout"
+          part="useCreateDrawerHandle"
+        >
+          useCreateDrawerHandle()
+        </PartLink>
+        ).
       </li>
       <li>
         Renders a <code>button</code> (Base UI’s <code>Drawer.Trigger</code>);

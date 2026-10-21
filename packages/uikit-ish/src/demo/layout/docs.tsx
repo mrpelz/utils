@@ -191,8 +191,21 @@ export const layoutDrawerRows: readonly PropRow[] = [
     undefined,
     <>
       A handle to associate the drawer with a trigger (outside it, e.g. in
-      another column’s bar), made by <code>Layout.createDrawerHandle()</code>{' '}
-      (in a component: <code>useCreateDrawerHandle()</code>).
+      another column’s bar), made by{' '}
+      <PartLink
+        component="layout"
+        part="Layout.createDrawerHandle"
+      >
+        Layout.createDrawerHandle()
+      </PartLink>{' '}
+      (in a component:{' '}
+      <PartLink
+        component="layout"
+        part="useCreateDrawerHandle"
+      >
+        useCreateDrawerHandle()
+      </PartLink>
+      ).
     </>,
   ],
   [
@@ -256,8 +269,21 @@ export const layoutDrawerTriggerRows: readonly PropRow[] = [
     undefined,
     <>
       A handle to associate the trigger with a drawer (the trigger outside it),
-      made by <code>Layout.createDrawerHandle()</code> (in a component:{' '}
-      <code>useCreateDrawerHandle()</code>).
+      made by{' '}
+      <PartLink
+        component="layout"
+        part="Layout.createDrawerHandle"
+      >
+        Layout.createDrawerHandle()
+      </PartLink>{' '}
+      (in a component:{' '}
+      <PartLink
+        component="layout"
+        part="useCreateDrawerHandle"
+      >
+        useCreateDrawerHandle()
+      </PartLink>
+      ).
     </>,
   ],
   [
@@ -283,8 +309,14 @@ export const layoutDrawerTriggerRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <code>{'<Toolbar.Button />'}</code> in the content’s
-            bar.
+            {row[3]} E.g. a{' '}
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Button"
+            >
+              {'<Toolbar.Button />'}
+            </PartLink>{' '}
+            in the content’s bar.
           </>,
         ]
       : row,
@@ -300,8 +332,14 @@ export const layoutDrawerCloseRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <code>{'<Toolbar.Button />'}</code> in the drawer’s
-            bar (Done).
+            {row[3]} E.g. a{' '}
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Button"
+            >
+              {'<Toolbar.Button />'}
+            </PartLink>{' '}
+            in the drawer’s bar (Done).
           </>,
         ]
       : row,

@@ -6,6 +6,7 @@ import {
   secondaryClickRow,
   union,
 } from '../guide/props-table.js';
+import { PartLink } from '../guide/sections.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -189,8 +190,13 @@ export const listExpandableTriggerRows: readonly PropRow[] = [
     undefined,
     <>
       Rendered by a row’s title (
-      <code>{'<List.Title render={<List.ExpandableTrigger />}>'}</code>), the
-      whole row toggles it.
+      <PartLink
+        component="list"
+        part="List.ExpandableTrigger"
+      >
+        {'<List.Title render={<List.ExpandableTrigger />}>'}
+      </PartLink>
+      ), the whole row toggles it.
     </>,
   ],
   [
