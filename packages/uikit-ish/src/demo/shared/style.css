@@ -168,15 +168,31 @@
       content: '';
     }
 
-    /* The frame's Safe Areas setting: the insets hatched. */
-    .demo-stage[data-safe-areas] &::before,
-    .demo-stage[data-safe-areas] &::after {
-      background-color: transparent;
-      background-image: repeating-linear-gradient(
+    /* The frame's Safe Areas setting: the insets hatched (under the
+       home indicator). */
+    .demo-stage[data-safe-areas] &::before {
+      background: repeating-linear-gradient(
         -45deg,
         rgb(255 59 48 / 25%) 0 4px,
         transparent 4px 8px
       );
+    }
+
+    .demo-stage[data-safe-areas] &::after {
+      background:
+        radial-gradient(circle at center, currentcolor 2.5px, transparent 2.5px)
+          calc(50% - var(--demo-home-indicator) / 2 + 2.5px) calc(100% - 8px) /
+          5px 5px no-repeat,
+        radial-gradient(circle at center, currentcolor 2.5px, transparent 2.5px)
+          calc(50% + var(--demo-home-indicator) / 2 - 2.5px) calc(100% - 8px) /
+          5px 5px no-repeat,
+        linear-gradient(currentcolor, currentcolor) center calc(100% - 8px) /
+          calc(var(--demo-home-indicator) - 5px) 5px no-repeat,
+        repeating-linear-gradient(
+          -45deg,
+          rgb(255 59 48 / 25%) 0 4px,
+          transparent 4px 8px
+        );
     }
   }
 
