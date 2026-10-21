@@ -117,8 +117,8 @@ export const NavigationInformationArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The transition’s mechanics: pushed and popped by the stack’s keys, the
-        bars cross-fading in place, swiping back from the leading edge.
+        The transition’s mechanics: pushed and popped by the stack’s keys, each
+        page with its bar, swiping back from the leading edge.
       </li>
       <li>
         Keeping pages under the top one alive (their state, their scroll

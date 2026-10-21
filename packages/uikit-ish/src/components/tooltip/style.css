@@ -1,5 +1,11 @@
 /* Tooltip (see main.tsx). */
 @layer uikit-ish {
+  .uikit-tooltip-positioner {
+    /* An overlay: above the page's layers (e.g. Viewport's bars), overlays
+       among themselves in the order they open (see Menu). */
+    z-index: 100;
+  }
+
   /* (Shared: page-control, progress, slider.) */
   .uikit-tooltip-surface {
     max-width: min(320px, calc(100vw - 16px));

@@ -36,9 +36,10 @@ export type { SheetDetent, SheetPopupProps } from './props.js';
 // - Detents don't change by dragging (`detent` is the app's), and the page
 //   behind a large sheet doesn't shrink back (UIKit's stacked look).
 
-// Opaque, with a list (see List): on the grouped background (elevated: in
-// dark mode, #1c1c1e, its groups #2c2c2e), the list without its own (which
-// would end with it, the sheet's around it).
+// Opaque, with a list (see List): on the grouped background, the list
+// without its own (which would end with it, the sheet's around it). In it,
+// UIKit's elevated backgrounds (dark mode: #1c1c1e, groups #2c2c2e), as
+// tokens for all its content (e.g. a navigation's pages).
 
 // A regular width (iPad): the window's, from 768px.
 const regularQuery = '(width >= 768px)';

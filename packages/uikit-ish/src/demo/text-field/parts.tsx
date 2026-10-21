@@ -471,8 +471,9 @@ export const TextFieldParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Empties the control (as typing would), keeping it focused; shown only
-        while the field is focused and filled (focus the field).
+        Empties the control (as typing would), focusing it; shown only while the
+        field is filled, and by its <code>mode</code>: while it’s focused (the
+        default: focus the field), while it isn’t, or always.
       </li>
       <li>Out of the tab order; its hit area 44px.</li>
       <li>

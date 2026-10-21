@@ -30,6 +30,9 @@ export const getPropOptionsColumn = (
   minSize: [undefined, 200, 280] as const,
   maxSize: [undefined, 400, 480] as const,
   resizable: [resizable, !resizable] as const,
+  // (As a drawer: compact.)
+  swipeEdgeWidth: [undefined, 0, 44] as const,
+  dismissOnOutsidePress: [undefined, false] as const,
   onSizeChange: [
     new MappedProp(
       (size: number) => addLog(`${name} size: ${String(size)}`),

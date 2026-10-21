@@ -7,6 +7,17 @@
     color-scheme: light dark;
 
     /*
+     * The safe area insets (the notch or Dynamic Island, the home indicator,
+     * the rounded corners): the device's, or an app's (e.g. a frame
+     * emulating a device). A component keeping a side clear sets it to 0px
+     * for its content (e.g. Viewport's layers, Page, Sheet).
+     */
+    --uikit-safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --uikit-safe-area-inset-right: env(safe-area-inset-right, 0px);
+    --uikit-safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --uikit-safe-area-inset-left: env(safe-area-inset-left, 0px);
+
+    /*
      * Grayscale antialiasing, as on iOS (Framework7 components/app/app.less;
      * Figma renders text the same way)
      */

@@ -52,3 +52,14 @@
   font-size: 15px;
   font-variant-numeric: tabular-nums;
 }
+
+/* Three columns at least 240px wide each (see composition.tsx): a tablet
+   as wide as they need, scrolling sideways in a narrower stage. */
+.layout-demo-scroller {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.layout-demo-wide {
+  min-width: 760px;
+}

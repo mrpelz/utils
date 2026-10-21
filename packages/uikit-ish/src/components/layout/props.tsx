@@ -12,6 +12,12 @@ export type LayoutColumnProps = ComponentProps<'div'> & {
   /** Its initial size (px, uncontrolled); without a size, it's flexible. */
   defaultSize?: number;
   /**
+   * As a drawer: closed by a press on the content dimmed behind it (or only
+   * by the app, `open`; swiping it back still closes it).
+   * @default true
+   */
+  dismissOnOutsidePress?: boolean;
+  /**
    * In a compact layout: floating over the others from this side, hidden
    * until opened (swiped in from that edge, or `open`).
    */
@@ -42,6 +48,12 @@ export type LayoutColumnProps = ComponentProps<'div'> & {
   resizable?: boolean;
   /** Its size (px, controlled). */
   size?: number;
+  /**
+   * As a drawer: the width of the strip at its edge it's swiped in from
+   * (px); 0: not swiped in, opened by the app only (`open`).
+   * @default 20
+   */
+  swipeEdgeWidth?: number;
 };
 
 export type LayoutRootProps = ComponentProps<'div'> & {

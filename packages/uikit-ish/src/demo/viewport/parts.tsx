@@ -507,7 +507,7 @@ const UseElementVisibilityPart: FunctionComponent = () => {
         <div className="viewport-demo-area">
           <div
             ref={card}
-            className="viewport-demo-card"
+            className="viewport-demo-card viewport-demo-card-start"
             data-visible={visible ? '' : undefined}
           >
             {visible ? 'Visible' : 'Hidden'}
@@ -845,8 +845,15 @@ export const ViewportParts: FunctionComponent = () => (
         about to scroll in).
       </li>
       <li>
-        Here: scroll the box (or the page, with the window as the area); the
-        card colored while visible, each change logged.
+        Here: the card starts visible in the box. Scroll the box to hide it;
+        with the viewport as the area (<code>scroller</code> unset), also scroll
+        the page until the box leaves the window (with the box as the area, the
+        page’s scrolling doesn’t matter). Colored while visible, each change
+        logged.
+      </li>
+      <li>
+        Clipped by the scroll containers around it, in either area (as an{' '}
+        <code>IntersectionObserver</code>).
       </li>
     </ul>
     <UseElementVisibilityPart />

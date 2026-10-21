@@ -39,13 +39,17 @@ const Trigger = forwardRef<HTMLButtonElement, TooltipTriggerProps>(
 );
 
 const Positioner = forwardRef<HTMLDivElement, TooltipPositionerProps>(
-  ({ collisionPadding = 8, side, sideOffset = 8, ...props }, ref) => (
+  (
+    { className, collisionPadding = 8, side, sideOffset = 8, ...props },
+    ref,
+  ) => (
     <BaseTooltip.Positioner
       ref={ref}
       collisionPadding={collisionPadding}
       side={positionerSide(side)}
       sideOffset={sideOffset}
       {...props}
+      className={cn('uikit-tooltip-positioner', className)}
     />
   ),
 );

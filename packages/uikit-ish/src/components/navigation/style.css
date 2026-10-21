@@ -63,9 +63,6 @@
 
     &[data-navigation-role='top'],
     &[data-navigation-role='under'] {
-      --uikit-navigation-counter: calc(-1 * var(--uikit-navigation-x)) 0;
-      --uikit-navigation-filter: opacity(var(--uikit-navigation-shown));
-
       pointer-events: none;
       translate: var(--uikit-navigation-x) 0;
     }

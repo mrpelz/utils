@@ -80,7 +80,15 @@ const arrowDepth = 13;
 
 const Positioner = forwardRef<HTMLDivElement, PopoverPositionerProps>(
   (
-    { align, anchor, collisionPadding = 8, side, sideOffset, ...props },
+    {
+      align,
+      anchor,
+      className,
+      collisionPadding = 8,
+      side,
+      sideOffset,
+      ...props
+    },
     ref,
   ) => {
     const context = useContext(PopoverContext);
@@ -96,6 +104,7 @@ const Positioner = forwardRef<HTMLDivElement, PopoverPositionerProps>(
         side={positionerSide(side)}
         sideOffset={sideOffset ?? 8 + (context?.arrow ? arrowDepth : 0)}
         {...props}
+        className={cn('uikit-popover-positioner', className)}
       />
     );
   },

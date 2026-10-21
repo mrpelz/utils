@@ -137,6 +137,7 @@ export const propOptionsError = {
 
 export const getPropOptionsClear = (addLog: AddLog) => ({
   ...commonPropOptions,
+  mode: [undefined, 'always', 'unlessEditing', 'whileEditing'] as const,
   onClick: [
     undefined,
     new MappedProp(() => addLog('clear clicked'), '[log click]'),

@@ -273,7 +273,11 @@ export const SidebarParts: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        <code>Layout.Column</code> (floating, or a drawer)
+        <PartLink
+          component="layout"
+          part="Layout.Column"
+        />{' '}
+        (floating, or a drawer)
         <ul>
           <li>
             <PartLink part="Sidebar.Root" />
@@ -282,7 +286,11 @@ export const SidebarParts: FunctionComponent = () => (
                 <PartLink part="Sidebar.Toolbar" />
                 <ul>
                   <li>
-                    <code>Button.Root</code> (borderless, at each end), or
+                    <PartLink
+                      component="button"
+                      part="Button.Root"
+                    />{' '}
+                    (borderless, at each end), or
                   </li>
                   <li>
                     <PartLink part="Sidebar.ToolbarGroup" /> (several)
@@ -290,10 +298,22 @@ export const SidebarParts: FunctionComponent = () => (
                 </ul>
               </li>
               <li>
-                <code>TextField.Root</code> → <code>TextField.Search</code>
+                <PartLink
+                  component="text-field"
+                  part="TextField.Root"
+                />{' '}
+                →{' '}
+                <PartLink
+                  component="text-field"
+                  part="TextField.Search"
+                />
               </li>
               <li>
-                <code>List.Root listStyle=&quot;sidebar&quot;</code>
+                <PartLink
+                  component="list"
+                  part="List.Root"
+                />{' '}
+                (<code>listStyle=&quot;sidebar&quot;</code>)
               </li>
             </ul>
           </li>

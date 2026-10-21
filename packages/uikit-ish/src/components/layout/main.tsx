@@ -124,9 +124,11 @@ const SplitColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
       style,
       // (A drawer's only, see `DrawerColumn`.)
       defaultOpen,
+      dismissOnOutsidePress,
       drawer,
       onOpenChange,
       open,
+      swipeEdgeWidth,
       ...props
     },
     forwardedRef,
@@ -234,6 +236,40 @@ const SplitColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
   },
 );
 
+/** A drawer's style (and its scrim's): its sizes, side and progress. */
+const drawerColumnStyle = ({
+  drawer,
+  maxSize,
+  minSize,
+  progress,
+  size = 320,
+  style,
+}: {
+  drawer: LayoutColumnProps['drawer'];
+  maxSize: number;
+  minSize: number;
+  progress: number;
+  size?: number;
+  style: LayoutColumnProps['style'];
+}) =>
+  ({
+    ...withStyle(
+      {
+        '--uikit-layout-column-max': Number.isFinite(maxSize)
+          ? `${String(maxSize)}px`
+          : undefined,
+        '--uikit-layout-column-min': `${String(minSize)}px`,
+      },
+      style,
+    ),
+    '--uikit-layout-drawer-progress': String(progress),
+    '--uikit-layout-drawer-sign':
+      drawer === 'inline-start'
+        ? 'var(--uikit-layout-start-sign)'
+        : 'var(--uikit-layout-end-sign)',
+    '--uikit-layout-drawer-size': `${String(size)}px`,
+  }) as CSSProperties;
+
 /** A drawer column (compact): over the others at its side, swiped in. */
 const DrawerColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
   (
@@ -244,6 +280,7 @@ const DrawerColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
       clearFloating: _clearFloating,
       defaultOpen = false,
       defaultSize,
+      dismissOnOutsidePress = true,
       drawer,
       floating,
       maxSize = Infinity,
@@ -255,6 +292,7 @@ const DrawerColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
       resizable: _resizable,
       size,
       style,
+      swipeEdgeWidth = 20,
       ...props
     },
     ref,
@@ -269,16 +307,6 @@ const DrawerColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
       setOwnOpen(next);
       if (next !== open) onOpenChange?.(next);
     };
-    const columnStyle = withStyle(
-      {
-        '--uikit-layout-column-max': Number.isFinite(maxSize)
-          ? `${String(maxSize)}px`
-          : undefined,
-        '--uikit-layout-column-min': `${String(minSize)}px`,
-      },
-      style,
-    );
-
     // Dragging it (from its edge, itself, or the scrim): the pointer's
     // way along its side's direction moves it, once clearly sideways.
     const startDrag = (
@@ -341,30 +369,31 @@ const DrawerColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
     };
 
     const progress = dragProgress ?? (open ? 1 : 0);
-    const drawerStyle = {
-      ...columnStyle,
-      '--uikit-layout-drawer-progress': String(progress),
-      '--uikit-layout-drawer-sign':
-        drawer === 'inline-start'
-          ? 'var(--uikit-layout-start-sign)'
-          : 'var(--uikit-layout-end-sign)',
-      '--uikit-layout-drawer-size': `${String(size ?? defaultSize ?? 320)}px`,
-    } as CSSProperties;
+    const drawerStyle = drawerColumnStyle({
+      drawer,
+      maxSize,
+      minSize,
+      progress,
+      size: size ?? defaultSize,
+      style,
+    });
 
     return (
       <>
-        {open ? null : (
+        {open || swipeEdgeWidth <= 0 ? null : (
           // Where a closed drawer is swiped in from: a strip at its edge.
           <div
             className="uikit-layout-edge"
             data-layout-part="drawer-edge"
             data-side={drawer}
+            style={{ width: swipeEdgeWidth }}
             onPointerDown={(event: PointerEvent<HTMLDivElement>) =>
               startDrag(event, 'closed')
             }
           />
         )}
-        {/* The content dimmed behind an open drawer (pressed: closing it).
+        {/* The content dimmed behind an open drawer (pressed: closing it,
+            unless not `dismissOnOutsidePress`; swiped: closing it too).
             (Over the columns, resizable ones raised too; below the drawer.) */}
         <div
           className="uikit-layout-scrim"
@@ -372,7 +401,9 @@ const DrawerColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
           data-layout-part="scrim"
           data-open={open ? '' : undefined}
           style={drawerStyle}
-          onClick={() => changeOpen(false)}
+          onClick={() => {
+            if (dismissOnOutsidePress) changeOpen(false);
+          }}
           onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
             if (open) startDrag(event, 'open');
           }}

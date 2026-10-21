@@ -66,6 +66,10 @@
     border-radius: 100px;
     gap: 8px;
     outline-offset: 2px;
+
+    /* Dragged sideways, it scrubs (see main.tsx); the page scrolls
+       vertically. */
+    touch-action: pan-y;
     touch-action: manipulation;
     -webkit-user-select: none;
     user-select: none;

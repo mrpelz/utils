@@ -171,7 +171,7 @@ const Detents: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content className="sheet-demo-short">
-              <List.Root listStyle="plain">
+              <List.Root>
                 <List.Section>
                   <List.Group>
                     {['First Name', 'Last Name', 'Company'].map((order) => (

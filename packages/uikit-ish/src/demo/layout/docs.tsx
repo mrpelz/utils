@@ -102,5 +102,24 @@ export const layoutColumnRows: readonly PropRow[] = [
     undefined,
     'As a drawer: called as it opens or closes (swiped, or the dimmed content pressed).',
   ],
+  [
+    'swipeEdgeWidth',
+    'number',
+    code('20'),
+    <>
+      As a drawer: the width of the strip at its edge it’s swiped in from (px);{' '}
+      <code>0</code>: not swiped in, opened by the app only (<code>open</code>
+      ).
+    </>,
+  ],
+  [
+    'dismissOnOutsidePress',
+    'boolean',
+    code('true'),
+    <>
+      As a drawer: closed by a press on the content dimmed behind it; otherwise
+      only by the app (<code>open</code>), or swiped back.
+    </>,
+  ],
   ...elementRows('div', 'HTMLDivElement'),
 ];

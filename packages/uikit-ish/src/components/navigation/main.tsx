@@ -35,12 +35,12 @@ export type { NavigationRootProps } from './props.js';
 // otherwise it settles back.
 //
 // Pages under the top one stay mounted (their state and scroll positions
-// kept), hidden. A page's `Header` blends over: its bar stays in place
-// while its content fades (the large title moves with the page).
+// kept), hidden. A page's `Header` moves with its page, its bar too.
 //
 // Deviations:
-// - The bar's title cross-fades in place (iOS: it moves to the back
-//   button's place, and the back button's label to the title's).
+// - Each page's bar moves with it (iOS: the navigation bar stays, its title
+//   moving to the back button's place). A bar that stays (e.g. its title)
+//   is the app's: a toolbar in a `Viewport.BlockStart`, outside the stack.
 
 /** Pushing and popping (iOS: about 350ms, an ease-out curve). */
 const duration = 350;
@@ -220,9 +220,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
           return (
             // A page's frame. In a transition (see `Root`), the upper page
             // (`top`) and the one under it (`under`) move by the progress (0:
-            // the upper shown), their headers' bars held in place
-            // (`--uikit-navigation-counter`) while their content fades
-            // (`--uikit-navigation-shown`, see `Header`). At rest, none of it
+            // the upper shown), their headers with them. At rest, none of it
             // applies (no transforms, which would isolate glass' blending).
             <div
               key={key}

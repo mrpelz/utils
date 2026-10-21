@@ -159,7 +159,7 @@ export const HeaderOverview: FunctionComponent = () => (
       <li>
         Every <a href="page">Page</a> of an app’s navigation: its title, its way
         back, its actions (in a <a href="navigation">Navigation</a>, each page
-        its own header, blending over in transitions).
+        its own header, moving with it in transitions).
       </li>
       <li>
         A large title on a stack’s root page (and top-level pages), the bar’s
@@ -257,8 +257,9 @@ export const HeaderOverview: FunctionComponent = () => (
       </li>
       <li>Pulled down, the large title doesn’t grow (iOS: it scales up).</li>
       <li>
-        In a <a href="navigation">Navigation</a>’s transition: its bar held in
-        place while its content fades, its large title moving with its page.
+        In a <a href="navigation">Navigation</a>’s transition: moving with its
+        page, its bar too (a bar that stays: a <a href="toolbar">Toolbar</a> in
+        a <a href="viewport">Viewport</a>’s <code>BlockStart</code>).
       </li>
     </ul>
   </>

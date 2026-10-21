@@ -24,15 +24,15 @@ import { names } from '../viewport/content.js';
 
 const threeColumnsCode = `<Layout.Root>
   {/* Fixed: the mailboxes. */}
-  <Layout.Column defaultSize={180} minSize={160}>
+  <Layout.Column defaultSize={240}>
     <Page.Root>…</Page.Root>
   </Layout.Column>
   {/* Resizable: the messages. */}
-  <Layout.Column resizable defaultSize={220} minSize={200}>
+  <Layout.Column resizable defaultSize={280}>
     <Page.Root>…</Page.Root>
   </Layout.Column>
-  {/* Flexible: the message. */}
-  <Layout.Column minSize={140}>
+  {/* Flexible: the message (at least minSize, 240px, as all). */}
+  <Layout.Column>
     <Page.Root background="plain">…</Page.Root>
   </Layout.Column>
 </Layout.Root>`;
@@ -118,107 +118,105 @@ const ThreeColumns: FunctionComponent = () => {
       log={log}
       title="Layout of three columns"
     >
-      <div className="layout-demo-tablet">
-        <Layout.Root>
-          <Layout.Column
-            defaultSize={180}
-            minSize={160}
-          >
-            <Page.Root>
-              <Header.Root>
-                <Header.Bar>
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
-                    <span>Mailboxes</span>
-                  </Toolbar.Title>
-                  <Toolbar.Trailing />
-                </Header.Bar>
-              </Header.Root>
-              <List.Root>
-                {sidebarSections.map(([title, rows]) => (
-                  <List.Section key={title}>
+      <div className="layout-demo-scroller">
+        <div className="layout-demo-tablet layout-demo-wide">
+          <Layout.Root>
+            <Layout.Column defaultSize={240}>
+              <Page.Root>
+                <Header.Root>
+                  <Header.Bar>
+                    <Toolbar.Leading />
+                    <Toolbar.Title>
+                      <span>Mailboxes</span>
+                    </Toolbar.Title>
+                    <Toolbar.Trailing />
+                  </Header.Bar>
+                </Header.Root>
+                <List.Root>
+                  {sidebarSections.map(([title, rows]) => (
+                    <List.Section key={title}>
+                      <List.Group>
+                        {rows.map(([value, rowTitle, icon]) => (
+                          <List.Item key={value}>
+                            <List.Image variant="symbol">
+                              <Symbol icon={icon} />
+                            </List.Image>
+                            <List.Title
+                              render={<button type="button" />}
+                              onClick={() => {
+                                addLog(`mailbox: ${value}`);
+                                setMailbox(value);
+                              }}
+                            >
+                              {rowTitle}
+                            </List.Title>
+                            {mailbox === value ? <List.Checkmark /> : null}
+                          </List.Item>
+                        ))}
+                      </List.Group>
+                    </List.Section>
+                  ))}
+                </List.Root>
+              </Page.Root>
+            </Layout.Column>
+            <Layout.Column
+              resizable
+              defaultSize={280}
+            >
+              <Page.Root>
+                <Header.Root>
+                  <Header.Bar>
+                    <Toolbar.Leading />
+                    <Toolbar.Title>
+                      <span>{rowTitles[mailbox]}</span>
+                    </Toolbar.Title>
+                    <Toolbar.Trailing />
+                  </Header.Bar>
+                </Header.Root>
+                <List.Root>
+                  <List.Section>
                     <List.Group>
-                      {rows.map(([value, rowTitle, icon]) => (
-                        <List.Item key={value}>
-                          <List.Image variant="symbol">
-                            <Symbol icon={icon} />
-                          </List.Image>
+                      {names.map((name) => (
+                        <List.Item key={name}>
                           <List.Title
                             render={<button type="button" />}
                             onClick={() => {
-                              addLog(`mailbox: ${value}`);
-                              setMailbox(value);
+                              addLog(`message: ${name}`);
+                              setMessage(name);
                             }}
                           >
-                            {rowTitle}
+                            {name}
                           </List.Title>
-                          {mailbox === value ? <List.Checkmark /> : null}
+                          {message === name ? <List.Checkmark /> : null}
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
-                ))}
-              </List.Root>
-            </Page.Root>
-          </Layout.Column>
-          <Layout.Column
-            resizable
-            defaultSize={220}
-            minSize={200}
-          >
-            <Page.Root>
-              <Header.Root>
-                <Header.Bar>
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
-                    <span>{rowTitles[mailbox]}</span>
-                  </Toolbar.Title>
-                  <Toolbar.Trailing />
-                </Header.Bar>
-              </Header.Root>
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    {names.map((name) => (
-                      <List.Item key={name}>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => {
-                            addLog(`message: ${name}`);
-                            setMessage(name);
-                          }}
-                        >
-                          {name}
-                        </List.Title>
-                        {message === name ? <List.Checkmark /> : null}
-                      </List.Item>
-                    ))}
-                  </List.Group>
-                </List.Section>
-              </List.Root>
-            </Page.Root>
-          </Layout.Column>
-          <Layout.Column minSize={140}>
-            <Page.Root background="plain">
-              <Header.Root>
-                <Header.Bar>
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
-                    <span>{message}</span>
-                  </Toolbar.Title>
-                  <Toolbar.Trailing />
-                </Header.Bar>
-              </Header.Root>
-              <List.Root listStyle="plain">
-                <List.Section>
-                  <List.Block>
-                    From {message}, in {rowTitles[mailbox]}.
-                  </List.Block>
-                </List.Section>
-              </List.Root>
-            </Page.Root>
-          </Layout.Column>
-        </Layout.Root>
+                </List.Root>
+              </Page.Root>
+            </Layout.Column>
+            <Layout.Column>
+              <Page.Root background="plain">
+                <Header.Root>
+                  <Header.Bar>
+                    <Toolbar.Leading />
+                    <Toolbar.Title>
+                      <span>{message}</span>
+                    </Toolbar.Title>
+                    <Toolbar.Trailing />
+                  </Header.Bar>
+                </Header.Root>
+                <List.Root listStyle="plain">
+                  <List.Section>
+                    <List.Block>
+                      From {message}, in {rowTitles[mailbox]}.
+                    </List.Block>
+                  </List.Section>
+                </List.Root>
+              </Page.Root>
+            </Layout.Column>
+          </Layout.Root>
+        </div>
       </div>
     </Component>
   );
@@ -558,8 +556,9 @@ export const LayoutComposition: FunctionComponent = () => (
         (flexible, taking what’s left).
       </li>
       <li>
-        Each a page of its own, scrolling on its own; sized to fit here (Expand
-        for a tablet’s width).
+        Each a page of its own, scrolling on its own; each at least its{' '}
+        <code>minSize</code> (240px, a list’s narrowest), so the tablet scrolls
+        sideways here (Expand for its width).
       </li>
     </ul>
     <CodeView code={threeColumnsCode} />

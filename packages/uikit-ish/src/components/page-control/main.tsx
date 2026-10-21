@@ -9,6 +9,7 @@ import {
   MouseEvent,
   PointerEvent,
   useContext,
+  useRef,
   useState,
 } from 'react';
 
@@ -29,8 +30,9 @@ export type { PageControlProps } from './props.js';
 // dots show at a time: the dots before and after them (if any) are hinted
 // at by the outermost two shrinking (6px and 4px, in 8px and 6px slots).
 // Behavior after UIKit's `UIPageControl`: a press on either side of the
-// current dot goes to the previous or next page; an adjustable control
-// (arrow keys, Home and End).
+// current dot goes to the previous or next page; dragged along (scrubbing,
+// UIKit's continuous interaction), a page per dot passed; an adjustable
+// control (arrow keys, Home and End).
 //
 // Its plain variant: Figma “Page Controls” (UIKit's, over content): a
 // capsule 24px high, 12px from its ends, the current page's dot in the
@@ -101,6 +103,7 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       onKeyDown,
       onPointerCancel,
       onPointerDown,
+      onPointerMove,
       onPointerUp,
       onValueChange,
       value: valueProp,
@@ -128,9 +131,20 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       onValueChange?.(next);
     };
 
+    // Scrubbing: from where it was pressed, a page per dot (16px: a dot and
+    // its gap) passed; once it's moved, its click doesn't page.
+    const scrub = useRef<
+      { page: number; scrubbed: boolean; x: number } | undefined
+    >(undefined);
+    const scrubbed = useRef(false);
+
     // A press before or after the current dot (in reading order).
     const handleClick = (event: MouseEvent<HTMLDivElement>) => {
       onClick?.(event);
+      if (scrubbed.current) {
+        scrubbed.current = false;
+        return;
+      }
       const current = event.currentTarget.querySelector('[data-current]');
       if (!current) return;
       const { left, width } = current.getBoundingClientRect();
@@ -160,14 +174,31 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
     const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
       onPointerDown?.(event);
       setPressed(true);
+      scrubbed.current = false;
+      if (disabled || event.button !== 0) return;
+      scrub.current = { page: value, scrubbed: false, x: event.clientX };
+      event.currentTarget.setPointerCapture(event.pointerId);
+    };
+    const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+      onPointerMove?.(event);
+      const from = scrub.current;
+      if (!from) return;
+      const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+      const dx = (event.clientX - from.x) * (rtl ? -1 : 1);
+      if (!from.scrubbed && Math.abs(dx) < 4) return;
+      from.scrubbed = true;
+      go(from.page + Math.round(dx / 16));
     };
     const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
       onPointerUp?.(event);
       setPressed(false);
+      scrubbed.current = scrub.current?.scrubbed ?? false;
+      scrub.current = undefined;
     };
     const handlePointerCancel = (event: PointerEvent<HTMLDivElement>) => {
       onPointerCancel?.(event);
       setPressed(false);
+      scrub.current = undefined;
     };
 
     const valueText = format(value, pages);
@@ -195,6 +226,7 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
         onKeyDown={handleKeyDown}
         onPointerCancel={handlePointerCancel}
         onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         {...props}
         className={cn('uikit-page-control-root', className)}

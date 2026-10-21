@@ -4,10 +4,10 @@
      bottom, less what the keyboard covers (where it's kept clear of). */
   .uikit-viewport-anchor,
   .uikit-viewport-content {
-    --uikit-viewport-safe-top: env(safe-area-inset-top, 0px);
-    --uikit-viewport-safe-right: env(safe-area-inset-right, 0px);
-    --uikit-viewport-safe-bottom: env(safe-area-inset-bottom, 0px);
-    --uikit-viewport-safe-left: env(safe-area-inset-left, 0px);
+    --uikit-viewport-safe-top: var(--uikit-safe-area-inset-top, 0px);
+    --uikit-viewport-safe-right: var(--uikit-safe-area-inset-right, 0px);
+    --uikit-viewport-safe-bottom: var(--uikit-safe-area-inset-bottom, 0px);
+    --uikit-viewport-safe-left: var(--uikit-safe-area-inset-left, 0px);
     --uikit-viewport-safe-bottom-keyboard: max(
       0px,
       var(--uikit-viewport-safe-bottom) -
@@ -27,6 +27,17 @@
     &[data-safe-area='none'] {
       --uikit-viewport-safe-top: 0px;
       --uikit-viewport-safe-bottom: 0px;
+    }
+
+    /* Kept clear: none left for its content (e.g. a page in it). */
+    &:not([data-safe-area='inline'], [data-safe-area='none']) > * {
+      --uikit-safe-area-inset-top: 0px;
+      --uikit-safe-area-inset-bottom: 0px;
+    }
+
+    &:not([data-safe-area='block'], [data-safe-area='none']) > * {
+      --uikit-safe-area-inset-right: 0px;
+      --uikit-safe-area-inset-left: 0px;
     }
   }
 

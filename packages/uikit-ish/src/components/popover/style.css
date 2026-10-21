@@ -1,5 +1,11 @@
 /* Popover (see main.tsx). */
 @layer uikit-ish {
+  .uikit-popover-positioner {
+    /* An overlay: above the page's layers (e.g. Viewport's bars), overlays
+       among themselves in the order they open (see Menu). */
+    z-index: 100;
+  }
+
   .uikit-popover-body {
     overflow: auto;
     max-height: inherit;

@@ -881,8 +881,8 @@ export const NavigationComposition: FunctionComponent = () => (
         title only.
       </li>
       <li>
-        In a transition, the bars stay in place, their content fading; the large
-        title moves with its page.
+        In a transition, each page’s header moves with it, its bar and large
+        title too.
       </li>
     </ul>
     <CodeView code={largeTitlesCode} />

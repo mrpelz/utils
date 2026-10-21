@@ -115,18 +115,31 @@ const setValue = (control: HTMLInputElement | HTMLTextAreaElement) => {
 
 /**
  * Empties the field's control (as typing would, so its change handlers run),
- * keeping it focused (UIKit `clearButtonMode = .whileEditing`).
+ * focusing it; shown while it's filled, and (`mode`, UIKit's
+ * `clearButtonMode`) while it's focused, while it isn't, or always.
  */
 const Clear = forwardRef<HTMLButtonElement, ClearProps>(
-  ({ className, children, onClick, onPointerDown, ...props }, ref) => {
+  (
+    {
+      className,
+      children,
+      mode = 'whileEditing',
+      onClick,
+      onPointerDown,
+      ...props
+    },
+    ref,
+  ) => {
     const mask = useId();
 
     return (
-      // Shown while the field is focused and filled (Framework7
-      // `.input-clear-button`, `.input-with-value`); its hit area is 44px.
+      // Shown while the field is filled, and (`mode`) focused or not
+      // (Framework7 `.input-clear-button`, `.input-with-value`); its hit area
+      // is 44px.
       <button
         ref={ref}
         aria-label="Clear text"
+        data-mode={mode}
         data-text-field-part="clear"
         tabIndex={-1}
         type="button"

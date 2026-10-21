@@ -9,8 +9,25 @@
     background-color: var(--color-ios-system-grouped-background);
     color: var(--color-ios-label);
     overscroll-behavior: contain;
+    padding-block-end: var(--uikit-page-safe-bottom);
     padding-inline-start: var(--uikit-layout-inset-start, 0);
     scrollbar-width: thin;
+
+    /* The safe area: its end scrolling clear of the bottom inset; at its
+       top, its header's bar below the top inset, its glass reaching under
+       it (see Header), or else its content below it. None left for its
+       content. */
+    --uikit-page-safe-top: var(--uikit-safe-area-inset-top, 0px);
+    --uikit-page-safe-bottom: var(--uikit-safe-area-inset-bottom, 0px);
+
+    &:not(:has(> [data-header-part], > * > [data-header-part='bar'])) {
+      padding-block-start: var(--uikit-page-safe-top);
+    }
+
+    & > * {
+      --uikit-safe-area-inset-top: 0px;
+      --uikit-safe-area-inset-bottom: 0px;
+    }
 
     &[data-background='plain'] {
       background-color: var(--color-ios-system-background);

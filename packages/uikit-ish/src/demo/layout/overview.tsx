@@ -244,6 +244,8 @@ export const LayoutOverview: FunctionComponent = () => (
             'floating',
             'clearFloating',
             'drawer',
+            'swipeEdgeWidth',
+            'dismissOnOutsidePress',
           ),
         ],
       ]}
@@ -306,9 +308,10 @@ export const LayoutOverview: FunctionComponent = () => (
       <li>
         Compact: <code>drawer</code> columns over the others at their side (at
         most 44px short of the layout’s width), hidden until opened: swiped in
-        from a 20px strip at their edge, swiped back or the dimmed content
-        pressed to close; dragged a third of their width (or flung), they
-        switch.
+        from a strip at their edge (<code>swipeEdgeWidth</code>, 20px; 0: by the
+        app only), swiped back or the dimmed content pressed to close (
+        <code>dismissOnOutsidePress</code>); dragged a third of their width (or
+        flung), they switch.
       </li>
       <li>
         Behind it all, a <code>Layout.Background</code> of the app’s, where

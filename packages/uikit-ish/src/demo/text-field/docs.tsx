@@ -214,6 +214,12 @@ export const textFieldErrorRows: readonly PropRow[] = [
 
 export const textFieldClearRows: readonly PropRow[] = [
   [
+    'mode',
+    union('always', 'unlessEditing', 'whileEditing'),
+    code(union('whileEditing')),
+    'When it’s shown (UIKit clearButtonMode), only ever while the field is filled: while the field is focused, while it isn’t, or either way.',
+  ],
+  [
     'children',
     'ReactNode',
     'a circled cross',

@@ -6,8 +6,64 @@ import { createElement, isValidElement, ReactElement, ReactNode } from 'react';
 // which would break the app's own rendering).
 const marker = '$';
 
-const unwrap = (node: ReactNode): ReactNode => {
-  if (Array.isArray(node)) return node.map((child: ReactNode) => unwrap(child));
+// A part shared by namespaces (e.g. Base UI's `Dialog.Trigger`, both
+// `Sheet.Trigger` and `ActionSheet.Trigger`): named by its context, a
+// descendant's namespace among its names (e.g. a root's, by its popup), or
+// else the nearest of its ancestors' (e.g. a close button's); a stand-in,
+// named so, renders in its place.
+type StandIn = () => null;
+
+const standIns = new Map<string, StandIn>();
+
+const standIn = (displayName: string) => {
+  let component = standIns.get(displayName);
+  if (!component) {
+    component = () => null;
+    (component as { displayName?: string }).displayName = displayName;
+    standIns.set(displayName, component);
+  }
+  return component;
+};
+
+const namespaceOf = (displayName: string): string =>
+  displayName.split('.')[0] ?? displayName;
+
+// The namespace of the first part below `node` named only in one of
+// `namespaces` (in its children, or elements in its props).
+const descendantNamespace = (
+  node: ReactNode,
+  namespaces: readonly string[],
+): string | undefined => {
+  if (Array.isArray(node)) {
+    for (const child of node as ReactNode[]) {
+      const found = descendantNamespace(child, namespaces);
+      if (found) return found;
+    }
+    return undefined;
+  }
+  if (!isValidElement(node)) return undefined;
+
+  const element = node as ReactElement<Record<string, unknown>>;
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  const own = names.get(element.type as object);
+  const namespace = own?.length === 1 ? namespaceOf(own[0] ?? '') : undefined;
+  if (namespace && namespaces.includes(namespace)) return namespace;
+
+  for (const value of Object.values(element.props)) {
+    if (!isValidElement(value) && !Array.isArray(value)) continue;
+    const found = descendantNamespace(value as ReactNode, namespaces);
+    if (found) return found;
+  }
+  return undefined;
+};
+
+const unwrap = (
+  node: ReactNode,
+  context: readonly string[] = [],
+): ReactNode => {
+  if (Array.isArray(node)) {
+    return node.map((child: ReactNode) => unwrap(child, context));
+  }
   if (!isValidElement(node)) return node;
 
   const element = node as ReactElement<Record<string, unknown>>;
@@ -15,31 +71,56 @@ const unwrap = (node: ReactNode): ReactNode => {
   // (Preact's compat copies an element's `className` to `class`: written once.)
   if ('className' in props) delete props.class;
 
+  // Its name: its only one, or the one of its context.
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  const own = names.get(element.type as object) ?? [];
+  const namespaces = own.map((displayName) => namespaceOf(displayName));
+  const namespace =
+    own.length > 1
+      ? (descendantNamespace(element, namespaces) ??
+        context.findLast((ancestor) => namespaces.includes(ancestor)))
+      : namespaces[0];
+  const resolved = own.find(
+    (displayName) => namespaceOf(displayName) === namespace,
+  );
+  const type =
+    own.length > 1 && resolved && resolved !== own[0]
+      ? standIn(resolved)
+      : element.type;
+  const inner = namespace ? [...context, namespace] : context;
+
   // (Elements in props, too, e.g. `render`.) Their names marked (see
   // `attributeHook`): rendering would rename some as HTML attributes
   // (e.g. `defaultValue` to `value`, `className` to `class`).
   const copied = Object.fromEntries(
     Object.entries(props).map(([key, value]) => [
       `${marker}${key}`,
-      isValidElement(value) ? unwrap(value as ReactNode) : value,
+      isValidElement(value) ? unwrap(value as ReactNode, inner) : value,
     ]),
   );
 
   // (Created anew: a clone would keep the props, unmarked.)
   return children === undefined
-    ? createElement(element.type, copied)
-    : createElement(element.type, copied, unwrap(children as ReactNode));
+    ? createElement(type, copied)
+    : createElement(type, copied, unwrap(children as ReactNode, inner));
 };
 
-const named = new WeakSet<object>();
+// Every name of a component (shared parts: several), the first its
+// display name.
+const names = new WeakMap<object, string[]>();
 
 // (Components' names start uppercase.)
 const isComponentName = (text: string) =>
   text.charAt(0) !== text.charAt(0).toLowerCase();
 
 const name = (component: unknown, displayName: string) => {
-  if (typeof component !== 'function' || named.has(component)) return;
-  named.add(component);
+  if (typeof component !== 'function') return;
+  const own = names.get(component);
+  if (own) {
+    if (!own.includes(displayName)) own.push(displayName);
+    return;
+  }
+  names.set(component, [displayName]);
   (component as { displayName?: string }).displayName = displayName;
 };
 
@@ -47,7 +128,8 @@ const name = (component: unknown, displayName: string) => {
  * Names the components of a module's exports for the code shown (e.g.
  * `Popover.Root`; anonymous `forwardRef`s would show as `ForwardRef`): its
  * components, and its namespaces' parts. The first name a component gets
- * stays (re-exported parts keep their first namespace's).
+ * is its display name; a part shared by namespaces is named by its context
+ * in the code (see `unwrap`).
  */
 export const nameComponents = (exports: Record<string, unknown>): void => {
   for (const [exportName, value] of Object.entries(exports)) {

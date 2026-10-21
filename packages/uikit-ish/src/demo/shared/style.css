@@ -30,4 +30,39 @@
   body {
     margin: 0;
   }
+
+  /* Devices' screens (the demos' frames): their safe area insets, as the
+     library's custom properties (the components keep clear of them): an
+     iPhone's (the Dynamic Island, the home indicator), an iPad's (the
+     status bar, the home indicator). */
+  :is(
+      .header-demo-phone,
+      .header-demo-screen,
+      .layout-demo-phone,
+      .layout-demo-screen,
+      .navigation-demo-phone,
+      .navigation-demo-screen,
+      .page-demo-phone,
+      .page-demo-screen,
+      .sheet-demo-phone,
+      .sidebar-demo-phone,
+      .tab-bar-demo-screen,
+      .toolbar-demo-screen,
+      .viewport-demo-screen
+    ) {
+    --uikit-safe-area-inset-top: 62px;
+    --uikit-safe-area-inset-bottom: 34px;
+  }
+
+  :is(
+      .layout-demo-tablet,
+      .navigation-demo-tablet,
+      .page-demo-tablet,
+      .sheet-demo-tablet,
+      .sidebar-demo-screen,
+      .sidebar-demo-tablet
+    ) {
+    --uikit-safe-area-inset-top: 24px;
+    --uikit-safe-area-inset-bottom: 20px;
+  }
 }

@@ -107,7 +107,8 @@ export const tests = [
         background: [0, 0, 1400],
         content: [0, 0, 1400],
         inset: '336px',
-        panel: [8, 8, 320, '20px'],
+        // (Below the tablet's top safe area inset, 24px.)
+        panel: [8, 24, 320, '20px'],
         sidebar: [0, 0, 336, 'absolute'],
         // (Its text 16px in.)
         title: 336,

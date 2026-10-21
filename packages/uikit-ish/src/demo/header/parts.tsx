@@ -182,18 +182,39 @@ export const HeaderParts: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        <code>Page.Root</code>
+        <PartLink
+          component="page"
+          part="Page.Root"
+        />
         <ul>
           <li>
             <PartLink part="Header.Root" />
             <ul>
               <li>
-                <PartLink part="Header.Bar" /> (<code>Toolbar.Leading</code>,{' '}
-                <code>Toolbar.Title</code>, <code>Toolbar.Trailing</code>)
+                <PartLink part="Header.Bar" /> (
+                <PartLink
+                  component="toolbar"
+                  part="Toolbar.Leading"
+                />
+                ,{' '}
+                <PartLink
+                  component="toolbar"
+                  part="Toolbar.Title"
+                />
+                ,{' '}
+                <PartLink
+                  component="toolbar"
+                  part="Toolbar.Trailing"
+                />
+                )
               </li>
               <li>
                 <PartLink part="Header.LargeTitle" /> (optional; with a{' '}
-                <code>Toolbar.Subtitle</code>)
+                <PartLink
+                  component="toolbar"
+                  part="Toolbar.Subtitle"
+                />
+                )
               </li>
             </ul>
           </li>

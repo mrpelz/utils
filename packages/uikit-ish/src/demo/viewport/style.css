@@ -112,6 +112,11 @@
   }
 }
 
+.viewport-demo-card-start {
+  top: 80px;
+  left: 60px;
+}
+
 .viewport-demo-box + .viewport-demo-metrics {
   margin-block-start: 16px;
 }

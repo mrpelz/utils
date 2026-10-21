@@ -237,9 +237,10 @@ export const TextFieldOverview: FunctionComponent = () => (
         4px apart; the label in Subheadline.
       </li>
       <li>
-        The clear button only while it’s focused and filled (UIKit’s{' '}
-        <code>whileEditing</code>), clearing as typing would (its change
-        handlers run), the control kept focused.
+        The clear button only while it’s filled: by default while it’s focused
+        too (UIKit’s <code>whileEditing</code>; its <code>mode</code>: also{' '}
+        <code>unlessEditing</code>, <code>always</code>), clearing as typing
+        would (its change handlers run), focusing the control.
       </li>
       <li>
         Validated when its <code>validationMode</code> says: on submitting its{' '}

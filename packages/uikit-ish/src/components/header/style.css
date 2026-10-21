@@ -20,25 +20,17 @@
     }
   }
 
+  /* (In a navigation's transition, it moves with its page, see
+     `Navigation`: a bar that stays, e.g. its title, is a `Viewport` anchor's
+     toolbar.) */
   .uikit-header-bar {
-    /* In a navigation's transition (see `Navigation`): held in place while
-       its page moves, its content fading (glass by its fade, the title by a
-       filter, as it's animated by the scroll, buttons' content by its
-       opacity); none of it at rest. */
-    --uikit-glass-fade: var(--uikit-navigation-shown, 1);
-
     position: sticky;
     z-index: 10;
     top: 0;
-    translate: var(--uikit-navigation-counter, none);
 
-    & [data-toolbar-part='title'] {
-      filter: var(--uikit-navigation-filter, none);
-    }
-
-    & [data-button-part] {
-      opacity: var(--uikit-navigation-shown, 1);
-    }
+    /* Below the page's top safe area inset (see Page), its glass and edge
+       effect reaching under it. */
+    border-block-start: var(--uikit-page-safe-top, 0) solid transparent;
 
     /* The scroll edge effect, once content is scrolled under the bar. */
     &::before {
@@ -49,7 +41,9 @@
       animation-timeline: scroll(nearest);
       backdrop-filter: blur(8px);
       content: '';
-      inset: 0 0 -16px;
+
+      /* (Its border too: the safe area inset above it.) */
+      inset: calc(-1 * var(--uikit-page-safe-top, 0px)) 0 -16px;
 
       /* (Under a floating column too, see Layout and Page.) */
       inset-inline-start: calc(var(--uikit-layout-inset-start, 0px) * -1);
@@ -75,7 +69,7 @@
     padding: 0 16px 10px;
     animation: uikit-header-fade-out linear both;
     animation-range: exit-crossing 0% exit-crossing 50%;
-    animation-timeline: view(block 54px 0);
+    animation-timeline: view(block calc(54px + var(--uikit-page-safe-top, 0px)) 0);
     color: var(--color-ios-label);
     font-size: var(--font-ios-large-title-size);
     font-style: normal;
@@ -95,7 +89,7 @@
       (var(--font-ios-large-title-weight-emphasized) - 400) / 326 * 1px
     );
     view-timeline-axis: block;
-    view-timeline-inset: 54px 0;
+    view-timeline-inset: calc(54px + var(--uikit-page-safe-top, 0px)) 0;
     view-timeline-name: var(--uikit-header-timeline);
 
     --uikit-symbol-thinning: max(

@@ -67,11 +67,15 @@ export const Contents: FunctionComponent<{
  * A part's name in a parts page's tree (`<code>`), linking to its section
  * on the component's parts page.
  */
-export const PartLink: FunctionComponent<{ part: string }> = ({ part }) => {
+export const PartLink: FunctionComponent<{
+  /** Another component's (its id: its route), e.g. `toolbar`. */
+  component?: string;
+  part: string;
+}> = ({ component, part }) => {
   const entry = useContext(EntryContext);
 
   return (
-    <a href={`${entry?.id ?? ''}/parts#${sectionId(part)}`}>
+    <a href={`${component ?? entry?.id ?? ''}/parts#${sectionId(part)}`}>
       <code>{part}</code>
     </a>
   );

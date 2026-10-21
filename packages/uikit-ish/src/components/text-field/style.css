@@ -7,25 +7,27 @@
       gap: 4px;
     }
 
-    /* The clear button, only while focused and filled; in a list row (in its
+    /* The clear button, only while filled, and by its mode (`data-mode`):
+       while focused, while not, or either way; in a list row (in its
        content), taking no room until then, so a value aligned to the end
-       reaches it (UIKit: the value moves over for the button). */
-    &:not([data-filled][data-focused]) > [data-text-field-part='clear'] {
-      visibility: hidden;
-    }
+       reaches it (UIKit: the value moves over for the button). Its own
+       field's state, also in a search field's capsule (see Search). */
+    &:not([data-filled]),
+    &:not([data-focused]):has(> * [data-mode='whileEditing']),
+    &[data-focused]:has(> * [data-mode='unlessEditing']),
+    &:not([data-focused]):has(> [data-mode='whileEditing']),
+    &[data-focused]:has(> [data-mode='unlessEditing']) {
+      & > [data-text-field-part='clear'],
+      & > [data-text-field-part='search'] > [data-text-field-part='clear'] {
+        visibility: hidden;
+      }
 
-    /* (In a search field's capsule, see Search.) */
-    &:not([data-filled][data-focused])
-      > [data-text-field-part='search']
-      > [data-text-field-part='clear'] {
-      visibility: hidden;
-    }
-
-    &[data-list-part]:not([data-filled][data-focused])
-      > *
-      > [data-list-part='row']
-      > [data-text-field-part='clear'] {
-      display: none;
+      &[data-list-part]
+        > *
+        > [data-list-part='row']
+        > [data-text-field-part='clear'] {
+        display: none;
+      }
     }
   }
 

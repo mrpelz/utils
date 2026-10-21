@@ -4,6 +4,10 @@
     --uikit-sheet-dim: light-dark(rgb(0 0 0 / 20%), rgb(0 0 0 / 48%));
 
     position: fixed;
+
+    /* An overlay: above the page's layers (e.g. Viewport's bars), overlays
+       among themselves in the order they open (see Menu). */
+    z-index: 100;
     background-color: var(--uikit-sheet-dim);
     inset: 0;
     transition: opacity 350ms;
@@ -15,7 +19,33 @@
   }
 
   .uikit-sheet-popup {
+    /* UIKit's elevated level (a modal presentation's): in dark mode, the
+       backgrounds a step lighter, for everything in it (its lists, pages,
+       a navigation's). */
+    --color-ios-system-background: light-dark(rgb(255 255 255), rgb(28 28 30));
+    --color-ios-secondary-system-background: light-dark(
+      rgb(242 242 247),
+      rgb(44 44 46)
+    );
+    --color-ios-tertiary-system-background: light-dark(
+      rgb(255 255 255),
+      rgb(58 58 60)
+    );
+    --color-ios-system-grouped-background: light-dark(
+      rgb(242 242 247),
+      rgb(28 28 30)
+    );
+    --color-ios-secondary-system-grouped-background: light-dark(
+      rgb(255 255 255),
+      rgb(44 44 46)
+    );
+    --color-ios-tertiary-system-grouped-background: light-dark(
+      rgb(242 242 247),
+      rgb(58 58 60)
+    );
+
     position: fixed;
+    z-index: 100;
     display: flex;
     overflow: hidden;
     box-sizing: border-box;
@@ -34,28 +64,37 @@
       transition: none;
     }
 
-    &[data-detent='large'] {
-      border-radius: 38px 38px 0 0;
-      background-color: light-dark(
-        var(--color-ios-system-background),
-        var(--color-ios-secondary-system-background)
-      );
-      box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
-      inset: calc(10px + env(safe-area-inset-top)) 0 0;
+    /* Below the top inset (large), above the bottom one (medium), or clear
+       of both (a form sheet): none left for its content but a large one's
+       bottom (its end scrolling clear of the home indicator). */
+    & > * {
+      --uikit-safe-area-inset-top: 0px;
+      --uikit-safe-area-inset-right: 0px;
+      --uikit-safe-area-inset-left: 0px;
     }
 
+    &:is([data-detent='medium'], :not([data-compact])) > * {
+      --uikit-safe-area-inset-bottom: 0px;
+    }
+
+    &[data-detent='large'] {
+      border-radius: 38px 38px 0 0;
+      background-color: var(--color-ios-system-background);
+      box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
+      inset: calc(10px + var(--uikit-safe-area-inset-top, 0px)) 0 0;
+    }
+
+    /* With a list: on the grouped background, the list without its own
+       (which would end with it, the sheet's around it). */
     &[data-detent='large']:has([data-list-part='root']) {
       --uikit-list-container-background: transparent;
-      --uikit-list-container-group-background: var(
-        --color-ios-tertiary-system-background
-      );
 
-      background-color: var(--color-ios-secondary-system-background);
+      background-color: var(--color-ios-system-grouped-background);
     }
 
     &[data-detent='medium'] {
       right: 6px;
-      bottom: calc(6px + env(safe-area-inset-bottom));
+      bottom: calc(6px + var(--uikit-safe-area-inset-bottom, 0px));
       left: 6px;
       max-height: calc(100% - 64px);
       border-radius: 34px;
@@ -67,10 +106,7 @@
       width: min(936px, calc(100% - 64px));
       height: min(852px, calc(100% - 64px));
       border-radius: 38px;
-      background-color: light-dark(
-        var(--color-ios-system-background),
-        var(--color-ios-secondary-system-background)
-      );
+      background-color: var(--color-ios-system-background);
       box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
       color: var(--color-ios-label);
       inset: 50% auto auto 50%;
@@ -78,11 +114,8 @@
 
       &:has([data-list-part='root']) {
         --uikit-list-container-background: transparent;
-        --uikit-list-container-group-background: var(
-          --color-ios-tertiary-system-background
-        );
 
-        background-color: var(--color-ios-secondary-system-background);
+        background-color: var(--color-ios-system-grouped-background);
       }
 
       &[data-starting-style],

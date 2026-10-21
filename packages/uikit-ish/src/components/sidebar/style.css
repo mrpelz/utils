@@ -71,6 +71,17 @@
     border-radius: 20px;
     margin: var(--uikit-sidebar-margin, 8px);
     color: var(--color-ios-label);
+
+    /* Clear of the safe area insets (in a regular layout, e.g. an iPad's
+       status bar). */
+    margin-block: max(
+        var(--uikit-sidebar-margin, 8px),
+        var(--uikit-safe-area-inset-top, 0px)
+      )
+      max(
+        var(--uikit-sidebar-margin, 8px),
+        var(--uikit-safe-area-inset-bottom, 0px)
+      );
     overscroll-behavior: contain;
     scrollbar-width: none;
 
