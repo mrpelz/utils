@@ -9,6 +9,8 @@ const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
 /** The component a page or demo is about (see the catalog). */
 export type EntryInfo = {
   baseUiId?: string;
+  /** Its category's id: its section on the index (`/#:category`). */
+  category: string;
   categoryTitle: string;
   framework7Id?: string;
   /** Has a composition page (`/:id/composition`). */
@@ -40,7 +42,8 @@ export const Breadcrumb: FunctionComponent<{
   withComponent?: boolean;
 }> = ({ entry, withComponent = false }) => (
   <nav className="demo-page-nav">
-    <a href="./">uikit-ish</a> › {entry.categoryTitle}
+    <a href="./">uikit-ish</a> ›{' '}
+    <a href={`./#${entry.category}`}>{entry.categoryTitle}</a>
     {withComponent ? (
       <>
         {' › '}

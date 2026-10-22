@@ -202,28 +202,32 @@
     }
   }
 
-  /* A screen's wallpaper (a frame's, see above): a grid of photos, for what
-     lies over it to show its blur or glass (e.g. a contextual menu's
-     backdrop, a menu's popup). */
+  /* A screen's content (a frame's, see above): a list, its rows drawn as
+     placeholder text, for what lies over it to show its blur or glass (e.g. a
+     contextual menu's backdrop, a menu's popup). */
   .demo-wallpaper {
-    background:
+    background-image:
+      repeating-linear-gradient(
+        transparent 0 43.5px,
+        var(--color-ios-separator) 43.5px 44px
+      ),
+      repeating-linear-gradient(
+        transparent 0 16px,
+        var(--color-ios-tertiary-system-fill) 16px 28px,
+        transparent 28px 44px
+      ),
       linear-gradient(
-          90deg,
-          transparent calc(100% - 4px),
-          var(--color-ios-system-background) 0
-        )
-        0 0 / 100px 100px,
-      linear-gradient(
-          transparent calc(100% - 4px),
-          var(--color-ios-system-background) 0
-        )
-        0 0 / 100px 100px,
-      repeating-conic-gradient(
-          var(--color-ios-system-orange) 0 25%,
-          var(--color-ios-system-teal) 0 50%,
-          var(--color-ios-system-pink) 0 75%,
-          var(--color-ios-system-indigo) 0 100%
-        )
-        0 0 / 200px 200px;
+        var(--color-ios-secondary-system-grouped-background),
+        var(--color-ios-secondary-system-grouped-background)
+      );
+    background-position:
+      32px 16px,
+      32px 16px,
+      16px 16px;
+    background-repeat: no-repeat;
+    background-size:
+      calc(100% - 48px) calc(100% - 32px),
+      40% calc(100% - 32px),
+      calc(100% - 32px) calc(100% - 32px);
   }
 }

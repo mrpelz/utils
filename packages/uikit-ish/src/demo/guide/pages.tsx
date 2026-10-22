@@ -19,12 +19,13 @@ import {
   type Tab,
   Tabs,
 } from './nav.js';
-import { PagePathContext } from './sections.js';
+import { Contents, Heading, PagePathContext } from './sections.js';
 
 // (Links are relative to the document's base: the demo's public path.)
 
 const entryInfo = (entry: CatalogEntry): EntryInfo => ({
   baseUiId: entry.baseUiId,
+  category: entry.category,
   categoryTitle: categories[entry.category].title,
   framework7Id: entry.framework7Id,
   hasComposition: entry.Composition !== undefined,
@@ -202,12 +203,23 @@ export const IndexPage: FunctionComponent = () => (
       </a>
     </nav>
     <p>The components, grouped by what they&apos;re for:</p>
+    <Contents
+      sections={(Object.keys(categories) as Category[]).map((category) => [
+        category,
+        categories[category].title,
+      ])}
+    />
     {(Object.keys(categories) as Category[]).map((category) => (
       <section
         key={category}
         className="demo-index-category"
       >
-        <h2>{categories[category].title}</h2>
+        <Heading
+          id={category}
+          level={2}
+        >
+          {categories[category].title}
+        </Heading>
         <p>{categories[category].description}</p>
         <ul className="demo-index-cards">
           {catalog

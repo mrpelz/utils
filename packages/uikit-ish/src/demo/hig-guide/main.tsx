@@ -22,30 +22,17 @@ const contents: readonly (readonly [string, string])[] = [
   ['section-appendix', 'Appendix: link index'],
 ];
 
-// Whether the history navigated last (back, forward; also a reload): the
-// page goes back to where it was then, not to its anchor. A click
-// (following a link) is a navigation of the app's own.
-let historyNavigated =
-  typeof performance === 'object' &&
-  ['back_forward', 'reload'].includes(
-    (
-      performance.getEntriesByType('navigation')[0] as
-        PerformanceNavigationTiming | undefined
-    )?.type ?? '',
-  );
-// Whether that was within the app (back, forward between its pages): the
-// browser's own restoring falls short then (see below); on a reload, it
-// doesn't.
+// Whether the history navigated last (back, forward): the page goes back to
+// where it was then, not to its anchor. A click (following a link) is a
+// navigation of the app's own.
 let popped = false;
 if (typeof addEventListener === 'function') {
   addEventListener('popstate', () => {
-    historyNavigated = true;
     popped = true;
   });
   addEventListener(
     'click',
     () => {
-      historyNavigated = false;
       popped = false;
     },
     { capture: true },
@@ -53,18 +40,16 @@ if (typeof addEventListener === 'function') {
 }
 
 /**
- * Scrolls to the location's anchor as a link leads to it (the router
- * scrolls to the top on navigating, and doesn't follow anchors itself). As
- * the history navigates back or forward, to where the page was instead: the
- * browser's own restoring comes too early (before the page is rendered
+ * As the history navigates back or forward, scrolls to where the page was:
+ * the browser's own restoring comes too early (before the page is rendered
  * again) and falls back to the anchor, so the position is kept in the
- * history entry's state.
+ * history entry's state. (Links to its anchors scroll as any page's do: see
+ * main.tsx.)
  */
 const useScrollPosition = () => {
   const { url } = useLocation();
 
   useEffect(() => {
-    const id = decodeURIComponent(location.hash.slice(1));
     const { guideScrollY } = (history.state ?? {}) as {
       guideScrollY?: number;
     };
@@ -72,8 +57,6 @@ const useScrollPosition = () => {
     const timeout = setTimeout(() => {
       if (popped && guideScrollY !== undefined) {
         scrollTo(0, guideScrollY);
-      } else if (!historyNavigated && id) {
-        document.querySelector(`#${CSS.escape(id)}`)?.scrollIntoView();
       }
     });
 

@@ -18,6 +18,14 @@ export type Section = readonly [id: string, title: ReactNode];
 /** The current page's path (for its anchors' links; see `ComponentShell`). */
 export const PagePathContext = createContext('');
 
+/**
+ * A link to a section of the page at `path` (the index's: empty), never
+ * just `#…`: the router leaves those to the browser, without a smooth scroll
+ * (see main.tsx).
+ */
+const sectionHref = (path: string, id: string): string =>
+  `${path || './'}#${id}`;
+
 /** A section's heading, anchored (`id`), with a link to itself. */
 export const Heading: FunctionComponent<{
   children: ReactNode;
@@ -33,7 +41,7 @@ export const Heading: FunctionComponent<{
       <a
         aria-label="Link to this section"
         className="demo-anchor"
-        href={`${path}#${id}`}
+        href={sectionHref(path, id)}
       >
         #
       </a>
@@ -55,7 +63,7 @@ export const Contents: FunctionComponent<{
       <ul>
         {sections.map(([id, title]) => (
           <li key={id}>
-            <a href={`${path}#${id}`}>{title}</a>
+            <a href={sectionHref(path, id)}>{title}</a>
           </li>
         ))}
       </ul>
