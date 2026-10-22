@@ -1,3 +1,4 @@
+import '../toolbar/style.css';
 import './style.css';
 
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
@@ -13,6 +14,7 @@ import {
   Segmented,
   Symbol,
   Toolbar,
+  Viewport,
 } from '../../components/index.js';
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
@@ -52,23 +54,25 @@ const headerCode = `<Page.Root>
   <List.Root>…</List.Root>
 </Page.Root>`;
 
-const toolbarCode = `<Toolbar.Root>
-  <Toolbar.Leading>
-    <Toolbar.Button aria-label="Location" shape="circle">…</Toolbar.Button>
-  </Toolbar.Leading>
-  <Segmented.Root
-    aria-label="Map style"
-    defaultValue="explore"
-  >
-    <Segmented.Item value="explore">Explore</Segmented.Item>
-    <Segmented.Item value="driving">Driving</Segmented.Item>
-    <Segmented.Item value="transit">Transit</Segmented.Item>
-    <Segmented.Highlight />
-  </Segmented.Root>
-  <Toolbar.Trailing>
-    <Toolbar.Button aria-label="More" shape="circle">…</Toolbar.Button>
-  </Toolbar.Trailing>
-</Toolbar.Root>`;
+const toolbarCode = `<Viewport.BlockEnd>
+  <Toolbar.Root>
+    <Toolbar.Leading>
+      <Toolbar.Button aria-label="Location" shape="circle">…</Toolbar.Button>
+    </Toolbar.Leading>
+    <Segmented.Root
+      aria-label="Map style"
+      defaultValue="explore"
+    >
+      <Segmented.Item value="explore">Explore</Segmented.Item>
+      <Segmented.Item value="driving">Driving</Segmented.Item>
+      <Segmented.Item value="transit">Transit</Segmented.Item>
+      <Segmented.Highlight />
+    </Segmented.Root>
+    <Toolbar.Trailing>
+      <Toolbar.Button aria-label="More" shape="circle">…</Toolbar.Button>
+    </Toolbar.Trailing>
+  </Toolbar.Root>
+</Viewport.BlockEnd>`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 // A period's figures (as Health's).
@@ -120,29 +124,42 @@ const ContentViews: FunctionComponent = () => {
       log={log}
       title="Segmented switching content"
     >
-      <div className="segmented-demo-content">
-        <Segmented.Root
-          aria-label="Period"
-          value={period}
-          onValueChange={logChange(addLog, setPeriod)}
-        >
-          <Segmented.Item value="day">Day</Segmented.Item>
-          <Segmented.Item value="week">Week</Segmented.Item>
-          <Segmented.Item value="month">Month</Segmented.Item>
-          <Segmented.Highlight />
-        </Segmented.Root>
-        <List.Root>
-          <List.Section>
-            <List.Group>
-              {figures[period]?.map(([title, value]) => (
-                <List.Item key={title}>
-                  <List.Title>{title}</List.Title>
-                  <List.Detail>{value}</List.Detail>
-                </List.Item>
-              ))}
-            </List.Group>
-          </List.Section>
-        </List.Root>
+      <div className="toolbar-demo-screen">
+        <Page.Root>
+          <Header.Root>
+            <Header.Bar>
+              <Toolbar.Title>
+                <span>Activity</span>
+              </Toolbar.Title>
+            </Header.Bar>
+          </Header.Root>
+          <div className="segmented-demo-content">
+            <div className="segmented-demo-control">
+              <Segmented.Root
+                aria-label="Period"
+                value={period}
+                onValueChange={logChange(addLog, setPeriod)}
+              >
+                <Segmented.Item value="day">Day</Segmented.Item>
+                <Segmented.Item value="week">Week</Segmented.Item>
+                <Segmented.Item value="month">Month</Segmented.Item>
+                <Segmented.Highlight />
+              </Segmented.Root>
+            </div>
+            <List.Root>
+              <List.Section>
+                <List.Group>
+                  {figures[period]?.map(([title, value]) => (
+                    <List.Item key={title}>
+                      <List.Title>{title}</List.Title>
+                      <List.Detail>{value}</List.Detail>
+                    </List.Item>
+                  ))}
+                </List.Group>
+              </List.Section>
+            </List.Root>
+          </div>
+        </Page.Root>
       </div>
     </Component>
   );
@@ -161,43 +178,45 @@ const InHeader: FunctionComponent = () => {
       log={log}
       title="Segmented in a navigation bar"
     >
-      <Page.Root className="segmented-demo-screen">
-        <Header.Root>
-          <Header.Bar>
-            <Segmented.Root
-              aria-label="Calls"
-              value={filter}
-              onValueChange={logChange(addLog, setFilter)}
-            >
-              <Segmented.Item value="all">All</Segmented.Item>
-              <Segmented.Item value="missed">Missed</Segmented.Item>
-              <Segmented.Highlight />
-            </Segmented.Root>
-          </Header.Bar>
-        </Header.Root>
-        <List.Root>
-          <List.Section>
-            <List.Group>
-              {calls
-                .filter((call) => filter === 'all' || call[2])
-                .map(([name, kind, missed], index) => (
-                  <List.Item key={index}>
-                    <List.Title
-                      style={
-                        missed
-                          ? { color: 'var(--color-ios-system-red)' }
-                          : undefined
-                      }
-                    >
-                      {name}
-                    </List.Title>
-                    <List.Detail>{kind}</List.Detail>
-                  </List.Item>
-                ))}
-            </List.Group>
-          </List.Section>
-        </List.Root>
-      </Page.Root>
+      <div className="toolbar-demo-screen">
+        <Page.Root>
+          <Header.Root>
+            <Header.Bar>
+              <Segmented.Root
+                aria-label="Calls"
+                value={filter}
+                onValueChange={logChange(addLog, setFilter)}
+              >
+                <Segmented.Item value="all">All</Segmented.Item>
+                <Segmented.Item value="missed">Missed</Segmented.Item>
+                <Segmented.Highlight />
+              </Segmented.Root>
+            </Header.Bar>
+          </Header.Root>
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {calls
+                  .filter((call) => filter === 'all' || call[2])
+                  .map(([name, kind, missed], index) => (
+                    <List.Item key={index}>
+                      <List.Title
+                        style={
+                          missed
+                            ? { color: 'var(--color-ios-system-red)' }
+                            : undefined
+                        }
+                      >
+                        {name}
+                      </List.Title>
+                      <List.Detail>{kind}</List.Detail>
+                    </List.Item>
+                  ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+        </Page.Root>
+      </div>
     </Component>
   );
 };
@@ -208,49 +227,53 @@ const InToolbar: FunctionComponent = () => {
 
   return (
     <Component
+      center
       inline
-      stretch
       id="segmented-composition-toolbar"
       log={log}
       title="Segmented in a toolbar"
     >
-      <Toolbar.Root>
-        <Toolbar.Leading>
-          <Toolbar.Button
-            aria-label="Location"
-            shape="circle"
-            onClick={() => addLog('Location clicked')}
-          >
-            <Button.Icon>
-              <Symbol icon={sfLocationFill} />
-            </Button.Icon>
-          </Toolbar.Button>
-        </Toolbar.Leading>
-        <Segmented.Root
-          aria-label="Map style"
-          defaultValue="explore"
-          onValueChange={(
-            value: unknown,
-            { reason }: BaseRadioGroup.ChangeEventDetails,
-          ) => addLog(`value change: ${String(value)}/${reason}`)}
-        >
-          <Segmented.Item value="explore">Explore</Segmented.Item>
-          <Segmented.Item value="driving">Driving</Segmented.Item>
-          <Segmented.Item value="transit">Transit</Segmented.Item>
-          <Segmented.Highlight />
-        </Segmented.Root>
-        <Toolbar.Trailing>
-          <Toolbar.Button
-            aria-label="More"
-            shape="circle"
-            onClick={() => addLog('More clicked')}
-          >
-            <Button.Icon>
-              <Symbol icon={sfEllipsis} />
-            </Button.Icon>
-          </Toolbar.Button>
-        </Toolbar.Trailing>
-      </Toolbar.Root>
+      <div className="toolbar-demo-screen">
+        <Viewport.BlockEnd>
+          <Toolbar.Root>
+            <Toolbar.Leading>
+              <Toolbar.Button
+                aria-label="Location"
+                shape="circle"
+                onClick={() => addLog('Location clicked')}
+              >
+                <Button.Icon>
+                  <Symbol icon={sfLocationFill} />
+                </Button.Icon>
+              </Toolbar.Button>
+            </Toolbar.Leading>
+            <Segmented.Root
+              aria-label="Map style"
+              defaultValue="explore"
+              onValueChange={(
+                value: unknown,
+                { reason }: BaseRadioGroup.ChangeEventDetails,
+              ) => addLog(`value change: ${String(value)}/${reason}`)}
+            >
+              <Segmented.Item value="explore">Explore</Segmented.Item>
+              <Segmented.Item value="driving">Driving</Segmented.Item>
+              <Segmented.Item value="transit">Transit</Segmented.Item>
+              <Segmented.Highlight />
+            </Segmented.Root>
+            <Toolbar.Trailing>
+              <Toolbar.Button
+                aria-label="More"
+                shape="circle"
+                onClick={() => addLog('More clicked')}
+              >
+                <Button.Icon>
+                  <Symbol icon={sfEllipsis} />
+                </Button.Icon>
+              </Toolbar.Button>
+            </Toolbar.Trailing>
+          </Toolbar.Root>
+        </Viewport.BlockEnd>
+      </div>
     </Component>
   );
 };

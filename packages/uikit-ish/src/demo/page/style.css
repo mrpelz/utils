@@ -26,13 +26,11 @@
   justify-content: center;
   gap: 16px;
 
-  /* Side by side while they fit (wrapping below 496px), a hairline at their
-     edges (a plain page is as white as the stage). */
+  /* Side by side while they fit (wrapping below 496px). */
   & > .page-demo-phone {
     max-width: 320px;
     height: min(480px, 70vh);
     flex: 1 1 240px;
-    box-shadow: 0 0 0 1px var(--color-ios-separator);
   }
 }
 

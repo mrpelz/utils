@@ -62,7 +62,7 @@ export {
   type AvatarGroupProps,
   type AvatarRootProps,
 } from './avatar/main.js';
-export { Badge, type BadgeProps } from './badge/main.js';
+export { Badge, type BadgePlacement, type BadgeProps } from './badge/main.js';
 export {
   ColorPicker,
   type ColorPickerChangeEventDetails,

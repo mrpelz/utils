@@ -27,7 +27,14 @@ import { AlertDemo } from './alert/main.js';
 import { AlertOverview, alertOverviewDemos } from './alert/overview.js';
 import { AlertParts, alertPartsDemos } from './alert/parts.js';
 import { AvatarDemo } from './avatar/main.js';
+import {
+  BadgeComposition,
+  badgeCompositionDemos,
+} from './badge/composition.js';
+import { BadgeInformationArchitecture } from './badge/information-architecture.js';
 import { BadgeDemo } from './badge/main.js';
+import { BadgeOverview, badgeOverviewDemos } from './badge/overview.js';
+import { BadgeParts, badgePartsDemos } from './badge/parts.js';
 import {
   ButtonComposition,
   buttonCompositionDemos,
@@ -165,7 +172,17 @@ import { PopoverInformationArchitecture } from './popover/information-architectu
 import { PopoverDemo } from './popover/main.js';
 import { PopoverOverview, popoverOverviewDemos } from './popover/overview.js';
 import { PopoverParts, popoverPartsDemos } from './popover/parts.js';
+import {
+  ProgressComposition,
+  progressCompositionDemos,
+} from './progress/composition.js';
+import { ProgressInformationArchitecture } from './progress/information-architecture.js';
 import { ProgressDemo } from './progress/main.js';
+import {
+  ProgressOverview,
+  progressOverviewDemos,
+} from './progress/overview.js';
+import { ProgressParts, progressPartsDemos } from './progress/parts.js';
 import { RollComposition, rollCompositionDemos } from './roll/composition.js';
 import { RollInformationArchitecture } from './roll/information-architecture.js';
 import { RollDemo } from './roll/main.js';
@@ -793,9 +810,20 @@ export const catalog: readonly CatalogEntry[] = [
   },
   {
     category: 'status',
-    demos: [BadgeDemo],
+    demos: [
+      BadgeDemo,
+      ...badgeOverviewDemos,
+      ...badgePartsDemos,
+      ...badgeCompositionDemos,
+    ],
     framework7Id: 'badge',
     id: 'badge',
+    Composition: BadgeComposition,
+    InformationArchitecture: BadgeInformationArchitecture,
+    Overview: BadgeOverview,
+    Parts: BadgeParts,
+    summary:
+      'A count in a red capsule, or a dot: something new waiting, on a tab’s or a button’s symbol, an avatar’s corner, or in a row.',
     title: 'Badge',
   },
   {
@@ -816,10 +844,21 @@ export const catalog: readonly CatalogEntry[] = [
   {
     baseUiId: 'progress',
     category: 'status',
-    demos: [ProgressDemo],
+    demos: [
+      ProgressDemo,
+      ...progressOverviewDemos,
+      ...progressPartsDemos,
+      ...progressCompositionDemos,
+    ],
     framework7Id: 'progressbar',
     higId: 'progress-indicators',
     id: 'progress',
+    Composition: ProgressComposition,
+    InformationArchitecture: ProgressInformationArchitecture,
+    Overview: ProgressOverview,
+    Parts: ProgressParts,
+    summary:
+      'Work going on: a bar filling as it advances, labeled, its value shown; or, of unknown length, spinning spokes.',
     title: 'Progress',
   },
   {

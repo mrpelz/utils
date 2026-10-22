@@ -1,4 +1,4 @@
-import { commonPropOptions } from '../frame/prop-control.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 export const propOptionsBar = {
   ...commonPropOptions,
@@ -52,4 +52,57 @@ export const propOptionsIndicator = {
     'var(--color-ios-primary)',
   ] as const,
   children: [undefined, 'Loading'] as const,
+};
+
+/** `Progress.Root` (the parts page's): all of its props. */
+export const propOptionsGuideRoot = {
+  ...propOptionsBar,
+  min: [undefined, 0, 20] as const,
+  max: [undefined, 100, 200] as const,
+  format: [
+    undefined,
+    new MappedProp<Intl.NumberFormatOptions>(
+      { style: 'unit', unit: 'megabyte' },
+      '[megabytes]',
+    ),
+  ] as const,
+  locale: [undefined, 'en-US', 'de-DE'] as const,
+  getAriaValueText: [
+    undefined,
+    new MappedProp(
+      (formattedValue: string) => `${formattedValue} downloaded`,
+      '[… downloaded]',
+    ),
+  ] as const,
+};
+
+/** `Progress.Track`, `Progress.Indicator`: their own props only. */
+export const propOptionsPart = { ...commonPropOptions };
+
+/** `Progress.Label` (the parts page's). */
+export const propOptionsGuideLabel = {
+  ...propOptionsLabel,
+  children: ['Downloading', 'Installing Update'] as const,
+};
+
+/** `Progress.Value` (the parts page's). */
+export const propOptionsGuideValue = {
+  ...propOptionsValue,
+  children: [
+    undefined,
+    new MappedProp(
+      (formattedValue: string | null) => `${String(formattedValue)} done`,
+      '[… done]',
+    ),
+  ] as const,
+};
+
+/** The overview's: the bar's value and where its value is. */
+export const propOptionsOverviewRoot = {
+  value: propOptionsBar.value,
+  tint: propOptionsBar.tint,
+};
+
+export const propOptionsOverviewValue = {
+  placement: propOptionsValue.placement,
 };

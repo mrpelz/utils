@@ -103,6 +103,12 @@
       .sidebar-demo-tablet
     ) {
     position: relative;
+
+    /* An app's background (a page's default, see Page), where nothing paints
+       its own (bars, a sheet's trigger), a hairline at its edges (a dark
+       screen on the dark stage). */
+    background-color: var(--color-ios-system-grouped-background);
+    box-shadow: 0 0 0 1px var(--color-ios-separator);
     isolation: isolate;
   }
 

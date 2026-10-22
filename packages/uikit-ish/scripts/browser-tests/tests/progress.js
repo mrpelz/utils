@@ -249,4 +249,38 @@ export const tests = [
       assert.equal(await shown(), 1, 'focused by keyboard');
     },
   },
+  {
+    name: 'progress: alone or first in the markup, a value above or below the track is at the line’s end, the label at its start',
+    run: async (page) => {
+      /** The value's and the root's inline ends, and the value's top. */
+      const ends = () =>
+        page.evaluate(`(() => {
+          const root = ${page.section}.querySelector('[role=progressbar]');
+          const value = root.querySelector('[data-progress-part=value]').getBoundingClientRect();
+          return [Math.round(value.right), Math.round(root.getBoundingClientRect().right)];
+        })()`);
+
+      // Alone (the parts page's value).
+      await page.open('progress-parts-value');
+      const [alone, rootEnd] = await ends();
+      assert.equal(alone, rootEnd, 'alone');
+
+      await page.open('progress-parts-value', 'light', {
+        state: [{ $rest: true, placement: 'block-end' }],
+      });
+      const [below, belowEnd] = await ends();
+      assert.equal(below, belowEnd, 'below');
+    },
+  },
+  {
+    name: 'progress: counting items, its value told by a function of it',
+    run: async (page) => {
+      await page.open('progress-composition-count');
+      await sleep(1500);
+      const text = await page.evaluate(
+        `${page.section}.querySelector('[data-progress-part=value]').textContent`,
+      );
+      assert.match(text, /^\d+ of 12$/u);
+    },
+  },
 ];

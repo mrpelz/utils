@@ -5,15 +5,15 @@ import { forwardRef } from 'react';
 import { cn, withStyle } from '../utils/main.js';
 import type { BadgeProps } from './props.js';
 
-export type { BadgeProps } from './props.js';
+export type { BadgePlacement, BadgeProps } from './props.js';
 
 // Source: Apple iOS 26 Figma (app icons, “_Badge”): a capsule 24px high, at
 // least 24px wide (a circle for a digit), 7px from its ends, in system red,
 // its text white, 16px/19px regular. Placed after Framework7's badge: on a
-// symbol (a child of a `Symbol`, e.g. in a `Button.Icon` or `TabBar.Icon`),
-// in Framework7's size there (16px, its text 10px semibold, 2px from its
-// ends); otherwise on its element's top end corner (e.g. an `Avatar`'s); or
-// inline (e.g. a list row's detail); any tint.
+// symbol (`placement` 'symbol', a child of a `Symbol`, e.g. in a
+// `Button.Icon` or `TabBar.Icon`), in Framework7's size there (16px, its
+// text 10px semibold, 2px from its ends); on its element's top end corner
+// (e.g. an `Avatar`'s); or inline (e.g. a list row's detail); any tint.
 //
 // Deviations:
 // - Without content, a dot (10px; Figma, Framework7 have none; e.g. an
@@ -30,7 +30,7 @@ export type { BadgeProps } from './props.js';
 /**
  * A badge (UIKit `badgeValue`): a count (or short text) in a capsule, or,
  * without content, a dot; on a `Symbol` (its child), an element's corner,
- * or inline.
+ * or inline (`placement`).
  */
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   (

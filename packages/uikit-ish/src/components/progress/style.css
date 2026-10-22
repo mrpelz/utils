@@ -47,12 +47,21 @@
       order: 3;
     }
 
+    /* On a line of their own, the label always first, the value always at
+       the line's end (whichever comes first in the markup, either alone). */
+    & > [data-progress-part='label'][data-progress-placement='block-start'] {
+      order: -4;
+    }
+
+    & > [data-progress-part='value'][data-progress-placement='block-end'] {
+      order: 4;
+    }
+
     &
-      > [data-progress-placement='block-start']
-      + [data-progress-placement='block-start'],
-    &
-      > [data-progress-placement='block-end']
-      + [data-progress-placement='block-end'] {
+      > [data-progress-part='value']:is(
+        [data-progress-placement='block-start'],
+        [data-progress-placement='block-end']
+      ) {
       margin-inline-start: auto;
     }
 

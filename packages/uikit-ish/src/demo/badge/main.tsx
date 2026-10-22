@@ -68,7 +68,10 @@ export const BadgeDemo: FunctionComponent = () => {
         >
           <Button.Icon>
             <Symbol icon={sfBell}>
-              <Badge {...propsRoot} />
+              <Badge
+                placement="symbol"
+                {...propsRoot}
+              />
             </Symbol>
           </Button.Icon>
         </Button.Root>
@@ -87,7 +90,10 @@ export const BadgeDemo: FunctionComponent = () => {
               >
                 <TabBar.Icon>
                   <Symbol icon={sfHeartFill}>
-                    <Badge {...propsRoot} />
+                    <Badge
+                      placement="symbol"
+                      {...propsRoot}
+                    />
                   </Symbol>
                 </TabBar.Icon>
                 <TabBar.Label>Favorites</TabBar.Label>
@@ -107,7 +113,10 @@ export const BadgeDemo: FunctionComponent = () => {
               >
                 <TabBar.Icon>
                   <Symbol icon={sfPersonCropCircle}>
-                    <Badge {...propsRoot} />
+                    <Badge
+                      placement="symbol"
+                      {...propsRoot}
+                    />
                   </Symbol>
                 </TabBar.Icon>
                 <TabBar.Label>Contacts</TabBar.Label>
@@ -122,7 +131,10 @@ export const BadgeDemo: FunctionComponent = () => {
               >
                 <TabBar.Icon>
                   <Symbol icon={sfMagnifyingglass}>
-                    <Badge {...propsRoot} />
+                    <Badge
+                      placement="symbol"
+                      {...propsRoot}
+                    />
                   </Symbol>
                 </TabBar.Icon>
               </TabBar.Tab>

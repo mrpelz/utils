@@ -1,8 +1,15 @@
+import './style.css';
+
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
 import { FunctionComponent, useState } from 'react';
 
-import { collapsedSelection, Symbol, TabBar } from '../../components/index.js';
+import {
+  collapsedSelection,
+  Symbol,
+  TabBar,
+  Viewport,
+} from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
@@ -61,47 +68,53 @@ const LiveView: FunctionComponent = () => {
       state={[stateContent, stateList]}
       title="Tab bar"
     >
-      <TabBar.Root
-        key={elementKey}
-        value={value}
-        onValueChange={(
-          next: unknown,
-          { reason }: BaseTabs.Root.ChangeEventDetails,
-        ) => {
-          addLog(`value change: ${String(next)}/${reason}`);
-          setValue(next);
-        }}
-      >
-        <TabBar.List {...propsList}>
-          <TabBar.Group visibleWhenCollapsed={sections?.remains}>
-            <TabBar.Indicator />
-            {tabs.map(([tab, label, icon], index) => (
-              <TabBar.Tab
-                key={tab}
-                value={tab}
-                visibleWhenCollapsed={sections?.tab === index}
-              >
-                <TabBar.Icon>
-                  <Symbol icon={icon} />
-                </TabBar.Icon>
-                {content.labels ? <TabBar.Label>{label}</TabBar.Label> : null}
-              </TabBar.Tab>
-            ))}
-          </TabBar.Group>
-          <TabBar.Group visibleWhenCollapsed={search?.remains}>
-            <TabBar.Indicator />
-            <TabBar.Tab
-              aria-label="Search"
-              value="search"
-              visibleWhenCollapsed={search?.remains}
-            >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
-              </TabBar.Icon>
-            </TabBar.Tab>
-          </TabBar.Group>
-        </TabBar.List>
-      </TabBar.Root>
+      <div className="tab-bar-demo-screen">
+        <TabBar.Root
+          key={elementKey}
+          value={value}
+          onValueChange={(
+            next: unknown,
+            { reason }: BaseTabs.Root.ChangeEventDetails,
+          ) => {
+            addLog(`value change: ${String(next)}/${reason}`);
+            setValue(next);
+          }}
+        >
+          <Viewport.BlockEnd>
+            <TabBar.List {...propsList}>
+              <TabBar.Group visibleWhenCollapsed={sections?.remains}>
+                <TabBar.Indicator />
+                {tabs.map(([tab, label, icon], index) => (
+                  <TabBar.Tab
+                    key={tab}
+                    value={tab}
+                    visibleWhenCollapsed={sections?.tab === index}
+                  >
+                    <TabBar.Icon>
+                      <Symbol icon={icon} />
+                    </TabBar.Icon>
+                    {content.labels ? (
+                      <TabBar.Label>{label}</TabBar.Label>
+                    ) : null}
+                  </TabBar.Tab>
+                ))}
+              </TabBar.Group>
+              <TabBar.Group visibleWhenCollapsed={search?.remains}>
+                <TabBar.Indicator />
+                <TabBar.Tab
+                  aria-label="Search"
+                  value="search"
+                  visibleWhenCollapsed={search?.remains}
+                >
+                  <TabBar.Icon>
+                    <Symbol icon={sfMagnifyingglass} />
+                  </TabBar.Icon>
+                </TabBar.Tab>
+              </TabBar.Group>
+            </TabBar.List>
+          </Viewport.BlockEnd>
+        </TabBar.Root>
+      </div>
     </Component>
   );
 };

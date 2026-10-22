@@ -10,7 +10,6 @@
   max-width: 100%;
   height: min(640px, 70vh);
   border-radius: 24px;
-  background-color: var(--color-ios-system-grouped-background);
   transform: translateZ(0);
 }
 

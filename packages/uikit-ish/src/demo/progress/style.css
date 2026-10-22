@@ -1,0 +1,28 @@
+/* Progress guide pages (see overview.tsx). */
+
+/* A bar (as wide as a phone's content) above a spinner. */
+.progress-demo-stage {
+  display: grid;
+  width: 370px;
+  max-width: 100%;
+  gap: 32px;
+  justify-items: center;
+  padding-block: 16px;
+
+  & > [data-progress-part='root'] {
+    width: 100%;
+  }
+}
+
+/* A list as wide as a phone's (the stage shrinks to its content). */
+.progress-demo-list {
+  width: 360px;
+  max-width: 100%;
+}
+
+/* A page's loading content: its spinner in the middle of the screen. */
+.progress-demo-loading {
+  display: grid;
+  min-height: 60%;
+  place-items: center;
+}

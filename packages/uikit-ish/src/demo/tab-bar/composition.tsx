@@ -1,8 +1,10 @@
+import './style.css';
+
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
 import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
 import { sfPlayFill } from '@bradleyhodges/sfsymbols/sfPlayFill';
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, RefObject, useState } from 'react';
 
 import {
   Badge,
@@ -20,6 +22,7 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { AddLog, useLog } from '../frame/log.js';
+import { useLabelledRef } from '../frame/render-code.js';
 import {
   Contents,
   Heading,
@@ -27,6 +30,7 @@ import {
   type Section,
 } from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
+import { names } from '../viewport/content.js';
 import { phoneTabs, phoneTabValues } from './tabs.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -112,13 +116,14 @@ const [sections] = collapsedSelection([sectionValues], section);
 const badgeCode = `<TabBar.Tab value="recents">
   <TabBar.Icon>
     <Symbol icon={sfClockFill}>
-      <Badge>1</Badge>
+      <Badge placement="symbol">1</Badge>
     </Symbol>
   </TabBar.Icon>
   <TabBar.Label>Recents</TabBar.Label>
 </TabBar.Tab>`;
 
-const scrollCode = `// Inside a <Viewport.Provider> (tracking the document's scrolling).
+const scrollCode = `// Inside a <Viewport.Provider scroller={contentRef}> (tracking the
+// content layer's scrolling, not the document's).
 const [collapsed, setCollapsed] = useState(false);
 
 useViewportScroll(({ atTop, direction }) =>
@@ -287,59 +292,63 @@ const Search: FunctionComponent = () => {
       log={log}
       title="Tab bar with search"
     >
-      <TabBar.Root
-        value={value}
-        onValueChange={(
-          next: unknown,
-          { reason }: BaseTabs.Root.ChangeEventDetails,
-        ) => {
-          addLog(`value change: ${String(next)}/${reason}`);
-          setValue(next);
-          if (next !== 'search') setSection(next);
-        }}
-      >
-        <TabBar.List collapsed={value === 'search'}>
-          <TabBar.Group visibleWhenCollapsed>
-            <TabBar.Indicator />
-            {phoneTabs.map(([tab, label, icon], index) => (
-              <TabBar.Tab
-                key={tab}
-                value={tab}
-                visibleWhenCollapsed={sections?.tab === index}
-              >
-                <TabBar.Icon>
-                  <Symbol icon={icon} />
-                </TabBar.Icon>
-                <TabBar.Label>{label}</TabBar.Label>
-              </TabBar.Tab>
-            ))}
-          </TabBar.Group>
-          <TabBar.Group>
-            <TabBar.Indicator />
-            <TabBar.Tab
-              aria-label="Search"
-              value="search"
-            >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
-              </TabBar.Icon>
-            </TabBar.Tab>
-          </TabBar.Group>
-        </TabBar.List>
-        <TabBar.Accessory visibleIn="collapsed">
-          <TextField.Root style={{ flex: 1 }}>
-            <TextField.Search>
-              <Symbol icon={sfMagnifyingglass} />
-              <TextField.Control
-                aria-label="Search"
-                placeholder="Search"
-                type="search"
-              />
-              <TextField.Clear />
-            </TextField.Search>
-          </TextField.Root>
-        </TabBar.Accessory>
-      </TabBar.Root>
+      <div className="tab-bar-demo-screen">
+        <TabBar.Root
+          value={value}
+          onValueChange={(
+            next: unknown,
+            { reason }: BaseTabs.Root.ChangeEventDetails,
+          ) => {
+            addLog(`value change: ${String(next)}/${reason}`);
+            setValue(next);
+            if (next !== 'search') setSection(next);
+          }}
+        >
+          <Viewport.BlockEnd>
+            <TabBar.List collapsed={value === 'search'}>
+              <TabBar.Group visibleWhenCollapsed>
+                <TabBar.Indicator />
+                {phoneTabs.map(([tab, label, icon], index) => (
+                  <TabBar.Tab
+                    key={tab}
+                    value={tab}
+                    visibleWhenCollapsed={sections?.tab === index}
+                  >
+                    <TabBar.Icon>
+                      <Symbol icon={icon} />
+                    </TabBar.Icon>
+                    <TabBar.Label>{label}</TabBar.Label>
+                  </TabBar.Tab>
+                ))}
+              </TabBar.Group>
+              <TabBar.Group>
+                <TabBar.Indicator />
+                <TabBar.Tab
+                  aria-label="Search"
+                  value="search"
+                >
+                  <TabBar.Icon>
+                    <Symbol icon={sfMagnifyingglass} />
+                  </TabBar.Icon>
+                </TabBar.Tab>
+              </TabBar.Group>
+            </TabBar.List>
+            <TabBar.Accessory visibleIn="collapsed">
+              <TextField.Root style={{ flex: 1 }}>
+                <TextField.Search>
+                  <Symbol icon={sfMagnifyingglass} />
+                  <TextField.Control
+                    aria-label="Search"
+                    placeholder="Search"
+                    type="search"
+                  />
+                  <TextField.Clear />
+                </TextField.Search>
+              </TextField.Root>
+            </TabBar.Accessory>
+          </Viewport.BlockEnd>
+        </TabBar.Root>
+      </div>
     </Component>
   );
 };
@@ -357,38 +366,47 @@ const Badges: FunctionComponent = () => {
       log={log}
       title="Tab bar with badges"
     >
-      <TabBar.Root
-        value={value}
-        onValueChange={onValueChange}
-      >
-        <TabBar.List>
-          <TabBar.Group>
-            <TabBar.Indicator />
-            {phoneTabs.map(([tab, label, icon], index) => (
-              <TabBar.Tab
-                key={tab}
-                value={tab}
-              >
-                <TabBar.Icon>
-                  <Symbol icon={icon}>
-                    {index % 2 === 1 ? <Badge>{index}</Badge> : null}
-                  </Symbol>
-                </TabBar.Icon>
-                <TabBar.Label>{label}</TabBar.Label>
-              </TabBar.Tab>
-            ))}
-          </TabBar.Group>
-        </TabBar.List>
-      </TabBar.Root>
+      <div className="tab-bar-demo-screen">
+        <TabBar.Root
+          value={value}
+          onValueChange={onValueChange}
+        >
+          <Viewport.BlockEnd>
+            <TabBar.List>
+              <TabBar.Group>
+                <TabBar.Indicator />
+                {phoneTabs.map(([tab, label, icon], index) => (
+                  <TabBar.Tab
+                    key={tab}
+                    value={tab}
+                  >
+                    <TabBar.Icon>
+                      <Symbol icon={icon}>
+                        {index % 2 === 1 ? (
+                          <Badge placement="symbol">{index}</Badge>
+                        ) : null}
+                      </Symbol>
+                    </TabBar.Icon>
+                    <TabBar.Label>{label}</TabBar.Label>
+                  </TabBar.Tab>
+                ))}
+              </TabBar.Group>
+            </TabBar.List>
+          </Viewport.BlockEnd>
+        </TabBar.Root>
+      </div>
     </Component>
   );
 };
 
 /**
- * Collapsing as this page scrolls down, expanding as it scrolls up: inside
- * the viewport's provider (see `OnScroll`), so its code is the bar's own.
+ * Collapsing as its screen's content scrolls down, expanding as it scrolls
+ * up: inside the viewport's provider (see `OnScroll`), so its code is the
+ * bar's own.
  */
-const OnScrollView: FunctionComponent = () => {
+const OnScrollView: FunctionComponent<{
+  contentRef: RefObject<HTMLDivElement | null>;
+}> = ({ contentRef }) => {
   const [log, addLog] = useLog();
   const [value, onValueChange] = useValue(addLog);
   const [collapsed, setCollapsed] = useState(false);
@@ -406,38 +424,59 @@ const OnScrollView: FunctionComponent = () => {
       log={log}
       title="Tab bar collapsing on scroll"
     >
-      <TabBar.Root
-        value={value}
-        onValueChange={onValueChange}
-      >
-        <TabBar.List collapsed={collapsed}>
-          <TabBar.Group visibleWhenCollapsed>
-            <TabBar.Indicator />
-            {phoneTabs.map(([tab, label, icon], index) => (
-              <TabBar.Tab
-                key={tab}
-                value={tab}
-                visibleWhenCollapsed={sections?.tab === index}
-              >
-                <TabBar.Icon>
-                  <Symbol icon={icon} />
-                </TabBar.Icon>
-                <TabBar.Label>{label}</TabBar.Label>
-              </TabBar.Tab>
-            ))}
-          </TabBar.Group>
-        </TabBar.List>
-      </TabBar.Root>
+      <div className="tab-bar-demo-screen">
+        <TabBar.Root
+          value={value}
+          onValueChange={onValueChange}
+        >
+          <Viewport.Content ref={contentRef}>
+            <List.Root className="tab-bar-demo-list">
+              <List.Section>
+                <List.Group>
+                  {names.map((name) => (
+                    <List.Item key={name}>
+                      <List.Title>{name}</List.Title>
+                    </List.Item>
+                  ))}
+                </List.Group>
+              </List.Section>
+            </List.Root>
+          </Viewport.Content>
+          <Viewport.BlockEnd>
+            <TabBar.List collapsed={collapsed}>
+              <TabBar.Group visibleWhenCollapsed>
+                <TabBar.Indicator />
+                {phoneTabs.map(([tab, label, icon], index) => (
+                  <TabBar.Tab
+                    key={tab}
+                    value={tab}
+                    visibleWhenCollapsed={sections?.tab === index}
+                  >
+                    <TabBar.Icon>
+                      <Symbol icon={icon} />
+                    </TabBar.Icon>
+                    <TabBar.Label>{label}</TabBar.Label>
+                  </TabBar.Tab>
+                ))}
+              </TabBar.Group>
+            </TabBar.List>
+          </Viewport.BlockEnd>
+        </TabBar.Root>
+      </div>
     </Component>
   );
 };
 
-/** `OnScrollView`, tracking the document's scrolling. */
-const OnScroll: FunctionComponent = () => (
-  <Viewport.Provider>
-    <OnScrollView />
-  </Viewport.Provider>
-);
+/** `OnScrollView`, tracking its screen's content layer's scrolling. */
+const OnScroll: FunctionComponent = () => {
+  const contentRef = useLabelledRef<HTMLDivElement>('contentRef');
+
+  return (
+    <Viewport.Provider scroller={contentRef}>
+      <OnScrollView contentRef={contentRef} />
+    </Viewport.Provider>
+  );
+};
 
 /** A mini player above the bar, between its groups while collapsed. */
 const MiniPlayer: FunctionComponent = () => {
@@ -457,57 +496,61 @@ const MiniPlayer: FunctionComponent = () => {
       log={log}
       title="Tab bar with an accessory"
     >
-      <TabBar.Root
-        value={value}
-        onValueChange={(
-          next: unknown,
-          { reason }: BaseTabs.Root.ChangeEventDetails,
-        ) => {
-          addLog(`value change: ${String(next)}/${reason}`);
-          setValue(next);
-          if (next !== 'search') setSection(next);
-        }}
-      >
-        <TabBar.List collapsed={value === 'search'}>
-          <TabBar.Group visibleWhenCollapsed={sections?.remains}>
-            <TabBar.Indicator />
-            {phoneTabs.map(([tab, label, icon], index) => (
-              <TabBar.Tab
-                key={tab}
-                value={tab}
-                visibleWhenCollapsed={sections?.tab === index}
-              >
-                <TabBar.Icon>
-                  <Symbol icon={icon} />
-                </TabBar.Icon>
-                <TabBar.Label>{label}</TabBar.Label>
-              </TabBar.Tab>
-            ))}
-          </TabBar.Group>
-          <TabBar.Group visibleWhenCollapsed={search?.remains}>
-            <TabBar.Indicator />
-            <TabBar.Tab
-              aria-label="Search"
-              value="search"
-              visibleWhenCollapsed={search?.remains}
-              onClick={() => {
-                if (value !== 'search') return;
-                addLog(`value change: ${String(section)}/search tab`);
-                setValue(section);
-              }}
-            >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
-              </TabBar.Icon>
-            </TabBar.Tab>
-          </TabBar.Group>
-        </TabBar.List>
-        <TabBar.Accessory>
-          <span className="tab-bar-demo-accessory-title">Not Playing</span>
-          <Symbol icon={sfPlayFill} />
-          <Symbol icon={sfForwardFill} />
-        </TabBar.Accessory>
-      </TabBar.Root>
+      <div className="tab-bar-demo-screen">
+        <TabBar.Root
+          value={value}
+          onValueChange={(
+            next: unknown,
+            { reason }: BaseTabs.Root.ChangeEventDetails,
+          ) => {
+            addLog(`value change: ${String(next)}/${reason}`);
+            setValue(next);
+            if (next !== 'search') setSection(next);
+          }}
+        >
+          <Viewport.BlockEnd>
+            <TabBar.List collapsed={value === 'search'}>
+              <TabBar.Group visibleWhenCollapsed={sections?.remains}>
+                <TabBar.Indicator />
+                {phoneTabs.map(([tab, label, icon], index) => (
+                  <TabBar.Tab
+                    key={tab}
+                    value={tab}
+                    visibleWhenCollapsed={sections?.tab === index}
+                  >
+                    <TabBar.Icon>
+                      <Symbol icon={icon} />
+                    </TabBar.Icon>
+                    <TabBar.Label>{label}</TabBar.Label>
+                  </TabBar.Tab>
+                ))}
+              </TabBar.Group>
+              <TabBar.Group visibleWhenCollapsed={search?.remains}>
+                <TabBar.Indicator />
+                <TabBar.Tab
+                  aria-label="Search"
+                  value="search"
+                  visibleWhenCollapsed={search?.remains}
+                  onClick={() => {
+                    if (value !== 'search') return;
+                    addLog(`value change: ${String(section)}/search tab`);
+                    setValue(section);
+                  }}
+                >
+                  <TabBar.Icon>
+                    <Symbol icon={sfMagnifyingglass} />
+                  </TabBar.Icon>
+                </TabBar.Tab>
+              </TabBar.Group>
+            </TabBar.List>
+            <TabBar.Accessory>
+              <span className="tab-bar-demo-accessory-title">Not Playing</span>
+              <Symbol icon={sfPlayFill} />
+              <Symbol icon={sfForwardFill} />
+            </TabBar.Accessory>
+          </Viewport.BlockEnd>
+        </TabBar.Root>
+      </div>
     </Component>
   );
 };
@@ -620,7 +663,7 @@ export const TabBarComposition: FunctionComponent = () => (
         reports the scroll direction (past a threshold) and whether it’s at the
         top.
       </li>
-      <li>Scroll this page to see it.</li>
+      <li>Scroll the screen’s list to see it.</li>
     </ul>
     <CodeView code={scrollCode} />
     <OnScroll />

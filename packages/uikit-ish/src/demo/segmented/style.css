@@ -1,20 +1,13 @@
 /* Segmented guide pages (see composition.tsx). */
 
-/* A control above the content it switches. */
+/* A control above the content it switches, below the page's bar. */
 .segmented-demo-content {
   display: grid;
-  width: 402px;
-  max-width: 100%;
   gap: 16px;
-  justify-items: center;
-
-  & > :last-child {
-    justify-self: stretch;
-  }
+  padding-block-start: 8px;
 }
 
-/* The page as a phone's screen in the stage, as high as its content. */
-.segmented-demo-screen {
-  width: 402px;
-  max-width: 100%;
+/* The control 16px from the screen's sides, as the list's rows. */
+.segmented-demo-control {
+  padding-inline: 16px;
 }

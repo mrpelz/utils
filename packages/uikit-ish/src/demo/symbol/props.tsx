@@ -19,8 +19,8 @@ export const propOptionsSymbol = {
   // On the symbol: a badge (a count, or a dot).
   children: [
     undefined,
-    new MappedProp(<Badge>3</Badge>, '[badge: 3]'),
-    new MappedProp(<Badge />, '[badge: dot]'),
+    new MappedProp(<Badge placement="symbol">3</Badge>, '[badge: 3]'),
+    new MappedProp(<Badge placement="symbol" />, '[badge: dot]'),
   ] as const,
 };
 

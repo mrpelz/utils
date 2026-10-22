@@ -1,7 +1,9 @@
 import { commonPropOptions } from '../frame/prop-control.js';
 
 export const propOptionsRoot = {
-  ...commonPropOptions,
+  // (Its own element: no `render`.)
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
   // A count (a digit: a circle), longer, text, or none (a dot).
   children: [3, 67, 999, 'New', undefined] as const,
   // Over the tint: dark, light, or custom.
@@ -17,6 +19,18 @@ export const propOptionsRoot = {
     'var(--color-ios-system-green)',
     'var(--color-ios-system-gray)',
   ] as const,
+};
+
+/** The parts page's badge: also where it sits. */
+export const propOptionsPart = {
+  ...propOptionsRoot,
+  placement: [undefined, 'corner', 'inline', 'symbol'] as const,
+};
+
+/** The overview's: its content and color. */
+export const propOptionsOverview = {
+  children: propOptionsRoot.children,
+  tint: propOptionsRoot.tint,
 };
 
 export const propOptionsContent = {

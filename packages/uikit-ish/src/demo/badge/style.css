@@ -8,3 +8,27 @@
   padding-block: 16px;
   place-items: center center;
 }
+
+/* The badges on a symbol and a corner, side by side. */
+.badge-demo-row {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+/* A list as wide as a phone's (the stage shrinks to its content). */
+.badge-demo-list {
+  width: 360px;
+  max-width: 100%;
+}
+
+/* What the parts page's badge sits on: a symbol in a tile. */
+.badge-demo-host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border-radius: 12px;
+  background-color: var(--color-ios-secondary-system-fill);
+  font-size: 34px;
+}

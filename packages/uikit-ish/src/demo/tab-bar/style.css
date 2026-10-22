@@ -24,3 +24,9 @@
   border-radius: 24px;
   transform: translateZ(0);
 }
+
+/* A list in the content layer, clear of the status bar and the tab bar
+   floating over its ends. */
+.tab-bar-demo-list {
+  padding-block: 64px 96px;
+}
