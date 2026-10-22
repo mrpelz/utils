@@ -27,6 +27,10 @@
     flex: 0 1 auto;
     border-radius: inherit;
     overscroll-behavior: contain;
+
+    /* Its end 16px after its content, as a list's inset from its sides (a
+       list's ends are its container's, see List). */
+    padding-block-end: 16px;
   }
 
   /* Its material (see main.tsx): its outlines' clip paths by its arrow's

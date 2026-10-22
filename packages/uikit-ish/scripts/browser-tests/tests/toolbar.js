@@ -36,8 +36,9 @@ export const tests = [
       });
       const { bar, buttons, groups } = await geometry(page);
 
-      // 4px 16px 36px; one capsule, 6 × 36px + 5 × 12px + 2 × 6px = 288px.
-      assert.deepEqual(bar, [4, 16, 36, 16]);
+      // 4px 16px 2px (Figma's 36px below, but the home indicator's 34px: its
+      // anchor's); one capsule, 6 × 36px + 5 × 12px + 2 × 6px = 288px.
+      assert.deepEqual(bar, [4, 16, 2, 16]);
       assert.deepEqual(
         groups.map(([, width, height]) => [width, height]),
         [[288, 48]],

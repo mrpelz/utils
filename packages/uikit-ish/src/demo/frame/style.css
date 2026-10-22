@@ -148,6 +148,14 @@
     display: block;
     width: fit-content;
 
+    /* A list alone on the stage (not in a screen or a popup): 16px at its
+       ends, as a container's (a list's ends are its container's, see
+       List). */
+    & > .uikit-list-root,
+    & > form > .uikit-list-root {
+      padding-block: 16px;
+    }
+
     &[data-stretch] {
       width: 100%;
     }

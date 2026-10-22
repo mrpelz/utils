@@ -92,7 +92,8 @@ export type {
 // `swipeout.js`, `list-index.less`, `block.less`):
 // - list styles (UIKit `UITableView.Style`): `insetGrouped` (the default: 16px
 //   inset, 24px corners), `grouped`, `plain` (Framework7 `.list`,
-//   `.list.inset`); 35px between sections; optionally outlined
+//   `.list.inset`); 35px between sections (none at the list's ends: its
+//   neighbors' and container's spacing); optionally outlined
 //   (`.list-outline`)
 // - pressed rows (UIKit's cell selection, `systemGray4`), hiding the separators
 //   around pressed and swiped rows

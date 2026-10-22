@@ -106,14 +106,18 @@ export const tests = [
         [[22, 22], [3, 7], '4px'],
       );
 
-      // Its speed, and stopped.
+      // Its speed, and stopped: at rest (by default), or frozen.
+      const timing = () =>
+        page.evaluate(`(() => {
+          const [, root] = ${page.section}.querySelectorAll('[role=progressbar]');
+          const style = getComputedStyle(root.querySelector('[aria-hidden]'));
+          return [style.animationName, style.animationDuration, style.animationPlayState];
+        })()`);
       await page.setState(2, { animating: false, duration: 2 });
-      const timing = await page.evaluate(`(() => {
-        const [, root] = ${page.section}.querySelectorAll('[role=progressbar]');
-        const style = getComputedStyle(root.querySelector('[aria-hidden]'));
-        return [style.animationDuration, style.animationPlayState];
-      })()`);
-      assert.deepEqual(timing, ['2s', 'paused']);
+      const [rest] = await timing();
+      assert.equal(rest, 'none');
+      await page.setState(2, { animating: false, stopBehavior: 'freeze' });
+      assert.deepEqual(await timing(), ['uikit-progress-spin', '2s', 'paused']);
     },
   },
   {

@@ -16,7 +16,8 @@
   padding: 8px 16px;
 }
 
-/* A list clear of the anchor at either end (its height, 48px). */
+/* A list clear of the anchor at either end (its height, 48px), 10px from
+   it (as from a page's bar). */
 .segmented-demo-list {
-  padding-block: 48px;
+  padding-block: 58px;
 }

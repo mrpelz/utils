@@ -4,10 +4,22 @@
    placement, whatever their order.) */
 /* stylelint-disable no-descending-specificity */
 @layer uikit-ish {
+  /* Spaced between each other only: at the list's ends, what precedes or
+     follows it (a bar, a large title, a header) or its container spaces it,
+     so their spacing doesn't add up. */
   .uikit-list-section {
     display: block;
     margin-block: var(--uikit-list-section-spacing, 35px);
     scroll-snap-align: var(--uikit-list-section-snap, none);
+
+    /* (By class: a section can be another element, e.g. a fieldset.) */
+    &:not(.uikit-list-section ~ &) {
+      margin-block-start: 0;
+    }
+
+    &:not(:has(~ .uikit-list-section)) {
+      margin-block-end: 0;
+    }
   }
 
   .uikit-list-group {

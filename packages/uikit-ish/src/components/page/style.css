@@ -9,7 +9,11 @@
     background-color: var(--color-ios-system-grouped-background);
     color: var(--color-ios-label);
     overscroll-behavior: contain;
-    padding-block-end: var(--uikit-page-safe-bottom);
+
+    /* Its end: 35px after its content (as between a list's sections: a
+       list's ends are its container's, see List), clear of the bottom
+       inset. */
+    padding-block-end: calc(var(--uikit-page-safe-bottom) + 35px);
     padding-inline-start: var(--uikit-layout-inset-start, 0);
     scrollbar-width: thin;
 
