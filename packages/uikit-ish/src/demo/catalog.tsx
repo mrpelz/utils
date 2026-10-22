@@ -26,7 +26,14 @@ import { AlertInformationArchitecture } from './alert/information-architecture.j
 import { AlertDemo } from './alert/main.js';
 import { AlertOverview, alertOverviewDemos } from './alert/overview.js';
 import { AlertParts, alertPartsDemos } from './alert/parts.js';
+import {
+  AvatarComposition,
+  avatarCompositionDemos,
+} from './avatar/composition.js';
+import { AvatarInformationArchitecture } from './avatar/information-architecture.js';
 import { AvatarDemo } from './avatar/main.js';
+import { AvatarOverview, avatarOverviewDemos } from './avatar/overview.js';
+import { AvatarParts, avatarPartsDemos } from './avatar/parts.js';
 import {
   BadgeComposition,
   badgeCompositionDemos,
@@ -243,7 +250,14 @@ import { SwitchInformationArchitecture } from './switch/information-architecture
 import { SwitchDemo } from './switch/main.js';
 import { SwitchOverview, switchOverviewDemos } from './switch/overview.js';
 import { SwitchParts, switchPartsDemos } from './switch/parts.js';
+import {
+  SymbolComposition,
+  symbolCompositionDemos,
+} from './symbol/composition.js';
+import { SymbolInformationArchitecture } from './symbol/information-architecture.js';
 import { SymbolDemo } from './symbol/main.js';
+import { SymbolOverview, symbolOverviewDemos } from './symbol/overview.js';
+import { SymbolParts, symbolPartsDemos } from './symbol/parts.js';
 import {
   TabBarComposition,
   tabBarCompositionDemos,
@@ -293,10 +307,20 @@ import { TooltipDemo } from './tooltip/main.js';
 import { TooltipOverview, tooltipOverviewDemos } from './tooltip/overview.js';
 import { TooltipParts, tooltipPartsDemos } from './tooltip/parts.js';
 import {
+  TypographyComposition,
+  typographyCompositionDemos,
+} from './typography/composition.js';
+import { TypographyInformationArchitecture } from './typography/information-architecture.js';
+import {
   TypographyDemo,
   TypographyMatrixDemo,
   TypographySizesDemo,
 } from './typography/main.js';
+import {
+  TypographyOverview,
+  typographyOverviewDemos,
+} from './typography/overview.js';
+import { TypographyParts, typographyPartsDemos } from './typography/parts.js';
 import {
   ViewportComposition,
   viewportCompositionDemos,
@@ -433,9 +457,22 @@ export const catalog: readonly CatalogEntry[] = [
   },
   {
     category: 'content',
-    demos: [TypographyDemo, TypographyMatrixDemo, TypographySizesDemo],
+    demos: [
+      TypographyDemo,
+      TypographyMatrixDemo,
+      TypographySizesDemo,
+      ...typographyOverviewDemos,
+      ...typographyPartsDemos,
+      ...typographyCompositionDemos,
+    ],
     higId: 'typography',
     id: 'typography',
+    Composition: TypographyComposition,
+    InformationArchitecture: TypographyInformationArchitecture,
+    Overview: TypographyOverview,
+    Parts: TypographyParts,
+    summary:
+      'Text in iOS’s text styles, Large Title to Caption 2: emphasized or italic, in a label color, at a Dynamic Type size.',
     title: 'Typography',
   },
   {
@@ -828,17 +865,39 @@ export const catalog: readonly CatalogEntry[] = [
   },
   {
     category: 'content',
-    demos: [SymbolDemo],
+    demos: [
+      SymbolDemo,
+      ...symbolOverviewDemos,
+      ...symbolPartsDemos,
+      ...symbolCompositionDemos,
+    ],
     framework7Id: 'icon',
     higId: 'sf-symbols',
     id: 'symbol',
+    Composition: SymbolComposition,
+    InformationArchitecture: SymbolInformationArchitecture,
+    Overview: SymbolOverview,
+    Parts: SymbolParts,
+    summary:
+      'An SF Symbol sized, weighted and colored as the text around it: a button’s, a tab’s, a row’s image; a badge on it.',
     title: 'Symbol',
   },
   {
     baseUiId: 'avatar',
     category: 'content',
-    demos: [AvatarDemo],
+    demos: [
+      AvatarDemo,
+      ...avatarOverviewDemos,
+      ...avatarPartsDemos,
+      ...avatarCompositionDemos,
+    ],
     id: 'avatar',
+    Composition: AvatarComposition,
+    InformationArchitecture: AvatarInformationArchitecture,
+    Overview: AvatarOverview,
+    Parts: AvatarParts,
+    summary:
+      'A person: their photo in a circle, or their initials; several people in one circle; a badge on its corner.',
     title: 'Avatar',
   },
   {

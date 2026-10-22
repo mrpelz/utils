@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
+import { AddLog } from '../frame/log.js';
 import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 /** A placeholder photo (a gradient, a head and shoulders). */
@@ -27,4 +28,41 @@ export const propOptionsContent = {
   badge: [false, true] as const,
   // A group: 2 or 3 people in one circle.
   people: [1, 2, 3] as const,
+};
+
+// The guide pages' views (see overview.tsx, parts.tsx).
+
+/** `Avatar.Image` (the parts page's): all of its props. */
+export const getPropOptionsGuideImage = (addLog: AddLog) => ({
+  ...commonPropOptions,
+  ...propOptionsImage,
+  alt: [undefined, 'Anna Haro', ''] as const,
+  keepMounted: [undefined, false, true] as const,
+  onLoadingStatusChange: [
+    new MappedProp(
+      (status: string) => addLog(`loading status: ${status}`),
+      '[log status]',
+    ),
+    undefined,
+  ] as const,
+});
+
+/** `Avatar.Fallback` (the parts page's). */
+export const propOptionsGuideFallback = {
+  ...commonPropOptions,
+  delay: [undefined, 0, 600] as const,
+};
+
+/** `Avatar.Group` (the parts page's): its own element. */
+export const propOptionsGuideGroup = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+  size: [undefined, 50, 100] as const,
+  'aria-label': ['Weekend Trip', undefined] as const,
+};
+
+/** The overview's: one person or several, a photo or initials. */
+export const propOptionsOverview = {
+  people: propOptionsContent.people,
+  image: [true, false] as const,
 };

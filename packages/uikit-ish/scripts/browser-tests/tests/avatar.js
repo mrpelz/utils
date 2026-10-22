@@ -89,4 +89,23 @@ export const tests = [
       assert.equal(three.people[2]?.[2], 18);
     },
   },
+  {
+    name: 'avatar: its image marked as its part, named by alt; a group named, sizing its people',
+    run: async (page) => {
+      await page.open('avatar-parts-group');
+      const group = await page.evaluate(`(() => {
+        const group = ${page.section}.querySelector('[data-avatar-part=group]');
+        const images = [...group.querySelectorAll('[data-avatar-part=image]')].map((image) => image.getAttribute('alt'));
+        const sizes = [...group.querySelectorAll('[data-avatar-part=root]')].map((root) => Math.round(root.getBoundingClientRect().width));
+        return { images, label: group.getAttribute('aria-label'), role: group.getAttribute('role'), sizes };
+      })()`);
+      // 53%, 31% and 26% of 70px.
+      assert.deepEqual(group, {
+        images: ['Anna Haro', 'Kate Bell'],
+        label: 'Weekend Trip',
+        role: 'group',
+        sizes: [37, 22, 18],
+      });
+    },
+  },
 ];

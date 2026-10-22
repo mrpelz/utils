@@ -1,5 +1,4 @@
-import type { Properties } from 'csstype';
-import type { ComponentProps, JSX } from 'react';
+import type { useRender } from '@base-ui/react/use-render';
 
 /** UIKit `UIFont.TextStyle`. */
 export type TextStyle =
@@ -33,12 +32,7 @@ export type DynamicTypeSize =
 /** Label colors of the text styles (Figma: the four label colors). */
 export type TextColor = 'primary' | 'quaternary' | 'secondary' | 'tertiary';
 
-export type TypographyProps = ComponentProps<'span'> & {
-  /**
-   * The element to render.
-   * @default 'span'
-   */
-  as?: keyof JSX.IntrinsicElements;
+export type TypographyProps = useRender.ComponentProps<'span'> & {
   /**
    * Label color.
    * @default inherited
@@ -57,5 +51,4 @@ export type TypographyProps = ComponentProps<'span'> & {
    * @default 'body'
    */
   textStyle?: TextStyle;
-  textWrap?: Properties['textWrap'];
 };

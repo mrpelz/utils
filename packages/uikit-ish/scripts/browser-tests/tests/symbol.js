@@ -58,4 +58,15 @@ export const tests = [
       assert.deepEqual(badged.badge, [5, -4]);
     },
   },
+  {
+    name: 'symbol: decorative (its glyph hidden), or an image named on its own',
+    run: async (page) => {
+      await page.open('symbol-composition-image');
+      const named = await page.evaluate(`(() => {
+        const symbol = ${page.section}.querySelector('.uikit-symbol');
+        return [symbol.getAttribute('role'), symbol.getAttribute('aria-label'), symbol.querySelector('svg').getAttribute('aria-hidden')];
+      })()`);
+      assert.deepEqual(named, ['img', 'Not synced', 'true']);
+    },
+  },
 ];

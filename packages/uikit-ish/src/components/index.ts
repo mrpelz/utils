@@ -61,6 +61,7 @@ export {
   Avatar,
   type AvatarFallbackProps,
   type AvatarGroupProps,
+  type AvatarImageProps,
   type AvatarRootProps,
 } from './avatar/main.js';
 export { Badge, type BadgePlacement, type BadgeProps } from './badge/main.js';

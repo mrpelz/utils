@@ -8,7 +8,9 @@ import { Badge } from '../../components/index.js';
 import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 export const propOptionsSymbol = {
-  ...commonPropOptions,
+  // (Its own element: no `render`.)
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
   icon: [
     new MappedProp(sfBell, '[bell]'),
     new MappedProp(sfHeartFill, '[heart.fill]'),
@@ -32,4 +34,17 @@ export const propOptionsContent = {
     'var(--color-ios-primary)',
     'var(--color-ios-secondary-label)',
   ] as const,
+};
+
+// The guide pages' views (see overview.tsx).
+
+/** The overview's: the symbol, and the text style it's in. */
+export const propOptionsOverviewSymbol = {
+  icon: propOptionsSymbol.icon,
+};
+
+export const propOptionsOverviewText = {
+  textStyle: [undefined, 'largeTitle', 'title3', 'footnote'] as const,
+  emphasized: [undefined, false, true] as const,
+  color: [undefined, 'secondary'] as const,
 };

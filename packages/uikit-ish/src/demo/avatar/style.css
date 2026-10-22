@@ -1,0 +1,7 @@
+/* Avatar guide pages (see composition.tsx). */
+
+/* A list as wide as a phone's (the stage shrinks to its content). */
+.avatar-demo-list {
+  width: 360px;
+  max-width: 100%;
+}

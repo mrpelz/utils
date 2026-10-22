@@ -20,3 +20,21 @@
   font-family: monospace;
   font-size: 12px;
 }
+
+/* An article's texts, one below the other, as wide as a phone's. */
+.typography-demo-article {
+  display: grid;
+  width: 370px;
+  max-width: 100%;
+  gap: 8px;
+
+  & > * {
+    margin: 0;
+  }
+}
+
+/* A list as wide as a phone's (the stage shrinks to its content). */
+.typography-demo-list {
+  width: 370px;
+  max-width: 100%;
+}

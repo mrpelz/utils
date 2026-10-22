@@ -1,5 +1,5 @@
 import { DynamicTypeSize, TextStyle } from '../../components/index.js';
-import { commonPropOptions } from '../frame/prop-control.js';
+import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
 export const textStyles: [TextStyle, string][] = [
   ['largeTitle', 'Large Title'],
@@ -44,7 +44,11 @@ export const propOptionsTypography = {
   italic: [undefined, false, true] as const,
   color: [undefined, 'primary', 'secondary', 'tertiary', 'quaternary'] as const,
   dynamicTypeSize: [undefined, ...dynamicTypeSizes] as const,
-  as: [undefined, 'span', 'p', 'h1', 'label'] as const,
+  render: [
+    undefined,
+    new MappedProp(<p />, '[<p />]'),
+    new MappedProp(<h1 />, '[<h1 />]'),
+  ] as const,
 };
 
 export const propOptionsMatrix = {
@@ -57,4 +61,21 @@ export const propOptionsMatrix = {
 
 export const propOptionsSizes = {
   color: ['primary', 'secondary', 'tertiary', 'quaternary'] as const,
+};
+
+// The guide pages' views (see overview.tsx, parts.tsx, composition.tsx).
+
+/** The overview's: the style, its weight, its color. */
+export const propOptionsOverview = {
+  textStyle: propOptionsTypography.textStyle,
+  emphasized: propOptionsTypography.emphasized,
+  color: propOptionsTypography.color,
+};
+
+/** The composition's: the size of a list's text, set around it. */
+export const propOptionsCompositionSize = {
+  dynamicTypeSize: [
+    'large',
+    ...dynamicTypeSizes.filter((size) => size !== 'large'),
+  ] as const,
 };
