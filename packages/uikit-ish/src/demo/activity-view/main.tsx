@@ -128,26 +128,24 @@ export const ActivityViewDemo: FunctionComponent = () => {
               <ActivityView.Separator />
               <ActivityView.People aria-label="People">
                 <ActivityView.Person
-                  name="Ashley Kamin"
                   onClick={() => addLog('person: Ashley Kamin')}
                 >
                   <Avatar.Root>
                     <Avatar.Image src={photo(20)} />
                     <Avatar.Fallback>AK</Avatar.Fallback>
                   </Avatar.Root>
+                  <ActivityView.Name>Ashley Kamin</ActivityView.Name>
                 </ActivityView.Person>
                 <ActivityView.Person
-                  name="Amber Spiers"
                   onClick={() => addLog('person: Amber Spiers')}
                 >
                   <Avatar.Root>
                     <Avatar.Image src={photo(200)} />
                     <Avatar.Fallback>AS</Avatar.Fallback>
                   </Avatar.Root>
+                  <ActivityView.Name>Amber Spiers</ActivityView.Name>
                 </ActivityView.Person>
                 <ActivityView.Person
-                  count="2 People"
-                  name="Gary and Fatima"
                   onClick={() => addLog('person: Gary and Fatima')}
                 >
                   <Avatar.Group>
@@ -160,50 +158,58 @@ export const ActivityViewDemo: FunctionComponent = () => {
                       <Avatar.Fallback>GF</Avatar.Fallback>
                     </Avatar.Root>
                   </Avatar.Group>
+                  <ActivityView.Name>Gary and Fatima</ActivityView.Name>
+                  <ActivityView.Count>2 People</ActivityView.Count>
                 </ActivityView.Person>
                 <ActivityView.Person
-                  name="Simon Pickford"
                   onClick={() => addLog('person: Simon Pickford')}
                 >
                   <Avatar.Root>
                     <Avatar.Fallback>SP</Avatar.Fallback>
                   </Avatar.Root>
+                  <ActivityView.Name>Simon Pickford</ActivityView.Name>
                 </ActivityView.Person>
                 <ActivityView.Person
-                  name="Lea Rossi"
                   onClick={() => addLog('person: Lea Rossi')}
                 >
                   <Avatar.Root>
                     <Avatar.Image src={photo(50)} />
                     <Avatar.Fallback>LR</Avatar.Fallback>
                   </Avatar.Root>
+                  <ActivityView.Name>Lea Rossi</ActivityView.Name>
                 </ActivityView.Person>
               </ActivityView.People>
               <ActivityView.Separator />
               <ActivityView.Actions aria-label="Actions">
-                <ActivityView.Action
-                  label="Copy"
-                  onClick={() => addLog('action: Copy')}
-                >
-                  <Symbol icon={sfDocumentOnDocument} />
+                <ActivityView.Action onClick={() => addLog('action: Copy')}>
+                  <ActivityView.Symbol>
+                    <Symbol icon={sfDocumentOnDocument} />
+                  </ActivityView.Symbol>
+                  <ActivityView.Label>Copy</ActivityView.Label>
                 </ActivityView.Action>
                 <ActivityView.Action
-                  label="Add to Favorites"
                   onClick={() => addLog('action: Add to Favorites')}
                 >
-                  <Symbol icon={sfHeart} />
+                  <ActivityView.Symbol>
+                    <Symbol icon={sfHeart} />
+                  </ActivityView.Symbol>
+                  <ActivityView.Label>Add to Favorites</ActivityView.Label>
                 </ActivityView.Action>
                 <ActivityView.Action
-                  label="Add to Reading List"
                   onClick={() => addLog('action: Add to Reading List')}
                 >
-                  <Symbol icon={sfEyeglasses} />
+                  <ActivityView.Symbol>
+                    <Symbol icon={sfEyeglasses} />
+                  </ActivityView.Symbol>
+                  <ActivityView.Label>Add to Reading List</ActivityView.Label>
                 </ActivityView.Action>
                 <ActivityView.Action
-                  label="Add Bookmark"
                   onClick={() => addLog('action: Add Bookmark')}
                 >
-                  <Symbol icon={sfBook} />
+                  <ActivityView.Symbol>
+                    <Symbol icon={sfBook} />
+                  </ActivityView.Symbol>
+                  <ActivityView.Label>Add Bookmark</ActivityView.Label>
                 </ActivityView.Action>
               </ActivityView.Actions>
               {/* (On the glass: its groups on a fill, see List.) */}
@@ -384,26 +390,24 @@ export const ActivityViewPopoverDemo: FunctionComponent = () => {
                 <ActivityView.Separator />
                 <ActivityView.People aria-label="People">
                   <ActivityView.Person
-                    name="Ashley Kamin"
                     onClick={() => addLog('person: Ashley Kamin')}
                   >
                     <Avatar.Root>
                       <Avatar.Image src={photo(20)} />
                       <Avatar.Fallback>AK</Avatar.Fallback>
                     </Avatar.Root>
+                    <ActivityView.Name>Ashley Kamin</ActivityView.Name>
                   </ActivityView.Person>
                   <ActivityView.Person
-                    name="Amber Spiers"
                     onClick={() => addLog('person: Amber Spiers')}
                   >
                     <Avatar.Root>
                       <Avatar.Image src={photo(200)} />
                       <Avatar.Fallback>AS</Avatar.Fallback>
                     </Avatar.Root>
+                    <ActivityView.Name>Amber Spiers</ActivityView.Name>
                   </ActivityView.Person>
                   <ActivityView.Person
-                    count="2 People"
-                    name="Gary and Fatima"
                     onClick={() => addLog('person: Gary and Fatima')}
                   >
                     <Avatar.Group>
@@ -416,50 +420,58 @@ export const ActivityViewPopoverDemo: FunctionComponent = () => {
                         <Avatar.Fallback>GF</Avatar.Fallback>
                       </Avatar.Root>
                     </Avatar.Group>
+                    <ActivityView.Name>Gary and Fatima</ActivityView.Name>
+                    <ActivityView.Count>2 People</ActivityView.Count>
                   </ActivityView.Person>
                   <ActivityView.Person
-                    name="Simon Pickford"
                     onClick={() => addLog('person: Simon Pickford')}
                   >
                     <Avatar.Root>
                       <Avatar.Fallback>SP</Avatar.Fallback>
                     </Avatar.Root>
+                    <ActivityView.Name>Simon Pickford</ActivityView.Name>
                   </ActivityView.Person>
                   <ActivityView.Person
-                    name="Lea Rossi"
                     onClick={() => addLog('person: Lea Rossi')}
                   >
                     <Avatar.Root>
                       <Avatar.Image src={photo(50)} />
                       <Avatar.Fallback>LR</Avatar.Fallback>
                     </Avatar.Root>
+                    <ActivityView.Name>Lea Rossi</ActivityView.Name>
                   </ActivityView.Person>
                 </ActivityView.People>
                 <ActivityView.Separator />
                 <ActivityView.Actions aria-label="Actions">
-                  <ActivityView.Action
-                    label="Copy"
-                    onClick={() => addLog('action: Copy')}
-                  >
-                    <Symbol icon={sfDocumentOnDocument} />
+                  <ActivityView.Action onClick={() => addLog('action: Copy')}>
+                    <ActivityView.Symbol>
+                      <Symbol icon={sfDocumentOnDocument} />
+                    </ActivityView.Symbol>
+                    <ActivityView.Label>Copy</ActivityView.Label>
                   </ActivityView.Action>
                   <ActivityView.Action
-                    label="Add to Favorites"
                     onClick={() => addLog('action: Add to Favorites')}
                   >
-                    <Symbol icon={sfHeart} />
+                    <ActivityView.Symbol>
+                      <Symbol icon={sfHeart} />
+                    </ActivityView.Symbol>
+                    <ActivityView.Label>Add to Favorites</ActivityView.Label>
                   </ActivityView.Action>
                   <ActivityView.Action
-                    label="Add to Reading List"
                     onClick={() => addLog('action: Add to Reading List')}
                   >
-                    <Symbol icon={sfEyeglasses} />
+                    <ActivityView.Symbol>
+                      <Symbol icon={sfEyeglasses} />
+                    </ActivityView.Symbol>
+                    <ActivityView.Label>Add to Reading List</ActivityView.Label>
                   </ActivityView.Action>
                   <ActivityView.Action
-                    label="Add Bookmark"
                     onClick={() => addLog('action: Add Bookmark')}
                   >
-                    <Symbol icon={sfBook} />
+                    <ActivityView.Symbol>
+                      <Symbol icon={sfBook} />
+                    </ActivityView.Symbol>
+                    <ActivityView.Label>Add Bookmark</ActivityView.Label>
                   </ActivityView.Action>
                 </ActivityView.Actions>
                 {/* (On the glass: its groups on a fill, see List.) */}

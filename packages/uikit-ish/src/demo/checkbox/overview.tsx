@@ -76,8 +76,20 @@ export const CheckboxOverview: FunctionComponent = () => (
         circles, e.g. rows while editing a list (UIKit’s editing selection).
       </li>
       <li>
-        <code>Checkbox</code> and <code>Radio</code>: those circles, Base UI’s
-        checkbox and radio.
+        <PartLink
+          component="checkbox"
+          part="Checkbox.Root"
+        >
+          Checkbox
+        </PartLink>{' '}
+        and{' '}
+        <PartLink
+          component="checkbox"
+          part="Radio.Root"
+        >
+          Radio
+        </PartLink>
+        : those circles, Base UI’s checkbox and radio.
       </li>
       <li>
         Unticked: a gray ring. Ticked: the tint, with a checkmark. Mixed: a
@@ -95,10 +107,23 @@ export const CheckboxOverview: FunctionComponent = () => (
     <ul>
       <li>
         Selecting items to act on together (rows to delete or move, people to
-        invite): a <code>Checkbox</code> per item, several at once.
+        invite): a{' '}
+        <PartLink
+          component="checkbox"
+          part="Checkbox.Root"
+        >
+          Checkbox
+        </PartLink>{' '}
+        per item, several at once.
       </li>
       <li>
-        Choosing one item of a list (e.g. a default account): <code>Radio</code>
+        Choosing one item of a list (e.g. a default account):{' '}
+        <PartLink
+          component="checkbox"
+          part="Radio.Root"
+        >
+          Radio
+        </PartLink>
         s in a{' '}
         <PartLink
           component="checkbox"

@@ -11,9 +11,15 @@ export const formRows: readonly PropRow[] = [
     undefined,
     <>
       Event handler called when the form is submitted, with its fields’ values
-      by their <code>name</code> (<code>Field.Root</code>’s, or a control’s in
-      one). <code>preventDefault()</code> is called on the native submit event
-      when used.
+      by their <code>name</code> (
+      <PartLink
+        component="form"
+        part="Field"
+      >
+        Field.Root
+      </PartLink>
+      ’s, or a control’s in one). <code>preventDefault()</code> is called on the
+      native submit event when used.
     </>,
   ],
   [

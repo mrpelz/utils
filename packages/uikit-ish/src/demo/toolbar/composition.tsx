@@ -513,8 +513,15 @@ export const ToolbarComposition: FunctionComponent = () => (
         the selection’s commands in a capsule at the end.
       </li>
       <li>
-        A disabled capsule (<code>Group</code> <code>disabled</code>) while
-        nothing is selected; its buttons stay focusable.
+        A disabled capsule (
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Group"
+        >
+          Group
+        </PartLink>{' '}
+        <code>disabled</code>) while nothing is selected; its buttons stay
+        focusable.
       </li>
       <li>
         A list’s edit mode: see <a href="list/composition">List</a>; a

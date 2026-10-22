@@ -119,9 +119,26 @@ export const useCreateTooltipHandle = <
  * A tooltip (Base UI's `Tooltip`; no UIKit equivalent): a short label in a
  * glass capsule at its trigger, on hover and focus, or held open.
  */
+/**
+ * Its portal (Base UI's): no box of its own (`display: contents`), so
+ * rendered into a container (e.g. a screen laid out as a flex column) it
+ * doesn't shift its content.
+ */
+const Portal = forwardRef<
+  HTMLDivElement,
+  Omit<BaseTooltip.Portal.Props, 'ref'>
+>(({ className, ...props }, ref) => (
+  <BaseTooltip.Portal
+    ref={ref}
+    {...props}
+    className={cn('uikit-tooltip-portal', className)}
+  />
+));
+
 export const Tooltip = {
   ...BaseTooltip,
   Provider,
+  Portal,
   Trigger,
   Positioner,
   Popup,

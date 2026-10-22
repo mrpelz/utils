@@ -151,9 +151,9 @@ export const EditMenuDemo: FunctionComponent = () => {
               <EditMenu.Item onClick={() => addLog('AutoFill clicked')}>
                 AutoFill
               </EditMenu.Item>
-              <Menu.SubmenuRoot>
+              <EditMenu.SubmenuRoot>
                 <EditMenu.More {...propsMore} />
-                <Menu.Portal>
+                <EditMenu.Portal>
                   <Menu.Positioner {...propsSubmenuPositioner}>
                     <Menu.Popup {...propsSubmenuPopup}>
                       <Menu.Item onClick={() => addLog('Look Up clicked')}>
@@ -167,8 +167,8 @@ export const EditMenuDemo: FunctionComponent = () => {
                       </Menu.Item>
                     </Menu.Popup>
                   </Menu.Positioner>
-                </Menu.Portal>
-              </Menu.SubmenuRoot>
+                </EditMenu.Portal>
+              </EditMenu.SubmenuRoot>
             </EditMenu.Popup>
           </EditMenu.Positioner>
         </EditMenu.Portal>

@@ -793,8 +793,21 @@ export const ViewportParts: FunctionComponent = () => (
       </li>
       <li>Content: the content layer, scrolling.</li>
       <li>
-        Anchors: bars floating at an edge (<code>BlockStart</code>,{' '}
-        <code>BlockEnd</code>: the top and the bottom).
+        Anchors: bars floating at an edge (
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockStart"
+        >
+          BlockStart
+        </PartLink>
+        ,{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        >
+          BlockEnd
+        </PartLink>
+        : the top and the bottom).
       </li>
       <li>
         Hooks: what the provider tracks, inside it; and an element’s visibility
@@ -1287,8 +1300,8 @@ export const ViewportParts: FunctionComponent = () => (
       <li>
         iOS scrolls the page (its layout viewport) to a text field it focuses,
         to keep it clear of the keyboard, shifting a fixed layout (e.g. a{' '}
-        <code>Viewport</code>’s bars). Guarded, a field touched in its target is
-        focused without scrolling (as the touch ends).
+        <a href="viewport">Viewport</a>’s bars). Guarded, a field touched in its
+        target is focused without scrolling (as the touch ends).
       </li>
       <li>
         The touch’s click doesn’t follow, and the caret goes where the field

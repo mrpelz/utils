@@ -55,3 +55,48 @@ export const propOptionsMore = {
   openOnHover: [undefined, false, true] as const,
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
 };
+
+// The guide pages' views (see parts.tsx).
+
+/** `EditMenu.Root` (the parts page's): its props but `open` (the app's). */
+export const propOptionsGuideRoot = {
+  modal: [undefined, false, true] as const,
+  loopFocus: [undefined, false, true] as const,
+  highlightItemOnHover: [undefined, false, true] as const,
+  disabled: [undefined, false, true] as const,
+};
+
+export const propOptionsGuidePortal = {
+  ...commonPropOptions,
+  keepMounted: [undefined, false, true] as const,
+};
+
+export const getPropOptionsGuideItem = (addLog: AddLog) => ({
+  ...propOptionsItem,
+  label: [undefined, 'Cut selection'] as const,
+  onClick: [
+    new MappedProp(() => addLog('Cut clicked'), '[log click]'),
+    undefined,
+  ] as const,
+});
+
+export const getPropOptionsGuideSubmenuRoot = (addLog: AddLog) => ({
+  closeParentOnEsc: [undefined, false, true] as const,
+  disabled: [undefined, false, true] as const,
+  onOpenChange: [
+    undefined,
+    new MappedProp(
+      (open: boolean) => addLog(`more open change: ${String(open)}`),
+      '[log change]',
+    ),
+  ] as const,
+});
+
+export const propOptionsGuideMore = {
+  ...commonPropOptions,
+  disabled: [undefined, false, true] as const,
+  openOnHover: [undefined, false, true] as const,
+  delay: [undefined, 0, 500] as const,
+  closeDelay: [undefined, 0, 500] as const,
+  'aria-label': [undefined, 'More Actions'] as const,
+};

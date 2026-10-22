@@ -294,8 +294,14 @@ export const DatePickerComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a <a href="form">Form</a>, in Base UI’s <code>Field.Root</code> (its{' '}
-        <code>name</code>; the row:{' '}
+        In a <a href="form">Form</a>, in Base UI’s{' '}
+        <PartLink
+          component="form"
+          part="Field"
+        >
+          Field.Root
+        </PartLink>{' '}
+        (its <code>name</code>; the row:{' '}
         <PartLink
           component="list"
           part="List.Item"

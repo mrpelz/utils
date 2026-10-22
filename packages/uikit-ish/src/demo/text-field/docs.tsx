@@ -61,7 +61,11 @@ export const textFieldRootRows: readonly PropRow[] = [
       Determines when the field should be validated: when the form is submitted
       (and on change after it), when the control loses focus, or on every
       change. Takes precedence over the <code>validationMode</code> prop on{' '}
-      <code>Form</code>.
+      <PartLink
+        component="form"
+        part="Form"
+      />
+      .
     </>,
   ],
   [
@@ -216,7 +220,12 @@ export const textFieldErrorRows: readonly PropRow[] = [
       <code>typeMismatch</code>, <code>customError</code>). Specifying{' '}
       <code>true</code> will always show the error message, and lets external
       libraries control the visibility. Without it: whenever the field is
-      invalid (or has a <code>Form</code>’s error).
+      invalid (or has a{' '}
+      <PartLink
+        component="form"
+        part="Form"
+      />
+      ’s error).
     </>,
   ],
   [

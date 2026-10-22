@@ -15,9 +15,22 @@ import {
   actionSheetPartsDemos,
 } from './action-sheet/parts.js';
 import {
+  ActivityViewComposition,
+  activityViewCompositionDemos,
+} from './activity-view/composition.js';
+import { ActivityViewInformationArchitecture } from './activity-view/information-architecture.js';
+import {
   ActivityViewDemo,
   ActivityViewPopoverDemo,
 } from './activity-view/main.js';
+import {
+  ActivityViewOverview,
+  activityViewOverviewDemos,
+} from './activity-view/overview.js';
+import {
+  ActivityViewParts,
+  activityViewPartsDemos,
+} from './activity-view/parts.js';
 import {
   AlertComposition,
   alertCompositionDemos,
@@ -75,7 +88,20 @@ import {
   ColorPickerParts,
   colorPickerPartsDemos,
 } from './color-picker/parts.js';
+import {
+  ContextualMenuComposition,
+  contextualMenuCompositionDemos,
+} from './contextual-menu/composition.js';
+import { ContextualMenuInformationArchitecture } from './contextual-menu/information-architecture.js';
 import { ContextualMenuDemo } from './contextual-menu/main.js';
+import {
+  ContextualMenuOverview,
+  contextualMenuOverviewDemos,
+} from './contextual-menu/overview.js';
+import {
+  ContextualMenuParts,
+  contextualMenuPartsDemos,
+} from './contextual-menu/parts.js';
 import {
   DatePickerComposition,
   datePickerCompositionDemos,
@@ -93,7 +119,17 @@ import {
   datePickerOverviewDemos,
 } from './date-picker/overview.js';
 import { DatePickerParts, datePickerPartsDemos } from './date-picker/parts.js';
+import {
+  EditMenuComposition,
+  editMenuCompositionDemos,
+} from './edit-menu/composition.js';
+import { EditMenuInformationArchitecture } from './edit-menu/information-architecture.js';
 import { EditMenuDemo } from './edit-menu/main.js';
+import {
+  EditMenuOverview,
+  editMenuOverviewDemos,
+} from './edit-menu/overview.js';
+import { EditMenuParts, editMenuPartsDemos } from './edit-menu/parts.js';
 import { FormComposition, formCompositionDemos } from './form/composition.js';
 import { FormInformationArchitecture } from './form/information-architecture.js';
 import { FormDemo } from './form/main.js';
@@ -134,6 +170,8 @@ import {
 } from './list/main.js';
 import { ListOverview, listOverviewDemos } from './list/overview.js';
 import { ListParts, listPartsDemos } from './list/parts.js';
+import { MenuComposition, menuCompositionDemos } from './menu/composition.js';
+import { MenuInformationArchitecture } from './menu/information-architecture.js';
 import {
   MenuDemo,
   MenuOpenDemo,
@@ -141,6 +179,8 @@ import {
   MenuRegularDemo,
   MenuTogglesDemo,
 } from './menu/main.js';
+import { MenuOverview, menuOverviewDemos } from './menu/overview.js';
+import { MenuParts, menuPartsDemos } from './menu/parts.js';
 import {
   NavigationComposition,
   navigationCompositionDemos,
@@ -1040,9 +1080,21 @@ export const catalog: readonly CatalogEntry[] = [
   },
   {
     category: 'actions',
-    demos: [ActivityViewDemo, ActivityViewPopoverDemo],
+    demos: [
+      ActivityViewDemo,
+      ActivityViewPopoverDemo,
+      ...activityViewOverviewDemos,
+      ...activityViewPartsDemos,
+      ...activityViewCompositionDemos,
+    ],
     higId: 'activity-views',
     id: 'activity-view',
+    Composition: ActivityViewComposition,
+    InformationArchitecture: ActivityViewInformationArchitecture,
+    Overview: ActivityViewOverview,
+    Parts: ActivityViewParts,
+    summary:
+      'Sharing: what’s shared, people to share with and actions, in rows; in a sheet on iPhone, a popover on iPad.',
     title: 'Activity view',
   },
   {
@@ -1054,25 +1106,56 @@ export const catalog: readonly CatalogEntry[] = [
       MenuRegularDemo,
       MenuTogglesDemo,
       MenuPopUpDemo,
+      ...menuOverviewDemos,
+      ...menuPartsDemos,
+      ...menuCompositionDemos,
     ],
     higId: 'menus',
     id: 'menu',
+    Composition: MenuComposition,
+    InformationArchitecture: MenuInformationArchitecture,
+    Overview: MenuOverview,
+    Parts: MenuParts,
+    summary:
+      'Actions and choices behind a control, in a glass popup at it: the iPhone’s or the iPad’s, with submenus, toggles and quick actions.',
     title: 'Menu',
   },
   {
     baseUiId: 'menu',
     category: 'actions',
-    demos: [ContextualMenuDemo],
+    demos: [
+      ContextualMenuDemo,
+      ...contextualMenuOverviewDemos,
+      ...contextualMenuPartsDemos,
+      ...contextualMenuCompositionDemos,
+    ],
     higId: 'context-menus',
     id: 'contextual-menu',
+    Composition: ContextualMenuComposition,
+    InformationArchitecture: ContextualMenuInformationArchitecture,
+    Overview: ContextualMenuOverview,
+    Parts: ContextualMenuParts,
+    summary:
+      'Actions on a piece of content, summoned from it: the content lifts above the blurred page, or turns into a preview, a menu below it.',
     title: 'Contextual menu',
   },
   {
     baseUiId: 'menu',
     category: 'actions',
-    demos: [EditMenuDemo],
+    demos: [
+      EditMenuDemo,
+      ...editMenuOverviewDemos,
+      ...editMenuPartsDemos,
+      ...editMenuCompositionDemos,
+    ],
     higId: 'edit-menus',
     id: 'edit-menu',
+    Composition: EditMenuComposition,
+    InformationArchitecture: EditMenuInformationArchitecture,
+    Overview: EditMenuOverview,
+    Parts: EditMenuParts,
+    summary:
+      'Actions on a selection in a horizontal glass capsule above it: opened by the app, more actions scrolling or behind a chevron.',
     title: 'Edit menu',
   },
 ];

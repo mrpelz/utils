@@ -36,8 +36,15 @@ export const tabBarRootRows: readonly PropRow[] = [
     'any',
     undefined,
     <>
-      The value of the currently active <code>Tab</code>. Use when the component
-      is controlled. When the value is <code>null</code>, no Tab will be active.
+      The value of the currently active{' '}
+      <PartLink
+        component="tab-bar"
+        part="TabBar.Tab"
+      >
+        Tab
+      </PartLink>
+      . Use when the component is controlled. When the value is{' '}
+      <code>null</code>, no Tab will be active.
     </>,
   ],
   [

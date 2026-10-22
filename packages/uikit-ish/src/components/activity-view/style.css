@@ -114,7 +114,8 @@
     line-height: 15px;
 
     /* With a count (a group's): on one line, truncated. */
-    &[data-counted] {
+    [data-activity-view-part='item']:has(> [data-activity-view-part='count'])
+      > & {
       display: block;
       max-width: 100%;
       text-overflow: ellipsis;
@@ -164,7 +165,7 @@
   .uikit-activity-view-action {
     gap: 7px;
 
-    & > [data-activity-view-part='action-symbol'] {
+    & > [data-activity-view-part='symbol'] {
       display: grid;
       width: 70px;
       height: 70px;
@@ -181,11 +182,11 @@
       --uikit-symbol-thinning: max(0px, (400 - 300) / 326 * 1px);
     }
 
-    &:active > [data-activity-view-part='action-symbol'] {
+    &:active > [data-activity-view-part='symbol'] {
       filter: brightness(0.9);
     }
 
-    & > span:last-child {
+    & > [data-activity-view-part='label'] {
       display: -webkit-box;
       overflow: hidden;
       -webkit-box-orient: vertical;

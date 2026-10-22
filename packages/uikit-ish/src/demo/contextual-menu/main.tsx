@@ -1,3 +1,4 @@
+import '../sheet/style.css';
 import './style.css';
 
 import { sfPhoto } from '@bradleyhodges/sfsymbols/sfPhoto';
@@ -9,6 +10,7 @@ import { Button, ContextualMenu, Symbol } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
+import { useLabelledRef } from '../frame/render-code.js';
 import { useProvidedState } from '../frame/state.js';
 import {
   getPropOptionsItem as getPropOptionsMenuItem,
@@ -29,6 +31,7 @@ import {
  * preview of the photo the menu acts on.
  */
 export const ContextualMenuDemo: FunctionComponent = () => {
+  const screen = useLabelledRef<HTMLDivElement>('screen');
   const id = 'contextual-menu';
 
   const [log, addLog] = useLog();
@@ -115,56 +118,61 @@ export const ContextualMenuDemo: FunctionComponent = () => {
         stateDestructiveItem,
       ]}
     >
-      <ContextualMenu.Root
-        key={elementKey}
-        {...propsRoot}
+      <div
+        ref={screen}
+        className="sheet-demo-phone demo-wallpaper"
       >
-        <ContextualMenu.Trigger
-          {...propsTrigger}
-          render={<Button.Root variant="bordered" />}
+        <ContextualMenu.Root
+          key={elementKey}
+          {...propsRoot}
         >
-          <Button.Icon>
-            <Symbol icon={sfPhoto} />
-          </Button.Icon>
-          <Button.Label>Photo</Button.Label>
-        </ContextualMenu.Trigger>
-        {content.preview ? (
-          <ContextualMenu.Preview {...propsPreview}>
-            <div
-              aria-label="Photo"
-              className="contextual-menu-demo-photo"
-            >
+          <ContextualMenu.Trigger
+            {...propsTrigger}
+            render={<Button.Root variant="bordered" />}
+          >
+            <Button.Icon>
               <Symbol icon={sfPhoto} />
-            </div>
-          </ContextualMenu.Preview>
-        ) : null}
-        <ContextualMenu.Portal>
-          {content.backdrop ? <ContextualMenu.Backdrop /> : null}
-          <ContextualMenu.Positioner {...propsPositioner}>
-            <ContextualMenu.Popup {...propsPopup}>
-              <ContextualMenu.Item {...propsItem}>
-                <ContextualMenu.Label>Share</ContextualMenu.Label>
-                <ContextualMenu.Icon>
-                  <Symbol icon={sfSquareAndArrowUp} />
-                </ContextualMenu.Icon>
-              </ContextualMenu.Item>
-              <ContextualMenu.Item onClick={() => addLog('Copy clicked')}>
-                <ContextualMenu.Label>Copy</ContextualMenu.Label>
-              </ContextualMenu.Item>
-              <ContextualMenu.Separator />
-              <ContextualMenu.Item
-                {...propsDestructiveItem}
-                onClick={() => addLog('Delete clicked')}
+            </Button.Icon>
+            <Button.Label>Photo</Button.Label>
+          </ContextualMenu.Trigger>
+          {content.preview ? (
+            <ContextualMenu.Preview {...propsPreview}>
+              <div
+                aria-label="Photo"
+                className="contextual-menu-demo-photo"
               >
-                <ContextualMenu.Label>Delete</ContextualMenu.Label>
-                <ContextualMenu.Icon>
-                  <Symbol icon={sfTrash} />
-                </ContextualMenu.Icon>
-              </ContextualMenu.Item>
-            </ContextualMenu.Popup>
-          </ContextualMenu.Positioner>
-        </ContextualMenu.Portal>
-      </ContextualMenu.Root>
+                <Symbol icon={sfPhoto} />
+              </div>
+            </ContextualMenu.Preview>
+          ) : null}
+          <ContextualMenu.Portal container={screen}>
+            {content.backdrop ? <ContextualMenu.Backdrop /> : null}
+            <ContextualMenu.Positioner {...propsPositioner}>
+              <ContextualMenu.Popup {...propsPopup}>
+                <ContextualMenu.Item {...propsItem}>
+                  <ContextualMenu.Label>Share</ContextualMenu.Label>
+                  <ContextualMenu.Icon>
+                    <Symbol icon={sfSquareAndArrowUp} />
+                  </ContextualMenu.Icon>
+                </ContextualMenu.Item>
+                <ContextualMenu.Item onClick={() => addLog('Copy clicked')}>
+                  <ContextualMenu.Label>Copy</ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Separator />
+                <ContextualMenu.Item
+                  {...propsDestructiveItem}
+                  onClick={() => addLog('Delete clicked')}
+                >
+                  <ContextualMenu.Label>Delete</ContextualMenu.Label>
+                  <ContextualMenu.Icon>
+                    <Symbol icon={sfTrash} />
+                  </ContextualMenu.Icon>
+                </ContextualMenu.Item>
+              </ContextualMenu.Popup>
+            </ContextualMenu.Positioner>
+          </ContextualMenu.Portal>
+        </ContextualMenu.Root>
+      </div>
     </Component>
   );
 };

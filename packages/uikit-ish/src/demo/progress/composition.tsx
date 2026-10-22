@@ -15,7 +15,12 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -153,7 +158,12 @@ export const ProgressComposition: FunctionComponent = () => (
     <ul>
       <li>
         Of items, not a percentage: <code>max</code> the count, the value told
-        by <code>Progress.Value</code>’s function (“5 of 12”).
+        by{' '}
+        <PartLink
+          component="progress"
+          part="Progress.Value"
+        />
+        ’s function (“5 of 12”).
       </li>
       <li>
         The app sets <code>value</code> as the work advances; the fill grows to

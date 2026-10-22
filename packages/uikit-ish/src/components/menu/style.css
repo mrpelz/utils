@@ -1,5 +1,10 @@
 /* Menu (see main.tsx). */
 @layer uikit-ish {
+  /* Its portal (see Portal): no box of its own. */
+  .uikit-menu-portal {
+    display: contents;
+  }
+
   /* (Shared: edit-menu, popover, tooltip.) */
   .uikit-popup-transition {
     transform-origin: var(--transform-origin);

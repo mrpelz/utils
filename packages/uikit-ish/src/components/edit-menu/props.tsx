@@ -1,7 +1,14 @@
 import type { Menu as BaseMenu } from '@base-ui/react/menu';
 import type { Properties } from 'csstype';
 
+import type { MenuRootProps } from '../menu/main.js';
 import type { LogicalSide } from '../utils/main.js';
+
+/** A menu root's props but its size (an edit menu has one; see `Root`). */
+export type EditMenuRootProps<Payload = unknown> = Omit<
+  MenuRootProps<Payload>,
+  'size'
+>;
 
 export type EditMenuPositionerProps = Omit<
   BaseMenu.Positioner.Props,

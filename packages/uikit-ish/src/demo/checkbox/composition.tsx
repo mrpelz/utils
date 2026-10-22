@@ -403,9 +403,15 @@ export const CheckboxComposition: FunctionComponent = () => (
         the text ticks it and names it.
       </li>
       <li>
-        In a <a href="form">Form</a>: Base UI’s <code>Field.Root</code> names
-        each value (the radio group’s chosen <code>value</code>, the checkbox’s
-        ticked state).
+        In a <a href="form">Form</a>: Base UI’s{' '}
+        <PartLink
+          component="form"
+          part="Field"
+        >
+          Field.Root
+        </PartLink>{' '}
+        names each value (the radio group’s chosen <code>value</code>, the
+        checkbox’s ticked state).
       </li>
       <li>
         Outside a field: the checkbox’s own <code>name</code> and{' '}

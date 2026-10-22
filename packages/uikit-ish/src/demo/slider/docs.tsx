@@ -399,7 +399,12 @@ export const sliderSymbolRows: readonly PropRow[] = [
     undefined,
     <>
       The symbol (UIKit <code>minimumValueImage</code>,{' '}
-      <code>maximumValueImage</code>), e.g. a <code>Symbol</code>, or text.
+      <code>maximumValueImage</code>), e.g. a{' '}
+      <PartLink
+        component="symbol"
+        part="Symbol"
+      />
+      , or text.
     </>,
   ],
   ...elementRows('span', 'HTMLSpanElement'),

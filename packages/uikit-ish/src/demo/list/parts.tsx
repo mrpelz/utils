@@ -1873,8 +1873,35 @@ export const ListParts: FunctionComponent = () => (
         A section (a <code>section</code>).
       </li>
       <li>
-        An optional <code>Header</code>, a <code>Group</code> of rows (or a{' '}
-        <code>Block</code>), an optional <code>Footer</code>.
+        An optional{' '}
+        <PartLink
+          component="list"
+          part="List.Header"
+        >
+          Header
+        </PartLink>
+        , a{' '}
+        <PartLink
+          component="list"
+          part="List.Group"
+        >
+          Group
+        </PartLink>{' '}
+        of rows (or a{' '}
+        <PartLink
+          component="list"
+          part="List.Block"
+        >
+          Block
+        </PartLink>
+        ), an optional{' '}
+        <PartLink
+          component="list"
+          part="List.Footer"
+        >
+          Footer
+        </PartLink>
+        .
       </li>
       <li>35px apart.</li>
     </ul>
@@ -1892,8 +1919,21 @@ export const ListParts: FunctionComponent = () => (
       <li>A section’s header.</li>
       <li>
         A title (a heading, by <code>render</code>); optionally a supertitle, a
-        subtitle, trailing parts (an <code>Accessory</code>, an{' '}
-        <code>Action</code>).
+        subtitle, trailing parts (an{' '}
+        <PartLink
+          component="list"
+          part="List.Accessory"
+        >
+          Accessory
+        </PartLink>
+        , an{' '}
+        <PartLink
+          component="list"
+          part="List.Action"
+        >
+          Action
+        </PartLink>
+        ).
       </li>
       <li>
         <code>prominence</code>: prominent, nested (a plain list’s sticky
@@ -1916,8 +1956,15 @@ export const ListParts: FunctionComponent = () => (
       </li>
       <li>Inset with rounded corners, full width, or plain.</li>
       <li>
-        Rows with a <code>Grabber</code> reorder within it: it calls{' '}
-        <code>onReorder</code>; the app reorders its rows.
+        Rows with a{' '}
+        <PartLink
+          component="list"
+          part="List.Grabber"
+        >
+          Grabber
+        </PartLink>{' '}
+        reorder within it: it calls <code>onReorder</code>; the app reorders its
+        rows.
       </li>
     </ul>
     <GroupPart />
@@ -1936,13 +1983,27 @@ export const ListParts: FunctionComponent = () => (
       </li>
       <li>At least 52px high (68px with a subtitle).</li>
       <li>
-        Pressable through its title (or a <code>Button</code>), or by its own{' '}
-        <code>onClick</code> (e.g. <PartLink part="forwardClick" />
+        Pressable through its title (or a{' '}
+        <PartLink
+          component="list"
+          part="List.Button"
+        >
+          Button
+        </PartLink>
+        ), or by its own <code>onClick</code> (e.g.{' '}
+        <PartLink part="forwardClick" />
         ).
       </li>
       <li>
         Can be <code>selected</code>, indented (<code>level</code>), swiped for
-        its <code>SwipeActions</code>.
+        its{' '}
+        <PartLink
+          component="list"
+          part="List.SwipeActions"
+        >
+          SwipeActions
+        </PartLink>
+        .
       </li>
     </ul>
     <ItemPart />
@@ -1961,7 +2022,14 @@ export const ListParts: FunctionComponent = () => (
         <code>open</code> and <code>onOpenChange</code>.
       </li>
       <li>
-        Around the row toggling it and the <code>Expandable</code>.
+        Around the row toggling it and the{' '}
+        <PartLink
+          component="list"
+          part="List.Expandable"
+        >
+          Expandable
+        </PartLink>
+        .
       </li>
       <li>Renders no element: they stay its group’s children.</li>
       <li>
@@ -2006,8 +2074,14 @@ export const ListParts: FunctionComponent = () => (
         below the row toggling it (iOS’s Calendar).
       </li>
       <li>
-        In an <code>ExpandableRoot</code>: by its state. Otherwise: by its own{' '}
-        <code>open</code>.
+        In an{' '}
+        <PartLink
+          component="list"
+          part="List.ExpandableRoot"
+        >
+          ExpandableRoot
+        </PartLink>
+        : by its state. Otherwise: by its own <code>open</code>.
       </li>
       <li>Closed: inert.</li>
       <li>Takes a row’s props, too.</li>
@@ -2218,7 +2292,13 @@ export const ListParts: FunctionComponent = () => (
     <ul>
       <li>
         A trailing handle dragging its row to reorder its group (see{' '}
-        <code>Group</code>).
+        <PartLink
+          component="list"
+          part="List.Group"
+        >
+          Group
+        </PartLink>
+        ).
       </li>
       <li>Focused: arrow keys move the row by one.</li>
     </ul>
@@ -2295,7 +2375,14 @@ export const ListParts: FunctionComponent = () => (
           component="checkbox"
           part="RadioGroup"
         />{' '}
-        rendering the <code>Group</code>.
+        rendering the{' '}
+        <PartLink
+          component="list"
+          part="List.Group"
+        >
+          Group
+        </PartLink>
+        .
       </li>
     </ul>
     <RadioPart />

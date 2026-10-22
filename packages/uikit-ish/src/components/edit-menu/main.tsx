@@ -15,8 +15,8 @@ import {
 
 import {
   dragOverItems,
+  Menu,
   MenuContext,
-  MenuRootProps,
   useCloseOutOfView,
   useRootActions,
 } from '../menu/main.js';
@@ -26,9 +26,13 @@ import {
   positionerSide,
   useForwardedRef,
 } from '../utils/main.js';
-import type { EditMenuPositionerProps, ItemProps } from './props.js';
+import type {
+  EditMenuPositionerProps,
+  EditMenuRootProps,
+  ItemProps,
+} from './props.js';
 
-export type { EditMenuPositionerProps } from './props.js';
+export type { EditMenuPositionerProps, EditMenuRootProps } from './props.js';
 
 // Source: Apple iOS 26 Figma (“Menus”: “Edit Menu”, “_Edit Menu Item”,
 // Mode=Light and Dark), with the destructive color mapped to `systemRed`; the
@@ -67,16 +71,16 @@ export type { EditMenuPositionerProps } from './props.js';
  * (by default): the page stays interactive, and pressing outside of it
  * reaches the page (e.g. clearing the selection) as it closes the menu.
  */
-const Root = ({
+const Root = <Payload,>({
   children,
   orientation = 'horizontal',
-  size = 'compact',
   ...props
-}: MenuRootProps): ReactNode => {
+}: EditMenuRootProps<Payload>): ReactNode => {
   const actionsRef = useRootActions(props.actionsRef);
 
   return (
-    <MenuContext.Provider value={{ actionsRef, orientation, size }}>
+    // (Its submenus are iPad menus, see `Menu.SubmenuRoot`.)
+    <MenuContext.Provider value={{ actionsRef, orientation, size: 'regular' }}>
       <BaseMenu.Root
         modal={false}
         orientation={orientation}
@@ -361,8 +365,9 @@ const Item = forwardRef<
 ));
 
 /**
- * The “more” button, opening a submenu with further actions: place it in a
- * `Menu.SubmenuRoot`, followed by a `Menu.Portal` with the submenu.
+ * The “more” button, opening a submenu with further actions: place it in an
+ * `EditMenu.SubmenuRoot`, followed by an `EditMenu.Portal` with the submenu
+ * (a `Menu`'s positioner and popup).
  */
 const More = forwardRef<
   HTMLElement,
@@ -508,9 +513,16 @@ export const useSelectionAnchor = (
   return [anchor, clear];
 };
 
+// Base UI's menu parts but its handles: an edit menu has no trigger to open
+// at (the app opens it, `open`).
+const { createHandle: _createHandle, ...menuParts } = BaseMenu;
+
 export const EditMenu = {
-  ...BaseMenu,
+  ...menuParts,
   Root,
+  // A menu's (its submenu's: an iPad menu, see `Menu`).
+  Portal: Menu.Portal,
+  SubmenuRoot: Menu.SubmenuRoot,
   Positioner,
   Popup,
   Item,

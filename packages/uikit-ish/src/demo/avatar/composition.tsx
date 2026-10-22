@@ -5,7 +5,12 @@ import { FunctionComponent } from 'react';
 import { Avatar, List } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { photo } from './props.js';
 
 /** Contacts' rows: each person's avatar as the row's image. */
@@ -120,8 +125,12 @@ export const AvatarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="list">List</a> row’s image (<code>List.Image</code>,{' '}
-        <code>variant=&quot;circular&quot;</code>), the avatar its size (
+        A <a href="list">List</a> row’s image (
+        <PartLink
+          component="list"
+          part="List.Image"
+        />
+        , <code>variant=&quot;circular&quot;</code>), the avatar its size (
         <code>size={'{42}'}</code>).
       </li>
       <li>
@@ -138,8 +147,12 @@ export const AvatarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A group conversation’s people in one circle (<code>Avatar.Group</code>),
-        as the row’s image.
+        A group conversation’s people in one circle (
+        <PartLink
+          component="avatar"
+          part="Avatar.Group"
+        />
+        ), as the row’s image.
       </li>
       <li>
         Hidden from assistive technology here (<code>aria-hidden</code>): the

@@ -12,3 +12,17 @@
   width: 402px;
   max-height: 640px;
 }
+
+/* As a sheet's content (the parts page's views): at the screen's bottom, on
+   the sheet's background. */
+.activity-view-demo-panel {
+  /* (Below the status bar: none of its inset left, as in a sheet.) */
+  --uikit-safe-area-inset-top: 0px;
+
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 38px 38px 0 0;
+  background-color: var(--color-ios-secondary-system-grouped-background);
+  margin-block-start: auto;
+  padding-block: 16px 34px;
+}

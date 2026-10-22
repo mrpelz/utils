@@ -134,7 +134,7 @@ const Actions = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
 
 /** A person (or a group) to share with: its `Avatar` (the children). */
 const Person = forwardRef<HTMLButtonElement, ActivityViewPersonProps>(
-  ({ className, children, count, name, ...props }, ref) => (
+  ({ className, ...props }, ref) => (
     // A person or an action (see style.css), in its list item.
     <div
       className="uikit-activity-view-list-item"
@@ -147,31 +147,41 @@ const Person = forwardRef<HTMLButtonElement, ActivityViewPersonProps>(
         {...props}
         className={cn('uikit-activity-view-item', className)}
         data-activity-view-part="item"
-      >
-        {children}
-        <span
-          className="uikit-activity-view-name"
-          data-activity-view-part="name"
-          data-counted={count === undefined ? undefined : ''}
-        >
-          {name}
-        </span>
-        {count === undefined ? null : (
-          <span
-            className="uikit-activity-view-count"
-            data-activity-view-part="count"
-          >
-            {count}
-          </span>
-        )}
-      </button>
+      />
     </div>
   ),
 );
 
-/** An action (Figma “Action”): its symbol (the children) in a circle. */
+/** A person's name (e.g. first and last name, two lines). */
+const Name = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
+  ({ className, ...props }, ref) => (
+    <span
+      ref={ref}
+      {...props}
+      className={cn('uikit-activity-view-name', className)}
+      data-activity-view-part="name"
+    />
+  ),
+);
+
+/**
+ * How many people (a group's, e.g. “2 People”), below its name (on one
+ * line then).
+ */
+const Count = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
+  ({ className, ...props }, ref) => (
+    <span
+      ref={ref}
+      {...props}
+      className={cn('uikit-activity-view-count', className)}
+      data-activity-view-part="count"
+    />
+  ),
+);
+
+/** An action (Figma “Action”): its `Symbol` above its `Label`. */
 const Action = forwardRef<HTMLButtonElement, ActivityViewActionProps>(
-  ({ className, children, label, ...props }, ref) => (
+  ({ className, ...props }, ref) => (
     <div
       className="uikit-activity-view-list-item"
       data-activity-view-part="list-item"
@@ -186,16 +196,33 @@ const Action = forwardRef<HTMLButtonElement, ActivityViewActionProps>(
           'uikit-activity-view-item uikit-activity-view-action',
           className,
         )}
-      >
-        <span
-          aria-hidden="true"
-          data-activity-view-part="action-symbol"
-        >
-          {children}
-        </span>
-        <span>{label}</span>
-      </button>
+      />
     </div>
+  ),
+);
+
+/** An action's symbol (e.g. a `Symbol`) in a 70px circle on a fill. */
+const ActionSymbol = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
+  ({ className, ...props }, ref) => (
+    <span
+      ref={ref}
+      aria-hidden="true"
+      {...props}
+      className={cn('uikit-activity-view-symbol', className)}
+      data-activity-view-part="symbol"
+    />
+  ),
+);
+
+/** An action's label (e.g. “Add to Reading List”, two lines). */
+const Label = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
+  ({ className, ...props }, ref) => (
+    <span
+      ref={ref}
+      {...props}
+      className={cn('uikit-activity-view-label', className)}
+      data-activity-view-part="label"
+    />
   ),
 );
 
@@ -225,7 +252,11 @@ export const ActivityView = {
   Message,
   People,
   Person,
+  Name,
+  Count,
   Actions,
   Action,
+  Symbol: ActionSymbol,
+  Label,
   Separator,
 };

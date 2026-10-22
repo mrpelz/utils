@@ -159,23 +159,30 @@ export {
 // Menus
 export {
   ContextualMenu,
+  type ContextualMenuHandle,
   type ContextualMenuPopupProps,
+  type ContextualMenuPortalProps,
   type ContextualMenuPositionerProps,
   type ContextualMenuPreviewProps,
   type ContextualMenuRootProps,
   type ContextualMenuTriggerProps,
+  useCreateContextualMenuHandle,
 } from './contextual-menu/main.js';
 export {
   EditMenu,
   type SelectionAnchor,
   useSelectionAnchor,
   type EditMenuPositionerProps,
+  type EditMenuRootProps,
 } from './edit-menu/main.js';
 export {
   Menu,
+  type MenuHandle,
   type MenuRootProps,
   type Size as MenuSize,
   type MenuPositionerProps,
+  type MenuTriggerProps,
+  useCreateMenuHandle,
 } from './menu/main.js';
 
 // Bars

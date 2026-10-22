@@ -202,4 +202,28 @@
     }
   }
 
+  /* A screen's wallpaper (a frame's, see above): a grid of photos, for what
+     lies over it to show its blur or glass (e.g. a contextual menu's
+     backdrop, a menu's popup). */
+  .demo-wallpaper {
+    background:
+      linear-gradient(
+          90deg,
+          transparent calc(100% - 4px),
+          var(--color-ios-system-background) 0
+        )
+        0 0 / 100px 100px,
+      linear-gradient(
+          transparent calc(100% - 4px),
+          var(--color-ios-system-background) 0
+        )
+        0 0 / 100px 100px,
+      repeating-conic-gradient(
+          var(--color-ios-system-orange) 0 25%,
+          var(--color-ios-system-teal) 0 50%,
+          var(--color-ios-system-pink) 0 75%,
+          var(--color-ios-system-indigo) 0 100%
+        )
+        0 0 / 200px 200px;
+  }
 }

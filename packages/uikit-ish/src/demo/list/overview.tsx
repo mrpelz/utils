@@ -327,7 +327,14 @@ export const ListOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A row is pressable when its <code>Title</code> (or a{' '}
+        A row is pressable when its{' '}
+        <PartLink
+          component="list"
+          part="List.Title"
+        >
+          Title
+        </PartLink>{' '}
+        (or a{' '}
         <PartLink
           component="list"
           part="List.Button"
@@ -346,17 +353,43 @@ export const ListOverview: FunctionComponent = () => (
         the outermost one. One row is open at a time.
       </li>
       <li>
-        Dragging a row’s <code>Grabber</code> reorders it in its group (
-        <code>onReorder</code>; the app reorders its rows). Plain lists’ section
-        titles stick to the top while their section scrolls.
+        Dragging a row’s{' '}
+        <PartLink
+          component="list"
+          part="List.Grabber"
+        >
+          Grabber
+        </PartLink>{' '}
+        reorders it in its group (<code>onReorder</code>; the app reorders its
+        rows). Plain lists’ section titles stick to the top while their section
+        scrolls.
       </li>
       <li>
-        Edit controls (<code>Checkbox</code>, <code>Radio</code>,{' '}
-        <code>EditButton</code>) lead the row, grabbers end it; entering and
-        leaving edit mode (<code>editing</code>), they slide in and out from the
-        row’s edges (300ms). A delete button opens the row’s trailing swipe
-        actions (guide <GuideLink to="rule-g7">G7</GuideLink>: the list owns the
-        selection).
+        Edit controls (
+        <PartLink
+          component="list"
+          part="List.Checkbox"
+        >
+          Checkbox
+        </PartLink>
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.Radio"
+        >
+          Radio
+        </PartLink>
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.EditButton"
+        >
+          EditButton
+        </PartLink>
+        ) lead the row, grabbers end it; entering and leaving edit mode (
+        <code>editing</code>), they slide in and out from the row’s edges
+        (300ms). A delete button opens the row’s trailing swipe actions (guide{' '}
+        <GuideLink to="rule-g7">G7</GuideLink>: the list owns the selection).
       </li>
     </ul>
   </>

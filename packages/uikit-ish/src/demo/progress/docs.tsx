@@ -11,8 +11,12 @@ const formatRows: readonly PropRow[] = [
     'Intl.NumberFormatOptions',
     undefined,
     <>
-      Options to format the value (its <code>Progress.Value</code> and{' '}
-      <code>aria-valuetext</code>; by default, a percentage).
+      Options to format the value (its{' '}
+      <PartLink
+        component="progress"
+        part="Progress.Value"
+      />{' '}
+      and <code>aria-valuetext</code>; by default, a percentage).
     </>,
   ],
   [

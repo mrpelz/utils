@@ -637,6 +637,11 @@ export const TooltipParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
+        No box of its own (<code>display: contents</code>): rendered into a
+        container laid out as a flex column (e.g. a screen), it doesn’t shift
+        its content.
+      </li>
+      <li>
         Where it renders: the document’s body (<code>container</code>); while
         closed, nothing (<code>keepMounted</code>: hidden).
       </li>

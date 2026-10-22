@@ -545,8 +545,14 @@ export const SliderComposition: FunctionComponent = () => (
         value at its end), or beside it.
       </li>
       <li>
-        In a <a href="form">Form</a>: Base UI’s <code>Field.Root</code> names
-        each value.
+        In a <a href="form">Form</a>: Base UI’s{' '}
+        <PartLink
+          component="form"
+          part="Field"
+        >
+          Field.Root
+        </PartLink>{' '}
+        names each value.
       </li>
       <li>
         Outside one: the root’s <code>name</code> names its hidden input.

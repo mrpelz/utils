@@ -49,9 +49,13 @@ export const popoverRootRows: readonly PropRow[] = [
       Determines if the popover enters a modal state when open:{' '}
       <code>true</code>, user interaction is limited to the popover (page scroll
       locked, outside pointer interactions disabled; focus trapped with a{' '}
-      <code>Popover.Close</code> in it); <code>false</code>, user interaction
-      with the rest of the document is allowed; <code>trap-focus</code>, focus
-      is trapped, but scroll and outside pointer interactions remain enabled.
+      <PartLink
+        component="popover"
+        part="Popover.Close"
+      />{' '}
+      in it); <code>false</code>, user interaction with the rest of the document
+      is allowed; <code>trap-focus</code>, focus is trapped, but scroll and
+      outside pointer interactions remain enabled.
     </>,
   ],
   [

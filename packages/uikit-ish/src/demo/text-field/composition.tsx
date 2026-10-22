@@ -492,8 +492,14 @@ export const TextFieldComposition: FunctionComponent = () => (
           {'render={<List.Item />}'}
         </PartLink>
         ) of a grouped <a href="list">List</a>, in sections: a{' '}
-        <a href="form">Form</a>’s <code>Fieldset</code> (its legend the
-        section’s header).
+        <a href="form">Form</a>’s{' '}
+        <PartLink
+          component="form"
+          part="Fieldset.Root"
+        >
+          Fieldset
+        </PartLink>{' '}
+        (its legend the section’s header).
       </li>
       <li>
         A label as the row’s title, the value after it; or no label, the

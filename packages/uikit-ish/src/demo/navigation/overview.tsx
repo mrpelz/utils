@@ -256,8 +256,14 @@ export const NavigationOverview: FunctionComponent = () => (
       <li>
         A page’s <a href="header">Header</a> moves with its page, its bar too (a
         bar that stays, e.g. its title: a <a href="toolbar">Toolbar</a> in a{' '}
-        <a href="viewport">Viewport</a>’s <code>BlockStart</code>, outside the
-        stack).
+        <a href="viewport">Viewport</a>’s{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockStart"
+        >
+          BlockStart
+        </PartLink>
+        , outside the stack).
       </li>
       <li>
         Swiping back starts within 20px of the leading edge (touch or mouse):

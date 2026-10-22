@@ -299,7 +299,13 @@ const FieldPart: FunctionComponent = () => {
 export const FormParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>Form: Base UI’s, collecting and validating its fields.</li>
+      <li>
+        <PartLink
+          component="form"
+          part="Form"
+        />
+        : Base UI’s, collecting and validating its fields.
+      </li>
       <li>
         Fieldset: a list section of fields, its legend the section’s header.
       </li>
@@ -436,7 +442,14 @@ export const FormParts: FunctionComponent = () => (
         >
           Base UI’s Field
         </a>
-        ): <code>Field.Root</code> names a value in the form, its control’s.
+        ):{' '}
+        <PartLink
+          component="form"
+          part="Field"
+        >
+          Field.Root
+        </PartLink>{' '}
+        names a value in the form, its control’s.
       </li>
       <li>
         Around a control that isn’t a text field (a{' '}
@@ -456,9 +469,28 @@ export const FormParts: FunctionComponent = () => (
           component="text-field"
           part="TextField.Root"
         />
-        s: Base UI’s field, styled; its other parts (<code>Field.Label</code>,{' '}
-        <code>Field.Control</code>, <code>Field.Error</code>, …) as{' '}
-        <a href="text-field/parts">Text field’s</a>.
+        s: Base UI’s field, styled; its other parts (
+        <PartLink
+          component="form"
+          part="Field"
+        >
+          Field.Label
+        </PartLink>
+        ,{' '}
+        <PartLink
+          component="form"
+          part="Field"
+        >
+          Field.Control
+        </PartLink>
+        ,{' '}
+        <PartLink
+          component="form"
+          part="Field"
+        >
+          Field.Error
+        </PartLink>
+        , …) as <a href="text-field/parts">Text field’s</a>.
       </li>
     </ul>
     <FieldPart />

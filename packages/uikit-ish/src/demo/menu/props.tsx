@@ -2,6 +2,7 @@
 
 import { Menu as BaseMenu } from '@base-ui/react/menu';
 
+import { Button } from '../../components/index.js';
 import { AddLog } from '../frame/log.js';
 import { commonPropOptions, MappedProp } from '../frame/prop-control.js';
 
@@ -152,3 +153,98 @@ export const getPropOptionsItem = (addLog: AddLog) => ({
     undefined,
   ] as const,
 });
+
+// The guide pages' views (see overview.tsx, parts.tsx, composition.tsx).
+
+/** `Menu.Root` (the parts page's): all of its props. */
+export const getPropOptionsGuideRoot = (addLog: AddLog) => ({
+  size: [undefined, 'compact', 'regular'] as const,
+  ...getPropOptionsRoot(addLog),
+  closeParentOnEsc: [undefined, false, true] as const,
+  onOpenChangeComplete: [
+    undefined,
+    new MappedProp(
+      (open: boolean) => addLog(`open complete: ${String(open)}`),
+      '[log change]',
+    ),
+  ] as const,
+  onItemHighlighted: [
+    undefined,
+    new MappedProp(
+      (item: HTMLElement | undefined) =>
+        addLog(`highlighted: ${item?.textContent ?? 'none'}`),
+      '[log highlight]',
+    ),
+  ] as const,
+});
+
+/** `Menu.Trigger` (the parts page's): a button, and how it opens. */
+export const getPropOptionsGuideTrigger = (addLog: AddLog) => ({
+  ...getPropOptionsTrigger(addLog),
+  render: [
+    new MappedProp(
+      <Button.Root
+        size="large"
+        variant="bordered"
+      />,
+      '[<Button.Root size="large" variant="bordered" />]',
+    ),
+    undefined,
+  ] as const,
+  closeDelay: [undefined, 0, 500] as const,
+});
+
+export const propOptionsGuidePortal = {
+  ...commonPropOptions,
+  keepMounted: [undefined, false, true] as const,
+};
+
+/** Parts with only Base UI's common props (or an element's own). */
+export const propOptionsPart = { ...commonPropOptions };
+
+export const propOptionsElement = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+};
+
+export const getPropOptionsGuideItem = (addLog: AddLog) => ({
+  ...getPropOptionsItem(addLog),
+  label: [undefined, 'Rename file'] as const,
+});
+
+export const propOptionsGuideLinkItem = {
+  ...propOptionsToggleItem,
+  href: ['#', 'https://example.com'] as const,
+  label: [undefined, 'Help'] as const,
+};
+
+export const getPropOptionsGuideCheckboxItem = (addLog: AddLog) => ({
+  ...getPropOptionsCheckboxItems(addLog),
+  label: [undefined, 'Previews'] as const,
+});
+
+export const propOptionsGuideIndicator = {
+  ...commonPropOptions,
+  keepMounted: [undefined, false, true] as const,
+};
+
+export const propOptionsGuideRadioItem = {
+  ...propOptionsToggleItem,
+  label: [undefined, 'By date'] as const,
+};
+
+export const propOptionsGuideSubmenuTrigger = {
+  ...propOptionsSubmenuTrigger,
+  closeDelay: [undefined, 0, 500] as const,
+  label: [undefined, 'Move to'] as const,
+};
+
+export const propOptionsGuideSeparator = {
+  ...commonPropOptions,
+  orientation: [undefined, 'horizontal', 'vertical'] as const,
+};
+
+/** The overview's: the size class (by the window's, or set). */
+export const propOptionsOverviewRoot = {
+  size: [undefined, 'compact', 'regular'] as const,
+};

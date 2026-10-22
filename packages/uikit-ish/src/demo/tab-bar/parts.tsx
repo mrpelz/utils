@@ -900,7 +900,12 @@ export const TabBarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A tab’s symbol (e.g. a <code>Symbol</code>, with its badge).
+        A tab’s symbol (e.g. a{' '}
+        <PartLink
+          component="symbol"
+          part="Symbol"
+        />
+        , with its badge).
       </li>
       <li>Sized by the list’s size; bolder while active.</li>
     </ul>

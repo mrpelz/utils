@@ -1499,8 +1499,17 @@ export const PopoverParts: FunctionComponent = () => (
         panel (the menus’ glass).
       </li>
       <li>
-        In the popup: its arrow, its bar (Header), its content (Body); its
-        title, description and close button wherever they go.
+        In the popup: its arrow, its bar (
+        <PartLink
+          component="popover"
+          part="Popover.Header"
+        />
+        ), its content (
+        <PartLink
+          component="popover"
+          part="Popover.Body"
+        />
+        ); its title, description and close button wherever they go.
       </li>
       <li>Handles: triggers outside the root, opening it imperatively.</li>
       <li>Press each view’s button to open its popover.</li>
@@ -1677,6 +1686,11 @@ export const PopoverParts: FunctionComponent = () => (
       <code>Popover.Portal</code>
     </Heading>
     <ul>
+      <li>
+        No box of its own (<code>display: contents</code>): rendered into a
+        container laid out as a flex column (e.g. a screen), it doesn’t shift
+        its content.
+      </li>
       <li>
         Where it renders: the document’s body (<code>container</code>); while
         closed, nothing (<code>keepMounted</code>: hidden).

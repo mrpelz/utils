@@ -14,3 +14,51 @@
   font-size: 48px;
   place-items: center;
 }
+
+/* A trigger and a button opening its menu, side by side. */
+.contextual-menu-demo-triggers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Photos' thumbnails, in a row. */
+.contextual-menu-demo-grid {
+  display: flex;
+  gap: 4px;
+}
+
+.contextual-menu-demo-thumbnail {
+  display: grid;
+  width: 96px;
+  height: 96px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 32px;
+  place-items: center;
+}
+
+/* A message, as a card: its sender above its text. */
+.contextual-menu-demo-message {
+  display: grid;
+  width: 320px;
+  max-width: 100%;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 20px;
+  background-color: var(--color-ios-secondary-system-grouped-background);
+  color: var(--color-ios-label);
+  cursor: pointer;
+  font: inherit;
+  gap: 2px;
+  text-align: start;
+
+  & > span {
+    color: var(--color-ios-secondary-label);
+  }
+}

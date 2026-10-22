@@ -11,3 +11,18 @@
   display: block;
   margin-bottom: 320px;
 }
+
+/* Triggers side by side (the handles' views). */
+.menu-demo-triggers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* A list as wide as a phone's (the stage shrinks to its content). */
+.menu-demo-list {
+  width: 360px;
+  max-width: 100%;
+}

@@ -39,3 +39,23 @@ export const propOptionsPositioner = {
   align: [undefined, 'start', 'center', 'end'] as const,
   sideOffset: [undefined, 0, 8, 16] as const,
 };
+
+// The guide pages' views (see parts.tsx).
+
+/** `ContextualMenu.Preview`: its own element (no `render`). */
+export const propOptionsGuidePreview = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+};
+
+export const propOptionsGuidePortal = {
+  ...commonPropOptions,
+  keepMounted: [undefined, false, true] as const,
+};
+
+export const propOptionsGuideBackdrop = { ...commonPropOptions };
+
+export const propOptionsGuidePositioner = {
+  ...propOptionsPositioner,
+  collisionPadding: [undefined, 0, 16] as const,
+};

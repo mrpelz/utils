@@ -333,14 +333,33 @@ export const ToolbarOverview: FunctionComponent = () => (
         the safe area’s). At the top: 44px capsules, 10px apart, 54px high.
       </li>
       <li>
-        <code>Leading</code> and <code>Trailing</code> share the free space
-        equally, so what’s between them (a title) is centered in the bar while
-        they fit; a title aligned to the start takes the free space instead.
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Leading"
+        >
+          Leading
+        </PartLink>{' '}
+        and{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Trailing"
+        >
+          Trailing
+        </PartLink>{' '}
+        share the free space equally, so what’s between them (a title) is
+        centered in the bar while they fit; a title aligned to the start takes
+        the free space instead.
       </li>
       <li>
         A button of its own is a glass <a href="button">Button</a> (a circle for
-        a symbol); several share a capsule (<code>Group</code>), their content
-        blended with its glass.
+        a symbol); several share a capsule (
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Group"
+        >
+          Group
+        </PartLink>
+        ), their content blended with its glass.
       </li>
       <li>
         Pressed, a capsule of several buttons turns into a glass lens (scaled by

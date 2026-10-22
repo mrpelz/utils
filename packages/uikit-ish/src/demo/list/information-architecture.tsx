@@ -140,9 +140,63 @@ export const ListInformationArchitecture: FunctionComponent = () => (
           component="list"
           part="List.Image"
         />
-        ; <code>Title</code>, <code>Subtitle</code>, <code>Text</code>; trailing{' '}
-        <code>Detail</code>, <code>Accessory</code>, <code>Checkmark</code>,{' '}
-        <code>DrillIn</code>, <code>Grabber</code> or a control.
+        ;{' '}
+        <PartLink
+          component="list"
+          part="List.Title"
+        >
+          Title
+        </PartLink>
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.Subtitle"
+        >
+          Subtitle
+        </PartLink>
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.Text"
+        >
+          Text
+        </PartLink>
+        ; trailing{' '}
+        <PartLink
+          component="list"
+          part="List.Detail"
+        >
+          Detail
+        </PartLink>
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.Accessory"
+        >
+          Accessory
+        </PartLink>
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.Checkmark"
+        >
+          Checkmark
+        </PartLink>
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.DrillIn"
+        >
+          DrillIn
+        </PartLink>
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.Grabber"
+        >
+          Grabber
+        </PartLink>{' '}
+        or a control.
       </li>
       <li>
         <strong>Commands:</strong> swipe actions and header actions are Commands

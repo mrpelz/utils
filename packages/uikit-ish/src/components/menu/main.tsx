@@ -14,6 +14,7 @@ import {
   useContext,
   useEffect,
   useRef,
+  useState,
 } from 'react';
 
 import {
@@ -30,13 +31,20 @@ import type {
   Finger,
   ItemProps,
   MenuContextValue,
+  MenuHandle,
   MenuPositionerProps,
   MenuRootProps,
   SpanProps,
   TriggerProps,
 } from './props.js';
 
-export type { MenuPositionerProps, MenuRootProps, Size } from './props.js';
+export type {
+  MenuHandle,
+  MenuPositionerProps,
+  MenuRootProps,
+  Size,
+  TriggerProps as MenuTriggerProps,
+} from './props.js';
 
 // Source: Apple iOS 26 Figma (“Menus”: “Menu - iPhone”, “Menu - iPad -
 // Actions (and Submenus)”, “Items - iPhone/iPad”, “Section Title”,
@@ -101,7 +109,10 @@ export const useRootActions = (
   return actionsRef ?? ownActionsRef;
 };
 
-const Root = ({ size = 'compact', ...props }: MenuRootProps): ReactNode => {
+const Root = <Payload,>({
+  size = 'compact',
+  ...props
+}: MenuRootProps<Payload>): ReactNode => {
   const actionsRef = useRootActions(props.actionsRef);
 
   return (
@@ -880,15 +891,49 @@ const Subtitle = forwardRef<HTMLSpanElement, SpanProps>(
   ),
 );
 
+/**
+ * A handle linking a menu to its triggers outside it (detached), and
+ * opening or closing it imperatively (Base UI's `Menu.createHandle`): pass
+ * it to the root's and the triggers' `handle` (in a component, see
+ * `useCreateMenuHandle`).
+ */
+const createHandle = <Payload = unknown,>(): MenuHandle<Payload> =>
+  BaseMenu.createHandle<Payload>();
+
+/** `Menu.createHandle`, in a component: made once, for its lifetime. */
+export const useCreateMenuHandle = <
+  Payload = unknown,
+>(): MenuHandle<Payload> => {
+  const [handle] = useState(() => createHandle<Payload>());
+  return handle;
+};
+
 /** The menu's trigger (also of `ContextualMenu`). */
 export { Trigger as MenuTrigger };
+
+/**
+ * Its portal (Base UI's): no box of its own (\`display: contents\`), so
+ * rendered into a container (e.g. a screen laid out as a flex column) it
+ * doesn't shift its content.
+ */
+const Portal = forwardRef<HTMLDivElement, Omit<BaseMenu.Portal.Props, 'ref'>>(
+  ({ className, ...props }, ref) => (
+    <BaseMenu.Portal
+      ref={ref}
+      {...props}
+      className={cn('uikit-menu-portal', className)}
+    />
+  ),
+);
 
 export const Menu = {
   ...BaseMenu,
   Root,
+  Portal,
   SubmenuRoot,
   Trigger,
   Positioner,
+  createHandle,
   Popup,
   Item,
   LinkItem,

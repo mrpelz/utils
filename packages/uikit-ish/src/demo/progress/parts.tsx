@@ -381,7 +381,11 @@ export const ProgressParts: FunctionComponent = () => (
     <ul>
       <li>
         Spinning spokes, for work of unknown length (an indeterminate{' '}
-        <code>Progress.Root</code> of its own: no parts).
+        <PartLink
+          component="progress"
+          part="Progress.Root"
+        />{' '}
+        of its own: no parts).
       </li>
       <li>
         Look: <code>size</code>, <code>movement</code>, <code>duration</code>,{' '}

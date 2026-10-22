@@ -742,4 +742,76 @@ export const tests = [
       assert.match(await page.log(), /item clicked/u);
     },
   },
+  {
+    name: 'menu: a handle opens it imperatively; triggers outside its root pass their payload',
+    run: async (page) => {
+      /** Clicks the view's second button. */
+      const pressSecond = async () => {
+        const button = await page.rect('button', 1);
+        await page.click([
+          button.x + button.width / 2,
+          button.y + button.height / 2,
+        ]);
+        await sleep(500);
+      };
+      const open = () =>
+        page.evaluate(
+          `Boolean(document.querySelector(${JSON.stringify('[role=menu]')}))`,
+        );
+
+      await page.open('menu-parts-create-handle');
+      await pressSecond();
+      assert.equal(await open(), true, 'opened imperatively');
+
+      await page.open('menu-parts-use-create-menu-handle');
+      await pressSecond();
+      const label = await page.evaluate(
+        `document.querySelector(${JSON.stringify('[role=menu] [data-menu-part=group-label]')}).textContent`,
+      );
+      assert.equal(label, 'Photo.jpg');
+    },
+  },
+  {
+    name: 'menu: a pop-up button shows its chosen option, its items 40px high (compact)',
+    run: async (page) => {
+      await page.open('menu-composition-pop-up');
+      const trigger = await page.rect('button');
+      await page.click([
+        trigger.x + trigger.width / 2,
+        trigger.y + trigger.height / 2,
+      ]);
+      await sleep(500);
+      const name = await page.evaluate(
+        `(() => { const { x, y, width, height } = [...document.querySelectorAll(${JSON.stringify('[role=menuitemradio]')})][1].getBoundingClientRect(); return { height, x: x + width / 2, y: y + height / 2 }; })()`,
+      );
+      assert.equal(Math.round(name.height), 40, 'compact');
+      await page.click([name.x, name.y]);
+      await sleep(500);
+      const label = await page.evaluate(
+        `${page.section}.querySelector('[data-button-part=label]').textContent`,
+      );
+      assert.equal(label, 'Name');
+    },
+  },
+  {
+    name: 'menu: rendered into its frame, opening doesn’t move its trigger (its portal has no box)',
+    run: async (page) => {
+      await page.open('menu-parts-root');
+      const before = await page.rect('button');
+      await page.click([
+        before.x + before.width / 2,
+        before.y + before.height / 2,
+      ]);
+      await sleep(600);
+      const after = await page.rect('button');
+      assert.deepEqual(
+        [Math.round(after.x), Math.round(after.y)],
+        [Math.round(before.x), Math.round(before.y)],
+      );
+      const inFrame = await page.evaluate(
+        `Boolean(${page.section}.querySelector(${JSON.stringify('.sheet-demo-phone [role=menu]')}))`,
+      );
+      assert.equal(inFrame, true);
+    },
+  },
 ];

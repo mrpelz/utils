@@ -15,7 +15,12 @@ import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { names } from '../viewport/content.js';
 import { headerBarRows, headerLargeTitleRows } from './docs.js';
 import {
@@ -181,7 +186,14 @@ export const HeaderOverview: FunctionComponent = () => (
       <li>
         A bar that doesn’t belong to a page (fixed to the window, over several
         pages): a <a href="toolbar">Toolbar</a> in a{' '}
-        <a href="viewport">Viewport</a>’s <code>BlockStart</code>.
+        <a href="viewport">Viewport</a>’s{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockStart"
+        >
+          BlockStart
+        </PartLink>
+        .
       </li>
       <li>
         Commands at the bottom: a bottom <a href="toolbar">Toolbar</a>.
@@ -259,7 +271,14 @@ export const HeaderOverview: FunctionComponent = () => (
       <li>
         In a <a href="navigation">Navigation</a>’s transition: moving with its
         page, its bar too (a bar that stays: a <a href="toolbar">Toolbar</a> in
-        a <a href="viewport">Viewport</a>’s <code>BlockStart</code>).
+        a <a href="viewport">Viewport</a>’s{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockStart"
+        >
+          BlockStart
+        </PartLink>
+        ).
       </li>
     </ul>
   </>

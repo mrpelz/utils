@@ -229,7 +229,12 @@ export const SliderOverview: FunctionComponent = () => (
       </li>
       <li>
         The ticks and the value tooltips are hidden from assistive technology,
-        as are the glyphs of the ends’ <code>Symbol</code>s (text in a{' '}
+        as are the glyphs of the ends’{' '}
+        <PartLink
+          component="symbol"
+          part="Symbol"
+        />
+        s (text in a{' '}
         <PartLink
           component="slider"
           part="Slider.Symbol"

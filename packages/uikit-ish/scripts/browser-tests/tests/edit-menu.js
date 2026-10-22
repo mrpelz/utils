@@ -284,4 +284,22 @@ export const tests = [
       );
     },
   },
+  {
+    name: 'edit menu: a selection opens it above the selection, inside its frame (its portal’s container)',
+    run: async (page) => {
+      await page.open('edit-menu-overview');
+      await page.evaluate(
+        `document.getSelection().selectAllChildren(${page.section}.querySelector(${JSON.stringify('.edit-menu-demo-text')}))`,
+      );
+      // (Selected without the pointer: shown after a pause.)
+      await sleep(900);
+      const placed = await page.evaluate(`(() => {
+        const frame = ${page.section}.querySelector(${JSON.stringify('.sheet-demo-phone')});
+        const menu = frame.querySelector(${JSON.stringify('[role=menu]')});
+        const text = document.getSelection().getRangeAt(0).getBoundingClientRect();
+        return menu ? { above: Math.round(text.top - menu.getBoundingClientRect().bottom) } : null;
+      })()`);
+      assert.deepEqual(placed, { above: 8 });
+    },
+  },
 ];

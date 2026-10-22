@@ -138,8 +138,14 @@ export const toolbarButtonRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Of its own (not in a <code>Group</code>): tinted glass (
-      <code>variant=&quot;glass-prominent&quot;</code>).
+      Of its own (not in a{' '}
+      <PartLink
+        component="toolbar"
+        part="Toolbar.Group"
+      >
+        Group
+      </PartLink>
+      ): tinted glass (<code>variant=&quot;glass-prominent&quot;</code>).
     </>,
   ],
   [

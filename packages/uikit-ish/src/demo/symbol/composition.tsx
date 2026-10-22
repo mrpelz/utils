@@ -7,7 +7,12 @@ import { FunctionComponent } from 'react';
 
 import { List, Symbol } from '../../components/index.js';
 import { Component } from '../frame/component.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 
 /** Settings' rows: each a symbol, white on its color, as its image. */
 const RowImages: FunctionComponent = () => (
@@ -93,8 +98,12 @@ export const SymbolComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a <a href="button">Button</a>’s icon (<code>Button.Icon</code>):
-        before a label, after it (a pop-up’s chevrons), or alone (a circle,
+        In a <a href="button">Button</a>’s icon (
+        <PartLink
+          component="button"
+          part="Button.Icon"
+        />
+        ): before a label, after it (a pop-up’s chevrons), or alone (a circle,
         named): see <a href="button/composition#symbols-and-labels">Button</a>.
       </li>
       <li>
@@ -111,7 +120,11 @@ export const SymbolComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Settings’ rows: a <a href="list">List</a> row’s <code>List.Image</code>{' '}
+        Settings’ rows: a <a href="list">List</a> row’s{' '}
+        <PartLink
+          component="list"
+          part="List.Image"
+        />{' '}
         (rounded, its background the color), the symbol white in it.
       </li>
       <li>Decorative: the row’s title names it.</li>

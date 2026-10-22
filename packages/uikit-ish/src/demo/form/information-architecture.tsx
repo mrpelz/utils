@@ -1,6 +1,11 @@
 import { FunctionComponent } from 'react';
 
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -73,9 +78,13 @@ export const FormInformationArchitecture: FunctionComponent = () => (
         <GuideLink to="commit-model">§8.2</GuideLink>).
       </li>
       <li>
-        This library’s <code>Form</code> is the second kind: values collected
-        and submitted together; the first needs no form, each control’s change
-        applied as it happens.
+        This library’s{' '}
+        <PartLink
+          component="form"
+          part="Form"
+        />{' '}
+        is the second kind: values collected and submitted together; the first
+        needs no form, each control’s change applied as it happens.
       </li>
       <li>
         Progressive disclosure: a choice reveals the fields below it (the

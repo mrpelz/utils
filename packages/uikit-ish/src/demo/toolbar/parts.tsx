@@ -699,7 +699,14 @@ export const ToolbarParts: FunctionComponent = () => (
               component="toolbar"
               part="Toolbar.Trailing"
             />{' '}
-            (optional; as <code>Leading</code>)
+            (optional; as{' '}
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Leading"
+            >
+              Leading
+            </PartLink>
+            )
           </li>
           <li>
             Also:{' '}
@@ -766,8 +773,14 @@ export const ToolbarParts: FunctionComponent = () => (
         The bar’s start: its capsules in a row, as wide as they are at least.
       </li>
       <li>
-        Shares the free space equally with <code>Trailing</code>, so what’s
-        between them is centered in the bar.
+        Shares the free space equally with{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Trailing"
+        >
+          Trailing
+        </PartLink>
+        , so what’s between them is centered in the bar.
       </li>
       <li>
         Renders a <code>div</code> (<code>render</code>).
@@ -869,8 +882,15 @@ export const ToolbarParts: FunctionComponent = () => (
         a symbol, text 12px from its ends); <code>prominent</code>: tinted.
       </li>
       <li>
-        In a <code>Group</code>: 36px, its content in the capsule’s color; the
-        capsule’s glass, not its own.
+        In a{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Group"
+        >
+          Group
+        </PartLink>
+        : 36px, its content in the capsule’s color; the capsule’s glass, not its
+        own.
       </li>
       <li>
         Renders a <code>button</code>.

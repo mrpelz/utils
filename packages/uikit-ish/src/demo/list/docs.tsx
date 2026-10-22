@@ -30,9 +30,28 @@ export const listRootRows: readonly PropRow[] = [
     'always shown',
     <>
       In edit mode (UIKit <code>isEditing</code>): its rows’ edit controls (
-      <code>Checkbox</code>, <code>Radio</code>, <code>EditButton</code>) and
-      grabbers are shown, sliding in from the rows’ edges as it changes; out of
-      it (<code>false</code>), they’re collapsed and hidden.
+      <PartLink
+        component="list"
+        part="List.Checkbox"
+      >
+        Checkbox
+      </PartLink>
+      ,{' '}
+      <PartLink
+        component="list"
+        part="List.Radio"
+      >
+        Radio
+      </PartLink>
+      ,{' '}
+      <PartLink
+        component="list"
+        part="List.EditButton"
+      >
+        EditButton
+      </PartLink>
+      ) and grabbers are shown, sliding in from the rows’ edges as it changes;
+      out of it (<code>false</code>), they’re collapsed and hidden.
     </>,
   ],
   [
@@ -82,8 +101,14 @@ export const listGroupRows: readonly PropRow[] = [
     '(from: number, to: number) => void',
     undefined,
     <>
-      Called when a row is moved by its <code>Grabber</code> from one index to
-      another (among the group’s rows); the app reorders them.
+      Called when a row is moved by its{' '}
+      <PartLink
+        component="list"
+        part="List.Grabber"
+      >
+        Grabber
+      </PartLink>{' '}
+      from one index to another (among the group’s rows); the app reorders them.
     </>,
   ],
   ...renderRows('ul', 'HTMLElement'),
@@ -133,7 +158,14 @@ export const listExpandableRows: readonly PropRow[] = [
     'open',
     'boolean',
     <>
-      its <code>ExpandableRoot</code>’s state, or <code>false</code>
+      its{' '}
+      <PartLink
+        component="list"
+        part="List.ExpandableRoot"
+      >
+        ExpandableRoot
+      </PartLink>
+      ’s state, or <code>false</code>
     </>,
     'Shown; changing, its height and padding transition (300ms). Closed, it’s inert.',
   ],
@@ -141,8 +173,14 @@ export const listExpandableRows: readonly PropRow[] = [
     'id',
     'string',
     <>
-      its <code>ExpandableRoot</code>’s (its trigger’s{' '}
-      <code>aria-controls</code>)
+      its{' '}
+      <PartLink
+        component="list"
+        part="List.ExpandableRoot"
+      >
+        ExpandableRoot
+      </PartLink>
+      ’s (its trigger’s <code>aria-controls</code>)
     </>,
     'The row’s id.',
   ],
@@ -155,8 +193,14 @@ export const listExpandableRootRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Initially open (uncontrolled: its <code>ExpandableTrigger</code> toggles
-      it).
+      Initially open (uncontrolled: its{' '}
+      <PartLink
+        component="list"
+        part="List.ExpandableTrigger"
+      >
+        ExpandableTrigger
+      </PartLink>{' '}
+      toggles it).
     </>,
   ],
   [
@@ -178,8 +222,14 @@ export const listExpandableRootRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      The row with its trigger, and the <code>Expandable</code>. It renders no
-      element, so they stay its group’s children.
+      The row with its trigger, and the{' '}
+      <PartLink
+        component="list"
+        part="List.Expandable"
+      >
+        Expandable
+      </PartLink>
+      . It renders no element, so they stay its group’s children.
     </>,
   ],
 ];
@@ -410,7 +460,13 @@ export const listSwipeActionRows: readonly PropRow[] = [
     code('false'),
     <>
       Shows the label below the shape. It needs room: for multi-line rows (
-      <code>Text</code>).
+      <PartLink
+        component="list"
+        part="List.Text"
+      >
+        Text
+      </PartLink>
+      ).
     </>,
   ],
   [

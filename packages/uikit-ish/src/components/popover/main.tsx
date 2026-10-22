@@ -386,9 +386,26 @@ const Body = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
  * a panel of the menus' glass at its trigger (or `anchor`), optionally with
  * an arrow pointing at it.
  */
+/**
+ * Its portal (Base UI's): no box of its own (\`display: contents\`), so
+ * rendered into a container (e.g. a screen laid out as a flex column) it
+ * doesn't shift its content.
+ */
+const Portal = forwardRef<
+  HTMLDivElement,
+  Omit<BasePopover.Portal.Props, 'ref'>
+>(({ className, ...props }, ref) => (
+  <BasePopover.Portal
+    ref={ref}
+    {...props}
+    className={cn('uikit-popover-portal', className)}
+  />
+));
+
 export const Popover = {
   ...BasePopover,
   Root,
+  Portal,
   Positioner,
   Popup,
   Arrow,

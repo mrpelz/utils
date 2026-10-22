@@ -510,7 +510,20 @@ export const PopoverComposition: FunctionComponent = () => (
           part="useSizeClass"
         />
         ; a <a href="sheet">Sheet</a> with the same bar and content (its{' '}
-        <code>Header</code>, <code>Content</code>).
+        <PartLink
+          component="sheet"
+          part="Sheet.Header"
+        >
+          Header
+        </PartLink>
+        ,{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Content"
+        >
+          Content
+        </PartLink>
+        ).
       </li>
       <li>Resize the window, or choose the presentation.</li>
     </ul>

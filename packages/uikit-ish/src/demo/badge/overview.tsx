@@ -9,7 +9,12 @@ import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
 import { useProvidedState } from '../frame/state.js';
 import { KeyPropsTable, pickRows } from '../guide/props-table.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { badgeRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 
@@ -132,7 +137,12 @@ export const BadgeOverview: FunctionComponent = () => (
     <ul>
       <li>
         A count that isn’t waiting for anyone (a folder’s items): a list row’s
-        plain <code>List.Detail</code> text, as Mail’s mailboxes.
+        plain{' '}
+        <PartLink
+          component="list"
+          part="List.Detail"
+        />{' '}
+        text, as Mail’s mailboxes.
       </li>
       <li>
         Work going on: <a href="progress">Progress</a>.
