@@ -56,9 +56,7 @@ export const tests = [
 
       // A regular width (a tablet's screen): a form sheet, centered.
       await page.open('sheet-composition-form-sheet');
-      await page.evaluate(
-        `${page.section}.querySelector('.demo-stage button').click()`,
-      );
+      await page.evaluate(`${page.section}.querySelector('button').click()`);
       await sleep(800);
       const form = await sheet(page);
       if (!form) throw new Error('not open');
