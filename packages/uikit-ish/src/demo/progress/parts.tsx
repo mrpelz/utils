@@ -209,7 +209,7 @@ const ValuePart: FunctionComponent = () => {
 const ActivityIndicatorPart: FunctionComponent = () => {
   const id = 'progress-parts-activity-indicator';
   const [external] = useProvidedState(id);
-  const [control, props, state, elementKey] = usePropControl(
+  const [control, props, state] = usePropControl(
     propOptionsIndicator,
     'ActivityIndicator',
     external,
@@ -228,7 +228,6 @@ const ActivityIndicatorPart: FunctionComponent = () => {
       title="ActivityIndicator"
     >
       <ActivityIndicator
-        key={elementKey}
         aria-label={props.children === undefined ? 'Loading' : undefined}
         {...props}
       />
@@ -386,7 +385,8 @@ export const ProgressParts: FunctionComponent = () => (
       </li>
       <li>
         Look: <code>size</code>, <code>movement</code>, <code>duration</code>,{' '}
-        <code>color</code>; stopped: <code>animating</code>.
+        <code>color</code>; stopped: <code>animating</code>, how:{' '}
+        <code>stopBehavior</code>.
       </li>
       <li>
         Its children a label after it, naming it (without: an{' '}

@@ -145,6 +145,16 @@ export const activityIndicatorRows: readonly PropRow[] = [
     </>,
   ],
   [
+    'stopBehavior',
+    union('reset', 'freeze', 'finish'),
+    code(union('reset')),
+    <>
+      Stopping (<code>animating</code> false): at rest at once (as UIKit’s),
+      frozen where it is, or finishing its turn first, then resting at the top
+      (no jump), whatever its <code>movement</code>.
+    </>,
+  ],
+  [
     'size',
     union('regular', 'small'),
     code(union('regular')),

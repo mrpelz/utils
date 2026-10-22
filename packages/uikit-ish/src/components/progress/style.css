@@ -265,8 +265,14 @@
       );
     }
 
-    [data-stopped] > &,
-    [data-stopped] > & > span {
+    /* Stopped (see `stopBehavior`): at rest, or frozen where it is. */
+    [data-stopped='reset'] > &,
+    [data-stopped='reset'] > & > span {
+      animation: none;
+    }
+
+    [data-stopped='freeze'] > &,
+    [data-stopped='freeze'] > & > span {
       animation-play-state: paused;
     }
   }

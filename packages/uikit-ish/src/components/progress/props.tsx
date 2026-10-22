@@ -30,6 +30,12 @@ export type ProgressValueProps = Omit<BaseProgress.Value.Props, 'ref'> & {
 
 export type ActivityIndicatorMovement = 'fade' | 'rotate' | 'stepped';
 
+/**
+ * Stopping (`animating` false): at rest at once, frozen where it is, or
+ * finishing its turn first (resting at the top).
+ */
+export type ActivityIndicatorStopBehavior = 'finish' | 'freeze' | 'reset';
+
 export type ActivityIndicatorProps = Omit<
   BaseProgress.Root.Props,
   'children' | 'ref' | 'value'
@@ -62,4 +68,10 @@ export type ActivityIndicatorProps = Omit<
    * @default 'regular'
    */
   size?: 'regular' | 'small';
+  /**
+   * Stopping (`animating` false): at rest at once (as UIKit's), frozen where
+   * it is, or finishing its turn first, then resting (no jump).
+   * @default 'reset'
+   */
+  stopBehavior?: ActivityIndicatorStopBehavior;
 };

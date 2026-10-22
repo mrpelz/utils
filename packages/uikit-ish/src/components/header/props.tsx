@@ -16,3 +16,5 @@ export type HeaderRootProps = { children?: ReactNode };
 export type HeaderBarProps = Omit<ToolbarRootProps, 'placement'>;
 
 export type HeaderLargeTitleProps = useRender.ComponentProps<'div'>;
+
+export type HeaderAccessoryProps = useRender.ComponentProps<'div'>;

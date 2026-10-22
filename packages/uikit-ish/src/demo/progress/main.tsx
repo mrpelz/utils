@@ -40,8 +40,12 @@ export const ProgressDemo: FunctionComponent = () => {
     externalBarContent,
     true,
   );
-  const [controlIndicator, propsIndicator, stateIndicator, keyIndicator] =
-    usePropControl(propOptionsIndicator, 'indicator', externalIndicator, true);
+  const [controlIndicator, propsIndicator, stateIndicator] = usePropControl(
+    propOptionsIndicator,
+    'indicator',
+    externalIndicator,
+    true,
+  );
 
   const [controlLabel, propsLabel, stateLabel] = usePropControl(
     propOptionsLabel,
@@ -100,7 +104,6 @@ export const ProgressDemo: FunctionComponent = () => {
           </Progress.Track>
         </Progress.Root>
         <ActivityIndicator
-          key={keyIndicator}
           aria-label={
             propsIndicator.children === undefined ? 'Loading' : undefined
           }

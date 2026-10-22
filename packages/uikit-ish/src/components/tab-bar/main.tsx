@@ -85,6 +85,9 @@ export type {
 //   a circle in both sizes). Labels reserve their selected width, so selecting
 //   a tab doesn't shift the tabs.
 // - The bar's inline padding is always 32px (Figma: 28px with up to 3 tabs).
+// - No padding below the groups (Figma: 32px, within the home indicator's
+//   34px): the safe area is its anchor's (a `Viewport.BlockEnd`), so it sits
+//   right above it.
 // - In a bar wider than its groups, the space between them widens (Figma:
 //   groups centered), the first at the bar's start, as when collapsed.
 // - Nothing isolates blending (Figma: each group), as that would cut the glass

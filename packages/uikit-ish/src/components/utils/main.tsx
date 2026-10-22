@@ -10,6 +10,7 @@ import {
   PointerEvent as ReactPointerEvent,
   ReactNode,
   Ref,
+  RefObject,
   useCallback,
   useImperativeHandle,
   useLayoutEffect,
@@ -340,6 +341,37 @@ export const withSecondaryClick = <Props extends SecondaryClickProps>(
     />
   )) as FunctionComponent<Props>;
 };
+
+// What a popup's first tabbable element can be (roughly: enabled, in the
+// tab order).
+const tabbable = [
+  'a[href]',
+  'button:not(:disabled)',
+  'input:not(:disabled)',
+  'select:not(:disabled)',
+  'textarea:not(:disabled)',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+/**
+ * A Base UI popup's `initialFocus` as its default (its first tabbable
+ * element; opened by touch, or without one, the popup itself), but not
+ * scrolling: Base UI focuses the element scrolling it into view, which
+ * Safari does before the popup is in place, scrolling its content down.
+ */
+export const useInitialFocus = (
+  popup: RefObject<HTMLElement | null>,
+): ((openType: string) => boolean) =>
+  useCallback(
+    (openType: string) => {
+      if (openType === 'touch') return true;
+      const first = popup.current?.querySelector<HTMLElement>(tabbable);
+      if (!first) return true;
+      first.focus({ preventScroll: true });
+      return false;
+    },
+    [popup],
+  );
 
 /**
  * Returns an internal ref object for a `forwardRef` component's element that

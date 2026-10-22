@@ -1,13 +1,22 @@
 /* Segmented guide pages (see composition.tsx). */
 
-/* A control above the content it switches, below the page's bar. */
-.segmented-demo-content {
-  display: grid;
-  gap: 16px;
-  padding-block-start: 8px;
+/* The control's anchor, its surface (see Viewport.Anchor): a translucent
+   background reaching the screen's edge (its padding the safe area). */
+.segmented-demo-bar {
+  backdrop-filter: blur(8px);
+  background-color: color-mix(
+    in srgb,
+    var(--color-ios-system-grouped-background) 80%,
+    transparent
+  );
 }
 
-/* The control 16px from the screen's sides, as the list's rows. */
+/* The control in it, 16px from the screen's sides. */
 .segmented-demo-control {
-  padding-inline: 16px;
+  padding: 8px 16px;
+}
+
+/* A list clear of the anchor at either end (its height, 48px). */
+.segmented-demo-list {
+  padding-block: 48px;
 }

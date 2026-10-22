@@ -57,8 +57,8 @@ const searchCode = `const [query, setQuery] = useState('');
     <Header.LargeTitle>
       <span>Contacts</span>
     </Header.LargeTitle>
-    {/* Scrolling with the large title. */}
-    <div className="search">
+    {/* Scrolling with the large title, then staying below the bar. */}
+    <Header.Accessory>
       <TextField.Root>
         <TextField.Search>
           <Symbol icon={sfMagnifyingglass} />
@@ -72,7 +72,7 @@ const searchCode = `const [query, setQuery] = useState('');
           <TextField.Clear />
         </TextField.Search>
       </TextField.Root>
-    </div>
+    </Header.Accessory>
   </Header.Root>
   <List.Root>…{/* the rows matching query */}</List.Root>
 </Page.Root>`;
@@ -105,7 +105,7 @@ const controlCode = `const [filter, setFilter] = useState('all');
     <Header.LargeTitle>
       <span>Inbox</span>
     </Header.LargeTitle>
-    <div className="filter">
+    <Header.Accessory>
       <Segmented.Root
         aria-label="Show"
         value={filter}
@@ -115,7 +115,7 @@ const controlCode = `const [filter, setFilter] = useState('all');
         <Segmented.Item value="unread">Unread</Segmented.Item>
         <Segmented.Highlight />
       </Segmented.Root>
-    </div>
+    </Header.Accessory>
   </Header.Root>
   <List.Root>…{/* the rows filtered */}</List.Root>
 </Page.Root>`;
@@ -208,7 +208,7 @@ const Search: FunctionComponent = () => {
             <Header.LargeTitle>
               <span>Contacts</span>
             </Header.LargeTitle>
-            <div className="header-demo-below">
+            <Header.Accessory>
               <TextField.Root>
                 <TextField.Search>
                   <Symbol icon={sfMagnifyingglass} />
@@ -222,7 +222,7 @@ const Search: FunctionComponent = () => {
                   <TextField.Clear />
                 </TextField.Search>
               </TextField.Root>
-            </div>
+            </Header.Accessory>
           </Header.Root>
           <List.Root>
             <List.Section>
@@ -334,7 +334,7 @@ const ControlBelow: FunctionComponent = () => {
             <Header.LargeTitle>
               <span>Inbox</span>
             </Header.LargeTitle>
-            <div className="header-demo-below">
+            <Header.Accessory>
               <Segmented.Root
                 aria-label="Show"
                 value={filter}
@@ -347,7 +347,7 @@ const ControlBelow: FunctionComponent = () => {
                 <Segmented.Item value="unread">Unread</Segmented.Item>
                 <Segmented.Highlight />
               </Segmented.Root>
-            </div>
+            </Header.Accessory>
           </Header.Root>
           <List.Root>
             <List.Section>
@@ -384,8 +384,8 @@ export const HeaderComposition: FunctionComponent = () => (
         <a href="toolbar">Toolbar</a>’s parts.
       </li>
       <li>
-        What follows the large title in the header scrolls with it: a search
-        field, a control.
+        What stays with the bar follows the large title, in an accessory: a
+        search field, a control.
       </li>
       <li>
         In a stack: see{' '}
@@ -409,12 +409,12 @@ export const HeaderComposition: FunctionComponent = () => (
         both fade in together.
       </li>
       <li>
-        Both sides in the bar (an empty{' '}
+        Its title centered, with or without sides (here an empty{' '}
         <PartLink
           component="toolbar"
           part="Toolbar.Leading"
-        />{' '}
-        too), so its title is centered.
+        />
+        ).
       </li>
     </ul>
     <CodeView code={largeTitleCode} />
@@ -433,8 +433,13 @@ export const HeaderComposition: FunctionComponent = () => (
           component="text-field"
           part="TextField.Search"
         />{' '}
-        below the large title, in the header (it scrolls away with the title),
-        filtering the page.
+        in the header’s{' '}
+        <PartLink
+          component="header"
+          part="Header.Accessory"
+        />
+        , filtering the page: below the large title, scrolling with it, then
+        staying below the bar.
       </li>
       <li>
         Search sits with the page’s Region (guide{' '}
@@ -473,11 +478,16 @@ export const HeaderComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="segmented">Segmented</a> control below the large title,
-        switching what the page lists (All, Unread), scrolling with the title.
+        A <a href="segmented">Segmented</a> control in the header’s{' '}
+        <PartLink
+          component="header"
+          part="Header.Accessory"
+        />
+        , switching what the page lists (All, Unread): scrolling with the large
+        title, then staying below the bar.
       </li>
       <li>
-        In the bar instead (staying): see{' '}
+        In the bar instead, in place of its title: see{' '}
         <a href="segmented/composition#in-a-navigation-bar">Segmented</a>.
       </li>
     </ul>

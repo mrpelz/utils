@@ -497,7 +497,10 @@
     box-sizing: border-box;
     align-items: center;
     justify-content: flex-start;
-    padding: 16px 32px 32px;
+
+    /* (Figma: 32px below, within the home indicator's 34px: the safe area,
+       kept clear by its anchor, see Viewport; none of its own.) */
+    padding: 16px 32px 0;
     gap: var(--uikit-tab-bar-group-gap, 16px);
     interpolate-size: allow-keywords;
     touch-action: none;
@@ -645,7 +648,7 @@
 
       padding: calc(16px + var(--uikit-tab-bar-collapsed-inset))
         calc(32px + var(--uikit-tab-bar-collapsed-inset))
-        calc(32px + var(--uikit-tab-bar-collapsed-inset));
+        var(--uikit-tab-bar-collapsed-inset);
 
       && > div > [data-tab-bar-part='tabs'] > [role='tab'] {
         --uikit-tab-bar-label-size: var(--font-ios-subheadline-size);

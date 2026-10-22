@@ -18,6 +18,7 @@ import {
 import { Toolbar } from '../toolbar/main.js';
 import { cn } from '../utils/main.js';
 import type {
+  HeaderAccessoryProps,
   HeaderBarProps,
   HeaderContextValue,
   HeaderLargeTitleProps,
@@ -25,6 +26,7 @@ import type {
 } from './props.js';
 
 export type {
+  HeaderAccessoryProps,
   HeaderBarProps,
   HeaderLargeTitleProps,
   HeaderRootProps,
@@ -46,8 +48,15 @@ export type {
 // effect, a soft one: a backdrop blur, fading out downwards), whatever the
 // page's background.
 //
+// An accessory (`Accessory`: a search field, a segmented control) scrolls
+// with the large title, then sticks below the bar (UIKit: a search
+// controller's bar with `hidesSearchBarWhenScrolling` false), 16px from
+// the sides, 8px above the content.
+//
 // Deviations:
 // - Pulled down, the large title doesn't grow (iOS: it scales up).
+// - The accessory sticks below the bar's height in Figma (54px), not its
+//   own (e.g. taller with a two-line title).
 // - The scroll edge effect is an approximation (Figma: none).
 
 const HeaderContext = createContext<HeaderContextValue>({ largeTitle: false });
@@ -129,8 +138,28 @@ const LargeTitle = forwardRef<HTMLDivElement, HeaderLargeTitleProps>(
   },
 );
 
+/**
+ * What stays with the bar (a search field, a segmented control, UIKit's
+ * `hidesSearchBarWhenScrolling` false): below the large title, scrolling
+ * with it, then sticking below the bar, the content beneath it blurred.
+ */
+const Accessory = forwardRef<HTMLDivElement, HeaderAccessoryProps>(
+  ({ className, render, ...props }, ref) =>
+    useRender({
+      defaultTagName: 'div',
+      props: {
+        'data-header-part': 'accessory',
+        ...props,
+        className: cn('uikit-header-accessory', className),
+      },
+      ref,
+      render,
+    }),
+);
+
 export const Header = {
   Root,
   Bar,
   LargeTitle,
+  Accessory,
 };

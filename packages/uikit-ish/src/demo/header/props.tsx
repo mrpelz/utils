@@ -25,6 +25,8 @@ export const propOptionsLargeTitle = {
   'aria-level': [undefined, 1, 2] as const,
 };
 
+export const propOptionsAccessory = { ...commonPropOptions };
+
 // The guide pages' views (see overview.tsx, parts.tsx).
 
 /** The overview's header: a large title (or the bar's only), a subtitle. */

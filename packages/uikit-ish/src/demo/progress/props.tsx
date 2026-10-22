@@ -45,6 +45,7 @@ export const propOptionsIndicator = {
   size: [undefined, 'regular', 'small'] as const,
   movement: [undefined, 'stepped', 'rotate', 'fade'] as const,
   animating: [undefined, true, false] as const,
+  stopBehavior: [undefined, 'reset', 'freeze', 'finish'] as const,
   duration: [undefined, 0.5, 2] as const,
   color: [
     undefined,

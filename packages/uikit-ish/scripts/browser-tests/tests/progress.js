@@ -283,4 +283,50 @@ export const tests = [
       assert.match(text, /^\d+ of 12$/u);
     },
   },
+  {
+    name: 'progress: an activity indicator stopped rests at once (reset), freezes where it is (freeze), or finishes its turn first (finish), spinning or fading',
+    run: async (page) => {
+      /**
+       * The running animations' states (the spinner's and its spokes').
+       *
+       * @returns {Promise<string[]>}
+       */
+      const animations = () =>
+        page.evaluate(
+          `[...${page.section}.querySelector('[aria-hidden]').getAnimations({ subtree: true })].map((animation) => animation.playState)`,
+        );
+
+      for (const movement of ['stepped', 'fade']) {
+        await page.open('progress-parts-activity-indicator', 'light', {
+          state: [{ $rest: true, movement }],
+        });
+        const spinning = await animations();
+        assert.ok(spinning.length > 0, `${movement}: spinning`);
+
+        await page.setState(0, { animating: false, stopBehavior: 'reset' });
+        assert.deepEqual(await animations(), [], `${movement}: reset`);
+
+        await page.setState(0, { animating: true });
+        await sleep(400);
+        await page.setState(0, { animating: false, stopBehavior: 'freeze' });
+        const frozen = await animations();
+        assert.ok(
+          frozen.length > 0 && frozen.every((state) => state === 'paused'),
+          `${movement}: freeze ${frozen.join(', ')}`,
+        );
+
+        await page.setState(0, { animating: true });
+        await sleep(400);
+        await page.setState(0, { animating: false, stopBehavior: 'finish' });
+        const finishing = await animations();
+        assert.ok(
+          finishing.includes('running'),
+          `${movement}: finishing ${finishing.join(', ')}`,
+        );
+        // (A turn is a second long.)
+        await sleep(1200);
+        assert.deepEqual(await animations(), [], `${movement}: finished`);
+      }
+    },
+  },
 ];

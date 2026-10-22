@@ -201,8 +201,9 @@ export const ProgressOverview: FunctionComponent = () => (
         the value at its end (whichever comes first in the markup).
       </li>
       <li>
-        The activity indicator turns once a second, a spoke at a time; stopped,
-        its spokes rest.
+        The activity indicator turns once a second, a spoke at a time. Stopped,
+        it rests at once, freezes where it is, or finishes its turn first (
+        <code>stopBehavior</code>).
       </li>
     </ul>
   </>

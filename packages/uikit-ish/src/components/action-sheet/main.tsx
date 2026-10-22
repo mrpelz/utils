@@ -15,7 +15,7 @@ import {
   useState,
 } from 'react';
 
-import { cn } from '../utils/main.js';
+import { cn, useForwardedRef, useInitialFocus } from '../utils/main.js';
 import type {
   ActionSheetActionProps,
   ActionSheetHandle,
@@ -108,8 +108,10 @@ const bottomAnchor = (container: ActionSheetPopupProps['container']) => ({
  * behind it, in its portal.
  */
 const Popup = forwardRef<HTMLDivElement, ActionSheetPopupProps>(
-  ({ className, container, ...props }, ref) => {
+  ({ className, container, initialFocus, ...props }, ref) => {
     const trigger = useContext(ActionSheetContext);
+    const popupRef = useForwardedRef(ref);
+    const focus = useInitialFocus(popupRef);
     const bottom = useMemo(() => bottomAnchor(container), [container]);
     // Within its container, if one (e.g. the views' frames).
     const boundary = container ? containerElement(container) : undefined;
@@ -132,7 +134,8 @@ const Popup = forwardRef<HTMLDivElement, ActionSheetPopupProps>(
           sideOffset={8}
         >
           <BasePopover.Popup
-            ref={ref}
+            ref={popupRef}
+            initialFocus={initialFocus ?? focus}
             {...props}
             data-action-sheet-part="popup"
             className={cn(

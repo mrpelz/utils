@@ -48,7 +48,9 @@
       --uikit-toolbar-gap: 12px;
       --uikit-toolbar-text-padding: 6px;
 
-      padding: 4px 16px 36px;
+      /* (Figma: 36px below, the home indicator's 34px in it: the safe area,
+         kept clear by its anchor, see Viewport; 2px of its own.) */
+      padding: 4px 16px 2px;
     }
 
     &[data-placement='block-start'] {

@@ -37,6 +37,7 @@ export {
   type ProgressRootProps,
   type ProgressValueProps,
   type ActivityIndicatorMovement,
+  type ActivityIndicatorStopBehavior,
 } from './progress/main.js';
 export {
   Sheet,
@@ -179,6 +180,7 @@ export {
 // Bars
 export {
   Header,
+  type HeaderAccessoryProps,
   type HeaderBarProps,
   type HeaderLargeTitleProps,
   type HeaderRootProps,

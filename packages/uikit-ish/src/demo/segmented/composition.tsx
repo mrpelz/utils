@@ -19,23 +19,38 @@ import {
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { AddLog, useLog } from '../frame/log.js';
-import { Contents, Heading, type Section } from '../guide/sections.js';
+import { usePropControl } from '../frame/prop-control.js';
+import { useProvidedState } from '../frame/state.js';
+import {
+  Contents,
+  Heading,
+  PartLink,
+  type Section,
+} from '../guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
+import { names } from '../viewport/content.js';
+import { propOptionsContentAnchor } from './props.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
-const contentCode = `const [period, setPeriod] = useState('day');
+const contentCode = `const [show, setShow] = useState('all');
 
-<Segmented.Root
-  aria-label="Period"
-  value={period}
-  onValueChange={setPeriod}
->
-  <Segmented.Item value="day">Day</Segmented.Item>
-  <Segmented.Item value="week">Week</Segmented.Item>
-  <Segmented.Item value="month">Month</Segmented.Item>
-  <Segmented.Highlight />
-</Segmented.Root>
-<List.Root>…{/* the period's figures */}</List.Root>`;
+<Viewport.Content>
+  <List.Root>…{/* all, or the favorites */}</List.Root>
+</Viewport.Content>
+{/* The anchor is the surface: its class gives it a background. */}
+<Viewport.Anchor className="bar" edge="block-start">
+  <div className="bar-content">
+    <Segmented.Root
+      aria-label="Show"
+      value={show}
+      onValueChange={setShow}
+    >
+      <Segmented.Item value="all">All</Segmented.Item>
+      <Segmented.Item value="favorites">Favorites</Segmented.Item>
+      <Segmented.Highlight />
+    </Segmented.Root>
+  </div>
+</Viewport.Anchor>`;
 
 const headerCode = `<Page.Root>
   <Header.Root>
@@ -75,24 +90,8 @@ const toolbarCode = `<Viewport.BlockEnd>
 </Viewport.BlockEnd>`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
-// A period's figures (as Health's).
-const figures: Record<string, readonly (readonly [string, string])[]> = {
-  day: [
-    ['Steps', '8,412'],
-    ['Distance', '6.1 km'],
-    ['Flights Climbed', '9'],
-  ],
-  month: [
-    ['Steps', '7,215 a day'],
-    ['Distance', '5.2 km a day'],
-    ['Flights Climbed', '7 a day'],
-  ],
-  week: [
-    ['Steps', '7,903 a day'],
-    ['Distance', '5.7 km a day'],
-    ['Flights Climbed', '8 a day'],
-  ],
-};
+// Some of the contacts, as favorites.
+const favorites = names.filter((_, index) => index % 4 === 0);
 
 // Recent calls (as Phone's): name, kind, missed.
 const calls = [
@@ -111,55 +110,61 @@ const logChange =
     set(String(value));
   };
 
-/** A period's figures, chosen above them. */
+/**
+ * Contacts, all or the favorites, chosen on an anchor (the screen's top or
+ * bottom edge) over the scrolling list.
+ */
 const ContentViews: FunctionComponent = () => {
+  const id = 'segmented-composition-content';
   const [log, addLog] = useLog();
-  const [period, setPeriod] = useState('day');
+  const [external] = useProvidedState(id);
+  const [control, props, state] = usePropControl(
+    propOptionsContentAnchor,
+    'Viewport.Anchor',
+    external,
+  );
+  const [show, setShow] = useState('all');
 
   return (
     <Component
       center
       inline
-      id="segmented-composition-content"
+      controls={[control]}
+      id={id}
       log={log}
+      state={[state]}
       title="Segmented switching content"
     >
       <div className="toolbar-demo-screen">
-        <Page.Root>
-          <Header.Root>
-            <Header.Bar>
-              <Toolbar.Title>
-                <span>Activity</span>
-              </Toolbar.Title>
-            </Header.Bar>
-          </Header.Root>
-          <div className="segmented-demo-content">
-            <div className="segmented-demo-control">
-              <Segmented.Root
-                aria-label="Period"
-                value={period}
-                onValueChange={logChange(addLog, setPeriod)}
-              >
-                <Segmented.Item value="day">Day</Segmented.Item>
-                <Segmented.Item value="week">Week</Segmented.Item>
-                <Segmented.Item value="month">Month</Segmented.Item>
-                <Segmented.Highlight />
-              </Segmented.Root>
-            </div>
-            <List.Root>
-              <List.Section>
-                <List.Group>
-                  {figures[period]?.map(([title, value]) => (
-                    <List.Item key={title}>
-                      <List.Title>{title}</List.Title>
-                      <List.Detail>{value}</List.Detail>
-                    </List.Item>
-                  ))}
-                </List.Group>
-              </List.Section>
-            </List.Root>
+        <Viewport.Content>
+          <List.Root className="segmented-demo-list">
+            <List.Section>
+              <List.Group>
+                {(show === 'all' ? names : favorites).map((name) => (
+                  <List.Item key={name}>
+                    <List.Title>{name}</List.Title>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+        </Viewport.Content>
+        <Viewport.Anchor
+          className="segmented-demo-bar"
+          {...props}
+        >
+          <div className="segmented-demo-control">
+            <Segmented.Root
+              aria-label="Show"
+              value={show}
+              onValueChange={logChange(addLog, setShow)}
+            >
+              <Segmented.Item value="all">All</Segmented.Item>
+              <Segmented.Item value="favorites">Favorites</Segmented.Item>
+              <Segmented.Highlight />
+            </Segmented.Root>
           </div>
-        </Page.Root>
+        </Viewport.Anchor>
       </div>
     </Component>
   );
@@ -298,8 +303,18 @@ export const SegmentedComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Above the content it filters or rearranges, e.g. a chart’s period, its
-        figures changing with it.
+        At the screen’s top or bottom edge, over the content it filters or
+        rearranges (all contacts, or the favorites), staying as the list scrolls
+        under it.
+      </li>
+      <li>
+        A{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Anchor"
+        />{' '}
+        (<code>edge</code>), in the content layer’s place for a bar: the anchor
+        is the surface, its class giving it a background.
       </li>
       <li>
         Guide <GuideLink to="section-3-clusters">§3</GuideLink>: segmented

@@ -18,6 +18,7 @@ import {
   cn,
   positionerSide,
   useForwardedRef,
+  useInitialFocus,
   withStyle,
 } from '../utils/main.js';
 import type {
@@ -219,29 +220,35 @@ const outlines = Object.fromEntries(
 
 /** Its panel: the material (see above) behind its content. */
 const Popup = forwardRef<HTMLDivElement, Omit<BasePopover.Popup.Props, 'ref'>>(
-  ({ className, children, style, ...props }, ref) => (
-    <BasePopover.Popup
-      ref={ref}
-      style={withStyle(outlines, style)}
-      {...props}
-      data-popover-part="popup"
-      className={cn(
-        'uikit-popover-popup uikit-glass-medium uikit-popup-transition',
-        className,
-      )}
-    >
-      <span
-        aria-hidden="true"
-        className="uikit-popover-shape"
-        data-popover-part="shape"
+  ({ className, children, initialFocus, style, ...props }, ref) => {
+    const popupRef = useForwardedRef(ref);
+    const focus = useInitialFocus(popupRef);
+
+    return (
+      <BasePopover.Popup
+        ref={popupRef}
+        initialFocus={initialFocus ?? focus}
+        style={withStyle(outlines, style)}
+        {...props}
+        data-popover-part="popup"
+        className={cn(
+          'uikit-popover-popup uikit-glass-medium uikit-popup-transition',
+          className,
+        )}
       >
-        <span data-layer="fill" />
-        <span data-layer="rim" />
-        <span data-layer="highlight" />
-      </span>
-      {children}
-    </BasePopover.Popup>
-  ),
+        <span
+          aria-hidden="true"
+          className="uikit-popover-shape"
+          data-popover-part="shape"
+        >
+          <span data-layer="fill" />
+          <span data-layer="rim" />
+          <span data-layer="highlight" />
+        </span>
+        {children}
+      </BasePopover.Popup>
+    );
+  },
 );
 
 /**

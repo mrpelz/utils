@@ -6,6 +6,7 @@ import {
   Header,
   List,
   Page,
+  Segmented,
   Symbol,
   Toolbar,
 } from '../../components/index.js';
@@ -15,8 +16,17 @@ import { useProvidedState } from '../frame/state.js';
 import { PropsTable } from '../guide/props-table.js';
 import { Heading, PartLink } from '../guide/sections.js';
 import { names } from '../viewport/content.js';
-import { headerBarRows, headerLargeTitleRows, headerRootRows } from './docs.js';
-import { propOptionsBar, propOptionsLargeTitle } from './props.js';
+import {
+  headerAccessoryRows,
+  headerBarRows,
+  headerLargeTitleRows,
+  headerRootRows,
+} from './docs.js';
+import {
+  propOptionsAccessory,
+  propOptionsBar,
+  propOptionsLargeTitle,
+} from './props.js';
 
 /** `Header.Root`: a bar and a large title (it has no element to outline). */
 const RootPart: FunctionComponent = () => (
@@ -167,13 +177,73 @@ const LargeTitlePart: FunctionComponent = () => {
   );
 };
 
-/** `/header/parts`: its root, bar and large title. */
+/** `Header.Accessory`, outlined: a segmented control staying below the bar. */
+const AccessoryPart: FunctionComponent = () => {
+  const id = 'header-parts-accessory';
+  const [external] = useProvidedState(id);
+  const [control, props, state] = usePropControl(
+    propOptionsAccessory,
+    'Header.Accessory',
+    external,
+    true,
+    true,
+  );
+
+  return (
+    <Component
+      center
+      inline
+      controls={[control]}
+      id={id}
+      state={[state]}
+      title="Header.Accessory"
+    >
+      <div className="header-demo-phone">
+        <Page.Root>
+          <Header.Root>
+            <Header.Bar>
+              <Toolbar.Title>
+                <span>Contacts</span>
+              </Toolbar.Title>
+            </Header.Bar>
+            <Header.LargeTitle>
+              <span>Contacts</span>
+            </Header.LargeTitle>
+            <Header.Accessory {...props}>
+              <Segmented.Root
+                aria-label="Show"
+                defaultValue="all"
+              >
+                <Segmented.Item value="all">All</Segmented.Item>
+                <Segmented.Item value="favorites">Favorites</Segmented.Item>
+                <Segmented.Highlight />
+              </Segmented.Root>
+            </Header.Accessory>
+          </Header.Root>
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {names.map((name) => (
+                  <List.Item key={name}>
+                    <List.Title>{name}</List.Title>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+        </Page.Root>
+      </div>
+    </Component>
+  );
+};
+
+/** `/header/parts`: its root, bar, large title and accessory. */
 export const HeaderParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        A root (no box of its own), a bar (a top toolbar), and an optional large
-        title.
+        A root (no box of its own), a bar (a top toolbar), an optional large
+        title, and an optional accessory staying below the bar.
       </li>
       <li>
         At the start of a scroll container: a <a href="page">Page</a>. The
@@ -226,6 +296,13 @@ export const HeaderParts: FunctionComponent = () => (
                   part="Toolbar.Subtitle"
                 />
                 )
+              </li>
+              <li>
+                <PartLink
+                  component="header"
+                  part="Header.Accessory"
+                />{' '}
+                (optional)
               </li>
             </ul>
           </li>
@@ -306,8 +383,41 @@ export const HeaderParts: FunctionComponent = () => (
     <LargeTitlePart />
     <h3>Props</h3>
     <PropsTable rows={headerLargeTitleRows} />
+
+    <Heading
+      id="header-accessory"
+      level={2}
+    >
+      <code>Header.Accessory</code>
+    </Heading>
+    <ul>
+      <li>
+        What stays with the bar (a search field, a segmented control): after the
+        large title, scrolling with it, then sticking below the bar (UIKit: a
+        search bar with <code>hidesSearchBarWhenScrolling</code> false).
+      </li>
+      <li>
+        16px from the sides, 8px above the content; what scrolls under it
+        blurred, as under the bar.
+      </li>
+      <li>
+        It sticks 54px below the safe area (the bar’s height in Figma): a taller
+        bar (a two-line title) would overlap it.
+      </li>
+      <li>
+        Renders a <code>div</code> (<code>render</code>).
+      </li>
+    </ul>
+    <AccessoryPart />
+    <h3>Props</h3>
+    <PropsTable rows={headerAccessoryRows} />
   </>
 );
 
 /** Its live views, also on the component's page of demos (and `/all`). */
-export const headerPartsDemos = [RootPart, BarPart, LargeTitlePart];
+export const headerPartsDemos = [
+  RootPart,
+  BarPart,
+  LargeTitlePart,
+  AccessoryPart,
+];

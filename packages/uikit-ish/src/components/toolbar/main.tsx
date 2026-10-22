@@ -60,8 +60,9 @@ export type {
 // - Pressed, a capsule of several buttons turns into a glass lens as the tab
 //   bar's groups do (scaled up by 1.05, measured on iOS 26), the pressed
 //   button showing the selection (Figma: no pressed state).
-// - The bottom bar's padding is Figma's (4px 16px 36px, the home
-//   indicator's 34px included), not the safe area's.
+// - The bottom bar's padding is Figma's (4px 16px 36px) without the home
+//   indicator's 34px in it (2px below): the safe area is its anchor's (a
+//   `Viewport.BlockEnd`, a sheet's), so it sits right above it.
 // - With a subtitle, the title stays in 17px (Figma: 15px), as iOS 26's
 //   (user: not smaller than the rows' text).
 

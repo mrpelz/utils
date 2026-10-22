@@ -256,4 +256,38 @@ export const tests = [
       assert.equal(checked, 1);
     },
   },
+  {
+    name: 'segmented: on a viewport anchor at the screen’s top or bottom edge, clear of the safe area, over the scrolling list it filters',
+    run: async (page) => {
+      /** The control's box relative to its screen's (top, bottom gap). */
+      const placed = () =>
+        page.evaluate(`(() => {
+          const screen = ${page.section}.querySelector('.toolbar-demo-screen').getBoundingClientRect();
+          const control = ${page.section}.querySelector('[role=radiogroup]').getBoundingClientRect();
+          return [Math.round(control.top - screen.top), Math.round(screen.bottom - control.bottom)];
+        })()`);
+      const rows = () =>
+        page.evaluate(
+          `${page.section}.querySelectorAll('[data-list-part=row]').length`,
+        );
+
+      await page.open('segmented-composition-content');
+      const [top] = await placed();
+      // Below the status bar (62px), 8px into its bar.
+      assert.equal(top, 70);
+      const all = await rows();
+      const favorites = await page.rect('[role=radio]', 1);
+      await page.click([
+        favorites.x + favorites.width / 2,
+        favorites.y + favorites.height / 2,
+      ]);
+      await sleep(300);
+      assert.ok((await rows()) < all, 'filtered');
+
+      await page.setState(0, { edge: 'block-end' });
+      const [, bottom] = await placed();
+      // Above the home indicator (34px), 8px into its bar.
+      assert.equal(bottom, 42);
+    },
+  },
 ];

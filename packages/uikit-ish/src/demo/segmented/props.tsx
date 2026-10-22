@@ -94,3 +94,8 @@ export const getPropOptionsRoot = (
     ),
   ] as const,
 });
+
+/** The composition's anchor: the control at the screen's top or bottom. */
+export const propOptionsContentAnchor = {
+  edge: ['block-start', 'block-end'] as const,
+};
