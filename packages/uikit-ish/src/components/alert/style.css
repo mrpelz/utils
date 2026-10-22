@@ -1,10 +1,17 @@
 /* Alert (see main.tsx). */
 @layer uikit-ish {
+  /* Its portal: no box of its own (its container's layout unchanged). */
+  .uikit-alert-portal {
+    display: contents;
+  }
+
   /* (Shared: action-sheet.) */
   .uikit-alert-panel {
     display: flex;
     width: 300px;
-    max-width: calc(100vw - 32px);
+
+    /* (Of its containing block: the viewport, or a container's.) */
+    max-width: calc(100% - 32px);
     box-sizing: border-box;
     flex-direction: column;
     padding: 14px;

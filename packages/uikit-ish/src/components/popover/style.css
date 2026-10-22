@@ -6,10 +6,25 @@
     z-index: 100;
   }
 
+  /* Its bar (Figma: 16px from the popover's top, 10px above its content),
+     a toolbar in it a 44px row, its padding the header's (not a bar's). */
+  .uikit-popover-header {
+    padding: 16px 0 10px;
+
+    /* (Over the bar's own: its placement's padding and height.) */
+    & > [data-toolbar-part='root'][data-placement] {
+      min-height: 44px;
+      padding-block: 0;
+    }
+  }
+
+  /* What's below its header, filling the rest of the popup (at most as
+     high as the room for it, see the popup), scrolling. */
   .uikit-popover-body {
     overflow: auto;
-    max-height: inherit;
+    min-height: 0;
     box-sizing: border-box;
+    flex: 0 1 auto;
     border-radius: inherit;
     overscroll-behavior: contain;
   }
@@ -22,6 +37,12 @@
     --uikit-popover-glow: light-dark(rgb(0 0 0 / 20%), rgb(0 0 0 / 15%));
 
     position: relative;
+
+    /* Its header and body stacked, within the viewport (Base UI's room for
+       it): taller content scrolls in its body (see `Body`). */
+    display: flex;
+    max-height: var(--available-height);
+    flex-direction: column;
     border-radius: 13px;
     backdrop-filter: none;
     background-color: transparent;

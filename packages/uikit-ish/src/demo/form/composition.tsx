@@ -201,6 +201,7 @@ const InASheetWithCancelDone: FunctionComponent = () => {
                         <DatePicker.Root
                           defaultValue={new Date(2025, 3, 20, 9, 41)}
                           mode="dateAndTime"
+                          popoverAlign="end"
                         />
                       </Field.Root>
                     </List.Group>
@@ -263,7 +264,10 @@ const ASwitchRevealingAFieldset: FunctionComponent = () => {
                 render={<List.Item />}
               >
                 <List.Title>Date</List.Title>
-                <DatePicker.Root defaultValue={new Date(2025, 3, 20)} />
+                <DatePicker.Root
+                  defaultValue={new Date(2025, 3, 20)}
+                  popoverAlign="end"
+                />
               </Field.Root>
             </List.Group>
           </Fieldset.Root>
@@ -358,7 +362,10 @@ const MixedControls: FunctionComponent = () => {
                 render={<List.Item />}
               >
                 <List.Title>Delivery</List.Title>
-                <DatePicker.Root defaultValue={new Date(2025, 3, 24)} />
+                <DatePicker.Root
+                  defaultValue={new Date(2025, 3, 24)}
+                  popoverAlign="end"
+                />
               </Field.Root>
               <Field.Root
                 name="gift"

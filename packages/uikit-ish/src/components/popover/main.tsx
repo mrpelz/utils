@@ -20,17 +20,27 @@ import {
   useForwardedRef,
   withStyle,
 } from '../utils/main.js';
-import type { Nose, PopoverPositionerProps, PopoverState } from './props.js';
+import type {
+  Nose,
+  PopoverHandle,
+  PopoverPositionerProps,
+  PopoverState,
+} from './props.js';
 
-export type { PopoverAlign, PopoverPositionerProps } from './props.js';
+export type {
+  PopoverAlign,
+  PopoverHandle,
+  PopoverPositionerProps,
+} from './props.js';
 
 // Source: Apple iOS 26 Figma (“Popovers (iPad Only)”): a panel with 13px
 // corners, its arrow a rounded wedge 56px wide, 13px deep, on any side, at
 // its start, center or end (Base UI's `Arrow`, pointing at its anchor's
 // center), its shadow 0 10px 100px at 30%. After the date picker's popover
 // (see `DatePicker`): 8px from its anchor (its arrow's tip, with an arrow)
-// and from the viewport's edges; in a list row, aligned with its end (as
-// its value's), otherwise centered; scaling in from its anchor (as menus).
+// and from the viewport's edges; centered (in a list row, iOS aligns it
+// with the row's end: the app's `align`); scaling in from its anchor (as
+// menus). Its bar (`Header`) as Figma's: 16px from its top.
 //
 // Deviations:
 // - The material is the menus' glass (`glassMedium`, see `Menu`; Figma: the
@@ -43,11 +53,7 @@ const Root = <Payload,>(
   props: BasePopover.Root.Props<Payload>,
 ): ReactElement => {
   const [arrow, setArrow] = useState(false);
-  const [trigger, setTrigger] = useState<HTMLElement | null>(null);
-  const state = useMemo(
-    () => ({ arrow, setArrow, setTrigger, trigger }),
-    [arrow, trigger],
-  );
+  const state = useMemo(() => ({ arrow, setArrow }), [arrow]);
 
   return (
     <PopoverContext.Provider value={state}>
@@ -56,24 +62,22 @@ const Root = <Payload,>(
   );
 };
 
-const Trigger = forwardRef<
-  HTMLButtonElement,
-  Omit<BasePopover.Trigger.Props, 'ref'>
->((props, ref) => {
-  const triggerRef = useForwardedRef(ref);
-  const setTrigger = useContext(PopoverContext)?.setTrigger;
-  useLayoutEffect(() => {
-    setTrigger?.(triggerRef.current);
-    return () => setTrigger?.(null);
-  }, [setTrigger, triggerRef]);
+/**
+ * A handle linking a popover to its triggers outside it (detached), and
+ * opening or closing it imperatively (Base UI's `Popover.createHandle`):
+ * pass it to the root's and the triggers' `handle` (in a component, see
+ * `useCreatePopoverHandle`).
+ */
+const createHandle = <Payload = unknown,>(): PopoverHandle<Payload> =>
+  BasePopover.createHandle<Payload>();
 
-  return (
-    <BasePopover.Trigger
-      ref={triggerRef}
-      {...props}
-    />
-  );
-});
+/** `Popover.createHandle`, in a component: made once, for its lifetime. */
+export const useCreatePopoverHandle = <
+  Payload = unknown,
+>(): PopoverHandle<Payload> => {
+  const [handle] = useState(() => createHandle<Payload>());
+  return handle;
+};
 
 /** The arrow's depth. */
 const arrowDepth = 13;
@@ -81,8 +85,7 @@ const arrowDepth = 13;
 const Positioner = forwardRef<HTMLDivElement, PopoverPositionerProps>(
   (
     {
-      align,
-      anchor,
+      align = 'center',
       className,
       collisionPadding = 8,
       side,
@@ -92,14 +95,11 @@ const Positioner = forwardRef<HTMLDivElement, PopoverPositionerProps>(
     ref,
   ) => {
     const context = useContext(PopoverContext);
-    // In a list row (by its trigger, as is its anchor, if another element).
-    const inRow = Boolean(context?.trigger?.closest('[data-list-part=item]'));
 
     return (
       <BasePopover.Positioner
         ref={ref}
-        align={align ?? (inRow ? 'end' : 'center')}
-        anchor={anchor}
+        align={align}
         collisionPadding={collisionPadding}
         side={positionerSide(side)}
         sideOffset={sideOffset ?? 8 + (context?.arrow ? arrowDepth : 0)}
@@ -344,12 +344,25 @@ const Arrow = forwardRef<HTMLDivElement, Omit<BasePopover.Arrow.Props, 'ref'>>(
 );
 
 /**
- * A popover (UIKit `UIPopoverPresentationController`, Base UI's `Popover`):
- * a panel of the menus' glass at its trigger (or `anchor`), optionally with
- * an arrow pointing at it.
+ * Its bar at its top (e.g. a `Toolbar`: its title, a close button), spaced
+ * as Figma's popovers' (16px from the top, 10px above the content; the
+ * toolbar's row 44px). Optional.
  */
-// Its content scrolling inside the popup, as high as the popup may be (the
-// popup itself can't scroll: its material and arrow are drawn around it).
+const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn('uikit-popover-header', className)}
+      data-popover-part="header"
+      {...props}
+    />
+  ),
+);
+
+/**
+ * Its content, scrolling inside the popup, as high as the popup may be (the
+ * popup itself can't scroll: its material and arrow are drawn around it).
+ */
 const Body = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -361,12 +374,18 @@ const Body = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ),
 );
 
+/**
+ * A popover (UIKit `UIPopoverPresentationController`, Base UI's `Popover`):
+ * a panel of the menus' glass at its trigger (or `anchor`), optionally with
+ * an arrow pointing at it.
+ */
 export const Popover = {
   ...BasePopover,
   Root,
-  Trigger,
   Positioner,
   Popup,
   Arrow,
+  Header,
   Body,
+  createHandle,
 };

@@ -45,6 +45,7 @@ const InAListRow: FunctionComponent = () => {
               <List.Title>Date</List.Title>
               <DatePicker.Root
                 defaultValue={example}
+                popoverAlign="end"
                 onValueChange={(next: Date) =>
                   addLog(`date: ${next.toLocaleDateString()}`)
                 }
@@ -55,6 +56,7 @@ const InAListRow: FunctionComponent = () => {
               <DatePicker.Root
                 defaultValue={example}
                 mode="time"
+                popoverAlign="end"
                 onValueChange={(next: Date) =>
                   addLog(`reminder: ${next.toLocaleTimeString()}`)
                 }
@@ -157,6 +159,7 @@ const InAForm: FunctionComponent = () => {
                 <List.Title>Birthday</List.Title>
                 <DatePicker.Root
                   max={new Date()}
+                  popoverAlign="end"
                   value={birthday}
                   onValueChange={(next: Date) => setBirthday(next)}
                 />

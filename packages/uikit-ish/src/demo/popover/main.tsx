@@ -1,7 +1,16 @@
+import './style.css';
+
 import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
+import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent, useMemo } from 'react';
 
-import { Button, List, Popover, Symbol } from '../../components/index.js';
+import {
+  Button,
+  List,
+  Popover,
+  Symbol,
+  Toolbar,
+} from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
@@ -43,27 +52,6 @@ export const PopoverDemo: FunctionComponent = () => {
     true,
   );
 
-  const panel = (
-    <Popover.Portal>
-      <Popover.Positioner {...propsPositioner}>
-        <Popover.Popup>
-          {propsContent.arrow ? <Popover.Arrow /> : null}
-          <div style={{ maxWidth: 280, padding: 16 }}>
-            <Popover.Title
-              style={{ font: 'inherit', fontWeight: 600, margin: 0 }}
-            >
-              Popover
-            </Popover.Title>
-            <Popover.Description style={{ margin: '4px 0 0' }}>
-              A transient view above other content, at the control that showed
-              it.
-            </Popover.Description>
-          </div>
-        </Popover.Popup>
-      </Popover.Positioner>
-    </Popover.Portal>
-  );
-
   return (
     <Component
       center
@@ -85,7 +73,7 @@ export const PopoverDemo: FunctionComponent = () => {
         }}
       >
         <Popover.Root
-          key={`${keyRoot}`}
+          key={keyRoot}
           {...propsRoot}
         >
           <Popover.Trigger
@@ -98,7 +86,46 @@ export const PopoverDemo: FunctionComponent = () => {
           >
             <Button.Label>Show Popover</Button.Label>
           </Popover.Trigger>
-          {panel}
+          <Popover.Portal>
+            <Popover.Positioner {...propsPositioner}>
+              <Popover.Popup className="popover-demo-popup">
+                {propsContent.arrow ? <Popover.Arrow /> : null}
+                <Popover.Header>
+                  <Toolbar.Root placement="block-start">
+                    <Toolbar.Title>
+                      <Popover.Title render={<span />}>Popover</Popover.Title>
+                    </Toolbar.Title>
+                    <Toolbar.Trailing>
+                      <Popover.Close
+                        render={
+                          <Toolbar.Button
+                            aria-label="Close"
+                            shape="circle"
+                          />
+                        }
+                      >
+                        <Button.Icon>
+                          <Symbol icon={sfXmark} />
+                        </Button.Icon>
+                      </Popover.Close>
+                    </Toolbar.Trailing>
+                  </Toolbar.Root>
+                </Popover.Header>
+                <Popover.Body>
+                  <List.Root>
+                    <List.Section>
+                      <List.Footer>
+                        <Popover.Description>
+                          A transient view above other content, at the control
+                          that showed it.
+                        </Popover.Description>
+                      </List.Footer>
+                    </List.Section>
+                  </List.Root>
+                </Popover.Body>
+              </Popover.Popup>
+            </Popover.Positioner>
+          </Popover.Portal>
         </Popover.Root>
         <List.Root style={{ width: '100%' }}>
           <List.Section>
@@ -119,7 +146,33 @@ export const PopoverDemo: FunctionComponent = () => {
                       <Symbol icon={sfICircle} />
                     </Button.Icon>
                   </Popover.Trigger>
-                  {panel}
+                  <Popover.Portal>
+                    <Popover.Positioner align="end">
+                      <Popover.Popup className="popover-demo-popup">
+                        {propsContent.arrow ? <Popover.Arrow /> : null}
+                        <Popover.Header>
+                          <Toolbar.Root placement="block-start">
+                            <Toolbar.Title>
+                              <Popover.Title render={<span />}>
+                                In a Row
+                              </Popover.Title>
+                            </Toolbar.Title>
+                          </Toolbar.Root>
+                        </Popover.Header>
+                        <Popover.Body>
+                          <List.Root>
+                            <List.Section>
+                              <List.Footer>
+                                <Popover.Description>
+                                  Aligned with the row’s end.
+                                </Popover.Description>
+                              </List.Footer>
+                            </List.Section>
+                          </List.Root>
+                        </Popover.Body>
+                      </Popover.Popup>
+                    </Popover.Positioner>
+                  </Popover.Portal>
                 </Popover.Root>
               </List.Item>
             </List.Group>

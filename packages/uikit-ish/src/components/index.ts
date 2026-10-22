@@ -7,17 +7,26 @@ export {
 export {
   ActionSheet,
   type ActionSheetActionProps,
+  type ActionSheetActionVariant,
+  type ActionSheetHandle,
+  type ActionSheetPopupProps,
+  useCreateActionSheetHandle,
 } from './action-sheet/main.js';
 export {
   Alert,
   type AlertActionProps,
   type AlertActionsProps,
   type AlertActionVariant,
+  type AlertHandle,
+  type AlertPopupProps,
+  useCreateAlertHandle,
 } from './alert/main.js';
 export {
   Popover,
   type PopoverAlign,
+  type PopoverHandle,
   type PopoverPositionerProps,
+  useCreatePopoverHandle,
 } from './popover/main.js';
 export {
   ActivityIndicator,
@@ -40,8 +49,10 @@ export {
 } from './sheet/main.js';
 export {
   Tooltip,
+  type TooltipHandle,
   type TooltipPositionerProps,
   type TooltipTriggerProps,
+  useCreateTooltipHandle,
 } from './tooltip/main.js';
 
 // Buttons & inputs

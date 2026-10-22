@@ -214,8 +214,8 @@ export const datePickerRootRows: readonly PropRow[] = [
   [
     'popoverAlign',
     union('start', 'center', 'end'),
-    'its end in a list row, otherwise centered',
-    'How the compact style’s popover aligns to its buttons.',
+    code(union('center')),
+    'How the compact style’s popover aligns to its buttons (in a list row, which they end, iOS aligns it with their end: end).',
   ],
   [
     'buttonShape',

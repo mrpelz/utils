@@ -1,0 +1,17 @@
+/* Tooltip demos (see main.tsx). */
+
+/* A view's buttons, side by side (room above them for their tooltips). */
+.tooltip-demo-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding-block: 48px;
+}
+
+/* An element a tooltip is held open at (a map's pin). */
+.tooltip-demo-pin {
+  color: var(--color-ios-system-red);
+  font-size: 34px;
+}

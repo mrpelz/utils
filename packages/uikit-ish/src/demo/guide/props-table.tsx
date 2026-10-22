@@ -93,6 +93,70 @@ export const renderRows = (
   ...elementRows(element, refElement).slice(2),
 ];
 
+/**
+ * A positioner's props (Base UI's anchor positioning, its descriptions) but
+ * its side, alignment, side offset and collision padding (each component's
+ * own defaults).
+ */
+export const anchorPositioningRows: readonly PropRow[] = [
+  [
+    'alignOffset',
+    'number | ((data) => number)',
+    code('0'),
+    'Additional offset along the alignment axis in pixels; or a function of the anchor’s and positioner’s dimensions, its side and alignment.',
+  ],
+  [
+    'anchor',
+    'Element | VirtualElement | RefObject<Element | null> | (() => …) | null',
+    'its trigger',
+    'An element to position the popup against.',
+  ],
+  [
+    'arrowPadding',
+    'number',
+    code('5'),
+    'Minimum distance to maintain between the arrow and the edges of the popup.',
+  ],
+  [
+    'collisionAvoidance',
+    '{ side?, align?, fallbackAxisSide? }',
+    undefined,
+    <>
+      Determines how to handle collisions when positioning the popup:{' '}
+      <code>side</code> (<code>flip</code>, <code>shift</code>,{' '}
+      <code>none</code>) on the side’s axis, <code>align</code> (the same) on
+      the alignment axis, <code>fallbackAxisSide</code> (<code>start</code>,{' '}
+      <code>end</code>, <code>none</code>) to the perpendicular axis.
+    </>,
+  ],
+  [
+    'collisionBoundary',
+    'Element | Element[] | Rect | ‘clipping-ancestors’',
+    code(union('clipping-ancestors')),
+    'An element or a rectangle that delimits the area that the popup is confined to.',
+  ],
+  [
+    'disableAnchorTracking',
+    'boolean',
+    code('false'),
+    'Whether to disable the popup from tracking any layout shift of its positioning anchor.',
+  ],
+  [
+    'positionMethod',
+    union('absolute', 'fixed'),
+    code(union('absolute')),
+    <>
+      Determines which CSS <code>position</code> property to use.
+    </>,
+  ],
+  [
+    'sticky',
+    'boolean',
+    code('false'),
+    'Whether to maintain the popup in the viewport after the anchor element was scrolled out of view.',
+  ],
+];
+
 /** A secondary click (see `useSecondaryClick`), on buttons and rows. */
 export const secondaryClickRow: PropRow = [
   'onSecondaryClick',

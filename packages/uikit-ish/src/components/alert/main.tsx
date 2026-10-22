@@ -4,15 +4,22 @@ import './style.css';
 
 import { AlertDialog as BaseAlertDialog } from '@base-ui/react/alert-dialog';
 import { Input as BaseInput } from '@base-ui/react/input';
-import { ComponentProps, forwardRef } from 'react';
+import { ComponentProps, forwardRef, useState } from 'react';
 
 import { cn } from '../utils/main.js';
-import type { AlertActionProps, AlertActionsProps } from './props.js';
+import type {
+  AlertActionProps,
+  AlertActionsProps,
+  AlertHandle,
+  AlertPopupProps,
+} from './props.js';
 
 export type {
   AlertActionProps,
   AlertActionVariant,
   AlertActionsProps,
+  AlertHandle,
+  AlertPopupProps,
 } from './props.js';
 
 // Source: Apple iOS 26 Figma (“Alerts”, Type=Side-by-Side and Stacked; also
@@ -34,27 +41,32 @@ export type {
 // - Behind it, the page dims (black, 20%; 40% in dark mode; Figma has
 //   none); it scales in from 110% as it fades in.
 
-/** The alert at the viewport's center, the page dimmed behind it. */
-const Popup = forwardRef<
-  HTMLDivElement,
-  Omit<BaseAlertDialog.Popup.Props, 'ref'>
->(({ className, ...props }, ref) => (
-  <BaseAlertDialog.Portal>
-    <BaseAlertDialog.Backdrop
-      className="uikit-alert-backdrop"
-      data-alert-part="backdrop"
-    />
-    <BaseAlertDialog.Popup
-      ref={ref}
-      {...props}
-      data-alert-part="popup"
-      className={cn(
-        'uikit-alert-popup uikit-alert-panel uikit-glass-medium uikit-alert-centered',
-        className,
-      )}
-    />
-  </BaseAlertDialog.Portal>
-));
+/**
+ * The alert at the viewport's center (or its `container`'s, if that's a
+ * containing block), the page dimmed behind it, in its portal.
+ */
+const Popup = forwardRef<HTMLDivElement, AlertPopupProps>(
+  ({ className, container, ...props }, ref) => (
+    <BaseAlertDialog.Portal
+      className="uikit-alert-portal"
+      container={container}
+    >
+      <BaseAlertDialog.Backdrop
+        className="uikit-alert-backdrop"
+        data-alert-part="backdrop"
+      />
+      <BaseAlertDialog.Popup
+        ref={ref}
+        {...props}
+        data-alert-part="popup"
+        className={cn(
+          'uikit-alert-popup uikit-alert-panel uikit-glass-medium uikit-alert-centered',
+          className,
+        )}
+      />
+    </BaseAlertDialog.Portal>
+  ),
+);
 
 /** Its title and description (Figma “Title and Description”). */
 export const AlertHeader = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
@@ -145,6 +157,23 @@ const Action = forwardRef<HTMLButtonElement, AlertActionProps>(
 );
 
 /**
+ * A handle linking an alert to its triggers outside it, and opening or
+ * closing it imperatively (Base UI's `AlertDialog.createHandle`): pass it to
+ * the root's and the triggers' `handle` (in a component, see
+ * `useCreateAlertHandle`).
+ */
+const createHandle = <Payload = unknown,>(): AlertHandle<Payload> =>
+  BaseAlertDialog.createHandle<Payload>();
+
+/** `Alert.createHandle`, in a component: made once, for its lifetime. */
+export const useCreateAlertHandle = <
+  Payload = unknown,
+>(): AlertHandle<Payload> => {
+  const [handle] = useState(() => createHandle<Payload>());
+  return handle;
+};
+
+/**
  * An alert (UIKit `UIAlertController`, style `alert`; Base UI's
  * `AlertDialog`): a modal panel with a title and description, optionally
  * text fields, and its buttons.
@@ -159,4 +188,5 @@ export const Alert = {
   Field,
   Actions: AlertActions,
   Action,
+  createHandle,
 };

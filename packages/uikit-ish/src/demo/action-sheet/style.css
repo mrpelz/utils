@@ -1,0 +1,16 @@
+/* Action sheet demos (see main.tsx). */
+
+/* A view's triggers, side by side. */
+.action-sheet-demo-triggers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* A popover's actions (iPad): an action sheet's width. */
+.action-sheet-demo-popup {
+  width: 300px;
+  padding: 14px;
+}

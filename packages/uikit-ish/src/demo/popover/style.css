@@ -1,0 +1,15 @@
+/* Popover demos (see main.tsx). */
+
+/* A popover's width (UIKit: its `preferredContentSize`, the app's). */
+.popover-demo-popup {
+  width: min(320px, calc(100vw - 16px));
+}
+
+/* A view's triggers, side by side. */
+.popover-demo-triggers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}

@@ -224,6 +224,7 @@ export const FormDemo: FunctionComponent = () => {
                 <List.Title>Birthday</List.Title>
                 <DatePicker.Root
                   max={new Date()}
+                  popoverAlign="end"
                   value={birthday}
                   onValueChange={(next: Date) => {
                     addLog(`birthday: ${next.toLocaleDateString()}`);

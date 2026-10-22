@@ -1,9 +1,12 @@
+import '../sheet/style.css';
+
 import { FunctionComponent, useMemo } from 'react';
 
 import { Alert, Button } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
+import { useLabelledRef } from '../frame/render-code.js';
 import { useProvidedState } from '../frame/state.js';
 import { getPropOptionsRoot, propOptionsContent } from './props.js';
 
@@ -16,6 +19,7 @@ export const AlertDemo: FunctionComponent = () => {
   const id = 'alert';
 
   const [log, addLog] = useLog();
+  const screen = useLabelledRef<HTMLDivElement>('screen');
 
   const [externalRoot, externalContent] = useProvidedState(id);
 
@@ -44,75 +48,80 @@ export const AlertDemo: FunctionComponent = () => {
       state={[stateRoot, stateContent]}
       title="Alert"
     >
-      <Alert.Root
-        key={`${keyRoot}`}
-        {...propsRoot}
+      <div
+        ref={screen}
+        className="sheet-demo-phone"
       >
-        <Alert.Trigger
-          render={
-            <Button.Root
-              size="large"
-              variant="bordered"
-            />
-          }
+        <Alert.Root
+          key={`${keyRoot}`}
+          {...propsRoot}
         >
-          <Button.Label>Show Alert</Button.Label>
-        </Alert.Trigger>
-        <Alert.Popup>
-          <Alert.Header>
-            <Alert.Title>A Short Title Is Best</Alert.Title>
-            <Alert.Description>
-              A description should be a short, complete sentence.
-            </Alert.Description>
-          </Alert.Header>
-          {fields ? (
-            <Alert.Fields>
-              <Alert.Field
-                aria-label="Name"
-                placeholder="Name"
+          <Alert.Trigger
+            render={
+              <Button.Root
+                size="large"
+                variant="bordered"
               />
-              <Alert.Field
-                aria-label="Password"
-                placeholder="Password"
-                type="password"
-              />
-            </Alert.Fields>
-          ) : null}
-          <Alert.Actions stacked={stacked}>
-            {actions === 'three' ? (
-              <>
-                <Alert.Action
-                  variant="primary"
-                  onClick={() => addLog('action: primary')}
-                >
-                  Primary
-                </Alert.Action>
-                <Alert.Action
-                  variant="destructive"
-                  onClick={() => addLog('action: destructive')}
-                >
-                  Destructive
-                </Alert.Action>
-                <Alert.Action onClick={() => addLog('action: secondary')}>
-                  Secondary
-                </Alert.Action>
-              </>
-            ) : (
-              <>
-                <Alert.Action onClick={() => addLog('action: cancel')}>
-                  Cancel
-                </Alert.Action>
-                <Alert.Action
-                  variant="primary"
-                  onClick={() => addLog('action: ok')}
-                >
-                  OK
-                </Alert.Action>
-              </>
-            )}
-          </Alert.Actions>
-        </Alert.Popup>
-      </Alert.Root>
+            }
+          >
+            <Button.Label>Show Alert</Button.Label>
+          </Alert.Trigger>
+          <Alert.Popup container={screen}>
+            <Alert.Header>
+              <Alert.Title>A Short Title Is Best</Alert.Title>
+              <Alert.Description>
+                A description should be a short, complete sentence.
+              </Alert.Description>
+            </Alert.Header>
+            {fields ? (
+              <Alert.Fields>
+                <Alert.Field
+                  aria-label="Name"
+                  placeholder="Name"
+                />
+                <Alert.Field
+                  aria-label="Password"
+                  placeholder="Password"
+                  type="password"
+                />
+              </Alert.Fields>
+            ) : null}
+            <Alert.Actions stacked={stacked}>
+              {actions === 'three' ? (
+                <>
+                  <Alert.Action
+                    variant="primary"
+                    onClick={() => addLog('action: primary')}
+                  >
+                    Primary
+                  </Alert.Action>
+                  <Alert.Action
+                    variant="destructive"
+                    onClick={() => addLog('action: destructive')}
+                  >
+                    Destructive
+                  </Alert.Action>
+                  <Alert.Action onClick={() => addLog('action: secondary')}>
+                    Secondary
+                  </Alert.Action>
+                </>
+              ) : (
+                <>
+                  <Alert.Action onClick={() => addLog('action: cancel')}>
+                    Cancel
+                  </Alert.Action>
+                  <Alert.Action
+                    variant="primary"
+                    onClick={() => addLog('action: ok')}
+                  >
+                    OK
+                  </Alert.Action>
+                </>
+              )}
+            </Alert.Actions>
+          </Alert.Popup>
+        </Alert.Root>
+      </div>
     </Component>
   );
 };

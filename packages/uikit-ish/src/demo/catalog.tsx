@@ -1,11 +1,31 @@
 import { FunctionComponent } from 'react';
 
+import {
+  ActionSheetComposition,
+  actionSheetCompositionDemos,
+} from './action-sheet/composition.js';
+import { ActionSheetInformationArchitecture } from './action-sheet/information-architecture.js';
 import { ActionSheetDemo } from './action-sheet/main.js';
+import {
+  ActionSheetOverview,
+  actionSheetOverviewDemos,
+} from './action-sheet/overview.js';
+import {
+  ActionSheetParts,
+  actionSheetPartsDemos,
+} from './action-sheet/parts.js';
 import {
   ActivityViewDemo,
   ActivityViewPopoverDemo,
 } from './activity-view/main.js';
+import {
+  AlertComposition,
+  alertCompositionDemos,
+} from './alert/composition.js';
+import { AlertInformationArchitecture } from './alert/information-architecture.js';
 import { AlertDemo } from './alert/main.js';
+import { AlertOverview, alertOverviewDemos } from './alert/overview.js';
+import { AlertParts, alertPartsDemos } from './alert/parts.js';
 import { AvatarDemo } from './avatar/main.js';
 import { BadgeDemo } from './badge/main.js';
 import {
@@ -137,7 +157,14 @@ import {
   PageControlParts,
   pageControlPartsDemos,
 } from './page-control/parts.js';
+import {
+  PopoverComposition,
+  popoverCompositionDemos,
+} from './popover/composition.js';
+import { PopoverInformationArchitecture } from './popover/information-architecture.js';
 import { PopoverDemo } from './popover/main.js';
+import { PopoverOverview, popoverOverviewDemos } from './popover/overview.js';
+import { PopoverParts, popoverPartsDemos } from './popover/parts.js';
 import { ProgressDemo } from './progress/main.js';
 import { RollComposition, rollCompositionDemos } from './roll/composition.js';
 import { RollInformationArchitecture } from './roll/information-architecture.js';
@@ -240,7 +267,14 @@ import {
 } from './toolbar/main.js';
 import { ToolbarOverview, toolbarOverviewDemos } from './toolbar/overview.js';
 import { ToolbarParts, toolbarPartsDemos } from './toolbar/parts.js';
+import {
+  TooltipComposition,
+  tooltipCompositionDemos,
+} from './tooltip/composition.js';
+import { TooltipInformationArchitecture } from './tooltip/information-architecture.js';
 import { TooltipDemo } from './tooltip/main.js';
+import { TooltipOverview, tooltipOverviewDemos } from './tooltip/overview.js';
+import { TooltipParts, tooltipPartsDemos } from './tooltip/parts.js';
 import {
   TypographyDemo,
   TypographyMatrixDemo,
@@ -791,36 +825,80 @@ export const catalog: readonly CatalogEntry[] = [
   {
     baseUiId: 'popover',
     category: 'presentation',
-    demos: [PopoverDemo],
+    demos: [
+      PopoverDemo,
+      ...popoverOverviewDemos,
+      ...popoverPartsDemos,
+      ...popoverCompositionDemos,
+    ],
     framework7Id: 'popover',
     higId: 'popovers',
     id: 'popover',
+    Composition: PopoverComposition,
+    InformationArchitecture: PopoverInformationArchitecture,
+    Overview: PopoverOverview,
+    Parts: PopoverParts,
+    summary:
+      'A transient view at the control that shows it, its arrow pointing at it: a small task or a few settings, on iPad (a sheet on iPhone).',
     title: 'Popover',
   },
   {
     baseUiId: 'alert-dialog',
     category: 'presentation',
-    demos: [AlertDemo],
+    demos: [
+      AlertDemo,
+      ...alertOverviewDemos,
+      ...alertPartsDemos,
+      ...alertCompositionDemos,
+    ],
     framework7Id: 'dialog',
     higId: 'alerts',
     id: 'alert',
+    Composition: AlertComposition,
+    InformationArchitecture: AlertInformationArchitecture,
+    Overview: AlertOverview,
+    Parts: AlertParts,
+    summary:
+      'Important information that needs a response now: a title, a message, its actions; modal, the page dimmed. Sparingly.',
     title: 'Alert',
   },
   {
-    baseUiId: 'dialog',
+    baseUiId: 'popover',
     category: 'presentation',
-    demos: [ActionSheetDemo],
+    demos: [
+      ActionSheetDemo,
+      ...actionSheetOverviewDemos,
+      ...actionSheetPartsDemos,
+      ...actionSheetCompositionDemos,
+    ],
     framework7Id: 'action-sheet',
     higId: 'action-sheets',
     id: 'action-sheet',
+    Composition: ActionSheetComposition,
+    InformationArchitecture: ActionSheetInformationArchitecture,
+    Overview: ActionSheetOverview,
+    Parts: ActionSheetParts,
+    summary:
+      'Choices about an action the person just started, at its control: a destructive one first; a popover on iPad.',
     title: 'Action sheet',
   },
   {
     baseUiId: 'tooltip',
     category: 'presentation',
-    demos: [TooltipDemo],
+    demos: [
+      TooltipDemo,
+      ...tooltipOverviewDemos,
+      ...tooltipPartsDemos,
+      ...tooltipCompositionDemos,
+    ],
     framework7Id: 'tooltip',
     id: 'tooltip',
+    Composition: TooltipComposition,
+    InformationArchitecture: TooltipInformationArchitecture,
+    Overview: TooltipOverview,
+    Parts: TooltipParts,
+    summary:
+      'A short label at a control, on hover and keyboard focus (not on touch); or held open, labeling an element for good.',
     title: 'Tooltip',
   },
   {

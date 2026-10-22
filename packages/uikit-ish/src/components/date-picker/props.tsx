@@ -220,8 +220,9 @@ export type DatePickerProps = CalendarProps & {
    */
   popover?: boolean;
   /**
-   * How the compact style's popover aligns to its buttons.
-   * @default their end in a list row (which they end), otherwise centered
+   * How the compact style's popover aligns to its buttons (in a list row,
+   * which they end, iOS aligns it with their end: `end`).
+   * @default 'center'
    */
   popoverAlign?: PopoverAlign;
 };

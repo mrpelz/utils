@@ -1,5 +1,20 @@
 /* Action-sheet (see main.tsx). */
 @layer uikit-ish {
+  .uikit-action-sheet-positioner {
+    /* An overlay: above the page's layers (e.g. Viewport's bars), overlays
+       among themselves in the order they open (see Menu). */
+    z-index: 100;
+  }
+
+  /* Its panel: within the room for it (not its positioner's width), its
+     actions scrolling when they don't fit (as UIKit's). */
+  .uikit-action-sheet-popup.uikit-alert-panel {
+    max-width: var(--available-width);
+    max-height: var(--available-height);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
   .uikit-action-sheet-actions {
     display: flex;
     flex-direction: column;

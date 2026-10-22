@@ -308,7 +308,9 @@
 
     /* A toolbar in it: Figma's 44px row, its padding the header's (not a
        bar's). */
-    & > [role='toolbar'] {
+
+    /* (Over the bar's own: its placement's padding and height.) */
+    & > [data-toolbar-part='root'][data-placement] {
       min-height: 44px;
       padding-block: 0;
     }
