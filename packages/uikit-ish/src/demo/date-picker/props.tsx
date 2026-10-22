@@ -234,6 +234,15 @@ export const getPropOptionsCalendar = (addLog: AddLog) => ({
   ] as const,
 });
 
+/**
+ * Its hidden control's: `name`, and `form` (the demo's form, beside the
+ * picker, not around it).
+ */
+export const getPropOptionsFormValue = (form: string) => ({
+  name: [undefined, 'date'] as const,
+  form: [undefined, form] as const,
+});
+
 /** `DatePicker.TimeRoll` (its value the demo's). */
 export const propOptionsTimeRoll = {
   hourCycle: [undefined, 'h12', 'h23'] as const,

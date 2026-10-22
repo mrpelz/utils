@@ -646,7 +646,8 @@ export const ToolbarParts: FunctionComponent = () => (
             <PartLink
               component="toolbar"
               part="Toolbar.Leading"
-            />
+            />{' '}
+            (optional)
             <ul>
               <li>
                 <PartLink
@@ -677,7 +678,7 @@ export const ToolbarParts: FunctionComponent = () => (
               component="toolbar"
               part="Toolbar.Title"
             />{' '}
-            (or a control, e.g.{' '}
+            (optional; or a control, e.g.{' '}
             <PartLink
               component="toolbar"
               part="Toolbar.Input"
@@ -688,7 +689,8 @@ export const ToolbarParts: FunctionComponent = () => (
                 <PartLink
                   component="toolbar"
                   part="Toolbar.Subtitle"
-                />
+                />{' '}
+                (optional)
               </li>
             </ul>
           </li>
@@ -697,24 +699,25 @@ export const ToolbarParts: FunctionComponent = () => (
               component="toolbar"
               part="Toolbar.Trailing"
             />{' '}
-            (as <code>Leading</code>)
+            (optional; as <code>Leading</code>)
           </li>
           <li>
             Also:{' '}
             <PartLink
               component="toolbar"
               part="Toolbar.Spacer"
-            />
-            ,{' '}
+            />{' '}
+            (optional) ,{' '}
             <PartLink
               component="toolbar"
               part="Toolbar.Separator"
-            />
-            ,{' '}
+            />{' '}
+            (optional) ,{' '}
             <PartLink
               component="toolbar"
               part="Toolbar.Link"
-            />
+            />{' '}
+            (optional)
           </li>
         </ul>
       </li>

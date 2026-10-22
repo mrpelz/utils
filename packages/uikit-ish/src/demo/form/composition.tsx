@@ -58,7 +58,9 @@ const ValidationAndServerErrors: FunctionComponent = () => {
       >
         <List.Root>
           <Fieldset.Root>
-            <Fieldset.Legend>Account</Fieldset.Legend>
+            <Fieldset.Legend>
+              <List.Title>Account</List.Title>
+            </Fieldset.Legend>
             <List.Group>
               <TextField.Root
                 name="name"
@@ -141,6 +143,7 @@ const InASheetWithCancelDone: FunctionComponent = () => {
           </Sheet.Trigger>
           <Sheet.Popup
             compact
+            background="grouped"
             container={screen}
             detent="large"
           >
@@ -251,7 +254,9 @@ const ASwitchRevealingAFieldset: FunctionComponent = () => {
             </List.Group>
           </List.Section>
           <Fieldset.Root disabled={!remind}>
-            <Fieldset.Legend>Reminder</Fieldset.Legend>
+            <Fieldset.Legend>
+              <List.Title>Reminder</List.Title>
+            </Fieldset.Legend>
             <List.Group>
               <Field.Root
                 name="date"
@@ -302,7 +307,9 @@ const MixedControls: FunctionComponent = () => {
       >
         <List.Root>
           <Fieldset.Root>
-            <Fieldset.Legend>Order</Fieldset.Legend>
+            <Fieldset.Legend>
+              <List.Title>Order</List.Title>
+            </Fieldset.Legend>
             <List.Group>
               <TextField.Root
                 name="name"

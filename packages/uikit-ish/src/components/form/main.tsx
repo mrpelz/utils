@@ -43,16 +43,19 @@ const FieldsetRoot = forwardRef<
   />
 ));
 
-/** A fieldset's legend (Base UI): its section's header (`List.Header`). */
+/**
+ * A fieldset's legend (Base UI's: it names the fieldset, its
+ * `aria-labelledby`): its section's header (`List.Header`), its parts the
+ * header's (`List.Title`, …); another header by `render` (e.g.
+ * `<List.Header prominence="nested" />`).
+ */
 const FieldsetLegend = forwardRef<HTMLDivElement, FieldsetLegendProps>(
-  ({ children, prominence, ...props }, ref) => (
+  (props, ref) => (
     <BaseFieldset.Legend
       ref={ref}
       {...props}
-      render={props.render ?? <List.Header prominence={prominence} />}
-    >
-      <List.Title>{children}</List.Title>
-    </BaseFieldset.Legend>
+      render={props.render ?? <List.Header />}
+    />
   ),
 );
 

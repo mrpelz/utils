@@ -235,7 +235,8 @@ export const RollParts: FunctionComponent = () => (
             <PartLink
               component="roll"
               part="Roll.Separator"
-            />
+            />{' '}
+            (optional)
           </li>
         </ul>
       </li>

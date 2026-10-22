@@ -73,7 +73,9 @@ const searchCode = `const [query, setQuery] = useState('');
 
 const formCode = `<List.Root>
   <Fieldset.Root>
-    <Fieldset.Legend>Contact</Fieldset.Legend>
+    <Fieldset.Legend>
+      <List.Title>Contact</List.Title>
+    </Fieldset.Legend>
     <List.Group>
       <TextField.Root render={<List.Item />}>
         <TextField.Label>Name</TextField.Label>
@@ -88,7 +90,9 @@ const formCode = `<List.Root>
     </List.Group>
   </Fieldset.Root>
   <Fieldset.Root>
-    <Fieldset.Legend>Notes</Fieldset.Legend>
+    <Fieldset.Legend>
+      <List.Title>Notes</List.Title>
+    </Fieldset.Legend>
     <List.Group>
       {/* No label: the placeholder shows, aria-label names it. */}
       <TextField.Root render={<List.Item />}>
@@ -275,7 +279,9 @@ const InAFormList: FunctionComponent = () => {
     >
       <List.Root className="text-field-demo-list">
         <Fieldset.Root>
-          <Fieldset.Legend>Contact</Fieldset.Legend>
+          <Fieldset.Legend>
+            <List.Title>Contact</List.Title>
+          </Fieldset.Legend>
           <List.Group>
             <TextField.Root render={<List.Item />}>
               <TextField.Label>Name</TextField.Label>
@@ -298,7 +304,9 @@ const InAFormList: FunctionComponent = () => {
           </List.Group>
         </Fieldset.Root>
         <Fieldset.Root>
-          <Fieldset.Legend>Address</Fieldset.Legend>
+          <Fieldset.Legend>
+            <List.Title>Address</List.Title>
+          </Fieldset.Legend>
           <List.Group>
             <TextField.Root render={<List.Item />}>
               <TextField.Control
@@ -320,7 +328,9 @@ const InAFormList: FunctionComponent = () => {
           </List.Group>
         </Fieldset.Root>
         <Fieldset.Root>
-          <Fieldset.Legend>Notes</Fieldset.Legend>
+          <Fieldset.Legend>
+            <List.Title>Notes</List.Title>
+          </Fieldset.Legend>
           <List.Group>
             <TextField.Root render={<List.Item />}>
               <TextField.Control

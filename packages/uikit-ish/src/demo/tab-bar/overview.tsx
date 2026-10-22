@@ -84,7 +84,7 @@ const LiveView: FunctionComponent = () => {
                 <TabBar.Icon>
                   <Symbol icon={icon} />
                 </TabBar.Icon>
-                <TabBar.Label>{label}</TabBar.Label>
+                {content.labels ? <TabBar.Label>{label}</TabBar.Label> : null}
               </TabBar.Tab>
             ))}
           </TabBar.Group>

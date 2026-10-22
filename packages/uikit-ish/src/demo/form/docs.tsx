@@ -92,19 +92,19 @@ export const fieldsetRootRows: readonly PropRow[] = [
 
 export const fieldsetLegendRows: readonly PropRow[] = [
   [
-    'prominence',
-    union('prominent', 'nested', 'extraProminent'),
-    'its list’s',
+    'children',
+    'ReactNode',
+    undefined,
     <>
-      Its header’s prominence (
+      Its header’s parts (
       <PartLink
         component="list"
-        part="List.Header"
+        part="List.Title"
       />
-      ’s).
+      , …): the section’s title; its text names the fieldset (its{' '}
+      <code>aria-labelledby</code>).
     </>,
   ],
-  ['children', 'ReactNode', undefined, 'Its text: the section’s title.'],
   [
     'render',
     'ReactElement | ((props, state) => ReactElement)',
@@ -115,7 +115,10 @@ export const fieldsetLegendRows: readonly PropRow[] = [
         part="List.Header"
       />
     </>,
-    'What it renders.',
+    <>
+      What it renders: e.g. another prominence (
+      <code>{'<List.Header prominence="nested" />'}</code>).
+    </>,
   ],
   ...baseUiRows('div', 'HTMLDivElement').filter(([name]) => name !== 'render'),
 ];

@@ -54,8 +54,9 @@ export type {
 // Deviations:
 // - The bar's middle is centered in it while the sides fit (as iOS's
 //   titles; Figma: the title absolutely centered): the sides share the free
-//   space equally; a title aligned to the start (or anything taking the
-//   free space) takes all of it instead.
+//   space equally (a missing side is held by an empty one, so a title
+//   without `Leading` stays centered); a title aligned to the start (or
+//   anything taking the free space) takes all of it instead.
 // - Pressed, a capsule of several buttons turns into a glass lens as the tab
 //   bar's groups do (scaled up by 1.05, measured on iOS 26), the pressed
 //   button showing the selection (Figma: no pressed state).

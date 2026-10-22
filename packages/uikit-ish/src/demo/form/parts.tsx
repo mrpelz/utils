@@ -58,7 +58,9 @@ const FormPart: FunctionComponent = () => {
       >
         <List.Root>
           <Fieldset.Root>
-            <Fieldset.Legend>Order</Fieldset.Legend>
+            <Fieldset.Legend>
+              <List.Title>Order</List.Title>
+            </Fieldset.Legend>
             <List.Group>
               <TextField.Root
                 name="email"
@@ -144,7 +146,9 @@ const FieldsetRootPart: FunctionComponent = () => {
       >
         <List.Root>
           <Fieldset.Root {...props}>
-            <Fieldset.Legend>Contact</Fieldset.Legend>
+            <Fieldset.Legend>
+              <List.Title>Contact</List.Title>
+            </Fieldset.Legend>
             <List.Group>
               <TextField.Root
                 name="name"
@@ -198,7 +202,9 @@ const FieldsetLegendPart: FunctionComponent = () => {
       <Form style={{ width: 'min(402px, 100%)' }}>
         <List.Root>
           <Fieldset.Root>
-            <Fieldset.Legend {...props}>Contact</Fieldset.Legend>
+            <Fieldset.Legend {...props}>
+              <List.Title>Contact</List.Title>
+            </Fieldset.Legend>
             <List.Group>
               <TextField.Root
                 name="name"
@@ -313,13 +319,15 @@ export const FormParts: FunctionComponent = () => (
             <PartLink
               component="form"
               part="Fieldset.Root"
-            />
+            />{' '}
+            (optional)
             <ul>
               <li>
                 <PartLink
                   component="form"
                   part="Fieldset.Legend"
-                />
+                />{' '}
+                (optional)
               </li>
               <li>
                 <PartLink
@@ -389,12 +397,23 @@ export const FormParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The fieldset’s legend (Base UI’s), rendered as the section’s{' '}
+        The fieldset’s legend (Base UI’s): it names the fieldset (Base UI sets
+        the fieldset’s <code>aria-labelledby</code> to it; an accessible name,
+        not a form field’s name).
+      </li>
+      <li>
+        Rendered as the section’s{' '}
         <PartLink
           component="list"
           part="List.Header"
         />
-        , its text a title: it names the group.
+        , its children the header’s parts, as any header’s (a{' '}
+        <PartLink
+          component="list"
+          part="List.Title"
+        />
+        , …); another header by <code>render</code> (e.g.{' '}
+        <code>{'<List.Header prominence="nested" />'}</code>).
       </li>
     </ul>
     <FieldsetLegendPart />

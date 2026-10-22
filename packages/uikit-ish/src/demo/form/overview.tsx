@@ -45,7 +45,9 @@ const LiveView: FunctionComponent = () => {
       >
         <List.Root>
           <Fieldset.Root>
-            <Fieldset.Legend>Order</Fieldset.Legend>
+            <Fieldset.Legend>
+              <List.Title>Order</List.Title>
+            </Fieldset.Legend>
             <List.Group>
               <TextField.Root
                 name="name"
@@ -177,7 +179,7 @@ export const FormOverview: FunctionComponent = () => (
           pickRows(formRows, 'onFormSubmit', 'validationMode', 'errors'),
         ],
         ['Fieldset.Root', pickRows(fieldsetRootRows, 'disabled')],
-        ['Fieldset.Legend', pickRows(fieldsetLegendRows, 'prominence')],
+        ['Fieldset.Legend', pickRows(fieldsetLegendRows, 'render')],
       ]}
     />
 
@@ -189,8 +191,8 @@ export const FormOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A fieldset is a <code>fieldset</code>, its legend naming the group (the
-        section’s header).
+        A fieldset is a <code>fieldset</code>, its legend naming the group (its{' '}
+        <code>aria-labelledby</code>; the section’s header).
       </li>
       <li>
         Each field names its control: a label (

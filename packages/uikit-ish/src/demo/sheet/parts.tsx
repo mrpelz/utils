@@ -83,6 +83,7 @@ const RootPart: FunctionComponent = () => {
           </Sheet.Trigger>
           <Sheet.Popup
             compact
+            background="grouped"
             container={screen}
           >
             <Sheet.Header>
@@ -172,6 +173,7 @@ const TriggerPart: FunctionComponent = () => {
           </Sheet.Trigger>
           <Sheet.Popup
             compact
+            background="grouped"
             container={screen}
           >
             <Sheet.Header>
@@ -349,6 +351,7 @@ const HeaderPart: FunctionComponent = () => {
           </Sheet.Trigger>
           <Sheet.Popup
             compact
+            background="grouped"
             container={screen}
           >
             <Sheet.Header {...props}>
@@ -437,6 +440,7 @@ const GrabberPart: FunctionComponent = () => {
           </Sheet.Trigger>
           <Sheet.Popup
             compact
+            background="grouped"
             container={screen}
           >
             <Sheet.Header>
@@ -525,6 +529,7 @@ const ContentPart: FunctionComponent = () => {
           </Sheet.Trigger>
           <Sheet.Popup
             compact
+            background="grouped"
             container={screen}
           >
             <Sheet.Header>
@@ -613,6 +618,7 @@ const TitlePart: FunctionComponent = () => {
           </Sheet.Trigger>
           <Sheet.Popup
             compact
+            background="grouped"
             container={screen}
           >
             <Sheet.Header>
@@ -706,6 +712,7 @@ const DescriptionPart: FunctionComponent = () => {
           </Sheet.Trigger>
           <Sheet.Popup
             compact
+            background="grouped"
             container={screen}
           >
             <Sheet.Header>
@@ -794,6 +801,7 @@ const ClosePart: FunctionComponent = () => {
           </Sheet.Trigger>
           <Sheet.Popup
             compact
+            background="grouped"
             container={screen}
           >
             <Sheet.Header>
@@ -888,6 +896,7 @@ const CreateHandlePart: FunctionComponent = () => {
         >
           <Sheet.Popup
             compact
+            background="grouped"
             container={screen}
           >
             <Sheet.Header>
@@ -980,6 +989,7 @@ const UseCreateSheetHandlePart: FunctionComponent = () => {
           {({ payload }) => (
             <Sheet.Popup
               compact
+              background="grouped"
               container={screen}
             >
               <Sheet.Header>
@@ -1050,7 +1060,8 @@ export const SheetParts: FunctionComponent = () => (
             <PartLink
               component="sheet"
               part="Sheet.Trigger"
-            />
+            />{' '}
+            (optional; or a handle’s, or <code>open</code>)
           </li>
           <li>
             <PartLink
@@ -1167,6 +1178,15 @@ export const SheetParts: FunctionComponent = () => (
       <li>
         <code>container</code>: here, the phone’s screen (a containing block, so
         it fills the screen, not the window).
+      </li>
+      <li>
+        <code>background</code>: grouped for grouped lists in it (here), plain
+        otherwise, as a{' '}
+        <PartLink
+          component="page"
+          part="Page.Root"
+        />
+        ’s; set by the app, not by what’s inside.
       </li>
       <li>
         Renders a <code>div</code> (a <code>dialog</code>) in its viewport’s{' '}

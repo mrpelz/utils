@@ -172,3 +172,49 @@ export const colorPickerWellRows: readonly PropRow[] = [
   ],
   ...elementRows('button', 'HTMLButtonElement'),
 ];
+
+/** `parseColor(hex)`: its argument, what it returns. */
+export const parseColorRows: readonly PropRow[] = [
+  ['hex', 'string', undefined, 'A hex color: #rgb, #rrggbb or #rrggbbaa.'],
+  [
+    '(return)',
+    'Rgba',
+    undefined,
+    <>
+      Its channels: <code>r</code>, <code>g</code>, <code>b</code> (0–255),{' '}
+      <code>a</code> (0–1; 1 without alpha).
+    </>,
+  ],
+];
+
+/** `formatColor(rgba)`: its argument, what it returns. */
+export const formatColorRows: readonly PropRow[] = [
+  [
+    'rgba',
+    'Rgba',
+    undefined,
+    <>
+      Channels: <code>r</code>, <code>g</code>, <code>b</code> (0–255, rounded
+      and clamped), <code>a</code> (0–1).
+    </>,
+  ],
+  [
+    '(return)',
+    'string',
+    undefined,
+    'A hex color in capitals: #RRGGBB, or #RRGGBBAA if not opaque.',
+  ],
+];
+
+/** `defaultSavedColors`: what it is. */
+export const defaultSavedColorsRows: readonly PropRow[] = [
+  [
+    '(value)',
+    'string[]',
+    undefined,
+    <>
+      Figma’s saved colors (hex strings), the panel’s{' '}
+      <code>defaultSavedColors</code> by default.
+    </>,
+  ],
+];

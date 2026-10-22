@@ -240,6 +240,21 @@ export const sheetPopupRows: readonly PropRow[] = [
     'A sheet from the bottom (its detent), or not compact, a form sheet, centered (up to 936px by 852px).',
   ],
   [
+    'background',
+    union('grouped', 'plain'),
+    code(union('plain')),
+    <>
+      Its background, as a page’s (
+      <PartLink
+        component="page"
+        part="Page.Root"
+      />
+      ’s): grouped for grouped lists in it (their own background then
+      transparent, the sheet’s around them), plain for plain lists and other
+      content. Not the medium detent’s (glass).
+    </>,
+  ],
+  [
     'container',
     'HTMLElement | ShadowRoot | RefObject<…> | null',
     <>

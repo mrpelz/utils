@@ -18,16 +18,21 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
 export const propOptionsPopup = {
   ...commonPropOptions,
   detent: [undefined, 'large', 'medium'] as const,
+  // Its lists are grouped: on the grouped background.
+  background: ['grouped', 'plain', undefined] as const,
 };
 
 /**
- * The overview's screen (a phone's: compact, or a tablet's), and where its
- * sheet is portaled: into the screen (the demo frame), or the page's body
- * (`global`: compact by the window, see Viewport's `useSizeClass`).
+ * The overview's screen (a phone's: compact, a tablet's, or, unset, by the
+ * window's size class: Viewport's `useSizeClass`), and where its sheet is
+ * portaled: into the screen (the demo frame), or the page's body (`global`:
+ * compact by the window).
  */
 export const propOptionsOverviewContent = {
-  layout: ['phone', 'tablet'] as const,
+  layout: [undefined, 'phone', 'tablet'] as const,
   portal: ['frame', 'global'] as const,
+  // The grabber is optional (the header's toolbar where it'd be).
+  grabber: [true, false] as const,
 };
 
 /** The overview's root: its modality, its dismissal. */
@@ -39,6 +44,8 @@ export const propOptionsOverviewRoot = {
 /** The overview's few: its detent, its dismissal. */
 export const propOptionsOverviewPopup = {
   detent: [undefined, 'large', 'medium'] as const,
+  // Its lists are grouped: on the grouped background.
+  background: ['grouped', 'plain', undefined] as const,
 };
 
 /** The root's options in the guide's view (its changes logged). */
@@ -80,6 +87,8 @@ export const getPropOptionsGuideRoot = (addLog: AddLog) => ({
 export const propOptionsGuidePopup = {
   ...commonPropOptions,
   detent: [undefined, 'large', 'medium'] as const,
+  // Its lists are grouped: on the grouped background.
+  background: ['grouped', 'plain', undefined] as const,
   compact: [true, false, undefined] as const,
   initialFocus: [undefined, false, true] as const,
   finalFocus: [undefined, false, true] as const,

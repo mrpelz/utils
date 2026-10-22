@@ -140,9 +140,9 @@
       inset: calc(10px + var(--uikit-safe-area-inset-top, 0px)) 0 0;
     }
 
-    /* With a list: on the grouped background, the list without its own
-       (which would end with it, the sheet's around it). */
-    &[data-detent='large']:has([data-list-part='root']) {
+    /* Grouped (`background`): on the grouped background, a list in it
+       without its own (which would end with it, the sheet's around it). */
+    &[data-detent='large'][data-background='grouped'] {
       --uikit-list-container-background: transparent;
 
       background-color: var(--color-ios-system-grouped-background);
@@ -168,7 +168,7 @@
       inset: 50% auto auto 50%;
       translate: -50% -50%;
 
-      &:has([data-list-part='root']) {
+      &[data-background='grouped'] {
         --uikit-list-container-background: transparent;
 
         background-color: var(--color-ios-system-grouped-background);

@@ -11,6 +11,7 @@ import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
 import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 
 import { forwardClick, List, Symbol } from '../../components/index.js';
+import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { commonPropOptions, usePropControl } from '../frame/prop-control.js';
@@ -19,6 +20,7 @@ import { PropsTable } from '../guide/props-table.js';
 import { Heading, PartLink } from '../guide/sections.js';
 import { contacts, messages, planets, settings } from './content.js';
 import {
+  forwardClickRows,
   listAccessoryRows,
   listActionRows,
   listBlockRows,
@@ -1586,6 +1588,13 @@ const IndexItemPart: FunctionComponent = () => {
   );
 };
 
+const forwardClickCode = `<List.Item onClick={forwardClick('[role=switch]')}>
+  <List.Title>Wi-Fi</List.Title>
+  <Switch.Root aria-label="Wi-Fi">
+    <Switch.Thumb />
+  </Switch.Root>
+</List.Item>`;
+
 /** `/list/parts`: a list's parts, from the root to its rows' parts. */
 export const ListParts: FunctionComponent = () => (
   <>
@@ -1819,6 +1828,13 @@ export const ListParts: FunctionComponent = () => (
           </li>
         </ul>
       </li>
+      <li>
+        <PartLink
+          component="list"
+          part="forwardClick"
+        />{' '}
+        (a helper: a row’s click handler)
+      </li>
     </ul>
 
     <Heading
@@ -1921,7 +1937,8 @@ export const ListParts: FunctionComponent = () => (
       <li>At least 52px high (68px with a subtitle).</li>
       <li>
         Pressable through its title (or a <code>Button</code>), or by its own{' '}
-        <code>onClick</code> (e.g. <code>forwardClick</code>).
+        <code>onClick</code> (e.g. <PartLink part="forwardClick" />
+        ).
       </li>
       <li>
         Can be <code>selected</code>, indented (<code>level</code>), swiped for
@@ -2253,7 +2270,8 @@ export const ListParts: FunctionComponent = () => (
         selecting several rows.
       </li>
       <li>
-        Rows pass their clicks on to it (<code>forwardClick</code>).
+        Rows pass their clicks on to it (<PartLink part="forwardClick" />
+        ).
       </li>
     </ul>
     <CheckboxPart />
@@ -2374,6 +2392,30 @@ export const ListParts: FunctionComponent = () => (
     <IndexItemPart />
     <h3>Props</h3>
     <PropsTable rows={listIndexItemRows} />
+
+    <Heading
+      id="forwardclick"
+      level={2}
+    >
+      <code>forwardClick</code>
+    </Heading>
+    <ul>
+      <li>
+        A row’s click handler passing the click on to the control in it, as iOS
+        rows do: pressing a switch’s row toggles the switch (see{' '}
+        <PartLink part="List.Checkbox" />, <PartLink part="List.Radio" />
+        ).
+      </li>
+      <li>
+        As the click it is: a pointer’s or a keyboard’s (a control’s{' '}
+        <code>click()</code> would be a keyboard’s, so menus would open with
+        their first item highlighted); the control’s own clicks aren’t passed on
+        again.
+      </li>
+    </ul>
+    <CodeView code={forwardClickCode} />
+    <h3>Arguments and return</h3>
+    <PropsTable rows={forwardClickRows} />
   </>
 );
 

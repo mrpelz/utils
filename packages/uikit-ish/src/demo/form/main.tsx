@@ -125,7 +125,9 @@ export const FormDemo: FunctionComponent = () => {
       >
         <List.Root>
           <Fieldset.Root {...propsFieldset}>
-            <Fieldset.Legend {...propsLegend}>Contact</Fieldset.Legend>
+            <Fieldset.Legend {...propsLegend}>
+              <List.Title>Contact</List.Title>
+            </Fieldset.Legend>
             <List.Group>
               <TextField.Root
                 name="name"
@@ -233,7 +235,9 @@ export const FormDemo: FunctionComponent = () => {
           </Fieldset.Root>
 
           <Fieldset.Root>
-            <Fieldset.Legend>Notifications</Fieldset.Legend>
+            <Fieldset.Legend>
+              <List.Title>Notifications</List.Title>
+            </Fieldset.Legend>
             {/* Fields: their values are the form's (by name). */}
 
             <Field.Root
@@ -273,7 +277,9 @@ export const FormDemo: FunctionComponent = () => {
           </Fieldset.Root>
 
           <Fieldset.Root>
-            <Fieldset.Legend>Appearance</Fieldset.Legend>
+            <Fieldset.Legend>
+              <List.Title>Appearance</List.Title>
+            </Fieldset.Legend>
 
             <Field.Root
               key={`${keyRadioGroup}-${keyRadio}`}

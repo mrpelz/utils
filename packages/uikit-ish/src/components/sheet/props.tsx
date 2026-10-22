@@ -6,6 +6,13 @@ export type SheetDetent = 'large' | 'medium';
 
 export type SheetPopupProps = Omit<BaseDrawer.Popup.Props, 'ref'> & {
   /**
+   * Its background (as a page's, see `Page.Root`): `grouped` for grouped
+   * lists in it (their own background then transparent), `plain` for plain
+   * lists and other content. Not the medium detent's (glass).
+   * @default 'plain'
+   */
+  background?: 'grouped' | 'plain';
+  /**
    * A sheet from the bottom (`detent`), or (not compact) a form sheet,
    * centered.
    * @default by the window's width (compact below 768px)

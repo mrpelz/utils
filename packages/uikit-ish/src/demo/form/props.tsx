@@ -30,9 +30,21 @@ export const propOptionsFieldset = {
   disabled: [undefined, false, true] as const,
 };
 
+/** Its header by `render` (another prominence: `List.Header`'s). */
 export const propOptionsLegend = {
-  ...commonPropOptions,
-  prominence: [undefined, 'prominent', 'nested', 'extraProminent'] as const,
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+  render: [
+    undefined,
+    new MappedProp(
+      <List.Header prominence="nested" />,
+      '[<List.Header prominence="nested" />]',
+    ),
+    new MappedProp(
+      <List.Header prominence="extraProminent" />,
+      '[<List.Header prominence="extraProminent" />]',
+    ),
+  ] as const,
 };
 
 export const getPropOptionsCheckboxGroup = (addLog: AddLog) => ({

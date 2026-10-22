@@ -50,9 +50,10 @@ const messageCode = `<Viewport.Provider>
   <Viewport.Content>
     <List.Root>…</List.Root>
   </Viewport.Content>
-  {/* Pushed up by the keyboard (keyboard="push", the default). */}
-  <Viewport.BlockEnd>
-    <div className="message-bar">
+  {/* Pushed up by the keyboard (keyboard="push", the default); the anchor
+      is the surface (its background to the edge), its content spaced in it. */}
+  <Viewport.BlockEnd className="message-bar">
+    <div className="message-bar-content">
       <TextField.Root>
         <TextField.Search>
           <TextField.Control
@@ -234,7 +235,7 @@ const Message: FunctionComponent = () => {
             </List.Section>
           </List.Root>
         </Viewport.Content>
-        <Viewport.BlockEnd>
+        <Viewport.BlockEnd className="viewport-demo-surface">
           <div className="viewport-demo-bar">
             <TextField.Root>
               <TextField.Search>
@@ -468,6 +469,15 @@ export const ViewportComposition: FunctionComponent = () => (
       <li>
         The content layer resized above the keyboard (its default): the last
         message stays in view.
+      </li>
+      <li>
+        The bar’s background on the anchor (the app’s class): the anchor is the
+        surface (see{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Anchor"
+        />
+        ), reaching the screen’s edge below the field.
       </li>
     </ul>
     <CodeView code={messageCode} />

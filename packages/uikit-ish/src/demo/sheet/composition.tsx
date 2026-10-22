@@ -48,7 +48,9 @@ const detentsCode = `const screen = useRef<HTMLDivElement>(null);
       <Button.Label>Large</Button.Label>
     </Sheet.Trigger>
     {/* The whole screen but its top. */}
-    <Sheet.Popup compact container={screen}>…</Sheet.Popup>
+    <Sheet.Popup background="grouped" compact container={screen}>
+      …
+    </Sheet.Popup>
   </Sheet.Root>
 </div>`;
 
@@ -65,7 +67,7 @@ const close = () => (edited ? setConfirming(true) : setOpen(false));
   onOpenChange={(next) => (next ? setOpen(true) : close())}
 >
   <Sheet.Trigger render={<Button.Root variant="bordered" />}>…</Sheet.Trigger>
-  <Sheet.Popup>
+  <Sheet.Popup background="grouped">
     <Sheet.Header>
       <Sheet.Grabber />
       <Toolbar.Root placement="block-start">
@@ -100,7 +102,7 @@ const close = () => (edited ? setConfirming(true) : setOpen(false));
 
 const navigationCode = `const [keys, setKeys] = useState(['settings']);
 
-<Sheet.Popup>
+<Sheet.Popup background="grouped">
   {/* Its grabber alone: each page has its own bar. */}
   <Sheet.Header>
     <Sheet.Grabber />
@@ -127,7 +129,11 @@ const navigationCode = `const [keys, setKeys] = useState(['settings']);
   </Sheet.Content>
 </Sheet.Popup>`;
 
-const formSheetCode = `<Sheet.Popup compact={false} container={screen}>
+const formSheetCode = `<Sheet.Popup
+  background="grouped"
+  compact={false}
+  container={screen}
+>
   <Sheet.Header>
     <Sheet.Grabber />…</Sheet.Header>
   <Sheet.Content>…</Sheet.Content>
@@ -215,6 +221,7 @@ const Detents: FunctionComponent = () => {
           </Sheet.Trigger>
           <Sheet.Popup
             compact
+            background="grouped"
             container={screen}
           >
             <Sheet.Header>
@@ -291,6 +298,7 @@ const CancelDone: FunctionComponent = () => {
           </Sheet.Trigger>
           <Sheet.Popup
             compact
+            background="grouped"
             container={screen}
           >
             <Sheet.Header>
@@ -478,6 +486,7 @@ const NavigationInside: FunctionComponent = () => {
           </Sheet.Trigger>
           <Sheet.Popup
             compact
+            background="grouped"
             container={screen}
           >
             <Sheet.Header>
@@ -575,6 +584,7 @@ const FormSheet: FunctionComponent = () => {
             <Button.Label>New Contact</Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
+            background="grouped"
             compact={false}
             container={screen}
           >

@@ -16,8 +16,7 @@ import {
   TextField,
   Toolbar,
   useCreateDrawerHandle,
-  useVisualViewport,
-  Viewport,
+  useSizeClass,
 } from '../../components/index.js';
 import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
@@ -178,9 +177,8 @@ const [checked, setChecked] = useState<string[]>([]);
   </List.Root>
 </Sidebar.Root>`;
 
-const adaptiveCode = `// Inside a <Viewport.Provider> (the visual viewport, tracked).
-const { width } = useVisualViewport();
-const compact = width < 768;
+const adaptiveCode = `// Compact (a phone) or regular (a tablet), by the window's width.
+const compact = useSizeClass() === 'compact';
 // Its trigger, in the content's bar (outside the drawer).
 const sidebarDrawer = useCreateDrawerHandle();
 
@@ -609,7 +607,7 @@ const Editing: FunctionComponent = () => {
  * floating beside the content (inside a provider tracking the visual
  * viewport, see `Adaptive`).
  */
-const AdaptiveView: FunctionComponent = () => {
+const Adaptive: FunctionComponent = () => {
   const id = 'sidebar-composition-adaptive';
   const [log, addLog] = useLog();
   const [externalContent] = useProvidedState(id);
@@ -619,10 +617,12 @@ const AdaptiveView: FunctionComponent = () => {
     externalContent,
     true,
   );
-  const { width } = useVisualViewport();
+  const sizeClass = useSizeClass();
   // (Unset, by the window's width; or as a phone's, or a tablet's.)
   const compact =
-    content.layout === undefined ? width < 768 : content.layout === 'phone';
+    content.layout === undefined
+      ? sizeClass === 'compact'
+      : content.layout === 'phone';
   const [selected, setSelected] = useState('inbox');
   // Its trigger, in the content's bar (outside the drawer).
   const adaptiveDrawer = codeLabel(useCreateDrawerHandle(), 'adaptiveDrawer');
@@ -737,13 +737,6 @@ const AdaptiveView: FunctionComponent = () => {
     </Component>
   );
 };
-
-/** `AdaptiveView`, in a provider tracking the visual viewport. */
-const Adaptive: FunctionComponent = () => (
-  <Viewport.Provider>
-    <AdaptiveView />
-  </Viewport.Provider>
-);
 
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
@@ -898,17 +891,12 @@ export const SidebarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        By the window’s width (
+        By the window’s size class (
         <PartLink
           component="viewport"
-          part="useVisualViewport"
+          part="useSizeClass"
         />
-        , in a{' '}
-        <PartLink
-          component="viewport"
-          part="Viewport.Provider"
-        />
-        ; here below 768px): compact, a drawer with the page’s button to open
+        : compact below 768px): compact, a drawer with the page’s button to open
         it; regular, floating beside the content.
       </li>
       <li>

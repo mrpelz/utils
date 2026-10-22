@@ -12,7 +12,9 @@ const safeAreaRow: PropRow = [
     The safe area insets kept clear (as padding): all, those of the block
     dimension (top, bottom) or the inline one (left, right) only, or none (CSS{' '}
     <code>env(safe-area-inset-*)</code>). Its own background reaches the
-    screen’s edge, its content clear of them: the anchor is the surface.
+    screen’s edge, its content clear of them: the anchor is the surface (a bar’s
+    background goes on the anchor, by its <code>className</code>; its content
+    spaced inside it).
   </>,
 ];
 

@@ -1220,4 +1220,30 @@ export const tests = [
       );
     },
   },
+  {
+    name: 'date picker: name and form (a form beside it): the picker’s and the calendar’s value is submitted by name; unnamed, nothing',
+    run: async (page) => {
+      for (const part of ['root', 'calendar']) {
+        const form = `date-picker-parts-${part}-form`;
+        await page.open(`date-picker-parts-${part}`);
+        await page.evaluate(
+          `${page.section}.querySelector('button[type=submit]').click()`,
+        );
+        await sleep(300);
+        assert.match(await page.log(), /submitted: \{\}/u);
+
+        await page.setState(0, { form, name: 'date' });
+        await page.evaluate(
+          `${page.section}.querySelector('button[type=submit]').click()`,
+        );
+        await sleep(300);
+        assert.match(
+          await page.log(),
+          part === 'root'
+            ? /submitted: \{"date":"2025-04-20"\}/u
+            : /submitted: \{"date":""\}/u,
+        );
+      }
+    },
+  },
 ];

@@ -146,7 +146,9 @@ const InAForm: FunctionComponent = () => {
       >
         <List.Root>
           <Fieldset.Root>
-            <Fieldset.Legend>About you</Fieldset.Legend>
+            <Fieldset.Legend>
+              <List.Title>About you</List.Title>
+            </Fieldset.Legend>
             <List.Group>
               <Field.Root
                 name="birthday"

@@ -43,6 +43,8 @@ export const propOptionsList = {
 /** The guide pages' content: how many of Phone's tabs (see phone.tsx). */
 export const propOptionsPhoneContent = {
   tabs: [4, 2, 3] as const,
+  // A tab's label is optional (symbols only: circles).
+  labels: [true, false] as const,
 };
 
 /** The overview's few: its look and states, not its plumbing. */

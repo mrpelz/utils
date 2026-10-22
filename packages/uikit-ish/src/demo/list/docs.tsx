@@ -110,8 +110,9 @@ export const listItemRows: readonly PropRow[] = [
     'MouseEventHandler<HTMLElement>',
     undefined,
     <>
-      A click on the row: e.g. <code>forwardClick(selector)</code>, passing it
-      on to a control in the row (a switch, a checkbox), as iOS rows do.
+      A click on the row: e.g.{' '}
+      <PartLink part="forwardClick">forwardClick(selector)</PartLink>, passing
+      it on to a control in the row (a switch, a checkbox), as iOS rows do.
     </>,
   ],
   secondaryClickRow,
@@ -472,4 +473,26 @@ export const listIndexItemRows: readonly PropRow[] = [
   ],
   secondaryClickRow,
   ...renderRows('button', 'HTMLElement'),
+];
+
+/** `forwardClick(selector)`: its argument, what it returns. */
+export const forwardClickRows: readonly PropRow[] = [
+  [
+    'selector',
+    'string',
+    undefined,
+    <>
+      The control in the row to pass the click on to (e.g.{' '}
+      <code>[role=switch]</code>, <code>[role=checkbox]</code>).
+    </>,
+  ],
+  [
+    '(return)',
+    '(event: MouseEvent<HTMLElement>) => void',
+    undefined,
+    <>
+      The row’s <code>onClick</code>: clicks the control as the click it is (a
+      pointer’s or a keyboard’s), unless the click was the control’s own.
+    </>,
+  ],
 ];

@@ -171,7 +171,9 @@ const InForms: FunctionComponent = () => {
       >
         <List.Root>
           <Fieldset.Root>
-            <Fieldset.Legend>Order</Fieldset.Legend>
+            <Fieldset.Legend>
+              <List.Title>Order</List.Title>
+            </Fieldset.Legend>
             <List.Group>
               <Field.Root
                 name="quantity"

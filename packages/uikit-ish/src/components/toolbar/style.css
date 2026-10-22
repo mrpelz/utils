@@ -60,6 +60,16 @@
       min-height: 54px;
       padding: 0 16px 10px;
     }
+
+    /* A centered title stays centered without a side: an empty one stands
+       in (the other side would take all the free space). */
+    &:has(> .uikit-toolbar-title:not([data-align-start])) {
+      &:not(:has(> .uikit-toolbar-leading))::before,
+      &:not(:has(> .uikit-toolbar-trailing))::after {
+        flex: 1 1 0;
+        content: '';
+      }
+    }
   }
 
   .uikit-toolbar-group {

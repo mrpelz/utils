@@ -10,6 +10,7 @@ import {
   Symbol,
   Toolbar,
   useCreateDrawerHandle,
+  useSizeClass,
 } from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
@@ -35,7 +36,7 @@ import { getPropOptionsGuideColumn, propOptionsGuideRoot } from './props.js';
 
 /**
  * A tablet: a list column (resizable) beside the selected row's page;
- * compact (a phone), the list a drawer's.
+ * compact (a phone), the list a drawer's; unset, by the window's size class.
  */
 const LiveView: FunctionComponent = () => {
   const id = 'layout-overview';
@@ -58,7 +59,9 @@ const LiveView: FunctionComponent = () => {
     'Layout.Column (list)',
     externalColumn,
   );
-  const compact = propsRoot.compact ?? false;
+  const sizeClass = useSizeClass();
+  // (Unset, by the window's size class.)
+  const compact = propsRoot.compact ?? sizeClass === 'compact';
 
   return (
     <Component
@@ -71,7 +74,10 @@ const LiveView: FunctionComponent = () => {
       title="Layout"
     >
       <div className={compact ? 'layout-demo-phone' : 'layout-demo-tablet'}>
-        <Layout.Root {...propsRoot}>
+        <Layout.Root
+          {...propsRoot}
+          compact={compact}
+        >
           <Layout.Drawer
             handle={listDrawer}
             onOpenChange={(next: boolean, { reason }) => {

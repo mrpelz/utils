@@ -6,6 +6,7 @@ import {
   PropRow,
   union,
 } from '../guide/props-table.js';
+import { PartLink } from '../guide/sections.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -128,8 +129,8 @@ export const tabBarGroupRows: readonly PropRow[] = [
     code('false'),
     <>
       Remains while the bar is collapsed, with its tabs marked so; groups not
-      marked collapse away (<code>collapsedSelection</code> picks them as iOS
-      does: the active tab and its group).
+      marked collapse away (<PartLink part="collapsedSelection" /> picks them as
+      iOS does: the active tab and its group).
     </>,
   ],
   [
@@ -257,4 +258,25 @@ export const tabBarAccessoryRows: readonly PropRow[] = [
   ],
   glassContext(' (as the list’s)'),
   ...elementRows('div', 'HTMLDivElement'),
+];
+
+/** `collapsedSelection(groups, value)`: its arguments, what it returns. */
+export const collapsedSelectionRows: readonly PropRow[] = [
+  [
+    'groups',
+    'readonly (readonly Value[])[]',
+    undefined,
+    'The groups’ tab values, in order.',
+  ],
+  ['value', 'Value | undefined', undefined, 'The active tab’s value.'],
+  [
+    '(return)',
+    '{ remains: boolean; tab: number }[]',
+    undefined,
+    <>
+      Per group: whether it remains (the active tab’s group; without one, the
+      first), and its tab (the active one, or its first) by index; for{' '}
+      <code>visibleWhenCollapsed</code>.
+    </>,
+  ],
 ];

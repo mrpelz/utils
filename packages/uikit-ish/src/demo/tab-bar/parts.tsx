@@ -5,6 +5,7 @@ import { sfPlayFill } from '@bradleyhodges/sfsymbols/sfPlayFill';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import { collapsedSelection, Symbol, TabBar } from '../../components/index.js';
+import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { AddLog, useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
@@ -12,6 +13,7 @@ import { useProvidedState } from '../frame/state.js';
 import { PropsTable } from '../guide/props-table.js';
 import { Heading, PartLink } from '../guide/sections.js';
 import {
+  collapsedSelectionRows,
   tabBarAccessoryRows,
   tabBarGroupRows,
   tabBarIconRows,
@@ -37,6 +39,26 @@ import { phoneTabs, phoneTabValues } from './tabs.js';
 // Every view writes out its tab bar (Phone's, see tabs.ts), the part's
 // props on it (on the first group, its indicator, its first tab and that
 // tab's symbol and label), so its code shows as it'd be used.
+
+/* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
+const collapsedSelectionCode = `const [sections, search] = collapsedSelection(
+  [['favorites', 'recents', 'contacts'], ['search']],
+  value,
+);
+
+<TabBar.Group visibleWhenCollapsed={sections.remains}>
+  {['favorites', 'recents', 'contacts'].map((tab, index) => (
+    <TabBar.Tab
+      key={tab}
+      value={tab}
+      visibleWhenCollapsed={sections.tab === index}
+    >
+      …
+    </TabBar.Tab>
+  ))}
+</TabBar.Group>
+<TabBar.Group visibleWhenCollapsed={search.remains}>…</TabBar.Group>`;
+/* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 /** The tab bar's value, logged, and what remains while collapsed. */
 const usePhoneState = (addLog: AddLog) => {
@@ -722,12 +744,13 @@ export const TabBarParts: FunctionComponent = () => (
                     <PartLink
                       component="tab-bar"
                       part="TabBar.Icon"
-                    />
-                    ,{' '}
+                    />{' '}
+                    (one or both) ,{' '}
                     <PartLink
                       component="tab-bar"
                       part="TabBar.Label"
-                    />
+                    />{' '}
+                    (one or both)
                   </li>
                 </ul>
               </li>
@@ -741,6 +764,13 @@ export const TabBarParts: FunctionComponent = () => (
             (optional)
           </li>
         </ul>
+      </li>
+      <li>
+        <PartLink
+          component="tab-bar"
+          part="collapsedSelection"
+        />{' '}
+        (a helper: what remains while collapsed)
       </li>
     </ul>
 
@@ -942,6 +972,27 @@ export const TabBarParts: FunctionComponent = () => (
     <AccessoryPart />
     <h3>Props</h3>
     <PropsTable rows={tabBarAccessoryRows} />
+
+    <Heading
+      id="collapsedselection"
+      level={2}
+    >
+      <code>collapsedSelection</code>
+    </Heading>
+    <ul>
+      <li>
+        What remains while the bar is collapsed, as iOS picks it: the active tab
+        and its group (without one, the first group’s first tab), for the
+        groups’ and tabs’ <code>visibleWhenCollapsed</code>.
+      </li>
+      <li>
+        A choice, not the bar’s: the app may keep other groups and tabs instead
+        (marking them itself).
+      </li>
+    </ul>
+    <CodeView code={collapsedSelectionCode} />
+    <h3>Arguments and return</h3>
+    <PropsTable rows={collapsedSelectionRows} />
   </>
 );
 

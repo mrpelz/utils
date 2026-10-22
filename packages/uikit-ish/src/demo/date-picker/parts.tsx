@@ -1,6 +1,7 @@
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
+  Button,
   type CalendarFooter,
   type CalendarProps,
   DatePicker,
@@ -24,6 +25,7 @@ import {
 import {
   getPropOptionsCalendar,
   getPropOptionsDatePicker,
+  getPropOptionsFormValue,
   propOptionsCalendarButton,
   propOptionsCalendarMessage,
   propOptionsCalendarRow,
@@ -40,7 +42,13 @@ const RootPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
-    useMemo(() => getPropOptionsDatePicker('date', addLog), [addLog]),
+    useMemo(
+      () => ({
+        ...getPropOptionsDatePicker('date', addLog),
+        ...getPropOptionsFormValue('date-picker-parts-root-form'),
+      }),
+      [addLog],
+    ),
     'DatePicker.Root',
     external,
     true,
@@ -63,6 +71,20 @@ const RootPart: FunctionComponent = () => {
         defaultValue={example}
         {...props}
       />
+      <form
+        id="date-picker-parts-root-form"
+        style={{ marginBlockStart: 16 }}
+        onSubmit={(event) => {
+          event.preventDefault();
+          addLog(
+            `submitted: ${JSON.stringify(Object.fromEntries(new FormData(event.currentTarget)))}`,
+          );
+        }}
+      >
+        <Button.Root type="submit">
+          <Button.Label>Submit</Button.Label>
+        </Button.Root>
+      </form>
     </Component>
   );
 };
@@ -73,7 +95,13 @@ const CalendarPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
-    useMemo(() => getPropOptionsCalendar(addLog), [addLog]),
+    useMemo(
+      () => ({
+        ...getPropOptionsCalendar(addLog),
+        ...getPropOptionsFormValue('date-picker-parts-calendar-form'),
+      }),
+      [addLog],
+    ),
     'DatePicker.Calendar',
     external,
     true,
@@ -95,6 +123,20 @@ const CalendarPart: FunctionComponent = () => {
         // (A date's props, or a range's: `range` picks which.)
         {...(props as CalendarProps)}
       />
+      <form
+        id="date-picker-parts-calendar-form"
+        style={{ marginBlockStart: 16 }}
+        onSubmit={(event) => {
+          event.preventDefault();
+          addLog(
+            `submitted: ${JSON.stringify(Object.fromEntries(new FormData(event.currentTarget)))}`,
+          );
+        }}
+      >
+        <Button.Root type="submit">
+          <Button.Label>Submit</Button.Label>
+        </Button.Root>
+      </form>
     </Component>
   );
 };
@@ -318,7 +360,7 @@ export const DatePickerParts: FunctionComponent = () => (
         />
         <ul>
           <li>
-            (its <code>footer</code>)
+            (its <code>footer</code>, optional)
             <ul>
               <li>
                 <PartLink

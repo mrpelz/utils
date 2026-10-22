@@ -119,7 +119,10 @@ const calendarRows: readonly PropRow[] = [
       date <code>YYYY-MM-DD</code>, a time <code>HH:MM</code>, both{' '}
       <code>YYYY-MM-DDTHH:MM</code>, a range <code>start/end</code>, empty until
       its end is picked). In Base UI’s <code>Field</code>, the field’s name
-      applies.
+      applies. <code>DatePicker.Root</code> and <code>DatePicker.Calendar</code>{' '}
+      are alternatives, never nested (the picker renders its own calendar): name
+      the one that holds the value (with <code>{'popover={false}'}</code>, the
+      picker, not the calendar the app shows below it).
     </>,
   ],
   [

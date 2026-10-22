@@ -118,6 +118,9 @@ export const getPropOptionsPageControl = (addLog: AddLog) => ({
 /** The overview's bars: shown, and what they hold. */
 export const propOptionsOverviewTop = {
   shown: [true, false] as const,
+  // Its sides are optional: without one, the title stays centered.
+  leading: [true, false] as const,
+  trailing: [true, false] as const,
   subtitle: [false, true] as const,
   alignStart: [undefined, false, true] as const,
 };

@@ -96,45 +96,49 @@ const LiveView: FunctionComponent = () => {
               placement="block-start"
               {...propsRoot}
             >
-              <Toolbar.Leading>
-                <Toolbar.Button
-                  aria-label="Back"
-                  shape="circle"
-                  onClick={() => addLog('Back clicked')}
-                >
-                  <Button.Icon>
-                    <Symbol icon={sfChevronBackward} />
-                  </Button.Icon>
-                </Toolbar.Button>
-              </Toolbar.Leading>
+              {top.leading ? (
+                <Toolbar.Leading>
+                  <Toolbar.Button
+                    aria-label="Back"
+                    shape="circle"
+                    onClick={() => addLog('Back clicked')}
+                  >
+                    <Button.Icon>
+                      <Symbol icon={sfChevronBackward} />
+                    </Button.Icon>
+                  </Toolbar.Button>
+                </Toolbar.Leading>
+              ) : null}
               <Toolbar.Title alignStart={top.alignStart}>
                 <span>Contacts</span>
                 {top.subtitle ? (
                   <Toolbar.Subtitle>{names.length} people</Toolbar.Subtitle>
                 ) : null}
               </Toolbar.Title>
-              <Toolbar.Trailing>
-                <Toolbar.Group>
-                  <Toolbar.Button
-                    aria-label="Share"
-                    shape="circle"
-                    onClick={() => addLog('Share clicked')}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfSquareAndArrowUp} />
-                    </Button.Icon>
-                  </Toolbar.Button>
-                  <Toolbar.Button
-                    aria-label="More"
-                    shape="circle"
-                    onClick={() => addLog('More clicked')}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfEllipsis} />
-                    </Button.Icon>
-                  </Toolbar.Button>
-                </Toolbar.Group>
-              </Toolbar.Trailing>
+              {top.trailing ? (
+                <Toolbar.Trailing>
+                  <Toolbar.Group>
+                    <Toolbar.Button
+                      aria-label="Share"
+                      shape="circle"
+                      onClick={() => addLog('Share clicked')}
+                    >
+                      <Button.Icon>
+                        <Symbol icon={sfSquareAndArrowUp} />
+                      </Button.Icon>
+                    </Toolbar.Button>
+                    <Toolbar.Button
+                      aria-label="More"
+                      shape="circle"
+                      onClick={() => addLog('More clicked')}
+                    >
+                      <Button.Icon>
+                        <Symbol icon={sfEllipsis} />
+                      </Button.Icon>
+                    </Toolbar.Button>
+                  </Toolbar.Group>
+                </Toolbar.Trailing>
+              ) : null}
             </Toolbar.Root>
           </Viewport.BlockStart>
         ) : null}

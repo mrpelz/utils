@@ -7,6 +7,7 @@ import {
   Symbol,
   Toolbar,
 } from '../../components/index.js';
+import { CodeView } from '../frame/code-view.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
@@ -19,6 +20,9 @@ import {
   colorPickerPanelRows,
   colorPickerRootRows,
   colorPickerWellRows,
+  defaultSavedColorsRows,
+  formatColorRows,
+  parseColorRows,
 } from './docs.js';
 import {
   getPropOptionsPanel,
@@ -27,6 +31,15 @@ import {
   propOptionsGuideWell,
   propOptionsHeader,
 } from './props.js';
+
+const parseColorCode = `parseColor('#007AFF'); // { r: 0, g: 122, b: 255, a: 1 }
+parseColor('#007AFF80'); // { r: 0, g: 122, b: 255, a: 0.502 }`;
+
+const formatColorCode = `formatColor({ r: 0, g: 122, b: 255, a: 1 }); // '#007AFF'
+formatColor({ r: 0, g: 122, b: 255, a: 0.5 }); // '#007AFF80'`;
+
+const defaultSavedColorsCode = `// Figma's, and the app's own after them.
+<ColorPicker.Panel defaultSavedColors={[...defaultSavedColors, '#5856D6']} />`;
 
 /** `ColorPicker.Root`, outlined, with its props (its panel inside). */
 const RootPart: FunctionComponent = () => {
@@ -240,13 +253,15 @@ export const ColorPickerParts: FunctionComponent = () => (
             <PartLink
               component="color-picker"
               part="ColorPicker.Header"
-            />
+            />{' '}
+            (optional)
             <ul>
               <li>
                 <PartLink
                   component="color-picker"
                   part="ColorPicker.Eyedropper"
-                />
+                />{' '}
+                (optional)
               </li>
             </ul>
           </li>
@@ -262,7 +277,31 @@ export const ColorPickerParts: FunctionComponent = () => (
         <PartLink
           component="color-picker"
           part="ColorPicker.Well"
-        />
+        />{' '}
+        (optional; or any trigger)
+      </li>
+      <li>
+        Helpers (anywhere):
+        <ul>
+          <li>
+            <PartLink
+              component="color-picker"
+              part="parseColor"
+            />
+          </li>
+          <li>
+            <PartLink
+              component="color-picker"
+              part="formatColor"
+            />
+          </li>
+          <li>
+            <PartLink
+              component="color-picker"
+              part="defaultSavedColors"
+            />
+          </li>
+        </ul>
       </li>
     </ul>
 
@@ -307,6 +346,11 @@ export const ColorPickerParts: FunctionComponent = () => (
           part="Sheet.Header"
         />{' '}
         instead.
+      </li>
+      <li>
+        Optional: without it (e.g. a popover from a list row,{' '}
+        <a href="color-picker/composition#in-a-list-row">In a list row</a>), the
+        panel starts 16px from the top.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -390,6 +434,55 @@ export const ColorPickerParts: FunctionComponent = () => (
     <WellPart />
     <h3>Props</h3>
     <PropsTable rows={colorPickerWellRows} />
+
+    <Heading
+      id="parsecolor"
+      level={2}
+    >
+      <code>parseColor</code>
+    </Heading>
+    <ul>
+      <li>
+        A hex color (the picker’s values) as its channels, e.g. to blend it or
+        to check its contrast.
+      </li>
+    </ul>
+    <CodeView code={parseColorCode} />
+    <h3>Arguments and return</h3>
+    <PropsTable rows={parseColorRows} />
+
+    <Heading
+      id="formatcolor"
+      level={2}
+    >
+      <code>formatColor</code>
+    </Heading>
+    <ul>
+      <li>
+        Channels as a hex color, as the picker’s values are (
+        <PartLink part="parseColor" />
+        ’s reverse).
+      </li>
+    </ul>
+    <CodeView code={formatColorCode} />
+    <h3>Arguments and return</h3>
+    <PropsTable rows={formatColorRows} />
+
+    <Heading
+      id="defaultsavedcolors"
+      level={2}
+    >
+      <code>defaultSavedColors</code>
+    </Heading>
+    <ul>
+      <li>
+        Figma’s saved colors: the <PartLink part="ColorPicker.Panel" />
+        ’s by default; to start from them, adding the app’s.
+      </li>
+    </ul>
+    <CodeView code={defaultSavedColorsCode} />
+    <h3>Value</h3>
+    <PropsTable rows={defaultSavedColorsRows} />
   </>
 );
 

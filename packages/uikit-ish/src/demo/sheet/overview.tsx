@@ -1,6 +1,12 @@
 import { FunctionComponent } from 'react';
 
-import { Button, List, Sheet, Toolbar } from '../../components/index.js';
+import {
+  Button,
+  List,
+  Sheet,
+  Toolbar,
+  useSizeClass,
+} from '../../components/index.js';
 import { Component } from '../frame/component.js';
 import { useLog } from '../frame/log.js';
 import { usePropControl } from '../frame/prop-control.js';
@@ -48,7 +54,12 @@ const LiveView: FunctionComponent = () => {
     externalPopup,
     true,
   );
-  const tablet = content.layout === 'tablet';
+  const sizeClass = useSizeClass();
+  // (Unset, by the window's size class; or a phone's, or a tablet's.)
+  const tablet =
+    content.layout === undefined
+      ? sizeClass === 'regular'
+      : content.layout === 'tablet';
   const global = content.portal === 'global';
 
   return (
@@ -86,7 +97,7 @@ const LiveView: FunctionComponent = () => {
             {...propsPopup}
           >
             <Sheet.Header>
-              <Sheet.Grabber />
+              {content.grabber ? <Sheet.Grabber /> : null}
               <Toolbar.Root placement="block-start">
                 <Toolbar.Leading>
                   <Sheet.Close render={<Toolbar.Button />}>
@@ -222,7 +233,10 @@ export const SheetOverview: FunctionComponent = () => (
             'disablePointerDismissal',
           ),
         ],
-        ['Sheet.Popup', pickRows(sheetPopupRows, 'detent', 'compact')],
+        [
+          'Sheet.Popup',
+          pickRows(sheetPopupRows, 'detent', 'compact', 'background'),
+        ],
       ]}
     />
 
@@ -289,8 +303,9 @@ export const SheetOverview: FunctionComponent = () => (
         third of its height, or flung, and it closes; otherwise it springs back.
       </li>
       <li>
-        With a list: on the grouped background, the list’s groups on the
-        elevated one.
+        With grouped lists, <code>background=&quot;grouped&quot;</code>: on the
+        grouped background, the lists’ groups on the elevated one (as a page’s;
+        the sheet doesn’t look inside for lists).
       </li>
       <li>
         Its detent is the app’s: swiping doesn’t switch medium and large

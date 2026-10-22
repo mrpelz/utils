@@ -98,7 +98,7 @@ export const ViewportBarDemo: FunctionComponent = () => {
     >
       <Viewport.Provider>
         <ViewportStatus onScrollLog={addLog} />
-        <Viewport.BlockEnd>
+        <Viewport.BlockEnd className="viewport-demo-surface">
           <div className="viewport-demo-bar">
             <List.Root>
               <List.Group style={{ marginInline: 0 }}>

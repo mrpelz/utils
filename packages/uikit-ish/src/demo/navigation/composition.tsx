@@ -12,7 +12,7 @@ import {
   Symbol,
   TabBar,
   Toolbar,
-  useVisualViewport,
+  useSizeClass,
   Viewport,
 } from '../../components/index.js';
 import { CodeView } from '../frame/code-view.js';
@@ -131,9 +131,8 @@ const largeTitlesCode = `<Navigation.Root onBack={pop}>
   ))}
 </Navigation.Root>`;
 
-const adaptiveCode = `// Inside a <Viewport.Provider> (the visual viewport, tracked).
-const { width } = useVisualViewport();
-const compact = width < 768;
+const adaptiveCode = `// Compact (a phone) or regular (a tablet), by the window's width.
+const compact = useSizeClass() === 'compact';
 
 // Compact (a phone): the sections are the stack's root page, drilled into.
 const keys = opened ? ['sections', ...stacks[section]] : ['sections'];
@@ -553,7 +552,7 @@ const LargeTitles: FunctionComponent = () => {
  * the stack's root page; regular (a tablet), in a sidebar beside the stack
  * (inside a provider tracking the visual viewport, see `Adaptive`).
  */
-const AdaptiveView: FunctionComponent = () => {
+const Adaptive: FunctionComponent = () => {
   const id = 'navigation-composition-adaptive';
   const [log, addLog] = useLog();
   const [externalContent] = useProvidedState(id);
@@ -563,10 +562,12 @@ const AdaptiveView: FunctionComponent = () => {
     externalContent,
     true,
   );
-  const { width } = useVisualViewport();
+  const sizeClass = useSizeClass();
   // (Unset, by the window's width; or as a phone's, or a tablet's.)
   const compact =
-    content.layout === undefined ? width < 768 : content.layout === 'phone';
+    content.layout === undefined
+      ? sizeClass === 'compact'
+      : content.layout === 'phone';
   const [section, setSection] = useState<SectionValue>('settings');
   // Compact: whether the section is opened (pushed on the sections).
   const [opened, setOpened] = useState(false);
@@ -776,13 +777,6 @@ const AdaptiveView: FunctionComponent = () => {
   );
 };
 
-/** `AdaptiveView`, in a provider tracking the visual viewport. */
-const Adaptive: FunctionComponent = () => (
-  <Viewport.Provider>
-    <AdaptiveView />
-  </Viewport.Provider>
-);
-
 /** The page's sections (its headings' ids), listed at its top. */
 const pageSections: readonly Section[] = [
   ['a-stack-per-tab', 'A stack per tab'],
@@ -911,17 +905,12 @@ export const NavigationComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        By the window’s width (
+        By the window’s size class (
         <PartLink
           component="viewport"
-          part="useVisualViewport"
+          part="useSizeClass"
         />
-        , in a{' '}
-        <PartLink
-          component="viewport"
-          part="Viewport.Provider"
-        />
-        ; here below 768px): compact, the sections are the stack’s root page,
+        : compact below 768px): compact, the sections are the stack’s root page,
         drilled into; regular, a sidebar beside the stack.
       </li>
       <li>

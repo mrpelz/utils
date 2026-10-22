@@ -863,57 +863,57 @@ export const ViewportParts: FunctionComponent = () => (
               </li>
             </ul>
           </li>
+        </ul>
+      </li>
+      <li>
+        Hooks (anywhere, no provider needed):
+        <ul>
           <li>
-            Hooks (anywhere, no provider needed):
-            <ul>
-              <li>
-                <PartLink
-                  component="viewport"
-                  part="useElementVisibility"
-                />
-              </li>
-              <li>
-                <PartLink
-                  component="viewport"
-                  part="useElementGeometry"
-                />
-              </li>
-              <li>
-                <PartLink
-                  component="viewport"
-                  part="useSizeClass"
-                />
-              </li>
-            </ul>
+            <PartLink
+              component="viewport"
+              part="useElementVisibility"
+            />
           </li>
           <li>
-            Input guards (iOS; anywhere, no provider needed):
-            <ul>
-              <li>
-                <PartLink
-                  component="viewport"
-                  part="preventInputZoom"
-                />{' '}
-                (and{' '}
-                <PartLink
-                  component="viewport"
-                  part="useInputZoomPrevention"
-                />
-                )
-              </li>
-              <li>
-                <PartLink
-                  component="viewport"
-                  part="preventFocusShift"
-                />{' '}
-                (and{' '}
-                <PartLink
-                  component="viewport"
-                  part="useFocusShiftPrevention"
-                />
-                )
-              </li>
-            </ul>
+            <PartLink
+              component="viewport"
+              part="useElementGeometry"
+            />
+          </li>
+          <li>
+            <PartLink
+              component="viewport"
+              part="useSizeClass"
+            />
+          </li>
+        </ul>
+      </li>
+      <li>
+        Input guards (iOS; anywhere, no provider needed):
+        <ul>
+          <li>
+            <PartLink
+              component="viewport"
+              part="preventInputZoom"
+            />{' '}
+            (and{' '}
+            <PartLink
+              component="viewport"
+              part="useInputZoomPrevention"
+            />
+            )
+          </li>
+          <li>
+            <PartLink
+              component="viewport"
+              part="preventFocusShift"
+            />{' '}
+            (and{' '}
+            <PartLink
+              component="viewport"
+              part="useFocusShiftPrevention"
+            />
+            )
           </li>
         </ul>
       </li>
@@ -1002,6 +1002,28 @@ export const ViewportParts: FunctionComponent = () => (
       <li>
         Keeps the safe area insets clear (<code>safeArea</code>), as padding;
         doesn’t inset the content.
+      </li>
+      <li>
+        The anchor is the surface: it has no background of its own, so a bar
+        with one (a background, a separator) styles the anchor itself (its{' '}
+        <code>className</code>, the app’s class), reaching the screen’s edge
+        behind the home indicator, its content clear of it. Space the content
+        inside it (its own padding or margin), not by the anchor’s padding
+        (that’s the insets’). Here: <code>viewport-demo-surface</code>.
+      </li>
+      <li>
+        A surface inside the anchor instead ends at the insets: a gap below a
+        bottom bar. Glass bars (a{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Root"
+        />
+        , a{' '}
+        <PartLink
+          component="tab-bar"
+          part="TabBar.List"
+        />
+        ) need none: the content shows through to the edge.
       </li>
       <li>
         Renders a <code>div</code> (<code>z-index</code> 10).

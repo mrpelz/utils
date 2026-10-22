@@ -133,7 +133,9 @@ export type CalendarProps = {
    * Its value's name in a form: submitted by a hidden control (as an
    * input's: a date `YYYY-MM-DD`, a time `HH:MM`, both `YYYY-MM-DDTHH:MM`,
    * a range `start/end`, empty until its end is picked). In a Base UI
-   * `Field`, the field's name applies.
+   * `Field`, the field's name applies. `DatePicker.Root` and
+   * `DatePicker.Calendar` are alternatives, never nested (the picker renders
+   * its own calendar): name the one holding the value.
    */
   name?: string;
   /**

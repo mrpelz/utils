@@ -14,10 +14,10 @@
 }
 
 /* A bar above the keyboard: a message field. */
+
+/* A bar's content, spaced inside its anchor (the surface). */
 .viewport-demo-bar {
   padding: 8px 16px;
-  background-color: var(--color-ios-secondary-system-grouped-background);
-  box-shadow: 0 -0.5px var(--color-ios-separator);
 }
 
 /* An anchor's sample content (a bar, or a sidebar), labelled. */

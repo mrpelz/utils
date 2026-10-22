@@ -43,15 +43,23 @@ export type {
 // - Detents don't change by dragging (`detent` is the app's), and the page
 //   behind a large sheet doesn't shrink back (UIKit's stacked look).
 
-// Opaque, with a list (see List): on the grouped background, the list
-// without its own (which would end with it, the sheet's around it). In it,
+// Opaque, grouped (`background`, for grouped lists, as a page's): on the
+// grouped background, a list in it without its own (which would end with
+// it, the sheet's around it). In it,
 // UIKit's elevated backgrounds (dark mode: #1c1c1e, groups #2c2c2e), as
 // tokens for all its content (e.g. a navigation's pages).
 
 /** The sheet, the page dimmed behind it. */
 const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
   (
-    { className, compact: compactProp, container, detent = 'large', ...props },
+    {
+      background = 'plain',
+      className,
+      compact: compactProp,
+      container,
+      detent = 'large',
+      ...props
+    },
     ref,
   ) => {
     // (By the window's size class, see Viewport.)
@@ -75,6 +83,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
         >
           <BaseDrawer.Popup
             ref={ref}
+            data-background={background}
             data-compact={compact ? '' : undefined}
             data-detent={detent}
             data-sheet-part="popup"
