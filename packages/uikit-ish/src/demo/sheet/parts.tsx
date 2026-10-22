@@ -1239,6 +1239,11 @@ export const SheetParts: FunctionComponent = () => (
         up to the screen but 64px).
       </li>
       <li>
+        Its end scrolls clear of the home indicator (padded by the bottom safe
+        area inset; medium, 6px from the screen’s edge, what’s left of it), the
+        sheet’s background reaching the edge.
+      </li>
+      <li>
         Renders a <code>div</code>.
       </li>
     </ul>
