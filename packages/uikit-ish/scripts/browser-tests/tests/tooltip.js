@@ -111,8 +111,14 @@ export const tests = [
     name: 'tooltip: by a handle, two triggers, its text their payloads',
     run: async (page) => {
       await page.open('tooltip-parts-use-create-tooltip-handle');
-      /** @param {number} index */
-      const text = async (index) => {
+      /**
+       * Hovers the trigger at `index`, until its tooltip shows `expected`
+       * (its delay varies with the machine's load).
+       *
+       * @param {number} index
+       * @param {string} expected
+       */
+      const shows = async (index, expected) => {
         const button = await page.rect('button', index);
         await page.mouse('mouseMoved', 1, 1);
         await sleep(300);
@@ -121,13 +127,13 @@ export const tests = [
           button.x + button.width / 2,
           button.y + button.height / 2,
         );
-        await sleep(900);
-        return page.evaluate(
-          `document.querySelector(${JSON.stringify('[data-side][data-open]:not([role])')})?.textContent`,
+        await page.waitFor(
+          `document.querySelector(${JSON.stringify('[data-side][data-open]:not([role])')})?.textContent === ${JSON.stringify(expected)}`,
+          3000,
         );
       };
-      assert.equal(await text(1), 'Delete');
-      assert.equal(await text(0), 'Duplicate');
+      await shows(1, 'Delete');
+      await shows(0, 'Duplicate');
     },
   },
 ];

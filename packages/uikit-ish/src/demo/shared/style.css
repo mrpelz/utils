@@ -206,6 +206,12 @@
      placeholder text, for what lies over it to show its blur or glass (e.g. a
      contextual menu's backdrop, a menu's popup). */
   .demo-wallpaper {
+    --demo-wallpaper-top: calc(var(--uikit-safe-area-inset-top, 0px) + 16px);
+    --demo-wallpaper-height: calc(
+      100% - var(--demo-wallpaper-top) -
+        var(--uikit-safe-area-inset-bottom, 0px) - 16px
+    );
+
     background-image:
       repeating-linear-gradient(
         transparent 0 43.5px,
@@ -221,13 +227,13 @@
         var(--color-ios-secondary-system-grouped-background)
       );
     background-position:
-      32px 16px,
-      32px 16px,
-      16px 16px;
+      32px var(--demo-wallpaper-top),
+      32px var(--demo-wallpaper-top),
+      16px var(--demo-wallpaper-top);
     background-repeat: no-repeat;
     background-size:
-      calc(100% - 48px) calc(100% - 32px),
-      40% calc(100% - 32px),
-      calc(100% - 32px) calc(100% - 32px);
+      calc(100% - 48px) var(--demo-wallpaper-height),
+      40% var(--demo-wallpaper-height),
+      calc(100% - 32px) var(--demo-wallpaper-height);
   }
 }

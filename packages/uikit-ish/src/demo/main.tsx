@@ -61,13 +61,43 @@ const usePath = (input: string) =>
 // router's `onRouteChange`), on the same page once the router pushed it.
 // Back and forward are left to the browser's scroll restoration.
 
+// Content above the anchor may still grow as it's scrolled to (e.g. the
+// guide's diagrams, rendered on the client): the scroll is aimed at it again
+// on every resize, until the person scrolls themselves (or for a while).
+
+const settling = 3000;
+const userScroll = ['keydown', 'pointerdown', 'touchstart', 'wheel'] as const;
+
+let stopFollowing: (() => void) | undefined;
+
 const scrollToAnchor = () => {
+  stopFollowing?.();
+
   const id = decodeURIComponent(location.hash.slice(1));
   if (!id) return;
 
-  document
-    .querySelector(`#${CSS.escape(id)}`)
-    ?.scrollIntoView({ behavior: 'smooth' });
+  const target = document.querySelector(`#${CSS.escape(id)}`);
+  if (!target) return;
+
+  const scroll = () => target.scrollIntoView({ behavior: 'smooth' });
+  scroll();
+
+  const observer = new ResizeObserver(scroll);
+  observer.observe(document.documentElement);
+
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const stop = () => {
+    observer.disconnect();
+    clearTimeout(timeout);
+    for (const type of userScroll) removeEventListener(type, stop);
+    stopFollowing = undefined;
+  };
+  timeout = setTimeout(stop, settling);
+  for (const type of userScroll) {
+    addEventListener(type, stop, { passive: true });
+  }
+
+  stopFollowing = stop;
 };
 
 // An anchor link to another page was followed (until it's rendered).
