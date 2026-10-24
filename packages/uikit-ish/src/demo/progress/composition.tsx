@@ -120,7 +120,7 @@ const LoadingAPage: FunctionComponent = () => (
     id="progress-composition-page"
     title="Activity indicator loading a page"
   >
-    <div className="toolbar-demo-screen">
+    <div className="demo-phone">
       <Page.Root>
         <Header.Root>
           <Header.Bar>

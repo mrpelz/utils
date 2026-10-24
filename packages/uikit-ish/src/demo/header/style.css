@@ -1,20 +1,5 @@
 /* Header demos (see main.tsx). */
 
-/* The page as a phone's screen in the stage. */
-.header-demo-screen {
-  height: min(640px, 70vh);
-}
-
-/* A phone's screen (the guide pages' views): a page, sized as a window. */
-.header-demo-phone {
-  display: grid;
-  overflow: hidden;
-  width: 402px;
-  max-width: 100%;
-  height: min(640px, 70vh);
-  border-radius: 24px;
-}
-
 /* A picture at the page's top, under its bar (pulled up by the bar's
    height, 54px). */
 .header-demo-picture {

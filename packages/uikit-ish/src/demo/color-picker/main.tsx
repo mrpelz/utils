@@ -42,26 +42,20 @@ export const ColorPickerDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlPanel, propsPanel, statePanel, keyPanel] = usePropControl(
     useMemo(() => getPropOptionsPanel(addLog), [addLog]),
-    'panel',
-    externalPanel,
+    { external: externalPanel, title: 'panel' },
   );
-  const [controlWell, propsWell, stateWell] = usePropControl(
-    propOptionsWell,
-    'well',
-    externalWell,
-  );
+  const [controlWell, propsWell, stateWell] = usePropControl(propOptionsWell, {
+    external: externalWell,
+    title: 'well',
+  });
 
   // The well shows the picked color.
   const [color, setColor] = useState<string>(propsRoot.defaultValue);
@@ -125,7 +119,7 @@ export const ColorPickerDemo: FunctionComponent = () => {
         (sizeClass === 'compact' ? 'sheet' : 'popover')) === 'sheet' ? (
         <div
           ref={screen}
-          className="sheet-demo-phone"
+          className="demo-phone demo-centered"
         >
           <Sheet.Root defaultOpen={content.defaultOpen}>
             <Sheet.Trigger render={well} />

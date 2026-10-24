@@ -41,14 +41,11 @@ export const ToolbarDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     propOptionsRoot,
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlButton, buttonProps, stateButton] = usePropControl(
     useMemo(() => getPropOptionsButton(addLog, true), [addLog]),
-    'button (first)',
-    externalButton,
+    { external: externalButton, title: 'button (first)' },
   );
   // (Of its own: `prominent`, too.)
   const propsButton = buttonProps as ToolbarButtonProps;
@@ -140,20 +137,15 @@ export const ToolbarPageDotsDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsPageDotsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     propOptionsRoot,
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlButton, buttonProps, stateButton] = usePropControl(
     useMemo(() => getPropOptionsButton(addLog, true), [addLog]),
-    'button (first)',
-    externalButton,
+    { external: externalButton, title: 'button (first)' },
   );
   // (Of its own: `prominent`, too.)
   const propsButton = buttonProps as ToolbarButtonProps;
@@ -164,8 +156,7 @@ export const ToolbarPageDotsDemo: FunctionComponent = () => {
     keyPageControl,
   ] = usePropControl(
     useMemo(() => getPropOptionsPageControl(addLog), [addLog]),
-    'page control',
-    externalPageControl,
+    { external: externalPageControl, title: 'page control' },
   );
 
   return (
@@ -229,27 +220,20 @@ export const ToolbarSymbolsDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsSymbolsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     propOptionsRoot,
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
     propOptionsGroup,
-    'group',
-    externalGroup,
-    true,
+    { external: externalGroup, open: true, title: 'group' },
   );
   // (In the capsule: what applies there.)
   const [controlButton, propsButton, stateButton] = usePropControl(
     useMemo(() => getPropOptionsButton(addLog, false), [addLog]),
-    'button (first)',
-    externalButton,
+    { external: externalButton, title: 'button (first)' },
   );
 
   return (
@@ -346,14 +330,11 @@ export const ToolbarTextDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     propOptionsRoot,
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlButton, buttonProps, stateButton] = usePropControl(
     useMemo(() => getPropOptionsButton(addLog, true), [addLog]),
-    'button (first)',
-    externalButton,
+    { external: externalButton, title: 'button (first)' },
   );
   // (Of its own: `prominent`, too.)
   const propsButton = buttonProps as ToolbarButtonProps;

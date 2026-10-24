@@ -25,9 +25,7 @@ export const ActionSheetDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
 
   return (
@@ -42,7 +40,7 @@ export const ActionSheetDemo: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <ActionSheet.Root
           key={keyRoot}

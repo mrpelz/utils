@@ -48,10 +48,7 @@ const RootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'ColorPicker.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'ColorPicker.Root' },
   );
 
   return (
@@ -80,13 +77,12 @@ const RootPart: FunctionComponent = () => {
 const HeaderPart: FunctionComponent = () => {
   const id = 'color-picker-parts-header';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsHeader,
-    'ColorPicker.Header',
+  const [control, props, state] = usePropControl(propOptionsHeader, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ColorPicker.Header',
+  });
 
   return (
     <Component
@@ -122,10 +118,7 @@ const PanelPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsPanel(addLog), [addLog]),
-    'ColorPicker.Panel',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'ColorPicker.Panel' },
   );
 
   return (
@@ -156,13 +149,12 @@ const PanelPart: FunctionComponent = () => {
 const EyedropperPart: FunctionComponent = () => {
   const id = 'color-picker-parts-eyedropper';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsEyedropper,
-    'ColorPicker.Eyedropper',
+  const [control, props, state] = usePropControl(propOptionsEyedropper, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ColorPicker.Eyedropper',
+  });
 
   return (
     <Component
@@ -203,13 +195,12 @@ const WellPart: FunctionComponent = () => {
   const id = 'color-picker-parts-well';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideWell,
-    'ColorPicker.Well',
+  const [control, props, state] = usePropControl(propOptionsGuideWell, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ColorPicker.Well',
+  });
 
   return (
     <Component

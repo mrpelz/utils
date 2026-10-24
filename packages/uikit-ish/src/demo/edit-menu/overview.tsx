@@ -38,7 +38,7 @@ const LiveView: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <EditMenu.Root
           open={selection !== null}

@@ -262,7 +262,7 @@ export const tests = [
       /** The control's box relative to its screen's (top, bottom gap). */
       const placed = () =>
         page.evaluate(`(() => {
-          const screen = ${page.section}.querySelector('.toolbar-demo-screen').getBoundingClientRect();
+          const screen = ${page.section}.querySelector('.demo-phone').getBoundingClientRect();
           const control = ${page.section}.querySelector('[role=radiogroup]').getBoundingClientRect();
           return [Math.round(control.top - screen.top), Math.round(screen.bottom - control.bottom)];
         })()`);

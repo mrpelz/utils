@@ -23,25 +23,19 @@ export const ButtonDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlSymbol, propsSymbol, stateSymbol] = usePropControl(
     commonPropOptions,
-    'symbol',
-    externalSymbol,
+    { external: externalSymbol, title: 'symbol' },
   );
   const [controlLabel, propsLabel, stateLabel] = usePropControl(
     commonPropOptions,
-    'label',
-    externalLabel,
+    { external: externalLabel, title: 'label' },
   );
 
   const symbol =
@@ -110,12 +104,11 @@ export const ButtonMatrixDemo: FunctionComponent = () => {
 
   const [externalControl] = useProvidedState(id);
 
-  const [control, props, stateControl] = usePropControl(
-    propOptionsMatrix,
-    'matrix',
-    externalControl,
-    true,
-  );
+  const [control, props, stateControl] = usePropControl(propOptionsMatrix, {
+    external: externalControl,
+    open: true,
+    title: 'matrix',
+  });
 
   return (
     <Component

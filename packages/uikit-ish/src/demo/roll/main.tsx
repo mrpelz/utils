@@ -28,26 +28,21 @@ export const RollDemo: FunctionComponent = () => {
   const [externalRoot, externalColumn, externalItem, externalSeparator] =
     useProvidedState(id);
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'root',
+  });
   const [controlColumn, propsColumn, stateColumn, keyColumn] = usePropControl(
     useMemo(() => getPropOptionsColumn(addLog), [addLog]),
-    'column (hours)',
-    externalColumn,
-    true,
+    { external: externalColumn, open: true, title: 'column (hours)' },
   );
-  const [controlItem, propsItem, stateItem] = usePropControl(
-    propOptionsItem,
-    'item (hours: 12)',
-    externalItem,
-  );
+  const [controlItem, propsItem, stateItem] = usePropControl(propOptionsItem, {
+    external: externalItem,
+    title: 'item (hours: 12)',
+  });
   const [controlSeparator, propsSeparator, stateSeparator] = usePropControl(
     propOptionsSeparator,
-    'separator',
-    externalSeparator,
+    { external: externalSeparator, title: 'separator' },
   );
 
   return (

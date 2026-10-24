@@ -40,14 +40,11 @@ const LiveView: FunctionComponent = () => {
   const [externalContent, externalList] = useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsPhoneContent,
-    '[content]',
-    externalContent,
+    { external: externalContent, title: '[content]' },
   );
   const [controlList, propsList, stateList, elementKey] = usePropControl(
     propOptionsOverviewList,
-    'TabBar.List',
-    externalList,
-    true,
+    { external: externalList, open: true, title: 'TabBar.List' },
   );
 
   const [value, setValue] = useState<unknown>('favorites');
@@ -68,7 +65,7 @@ const LiveView: FunctionComponent = () => {
       state={[stateContent, stateList]}
       title="Tab bar"
     >
-      <div className="tab-bar-demo-screen">
+      <div className="demo-phone">
         <TabBar.Root
           key={elementKey}
           value={value}

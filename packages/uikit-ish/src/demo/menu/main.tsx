@@ -57,44 +57,39 @@ export const MenuDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
     useMemo(() => getPropOptionsTrigger(addLog), [addLog]),
-    'trigger',
-    externalTrigger,
+    { external: externalTrigger, title: 'trigger' },
   );
   const [controlPositioner, propsPositioner, statePositioner] = usePropControl(
     propOptionsPositioner,
-    'positioner',
-    externalPositioner,
+    { external: externalPositioner, title: 'positioner' },
   );
   const [controlPopup, propsPopup, statePopup] = usePropControl(
     propOptionsPopup,
-    'popup',
-    externalPopup,
+    { external: externalPopup, title: 'popup' },
   );
   const [controlQuickAction, propsQuickAction, stateQuickAction] =
-    usePropControl(propOptionsItem, 'quick action (1st)', externalQuickAction);
+    usePropControl(propOptionsItem, {
+      external: externalQuickAction,
+      title: 'quick action (1st)',
+    });
   const [controlItem, propsItem, stateItem] = usePropControl(
     useMemo(() => getPropOptionsItem(addLog), [addLog]),
-    'item (1st)',
-    externalItem,
+    { external: externalItem, title: 'item (1st)' },
   );
   const [controlDisabledItem, propsDisabledItem, stateDisabledItem] =
-    usePropControl(
-      propOptionsItemDisabled,
-      'item (disabled)',
-      externalDisabledItem,
-    );
+    usePropControl(propOptionsItemDisabled, {
+      external: externalDisabledItem,
+      title: 'item (disabled)',
+    });
   const [controlDestructiveItem, propsDestructiveItem, stateDestructiveItem] =
-    usePropControl(
-      propOptionsItemDestructive,
-      'item (destructive)',
-      externalDestructiveItem,
-    );
+    usePropControl(propOptionsItemDestructive, {
+      external: externalDestructiveItem,
+      title: 'item (destructive)',
+    });
   const [
     controlSubmenuRoot,
     propsSubmenuRoot,
@@ -102,26 +97,26 @@ export const MenuDemo: FunctionComponent = () => {
     keySubmenuRoot,
   ] = usePropControl(
     useMemo(() => getPropOptionsSubmenuRoot(addLog), [addLog]),
-    'submenu root',
-    externalSubmenuRoot,
+    { external: externalSubmenuRoot, title: 'submenu root' },
   );
   const [controlSubmenuTrigger, propsSubmenuTrigger, stateSubmenuTrigger] =
-    usePropControl(
-      propOptionsSubmenuTrigger,
-      'submenu trigger',
-      externalSubmenuTrigger,
-    );
+    usePropControl(propOptionsSubmenuTrigger, {
+      external: externalSubmenuTrigger,
+      title: 'submenu trigger',
+    });
   const [
     controlSubmenuPositioner,
     propsSubmenuPositioner,
     stateSubmenuPositioner,
-  ] = usePropControl(
-    propOptionsPositioner,
-    'submenu positioner',
-    externalSubmenuPositioner,
-  );
+  ] = usePropControl(propOptionsPositioner, {
+    external: externalSubmenuPositioner,
+    title: 'submenu positioner',
+  });
   const [controlSubmenuPopup, propsSubmenuPopup, stateSubmenuPopup] =
-    usePropControl(propOptionsPopup, 'submenu popup', externalSubmenuPopup);
+    usePropControl(propOptionsPopup, {
+      external: externalSubmenuPopup,
+      title: 'submenu popup',
+    });
 
   return (
     <Component
@@ -307,44 +302,39 @@ export const MenuRegularDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
     useMemo(() => getPropOptionsTrigger(addLog), [addLog]),
-    'trigger',
-    externalTrigger,
+    { external: externalTrigger, title: 'trigger' },
   );
   const [controlPositioner, propsPositioner, statePositioner] = usePropControl(
     propOptionsPositioner,
-    'positioner',
-    externalPositioner,
+    { external: externalPositioner, title: 'positioner' },
   );
   const [controlPopup, propsPopup, statePopup] = usePropControl(
     propOptionsPopup,
-    'popup',
-    externalPopup,
+    { external: externalPopup, title: 'popup' },
   );
   const [controlQuickAction, propsQuickAction, stateQuickAction] =
-    usePropControl(propOptionsItem, 'quick action (1st)', externalQuickAction);
+    usePropControl(propOptionsItem, {
+      external: externalQuickAction,
+      title: 'quick action (1st)',
+    });
   const [controlItem, propsItem, stateItem] = usePropControl(
     useMemo(() => getPropOptionsItem(addLog), [addLog]),
-    'item (1st)',
-    externalItem,
+    { external: externalItem, title: 'item (1st)' },
   );
   const [controlDisabledItem, propsDisabledItem, stateDisabledItem] =
-    usePropControl(
-      propOptionsItemDisabled,
-      'item (disabled)',
-      externalDisabledItem,
-    );
+    usePropControl(propOptionsItemDisabled, {
+      external: externalDisabledItem,
+      title: 'item (disabled)',
+    });
   const [controlDestructiveItem, propsDestructiveItem, stateDestructiveItem] =
-    usePropControl(
-      propOptionsItemDestructive,
-      'item (destructive)',
-      externalDestructiveItem,
-    );
+    usePropControl(propOptionsItemDestructive, {
+      external: externalDestructiveItem,
+      title: 'item (destructive)',
+    });
   const [
     controlSubmenuRoot,
     propsSubmenuRoot,
@@ -352,26 +342,26 @@ export const MenuRegularDemo: FunctionComponent = () => {
     keySubmenuRoot,
   ] = usePropControl(
     useMemo(() => getPropOptionsSubmenuRoot(addLog), [addLog]),
-    'submenu root',
-    externalSubmenuRoot,
+    { external: externalSubmenuRoot, title: 'submenu root' },
   );
   const [controlSubmenuTrigger, propsSubmenuTrigger, stateSubmenuTrigger] =
-    usePropControl(
-      propOptionsSubmenuTrigger,
-      'submenu trigger',
-      externalSubmenuTrigger,
-    );
+    usePropControl(propOptionsSubmenuTrigger, {
+      external: externalSubmenuTrigger,
+      title: 'submenu trigger',
+    });
   const [
     controlSubmenuPositioner,
     propsSubmenuPositioner,
     stateSubmenuPositioner,
-  ] = usePropControl(
-    propOptionsPositioner,
-    'submenu positioner',
-    externalSubmenuPositioner,
-  );
+  ] = usePropControl(propOptionsPositioner, {
+    external: externalSubmenuPositioner,
+    title: 'submenu positioner',
+  });
   const [controlSubmenuPopup, propsSubmenuPopup, stateSubmenuPopup] =
-    usePropControl(propOptionsPopup, 'submenu popup', externalSubmenuPopup);
+    usePropControl(propOptionsPopup, {
+      external: externalSubmenuPopup,
+      title: 'submenu popup',
+    });
 
   return (
     <Component
@@ -551,9 +541,7 @@ export const MenuTogglesDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [
     controlCheckboxItem,
@@ -562,24 +550,20 @@ export const MenuTogglesDemo: FunctionComponent = () => {
     keyCheckboxItem,
   ] = usePropControl(
     useMemo(() => getPropOptionsCheckboxItems(addLog), [addLog]),
-    'checkbox item (1st)',
-    externalCheckboxItem,
+    { external: externalCheckboxItem, title: 'checkbox item (1st)' },
   );
   const [controlRadioGroup, propsRadioGroup, stateRadioGroup, keyRadioGroup] =
     usePropControl(
       useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
-      'radio group',
-      externalRadioGroup,
+      { external: externalRadioGroup, title: 'radio group' },
     );
   const [controlRadioItem, propsRadioItem, stateRadioItem] = usePropControl(
     propOptionsToggleItem,
-    'radio item (1st)',
-    externalRadioItem,
+    { external: externalRadioItem, title: 'radio item (1st)' },
   );
   const [controlIndicator, propsIndicator, stateIndicator] = usePropControl(
     propOptionsIndicator,
-    'indicator (1st)',
-    externalIndicator,
+    { external: externalIndicator, title: 'indicator (1st)' },
   );
 
   return (
@@ -758,15 +742,12 @@ export const MenuOpenDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsOpenRoot,
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
 
   const [controlPopup, propsPopup, statePopup] = usePropControl(
     propOptionsPopup,
-    'popup',
-    externalPopup,
+    { external: externalPopup, title: 'popup' },
   );
 
   return (

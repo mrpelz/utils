@@ -61,9 +61,7 @@ export const NavigationDemo: FunctionComponent = () => {
   const [externalRoot] = useProvidedState(id);
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(pop), [pop]),
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
 
   return (
@@ -89,7 +87,7 @@ export const NavigationDemo: FunctionComponent = () => {
         <Segmented.Item value="mail">Mail</Segmented.Item>
         <Segmented.Highlight />
       </Segmented.Root>
-      <div className="navigation-demo-screen">
+      <div className="demo-phone demo-fill">
         <Navigation.Root {...propsRoot}>
           {keys.map((key, depth) => {
             const page = pages[key] ?? { children: [], title: key };

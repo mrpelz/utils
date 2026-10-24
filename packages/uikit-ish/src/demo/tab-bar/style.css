@@ -12,19 +12,6 @@
   justify-items: center;
 }
 
-/* A phone's screen in the stage: its viewport's fixed layers (content,
-   anchors) within it (a transform makes it their containing block), sized
-   as a window, the content layer scrolling. */
-.tab-bar-demo-screen {
-  position: relative;
-  overflow: hidden;
-  width: 402px;
-  max-width: 100%;
-  height: min(640px, 70vh);
-  border-radius: 24px;
-  transform: translateZ(0);
-}
-
 /* A list in the content layer, clear of the status bar and the tab bar
    floating over its ends. */
 .tab-bar-demo-list {

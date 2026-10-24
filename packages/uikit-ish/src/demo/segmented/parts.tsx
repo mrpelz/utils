@@ -44,10 +44,7 @@ const RootPart: FunctionComponent = () => {
       () => getPropOptionsRoot(addLog, ['day', 'week', 'month']),
       [addLog],
     ),
-    'Segmented.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Segmented.Root' },
   );
 
   return (
@@ -86,10 +83,7 @@ const ItemPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsItem('day', addLog), [addLog]),
-    'Segmented.Item',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Segmented.Item' },
   );
 
   return (
@@ -130,10 +124,7 @@ const HighlightPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsHighlight,
-    'Segmented.Highlight',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Segmented.Highlight' },
   );
 
   return (
@@ -173,10 +164,7 @@ const IndicatorPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsIndicator,
-    'Segmented.Indicator',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Segmented.Indicator' },
   );
 
   return (

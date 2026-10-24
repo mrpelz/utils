@@ -113,7 +113,7 @@ const FromAToolbarButton: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="toolbar-demo-screen"
+        className="demo-phone"
       >
         <Page.Root>
           <Header.Root>
@@ -196,7 +196,7 @@ const APopUpButton: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <List.Root className="menu-demo-list">
           <List.Section>
@@ -262,7 +262,7 @@ const AHistory: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="toolbar-demo-screen"
+        className="demo-phone"
       >
         <Page.Root>
           <Header.Root>
@@ -330,7 +330,7 @@ const ViewOptions: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger

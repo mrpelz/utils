@@ -35,19 +35,15 @@ const LiveView: FunctionComponent = () => {
     useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'Tooltip.Root',
-    externalRoot,
+    { external: externalRoot, title: 'Tooltip.Root' },
   );
   const [controlPositioner, propsPositioner, statePositioner] = usePropControl(
     propOptionsOverviewPositioner,
-    'Tooltip.Positioner',
-    externalPositioner,
+    { external: externalPositioner, title: 'Tooltip.Positioner' },
   );
 
   return (

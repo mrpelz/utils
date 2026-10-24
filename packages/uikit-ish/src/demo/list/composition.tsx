@@ -298,7 +298,7 @@ const SettingsScreen: FunctionComponent = () => {
       title="List as a settings page"
     >
       {/* (A phone's screen, as high as its page, see style.css.) */}
-      <div className="list-demo-screen">
+      <div className="demo-phone demo-flow">
         <Page.Root>
           <Header.Root>
             <Header.Bar>
@@ -449,7 +449,7 @@ const DrillIn: FunctionComponent = () => {
       log={log}
       title="List drilling into pages"
     >
-      <div className="list-demo-screen list-demo-window list-demo-navigation">
+      <div className="demo-phone">
         <Navigation.Root onBack={pop}>
           {keys.map((key, depth) => {
             const page = settingsPages[key];
@@ -529,7 +529,7 @@ const EditMode: FunctionComponent = () => {
       title="List in edit mode"
     >
       {/* (A phone's screen: its fixed layers within, see style.css.) */}
-      <div className="list-demo-screen list-demo-window">
+      <div className="demo-phone">
         <Viewport.Content>
           <Page.Root>
             <Header.Root>

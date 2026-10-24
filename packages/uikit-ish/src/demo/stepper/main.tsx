@@ -35,29 +35,23 @@ export const StepperDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
     propOptionsGroup,
-    'group',
-    externalGroup,
+    { external: externalGroup, title: 'group' },
   );
   const [controlInput, propsInput, stateInput] = usePropControl(
     propOptionsInput,
-    'input',
-    externalInput,
+    { external: externalInput, title: 'input' },
   );
   const [controlDecrement, propsDecrement, stateDecrement] = usePropControl(
     propOptionsHalf,
-    'decrement',
-    externalDecrement,
+    { external: externalDecrement, title: 'decrement' },
   );
   const [controlIncrement, propsIncrement, stateIncrement] = usePropControl(
     propOptionsHalf,
-    'increment',
-    externalIncrement,
+    { external: externalIncrement, title: 'increment' },
   );
 
   return (

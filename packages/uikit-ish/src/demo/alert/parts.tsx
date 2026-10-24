@@ -47,10 +47,7 @@ const RootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsGuideRoot(addLog), [addLog]),
-    'Alert.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Alert.Root' },
   );
 
   return (
@@ -67,7 +64,7 @@ const RootPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Root
           key={elementKey}
@@ -106,13 +103,12 @@ const TriggerPart: FunctionComponent = () => {
   const id = 'alert-parts-trigger';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsTrigger,
-    'Alert.Trigger',
+  const [control, props, state] = usePropControl(propOptionsTrigger, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Alert.Trigger',
+  });
 
   return (
     <Component
@@ -127,7 +123,7 @@ const TriggerPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Root>
           <Alert.Trigger {...props}>
@@ -156,13 +152,12 @@ const PopupPart: FunctionComponent = () => {
   const id = 'alert-parts-popup';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPopup,
-    'Alert.Popup',
+  const [control, props, state] = usePropControl(propOptionsPopup, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Alert.Popup',
+  });
 
   return (
     <Component
@@ -177,7 +172,7 @@ const PopupPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Root>
           <Alert.Trigger
@@ -216,13 +211,12 @@ const HeaderPart: FunctionComponent = () => {
   const id = 'alert-parts-header';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'Alert.Header',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Alert.Header',
+  });
 
   return (
     <Component
@@ -237,7 +231,7 @@ const HeaderPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Root>
           <Alert.Trigger
@@ -273,13 +267,12 @@ const TitlePart: FunctionComponent = () => {
   const id = 'alert-parts-title';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Alert.Title',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Alert.Title',
+  });
 
   return (
     <Component
@@ -294,7 +287,7 @@ const TitlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Root>
           <Alert.Trigger
@@ -330,13 +323,12 @@ const DescriptionPart: FunctionComponent = () => {
   const id = 'alert-parts-description';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Alert.Description',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Alert.Description',
+  });
 
   return (
     <Component
@@ -351,7 +343,7 @@ const DescriptionPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Root>
           <Alert.Trigger
@@ -387,13 +379,12 @@ const FieldsPart: FunctionComponent = () => {
   const id = 'alert-parts-fields';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'Alert.Fields',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Alert.Fields',
+  });
 
   return (
     <Component
@@ -408,7 +399,7 @@ const FieldsPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Root>
           <Alert.Trigger
@@ -454,10 +445,7 @@ const FieldPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsField(addLog), [addLog]),
-    'Alert.Field',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Alert.Field' },
   );
 
   return (
@@ -474,7 +462,7 @@ const FieldPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Root>
           <Alert.Trigger
@@ -516,13 +504,12 @@ const ActionsPart: FunctionComponent = () => {
   const id = 'alert-parts-actions';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsActions,
-    'Alert.Actions',
+  const [control, props, state] = usePropControl(propOptionsActions, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Alert.Actions',
+  });
 
   return (
     <Component
@@ -537,7 +524,7 @@ const ActionsPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Root>
           <Alert.Trigger
@@ -573,13 +560,12 @@ const ActionPart: FunctionComponent = () => {
   const id = 'alert-parts-action';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsAction,
-    'Alert.Action',
+  const [control, props, state] = usePropControl(propOptionsAction, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Alert.Action',
+  });
 
   return (
     <Component
@@ -594,7 +580,7 @@ const ActionPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Root>
           <Alert.Trigger
@@ -645,7 +631,7 @@ const CreateHandlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Trigger
           handle={deleteAlert}
@@ -710,7 +696,7 @@ const UseCreateAlertHandlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Trigger
           handle={deleteItemAlert}

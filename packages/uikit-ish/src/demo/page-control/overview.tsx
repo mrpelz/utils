@@ -16,9 +16,7 @@ const LiveView: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsOverview,
-    'PageControl',
-    external,
-    true,
+    { external, open: true, title: 'PageControl' },
   );
 
   return (

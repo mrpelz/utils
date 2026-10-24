@@ -83,13 +83,12 @@ const RootPart: FunctionComponent = () => {
   const id = 'tab-bar-parts-root';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state, elementKey] = usePropControl(
-    propOptionsRoot,
-    'TabBar.Root',
+  const [control, props, state, elementKey] = usePropControl(propOptionsRoot, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'TabBar.Root',
+  });
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
   return (
@@ -147,13 +146,12 @@ const ListPart: FunctionComponent = () => {
   const id = 'tab-bar-parts-list';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state, elementKey] = usePropControl(
-    propOptionsList,
-    'TabBar.List',
+  const [control, props, state, elementKey] = usePropControl(propOptionsList, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'TabBar.List',
+  });
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
   return (
@@ -210,18 +208,16 @@ const GroupPart: FunctionComponent = () => {
   const id = 'tab-bar-parts-group';
   const [log, addLog] = useLog();
   const [external, externalList] = useProvidedState(id);
-  const [control, props, state, elementKey] = usePropControl(
-    propOptionsGroup,
-    'TabBar.Group',
+  const [control, props, state, elementKey] = usePropControl(propOptionsGroup, {
     external,
-    true,
-    true,
-  );
-  const [controlList, propsList, stateList] = usePropControl(
-    propOptionsList,
-    'TabBar.List',
-    externalList,
-  );
+    open: true,
+    outlined: true,
+    title: 'TabBar.Group',
+  });
+  const [controlList, propsList, stateList] = usePropControl(propOptionsList, {
+    external: externalList,
+    title: 'TabBar.List',
+  });
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
   return (
@@ -286,10 +282,7 @@ const IndicatorPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsGuideIndicator,
-    'TabBar.Indicator',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'TabBar.Indicator' },
   );
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
@@ -349,16 +342,12 @@ const TabPart: FunctionComponent = () => {
   const [external, externalList] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsGuideTab(addLog), [addLog]),
-    'TabBar.Tab',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'TabBar.Tab' },
   );
-  const [controlList, propsList, stateList] = usePropControl(
-    propOptionsList,
-    'TabBar.List',
-    externalList,
-  );
+  const [controlList, propsList, stateList] = usePropControl(propOptionsList, {
+    external: externalList,
+    title: 'TabBar.List',
+  });
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
   return (
@@ -418,10 +407,7 @@ const IconPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsStyling,
-    'TabBar.Icon',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'TabBar.Icon' },
   );
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
@@ -481,10 +467,7 @@ const LabelPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsStyling,
-    'TabBar.Label',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'TabBar.Label' },
   );
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
@@ -546,10 +529,7 @@ const PanelPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsGuidePanel,
-    'TabBar.Panel',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'TabBar.Panel' },
   );
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
@@ -620,16 +600,12 @@ const AccessoryPart: FunctionComponent = () => {
   const [external, externalList] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsAccessory,
-    'TabBar.Accessory',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'TabBar.Accessory' },
   );
-  const [controlList, propsList, stateList] = usePropControl(
-    propOptionsList,
-    'TabBar.List',
-    externalList,
-  );
+  const [controlList, propsList, stateList] = usePropControl(propOptionsList, {
+    external: externalList,
+    title: 'TabBar.List',
+  });
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
   return (

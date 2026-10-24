@@ -60,42 +60,34 @@ export const TabBarDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'TabBar.Root',
-    externalRoot,
-  );
-  const [controlList, propsList, stateList] = usePropControl(
-    propOptionsList,
-    'TabBar.List',
-    externalList,
-    true,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'TabBar.Root',
+  });
+  const [controlList, propsList, stateList] = usePropControl(propOptionsList, {
+    external: externalList,
+    open: true,
+    title: 'TabBar.List',
+  });
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
     propOptionsGroup,
-    'TabBar.Group',
-    externalGroup,
+    { external: externalGroup, title: 'TabBar.Group' },
   );
   const tabOptions = useMemo(() => getPropOptionsTab(addLog), [addLog]);
-  const [controlTab1, propsTab1, stateTab1] = usePropControl(
-    tabOptions,
-    'TabBar.Tab (1st)',
-    externalTab1,
-  );
-  const [controlTab2, propsTab2, stateTab2] = usePropControl(
-    tabOptions,
-    'TabBar.Tab (2nd)',
-    externalTab2,
-  );
-  const [controlTab3, propsTab3, stateTab3] = usePropControl(
-    tabOptions,
-    'TabBar.Tab (3rd)',
-    externalTab3,
-  );
+  const [controlTab1, propsTab1, stateTab1] = usePropControl(tabOptions, {
+    external: externalTab1,
+    title: 'TabBar.Tab (1st)',
+  });
+  const [controlTab2, propsTab2, stateTab2] = usePropControl(tabOptions, {
+    external: externalTab2,
+    title: 'TabBar.Tab (2nd)',
+  });
+  const [controlTab3, propsTab3, stateTab3] = usePropControl(tabOptions, {
+    external: externalTab3,
+    title: 'TabBar.Tab (3rd)',
+  });
 
   // What remains while collapsed (see above).
   const [selection] = collapsedSelection(
@@ -254,52 +246,42 @@ export const TabBarSearchDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'TabBar.Root',
-    externalRoot,
-  );
-  const [controlList, propsList, stateList] = usePropControl(
-    propOptionsList,
-    'TabBar.List',
-    externalList,
-    true,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'TabBar.Root',
+  });
+  const [controlList, propsList, stateList] = usePropControl(propOptionsList, {
+    external: externalList,
+    open: true,
+    title: 'TabBar.List',
+  });
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
     propOptionsGroup,
-    'TabBar.Group',
-    externalGroup,
+    { external: externalGroup, title: 'TabBar.Group' },
   );
   const tabOptions = useMemo(() => getPropOptionsTab(addLog), [addLog]);
-  const [controlTab1, propsTab1, stateTab1] = usePropControl(
-    tabOptions,
-    'TabBar.Tab (1st)',
-    externalTab1,
-  );
-  const [controlTab2, propsTab2, stateTab2] = usePropControl(
-    tabOptions,
-    'TabBar.Tab (2nd)',
-    externalTab2,
-  );
-  const [controlTab3, propsTab3, stateTab3] = usePropControl(
-    tabOptions,
-    'TabBar.Tab (3rd)',
-    externalTab3,
-  );
+  const [controlTab1, propsTab1, stateTab1] = usePropControl(tabOptions, {
+    external: externalTab1,
+    title: 'TabBar.Tab (1st)',
+  });
+  const [controlTab2, propsTab2, stateTab2] = usePropControl(tabOptions, {
+    external: externalTab2,
+    title: 'TabBar.Tab (2nd)',
+  });
+  const [controlTab3, propsTab3, stateTab3] = usePropControl(tabOptions, {
+    external: externalTab3,
+    title: 'TabBar.Tab (3rd)',
+  });
   const [controlSearchGroup, propsSearchGroup, stateSearchGroup] =
-    usePropControl(
-      propOptionsGroup,
-      'TabBar.Group (search)',
-      externalSearchGroup,
-    );
+    usePropControl(propOptionsGroup, {
+      external: externalSearchGroup,
+      title: 'TabBar.Group (search)',
+    });
   const [controlSearchTab, propsSearchTab, stateSearchTab] = usePropControl(
     tabOptions,
-    'TabBar.Tab (search)',
-    externalSearchTab,
+    { external: externalSearchTab, title: 'TabBar.Tab (search)' },
   );
 
   // What remains while collapsed (see above).
@@ -484,32 +466,26 @@ export const TabBarAccessoryDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsAccessoryContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'TabBar.Root',
-    externalRoot,
-  );
-  const [controlList, propsList, stateList] = usePropControl(
-    propOptionsList,
-    'TabBar.List',
-    externalList,
-    true,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'TabBar.Root',
+  });
+  const [controlList, propsList, stateList] = usePropControl(propOptionsList, {
+    external: externalList,
+    open: true,
+    title: 'TabBar.List',
+  });
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
     propOptionsGroup,
-    'TabBar.Group',
-    externalGroup,
+    { external: externalGroup, title: 'TabBar.Group' },
   );
   const [controlSearchGroup, propsSearchGroup, stateSearchGroup] =
-    usePropControl(
-      propOptionsGroup,
-      'TabBar.Group (search)',
-      externalSearchGroup,
-    );
+    usePropControl(propOptionsGroup, {
+      external: externalSearchGroup,
+      title: 'TabBar.Group (search)',
+    });
 
   // What remains while collapsed (see above).
   const [primary, search] = collapsedSelection(
@@ -711,26 +687,21 @@ export const TabBarRegularDemo: FunctionComponent = () => {
   const [value, setValue] = useState<unknown>('tab-2');
   const [collapsed, setCollapsed] = useState(false);
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'TabBar.Root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'TabBar.Root',
+  });
   const [controlList, propsList, stateList] = usePropControl(
     propOptionsListRegular,
-    'TabBar.List',
-    externalList,
-    true,
+    { external: externalList, open: true, title: 'TabBar.List' },
   );
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
     propOptionsGroup,
-    'TabBar.Group',
-    externalGroup,
+    { external: externalGroup, title: 'TabBar.Group' },
   );
   const [controlTab1, propsTab1, stateTab1] = usePropControl(
     useMemo(() => getPropOptionsTab(addLog), [addLog]),
-    'TabBar.Tab (1st, sidebar)',
-    externalTab1,
+    { external: externalTab1, title: 'TabBar.Tab (1st, sidebar)' },
   );
 
   // What remains while collapsed (see above).
@@ -905,12 +876,11 @@ export const TabBarContentDemo: FunctionComponent = () => {
 
   const [value, setValue] = useState<unknown>('tab-1');
 
-  const [controlList, propsList, stateList] = usePropControl(
-    propOptionsList,
-    'TabBar.List',
-    externalList,
-    true,
-  );
+  const [controlList, propsList, stateList] = usePropControl(propOptionsList, {
+    external: externalList,
+    open: true,
+    title: 'TabBar.List',
+  });
 
   // What remains while collapsed: the active tab and its group.
   const [selection, search] = collapsedSelection(

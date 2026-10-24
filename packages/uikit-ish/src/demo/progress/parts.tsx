@@ -30,10 +30,7 @@ const RootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsGuideRoot,
-    'Progress.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Progress.Root' },
   );
 
   return (
@@ -66,13 +63,12 @@ const RootPart: FunctionComponent = () => {
 const TrackPart: FunctionComponent = () => {
   const id = 'progress-parts-track';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Progress.Track',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Progress.Track',
+  });
 
   return (
     <Component
@@ -102,13 +98,12 @@ const TrackPart: FunctionComponent = () => {
 const IndicatorPart: FunctionComponent = () => {
   const id = 'progress-parts-indicator';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Progress.Indicator',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Progress.Indicator',
+  });
 
   return (
     <Component
@@ -138,13 +133,12 @@ const IndicatorPart: FunctionComponent = () => {
 const LabelPart: FunctionComponent = () => {
   const id = 'progress-parts-label';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideLabel,
-    'Progress.Label',
+  const [control, props, state] = usePropControl(propOptionsGuideLabel, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Progress.Label',
+  });
 
   return (
     <Component
@@ -172,13 +166,12 @@ const LabelPart: FunctionComponent = () => {
 const ValuePart: FunctionComponent = () => {
   const id = 'progress-parts-value';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideValue,
-    'Progress.Value',
+  const [control, props, state] = usePropControl(propOptionsGuideValue, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Progress.Value',
+  });
 
   return (
     <Component
@@ -209,13 +202,12 @@ const ValuePart: FunctionComponent = () => {
 const ActivityIndicatorPart: FunctionComponent = () => {
   const id = 'progress-parts-activity-indicator';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsIndicator,
-    'ActivityIndicator',
+  const [control, props, state] = usePropControl(propOptionsIndicator, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityIndicator',
+  });
 
   return (
     <Component

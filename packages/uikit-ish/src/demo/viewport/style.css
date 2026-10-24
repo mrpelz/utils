@@ -56,19 +56,6 @@
   color: var(--color-ios-label);
 }
 
-/* A phone's screen in the stage, sized as a window: the viewport's fixed
-   layers within it (a transform makes it their containing block), its
-   content layer scrolling beneath the anchors. */
-.viewport-demo-screen {
-  position: relative;
-  overflow: hidden;
-  width: 402px;
-  max-width: 100%;
-  height: min(640px, 70vh);
-  border-radius: 24px;
-  transform: translateZ(0);
-}
-
 /* A list in the content layer, clear of the bars floating over its ends
    (the app keeps it clear: anchors don't inset the content). */
 .viewport-demo-list {
@@ -76,7 +63,7 @@
 }
 
 /* A readout of the hooks, below the screen. */
-.viewport-demo-screen + .viewport-demo-metrics {
+.demo-phone + .viewport-demo-metrics {
   margin-block-start: 16px;
 }
 

@@ -23,13 +23,14 @@
  *   1px)`); lighter than Regular, symbols' edges are taken off as much
  *   (`--uikit-symbol-thinning`, see Symbol; lengths, not numbers:
  *   engines may reject a number from a custom property in `stroke-width`).
- * - Color schemes: colors as `light-dark(light, dark)`, by the root's
- *   `color-scheme` (the user's preference, or forced by its
- *   `data-color-scheme`, see styles.css). Other values (e.g. blend modes,
- *   shadows): light declarations, the dark ones in
- *   `@media (prefers-color-scheme: dark)`, and both again where
- *   `data-color-scheme` forces either (`&:where(:root[…] *)`: the rule's
- *   specificity kept, after the media query, so they win).
+ * - Color schemes: colors as `light-dark(light, dark)`, by the inherited
+ *   `color-scheme` (the user's preference, or forced by a
+ *   `data-color-scheme`, on the root element or any other, see
+ *   styles.css). Other values (e.g. blend modes, shadows): light
+ *   declarations, the dark ones in `@media (prefers-color-scheme: dark)`,
+ *   and both again where `data-color-scheme` forces either
+ *   (`&:where([…], […] *)`: the rule's specificity kept, after the media
+ *   query, so they win).
  * - Cursors, as `Button`'s: a `cursor` attribute (prop), or a fallback
  *   (`--uikit-utils-cursor: attr(cursor type(<custom-ident>), …)`), applied on
  *   devices that hover.

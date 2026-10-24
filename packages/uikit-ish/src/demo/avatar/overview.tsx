@@ -25,12 +25,11 @@ import { photo, propOptionsOverview } from './props.js';
 const LiveView: FunctionComponent = () => {
   const id = 'avatar-overview';
   const [external] = useProvidedState(id);
-  const [control, content, state] = usePropControl(
-    propOptionsOverview,
-    '[content]',
+  const [control, content, state] = usePropControl(propOptionsOverview, {
     external,
-    true,
-  );
+    open: true,
+    title: '[content]',
+  });
 
   return (
     <Component

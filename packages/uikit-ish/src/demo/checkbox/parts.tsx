@@ -48,10 +48,7 @@ const CheckboxRootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsCheckbox(addLog), [addLog]),
-    'Checkbox.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Checkbox.Root' },
   );
 
   return (
@@ -80,10 +77,7 @@ const CheckboxIndicatorPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsIndicator,
-    'Checkbox.Indicator',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Checkbox.Indicator' },
   );
 
   return (
@@ -114,13 +108,12 @@ const RadioRootPart: FunctionComponent = () => {
   const id = 'checkbox-parts-radio-root';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state, elementKey] = usePropControl(
-    propOptionsRadio,
-    'Radio.Root',
+  const [control, props, state, elementKey] = usePropControl(propOptionsRadio, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Radio.Root',
+  });
 
   return (
     <Component
@@ -166,10 +159,7 @@ const RadioIndicatorPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsIndicator,
-    'Radio.Indicator',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Radio.Indicator' },
   );
 
   return (
@@ -217,10 +207,7 @@ const CheckboxGroupPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsCheckboxGroup(addLog), [addLog]),
-    'CheckboxGroup',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'CheckboxGroup' },
   );
 
   return (
@@ -265,10 +252,7 @@ const RadioGroupPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
-    'RadioGroup',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'RadioGroup' },
   );
 
   return (

@@ -1,6 +1,8 @@
 import {
+  Dispatch,
   FunctionComponent,
   ReactNode,
+  SetStateAction,
   useContext,
   useEffect,
   useMemo,
@@ -15,10 +17,15 @@ import {
 import { ColorScheme } from '../../components/utils/main.js';
 import { Breadcrumb, Tabs, useEntry } from '../guide/nav.js';
 import { PagePathContext } from '../guide/sections.js';
-import { useLocalStorage } from '../shared/use-local-storage.js';
 import { CodeView } from './code-view.js';
+import { usePortalColorScheme } from './portal-scheme.js';
 import { renderCode } from './render-code.js';
-import { useCreateStateUrl, useOptions } from './state.js';
+import {
+  Settings,
+  useCreateStateUrl,
+  useOptions,
+  useProvidedSettings,
+} from './state.js';
 
 // A demo's frame: its stage, its header (full-page) and its config
 // column (settings, prop controls, code, log); inline, a page's live view.
@@ -106,70 +113,79 @@ const DemoHeader: FunctionComponent<{
 /**
  * An inline demo (see `Component`) and, below it (as a code view's Copy
  * button), a link to it on its component's page of demos, and its width:
- * the page's, or the viewport's (shared by its component's inline demos).
+ * the page's, or the viewport's (expanded, a setting, see `Settings`).
  */
 const InlineDemo: FunctionComponent<{
   children: ReactNode;
+  expanded: boolean;
   fullscreenUrl?: string;
-  /** Its settings' key (see `Component`). */
-  settings: string;
-}> = ({ children, fullscreenUrl, settings }) => {
-  const [expanded, setExpanded] = useLocalStorage(
-    `${settings}.expanded`,
-    false,
-  );
+  setExpanded: (expanded: boolean) => void;
+}> = ({ children, expanded, fullscreenUrl, setExpanded }) => (
+  <div
+    className="demo-inline"
+    data-expanded={expanded ? '' : undefined}
+  >
+    {children}
+    <div className="demo-inline-actions">
+      <a
+        className="demo-button"
+        href={fullscreenUrl}
+        rel="noreferrer"
+        target="_blank"
+      >
+        Fullscreen
+      </a>
+      <button
+        className="demo-button"
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+      >
+        {expanded ? 'Collapse' : 'Expand'}
+      </button>
+    </div>
+  </div>
+);
+
+/**
+ * A demo's stage, by its frame's settings (its color scheme also its
+ * popups', portaled out of it, see portal-scheme.ts).
+ */
+const Stage: FunctionComponent<{
+  children: ReactNode;
+  settings: Settings;
+}> = ({
+  children,
+  settings: {
+    backdrop,
+    center,
+    colorScheme,
+    safeAreas,
+    stageBackground,
+    stretch,
+  },
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  usePortalColorScheme(ref, colorScheme);
 
   return (
     <div
-      className="demo-inline"
-      data-expanded={expanded ? '' : undefined}
+      ref={ref}
+      className="demo-stage"
+      data-color-scheme={colorScheme}
+      data-safe-areas={safeAreas ? '' : undefined}
     >
-      {children}
-      <div className="demo-inline-actions">
-        <a
-          className="demo-button"
-          href={fullscreenUrl}
-          rel="noreferrer"
-          target="_blank"
-        >
-          Fullscreen
-        </a>
-        <button
-          className="demo-button"
-          type="button"
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? 'Collapse' : 'Expand'}
-        </button>
+      {stageBackground ? <div className="demo-stage-background" /> : null}
+      <div
+        className="demo-stage-inner"
+        data-backdrop={backdrop ? '' : undefined}
+        data-center={center ? '' : undefined}
+        data-stretch={stretch ? '' : undefined}
+      >
+        {children}
       </div>
     </div>
   );
 };
-
-/** A demo's stage, by its frame's settings. */
-const Stage: FunctionComponent<{
-  backdrop: boolean;
-  background: boolean;
-  center: boolean;
-  children: ReactNode;
-  safeAreas: boolean;
-  stretch: boolean;
-}> = ({ backdrop, background, center, children, safeAreas, stretch }) => (
-  <div
-    className="demo-stage"
-    data-safe-areas={safeAreas ? '' : undefined}
-  >
-    {background ? <div className="demo-stage-background" /> : null}
-    <div
-      className="demo-stage-inner"
-      data-backdrop={backdrop ? '' : undefined}
-      data-center={center ? '' : undefined}
-      data-stretch={stretch ? '' : undefined}
-    >
-      {children}
-    </div>
-  </div>
-);
 
 /** The guards' hooks, above the code of a demo with `inputGuards`. */
 const inputGuardsCode = `useInputZoomPrevention();
@@ -197,12 +213,91 @@ const useGuards = (hidden: boolean, inputGuards: boolean, raw: boolean) => {
 const demoCode = (children: ReactNode, inputGuards: boolean) =>
   `${inputGuards ? inputGuardsCode : ''}${renderCode(children)}`;
 
+/** A demo's settings changed from its defaults (none: `undefined`). */
+const changedSettings = (defaults: Settings, settings: Settings) => {
+  const changed = Object.fromEntries(
+    Object.entries(settings).filter(
+      ([key, value]) => defaults[key as keyof Settings] !== value,
+    ),
+  ) as Partial<Settings>;
+
+  return Object.keys(changed).length > 0 ? changed : undefined;
+};
+
+/** A demo's stage settings, in its config column. */
+const StageSettings: FunctionComponent<{
+  defaults: Settings;
+  setSettings: Dispatch<SetStateAction<Settings>>;
+  settings: Settings;
+}> = ({ defaults, setSettings, settings }) => {
+  const toggle = (
+    key: Exclude<keyof Settings, 'colorScheme'>,
+    label: string,
+  ) => (
+    <label style={{ display: 'block' }}>
+      <input
+        checked={settings[key]}
+        name={key}
+        type="checkbox"
+        onChange={() =>
+          setSettings((settings_) => ({ ...settings_, [key]: !settings_[key] }))
+        }
+      />
+      {label}
+    </label>
+  );
+
+  return (
+    <section className="demo-config-section">
+      <details open>
+        <summary className="demo-config-heading">Stage</summary>
+        <label style={{ display: 'block' }}>
+          Color Scheme{' '}
+          <select
+            name="colorScheme"
+            value={settings.colorScheme ?? ''}
+            onChange={({ currentTarget }) =>
+              setSettings((settings_) => ({
+                ...settings_,
+                colorScheme: (currentTarget.value as ColorScheme) || undefined,
+              }))
+            }
+          >
+            <option value="">[auto]</option>
+            <option value="light">light</option>
+            <option value="dark">dark</option>
+          </select>
+        </label>
+        {toggle('stageBackground', 'Stage Background')}
+        {toggle('backdrop', 'Backdrop')}
+        {toggle('center', 'Center')}
+        {toggle('stretch', 'Stretch')}
+        {toggle('safeAreas', 'Safe Areas')}
+        <button
+          className="demo-button"
+          disabled={changedSettings(defaults, settings) === undefined}
+          onClick={() => setSettings(defaults)}
+        >
+          Reset
+        </button>
+      </details>
+    </section>
+  );
+};
+
 export const Component: FunctionComponent<{
   backdrop?: boolean;
   /** Base UI component the demo is built on, for the docs link (if any). */
   baseUiId?: string;
   center?: boolean;
+  /** Forced on its stage (a setting, see `Settings`). */
+  colorScheme?: ColorScheme;
   controls?: ReactNode;
+  /**
+   * Inline, as wide as the viewport at first (a setting, see `Settings`):
+   * e.g. a tablet's screen, wider than the page's column.
+   */
+  expanded?: boolean;
   /** Unique demo id, used for selecting demos (`#id=…`) and storing config. */
   id: string;
   /**
@@ -218,6 +313,10 @@ export const Component: FunctionComponent<{
    */
   inputGuards?: boolean;
   log?: ReactNode;
+  /** Its devices' safe area insets hatched (a setting, see `Settings`). */
+  safeAreas?: boolean;
+  /** Its stage's dotted background (a setting, see `Settings`). */
+  stageBackground?: boolean;
   /** Its prop controls' state, for its URL (see `useCreateStateUrl`). */
   state?: unknown[];
   stretch?: boolean;
@@ -227,54 +326,73 @@ export const Component: FunctionComponent<{
   baseUiId,
   center = false,
   children,
+  colorScheme,
   controls,
+  expanded = false,
   id,
   inline = false,
   inputGuards = false,
   log,
+  safeAreas = false,
+  stageBackground = true,
   state,
   stretch = false,
   title,
 }) => {
   const { back, id: showId, raw } = useOptions();
-  // Its settings: its component's, shared by the component's demos on all
-  // its pages (see guide/nav.tsx); a demo's own outside of one.
   const entry = useEntry();
   // (Inline on a guide page only, see guide/pages.tsx.)
   const pagePath = useContext(PagePathContext);
   const isInline = inline && pagePath !== '';
-  const stateUrl = useCreateStateUrl(id, state);
-  const fullscreenUrl = useCreateStateUrl(
-    id,
+  // Its settings: its defaults, or as its URL has them; changed here alone.
+  const defaults = useMemo<Settings>(
+    () => ({
+      backdrop,
+      center,
+      colorScheme,
+      expanded,
+      safeAreas,
+      stageBackground,
+      stretch,
+    }),
+    [
+      backdrop,
+      center,
+      colorScheme,
+      expanded,
+      safeAreas,
+      stageBackground,
+      stretch,
+    ],
+  );
+  const provided = useProvidedSettings(id);
+  const initial = useMemo(
+    () => ({ ...defaults, ...provided }),
+    [defaults, provided],
+  );
+  const [settings, setSettings] = useState(initial);
+  useEffect(() => {
+    // (Its URL changed, as a prop control's state does.)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSettings(initial);
+  }, [initial]);
+  const changed = useMemo(
+    () => changedSettings(defaults, settings),
+    [defaults, settings],
+  );
+  const stateUrl = useCreateStateUrl(id, { settings: changed, state });
+  // (Full-page there: not expanded, as inline.)
+  const fullscreenSettings = useMemo(() => {
+    if (!changed) return undefined;
+    const { expanded: _expanded, ...rest } = changed;
+    return Object.keys(rest).length > 0 ? rest : undefined;
+  }, [changed]);
+  const fullscreenUrl = useCreateStateUrl(id, {
+    back: true,
+    path: `${entry?.id ?? ''}/all`,
+    settings: fullscreenSettings,
     state,
-    `${entry?.id ?? ''}/all`,
-    true,
-  );
-  const settings = entry?.id ?? id;
-  const [colorScheme, setColorScheme] = useLocalStorage<
-    ColorScheme | undefined
-  >('colorScheme', undefined);
-  const [stageBackground, setStageBackground] = useLocalStorage(
-    `${settings}.stageBackground`,
-    true,
-  );
-  const [isCentered, setIsCentered] = useLocalStorage(
-    `${settings}.center`,
-    center,
-  );
-  const [isStretched, setIsStretched] = useLocalStorage(
-    `${settings}.stretch`,
-    stretch,
-  );
-  const [hasBackdrop, setHasBackdrop] = useLocalStorage(
-    `${settings}.backdrop`,
-    backdrop,
-  );
-  // Its devices' safe area insets, hatched (see shared/style.css).
-  const [safeAreas, setSafeAreas] = useLocalStorage(
-    `${settings}.safeAreas`,
-    false,
-  );
+  });
   // (Its own: closed at first, not kept, nor shared with other views.)
   const [codeOpen, setCodeOpen] = useState(false);
   // (After rendering: rendering to a string resets Preact's hooks state.)
@@ -310,86 +428,19 @@ export const Component: FunctionComponent<{
           stateUrl={stateUrl}
           title={title}
         />
-        <Stage
-          backdrop={hasBackdrop}
-          background={stageBackground}
-          center={isCentered}
-          safeAreas={safeAreas}
-          stretch={isStretched}
-        >
-          {children}
-        </Stage>
+        <Stage settings={settings}>{children}</Stage>
       </section>
       <aside
         ref={config}
         className="demo-config"
       >
-        <section className="demo-config demo-config-section">
-          <summary className="demo-config-heading">Config</summary>
-          <label style={{ display: 'block' }}>
-            Color Scheme{' '}
-            <select
-              name="colorScheme"
-              value={colorScheme}
-              onChange={({ currentTarget }) =>
-                setColorScheme(
-                  (currentTarget.value as ColorScheme) || undefined,
-                )
-              }
-            >
-              <option value="">[auto]</option>
-              <option value="light">light</option>
-              <option value="dark">dark</option>
-            </select>
-          </label>
-          <label style={{ display: 'block' }}>
-            <input
-              checked={stageBackground}
-              name={`${settings}.stageBackground`}
-              type="checkbox"
-              onClick={() => setStageBackground(!stageBackground)}
-            />
-            Stage Background
-          </label>
-          <label style={{ display: 'block' }}>
-            <input
-              checked={hasBackdrop}
-              name={`${settings}.backdrop`}
-              type="checkbox"
-              onClick={() => setHasBackdrop(!hasBackdrop)}
-            />
-            Backdrop
-          </label>
-          <label style={{ display: 'block' }}>
-            <input
-              checked={isCentered}
-              name={`${settings}.center`}
-              type="checkbox"
-              onClick={() => setIsCentered(!isCentered)}
-            />
-            Center
-          </label>
-          <label style={{ display: 'block' }}>
-            <input
-              checked={isStretched}
-              name={`${settings}.stretch`}
-              type="checkbox"
-              onClick={() => setIsStretched(!isStretched)}
-            />
-            Stretch
-          </label>
-          <label style={{ display: 'block' }}>
-            <input
-              checked={safeAreas}
-              name={`${settings}.safeAreas`}
-              type="checkbox"
-              onClick={() => setSafeAreas(!safeAreas)}
-            />
-            Safe Areas
-          </label>
-        </section>
+        <StageSettings
+          defaults={defaults}
+          setSettings={setSettings}
+          settings={settings}
+        />
         {controls}
-        <section className="demo-config demo-config-section">
+        <section className="demo-config-section">
           <details
             open={codeOpen}
             onToggle={({ currentTarget }) =>
@@ -407,8 +458,11 @@ export const Component: FunctionComponent<{
 
   return isInline ? (
     <InlineDemo
+      expanded={settings.expanded}
       fullscreenUrl={fullscreenUrl}
-      settings={settings}
+      setExpanded={(expanded_) =>
+        setSettings((settings_) => ({ ...settings_, expanded: expanded_ }))
+      }
     >
       {container}
     </InlineDemo>

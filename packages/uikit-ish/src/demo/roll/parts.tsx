@@ -27,13 +27,12 @@ import {
 const RootPart: FunctionComponent = () => {
   const id = 'roll-parts-root';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsRoot,
-    'Roll.Root',
+  const [control, props, state] = usePropControl(propOptionsRoot, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Roll.Root',
+  });
 
   return (
     <Component
@@ -69,10 +68,7 @@ const ColumnPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsColumn(addLog), [addLog]),
-    'Roll.Column',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Roll.Column' },
   );
 
   return (
@@ -107,13 +103,12 @@ const ColumnPart: FunctionComponent = () => {
 const ItemPart: FunctionComponent = () => {
   const id = 'roll-parts-item';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsItem,
-    'Roll.Item (Durian)',
+  const [control, props, state] = usePropControl(propOptionsItem, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Roll.Item (Durian)',
+  });
 
   return (
     <Component
@@ -147,13 +142,12 @@ const ItemPart: FunctionComponent = () => {
 const SeparatorPart: FunctionComponent = () => {
   const id = 'roll-parts-separator';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsSeparator,
-    'Roll.Separator',
+  const [control, props, state] = usePropControl(propOptionsSeparator, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Roll.Separator',
+  });
 
   return (
     <Component

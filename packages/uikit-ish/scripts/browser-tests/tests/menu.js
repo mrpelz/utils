@@ -809,7 +809,7 @@ export const tests = [
         [Math.round(before.x), Math.round(before.y)],
       );
       const inFrame = await page.evaluate(
-        `Boolean(${page.section}.querySelector(${JSON.stringify('.sheet-demo-phone [role=menu]')}))`,
+        `Boolean(${page.section}.querySelector(${JSON.stringify('.demo-phone [role=menu]')}))`,
       );
       assert.equal(inFrame, true);
     },

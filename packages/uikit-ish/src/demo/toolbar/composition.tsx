@@ -162,7 +162,7 @@ const NavigationBar: FunctionComponent = () => {
       log={log}
       title="Toolbar as a navigation bar"
     >
-      <div className="toolbar-demo-screen">
+      <div className="demo-phone">
         <Page.Root>
           <Header.Root>
             <Header.Bar>
@@ -238,7 +238,7 @@ const EditMode: FunctionComponent = () => {
       log={log}
       title="Toolbar in edit mode"
     >
-      <div className="toolbar-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content>
           <List.Root
             editing
@@ -330,7 +330,7 @@ const Search: FunctionComponent = () => {
       log={log}
       title="Toolbar with a search field"
     >
-      <div className="toolbar-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content>
           <List.Root className="toolbar-demo-list">
             <List.Section>
@@ -397,7 +397,7 @@ const Pages: FunctionComponent = () => {
       log={log}
       title="Toolbar with page dots"
     >
-      <div className="toolbar-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content>
           <List.Root className="toolbar-demo-list">
             <List.Section>

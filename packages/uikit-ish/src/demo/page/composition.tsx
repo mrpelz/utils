@@ -84,7 +84,7 @@ const Backgrounds: FunctionComponent = () => (
     title="Pages, grouped and plain"
   >
     <div className="page-demo-pair">
-      <div className="page-demo-phone">
+      <div className="demo-phone">
         <Page.Root>
           <Header.Root>
             <Header.Bar>
@@ -113,7 +113,7 @@ const Backgrounds: FunctionComponent = () => (
           </List.Root>
         </Page.Root>
       </div>
-      <div className="page-demo-phone">
+      <div className="demo-phone">
         <Page.Root background="plain">
           <Header.Root>
             <Header.Bar>
@@ -165,7 +165,7 @@ const InAStack: FunctionComponent = () => {
       log={log}
       title="Pages in a stack"
     >
-      <div className="page-demo-phone">
+      <div className="demo-phone">
         <Navigation.Root onBack={pop}>
           {keys.map((key, depth) => (
             <Page.Root key={key}>
@@ -231,12 +231,13 @@ const InAColumn: FunctionComponent = () => {
   return (
     <Component
       center
+      expanded
       inline
       id="page-composition-column"
       log={log}
       title="Page beside a sidebar"
     >
-      <div className="page-demo-tablet">
+      <div className="demo-tablet">
         <Layout.Root>
           <Layout.Column
             floating
@@ -321,7 +322,7 @@ const OverAViewport: FunctionComponent = () => {
       log={log}
       title="Page beneath a bottom bar"
     >
-      <div className="page-demo-phone">
+      <div className="demo-phone">
         <Viewport.Content>
           <Page.Root>
             <Header.Root>

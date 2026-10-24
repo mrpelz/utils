@@ -44,9 +44,7 @@ export const ActivityViewDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
 
   return (
@@ -60,7 +58,7 @@ export const ActivityViewDemo: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root defaultOpen={content.defaultOpen}>
           <Sheet.Trigger
@@ -314,9 +312,7 @@ export const ActivityViewPopoverDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
 
   return (

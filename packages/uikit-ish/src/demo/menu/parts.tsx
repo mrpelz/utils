@@ -76,10 +76,7 @@ const RootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsGuideRoot(addLog), [addLog]),
-    'Menu.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Menu.Root' },
   );
 
   return (
@@ -95,7 +92,7 @@ const RootPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root
           key={elementKey}
@@ -208,10 +205,7 @@ const TriggerPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsGuideTrigger(addLog), [addLog]),
-    'Menu.Trigger',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Menu.Trigger' },
   );
 
   return (
@@ -227,7 +221,7 @@ const TriggerPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger {...props}>
@@ -328,13 +322,12 @@ const PortalPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuidePortal,
-    'Menu.Portal',
+  const [control, props, state] = usePropControl(propOptionsGuidePortal, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.Portal',
+  });
 
   return (
     <Component
@@ -349,7 +342,7 @@ const PortalPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -460,13 +453,12 @@ const BackdropPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Menu.Backdrop',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.Backdrop',
+  });
 
   return (
     <Component
@@ -481,7 +473,7 @@ const BackdropPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -590,13 +582,12 @@ const PositionerPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPositioner,
-    'Menu.Positioner',
+  const [control, props, state] = usePropControl(propOptionsPositioner, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.Positioner',
+  });
 
   return (
     <Component
@@ -611,7 +602,7 @@ const PositionerPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -719,13 +710,12 @@ const PopupPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPopup,
-    'Menu.Popup',
+  const [control, props, state] = usePropControl(propOptionsPopup, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.Popup',
+  });
 
   return (
     <Component
@@ -740,7 +730,7 @@ const PopupPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -850,10 +840,7 @@ const ItemPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsGuideItem(addLog), [addLog]),
-    'Menu.Item',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Menu.Item' },
   );
 
   return (
@@ -869,7 +856,7 @@ const ItemPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -980,13 +967,12 @@ const LinkItemPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideLinkItem,
-    'Menu.LinkItem',
+  const [control, props, state] = usePropControl(propOptionsGuideLinkItem, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.LinkItem',
+  });
 
   return (
     <Component
@@ -1001,7 +987,7 @@ const LinkItemPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -1111,10 +1097,7 @@ const CheckboxItemPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsGuideCheckboxItem(addLog), [addLog]),
-    'Menu.CheckboxItem',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Menu.CheckboxItem' },
   );
 
   return (
@@ -1130,7 +1113,7 @@ const CheckboxItemPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root key={elementKey}>
           <Menu.Trigger
@@ -1238,13 +1221,12 @@ const CheckboxItemIndicatorPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideIndicator,
-    'Menu.CheckboxItemIndicator',
+  const [control, props, state] = usePropControl(propOptionsGuideIndicator, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.CheckboxItemIndicator',
+  });
 
   return (
     <Component
@@ -1259,7 +1241,7 @@ const CheckboxItemIndicatorPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -1369,10 +1351,7 @@ const RadioGroupPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
-    'Menu.RadioGroup',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Menu.RadioGroup' },
   );
 
   return (
@@ -1388,7 +1367,7 @@ const RadioGroupPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root key={elementKey}>
           <Menu.Trigger
@@ -1496,13 +1475,12 @@ const RadioItemPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideRadioItem,
-    'Menu.RadioItem',
+  const [control, props, state] = usePropControl(propOptionsGuideRadioItem, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.RadioItem',
+  });
 
   return (
     <Component
@@ -1517,7 +1495,7 @@ const RadioItemPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -1628,13 +1606,12 @@ const RadioItemIndicatorPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideIndicator,
-    'Menu.RadioItemIndicator',
+  const [control, props, state] = usePropControl(propOptionsGuideIndicator, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.RadioItemIndicator',
+  });
 
   return (
     <Component
@@ -1649,7 +1626,7 @@ const RadioItemIndicatorPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -1759,10 +1736,7 @@ const SubmenuRootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsSubmenuRoot(addLog), [addLog]),
-    'Menu.SubmenuRoot',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Menu.SubmenuRoot' },
   );
 
   return (
@@ -1778,7 +1752,7 @@ const SubmenuRootPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -1888,10 +1862,7 @@ const SubmenuTriggerPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     propOptionsGuideSubmenuTrigger,
-    'Menu.SubmenuTrigger',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Menu.SubmenuTrigger' },
   );
 
   return (
@@ -1907,7 +1878,7 @@ const SubmenuTriggerPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -2015,13 +1986,12 @@ const GroupPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Menu.Group',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.Group',
+  });
 
   return (
     <Component
@@ -2036,7 +2006,7 @@ const GroupPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -2144,13 +2114,12 @@ const GroupLabelPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Menu.GroupLabel',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.GroupLabel',
+  });
 
   return (
     <Component
@@ -2165,7 +2134,7 @@ const GroupLabelPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -2273,13 +2242,12 @@ const SeparatorPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideSeparator,
-    'Menu.Separator',
+  const [control, props, state] = usePropControl(propOptionsGuideSeparator, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.Separator',
+  });
 
   return (
     <Component
@@ -2294,7 +2262,7 @@ const SeparatorPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -2402,13 +2370,12 @@ const QuickActionsPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'Menu.QuickActions',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.QuickActions',
+  });
 
   return (
     <Component
@@ -2423,7 +2390,7 @@ const QuickActionsPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -2533,10 +2500,7 @@ const QuickActionPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsGuideItem(addLog), [addLog]),
-    'Menu.QuickAction',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Menu.QuickAction' },
   );
 
   return (
@@ -2552,7 +2516,7 @@ const QuickActionPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -2663,13 +2627,12 @@ const IconPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'Menu.Icon',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.Icon',
+  });
 
   return (
     <Component
@@ -2684,7 +2647,7 @@ const IconPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -2792,13 +2755,12 @@ const LabelPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'Menu.Label',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.Label',
+  });
 
   return (
     <Component
@@ -2813,7 +2775,7 @@ const LabelPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -2921,13 +2883,12 @@ const SubtitlePart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'Menu.Subtitle',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.Subtitle',
+  });
 
   return (
     <Component
@@ -2942,7 +2903,7 @@ const SubtitlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -3050,13 +3011,12 @@ const ShortcutPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'Menu.Shortcut',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Menu.Shortcut',
+  });
 
   return (
     <Component
@@ -3071,7 +3031,7 @@ const ShortcutPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <Menu.Root>
           <Menu.Trigger
@@ -3193,7 +3153,7 @@ const CreateHandlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <div className="menu-demo-triggers">
           <Menu.Trigger
@@ -3270,7 +3230,7 @@ const UseCreateMenuHandlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <div className="menu-demo-triggers">
           <Menu.Trigger

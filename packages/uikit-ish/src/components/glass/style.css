@@ -367,7 +367,7 @@
       --uikit-glass-lens-shadow: var(--glass-ios-dim-lens-shadow);
     }
 
-    &:where(:root[data-color-scheme='light'] *) {
+    &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
       --uikit-glass-fill-filter: var(--glass-ios-bright-fill-filter);
       --uikit-glass-content-blend: var(--glass-ios-bright-content-blend);
       --uikit-glass-content-prominent: var(
@@ -389,7 +389,7 @@
       --uikit-glass-lens-shadow: var(--glass-ios-bright-lens-shadow);
     }
 
-    &:where(:root[data-color-scheme='dark'] *) {
+    &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
       --uikit-glass-fill-filter: var(--glass-ios-dim-fill-filter);
       --uikit-glass-content-blend: var(--glass-ios-dim-content-blend);
       --uikit-glass-content-prominent: var(--glass-ios-dim-content-prominent);
@@ -478,7 +478,7 @@
       --uikit-glass-shadow: var(--glass-ios-dim-shadow);
     }
 
-    &:where(:root[data-color-scheme='light'] *) {
+    &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
       --uikit-glass-content-blend: var(--glass-ios-medium-light-content-blend);
       --uikit-glass-content-secondary: var(
         --glass-ios-medium-light-content-secondary
@@ -489,7 +489,7 @@
       --uikit-glass-shadow: var(--glass-ios-bright-shadow);
     }
 
-    &:where(:root[data-color-scheme='dark'] *) {
+    &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
       --uikit-glass-content-blend: var(--glass-ios-medium-dark-content-blend);
       --uikit-glass-content-secondary: var(
         --glass-ios-medium-dark-content-secondary

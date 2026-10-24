@@ -44,11 +44,11 @@
         0 0 25px rgb(0 0 0 / 30%);
     }
 
-    &:where(:root[data-color-scheme='light'] *) {
+    &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
       box-shadow: var(--uikit-glass-shadow);
     }
 
-    &:where(:root[data-color-scheme='dark'] *) {
+    &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
       box-shadow:
         inset 0 0 0 1px rgb(255 255 255 / 15%),
         0 0 25px rgb(0 0 0 / 30%);

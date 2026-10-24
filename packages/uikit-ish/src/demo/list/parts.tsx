@@ -108,13 +108,12 @@ const RootPart: FunctionComponent = () => {
   const id = 'list-parts-root';
   const [log] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsRootAll,
-    'List.Root',
+  const [control, props, state] = usePropControl(propOptionsRootAll, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Root',
+  });
 
   return (
     <Component
@@ -151,13 +150,12 @@ const SectionPart: FunctionComponent = () => {
   const id = 'list-parts-section';
   const [log] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    commonPropOptions,
-    'List.Section',
+  const [control, props, state] = usePropControl(commonPropOptions, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Section',
+  });
 
   return (
     <Component
@@ -193,13 +191,12 @@ const HeaderPart: FunctionComponent = () => {
   const id = 'list-parts-header';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsHeader,
-    'List.Header',
+  const [control, props, state] = usePropControl(propOptionsHeader, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Header',
+  });
 
   return (
     <Component
@@ -251,10 +248,7 @@ const GroupPart: FunctionComponent = () => {
   );
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsGuideGroup(reorder), [reorder]),
-    'List.Group',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'List.Group' },
   );
 
   return (
@@ -290,10 +284,7 @@ const ItemPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsItem(addLog), [addLog]),
-    'List.Item',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'List.Item' },
   );
 
   return (
@@ -331,9 +322,7 @@ const ExpandableRootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsExpandableRoot(addLog), [addLog]),
-    'List.ExpandableRoot',
-    external,
-    true,
+    { external, title: 'List.ExpandableRoot' },
   );
 
   return (
@@ -382,10 +371,7 @@ const ExpandableTriggerPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsExpandableTrigger(addLog), [addLog]),
-    'List.ExpandableTrigger',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'List.ExpandableTrigger' },
   );
 
   return (
@@ -427,10 +413,7 @@ const ExpandablePart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsGuideExpandable(addLog), [addLog]),
-    'List.Expandable',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'List.Expandable' },
   );
 
   return (
@@ -475,13 +458,12 @@ const FooterPart: FunctionComponent = () => {
   const id = 'list-parts-footer';
   const [log] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    commonPropOptions,
-    'List.Footer',
+  const [control, props, state] = usePropControl(commonPropOptions, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Footer',
+  });
 
   return (
     <Component
@@ -516,13 +498,12 @@ const BlockPart: FunctionComponent = () => {
   const id = 'list-parts-block';
   const [log] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsBlock,
-    'List.Block',
+  const [control, props, state] = usePropControl(propOptionsBlock, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Block',
+  });
 
   return (
     <Component
@@ -559,10 +540,7 @@ const TitlePart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsTitleFirst(addLog), [addLog]),
-    'List.Title',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'List.Title' },
   );
 
   return (
@@ -602,13 +580,12 @@ const SubtitlePart: FunctionComponent = () => {
   const id = 'list-parts-subtitle';
   const [log] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    commonPropOptions,
-    'List.Subtitle',
+  const [control, props, state] = usePropControl(commonPropOptions, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Subtitle',
+  });
 
   return (
     <Component
@@ -643,13 +620,12 @@ const SupertitlePart: FunctionComponent = () => {
   const id = 'list-parts-supertitle';
   const [log] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    commonPropOptions,
-    'List.Supertitle',
+  const [control, props, state] = usePropControl(commonPropOptions, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Supertitle',
+  });
 
   return (
     <Component
@@ -686,13 +662,12 @@ const TextPart: FunctionComponent = () => {
   const id = 'list-parts-text';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsText,
-    'List.Text',
+  const [control, props, state] = usePropControl(propOptionsText, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Text',
+  });
 
   return (
     <Component
@@ -733,13 +708,12 @@ const DetailPart: FunctionComponent = () => {
   const id = 'list-parts-detail';
   const [log] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    commonPropOptions,
-    'List.Detail',
+  const [control, props, state] = usePropControl(commonPropOptions, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Detail',
+  });
 
   return (
     <Component
@@ -774,13 +748,12 @@ const ImagePart: FunctionComponent = () => {
   const id = 'list-parts-image';
   const [log] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsImage,
-    'List.Image',
+  const [control, props, state] = usePropControl(propOptionsImage, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Image',
+  });
 
   return (
     <Component
@@ -821,10 +794,7 @@ const AccessoryPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsAccessory(addLog), [addLog]),
-    'List.Accessory',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'List.Accessory' },
   );
 
   return (
@@ -867,13 +837,12 @@ const CheckmarkPart: FunctionComponent = () => {
   const id = 'list-parts-checkmark';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    commonPropOptions,
-    'List.Checkmark',
+  const [control, props, state] = usePropControl(commonPropOptions, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Checkmark',
+  });
   const [chosen, setChosen] = useState<string>(planets[0]);
 
   return (
@@ -915,13 +884,12 @@ const DrillInPart: FunctionComponent = () => {
   const id = 'list-parts-drill-in';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    commonPropOptions,
-    'List.DrillIn',
+  const [control, props, state] = usePropControl(commonPropOptions, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.DrillIn',
+  });
 
   return (
     <Component
@@ -960,13 +928,12 @@ const DisclosurePart: FunctionComponent = () => {
   const id = 'list-parts-disclosure';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    commonPropOptions,
-    'List.Disclosure',
+  const [control, props, state] = usePropControl(commonPropOptions, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Disclosure',
+  });
 
   return (
     <Component
@@ -1010,13 +977,12 @@ const GrabberPart: FunctionComponent = () => {
   const id = 'list-parts-grabber';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGrabber,
-    'List.Grabber',
+  const [control, props, state] = usePropControl(propOptionsGrabber, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Grabber',
+  });
   const [order, setOrder] = useState<readonly string[]>(rows);
 
   return (
@@ -1061,10 +1027,7 @@ const ActionPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsAction(addLog), [addLog]),
-    'List.Action',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'List.Action' },
   );
 
   return (
@@ -1103,10 +1066,7 @@ const ButtonPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsButton(addLog), [addLog]),
-    'List.Button',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'List.Button' },
   );
 
   return (
@@ -1147,10 +1107,7 @@ const CheckboxPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsCheckboxFirst(addLog), [addLog]),
-    'List.Checkbox',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'List.Checkbox' },
   );
 
   return (
@@ -1195,13 +1152,12 @@ const RadioPart: FunctionComponent = () => {
   const id = 'list-parts-radio';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsRadio,
-    'List.Radio',
+  const [control, props, state] = usePropControl(propOptionsRadio, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Radio',
+  });
 
   return (
     <Component
@@ -1262,10 +1218,7 @@ const EditButtonPart: FunctionComponent = () => {
       }),
       [addLog],
     ),
-    'List.EditButton',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'List.EditButton' },
   );
 
   return (
@@ -1314,10 +1267,7 @@ const SwipeActionsPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsSwipeActionsTrailing(addLog), [addLog]),
-    'List.SwipeActions',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'List.SwipeActions' },
   );
 
   return (
@@ -1367,10 +1317,7 @@ const SwipeActionPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsSwipeActionOutermost(addLog), [addLog]),
-    'List.SwipeAction',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'List.SwipeAction' },
   );
 
   return (
@@ -1432,13 +1379,12 @@ const IndexPart: FunctionComponent = () => {
   const id = 'list-parts-index';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsIndex,
-    'List.Index',
+  const [control, props, state] = usePropControl(propOptionsIndex, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'List.Index',
+  });
 
   return (
     <Component
@@ -1514,10 +1460,7 @@ const IndexItemPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsIndexItem(addLog), [addLog]),
-    'List.IndexItem',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'List.IndexItem' },
   );
 
   return (

@@ -93,7 +93,7 @@ const ProviderPartFrame: FunctionComponent<{
       state={[state]}
       title="Viewport.Provider"
     >
-      <div className="viewport-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content ref={contentRef}>
           <List.Root>
             <List.Section>
@@ -140,9 +140,7 @@ const ProviderPart: FunctionComponent = () => {
       }),
       [contentRef],
     ),
-    'Viewport.Provider',
-    external,
-    true,
+    { external, title: 'Viewport.Provider' },
   );
 
   return (
@@ -160,13 +158,12 @@ const ProviderPart: FunctionComponent = () => {
 const ContentPart: FunctionComponent = () => {
   const id = 'viewport-parts-content';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsContent,
-    'Viewport.Content',
+  const [control, props, state] = usePropControl(propOptionsContent, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Viewport.Content',
+  });
 
   return (
     <Component
@@ -177,7 +174,7 @@ const ContentPart: FunctionComponent = () => {
       state={[state]}
       title="Viewport.Content"
     >
-      <div className="viewport-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content {...props}>
           <List.Root>
             <List.Section>
@@ -200,13 +197,12 @@ const ContentPart: FunctionComponent = () => {
 const AnchorPart: FunctionComponent = () => {
   const id = 'viewport-parts-anchor';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsAnchor,
-    'Viewport.Anchor',
+  const [control, props, state] = usePropControl(propOptionsAnchor, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Viewport.Anchor',
+  });
   const side = props.edge === 'inline-start' || props.edge === 'inline-end';
 
   return (
@@ -218,7 +214,7 @@ const AnchorPart: FunctionComponent = () => {
       state={[state]}
       title="Viewport.Anchor"
     >
-      <div className="viewport-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content>
           <List.Root className="viewport-demo-list">
             <List.Section>
@@ -254,13 +250,12 @@ const AnchorPart: FunctionComponent = () => {
 const BlockStartPart: FunctionComponent = () => {
   const id = 'viewport-parts-block-start';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsBlockStart,
-    'Viewport.BlockStart',
+  const [control, props, state] = usePropControl(propOptionsBlockStart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Viewport.BlockStart',
+  });
 
   return (
     <Component
@@ -271,7 +266,7 @@ const BlockStartPart: FunctionComponent = () => {
       state={[state]}
       title="Viewport.BlockStart"
     >
-      <div className="viewport-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content>
           <List.Root className="viewport-demo-list">
             <List.Section>
@@ -301,13 +296,12 @@ const BlockStartPart: FunctionComponent = () => {
 const BlockEndPart: FunctionComponent = () => {
   const id = 'viewport-parts-block-end';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsBlockEnd,
-    'Viewport.BlockEnd',
+  const [control, props, state] = usePropControl(propOptionsBlockEnd, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Viewport.BlockEnd',
+  });
 
   return (
     <Component
@@ -318,7 +312,7 @@ const BlockEndPart: FunctionComponent = () => {
       state={[state]}
       title="Viewport.BlockEnd"
     >
-      <div className="viewport-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content>
           <List.Root className="viewport-demo-list">
             <List.Section>
@@ -405,7 +399,7 @@ const UseViewportScrollView: FunctionComponent<{
       log={log}
       title="useViewportScroll"
     >
-      <div className="viewport-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content ref={contentRef}>
           <List.Root>
             <List.Section>
@@ -453,7 +447,7 @@ const UseScrollDirectionView: FunctionComponent<{
       id="viewport-parts-use-scroll-direction"
       title="useScrollDirection"
     >
-      <div className="viewport-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content ref={contentRef}>
           <List.Root>
             <List.Section>
@@ -511,9 +505,7 @@ const UseElementVisibilityPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, options, state] = usePropControl(
     propOptionsElementVisibility,
-    'options',
-    external,
-    true,
+    { external, title: 'options' },
   );
   const visible = useElementVisibility(card, {
     rootMargin: options.rootMargin,
@@ -561,12 +553,10 @@ const UseElementGeometryPart: FunctionComponent = () => {
   const box = useRef<HTMLDivElement>(null);
   const card = useRef<HTMLDivElement>(null);
   const [external] = useProvidedState(id);
-  const [control, options, state] = usePropControl(
-    propOptionsElementGeometry,
-    'options',
+  const [control, options, state] = usePropControl(propOptionsElementGeometry, {
     external,
-    true,
-  );
+    title: 'options',
+  });
   const [geometry, setGeometry] = useState<ElementGeometry>();
   const calls = useRef(0);
   useElementGeometry(
@@ -694,12 +684,10 @@ const UseInputZoomPreventionPart: FunctionComponent = () => {
   const id = 'viewport-parts-use-input-zoom-prevention';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, args, state] = usePropControl(
-    propOptionsInputZoom,
-    'arguments',
+  const [control, args, state] = usePropControl(propOptionsInputZoom, {
     external,
-    true,
-  );
+    title: 'arguments',
+  });
   useInputZoomPrevention(args.enabled);
 
   return (
@@ -731,12 +719,10 @@ const UseFocusShiftPreventionPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const frame = useRef<HTMLDivElement>(null);
   const [external] = useProvidedState(id);
-  const [control, args, state] = usePropControl(
-    propOptionsFocusShift,
-    'arguments',
+  const [control, args, state] = usePropControl(propOptionsFocusShift, {
     external,
-    true,
-  );
+    title: 'arguments',
+  });
   useFocusShiftPrevention(
     args.target === 'frame' ? frame : undefined,
     args.enabled,

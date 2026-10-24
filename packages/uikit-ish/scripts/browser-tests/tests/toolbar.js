@@ -408,7 +408,7 @@ export const tests = [
       /** The accessory's top and the bar's bottom, from the screen's top. */
       const edges = () =>
         page.evaluate(`(() => {
-          const screen = ${page.section}.querySelector('.header-demo-phone').getBoundingClientRect();
+          const screen = ${page.section}.querySelector('.demo-phone').getBoundingClientRect();
           const bar = ${page.section}.querySelector('[data-header-part=bar]').getBoundingClientRect();
           const accessory = ${page.section}.querySelector('[data-header-part=accessory]').getBoundingClientRect();
           return { accessory: Math.round(accessory.top - screen.top), bar: Math.round(bar.bottom - screen.top) };

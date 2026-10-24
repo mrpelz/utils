@@ -34,10 +34,7 @@ const FormPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsForm(addLog), [addLog]),
-    'Form',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Form' },
   );
 
   return (
@@ -119,13 +116,12 @@ const FieldsetRootPart: FunctionComponent = () => {
   const id = 'form-parts-fieldset-root';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsFieldset,
-    'Fieldset.Root',
+  const [control, props, state] = usePropControl(propOptionsFieldset, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Fieldset.Root',
+  });
 
   return (
     <Component
@@ -181,13 +177,12 @@ const FieldsetRootPart: FunctionComponent = () => {
 const FieldsetLegendPart: FunctionComponent = () => {
   const id = 'form-parts-fieldset-legend';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsLegend,
-    'Fieldset.Legend',
+  const [control, props, state] = usePropControl(propOptionsLegend, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Fieldset.Legend',
+  });
 
   return (
     <Component
@@ -227,13 +222,12 @@ const FieldPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [quantity, setQuantity] = useState<number | null>(1);
   const [external] = useProvidedState(id);
-  const [control, props, state, elementKey] = usePropControl(
-    propOptionsField,
-    'Field.Root',
+  const [control, props, state, elementKey] = usePropControl(propOptionsField, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Field.Root',
+  });
 
   return (
     <Component

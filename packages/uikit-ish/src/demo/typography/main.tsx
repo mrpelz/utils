@@ -22,17 +22,14 @@ export const TypographyDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
 
-  const [control, props, stateControl] = usePropControl(
-    propOptionsTypography,
-    'typography',
-    externalControl,
-    true,
-  );
+  const [control, props, stateControl] = usePropControl(propOptionsTypography, {
+    external: externalControl,
+    open: true,
+    title: 'typography',
+  });
 
   return (
     <Component
@@ -63,9 +60,7 @@ export const TypographyMatrixDemo: FunctionComponent = () => {
 
   const [control, { color, dynamicTypeSize }, stateControl] = usePropControl(
     propOptionsMatrix,
-    'matrix',
-    externalControl,
-    true,
+    { external: externalControl, open: true, title: 'matrix' },
   );
 
   return (
@@ -114,12 +109,11 @@ export const TypographySizesDemo: FunctionComponent = () => {
 
   const [externalControl] = useProvidedState(id);
 
-  const [control, { color }, stateControl] = usePropControl(
-    propOptionsSizes,
-    'sizes',
-    externalControl,
-    true,
-  );
+  const [control, { color }, stateControl] = usePropControl(propOptionsSizes, {
+    external: externalControl,
+    open: true,
+    title: 'sizes',
+  });
 
   return (
     <Component

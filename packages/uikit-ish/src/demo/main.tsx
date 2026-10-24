@@ -2,8 +2,7 @@ import { ErrorBoundary, LocationProvider, Route, Router } from 'preact-iso';
 import { FunctionComponent, useMemo } from 'react';
 
 import * as components from '../components/index.js';
-import { ColorScheme as TColorScheme } from '../components/utils/main.js';
-import { useColorScheme, useTouchActive } from '../styles.js';
+import { useTouchActive } from '../styles.js';
 import { publicPath } from './env.js';
 import { nameComponents } from './frame/render-code.js';
 import { OptionsProvider } from './frame/state.js';
@@ -18,22 +17,14 @@ import {
   PartsPage,
 } from './guide/pages.js';
 import { HigGuidePage } from './hig-guide/main.js';
-import { useLocalStorage } from './shared/use-local-storage.js';
+import { startClock } from './shared/clock.js';
+import { startStatusBarTaps } from './shared/status-bar.js';
 
 // (Named for the code shown, see `renderCode`.)
 nameComponents(components);
 
-// The forced color scheme (demo option), as the library's `Styles` does.
-const ColorScheme: FunctionComponent = () => {
-  const [colorScheme] = useLocalStorage<TColorScheme | undefined>(
-    'colorScheme',
-    undefined,
-  );
-
-  useColorScheme(colorScheme);
-
-  return null;
-};
+startClock();
+startStatusBarTaps();
 
 // Pressed states on touch (iOS Safari), as the library's `Styles` does.
 const TouchActive: FunctionComponent = () => {
@@ -134,7 +125,6 @@ export const Demo: FunctionComponent = () => (
   <LocationProvider>
     <OptionsProvider>
       <ErrorBoundary>
-        <ColorScheme />
         <TouchActive />
         <Router onRouteChange={onRouteChange}>
           <Route

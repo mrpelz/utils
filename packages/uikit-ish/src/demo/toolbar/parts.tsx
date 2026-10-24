@@ -48,13 +48,12 @@ import {
 const RootPart: FunctionComponent = () => {
   const id = 'toolbar-parts-root';
   const [external] = useProvidedState(id);
-  const [control, props, state, elementKey] = usePropControl(
-    propOptionsRoot,
-    'Toolbar.Root',
+  const [control, props, state, elementKey] = usePropControl(propOptionsRoot, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Toolbar.Root',
+  });
 
   return (
     <Component
@@ -113,13 +112,12 @@ const RootPart: FunctionComponent = () => {
 const LeadingPart: FunctionComponent = () => {
   const id = 'toolbar-parts-leading';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsSide,
-    'Toolbar.Leading',
+  const [control, props, state] = usePropControl(propOptionsSide, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Toolbar.Leading',
+  });
 
   return (
     <Component
@@ -170,13 +168,12 @@ const LeadingPart: FunctionComponent = () => {
 const TrailingPart: FunctionComponent = () => {
   const id = 'toolbar-parts-trailing';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsSide,
-    'Toolbar.Trailing',
+  const [control, props, state] = usePropControl(propOptionsSide, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Toolbar.Trailing',
+  });
 
   return (
     <Component
@@ -229,13 +226,12 @@ const TrailingPart: FunctionComponent = () => {
 const SpacerPart: FunctionComponent = () => {
   const id = 'toolbar-parts-spacer';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsSpacer,
-    'Toolbar.Spacer',
+  const [control, props, state] = usePropControl(propOptionsSpacer, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Toolbar.Spacer',
+  });
 
   return (
     <Component
@@ -276,13 +272,12 @@ const GroupPart: FunctionComponent = () => {
   const id = 'toolbar-parts-group';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGroup,
-    'Toolbar.Group',
+  const [control, props, state] = usePropControl(propOptionsGroup, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Toolbar.Group',
+  });
 
   return (
     <Component
@@ -340,10 +335,7 @@ const ButtonPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, buttonProps, state] = usePropControl(
     useMemo(() => getPropOptionsButton(addLog, true), [addLog]),
-    'Toolbar.Button',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Toolbar.Button' },
   );
   // (Of its own: `prominent`, too.)
   const props = buttonProps as ToolbarButtonProps;
@@ -375,13 +367,12 @@ const ButtonPart: FunctionComponent = () => {
 const TitlePart: FunctionComponent = () => {
   const id = 'toolbar-parts-title';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsTitle,
-    'Toolbar.Title',
+  const [control, props, state] = usePropControl(propOptionsTitle, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Toolbar.Title',
+  });
 
   return (
     <Component
@@ -427,13 +418,12 @@ const TitlePart: FunctionComponent = () => {
 const SubtitlePart: FunctionComponent = () => {
   const id = 'toolbar-parts-subtitle';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsSubtitle,
-    'Toolbar.Subtitle',
+  const [control, props, state] = usePropControl(propOptionsSubtitle, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Toolbar.Subtitle',
+  });
 
   return (
     <Component
@@ -480,13 +470,12 @@ const SubtitlePart: FunctionComponent = () => {
 const SeparatorPart: FunctionComponent = () => {
   const id = 'toolbar-parts-separator';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsSeparator,
-    'Toolbar.Separator',
+  const [control, props, state] = usePropControl(propOptionsSeparator, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Toolbar.Separator',
+  });
 
   return (
     <Component
@@ -528,13 +517,12 @@ const SeparatorPart: FunctionComponent = () => {
 const LinkPart: FunctionComponent = () => {
   const id = 'toolbar-parts-link';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsLink,
-    'Toolbar.Link',
+  const [control, props, state] = usePropControl(propOptionsLink, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Toolbar.Link',
+  });
 
   return (
     <Component
@@ -570,13 +558,12 @@ const LinkPart: FunctionComponent = () => {
 const InputPart: FunctionComponent = () => {
   const id = 'toolbar-parts-input';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsInput,
-    'Toolbar.Input',
+  const [control, props, state] = usePropControl(propOptionsInput, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Toolbar.Input',
+  });
 
   return (
     <Component

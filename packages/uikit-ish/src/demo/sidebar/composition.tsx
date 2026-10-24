@@ -214,12 +214,13 @@ const Selecting: FunctionComponent = () => {
   return (
     <Component
       center
+      expanded
       inline
       id="sidebar-composition-selecting"
       log={log}
       title="Sidebar selecting content"
     >
-      <div className="sidebar-demo-tablet">
+      <div className="demo-tablet">
         <Layout.Root>
           <Layout.Column
             floating
@@ -311,7 +312,7 @@ const Drawer: FunctionComponent = () => {
       log={log}
       title="Sidebar as a drawer"
     >
-      <div className="sidebar-demo-phone">
+      <div className="demo-phone">
         <Layout.Root compact>
           <Layout.Drawer
             handle={sidebarDrawer}
@@ -613,9 +614,7 @@ const Adaptive: FunctionComponent = () => {
   const [externalContent] = useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsAdaptiveContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const sizeClass = useSizeClass();
   // (Unset, by the window's width; or as a phone's, or a tablet's.)
@@ -630,6 +629,7 @@ const Adaptive: FunctionComponent = () => {
   return (
     <Component
       center
+      expanded
       inline
       controls={[controlContent]}
       id={id}
@@ -637,7 +637,7 @@ const Adaptive: FunctionComponent = () => {
       state={[stateContent]}
       title="Sidebar, floating or a drawer"
     >
-      <div className={compact ? 'sidebar-demo-phone' : 'sidebar-demo-tablet'}>
+      <div className={compact ? 'demo-phone' : 'demo-tablet'}>
         <Layout.Root compact={compact}>
           <Layout.Drawer
             handle={adaptiveDrawer}

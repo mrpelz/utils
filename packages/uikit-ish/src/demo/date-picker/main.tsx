@@ -29,9 +29,7 @@ export const DatePickerDemo: FunctionComponent = () => {
 
   const [controlPicker, propsPicker, statePicker, elementKey] = usePropControl(
     useMemo(() => getPropOptionsDatePicker('date', addLog), [addLog]),
-    'date picker',
-    externalPicker,
-    true,
+    { external: externalPicker, open: true, title: 'date picker' },
   );
 
   return (
@@ -67,9 +65,7 @@ export const DatePickerRangeDemo: FunctionComponent = () => {
 
   const [controlPicker, propsPicker, statePicker, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRangePicker(addLog), [addLog]),
-    'date picker',
-    externalPicker,
-    true,
+    { external: externalPicker, open: true, title: 'date picker' },
   );
 
   const message = rangeMessages.get(
@@ -126,9 +122,7 @@ export const TimePickerDemo: FunctionComponent = () => {
 
   const [controlPicker, propsPicker, statePicker, elementKey] = usePropControl(
     useMemo(() => getPropOptionsDatePicker('time', addLog), [addLog]),
-    'date picker',
-    externalPicker,
-    true,
+    { external: externalPicker, open: true, title: 'date picker' },
   );
 
   return (
@@ -160,9 +154,7 @@ export const DateAndTimePickerDemo: FunctionComponent = () => {
 
   const [controlPicker, propsPicker, statePicker, elementKey] = usePropControl(
     useMemo(() => getPropOptionsDatePicker('dateAndTime', addLog), [addLog]),
-    'date picker',
-    externalPicker,
-    true,
+    { external: externalPicker, open: true, title: 'date picker' },
   );
 
   return (
@@ -197,15 +189,11 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsFooterContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlPicker, propsPicker, statePicker, elementKey] = usePropControl(
     useMemo(() => getPropOptionsDatePicker('dateAndTime', addLog), [addLog]),
-    'date picker',
-    externalPicker,
-    true,
+    { external: externalPicker, open: true, title: 'date picker' },
   );
 
   const timeRow =

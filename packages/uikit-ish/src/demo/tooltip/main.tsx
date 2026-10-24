@@ -27,25 +27,19 @@ export const TooltipDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
     propOptionsTrigger,
-    'trigger',
-    externalTrigger,
+    { external: externalTrigger, title: 'trigger' },
   );
   const [controlPositioner, propsPositioner, statePositioner] = usePropControl(
     propOptionsPositioner,
-    'positioner',
-    externalPositioner,
+    { external: externalPositioner, title: 'positioner' },
   );
   const [controlContent, propsContent, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
 
   return (

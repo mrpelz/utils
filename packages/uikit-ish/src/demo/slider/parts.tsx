@@ -49,10 +49,7 @@ const RootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'Slider.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Slider.Root' },
   );
   // (A range, by its values: a thumb for each.)
   const range = Array.isArray(props.value ?? props.defaultValue);
@@ -103,13 +100,12 @@ const LabelPart: FunctionComponent = () => {
   const id = 'slider-parts-label';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsLabel,
-    'Slider.Label',
+  const [control, props, state] = usePropControl(propOptionsLabel, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Slider.Label',
+  });
 
   return (
     <Component
@@ -143,13 +139,12 @@ const ValuePart: FunctionComponent = () => {
   const id = 'slider-parts-value';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsValue,
-    'Slider.Value',
+  const [control, props, state] = usePropControl(propOptionsValue, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Slider.Value',
+  });
 
   return (
     <Component
@@ -184,13 +179,12 @@ const ControlPart: FunctionComponent = () => {
   const id = 'slider-parts-control';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    commonPropOptions,
-    'Slider.Control',
+  const [control, props, state] = usePropControl(commonPropOptions, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Slider.Control',
+  });
 
   return (
     <Component
@@ -229,13 +223,12 @@ const TrackPart: FunctionComponent = () => {
   const id = 'slider-parts-track';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    commonPropOptions,
-    'Slider.Track',
+  const [control, props, state] = usePropControl(commonPropOptions, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Slider.Track',
+  });
 
   return (
     <Component
@@ -274,13 +267,12 @@ const IndicatorPart: FunctionComponent = () => {
   const id = 'slider-parts-indicator';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    commonPropOptions,
-    'Slider.Indicator',
+  const [control, props, state] = usePropControl(commonPropOptions, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Slider.Indicator',
+  });
 
   return (
     <Component
@@ -321,10 +313,7 @@ const ThumbPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsGuideThumb(addLog), [addLog]),
-    'Slider.Thumb',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Slider.Thumb' },
   );
 
   return (
@@ -368,13 +357,12 @@ const TicksPart: FunctionComponent = () => {
   const id = 'slider-parts-ticks';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state, elementKey] = usePropControl(
-    propOptionsTicks,
-    'Slider.Ticks',
+  const [control, props, state, elementKey] = usePropControl(propOptionsTicks, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Slider.Ticks',
+  });
 
   return (
     <Component
@@ -419,10 +407,7 @@ const SymbolPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsMinSymbol(addLog), [addLog]),
-    'Slider.Symbol',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Slider.Symbol' },
   );
 
   return (

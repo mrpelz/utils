@@ -47,10 +47,7 @@ const RootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsGuideRoot(addLog), [addLog]),
-    'Tooltip.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Tooltip.Root' },
   );
 
   return (
@@ -96,13 +93,12 @@ const RootPart: FunctionComponent = () => {
 const TriggerPart: FunctionComponent = () => {
   const id = 'tooltip-parts-trigger';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideTrigger,
-    'Tooltip.Trigger',
+  const [control, props, state] = usePropControl(propOptionsGuideTrigger, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Tooltip.Trigger',
+  });
 
   return (
     <Component
@@ -137,13 +133,12 @@ const TriggerPart: FunctionComponent = () => {
 const PortalPart: FunctionComponent = () => {
   const id = 'tooltip-parts-portal';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPortal,
-    'Tooltip.Portal',
+  const [control, props, state] = usePropControl(propOptionsPortal, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Tooltip.Portal',
+  });
 
   return (
     <Component
@@ -184,13 +179,12 @@ const PortalPart: FunctionComponent = () => {
 const PositionerPart: FunctionComponent = () => {
   const id = 'tooltip-parts-positioner';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuidePositioner,
-    'Tooltip.Positioner',
+  const [control, props, state] = usePropControl(propOptionsGuidePositioner, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Tooltip.Positioner',
+  });
 
   return (
     <Component
@@ -231,13 +225,12 @@ const PositionerPart: FunctionComponent = () => {
 const PopupPart: FunctionComponent = () => {
   const id = 'tooltip-parts-popup';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPopup,
-    'Tooltip.Popup',
+  const [control, props, state] = usePropControl(propOptionsPopup, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Tooltip.Popup',
+  });
 
   return (
     <Component
@@ -278,12 +271,10 @@ const PopupPart: FunctionComponent = () => {
 const ProviderPart: FunctionComponent = () => {
   const id = 'tooltip-parts-provider';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsProvider,
-    'Tooltip.Provider',
+  const [control, props, state] = usePropControl(propOptionsProvider, {
     external,
-    true,
-  );
+    title: 'Tooltip.Provider',
+  });
 
   return (
     <Component

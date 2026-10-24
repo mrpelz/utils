@@ -18,6 +18,8 @@ import {
   useState,
 } from 'react';
 
+import { overlayProperty, useOverlay } from './overlay.js';
+
 export type RemappedPropValue<T extends any> =
   T extends MappedProp<infer M> ? M : T;
 
@@ -60,20 +62,26 @@ export class MappedProp<T> {
   ) {}
 }
 
-const PropSelectorOption = <T,>({ value }: { value: T }): ReactNode => {
-  const displayValue = useMemo(() => {
-    if (value === undefined) return 'undefined';
-    if (value === null) return 'null';
-    if (value instanceof MappedProp) {
-      return value.label;
-    }
+/** A value's display: its label (a mapped prop's), or as JSON. */
+const display = (value: unknown): string => {
+  if (value === undefined) return 'undefined';
+  if (value === null) return 'null';
+  if (value instanceof MappedProp) return value.label;
 
-    return JSON.stringify(value) || value.toString();
-  }, [value]);
-
-  return <option value={displayValue} />;
+  return JSON.stringify(value) || String(value);
 };
 
+/** A JSON string (as typed in a field). */
+const jsonString = /^".*"$/;
+
+/** The select's option for a value of one's own (see PropSelector). */
+const customOption = '[custom…]';
+
+/**
+ * A prop's control: its values listed (a select), or one of one's own
+ * (`[custom…]`: a field below it, its value as JSON, or a mapped prop's
+ * label), and its reset.
+ */
 const PropSelector = <T extends PropMap>({
   initialState,
   objectKey,
@@ -88,7 +96,6 @@ const PropSelector = <T extends PropMap>({
   values: readonly T[keyof T][number][];
 }>): ReactNode => {
   const inputId = useId();
-  const datalistId = useId();
 
   const initialValue = initialState[objectKey];
 
@@ -99,89 +106,63 @@ const PropSelector = <T extends PropMap>({
     [objectKey, setState],
   );
 
-  const resetState = useCallback(
-    () => handleSet(initialValue),
-    [handleSet, initialValue],
-  );
-
   const value: any = useMemo(() => state[objectKey], [objectKey, state]);
 
-  const isModified = useMemo(
-    () => value !== initialValue,
-    [initialValue, value],
-  );
-  const isCustomValue = useMemo(() => !values.includes(value), [value, values]);
+  const isModified = value !== initialValue;
+  const index = values.indexOf(value);
+  const displayValue = display(value);
 
-  const displayValue = useMemo(() => {
-    if (value === undefined) return 'undefined';
-    if (value === null) return 'null';
-    if (value instanceof MappedProp) {
-      return value.label;
-    }
-
-    return JSON.stringify(value) || value.toString();
-  }, [value]);
+  // A value of one's own: its field shown (also when chosen, before it's
+  // entered).
+  const [isCustom, setIsCustom] = useState(index === -1);
+  const showCustom = isCustom || index === -1;
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const applyInput = useCallback(
-    (force: boolean) => {
-      const { current: input } = inputRef;
-      if (!input) return;
+  // The field follows the value, unless it's being edited (its JSON as
+  // typed, not as reformatted).
+  useEffect(() => {
+    const { current: input } = inputRef;
+    if (!input || input === document.activeElement) return;
+    input.value = displayValue;
+  }, [displayValue, showCustom]);
 
-      try {
-        input.setCustomValidity('');
+  const applyInput = useCallback(() => {
+    const { current: input } = inputRef;
+    if (!input) return;
 
-        if (input.value.length === 0) {
-          if (force) {
-            input.value = displayValue;
-            input.blur();
-          }
+    try {
+      input.setCustomValidity('');
 
-          return;
-        }
+      if (input.value.length === 0) return;
 
-        for (const value_ of values) {
-          if (
-            !isObject(value_) ||
-            !((value_ as any) instanceof MappedProp) ||
-            value_.label !== input.value
-          ) {
-            continue;
-          }
-
-          handleSet(value_);
-          input.blur();
-          return;
-        }
-
-        if (input.value === 'undefined') {
-          handleSet(undefined);
-          input.blur();
-          return;
-        }
-
-        handleSet(JSON.parse(input.value));
-      } catch {
-        input.setCustomValidity('enter valid JSON string');
+      const mapped = values.find(
+        (value_) =>
+          (value_ as any) instanceof MappedProp &&
+          (value_ as MappedProp<unknown>).label === input.value,
+      );
+      if (mapped !== undefined) {
+        handleSet(mapped);
+        return;
       }
-    },
-    [displayValue, handleSet, values],
-  );
+
+      if (input.value === 'undefined') {
+        handleSet(undefined);
+        return;
+      }
+
+      handleSet(JSON.parse(input.value));
+    } catch {
+      input.setCustomValidity('enter valid JSON string');
+    }
+  }, [handleSet, values]);
 
   const onBlur = useCallback(() => {
-    applyInput(true);
-    inputRef.current?.reportValidity();
-  }, [applyInput]);
-
-  const onFocus = useCallback(() => {
-    if (!inputRef.current || isCustomValue) return;
-    inputRef.current.value = '';
-  }, [isCustomValue]);
-
-  const onInput = useCallback(() => {
-    applyInput(false);
-  }, [applyInput]);
+    const { current: input } = inputRef;
+    if (!input) return;
+    input.reportValidity();
+    if (input.validity.valid) input.value = displayValue;
+  }, [displayValue]);
 
   const onKeyDown = useCallback<KeyboardEventHandler<HTMLInputElement>>(
     (event) => {
@@ -191,78 +172,78 @@ const PropSelector = <T extends PropMap>({
         return;
       }
 
-      const isJsonString = Boolean(displayValue.match(/^".*"$/));
+      // In a JSON string: a line break escaped.
+      if (event.key === 'Enter' && jsonString.test(currentTarget.value)) {
+        const cursor = currentTarget.selectionEnd || 1;
+        const preCursorValue = currentTarget.value.slice(0, cursor);
+        const postCursorValue = currentTarget.value.slice(cursor);
 
-      switch (event.key) {
-        case 'Tab': {
-          if (currentTarget.value.length > 0) break;
-
-          event.preventDefault();
-          currentTarget.value = displayValue;
-
-          if (isJsonString) {
-            currentTarget.setSelectionRange(1, displayValue.length - 1);
-
-            break;
-          }
-
-          currentTarget.setSelectionRange(0, displayValue.length);
-          break;
-        }
-
-        case 'Enter': {
-          if (!isJsonString) break;
-
-          const cursor = currentTarget.selectionEnd || 1;
-          const preCursorValue = currentTarget.value.slice(0, cursor);
-          const postCursorValue = currentTarget.value.slice(cursor);
-
-          currentTarget.value = String.raw`${preCursorValue}\n${postCursorValue}`;
-          currentTarget.selectionEnd = cursor + 2;
-          applyInput(false);
-
-          break;
-        }
-
-        default:
+        currentTarget.value = String.raw`${preCursorValue}\n${postCursorValue}`;
+        currentTarget.selectionEnd = cursor + 2;
+        applyInput();
       }
     },
-    [applyInput, displayValue],
+    [applyInput],
   );
 
   return (
     <>
       <label htmlFor={inputId}>
         {objectKey}
-        {isCustomValue ? '*' : null}
+        {index === -1 ? '*' : null}
       </label>
-      <input
-        ref={inputRef}
-        autoComplete="off"
+      <select
         id={inputId}
-        list={datalistId}
         name={objectKey}
-        value={displayValue}
-        onBlur={onBlur}
-        onFocus={onFocus}
-        onInput={onInput}
-        onKeyDown={onKeyDown}
-      />
-      <datalist id={datalistId}>
-        {values.map((optionValue) => (
-          <PropSelectorOption<T[keyof T][number]>
-            key={optionValue}
-            value={optionValue}
-          />
+        value={showCustom ? customOption : String(index)}
+        onChange={({ currentTarget }) => {
+          if (currentTarget.value === customOption) {
+            setIsCustom(true);
+            // (Its text selected, to be typed over.)
+            requestAnimationFrame(() => {
+              inputRef.current?.focus();
+              inputRef.current?.select();
+            });
+            return;
+          }
+
+          setIsCustom(false);
+          handleSet(values[Number(currentTarget.value)]);
+        }}
+      >
+        {values.map((optionValue, optionIndex) => (
+          <option
+            key={display(optionValue)}
+            value={String(optionIndex)}
+          >
+            {display(optionValue)}
+          </option>
         ))}
-      </datalist>
+        <option value={customOption}>{customOption}</option>
+      </select>
       <button
         className="demo-button"
-        disabled={!isModified}
-        onClick={() => resetState()}
+        disabled={!isModified && !isCustom}
+        onClick={() => {
+          setIsCustom(false);
+          handleSet(initialValue);
+        }}
       >
         ×
       </button>
+      {showCustom ? (
+        <input
+          ref={inputRef}
+          aria-label={`${objectKey} (JSON)`}
+          autoComplete="off"
+          className="demo-props-custom"
+          defaultValue={displayValue}
+          name={`${objectKey}.custom`}
+          onBlur={onBlur}
+          onInput={applyInput}
+          onKeyDown={onKeyDown}
+        />
+      ) : null}
     </>
   );
 };
@@ -271,22 +252,42 @@ const undefinedString = '$undefined';
 
 export const usePropControl = <T extends PropMap>(
   propMap: T,
-  title?: string,
-  externalState?: unknown,
-  open?: boolean,
-  /** Outlined by default (e.g. the part a section is about). */
-  outlined = false,
+  {
+    external: externalState,
+    open,
+    outlined = false,
+    title,
+  }: {
+    /** Its state from the URL (see `useProvidedState`). */
+    external?: unknown;
+    /**
+     * Open at first (the demo's subject, e.g. the part a section is
+     * about); untitled (a demo's only control), it is.
+     */
+    open?: boolean;
+    /** Outlined by default (e.g. the part a section is about). */
+    outlined?: boolean;
+    title?: string;
+  } = {},
 ): [ReactNode, ControlledProps<T>, object, string] => {
-  // With a `style` prop: an outline option, toggled by its checkbox, so
-  // the part can be seen (red, as every demo's).
-  const outline = useMemo(
+  // With a `style` prop: an outline option and an overlay option (the
+  // part's box hatched over it, see overlay.ts), each toggled by its
+  // checkbox (one at a time), so the part can be seen (red, as every
+  // demo's).
+  const [outline, overlay] = useMemo(
     () =>
       'style' in propMap
-        ? new MappedProp<CSSProperties>(
-            { outline: '2px dashed red', outlineOffset: '2px' },
-            '[outline]',
-          )
-        : undefined,
+        ? [
+            new MappedProp<CSSProperties>(
+              { outline: '2px dashed red', outlineOffset: '2px' },
+              '[outline]',
+            ),
+            new MappedProp<CSSProperties>(
+              { [overlayProperty]: '1' } as CSSProperties,
+              '[overlay]',
+            ),
+          ]
+        : [undefined, undefined],
     [propMap],
   );
 
@@ -299,13 +300,13 @@ export const usePropControl = <T extends PropMap>(
             (key) =>
               [
                 key,
-                key === 'style' && outline
-                  ? [...(propMap[key] ?? []), outline]
+                key === 'style' && outline && overlay
+                  ? [...(propMap[key] ?? []), outline, overlay]
                   : propMap[key],
               ] as const,
           ),
       ) as unknown as T,
-    [outline, propMap],
+    [outline, overlay, propMap],
   );
 
   const initialState = useMemo(
@@ -402,6 +403,8 @@ export const usePropControl = <T extends PropMap>(
   ) as ControlledProps<T>;
 
   const isOutlined = outline !== undefined && state.style === outline;
+  const isOverlaid = overlay !== undefined && state.style === overlay;
+  useOverlay(isOverlaid);
 
   const toExternalState = useMemo(
     () =>
@@ -429,11 +432,27 @@ export const usePropControl = <T extends PropMap>(
   return [
     <section
       key={0}
-      className="demo-config demo-config-section"
+      className="demo-config-section"
     >
       <details open={open ?? !title}>
         <summary className="demo-config-heading">
           {title ?? 'Props'}
+          {overlay ? (
+            <label className="demo-outline-toggle">
+              <input
+                checked={isOverlaid}
+                name="overlay"
+                type="checkbox"
+                onChange={() =>
+                  setState((state_) => ({
+                    ...state_,
+                    style: isOverlaid ? undefined : overlay,
+                  }))
+                }
+              />
+              overlay
+            </label>
+          ) : null}
           {outline ? (
             <label className="demo-outline-toggle">
               <input

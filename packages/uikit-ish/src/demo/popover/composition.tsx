@@ -151,12 +151,11 @@ const ASheetOnIPhone: FunctionComponent = () => {
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const sizeClass = useSizeClass();
   const [external] = useProvidedState(id);
-  const [control, content, state] = usePropControl(
-    propOptionsPresentation,
-    '[content]',
+  const [control, content, state] = usePropControl(propOptionsPresentation, {
     external,
-    true,
-  );
+    open: true,
+    title: '[content]',
+  });
   const sheet =
     (content.presentation ??
       (sizeClass === 'compact' ? 'sheet' : 'popover')) === 'sheet';
@@ -175,7 +174,7 @@ const ASheetOnIPhone: FunctionComponent = () => {
       {sheet ? (
         <div
           ref={screen}
-          className="sheet-demo-phone"
+          className="demo-phone demo-centered"
         >
           <Sheet.Root
             onOpenChange={(open: boolean) => addLog(`sheet: ${String(open)}`)}

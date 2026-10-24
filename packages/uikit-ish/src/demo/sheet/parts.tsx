@@ -47,10 +47,7 @@ const RootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsGuideRoot(addLog), [addLog]),
-    'Sheet.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Sheet.Root' },
   );
 
   return (
@@ -65,7 +62,7 @@ const RootPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root
           key={elementKey}
@@ -135,13 +132,12 @@ const TriggerPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Sheet.Trigger',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Sheet.Trigger',
+  });
 
   return (
     <Component
@@ -155,7 +151,7 @@ const TriggerPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root
           onOpenChange={(open: boolean) => addLog(`open: ${String(open)}`)}
@@ -227,10 +223,7 @@ const PopupPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsGuidePopup,
-    'Sheet.Popup',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Sheet.Popup' },
   );
 
   return (
@@ -245,7 +238,7 @@ const PopupPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root
           onOpenChange={(open: boolean) => addLog(`open: ${String(open)}`)}
@@ -314,13 +307,12 @@ const HeaderPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsHeader,
-    'Sheet.Header',
+  const [control, props, state] = usePropControl(propOptionsHeader, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Sheet.Header',
+  });
 
   return (
     <Component
@@ -334,7 +326,7 @@ const HeaderPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root
           onOpenChange={(open: boolean) => addLog(`open: ${String(open)}`)}
@@ -403,13 +395,12 @@ const GrabberPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGrabber,
-    'Sheet.Grabber',
+  const [control, props, state] = usePropControl(propOptionsGrabber, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Sheet.Grabber',
+  });
 
   return (
     <Component
@@ -423,7 +414,7 @@ const GrabberPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root
           onOpenChange={(open: boolean) => addLog(`open: ${String(open)}`)}
@@ -492,13 +483,12 @@ const ContentPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Sheet.Content',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Sheet.Content',
+  });
 
   return (
     <Component
@@ -512,7 +502,7 @@ const ContentPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root
           onOpenChange={(open: boolean) => addLog(`open: ${String(open)}`)}
@@ -581,13 +571,12 @@ const TitlePart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Sheet.Title',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Sheet.Title',
+  });
 
   return (
     <Component
@@ -601,7 +590,7 @@ const TitlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root
           onOpenChange={(open: boolean) => addLog(`open: ${String(open)}`)}
@@ -675,13 +664,12 @@ const DescriptionPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Sheet.Description',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Sheet.Description',
+  });
 
   return (
     <Component
@@ -695,7 +683,7 @@ const DescriptionPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root
           onOpenChange={(open: boolean) => addLog(`open: ${String(open)}`)}
@@ -764,13 +752,12 @@ const ClosePart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Sheet.Close',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Sheet.Close',
+  });
 
   return (
     <Component
@@ -784,7 +771,7 @@ const ClosePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root
           onOpenChange={(open: boolean) => addLog(`open: ${String(open)}`)}
@@ -869,7 +856,7 @@ const CreateHandlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Trigger
           handle={contactSheet}
@@ -954,7 +941,7 @@ const UseCreateSheetHandlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Trigger
           handle={addSheet}

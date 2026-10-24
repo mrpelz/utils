@@ -117,8 +117,9 @@ export const positionerSide = (
 };
 
 /**
- * Attribute on the root element (`<html>`) that forces a color scheme
- * regardless of the browser's preference (see `Styles`).
+ * Attribute that forces a color scheme regardless of the browser's
+ * preference: on the root element (`<html>`, see `Styles`), or on any
+ * element, for what's within it.
  */
 export const colorSchemeAttribute = 'data-color-scheme';
 

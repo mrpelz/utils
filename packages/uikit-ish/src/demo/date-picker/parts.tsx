@@ -49,9 +49,7 @@ const RootPart: FunctionComponent = () => {
       }),
       [addLog],
     ),
-    'DatePicker.Root',
-    external,
-    true,
+    { external, title: 'DatePicker.Root' },
   );
 
   return (
@@ -102,9 +100,7 @@ const CalendarPart: FunctionComponent = () => {
       }),
       [addLog],
     ),
-    'DatePicker.Calendar',
-    external,
-    true,
+    { external, title: 'DatePicker.Calendar' },
   );
 
   return (
@@ -147,11 +143,10 @@ const TimeRollPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [time, setTime] = useState<Date | null>(example);
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsTimeRoll,
-    'DatePicker.TimeRoll',
+  const [control, props, state] = usePropControl(propOptionsTimeRoll, {
     external,
-  );
+    title: 'DatePicker.TimeRoll',
+  });
 
   return (
     <Component
@@ -180,13 +175,12 @@ const TimeRollPart: FunctionComponent = () => {
 const CalendarRowPart: FunctionComponent = () => {
   const id = 'date-picker-parts-calendar-row';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsCalendarRow,
-    'DatePicker.CalendarRow',
+  const [control, props, state] = usePropControl(propOptionsCalendarRow, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'DatePicker.CalendarRow',
+  });
 
   return (
     <Component
@@ -220,13 +214,12 @@ const CalendarButtonPart: FunctionComponent = () => {
   const id = 'date-picker-parts-calendar-button';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsCalendarButton,
-    'DatePicker.CalendarButton',
+  const [control, props, state] = usePropControl(propOptionsCalendarButton, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'DatePicker.CalendarButton',
+  });
 
   return (
     <Component
@@ -264,11 +257,10 @@ const CalendarButtonPart: FunctionComponent = () => {
 const CalendarTimeRowPart: FunctionComponent = () => {
   const id = 'date-picker-parts-calendar-time-row';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsCalendarTimeRow,
-    'DatePicker.CalendarTimeRow',
+  const [control, props, state] = usePropControl(propOptionsCalendarTimeRow, {
     external,
-  );
+    title: 'DatePicker.CalendarTimeRow',
+  });
 
   return (
     <Component
@@ -299,13 +291,12 @@ const CalendarTimeRowPart: FunctionComponent = () => {
 const CalendarMessagePart: FunctionComponent = () => {
   const id = 'date-picker-parts-calendar-message';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsCalendarMessage,
-    'DatePicker.CalendarMessage',
+  const [control, props, state] = usePropControl(propOptionsCalendarMessage, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'DatePicker.CalendarMessage',
+  });
 
   return (
     <Component

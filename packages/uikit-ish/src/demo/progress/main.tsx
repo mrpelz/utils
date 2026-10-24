@@ -30,32 +30,24 @@ export const ProgressDemo: FunctionComponent = () => {
 
   const [controlBar, propsBar, stateBar, keyBar] = usePropControl(
     propOptionsBar,
-    'bar',
-    externalBar,
-    true,
+    { external: externalBar, open: true, title: 'bar' },
   );
   const [controlBarContent, propsBarContent, stateBarContent] = usePropControl(
     propOptionsBarContent,
-    '[bar content]',
-    externalBarContent,
-    true,
+    { external: externalBarContent, open: true, title: '[bar content]' },
   );
   const [controlIndicator, propsIndicator, stateIndicator] = usePropControl(
     propOptionsIndicator,
-    'indicator',
-    externalIndicator,
-    true,
+    { external: externalIndicator, open: true, title: 'indicator' },
   );
 
   const [controlLabel, propsLabel, stateLabel] = usePropControl(
     propOptionsLabel,
-    'label',
-    externalLabel,
+    { external: externalLabel, title: 'label' },
   );
   const [controlValue, propsValue, stateValue] = usePropControl(
     propOptionsValue,
-    'value',
-    externalValue,
+    { external: externalValue, title: 'value' },
   );
 
   const { label, showValue } = propsBarContent;

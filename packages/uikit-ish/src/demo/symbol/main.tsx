@@ -17,15 +17,11 @@ export const SymbolDemo: FunctionComponent = () => {
 
   const [controlSymbol, propsSymbol, stateSymbol] = usePropControl(
     propOptionsSymbol,
-    'symbol',
-    externalSymbol,
-    true,
+    { external: externalSymbol, open: true, title: 'symbol' },
   );
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
 
   return (

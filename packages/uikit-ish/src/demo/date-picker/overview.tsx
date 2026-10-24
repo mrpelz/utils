@@ -26,9 +26,7 @@ const LiveView: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsOverview,
-    'DatePicker.Root',
-    external,
-    true,
+    { external, open: true, title: 'DatePicker.Root' },
   );
 
   return (

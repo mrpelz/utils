@@ -36,7 +36,7 @@ const RootPart: FunctionComponent = () => (
     id="header-parts-root"
     title="Header.Root"
   >
-    <div className="header-demo-phone">
+    <div className="demo-phone">
       <Page.Root>
         <Header.Root>
           <Header.Bar>
@@ -70,13 +70,12 @@ const RootPart: FunctionComponent = () => (
 const BarPart: FunctionComponent = () => {
   const id = 'header-parts-bar';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsBar,
-    'Header.Bar',
+  const [control, props, state] = usePropControl(propOptionsBar, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Header.Bar',
+  });
 
   return (
     <Component
@@ -87,7 +86,7 @@ const BarPart: FunctionComponent = () => {
       state={[state]}
       title="Header.Bar"
     >
-      <div className="header-demo-phone">
+      <div className="demo-phone">
         <Page.Root>
           <Header.Root>
             <Header.Bar {...props}>
@@ -128,13 +127,12 @@ const BarPart: FunctionComponent = () => {
 const LargeTitlePart: FunctionComponent = () => {
   const id = 'header-parts-large-title';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsLargeTitle,
-    'Header.LargeTitle',
+  const [control, props, state] = usePropControl(propOptionsLargeTitle, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Header.LargeTitle',
+  });
 
   return (
     <Component
@@ -145,7 +143,7 @@ const LargeTitlePart: FunctionComponent = () => {
       state={[state]}
       title="Header.LargeTitle"
     >
-      <div className="header-demo-phone">
+      <div className="demo-phone">
         <Page.Root>
           <Header.Root>
             <Header.Bar>
@@ -181,13 +179,12 @@ const LargeTitlePart: FunctionComponent = () => {
 const AccessoryPart: FunctionComponent = () => {
   const id = 'header-parts-accessory';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsAccessory,
-    'Header.Accessory',
+  const [control, props, state] = usePropControl(propOptionsAccessory, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Header.Accessory',
+  });
 
   return (
     <Component
@@ -198,7 +195,7 @@ const AccessoryPart: FunctionComponent = () => {
       state={[state]}
       title="Header.Accessory"
     >
-      <div className="header-demo-phone">
+      <div className="demo-phone">
         <Page.Root>
           <Header.Root>
             <Header.Bar>

@@ -216,7 +216,7 @@ const Panels: FunctionComponent = () => {
       title="Tab bar with panels"
     >
       {/* (A phone's screen: its fixed layers within, see style.css.) */}
-      <div className="tab-bar-demo-screen">
+      <div className="demo-phone">
         <TabBar.Root
           value={value}
           onValueChange={onValueChange}
@@ -292,7 +292,7 @@ const Search: FunctionComponent = () => {
       log={log}
       title="Tab bar with search"
     >
-      <div className="tab-bar-demo-screen">
+      <div className="demo-phone">
         <TabBar.Root
           value={value}
           onValueChange={(
@@ -366,7 +366,7 @@ const Badges: FunctionComponent = () => {
       log={log}
       title="Tab bar with badges"
     >
-      <div className="tab-bar-demo-screen">
+      <div className="demo-phone">
         <TabBar.Root
           value={value}
           onValueChange={onValueChange}
@@ -424,7 +424,7 @@ const OnScrollView: FunctionComponent<{
       log={log}
       title="Tab bar collapsing on scroll"
     >
-      <div className="tab-bar-demo-screen">
+      <div className="demo-phone">
         <TabBar.Root
           value={value}
           onValueChange={onValueChange}
@@ -496,7 +496,7 @@ const MiniPlayer: FunctionComponent = () => {
       log={log}
       title="Tab bar with an accessory"
     >
-      <div className="tab-bar-demo-screen">
+      <div className="demo-phone">
         <TabBar.Root
           value={value}
           onValueChange={(

@@ -40,34 +40,29 @@ export const LayoutDemo: FunctionComponent = () => {
   const [folder, setFolder] = useState('Inbox');
   const [message, setMessage] = useState('Message 1');
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'root',
+  });
   const [controlSidebar, propsSidebar, stateSidebar, keySidebar] =
     usePropControl(
       useMemo(
         () => getPropOptionsColumn('sidebar', 280, true, addLog),
         [addLog],
       ),
-      'column (sidebar)',
-      externalSidebar,
-      true,
+      { external: externalSidebar, open: true, title: 'column (sidebar)' },
     );
 
   const [controlList, propsList, stateList, keyList] = usePropControl(
     useMemo(() => getPropOptionsColumn('list', 320, true, addLog), [addLog]),
-    'column (list)',
-    externalList,
+    { external: externalList, title: 'column (list)' },
   );
   const [controlDetail, propsDetail, stateDetail, keyDetail] = usePropControl(
     useMemo(
       () => getPropOptionsColumn('detail', undefined, false, addLog),
       [addLog],
     ),
-    'column (detail)',
-    externalDetail,
+    { external: externalDetail, title: 'column (detail)' },
   );
 
   return (
@@ -79,7 +74,7 @@ export const LayoutDemo: FunctionComponent = () => {
       state={[stateRoot, stateSidebar, stateList, stateDetail]}
       title="Layout"
     >
-      <div className="layout-demo-screen">
+      <div className="demo-phone demo-fill">
         <Layout.Root {...propsRoot}>
           <Layout.Column
             key={keySidebar}
@@ -248,44 +243,36 @@ export const LayoutCompactDemo: FunctionComponent = () => {
   // is chosen).
   const [open, setOpen] = useState(false);
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'root',
+  });
   const [controlSidebar, propsSidebar, stateSidebar, keySidebar] =
     usePropControl(
       useMemo(
         () => getPropOptionsColumn('sidebar', 280, true, addLog),
         [addLog],
       ),
-      'column (sidebar)',
-      externalSidebar,
-      true,
+      { external: externalSidebar, open: true, title: 'column (sidebar)' },
     );
   const [controlDrawer, propsDrawer, stateDrawer, keyDrawer] = usePropControl(
     propOptionsDrawer,
-    'drawer',
-    externalDrawer,
-    true,
+    { external: externalDrawer, open: true, title: 'drawer' },
   );
   const [controlSwipeArea, propsSwipeArea, stateSwipeArea] = usePropControl(
     propOptionsDrawerSwipeArea,
-    'drawer swipe area',
-    externalSwipeArea,
+    { external: externalSwipeArea, title: 'drawer swipe area' },
   );
   const [controlList, propsList, stateList, keyList] = usePropControl(
     useMemo(() => getPropOptionsColumn('list', 320, true, addLog), [addLog]),
-    'column (list)',
-    externalList,
+    { external: externalList, title: 'column (list)' },
   );
   const [controlDetail, propsDetail, stateDetail, keyDetail] = usePropControl(
     useMemo(
       () => getPropOptionsColumn('detail', undefined, false, addLog),
       [addLog],
     ),
-    'column (detail)',
-    externalDetail,
+    { external: externalDetail, title: 'column (detail)' },
   );
 
   return (
@@ -311,7 +298,7 @@ export const LayoutCompactDemo: FunctionComponent = () => {
         stateDetail,
       ]}
     >
-      <div className="layout-demo-screen">
+      <div className="demo-phone demo-fill">
         <Layout.Root
           {...propsRoot}
           compact

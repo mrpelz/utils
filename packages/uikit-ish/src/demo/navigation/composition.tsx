@@ -190,7 +190,7 @@ const PerTab: FunctionComponent = () => {
       log={log}
       title="Navigation per tab"
     >
-      <div className="navigation-demo-phone">
+      <div className="demo-phone">
         <TabBar.Root
           value={tab}
           onValueChange={(value: SectionValue) => {
@@ -300,12 +300,13 @@ const WithSidebar: FunctionComponent = () => {
   return (
     <Component
       center
+      expanded
       inline
       id="navigation-composition-sidebar"
       log={log}
       title="Navigation beside a sidebar"
     >
-      <div className="navigation-demo-tablet">
+      <div className="demo-tablet">
         <Layout.Root>
           <Layout.Column
             floating
@@ -412,7 +413,7 @@ const PopToRoot: FunctionComponent = () => {
       log={log}
       title="Navigation popping to its root"
     >
-      <div className="navigation-demo-phone">
+      <div className="demo-phone">
         <Navigation.Root onBack={pop}>
           {keys.map((key, depth) => (
             <Page.Root key={key}>
@@ -493,7 +494,7 @@ const LargeTitles: FunctionComponent = () => {
       log={log}
       title="Navigation with large titles"
     >
-      <div className="navigation-demo-phone">
+      <div className="demo-phone">
         <Navigation.Root onBack={pop}>
           {keys.map((key, depth) => (
             <Page.Root key={key}>
@@ -558,9 +559,7 @@ const Adaptive: FunctionComponent = () => {
   const [externalContent] = useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsAdaptiveContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const sizeClass = useSizeClass();
   // (Unset, by the window's width; or as a phone's, or a tablet's.)
@@ -601,6 +600,7 @@ const Adaptive: FunctionComponent = () => {
   return (
     <Component
       center
+      expanded
       inline
       controls={[controlContent]}
       id={id}
@@ -609,7 +609,7 @@ const Adaptive: FunctionComponent = () => {
       title="Navigation, compact or beside a sidebar"
     >
       {compact ? (
-        <div className="navigation-demo-phone">
+        <div className="demo-phone">
           <Navigation.Root onBack={pop}>
             {keys.map((key, depth) =>
               key === 'sections' ? (
@@ -693,7 +693,7 @@ const Adaptive: FunctionComponent = () => {
           </Navigation.Root>
         </div>
       ) : (
-        <div className="navigation-demo-tablet">
+        <div className="demo-tablet">
           <Layout.Root>
             <Layout.Column
               floating

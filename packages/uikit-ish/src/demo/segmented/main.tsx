@@ -28,45 +28,35 @@ export const SegmentedDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'Segmented.Root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'Segmented.Root' },
   );
   const [controlItemFirst, propsItemFirst, stateItemFirst] = usePropControl(
     useMemo(() => getPropOptionsItem('first', addLog), [addLog]),
-    'Segmented.Item (1st)',
-    externalItemFirst,
+    { external: externalItemFirst, title: 'Segmented.Item (1st)' },
   );
   const [controlItemSecond, propsItemSecond, stateItemSecond] = usePropControl(
     useMemo(() => getPropOptionsItem('second', addLog), [addLog]),
-    'Segmented.Item (2nd)',
-    externalItemSecond,
+    { external: externalItemSecond, title: 'Segmented.Item (2nd)' },
   );
   const [controlItemThird, propsItemThird, stateItemThird] = usePropControl(
     useMemo(() => getPropOptionsItem('third', addLog), [addLog]),
-    'Segmented.Item (3rd)',
-    externalItemThird,
+    { external: externalItemThird, title: 'Segmented.Item (3rd)' },
   );
   const [controlItemFourth, propsItemFourth, stateItemFourth] = usePropControl(
     useMemo(() => getPropOptionsItem('fourth', addLog), [addLog]),
-    'Segmented.Item (4th)',
-    externalItemFourth,
+    { external: externalItemFourth, title: 'Segmented.Item (4th)' },
   );
   const [controlItemFifth, propsItemFifth, stateItemFifth] = usePropControl(
     useMemo(() => getPropOptionsItem('fifth', addLog), [addLog]),
-    'Segmented.Item (5th)',
-    externalItemFifth,
+    { external: externalItemFifth, title: 'Segmented.Item (5th)' },
   );
   const [controlHighlight, propsHighlight, stateHighlight] = usePropControl(
     commonPropOptions,
-    'Segmented.Highlight',
-    externalHighlight,
+    { external: externalHighlight, title: 'Segmented.Highlight' },
   );
 
   const count = Number(content.count);

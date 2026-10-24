@@ -294,7 +294,7 @@ export const tests = [
       // (Selected without the pointer: shown after a pause.)
       await sleep(900);
       const placed = await page.evaluate(`(() => {
-        const frame = ${page.section}.querySelector(${JSON.stringify('.sheet-demo-phone')});
+        const frame = ${page.section}.querySelector(${JSON.stringify('.demo-phone')});
         const menu = frame.querySelector(${JSON.stringify('[role=menu]')});
         const text = document.getSelection().getRangeAt(0).getBoundingClientRect();
         return menu ? { above: Math.round(text.top - menu.getBoundingClientRect().bottom) } : null;

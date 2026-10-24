@@ -24,11 +24,11 @@ const LiveView: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [fruit, setFruit] = useState<RollValue>('Cherry');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsOverview,
-    'Roll.Column',
+  const [control, props, state] = usePropControl(propOptionsOverview, {
     external,
-  );
+    open: true,
+    title: 'Roll.Column',
+  });
 
   return (
     <Component

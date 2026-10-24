@@ -41,13 +41,12 @@ const HeaderPart: FunctionComponent = () => {
   const id = 'activity-view-parts-header';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'ActivityView.Header',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityView.Header',
+  });
 
   return (
     <Component
@@ -59,7 +58,7 @@ const HeaderPart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Header"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header {...props}>
             <ActivityView.Thumbnail>
@@ -127,13 +126,12 @@ const ThumbnailPart: FunctionComponent = () => {
   const id = 'activity-view-parts-thumbnail';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'ActivityView.Thumbnail',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityView.Thumbnail',
+  });
 
   return (
     <Component
@@ -145,7 +143,7 @@ const ThumbnailPart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Thumbnail"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail {...props}>
@@ -213,13 +211,12 @@ const HeadingPart: FunctionComponent = () => {
   const id = 'activity-view-parts-heading';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'ActivityView.Heading',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityView.Heading',
+  });
 
   return (
     <Component
@@ -231,7 +228,7 @@ const HeadingPart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Heading"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail>
@@ -299,13 +296,12 @@ const TitlePart: FunctionComponent = () => {
   const id = 'activity-view-parts-title';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'ActivityView.Title',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityView.Title',
+  });
 
   return (
     <Component
@@ -317,7 +313,7 @@ const TitlePart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Title"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail>
@@ -385,13 +381,12 @@ const SubtitlePart: FunctionComponent = () => {
   const id = 'activity-view-parts-subtitle';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'ActivityView.Subtitle',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityView.Subtitle',
+  });
 
   return (
     <Component
@@ -403,7 +398,7 @@ const SubtitlePart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Subtitle"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail>
@@ -473,13 +468,12 @@ const MessagePart: FunctionComponent = () => {
   const id = 'activity-view-parts-message';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'ActivityView.Message',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityView.Message',
+  });
 
   return (
     <Component
@@ -491,7 +485,7 @@ const MessagePart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Message"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail>
@@ -559,13 +553,12 @@ const SeparatorPart: FunctionComponent = () => {
   const id = 'activity-view-parts-separator';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'ActivityView.Separator',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityView.Separator',
+  });
 
   return (
     <Component
@@ -577,7 +570,7 @@ const SeparatorPart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Separator"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail>
@@ -645,13 +638,12 @@ const PeoplePart: FunctionComponent = () => {
   const id = 'activity-view-parts-people';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsRow,
-    'ActivityView.People',
+  const [control, props, state] = usePropControl(propOptionsRow, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityView.People',
+  });
 
   return (
     <Component
@@ -663,7 +655,7 @@ const PeoplePart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.People"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail>
@@ -733,10 +725,7 @@ const PersonPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsButton(addLog), [addLog]),
-    'ActivityView.Person',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'ActivityView.Person' },
   );
 
   return (
@@ -749,7 +738,7 @@ const PersonPart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Person"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail>
@@ -817,13 +806,12 @@ const NamePart: FunctionComponent = () => {
   const id = 'activity-view-parts-name';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'ActivityView.Name',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityView.Name',
+  });
 
   return (
     <Component
@@ -835,7 +823,7 @@ const NamePart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Name"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail>
@@ -903,13 +891,12 @@ const CountPart: FunctionComponent = () => {
   const id = 'activity-view-parts-count';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'ActivityView.Count',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityView.Count',
+  });
 
   return (
     <Component
@@ -921,7 +908,7 @@ const CountPart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Count"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail>
@@ -989,13 +976,12 @@ const ActionsPart: FunctionComponent = () => {
   const id = 'activity-view-parts-actions';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsRow,
-    'ActivityView.Actions',
+  const [control, props, state] = usePropControl(propOptionsRow, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityView.Actions',
+  });
 
   return (
     <Component
@@ -1007,7 +993,7 @@ const ActionsPart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Actions"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail>
@@ -1077,10 +1063,7 @@ const ActionPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsButton(addLog), [addLog]),
-    'ActivityView.Action',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'ActivityView.Action' },
   );
 
   return (
@@ -1093,7 +1076,7 @@ const ActionPart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Action"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail>
@@ -1161,13 +1144,12 @@ const SymbolPart: FunctionComponent = () => {
   const id = 'activity-view-parts-symbol';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'ActivityView.Symbol',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityView.Symbol',
+  });
 
   return (
     <Component
@@ -1179,7 +1161,7 @@ const SymbolPart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Symbol"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail>
@@ -1247,13 +1229,12 @@ const LabelPart: FunctionComponent = () => {
   const id = 'activity-view-parts-label';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'ActivityView.Label',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActivityView.Label',
+  });
 
   return (
     <Component
@@ -1265,7 +1246,7 @@ const LabelPart: FunctionComponent = () => {
       state={[state]}
       title="ActivityView.Label"
     >
-      <div className="sheet-demo-phone">
+      <div className="demo-phone demo-centered">
         <div className="activity-view-demo-panel">
           <ActivityView.Header>
             <ActivityView.Thumbnail>

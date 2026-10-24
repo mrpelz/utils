@@ -25,9 +25,7 @@ export const CheckboxDemo: FunctionComponent = () => {
 
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsCheckbox(addLog), [addLog]),
-    'Checkbox.Root',
-    externalCheckbox,
-    true,
+    { external: externalCheckbox, open: true, title: 'Checkbox.Root' },
   );
 
   return (
@@ -58,14 +56,11 @@ export const CheckboxRadioDemo: FunctionComponent = () => {
 
   const [controlGroup, propsGroup, stateGroup, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
-    'RadioGroup',
-    externalGroup,
-    true,
+    { external: externalGroup, open: true, title: 'RadioGroup' },
   );
   const [controlRadio, propsRadio, stateRadio] = usePropControl(
     propOptionsRadio,
-    'Radio.Root (email)',
-    externalRadio,
+    { external: externalRadio, title: 'Radio.Root (email)' },
   );
 
   return (

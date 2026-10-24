@@ -29,13 +29,12 @@ const RootPart: FunctionComponent = () => {
   const id = 'sidebar-parts-root';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideRoot,
-    'Sidebar.Root',
+  const [control, props, state] = usePropControl(propOptionsGuideRoot, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Sidebar.Root',
+  });
 
   return (
     <Component
@@ -105,13 +104,12 @@ const ToolbarPart: FunctionComponent = () => {
   const id = 'sidebar-parts-toolbar';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Sidebar.Toolbar',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Sidebar.Toolbar',
+  });
 
   return (
     <Component
@@ -177,13 +175,12 @@ const ToolbarGroupPart: FunctionComponent = () => {
   const id = 'sidebar-parts-toolbar-group';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Sidebar.ToolbarGroup',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Sidebar.ToolbarGroup',
+  });
 
   return (
     <Component

@@ -21,15 +21,11 @@ const LiveView: FunctionComponent = () => {
   const [externalContent, externalRoot] = useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsOverviewContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, props, stateRoot, elementKey] = usePropControl(
     propOptionsOverviewRoot,
-    'Button.Root',
-    externalRoot,
-    true,
+    { external: externalRoot, title: 'Button.Root' },
   );
 
   return (

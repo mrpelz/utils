@@ -36,10 +36,7 @@ const RootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsGuideRoot,
-    'TextField.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'TextField.Root' },
   );
 
   return (
@@ -75,13 +72,12 @@ const RootPart: FunctionComponent = () => {
 const LabelPart: FunctionComponent = () => {
   const id = 'text-field-parts-label';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideLabel,
-    'TextField.Label',
+  const [control, props, state] = usePropControl(propOptionsGuideLabel, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'TextField.Label',
+  });
 
   return (
     <Component
@@ -108,10 +104,7 @@ const ControlPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsControl(addLog), [addLog]),
-    'TextField.Control',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'TextField.Control' },
   );
 
   return (
@@ -154,13 +147,12 @@ const ControlPart: FunctionComponent = () => {
 const DescriptionPart: FunctionComponent = () => {
   const id = 'text-field-parts-description';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'TextField.Description',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'TextField.Description',
+  });
 
   return (
     <Component
@@ -196,13 +188,12 @@ const DescriptionPart: FunctionComponent = () => {
 const ErrorPart: FunctionComponent = () => {
   const id = 'text-field-parts-error';
   const [external] = useProvidedState(id);
-  const [control, props, state, elementKey] = usePropControl(
-    propOptionsError,
-    'TextField.Error',
+  const [control, props, state, elementKey] = usePropControl(propOptionsError, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'TextField.Error',
+  });
 
   return (
     <Component
@@ -248,10 +239,7 @@ const ClearPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsClear(addLog), [addLog]),
-    'TextField.Clear',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'TextField.Clear' },
   );
 
   return (
@@ -284,13 +272,12 @@ const ClearPart: FunctionComponent = () => {
 const SearchPart: FunctionComponent = () => {
   const id = 'text-field-parts-search';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideSearch,
-    'TextField.Search',
+  const [control, props, state] = usePropControl(propOptionsGuideSearch, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'TextField.Search',
+  });
 
   return (
     <Component

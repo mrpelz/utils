@@ -51,7 +51,7 @@ const AtAnElement: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <EditMenu.Root
           open={open}
@@ -102,7 +102,7 @@ const ManyActions: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <EditMenu.Root
           open={open}

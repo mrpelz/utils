@@ -53,11 +53,11 @@ const AnArticle: FunctionComponent = () => (
 const ASizeForAList: FunctionComponent = () => {
   const id = 'typography-composition-size';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsCompositionSize,
-    'Typography',
+  const [control, props, state] = usePropControl(propOptionsCompositionSize, {
     external,
-  );
+    open: true,
+    title: 'Typography',
+  });
 
   return (
     <Component

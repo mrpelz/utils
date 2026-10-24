@@ -59,10 +59,7 @@ const RootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsGuideRoot(addLog), [addLog]),
-    'Popover.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Popover.Root' },
   );
 
   return (
@@ -155,13 +152,12 @@ const RootPart: FunctionComponent = () => {
 const TriggerPart: FunctionComponent = () => {
   const id = 'popover-parts-trigger';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsTrigger,
-    'Popover.Trigger',
+  const [control, props, state] = usePropControl(propOptionsTrigger, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Popover.Trigger',
+  });
 
   return (
     <Component
@@ -242,13 +238,12 @@ const TriggerPart: FunctionComponent = () => {
 const PortalPart: FunctionComponent = () => {
   const id = 'popover-parts-portal';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPortal,
-    'Popover.Portal',
+  const [control, props, state] = usePropControl(propOptionsPortal, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Popover.Portal',
+  });
 
   return (
     <Component
@@ -336,13 +331,12 @@ const PortalPart: FunctionComponent = () => {
 const BackdropPart: FunctionComponent = () => {
   const id = 'popover-parts-backdrop';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Popover.Backdrop',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Popover.Backdrop',
+  });
 
   return (
     <Component
@@ -431,13 +425,12 @@ const BackdropPart: FunctionComponent = () => {
 const PositionerPart: FunctionComponent = () => {
   const id = 'popover-parts-positioner';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuidePositioner,
-    'Popover.Positioner',
+  const [control, props, state] = usePropControl(propOptionsGuidePositioner, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Popover.Positioner',
+  });
 
   return (
     <Component
@@ -525,13 +518,12 @@ const PositionerPart: FunctionComponent = () => {
 const PopupPart: FunctionComponent = () => {
   const id = 'popover-parts-popup';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPopup,
-    'Popover.Popup',
+  const [control, props, state] = usePropControl(propOptionsPopup, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Popover.Popup',
+  });
 
   return (
     <Component
@@ -619,13 +611,12 @@ const PopupPart: FunctionComponent = () => {
 const ArrowPart: FunctionComponent = () => {
   const id = 'popover-parts-arrow';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Popover.Arrow',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Popover.Arrow',
+  });
 
   return (
     <Component
@@ -713,13 +704,12 @@ const ArrowPart: FunctionComponent = () => {
 const HeaderPart: FunctionComponent = () => {
   const id = 'popover-parts-header';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'Popover.Header',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Popover.Header',
+  });
 
   return (
     <Component
@@ -807,13 +797,12 @@ const HeaderPart: FunctionComponent = () => {
 const BodyPart: FunctionComponent = () => {
   const id = 'popover-parts-body';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'Popover.Body',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Popover.Body',
+  });
 
   return (
     <Component
@@ -901,13 +890,12 @@ const BodyPart: FunctionComponent = () => {
 const ViewportPart: FunctionComponent = () => {
   const id = 'popover-parts-viewport';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Popover.Viewport',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Popover.Viewport',
+  });
 
   return (
     <Component
@@ -997,13 +985,12 @@ const ViewportPart: FunctionComponent = () => {
 const TitlePart: FunctionComponent = () => {
   const id = 'popover-parts-title';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsTitle,
-    'Popover.Title',
+  const [control, props, state] = usePropControl(propOptionsTitle, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Popover.Title',
+  });
 
   return (
     <Component
@@ -1091,13 +1078,12 @@ const TitlePart: FunctionComponent = () => {
 const DescriptionPart: FunctionComponent = () => {
   const id = 'popover-parts-description';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Popover.Description',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Popover.Description',
+  });
 
   return (
     <Component
@@ -1185,13 +1171,12 @@ const DescriptionPart: FunctionComponent = () => {
 const ClosePart: FunctionComponent = () => {
   const id = 'popover-parts-close';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsClose,
-    'Popover.Close',
+  const [control, props, state] = usePropControl(propOptionsClose, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Popover.Close',
+  });
 
   return (
     <Component

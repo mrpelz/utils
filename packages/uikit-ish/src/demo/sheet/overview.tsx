@@ -38,21 +38,15 @@ const LiveView: FunctionComponent = () => {
   const [externalContent, externalRoot, externalPopup] = useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsOverviewContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     propOptionsOverviewRoot,
-    'Sheet.Root',
-    externalRoot,
-    true,
+    { external: externalRoot, title: 'Sheet.Root' },
   );
   const [controlPopup, propsPopup, statePopup] = usePropControl(
     propOptionsOverviewPopup,
-    'Sheet.Popup',
-    externalPopup,
-    true,
+    { external: externalPopup, title: 'Sheet.Popup' },
   );
   const sizeClass = useSizeClass();
   // (Unset, by the window's size class; or a phone's, or a tablet's.)
@@ -65,6 +59,7 @@ const LiveView: FunctionComponent = () => {
   return (
     <Component
       center
+      expanded
       inline
       controls={[controlContent, controlRoot, controlPopup]}
       id={id}
@@ -74,7 +69,9 @@ const LiveView: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className={tablet ? 'sheet-demo-tablet' : 'sheet-demo-phone'}
+        className={
+          tablet ? 'demo-tablet demo-centered' : 'demo-phone demo-centered'
+        }
       >
         <Sheet.Root
           key={keyRoot}

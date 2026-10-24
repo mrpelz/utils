@@ -18,10 +18,7 @@ const RootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'Button.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Button.Root' },
   );
 
   return (
@@ -52,13 +49,12 @@ const IconPart: FunctionComponent = () => {
   const id = 'button-parts-icon';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Button.Icon',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Button.Icon',
+  });
 
   return (
     <Component
@@ -88,13 +84,12 @@ const LabelPart: FunctionComponent = () => {
   const id = 'button-parts-label';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Button.Label',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Button.Label',
+  });
 
   return (
     <Component

@@ -48,10 +48,7 @@ const RootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsGuideRoot(addLog), [addLog]),
-    'ActionSheet.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'ActionSheet.Root' },
   );
 
   return (
@@ -67,7 +64,7 @@ const RootPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <ActionSheet.Root
           key={elementKey}
@@ -108,13 +105,12 @@ const TriggerPart: FunctionComponent = () => {
   const id = 'action-sheet-parts-trigger';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsTrigger,
-    'ActionSheet.Trigger',
+  const [control, props, state] = usePropControl(propOptionsTrigger, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActionSheet.Trigger',
+  });
 
   return (
     <Component
@@ -128,7 +124,7 @@ const TriggerPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <ActionSheet.Root>
           <ActionSheet.Trigger {...props}>
@@ -159,13 +155,12 @@ const PopupPart: FunctionComponent = () => {
   const id = 'action-sheet-parts-popup';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPopup,
-    'ActionSheet.Popup',
+  const [control, props, state] = usePropControl(propOptionsPopup, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActionSheet.Popup',
+  });
 
   return (
     <Component
@@ -179,7 +174,7 @@ const PopupPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <ActionSheet.Root>
           <ActionSheet.Trigger
@@ -220,13 +215,12 @@ const HeaderPart: FunctionComponent = () => {
   const id = 'action-sheet-parts-header';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'ActionSheet.Header',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActionSheet.Header',
+  });
 
   return (
     <Component
@@ -240,7 +234,7 @@ const HeaderPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <ActionSheet.Root>
           <ActionSheet.Trigger
@@ -278,13 +272,12 @@ const TitlePart: FunctionComponent = () => {
   const id = 'action-sheet-parts-title';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'ActionSheet.Title',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActionSheet.Title',
+  });
 
   return (
     <Component
@@ -298,7 +291,7 @@ const TitlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <ActionSheet.Root>
           <ActionSheet.Trigger
@@ -336,13 +329,12 @@ const DescriptionPart: FunctionComponent = () => {
   const id = 'action-sheet-parts-description';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'ActionSheet.Description',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActionSheet.Description',
+  });
 
   return (
     <Component
@@ -356,7 +348,7 @@ const DescriptionPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <ActionSheet.Root>
           <ActionSheet.Trigger
@@ -394,13 +386,12 @@ const ActionsPart: FunctionComponent = () => {
   const id = 'action-sheet-parts-actions';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsElement,
-    'ActionSheet.Actions',
+  const [control, props, state] = usePropControl(propOptionsElement, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActionSheet.Actions',
+  });
 
   return (
     <Component
@@ -414,7 +405,7 @@ const ActionsPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <ActionSheet.Root>
           <ActionSheet.Trigger
@@ -452,13 +443,12 @@ const ActionPart: FunctionComponent = () => {
   const id = 'action-sheet-parts-action';
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsAction,
-    'ActionSheet.Action',
+  const [control, props, state] = usePropControl(propOptionsAction, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ActionSheet.Action',
+  });
 
   return (
     <Component
@@ -472,7 +462,7 @@ const ActionPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <ActionSheet.Root>
           <ActionSheet.Trigger
@@ -523,7 +513,7 @@ const CreateHandlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <ActionSheet.Trigger
           handle={photoSheet}
@@ -591,7 +581,7 @@ const UseCreateActionSheetHandlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <div className="action-sheet-demo-triggers">
           <ActionSheet.Trigger

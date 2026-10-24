@@ -50,10 +50,7 @@ const RootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsGuideRoot(addLog), [addLog]),
-    'ContextualMenu.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'ContextualMenu.Root' },
   );
 
   return (
@@ -69,7 +66,7 @@ const RootPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <ContextualMenu.Root
           key={elementKey}
@@ -127,10 +124,7 @@ const TriggerPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsGuideTrigger(addLog), [addLog]),
-    'ContextualMenu.Trigger',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'ContextualMenu.Trigger' },
   );
 
   return (
@@ -146,7 +140,7 @@ const TriggerPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <ContextualMenu.Root>
           <ContextualMenu.Trigger {...props}>
@@ -199,13 +193,12 @@ const PreviewPart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-preview';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuidePreview,
-    'ContextualMenu.Preview',
+  const [control, props, state] = usePropControl(propOptionsGuidePreview, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ContextualMenu.Preview',
+  });
 
   return (
     <Component
@@ -220,7 +213,7 @@ const PreviewPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <ContextualMenu.Root>
           <ContextualMenu.Trigger render={<Button.Root variant="bordered" />}>
@@ -273,13 +266,12 @@ const PortalPart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-portal';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuidePortal,
-    'ContextualMenu.Portal',
+  const [control, props, state] = usePropControl(propOptionsGuidePortal, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ContextualMenu.Portal',
+  });
 
   return (
     <Component
@@ -294,7 +286,7 @@ const PortalPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <ContextualMenu.Root>
           <ContextualMenu.Trigger render={<Button.Root variant="bordered" />}>
@@ -350,13 +342,12 @@ const BackdropPart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-backdrop';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideBackdrop,
-    'ContextualMenu.Backdrop',
+  const [control, props, state] = usePropControl(propOptionsGuideBackdrop, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ContextualMenu.Backdrop',
+  });
 
   return (
     <Component
@@ -371,7 +362,7 @@ const BackdropPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <ContextualMenu.Root>
           <ContextualMenu.Trigger render={<Button.Root variant="bordered" />}>
@@ -424,13 +415,12 @@ const PositionerPart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-positioner';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuidePositioner,
-    'ContextualMenu.Positioner',
+  const [control, props, state] = usePropControl(propOptionsGuidePositioner, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ContextualMenu.Positioner',
+  });
 
   return (
     <Component
@@ -445,7 +435,7 @@ const PositionerPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <ContextualMenu.Root>
           <ContextualMenu.Trigger render={<Button.Root variant="bordered" />}>
@@ -498,13 +488,12 @@ const PopupPart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-popup';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPopup,
-    'ContextualMenu.Popup',
+  const [control, props, state] = usePropControl(propOptionsPopup, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'ContextualMenu.Popup',
+  });
 
   return (
     <Component
@@ -519,7 +508,7 @@ const PopupPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <ContextualMenu.Root>
           <ContextualMenu.Trigger render={<Button.Root variant="bordered" />}>
@@ -586,7 +575,7 @@ const CreateHandlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <div className="contextual-menu-demo-triggers">
           <ContextualMenu.Root handle={photoMenu}>
@@ -646,7 +635,7 @@ const UseCreateContextualMenuHandlePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <div className="contextual-menu-demo-triggers">
           <ContextualMenu.Root handle={imageMenu}>

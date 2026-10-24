@@ -1,18 +1,5 @@
 /* Toolbar demos (see main.tsx). */
 
-/* A phone's screen in the stage, sized as a window: a viewport's fixed
-   layers within it (a transform makes it their containing block), its
-   content layer scrolling beneath the bars. */
-.toolbar-demo-screen {
-  position: relative;
-  overflow: hidden;
-  width: 402px;
-  max-width: 100%;
-  height: min(640px, 70vh);
-  border-radius: 24px;
-  transform: translateZ(0);
-}
-
 /* A list in the content layer, clear of the bars floating over its ends. */
 .toolbar-demo-list {
   padding-block: 64px 96px;

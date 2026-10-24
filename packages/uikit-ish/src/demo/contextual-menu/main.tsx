@@ -48,47 +48,37 @@ export const ContextualMenuDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
     propOptionsTrigger,
-    'trigger',
-    externalTrigger,
+    { external: externalTrigger, title: 'trigger' },
   );
   const [controlPreview, propsPreview, statePreview] = usePropControl(
     propOptionsPreview,
-    'preview',
-    externalPreview,
+    { external: externalPreview, title: 'preview' },
   );
   const [controlPositioner, propsPositioner, statePositioner] = usePropControl(
     propOptionsPositioner,
-    'positioner',
-    externalPositioner,
+    { external: externalPositioner, title: 'positioner' },
   );
   const [controlPopup, propsPopup, statePopup] = usePropControl(
     propOptionsMenuPopup,
-    'popup',
-    externalPopup,
+    { external: externalPopup, title: 'popup' },
   );
   const [controlItem, propsItem, stateItem] = usePropControl(
     useMemo(() => getPropOptionsMenuItem(addLog), [addLog]),
-    'item (share)',
-    externalItem,
+    { external: externalItem, title: 'item (share)' },
   );
   const [controlDestructiveItem, propsDestructiveItem, stateDestructiveItem] =
-    usePropControl(
-      propOptionsMenuItemDestructive,
-      'item (delete)',
-      externalDestructiveItem,
-    );
+    usePropControl(propOptionsMenuItemDestructive, {
+      external: externalDestructiveItem,
+      title: 'item (delete)',
+    });
 
   return (
     <Component
@@ -120,7 +110,7 @@ export const ContextualMenuDemo: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <ContextualMenu.Root
           key={elementKey}

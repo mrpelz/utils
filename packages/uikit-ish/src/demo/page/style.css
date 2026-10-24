@@ -1,24 +1,5 @@
 /* Page demo (see main.tsx). */
 
-/* The page as a phone's screen in the stage (a grid: its content stretched to its
-   height). */
-.page-demo-screen {
-  display: grid;
-  height: min(640px, 70vh);
-}
-
-/* A phone's screen (the guide pages' views): a page, sized as a window (a
-   transform contains a viewport's fixed layers). */
-.page-demo-phone {
-  display: grid;
-  overflow: hidden;
-  width: 402px;
-  max-width: 100%;
-  height: min(640px, 70vh);
-  border-radius: 24px;
-  transform: translateZ(0);
-}
-
 /* Two phones' screens side by side (comparing pages). */
 .page-demo-pair {
   display: flex;
@@ -27,21 +8,11 @@
   gap: 16px;
 
   /* Side by side while they fit (wrapping below 496px). */
-  & > .page-demo-phone {
+  & > .demo-phone {
     max-width: 320px;
     height: min(480px, 70vh);
     flex: 1 1 240px;
   }
-}
-
-/* A tablet's screen (an iPad's width, at most the stage's): a layout. */
-.page-demo-tablet {
-  display: grid;
-  overflow: hidden;
-  width: 820px;
-  max-width: 100%;
-  height: min(640px, 70vh);
-  border-radius: 24px;
 }
 
 /* A page's list clear of a bar floating over the page's end (the app keeps

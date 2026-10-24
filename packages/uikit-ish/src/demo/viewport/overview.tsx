@@ -41,22 +41,16 @@ const LiveViewFrame: FunctionComponent<{
   const [externalContent, externalStart, externalEnd] = useProvidedState(id);
   const [controlContent, propsContent, stateContent] = usePropControl(
     propOptionsOverviewContent,
-    'Viewport.Content',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: 'Viewport.Content' },
   );
   const [controlStart, { shown: start, ...propsStart }, stateStart] =
-    usePropControl(
-      propOptionsOverviewBlockStart,
-      'Viewport.BlockStart',
-      externalStart,
-      true,
-    );
+    usePropControl(propOptionsOverviewBlockStart, {
+      external: externalStart,
+      title: 'Viewport.BlockStart',
+    });
   const [controlEnd, { shown: end, ...propsEnd }, stateEnd] = usePropControl(
     propOptionsOverviewBlockEnd,
-    'Viewport.BlockEnd',
-    externalEnd,
-    true,
+    { external: externalEnd, title: 'Viewport.BlockEnd' },
   );
   const visual = useVisualViewport();
   const { atBottom, atTop, direction = '–' } = useScrollDirection();
@@ -71,7 +65,7 @@ const LiveViewFrame: FunctionComponent<{
       state={[stateContent, stateStart, stateEnd]}
       title="Viewport"
     >
-      <div className="viewport-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content
           ref={contentRef}
           {...propsContent}

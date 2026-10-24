@@ -43,41 +43,37 @@ export const EditMenuDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlPositioner, propsPositioner, statePositioner] = usePropControl(
     propOptionsPositioner,
-    'positioner',
-    externalPositioner,
+    { external: externalPositioner, title: 'positioner' },
   );
   const [controlPopup, propsPopup, statePopup] = usePropControl(
     propOptionsPopup,
-    'popup',
-    externalPopup,
+    { external: externalPopup, title: 'popup' },
   );
   const [controlItem, propsItem, stateItem] = usePropControl(
     useMemo(() => getPropOptionsItems(addLog), [addLog]),
-    'item (1st)',
-    externalItem,
+    { external: externalItem, title: 'item (1st)' },
   );
-  const [controlMore, propsMore, stateMore] = usePropControl(
-    propOptionsMore,
-    'more',
-    externalMore,
-  );
+  const [controlMore, propsMore, stateMore] = usePropControl(propOptionsMore, {
+    external: externalMore,
+    title: 'more',
+  });
   const [
     controlSubmenuPositioner,
     propsSubmenuPositioner,
     stateSubmenuPositioner,
-  ] = usePropControl(
-    propOptionsMenuPositioner,
-    'more positioner',
-    externalSubmenuPositioner,
-  );
+  ] = usePropControl(propOptionsMenuPositioner, {
+    external: externalSubmenuPositioner,
+    title: 'more positioner',
+  });
   const [controlSubmenuPopup, propsSubmenuPopup, stateSubmenuPopup] =
-    usePropControl(propOptionsMenuPopup, 'more popup', externalSubmenuPopup);
+    usePropControl(propOptionsMenuPopup, {
+      external: externalSubmenuPopup,
+      title: 'more popup',
+    });
 
   const { onOpenChange, open, ...rootProps } = propsRoot;
 

@@ -40,29 +40,26 @@ const LiveView: FunctionComponent = () => {
     useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlColumn, propsColumn, stateColumn, keyColumn] = usePropControl(
     useMemo(() => getPropOptionsSidebarColumn(addLog), [addLog]),
-    'Layout.Column (sidebar)',
-    externalColumn,
+    { external: externalColumn, title: 'Layout.Column (sidebar)' },
   );
   const [
     controlContentColumn,
     propsContentColumn,
     stateContentColumn,
     keyContentColumn,
-  ] = usePropControl(
-    propOptionsContentColumn,
-    'Layout.Column (content)',
-    externalContentColumn,
-  );
+  ] = usePropControl(propOptionsContentColumn, {
+    external: externalContentColumn,
+    title: 'Layout.Column (content)',
+  });
 
   return (
     <Component
       center
+      expanded
       inline
       inputGuards
       controls={[controlContent, controlColumn, controlContentColumn]}
@@ -71,7 +68,7 @@ const LiveView: FunctionComponent = () => {
       state={[stateContent, stateColumn, stateContentColumn]}
       title="Sidebar"
     >
-      <div className="sidebar-demo-tablet">
+      <div className="demo-tablet">
         <Layout.Root key={`${keyColumn}-${keyContentColumn}`}>
           {content.background === 'picture' ? (
             <Layout.Background>

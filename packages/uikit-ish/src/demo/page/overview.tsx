@@ -21,16 +21,12 @@ const LiveView: FunctionComponent = () => {
   const [externalContent, externalRoot] = useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsOverviewContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
-  const [controlRoot, props, stateRoot] = usePropControl(
-    propOptionsGuideRoot,
-    'Page.Root',
-    externalRoot,
-    true,
-  );
+  const [controlRoot, props, stateRoot] = usePropControl(propOptionsGuideRoot, {
+    external: externalRoot,
+    title: 'Page.Root',
+  });
 
   return (
     <Component
@@ -41,7 +37,7 @@ const LiveView: FunctionComponent = () => {
       state={[stateContent, stateRoot]}
       title="Page"
     >
-      <div className="page-demo-phone">
+      <div className="demo-phone">
         <Page.Root {...props}>
           <Header.Root>
             <Header.Bar>

@@ -18,10 +18,7 @@ const RootPart: FunctionComponent = () => {
   const [pending, setPending] = useState(false);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog, setPending), [addLog]),
-    'Switch.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Switch.Root' },
   );
 
   return (
@@ -50,13 +47,12 @@ const RootPart: FunctionComponent = () => {
 const ThumbPart: FunctionComponent = () => {
   const id = 'switch-parts-thumb';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsThumb,
-    'Switch.Thumb',
+  const [control, props, state] = usePropControl(propOptionsThumb, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Switch.Thumb',
+  });
 
   return (
     <Component

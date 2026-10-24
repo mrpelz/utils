@@ -47,7 +47,7 @@ const MoreActionsAsAList: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root>
           <Sheet.Trigger
@@ -136,6 +136,7 @@ const InAPopover: FunctionComponent = () => {
   return (
     <Component
       center
+      expanded
       inline
       baseUiId="popover"
       id="activity-view-composition-popover"
@@ -144,7 +145,7 @@ const InAPopover: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-tablet"
+        className="demo-tablet demo-centered"
       >
         <Page.Root>
           <Header.Root>

@@ -16,13 +16,12 @@ import { propOptionsPart } from './props.js';
 const BadgePart: FunctionComponent = () => {
   const id = 'badge-parts-badge';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPart,
-    'Badge',
+  const [control, props, state] = usePropControl(propOptionsPart, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Badge',
+  });
 
   return (
     <Component

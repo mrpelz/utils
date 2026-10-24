@@ -1,33 +1,5 @@
 /* Layout demos (see main.tsx). */
 
-/* The layout as a screen in the stage (a grid: its content stretched to its
-   height). */
-.layout-demo-screen {
-  display: grid;
-  height: min(640px, 70vh);
-}
-
-/* A tablet's screen (the guide pages' views; an iPad's width, at most the
-   stage's). */
-.layout-demo-tablet {
-  display: grid;
-  overflow: hidden;
-  width: 820px;
-  max-width: 100%;
-  height: min(640px, 70vh);
-  border-radius: 24px;
-}
-
-/* A phone's screen: a compact layout, its drawers. */
-.layout-demo-phone {
-  display: grid;
-  overflow: hidden;
-  width: 402px;
-  max-width: 100%;
-  height: min(640px, 70vh);
-  border-radius: 24px;
-}
-
 /* The layout's background: a picture (here, of gradients). */
 .layout-demo-picture {
   background:

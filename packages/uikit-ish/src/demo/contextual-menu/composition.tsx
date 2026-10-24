@@ -72,7 +72,7 @@ const Thumbnails: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <div className="contextual-menu-demo-grid">
           {photos.map(([name, color]) => (
@@ -152,7 +152,7 @@ const OnAHeldPress: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <ContextualMenu.Root>
           <ContextualMenu.Trigger

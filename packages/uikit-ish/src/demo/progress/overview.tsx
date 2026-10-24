@@ -28,14 +28,11 @@ const LiveView: FunctionComponent = () => {
   const [externalRoot, externalValue] = useProvidedState(id);
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsOverviewRoot,
-    'Progress.Root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'Progress.Root' },
   );
   const [controlValue, propsValue, stateValue] = usePropControl(
     propOptionsOverviewValue,
-    'Progress.Value',
-    externalValue,
+    { external: externalValue, title: 'Progress.Value' },
   );
 
   return (

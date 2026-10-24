@@ -36,21 +36,18 @@ export const HeaderDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [externalBar, externalTitle, externalLargeTitle] = useProvidedState(id);
 
-  const [controlBar, propsBar, stateBar] = usePropControl(
-    propOptionsBar,
-    'bar',
-    externalBar,
-    true,
-  );
+  const [controlBar, propsBar, stateBar] = usePropControl(propOptionsBar, {
+    external: externalBar,
+    open: true,
+    title: 'bar',
+  });
   const [controlTitle, propsTitle, stateTitle] = usePropControl(
     propOptionsTitle,
-    'title',
-    externalTitle,
+    { external: externalTitle, title: 'title' },
   );
   const [controlLargeTitle, propsLargeTitle, stateLargeTitle] = usePropControl(
     propOptionsLargeTitle,
-    'large title',
-    externalLargeTitle,
+    { external: externalLargeTitle, title: 'large title' },
   );
 
   return (
@@ -62,72 +59,74 @@ export const HeaderDemo: FunctionComponent = () => {
       state={[stateBar, stateTitle, stateLargeTitle]}
       title="Header"
     >
-      <Page.Root className="header-demo-screen">
-        <Header.Root>
-          <Header.Bar {...propsBar}>
-            <Toolbar.Leading>
-              <Toolbar.Button
-                aria-label="Back"
-                shape="circle"
-                onClick={() => addLog('Back clicked')}
-              >
-                <Button.Icon>
-                  <Symbol icon={sfChevronBackward} />
-                </Button.Icon>
-              </Toolbar.Button>
-            </Toolbar.Leading>
-            <Toolbar.Title {...propsTitle}>
+      <div className="demo-phone demo-fill">
+        <Page.Root>
+          <Header.Root>
+            <Header.Bar {...propsBar}>
+              <Toolbar.Leading>
+                <Toolbar.Button
+                  aria-label="Back"
+                  shape="circle"
+                  onClick={() => addLog('Back clicked')}
+                >
+                  <Button.Icon>
+                    <Symbol icon={sfChevronBackward} />
+                  </Button.Icon>
+                </Toolbar.Button>
+              </Toolbar.Leading>
+              <Toolbar.Title {...propsTitle}>
+                <span>Inbox</span>
+              </Toolbar.Title>
+              <Toolbar.Trailing>
+                <Toolbar.Group>
+                  <Toolbar.Button
+                    aria-label="Share"
+                    shape="circle"
+                    onClick={() => addLog('Share clicked')}
+                  >
+                    <Button.Icon>
+                      <Symbol icon={sfSquareAndArrowUp} />
+                    </Button.Icon>
+                  </Toolbar.Button>
+                  <Toolbar.Button
+                    aria-label="More"
+                    shape="circle"
+                    onClick={() => addLog('More clicked')}
+                  >
+                    <Button.Icon>
+                      <Symbol icon={sfEllipsis} />
+                    </Button.Icon>
+                  </Toolbar.Button>
+                </Toolbar.Group>
+                <Toolbar.Button
+                  prominent
+                  aria-label="Done"
+                  shape="circle"
+                  onClick={() => addLog('Done clicked')}
+                >
+                  <Button.Icon>
+                    <Symbol icon={sfCheckmark} />
+                  </Button.Icon>
+                </Toolbar.Button>
+              </Toolbar.Trailing>
+            </Header.Bar>
+            <Header.LargeTitle {...propsLargeTitle}>
               <span>Inbox</span>
-            </Toolbar.Title>
-            <Toolbar.Trailing>
-              <Toolbar.Group>
-                <Toolbar.Button
-                  aria-label="Share"
-                  shape="circle"
-                  onClick={() => addLog('Share clicked')}
-                >
-                  <Button.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
-                  </Button.Icon>
-                </Toolbar.Button>
-                <Toolbar.Button
-                  aria-label="More"
-                  shape="circle"
-                  onClick={() => addLog('More clicked')}
-                >
-                  <Button.Icon>
-                    <Symbol icon={sfEllipsis} />
-                  </Button.Icon>
-                </Toolbar.Button>
-              </Toolbar.Group>
-              <Toolbar.Button
-                prominent
-                aria-label="Done"
-                shape="circle"
-                onClick={() => addLog('Done clicked')}
-              >
-                <Button.Icon>
-                  <Symbol icon={sfCheckmark} />
-                </Button.Icon>
-              </Toolbar.Button>
-            </Toolbar.Trailing>
-          </Header.Bar>
-          <Header.LargeTitle {...propsLargeTitle}>
-            <span>Inbox</span>
-          </Header.LargeTitle>
-        </Header.Root>
-        <List.Root>
-          <List.Section>
-            <List.Group>
-              {Array.from({ length: 30 }, (_, index) => (
-                <List.Item key={index}>
-                  <List.Title>Message {index + 1}</List.Title>
-                </List.Item>
-              ))}
-            </List.Group>
-          </List.Section>
-        </List.Root>
-      </Page.Root>
+            </Header.LargeTitle>
+          </Header.Root>
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {Array.from({ length: 30 }, (_, index) => (
+                  <List.Item key={index}>
+                    <List.Title>Message {index + 1}</List.Title>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+        </Page.Root>
+      </div>
     </Component>
   );
 };
@@ -142,22 +141,18 @@ export const HeaderTitleDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [externalBar, externalTitle, externalSubtitle] = useProvidedState(id);
 
-  const [controlBar, propsBar, stateBar] = usePropControl(
-    propOptionsBar,
-    'bar',
-    externalBar,
-    true,
-  );
+  const [controlBar, propsBar, stateBar] = usePropControl(propOptionsBar, {
+    external: externalBar,
+    open: true,
+    title: 'bar',
+  });
   const [controlTitle, propsTitle, stateTitle] = usePropControl(
     propOptionsTitle,
-    'title',
-    externalTitle,
-    true,
+    { external: externalTitle, open: true, title: 'title' },
   );
   const [controlSubtitle, propsSubtitle, stateSubtitle] = usePropControl(
     commonPropOptions,
-    'subtitle',
-    externalSubtitle,
+    { external: externalSubtitle, title: 'subtitle' },
   );
 
   return (
@@ -169,70 +164,72 @@ export const HeaderTitleDemo: FunctionComponent = () => {
       state={[stateBar, stateTitle, stateSubtitle]}
       title="Header (Title)"
     >
-      <Page.Root className="header-demo-screen">
-        <Header.Root>
-          <Header.Bar {...propsBar}>
-            <Toolbar.Leading>
-              <Toolbar.Button
-                aria-label="Back"
-                shape="circle"
-                onClick={() => addLog('Back clicked')}
-              >
-                <Button.Icon>
-                  <Symbol icon={sfChevronBackward} />
-                </Button.Icon>
-              </Toolbar.Button>
-            </Toolbar.Leading>
-            <Toolbar.Title {...propsTitle}>
-              <span>Inbox</span>
-              <Toolbar.Subtitle {...propsSubtitle}>Subtitle</Toolbar.Subtitle>
-            </Toolbar.Title>
-            <Toolbar.Trailing>
-              <Toolbar.Group>
+      <div className="demo-phone demo-fill">
+        <Page.Root>
+          <Header.Root>
+            <Header.Bar {...propsBar}>
+              <Toolbar.Leading>
                 <Toolbar.Button
-                  aria-label="Share"
+                  aria-label="Back"
                   shape="circle"
-                  onClick={() => addLog('Share clicked')}
+                  onClick={() => addLog('Back clicked')}
                 >
                   <Button.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                    <Symbol icon={sfChevronBackward} />
                   </Button.Icon>
                 </Toolbar.Button>
+              </Toolbar.Leading>
+              <Toolbar.Title {...propsTitle}>
+                <span>Inbox</span>
+                <Toolbar.Subtitle {...propsSubtitle}>Subtitle</Toolbar.Subtitle>
+              </Toolbar.Title>
+              <Toolbar.Trailing>
+                <Toolbar.Group>
+                  <Toolbar.Button
+                    aria-label="Share"
+                    shape="circle"
+                    onClick={() => addLog('Share clicked')}
+                  >
+                    <Button.Icon>
+                      <Symbol icon={sfSquareAndArrowUp} />
+                    </Button.Icon>
+                  </Toolbar.Button>
+                  <Toolbar.Button
+                    aria-label="More"
+                    shape="circle"
+                    onClick={() => addLog('More clicked')}
+                  >
+                    <Button.Icon>
+                      <Symbol icon={sfEllipsis} />
+                    </Button.Icon>
+                  </Toolbar.Button>
+                </Toolbar.Group>
                 <Toolbar.Button
-                  aria-label="More"
+                  prominent
+                  aria-label="Done"
                   shape="circle"
-                  onClick={() => addLog('More clicked')}
+                  onClick={() => addLog('Done clicked')}
                 >
                   <Button.Icon>
-                    <Symbol icon={sfEllipsis} />
+                    <Symbol icon={sfCheckmark} />
                   </Button.Icon>
                 </Toolbar.Button>
-              </Toolbar.Group>
-              <Toolbar.Button
-                prominent
-                aria-label="Done"
-                shape="circle"
-                onClick={() => addLog('Done clicked')}
-              >
-                <Button.Icon>
-                  <Symbol icon={sfCheckmark} />
-                </Button.Icon>
-              </Toolbar.Button>
-            </Toolbar.Trailing>
-          </Header.Bar>
-        </Header.Root>
-        <List.Root>
-          <List.Section>
-            <List.Group>
-              {Array.from({ length: 30 }, (_, index) => (
-                <List.Item key={index}>
-                  <List.Title>Message {index + 1}</List.Title>
-                </List.Item>
-              ))}
-            </List.Group>
-          </List.Section>
-        </List.Root>
-      </Page.Root>
+              </Toolbar.Trailing>
+            </Header.Bar>
+          </Header.Root>
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {Array.from({ length: 30 }, (_, index) => (
+                  <List.Item key={index}>
+                    <List.Title>Message {index + 1}</List.Title>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+        </Page.Root>
+      </div>
     </Component>
   );
 };

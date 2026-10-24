@@ -9,6 +9,26 @@ import {
   useState,
 } from 'react';
 
+import { ColorScheme } from '../../components/utils/main.js';
+
+/**
+ * A demo's frame settings (see `Component`): its defaults the demo's own,
+ * changed in its config column, carried by its URL (see
+ * `useCreateStateUrl`); not kept otherwise.
+ */
+export type Settings = {
+  backdrop: boolean;
+  center: boolean;
+  /** Forced on its stage (see `colorSchemeAttribute`). */
+  colorScheme?: ColorScheme;
+  /** Inline: as wide as the viewport (not the page's column). */
+  expanded: boolean;
+  /** Its devices' safe area insets, hatched (see shared/style.css). */
+  safeAreas: boolean;
+  stageBackground: boolean;
+  stretch: boolean;
+};
+
 type TOptionsContext = {
   /**
    * Opened in a tab of its own from a guide page (its Fullscreen link, see
@@ -17,6 +37,8 @@ type TOptionsContext = {
   back?: boolean;
   id?: string;
   raw: boolean;
+  /** Its settings changed from its defaults (see `Settings`). */
+  settings?: Partial<Settings>;
   state?: unknown[];
 };
 
@@ -101,19 +123,37 @@ export const useProvidedState = (demoId: string): unknown[] => {
   );
 };
 
+/** A demo's settings from the URL (those changed from its defaults). */
+export const useProvidedSettings = (
+  demoId: string,
+): Partial<Settings> | undefined => {
+  const { id, settings } = useOptions();
+
+  return id === demoId ? settings : undefined;
+};
+
 /**
- * A demo's URL with its state: on the current page, or on `path`'s (e.g.
- * `viewport/all`, relative to the document's base), then with `back`.
+ * A demo's URL with its state (its prop controls') and its settings
+ * changed: on the current page, or on `path`'s (e.g. `viewport/all`,
+ * relative to the document's base), then with `back`.
  */
 export const useCreateStateUrl = (
   id: string,
-  states?: unknown[],
-  path?: string,
-  back?: boolean,
+  {
+    back,
+    path,
+    settings,
+    state,
+  }: {
+    back?: boolean;
+    path?: string;
+    settings?: Partial<Settings>;
+    state?: unknown[];
+  },
 ): string | undefined =>
   useMemo(() => {
     if (path !== undefined) {
-      return `${path}#${createFragment({ back, id, state: states }, '') ?? ''}`;
+      return `${path}#${createFragment({ back, id, settings, state }, '') ?? ''}`;
     }
 
     // (Server-side, none: preact-iso's prerendering stubs `location` as
@@ -121,10 +161,10 @@ export const useCreateStateUrl = (
     if (typeof window === 'undefined') return undefined;
     const url = new URL(location.href);
 
-    const fragment = createFragment({ id, state: states });
+    const fragment = createFragment({ id, settings, state });
     if (!fragment) return undefined;
 
     url.hash = fragment;
 
     return url.href;
-  }, [back, id, path, states]);
+  }, [back, id, path, settings, state]);

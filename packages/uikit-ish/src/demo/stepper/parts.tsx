@@ -27,10 +27,7 @@ const RootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsGuideRoot(addLog), [addLog]),
-    'Stepper.Root',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Stepper.Root' },
   );
 
   return (
@@ -62,13 +59,12 @@ const RootPart: FunctionComponent = () => {
 const GroupPart: FunctionComponent = () => {
   const id = 'stepper-parts-group';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGroup,
-    'Stepper.Group',
+  const [control, props, state] = usePropControl(propOptionsGroup, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Stepper.Group',
+  });
 
   return (
     <Component
@@ -95,13 +91,12 @@ const GroupPart: FunctionComponent = () => {
 const InputPart: FunctionComponent = () => {
   const id = 'stepper-parts-input';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsInput,
-    'Stepper.Input',
+  const [control, props, state] = usePropControl(propOptionsInput, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Stepper.Input',
+  });
 
   return (
     <Component
@@ -128,13 +123,12 @@ const InputPart: FunctionComponent = () => {
 const DecrementPart: FunctionComponent = () => {
   const id = 'stepper-parts-decrement';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsHalf,
-    'Stepper.Decrement',
+  const [control, props, state] = usePropControl(propOptionsHalf, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Stepper.Decrement',
+  });
 
   return (
     <Component
@@ -161,13 +155,12 @@ const DecrementPart: FunctionComponent = () => {
 const IncrementPart: FunctionComponent = () => {
   const id = 'stepper-parts-increment';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsHalf,
-    'Stepper.Increment',
+  const [control, props, state] = usePropControl(propOptionsHalf, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Stepper.Increment',
+  });
 
   return (
     <Component

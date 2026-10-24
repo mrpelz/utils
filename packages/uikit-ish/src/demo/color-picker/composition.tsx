@@ -112,7 +112,7 @@ const InASheet: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root>
           <Sheet.Trigger render={<ColorPicker.Well color={color} />} />
@@ -172,12 +172,11 @@ const InAListRow: FunctionComponent = () => {
   const sizeClass = useSizeClass();
   const [tint, setTint] = useState('#FF9500');
   const [external] = useProvidedState(id);
-  const [control, content, state] = usePropControl(
-    propOptionsPresentation,
-    '[content]',
+  const [control, content, state] = usePropControl(propOptionsPresentation, {
     external,
-    true,
-  );
+    open: true,
+    title: '[content]',
+  });
   const sheet =
     (content.presentation ??
       (sizeClass === 'compact' ? 'sheet' : 'popover')) === 'sheet';
@@ -196,7 +195,7 @@ const InAListRow: FunctionComponent = () => {
       {sheet ? (
         <div
           ref={screen}
-          className="sheet-demo-phone"
+          className="demo-phone demo-centered"
         >
           <List.Root style={{ width: '100%' }}>
             <List.Section>

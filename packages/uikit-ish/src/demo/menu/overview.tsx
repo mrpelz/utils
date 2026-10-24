@@ -37,16 +37,16 @@ const LiveView: FunctionComponent = () => {
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const sizeClass = useSizeClass();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsOverviewRoot,
-    'Menu.Root',
+  const [control, props, state] = usePropControl(propOptionsOverviewRoot, {
     external,
-    true,
-  );
+    open: true,
+    title: 'Menu.Root',
+  });
 
   return (
     <Component
       center
+      expanded
       inline
       baseUiId="menu"
       controls={[control]}
@@ -60,8 +60,8 @@ const LiveView: FunctionComponent = () => {
         ref={screen}
         className={
           (props.size ?? sizeClass) === 'regular'
-            ? 'sheet-demo-tablet demo-wallpaper'
-            : 'sheet-demo-phone demo-wallpaper'
+            ? 'demo-tablet demo-centered demo-wallpaper'
+            : 'demo-phone demo-centered demo-wallpaper'
         }
       >
         <Menu.Root size={props.size ?? sizeClass}>

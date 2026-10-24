@@ -13,13 +13,12 @@ import { propOptionsTypography } from './props.js';
 const TypographyPart: FunctionComponent = () => {
   const id = 'typography-parts-typography';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsTypography,
-    'Typography',
+  const [control, props, state] = usePropControl(propOptionsTypography, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Typography',
+  });
 
   return (
     <Component

@@ -72,32 +72,30 @@ export const SidebarDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     propOptionsRoot,
-    'root',
-    externalRoot,
+    { external: externalRoot, title: 'root' },
   );
   const [controlColumn, propsColumn, stateColumn, keyColumn] = usePropControl(
     useMemo(() => getPropOptionsSidebarColumn(addLog), [addLog]),
-    'column (sidebar)',
-    externalColumn,
+    { external: externalColumn, title: 'column (sidebar)' },
   );
   const [controlSidebar, propsSidebar, stateSidebar, keySidebar] =
-    usePropControl(propOptionsSidebar, 'sidebar', externalSidebar);
+    usePropControl(propOptionsSidebar, {
+      external: externalSidebar,
+      title: 'sidebar',
+    });
   const [
     controlContentColumn,
     propsContentColumn,
     stateContentColumn,
     keyContentColumn,
-  ] = usePropControl(
-    propOptionsContentColumn,
-    'column (content)',
-    externalContentColumn,
-  );
+  ] = usePropControl(propOptionsContentColumn, {
+    external: externalContentColumn,
+    title: 'column (content)',
+  });
 
   return (
     <Component
@@ -121,7 +119,7 @@ export const SidebarDemo: FunctionComponent = () => {
         stateContentColumn,
       ]}
     >
-      <div className="sidebar-demo-screen">
+      <div className="demo-tablet demo-fill">
         <Layout.Root
           key={`${keyRoot}-${keyColumn}-${keySidebar}-${keyContentColumn}`}
           {...propsRoot}
@@ -540,38 +538,34 @@ export const SidebarCompactDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     propOptionsRoot,
-    'root',
-    externalRoot,
+    { external: externalRoot, title: 'root' },
   );
   const [controlColumn, propsColumn, stateColumn, keyColumn] = usePropControl(
     useMemo(() => getPropOptionsSidebarColumn(addLog), [addLog]),
-    'column (sidebar)',
-    externalColumn,
+    { external: externalColumn, title: 'column (sidebar)' },
   );
   const [controlDrawer, propsDrawer, stateDrawer, keyDrawer] = usePropControl(
     propOptionsDrawer,
-    'drawer',
-    externalDrawer,
-    true,
+    { external: externalDrawer, open: true, title: 'drawer' },
   );
   const [controlSidebar, propsSidebar, stateSidebar, keySidebar] =
-    usePropControl(propOptionsSidebar, 'sidebar', externalSidebar);
+    usePropControl(propOptionsSidebar, {
+      external: externalSidebar,
+      title: 'sidebar',
+    });
   const [
     controlContentColumn,
     propsContentColumn,
     stateContentColumn,
     keyContentColumn,
-  ] = usePropControl(
-    propOptionsContentColumn,
-    'column (content)',
-    externalContentColumn,
-  );
+  ] = usePropControl(propOptionsContentColumn, {
+    external: externalContentColumn,
+    title: 'column (content)',
+  });
 
   return (
     <Component
@@ -597,7 +591,7 @@ export const SidebarCompactDemo: FunctionComponent = () => {
         stateContentColumn,
       ]}
     >
-      <div className="sidebar-demo-screen">
+      <div className="demo-tablet demo-fill">
         <Layout.Root
           key={`${keyRoot}-${keyColumn}-${keyDrawer}-${keySidebar}-${keyContentColumn}`}
           {...propsRoot}
@@ -1054,7 +1048,7 @@ export const SidebarEditingDemo: FunctionComponent = () => {
       log={log}
       title="Sidebar (Editing)"
     >
-      <div className="sidebar-demo-screen">
+      <div className="demo-tablet demo-fill">
         <Layout.Root>
           <Layout.Background>
             <div

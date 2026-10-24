@@ -17,10 +17,7 @@ const PageControlPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'PageControl',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'PageControl' },
   );
 
   return (

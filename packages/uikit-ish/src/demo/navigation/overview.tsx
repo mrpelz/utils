@@ -49,9 +49,7 @@ const LiveView: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsGuideRoot(pop), [pop]),
-    'Navigation.Root',
-    external,
-    true,
+    { external, open: true, title: 'Navigation.Root' },
   );
 
   return (
@@ -64,7 +62,7 @@ const LiveView: FunctionComponent = () => {
       state={[state]}
       title="Navigation"
     >
-      <div className="navigation-demo-phone">
+      <div className="demo-phone">
         <Navigation.Root {...props}>
           {keys.map((key, depth) => (
             <Page.Root key={key}>

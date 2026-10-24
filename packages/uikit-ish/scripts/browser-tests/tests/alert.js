@@ -79,7 +79,7 @@ export const tests = [
       await sleep(500);
       const placed = await page.evaluate(`(() => {
         const popup = document.querySelector('[role=alertdialog]');
-        const screen = document.querySelector('.sheet-demo-phone');
+        const screen = document.querySelector('.demo-phone');
         const backdrop = document.querySelector('[data-alert-part=backdrop]');
         const [p, s, b] = [popup, screen, backdrop].map((element) => element.getBoundingClientRect());
         return {

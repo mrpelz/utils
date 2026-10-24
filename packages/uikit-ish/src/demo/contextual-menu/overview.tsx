@@ -39,12 +39,11 @@ const LiveView: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const sizeClass = useSizeClass();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsOverviewRoot,
-    'ContextualMenu.Root',
+  const [control, props, state] = usePropControl(propOptionsOverviewRoot, {
     external,
-    true,
-  );
+    open: true,
+    title: 'ContextualMenu.Root',
+  });
 
   return (
     <Component
@@ -59,7 +58,7 @@ const LiveView: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone demo-wallpaper"
+        className="demo-phone demo-centered demo-wallpaper"
       >
         <ContextualMenu.Root size={props.size ?? sizeClass}>
           <ContextualMenu.Trigger render={<Button.Root variant="bordered" />}>

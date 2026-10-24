@@ -139,26 +139,35 @@ export const ViewportAnchorsDemo: FunctionComponent = () => {
 
   const [controlTop, { shown: top, ...propsTop }, stateTop] = usePropControl(
     propOptionsTop,
-    'anchor (top)',
-    externalTop,
-    true,
+    { external: externalTop, open: true, title: 'anchor (top)' },
   );
   const [controlBottom, { shown: bottom, ...propsBottom }, stateBottom] =
-    usePropControl(propOptionsBottom, 'anchor (bottom)', externalBottom, true);
+    usePropControl(propOptionsBottom, {
+      external: externalBottom,
+      open: true,
+      title: 'anchor (bottom)',
+    });
   const [controlLeading, { shown: leading, ...propsLeading }, stateLeading] =
-    usePropControl(propOptionsSide, 'anchor (leading)', externalLeading, true);
+    usePropControl(propOptionsSide, {
+      external: externalLeading,
+      open: true,
+      title: 'anchor (leading)',
+    });
   const [
     controlTrailing,
     { shown: trailing, ...propsTrailing },
     stateTrailing,
-  ] = usePropControl(
-    propOptionsSide,
-    'anchor (trailing)',
-    externalTrailing,
-    true,
-  );
+  ] = usePropControl(propOptionsSide, {
+    external: externalTrailing,
+    open: true,
+    title: 'anchor (trailing)',
+  });
   const [controlLayer, { shown: layer, ...propsLayer }, stateLayer] =
-    usePropControl(propOptionsLayer, 'content layer', externalLayer, true);
+    usePropControl(propOptionsLayer, {
+      external: externalLayer,
+      open: true,
+      title: 'content layer',
+    });
 
   return (
     <Component

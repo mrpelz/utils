@@ -15,13 +15,12 @@ import { propOptionsSymbol } from './props.js';
 const SymbolPart: FunctionComponent = () => {
   const id = 'symbol-parts-symbol';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsSymbol,
-    'Symbol',
+  const [control, props, state] = usePropControl(propOptionsSymbol, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Symbol',
+  });
 
   return (
     <Component

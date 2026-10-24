@@ -93,17 +93,14 @@ export const ListDemo: FunctionComponent = () => {
   const [favorite, setFavorite] = useState(true);
   const [quantity, setQuantity] = useState(1);
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'List.Root',
-    externalRoot,
-    true,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    open: true,
+    title: 'List.Root',
+  });
   const [controlItem, propsItem, stateItem] = usePropControl(
     propOptionsItemFirst,
-    'List.Item (1st)',
-    externalItem,
-    true,
+    { external: externalItem, open: true, title: 'List.Item (1st)' },
   );
   const [
     controlCollapsible,
@@ -112,13 +109,11 @@ export const ListDemo: FunctionComponent = () => {
     keyCollapsible,
   ] = usePropControl(
     useMemo(() => getPropOptionsCollapsible(addLog), [addLog]),
-    'Collapsible.Root',
-    externalCollapsible,
+    { external: externalCollapsible, title: 'Collapsible.Root' },
   );
   const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
     propOptionsCursor,
-    'Collapsible.Trigger (List.Header)',
-    externalTrigger,
+    { external: externalTrigger, title: 'Collapsible.Trigger (List.Header)' },
   );
 
   return (
@@ -466,125 +461,106 @@ export const ListPartsDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsPartsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'List.Root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'List.Root',
+  });
   const [controlSection, propsSection, stateSection] = usePropControl(
     commonPropOptions,
-    'List.Section',
-    externalSection,
+    { external: externalSection, title: 'List.Section' },
   );
   const [controlHeader, propsHeader, stateHeader] = usePropControl(
     propOptionsHeader,
-    'List.Header',
-    externalHeader,
-    true,
+    { external: externalHeader, open: true, title: 'List.Header' },
   );
   const [controlSupertitle, propsSupertitle, stateSupertitle] = usePropControl(
     commonPropOptions,
-    'List.Supertitle',
-    externalSupertitle,
+    { external: externalSupertitle, title: 'List.Supertitle' },
   );
   const [controlGroup, propsGroup, stateGroup] = usePropControl(
     commonPropOptions,
-    'List.Group',
-    externalGroup,
+    { external: externalGroup, title: 'List.Group' },
   );
   const [controlItem, propsItem, stateItem] = usePropControl(
     useMemo(() => getPropOptionsItemFirst(addLog), [addLog]),
-    'List.Item (1st)',
-    externalItem,
+    { external: externalItem, title: 'List.Item (1st)' },
   );
   const [controlImage, propsImage, stateImage] = usePropControl(
     propOptionsImage,
-    'List.Image',
-    externalImage,
+    { external: externalImage, title: 'List.Image' },
   );
   const [controlTitle, propsTitle, stateTitle] = usePropControl(
     useMemo(() => getPropOptionsTitleFirst(addLog), [addLog]),
-    'List.Title (1st)',
-    externalTitle,
+    { external: externalTitle, title: 'List.Title (1st)' },
   );
   const [controlSubtitle, propsSubtitle, stateSubtitle] = usePropControl(
     commonPropOptions,
-    'List.Subtitle',
-    externalSubtitle,
+    { external: externalSubtitle, title: 'List.Subtitle' },
   );
   const [controlDetail, propsDetail, stateDetail] = usePropControl(
     commonPropOptions,
-    'List.Detail',
-    externalDetail,
+    { external: externalDetail, title: 'List.Detail' },
   );
   const [controlDrillIn, propsDrillIn, stateDrillIn] = usePropControl(
     commonPropOptions,
-    'List.DrillIn',
-    externalDrillIn,
+    { external: externalDrillIn, title: 'List.DrillIn' },
   );
   const [controlAccessory, propsAccessory, stateAccessory] = usePropControl(
     useMemo(() => getPropOptionsAccessory(addLog), [addLog]),
-    'List.Accessory',
-    externalAccessory,
+    { external: externalAccessory, title: 'List.Accessory' },
   );
   const [controlCheckmark, propsCheckmark, stateCheckmark] = usePropControl(
     commonPropOptions,
-    'List.Checkmark',
-    externalCheckmark,
+    { external: externalCheckmark, title: 'List.Checkmark' },
   );
   const [controlAction, propsAction, stateAction] = usePropControl(
     useMemo(() => getPropOptionsAction(addLog), [addLog]),
-    'List.Action',
-    externalAction,
+    { external: externalAction, title: 'List.Action' },
   );
   const [controlButton, propsButton, stateButton] = usePropControl(
     useMemo(() => getPropOptionsButton(addLog), [addLog]),
-    'List.Button',
-    externalButton,
+    { external: externalButton, title: 'List.Button' },
   );
   const [controlCheckbox, propsCheckbox, stateCheckbox, keyCheckbox] =
-    usePropControl(propOptionsCheckbox, 'List.Checkbox', externalCheckbox);
+    usePropControl(propOptionsCheckbox, {
+      external: externalCheckbox,
+      title: 'List.Checkbox',
+    });
   const [controlEditButton, propsEditButton, stateEditButton] = usePropControl(
     useMemo(() => getPropOptionsEditButton(addLog), [addLog]),
-    'List.EditButton',
-    externalEditButton,
+    { external: externalEditButton, title: 'List.EditButton' },
   );
   const [controlGrabber, propsGrabber, stateGrabber] = usePropControl(
     propOptionsCursor,
-    'List.Grabber',
-    externalGrabber,
+    { external: externalGrabber, title: 'List.Grabber' },
   );
-  const [controlText, propsText, stateText] = usePropControl(
-    propOptionsText,
-    'List.Text',
-    externalText,
-  );
+  const [controlText, propsText, stateText] = usePropControl(propOptionsText, {
+    external: externalText,
+    title: 'List.Text',
+  });
   const [controlSwipeActions, propsSwipeActions, stateSwipeActions] =
     usePropControl(
       useMemo(() => getPropOptionsSwipeActionsTrailing(addLog), [addLog]),
-      'List.SwipeActions (trailing)',
-      externalSwipeActions,
-      true,
+      {
+        external: externalSwipeActions,
+        open: true,
+        title: 'List.SwipeActions (trailing)',
+      },
     );
   const [controlSwipeAction, propsSwipeAction, stateSwipeAction] =
     usePropControl(
       useMemo(() => getPropOptionsSwipeActionOutermost(addLog), [addLog]),
-      'List.SwipeAction (outermost)',
-      externalSwipeAction,
+      { external: externalSwipeAction, title: 'List.SwipeAction (outermost)' },
     );
   const [controlFooter, propsFooter, stateFooter] = usePropControl(
     commonPropOptions,
-    'List.Footer',
-    externalFooter,
+    { external: externalFooter, title: 'List.Footer' },
   );
   const [controlBlock, propsBlock, stateBlock] = usePropControl(
     propOptionsBlock,
-    'List.Block',
-    externalBlock,
+    { external: externalBlock, title: 'List.Block' },
   );
 
   return (
@@ -812,32 +788,26 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
     propsCollapsible,
     stateCollapsible,
     keyCollapsible,
-  ] = usePropControl(
-    propOptionsCollapsible,
-    'Collapsible.Root',
-    externalCollapsible,
-    true,
-  );
+  ] = usePropControl(propOptionsCollapsible, {
+    external: externalCollapsible,
+    open: true,
+    title: 'Collapsible.Root',
+  });
   const [controlTrigger, propsTrigger, stateTrigger] = usePropControl(
     propOptionsCursor,
-    'Collapsible.Trigger (List.Header)',
-    externalTrigger,
+    { external: externalTrigger, title: 'Collapsible.Trigger (List.Header)' },
   );
   const [controlPanel, propsPanel, statePanel] = usePropControl(
     propOptionsPanel,
-    'Collapsible.Panel (List.Group)',
-    externalPanel,
+    { external: externalPanel, title: 'Collapsible.Panel (List.Group)' },
   );
   const [controlDisclosure, propsDisclosure, stateDisclosure] = usePropControl(
     commonPropOptions,
-    'List.Disclosure',
-    externalDisclosure,
+    { external: externalDisclosure, title: 'List.Disclosure' },
   );
   const [controlExpandable, propsExpandable, stateExpandable] = usePropControl(
     propOptionsExpandable,
-    'List.Expandable',
-    externalExpandable,
-    true,
+    { external: externalExpandable, open: true, title: 'List.Expandable' },
   );
 
   return (
@@ -958,23 +928,23 @@ export const ListSwipeDemo: FunctionComponent = () => {
   const [externalRoot, externalSwipeActions, externalSwipeAction] =
     useProvidedState(id);
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'List.Root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'List.Root',
+  });
   const [controlSwipeActions, propsSwipeActions, stateSwipeActions] =
     usePropControl(
       useMemo(() => getPropOptionsSwipeActionsFirstLeading(addLog), [addLog]),
-      'List.SwipeActions (1st, leading)',
-      externalSwipeActions,
-      true,
+      {
+        external: externalSwipeActions,
+        open: true,
+        title: 'List.SwipeActions (1st, leading)',
+      },
     );
   const [controlSwipeAction, propsSwipeAction, stateSwipeAction] =
     usePropControl(
       useMemo(() => getPropOptionsSwipeActionFirst(addLog), [addLog]),
-      'List.SwipeAction (1st)',
-      externalSwipeAction,
+      { external: externalSwipeAction, title: 'List.SwipeAction (1st)' },
     );
 
   return (
@@ -1443,16 +1413,13 @@ export const ListEditDemo: FunctionComponent = () => {
 
   const [rows, setRows] = useState<readonly string[]>(planets);
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'List.Root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'List.Root',
+  });
   const [controlGrabber, propsGrabber, stateGrabber] = usePropControl(
     propOptionsCursor,
-    'List.Grabber (1st)',
-    externalGrabber,
-    true,
+    { external: externalGrabber, open: true, title: 'List.Grabber (1st)' },
   );
 
   return (
@@ -1523,16 +1490,17 @@ export const ListEditDeleteDemo: FunctionComponent = () => {
 
   const [rows, setRows] = useState<readonly string[]>(planets);
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'List.Root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'List.Root',
+  });
   const [controlEditButton, propsEditButton, stateEditButton] = usePropControl(
     useMemo(() => getPropOptionsEditButtonFirst(addLog), [addLog]),
-    'List.EditButton (1st)',
-    externalEditButton,
-    true,
+    {
+      external: externalEditButton,
+      open: true,
+      title: 'List.EditButton (1st)',
+    },
   );
 
   return (
@@ -1594,11 +1562,10 @@ export const ListEditInsertDemo: FunctionComponent = () => {
   const [rows, setRows] = useState<readonly string[]>(planets);
   const added = useRef(0);
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'List.Root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'List.Root',
+  });
 
   return (
     <Component
@@ -1663,17 +1630,14 @@ export const ListEditSelectDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [externalRoot, externalCheckbox] = useProvidedState(id);
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'List.Root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'List.Root',
+  });
   const [controlCheckbox, propsCheckbox, stateCheckbox, keyCheckbox] =
     usePropControl(
       useMemo(() => getPropOptionsCheckboxFirst(addLog), [addLog]),
-      'List.Checkbox (1st)',
-      externalCheckbox,
-      true,
+      { external: externalCheckbox, open: true, title: 'List.Checkbox (1st)' },
     );
 
   return (
@@ -1728,22 +1692,22 @@ export const ListEditSelectSingleDemo: FunctionComponent = () => {
 
   const [rows, setRows] = useState<readonly string[]>(planets);
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'List.Root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'List.Root',
+  });
   const [controlRadioGroup, propsRadioGroup, stateRadioGroup, keyRadioGroup] =
     usePropControl(
       useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
-      'RadioGroup (List.Group)',
-      externalRadioGroup,
-      true,
+      {
+        external: externalRadioGroup,
+        open: true,
+        title: 'RadioGroup (List.Group)',
+      },
     );
   const [controlRadio, propsRadio, stateRadio] = usePropControl(
     propOptionsRadioFirst,
-    'List.Radio (1st)',
-    externalRadio,
+    { external: externalRadio, title: 'List.Radio (1st)' },
   );
 
   return (
@@ -1812,11 +1776,10 @@ export const ListSegmentedDemo: FunctionComponent = () => {
 
   const [view, setView] = useState('upcoming');
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'List.Root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'List.Root',
+  });
 
   return (
     <Component
@@ -1916,11 +1879,10 @@ export const ListFormDemo: FunctionComponent = () => {
     readonly ['ends' | 'starts', DatePickerOpen] | null
   >(null);
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'List.Root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'List.Root',
+  });
 
   const startsOpen = open?.[0] === 'starts' ? open[1] : null;
   const endsOpen = open?.[0] === 'ends' ? open[1] : null;
@@ -2074,25 +2036,19 @@ export const ListIndexDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRootPlain,
-    'List.Root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'List.Root' },
   );
   const [controlHeader, propsHeader, stateHeader] = usePropControl(
     commonPropOptions,
-    'List.Header',
-    externalHeader,
+    { external: externalHeader, title: 'List.Header' },
   );
   const [controlIndex, propsIndex, stateIndex] = usePropControl(
     propOptionsIndex,
-    'List.Index',
-    externalIndex,
-    true,
+    { external: externalIndex, open: true, title: 'List.Index' },
   );
   const [controlIndexItem, propsIndexItem, stateIndexItem] = usePropControl(
     propOptionsCursor,
-    'List.IndexItem (1st)',
-    externalIndexItem,
+    { external: externalIndexItem, title: 'List.IndexItem (1st)' },
   );
 
   return (
@@ -2201,17 +2157,14 @@ export const ListMailDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRootPlain,
-    'List.Root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'List.Root' },
   );
 
-  const [controlText, propsText, stateText] = usePropControl(
-    propOptionsText,
-    'List.Text',
-    externalText,
-    true,
-  );
+  const [controlText, propsText, stateText] = usePropControl(propOptionsText, {
+    external: externalText,
+    open: true,
+    title: 'List.Text',
+  });
 
   return (
     <Component

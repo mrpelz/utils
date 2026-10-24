@@ -5,38 +5,6 @@
   margin-block-end: 16px;
 }
 
-/* The navigation as a phone's screen in the stage (a grid: its content stretched to its
-   height). */
-.navigation-demo-screen {
-  display: grid;
-  height: min(640px, 70vh);
-}
-
-/* A phone's screen (the guide pages' views): a navigation (or a tab bar
-   app, its fixed layers within: a transform makes it their containing
-   block), sized as a window. */
-.navigation-demo-phone {
-  display: grid;
-  overflow: hidden;
-  width: 402px;
-  max-width: 100%;
-  height: min(640px, 70vh);
-  border-radius: 24px;
-  transform: translateZ(0);
-}
-
-/* A tablet's screen (an iPad's width, at most the stage's): a layout of a
-   sidebar and a navigation. */
-.navigation-demo-tablet {
-  display: grid;
-  overflow: hidden;
-  width: 820px;
-  max-width: 100%;
-  height: min(640px, 70vh);
-  border-radius: 24px;
-  transform: translateZ(0);
-}
-
 /* A readout of the stack, below the screen. */
 .navigation-demo-stack {
   margin: 16px 0 0;

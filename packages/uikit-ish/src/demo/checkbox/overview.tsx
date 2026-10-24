@@ -29,9 +29,7 @@ const LiveView: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsOverview,
-    'Checkbox.Root',
-    external,
-    true,
+    { external, open: true, title: 'Checkbox.Root' },
   );
 
   return (

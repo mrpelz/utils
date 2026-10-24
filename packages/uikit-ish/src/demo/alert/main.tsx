@@ -25,15 +25,11 @@ export const AlertDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlContent, propsContent, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const { actions, fields, stacked } = propsContent;
 
@@ -50,7 +46,7 @@ export const AlertDemo: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Root
           key={`${keyRoot}`}

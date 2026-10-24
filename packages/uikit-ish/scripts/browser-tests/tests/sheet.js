@@ -17,7 +17,7 @@ const sheet = (page) =>
   page.evaluate(`(() => {
     const popup = document.querySelector('[data-detent]');
     if (!popup) return null;
-    const screen = popup.closest('.sheet-demo-phone, .sheet-demo-tablet');
+    const screen = popup.closest('.demo-phone, .demo-tablet');
     const frame = screen ? screen.getBoundingClientRect() : { bottom: innerHeight, left: 0, right: innerWidth, top: 0 };
     const { bottom, left, right, top } = popup.getBoundingClientRect();
     return { box: [left - frame.left, top - frame.top, frame.right - right, frame.bottom - bottom].map(Math.round), radius: getComputedStyle(popup).borderRadius, width: Math.round(right - left) };

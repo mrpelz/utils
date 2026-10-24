@@ -15,9 +15,7 @@ const LiveView: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsOverview,
-    'Switch.Root',
-    external,
-    true,
+    { external, open: true, title: 'Switch.Root' },
   );
 
   return (

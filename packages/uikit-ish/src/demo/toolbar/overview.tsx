@@ -46,21 +46,15 @@ const LiveView: FunctionComponent = () => {
   const [externalRoot, externalTop, externalBottom] = useProvidedState(id);
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     propOptionsOverviewRoot,
-    'Toolbar.Root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'Toolbar.Root' },
   );
-  const [controlTop, top, stateTop] = usePropControl(
-    propOptionsOverviewTop,
-    '[top bar]',
-    externalTop,
-    true,
-  );
+  const [controlTop, top, stateTop] = usePropControl(propOptionsOverviewTop, {
+    external: externalTop,
+    title: '[top bar]',
+  });
   const [controlBottom, bottom, stateBottom] = usePropControl(
     propOptionsOverviewBottom,
-    '[bottom bar]',
-    externalBottom,
-    true,
+    { external: externalBottom, title: '[bottom bar]' },
   );
 
   return (
@@ -75,7 +69,7 @@ const LiveView: FunctionComponent = () => {
     >
       <div
         key={elementKey}
-        className="toolbar-demo-screen"
+        className="demo-phone"
       >
         <Viewport.Content>
           <List.Root className="toolbar-demo-list">

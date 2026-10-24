@@ -155,13 +155,14 @@ const ThreeColumns: FunctionComponent = () => {
   return (
     <Component
       center
+      expanded
       inline
       id="layout-composition-three-columns"
       log={log}
       title="Layout of three columns"
     >
       <div className="layout-demo-scroller">
-        <div className="layout-demo-tablet layout-demo-wide">
+        <div className="demo-tablet layout-demo-wide">
           <Layout.Root>
             <Layout.Column defaultSize={240}>
               <Page.Root>
@@ -272,12 +273,13 @@ const Resizable: FunctionComponent = () => {
   return (
     <Component
       center
+      expanded
       inline
       id="layout-composition-resizable"
       log={log}
       title="Layout with a resizable column"
     >
-      <div className="layout-demo-tablet">
+      <div className="demo-tablet">
         <Layout.Root>
           <Layout.Column
             resizable
@@ -338,7 +340,7 @@ const Inspector: FunctionComponent = () => {
       log={log}
       title="Layout with an inspector"
     >
-      <div className="layout-demo-phone">
+      <div className="demo-phone">
         <Layout.Root compact>
           <Layout.Drawer
             handle={mailboxesDrawer}
@@ -494,12 +496,13 @@ const BackgroundBehind: FunctionComponent = () => {
   return (
     <Component
       center
+      expanded
       inline
       id="layout-composition-background"
       log={log}
       title="Layout on a background"
     >
-      <div className="layout-demo-tablet">
+      <div className="demo-tablet">
         <Layout.Root>
           <Layout.Background>
             <div

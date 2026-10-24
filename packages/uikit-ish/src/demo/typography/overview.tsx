@@ -15,12 +15,11 @@ import { propOptionsOverview } from './props.js';
 const LiveView: FunctionComponent = () => {
   const id = 'typography-overview';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsOverview,
-    'Typography',
+  const [control, props, state] = usePropControl(propOptionsOverview, {
     external,
-    true,
-  );
+    open: true,
+    title: 'Typography',
+  });
 
   return (
     <Component

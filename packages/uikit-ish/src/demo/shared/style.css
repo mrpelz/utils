@@ -13,6 +13,15 @@
     background-color: light-dark(white, #0a0a0a);
     color: light-dark(black, #fafafa);
     color-scheme: light dark;
+
+    /* What's shown hatched (the safe areas, a part overlaid, see
+       frame/overlay.ts). */
+    --demo-hatch: repeating-linear-gradient(
+      -45deg,
+      rgb(255 59 48 / 25%) 0 4px,
+      transparent 4px 8px
+    );
+
     font-family:
       -apple-system, 'SF Pro', system-ui, 'SF UI Text', 'Helvetica Neue',
       Helvetica, Arial, sans-serif;
@@ -30,25 +39,52 @@
     margin: 0;
   }
 
-  /* Devices' screens (the demos' frames): their safe area insets, as the
-     library's custom properties (the components keep clear of them): an
-     iPhone's (the Dynamic Island, the home indicator), an iPad's (the
-     status bar, the home indicator). */
-  :is(
-      .header-demo-phone,
-      .header-demo-screen,
-      .layout-demo-phone,
-      .layout-demo-screen,
-      .navigation-demo-phone,
-      .navigation-demo-screen,
-      .page-demo-phone,
-      .page-demo-screen,
-      .sheet-demo-phone,
-      .sidebar-demo-phone,
-      .tab-bar-demo-screen,
-      .toolbar-demo-screen,
-      .viewport-demo-screen
-    ) {
+  /* A modal's scroll lock (Base UI's, the document's: inline styles on the
+     root and the body) undone: the page scrolls on, a demo's modal blocks
+     only its own screen (its backdrop covering it). (Important: over the
+     inline styles; the library's apps keep the lock.) */
+  :root,
+  body {
+    overflow: visible !important;
+  }
+
+  /*
+   * Devices' screens, the demos' frames (one style for all): a phone's (an
+   * iPhone's width), a tablet's (an iPad's), at most the stage's, sized as
+   * a window. Their content is laid out in one cell (stretched to its
+   * height); clipped, not hidden (focus moving into what's within, e.g. a
+   * sheet, would scroll it); a transform makes them the containing block of
+   * the fixed layers within (a viewport's, a sheet's, a portal's).
+   *
+   * - `demo-fill`: as wide as the stage (a demo stretched, its layout
+   *   following its width).
+   * - `demo-centered`: its content centered, in a column (e.g. a sheet's
+   *   trigger).
+   * - `demo-flow`: as high as its content (a page in the stage's flow,
+   *   nothing scrolling within it).
+   */
+  .demo-phone,
+  .demo-tablet {
+    position: relative;
+    display: grid;
+    overflow: clip;
+    width: 402px;
+    max-width: 100%;
+    height: min(640px, 70vh);
+    box-sizing: border-box;
+    border-radius: 24px;
+
+    /* An app's background (a page's default, see Page), where nothing paints
+       its own (bars, a sheet's trigger), a hairline at its edges (a dark
+       screen on the dark stage). */
+    background-color: var(--color-ios-system-grouped-background);
+    box-shadow: 0 0 0 1px var(--color-ios-separator);
+    isolation: isolate;
+    transform: translateZ(0);
+
+    /* Its safe area insets, as the library's custom properties (the
+       components keep clear of them): an iPhone's (the Dynamic Island, the
+       home indicator). */
     --uikit-safe-area-inset-top: 62px;
     --uikit-safe-area-inset-bottom: 34px;
 
@@ -59,14 +95,10 @@
     --demo-home-indicator: 134px;
   }
 
-  :is(
-      .layout-demo-tablet,
-      .navigation-demo-tablet,
-      .page-demo-tablet,
-      .sheet-demo-tablet,
-      .sidebar-demo-screen,
-      .sidebar-demo-tablet
-    ) {
+  /* An iPad's (the status bar, the home indicator). */
+  .demo-tablet {
+    width: 820px;
+
     --uikit-safe-area-inset-top: 24px;
     --uikit-safe-area-inset-bottom: 20px;
     --demo-status-font-size: 13px;
@@ -75,64 +107,29 @@
     --demo-home-indicator: 200px;
   }
 
-  /*
-   * Devices' screens' chrome, over their content (as on iOS): the status
-   * bar's time in the top inset, the home indicator in the bottom one (so
-   * covered content shows). With the frame's Safe Areas setting, the insets
-   * hatched, too (`data-safe-areas` on the stage).
-   */
-  :where(
-      .header-demo-phone,
-      .header-demo-screen,
-      .layout-demo-phone,
-      .layout-demo-screen,
-      .navigation-demo-phone,
-      .navigation-demo-screen,
-      .page-demo-phone,
-      .page-demo-screen,
-      .sheet-demo-phone,
-      .sidebar-demo-phone,
-      .tab-bar-demo-screen,
-      .toolbar-demo-screen,
-      .viewport-demo-screen,
-      .layout-demo-tablet,
-      .navigation-demo-tablet,
-      .page-demo-tablet,
-      .sheet-demo-tablet,
-      .sidebar-demo-screen,
-      .sidebar-demo-tablet
-    ) {
-    position: relative;
-
-    /* An app's background (a page's default, see Page), where nothing paints
-       its own (bars, a sheet's trigger), a hairline at its edges (a dark
-       screen on the dark stage). */
-    background-color: var(--color-ios-system-grouped-background);
-    box-shadow: 0 0 0 1px var(--color-ios-separator);
-    isolation: isolate;
+  .demo-fill {
+    width: auto;
   }
 
-  :is(
-      .header-demo-phone,
-      .header-demo-screen,
-      .layout-demo-phone,
-      .layout-demo-screen,
-      .navigation-demo-phone,
-      .navigation-demo-screen,
-      .page-demo-phone,
-      .page-demo-screen,
-      .sheet-demo-phone,
-      .sidebar-demo-phone,
-      .tab-bar-demo-screen,
-      .toolbar-demo-screen,
-      .viewport-demo-screen,
-      .layout-demo-tablet,
-      .navigation-demo-tablet,
-      .page-demo-tablet,
-      .sheet-demo-tablet,
-      .sidebar-demo-screen,
-      .sidebar-demo-tablet
-    ) {
+  .demo-centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .demo-flow {
+    height: auto;
+  }
+
+  /*
+   * Their chrome, over their content (as on iOS): the status bar's time in
+   * the top inset, the home indicator in the bottom one (so covered content
+   * shows). With the frame's Safe Areas setting, the insets hatched, too
+   * (`data-safe-areas` on the stage).
+   */
+  :is(.demo-phone, .demo-tablet) {
     &::before,
     &::after {
       position: absolute;
@@ -149,12 +146,12 @@
       display: flex;
       height: var(--uikit-safe-area-inset-top);
       align-items: center;
-      content: '9:41';
-      font-size: 17px;
+      content: var(--demo-time, '9:41');
+      font-size: var(--demo-status-font-size);
       font-variation-settings: 'wght' 590;
       font-weight: 500;
-      line-height: 22px;
-      padding-inline: 32px;
+      line-height: var(--demo-status-line-height);
+      padding-inline: var(--demo-status-padding);
     }
 
     /* The home indicator: a pill (its ends circles, its middle a bar), 8px
@@ -177,11 +174,7 @@
     /* The frame's Safe Areas setting: the insets hatched (under the
        home indicator). */
     .demo-stage[data-safe-areas] &::before {
-      background: repeating-linear-gradient(
-        -45deg,
-        rgb(255 59 48 / 25%) 0 4px,
-        transparent 4px 8px
-      );
+      background: var(--demo-hatch);
     }
 
     .demo-stage[data-safe-areas] &::after {
@@ -194,11 +187,7 @@
           5px 5px no-repeat,
         linear-gradient(currentcolor, currentcolor) center calc(100% - 8px) /
           calc(var(--demo-home-indicator) - 5px) 5px no-repeat,
-        repeating-linear-gradient(
-          -45deg,
-          rgb(255 59 48 / 25%) 0 4px,
-          transparent 4px 8px
-        );
+        var(--demo-hatch);
     }
   }
 

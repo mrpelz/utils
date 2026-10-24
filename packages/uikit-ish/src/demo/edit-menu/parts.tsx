@@ -40,13 +40,12 @@ const RootPart: FunctionComponent = () => {
   const [text, setText] = useState<HTMLElement | null>(null);
   const [selection, clearSelection] = useSelectionAnchor(text);
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideRoot,
-    'EditMenu.Root',
+  const [control, props, state] = usePropControl(propOptionsGuideRoot, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'EditMenu.Root',
+  });
 
   return (
     <Component
@@ -61,7 +60,7 @@ const RootPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <EditMenu.Root
           {...props}
@@ -121,13 +120,12 @@ const PortalPart: FunctionComponent = () => {
   const [text, setText] = useState<HTMLElement | null>(null);
   const [selection, clearSelection] = useSelectionAnchor(text);
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuidePortal,
-    'EditMenu.Portal',
+  const [control, props, state] = usePropControl(propOptionsGuidePortal, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'EditMenu.Portal',
+  });
 
   return (
     <Component
@@ -142,7 +140,7 @@ const PortalPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <EditMenu.Root
           open={selection !== null}
@@ -204,13 +202,12 @@ const PositionerPart: FunctionComponent = () => {
   const [text, setText] = useState<HTMLElement | null>(null);
   const [selection, clearSelection] = useSelectionAnchor(text);
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPositioner,
-    'EditMenu.Positioner',
+  const [control, props, state] = usePropControl(propOptionsPositioner, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'EditMenu.Positioner',
+  });
 
   return (
     <Component
@@ -225,7 +222,7 @@ const PositionerPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <EditMenu.Root
           open={selection !== null}
@@ -287,13 +284,12 @@ const PopupPart: FunctionComponent = () => {
   const [text, setText] = useState<HTMLElement | null>(null);
   const [selection, clearSelection] = useSelectionAnchor(text);
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsPopup,
-    'EditMenu.Popup',
+  const [control, props, state] = usePropControl(propOptionsPopup, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'EditMenu.Popup',
+  });
 
   return (
     <Component
@@ -308,7 +304,7 @@ const PopupPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <EditMenu.Root
           open={selection !== null}
@@ -369,10 +365,7 @@ const ItemPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsGuideItem(addLog), [addLog]),
-    'EditMenu.Item',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'EditMenu.Item' },
   );
 
   return (
@@ -388,7 +381,7 @@ const ItemPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <EditMenu.Root
           open={selection !== null}
@@ -447,10 +440,7 @@ const SubmenuRootPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(() => getPropOptionsGuideSubmenuRoot(addLog), [addLog]),
-    'EditMenu.SubmenuRoot',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'EditMenu.SubmenuRoot' },
   );
 
   return (
@@ -466,7 +456,7 @@ const SubmenuRootPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <EditMenu.Root
           open={selection !== null}
@@ -525,13 +515,12 @@ const MorePart: FunctionComponent = () => {
   const [text, setText] = useState<HTMLElement | null>(null);
   const [selection, clearSelection] = useSelectionAnchor(text);
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideMore,
-    'EditMenu.More',
+  const [control, props, state] = usePropControl(propOptionsGuideMore, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'EditMenu.More',
+  });
 
   return (
     <Component
@@ -546,7 +535,7 @@ const MorePart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <EditMenu.Root
           open={selection !== null}
@@ -616,7 +605,7 @@ const UseSelectionAnchorPart: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <EditMenu.Root
           open={selection !== null}

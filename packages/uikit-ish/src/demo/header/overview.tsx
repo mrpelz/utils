@@ -40,19 +40,15 @@ const LiveView: FunctionComponent = () => {
     useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsOverviewContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
-  const [controlBar, propsBar, stateBar] = usePropControl(
-    propOptionsBar,
-    'Header.Bar',
-    externalBar,
-  );
+  const [controlBar, propsBar, stateBar] = usePropControl(propOptionsBar, {
+    external: externalBar,
+    title: 'Header.Bar',
+  });
   const [controlLargeTitle, propsLargeTitle, stateLargeTitle] = usePropControl(
     propOptionsLargeTitle,
-    'Header.LargeTitle',
-    externalLargeTitle,
+    { external: externalLargeTitle, title: 'Header.LargeTitle' },
   );
 
   return (
@@ -65,7 +61,7 @@ const LiveView: FunctionComponent = () => {
       state={[stateContent, stateBar, stateLargeTitle]}
       title="Header"
     >
-      <div className="header-demo-phone">
+      <div className="demo-phone">
         <Page.Root>
           <Header.Root>
             <Header.Bar {...propsBar}>

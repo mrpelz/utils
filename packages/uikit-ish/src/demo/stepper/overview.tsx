@@ -24,11 +24,11 @@ const LiveView: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [value, setValue] = useState<number | null>(5);
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsOverview,
-    'Stepper.Root',
+  const [control, props, state] = usePropControl(propOptionsOverview, {
     external,
-  );
+    open: true,
+    title: 'Stepper.Root',
+  });
 
   return (
     <Component

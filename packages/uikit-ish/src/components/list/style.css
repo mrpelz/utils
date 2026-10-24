@@ -637,14 +637,14 @@
         );
       }
 
-      &:where(:root[data-color-scheme='light'] *) {
+      &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
         --uikit-list-selected-background: var(
           --uikit-sidebar-selection,
           rgb(0 0 0 / 7%)
         );
       }
 
-      &:where(:root[data-color-scheme='dark'] *) {
+      &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
         --uikit-list-selected-background: var(
           --uikit-sidebar-selection,
           rgb(255 255 255 / 12%)

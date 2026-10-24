@@ -33,14 +33,11 @@ export const SheetDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlPopup, propsPopup, statePopup] = usePropControl(
     propOptionsPopup,
-    'popup',
-    externalPopup,
+    { external: externalPopup, title: 'popup' },
   );
 
   return (
@@ -55,7 +52,7 @@ export const SheetDemo: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root
           key={`${keyRoot}`}

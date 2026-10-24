@@ -47,17 +47,14 @@ const LiveView: FunctionComponent = () => {
   const [externalRoot, externalColumn] = useProvidedState(id);
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsGuideRoot,
-    'Layout.Root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'Layout.Root' },
   );
   const [controlColumn, propsColumn, stateColumn, keyColumn] = usePropControl(
     useMemo(
       () => getPropOptionsGuideColumn('list', 320, true, addLog),
       [addLog],
     ),
-    'Layout.Column (list)',
-    externalColumn,
+    { external: externalColumn, title: 'Layout.Column (list)' },
   );
   const sizeClass = useSizeClass();
   // (Unset, by the window's size class.)
@@ -66,6 +63,7 @@ const LiveView: FunctionComponent = () => {
   return (
     <Component
       center
+      expanded
       inline
       controls={[controlRoot, controlColumn]}
       id={id}
@@ -73,7 +71,7 @@ const LiveView: FunctionComponent = () => {
       state={[stateRoot, stateColumn]}
       title="Layout"
     >
-      <div className={compact ? 'layout-demo-phone' : 'layout-demo-tablet'}>
+      <div className={compact ? 'demo-phone' : 'demo-tablet'}>
         <Layout.Root
           {...propsRoot}
           compact={compact}

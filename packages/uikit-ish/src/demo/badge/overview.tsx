@@ -23,12 +23,11 @@ const LiveView: FunctionComponent = () => {
   const id = 'badge-overview';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsOverview,
-    'Badge',
+  const [control, props, state] = usePropControl(propOptionsOverview, {
     external,
-    true,
-  );
+    open: true,
+    title: 'Badge',
+  });
 
   return (
     <Component

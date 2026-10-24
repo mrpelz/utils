@@ -20,14 +20,11 @@ const LiveView: FunctionComponent = () => {
   const [externalContent, externalRoot] = useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsPeriodsContent,
-    '[content]',
-    externalContent,
+    { external: externalContent, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     propOptionsOverviewRoot,
-    'Segmented.Root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'Segmented.Root' },
   );
 
   return (

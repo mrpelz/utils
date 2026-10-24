@@ -45,24 +45,24 @@ import {
 const RootPart: FunctionComponent = () => {
   const id = 'layout-parts-root';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideRoot,
-    'Layout.Root',
+  const [control, props, state] = usePropControl(propOptionsGuideRoot, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Layout.Root',
+  });
 
   return (
     <Component
       center
+      expanded
       inline
       controls={[control]}
       id={id}
       state={[state]}
       title="Layout.Root"
     >
-      <div className="layout-demo-tablet">
+      <div className="demo-tablet">
         <Layout.Root {...props}>
           <Layout.Column defaultSize={320}>
             <Page.Root>
@@ -101,24 +101,24 @@ const RootPart: FunctionComponent = () => {
 const BackgroundPart: FunctionComponent = () => {
   const id = 'layout-parts-background';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideBackground,
-    'Layout.Background',
+  const [control, props, state] = usePropControl(propOptionsGuideBackground, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Layout.Background',
+  });
 
   return (
     <Component
       center
+      expanded
       inline
       controls={[control]}
       id={id}
       state={[state]}
       title="Layout.Background"
     >
-      <div className="layout-demo-tablet">
+      <div className="demo-tablet">
         <Layout.Root>
           <Layout.Background {...props}>
             <div
@@ -158,15 +158,13 @@ const ColumnPart: FunctionComponent = () => {
       () => getPropOptionsGuideColumn('column', 320, true, addLog),
       [addLog],
     ),
-    'Layout.Column',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Layout.Column' },
   );
 
   return (
     <Component
       center
+      expanded
       inline
       controls={[control]}
       id={id}
@@ -174,7 +172,7 @@ const ColumnPart: FunctionComponent = () => {
       state={[state]}
       title="Layout.Column"
     >
-      <div className="layout-demo-tablet">
+      <div className="demo-tablet">
         <Layout.Root>
           <Layout.Column
             key={key}
@@ -224,9 +222,7 @@ const DrawerPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, key] = usePropControl(
     useMemo(() => getPropOptionsGuideDrawer(addLog), [addLog]),
-    'Layout.Drawer',
-    external,
-    true,
+    { external, title: 'Layout.Drawer' },
   );
 
   return (
@@ -239,7 +235,7 @@ const DrawerPart: FunctionComponent = () => {
       state={[state]}
       title="Layout.Drawer"
     >
-      <div className="layout-demo-phone">
+      <div className="demo-phone">
         <Layout.Root compact>
           <Layout.Drawer
             key={key}
@@ -302,10 +298,7 @@ const DrawerSwipeAreaPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     propOptionsGuideDrawerSwipeArea,
-    'Layout.DrawerSwipeArea',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Layout.DrawerSwipeArea' },
   );
 
   return (
@@ -317,7 +310,7 @@ const DrawerSwipeAreaPart: FunctionComponent = () => {
       state={[state]}
       title="Layout.DrawerSwipeArea"
     >
-      <div className="layout-demo-phone">
+      <div className="demo-phone">
         <Layout.Root compact>
           <Layout.Drawer>
             <Layout.DrawerSwipeArea {...props} />
@@ -363,10 +356,7 @@ const DrawerTriggerPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     propOptionsGuideDrawerTrigger,
-    'Layout.DrawerTrigger',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Layout.DrawerTrigger' },
   );
 
   return (
@@ -378,7 +368,7 @@ const DrawerTriggerPart: FunctionComponent = () => {
       state={[state]}
       title="Layout.DrawerTrigger"
     >
-      <div className="layout-demo-phone">
+      <div className="demo-phone">
         <Layout.Root compact>
           <Layout.Drawer handle={triggerPartDrawer}>
             <Layout.Column>
@@ -432,13 +422,12 @@ const DrawerClosePart: FunctionComponent = () => {
   // Its trigger, in the content's bar (outside the drawer).
   const closePartDrawer = codeLabel(useCreateDrawerHandle(), 'closePartDrawer');
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideDrawerClose,
-    'Layout.DrawerClose',
+  const [control, props, state] = usePropControl(propOptionsGuideDrawerClose, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Layout.DrawerClose',
+  });
 
   return (
     <Component
@@ -449,7 +438,7 @@ const DrawerClosePart: FunctionComponent = () => {
       state={[state]}
       title="Layout.DrawerClose"
     >
-      <div className="layout-demo-phone">
+      <div className="demo-phone">
         <Layout.Root compact>
           <Layout.Drawer handle={closePartDrawer}>
             <Layout.DrawerSwipeArea />
@@ -531,7 +520,7 @@ const CreateDrawerHandlePart: FunctionComponent = () => {
       log={log}
       title="Layout.createDrawerHandle"
     >
-      <div className="layout-demo-phone">
+      <div className="demo-phone">
         <Layout.Root compact>
           <Layout.Drawer
             handle={contactsDrawer}
@@ -617,7 +606,7 @@ const UseCreateDrawerHandlePart: FunctionComponent = () => {
       log={log}
       title="useCreateDrawerHandle"
     >
-      <div className="layout-demo-phone">
+      <div className="demo-phone">
         <Layout.Root compact>
           <Layout.Drawer
             handle={peopleDrawer}

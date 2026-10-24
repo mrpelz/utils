@@ -156,7 +156,7 @@ const Detents: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root>
           <Sheet.Trigger
@@ -279,7 +279,7 @@ const CancelDone: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root
           disablePointerDismissal={edited}
@@ -391,7 +391,7 @@ const WithoutAGrabber: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root
           onOpenChange={(open: boolean) => addLog(`open: ${String(open)}`)}
@@ -467,7 +467,7 @@ const NavigationInside: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Sheet.Root
           onOpenChangeComplete={(open: boolean) => {
@@ -562,6 +562,7 @@ const FormSheet: FunctionComponent = () => {
   return (
     <Component
       center
+      expanded
       inline
       inputGuards
       id="sheet-composition-form-sheet"
@@ -570,7 +571,7 @@ const FormSheet: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-tablet"
+        className="demo-tablet demo-centered"
       >
         <Sheet.Root>
           <Sheet.Trigger

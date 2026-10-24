@@ -34,33 +34,29 @@ export const TextFieldDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     propOptionsRoot,
-    'root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'root' },
   );
   const [controlLabel, propsLabel, stateLabel] = usePropControl(
     commonPropOptions,
-    'label',
-    externalLabel,
+    { external: externalLabel, title: 'label' },
   );
   const [controlControl, propsControl, stateControl, keyControl] =
     usePropControl(
       useMemo(() => getPropOptionsControl(addLog), [addLog]),
-      'control',
-      externalControl,
-      true,
+      { external: externalControl, open: true, title: 'control' },
     );
   const [controlClear, propsClear, stateClear] = usePropControl(
     useMemo(() => getPropOptionsClear(addLog), [addLog]),
-    'clear',
-    externalClear,
+    { external: externalClear, title: 'clear' },
   );
   const [controlDescription, propsDescription, stateDescription] =
-    usePropControl(commonPropOptions, 'description', externalDescription);
+    usePropControl(commonPropOptions, {
+      external: externalDescription,
+      title: 'description',
+    });
   const [controlError, propsError, stateError] = usePropControl(
     propOptionsError,
-    'error',
-    externalError,
+    { external: externalError, title: 'error' },
   );
 
   return (

@@ -15,14 +15,11 @@ const LiveView: FunctionComponent = () => {
   const [externalSymbol, externalText] = useProvidedState(id);
   const [controlSymbol, propsSymbol, stateSymbol] = usePropControl(
     propOptionsOverviewSymbol,
-    'Symbol',
-    externalSymbol,
-    true,
+    { external: externalSymbol, open: true, title: 'Symbol' },
   );
   const [controlText, propsText, stateText] = usePropControl(
     propOptionsOverviewText,
-    'Typography',
-    externalText,
+    { external: externalText, title: 'Typography' },
   );
 
   return (

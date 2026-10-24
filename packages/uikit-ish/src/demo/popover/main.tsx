@@ -36,20 +36,15 @@ export const PopoverDemo: FunctionComponent = () => {
 
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'root',
-    externalRoot,
+    { external: externalRoot, title: 'root' },
   );
   const [controlPositioner, propsPositioner, statePositioner] = usePropControl(
     propOptionsPositioner,
-    'positioner',
-    externalPositioner,
-    true,
+    { external: externalPositioner, open: true, title: 'positioner' },
   );
   const [controlContent, propsContent, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
 
   return (

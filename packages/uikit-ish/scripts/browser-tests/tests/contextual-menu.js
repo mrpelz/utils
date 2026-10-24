@@ -28,7 +28,7 @@ export const tests = [
       await page.open('contextual-menu');
       // The trigger near its frame's bottom.
       await page.evaluate(`(() => {
-        const frame = ${page.section}.querySelector('.sheet-demo-phone').getBoundingClientRect();
+        const frame = ${page.section}.querySelector('.demo-phone').getBoundingClientRect();
         const wrapper = ${page.section}.querySelector('button').parentElement;
         wrapper.style.top = (frame.bottom - 40 - wrapper.getBoundingClientRect().bottom) + 'px';
       })()`);
@@ -37,7 +37,7 @@ export const tests = [
       await pressTrigger(page);
 
       const open = await page.evaluate(`(() => {
-        const frame = ${page.section}.querySelector('.sheet-demo-phone').getBoundingClientRect();
+        const frame = ${page.section}.querySelector('.demo-phone').getBoundingClientRect();
         const preview = document.querySelector(${JSON.stringify('[data-contextual-menu-part=preview]')}).getBoundingClientRect();
         const menu = document.querySelector(${JSON.stringify('[role=menu]')}).getBoundingClientRect();
         return { frameBottom: frame.bottom, menuBottom: menu.bottom, menuTop: menu.top, previewBottom: preview.bottom, previewTop: preview.top };
@@ -75,7 +75,7 @@ export const tests = [
       await pressTrigger(page);
       const preview = () =>
         page.evaluate(`(() => {
-          const frame = ${page.section}.querySelector('.sheet-demo-phone').getBoundingClientRect();
+          const frame = ${page.section}.querySelector('.demo-phone').getBoundingClientRect();
           const { bottom, left, right, top, width } = document.querySelector(${JSON.stringify('[data-contextual-menu-part=preview]')}).getBoundingClientRect();
           return { bottom, frameLeft: frame.left, frameRight: frame.right, frameTop: frame.top, left, right, top, width };
         })()`);
@@ -92,7 +92,7 @@ export const tests = [
       // The trigger partly above its frame: the preview comes down.
       await page.open('contextual-menu');
       await page.evaluate(`(() => {
-        const frame = ${page.section}.querySelector('.sheet-demo-phone').getBoundingClientRect();
+        const frame = ${page.section}.querySelector('.demo-phone').getBoundingClientRect();
         const wrapper = ${page.section}.querySelector('button').parentElement;
         wrapper.style.translate = '0 ' + (frame.top - wrapper.getBoundingClientRect().top - 10) + 'px';
       })()`);
@@ -122,7 +122,7 @@ export const tests = [
         await pressTrigger(page);
         const state = () =>
           page.evaluate(`(() => {
-            const frame = ${page.section}.querySelector('.sheet-demo-phone').getBoundingClientRect();
+            const frame = ${page.section}.querySelector('.demo-phone').getBoundingClientRect();
             const preview = document.querySelector(${JSON.stringify('[data-contextual-menu-part=preview]')}).getBoundingClientRect();
             const menu = document.querySelector(${JSON.stringify('[role=menu]')}).getBoundingClientRect();
             const scroller = document.querySelector(${JSON.stringify('[data-contextual-menu-part=scroller]')});
@@ -187,7 +187,7 @@ export const tests = [
       ]);
       await sleep(800);
       const opened = await page.evaluate(`(() => {
-        const frame = ${page.section}.querySelector('.sheet-demo-phone').getBoundingClientRect();
+        const frame = ${page.section}.querySelector('.demo-phone').getBoundingClientRect();
         const backdrop = document.querySelector('[data-contextual-menu-part=backdrop]').getBoundingClientRect();
         const trigger = document.querySelector('[data-contextual-menu-part=trigger]');
         return {

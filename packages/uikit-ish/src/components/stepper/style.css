@@ -85,11 +85,11 @@
         );
       }
 
-      &:where(:root[data-color-scheme='light'] *) {
+      &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
         background-image: linear-gradient(rgb(0 0 0 / 8%), rgb(0 0 0 / 8%));
       }
 
-      &:where(:root[data-color-scheme='dark'] *) {
+      &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
         background-image: linear-gradient(
           rgb(255 255 255 / 8%),
           rgb(255 255 255 / 8%)

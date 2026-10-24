@@ -60,12 +60,11 @@ const APopoverOnIPad: FunctionComponent = () => {
   const screen = useLabelledRef<HTMLDivElement>('screen');
   const sizeClass = useSizeClass();
   const [external] = useProvidedState(id);
-  const [control, content, state] = usePropControl(
-    propOptionsPresentation,
-    '[content]',
+  const [control, content, state] = usePropControl(propOptionsPresentation, {
     external,
-    true,
-  );
+    open: true,
+    title: '[content]',
+  });
   const sheet =
     (content.presentation ??
       (sizeClass === 'compact' ? 'sheet' : 'popover')) === 'sheet';
@@ -84,7 +83,7 @@ const APopoverOnIPad: FunctionComponent = () => {
       {sheet ? (
         <div
           ref={screen}
-          className="sheet-demo-phone"
+          className="demo-phone demo-centered"
         >
           <ActionSheet.Root>
             <ActionSheet.Trigger
@@ -177,7 +176,7 @@ const OpenedByTheApp: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Button.Root
           size="large"

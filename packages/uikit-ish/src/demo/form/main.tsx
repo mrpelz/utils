@@ -52,19 +52,15 @@ export const FormDemo: FunctionComponent = () => {
 
   const [controlForm, propsForm, stateForm, keyForm] = usePropControl(
     useMemo(() => getPropOptionsForm(addLog), [addLog]),
-    'form',
-    externalForm,
-    true,
+    { external: externalForm, open: true, title: 'form' },
   );
   const [controlFieldset, propsFieldset, stateFieldset] = usePropControl(
     propOptionsFieldset,
-    'fieldset (contact)',
-    externalFieldset,
+    { external: externalFieldset, title: 'fieldset (contact)' },
   );
   const [controlLegend, propsLegend, stateLegend] = usePropControl(
     propOptionsLegend,
-    'legend (contact)',
-    externalLegend,
+    { external: externalLegend, title: 'legend (contact)' },
   );
   const [
     controlCheckboxGroup,
@@ -73,23 +69,21 @@ export const FormDemo: FunctionComponent = () => {
     keyCheckboxGroup,
   ] = usePropControl(
     useMemo(() => getPropOptionsCheckboxGroup(addLog), [addLog]),
-    'checkbox group',
-    externalCheckboxGroup,
-    true,
+    { external: externalCheckboxGroup, open: true, title: 'checkbox group' },
   );
   const [controlCheckbox, propsCheckbox, stateCheckbox, keyCheckbox] =
-    usePropControl(propOptionsCheckbox, 'checkbox (first)', externalCheckbox);
+    usePropControl(propOptionsCheckbox, {
+      external: externalCheckbox,
+      title: 'checkbox (first)',
+    });
   const [controlRadioGroup, propsRadioGroup, stateRadioGroup, keyRadioGroup] =
     usePropControl(
       useMemo(() => getPropOptionsRadioGroup(addLog), [addLog]),
-      'radio group',
-      externalRadioGroup,
-      true,
+      { external: externalRadioGroup, open: true, title: 'radio group' },
     );
   const [controlRadio, propsRadio, stateRadio, keyRadio] = usePropControl(
     propOptionsRadio,
-    'radio (first)',
-    externalRadio,
+    { external: externalRadio, title: 'radio (first)' },
   );
 
   return (

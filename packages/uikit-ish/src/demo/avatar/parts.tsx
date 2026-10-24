@@ -25,13 +25,12 @@ import {
 const RootPart: FunctionComponent = () => {
   const id = 'avatar-parts-root';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsRoot,
-    'Avatar.Root',
+  const [control, props, state] = usePropControl(propOptionsRoot, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Avatar.Root',
+  });
 
   return (
     <Component
@@ -61,10 +60,7 @@ const ImagePart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsGuideImage(addLog), [addLog]),
-    'Avatar.Image',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Avatar.Image' },
   );
 
   return (
@@ -92,10 +88,7 @@ const FallbackPart: FunctionComponent = () => {
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     propOptionsGuideFallback,
-    'Avatar.Fallback',
-    external,
-    true,
-    true,
+    { external, open: true, outlined: true, title: 'Avatar.Fallback' },
   );
 
   return (
@@ -119,13 +112,12 @@ const FallbackPart: FunctionComponent = () => {
 const GroupPart: FunctionComponent = () => {
   const id = 'avatar-parts-group';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideGroup,
-    'Avatar.Group',
+  const [control, props, state] = usePropControl(propOptionsGuideGroup, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Avatar.Group',
+  });
 
   return (
     <Component

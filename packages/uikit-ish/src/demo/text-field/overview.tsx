@@ -30,23 +30,17 @@ const LiveView: FunctionComponent = () => {
   const [externalContent, externalRoot, externalControl] = useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsOverviewContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     propOptionsOverviewRoot,
-    'TextField.Root',
-    externalRoot,
-    true,
+    { external: externalRoot, title: 'TextField.Root' },
   );
   const [controlControl, propsControl, stateControl, keyControl] =
-    usePropControl(
-      propOptionsOverviewControl,
-      'TextField.Control',
-      externalControl,
-      true,
-    );
+    usePropControl(propOptionsOverviewControl, {
+      external: externalControl,
+      title: 'TextField.Control',
+    });
 
   return (
     <Component

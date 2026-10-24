@@ -21,7 +21,7 @@ const sheet = (page) =>
       actions: [...popup.querySelectorAll('[data-action-sheet-part=action]')].map(box),
       backdrop: box(document.querySelector('[data-action-sheet-part=backdrop]')),
       panel: [box(popup), getComputedStyle(popup).borderRadius],
-      screen: box(document.querySelector('.sheet-demo-phone')),
+      screen: box(document.querySelector('.demo-phone')),
       trigger: box(document.querySelector('[aria-haspopup]')),
     };
   })()`);
@@ -92,7 +92,7 @@ export const tests = [
       const [screenLeft, , screenWidth] = open.screen;
       const screenBottom = open.screen[1] + open.screen[3];
       const inset = await page.evaluate(
-        `parseFloat(getComputedStyle(document.querySelector(${JSON.stringify('.sheet-demo-phone')})).getPropertyValue(${JSON.stringify('--uikit-safe-area-inset-bottom')}))`,
+        `parseFloat(getComputedStyle(document.querySelector(${JSON.stringify('.demo-phone')})).getPropertyValue(${JSON.stringify('--uikit-safe-area-inset-bottom')}))`,
       );
       assert.equal(screenBottom - (top + height), inset + 8);
       assert.ok(

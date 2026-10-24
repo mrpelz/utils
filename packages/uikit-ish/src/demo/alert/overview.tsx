@@ -36,19 +36,15 @@ const LiveView: FunctionComponent = () => {
   const [externalContent, externalRoot, externalActions] = useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsOverviewContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'Alert.Root',
-    externalRoot,
+    { external: externalRoot, title: 'Alert.Root' },
   );
   const [controlActions, propsActions, stateActions] = usePropControl(
     propOptionsActions,
-    'Alert.Actions',
-    externalActions,
+    { external: externalActions, title: 'Alert.Actions' },
   );
 
   return (
@@ -65,7 +61,7 @@ const LiveView: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Root
           key={keyRoot}

@@ -137,7 +137,7 @@ const LargeTitle: FunctionComponent = () => {
       log={log}
       title="Header with a large title"
     >
-      <div className="header-demo-phone">
+      <div className="demo-phone">
         <Page.Root>
           <Header.Root>
             <Header.Bar>
@@ -195,7 +195,7 @@ const Search: FunctionComponent = () => {
       id="header-composition-search"
       title="Header with a search field"
     >
-      <div className="header-demo-phone">
+      <div className="demo-phone">
         <Page.Root>
           <Header.Root>
             <Header.Bar>
@@ -253,7 +253,7 @@ const OverPicture: FunctionComponent = () => {
       log={log}
       title="Header over a picture"
     >
-      <div className="header-demo-phone">
+      <div className="demo-phone">
         <Page.Root background="plain">
           <Header.Root>
             <Header.Bar context="adaptive">
@@ -321,7 +321,7 @@ const ControlBelow: FunctionComponent = () => {
       log={log}
       title="Header with a control"
     >
-      <div className="header-demo-phone">
+      <div className="demo-phone">
         <Page.Root>
           <Header.Root>
             <Header.Bar>

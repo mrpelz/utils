@@ -101,7 +101,10 @@
     font-size: 0.875rem;
   }
 
-  /* Snaps to snap points of demos having them (plain lists' sections). */
+  /* Snaps to snap points of demos having them (plain lists' sections). On
+     the page's background, as its color scheme has it (the demo's setting,
+     `data-color-scheme`); a stacking context, so the dotted background
+     and the backdrop, at z-index -1, are above it. */
   .demo-stage {
     position: relative;
     display: grid;
@@ -110,7 +113,10 @@
     /* (Filling the frame below its header, not a viewport's height.) */
     min-height: 0;
     align-items: center;
+    background-color: light-dark(white, #0a0a0a);
+    color: light-dark(black, #fafafa);
     grid-area: stage;
+    isolation: isolate;
     scroll-snap-stop: always;
 
     /* (Its components' long presses theirs, not iOS' callout: inherited.) */
@@ -142,7 +148,9 @@
   }
 
   /* The demo's own element: hugging it (or stretched), maybe centered, on
-     an opaque backdrop. */
+     a backdrop (the Backdrop setting): an app's background, as a device's
+     screen's (see shared/style.css), where the demo doesn't paint its
+     own. */
   .demo-stage-inner {
     position: relative;
     display: block;
@@ -168,7 +176,7 @@
       position: absolute;
       z-index: -1;
       display: block;
-      background-color: light-dark(white, #0a0a0a);
+      background-color: var(--color-ios-system-grouped-background);
       inset: 0;
     }
 
@@ -205,24 +213,22 @@
     }
   }
 
+  /* Its sections (settings, prop controls, code, log), a line between
+     them; the last filling the column (e.g. the log, growing in it). */
   .demo-config-section {
-    min-height: auto;
     padding: 0.5rem;
-    border-right: none;
-    border-left: none;
 
-    & + &,
-    &:first-child {
-      border-top: none;
+    & + & {
+      border-top: 1px dashed #404040;
     }
 
     &:last-child {
+      display: flex;
+      flex-direction: column;
       flex-grow: 1;
-      border-bottom: none;
     }
 
     @media screen and (width <= 768px) {
-      margin: 0;
       margin-inline: calc(1rem * -1);
     }
   }
@@ -248,9 +254,21 @@
     grid-template-columns: auto minmax(0, 1fr) min-content;
     margin-block: 1rem;
 
-    & > input {
+    & > input,
+    & > select {
       width: 100%;
       min-width: 0;
+    }
+
+    /* Each prop on a row of its own (its name first)… */
+    & > label {
+      grid-column: 1;
+    }
+
+    /* …a value of one's own below its select. */
+    & > .demo-props-custom {
+      font-family: monospace;
+      grid-column: 2;
     }
   }
 
@@ -289,6 +307,23 @@
     white-space: pre;
   }
 
+
+  /* Parts overlaid (see overlay.ts): their boxes, hatched, over the page. */
+  .demo-overlay {
+    position: fixed;
+    z-index: 2147483647;
+    inset: 0;
+    pointer-events: none;
+
+    & > div {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: var(--demo-hatch);
+      outline: 1px solid rgb(255 59 48 / 60%);
+      outline-offset: -1px;
+    }
+  }
 
   /* In a section's heading (also while it's collapsed). */
   .demo-outline-toggle {

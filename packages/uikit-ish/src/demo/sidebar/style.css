@@ -1,12 +1,5 @@
 /* Sidebar demos (see main.tsx). */
 
-/* The layout as a screen in the stage (a grid: its content stretched to
-   its height). */
-.sidebar-demo-screen {
-  display: grid;
-  height: min(640px, 70vh);
-}
-
 /* The layout's background: a picture (here, of gradients). */
 .sidebar-demo-picture {
   background:
@@ -22,27 +15,6 @@
   --uikit-list-container-background: transparent;
 
   background-color: transparent;
-}
-
-/* A tablet's screen (the guide pages' views; an iPad's width, at most the
-   stage's): a layout of the sidebar and the content. */
-.sidebar-demo-tablet {
-  display: grid;
-  overflow: hidden;
-  width: 820px;
-  max-width: 100%;
-  height: min(640px, 70vh);
-  border-radius: 24px;
-}
-
-/* A phone's screen: a compact layout, the sidebar its drawer. */
-.sidebar-demo-phone {
-  display: grid;
-  overflow: hidden;
-  width: 402px;
-  max-width: 100%;
-  height: min(640px, 70vh);
-  border-radius: 24px;
 }
 
 /* A sidebar of its own (a part's view): as wide as in a layout's column,

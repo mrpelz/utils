@@ -43,19 +43,15 @@ const LiveView: FunctionComponent = () => {
     useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     useMemo(() => getPropOptionsOverviewRoot(addLog), [addLog]),
-    'Popover.Root',
-    externalRoot,
+    { external: externalRoot, title: 'Popover.Root' },
   );
   const [controlPositioner, propsPositioner, statePositioner] = usePropControl(
     propOptionsOverviewPositioner,
-    'Popover.Positioner',
-    externalPositioner,
+    { external: externalPositioner, title: 'Popover.Positioner' },
   );
 
   return (

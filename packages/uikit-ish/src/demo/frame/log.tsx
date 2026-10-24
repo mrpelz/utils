@@ -41,7 +41,7 @@ export const useLog = (): [ReactNode, AddLog] => {
   }, []);
 
   const log = (
-    <section className="demo-config demo-config-section">
+    <section className="demo-config-section">
       <summary className="demo-config-heading">Log</summary>
       {/* (Following its last line, see Tail.) */}
       <Tail

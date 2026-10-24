@@ -468,11 +468,16 @@
     --shadow-ios-list-reorder: 0 2px 8px rgb(0 0 0 / 60%);
   }
 
-  :root[data-color-scheme='light'] {
+  /* A color scheme forced (see `useColorScheme`): on the root element, or
+     on any element, for what's within it. (Forced within one forced
+     otherwise, the dark one's rules win, not the nearer one's.) */
+  [data-color-scheme='light'] {
     color-scheme: light;
+
+    --glass-ios-lens-shadow: var(--glass-ios-bright-lens-shadow);
   }
 
-  :root[data-color-scheme='dark'] {
+  [data-color-scheme='dark'] {
     color-scheme: dark;
 
     --glass-ios-lens-shadow: var(--glass-ios-dim-lens-shadow);

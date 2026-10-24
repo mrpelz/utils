@@ -22,19 +22,15 @@ export const AvatarDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'root',
-    externalRoot,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    title: 'root',
+  });
   const [controlImage, propsImage, stateImage, keyImage] = usePropControl(
     propOptionsImage,
-    'image',
-    externalImage,
+    { external: externalImage, title: 'image' },
   );
 
   const badge = content.badge ? <Badge>3</Badge> : null;

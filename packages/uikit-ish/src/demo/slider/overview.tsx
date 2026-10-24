@@ -30,12 +30,11 @@ const LiveView: FunctionComponent = () => {
   const id = 'slider-overview';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, content, state] = usePropControl(
-    propOptionsOverviewContent,
-    '[content]',
+  const [control, content, state] = usePropControl(propOptionsOverviewContent, {
     external,
-    true,
-  );
+    open: true,
+    title: '[content]',
+  });
   const [name, min, max] = symbolPairs[content.symbols ?? 'brightness'];
 
   return (

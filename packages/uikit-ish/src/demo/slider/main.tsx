@@ -36,40 +36,31 @@ export const SliderDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlRoot, propsRoot, stateRoot, elementKey] = usePropControl(
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
-    'Slider.Root',
-    externalRoot,
-    true,
+    { external: externalRoot, open: true, title: 'Slider.Root' },
   );
   const [controlLabel, propsLabel, stateLabel] = usePropControl(
     propOptionsLabel,
-    'Slider.Label',
-    externalLabel,
+    { external: externalLabel, title: 'Slider.Label' },
   );
   const [controlValue, propsValue, stateValue] = usePropControl(
     propOptionsValue,
-    'Slider.Value',
-    externalValue,
+    { external: externalValue, title: 'Slider.Value' },
   );
   const [controlControl, propsControl, stateControl] = usePropControl(
     commonPropOptions,
-    'Slider.Control',
-    externalControl,
+    { external: externalControl, title: 'Slider.Control' },
   );
   const [controlTrack, propsTrack, stateTrack] = usePropControl(
     commonPropOptions,
-    'Slider.Track',
-    externalTrack,
+    { external: externalTrack, title: 'Slider.Track' },
   );
   const [controlIndicator, propsIndicator, stateIndicator] = usePropControl(
     commonPropOptions,
-    'Slider.Indicator',
-    externalIndicator,
+    { external: externalIndicator, title: 'Slider.Indicator' },
   );
   const propOptionsThumbWithLog = useMemo(
     () => getPropOptionsThumb(addLog),
@@ -77,29 +68,24 @@ export const SliderDemo: FunctionComponent = () => {
   );
   const [controlThumbFirst, propsThumbFirst, stateThumbFirst] = usePropControl(
     propOptionsThumbWithLog,
-    'Slider.Thumb (1st)',
-    externalThumbFirst,
+    { external: externalThumbFirst, title: 'Slider.Thumb (1st)' },
   );
   const [controlThumbSecond, propsThumbSecond, stateThumbSecond] =
-    usePropControl(
-      propOptionsThumbWithLog,
-      'Slider.Thumb (2nd)',
-      externalThumbSecond,
-    );
+    usePropControl(propOptionsThumbWithLog, {
+      external: externalThumbSecond,
+      title: 'Slider.Thumb (2nd)',
+    });
   const [controlTicks, propsTicks, stateTicks] = usePropControl(
     commonPropOptions,
-    'Slider.Ticks',
-    externalTicks,
+    { external: externalTicks, title: 'Slider.Ticks' },
   );
   const [controlMinSymbol, propsMinSymbol, stateMinSymbol] = usePropControl(
     useMemo(() => getPropOptionsMinSymbol(addLog), [addLog]),
-    'Slider.Symbol (min)',
-    externalMinSymbol,
+    { external: externalMinSymbol, title: 'Slider.Symbol (min)' },
   );
   const [controlMaxSymbol, propsMaxSymbol, stateMaxSymbol] = usePropControl(
     useMemo(() => getPropOptionsMaxSymbol(addLog), [addLog]),
-    'Slider.Symbol (max)',
-    externalMaxSymbol,
+    { external: externalMaxSymbol, title: 'Slider.Symbol (max)' },
   );
 
   return (

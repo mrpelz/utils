@@ -42,14 +42,11 @@ const LiveView: FunctionComponent = () => {
   const [externalContent, externalPanel] = useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsPresentation,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
   const [controlPanel, propsPanel, statePanel, keyPanel] = usePropControl(
     propOptionsOverview,
-    'ColorPicker.Panel',
-    externalPanel,
+    { external: externalPanel, title: 'ColorPicker.Panel' },
   );
   const sheet =
     (content.presentation ??
@@ -69,7 +66,7 @@ const LiveView: FunctionComponent = () => {
       {sheet ? (
         <div
           ref={screen}
-          className="sheet-demo-phone"
+          className="demo-phone demo-centered"
         >
           <Sheet.Root>
             <Sheet.Trigger

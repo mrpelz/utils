@@ -118,11 +118,11 @@ const ContentViews: FunctionComponent = () => {
   const id = 'segmented-composition-content';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsContentAnchor,
-    'Viewport.Anchor',
+  const [control, props, state] = usePropControl(propOptionsContentAnchor, {
     external,
-  );
+    open: true,
+    title: 'Viewport.Anchor',
+  });
   const [show, setShow] = useState('all');
 
   return (
@@ -135,7 +135,7 @@ const ContentViews: FunctionComponent = () => {
       state={[state]}
       title="Segmented switching content"
     >
-      <div className="toolbar-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content>
           <List.Root className="segmented-demo-list">
             <List.Section>
@@ -183,7 +183,7 @@ const InHeader: FunctionComponent = () => {
       log={log}
       title="Segmented in a navigation bar"
     >
-      <div className="toolbar-demo-screen">
+      <div className="demo-phone">
         <Page.Root>
           <Header.Root>
             <Header.Bar>
@@ -238,7 +238,7 @@ const InToolbar: FunctionComponent = () => {
       log={log}
       title="Segmented in a toolbar"
     >
-      <div className="toolbar-demo-screen">
+      <div className="demo-phone">
         <Viewport.BlockEnd>
           <Toolbar.Root>
             <Toolbar.Leading>

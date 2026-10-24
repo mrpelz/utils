@@ -154,7 +154,7 @@ const Shell: FunctionComponent = () => {
       log={log}
       title="Viewport with a tab bar"
     >
-      <div className="viewport-demo-screen">
+      <div className="demo-phone">
         <TabBar.Root
           defaultValue="favorites"
           onValueChange={(
@@ -220,7 +220,7 @@ const Message: FunctionComponent = () => {
       log={log}
       title="Viewport with a message field"
     >
-      <div className="viewport-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content>
           <List.Root className="viewport-demo-list">
             <List.Section>
@@ -278,7 +278,7 @@ const CollapseView: FunctionComponent<{
       id="viewport-composition-collapse"
       title="Viewport collapsing a tab bar"
     >
-      <div className="viewport-demo-screen">
+      <div className="demo-phone">
         <TabBar.Root
           value={value}
           onValueChange={setValue}
@@ -348,7 +348,7 @@ const Selection: FunctionComponent = () => {
       log={log}
       title="Viewport with a toolbar"
     >
-      <div className="viewport-demo-screen">
+      <div className="demo-phone">
         <Viewport.Content>
           <List.Root
             editing

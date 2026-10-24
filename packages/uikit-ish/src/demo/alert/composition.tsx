@@ -32,7 +32,7 @@ const WithATextField: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <List.Root style={{ width: '100%' }}>
           <List.Section>
@@ -110,7 +110,7 @@ const OpenedByTheApp: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Button.Root
           size="large"
@@ -164,7 +164,7 @@ const ThreeActions: FunctionComponent = () => {
     >
       <div
         ref={screen}
-        className="sheet-demo-phone"
+        className="demo-phone demo-centered"
       >
         <Alert.Root>
           <Alert.Trigger

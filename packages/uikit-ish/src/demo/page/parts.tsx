@@ -14,13 +14,12 @@ import { propOptionsGuideRoot } from './props.js';
 const RootPart: FunctionComponent = () => {
   const id = 'page-parts-root';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    propOptionsGuideRoot,
-    'Page.Root',
+  const [control, props, state] = usePropControl(propOptionsGuideRoot, {
     external,
-    true,
-    true,
-  );
+    open: true,
+    outlined: true,
+    title: 'Page.Root',
+  });
 
   return (
     <Component
@@ -31,7 +30,7 @@ const RootPart: FunctionComponent = () => {
       state={[state]}
       title="Page.Root"
     >
-      <div className="page-demo-phone">
+      <div className="demo-phone">
         <Page.Root {...props}>
           <Header.Root>
             <Header.Bar>

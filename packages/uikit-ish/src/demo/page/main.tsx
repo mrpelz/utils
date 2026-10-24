@@ -22,16 +22,13 @@ export const PageDemo: FunctionComponent = () => {
 
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'root',
-    externalRoot,
-    true,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    open: true,
+    title: 'root',
+  });
 
   return (
     <Component
@@ -42,7 +39,7 @@ export const PageDemo: FunctionComponent = () => {
       state={[stateContent, stateRoot]}
       title="Page"
     >
-      <div className="page-demo-screen">
+      <div className="demo-phone demo-fill">
         <Page.Root
           {...propsRoot}
           background={

@@ -37,17 +37,14 @@ export const BadgeDemo: FunctionComponent = () => {
 
   const [externalRoot, externalContent] = useProvidedState(id);
 
-  const [controlRoot, propsRoot, stateRoot] = usePropControl(
-    propOptionsRoot,
-    'root',
-    externalRoot,
-    true,
-  );
+  const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
+    external: externalRoot,
+    open: true,
+    title: 'root',
+  });
   const [controlContent, propsContent, stateContent] = usePropControl(
     propOptionsContent,
-    '[content]',
-    externalContent,
-    true,
+    { external: externalContent, open: true, title: '[content]' },
   );
 
   return (
