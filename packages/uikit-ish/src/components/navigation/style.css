@@ -68,11 +68,12 @@
     }
   }
 
-  /* Where a swipe back starts: within 20px of the leading edge. */
-  .uikit-navigation-edge {
+  /* Where a swipe back starts (see SwipeArea): within its width of the
+     leading edge, over the pages. */
+  .uikit-navigation-swipe-area {
     position: absolute;
     z-index: 2;
-    width: 20px;
+    width: var(--uikit-navigation-swipe-area-width);
     inset-block: 0;
     inset-inline-start: 0;
     touch-action: none;

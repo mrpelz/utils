@@ -118,12 +118,12 @@ config.plugins = [
             `'${publicPath}'`,
           ),
         ],
-        test: new RegExp(`^${path.resolve(dirSrc, 'demo/env.ts')}$`),
+        test: new RegExp(`^${path.resolve(dirSrc, 'demo/tooling/env.ts')}$`),
       },
     ],
   }),
   // Client-only, never imported while prerendering (from effects): Monaco
-  // (src/demo/frame/code-view.tsx) and Mermaid (src/demo/hig-guide/parts.tsx),
+  // (src/demo/tooling/frame/code-view.tsx) and Mermaid (src/demo/docs/hig-guide/parts.tsx),
   // left out entirely.
   // @ts-ignore
   new webpack.IgnorePlugin({

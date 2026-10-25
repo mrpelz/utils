@@ -4,6 +4,7 @@ import './style.css';
 import { useRender } from '@base-ui/react/use-render';
 import {
   Children,
+  ComponentProps,
   createContext,
   forwardRef,
   isValidElement,
@@ -16,11 +17,12 @@ import {
   useState,
 } from 'react';
 
-import { cn, useForwardedRef } from '../utils/main.js';
+import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import type {
   NavigationBackEventDetails,
   NavigationBackProps,
   NavigationRootProps,
+  NavigationSwipeAreaProps,
   Role,
   Transition,
 } from './props.js';
@@ -29,6 +31,7 @@ export type {
   NavigationBackEventDetails,
   NavigationBackProps,
   NavigationRootProps,
+  NavigationSwipeAreaProps,
 } from './props.js';
 
 // Navigation (UIKit `UINavigationController`, after Framework7's views and
@@ -43,8 +46,8 @@ export type {
 // - anything else (e.g. another stack, a sibling's): shown at once, no
 //   transition.
 //
-// Swiping from the top page's leading edge (touch, or a mouse) pops it
-// interactively: released past half the width (or flung), `onBack` is
+// Swiping from the top page's leading edge (its `SwipeArea`: touch, or a
+// mouse) pops it interactively: released past half the width (or flung), `onBack` is
 // called for the app to pop its stack (the transition is done by then);
 // otherwise it settles back. A `Back` (e.g. a bar's back button) calls
 // `onBack` too, the app's pop transitioning as any.
@@ -76,16 +79,62 @@ const sameKeys = (a: string[], b: string[]) =>
 
 type GoBack = (eventDetails: NavigationBackEventDetails) => void;
 
-/** Its stack, for its `Back`s: going back (the app's `onBack`), if it can. */
-const NavigationContext = createContext<{ back?: GoBack }>({});
+/** A swipe back's handlers (see `SwipeArea`), while one can start or goes on. */
+type SwipeHandlers = Pick<
+  ComponentProps<'div'>,
+  | 'onLostPointerCapture'
+  | 'onPointerCancel'
+  | 'onPointerDown'
+  | 'onPointerMove'
+  | 'onPointerUp'
+>;
+
+/**
+ * Its stack, for its `Back`s (going back: the app's `onBack`, if it can)
+ * and its `SwipeArea`s (swiping back, if it can).
+ */
+const NavigationContext = createContext<{
+  back?: GoBack;
+  swipe?: SwipeHandlers;
+}>({});
+
+/**
+ * Where a swipe back starts (touch, or a mouse): a strip at the leading
+ * edge (`width`, 20px), over the pages, while there's a page to go back to
+ * (and an `onBack`); in its `Root`, among its pages. Without one, pages
+ * aren't swiped back.
+ */
+const SwipeArea = forwardRef<HTMLDivElement, NavigationSwipeAreaProps>(
+  ({ className, style, width = 20, ...props }, ref) => {
+    const { swipe } = useContext(NavigationContext);
+    if (!swipe) return null;
+
+    return (
+      <div
+        ref={ref}
+        data-navigation-part="swipe-area"
+        style={withStyle(
+          { '--uikit-navigation-swipe-area-width': `${String(width)}px` },
+          style,
+        )}
+        {...props}
+        {...swipe}
+        className={cn('uikit-navigation-swipe-area', className)}
+      />
+    );
+  },
+);
 
 /** A navigation: the app's stack of pages (keyed children, see above). */
 const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
   ({ className, children, onBack, ...props }, forwardedRef) => {
     const ref = useForwardedRef(forwardedRef);
-    const pages = Children.toArray(children).filter(
+    const elements = Children.toArray(children).filter(
       (child): child is ReactElement => isValidElement(child),
     );
+    // Its swipe areas, and its pages (all else).
+    const swipeAreas = elements.filter((child) => child.type === SwipeArea);
+    const pages = elements.filter((child) => child.type !== SwipeArea);
     const keys = pages.map((page) => String(page.key));
     const previousRef = useRef({ keys, pages });
     const [transition, setTransition] = useState<Transition | null>(null);
@@ -107,10 +156,10 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
     >(undefined);
 
     // The progress (and its transition), on the root.
-    const setProgress = (progress: number, animate: boolean) => {
+    const setProgress = (progress: number, isAnimated: boolean) => {
       const { current: root } = ref;
       if (!root) return;
-      root.style.transition = animate
+      root.style.transition = isAnimated
         ? `--uikit-navigation-progress ${String(duration)}ms ${easing}`
         : 'none';
       root.style.setProperty('--uikit-navigation-progress', String(progress));
@@ -231,8 +280,49 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
         ? (eventDetails: NavigationBackEventDetails) => onBack(eventDetails)
         : undefined;
 
+    // Where a swipe back starts (see `SwipeArea`): while one can, or goes on.
+    const swipeHandlers: SwipeHandlers | undefined =
+      canSwipe || swipeRef.current
+        ? {
+            onLostPointerCapture: endSwipe,
+            onPointerCancel: endSwipe,
+            onPointerUp: endSwipe,
+            onPointerDown: (event: PointerEvent<HTMLDivElement>) => {
+              const { current: root } = ref;
+              const top = keys.at(-1);
+              const under = keys.at(-2);
+              if (!root || !top || !under || event.button !== 0) return;
+              event.preventDefault();
+              event.currentTarget.setPointerCapture(event.pointerId);
+              swipeRef.current = {
+                pointerId: event.pointerId,
+                moves: [[performance.now(), 0]],
+                progress: 0,
+                width: root.clientWidth,
+                x: event.clientX,
+              };
+              setProgress(0, false);
+              setTransition({ top, under });
+            },
+            onPointerMove: (event: PointerEvent<HTMLDivElement>) => {
+              const { current: swipe } = swipeRef;
+              const { current: root } = ref;
+              if (swipe?.pointerId !== event.pointerId || !root) return;
+              const direction =
+                getComputedStyle(root).direction === 'rtl' ? -1 : 1;
+              const moved = (event.clientX - swipe.x) * direction;
+              swipe.progress = Math.min(Math.max(moved / swipe.width, 0), 1);
+              swipe.moves = [
+                ...swipe.moves.slice(-8),
+                [performance.now(), swipe.progress],
+              ];
+              setProgress(swipe.progress, false);
+            },
+          }
+        : undefined;
+
     return (
-      <NavigationContext.Provider value={{ back }}>
+      <NavigationContext.Provider value={{ back, swipe: swipeHandlers }}>
         <div
           ref={ref}
           data-navigation-moving={transition ? '' : undefined}
@@ -260,47 +350,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
               </div>
             );
           })}
-          {canSwipe || swipeRef.current ? (
-            // Where a swipe back starts: the leading edge, over the pages.
-            <div
-              className="uikit-navigation-edge"
-              data-navigation-part="edge"
-              onLostPointerCapture={endSwipe}
-              onPointerCancel={endSwipe}
-              onPointerUp={endSwipe}
-              onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
-                const { current: root } = ref;
-                const top = keys.at(-1);
-                const under = keys.at(-2);
-                if (!root || !top || !under || event.button !== 0) return;
-                event.preventDefault();
-                event.currentTarget.setPointerCapture(event.pointerId);
-                swipeRef.current = {
-                  pointerId: event.pointerId,
-                  moves: [[performance.now(), 0]],
-                  progress: 0,
-                  width: root.clientWidth,
-                  x: event.clientX,
-                };
-                setProgress(0, false);
-                setTransition({ top, under });
-              }}
-              onPointerMove={(event: PointerEvent<HTMLDivElement>) => {
-                const { current: swipe } = swipeRef;
-                const { current: root } = ref;
-                if (swipe?.pointerId !== event.pointerId || !root) return;
-                const direction =
-                  getComputedStyle(root).direction === 'rtl' ? -1 : 1;
-                const moved = (event.clientX - swipe.x) * direction;
-                swipe.progress = Math.min(Math.max(moved / swipe.width, 0), 1);
-                swipe.moves = [
-                  ...swipe.moves.slice(-8),
-                  [performance.now(), swipe.progress],
-                ];
-                setProgress(swipe.progress, false);
-              }}
-            />
-          ) : null}
+          {swipeAreas}
         </div>
       </NavigationContext.Provider>
     );
@@ -337,5 +387,6 @@ const Back = forwardRef<HTMLButtonElement, NavigationBackProps>(
 
 export const Navigation = {
   Root,
+  SwipeArea,
   Back,
 };

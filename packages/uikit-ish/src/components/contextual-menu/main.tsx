@@ -18,7 +18,7 @@ import {
 import { createPortal } from 'react-dom';
 
 import { Menu, MenuTrigger } from '../menu/main.js';
-import { cn, useForwardedRef } from '../utils/main.js';
+import { cn, useForwardedRef, usePortalContainer } from '../utils/main.js';
 import type {
   Align,
   Box,
@@ -72,9 +72,9 @@ const margin = 8;
 const ContextualMenuContext = createContext<ContextualMenuContextValue>({
   align: 'center',
   lift: 0,
-  open: false,
-  overflowing: false,
-  preview: false,
+  isOpen: false,
+  isOverflowing: false,
+  isPreview: false,
   scrollerRef: { current: null },
   setAlign: () => undefined,
   setContainer: () => undefined,
@@ -84,6 +84,9 @@ const ContextualMenuContext = createContext<ContextualMenuContextValue>({
 });
 
 /** The screen it's on: its portal's container's box, or the viewport. */
+/** The trigger's box when it opened, and its direction. */
+type Origin = Box & { isRightToLeft: boolean };
+
 const screenOf = (container: PortalContainer | undefined): Box => {
   const target =
     container && 'current' in container ? container.current : container;
@@ -124,13 +127,15 @@ const boxOf = (
   trigger: Box,
   preview: { height: number; width: number } | undefined,
   align: Align,
-  rtl: boolean,
+  isRightToLeft: boolean,
 ): Box => {
   if (!preview) return trigger;
-  const start = rtl
+  const start = isRightToLeft
     ? trigger.left + trigger.width - preview.width
     : trigger.left;
-  const end = rtl ? trigger.left : trigger.left + trigger.width - preview.width;
+  const end = isRightToLeft
+    ? trigger.left
+    : trigger.left + trigger.width - preview.width;
   const left = {
     center: trigger.left + trigger.width / 2 - preview.width / 2,
     end,
@@ -160,13 +165,11 @@ const Root = <Payload,>({
   open: openProp,
   ...props
 }: ContextualMenuRootProps<Payload>): ReactNode => {
-  const [openState, setOpenState] = useState(defaultOpen);
-  const open = openProp ?? openState;
+  const [isOpenState, setIsOpenState] = useState(defaultOpen);
+  const isOpen = openProp ?? isOpenState;
   const triggerRef = useRef<HTMLElement | null>(null);
   // The trigger's box when it opened (unlifted).
-  const [origin, setOrigin] = useState<(Box & { rtl: boolean }) | undefined>(
-    undefined,
-  );
+  const [origin, setOrigin] = useState<Origin | undefined>(undefined);
   const [popupHeight, setPopupHeight] = useState(0);
   const [previewSize, setPreviewSize] = useState<
     { height: number; width: number } | undefined
@@ -175,17 +178,17 @@ const Root = <Payload,>({
   const [align, setAlign] = useState<Align>('center');
 
   // Opening, the trigger's box, before it lifts.
-  const [opened, setOpened] = useState(open);
-  if (opened !== open) {
-    setOpened(open);
-    if (!open) setOrigin(undefined);
+  const [isOpened, setIsOpened] = useState(isOpen);
+  if (isOpened !== isOpen) {
+    setIsOpened(isOpen);
+    if (!isOpen) setOrigin(undefined);
   }
   useLayoutEffect(() => {
     const { current: trigger } = triggerRef;
-    if (!open || origin || !trigger) return;
+    if (!isOpen || origin || !trigger) return;
     const { height, left, top, width } = trigger.getBoundingClientRect();
-    setOrigin({ height, left, rtl: isRtl(trigger), top, width });
-  }, [open, origin]);
+    setOrigin({ height, left, isRightToLeft: isRtl(trigger), top, width });
+  }, [isOpen, origin]);
 
   // Its screen (its portal's container, see `Portal`), as it opened.
   const [container, setContainer] = useState<PortalContainer | undefined>(
@@ -196,18 +199,20 @@ const Root = <Payload,>({
     [container, origin],
   );
   const box =
-    origin && screen && boxOf(screen, origin, previewSize, align, origin.rtl);
+    origin &&
+    screen &&
+    boxOf(screen, origin, previewSize, align, origin.isRightToLeft);
   // Too tall: scrolled (by `Scroller`, from 0 to the overflow), lifted
   // further as it scrolls on; opened at its end (the menu in view).
   const overflow =
-    open && screen && box && popupHeight
+    isOpen && screen && box && popupHeight
       ? overflowFor(screen, box.height, popupHeight)
       : 0;
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [scrolled, setScrolled] = useState<number | undefined>(undefined);
-  if (!open && scrolled !== undefined) setScrolled(undefined);
+  if (!isOpen && scrolled !== undefined) setScrolled(undefined);
   const lift =
-    open && screen && box
+    isOpen && screen && box
       ? liftFor(screen, box.top, box.height, popupHeight) +
         Math.min(scrolled ?? overflow, overflow)
       : 0;
@@ -240,10 +245,10 @@ const Root = <Payload,>({
       align,
       box,
       lift,
-      open,
+      isOpen,
       origin,
-      overflowing: overflow > 0,
-      preview: previewSize !== undefined,
+      isOverflowing: overflow > 0,
+      isPreview: previewSize !== undefined,
       scrollerRef,
       setAlign,
       setContainer,
@@ -251,7 +256,7 @@ const Root = <Payload,>({
       setPreviewSize,
       triggerRef,
     }),
-    [align, box, container, lift, open, origin, overflow, previewSize],
+    [align, box, container, lift, isOpen, origin, overflow, previewSize],
   );
 
   return (
@@ -274,16 +279,16 @@ const Root = <Payload,>({
         : null}
       <Menu.Root
         {...props}
-        open={open}
-        onOpenChange={(next, details) => {
+        open={isOpen}
+        onOpenChange={(isNextOpen, details) => {
           // Released off the trigger (it lifted away under the pointer):
           // open all the same, as iOS's stays open as the finger lifts.
-          if (!next && details.reason === 'cancel-open') {
+          if (!isNextOpen && details.reason === 'cancel-open') {
             details.cancel();
             return;
           }
-          setOpenState(next);
-          onOpenChange?.(next, details);
+          setIsOpenState(isNextOpen);
+          onOpenChange?.(isNextOpen, details);
         }}
       />
     </ContextualMenuContext.Provider>
@@ -296,7 +301,7 @@ const Root = <Payload,>({
  */
 const Trigger = forwardRef<HTMLElement, ContextualMenuTriggerProps>(
   (props, forwardedRef) => {
-    const { lift, open, overflowing, preview, triggerRef } = useContext(
+    const { lift, isOpen, isOverflowing, isPreview, triggerRef } = useContext(
       ContextualMenuContext,
     );
     const ref = useForwardedRef(forwardedRef);
@@ -311,9 +316,9 @@ const Trigger = forwardRef<HTMLElement, ContextualMenuTriggerProps>(
         }}
         className="uikit-contextual-menu-trigger"
         data-contextual-menu-part="trigger"
-        data-lifted={open ? '' : undefined}
-        data-overflowing={open && overflowing ? '' : undefined}
-        data-previewed={open && preview ? '' : undefined}
+        data-lifted={isOpen ? '' : undefined}
+        data-overflowing={isOpen && isOverflowing ? '' : undefined}
+        data-previewed={isOpen && isPreview ? '' : undefined}
         style={{ '--uikit-contextual-menu-lift': lift } as CSSProperties}
       >
         <MenuTrigger
@@ -332,15 +337,15 @@ const Trigger = forwardRef<HTMLElement, ContextualMenuTriggerProps>(
  */
 const Preview = forwardRef<HTMLDivElement, ContextualMenuPreviewProps>(
   ({ className, style, ...props }, forwardedRef) => {
-    const { align, box, lift, open, origin, overflowing, setPreviewSize } =
+    const { align, box, lift, isOpen, origin, isOverflowing, setPreviewSize } =
       useContext(ContextualMenuContext);
     const ref = useForwardedRef(forwardedRef);
     // Rendered once the trigger's box is known (see `Root`).
-    const shown = open && origin !== undefined;
+    const isShown = isOpen && origin !== undefined;
 
     useLayoutEffect(() => {
       const { current: preview } = ref;
-      if (!shown || !preview) return undefined;
+      if (!isShown || !preview) return undefined;
       const measure = () =>
         setPreviewSize({
           height: preview.offsetHeight,
@@ -353,16 +358,16 @@ const Preview = forwardRef<HTMLDivElement, ContextualMenuPreviewProps>(
         observer.disconnect();
         setPreviewSize(undefined);
       };
-    }, [ref, setPreviewSize, shown]);
+    }, [ref, setPreviewSize, isShown]);
 
-    if (!shown) return null;
+    if (!isShown) return null;
 
     return createPortal(
       // Over the page and the backdrop, at the lifted place; scaling in from
       // the trigger's top.
       <div
         ref={ref}
-        data-overflowing={overflowing ? '' : undefined}
+        data-overflowing={isOverflowing ? '' : undefined}
         {...props}
         className={cn('uikit-contextual-menu-preview', className)}
         data-contextual-menu-part="preview"
@@ -388,7 +393,8 @@ const Preview = forwardRef<HTMLDivElement, ContextualMenuPreviewProps>(
  * viewport.
  */
 const Portal = forwardRef<HTMLDivElement, ContextualMenuPortalProps>(
-  ({ container, ...props }, ref) => {
+  ({ container: containerProp, ...props }, ref) => {
+    const container = usePortalContainer(containerProp);
     const { setContainer } = useContext(ContextualMenuContext);
     useLayoutEffect(() => {
       setContainer(container ?? undefined);
@@ -445,7 +451,7 @@ const Positioner = forwardRef<HTMLDivElement, ContextualMenuPositionerProps>(
  */
 const Popup = forwardRef<HTMLDivElement, ContextualMenuPopupProps>(
   ({ onWheel, style, ...props }, forwardedRef) => {
-    const { overflowing, scrollerRef, setPopupHeight } = useContext(
+    const { isOverflowing, scrollerRef, setPopupHeight } = useContext(
       ContextualMenuContext,
     );
     const ref = useForwardedRef(forwardedRef);
@@ -463,7 +469,7 @@ const Popup = forwardRef<HTMLDivElement, ContextualMenuPopupProps>(
         // Scrolled with the preview: its whole height (not the space below
         // it), wheel input over it scrolling them.
         style={
-          overflowing
+          isOverflowing
             ? (state) => ({
                 ...(typeof style === 'function' ? style(state) : style),
                 maxHeight: 'none',
@@ -472,7 +478,9 @@ const Popup = forwardRef<HTMLDivElement, ContextualMenuPopupProps>(
         }
         onWheel={(event) => {
           onWheel?.(event);
-          if (overflowing) scrollerRef.current?.scrollBy({ top: event.deltaY });
+          if (isOverflowing) {
+            scrollerRef.current?.scrollBy({ top: event.deltaY });
+          }
         }}
         {...props}
       />

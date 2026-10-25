@@ -1,0 +1,13 @@
+/* Navigation demo (see main.tsx). */
+
+/* The stacks' switch, above the screen. */
+.navigation-demo-stacks {
+  margin: 8px 16px;
+}
+
+/* A readout of the stack, below the screen. */
+.navigation-demo-stack {
+  margin: 16px 0 0;
+  color: var(--color-ios-label);
+  font-size: 15px;
+}

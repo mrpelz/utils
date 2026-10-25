@@ -272,7 +272,7 @@ export type RangeDrag = {
   /** Moving on to other months, while held beyond the days. */
   edge: number;
   from: Date;
-  moved: boolean;
+  isMoved: boolean;
   /** The days the range can reach (see `rangeReach`). */
   reachable: (day: Date) => boolean;
   timer?: ReturnType<typeof setTimeout>;

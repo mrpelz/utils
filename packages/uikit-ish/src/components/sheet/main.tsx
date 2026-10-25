@@ -4,7 +4,7 @@ import './style.css';
 import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import { ComponentProps, forwardRef, useState } from 'react';
 
-import { cn } from '../utils/main.js';
+import { cn, usePortalContainer } from '../utils/main.js';
 import { useSizeClass } from '../viewport/main.js';
 import type {
   SheetContentProps,
@@ -64,14 +64,14 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
   ) => {
     // (By the window's size class, see Viewport.)
     const sizeClass = useSizeClass();
-    const compact = compactProp ?? sizeClass === 'compact';
+    const isCompact = compactProp ?? sizeClass === 'compact';
 
     return (
       // (No box of its own: nothing shifts in its container, e.g. a flex
       // layout's gaps.)
       <BaseDrawer.Portal
         className="uikit-sheet-portal"
-        container={container}
+        container={usePortalContainer(container)}
       >
         <BaseDrawer.Backdrop
           className="uikit-sheet-backdrop"
@@ -84,12 +84,12 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
           <BaseDrawer.Popup
             ref={ref}
             data-background={background}
-            data-compact={compact ? '' : undefined}
+            data-compact={isCompact ? '' : undefined}
             data-detent={detent}
             data-sheet-part="popup"
             className={cn(
               'uikit-sheet-popup',
-              compact && detent === 'medium'
+              isCompact && detent === 'medium'
                 ? cn('uikit-glass-medium', className)
                 : className,
             )}

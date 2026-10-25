@@ -83,11 +83,6 @@
         var(--uikit-safe-area-inset-bottom, 0px)
       );
     overscroll-behavior: contain;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
 
     & [data-text-field-part='search'] {
       color: var(--uikit-glass-content-secondary);

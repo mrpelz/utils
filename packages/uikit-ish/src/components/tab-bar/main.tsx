@@ -383,8 +383,8 @@ const setLens = (
 // transform origin. Scaling the group itself would isolate its layers'
 // blending (rendering the glass gray). Called again while the group scrolls,
 // as its center moves over its tabs.
-const pressGroup = (group: HTMLElement, pressed: boolean) => {
-  if (!pressed) {
+const pressGroup = (group: HTMLElement, isPressed: boolean) => {
+  if (!isPressed) {
     delete group.dataset.pressed;
     return;
   }
@@ -532,15 +532,15 @@ const release = (list: HTMLElement, tab?: HTMLElement) => {
   setLens(list, rect, rect.left + rect.width / 2);
 
   for (const group of groups) {
-    const chosen = group === groupOf(tab);
+    const isChosen = group === groupOf(tab);
     const hadActive = hadActiveTab.get(group) ?? false;
-    hadActiveTab.set(group, chosen);
+    hadActiveTab.set(group, isChosen);
     group.style.setProperty(
       '--uikit-tab-bar-selection-opacity',
-      chosen ? '1' : '0',
+      isChosen ? '1' : '0',
     );
 
-    if (chosen) {
+    if (isChosen) {
       // A group gaining the active tab only fades its selection in.
       setSelection(group, rect, { instant: !hadActive });
     } else {
@@ -595,10 +595,10 @@ const autoScroll = (pointer: {
  * function cancelling it.
  */
 const afterTransitions = (element: HTMLElement, done: () => void) => {
-  let cancelled = false;
+  let isCancelled = false;
 
   const check = () => {
-    if (cancelled) return;
+    if (isCancelled) return;
 
     const running = element
       .getAnimations({ subtree: true })
@@ -616,7 +616,7 @@ const afterTransitions = (element: HTMLElement, done: () => void) => {
   requestAnimationFrame(check);
 
   return () => {
-    cancelled = true;
+    isCancelled = true;
   };
 };
 
@@ -765,10 +765,10 @@ const measureFreeSpace = (list: HTMLElement) => {
   if (!last) return 0;
 
   const style = getComputedStyle(list);
-  const rtl = style.direction === 'rtl';
+  const isRightToLeft = style.direction === 'rtl';
   const box = list.getBoundingClientRect();
   const rect = last.getBoundingClientRect();
-  const rest = rtl
+  const rest = isRightToLeft
     ? rect.left - (box.left + Number.parseFloat(style.paddingLeft))
     : box.right - Number.parseFloat(style.paddingRight) - rect.right;
   if (groups.length < 2) return Math.max(0, rest);
@@ -777,7 +777,7 @@ const measureFreeSpace = (list: HTMLElement) => {
   const [, second] = groups;
   const margin = second
     ? Number.parseFloat(
-        getComputedStyle(second)[rtl ? 'marginRight' : 'marginLeft'],
+        getComputedStyle(second)[isRightToLeft ? 'marginRight' : 'marginLeft'],
       )
     : 0;
   const free = Math.max(0, margin + rest);
@@ -785,13 +785,13 @@ const measureFreeSpace = (list: HTMLElement) => {
 };
 
 /** Starts the accessory's morph to the collapsed (or expanded) place. */
-const morphAccessory = (list: HTMLElement, collapsed: boolean) => {
+const morphAccessory = (list: HTMLElement, isCollapsed: boolean) => {
   const morph = accessoryMorphs.get(list);
-  if (morph?.collapsed === collapsed) return;
+  if (morph?.isCollapsed === isCollapsed) return;
 
   const accessory = accessories.get(list);
   accessoryMorphs.set(list, {
-    collapsed,
+    isCollapsed,
     // From where it is (also mid-morph); placed right away the first time.
     from: morph && accessory ? accessoryBox(list, accessory) : undefined,
     remaining: morph?.remaining ?? [],
@@ -855,7 +855,7 @@ const relativeTo = (box: Box, rect: DOMRect): Box => ({
 const placeAccessory = (list: HTMLElement): void => {
   const accessory = accessories.get(list);
   const morph: AccessoryMorph = accessoryMorphs.get(list) ?? {
-    collapsed: false,
+    isCollapsed: false,
     remaining: [],
   };
   if (!accessory) return;
@@ -863,7 +863,7 @@ const placeAccessory = (list: HTMLElement): void => {
   const groups = [...list.querySelectorAll<HTMLElement>(':scope > div')];
   if (groups.length === 0) return;
 
-  if (morph.collapsed) {
+  if (morph.isCollapsed) {
     // Groups collapsing away stop taking pointer events right away.
     morph.remaining = groups.filter(
       (group) => getComputedStyle(group).pointerEvents !== 'none',
@@ -871,17 +871,17 @@ const placeAccessory = (list: HTMLElement): void => {
   }
 
   // State for its styles (see `StyledAccessory`).
-  accessory.toggleAttribute('data-collapsed', morph.collapsed);
+  accessory.toggleAttribute('data-collapsed', morph.isCollapsed);
   const visibleIn = getComputedStyle(accessory)
     .getPropertyValue('--uikit-tab-bar-accessory-visible-in')
     .trim();
 
   // Its place as the groups are; shown in one state only, at its place
   // there.
-  const collapsedPlace =
-    visibleIn === 'both' ? morph.collapsed : visibleIn === 'collapsed';
+  const isCollapsedPlace =
+    visibleIn === 'both' ? morph.isCollapsed : visibleIn === 'collapsed';
   const measure = () => {
-    const box = collapsedPlace
+    const box = isCollapsedPlace
       ? betweenGroups(
           list,
           morph.remaining.length > 0 ? morph.remaining : groups,
@@ -918,7 +918,7 @@ const placeAccessory = (list: HTMLElement): void => {
   } else {
     place = measure();
   }
-  const done = !morph.from;
+  const isDone = !morph.from;
 
   // Room above the list for its place above the groups (see StyledList).
   list.toggleAttribute('data-accessory-above', visibleIn !== 'collapsed');
@@ -931,7 +931,7 @@ const placeAccessory = (list: HTMLElement): void => {
   });
 
   // Morphing on by itself, also once the groups have settled.
-  if (!done && morph.frame === undefined && accessoryMorphs.has(list)) {
+  if (!isDone && morph.frame === undefined && accessoryMorphs.has(list)) {
     morph.frame = requestAnimationFrame(() => {
       morph.frame = undefined;
       placeAccessory(list);
@@ -1008,7 +1008,7 @@ const Root = forwardRef<HTMLDivElement, TabBarRootProps>(
 );
 
 const ListContext = createContext<ListState>({
-  collapsed: false,
+  isCollapsed: false,
   collapsedPosition: 'inline-start',
   markedGroups: 0,
 });
@@ -1052,15 +1052,15 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
     const wasCollapsedRef = useRef(collapsed);
     // Expanding (from collapsed, until settled): set while rendering, so
     // the transitions start with its easing (see `StyledList`).
-    const [expanding, setExpanding] = useState(false);
+    const [isExpanding, setIsExpanding] = useState(false);
     // Wider than its groups (expanded): the space between them as a length
     // (see `freeSpace`), so it transitions as the bar collapses.
-    const [wide, setWide] = useState(false);
+    const [isWide, setIsWide] = useState(false);
     const freeRef = useRef(0);
-    const [renderedCollapsed, setRenderedCollapsed] = useState(collapsed);
-    if (collapsed !== renderedCollapsed) {
-      setRenderedCollapsed(collapsed);
-      setExpanding(!collapsed);
+    const [isRenderedCollapsed, setIsRenderedCollapsed] = useState(collapsed);
+    if (collapsed !== isRenderedCollapsed) {
+      setIsRenderedCollapsed(collapsed);
+      setIsExpanding(!collapsed);
     }
 
     // The width while expanded, kept while collapsed (and until it has
@@ -1074,7 +1074,7 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
         if (resizingRef.current) return;
         expandedWidthRef.current = list.getBoundingClientRect().width;
         freeRef.current = measureFreeSpace(list);
-        setWide(freeRef.current > 0.5);
+        setIsWide(freeRef.current > 0.5);
       });
       observer.observe(list);
 
@@ -1161,9 +1161,9 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
         list.style.removeProperty('--uikit-tab-bar-spacer-grow');
         expandedWidthRef.current = list.getBoundingClientRect().width;
         placeAccessory(list);
-        setExpanding(false);
+        setIsExpanding(false);
         freeRef.current = measureFreeSpace(list);
-        setWide(freeRef.current > 0.5);
+        setIsWide(freeRef.current > 0.5);
       };
 
       if (!wasCollapsed) {
@@ -1266,17 +1266,22 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
 
     const [markedGroups, markGroup] = useMarks();
     const context = useMemo(
-      () => ({ collapsed, collapsedPosition, markGroup, markedGroups }),
+      () => ({
+        collapsedPosition,
+        isCollapsed: collapsed,
+        markGroup,
+        markedGroups,
+      }),
       [collapsed, collapsedPosition, markGroup, markedGroups],
     );
 
     const handlers = usePointerDrag<HTMLDivElement, { tab?: HTMLElement }>(
       {
-        end: (list, state, cancelled) => {
+        end: (list, state, isCancelled) => {
           dragRef.current = undefined;
           stopScrollingRef.current?.();
 
-          if (cancelled) {
+          if (isCancelled) {
             release(list);
             return;
           }
@@ -1331,11 +1336,11 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
           ref={listRef}
           data-collapsed={collapsed ? '' : undefined}
           data-collapsed-content={collapsed ? collapsedContent : undefined}
-          data-expanding={expanding ? '' : undefined}
+          data-expanding={isExpanding ? '' : undefined}
           data-glass-context={glassContext}
           data-size={size}
           data-spaced={markedGroups > 1 ? '' : undefined}
-          data-wide={wide ? '' : undefined}
+          data-wide={isWide ? '' : undefined}
           style={withStyle({ 'anchor-name': root.anchor }, style)}
           {...props}
           {...handlers}
@@ -1370,7 +1375,10 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
   },
 );
 
-const GroupContext = createContext<GroupState>({ away: false, markedTabs: 0 });
+const GroupContext = createContext<GroupState>({
+  isAway: false,
+  markedTabs: 0,
+});
 
 /**
  * A glass capsule of tabs, to be rendered inside `TabBar.List`. Its
@@ -1401,10 +1409,10 @@ const Group = forwardRef<HTMLDivElement, TabBarGroupProps>(
     );
 
     let collapsedVisibility: CollapsedVisibility | undefined;
-    if (list.collapsed) {
+    if (list.isCollapsed) {
       collapsedVisibility = visibleWhenCollapsed ? 'shown' : 'away';
     }
-    const away = collapsedVisibility === 'away';
+    const isAway = collapsedVisibility === 'away';
 
     useLayoutEffect(() => {
       const { current: group } = ref;
@@ -1446,8 +1454,8 @@ const Group = forwardRef<HTMLDivElement, TabBarGroupProps>(
     }, [ref]);
 
     const context = useMemo(
-      () => ({ away, markTab, markedTabs, shape }),
-      [away, markTab, markedTabs, shape],
+      () => ({ isAway, markTab, markedTabs, shape }),
+      [isAway, markTab, markedTabs, shape],
     );
 
     return (
@@ -1462,11 +1470,15 @@ const Group = forwardRef<HTMLDivElement, TabBarGroupProps>(
            track doesn't. */}
         <div
           ref={ref}
-          data-collapsed-content={list.collapsed ? collapsedContent : undefined}
           data-collapsed-visibility={collapsedVisibility}
           data-spaced={list.markedGroups > 1 ? '' : undefined}
+          data-collapsed-content={
+            list.isCollapsed ? collapsedContent : undefined
+          }
           data-selection-shown={
-            list.collapsed && !away && (markedTabs > 1 || list.markedGroups > 1)
+            list.isCollapsed &&
+            !isAway &&
+            (markedTabs > 1 || list.markedGroups > 1)
               ? ''
               : undefined
           }
@@ -1530,7 +1542,7 @@ const Tab = forwardRef<HTMLElement, Omit<TabBarTabProps, 'ref'>>(
     } = useSecondaryClick(tabProps);
     const group = useContext(GroupContext);
     const { markTab } = group;
-    const { collapsed } = useContext(ListContext);
+    const { isCollapsed } = useContext(ListContext);
 
     useLayoutEffect(
       () => (visibleWhenCollapsed ? markTab?.() : undefined),
@@ -1539,7 +1551,7 @@ const Tab = forwardRef<HTMLElement, Omit<TabBarTabProps, 'ref'>>(
 
     // Only while collapsed, in a remaining group.
     let collapsedVisibility: CollapsedVisibility | undefined;
-    if (collapsed && !group.away) {
+    if (isCollapsed && !group.isAway) {
       collapsedVisibility = visibleWhenCollapsed ? 'shown' : 'away';
     }
 
@@ -1548,7 +1560,7 @@ const Tab = forwardRef<HTMLElement, Omit<TabBarTabProps, 'ref'>>(
         ref={ref}
         {...props}
         className={cn('uikit-tab-bar-tab', className)}
-        data-collapsed-content={collapsed ? collapsedContent : undefined}
+        data-collapsed-content={isCollapsed ? collapsedContent : undefined}
         data-collapsed-visibility={collapsedVisibility}
         data-shape={shape ?? group.shape}
         data-tab-bar-part="tab"

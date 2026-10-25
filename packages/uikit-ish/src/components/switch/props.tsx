@@ -23,9 +23,9 @@ export type SwitchRootProps = BaseSwitch.Root.Props & {
 };
 
 export type Drag = {
-  checked: boolean;
   direction: 1 | -1;
-  flipped: boolean;
+  isChecked: boolean;
+  isFlipped: boolean;
   max: number;
   min: number;
   moved: number;

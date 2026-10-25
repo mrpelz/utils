@@ -1,0 +1,231 @@
+/*
+ * Demo page styles, in a layer under the components' (declared first, so
+ * the components' styles win, as they would over an app's base styles).
+ */
+@layer demo, uikit-ish;
+
+@layer demo {
+  * {
+    box-sizing: border-box;
+  }
+
+  :root {
+    background-color: light-dark(white, #0a0a0a);
+    color: light-dark(black, #fafafa);
+    color-scheme: light dark;
+
+    /* What's shown hatched (the safe areas, a part overlaid, see
+       frame/overlay.ts). */
+    --demo-hatch: repeating-linear-gradient(
+      -45deg,
+      rgb(255 59 48 / 25%) 0 4px,
+      transparent 4px 8px
+    );
+
+    font-family:
+      -apple-system, 'SF Pro', system-ui, 'SF UI Text', 'Helvetica Neue',
+      Helvetica, Arial, sans-serif;
+    scroll-snap-type: y mandatory;
+  }
+
+  /* Pages of prose (see guide/pages.tsx) don't snap, so leaving the demos' pages
+     (snapped to a demo) for one, it isn't re-snapped (to its end, the demo
+     gone) after scrolling to its top. */
+  :root:has(.demo-page) {
+    scroll-snap-type: none;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  /* A modal's scroll lock (Base UI's, the document's: inline styles on the
+     root and the body) undone: the page scrolls on, a demo's modal blocks
+     only its own screen (its backdrop covering it). (Important: over the
+     inline styles; the library's apps keep the lock.) */
+  :root,
+  body {
+    overflow: visible !important;
+  }
+
+  /*
+   * Devices' screens, the stages' frames (one style for all, see
+   * frame/component.tsx): a phone's (an iPhone's width), a tablet's (an
+   * iPad's), at most the stage's, sized as a window. Their content is laid
+   * out in one cell (stretched to its height); clipped, not hidden (focus
+   * moving into what's within, e.g. a sheet, would scroll it); a transform
+   * makes them the containing block of the fixed layers within (a
+   * viewport's, a sheet's, a portal's).
+   *
+   * Their layout (`data-screen`):
+   * - `centered`: their content centered, in a column (e.g. a sheet's
+   *   trigger), also in the viewport's content layer.
+   * - `flow`: as high as their content (a page in the stage's flow,
+   *   nothing scrolling within it).
+   */
+  .demo-phone,
+  .demo-tablet {
+    position: relative;
+    display: grid;
+    overflow: clip;
+    width: 402px;
+    max-width: 100%;
+    height: min(640px, 70vh);
+    box-sizing: border-box;
+    border-radius: 24px;
+
+    /* An app's background (a page's default, see Page), where nothing paints
+       its own (bars, a sheet's trigger), a hairline at its edges (a dark
+       screen on the dark stage). */
+    background-color: var(--color-ios-system-grouped-background);
+    box-shadow: 0 0 0 1px var(--color-ios-separator);
+    isolation: isolate;
+    transform: translateZ(0);
+
+    /* Its safe area insets, as the library's custom properties (the
+       components keep clear of them): an iPhone's (the Dynamic Island, the
+       home indicator). */
+    --uikit-safe-area-inset-top: 62px;
+    --uikit-safe-area-inset-bottom: 34px;
+
+    /* Its chrome (see below). */
+    --demo-status-font-size: 17px;
+    --demo-status-line-height: 22px;
+    --demo-status-padding: 32px;
+    --demo-home-indicator: 134px;
+  }
+
+  /* An iPad's (the status bar, the home indicator). */
+  .demo-tablet {
+    width: 820px;
+
+    --uikit-safe-area-inset-top: 24px;
+    --uikit-safe-area-inset-bottom: 20px;
+    --demo-status-font-size: 13px;
+    --demo-status-line-height: 18px;
+    --demo-status-padding: 20px;
+    --demo-home-indicator: 200px;
+  }
+
+  /*
+   * Their chrome, over their content (as on iOS): the status bar's time in
+   * the top inset, the home indicator in the bottom one (so covered content
+   * shows). With the frame's Safe Areas setting, the insets hatched, too
+   * (`data-safe-areas` on the stage).
+   */
+  :is(.demo-phone, .demo-tablet) {
+    &::before,
+    &::after {
+      position: absolute;
+      z-index: 1000;
+      box-sizing: border-box;
+      color: var(--color-ios-label);
+      inset-inline: 0;
+      pointer-events: none;
+
+      /* Layers of their own: Safari paints composited layers (e.g. a
+         viewport's anchors, see Viewport, over the insets) above
+         uncomposited ones, their z-index notwithstanding. */
+      transform: translateZ(0);
+    }
+
+    /* The status bar: its time at the start. */
+    &::before {
+      top: 0;
+      display: flex;
+      height: var(--uikit-safe-area-inset-top);
+      align-items: center;
+      content: var(--demo-time, '9:41');
+      font-size: var(--demo-status-font-size);
+      font-variation-settings: 'wght' 590;
+      font-weight: 500;
+      line-height: var(--demo-status-line-height);
+      padding-inline: var(--demo-status-padding);
+    }
+
+    /* The home indicator: a pill (its ends circles, its middle a bar), 8px
+       from the bottom, centered. */
+    &::after {
+      bottom: 0;
+      height: var(--uikit-safe-area-inset-bottom);
+      background:
+        radial-gradient(circle at center, currentcolor 2.5px, transparent 2.5px)
+          calc(50% - var(--demo-home-indicator) / 2 + 2.5px) calc(100% - 8px) /
+          5px 5px no-repeat,
+        radial-gradient(circle at center, currentcolor 2.5px, transparent 2.5px)
+          calc(50% + var(--demo-home-indicator) / 2 - 2.5px) calc(100% - 8px) /
+          5px 5px no-repeat,
+        linear-gradient(currentcolor, currentcolor) center calc(100% - 8px) /
+          calc(var(--demo-home-indicator) - 5px) 5px no-repeat;
+      content: '';
+    }
+
+    /* Its layout (see above). */
+    &[data-screen='centered'],
+    &[data-screen='centered'] > .uikit-viewport-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    &[data-screen='flow'] {
+      height: auto;
+    }
+
+    /* The frame's Safe Areas setting: the insets hatched (under the
+       home indicator). */
+    .demo-stage[data-safe-areas] &::before {
+      background: var(--demo-hatch);
+    }
+
+    .demo-stage[data-safe-areas] &::after {
+      background:
+        radial-gradient(circle at center, currentcolor 2.5px, transparent 2.5px)
+          calc(50% - var(--demo-home-indicator) / 2 + 2.5px) calc(100% - 8px) /
+          5px 5px no-repeat,
+        radial-gradient(circle at center, currentcolor 2.5px, transparent 2.5px)
+          calc(50% + var(--demo-home-indicator) / 2 - 2.5px) calc(100% - 8px) /
+          5px 5px no-repeat,
+        linear-gradient(currentcolor, currentcolor) center calc(100% - 8px) /
+          calc(var(--demo-home-indicator) - 5px) 5px no-repeat,
+        var(--demo-hatch);
+    }
+  }
+
+  /* A screen's content (a frame's, see above, `data-wallpaper`): a list, its
+     rows drawn as placeholder text, for what lies over it to show its blur
+     or glass (e.g. a contextual menu's backdrop, a menu's popup). */
+  :is(.demo-phone, .demo-tablet)[data-wallpaper] {
+    --demo-wallpaper-top: calc(var(--uikit-safe-area-inset-top, 0px) + 16px);
+    --demo-wallpaper-height: calc(
+      100% - var(--demo-wallpaper-top) -
+        var(--uikit-safe-area-inset-bottom, 0px) - 16px
+    );
+
+    background-image:
+      repeating-linear-gradient(
+        transparent 0 43.5px,
+        var(--color-ios-separator) 43.5px 44px
+      ),
+      repeating-linear-gradient(
+        transparent 0 16px,
+        var(--color-ios-tertiary-system-fill) 16px 28px,
+        transparent 28px 44px
+      ),
+      linear-gradient(
+        var(--color-ios-secondary-system-grouped-background),
+        var(--color-ios-secondary-system-grouped-background)
+      );
+    background-position:
+      32px var(--demo-wallpaper-top),
+      32px var(--demo-wallpaper-top),
+      16px var(--demo-wallpaper-top);
+    background-repeat: no-repeat;
+    background-size:
+      calc(100% - 48px) var(--demo-wallpaper-height),
+      40% var(--demo-wallpaper-height),
+      calc(100% - 32px) var(--demo-wallpaper-height);
+  }
+}

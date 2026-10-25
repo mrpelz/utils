@@ -25,6 +25,7 @@ import {
   MovingHighlight,
   positionerSide,
   useForwardedRef,
+  usePortalContainer,
   useSecondaryClick,
 } from '../utils/main.js';
 import type {
@@ -173,10 +174,10 @@ const isExpanded = (item: HTMLElement) =>
  */
 const hover = (
   element: HTMLElement,
-  entering: boolean,
+  isEntering: boolean,
   { movementX, movementY, x, y }: Finger,
 ) => {
-  const types = entering
+  const types = isEntering
     ? (['over', 'enter', 'move'] as const)
     : (['out', 'leave'] as const);
 
@@ -394,7 +395,7 @@ const openByTrigger = (trigger: HTMLElement, pointerId?: number) => {
 };
 
 /** Opening by a secondary click: the trigger's own mouse down (internal). */
-let openingBySecondaryClick = false;
+let isOpeningBySecondaryClick = false;
 
 /**
  * Opens the menu as Base UI's trigger does, but on touch already on touch
@@ -407,15 +408,15 @@ let openingBySecondaryClick = false;
  */
 const Trigger = forwardRef<HTMLElement, TriggerProps>(
   ({ onClick, onMouseDown, openOn, ...props }, ref) => {
-    const secondary = openOn === 'secondaryClick';
+    const isSecondary = openOn === 'secondaryClick';
     type Handler<E> = ((event: E) => void) | undefined;
     // A secondary click (or a handler for it) opens the menu.
     const triggerProps = useSecondaryClick({
       ...props,
-      onSecondaryClick: secondary
+      onSecondaryClick: isSecondary
         ? (event: ReactMouseEvent<HTMLElement>) => {
             props.onSecondaryClick?.(event);
-            openingBySecondaryClick = true;
+            isOpeningBySecondaryClick = true;
             try {
               // A touch held (a `contextmenu` pointer event): dragged on.
               const { nativeEvent } = event as { nativeEvent?: Event };
@@ -428,7 +429,7 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
                   : undefined,
               );
             } finally {
-              openingBySecondaryClick = false;
+              isOpeningBySecondaryClick = false;
             }
           }
         : props.onSecondaryClick,
@@ -449,11 +450,11 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
         // a click by keys).
         onClick={(event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => {
           (onClick as Handler<typeof event>)?.(event);
-          if (secondary) event.preventBaseUIHandler();
+          if (isSecondary) event.preventBaseUIHandler();
         }}
         onMouseDown={(event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => {
           (onMouseDown as Handler<typeof event>)?.(event);
-          if (secondary && !openingBySecondaryClick) {
+          if (isSecondary && !isOpeningBySecondaryClick) {
             event.preventBaseUIHandler();
           }
         }}
@@ -464,7 +465,7 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
               .onPointerDown as Handler<typeof event>
           )?.(event);
           if (
-            secondary ||
+            isSecondary ||
             event.pointerType !== 'touch' ||
             event.defaultPrevented
           ) {
@@ -593,12 +594,12 @@ const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
       ? undefined
       : (closeType: string) => closeType === 'keyboard';
     // Compact submenus cover their parent's items: as wide as its popup.
-    const overlay = submenu === 'vertical' && size === 'compact';
+    const isOverlay = submenu === 'vertical' && size === 'compact';
 
     return (
       <BaseMenu.Popup
         ref={ref}
-        data-overlay={overlay ? '' : undefined}
+        data-overlay={isOverlay ? '' : undefined}
         data-size={size}
         {...props}
         data-menu-part="popup"
@@ -917,9 +918,10 @@ export { Trigger as MenuTrigger };
  * doesn't shift its content.
  */
 const Portal = forwardRef<HTMLDivElement, Omit<BaseMenu.Portal.Props, 'ref'>>(
-  ({ className, ...props }, ref) => (
+  ({ className, container, ...props }, ref) => (
     <BaseMenu.Portal
       ref={ref}
+      container={usePortalContainer(container)}
       {...props}
       className={cn('uikit-menu-portal', className)}
     />

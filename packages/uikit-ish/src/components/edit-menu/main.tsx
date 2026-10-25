@@ -196,11 +196,11 @@ const useOverflow = (scrollerRef: { current: HTMLDivElement | null }) => {
 
     const update = () => {
       const [first, last] = ends;
-      const before = first !== undefined && hidden.has(first);
-      const after = last !== undefined && hidden.has(last);
-      actions.toggleAttribute('data-before', before);
-      actions.toggleAttribute('data-after', after);
-      actions.toggleAttribute('data-overflowing', before || after);
+      const isBefore = first !== undefined && hidden.has(first);
+      const isAfter = last !== undefined && hidden.has(last);
+      actions.toggleAttribute('data-before', isBefore);
+      actions.toggleAttribute('data-after', isAfter);
+      actions.toggleAttribute('data-overflowing', isBefore || isAfter);
     };
 
     const observe = () => {
@@ -427,10 +427,10 @@ export const useSelectionAnchor = (
   const [anchor, setAnchor] = useState<SelectionAnchor | null>(null);
 
   useEffect(() => {
-    let selecting = false;
+    let isSelecting = false;
     let timeout: ReturnType<typeof setTimeout> | undefined;
     let shown: Range | null = null;
-    let changed = false;
+    let isChanged = false;
 
     const current = () => {
       const documentSelection = document.getSelection();
@@ -471,24 +471,24 @@ export const useSelectionAnchor = (
       // Pressing a menu keeps it.
       if (target instanceof Element && target.closest('[role=menu]')) return;
 
-      selecting = true;
-      changed = false;
+      isSelecting = true;
+      isChanged = false;
       hide();
     };
 
     const onPointerUp = () => {
-      if (!selecting) return;
-      selecting = false;
-      if (changed) update();
+      if (!isSelecting) return;
+      isSelecting = false;
+      if (isChanged) update();
     };
 
     const onPointerCancel = () => {
-      selecting = false;
+      isSelecting = false;
     };
 
     const onSelectionChange = () => {
-      if (selecting) changed = true;
-      if (selecting || isShown(current())) return;
+      if (isSelecting) isChanged = true;
+      if (isSelecting || isShown(current())) return;
 
       clearTimeout(timeout);
       hide();

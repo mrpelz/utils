@@ -86,7 +86,7 @@ const Input = forwardRef<
 ));
 
 // Figma PNG: 14px wide, 2px strokes (Headline at 590).
-const Sign = ({ plus }: { plus: boolean }) => (
+const Sign = ({ isPlus }: { isPlus: boolean }) => (
   <svg
     aria-hidden="true"
     fill="none"
@@ -97,7 +97,7 @@ const Sign = ({ plus }: { plus: boolean }) => (
     viewBox="0 0 14 14"
     width="14"
   >
-    <path d={plus ? 'M1 7h12M7 1v12' : 'M1 7h12'} />
+    <path d={isPlus ? 'M1 7h12M7 1v12' : 'M1 7h12'} />
   </svg>
 );
 
@@ -113,7 +113,7 @@ const Decrement = forwardRef<
     className={cn('uikit-stepper-half uikit-stepper-decrement', className)}
     data-stepper-part="half"
   >
-    {(children as ReactNode) ?? <Sign plus={false} />}
+    {(children as ReactNode) ?? <Sign isPlus={false} />}
   </BaseNumberField.Decrement>
 ));
 
@@ -128,7 +128,7 @@ const Increment = forwardRef<
     className={cn('uikit-stepper-half uikit-stepper-increment', className)}
     data-stepper-part="half"
   >
-    {(children as ReactNode) ?? <Sign plus />}
+    {(children as ReactNode) ?? <Sign isPlus />}
   </BaseNumberField.Increment>
 ));
 

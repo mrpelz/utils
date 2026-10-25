@@ -10,8 +10,8 @@ import { exit } from 'node:process';
 
 import prerender, { locationStub } from 'preact-iso/prerender';
 
-import { publicPath } from './demo/env.js';
-import { Demo } from './demo/main.js';
+import { publicPath } from './demo/tooling/env.js';
+import { Demo } from './demo/tooling/main.js';
 
 const BODY = '<body></body>';
 

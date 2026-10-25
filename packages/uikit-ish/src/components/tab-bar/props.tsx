@@ -29,9 +29,9 @@ export type Box = { height: number; left: number; right: number; top: number };
  * pointer events again while expanding).
  */
 export type AccessoryMorph = {
-  collapsed: boolean;
   frame?: number;
   from?: Box;
+  isCollapsed: boolean;
   remaining: HTMLElement[];
   // Its place as the groups will be, as last measured (in a frame, by
   // `document.timeline`'s time, as it's placed several times a frame).
@@ -45,8 +45,8 @@ export type TabBarRootProps = Omit<BaseTabs.Root.Props, 'ref'>;
 
 /** The list's state, for its groups and tabs (internal). */
 export type ListState = {
-  collapsed: boolean;
   collapsedPosition: CollapsedPosition;
+  isCollapsed: boolean;
   markGroup?: () => () => void;
   markedGroups: number;
 };
@@ -85,7 +85,7 @@ export type Shape = 'capsule' | 'circle';
 
 /** The group's state, for its tabs (internal). */
 export type GroupState = {
-  away: boolean;
+  isAway: boolean;
   markTab?: () => () => void;
   markedTabs: number;
   shape?: Shape;

@@ -560,10 +560,10 @@ const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
     useLayoutEffect(() => {
       const { current: element } = pagesRef;
       if (!element || scrollTarget === undefined) return undefined;
-      const rtl = getComputedStyle(element).direction === 'rtl';
+      const isRightToLeft = getComputedStyle(element).direction === 'rtl';
       element.scrollTo({
         behavior: 'smooth',
-        left: (rtl ? -1 : 1) * scrollTarget * element.clientWidth,
+        left: (isRightToLeft ? -1 : 1) * scrollTarget * element.clientWidth,
       });
       // (Swipes count again once it's there.)
       const done = () => setScrollTarget(undefined);

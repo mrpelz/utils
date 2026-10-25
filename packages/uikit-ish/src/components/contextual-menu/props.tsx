@@ -23,12 +23,12 @@ export type ContextualMenuContextValue = {
   };
   /** The lifted box (the trigger's, or the preview's) before lifting. */
   box?: Box;
-  lift: number;
-  open: boolean;
-  origin?: Box;
+  isOpen: boolean;
   /** Too tall for the viewport: scrolled together (see `Root`). */
-  overflowing: boolean;
-  preview: boolean;
+  isOverflowing: boolean;
+  isPreview: boolean;
+  lift: number;
+  origin?: Box;
   scrollerRef: { current: HTMLDivElement | null };
   setAlign: (align: Align) => void;
   /** Its portal's container: the screen it lifts within (see `Portal`). */

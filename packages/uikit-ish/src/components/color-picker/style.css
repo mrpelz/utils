@@ -224,11 +224,6 @@
     overscroll-behavior-inline: contain;
     scroll-padding-inline: 4px;
     scroll-snap-type: inline mandatory;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
   }
 
   .uikit-color-picker-saved {

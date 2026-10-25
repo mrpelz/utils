@@ -19,6 +19,7 @@ import {
   positionerSide,
   useForwardedRef,
   useInitialFocus,
+  usePortalContainer,
   withStyle,
 } from '../utils/main.js';
 import type {
@@ -53,8 +54,8 @@ const PopoverContext = createContext<PopoverState | undefined>(undefined);
 const Root = <Payload,>(
   props: BasePopover.Root.Props<Payload>,
 ): ReactElement => {
-  const [arrow, setArrow] = useState(false);
-  const state = useMemo(() => ({ arrow, setArrow }), [arrow]);
+  const [hasArrow, setHasArrow] = useState(false);
+  const state = useMemo(() => ({ hasArrow, setHasArrow }), [hasArrow]);
 
   return (
     <PopoverContext.Provider value={state}>
@@ -103,7 +104,7 @@ const Positioner = forwardRef<HTMLDivElement, PopoverPositionerProps>(
         align={align}
         collisionPadding={collisionPadding}
         side={positionerSide(side)}
-        sideOffset={sideOffset ?? 8 + (context?.arrow ? arrowDepth : 0)}
+        sideOffset={sideOffset ?? 8 + (context?.hasArrow ? arrowDepth : 0)}
         {...props}
         className={cn('uikit-popover-positioner', className)}
       />
@@ -255,16 +256,16 @@ const Popup = forwardRef<HTMLDivElement, Omit<BasePopover.Popup.Props, 'ref'>>(
  * The arrow's (physical) side of its popup: facing its anchor, away from the
  * popup's side (Base UI's `data-side`, logical if requested so).
  */
-const arrowSide = (side: string | undefined, rtl: boolean): Nose => {
+const arrowSide = (side: string | undefined, isRightToLeft: boolean): Nose => {
   switch (side) {
     case 'bottom': {
       return 'top';
     }
     case 'inline-end': {
-      return rtl ? 'right' : 'left';
+      return isRightToLeft ? 'right' : 'left';
     }
     case 'inline-start': {
-      return rtl ? 'left' : 'right';
+      return isRightToLeft ? 'left' : 'right';
     }
     case 'left': {
       return 'right';
@@ -310,11 +311,11 @@ const placeNose = (arrow: HTMLElement, popup: HTMLElement) => {
 const Arrow = forwardRef<HTMLDivElement, Omit<BasePopover.Arrow.Props, 'ref'>>(
   ({ className, ...props }, ref) => {
     const arrowRef = useForwardedRef(ref);
-    const setArrow = useContext(PopoverContext)?.setArrow;
+    const setHasArrow = useContext(PopoverContext)?.setHasArrow;
     useLayoutEffect(() => {
-      setArrow?.(true);
-      return () => setArrow?.(false);
-    }, [setArrow]);
+      setHasArrow?.(true);
+      return () => setHasArrow?.(false);
+    }, [setHasArrow]);
 
     useLayoutEffect(() => {
       const { current: arrow } = arrowRef;
@@ -394,9 +395,10 @@ const Body = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
 const Portal = forwardRef<
   HTMLDivElement,
   Omit<BasePopover.Portal.Props, 'ref'>
->(({ className, ...props }, ref) => (
+>(({ className, container, ...props }, ref) => (
   <BasePopover.Portal
     ref={ref}
+    container={usePortalContainer(container)}
     {...props}
     className={cn('uikit-popover-portal', className)}
   />

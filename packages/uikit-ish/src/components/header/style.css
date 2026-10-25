@@ -20,38 +20,40 @@
     }
   }
 
-  /* (In a navigation's transition, it moves with its page, see
-     `Navigation`: a bar that stays, e.g. its title, is a `Viewport` anchor's
-     toolbar.) */
-  .uikit-header-bar {
-    position: sticky;
-    z-index: 10;
-    top: 0;
+  /* Its bar (see Root): the app's toolbar in a `Viewport.BlockStart`, its
+     child. No box of its own; its large title's timeline, and its page's
+     scroll (`--uikit-page-scroll`, see Page) when the page is within it
+     (else the page's own, an ancestor's), for its bar. Its page's content
+     starts below the bar (54px, below the safe area). */
+  .uikit-header-root {
+    display: contents;
+    timeline-scope: var(--uikit-header-timeline);
 
-    /* Below the page's top safe area inset (see Page), its glass and edge
-       effect reaching under it. */
-    border-block-start: var(--uikit-page-safe-top, 0) solid transparent;
-
-    /* (54px high below it, as a toolbar's: its border not counted in, e.g.
-       without buttons, which would make it as high otherwise.) */
-    &&[data-placement='block-start'] {
-      min-height: calc(54px + var(--uikit-page-safe-top, 0px));
+    &:has(.uikit-page-root) {
+      timeline-scope: var(--uikit-header-timeline), --uikit-page-scroll;
     }
 
+    &:has(> .uikit-viewport-anchor[data-edge='block-start']) {
+      --uikit-header-inset: 54px;
+    }
+  }
+
+  /* (In a navigation's transition, it moves with its page, see
+     `Navigation`: its anchor, fixed, within its page's frame.) */
+  .uikit-header-root > .uikit-viewport-anchor[data-edge='block-start'] {
     /* The scroll edge effect, once content is scrolled under the bar (none
        while its page can't scroll: its timeline inactive, the animation
-       doesn't apply, Safari leaving it at its own opacity). */
+       doesn't apply, Safari leaving it at its own opacity): under the
+       whole anchor, the safe area above the bar too. */
     &::before {
       position: absolute;
       z-index: -1;
       animation: uikit-header-fade-in linear both;
       animation-range: 0 16px;
-      animation-timeline: scroll(nearest);
+      animation-timeline: --uikit-page-scroll;
       backdrop-filter: blur(8px);
       content: '';
-
-      /* (Its border too: the safe area inset above it.) */
-      inset: calc(-1 * var(--uikit-page-safe-top, 0px)) 0 -16px;
+      inset: 0 0 -16px;
 
       /* (Under a floating column too, see Layout and Page.) */
       inset-inline-start: calc(var(--uikit-layout-inset-start, 0px) * -1);
@@ -60,22 +62,25 @@
       pointer-events: none;
     }
 
-    /* With a large title: the bar's title fades in as the large title scrolls
-       under the bar (see Root: the header's timeline). */
-    &[data-large-title] > [data-toolbar-part='title'] {
+    /* With a large title: the bar's title fades in as the large title
+       scrolls under the bar (see Root: the header's timeline). */
+    .uikit-header-root[data-large-title] >
+      &
+      > .uikit-toolbar-root
+      > [data-toolbar-part='title'] {
       animation: uikit-header-fade-in linear both;
       animation-range: exit-crossing 50% exit-crossing 100%;
       animation-timeline: var(--uikit-header-timeline);
     }
   }
 
-  /* What stays with the bar (see Accessory): sticking below it (54px below
-     the safe area inset), under it, the content beneath it blurred as
-     beneath the bar. */
+  /* What stays with the bar (see Accessory): sticking below it (at the
+     page's padding edge: its padding the safe area inset and the bar, see
+     Page), the content beneath it blurred as beneath the bar. */
   .uikit-header-accessory {
     position: sticky;
     z-index: 9;
-    top: calc(var(--uikit-page-safe-top, 0px) + 54px);
+    top: 0;
     padding: 0 16px 8px;
 
     &::before {

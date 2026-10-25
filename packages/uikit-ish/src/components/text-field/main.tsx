@@ -213,7 +213,7 @@ const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
   ({ className, onBlur, onFocus, onPointerDown, ...props }, ref) => {
     // Focused by a pointer (pressed first), or else by keyboard.
     const pressed = useRef(false);
-    const [keyboard, setKeyboard] = useState(false);
+    const [isKeyboardFocus, setIsKeyboardFocus] = useState(false);
 
     return (
       // Figma “Search Field” (Sidebars, Toolbars): a capsule (36px high, on the
@@ -223,7 +223,7 @@ const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
       // 44px high, on the secondary fill, 11px in, its parts 8px apart.
       <label
         ref={ref}
-        data-keyboard-focus={keyboard ? '' : undefined}
+        data-keyboard-focus={isKeyboardFocus ? '' : undefined}
         data-text-field-part="search"
         onBlur={(event) => {
           onBlur?.(event);
@@ -232,12 +232,12 @@ const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
             !(relatedTarget instanceof Node) ||
             !event.currentTarget.contains(relatedTarget)
           ) {
-            setKeyboard(false);
+            setIsKeyboardFocus(false);
           }
         }}
         onFocus={(event) => {
           onFocus?.(event);
-          setKeyboard(!pressed.current);
+          setIsKeyboardFocus(!pressed.current);
           pressed.current = false;
         }}
         onPointerDown={(event) => {

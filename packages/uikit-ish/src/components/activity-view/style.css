@@ -97,11 +97,6 @@
     padding: 14px 24px 20px;
     gap: 14px;
     overscroll-behavior-inline: contain;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
   }
 
   .uikit-activity-view-name {

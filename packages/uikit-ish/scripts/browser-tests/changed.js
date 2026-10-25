@@ -129,7 +129,7 @@ const exportsOf = async (packageDirectory, components) => {
  * @returns {Promise<Set<string>>}
  */
 const affectedDemoIds = async (packageDirectory, files, names) => {
-  const entries = await readdir(path.join(packageDirectory, 'src/demo'), {
+  const entries = await readdir(path.join(packageDirectory, 'src/demo/docs'), {
     withFileTypes: true,
   });
   /** @type {Set<string>} */
@@ -140,11 +140,13 @@ const affectedDemoIds = async (packageDirectory, files, names) => {
     if (!entry.isDirectory() || demo === 'utils') continue;
     const sources = await Promise.all(
       ['main.tsx', 'props.tsx', 'props.ts'].map((file) =>
-        read(packageDirectory, `src/demo/${demo}/${file}`),
+        read(packageDirectory, `src/demo/docs/${demo}/${file}`),
       ),
     );
     const source = sources.join('\n');
-    const changed = files.some((file) => file.startsWith(`src/demo/${demo}/`));
+    const changed = files.some((file) =>
+      file.startsWith(`src/demo/docs/${demo}/`),
+    );
     const uses = names.some((name) =>
       new RegExp(String.raw`\b${name}\b`, 'u').test(source),
     );

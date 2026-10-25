@@ -16,10 +16,10 @@ export type RollChangeEventDetails = {
 export type Entry = { disabled: boolean; value: RollValue };
 
 export type ColumnContextValue = {
-  editing: boolean;
   entries: WeakMap<Element, Entry>;
   /** The id of a row by its value. */
   idOf: (value: RollValue) => string;
+  isEditing: boolean;
   select: (element: HTMLElement, event: Event) => void;
   selected: RollValue | undefined;
 };
@@ -69,7 +69,7 @@ export type RollColumnProps = Omit<
 };
 
 export type Drag = {
-  moved: boolean;
+  isMoved: boolean;
   pointerId: number;
   samples: { time: number; y: number }[];
   startTop: number;

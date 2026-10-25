@@ -305,7 +305,7 @@ export const useElementVisibility = (
     threshold = 0,
   }: ElementVisibilityOptions = {},
 ): boolean => {
-  const [visible, setVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const element = ref.current;
@@ -315,7 +315,7 @@ export const useElementVisibility = (
       (entries) => {
         const entry = entries.at(-1);
         if (!entry) return;
-        setVisible(
+        setIsVisible(
           entry.isIntersecting && entry.intersectionRatio >= threshold,
         );
       },
@@ -326,7 +326,7 @@ export const useElementVisibility = (
     return () => observer.disconnect();
   }, [ref, rootMargin, scroller, threshold]);
 
-  return visible;
+  return isVisible;
 };
 
 /** The visible area's edges (client coordinates): the scroller's box, inside its borders and scroll bars, or the layout viewport's. */
@@ -392,7 +392,7 @@ export const useElementGeometry = (
   listener: (geometry: ElementGeometry) => void,
   { scroller }: ElementGeometryOptions = {},
 ): void => {
-  const visible = useElementVisibility(ref, { scroller });
+  const isVisible = useElementVisibility(ref, { scroller });
   const latest = useRef(listener);
   useLayoutEffect(() => {
     latest.current = listener;
@@ -406,7 +406,7 @@ export const useElementGeometry = (
       latest.current(readGeometry(element, scroller?.current ?? null));
     // (Visible or not: where it is now, e.g. having just left.)
     update();
-    if (!visible) return undefined;
+    if (!isVisible) return undefined;
 
     let frame = 0;
     const schedule = () => {
@@ -429,7 +429,7 @@ export const useElementGeometry = (
       removeEventListener('resize', schedule);
       resizes.disconnect();
     };
-  }, [ref, scroller, visible]);
+  }, [ref, scroller, isVisible]);
 };
 
 /**

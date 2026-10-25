@@ -39,6 +39,20 @@
 
 /* Utils (see main.tsx). */
 @layer uikit-ish {
+  /* Scrollbars, hidden in every component's scroll container (as iOS shows
+     none at rest): they couldn't be lifted above the layers over them
+     (bars, glass, a scroll edge effect), nor kept whole in rounded
+     containers (a sheet's, a popover's corners). Scrolled by touch, a
+     wheel or a trackpad, and the keys. (No specificity: a component's or
+     an app's own rule overrides it.) */
+  :where([class*='uikit-']) {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
   .uikit-utils-reserve-layer {
     grid-area: 1 / 1;
     white-space: nowrap;

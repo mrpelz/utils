@@ -1,36 +1,19 @@
 import './style.css';
 
-import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import {
   ComponentProps,
-  createContext,
   forwardRef,
   KeyboardEvent,
   PointerEvent,
-  ReactElement,
-  RefObject,
-  useContext,
   useLayoutEffect,
   useRef,
   useState,
 } from 'react';
 
 import { cn, useForwardedRef, withStyle } from '../utils/main.js';
-import type {
-  LayoutColumnProps,
-  LayoutDrawerProps,
-  LayoutDrawerSide,
-  LayoutDrawerSwipeAreaProps,
-  LayoutRootProps,
-} from './props.js';
+import type { LayoutColumnProps, LayoutRootProps } from './props.js';
 
-export type {
-  LayoutColumnProps,
-  LayoutDrawerProps,
-  LayoutDrawerSide,
-  LayoutDrawerSwipeAreaProps,
-  LayoutRootProps,
-} from './props.js';
+export type { LayoutColumnProps, LayoutRootProps } from './props.js';
 
 // Layouts (UIKit `UISplitViewController`, iPadOS' columns): columns side by
 // side, filling their container (e.g. `Viewport.Content`): a sidebar, a list, a
@@ -40,28 +23,25 @@ export type {
 // its divider (or arrow keys on it). Columns are divided by a hairline in
 // `separator`.
 //
-// Compact (`compact`, e.g. on an iPhone, the app's choice), a column in a
-// `Drawer` (e.g. a sidebar) floats over the others from its side (inline start
-// or end), hidden until opened: swiped in from that edge (its `SwipeArea`) or
-// by a `Trigger`, swiped back (or the dimmed content pressed, or a `Close`) to
-// close. A drawer is Base UI's `Drawer` (its state the app's, or its own; a
-// trigger outside it linked by a handle, `createDrawerHandle` or, in a
-// component, `useCreateDrawerHandle`); regular, its column is side by side.
+// Compact (e.g. on an iPhone, by the size class, `useSizeClass`: the app's
+// choice), a column can be a `Drawer` instead (e.g. a sidebar), over the
+// others from its side, hidden until opened: the app renders one or the
+// other.
 //
 // Floating (a column's `floating`, e.g. for a `Sidebar`, iPadOS 26), a column
 // floats over the others at the layout's start, which span the whole layout
 // underneath it; a column next to it can keep its content clear of it
-// (`clearFloating`: its pages' content inset by the floating column's size,
-// their backgrounds and bars' edges running underneath it). Compact, a floating
-// drawer has no background or shadow of its own (its content floats itself).
+// (`clearFloating`: its pages' content and its bars' inset by the floating
+// column's size, their backgrounds running underneath it).
 //
 // Behind it all, a background of the app's choice (`Background`: any content,
 // filling the whole layout), showing where columns have none.
 //
+// Each column is the containing block of its fixed layers (e.g. a header's
+// bar, in a `Viewport.BlockStart`): they span it, not the screen.
+//
 // Deviations:
 // - Resizable (iPadOS: fixed column widths, chosen by the system).
-// - Drawers (iOS: a compact split view shows one column at a time, pushed as a
-//   navigation stack; Framework7's panels swipe in).
 
 // Behind its columns, filling it: its children layered, each filling it
 // (images and videos covering it).
@@ -75,23 +55,6 @@ const Background = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
     />
   ),
 );
-
-/**
- * Whether it's compact (its drawers' columns over the others), its element
- * (their portals' container) and its direction (their sides' swipes).
- */
-const LayoutContext = createContext<{
-  compact: boolean;
-  root: RefObject<HTMLDivElement | null>;
-  rtl: boolean;
-}>({ compact: false, root: { current: null }, rtl: false });
-
-/** A drawer's side, for its parts (none: a column outside a drawer). */
-const DrawerContext = createContext<LayoutDrawerSide | undefined>(undefined);
-
-/** The physical direction a drawer at a side is swiped towards to close. */
-const closingDirection = (side: LayoutDrawerSide, rtl: boolean) =>
-  (side === 'inline-start') === rtl ? 'right' : 'left';
 
 /** How far an arrow key resizes (Shift: further). */
 const keyStep = 10;
@@ -111,12 +74,12 @@ const clamp = (size: number, min: number, max: number) =>
  */
 const useFloatingSize = (
   columnRef: { current: HTMLDivElement | null },
-  floating: boolean,
+  isFloating: boolean,
 ) => {
   useLayoutEffect(() => {
     const { current: column } = columnRef;
     const root = column?.parentElement;
-    if (!column || !root || !floating) return undefined;
+    if (!column || !root || !isFloating) return undefined;
 
     const property = '--uikit-layout-floating-size';
     const resizeObserver = new ResizeObserver(([entry]) => {
@@ -129,11 +92,11 @@ const useFloatingSize = (
       resizeObserver.disconnect();
       root.style.removeProperty(property);
     };
-  }, [columnRef, floating]);
+  }, [columnRef, isFloating]);
 };
 
 /** A column side by side: sized (resizable), or sharing the free space. */
-const SplitColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
+const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
   (
     {
       className,
@@ -152,14 +115,13 @@ const SplitColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
     forwardedRef,
   ) => {
     const ref = useForwardedRef(forwardedRef);
-    const { compact } = useContext(LayoutContext);
-    useFloatingSize(ref, floating && !compact);
+    useFloatingSize(ref, floating);
     const [ownSize, setOwnSize] = useState(defaultSize);
     const size = controlledSize ?? ownSize;
     const dragRef = useRef<
       { pointerId: number; size: number; x: number } | undefined
     >(undefined);
-    const [dragging, setDragging] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
 
     const resize = (next: number) => {
       const clamped = clamp(Math.round(next), minSize, maxSize);
@@ -206,7 +168,7 @@ const SplitColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
             aria-valuemin={minSize}
             aria-valuenow={size}
             className="uikit-layout-divider"
-            data-dragging={dragging ? '' : undefined}
+            data-dragging={isDragging ? '' : undefined}
             data-layout-part="divider"
             role="separator"
             tabIndex={0}
@@ -227,7 +189,7 @@ const SplitColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
             }}
             onLostPointerCapture={() => {
               dragRef.current = undefined;
-              setDragging(false);
+              setIsDragging(false);
             }}
             onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
               if (event.button !== 0) return;
@@ -238,7 +200,7 @@ const SplitColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
                 size: sizeOf(event.currentTarget),
                 x: event.clientX,
               };
-              setDragging(true);
+              setIsDragging(true);
             }}
             onPointerMove={(event: PointerEvent<HTMLDivElement>) => {
               const { current: drag } = dragRef;
@@ -255,202 +217,22 @@ const SplitColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
 );
 
 /**
- * A drawer's column (compact): over the others at its side (Base UI's
- * `Drawer.Popup`), the content dimmed behind it; kept mounted while closed
- * (its pages keep their state).
- */
-const DrawerColumn = forwardRef<HTMLDivElement, LayoutColumnProps>(
-  (
-    {
-      className,
-      // (Beside a floating column only, see `SplitColumn`.)
-      clearFloating: _clearFloating,
-      defaultSize,
-      floating = false,
-      maxSize = Infinity,
-      minSize = 240,
-      // (Resizing: a split column's only.)
-      onSizeChange: _onSizeChange,
-      resizable: _resizable,
-      size: sizeProp,
-      style,
-      ...props
-    },
-    ref,
-  ) => {
-    const size = sizeProp ?? defaultSize ?? 320;
-    const { root } = useContext(LayoutContext);
-    const side = useContext(DrawerContext);
-
-    return (
-      <BaseDrawer.Portal
-        keepMounted
-        className="uikit-layout-drawer-portal"
-        container={root}
-      >
-        <BaseDrawer.Backdrop
-          className="uikit-layout-backdrop"
-          data-layout-part="backdrop"
-        />
-        <BaseDrawer.Viewport
-          className="uikit-layout-drawer-viewport"
-          data-layout-part="drawer-viewport"
-        >
-          <BaseDrawer.Popup
-            ref={ref}
-            data-floating={floating ? '' : undefined}
-            data-layout-part="column"
-            data-side={side}
-            style={withStyle(
-              {
-                '--uikit-layout-column-max': Number.isFinite(maxSize)
-                  ? `${String(maxSize)}px`
-                  : undefined,
-                '--uikit-layout-column-min': `${String(minSize)}px`,
-                '--uikit-layout-drawer-size': `${String(size)}px`,
-              },
-              style,
-            )}
-            {...props}
-            className={cn('uikit-layout-column', className)}
-          />
-        </BaseDrawer.Viewport>
-      </BaseDrawer.Portal>
-    );
-  },
-);
-
-/**
- * A column: side by side (see `SplitColumn`), or (compact, in a `Drawer`) a
- * drawer's.
- */
-const Column = forwardRef<HTMLDivElement, LayoutColumnProps>((props, ref) => {
-  const { compact } = useContext(LayoutContext);
-  const side = useContext(DrawerContext);
-
-  return compact && side !== undefined ? (
-    <DrawerColumn
-      ref={ref}
-      {...props}
-    />
-  ) : (
-    <SplitColumn
-      ref={ref}
-      {...props}
-    />
-  );
-});
-
-/**
- * A drawer (Base UI's `Drawer.Root`): compact, its column (a `Column` in it)
- * over the others from its side, opened by its `SwipeArea` or a `Trigger`
- * (in it, or linked by its `handle`), closed by swiping it back, a press on
- * the dimmed content (unless `disablePointerDismissal`) or a `Close`.
- * Regular, its column is side by side (its state unused).
- */
-const Drawer = <Payload,>({
-  side = 'inline-start',
-  ...props
-}: LayoutDrawerProps<Payload>): ReactElement => {
-  const { rtl } = useContext(LayoutContext);
-
-  return (
-    <DrawerContext.Provider value={side}>
-      <BaseDrawer.Root
-        swipeDirection={closingDirection(side, rtl)}
-        {...props}
-      />
-    </DrawerContext.Provider>
-  );
-};
-
-/**
- * Compact: a strip at its drawer's edge (`width`, 20px) it's swiped in from;
- * without one, a drawer isn't swiped in.
- */
-const DrawerSwipeArea = forwardRef<HTMLDivElement, LayoutDrawerSwipeAreaProps>(
-  ({ className, style, width = 20, ...props }, ref) => {
-    const { compact } = useContext(LayoutContext);
-    const side = useContext(DrawerContext);
-    if (!compact || side === undefined) return null;
-
-    return (
-      <BaseDrawer.SwipeArea
-        ref={ref}
-        data-layout-part="drawer-swipe-area"
-        data-side={side}
-        style={withStyle(
-          { '--uikit-layout-swipe-area-width': `${String(width)}px` },
-          style,
-        )}
-        {...props}
-        className={cn('uikit-layout-swipe-area', className)}
-      />
-    );
-  },
-);
-
-/** A handle linking a drawer to its triggers outside it. */
-export type LayoutDrawerHandle<Payload = unknown> = BaseDrawer.Handle<Payload>;
-
-/**
- * A handle linking a drawer (its `handle`) to its triggers outside it (e.g.
- * in another column's bar, their `handle`), and opening or closing it
- * imperatively (Base UI's `Drawer.createHandle`): made once, e.g. at a
- * module's top level (in a component: `useCreateDrawerHandle`).
- */
-const createDrawerHandle = <
-  Payload = unknown,
->(): LayoutDrawerHandle<Payload> => BaseDrawer.createHandle<Payload>();
-
-/**
- * `Layout.createDrawerHandle`, in a component: made once, for the
- * component's lifetime.
- */
-export const useCreateDrawerHandle = <
-  Payload = unknown,
->(): LayoutDrawerHandle<Payload> => {
-  const [handle] = useState(() => createDrawerHandle<Payload>());
-
-  return handle;
-};
-
-/**
- * A layout: its columns side by side (compact: its drawers' over them;
- * floating ones over the others), optionally on a `Background`.
+ * A layout: its columns side by side (floating ones over the others),
+ * optionally on a `Background`.
  */
 const Root = forwardRef<HTMLDivElement, LayoutRootProps>(
-  ({ className, compact = false, ...props }, forwardedRef) => {
-    const ref = useForwardedRef(forwardedRef);
-    const [rtl, setRtl] = useState(false);
-
-    // Its direction (inherited, or its own `dir`), for its drawers' swipes.
-    useLayoutEffect(() => {
-      if (!ref.current) return;
-      setRtl(getComputedStyle(ref.current).direction === 'rtl');
-    }, [ref, props.dir]);
-
-    return (
-      <LayoutContext.Provider value={{ compact, root: ref, rtl }}>
-        <div
-          ref={ref}
-          data-compact={compact ? '' : undefined}
-          data-layout-part="root"
-          {...props}
-          className={cn('uikit-layout-root', className)}
-        />
-      </LayoutContext.Provider>
-    );
-  },
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      data-layout-part="root"
+      {...props}
+      className={cn('uikit-layout-root', className)}
+    />
+  ),
 );
 
 export const Layout = {
   Root,
   Background,
   Column,
-  Drawer,
-  DrawerSwipeArea,
-  DrawerTrigger: BaseDrawer.Trigger,
-  DrawerClose: BaseDrawer.Close,
-  createDrawerHandle,
 };

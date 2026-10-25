@@ -44,10 +44,10 @@ export const preventInputZoom = (): (() => void) => {
   }
   zoomHolds += 1;
 
-  let held = true;
+  let isHeld = true;
   return () => {
-    if (!held) return;
-    held = false;
+    if (!isHeld) return;
+    isHeld = false;
     zoomHolds -= 1;
     if (zoomHolds === 0 && zoomRestore !== undefined) {
       meta.content = zoomRestore;
@@ -56,8 +56,8 @@ export const preventInputZoom = (): (() => void) => {
 };
 
 /** `preventInputZoom`, while the component is mounted (and `enabled`). */
-export const useInputZoomPrevention = (enabled = true): void => {
-  useEffect(() => (enabled ? preventInputZoom() : undefined), [enabled]);
+export const useInputZoomPrevention = (isEnabled = true): void => {
+  useEffect(() => (isEnabled ? preventInputZoom() : undefined), [isEnabled]);
 };
 
 /** What the keyboard edits text in (not buttons, boxes, pickers or files). */
@@ -110,11 +110,11 @@ export const preventFocusShift = (
  */
 export const useFocusShiftPrevention = (
   target?: RefObject<HTMLElement | null>,
-  enabled = true,
+  isEnabled = true,
 ): void => {
   useEffect(
     () =>
-      enabled ? preventFocusShift(target?.current ?? document) : undefined,
-    [enabled, target],
+      isEnabled ? preventFocusShift(target?.current ?? document) : undefined,
+    [isEnabled, target],
   );
 };

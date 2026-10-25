@@ -144,7 +144,7 @@ const Group = forwardRef<HTMLDivElement, ToolbarGroupProps>(
     { className, children, prominent, style, textColor, tint, ...props },
     ref,
   ) => {
-    const tinted = prominent ?? tint !== undefined;
+    const isTinted = prominent ?? tint !== undefined;
     // With its own tint: the glass context's variables made of it (their
     // tint resolved here, not at the toolbar's).
     const context = useContext(InheritedGlassContext);
@@ -152,7 +152,7 @@ const Group = forwardRef<HTMLDivElement, ToolbarGroupProps>(
     return (
       <BaseToolbar.Group
         ref={ref}
-        data-prominent={tinted ? '' : undefined}
+        data-prominent={isTinted ? '' : undefined}
         data-glass-context={
           tint === undefined ? undefined : (context ?? 'auto')
         }
@@ -171,7 +171,7 @@ const Group = forwardRef<HTMLDivElement, ToolbarGroupProps>(
       >
         <GlassBackground
           kind="button"
-          tinted={tinted}
+          tinted={isTinted}
         />
         <GroupContext.Provider value>{children}</GroupContext.Provider>
       </BaseToolbar.Group>
@@ -207,7 +207,7 @@ const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
     },
     ref,
   ) => {
-    const inGroup = useContext(GroupContext);
+    const isInGroup = useContext(GroupContext);
     // (Alone: the bar's glass context, unless its own.)
     const inherited = useContext(InheritedGlassContext);
     const shared = { cursor, destructive, onSecondaryClick, tint };
@@ -219,7 +219,7 @@ const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
         {...props}
         render={
           render ??
-          (inGroup ? (
+          (isInGroup ? (
             // Figma “Symbol”, “Text”: 36px (symbols: circles, as their 17px
             // glyph and the padding are narrower), the content vibrant (blended
             // with the glass), scaled with the capsule's lens; pressed among

@@ -12,7 +12,12 @@ import {
   useState,
 } from 'react';
 
-import { cn, positionerSide, useForwardedRef } from '../utils/main.js';
+import {
+  cn,
+  positionerSide,
+  useForwardedRef,
+  usePortalContainer,
+} from '../utils/main.js';
 import type {
   TooltipHandle,
   TooltipPositionerProps,
@@ -54,13 +59,13 @@ const Provider = (props: BaseTooltip.Provider.Props): ReactElement => (
  */
 const Trigger = forwardRef<HTMLButtonElement, TooltipTriggerProps>(
   ({ delay, ...props }, ref) => {
-    const provided = useContext(ProvidedContext);
+    const isProvided = useContext(ProvidedContext);
     const triggerRef = useForwardedRef(ref);
 
     return (
       <BaseTooltip.Trigger
         ref={triggerRef}
-        delay={delay ?? (provided ? undefined : 300)}
+        delay={delay ?? (isProvided ? undefined : 300)}
         {...props}
       />
     );
@@ -127,9 +132,10 @@ export const useCreateTooltipHandle = <
 const Portal = forwardRef<
   HTMLDivElement,
   Omit<BaseTooltip.Portal.Props, 'ref'>
->(({ className, ...props }, ref) => (
+>(({ className, container, ...props }, ref) => (
   <BaseTooltip.Portal
     ref={ref}
+    container={usePortalContainer(container)}
     {...props}
     className={cn('uikit-tooltip-portal', className)}
   />

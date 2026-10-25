@@ -190,7 +190,7 @@ const Lines = () => (
   </svg>
 );
 
-const Sign = ({ plus }: { plus: boolean }) => (
+const Sign = ({ isPlus }: { isPlus: boolean }) => (
   <svg
     aria-hidden="true"
     fill="none"
@@ -201,7 +201,7 @@ const Sign = ({ plus }: { plus: boolean }) => (
     viewBox="0 0 12 12"
     width="0.8em"
   >
-    <path d={plus ? 'M2 6h8M6 2v8' : 'M2 6h8'} />
+    <path d={isPlus ? 'M2 6h8M6 2v8' : 'M2 6h8'} />
   </svg>
 );
 
@@ -272,8 +272,10 @@ const scrollContainerOf = (element: HTMLElement) => {
   return element.ownerDocument.scrollingElement ?? element.ownerDocument.body;
 };
 
-const setOffset = (item: HTMLElement, offset: number, animate: boolean) => {
-  item.style.transition = animate ? `transform ${reorderDuration}ms` : 'none';
+const setOffset = (item: HTMLElement, offset: number, isAnimated: boolean) => {
+  item.style.transition = isAnimated
+    ? `transform ${reorderDuration}ms`
+    : 'none';
   item.style.transform = offset === 0 ? '' : `translateY(${offset}px)`;
 };
 
@@ -307,11 +309,11 @@ const useReorder = (
     const commit = (items: HTMLElement[], from: number, to: number) => {
       const settle = { observer: undefined as MutationObserver | undefined };
       let timeout: ReturnType<typeof setTimeout> | undefined;
-      const clearOffsets = (animate: boolean) => {
+      const clearOffsets = (isAnimated: boolean) => {
         settle.observer?.disconnect();
         clearTimeout(timeout);
         for (const element of items) {
-          setOffset(element, 0, animate);
+          setOffset(element, 0, isAnimated);
           delete element.dataset.reordering;
           delete element.dataset.reorderEdge;
         }
@@ -390,9 +392,13 @@ const useReorder = (
         }
         for (const [index, element] of items.entries()) {
           if (index === from) continue;
-          const below = index > from && index <= to;
-          const above = index < from && index >= to;
-          setOffset(element, (above ? height : 0) - (below ? height : 0), true);
+          const isBelow = index > from && index <= to;
+          const isAbove = index < from && index >= to;
+          setOffset(
+            element,
+            (isAbove ? height : 0) - (isBelow ? height : 0),
+            true,
+          );
         }
         markEdges(to);
       };
@@ -643,13 +649,13 @@ const rowPath = (width: number, height: number, offset: number) => {
 const revealRanges = (container: HTMLElement, side: Side, lead: number) => {
   const width = container.offsetWidth;
   // Whether the row is on the container's left (the edge on its right).
-  const rowOnLeft = (side === 'trailing') === !isRtl(container);
+  const isRowOnLeft = (side === 'trailing') === !isRtl(container);
 
   for (const button of container.children) {
     if (!(button instanceof HTMLElement)) continue;
 
     // From the edge, uncovered from `start` to `start` + its width.
-    const start = rowOnLeft
+    const start = isRowOnLeft
       ? width - button.offsetLeft - button.offsetWidth
       : button.offsetLeft;
     const end = start + button.offsetWidth;
@@ -680,13 +686,13 @@ const placeRow = (
   item: HTMLElement,
   actions: Partial<Record<Side, HTMLElement>>,
   offset: number,
-  animate: boolean,
+  isAnimated: boolean,
   overswipes: (side: Side) => boolean,
 ) => {
   const direction = isRtl(item) ? -1 : 1;
   const transition = (...properties: string[]) =>
     properties
-      .map((property) => `${property} ${animate ? swipeDuration : 0}ms`)
+      .map((property) => `${property} ${isAnimated ? swipeDuration : 0}ms`)
       .join(', ');
 
   // Rounded at the side the content leaves (changing with the side only); at
@@ -710,8 +716,8 @@ const placeRow = (
     const revealed = Math.max(0, side === 'leading' ? offset : -offset);
     const extra = overswipes(side) ? Math.max(0, revealed - width) : 0;
     const outermost = outermostAction(container, side);
-    const rowOnLeft = (side === 'trailing') === (direction === 1);
-    const towardsRow = rowOnLeft ? -1 : 1;
+    const isRowOnLeft = (side === 'trailing') === (direction === 1);
+    const towardsRow = isRowOnLeft ? -1 : 1;
     const arm = armDistance(item, container, side, width);
     const arming = Math.min(extra / (arm - width), 1);
     // Past the armed place, on across the whole row (see `snapPlaces`): the
@@ -840,7 +846,7 @@ const snapPlaces = (
 };
 
 /** Whether the browser fires `scrollend` (else: a pause in scrolling). */
-const scrollEnds = typeof window !== 'undefined' && 'onscrollend' in window;
+const hasScrollEnd = typeof window !== 'undefined' && 'onscrollend' in window;
 
 /**
  * A row (UIKit `UITableViewCell`), with optional swipe actions. With a click
@@ -892,7 +898,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     undefined,
   );
   const outsideRef = useRef<((event: Event) => void) | undefined>(undefined);
-  const [swipeable, setSwipeable] = useState(false);
+  const [isSwipeable, setIsSwipeable] = useState(false);
   const [pin, setPin] = useState<HTMLElement | null>(null);
 
   const overswipes = (side: Side) => Boolean(overswipeRef.current[side]);
@@ -927,24 +933,24 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       const snap = snapsRef.current[point];
       if (!snap) continue;
       const side: Side = point.startsWith('leading') ? 'leading' : 'trailing';
-      const overswiping =
+      const isOverswiping =
         point.endsWith('Armed') || point.endsWith('Overswipe');
       snap.hidden =
         placesRef.current[point] === undefined ||
         (openSide !== undefined && point !== 'closed' && side !== openSide) ||
-        (overswiping && !overswipable(side));
+        (isOverswiping && !overswipable(side));
     }
     if (item && scrollLeft !== undefined && item.scrollLeft !== scrollLeft) {
       item.scrollLeft = scrollLeft;
     }
   };
 
-  const scrollTo = (offset: number, smooth: boolean) => {
+  const scrollTo = (offset: number, isSmooth: boolean) => {
     const { current: item } = itemRef;
     if (!item) return;
-    const rtl = isRtl(item);
-    const left = rtl ? offset - lead() : lead() - offset;
-    item.scrollTo({ behavior: smooth ? 'smooth' : 'instant', left });
+    const isRightToLeft = isRtl(item);
+    const left = isRightToLeft ? offset - lead() : lead() - offset;
+    item.scrollTo({ behavior: isSmooth ? 'smooth' : 'instant', left });
   };
 
   // Measures the actions (and the row) for the track's room and snap
@@ -1056,7 +1062,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         } else {
           delete actionsRef.current[side];
         }
-        setSwipeable(
+        setIsSwipeable(
           Boolean(actionsRef.current.leading ?? actionsRef.current.trailing),
         );
         measureRef.current();
@@ -1104,7 +1110,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
   // whole row: triggering there), open or closed.
   const settle = () => {
     const { current: item } = itemRef;
-    if (!item || dragRef.current?.moved || touchingRef.current) return;
+    if (!item || dragRef.current?.isMoved || touchingRef.current) return;
     item.style.removeProperty('scroll-snap-type');
     const offset = offsetOf(item);
     const side: Side = offset > 0 ? 'leading' : 'trailing';
@@ -1156,15 +1162,15 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     placeRow(item, actionsRef.current, offset, false, overswipesNow);
 
     const { [side]: arm = Infinity } = swipeRef.current.arms;
-    const armed =
+    const isArmed =
       !closingRef.current && overswipesNow(side) && Math.abs(offset) > arm;
     for (const key of sides) {
       const { [key]: actions } = actionsRef.current;
       const action = actions && outermostAction(actions, key);
-      action?.toggleAttribute('data-armed', armed && key === side);
+      action?.toggleAttribute('data-armed', isArmed && key === side);
     }
 
-    if (scrollEnds) return;
+    if (hasScrollEnd) return;
     clearTimeout(settleRef.current);
     settleRef.current = setTimeout(settle, scrollEndDelay);
   };
@@ -1178,7 +1184,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
   });
   useEffect(() => {
     const { current: item } = itemRef;
-    if (!item || !swipeable) return undefined;
+    if (!item || !isSwipeable) return undefined;
     const onScrollEnd = () => settleNowRef.current();
     const onTouchStart = () => {
       touchingRef.current = true;
@@ -1202,11 +1208,11 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       item.removeEventListener('touchend', onTouchEnd);
       item.removeEventListener('touchcancel', onTouchEnd);
     };
-  }, [itemRef, swipeable]);
+  }, [itemRef, isSwipeable]);
 
   useLayoutEffect(() => {
     const { current: item } = itemRef;
-    if (!item || !swipeable) return undefined;
+    if (!item || !isSwipeable) return undefined;
     measureRef.current();
     const observer = new ResizeObserver(() => measureRef.current());
     observer.observe(item);
@@ -1215,7 +1221,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       if (container) observer.observe(container);
     }
     return () => observer.disconnect();
-  }, [itemRef, swipeable]);
+  }, [itemRef, isSwipeable]);
 
   const release = () => {
     if (itemRef.current) delete itemRef.current.dataset.pressed;
@@ -1235,7 +1241,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       item.dataset.pressed = '';
     }
     if (
-      !swipeable ||
+      !isSwipeable ||
       sides.some((side) => actions[side]?.contains(event.target as Node | null))
     ) {
       return;
@@ -1249,7 +1255,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     if (event.pointerType !== 'mouse' || isOwnGesture(item, event)) return;
     dragRef.current = {
       base: offsetOf(item),
-      moved: false,
+      isMoved: false,
       pointerId: event.pointerId,
       scroll: item.scrollLeft,
       time: performance.now(),
@@ -1266,7 +1272,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     if (!item || drag?.pointerId !== event.pointerId) return;
 
     const dx = event.clientX - drag.x;
-    if (!drag.moved) {
+    if (!drag.isMoved) {
       const vertical = Math.abs(event.clientY - drag.y);
       if (vertical > swipeThreshold && vertical > Math.abs(dx)) {
         dragRef.current = null;
@@ -1274,7 +1280,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       }
       if (Math.abs(dx) < swipeThreshold) return;
 
-      drag.moved = true;
+      drag.isMoved = true;
       // Swiped: overswiping in one go (see `overswipable`).
       swipingRef.current = true;
       release();
@@ -1289,7 +1295,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
 
   // A mouse drag released: overswiped (armed), opened (past half its
   // actions, or quickly towards them) or closed, scrolling there.
-  const endDrag = (drag: Drag, cancelled: boolean) => {
+  const endDrag = (drag: Drag, isCancelled: boolean) => {
     const { current: item } = itemRef;
     if (!item) return;
     const offset = offsetOf(item);
@@ -1300,11 +1306,11 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
 
     suppressClick();
     // Open, the other side doesn't (see `showSnaps`).
-    const locked =
+    const isLocked =
       openSideRef.current !== undefined && openSideRef.current !== side;
     // Across the whole row, triggering there (see `settle`): not snapping
     // until then (which would start where it is).
-    if (!locked && !cancelled && overswipesNow(side) && distance > arm) {
+    if (!isLocked && !isCancelled && overswipesNow(side) && distance > arm) {
       const { [side]: extent = 0 } = swipeRef.current.extents;
       scrollTo((side === 'leading' ? 1 : -1) * extent, true);
       return;
@@ -1314,28 +1320,28 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     swipingRef.current = false;
     showSnaps();
     item.style.removeProperty('scroll-snap-type');
-    if (locked || cancelled || width === undefined || distance < 1) {
+    if (isLocked || isCancelled || width === undefined || distance < 1) {
       context.close();
       return;
     }
     const moved = offset - drag.base;
-    const quick = performance.now() - drag.time < 300;
-    const towards = side === 'leading' ? moved > 10 : moved < -10;
-    if (quick ? towards : distance > width / 2) {
+    const isQuick = performance.now() - drag.time < 300;
+    const isMovedTowards = side === 'leading' ? moved > 10 : moved < -10;
+    if (isQuick ? isMovedTowards : distance > width / 2) {
       context.open(side);
     } else {
       context.close();
     }
   };
 
-  const finish = (event: PointerEvent<HTMLElement>, cancelled: boolean) => {
+  const finish = (event: PointerEvent<HTMLElement>, isCancelled: boolean) => {
     const { current: press } = pressRef;
     const { current: drag } = dragRef;
     if (press?.pointerId === event.pointerId) pressRef.current = null;
     if (drag?.pointerId === event.pointerId) {
       dragRef.current = null;
-      if (drag.moved) {
-        endDrag(drag, cancelled);
+      if (drag.isMoved) {
+        endDrag(drag, isCancelled);
         return;
       }
     }
@@ -1343,7 +1349,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
 
     // A tap on an open row closes it.
     const moved = Math.hypot(event.clientX - press.x, event.clientY - press.y);
-    if (!cancelled && moved < swipeThreshold && openSideRef.current) {
+    if (!isCancelled && moved < swipeThreshold && openSideRef.current) {
       context.close();
       suppressClick();
     }
@@ -1379,7 +1385,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         aria-current={selected ? 'true' : undefined}
         data-clickable={props.onClick ? '' : undefined}
         data-selected={selected ? '' : undefined}
-        data-swipeable={swipeable ? '' : undefined}
+        data-swipeable={isSwipeable ? '' : undefined}
         style={withStyle(
           {
             '--uikit-list-level':
@@ -1392,7 +1398,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         onClickCapture={handleClickCapture}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
-        onScroll={swipeable ? onScroll : undefined}
+        onScroll={isSwipeable ? onScroll : undefined}
         onLostPointerCapture={(event: PointerEvent<HTMLElement>) => {
           (onLostPointerCapture as Handler<typeof event>)?.(event);
           // Only the row's own capture: taking it over from the touched
@@ -1418,7 +1424,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
           data-list-part="track"
         >
           <Pin ref={setPin} />
-          {swipeable
+          {isSwipeable
             ? snapPoints.map((point) => (
                 // Where a swipeable row snaps (see `Item`), in the track.
                 // Closed, it stops even when flung: closing one side doesn't
@@ -1477,18 +1483,18 @@ const ExpandableRoot: FunctionComponent<ListExpandableRootProps> = ({
   open: openProp,
 }) => {
   const id = useId();
-  const [uncontrolled, setUncontrolled] = useState(defaultOpen);
-  const open = openProp ?? uncontrolled;
+  const [isUncontrolled, setIsUncontrolled] = useState(defaultOpen);
+  const isOpen = openProp ?? isUncontrolled;
   const context = useMemo<ExpandableContextValue>(
     () => ({
       id,
-      open,
-      setOpen: (next, event) => {
-        onOpenChange?.(next, event);
-        if (openProp === undefined) setUncontrolled(next);
+      isOpen,
+      setOpen: (isNextOpen, event) => {
+        onOpenChange?.(isNextOpen, event);
+        if (openProp === undefined) setIsUncontrolled(isNextOpen);
       },
     }),
-    [id, onOpenChange, open, openProp],
+    [id, onOpenChange, isOpen, openProp],
   );
 
   return (
@@ -1511,14 +1517,14 @@ const ExpandableTrigger = forwardRef<HTMLElement, PartProps<'button'>>(
       defaultTagName: 'button',
       props: {
         'aria-controls': expandable?.id,
-        'aria-expanded': expandable?.open ?? false,
+        'aria-expanded': expandable?.isOpen ?? false,
         'data-list-part': 'expandable-trigger',
         type: 'button',
         ...props,
         onClick: (event: MouseEvent<HTMLElement>) => {
           (onClick as Handler<typeof event>)?.(event);
           if (event.defaultPrevented || !expandable) return;
-          expandable.setOpen(!expandable.open, event);
+          expandable.setOpen(!expandable.isOpen, event);
         },
       },
       ref,
@@ -1530,21 +1536,21 @@ const ExpandableTrigger = forwardRef<HTMLElement, PartProps<'button'>>(
 const Expandable = forwardRef<HTMLElement, ListExpandableProps>(
   ({ id, open: openProp, ...props }, ref) => {
     const expandable = useContext(ExpandableContext);
-    const open = openProp ?? expandable?.open ?? false;
+    const isOpen = openProp ?? expandable?.isOpen ?? false;
     const itemRef = useForwardedRef<HTMLElement>(ref);
     const shown = useRef<boolean | undefined>(undefined);
 
     useLayoutEffect(() => {
       const { current: item } = itemRef;
       if (!item) return undefined;
-      const was = shown.current;
-      shown.current = open;
+      const wasShown = shown.current;
+      shown.current = isOpen;
 
       const settle = () => {
-        item.toggleAttribute('data-closed', !open);
-        item.inert = !open;
+        item.toggleAttribute('data-closed', !isOpen);
+        item.inert = !isOpen;
       };
-      if (was === undefined || was === open) {
+      if (wasShown === undefined || wasShown === isOpen) {
         settle();
         return undefined;
       }
@@ -1562,10 +1568,10 @@ const Expandable = forwardRef<HTMLElement, ListExpandableProps>(
         };
       };
       const closed = { height: '0px', paddingBottom: '0px', paddingTop: '0px' };
-      const from = open ? closed : box(item);
-      if (open) settle();
-      const to = open ? box(item) : closed;
-      item.inert = !open;
+      const from = isOpen ? closed : box(item);
+      if (isOpen) settle();
+      const to = isOpen ? box(item) : closed;
+      item.inert = !isOpen;
 
       item.style.overflow = 'clip';
       const animation = item.animate(
@@ -1573,13 +1579,13 @@ const Expandable = forwardRef<HTMLElement, ListExpandableProps>(
           {
             ...from,
             minHeight: '0px',
-            opacity: open ? 0 : 1,
+            opacity: isOpen ? 0 : 1,
             visibility: 'visible',
           },
           {
             ...to,
             minHeight: '0px',
-            opacity: open ? 1 : 0,
+            opacity: isOpen ? 1 : 0,
             visibility: 'visible',
           },
         ],
@@ -1587,7 +1593,7 @@ const Expandable = forwardRef<HTMLElement, ListExpandableProps>(
       );
       const done = () => {
         item.style.removeProperty('overflow');
-        if (!open) settle();
+        if (!isOpen) settle();
       };
       animation.finished.then(done).catch(() => undefined);
 
@@ -1596,7 +1602,7 @@ const Expandable = forwardRef<HTMLElement, ListExpandableProps>(
         item.style.removeProperty('overflow');
         settle();
       };
-    }, [itemRef, open]);
+    }, [itemRef, isOpen]);
 
     return (
       <Item
@@ -1764,7 +1770,7 @@ const Disclosure = forwardRef<HTMLElement, PartProps<'span'>>(
       defaultTagName: 'span',
       props: {
         'data-list-part': 'disclosure',
-        'data-panel-open': expandable?.open ? '' : undefined,
+        'data-panel-open': expandable?.isOpen ? '' : undefined,
         className: cn('uikit-list-disclosure', className),
         'aria-hidden': 'true',
         children: children ?? <Chevron />,
@@ -1897,7 +1903,7 @@ const EditButton = forwardRef<HTMLElement, ListEditButtonProps>(
           item?.open('trailing');
         }}
       >
-        {children ?? <Sign plus={editingStyle === 'insert'} />}
+        {children ?? <Sign isPlus={editingStyle === 'insert'} />}
       </StyledEditButton>
     );
   },

@@ -62,21 +62,21 @@ export type {
 
 // Registers a momentary tooltip (see `Value`), which makes the bar
 // focusable.
-const RootContext = createContext<((momentary: boolean) => void) | undefined>(
+const RootContext = createContext<((isMomentary: boolean) => void) | undefined>(
   undefined,
 );
 
 /** A progress bar (UIKit `UIProgressView`), its parts Base UI's. */
 const Root = forwardRef<HTMLDivElement, ProgressRootProps>(
   ({ className, style, tabIndex, tint, ...props }, ref) => {
-    const [momentary, setMomentary] = useState(false);
+    const [isMomentary, setIsMomentary] = useState(false);
 
     return (
-      <RootContext.Provider value={setMomentary}>
+      <RootContext.Provider value={setIsMomentary}>
         <BaseProgress.Root
           ref={ref}
           style={withStyle({ '--uikit-progress-tint': tint }, style)}
-          tabIndex={tabIndex ?? (momentary ? 0 : undefined)}
+          tabIndex={tabIndex ?? (isMomentary ? 0 : undefined)}
           {...props}
           className={cn('uikit-progress-root', className)}
           data-progress-part="root"
@@ -124,12 +124,12 @@ const Label = forwardRef<HTMLSpanElement, ProgressLabelProps>(
 const Value = forwardRef<HTMLSpanElement, ProgressValueProps>(
   ({ className, placement = 'block-start', ...props }, ref) => {
     const setMomentary = useContext(RootContext);
-    const momentary = placement === 'momentary-tooltip';
+    const isMomentary = placement === 'momentary-tooltip';
     useLayoutEffect(() => {
-      if (!momentary) return undefined;
+      if (!isMomentary) return undefined;
       setMomentary?.(true);
       return () => setMomentary?.(false);
-    }, [momentary, setMomentary]);
+    }, [isMomentary, setMomentary]);
 
     return (
       <BaseProgress.Value
@@ -138,7 +138,7 @@ const Value = forwardRef<HTMLSpanElement, ProgressValueProps>(
         data-progress-placement={placement}
         className={cn(
           'uikit-progress-value',
-          placement === 'tooltip' || momentary
+          placement === 'tooltip' || isMomentary
             ? cn('uikit-tooltip-surface uikit-glass-medium', className)
             : className,
         )}
@@ -166,20 +166,20 @@ const spokes = [1, 0.15, 0.27, 0.39, 0.51, 0.63, 0.75, 0.87];
  */
 const useStopped = (
   spinner: RefObject<HTMLElement | null>,
-  animating: boolean,
+  isAnimating: boolean,
   movement: ActivityIndicatorMovement,
   stopBehavior: ActivityIndicatorStopBehavior,
 ): 'freeze' | 'reset' | undefined => {
   // Whether its last turn is done (stopped from the start: at rest).
-  const [finished, setFinished] = useState(!animating);
-  const [wasAnimating, setWasAnimating] = useState(animating);
-  if (animating !== wasAnimating) {
-    setWasAnimating(animating);
-    setFinished(false);
+  const [isFinished, setIsFinished] = useState(!isAnimating);
+  const [wasAnimating, setWasAnimating] = useState(isAnimating);
+  if (isAnimating !== wasAnimating) {
+    setWasAnimating(isAnimating);
+    setIsFinished(false);
   }
 
   useLayoutEffect(() => {
-    if (animating || stopBehavior !== 'finish') return undefined;
+    if (isAnimating || stopBehavior !== 'finish') return undefined;
 
     // Finishing: the turn's animation (the spinner's; fading, the top
     // spoke's) ends with its current iteration, at the top; then at rest.
@@ -193,21 +193,21 @@ const useStopped = (
       turn?.effect?.updateTiming({ iterations: iteration + 1 });
     }
 
-    let cancelled = false;
+    let isCancelled = false;
     (turn?.finished ?? Promise.resolve())
       .then(() => {
-        if (!cancelled) setFinished(true);
+        if (!isCancelled) setIsFinished(true);
       })
       .catch(() => undefined);
 
     return () => {
-      cancelled = true;
+      isCancelled = true;
       turn?.effect?.updateTiming({ iterations: Infinity });
     };
-  }, [animating, movement, spinner, stopBehavior]);
+  }, [isAnimating, movement, spinner, stopBehavior]);
 
-  if (animating) return undefined;
-  if (stopBehavior === 'finish') return finished ? 'reset' : undefined;
+  if (isAnimating) return undefined;
+  if (stopBehavior === 'finish') return isFinished ? 'reset' : undefined;
   return stopBehavior;
 };
 

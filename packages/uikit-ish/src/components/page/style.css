@@ -10,27 +10,38 @@
     color: var(--color-ios-label);
     overscroll-behavior: contain;
 
-    /* Its end: 35px after its content (as between a list's sections: a
-       list's ends are its container's, see List), clear of the bottom
-       inset. */
-    padding-block-end: calc(var(--uikit-page-safe-bottom) + 35px);
+    /* Its end: 16px after its content (a list's ends are its container's,
+       see List), clear of the bottom inset. */
+    padding-block: calc(
+      var(--uikit-page-safe-top) + var(--uikit-header-inset, 0px)
+    ) calc(var(--uikit-page-safe-bottom) + 16px);
     padding-inline-start: var(--uikit-layout-inset-start, 0);
-    scrollbar-width: thin;
 
-    /* The safe area: its end scrolling clear of the bottom inset; at its
-       top, its header's bar below the top inset, its glass reaching under
-       it (see Header), or else its content below it. None left for its
-       content. */
+    /* Its scrolling, for its header's bar (see Header). */
+    scroll-timeline: --uikit-page-scroll block;
+
+    /* The safe area: its content below the top inset (and below its
+       header's bar, see Header: the bar anchored over it), its end
+       scrolling clear of the bottom inset. None left for its content. */
     --uikit-page-safe-top: var(--uikit-safe-area-inset-top, 0px);
     --uikit-page-safe-bottom: var(--uikit-safe-area-inset-bottom, 0px);
 
-    &:not(:has(> [data-header-part], > * > [data-header-part='bar'])) {
-      padding-block-start: var(--uikit-page-safe-top);
+    /* (A header within it, e.g. a tab's panel rendered as a page.) */
+    &:has(> .uikit-header-root > .uikit-viewport-anchor[data-edge='block-start']) {
+      --uikit-header-inset: 54px;
     }
 
     & > * {
       --uikit-safe-area-inset-top: 0px;
       --uikit-safe-area-inset-bottom: 0px;
+      --uikit-header-inset: 0px;
+    }
+
+    /* A header within it: its bar anchored (fixed, not within its padding),
+       the safe areas its own. */
+    & > .uikit-header-root > .uikit-viewport-anchor {
+      --uikit-safe-area-inset-top: var(--uikit-page-safe-top);
+      --uikit-safe-area-inset-bottom: var(--uikit-page-safe-bottom);
     }
 
     &[data-background='plain'] {

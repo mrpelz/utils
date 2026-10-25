@@ -6,8 +6,8 @@ export type PopoverAlign = 'center' | 'end' | 'start';
 
 // Whether its popup has an arrow (for its distance).
 export type PopoverState = {
-  arrow: boolean;
-  setArrow: (arrow: boolean) => void;
+  hasArrow: boolean;
+  setHasArrow: (hasArrow: boolean) => void;
 };
 
 /** A handle linking a popover to its triggers outside it. */

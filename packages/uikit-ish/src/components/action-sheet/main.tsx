@@ -15,7 +15,12 @@ import {
   useState,
 } from 'react';
 
-import { cn, useForwardedRef, useInitialFocus } from '../utils/main.js';
+import {
+  cn,
+  useForwardedRef,
+  useInitialFocus,
+  usePortalContainer,
+} from '../utils/main.js';
 import type {
   ActionSheetActionProps,
   ActionSheetHandle,
@@ -57,14 +62,14 @@ const Root = <Payload,>({
       <BasePopover.Root
         modal={modal}
         {...props}
-        onOpenChange={(open, eventDetails) => {
-          if (open) setTrigger(eventDetails.trigger ?? null);
-          onOpenChange?.(open, eventDetails);
+        onOpenChange={(isOpen, eventDetails) => {
+          if (isOpen) setTrigger(eventDetails.trigger ?? null);
+          onOpenChange?.(isOpen, eventDetails);
         }}
-        onOpenChangeComplete={(open) => {
+        onOpenChangeComplete={(isOpen) => {
           // (Closed: presented anew, by a trigger or not.)
-          if (!open) setTrigger(null);
-          onOpenChangeComplete?.(open);
+          if (!isOpen) setTrigger(null);
+          onOpenChangeComplete?.(isOpen);
         }}
       />
     </ActionSheetContext.Provider>
@@ -108,7 +113,8 @@ const bottomAnchor = (container: ActionSheetPopupProps['container']) => ({
  * behind it, in its portal.
  */
 const Popup = forwardRef<HTMLDivElement, ActionSheetPopupProps>(
-  ({ className, container, initialFocus, ...props }, ref) => {
+  ({ className, container: containerProp, initialFocus, ...props }, ref) => {
+    const container = usePortalContainer(containerProp) ?? undefined;
     const trigger = useContext(ActionSheetContext);
     const popupRef = useForwardedRef(ref);
     const focus = useInitialFocus(popupRef);

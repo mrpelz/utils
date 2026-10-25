@@ -1,0 +1,118 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
+
+import { List } from '../../../components/index.js';
+import { AddLog } from '../../tooling/frame/log.js';
+import {
+  commonPropOptions,
+  MappedProp,
+} from '../../tooling/frame/prop-control.js';
+
+export const getPropOptionsForm = (addLog: AddLog) => ({
+  ...commonPropOptions,
+  validationMode: [undefined, 'onSubmit', 'onBlur', 'onChange'] as const,
+  // A server's errors, by field name.
+  errors: [
+    undefined,
+    new MappedProp(
+      { email: 'This address is taken.' },
+      '[email: this address is taken]',
+    ),
+  ] as const,
+  onFormSubmit: [
+    new MappedProp(
+      (values: Record<string, unknown>) =>
+        addLog(`submitted: ${JSON.stringify(values)}`),
+      '[log values]',
+    ),
+    undefined,
+  ] as const,
+});
+
+export const propOptionsFieldset = {
+  ...commonPropOptions,
+  disabled: [undefined, false, true] as const,
+};
+
+/** Its header by `render` (another prominence: `List.Header`'s). */
+export const propOptionsLegend = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+  render: [
+    undefined,
+    new MappedProp(
+      <List.Header prominence="nested" />,
+      '[<List.Header prominence="nested" />]',
+    ),
+    new MappedProp(
+      <List.Header prominence="extraProminent" />,
+      '[<List.Header prominence="extraProminent" />]',
+    ),
+  ] as const,
+};
+
+export const getPropOptionsCheckboxGroup = (addLog: AddLog) => ({
+  ...commonPropOptions,
+  defaultValue: [
+    new MappedProp(['messages'], '[messages]'),
+    undefined,
+    new MappedProp<string[]>([], '[none]'),
+  ] as const,
+  value: [
+    undefined,
+    new MappedProp(['messages', 'mentions', 'reminders'], '[all]'),
+  ] as const,
+  disabled: [undefined, false, true] as const,
+  onValueChange: [
+    new MappedProp(
+      (value: string[]) => addLog(`notifications: ${value.join(', ')}`),
+      '[log change]',
+    ),
+    undefined,
+  ] as const,
+});
+
+export const propOptionsCheckbox = {
+  ...commonPropOptions,
+  disabled: [undefined, false, true] as const,
+  readOnly: [undefined, false, true] as const,
+  required: [undefined, false, true] as const,
+  indeterminate: [undefined, false, true] as const,
+  cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
+};
+
+export const getPropOptionsRadioGroup = (addLog: AddLog) => ({
+  ...commonPropOptions,
+  defaultValue: ['automatic', undefined, 'light'] as const,
+  value: [undefined, 'dark'] as const,
+  disabled: [undefined, false, true] as const,
+  readOnly: [undefined, false, true] as const,
+  required: [undefined, false, true] as const,
+  onValueChange: [
+    new MappedProp(
+      (value: unknown) => addLog(`appearance: ${String(value)}`),
+      '[log change]',
+    ),
+    undefined,
+  ] as const,
+});
+
+export const propOptionsRadio = {
+  ...commonPropOptions,
+  disabled: [undefined, false, true] as const,
+  readOnly: [undefined, false, true] as const,
+  cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
+};
+
+/** `Field.Root` (around a stepper): its name and state. */
+export const propOptionsField = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+  // (Its row.)
+  render: [
+    new MappedProp(<List.Item />, '[<List.Item />]'),
+    undefined,
+  ] as const,
+  name: ['quantity', 'amount'] as const,
+  disabled: [undefined, false, true] as const,
+  validationMode: [undefined, 'onSubmit', 'onBlur', 'onChange'] as const,
+};

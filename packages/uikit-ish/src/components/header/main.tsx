@@ -1,4 +1,5 @@
 import '../toolbar/style.css';
+import '../viewport/style.css';
 import './style.css';
 
 import { useRender } from '@base-ui/react/use-render';
@@ -15,11 +16,9 @@ import {
   useState,
 } from 'react';
 
-import { Toolbar } from '../toolbar/main.js';
 import { cn } from '../utils/main.js';
 import type {
   HeaderAccessoryProps,
-  HeaderBarProps,
   HeaderContextValue,
   HeaderLargeTitleProps,
   HeaderRootProps,
@@ -27,7 +26,6 @@ import type {
 
 export type {
   HeaderAccessoryProps,
-  HeaderBarProps,
   HeaderLargeTitleProps,
   HeaderRootProps,
 } from './props.js';
@@ -37,16 +35,20 @@ export type {
 // colors. Behavior after Framework7's large navbar (`navbar.less`,
 // `navbar.js`: `.navbar-large`, collapsing on scroll).
 //
-// A page's header (UIKit `UINavigationBar` with `prefersLargeTitles`): a
-// top `Toolbar` (`Bar`), sticking to the top of the scroll container, and
-// a large title below it (`LargeTitle`, Large Title Emphasized, 16px from
-// the sides, with an optional `Toolbar.Subtitle` in 15px, 510), scrolling
-// with the page. As the large title scrolls under the bar, it fades out and
-// the bar's own `Toolbar.Title` fades in (scroll-driven animations, no
-// scroll listeners): without a large title, the bar's title just shows.
-// Content scrolled under the bar blurs beneath it (iOS 26's scroll edge
-// effect, a soft one: a backdrop blur, fading out downwards), whatever the
-// page's background.
+// A page's header (UIKit `UINavigationBar` with `prefersLargeTitles`): the
+// app's top `Toolbar` (`placement="block-start"`) in a
+// `Viewport.BlockStart` (staying where it is, as the page scrolls or
+// bounces under it), and a large title in the page below it (`LargeTitle`,
+// Large Title Emphasized, 16px from the sides, with an optional
+// `Toolbar.Subtitle` in 15px, 510), scrolling with the page. `Root` ties
+// them: around the anchor and the `Page` (or within the page, e.g. a tab's
+// panel rendered as one), its page's content starts below the bar. As the
+// large title scrolls under the bar, it fades out and the bar's own
+// `Toolbar.Title` fades in (scroll-driven animations, no scroll
+// listeners): without a large title, the bar's title just shows. Content
+// scrolled under the bar blurs beneath it (iOS 26's scroll edge effect, a
+// soft one: a backdrop blur, fading out downwards), whatever the page's
+// background.
 //
 // An accessory (`Accessory`: a search field, a segmented control) scrolls
 // with the large title, then sticks below the bar (UIKit: a search
@@ -55,16 +57,19 @@ export type {
 //
 // Deviations:
 // - Pulled down, the large title doesn't grow (iOS: it scales up).
-// - The accessory sticks below the bar's height in Figma (54px), not its
-//   own (e.g. taller with a two-line title).
+// - The bar is the Figma toolbar's 54px high (below the safe area), and the
+//   page's content starts below that, also with a taller one (e.g. a
+//   two-line title); the accessory sticks there.
 // - The scroll edge effect is an approximation (Figma: none).
 
-const HeaderContext = createContext<HeaderContextValue>({ largeTitle: false });
+const HeaderContext = createContext<HeaderContextValue>({
+  hasLargeTitle: false,
+});
 
 /**
- * A page's header: its `Bar` and `LargeTitle`, at the start of the scroll
- * container. It has no box of its own, so the bar sticks to the top of the
- * whole scroll container.
+ * A page's header: its bar (a `Toolbar` in a `Viewport.BlockStart`, its
+ * child) and its page's `LargeTitle` (and `Accessory`), around the page (or
+ * within it). It has no box of its own.
  */
 const Root: FunctionComponent<HeaderRootProps> = ({ children }) => {
   const id = useId();
@@ -75,20 +80,17 @@ const Root: FunctionComponent<HeaderRootProps> = ({ children }) => {
     return () => setLargeTitles((count) => count - 1);
   }, []);
   const value = useMemo(
-    () => ({ largeTitle: largeTitles > 0, markLargeTitle, timeline }),
+    () => ({ hasLargeTitle: largeTitles > 0, markLargeTitle, timeline }),
     [largeTitles, markLargeTitle, timeline],
   );
 
   return (
     <HeaderContext.Provider value={value}>
       <div
-        style={
-          {
-            display: 'contents',
-            'timeline-scope': timeline,
-            '--uikit-header-timeline': timeline,
-          } as CSSProperties
-        }
+        className="uikit-header-root"
+        data-header-part="root"
+        data-large-title={value.hasLargeTitle ? '' : undefined}
+        style={{ '--uikit-header-timeline': timeline } as CSSProperties}
       >
         {children}
       </div>
@@ -96,27 +98,9 @@ const Root: FunctionComponent<HeaderRootProps> = ({ children }) => {
   );
 };
 
-/** The header's top toolbar, sticking to the top of the scroll container. */
-const Bar = forwardRef<HTMLDivElement, HeaderBarProps>(
-  ({ className, ...props }, ref) => {
-    const { largeTitle } = useContext(HeaderContext);
-
-    return (
-      <Toolbar.Root
-        ref={ref}
-        data-large-title={largeTitle ? '' : undefined}
-        placement="block-start"
-        {...props}
-        className={cn('uikit-header-bar', className)}
-        data-header-part="bar"
-      />
-    );
-  },
-);
-
 /**
- * The header's large title (with an optional `Toolbar.Subtitle`), below its
- * `Bar`, scrolling with the page.
+ * The header's large title (with an optional `Toolbar.Subtitle`), at its
+ * page's start (below the bar), scrolling with the page.
  */
 const LargeTitle = forwardRef<HTMLDivElement, HeaderLargeTitleProps>(
   ({ className, render, ...props }, ref) => {
@@ -159,7 +143,6 @@ const Accessory = forwardRef<HTMLDivElement, HeaderAccessoryProps>(
 
 export const Header = {
   Root,
-  Bar,
   LargeTitle,
   Accessory,
 };

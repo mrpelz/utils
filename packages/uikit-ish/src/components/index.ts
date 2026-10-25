@@ -189,7 +189,6 @@ export {
 export {
   Header,
   type HeaderAccessoryProps,
-  type HeaderBarProps,
   type HeaderLargeTitleProps,
   type HeaderRootProps,
 } from './header/main.js';
@@ -211,13 +210,17 @@ export {
 export {
   Layout,
   type LayoutColumnProps,
-  type LayoutDrawerHandle,
-  type LayoutDrawerProps,
-  type LayoutDrawerSide,
-  type LayoutDrawerSwipeAreaProps,
   type LayoutRootProps,
-  useCreateDrawerHandle,
 } from './layout/main.js';
+export {
+  Drawer,
+  type DrawerHandle,
+  type DrawerPopupProps,
+  type DrawerRootProps,
+  type DrawerSide,
+  type DrawerSwipeAreaProps,
+  useCreateDrawerHandle,
+} from './drawer/main.js';
 export {
   Sidebar,
   type SidebarRootProps,
@@ -232,6 +235,7 @@ export {
   type NavigationBackEventDetails,
   type NavigationBackProps,
   type NavigationRootProps,
+  type NavigationSwipeAreaProps,
 } from './navigation/main.js';
 export {
   type AccessoryVisibility,
@@ -288,5 +292,7 @@ export type { GlassContextValue } from './glass/main.js';
 export type {
   ColorScheme,
   LogicalSide,
+  PortalContainer,
   SecondaryClickProps,
 } from './utils/main.js';
+export { PortalContainerContext } from './utils/main.js';

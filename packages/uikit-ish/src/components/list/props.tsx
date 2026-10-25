@@ -96,7 +96,7 @@ export type Swipe = {
 export type Drag = {
   /** The row's offset when it started. */
   base: number;
-  moved: boolean;
+  isMoved: boolean;
   pointerId: number;
   scroll: number;
   time: number;
@@ -128,8 +128,8 @@ export type ListExpandableRootProps = {
 export type ExpandableContextValue = {
   /** The expandable row's id (its trigger's `aria-controls`). */
   id: string;
-  open: boolean;
-  setOpen: (open: boolean, event: MouseEvent<HTMLElement>) => void;
+  isOpen: boolean;
+  setOpen: (isOpen: boolean, event: MouseEvent<HTMLElement>) => void;
 };
 
 export type ListTextProps = PartProps<'span'> & {

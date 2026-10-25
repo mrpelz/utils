@@ -9,11 +9,6 @@
     overflow: hidden auto;
     inset: 0;
     overscroll-behavior: contain;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
   }
 
   .uikit-contextual-menu-trigger {

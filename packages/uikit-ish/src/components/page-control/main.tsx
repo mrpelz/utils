@@ -81,12 +81,12 @@ const windowStart = (start: number, page: number, count: number) => {
 const dotSize = (index: number, start: number, count: number) => {
   if (count <= fullDots) return 8;
   const place = index - start;
-  const before = start > 0;
-  const after = start + windowSize < count;
-  if (before && place === 0) return 4;
-  if (before && place === 1) return 6;
-  if (after && place === windowSize - 1) return 4;
-  if (after && place === windowSize - 2) return 6;
+  const isBefore = start > 0;
+  const isAfter = start + windowSize < count;
+  if (isBefore && place === 0) return 4;
+  if (isBefore && place === 1) return 6;
+  if (isAfter && place === windowSize - 1) return 4;
+  if (isAfter && place === windowSize - 2) return 6;
   return 8;
 };
 
@@ -122,7 +122,7 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
     const inherited = useContext(InheritedGlassContext);
     const resolved = useGlassContext(ref, context);
     const [state, setState] = useState(defaultValue);
-    const [pressed, setPressed] = useState(false);
+    const [isPressed, setIsPressed] = useState(false);
     const pages = Math.max(0, Math.floor(count));
     const value = Math.min(Math.max(valueProp ?? state, 0), pages - 1);
     // The window's start, kept between renders (it only moves as needed).
@@ -141,7 +141,7 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
     // Scrubbing: from where it was pressed, a page per dot (16px: a dot and
     // its gap) passed; once it's moved, its click doesn't page.
     const scrub = useRef<
-      { page: number; scrubbed: boolean; x: number } | undefined
+      { isScrubbed: boolean; page: number; x: number } | undefined
     >(undefined);
     const scrubbed = useRef(false);
 
@@ -155,18 +155,23 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       const current = event.currentTarget.querySelector('[data-current]');
       if (!current) return;
       const { left, width } = current.getBoundingClientRect();
-      const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
-      const after = event.clientX > left + width / 2;
-      go(value + (after === rtl ? -1 : 1), { event, reason: 'track-press' });
+      const isRightToLeft =
+        getComputedStyle(event.currentTarget).direction === 'rtl';
+      const isAfter = event.clientX > left + width / 2;
+      go(value + (isAfter === isRightToLeft ? -1 : 1), {
+        event,
+        reason: 'track-press',
+      });
     };
 
     const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
       onKeyDown?.(event);
-      const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+      const isRightToLeft =
+        getComputedStyle(event.currentTarget).direction === 'rtl';
       const moves: Record<string, number> = {
         ArrowDown: value - 1,
-        ArrowLeft: value + (rtl ? 1 : -1),
-        ArrowRight: value + (rtl ? -1 : 1),
+        ArrowLeft: value + (isRightToLeft ? 1 : -1),
+        ArrowRight: value + (isRightToLeft ? -1 : 1),
         ArrowUp: value + 1,
         End: pages - 1,
         Home: 0,
@@ -180,31 +185,32 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
     // Pressed (also by touch, which doesn't hover): its tooltip shown.
     const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
       onPointerDown?.(event);
-      setPressed(true);
+      setIsPressed(true);
       scrubbed.current = false;
       if (disabled || event.button !== 0) return;
-      scrub.current = { page: value, scrubbed: false, x: event.clientX };
+      scrub.current = { page: value, isScrubbed: false, x: event.clientX };
       event.currentTarget.setPointerCapture(event.pointerId);
     };
     const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
       onPointerMove?.(event);
       const from = scrub.current;
       if (!from) return;
-      const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
-      const dx = (event.clientX - from.x) * (rtl ? -1 : 1);
-      if (!from.scrubbed && Math.abs(dx) < 4) return;
-      from.scrubbed = true;
+      const isRightToLeft =
+        getComputedStyle(event.currentTarget).direction === 'rtl';
+      const dx = (event.clientX - from.x) * (isRightToLeft ? -1 : 1);
+      if (!from.isScrubbed && Math.abs(dx) < 4) return;
+      from.isScrubbed = true;
       go(from.page + Math.round(dx / 16), { event, reason: 'drag' });
     };
     const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
       onPointerUp?.(event);
-      setPressed(false);
-      scrubbed.current = scrub.current?.scrubbed ?? false;
+      setIsPressed(false);
+      scrubbed.current = scrub.current?.isScrubbed ?? false;
       scrub.current = undefined;
     };
     const handlePointerCancel = (event: PointerEvent<HTMLDivElement>) => {
       onPointerCancel?.(event);
-      setPressed(false);
+      setIsPressed(false);
       scrub.current = undefined;
     };
 
@@ -225,7 +231,7 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
         aria-valuenow={value + 1}
         aria-valuetext={valueText}
         data-glass-context={resolved ?? inherited ?? 'auto'}
-        data-pressed={pressed ? '' : undefined}
+        data-pressed={isPressed ? '' : undefined}
         data-variant={variant}
         role="slider"
         tabIndex={disabled ? -1 : 0}

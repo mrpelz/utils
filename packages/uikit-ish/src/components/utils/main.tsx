@@ -3,6 +3,7 @@ import './style.css';
 
 import type { Signalish } from 'preact';
 import {
+  createContext,
   CSSProperties,
   forwardRef,
   FunctionComponent,
@@ -12,6 +13,7 @@ import {
   Ref,
   RefObject,
   useCallback,
+  useContext,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -22,6 +24,7 @@ import type {
   PointerDrag,
   PointerDragHandlers,
   PointerHandler,
+  PortalContainer,
   SecondaryClickHandlers,
   SecondaryClickProps,
 } from './props.js';
@@ -31,6 +34,7 @@ export type {
   LogicalSide,
   PointerDrag,
   PointerDragHandlers,
+  PortalContainer,
   SecondaryClickProps,
 } from './props.js';
 
@@ -122,6 +126,26 @@ export const positionerSide = (
  * element, for what's within it.
  */
 export const colorSchemeAttribute = 'data-color-scheme';
+
+/**
+ * Where popups given no `container` are portaled into (their portals':
+ * the `Alert`'s, `Sheet`'s, `ActionSheet`'s, `Menu`'s, `Popover`'s,
+ * `Tooltip`'s, `ContextualMenu`'s), for what's within it; none: Base UI's
+ * default, the body. E.g. a device's screen in a page of demos, or an
+ * app's layer above its own.
+ */
+export const PortalContainerContext = createContext<
+  PortalContainer | undefined
+>(undefined);
+
+/** A portal's container: its own, or else the provided one (see above). */
+export const usePortalContainer = (
+  container: PortalContainer | null | undefined,
+): PortalContainer | null | undefined => {
+  const provided = useContext(PortalContainerContext);
+
+  return container === undefined ? provided : container;
+};
 
 /** A frame at 60 Hz, in ms: what `edgeScrollDelta`'s speed is per. */
 const frameDuration = 1000 / 60;
@@ -436,18 +460,18 @@ export const usePointerDrag = <T extends HTMLElement, State>(
   }, []);
 
   const finish = useCallback(
-    (element: T, pointerId: number, cancelled: boolean) => {
+    (element: T, pointerId: number, isCancelled: boolean) => {
       const { current: active } = activeRef;
       if (active?.pointerId !== pointerId) return;
 
-      if (cancelled) {
+      if (isCancelled) {
         if (active.frame !== undefined) cancelAnimationFrame(active.frame);
       } else {
         flush(element);
       }
 
       activeRef.current = null;
-      dragRef.current.end(element, active.state, cancelled);
+      dragRef.current.end(element, active.state, isCancelled);
     },
     [flush],
   );
@@ -563,22 +587,22 @@ export const MovingHighlight: FunctionComponent<{
     const { current: highlight } = ref;
     const container = highlight?.parentElement;
     if (!highlight || !container) return undefined;
-    let shown = false;
+    let isShown = false;
     // Between items (e.g. over a separator), it stays a moment: the next
     // highlighted item moves it there.
     let hiding: ReturnType<typeof setTimeout> | undefined;
 
     // Instantly while its items scroll (it scrolls with them).
-    const update = (instant = false) => {
+    const update = (isInstant = false) => {
       const item = key
         .split('\n')
         .map((selector) => container.querySelector<HTMLElement>(selector))
         .find(Boolean);
       if (!item) {
-        if (!shown || hiding !== undefined) return;
+        if (!isShown || hiding !== undefined) return;
         hiding = setTimeout(() => {
           hiding = undefined;
-          shown = false;
+          isShown = false;
           highlight.style.opacity = '0';
         }, hideDelay);
         return;
@@ -607,7 +631,7 @@ export const MovingHighlight: FunctionComponent<{
         width: `${String(rect.width / scaleX)}px`,
       };
       // Appearing (or scrolling): in place, not moving there.
-      if (shown && !instant) {
+      if (isShown && !isInstant) {
         Object.assign(highlight.style, place);
       } else {
         highlight.style.transitionProperty = 'opacity';
@@ -615,7 +639,7 @@ export const MovingHighlight: FunctionComponent<{
         highlight.getBoundingClientRect();
         highlight.style.removeProperty('transition-property');
       }
-      shown = true;
+      isShown = true;
       highlight.style.opacity = '1';
     };
 

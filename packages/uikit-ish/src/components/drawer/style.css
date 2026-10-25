@@ -1,0 +1,135 @@
+/* Drawer (see main.tsx). */
+@layer uikit-ish {
+  /* Its portal: no box of its own (nothing shifts in its container). */
+  .uikit-drawer-portal {
+    display: contents;
+  }
+
+  /* The content dimmed behind it (over the page's layers, as overlays),
+     lighter as it's swiped closed. */
+  .uikit-drawer-backdrop {
+    position: fixed;
+    z-index: 100;
+    background-color: rgb(0 0 0 / 20%);
+    inset: 0;
+    opacity: calc(1 - var(--drawer-swipe-progress, 0));
+    transition: opacity 300ms cubic-bezier(0.32, 0.72, 0, 1);
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      opacity: 0;
+    }
+
+    &[data-swiping] {
+      transition: none;
+    }
+  }
+
+  /* Where its popup moves (filling the container, above the dimming),
+     passing presses through to it. */
+  .uikit-drawer-viewport {
+    position: fixed;
+    z-index: 100;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* Its column: over the content at its side, hidden towards it (its sign:
+     which way the inline start or end is) until open, following a
+     swipe. */
+  .uikit-drawer-popup {
+    --uikit-drawer-sign: -1;
+
+    position: absolute;
+    display: flex;
+    width: var(--uikit-drawer-size);
+    max-width: calc(100% - 44px);
+    box-sizing: border-box;
+    flex-direction: column;
+    background-color: var(--color-ios-system-background);
+    box-shadow: 0 0 30px rgb(0 0 0 / 20%);
+    inset-block: 0;
+    outline: none;
+    pointer-events: auto;
+
+    /* (A transform: Base UI's own while it's swiped closed, overriding
+       this one; swiped in, its movement by this one.) */
+    transform: translateX(var(--drawer-swipe-movement-x, 0));
+    transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
+
+    & > * {
+      min-height: 0;
+      flex: 1 1 auto;
+    }
+
+    &[data-side='inline-start'] {
+      inset-inline-start: 0;
+
+      &:dir(rtl) {
+        --uikit-drawer-sign: 1;
+      }
+    }
+
+    &[data-side='inline-end'] {
+      --uikit-drawer-sign: 1;
+
+      inset-inline-end: 0;
+
+      &:dir(rtl) {
+        --uikit-drawer-sign: -1;
+      }
+    }
+
+    &:is([data-starting-style], [data-ending-style]) {
+      transform: translateX(calc(100% * var(--uikit-drawer-sign)));
+    }
+
+    /* Let go (swiped): as fast as it was flung. */
+    &[data-ending-style] {
+      transition-duration: calc(var(--drawer-swipe-strength, 1) * 300ms);
+    }
+
+    &[data-swiping] {
+      transition: none;
+    }
+
+    /* Swiped in from its swipe area: closed until the swipe moves it (Base
+       UI opens it first, then moves it, on the next move), following it
+       from there (not animating open meanwhile). */
+    :root:has(.uikit-drawer-swipe-area[data-side='inline-start'][data-swiping])
+      &[data-side='inline-start']:not([data-swiping]),
+    :root:has(.uikit-drawer-swipe-area[data-side='inline-end'][data-swiping])
+      &[data-side='inline-end']:not([data-swiping]) {
+      transform: translateX(calc(100% * var(--uikit-drawer-sign)));
+      transition: none;
+    }
+
+    /* Floating: its content floats itself. */
+    &[data-floating] {
+      background-color: transparent;
+      box-shadow: none;
+    }
+  }
+
+  /* A strip at a closed drawer's edge, swiped in from (above the page's
+     layers, below overlays). */
+  .uikit-drawer-swipe-area {
+    position: fixed;
+    z-index: 99;
+    width: var(--uikit-drawer-swipe-area-width);
+    inset-block: 0;
+    touch-action: pan-y;
+
+    &[data-side='inline-start'] {
+      inset-inline-start: 0;
+    }
+
+    &[data-side='inline-end'] {
+      inset-inline-end: 0;
+    }
+
+    &[data-open] {
+      pointer-events: none;
+    }
+  }
+}
