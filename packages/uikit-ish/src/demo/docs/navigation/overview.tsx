@@ -22,7 +22,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { pages } from './content.js';
-import { navigationRootRows } from './docs.js';
+import { navigationRootRows, navigationStackRows } from './docs.js';
 import { useNavigationControls } from './props.js';
 
 /**
@@ -45,7 +45,7 @@ const LiveView: FunctionComponent = () => {
     [addLog],
   );
 
-  const { controls, propsBack, propsRoot, propsSwipeArea, state } =
+  const { controls, propsBack, propsRoot, propsStack, propsSwipeArea, state } =
     useNavigationControls(id, addLog, pop);
 
   return (
@@ -61,53 +61,58 @@ const LiveView: FunctionComponent = () => {
       <Viewport.Content safeArea="none">
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
-          {keys.map((key, depth) => (
-            <Header.Root key={key}>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Leading>
-                    {depth > 0 ? (
-                      <Navigation.Back
-                        aria-label={pages[keys[depth - 1] ?? '']?.title}
-                        {...propsBack}
-                      >
-                        <Button.Icon>
-                          <Symbol icon={sfChevronBackward} />
-                        </Button.Icon>
-                      </Navigation.Back>
-                    ) : null}
-                  </Toolbar.Leading>
-                  <Toolbar.Title>
+          <Viewport.BlockStart>
+            <Toolbar.Root placement="block-start">
+              <Toolbar.Leading>
+                {keys.length > 1 ? (
+                  <Navigation.Back
+                    aria-label={pages[keys.at(-2) ?? '']?.title}
+                    {...propsBack}
+                  >
+                    <Button.Icon>
+                      <Symbol icon={sfChevronBackward} />
+                    </Button.Icon>
+                  </Navigation.Back>
+                ) : null}
+              </Toolbar.Leading>
+            </Toolbar.Root>
+          </Viewport.BlockStart>
+          <Navigation.Stack {...propsStack}>
+            {keys.map((key) => (
+              <Header.Root key={key}>
+                <Viewport.BlockStart>
+                  <Toolbar.Root placement="block-start">
+                    <Toolbar.Title>
+                      <span>{pages[key]?.title}</span>
+                    </Toolbar.Title>
+                  </Toolbar.Root>
+                </Viewport.BlockStart>
+                <Page.Root>
+                  <Header.LargeTitle>
                     <span>{pages[key]?.title}</span>
-                  </Toolbar.Title>
-                  <Toolbar.Trailing />
-                </Toolbar.Root>
-              </Viewport.BlockStart>
-              <Page.Root>
-                <Header.LargeTitle>
-                  <span>{pages[key]?.title}</span>
-                </Header.LargeTitle>
+                  </Header.LargeTitle>
 
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      {pages[key]?.children.map((child) => (
-                        <List.Item key={child}>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => push(child)}
-                          >
-                            {pages[child]?.title}
-                          </List.Title>
-                          <List.DrillIn />
-                        </List.Item>
-                      ))}
-                    </List.Group>
-                  </List.Section>
-                </List.Root>
-              </Page.Root>
-            </Header.Root>
-          ))}
+                  <List.Root>
+                    <List.Section>
+                      <List.Group>
+                        {pages[key]?.children.map((child) => (
+                          <List.Item key={child}>
+                            <List.Title
+                              render={<button type="button" />}
+                              onClick={() => push(child)}
+                            >
+                              {pages[child]?.title}
+                            </List.Title>
+                            <List.DrillIn />
+                          </List.Item>
+                        ))}
+                      </List.Group>
+                    </List.Section>
+                  </List.Root>
+                </Page.Root>
+              </Header.Root>
+            ))}
+          </Navigation.Stack>
         </Navigation.Root>
       </Viewport.Content>
       <p className="navigation-demo-stack">
@@ -136,8 +141,13 @@ export const NavigationOverview: FunctionComponent = () => (
         in pushes a page over the one before, going back pops it.
       </li>
       <li>
-        The app’s stack, rendered as keyed children: the navigation transitions
-        between them (no router of its own).
+        The app’s stack, rendered as its{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Stack"
+        />
+        ’s keyed children: the navigation transitions between them (no router of
+        its own).
       </li>
       <li>
         Swiping from the leading edge goes back, as on iOS; pages under the top
@@ -202,13 +212,14 @@ export const NavigationOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its one part’s props (all of them: <a href="navigation/parts">Parts</a>
-        ).
+        Its root’s and its stack’s props (all of them, every part’s:{' '}
+        <a href="navigation/parts">Parts</a>).
       </li>
     </ul>
     <KeyPropsTable
       parts={[
-        ['Navigation.Root', pickRows(navigationRootRows, 'children', 'onBack')],
+        ['Navigation.Root', pickRows(navigationRootRows, 'onBack')],
+        ['Navigation.Stack', pickRows(navigationStackRows, 'children')],
       ]}
     />
 
@@ -252,16 +263,26 @@ export const NavigationOverview: FunctionComponent = () => (
         (another stack), shown at once.
       </li>
       <li>
-        A page’s <a href="header">Header</a> moves with its page, its bar too (a
-        bar that stays, e.g. its title: a <a href="toolbar">Toolbar</a> in a{' '}
+        A page’s <a href="header">Header</a> moves with its page, its bar and
+        title too; the back button stays (a <a href="toolbar">Toolbar</a> in a{' '}
         <a href="viewport">Viewport</a>’s{' '}
         <PartLink
           component="viewport"
           part="Viewport.BlockStart"
         >
           BlockStart
-        </PartLink>
-        , outside the stack).
+        </PartLink>{' '}
+        in the{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Root"
+        />
+        , outside its{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Stack"
+        />
+        ), over the pages’ bars.
       </li>
       <li>
         Swiping back starts within 20px of the leading edge (touch or mouse):

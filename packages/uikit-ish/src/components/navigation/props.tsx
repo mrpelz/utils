@@ -25,6 +25,9 @@ export type NavigationRootProps = ComponentProps<'div'> & {
   onBack?: (eventDetails: NavigationBackEventDetails) => void;
 };
 
+/** Its children: the app's stack of pages, bottom to top, each keyed. */
+export type NavigationStackProps = ComponentProps<'div'>;
+
 export type NavigationSwipeAreaProps = ComponentProps<'div'> & {
   /**
    * Its width (px): how far from the leading edge a swipe back starts.

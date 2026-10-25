@@ -25,8 +25,9 @@ type Stack = 'mail' | 'settings';
 /**
  * Navigation (UIKit `UINavigationController`): the app's stacks of pages
  * (its state, no router): drilling into a row pushes a page, the back button
- * (or swiping from the leading edge) pops it, each page's header blending
- * over; switching between the stacks (e.g. tabs) shows the other at once.
+ * (or swiping from the leading edge) pops it, each page's header moving
+ * with it, the back button staying; switching between the stacks (e.g.
+ * tabs) shows the other at once.
  */
 export const NavigationDemo: FunctionComponent = () => {
   const id = 'navigation';
@@ -57,7 +58,7 @@ export const NavigationDemo: FunctionComponent = () => {
     [addLog, stack],
   );
 
-  const { controls, propsBack, propsRoot, propsSwipeArea, state } =
+  const { controls, propsBack, propsRoot, propsStack, propsSwipeArea, state } =
     useNavigationControls(id, addLog, pop);
 
   return (
@@ -72,62 +73,67 @@ export const NavigationDemo: FunctionComponent = () => {
       <Viewport.Content safeArea="none">
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
-          {keys.map((key, depth) => {
-            const page = pages[key] ?? { children: [], title: key };
-            const back = depth > 0 ? pages[keys[depth - 1] ?? '']?.title : null;
+          <Viewport.BlockStart>
+            <Toolbar.Root placement="block-start">
+              <Toolbar.Leading>
+                {keys.length > 1 ? (
+                  <Navigation.Back
+                    aria-label={pages[keys.at(-2) ?? '']?.title}
+                    {...propsBack}
+                  >
+                    <Button.Icon>
+                      <Symbol icon={sfChevronBackward} />
+                    </Button.Icon>
+                  </Navigation.Back>
+                ) : null}
+              </Toolbar.Leading>
+            </Toolbar.Root>
+          </Viewport.BlockStart>
+          <Navigation.Stack {...propsStack}>
+            {keys.map((key) => {
+              const page = pages[key] ?? { children: [], title: key };
 
-            return (
-              <Header.Root key={key}>
-                <Viewport.BlockStart>
-                  <Toolbar.Root placement="block-start">
-                    {back ? (
-                      <Toolbar.Leading>
-                        <Navigation.Back
-                          aria-label={back}
-                          {...propsBack}
-                        >
-                          <Button.Icon>
-                            <Symbol icon={sfChevronBackward} />
-                          </Button.Icon>
-                        </Navigation.Back>
-                      </Toolbar.Leading>
-                    ) : null}
-                    <Toolbar.Title>
+              return (
+                <Header.Root key={key}>
+                  <Viewport.BlockStart>
+                    <Toolbar.Root placement="block-start">
+                      <Toolbar.Title>
+                        <span>{page.title}</span>
+                      </Toolbar.Title>
+                    </Toolbar.Root>
+                  </Viewport.BlockStart>
+                  <Page.Root>
+                    <Header.LargeTitle>
                       <span>{page.title}</span>
-                    </Toolbar.Title>
-                  </Toolbar.Root>
-                </Viewport.BlockStart>
-                <Page.Root>
-                  <Header.LargeTitle>
-                    <span>{page.title}</span>
-                  </Header.LargeTitle>
+                    </Header.LargeTitle>
 
-                  <List.Root>
-                    <List.Section>
-                      <List.Group>
-                        {page.children.map((child) => (
-                          <List.Item key={child}>
-                            <List.Title
-                              render={<button type="button" />}
-                              onClick={() => push(child)}
-                            >
-                              {pages[child]?.title ?? child}
-                            </List.Title>
-                            <List.DrillIn />
-                          </List.Item>
-                        ))}
-                        {Array.from({ length: 12 }, (_, index) => (
-                          <List.Item key={index}>
-                            <List.Title>Row {index + 1}</List.Title>
-                          </List.Item>
-                        ))}
-                      </List.Group>
-                    </List.Section>
-                  </List.Root>
-                </Page.Root>
-              </Header.Root>
-            );
-          })}
+                    <List.Root>
+                      <List.Section>
+                        <List.Group>
+                          {page.children.map((child) => (
+                            <List.Item key={child}>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => push(child)}
+                              >
+                                {pages[child]?.title ?? child}
+                              </List.Title>
+                              <List.DrillIn />
+                            </List.Item>
+                          ))}
+                          {Array.from({ length: 12 }, (_, index) => (
+                            <List.Item key={index}>
+                              <List.Title>Row {index + 1}</List.Title>
+                            </List.Item>
+                          ))}
+                        </List.Group>
+                      </List.Section>
+                    </List.Root>
+                  </Page.Root>
+                </Header.Root>
+              );
+            })}
+          </Navigation.Stack>
         </Navigation.Root>
       </Viewport.Content>
       {/* The stacks, as a tab bar's: switched at once. */}

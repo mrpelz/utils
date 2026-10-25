@@ -235,6 +235,7 @@ export {
   type NavigationBackEventDetails,
   type NavigationBackProps,
   type NavigationRootProps,
+  type NavigationStackProps,
   type NavigationSwipeAreaProps,
 } from './navigation/main.js';
 export {

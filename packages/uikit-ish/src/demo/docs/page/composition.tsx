@@ -21,6 +21,7 @@ import { useLog } from '../../tooling/frame/log.js';
 import {
   Contents,
   Heading,
+  PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
@@ -31,25 +32,42 @@ import { names } from '../viewport/content.js';
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 
 const backgroundsCode = `{/* Grouped lists, on the grouped background (the default). */}
-<Page.Root>
-  <Header.Root>…</Header.Root>
-  <List.Root>…</List.Root>
-</Page.Root>
+<Header.Root>
+  <Viewport.BlockStart>…</Viewport.BlockStart>
+  <Page.Root>
+    <List.Root>…</List.Root>
+  </Page.Root>
+</Header.Root>
 
 {/* Plain lists and other content, on the plain one. */}
-<Page.Root background="plain">
-  <Header.Root>…</Header.Root>
-  <List.Root listStyle="plain">…</List.Root>
-</Page.Root>`;
+<Header.Root>
+  <Viewport.BlockStart>…</Viewport.BlockStart>
+  <Page.Root background="plain">
+    <List.Root listStyle="plain">…</List.Root>
+  </Page.Root>
+</Header.Root>`;
 
 const stackCode = `<Navigation.Root onBack={pop}>
-  {keys.map((key) => (
-    // Under the top one: hidden, kept (its scroll position too).
-    <Page.Root key={key}>
-      <Header.Root>…</Header.Root>
-      <List.Root>…</List.Root>
-    </Page.Root>
-  ))}
+  <Navigation.SwipeArea />
+  {/* The back button: staying while the pages move. */}
+  <Viewport.BlockStart>
+    <Toolbar.Root placement="block-start">
+      <Toolbar.Leading>
+        {keys.length > 1 ? <Navigation.Back … /> : null}
+      </Toolbar.Leading>
+    </Toolbar.Root>
+  </Viewport.BlockStart>
+  <Navigation.Stack>
+    {keys.map((key) => (
+      // Under the top one: hidden, kept (its scroll position too).
+      <Header.Root key={key}>
+        <Viewport.BlockStart>…</Viewport.BlockStart>
+        <Page.Root>
+          <List.Root>…</List.Root>
+        </Page.Root>
+      </Header.Root>
+    ))}
+  </Navigation.Stack>
 </Navigation.Root>`;
 
 const columnCode = `<Layout.Root>
@@ -59,10 +77,12 @@ const columnCode = `<Layout.Root>
   {/* Its page's content inset by the sidebar's size, its background
       (and its bar's edge) running underneath it. */}
   <Layout.Column clearFloating>
-    <Page.Root>
-      <Header.Root>…</Header.Root>
-      <List.Root>…</List.Root>
-    </Page.Root>
+    <Header.Root>
+      <Viewport.BlockStart>…</Viewport.BlockStart>
+      <Page.Root>
+        <List.Root>…</List.Root>
+      </Page.Root>
+    </Header.Root>
   </Layout.Column>
 </Layout.Root>`;
 
@@ -191,58 +211,63 @@ const InAStack: FunctionComponent = () => {
       <Viewport.Content safeArea="none">
         <Navigation.Root onBack={pop}>
           <Navigation.SwipeArea />
-          {keys.map((key, depth) => (
-            <Header.Root key={key}>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Leading>
-                    {depth > 0 ? (
-                      <Navigation.Back
-                        aria-label={pages[keys[depth - 1] ?? '']?.title}
-                        render={<Toolbar.Button shape="circle" />}
-                      >
-                        <Button.Icon>
-                          <Symbol icon={sfChevronBackward} />
-                        </Button.Icon>
-                      </Navigation.Back>
-                    ) : null}
-                  </Toolbar.Leading>
-                  <Toolbar.Title>
-                    <span>{pages[key]?.title}</span>
-                  </Toolbar.Title>
-                  <Toolbar.Trailing />
-                </Toolbar.Root>
-              </Viewport.BlockStart>
-              <Page.Root>
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      {pages[key]?.children.map((child) => (
-                        <List.Item key={child}>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => push(child)}
-                          >
-                            {pages[child]?.title}
-                          </List.Title>
-                          <List.DrillIn />
-                        </List.Item>
-                      ))}
-                    </List.Group>
-                  </List.Section>
-                  <List.Section>
-                    <List.Group>
-                      {names.map((name) => (
-                        <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
-                        </List.Item>
-                      ))}
-                    </List.Group>
-                  </List.Section>
-                </List.Root>
-              </Page.Root>
-            </Header.Root>
-          ))}
+          <Viewport.BlockStart>
+            <Toolbar.Root placement="block-start">
+              <Toolbar.Leading>
+                {keys.length > 1 ? (
+                  <Navigation.Back
+                    aria-label={pages[keys.at(-2) ?? '']?.title}
+                    render={<Toolbar.Button shape="circle" />}
+                  >
+                    <Button.Icon>
+                      <Symbol icon={sfChevronBackward} />
+                    </Button.Icon>
+                  </Navigation.Back>
+                ) : null}
+              </Toolbar.Leading>
+            </Toolbar.Root>
+          </Viewport.BlockStart>
+          <Navigation.Stack>
+            {keys.map((key) => (
+              <Header.Root key={key}>
+                <Viewport.BlockStart>
+                  <Toolbar.Root placement="block-start">
+                    <Toolbar.Title>
+                      <span>{pages[key]?.title}</span>
+                    </Toolbar.Title>
+                  </Toolbar.Root>
+                </Viewport.BlockStart>
+                <Page.Root>
+                  <List.Root>
+                    <List.Section>
+                      <List.Group>
+                        {pages[key]?.children.map((child) => (
+                          <List.Item key={child}>
+                            <List.Title
+                              render={<button type="button" />}
+                              onClick={() => push(child)}
+                            >
+                              {pages[child]?.title}
+                            </List.Title>
+                            <List.DrillIn />
+                          </List.Item>
+                        ))}
+                      </List.Group>
+                    </List.Section>
+                    <List.Section>
+                      <List.Group>
+                        {names.map((name) => (
+                          <List.Item key={name}>
+                            <List.Title>{name}</List.Title>
+                          </List.Item>
+                        ))}
+                      </List.Group>
+                    </List.Section>
+                  </List.Root>
+                </Page.Root>
+              </Header.Root>
+            ))}
+          </Navigation.Stack>
         </Navigation.Root>
       </Viewport.Content>
     </Component>
@@ -467,8 +492,13 @@ export const PageComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="navigation">Navigation</a>’s children, one per level, each
-        scrolling on its own.
+        A{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Stack"
+        />
+        ’s children, one per level, each scrolling on its own; the back button
+        in a bar that stays, beside the stack.
       </li>
       <li>
         Under the top one: hidden, kept mounted, so popping back finds it where

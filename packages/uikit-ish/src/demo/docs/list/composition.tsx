@@ -97,41 +97,48 @@ const pop = () => setKeys((current) => current.slice(0, -1));
 
 <Navigation.Root onBack={pop}>
   <Navigation.SwipeArea />
-  {keys.map((key, depth) => (
-    <Header.Root>
-      <Viewport.BlockStart>
-        <Toolbar.Root placement="block-start">
-          {depth > 0 ? (
-            <Toolbar.Leading>
-              <Navigation.Back aria-label="Back" render={<Toolbar.Button shape="circle" />}>…</Navigation.Back>
-            </Toolbar.Leading>
-          ) : null}
-          <Toolbar.Title><span>{pages[key].title}</span></Toolbar.Title>
-        </Toolbar.Root>
-      </Viewport.BlockStart>
-      <Page.Root key={key}>
-        <List.Root>
-          <List.Section>
-            <List.Group>
-              {pages[key].rows.map(([title, page, detail]) => (
-                <List.Item key={title}>
-                  {page ? (
-                    <List.Title render={<button type="button" />} onClick={() => push(page)}>
-                      {title}
-                    </List.Title>
-                  ) : (
-                    <List.Title>{title}</List.Title>
-                  )}
-                  {detail ? <List.Detail>{detail}</List.Detail> : null}
-                  {page ? <List.DrillIn /> : null}
-                </List.Item>
-              ))}
-            </List.Group>
-          </List.Section>
-        </List.Root>
-      </Page.Root>
-    </Header.Root>
-  ))}
+  {/* The back button: staying while the pages move. */}
+  <Viewport.BlockStart>
+    <Toolbar.Root placement="block-start">
+      <Toolbar.Leading>
+        {keys.length > 1 ? (
+          <Navigation.Back aria-label="Back" render={<Toolbar.Button shape="circle" />}>…</Navigation.Back>
+        ) : null}
+      </Toolbar.Leading>
+    </Toolbar.Root>
+  </Viewport.BlockStart>
+  <Navigation.Stack>
+    {keys.map((key) => (
+      <Header.Root key={key}>
+        <Viewport.BlockStart>
+          <Toolbar.Root placement="block-start">
+            <Toolbar.Title><span>{pages[key].title}</span></Toolbar.Title>
+          </Toolbar.Root>
+        </Viewport.BlockStart>
+        <Page.Root>
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {pages[key].rows.map(([title, page, detail]) => (
+                  <List.Item key={title}>
+                    {page ? (
+                      <List.Title render={<button type="button" />} onClick={() => push(page)}>
+                        {title}
+                      </List.Title>
+                    ) : (
+                      <List.Title>{title}</List.Title>
+                    )}
+                    {detail ? <List.Detail>{detail}</List.Detail> : null}
+                    {page ? <List.DrillIn /> : null}
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+        </Page.Root>
+      </Header.Root>
+    ))}
+  </Navigation.Stack>
 </Navigation.Root>`;
 
 const editCode = `const [isEditing, setIsEditing] = useState(false);
@@ -460,61 +467,66 @@ const DrillIn: FunctionComponent = () => {
       <Viewport.Content safeArea="none">
         <Navigation.Root onBack={pop}>
           <Navigation.SwipeArea />
-          {keys.map((key, depth) => {
-            const page = settingsPages[key];
-            if (!page) return null;
+          <Viewport.BlockStart>
+            <Toolbar.Root placement="block-start">
+              <Toolbar.Leading>
+                {keys.length > 1 ? (
+                  <Navigation.Back
+                    aria-label="Back"
+                    render={<Toolbar.Button shape="circle" />}
+                  >
+                    <Button.Icon>
+                      <Symbol icon={sfChevronBackward} />
+                    </Button.Icon>
+                  </Navigation.Back>
+                ) : null}
+              </Toolbar.Leading>
+            </Toolbar.Root>
+          </Viewport.BlockStart>
+          <Navigation.Stack>
+            {keys.map((key) => {
+              const page = settingsPages[key];
+              if (!page) return null;
 
-            return (
-              <Header.Root key={key}>
-                <Viewport.BlockStart>
-                  <Toolbar.Root placement="block-start">
-                    {depth > 0 ? (
-                      <Toolbar.Leading>
-                        <Navigation.Back
-                          aria-label="Back"
-                          render={<Toolbar.Button shape="circle" />}
-                        >
-                          <Button.Icon>
-                            <Symbol icon={sfChevronBackward} />
-                          </Button.Icon>
-                        </Navigation.Back>
-                      </Toolbar.Leading>
-                    ) : null}
-                    <Toolbar.Title>
-                      <span>{page.title}</span>
-                    </Toolbar.Title>
-                    {depth > 0 ? <Toolbar.Trailing /> : null}
-                  </Toolbar.Root>
-                </Viewport.BlockStart>
-                <Page.Root>
-                  <List.Root>
-                    <List.Section>
-                      <List.Group>
-                        {page.rows.map(([title, target, detail]) => (
-                          <List.Item key={title}>
-                            {target ? (
-                              <List.Title
-                                render={<button type="button" />}
-                                onClick={() => push(target)}
-                              >
-                                {title}
-                              </List.Title>
-                            ) : (
-                              <List.Title>{title}</List.Title>
-                            )}
-                            {detail ? (
-                              <List.Detail>{detail}</List.Detail>
-                            ) : null}
-                            {target ? <List.DrillIn /> : null}
-                          </List.Item>
-                        ))}
-                      </List.Group>
-                    </List.Section>
-                  </List.Root>
-                </Page.Root>
-              </Header.Root>
-            );
-          })}
+              return (
+                <Header.Root key={key}>
+                  <Viewport.BlockStart>
+                    <Toolbar.Root placement="block-start">
+                      <Toolbar.Title>
+                        <span>{page.title}</span>
+                      </Toolbar.Title>
+                    </Toolbar.Root>
+                  </Viewport.BlockStart>
+                  <Page.Root>
+                    <List.Root>
+                      <List.Section>
+                        <List.Group>
+                          {page.rows.map(([title, target, detail]) => (
+                            <List.Item key={title}>
+                              {target ? (
+                                <List.Title
+                                  render={<button type="button" />}
+                                  onClick={() => push(target)}
+                                >
+                                  {title}
+                                </List.Title>
+                              ) : (
+                                <List.Title>{title}</List.Title>
+                              )}
+                              {detail ? (
+                                <List.Detail>{detail}</List.Detail>
+                              ) : null}
+                              {target ? <List.DrillIn /> : null}
+                            </List.Item>
+                          ))}
+                        </List.Group>
+                      </List.Section>
+                    </List.Root>
+                  </Page.Root>
+                </Header.Root>
+              );
+            })}
+          </Navigation.Stack>
         </Navigation.Root>
       </Viewport.Content>
     </Component>
@@ -882,8 +894,13 @@ export const ListComposition: FunctionComponent = () => (
         push a page in a <a href="navigation">Navigation</a>.
       </li>
       <li>
-        The app keeps the stack (keyed pages); the navigation transitions
-        between them.
+        The app keeps the stack (keyed pages, in a{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Stack"
+        />
+        ); the navigation transitions between them, the back button staying (in
+        a bar beside the stack).
       </li>
       <li>
         A swipe from the leading edge pops (<code>onBack</code>).

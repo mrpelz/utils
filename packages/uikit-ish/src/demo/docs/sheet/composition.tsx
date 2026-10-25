@@ -103,31 +103,40 @@ const close = () => (edited ? setIsConfirming(true) : setIsOpen(false));
 const navigationCode = `const [keys, setKeys] = useState(['settings']);
 
 <Sheet.Popup background="grouped">
-  {/* Its grabber alone: each page has its own bar. */}
+  {/* Its grabber alone: the navigation has its bars. */}
   <Sheet.Header>
     <Sheet.Grabber />
   </Sheet.Header>
   <Sheet.Content>
     <Navigation.Root onBack={pop}>
       <Navigation.SwipeArea />
-      {keys.map((key, depth) => (
-        <Header.Root>
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>{depth > 0 ? /* back */ … : null}</Toolbar.Leading>
-              <Toolbar.Title>…</Toolbar.Title>
-              <Toolbar.Trailing>
-                <Sheet.Close render={<Toolbar.Button prominent />}>
-                  <Button.Label>Done</Button.Label>
-                </Sheet.Close>
-              </Toolbar.Trailing>
-            </Toolbar.Root>
-          </Viewport.BlockStart>
-          <Page.Root key={key}>
-            <List.Root>…{/* rows pushing a page */}</List.Root>
-          </Page.Root>
-        </Header.Root>
-      ))}
+      {/* What stays while the pages move: the back button, Done. */}
+      <Viewport.BlockStart>
+        <Toolbar.Root placement="block-start">
+          <Toolbar.Leading>
+            {keys.length > 1 ? <Navigation.Back … /> : null}
+          </Toolbar.Leading>
+          <Toolbar.Trailing>
+            <Sheet.Close render={<Toolbar.Button prominent />}>
+              <Button.Label>Done</Button.Label>
+            </Sheet.Close>
+          </Toolbar.Trailing>
+        </Toolbar.Root>
+      </Viewport.BlockStart>
+      <Navigation.Stack>
+        {keys.map((key) => (
+          <Header.Root key={key}>
+            <Viewport.BlockStart>
+              <Toolbar.Root placement="block-start">
+                <Toolbar.Title>…</Toolbar.Title>
+              </Toolbar.Root>
+            </Viewport.BlockStart>
+            <Page.Root>
+              <List.Root>…{/* rows pushing a page */}</List.Root>
+            </Page.Root>
+          </Header.Root>
+        ))}
+      </Navigation.Stack>
     </Navigation.Root>
   </Sheet.Content>
 </Sheet.Popup>`;
@@ -483,59 +492,65 @@ const NavigationInside: FunctionComponent = () => {
             <Sheet.Content className="sheet-demo-stack">
               <Navigation.Root onBack={pop}>
                 <Navigation.SwipeArea />
-                {keys.map((key, depth) => (
-                  <Header.Root key={key}>
-                    <Viewport.BlockStart>
-                      <Toolbar.Root placement="block-start">
-                        <Toolbar.Leading>
-                          {depth > 0 ? (
-                            <Navigation.Back
-                              aria-label={pages[keys[depth - 1] ?? '']?.title}
-                              render={<Toolbar.Button shape="circle" />}
-                            >
-                              <Button.Icon>
-                                <Symbol icon={sfChevronBackward} />
-                              </Button.Icon>
-                            </Navigation.Back>
-                          ) : null}
-                        </Toolbar.Leading>
-                        <Toolbar.Title>
-                          {depth === 0 ? (
-                            <Sheet.Title render={<span />}>
-                              {pages[key]?.title}
-                            </Sheet.Title>
-                          ) : (
-                            <span>{pages[key]?.title}</span>
-                          )}
-                        </Toolbar.Title>
-                        <Toolbar.Trailing>
-                          <Sheet.Close render={<Toolbar.Button prominent />}>
-                            <Button.Label>Done</Button.Label>
-                          </Sheet.Close>
-                        </Toolbar.Trailing>
-                      </Toolbar.Root>
-                    </Viewport.BlockStart>
-                    <Page.Root>
-                      <List.Root>
-                        <List.Section>
-                          <List.Group>
-                            {pages[key]?.children.map((child) => (
-                              <List.Item key={child}>
-                                <List.Title
-                                  render={<button type="button" />}
-                                  onClick={() => push(child)}
-                                >
-                                  {pages[child]?.title}
-                                </List.Title>
-                                <List.DrillIn />
-                              </List.Item>
-                            ))}
-                          </List.Group>
-                        </List.Section>
-                      </List.Root>
-                    </Page.Root>
-                  </Header.Root>
-                ))}
+                <Viewport.BlockStart>
+                  <Toolbar.Root placement="block-start">
+                    <Toolbar.Leading>
+                      {keys.length > 1 ? (
+                        <Navigation.Back
+                          aria-label={pages[keys.at(-2) ?? '']?.title}
+                          render={<Toolbar.Button shape="circle" />}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Navigation.Back>
+                      ) : null}
+                    </Toolbar.Leading>
+                    <Toolbar.Trailing>
+                      <Sheet.Close render={<Toolbar.Button prominent />}>
+                        <Button.Label>Done</Button.Label>
+                      </Sheet.Close>
+                    </Toolbar.Trailing>
+                  </Toolbar.Root>
+                </Viewport.BlockStart>
+                <Navigation.Stack>
+                  {keys.map((key, depth) => (
+                    <Header.Root key={key}>
+                      <Viewport.BlockStart>
+                        <Toolbar.Root placement="block-start">
+                          <Toolbar.Title>
+                            {depth === 0 ? (
+                              <Sheet.Title render={<span />}>
+                                {pages[key]?.title}
+                              </Sheet.Title>
+                            ) : (
+                              <span>{pages[key]?.title}</span>
+                            )}
+                          </Toolbar.Title>
+                        </Toolbar.Root>
+                      </Viewport.BlockStart>
+                      <Page.Root>
+                        <List.Root>
+                          <List.Section>
+                            <List.Group>
+                              {pages[key]?.children.map((child) => (
+                                <List.Item key={child}>
+                                  <List.Title
+                                    render={<button type="button" />}
+                                    onClick={() => push(child)}
+                                  >
+                                    {pages[child]?.title}
+                                  </List.Title>
+                                  <List.DrillIn />
+                                </List.Item>
+                              ))}
+                            </List.Group>
+                          </List.Section>
+                        </List.Root>
+                      </Page.Root>
+                    </Header.Root>
+                  ))}
+                </Navigation.Stack>
               </Navigation.Root>
             </Sheet.Content>
           </Sheet.Popup>
@@ -728,7 +743,18 @@ export const SheetComposition: FunctionComponent = () => (
     <ul>
       <li>
         A task of several levels: a <a href="navigation">Navigation</a> as its
-        content, each page with its bar (back, its title, Done).
+        content, each page’s bar its title (moving with it); the back button and
+        Done in a bar that stays (in the{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Root"
+        />
+        , outside its{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Stack"
+        />
+        ).
       </li>
       <li>
         Its header the grabber alone (

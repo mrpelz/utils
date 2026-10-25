@@ -13,19 +13,35 @@ import { PartLink } from '../../tooling/guide/sections.js';
 export const navigationRootRows: readonly PropRow[] = [
   [
     'children',
-    'ReactElement[]',
+    'ReactNode',
     undefined,
     <>
-      The stack’s pages, bottom to top, each with a <code>key</code> (e.g. a{' '}
-      <a href="page">Page</a>, or a <a href="header">Header</a> around one):
-      keys extended, the new top page is pushed; cut back (by one or more), the
-      top page is popped; otherwise, the new top page is shown at once. And
-      optionally its{' '}
+      Its{' '}
+      <PartLink
+        component="navigation"
+        part="Navigation.Stack"
+      />
+      , and what stays while its pages move: optionally its{' '}
       <PartLink
         component="navigation"
         part="Navigation.SwipeArea"
+      />
+      , a bar with its{' '}
+      <PartLink
+        component="navigation"
+        part="Navigation.Back"
       />{' '}
-      (not a page).
+      (a{' '}
+      <PartLink
+        component="toolbar"
+        part="Toolbar.Root"
+      />{' '}
+      in a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.BlockStart"
+      />
+      ).
     </>,
   ],
   [
@@ -50,6 +66,21 @@ export const navigationRootRows: readonly PropRow[] = [
         part="Navigation.SwipeArea"
       />
       ), pages can’t be swiped back.
+    </>,
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const navigationStackRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactElement[]',
+    undefined,
+    <>
+      The stack’s pages, bottom to top, each with a <code>key</code> (e.g. a{' '}
+      <a href="page">Page</a>, or a <a href="header">Header</a> around one):
+      keys extended, the new top page is pushed; cut back (by one or more), the
+      top page is popped; otherwise, the new top page is shown at once.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -104,7 +135,7 @@ export const navigationBackRows: readonly PropRow[] = [
             >
               {'<Toolbar.Button shape="circle" />'}
             </PartLink>{' '}
-            in its page’s bar.
+            in a bar that stays.
           </>,
         ]
       : row,

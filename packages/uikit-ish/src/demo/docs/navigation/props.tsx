@@ -55,6 +55,11 @@ export const propOptionsAdaptiveContent = {
   layout: [undefined, 'phone', 'tablet'] as const,
 };
 
+export const propOptionsGuideStack = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+};
+
 export const propOptionsGuideSwipeArea = {
   className: commonPropOptions.className,
   style: commonPropOptions.style,
@@ -62,7 +67,7 @@ export const propOptionsGuideSwipeArea = {
 };
 
 /** A view's parts: the one it's about, open and emphasized. */
-export type NavigationPart = 'Back' | 'Root' | 'SwipeArea';
+export type NavigationPart = 'Back' | 'Root' | 'Stack' | 'SwipeArea';
 
 /**
  * A view's prop controls, one per part (each with all its props), the
@@ -81,7 +86,7 @@ export const useNavigationControls = (
     offset = 0,
   }: { featured?: NavigationPart; isClosed?: boolean; offset?: number } = {},
 ) => {
-  const [externalRoot, externalSwipeArea, externalBack] =
+  const [externalRoot, externalStack, externalSwipeArea, externalBack] =
     useProvidedState(id).slice(offset);
   // (The swipe area, showing nothing of its own, overlaid.)
   const emphasis =
@@ -97,6 +102,10 @@ export const useNavigationControls = (
     useMemo(() => getPropOptionsGuideRoot(pop), [pop]),
     { external: externalRoot, ...options('Root') },
   );
+  const [controlStack, propsStack, stateStack] = usePropControl(
+    propOptionsGuideStack,
+    { external: externalStack, ...options('Stack') },
+  );
   const [controlSwipeArea, propsSwipeArea, stateSwipeArea] = usePropControl(
     propOptionsGuideSwipeArea,
     { external: externalSwipeArea, ...options('SwipeArea') },
@@ -107,10 +116,11 @@ export const useNavigationControls = (
   );
 
   return {
-    controls: [controlRoot, controlSwipeArea, controlBack],
+    controls: [controlRoot, controlStack, controlSwipeArea, controlBack],
     propsBack,
     propsRoot,
+    propsStack,
     propsSwipeArea,
-    state: [stateRoot, stateSwipeArea, stateBack],
+    state: [stateRoot, stateStack, stateSwipeArea, stateBack],
   };
 };

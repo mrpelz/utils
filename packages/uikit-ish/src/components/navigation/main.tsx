@@ -11,6 +11,7 @@ import {
   MouseEvent,
   PointerEvent,
   ReactElement,
+  RefObject,
   useContext,
   useLayoutEffect,
   useRef,
@@ -22,6 +23,7 @@ import type {
   NavigationBackEventDetails,
   NavigationBackProps,
   NavigationRootProps,
+  NavigationStackProps,
   NavigationSwipeAreaProps,
   Role,
   Transition,
@@ -31,13 +33,15 @@ export type {
   NavigationBackEventDetails,
   NavigationBackProps,
   NavigationRootProps,
+  NavigationStackProps,
   NavigationSwipeAreaProps,
 } from './props.js';
 
 // Navigation (UIKit `UINavigationController`, after Framework7's views and
 // `router` transitions, without its routing): a stack of pages, the app's
-// (no router of its own). The app renders its stack's pages as children,
-// each with a key; the navigation transitions between them:
+// (no router of its own). The app renders its stack's pages as its
+// `Stack`'s children, each with a key; the navigation transitions between
+// them:
 //
 // - a page added on top (keys extended): pushed, sliding in from the
 //   trailing edge over the page under it, which moves on a little and dims;
@@ -47,18 +51,20 @@ export type {
 //   transition.
 //
 // Swiping from the top page's leading edge (its `SwipeArea`: touch, or a
-// mouse) pops it interactively: released past half the width (or flung), `onBack` is
-// called for the app to pop its stack (the transition is done by then);
-// otherwise it settles back. A `Back` (e.g. a bar's back button) calls
-// `onBack` too, the app's pop transitioning as any.
+// mouse) pops it interactively: released past half the width (or flung),
+// `onBack` is called for the app to pop its stack (the transition is done
+// by then); otherwise it settles back. A `Back` (e.g. a bar's back button)
+// calls `onBack` too, the app's pop transitioning as any.
 //
 // Pages under the top one stay mounted (their state and scroll positions
-// kept), hidden. A page's `Header` moves with its page, its bar too.
+// kept), hidden. A page's `Header` moves with its page, its bar too; what
+// stays (e.g. the back button: a toolbar in a `Viewport.BlockStart`) is in
+// the `Root`, outside its `Stack`.
 //
 // Deviations:
-// - Each page's bar moves with it (iOS: the navigation bar stays, its title
-//   moving to the back button's place). A bar that stays (e.g. its title)
-//   is the app's: a toolbar in a `Viewport.BlockStart`, outside the stack.
+// - Each page's bar moves with it, its title too (iOS: the title moves to
+//   the back button's place, fading); the back button stays, in a bar of
+//   the app's outside the stack (see above).
 
 /** Pushing and popping (iOS: about 350ms, an ease-out curve). */
 const duration = 350;
@@ -90,53 +96,37 @@ type SwipeHandlers = Pick<
 >;
 
 /**
- * Its stack, for its `Back`s (going back: the app's `onBack`, if it can)
- * and its `SwipeArea`s (swiping back, if it can).
+ * Its stack's transitions (see `Stack`): its keys reported, a transition
+ * set, animated, and done (at rest); the page a swipe popped.
+ */
+type StackContext = {
+  animate: (from: number, to: number, done: () => void) => void;
+  rest: () => void;
+  setKeys: (keys: string[]) => void;
+  setTransition: (transition: Transition) => void;
+  swipedRef: RefObject<string | undefined>;
+  transition: Transition | null;
+};
+
+/**
+ * Its root, for its `Back`s (going back: the app's `onBack`, if it can),
+ * its `SwipeArea`s (swiping back, if it can), and its `Stack`.
  */
 const NavigationContext = createContext<{
   back?: GoBack;
+  stack?: StackContext;
   swipe?: SwipeHandlers;
 }>({});
 
 /**
- * Where a swipe back starts (touch, or a mouse): a strip at the leading
- * edge (`width`, 20px), over the pages, while there's a page to go back to
- * (and an `onBack`); in its `Root`, among its pages. Without one, pages
- * aren't swiped back.
+ * A navigation: its stack's state (see above), its parts in it (its
+ * `Stack`, a `SwipeArea`, a bar that stays).
  */
-const SwipeArea = forwardRef<HTMLDivElement, NavigationSwipeAreaProps>(
-  ({ className, style, width = 20, ...props }, ref) => {
-    const { swipe } = useContext(NavigationContext);
-    if (!swipe) return null;
-
-    return (
-      <div
-        ref={ref}
-        data-navigation-part="swipe-area"
-        style={withStyle(
-          { '--uikit-navigation-swipe-area-width': `${String(width)}px` },
-          style,
-        )}
-        {...props}
-        {...swipe}
-        className={cn('uikit-navigation-swipe-area', className)}
-      />
-    );
-  },
-);
-
-/** A navigation: the app's stack of pages (keyed children, see above). */
 const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
-  ({ className, children, onBack, ...props }, forwardedRef) => {
+  ({ className, onBack, ...props }, forwardedRef) => {
     const ref = useForwardedRef(forwardedRef);
-    const elements = Children.toArray(children).filter(
-      (child): child is ReactElement => isValidElement(child),
-    );
-    // Its swipe areas, and its pages (all else).
-    const swipeAreas = elements.filter((child) => child.type === SwipeArea);
-    const pages = elements.filter((child) => child.type !== SwipeArea);
-    const keys = pages.map((page) => String(page.key));
-    const previousRef = useRef({ keys, pages });
+    // Its stack's keys (reported by its `Stack`).
+    const [keys, setKeys] = useState<string[]>([]);
     const [transition, setTransition] = useState<Transition | null>(null);
     // The page a completed swipe popped (the app pops it: no transition).
     const swipedRef = useRef<string | undefined>(undefined);
@@ -183,62 +173,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
       setTransition(null);
     };
 
-    // Pushed, popped, or replaced (see above).
-    useLayoutEffect(() => {
-      const { current: previous } = previousRef;
-      previousRef.current = { keys, pages };
-      if (sameKeys(previous.keys, keys)) return;
-
-      const oldTop = previous.keys.at(-1);
-      const newTop = keys.at(-1);
-      if (oldTop === undefined || newTop === undefined || oldTop === newTop) {
-        rest();
-        return;
-      }
-
-      if (isPrefix(keys, previous.keys)) {
-        // Swiped back: popped already.
-        if (swipedRef.current === oldTop) {
-          swipedRef.current = undefined;
-          rest();
-          return;
-        }
-        setTransition({
-          leaving: previous.pages.at(-1),
-          top: oldTop,
-          under: newTop,
-        });
-        animate(0, 1, rest);
-        return;
-      }
-
-      if (isPrefix(previous.keys, keys)) {
-        setTransition({ top: newTop, under: oldTop });
-        animate(1, 0, rest);
-        return;
-      }
-
-      rest();
-      // (On a change of the stack's keys only, compared above.)
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [keys.join('\n')]);
-
     useLayoutEffect(() => () => clearTimeout(timerRef.current), []);
-
-    const roleOf = (key: string, index: number, count: number): Role => {
-      if (transition) {
-        if (key === transition.top) return 'top';
-        if (key === transition.under) return 'under';
-        return 'hidden';
-      }
-      return index === count - 1 ? 'current' : 'hidden';
-    };
-
-    const leaving =
-      transition?.leaving && !keys.includes(transition.top)
-        ? [transition.leaving]
-        : [];
-    const shown = [...pages, ...leaving];
 
     const canSwipe = Boolean(onBack) && keys.length > 1 && !transition;
 
@@ -322,37 +257,156 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
         : undefined;
 
     return (
-      <NavigationContext.Provider value={{ back, swipe: swipeHandlers }}>
+      <NavigationContext.Provider
+        value={{
+          back,
+          stack: {
+            animate,
+            rest,
+            setKeys,
+            setTransition,
+            swipedRef,
+            transition,
+          },
+          swipe: swipeHandlers,
+        }}
+      >
         <div
           ref={ref}
           data-navigation-moving={transition ? '' : undefined}
           data-navigation-part="root"
           {...props}
           className={cn('uikit-navigation-root', className)}
-        >
-          {shown.map((page, index) => {
-            const key = String(page.key);
-            const role = roleOf(key, index, shown.length);
-            return (
-              // A page's frame. In a transition (see `Root`), the upper page
-              // (`top`) and the one under it (`under`) move by the progress (0:
-              // the upper shown), their headers with them. At rest, none of it
-              // applies (no transforms, which would isolate glass' blending).
-              <div
-                key={key}
-                aria-hidden={role === 'current' ? undefined : true}
-                className="uikit-navigation-frame"
-                data-navigation-part="page"
-                data-navigation-role={role}
-                inert={role !== 'current'}
-              >
-                {page}
-              </div>
-            );
-          })}
-          {swipeAreas}
-        </div>
+        />
       </NavigationContext.Provider>
+    );
+  },
+);
+
+/**
+ * Its stack of pages (keyed children, see above), filling its root: pushed,
+ * popped, or replaced as the app's keys change.
+ */
+const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
+  ({ className, children, ...props }, ref) => {
+    const { stack } = useContext(NavigationContext);
+    const pages = Children.toArray(children).filter(
+      (child): child is ReactElement => isValidElement(child),
+    );
+    const keys = pages.map((page) => String(page.key));
+    const previousRef = useRef({ keys, pages });
+    const transition = stack?.transition ?? null;
+
+    // Pushed, popped, or replaced (see above).
+    useLayoutEffect(() => {
+      stack?.setKeys(keys);
+      const { current: previous } = previousRef;
+      previousRef.current = { keys, pages };
+      if (!stack || sameKeys(previous.keys, keys)) return;
+
+      const oldTop = previous.keys.at(-1);
+      const newTop = keys.at(-1);
+      if (oldTop === undefined || newTop === undefined || oldTop === newTop) {
+        stack.rest();
+        return;
+      }
+
+      if (isPrefix(keys, previous.keys)) {
+        // Swiped back: popped already.
+        if (stack.swipedRef.current === oldTop) {
+          stack.swipedRef.current = undefined;
+          stack.rest();
+          return;
+        }
+        stack.setTransition({
+          leaving: previous.pages.at(-1),
+          top: oldTop,
+          under: newTop,
+        });
+        stack.animate(0, 1, stack.rest);
+        return;
+      }
+
+      if (isPrefix(previous.keys, keys)) {
+        stack.setTransition({ top: newTop, under: oldTop });
+        stack.animate(1, 0, stack.rest);
+        return;
+      }
+
+      stack.rest();
+      // (On a change of the stack's keys only, compared above.)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [keys.join('\n')]);
+
+    const roleOf = (key: string, index: number, count: number): Role => {
+      if (transition) {
+        if (key === transition.top) return 'top';
+        if (key === transition.under) return 'under';
+        return 'hidden';
+      }
+      return index === count - 1 ? 'current' : 'hidden';
+    };
+
+    const leaving =
+      transition?.leaving && !keys.includes(transition.top)
+        ? [transition.leaving]
+        : [];
+    const shown = [...pages, ...leaving];
+
+    return (
+      <div
+        ref={ref}
+        data-navigation-part="stack"
+        {...props}
+        className={cn('uikit-navigation-stack', className)}
+      >
+        {shown.map((page, index) => {
+          const key = String(page.key);
+          const role = roleOf(key, index, shown.length);
+          return (
+            // A page's frame. In a transition (see `Root`), the upper page
+            // (`top`) and the one under it (`under`) move by the progress (0:
+            // the upper shown), their headers with them. At rest, none of it
+            // applies (no transforms, which would isolate glass' blending).
+            <div
+              key={key}
+              aria-hidden={role === 'current' ? undefined : true}
+              className="uikit-navigation-frame"
+              data-navigation-part="page"
+              data-navigation-role={role}
+              inert={role !== 'current'}
+            >
+              {page}
+            </div>
+          );
+        })}
+      </div>
+    );
+  },
+);
+
+/**
+ * Where a swipe back starts (touch, or a mouse): a strip at the leading
+ * edge (`width`, 20px), over the pages, while there's a page to go back to
+ * (and an `onBack`); in its `Root`. Without one, pages aren't swiped back.
+ */
+const SwipeArea = forwardRef<HTMLDivElement, NavigationSwipeAreaProps>(
+  ({ className, style, width = 20, ...props }, ref) => {
+    const { swipe } = useContext(NavigationContext);
+    if (!swipe) return null;
+
+    return (
+      <div
+        ref={ref}
+        data-navigation-part="swipe-area"
+        style={withStyle(
+          { '--uikit-navigation-swipe-area-width': `${String(width)}px` },
+          style,
+        )}
+        {...props}
+        {...swipe}
+        className={cn('uikit-navigation-swipe-area', className)}
+      />
     );
   },
 );
@@ -387,6 +441,7 @@ const Back = forwardRef<HTMLButtonElement, NavigationBackProps>(
 
 export const Navigation = {
   Root,
+  Stack,
   SwipeArea,
   Back,
 };

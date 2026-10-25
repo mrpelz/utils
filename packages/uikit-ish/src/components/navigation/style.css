@@ -4,7 +4,6 @@
     --uikit-navigation-direction: 1;
 
     position: relative;
-    overflow: hidden;
     height: 100%;
     min-height: 0;
     box-sizing: border-box;
@@ -13,6 +12,15 @@
     &:dir(rtl) {
       --uikit-navigation-direction: -1;
     }
+  }
+
+  /* Its pages, filling the root; clipped and layered on their own (under a
+     bar that stays). */
+  .uikit-navigation-stack {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    isolation: isolate;
   }
 
   .uikit-navigation-frame {
@@ -77,5 +85,16 @@
     inset-block: 0;
     inset-inline-start: 0;
     touch-action: none;
+  }
+
+  /* A bar that stays (in the root, outside the stack, over its pages'
+     bars): only its items take the pointer, the moving bars' own under it. */
+  .uikit-navigation-root > .uikit-viewport-anchor {
+    pointer-events: none;
+
+    & :where(.uikit-toolbar-leading, .uikit-toolbar-trailing) > *,
+    & .uikit-toolbar-title {
+      pointer-events: auto;
+    }
   }
 }
