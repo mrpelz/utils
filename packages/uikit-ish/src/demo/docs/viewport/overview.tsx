@@ -270,10 +270,7 @@ export const ViewportOverview: FunctionComponent = () => (
     </ul>
     <KeyPropsTable
       parts={[
-        [
-          'Viewport.Provider',
-          pickRows(viewportProviderRows, 'scroller', 'threshold'),
-        ],
+        ['Viewport.Provider', pickRows(viewportProviderRows, 'scroller')],
         [
           'Viewport.Content',
           pickRows(viewportContentRows, 'keyboard', 'safeArea'),
@@ -410,9 +407,10 @@ export const ViewportOverview: FunctionComponent = () => (
       </li>
       <li>
         Scroll tracking (the document’s, or <code>scroller</code>’s): the
-        direction changes once scrolled <code>threshold</code> px (8) from where
-        it last turned; at the top within 0px, at the bottom within 1px. Before
-        the first scroll: at the top, no direction.
+        direction changes once scrolled a hook’s <code>threshold</code> px (8)
+        from where it last turned, never by bouncing past an end; at the top
+        within 0px, at the bottom within 1px. Before the first scroll: at the
+        top, no direction. Pulled past an end: its <code>overscroll</code>.
       </li>
       <li>
         Inline anchors mirror right to left (<code>inline-start</code>: the

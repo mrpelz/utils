@@ -23,6 +23,7 @@ import {
   useVisualViewport,
   Viewport,
   type ViewportAnchorHandle,
+  type ViewportScrollEvent,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
@@ -48,6 +49,7 @@ import {
   useElementVisibilityRows,
   useFocusShiftPreventionRows,
   useInputZoomPreventionRows,
+  useScrollDirectionArgumentRows,
   useScrollDirectionRows,
   useSizeClassReturnRows,
   useViewportScrollRows,
@@ -75,6 +77,7 @@ import {
   propOptionsPaddingEnd,
   propOptionsPaddingStart,
   propOptionsProvider,
+  propOptionsScrollOptions,
   toastAnchor,
 } from './props.js';
 
@@ -648,6 +651,14 @@ const UseVisualViewportPart: FunctionComponent = () => (
   </Viewport.Provider>
 );
 
+/** A length, rounded (or none yet). */
+const px = (value?: number) =>
+  value === undefined ? '—' : `${String(Math.round(value))}px`;
+
+/** A share, as a percentage (or none yet). */
+const percent = (value?: number) =>
+  value === undefined ? '—' : `${String(Math.round(value * 100))}%`;
+
 /**
  * `useViewportScroll`, logging the screen's content's scrolling (its turns
  * and edges; inside a provider tracking it, see below).
@@ -657,23 +668,52 @@ const UseViewportScrollView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
   log: ReactNode;
 }> = ({ addLog, contentRef, log }) => {
+  const id = 'viewport-parts-use-viewport-scroll';
   const calls = useRef(0);
+  const [external] = useProvidedState(id);
+  const [control, options, state] = usePropControl(propOptionsScrollOptions, {
+    external,
+    title: 'options',
+  });
 
-  // (Every call logged: once per scroll event.)
-  useViewportScroll(({ atBottom, atTop, direction, position }) => {
+  const [event, setEvent] = useState<ViewportScrollEvent>();
+
+  // (Every call logged: once per scroll event, or overscrolling input.)
+  useViewportScroll((scroll) => {
+    const { atBottom, atTop, direction, isHeld, overscroll, position } = scroll;
+    setEvent(scroll);
     calls.current += 1;
     addLog(
-      `scroll #${String(calls.current)}: direction: ${String(direction)}, atTop: ${String(atTop)}, atBottom: ${String(atBottom)}, position: ${String(Math.round(position))}`,
+      `scroll #${String(calls.current)}: direction: ${String(direction)}, atTop: ${String(atTop)}, atBottom: ${String(atBottom)}, position: ${String(Math.round(position))}, overscroll: ${String(Math.round(overscroll))}, isHeld: ${String(isHeld)}`,
     );
-  });
+  }, options);
 
   return (
     <Component
+      containsOverscroll
       isInline
-      id="viewport-parts-use-viewport-scroll"
+      controls={[control]}
+      id={id}
       log={log}
       stage="phone"
+      state={[state]}
       title="useViewportScroll"
+      diagnostics={
+        <dl className="viewport-demo-metrics">
+          <dt>direction</dt>
+          <dd>{String(event?.direction)}</dd>
+          <dt>atTop</dt>
+          <dd>{String(event?.atTop ?? '—')}</dd>
+          <dt>atBottom</dt>
+          <dd>{String(event?.atBottom ?? '—')}</dd>
+          <dt>position</dt>
+          <dd>{px(event?.position)}</dd>
+          <dt>overscroll</dt>
+          <dd>{px(event?.overscroll)}</dd>
+          <dt>isHeld</dt>
+          <dd>{String(event?.isHeld ?? '—')}</dd>
+        </dl>
+      }
     >
       <Viewport.Content ref={contentRef}>
         <Viewport.Padding edge="block-start" />
@@ -717,13 +757,26 @@ const UseViewportScrollPart: FunctionComponent = () => {
 const UseScrollDirectionView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
 }> = ({ contentRef }) => {
-  const { atBottom, atTop, direction = 'undefined' } = useScrollDirection();
+  const id = 'viewport-parts-use-scroll-direction';
+  const [external] = useProvidedState(id);
+  const [control, options, state] = usePropControl(propOptionsScrollOptions, {
+    external,
+    title: 'options',
+  });
+  const {
+    atBottom,
+    atTop,
+    direction = 'undefined',
+  } = useScrollDirection(options);
 
   return (
     <Component
+      containsOverscroll
       isInline
-      id="viewport-parts-use-scroll-direction"
+      controls={[control]}
+      id={id}
       stage="phone"
+      state={[state]}
       title="useScrollDirection"
       diagnostics={
         <dl className="viewport-demo-metrics">
@@ -768,14 +821,6 @@ const UseScrollDirectionPart: FunctionComponent = () => {
     </Viewport.Provider>
   );
 };
-
-/** A length, rounded (or none yet). */
-const px = (value?: number) =>
-  value === undefined ? '—' : `${String(Math.round(value))}px`;
-
-/** A share, as a percentage (or none yet). */
-const percent = (value?: number) =>
-  value === undefined ? '—' : `${String(Math.round(value * 100))}%`;
 
 /**
  * `useElementVisibility`: a card in a box scrolling both ways, colored
@@ -1298,7 +1343,7 @@ export const ViewportParts: FunctionComponent = () => (
           component="viewport"
           part="useScrollDirection"
         />
-        ; its direction changes past <code>threshold</code>.
+        : each takes its own <code>threshold</code>.
       </li>
       <li>Here: tracking the screen’s content layer, the readout below it.</li>
     </ul>
@@ -1640,12 +1685,19 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Calls its listener on every scroll of the tracked scroll container,
-        without re-rendering.
+        Calls its listener on every scroll of the tracked scroll container, and
+        as it’s pulled past an end, without re-rendering.
+      </li>
+      <li>
+        The direction changes past <code>threshold</code> (its own);{' '}
+        <code>overscroll</code>, how far it’s pulled past an end, and{' '}
+        <code>isHeld</code>: e.g. pulling to refresh, or to turn pages (see the{' '}
+        <a href="viewport/composition#pulling-to-refresh">composition</a>).
       </li>
       <li>
         Inside a provider (outside one: never called). Here: each call logged
-        (one per scroll event), with the content’s direction and edges.
+        (one per scroll event, or pull), with the content’s direction, edges and
+        overscroll.
       </li>
     </ul>
     <UseViewportScrollPart />
@@ -1662,14 +1714,21 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The direction scrolled in and the edges; re-rendering as they change
-        (not with every scroll).
+        The direction scrolled in (past <code>threshold</code>: more, a steadier
+        direction) and the edges; re-rendering as they change (not with every
+        scroll).
+      </li>
+      <li>
+        Bouncing past an end (e.g. back from the bottom) doesn’t change the
+        direction.
       </li>
       <li>
         Inside a provider (outside one: at the top, no direction, unchanging).
       </li>
     </ul>
     <UseScrollDirectionPart />
+    <h3>Arguments</h3>
+    <PropsTable rows={useScrollDirectionArgumentRows} />
     <h3>Returns</h3>
     <PropsTable rows={useScrollDirectionRows} />
 

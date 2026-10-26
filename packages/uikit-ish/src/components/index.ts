@@ -283,6 +283,7 @@ export {
   type ViewportSafeArea,
   type SizeClass,
   type ViewportScrollEvent,
+  type ViewportScrollOptions,
   type VisualViewportState,
 } from './viewport/main.js';
 

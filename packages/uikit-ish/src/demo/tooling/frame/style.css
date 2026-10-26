@@ -526,7 +526,11 @@
 
 /* Inline, scrolling within the stage (e.g. a page or a viewport's content
    layer, which contain their overscroll) hands on to the page's own:
-   unlayered, over the components' layer. */
-.demo-container[data-inline] .demo-stage * {
+   unlayered, over the components' layer. Not where a demo shows its
+   overscroll (`containsOverscroll`). */
+.demo-inline:not([data-contains-overscroll])
+  > .demo-container[data-inline]
+  .demo-stage
+  * {
   overscroll-behavior-y: auto;
 }

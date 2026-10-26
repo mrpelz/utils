@@ -24,13 +24,37 @@ export type ViewportScrollEvent = {
   atBottom: boolean;
   /** Scrolled to (or past) the start. */
   atTop: boolean;
-  /** The direction scrolled in, past the threshold (until then: none). */
+  /**
+   * The direction scrolled in, past the threshold (until then: none); not
+   * changed by overscrolling (e.g. bouncing back from the end).
+   */
   direction: 'down' | 'up' | undefined;
-  /** The scroll position. */
+  /**
+   * Overscrolling held: a touch, or a wheel (until quiet), pulling it (e.g.
+   * to act on release); once not, it's released, bouncing back.
+   */
+  isHeld: boolean;
+  /**
+   * How far it's pulled past an end (px, damped as rubber-banding):
+   * negative past the start (e.g. pulling to refresh), positive past the
+   * end; 0 within. Safari's own bounce, or (elsewhere) touches and wheels
+   * at an end.
+   */
+  overscroll: number;
+  /** The scroll position, within the scroll range (overscrolled: its end). */
   position: number;
 };
 
 export type Listener = (event: ViewportScrollEvent) => void;
+
+export type ViewportScrollOptions = {
+  /**
+   * How far to scroll before the direction changes (px): more for a
+   * steadier direction (e.g. over a device's jitter).
+   * @default 8
+   */
+  threshold?: number;
+};
 
 export type ViewportProviderProps = {
   children?: ReactNode;
@@ -47,11 +71,6 @@ export type ViewportProviderProps = {
    * @default the document's scrolling element
    */
   scroller?: RefObject<HTMLElement | null>;
-  /**
-   * How far to scroll before the direction changes (px).
-   * @default 8
-   */
-  threshold?: number;
 };
 
 /** The edge of the viewport an anchor floats at. */

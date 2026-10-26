@@ -1,7 +1,16 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
-import { FunctionComponent, RefObject, useState } from 'react';
+import { sfArrowDown } from '@bradleyhodges/sfsymbols/sfArrowDown';
+import { sfArrowUp } from '@bradleyhodges/sfsymbols/sfArrowUp';
+import {
+  CSSProperties,
+  FunctionComponent,
+  RefObject,
+  useRef,
+  useState,
+} from 'react';
 
 import {
+  ActivityIndicator,
   Button,
   CheckboxGroup,
   collapsedSelection,
@@ -12,6 +21,7 @@ import {
   TextField,
   Toolbar,
   useScrollDirection,
+  useViewportScroll,
   Viewport,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
@@ -27,7 +37,7 @@ import {
 import { GuideLink } from '../hig-guide/link.js';
 import { messages } from '../list/content.js';
 import { phoneTabs, phoneTabValues } from '../tab-bar/tabs.js';
-import { names } from './content.js';
+import { names, planets } from './content.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 const shellCode = `<Viewport.Provider>
@@ -153,6 +163,128 @@ const toolbarCode = `const [selected, setSelected] = useState<string[]>([]);
     </Toolbar.Trailing>
   </Toolbar.Root>
 </Viewport.BlockEnd>`;
+
+const refreshCode = `const contentRef = useRef<HTMLDivElement>(null);
+
+// Tracking the content layer's scrolling, not the document's.
+<Viewport.Provider scroller={contentRef}>
+  <App contentRef={contentRef} />
+</Viewport.Provider>
+
+// In App (inside the provider):
+// Pulled this far past the top (px), released, it refreshes.
+const refreshDistance = 60;
+const [rows, setRows] = useState(names);
+const [pulled, setPulled] = useState(0);
+const [isRefreshing, setIsRefreshing] = useState(false);
+// Released past the distance: refreshing.
+const isArmed = useRef(false);
+
+useViewportScroll(({ isHeld, overscroll }) => {
+  setPulled(Math.max(0, -overscroll));
+  if (isHeld) {
+    isArmed.current = -overscroll >= refreshDistance;
+    return;
+  }
+  if (!isArmed.current) return;
+  isArmed.current = false;
+  setIsRefreshing(true);
+  setTimeout(() => {
+    setRows((current) => [\`New Contact \${current.length + 1}\`, ...current]);
+    setIsRefreshing(false);
+  }, 1500);
+});
+
+<Viewport.Content ref={contentRef}>
+  {/* Not the indicator's anchor (over the content), but while refreshing. */}
+  <Viewport.Padding
+    anchor={isRefreshing ? undefined : null}
+    edge="block-start"
+  />
+  <List.Root>…{/* rows */}</List.Root>
+  <Viewport.Padding edge="block-end" />
+</Viewport.Content>
+<Viewport.BlockStart>
+  <div
+    className="pull"
+    style={{
+      '--pull': isRefreshing ? 1 : Math.min(pulled / refreshDistance, 1),
+    }}
+  >
+    <ActivityIndicator
+      animating={isRefreshing}
+      className="pull-spinner"
+    />
+  </div>
+</Viewport.BlockStart>`;
+
+const pagesCode = `const contentRef = useRef<HTMLDivElement>(null);
+
+<Viewport.Provider scroller={contentRef}>
+  <App contentRef={contentRef} />
+</Viewport.Provider>
+
+// In App (inside the provider):
+// Pulled this far past an end (px), released, it turns the page.
+const turnDistance = 80;
+const [index, setIndex] = useState(0);
+const [overscroll, setOverscroll] = useState(0);
+// Released past the distance: the page turned to (-1, 1), or none.
+const turn = useRef(0);
+const [name, facts] = planets[index];
+const previous = planets[index - 1]?.[0];
+const next = planets[index + 1]?.[0];
+
+useViewportScroll(({ isHeld, overscroll: by }) => {
+  setOverscroll(by);
+  if (isHeld) {
+    turn.current = 0;
+    if (previous && by <= -turnDistance) turn.current = -1;
+    if (next && by >= turnDistance) turn.current = 1;
+    return;
+  }
+  if (turn.current === 0) return;
+  setIndex(index + turn.current);
+  turn.current = 0;
+  contentRef.current?.scrollTo({ top: 0 });
+});
+
+<Viewport.Content ref={contentRef}>
+  <Viewport.Padding anchor={null} edge="block-start" />
+  <List.Root>
+    <List.Section>
+      <List.Header prominence="extraProminent">
+        <List.Title render={<h2 />}>{name}</List.Title>
+      </List.Header>
+      <List.Group>…{/* facts */}</List.Group>
+    </List.Section>
+  </List.Root>
+  <Viewport.Padding anchor={null} edge="block-end" />
+</Viewport.Content>
+{previous && (
+  <Viewport.BlockStart>
+    <div
+      className="pull"
+      data-armed={overscroll <= -turnDistance ? '' : undefined}
+      style={{ '--pull': Math.min(-overscroll / turnDistance, 1) }}
+    >
+      <Symbol className="pull-arrow" icon={sfArrowDown} />
+      {previous}
+    </div>
+  </Viewport.BlockStart>
+)}
+{next && (
+  <Viewport.BlockEnd>
+    <div
+      className="pull"
+      data-armed={overscroll >= turnDistance ? '' : undefined}
+      style={{ '--pull': Math.min(overscroll / turnDistance, 1) }}
+    >
+      <Symbol className="pull-arrow" icon={sfArrowUp} />
+      {next}
+    </div>
+  </Viewport.BlockEnd>
+)}`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 /** An app's shell: pages in the content layer, a tab bar at the bottom. */
@@ -354,6 +486,265 @@ const Collapse: FunctionComponent = () => {
   );
 };
 
+// Pulled this far past the top (px), released, it refreshes.
+const refreshDistance = 60;
+
+/**
+ * Contacts refreshed by pulling past the top (and releasing): an activity
+ * indicator over the content coming in with the pull, spinning while
+ * refreshing (inside a provider tracking the content layer, see `Refresh`).
+ */
+const RefreshView: FunctionComponent<{
+  contentRef: RefObject<HTMLDivElement | null>;
+}> = ({ contentRef }) => {
+  const [log, addLog] = useLog();
+  const [rows, setRows] = useState<readonly string[]>(names);
+  const [scroll, setScroll] = useState({ isHeld: false, overscroll: 0 });
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  // Released past the distance: refreshing.
+  const isArmed = useRef(false);
+  const pulled = Math.max(0, -scroll.overscroll);
+
+  useViewportScroll(({ isHeld, overscroll }) => {
+    setScroll({ isHeld, overscroll });
+    if (isHeld) {
+      isArmed.current = -overscroll >= refreshDistance;
+      return;
+    }
+    if (!isArmed.current) return;
+    isArmed.current = false;
+    setIsRefreshing(true);
+    addLog('refreshing');
+    setTimeout(() => {
+      setRows((current) => [
+        `New Contact ${String(current.length - names.length + 1)}`,
+        ...current,
+      ]);
+      setIsRefreshing(false);
+      addLog('refreshed');
+    }, 1500);
+  });
+
+  return (
+    <Component
+      containsOverscroll
+      isInline
+      id="viewport-composition-refresh"
+      log={log}
+      stage="phone"
+      title="Viewport pulled to refresh"
+      diagnostics={
+        <dl className="viewport-demo-metrics">
+          <dt>overscroll</dt>
+          <dd>{Math.round(scroll.overscroll)}px</dd>
+          <dt>isHeld</dt>
+          <dd>{String(scroll.isHeld)}</dd>
+          <dt>armed</dt>
+          <dd>{String(scroll.isHeld && pulled >= refreshDistance)}</dd>
+        </dl>
+      }
+    >
+      <>
+        <Viewport.Content ref={contentRef}>
+          {/* Not the indicator's anchor (over the content), but while
+              refreshing. */}
+          <Viewport.Padding
+            anchor={isRefreshing ? undefined : null}
+            edge="block-start"
+          />
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {rows.map((name) => (
+                  <List.Item key={name}>
+                    <List.Title>{name}</List.Title>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+          <Viewport.Padding edge="block-end" />
+        </Viewport.Content>
+        <Viewport.BlockStart>
+          <div
+            className="viewport-demo-pull"
+            style={
+              {
+                '--viewport-demo-pull': isRefreshing
+                  ? 1
+                  : Math.min(pulled / refreshDistance, 1),
+              } as CSSProperties
+            }
+          >
+            <ActivityIndicator
+              animating={isRefreshing}
+              className="viewport-demo-pull-spinner"
+            />
+          </div>
+        </Viewport.BlockStart>
+      </>
+    </Component>
+  );
+};
+
+/** `RefreshView`, in a provider tracking its screen's content layer. */
+const Refresh: FunctionComponent = () => {
+  const contentRef = useLabelledRef<HTMLDivElement>(
+    'contentRef',
+    'HTMLDivElement',
+  );
+
+  return (
+    <Viewport.Provider scroller={contentRef}>
+      <RefreshView contentRef={contentRef} />
+    </Viewport.Provider>
+  );
+};
+
+// Pulled this far past an end (px), released, it turns the page.
+const turnDistance = 80;
+
+/**
+ * The planets, a page each, turned by pulling past an end (and releasing):
+ * on past the end, the next; back past the start, the previous; a hint at
+ * the edge coming in with the pull (inside a provider tracking the content
+ * layer, see `Pages`).
+ */
+const PagesView: FunctionComponent<{
+  contentRef: RefObject<HTMLDivElement | null>;
+}> = ({ contentRef }) => {
+  const [log, addLog] = useLog();
+  const [index, setIndex] = useState(0);
+  const [scroll, setScroll] = useState({ isHeld: false, overscroll: 0 });
+  // Released past the distance: the page turned to (-1, 1), or none.
+  const turn = useRef(0);
+  const [name, facts] = planets[index] ?? ['', []];
+  const previous = planets[index - 1]?.[0];
+  const next = planets[index + 1]?.[0];
+  const { overscroll } = scroll;
+
+  useViewportScroll(({ isHeld, overscroll: by }) => {
+    setScroll({ isHeld, overscroll: by });
+    if (isHeld) {
+      turn.current = 0;
+      if (previous && by <= -turnDistance) turn.current = -1;
+      if (next && by >= turnDistance) turn.current = 1;
+      return;
+    }
+    if (turn.current === 0) return;
+    addLog(`turned to: ${String(turn.current < 0 ? previous : next)}`);
+    setIndex(index + turn.current);
+    turn.current = 0;
+    contentRef.current?.scrollTo({ top: 0 });
+  });
+
+  return (
+    <Component
+      containsOverscroll
+      isInline
+      id="viewport-composition-pages"
+      log={log}
+      stage="phone"
+      title="Viewport pulled to turn pages"
+      diagnostics={
+        <dl className="viewport-demo-metrics">
+          <dt>overscroll</dt>
+          <dd>{Math.round(overscroll)}px</dd>
+          <dt>isHeld</dt>
+          <dd>{String(scroll.isHeld)}</dd>
+          <dt>page</dt>
+          <dd>{name}</dd>
+        </dl>
+      }
+    >
+      <>
+        <Viewport.Content ref={contentRef}>
+          <Viewport.Padding
+            anchor={null}
+            edge="block-start"
+          />
+          <List.Root>
+            <List.Section>
+              <List.Header prominence="extraProminent">
+                <List.Title render={<h2 />}>{name}</List.Title>
+              </List.Header>
+              <List.Group>
+                {facts.map((fact) => (
+                  <List.Item key={fact}>
+                    <List.Title>{fact}</List.Title>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+          <Viewport.Padding
+            anchor={null}
+            edge="block-end"
+          />
+        </Viewport.Content>
+        {previous && (
+          <Viewport.BlockStart>
+            <div
+              className="viewport-demo-pull"
+              data-armed={overscroll <= -turnDistance ? '' : undefined}
+              style={
+                {
+                  '--viewport-demo-pull': Math.min(
+                    -overscroll / turnDistance,
+                    1,
+                  ),
+                } as CSSProperties
+              }
+            >
+              <Symbol
+                className="viewport-demo-pull-arrow"
+                icon={sfArrowDown}
+              />
+              {previous}
+            </div>
+          </Viewport.BlockStart>
+        )}
+        {next && (
+          <Viewport.BlockEnd>
+            <div
+              className="viewport-demo-pull"
+              data-armed={overscroll >= turnDistance ? '' : undefined}
+              style={
+                {
+                  '--viewport-demo-pull': Math.min(
+                    overscroll / turnDistance,
+                    1,
+                  ),
+                } as CSSProperties
+              }
+            >
+              <Symbol
+                className="viewport-demo-pull-arrow"
+                icon={sfArrowUp}
+              />
+              {next}
+            </div>
+          </Viewport.BlockEnd>
+        )}
+      </>
+    </Component>
+  );
+};
+
+/** `PagesView`, in a provider tracking its screen's content layer. */
+const Pages: FunctionComponent = () => {
+  const contentRef = useLabelledRef<HTMLDivElement>(
+    'contentRef',
+    'HTMLDivElement',
+  );
+
+  return (
+    <Viewport.Provider scroller={contentRef}>
+      <PagesView contentRef={contentRef} />
+    </Viewport.Provider>
+  );
+};
+
 /** A list's selection, acted on by a toolbar at the bottom. */
 const Selection: FunctionComponent = () => {
   const [log, addLog] = useLog();
@@ -429,6 +820,8 @@ const sections: readonly Section[] = [
   ['a-message-field-over-the-keyboard', 'A message field over the keyboard'],
   ['a-bar-collapsing-on-scroll', 'A bar collapsing on scroll'],
   ['a-bottom-toolbar-over-a-list', 'A bottom toolbar over a list'],
+  ['pulling-to-refresh', 'Pulling to refresh'],
+  ['pulling-to-turn-pages', 'Pulling to turn pages'],
 ];
 
 /** `/viewport/composition`: the viewport around an app's pages and bars. */
@@ -557,8 +950,98 @@ export const ViewportComposition: FunctionComponent = () => (
     </ul>
     <CodeView code={toolbarCode} />
     <Selection />
+
+    <Heading
+      id="pulling-to-refresh"
+      level={2}
+    >
+      Pulling to refresh
+    </Heading>
+    <ul>
+      <li>
+        Pulled past the top and released, the list refreshes (Mail’s,
+        Contacts’), an{' '}
+        <PartLink
+          component="progress"
+          part="ActivityIndicator"
+        />{' '}
+        coming in with the pull, spinning while it does.
+      </li>
+      <li>
+        <PartLink
+          component="viewport"
+          part="useViewportScroll"
+        />
+        ’s <code>overscroll</code> (negative past the top) and{' '}
+        <code>isHeld</code> (still pulled: a touch, or a wheel until quiet);
+        released past the distance, it refreshes.
+      </li>
+      <li>
+        The indicator in a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockStart"
+        />{' '}
+        over the content: the{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />{' '}
+        doesn’t keep clear of it (<code>anchor</code> <code>null</code>), but
+        while refreshing.
+      </li>
+      <li>
+        Safari bounces past the top by itself; elsewhere, the pull is the
+        touch’s (or the wheel’s), rubber-banded, the content staying.
+      </li>
+    </ul>
+    <CodeView code={refreshCode} />
+    <Refresh />
+
+    <Heading
+      id="pulling-to-turn-pages"
+      level={2}
+    >
+      Pulling to turn pages
+    </Heading>
+    <ul>
+      <li>
+        A page each (a story’s, an article’s): pulled on past the end and
+        released, the next; back past the start, the previous.
+      </li>
+      <li>
+        A hint at each edge coming in with the pull, its arrow turning once far
+        enough (released then, it turns the page).
+      </li>
+      <li>
+        <PartLink
+          component="viewport"
+          part="useViewportScroll"
+        />
+        ’s <code>overscroll</code> at either end (positive past the end), and{' '}
+        <code>isHeld</code>. Its <code>direction</code> doesn’t change bouncing
+        back.
+      </li>
+      <li>
+        Short pages too: the content layer bounces even when its content fits (
+        <PartLink
+          component="viewport"
+          part="Viewport.Content"
+        />
+        ’s <code>alwaysBounce</code>).
+      </li>
+    </ul>
+    <CodeView code={pagesCode} />
+    <Pages />
   </>
 );
 
 /** Its live views, also on the component's page of demos (and `/all`). */
-export const viewportCompositionDemos = [Shell, Message, Collapse, Selection];
+export const viewportCompositionDemos = [
+  Shell,
+  Message,
+  Collapse,
+  Selection,
+  Refresh,
+  Pages,
+];

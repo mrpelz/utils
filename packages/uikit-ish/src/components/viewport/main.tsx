@@ -35,6 +35,7 @@ import type {
   ViewportContentProps,
   ViewportProviderProps,
   ViewportScrollEvent,
+  ViewportScrollOptions,
   VisualViewportState,
 } from './props.js';
 
@@ -62,6 +63,7 @@ export type {
   ViewportSafeArea,
   SizeClass,
   ViewportScrollEvent,
+  ViewportScrollOptions,
   VisualViewportState,
 } from './props.js';
 
@@ -73,9 +75,10 @@ export type {
 //   `-width`, `-top`, `-left`, `-keyboard-inset`) and a hook.
 // - Scroll tracking (`Provider`, `useViewportScroll`, `useScrollDirection`):
 //   the direction a scroll container (the document's, by default) is
-//   scrolled in (past a threshold, so jitter doesn't flip it), and whether
-//   it's at its top or bottom; e.g. to collapse a tab bar while scrolling
-//   down.
+//   scrolled in (past each hook's threshold, so jitter doesn't flip it),
+//   whether it's at its top or bottom, e.g. to collapse a tab bar while
+//   scrolling down; and how far it's pulled past an end (overscroll), e.g.
+//   to pull to refresh.
 // - Anchors (`Anchor`; `Top`, `Bottom`): floating above the content at an
 //   edge of the visual viewport: top (e.g. a toolbar), bottom (e.g. a tab
 //   bar, or a message field pushed up by the keyboard), leading or trailing
@@ -89,23 +92,29 @@ export type {
 //   (`useElementGeometry`: its edges' distances, how much of it shows), in
 //   the viewport or a scroll container (`scroller`); no `Provider` needed.
 
+/** A scroll, without its direction (each listener's own, see below). */
+type Scroll = Omit<ViewportScrollEvent, 'direction'>;
+
+type ScrollListener = (scroll: Scroll) => void;
+
 /** The latest scroll, and its listeners. */
 const createScrollStore = () => {
-  let latest: ViewportScrollEvent = {
+  let latest: Scroll = {
     atBottom: false,
     atTop: true,
-    direction: undefined,
+    isHeld: false,
+    overscroll: 0,
     position: 0,
   };
-  const listeners = new Set<Listener>();
+  const listeners = new Set<ScrollListener>();
 
   return {
     current: () => latest,
-    emit: (event: ViewportScrollEvent) => {
+    emit: (event: Scroll) => {
       latest = event;
       for (const listener of listeners) listener(event);
     },
-    subscribe: (listener: Listener) => {
+    subscribe: (listener: ScrollListener) => {
       listeners.add(listener);
       return () => {
         listeners.delete(listener);
@@ -122,6 +131,43 @@ type ViewportContextValue = {
 const ViewportContext = createContext<ViewportContextValue | undefined>(
   undefined,
 );
+
+/**
+ * The direction scrolled in, of the scrolls given it (from `start`): it
+ * changes once scrolled `threshold` px the other way from where it last
+ * turned.
+ */
+const trackDirection = (threshold: number, start: number) => {
+  let turn = start;
+  let direction: ViewportScrollEvent['direction'];
+
+  return (scroll: Scroll): ViewportScrollEvent => {
+    const { position } = scroll;
+    const isOn = direction === 'down' ? position > turn : position < turn;
+    if (direction !== undefined && isOn) {
+      turn = position;
+    } else if (Math.abs(position - turn) >= threshold) {
+      direction = position > turn ? 'down' : 'up';
+      turn = position;
+    }
+
+    return { ...scroll, direction };
+  };
+};
+
+/**
+ * Rubber-banding (UIKit's): how far content moves pulled `distance` px past
+ * an end, in a scroll container `size` px high (never as far as that).
+ */
+const rubberBand = (distance: number, size: number) =>
+  size > 0 ? (1 - 1 / ((distance * 0.55) / size + 1)) * size : 0;
+
+// A wheel overscrolling (see `Provider`): held until quiet for this long.
+const wheelQuiet = 150;
+
+// A wheel's delta, in pixels (by its `deltaMode`: pixels, lines, pages).
+const wheelPixels = (event: WheelEvent, page: number) =>
+  event.deltaY * ([1, 16, page][event.deltaMode] ?? 1);
 
 const clamp = (value: number, max: number) =>
   Math.round(Math.min(Math.max(value, 0), max));
@@ -182,7 +228,6 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
   children,
   screen: ownScreen,
   scroller,
-  threshold = 8,
 }) => {
   // Its screen: its own, or the provided portal container's (e.g. a
   // device's frame), or none (the window's).
@@ -242,39 +287,117 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     };
   }, [screen]);
 
-  // Scroll tracking: the direction flips once scrolled past the threshold
-  // from where it last turned.
+  // Scroll tracking: the position (within the scroll range), and how far
+  // it's overscrolled: Safari's own bounce (the position past an end), or,
+  // where browsers keep it in range, touches and wheels pulling at an end
+  // (rubber-banded, as Safari's).
   useEffect(() => {
     const element = scroller?.current ?? document.scrollingElement;
     if (!element) return undefined;
     const target: EventTarget =
       element === document.scrollingElement ? window : element;
-    let turn = element.scrollTop;
+    // Bouncing by itself (seen past an end): its own overscroll only.
+    let isNative = false;
+    // Pulled past an end (px, signed as `overscroll`), from where a touch
+    // started pulling (`origin`).
+    let pull = 0;
+    let origin: number | undefined;
+    let isTouching = false;
+    let wheel: ReturnType<typeof setTimeout> | undefined;
 
-    const onScroll = () => {
-      const position = element.scrollTop;
-      const end = element.scrollHeight - element.clientHeight;
-      let { direction } = scroll.current();
+    const range = () =>
+      Math.max(0, element.scrollHeight - element.clientHeight);
 
-      if (direction === 'down' ? position > turn : position < turn) {
-        turn = position;
-      } else if (Math.abs(position - turn) >= threshold) {
-        direction = position > turn ? 'down' : 'up';
-        turn = position;
-      }
+    const emit = () => {
+      const end = range();
+      const raw = element.scrollTop;
+      const position = Math.min(Math.max(raw, 0), end);
+      if (raw !== position) isNative = true;
+      const overscroll = isNative
+        ? raw - position
+        : Math.sign(pull) * rubberBand(Math.abs(pull), element.clientHeight);
 
-      const next: ViewportScrollEvent = {
+      scroll.emit({
         atBottom: position >= end - 1,
         atTop: position <= 0,
-        direction,
+        isHeld: isTouching || wheel !== undefined,
+        overscroll,
         position,
-      };
-      scroll.emit(next);
+      });
     };
 
-    target.addEventListener('scroll', onScroll, { passive: true });
-    return () => target.removeEventListener('scroll', onScroll);
-  }, [scroll, scroller, threshold]);
+    const release = () => {
+      pull = 0;
+      origin = undefined;
+      emit();
+    };
+
+    const onTouchStart = () => {
+      isTouching = true;
+      origin = undefined;
+      pull = 0;
+    };
+
+    // Pulling down at the start (or up at the end), from where it started
+    // to; back the other way, scrolling again.
+    const onTouchMove = (event: Event) => {
+      const touch = (event as TouchEvent).touches[0];
+      if (!touch) return;
+      const y = touch.clientY;
+      const raw = element.scrollTop;
+      const isAtEdge = raw <= 0 || raw >= range();
+      origin ??= isAtEdge ? y : undefined;
+      const moved = origin === undefined ? 0 : y - origin;
+      if ((raw <= 0 && moved > 0) || (raw >= range() && moved < 0)) {
+        pull = -moved;
+      } else {
+        pull = 0;
+        origin = isAtEdge ? y : undefined;
+      }
+      emit();
+    };
+
+    const onTouchEnd = (event: Event) => {
+      if ((event as TouchEvent).touches.length > 0) return;
+      isTouching = false;
+      release();
+    };
+
+    // Wheeled on past an end (or back), until quiet.
+    const onWheel = (event: Event) => {
+      const delta = wheelPixels(event as WheelEvent, element.clientHeight);
+      const raw = element.scrollTop;
+      const isPast = (raw <= 0 && delta < 0) || (raw >= range() && delta > 0);
+      if (isPast || pull !== 0) {
+        const next = pull + delta;
+        pull = pull !== 0 && Math.sign(next) !== Math.sign(pull) ? 0 : next;
+      }
+      clearTimeout(wheel);
+      wheel = setTimeout(() => {
+        wheel = undefined;
+        release();
+      }, wheelQuiet);
+      emit();
+    };
+
+    const listeners: [string, (event: Event) => void][] = [
+      ['scroll', emit],
+      ['touchstart', onTouchStart],
+      ['touchmove', onTouchMove],
+      ['touchend', onTouchEnd],
+      ['touchcancel', onTouchEnd],
+      ['wheel', onWheel],
+    ];
+    for (const [type, listener] of listeners) {
+      target.addEventListener(type, listener, { passive: true });
+    }
+    return () => {
+      clearTimeout(wheel);
+      for (const [type, listener] of listeners) {
+        target.removeEventListener(type, listener);
+      }
+    };
+  }, [scroll, scroller]);
 
   const value = useMemo<ViewportContextValue>(
     () => ({ scroll, visual }),
@@ -317,45 +440,56 @@ export const useVisualViewport = (): VisualViewportState => {
 };
 
 /**
- * Calls `listener` on every scroll of the tracked scroll container (needs a
- * `Provider`); it can change without resubscribing.
+ * Calls `listener` on every scroll of the tracked scroll container, and as
+ * it's overscrolled (needs a `Provider`); the direction past its own
+ * `threshold`. It can change without resubscribing.
  */
-export const useViewportScroll = (listener: Listener): void => {
+export const useViewportScroll = (
+  listener: Listener,
+  { threshold = 8 }: ViewportScrollOptions = {},
+): void => {
   const context = useContext(ViewportContext);
   const latest = useRef(listener);
   useLayoutEffect(() => {
     latest.current = listener;
   });
 
-  useEffect(
-    () => context?.scroll.subscribe((event) => latest.current(event)),
-    [context],
-  );
+  useEffect(() => {
+    if (!context) return undefined;
+    const track = trackDirection(threshold, context.scroll.current().position);
+    return context.scroll.subscribe((scroll) => latest.current(track(scroll)));
+  }, [context, threshold]);
 };
 
 /**
- * The direction the tracked scroll container is scrolled in, and whether
- * it's at its top or bottom (re-rendering when these change).
+ * The direction the tracked scroll container is scrolled in (past
+ * `threshold`), and whether it's at its top or bottom (re-rendering when
+ * these change).
  */
-export const useScrollDirection = (): Omit<ViewportScrollEvent, 'position'> => {
+export const useScrollDirection = (
+  options?: ViewportScrollOptions,
+): Pick<ViewportScrollEvent, 'atBottom' | 'atTop' | 'direction'> => {
   const context = useContext(ViewportContext);
-  const [state, setState] = useState(() => {
-    const { atBottom, atTop, direction } = context?.scroll.current() ?? {
+  const [state, setState] = useState<
+    Pick<ViewportScrollEvent, 'atBottom' | 'atTop' | 'direction'>
+  >(() => {
+    const { atBottom, atTop } = context?.scroll.current() ?? {
       atBottom: false,
       atTop: true,
-      direction: undefined,
     };
-    return { atBottom, atTop, direction };
+    return { atBottom, atTop, direction: undefined };
   });
 
-  useViewportScroll(({ atBottom, atTop, direction }) =>
-    setState((current) =>
-      current.atBottom === atBottom &&
-      current.atTop === atTop &&
-      current.direction === direction
-        ? current
-        : { atBottom, atTop, direction },
-    ),
+  useViewportScroll(
+    ({ atBottom, atTop, direction }) =>
+      setState((current) =>
+        current.atBottom === atBottom &&
+        current.atTop === atTop &&
+        current.direction === direction
+          ? current
+          : { atBottom, atTop, direction },
+      ),
+    options,
   );
 
   return state;

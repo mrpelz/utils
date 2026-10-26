@@ -58,10 +58,14 @@ export const propOptionsOverviewBlockEnd = {
 };
 
 export const propOptionsProvider = {
-  threshold: [undefined, 0, 8, 50, 200] as const,
   // (Unset: the provided portal container, e.g. a frame's screen; null: the
   // window.)
   screen: [undefined, null] as const,
+};
+
+/** The scroll hooks' options (`useViewportScroll`, `useScrollDirection`). */
+export const propOptionsScrollOptions = {
+  threshold: [undefined, 0, 8, 50, 200] as const,
 };
 
 export const propOptionsContent = {

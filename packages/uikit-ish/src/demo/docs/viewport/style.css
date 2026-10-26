@@ -146,3 +146,31 @@
   font-size: 15px;
   pointer-events: auto;
 }
+
+/* A pull's indicator (see the overscroll views): over the content at an
+   edge, coming in as it's pulled (`--viewport-demo-pull`, 0 to 1). Armed
+   (pulled far enough to act on release), its arrow turns; a spinner turns
+   with the pull. */
+.viewport-demo-pull {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  color: var(--color-ios-secondary-label);
+  font-size: 15px;
+  gap: 6px;
+  opacity: var(--viewport-demo-pull, 0);
+  pointer-events: none;
+}
+
+.viewport-demo-pull-arrow {
+  transition: rotate 200ms;
+
+  [data-armed] > & {
+    rotate: 180deg;
+  }
+}
+
+.viewport-demo-pull-spinner {
+  rotate: calc(var(--viewport-demo-pull, 0) * 270deg);
+}

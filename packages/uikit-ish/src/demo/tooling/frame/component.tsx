@@ -165,6 +165,7 @@ const useCanExpand = (ref: RefObject<HTMLElement | null>) => {
 const InlineDemo: FunctionComponent<{
   canExpand: boolean;
   children: ReactNode;
+  containsOverscroll?: boolean;
   fullscreenUrl?: string;
   inlineRef: RefObject<HTMLDivElement | null>;
   isExpanded: boolean;
@@ -172,6 +173,7 @@ const InlineDemo: FunctionComponent<{
 }> = ({
   canExpand,
   children,
+  containsOverscroll,
   fullscreenUrl,
   inlineRef,
   isExpanded,
@@ -180,6 +182,7 @@ const InlineDemo: FunctionComponent<{
   <div
     ref={inlineRef}
     className="demo-inline"
+    data-contains-overscroll={containsOverscroll ? '' : undefined}
     data-expanded={isExpanded ? '' : undefined}
   >
     {children}
@@ -471,6 +474,11 @@ export const Component: FunctionComponent<{
   baseUiId?: string;
   /** Forced on its stage (a setting, see `Settings`). */
   colorScheme?: ColorScheme;
+  /**
+   * Inline, its scrolling keeps its overscroll (as in an app), not handing
+   * it on to the page's: e.g. pulled past an end (`overscroll`).
+   */
+  containsOverscroll?: boolean;
   controls?: ReactNode;
   /**
    * What the demo reads out (e.g. a hook's values), beside its stage: a
@@ -531,6 +539,7 @@ export const Component: FunctionComponent<{
   baseUiId,
   children,
   colorScheme,
+  containsOverscroll,
   controls,
   diagnostics,
   hasBackdrop = false,
@@ -688,6 +697,7 @@ export const Component: FunctionComponent<{
   return isInline ? (
     <InlineDemo
       canExpand={canExpand}
+      containsOverscroll={containsOverscroll}
       fullscreenUrl={fullscreenUrl}
       inlineRef={inlineRef}
       isExpanded={settings.isExpanded}

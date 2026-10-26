@@ -97,12 +97,6 @@ export const viewportProviderRows: readonly PropRow[] = [
     </>,
   ],
   [
-    'threshold',
-    'number',
-    code('8'),
-    'How far (px) to scroll from where the direction last turned before it changes, so jitter doesn’t flip it.',
-  ],
-  [
     'children',
     'ReactNode',
     undefined,
@@ -275,14 +269,27 @@ export const useVisualViewportRows: readonly PropRow[] = [
   ],
 ];
 
-/** `useViewportScroll(listener)`: its argument. */
+const thresholdRow: PropRow = [
+  'options.threshold',
+  'number',
+  code('8'),
+  'How far (px) to scroll from where the direction last turned before it changes, so jitter doesn’t flip it (more: a steadier direction). Overscrolling (e.g. bouncing back from the end) never changes it.',
+];
+
+/** `useViewportScroll(listener, options)`: its arguments. */
 export const useViewportScrollRows: readonly PropRow[] = [
   [
     'listener',
     '(event: ViewportScrollEvent) => void',
     undefined,
-    'Called on every scroll of the tracked scroll container; it can change between renders without resubscribing.',
+    'Called on every scroll of the tracked scroll container, and as it’s overscrolled; it can change between renders without resubscribing.',
   ],
+  thresholdRow,
+];
+
+/** `useScrollDirection(options)`: its argument. */
+export const useScrollDirectionArgumentRows: readonly PropRow[] = [
+  thresholdRow,
 ];
 
 /** A scroll's event (`ViewportScrollEvent`), the listener's argument. */
@@ -291,7 +298,7 @@ export const viewportScrollEventRows: readonly PropRow[] = [
     'direction',
     `${union('down', 'up')} | undefined`,
     undefined,
-    'The direction scrolled in, once past the threshold (until then: none).',
+    'The direction scrolled in, once past the threshold (until then: none); not changed by overscrolling.',
   ],
   ['atTop', 'boolean', undefined, 'Scrolled to (or past) the start.'],
   [
@@ -300,12 +307,31 @@ export const viewportScrollEventRows: readonly PropRow[] = [
     undefined,
     'Scrolled to (or past) the end (within 1px).',
   ],
-  ['position', 'number', undefined, 'The scroll position (px).'],
+  [
+    'position',
+    'number',
+    undefined,
+    'The scroll position (px), within the scroll range: overscrolled, its end.',
+  ],
+  [
+    'overscroll',
+    'number',
+    undefined,
+    'How far it’s pulled past an end (px), rubber-banded: negative past the start (e.g. pulling to refresh), positive past the end; 0 within. Safari’s own bounce; elsewhere, a touch or a wheel pulling at an end (damped as UIKit’s), the content staying.',
+  ],
+  [
+    'isHeld',
+    'boolean',
+    undefined,
+    'Overscrolling held: a touch, or a wheel until quiet (150ms), still pulling. Once not, it’s released (e.g. to act then), bouncing back.',
+  ],
 ];
 
-/** `useScrollDirection()`: what it returns. */
+/** `useScrollDirection(options)`: what it returns. */
 export const useScrollDirectionRows: readonly PropRow[] =
-  viewportScrollEventRows.filter(([name]) => name !== 'position');
+  viewportScrollEventRows.filter(([name]) =>
+    ['atBottom', 'atTop', 'direction'].includes(name),
+  );
 
 const elementRefRow: PropRow = [
   'ref',
