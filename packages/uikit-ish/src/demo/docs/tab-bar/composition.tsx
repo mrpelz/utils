@@ -42,12 +42,14 @@ const panelsCode = `<TabBar.Root defaultValue="favorites">
     >
       <Header.Root>…</Header.Root>
       <List.Root>…</List.Root>
+      <Viewport.Padding edge="block-end" />
     </TabBar.Panel>
     <TabBar.Panel
       render={<Page.Root />}
       value="recents"
     >
       …
+      <Viewport.Padding edge="block-end" />
     </TabBar.Panel>
     …
   </Viewport.Content>
@@ -63,7 +65,9 @@ const panelsCode = `<TabBar.Root defaultValue="favorites">
   </Viewport.BlockEnd>
 </TabBar.Root>`;
 
-const searchCode = `const [value, setValue] = useState('favorites');
+const searchCode = `// The sections' tabs (the bar's first group).
+const sectionValues = ['favorites', 'recents', 'contacts'];
+const [value, setValue] = useState('favorites');
 // The section last chosen, remaining while searching.
 const [section, setSection] = useState('favorites');
 const [sections] = collapsedSelection([sectionValues], section);
@@ -99,7 +103,7 @@ const [sections] = collapsedSelection([sectionValues], section);
   </TabBar.List>
   {/* The search field, in the collapsed bar. */}
   <TabBar.Accessory visibleIn="collapsed">
-    <TextField.Root style={{ flex: 1 }}>
+    <TextField.Root>
       <TextField.Search>
         <Symbol icon={sfMagnifyingglass} />
         <TextField.Control
@@ -132,7 +136,11 @@ useViewportScroll(({ atTop, direction }) =>
 
 <TabBar.List collapsed={isCollapsed}>…</TabBar.List>`;
 
-const accessoryCode = `<TabBar.Root
+const accessoryCode = `const [value, setValue] = useState('favorites');
+// The section last chosen, returned to from searching.
+const [section, setSection] = useState('favorites');
+
+<TabBar.Root
   value={value}
   onValueChange={(next) => {
     setValue(next);
@@ -236,6 +244,7 @@ const Panels: FunctionComponent = () => {
                     </Toolbar.Title>
                   </Toolbar.Root>
                 </Viewport.BlockStart>
+                <Viewport.Padding edge="block-start" />
                 <Header.LargeTitle>
                   <span>{label}</span>
                 </Header.LargeTitle>
@@ -251,6 +260,7 @@ const Panels: FunctionComponent = () => {
                   </List.Group>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </TabBar.Panel>
           ))}
         </Viewport.Content>
@@ -334,7 +344,7 @@ const Search: FunctionComponent = () => {
             </TabBar.Group>
           </TabBar.List>
           <TabBar.Accessory visibleIn="collapsed">
-            <TextField.Root style={{ flex: 1 }}>
+            <TextField.Root>
               <TextField.Search>
                 <Symbol icon={sfMagnifyingglass} />
                 <TextField.Control
@@ -426,7 +436,8 @@ const OnScrollView: FunctionComponent<{
         onValueChange={onValueChange}
       >
         <Viewport.Content ref={contentRef}>
-          <List.Root className="tab-bar-demo-list">
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
             <List.Section>
               <List.Group>
                 {names.map((name) => (
@@ -437,6 +448,7 @@ const OnScrollView: FunctionComponent<{
               </List.Group>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
         <Viewport.BlockEnd>
           <TabBar.List collapsed={isCollapsed}>
@@ -464,7 +476,10 @@ const OnScrollView: FunctionComponent<{
 
 /** `OnScrollView`, tracking its screen's content layer's scrolling. */
 const OnScroll: FunctionComponent = () => {
-  const contentRef = useLabelledRef<HTMLDivElement>('contentRef');
+  const contentRef = useLabelledRef<HTMLDivElement>(
+    'contentRef',
+    'HTMLDivElement',
+  );
 
   return (
     <Viewport.Provider scroller={contentRef}>

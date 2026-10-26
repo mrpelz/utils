@@ -50,7 +50,8 @@ const toolbarCode = `<Toolbar.Trailing>
   </Menu.Root>
 </Toolbar.Trailing>`;
 
-const popUpCode = `const [sort, setSort] = useState('date');
+const popUpCode = `const labels = { date: 'Date', name: 'Name', size: 'Size' };
+const [sort, setSort] = useState('date');
 
 <List.Item>
   <List.Title>Sort By</List.Title>
@@ -83,7 +84,7 @@ const historyCode = `<Menu.Root>
     aria-label="Back"
     openOn="secondaryClick"
     render={<Toolbar.Button shape="circle" />}
-    onClick={goBack}
+    onClick={() => {…}}
   >
     …
   </Menu.Trigger>
@@ -160,6 +161,7 @@ const FromAToolbarButton: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root>
+            <Viewport.Padding edge="block-start" />
             <List.Root>
               <List.Section>
                 <List.Group>
@@ -170,6 +172,7 @@ const FromAToolbarButton: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -290,6 +293,7 @@ const AHistory: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root>
+            <Viewport.Padding edge="block-start" />
             <List.Root>
               <List.Section>
                 <List.Group>
@@ -300,6 +304,7 @@ const AHistory: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>

@@ -23,7 +23,9 @@ import { names } from '../viewport/content.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 
-const validationCode = `<Form onFormSubmit={(values) => save(values)}>
+const validationCode = `const taken = ['admin', 'root'];
+
+<Form onFormSubmit={(values) => {…}}>
   <List.Root>
     <List.Section>
       <List.Group>
@@ -47,11 +49,15 @@ const validationCode = `<Form onFormSubmit={(values) => save(values)}>
           <TextField.Error match="typeMismatch">Not an email address.</TextField.Error>
         </TextField.Root>
       </List.Group>
+      <List.Footer>Try “kate” as a username.</List.Footer>
+      {/* Its actions: below the group, as wide as it. */}
+      <List.Footer>
+        <Button.Root fill size="large" type="submit" variant="bordered-prominent">
+          <Button.Label>Sign Up</Button.Label>
+        </Button.Root>
+      </List.Footer>
     </List.Section>
   </List.Root>
-  <Button.Root fill size="large" type="submit" variant="bordered-prominent">
-    <Button.Label>Sign Up</Button.Label>
-  </Button.Root>
 </Form>`;
 
 const searchCode = `const [query, setQuery] = useState('');
@@ -106,7 +112,14 @@ const formCode = `<List.Root>
   </Fieldset.Root>
 </List.Root>`;
 
-const suggestionsCode = `const [to, setTo] = useState('');
+const suggestionsCode = `const contacts = ['Anna Haro', 'Daniel Higgins', 'David Taylor', 'Kate Bell'];
+// Its words starting with the text typed.
+const matches = (name, text) =>
+  name
+    .toLowerCase()
+    .split(' ')
+    .some((word) => word.startsWith(text.toLowerCase()));
+const [to, setTo] = useState('');
 const matching = to ? contacts.filter((name) => matches(name, to)) : [];
 
 <TextField.Root render={<List.Item />}>
@@ -201,16 +214,18 @@ const Validation: FunctionComponent = () => {
               </TextField.Root>
             </List.Group>
             <List.Footer>Try “kate” as a username.</List.Footer>
+            <List.Footer>
+              <Button.Root
+                fill
+                size="large"
+                type="submit"
+                variant="bordered-prominent"
+              >
+                <Button.Label>Sign Up</Button.Label>
+              </Button.Root>
+            </List.Footer>
           </List.Section>
         </List.Root>
-        <Button.Root
-          fill
-          size="large"
-          type="submit"
-          variant="bordered-prominent"
-        >
-          <Button.Label>Sign Up</Button.Label>
-        </Button.Root>
       </Form>
     </Component>
   );

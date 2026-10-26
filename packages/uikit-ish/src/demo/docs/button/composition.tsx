@@ -21,7 +21,7 @@ import { GuideLink } from '../hig-guide/link.js';
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 
 const symbolCode = `{/* A symbol, then a label. */}
-<Button.Root variant="bordered" onClick={add}>
+<Button.Root variant="bordered" onClick={() => {…}}>
   <Button.Icon>
     <Symbol icon={sfPlus} />
   </Button.Icon>
@@ -29,7 +29,7 @@ const symbolCode = `{/* A symbol, then a label. */}
 </Button.Root>
 
 {/* A pop-up button: the label, then the symbol. */}
-<Button.Root onClick={sort}>
+<Button.Root onClick={() => {…}}>
   <Button.Label>Sort</Button.Label>
   <Button.Icon>
     <Symbol icon={sfChevronUpChevronDown} />
@@ -37,7 +37,7 @@ const symbolCode = `{/* A symbol, then a label. */}
 </Button.Root>
 
 {/* A symbol alone: a circle, named. */}
-<Button.Root aria-label="More" shape="circle" variant="bordered" onClick={more}>
+<Button.Root aria-label="More" shape="circle" variant="bordered" onClick={() => {…}}>
   <Button.Icon>
     <Symbol icon={sfEllipsis} />
   </Button.Icon>
@@ -45,20 +45,20 @@ const symbolCode = `{/* A symbol, then a label. */}
 
 const pairsCode = `{/* Stacked: the likely action first. */}
 <div className="stack">
-  <Button.Root fill size="large" variant="bordered-prominent" onClick={next}>
+  <Button.Root fill size="large" variant="bordered-prominent" onClick={() => {…}}>
     <Button.Label>Continue</Button.Label>
   </Button.Root>
-  <Button.Root fill size="large" onClick={skip}>
+  <Button.Root fill size="large" onClick={() => {…}}>
     <Button.Label>Not Now</Button.Label>
   </Button.Root>
 </div>
 
 {/* Side by side: sharing the row. */}
 <div className="row">
-  <Button.Root fill size="large" variant="bordered-secondary" onClick={cancel}>
+  <Button.Root fill size="large" variant="bordered-secondary" onClick={() => {…}}>
     <Button.Label>Cancel</Button.Label>
   </Button.Root>
-  <Button.Root fill size="large" variant="bordered-prominent" onClick={save}>
+  <Button.Root fill size="large" variant="bordered-prominent" onClick={() => {…}}>
     <Button.Label>Save</Button.Label>
   </Button.Root>
 </div>`;
@@ -79,7 +79,7 @@ const destructiveCode = `<Alert.Root>
     </Alert.Header>
     <Alert.Actions>
       <Alert.Action>Cancel</Alert.Action>
-      <Alert.Action variant="destructive" onClick={remove}>
+      <Alert.Action variant="destructive" onClick={() => {…}}>
         Delete
       </Alert.Action>
     </Alert.Actions>
@@ -92,20 +92,20 @@ const glassCode = `<div className="cover">
     context="adaptive"
     shape="circle"
     variant="glass"
-    onClick={close}
+    onClick={() => {…}}
   >
     <Button.Icon>
       <Symbol icon={sfXmark} />
     </Button.Icon>
   </Button.Root>
   <div className="controls">
-    <Button.Root context="adaptive" variant="glass-prominent" onClick={play}>
+    <Button.Root context="adaptive" variant="glass-prominent" onClick={() => {…}}>
       <Button.Icon>
         <Symbol icon={sfPlayFill} />
       </Button.Icon>
       <Button.Label>Play</Button.Label>
     </Button.Root>
-    <Button.Root context="adaptive" variant="glass" onClick={shuffle}>…</Button.Root>
+    <Button.Root context="adaptive" variant="glass" onClick={() => {…}}>…</Button.Root>
   </div>
 </div>`;
 

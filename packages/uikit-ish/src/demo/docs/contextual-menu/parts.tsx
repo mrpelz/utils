@@ -550,7 +550,11 @@ const PopupPart: FunctionComponent = () => {
 };
 
 // Its trigger's menu, opened by a button too: made once, here.
-const photoMenu = codeLabel(ContextualMenu.createHandle(), 'photoMenu');
+const photoMenu = codeLabel(
+  ContextualMenu.createHandle(),
+  'photoMenu',
+  'const photoMenu = ContextualMenu.createHandle(); // (at module level)',
+);
 
 /** `ContextualMenu.createHandle`: opened imperatively, its trigger inside its root. */
 const CreateHandlePart: FunctionComponent = () => {
@@ -613,7 +617,11 @@ const CreateHandlePart: FunctionComponent = () => {
 const UseCreateContextualMenuHandlePart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-use-create-contextual-menu-handle';
   const [log, addLog] = useLog();
-  const imageMenu = codeLabel(useCreateContextualMenuHandle(), 'imageMenu');
+  const imageMenu = codeLabel(
+    useCreateContextualMenuHandle(),
+    'imageMenu',
+    'const imageMenu = useCreateContextualMenuHandle();',
+  );
 
   return (
     <Component

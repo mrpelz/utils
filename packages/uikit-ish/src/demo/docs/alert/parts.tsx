@@ -584,7 +584,11 @@ const ActionPart: FunctionComponent = () => {
 };
 
 // Its trigger and its button, outside the root: made once, here.
-const deleteAlert = codeLabel(Alert.createHandle(), 'deleteAlert');
+const deleteAlert = codeLabel(
+  Alert.createHandle(),
+  'deleteAlert',
+  'const deleteAlert = Alert.createHandle(); // (at module level)',
+);
 
 /** `Alert.createHandle`: a trigger outside the root, an imperative open. */
 const CreateHandlePart: FunctionComponent = () => {
@@ -651,6 +655,7 @@ const UseCreateAlertHandlePart: FunctionComponent = () => {
   const deleteItemAlert = codeLabel(
     useCreateAlertHandle<{ title: string }>(),
     'deleteItemAlert',
+    'const deleteItemAlert = useCreateAlertHandle<{ title: string }>();',
   );
 
   return (

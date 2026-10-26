@@ -488,6 +488,12 @@
       pointer-events: none;
       visibility: hidden;
     }
+
+    /* A text field in it (e.g. a search field): its whole width. */
+    & > [data-text-field-part='root'] {
+      min-width: 0;
+      flex: 1 1 0;
+    }
   }
 
   .uikit-tab-bar-list {

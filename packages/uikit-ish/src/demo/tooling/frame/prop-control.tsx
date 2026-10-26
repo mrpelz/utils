@@ -442,38 +442,42 @@ export const usePropControl = <T extends PropMap>(
     >
       <details open={isOpen ?? !title}>
         <summary className="demo-config-heading">
-          {title ?? 'Props'}
-          {overlay ? (
-            <label className="demo-outline-toggle">
-              <input
-                checked={isOverlaid}
-                name="overlay"
-                type="checkbox"
-                onChange={() =>
-                  setState((state_) => ({
-                    ...state_,
-                    style: isOverlaid ? undefined : overlay,
-                  }))
-                }
-              />
-              overlay
-            </label>
-          ) : null}
-          {outline ? (
-            <label className="demo-outline-toggle">
-              <input
-                checked={isOutlined}
-                name="outline"
-                type="checkbox"
-                onChange={() =>
-                  setState((state_) => ({
-                    ...state_,
-                    style: isOutlined ? undefined : outline,
-                  }))
-                }
-              />
-              outline
-            </label>
+          <span className="demo-config-title">{title ?? 'Props'}</span>
+          {overlay || outline ? (
+            <span className="demo-outline-toggles">
+              {overlay ? (
+                <label className="demo-outline-toggle">
+                  <input
+                    checked={isOverlaid}
+                    name="overlay"
+                    type="checkbox"
+                    onChange={() =>
+                      setState((state_) => ({
+                        ...state_,
+                        style: isOverlaid ? undefined : overlay,
+                      }))
+                    }
+                  />
+                  overlay
+                </label>
+              ) : null}
+              {outline ? (
+                <label className="demo-outline-toggle">
+                  <input
+                    checked={isOutlined}
+                    name="outline"
+                    type="checkbox"
+                    onChange={() =>
+                      setState((state_) => ({
+                        ...state_,
+                        style: isOutlined ? undefined : outline,
+                      }))
+                    }
+                  />
+                  outline
+                </label>
+              ) : null}
+            </span>
           ) : null}
         </summary>
         <div className="demo-props">

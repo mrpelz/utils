@@ -468,7 +468,11 @@ const ActionPart: FunctionComponent = () => {
 };
 
 // Its trigger and its button, outside the root: made once, here.
-const photoSheet = codeLabel(ActionSheet.createHandle(), 'photoSheet');
+const photoSheet = codeLabel(
+  ActionSheet.createHandle(),
+  'photoSheet',
+  'const photoSheet = ActionSheet.createHandle(); // (at module level)',
+);
 
 /** `ActionSheet.createHandle`: a trigger outside the root, opened by it. */
 const CreateHandlePart: FunctionComponent = () => {
@@ -538,6 +542,7 @@ const UseCreateActionSheetHandlePart: FunctionComponent = () => {
   const deleteSheet = codeLabel(
     useCreateActionSheetHandle<{ action: string; title: string }>(),
     'deleteSheet',
+    'const deleteSheet = useCreateActionSheetHandle<{ action: string; title: string }>();',
   );
 
   return (

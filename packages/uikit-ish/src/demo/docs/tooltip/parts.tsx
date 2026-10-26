@@ -357,7 +357,11 @@ const ProviderPart: FunctionComponent = () => {
   );
 };
 // Its trigger and its button, outside the root: made once, here.
-const shareTooltip = codeLabel(Tooltip.createHandle(), 'shareTooltip');
+const shareTooltip = codeLabel(
+  Tooltip.createHandle(),
+  'shareTooltip',
+  'const shareTooltip = Tooltip.createHandle(); // (at module level)',
+);
 
 /** `Tooltip.createHandle`: a trigger outside the root, an imperative open. */
 const CreateHandlePart: FunctionComponent = () => {
@@ -420,6 +424,7 @@ const UseCreateTooltipHandlePart: FunctionComponent = () => {
   const toolbarTooltip = codeLabel(
     useCreateTooltipHandle<{ text: string }>(),
     'toolbarTooltip',
+    'const toolbarTooltip = useCreateTooltipHandle<{ text: string }>();',
   );
 
   return (

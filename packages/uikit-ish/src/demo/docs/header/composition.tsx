@@ -44,11 +44,13 @@ const largeTitleCode = `<Header.Root>
     </Toolbar.Root>
   </Viewport.BlockStart>
   <Page.Root>
+    <Viewport.Padding edge="block-start" />
     <Header.LargeTitle>
       <span>Contacts</span>
       <Toolbar.Subtitle>29 people</Toolbar.Subtitle>
     </Header.LargeTitle>
     <List.Root>…</List.Root>
+    <Viewport.Padding edge="block-end" />
   </Page.Root>
 </Header.Root>`;
 
@@ -59,6 +61,7 @@ const searchCode = `const [query, setQuery] = useState('');
     <Toolbar.Root placement="block-start">…</Toolbar.Root>
   </Viewport.BlockStart>
   <Page.Root>
+    <Viewport.Padding edge="block-start" />
     <Header.LargeTitle>
       <span>Contacts</span>
     </Header.LargeTitle>
@@ -79,6 +82,7 @@ const searchCode = `const [query, setQuery] = useState('');
       </TextField.Root>
     </Header.Accessory>
     <List.Root>…{/* the rows matching query */}</List.Root>
+    <Viewport.Padding edge="block-end" />
   </Page.Root>
 </Header.Root>`;
 
@@ -97,9 +101,10 @@ const pictureCode = `<Header.Root>
     </Toolbar.Root>
   </Viewport.BlockStart>
   <Page.Root background="plain">
-    {/* Under the bar (pulled up by its height). */}
+    {/* Under the bar: no padding for it. */}
     <div className="cover" />
     <List.Root listStyle="plain">…</List.Root>
+    <Viewport.Padding edge="block-end" />
   </Page.Root>
 </Header.Root>`;
 
@@ -110,6 +115,7 @@ const controlCode = `const [filter, setFilter] = useState('all');
     <Toolbar.Root placement="block-start">…</Toolbar.Root>
   </Viewport.BlockStart>
   <Page.Root>
+    <Viewport.Padding edge="block-start" />
     <Header.LargeTitle>
       <span>Inbox</span>
     </Header.LargeTitle>
@@ -125,6 +131,7 @@ const controlCode = `const [filter, setFilter] = useState('all');
       </Segmented.Root>
     </Header.Accessory>
     <List.Root>…{/* the rows filtered */}</List.Root>
+    <Viewport.Padding edge="block-end" />
   </Page.Root>
 </Header.Root>`;
 
@@ -168,6 +175,7 @@ const LargeTitle: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root>
+            <Viewport.Padding edge="block-start" />
             <Header.LargeTitle>
               <span>Contacts</span>
               <Toolbar.Subtitle>{names.length} people</Toolbar.Subtitle>
@@ -184,6 +192,7 @@ const LargeTitle: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -218,6 +227,7 @@ const Search: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root>
+            <Viewport.Padding edge="block-start" />
             <Header.LargeTitle>
               <span>Contacts</span>
             </Header.LargeTitle>
@@ -248,6 +258,7 @@ const Search: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -317,6 +328,7 @@ const OverPicture: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -352,6 +364,7 @@ const ControlBelow: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root>
+            <Viewport.Padding edge="block-start" />
             <Header.LargeTitle>
               <span>Inbox</span>
             </Header.LargeTitle>
@@ -381,6 +394,7 @@ const ControlBelow: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -480,8 +494,12 @@ export const HeaderComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Music’s and Photos’: a picture at the page’s top, under the bar (pulled
-        up by its height), no large title.
+        Music’s and Photos’: a picture at the page’s top, under the bar (no{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />{' '}
+        for it), no large title.
       </li>
       <li>
         The bar’s glass by what’s behind it (

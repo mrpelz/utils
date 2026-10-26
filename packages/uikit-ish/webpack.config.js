@@ -120,6 +120,12 @@ config.plugins = [
   // @ts-ignore
   new HtmlWebpackPlugin({
     base: publicPath,
+    // The page under the device's safe areas (the notch, the home
+    // indicator): their insets in `env(safe-area-inset-*)`, kept clear by
+    // the library (see styles.css) and the guide's layout.
+    meta: {
+      viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
+    },
     title: '@mrpelz/uikit-ish',
   }),
   // @ts-ignore

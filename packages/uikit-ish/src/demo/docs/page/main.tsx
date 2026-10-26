@@ -1,5 +1,3 @@
-import './style.css';
-
 import { FunctionComponent } from 'react';
 
 import {
@@ -63,6 +61,8 @@ export const PageDemo: FunctionComponent = () => {
               (content.listStyle === 'plain' ? 'plain' : 'grouped')
             }
           >
+            {/* (Without the bar: none.) */}
+            <Viewport.Padding edge="block-start" />
             {content.header ? (
               <Header.LargeTitle>
                 <span>Page</span>
@@ -79,6 +79,7 @@ export const PageDemo: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>

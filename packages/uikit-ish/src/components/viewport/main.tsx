@@ -14,7 +14,17 @@ import {
   useSyncExternalStore,
 } from 'react';
 
-import { cn } from '../utils/main.js';
+import {
+  cn,
+  type PortalContainer,
+  useForwardedRef,
+  usePortalContainer,
+} from '../utils/main.js';
+import {
+  createAnchorHandle,
+  Padding,
+  useAnchorRegistration,
+} from './padding.js';
 import type {
   ElementGeometry,
   ElementGeometryOptions,
@@ -34,6 +44,12 @@ export {
   useFocusShiftPrevention,
   useInputZoomPrevention,
 } from './input.js';
+export {
+  useAnchorSize,
+  useCreateViewportAnchorHandle,
+  ViewportAnchorHandle,
+  ViewportScopeContext,
+} from './padding.js';
 export type {
   ElementGeometry,
   ElementGeometryOptions,
@@ -41,6 +57,7 @@ export type {
   ViewportAnchorProps,
   ViewportContentProps,
   ViewportEdge,
+  ViewportPaddingProps,
   ViewportProviderProps,
   ViewportSafeArea,
   SizeClass,
@@ -106,41 +123,84 @@ const ViewportContext = createContext<ViewportContextValue | undefined>(
   undefined,
 );
 
-const readVisual = (): VisualViewportState => {
+const clamp = (value: number, max: number) =>
+  Math.round(Math.min(Math.max(value, 0), max));
+
+/**
+ * The visual viewport: the window's; or, with a `screen` (the app's, when
+ * it isn't the window: e.g. a device's frame in a page), within it: what
+ * the keyboard covers of its bottom, how far its top is scrolled out of
+ * view while the keyboard shows (as the window's offset), what remains.
+ */
+const readVisual = (screen?: HTMLElement | null): VisualViewportState => {
   if (typeof window === 'undefined') {
     return { height: 0, keyboardInset: 0, left: 0, top: 0, width: 0 };
   }
   const { visualViewport: viewport } = window;
   const height = viewport?.height ?? window.innerHeight;
   const top = viewport?.offsetTop ?? 0;
+  const keyboardInset = Math.max(
+    0,
+    Math.round(window.innerHeight - height - top),
+  );
+  if (!screen) {
+    return {
+      height,
+      keyboardInset,
+      left: viewport?.offsetLeft ?? 0,
+      top,
+      width: viewport?.width ?? window.innerWidth,
+    };
+  }
+
+  // Within the screen (its box in the layout viewport): without the
+  // keyboard, all of it (its own scrolling out of view is the page's).
+  const rect = screen.getBoundingClientRect();
+  const screenKeyboard =
+    keyboardInset > 0 ? clamp(rect.bottom - (top + height), rect.height) : 0;
+  const screenTop = keyboardInset > 0 ? clamp(top - rect.top, rect.height) : 0;
 
   return {
-    height,
-    keyboardInset: Math.max(0, Math.round(window.innerHeight - height - top)),
-    left: viewport?.offsetLeft ?? 0,
-    top,
-    width: viewport?.width ?? window.innerWidth,
+    height: Math.max(0, Math.round(rect.height) - screenTop - screenKeyboard),
+    keyboardInset: screenKeyboard,
+    left: 0,
+    top: screenTop,
+    width: Math.round(rect.width),
   };
+};
+
+/** An element, or a ref's (a portal container's, if it's one). */
+const elementOf = (
+  value: PortalContainer | null | undefined,
+): HTMLElement | null => {
+  const element = value && 'current' in value ? value.current : value;
+  return element instanceof HTMLElement ? element : null;
 };
 
 /** Provides the visual viewport and scroll tracking (see above). */
 const Provider: FunctionComponent<ViewportProviderProps> = ({
   children,
+  screen: ownScreen,
   scroller,
   threshold = 8,
 }) => {
-  const [visual, setVisual] = useState(readVisual);
+  // Its screen: its own, or the provided portal container's (e.g. a
+  // device's frame), or none (the window's).
+  const screen = usePortalContainer(ownScreen);
+  const [visual, setVisual] = useState(() => readVisual());
   const [scroll] = useState(createScrollStore);
 
-  // The visual viewport (once per frame), as custom properties, too.
+  // The visual viewport (once per frame), as custom properties, too: on
+  // the root element, or its screen.
   useLayoutEffect(() => {
-    const { documentElement: root } = document;
+    const element = elementOf(screen);
+    const root = element ?? document.documentElement;
     let frame = 0;
 
     const update = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        const next = readVisual();
+        const next = readVisual(element);
         for (const [name, value] of [
           ['height', next.height],
           ['width', next.width],
@@ -165,13 +225,22 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     viewport?.addEventListener('resize', update);
     viewport?.addEventListener('scroll', update);
     window.addEventListener('resize', update);
+    // A screen moves with its page (any scroller's).
+    if (element) {
+      addEventListener('scroll', update, { capture: true, passive: true });
+    }
     return () => {
       cancelAnimationFrame(frame);
       viewport?.removeEventListener('resize', update);
       viewport?.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
+      if (!element) return;
+      removeEventListener('scroll', update, { capture: true });
+      for (const name of ['height', 'width', 'top', 'left', 'keyboard-inset']) {
+        element.style.removeProperty(`--uikit-viewport-${name}`);
+      }
     };
-  }, []);
+  }, [screen]);
 
   // Scroll tracking: the direction flips once scrolled past the threshold
   // from where it last turned.
@@ -439,18 +508,34 @@ export const useElementGeometry = (
  * area insets kept clear (as padding).
  */
 const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
-  ({ className, edge, keyboard = 'push', safeArea = 'all', ...props }, ref) => (
-    <div
-      ref={ref}
-      data-edge={edge}
-      data-keyboard={keyboard}
-      data-safe-area={safeArea}
-      {...props}
-      className={cn('uikit-viewport-anchor', className)}
-      data-viewport-part="anchor"
-    />
-  ),
+  (
+    { className, edge, handle, keyboard = 'push', safeArea = 'all', ...props },
+    forwardedRef,
+  ) => {
+    const ref = useForwardedRef(forwardedRef);
+    // Its size, for the paddings making room for it (see `Padding`).
+    useAnchorRegistration(ref, edge, handle);
+
+    return (
+      <div
+        ref={ref}
+        data-edge={edge}
+        data-keyboard={keyboard}
+        data-safe-area={safeArea}
+        {...props}
+        className={cn('uikit-viewport-anchor', className)}
+        data-viewport-part="anchor"
+      />
+    );
+  },
 );
+
+// A content layer's `alwaysBounce`, as its attribute: on, off (none), or
+// unset (`auto`, see style.css).
+const bounceAttribute = (alwaysBounce: boolean | undefined) => {
+  if (alwaysBounce === undefined) return 'auto';
+  return alwaysBounce ? '' : undefined;
+};
 
 /**
  * The content layer: filling the viewport, scrolling its content (track it
@@ -458,9 +543,19 @@ const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
  * kept clear (as padding).
  */
 const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
-  ({ className, keyboard = 'resize', safeArea = 'all', ...props }, ref) => (
+  (
+    {
+      alwaysBounce,
+      className,
+      keyboard = 'resize',
+      safeArea = 'all',
+      ...props
+    },
+    ref,
+  ) => (
     <div
       ref={ref}
+      data-always-bounce={bounceAttribute(alwaysBounce)}
       data-keyboard={keyboard}
       data-safe-area={safeArea}
       {...props}
@@ -499,4 +594,6 @@ export const Viewport = {
   Content,
   BlockStart,
   BlockEnd,
+  Padding,
+  createAnchorHandle,
 };

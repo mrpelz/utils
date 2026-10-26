@@ -58,6 +58,7 @@ const MoreActionsAsAList: FunctionComponent = () => {
             <Button.Label>Share</Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
+            compact
             background="grouped"
             detent="large"
           >
@@ -116,6 +117,7 @@ const MoreActionsAsAList: FunctionComponent = () => {
                   </List.Group>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -207,7 +209,10 @@ const InAPopover: FunctionComponent = () => {
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Viewport.BlockStart>
-          <Page.Root></Page.Root>
+          <Page.Root>
+            <Viewport.Padding edge="block-start" />
+            <Viewport.Padding edge="block-end" />
+          </Page.Root>
         </Header.Root>
       </Viewport.Content>
     </Component>

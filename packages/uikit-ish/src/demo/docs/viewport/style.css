@@ -21,10 +21,6 @@
 
 /* A bar above the keyboard: a message field. */
 
-/* A bar's content, spaced inside its anchor (the surface). */
-.viewport-demo-bar {
-  padding: 8px 16px;
-}
 
 /* An anchor's sample content (a bar, or a sidebar), labelled. */
 
@@ -54,18 +50,12 @@
 /* The content layer's sample: long enough to scroll. */
 .viewport-demo-layer {
   min-height: 200vh;
-  padding: 16px;
   background: linear-gradient(
     var(--color-ios-system-grouped-background),
     var(--color-ios-system-gray5)
   );
   color: var(--color-ios-label);
-}
-
-/* A list in the content layer, clear of the bars floating over its ends
-   (the app keeps it clear: anchors don't inset the content). */
-.viewport-demo-list {
-  padding-block: 64px 96px;
+  padding-inline: 16px;
 }
 
 /* A box scrolling both ways (see the element hooks' views): an area twice
@@ -138,4 +128,21 @@
 .viewport-demo-size-class {
   color: var(--color-ios-label);
   font-size: var(--font-ios-title2-size);
+}
+
+/* A toast floating over the content, above a toolbar (see the anchor
+   handle's view): the anchor lets taps through to the toolbar beneath. */
+.viewport-demo-toast-anchor {
+  pointer-events: none;
+}
+
+.viewport-demo-toast {
+  /* (Above the toolbar: its height, 54px, and 8px.) */
+  padding: 12px 16px;
+  border-radius: 16px;
+  margin: 0 16px 62px;
+  background-color: var(--color-ios-label);
+  color: var(--color-ios-system-background);
+  font-size: 15px;
+  pointer-events: auto;
 }

@@ -205,6 +205,22 @@ const InlineDemo: FunctionComponent<{
 );
 
 /**
+ * Raw, the demo is the app (its screen the window's): the document marked,
+ * so it doesn't bounce (see shared/style.css).
+ */
+const useRawDocument = (isRaw: boolean, isHidden: boolean) => {
+  const isRawShown = isRaw && !isHidden;
+  useLayoutEffect(() => {
+    if (!isRawShown) return undefined;
+    const { documentElement: root } = document;
+    root.dataset.demoRaw = '';
+    return () => {
+      delete root.dataset.demoRaw;
+    };
+  }, [isRawShown]);
+};
+
+/**
  * A device's screen (a stage's, see `Stage`): its frame (see
  * shared/style.css), also its popups' portal container (they show within
  * it, as on the device: see `PortalContainerContext`).
@@ -213,23 +229,20 @@ const Screen: FunctionComponent<{
   children: ReactNode;
   hasWallpaper: boolean;
   screen?: 'centered' | 'flow';
+  screenRef: RefObject<HTMLDivElement | null>;
   stage: StageType;
-}> = ({ children, hasWallpaper, screen, stage }) => {
-  const ref = useRef<HTMLDivElement>(null);
-
-  return (
-    <div
-      ref={ref}
-      className={`demo-${stage}`}
-      data-screen={screen}
-      data-wallpaper={hasWallpaper ? '' : undefined}
-    >
-      <PortalContainerContext.Provider value={ref}>
-        {children}
-      </PortalContainerContext.Provider>
-    </div>
-  );
-};
+}> = ({ children, hasWallpaper, screen, screenRef: ref, stage }) => (
+  <div
+    ref={ref}
+    className={`demo-${stage}`}
+    data-screen={screen}
+    data-wallpaper={hasWallpaper ? '' : undefined}
+  >
+    <PortalContainerContext.Provider value={ref}>
+      {children}
+    </PortalContainerContext.Provider>
+  </div>
+);
 
 /**
  * A demo's stage, by its type and its frame's settings (its color scheme
@@ -241,12 +254,14 @@ const Stage: FunctionComponent<{
   children: ReactNode;
   hasWallpaper: boolean;
   screen?: 'centered' | 'flow';
+  screenRef: RefObject<HTMLDivElement | null>;
   settings: Settings;
   stage?: StageType;
 }> = ({
   children,
   hasWallpaper,
   screen,
+  screenRef,
   settings: {
     colorScheme,
     hasBackdrop,
@@ -277,6 +292,7 @@ const Stage: FunctionComponent<{
           <Screen
             hasWallpaper={hasWallpaper}
             screen={screen}
+            screenRef={screenRef}
             stage={stage}
           >
             {children}
@@ -295,6 +311,31 @@ const Stage: FunctionComponent<{
     </div>
   );
 };
+
+/**
+ * A demo's diagnostics (see `Component`), in its config column: read as in
+ * its device's screen (`screenRef`, its portal container), if it has one.
+ */
+const Diagnostics: FunctionComponent<{
+  children: ReactNode;
+  screenRef: RefObject<HTMLDivElement | null> | undefined;
+}> = ({ children, screenRef }) =>
+  children ? (
+    <section className="demo-config-section">
+      <details open>
+        <summary className="demo-config-heading">Diagnostics</summary>
+        <div className="demo-diagnostics">
+          {screenRef ? (
+            <PortalContainerContext.Provider value={screenRef}>
+              {children}
+            </PortalContainerContext.Provider>
+          ) : (
+            children
+          )}
+        </div>
+      </details>
+    </section>
+  ) : null;
 
 /** The guards' hooks, above the code of a demo with `hasInputGuards`. */
 const inputGuardsCode = `useInputZoomPrevention();
@@ -323,15 +364,24 @@ const useGuards = (
 };
 
 /**
- * A demo's code: its guards' hooks (if it has them), its setup (the state
- * and hooks its JSX uses), then its stage's JSX.
+ * A demo's code: its guards' hooks (if it has them), the definitions of
+ * the labelled values its JSX uses (handles, refs; those its setup doesn't
+ * define), its setup (the state and hooks its JSX uses), then its stage's
+ * JSX.
  */
 const demoCode = (
   children: ReactNode,
   hasInputGuards: boolean,
   setup: string | undefined,
-) =>
-  `${hasInputGuards ? inputGuardsCode : ''}${setup ? `${setup.trim()}\n\n` : ''}${renderCode(children)}`;
+) => {
+  const { code, definitions } = renderCode(children);
+  const defined = [...definitions]
+    .filter(([label]) => !setup?.includes(`const ${label} =`))
+    .map(([, definition]) => definition);
+  const start = [...defined, ...(setup ? [setup.trim()] : [])].join('\n');
+
+  return `${hasInputGuards ? inputGuardsCode : ''}${start ? `${start}\n\n` : ''}${code}`;
+};
 
 /** A demo's settings changed from its defaults (none: `undefined`). */
 const changedSettings = (defaults: Settings, settings: Settings) => {
@@ -424,7 +474,9 @@ export const Component: FunctionComponent<{
   controls?: ReactNode;
   /**
    * What the demo reads out (e.g. a hook's values), beside its stage: a
-   * section of its own in its config column, open.
+   * section of its own in its config column, open. Technical values go
+   * here, not on its screen. On a device, read as in its screen (its
+   * portal container, e.g. for its anchors' sizes).
    */
   diagnostics?: ReactNode;
   /** An app's background behind it (a setting of simple demos). */
@@ -547,6 +599,9 @@ export const Component: FunctionComponent<{
     state,
   });
   const inlineRef = useRef<HTMLDivElement>(null);
+  // (Its device's screen: its content's portal container, see `Screen`;
+  // also its diagnostics', read as in it, e.g. its anchors' sizes.)
+  const screenRef = useRef<HTMLDivElement>(null);
   const canExpand = useCanExpand(inlineRef);
   // (Its own: closed at first, not kept, nor shared with other views.)
   const [isCodeOpen, setIsCodeOpen] = useState(false);
@@ -566,6 +621,8 @@ export const Component: FunctionComponent<{
   }, [id, showId]);
 
   const config = useGuards(isHidden, hasInputGuards, isRaw);
+
+  useRawDocument(isRaw, isHidden);
 
   if (isHidden) return null;
   if (isRaw) return children;
@@ -589,6 +646,7 @@ export const Component: FunctionComponent<{
         <Stage
           hasWallpaper={hasWallpaper}
           screen={screen}
+          screenRef={screenRef}
           settings={settings}
           stage={stage}
         >
@@ -607,14 +665,9 @@ export const Component: FunctionComponent<{
           settings={settings}
           stage={stage}
         />
-        {diagnostics ? (
-          <section className="demo-config-section">
-            <details open>
-              <summary className="demo-config-heading">Diagnostics</summary>
-              <div className="demo-diagnostics">{diagnostics}</div>
-            </details>
-          </section>
-        ) : null}
+        <Diagnostics screenRef={stage ? screenRef : undefined}>
+          {diagnostics}
+        </Diagnostics>
         {controls}
         <section className="demo-config-section">
           <details

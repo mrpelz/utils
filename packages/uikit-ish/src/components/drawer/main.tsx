@@ -10,6 +10,7 @@ import {
 } from 'react';
 
 import { cn, usePortalContainer, withStyle } from '../utils/main.js';
+import { ViewportScopeContext } from '../viewport/main.js';
 import type {
   DrawerHandle,
   DrawerPopupProps,
@@ -84,35 +85,39 @@ const Popup = forwardRef<HTMLDivElement, DrawerPopupProps>(
     ref,
   ) => {
     const side = useContext(SideContext);
+    // Its anchors' scope: fixed to it (see Viewport.Padding).
+    const [scope] = useState(() => ({}));
 
     return (
-      <BaseDrawer.Portal
-        keepMounted
-        className="uikit-drawer-portal"
-        container={usePortalContainer(container)}
-      >
-        <BaseDrawer.Backdrop
-          className="uikit-drawer-backdrop"
-          data-drawer-part="backdrop"
-        />
-        <BaseDrawer.Viewport
-          className="uikit-drawer-viewport"
-          data-drawer-part="viewport"
+      <ViewportScopeContext.Provider value={scope}>
+        <BaseDrawer.Portal
+          keepMounted
+          className="uikit-drawer-portal"
+          container={usePortalContainer(container)}
         >
-          <BaseDrawer.Popup
-            ref={ref}
-            data-drawer-part="popup"
-            data-floating={floating ? '' : undefined}
-            data-side={side}
-            style={withStyle(
-              { '--uikit-drawer-size': `${String(size)}px` },
-              style,
-            )}
-            {...props}
-            className={cn('uikit-drawer-popup', className)}
+          <BaseDrawer.Backdrop
+            className="uikit-drawer-backdrop"
+            data-drawer-part="backdrop"
           />
-        </BaseDrawer.Viewport>
-      </BaseDrawer.Portal>
+          <BaseDrawer.Viewport
+            className="uikit-drawer-viewport"
+            data-drawer-part="viewport"
+          >
+            <BaseDrawer.Popup
+              ref={ref}
+              data-drawer-part="popup"
+              data-floating={floating ? '' : undefined}
+              data-side={side}
+              style={withStyle(
+                { '--uikit-drawer-size': `${String(size)}px` },
+                style,
+              )}
+              {...props}
+              className={cn('uikit-drawer-popup', className)}
+            />
+          </BaseDrawer.Viewport>
+        </BaseDrawer.Portal>
+      </ViewportScopeContext.Provider>
     );
   },
 );

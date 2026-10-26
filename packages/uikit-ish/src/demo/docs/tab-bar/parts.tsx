@@ -942,6 +942,14 @@ export const TabBarParts: FunctionComponent = () => (
     <ul>
       <li>App content in a glass capsule, after the list.</li>
       <li>
+        A{' '}
+        <PartLink
+          component="text-field"
+          part="TextField.Root"
+        />{' '}
+        in it (e.g. a search field) takes its whole width.
+      </li>
+      <li>
         Above the groups; between them while the bar is collapsed (collapse it
         with{' '}
         <PartLink

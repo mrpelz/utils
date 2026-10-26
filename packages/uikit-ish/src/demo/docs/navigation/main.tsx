@@ -103,6 +103,7 @@ export const NavigationDemo: FunctionComponent = () => {
                     </Toolbar.Root>
                   </Viewport.BlockStart>
                   <Page.Root>
+                    <Viewport.Padding edge="block-start" />
                     <Header.LargeTitle>
                       <span>{page.title}</span>
                     </Header.LargeTitle>
@@ -129,6 +130,7 @@ export const NavigationDemo: FunctionComponent = () => {
                         </List.Group>
                       </List.Section>
                     </List.Root>
+                    <Viewport.Padding edge="block-end" />
                   </Page.Root>
                 </Header.Root>
               );

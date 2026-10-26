@@ -115,6 +115,7 @@ const RootPart: FunctionComponent = () => {
                   </List.Footer>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -200,6 +201,7 @@ const TriggerPart: FunctionComponent = () => {
                   </List.Footer>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -283,6 +285,7 @@ const PopupPart: FunctionComponent = () => {
                   </List.Footer>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -368,6 +371,7 @@ const HeaderPart: FunctionComponent = () => {
                   </List.Footer>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -453,6 +457,7 @@ const GrabberPart: FunctionComponent = () => {
                   </List.Footer>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -538,6 +543,7 @@ const ContentPart: FunctionComponent = () => {
                   </List.Footer>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -628,6 +634,7 @@ const TitlePart: FunctionComponent = () => {
                   </List.Footer>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -713,6 +720,7 @@ const DescriptionPart: FunctionComponent = () => {
                   </List.Footer>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -801,6 +809,7 @@ const ClosePart: FunctionComponent = () => {
                   </List.Footer>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -810,7 +819,11 @@ const ClosePart: FunctionComponent = () => {
 };
 
 // Its trigger and its button, outside the root: made once, here.
-const contactSheet = codeLabel(Sheet.createHandle(), 'contactSheet');
+const contactSheet = codeLabel(
+  Sheet.createHandle(),
+  'contactSheet',
+  'const contactSheet = Sheet.createHandle(); // (at module level)',
+);
 
 /** `Sheet.createHandle`: a trigger outside the root, and an imperative open. */
 const CreateHandlePart: FunctionComponent = () => {
@@ -880,6 +893,7 @@ const CreateHandlePart: FunctionComponent = () => {
                   </List.Group>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -896,6 +910,7 @@ const UseCreateSheetHandlePart: FunctionComponent = () => {
   const addSheet = codeLabel(
     useCreateSheetHandle<{ title: string }>(),
     'addSheet',
+    'const addSheet = useCreateSheetHandle<{ title: string }>();',
   );
 
   return (
@@ -971,6 +986,7 @@ const UseCreateSheetHandlePart: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Sheet.Content>
             </Sheet.Popup>
           )}

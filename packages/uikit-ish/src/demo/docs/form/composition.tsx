@@ -204,6 +204,7 @@ const InASheetWithCancelDone: FunctionComponent = () => {
                   </List.Section>
                 </List.Root>
               </Form>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>

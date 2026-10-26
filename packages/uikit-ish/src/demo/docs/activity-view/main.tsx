@@ -281,16 +281,17 @@ export const ActivityViewDemo: FunctionComponent = () => {
                       </List.Title>
                     </List.Item>
                   </List.Group>
+                  <List.Footer>
+                    <Button.Root
+                      variant="glass"
+                      onClick={() => addLog('edit actions')}
+                    >
+                      <Button.Label>Edit Actions</Button.Label>
+                    </Button.Root>
+                  </List.Footer>
                 </List.Section>
               </List.Root>
-              <div className="activity-view-demo-edit">
-                <Button.Root
-                  variant="glass"
-                  onClick={() => addLog('edit actions')}
-                >
-                  <Button.Label>Edit Actions</Button.Label>
-                </Button.Root>
-              </div>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -541,16 +542,21 @@ export const ActivityViewPopoverDemo: FunctionComponent = () => {
                         </List.Title>
                       </List.Item>
                     </List.Group>
+                    <List.Footer>
+                      <Button.Root
+                        variant="glass"
+                        onClick={() => addLog('edit actions')}
+                      >
+                        <Button.Label>Edit Actions</Button.Label>
+                      </Button.Root>
+                    </List.Footer>
                   </List.Section>
                 </List.Root>
-                <div className="activity-view-demo-edit">
-                  <Button.Root
-                    variant="glass"
-                    onClick={() => addLog('edit actions')}
-                  >
-                    <Button.Label>Edit Actions</Button.Label>
-                  </Button.Root>
-                </div>
+                {/* (Its own gap: the screen's anchors aren't the popover's.) */}
+                <Viewport.Padding
+                  anchor={null}
+                  edge="block-end"
+                />
               </Popover.Body>
             </Popover.Popup>
           </Popover.Positioner>

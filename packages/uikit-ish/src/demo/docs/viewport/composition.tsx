@@ -34,9 +34,12 @@ const shellCode = `<Viewport.Provider>
   <TabBar.Root defaultValue="favorites">
     {/* The pages, scrolling. */}
     <Viewport.Content>
+      <Viewport.Padding edge="block-start" />
       <TabBar.Panel value="favorites">…</TabBar.Panel>
       <TabBar.Panel value="recents">…</TabBar.Panel>
       …
+      {/* Its end scrolling out from under the tab bar. */}
+      <Viewport.Padding edge="block-end" />
     </Viewport.Content>
     {/* The bar, at the bottom; the keyboard covers it. */}
     <Viewport.BlockEnd keyboard="cover">
@@ -48,12 +51,14 @@ const shellCode = `<Viewport.Provider>
 const messageCode = `<Viewport.Provider>
   {/* Resized above the keyboard: its end stays in view. */}
   <Viewport.Content>
+    <Viewport.Padding edge="block-start" />
     <List.Root>…</List.Root>
+    <Viewport.Padding edge="block-end" />
   </Viewport.Content>
-  {/* Pushed up by the keyboard (keyboard="push", the default); the anchor
-      is the surface (its background to the edge), its content spaced in it. */}
-  <Viewport.BlockEnd className="message-bar">
-    <div className="message-bar-content">
+  {/* Pushed up by the keyboard (keyboard="push", the default); a toolbar
+      in it spacing the field. */}
+  <Viewport.BlockEnd>
+    <Toolbar.Root>
       <TextField.Root>
         <TextField.Search>
           <TextField.Control
@@ -64,7 +69,7 @@ const messageCode = `<Viewport.Provider>
           <TextField.Clear />
         </TextField.Search>
       </TextField.Root>
-    </div>
+    </Toolbar.Root>
   </Viewport.BlockEnd>
 </Viewport.Provider>`;
 
@@ -76,6 +81,12 @@ const collapseCode = `const contentRef = useRef<HTMLDivElement>(null);
 </Viewport.Provider>
 
 // In App (inside the provider):
+const tabs = [
+  ['favorites', 'Favorites', sfStarFill],
+  ['recents', 'Recents', sfClockFill],
+  ['contacts', 'Contacts', sfPersonCropCircleFill],
+];
+const tabValues = tabs.map(([tab]) => tab);
 const { atTop, direction } = useScrollDirection();
 const [value, setValue] = useState('contacts');
 // Collapsed, its selected tab remains.
@@ -104,6 +115,7 @@ const [sections] = collapsedSelection([tabValues], value);
 const toolbarCode = `const [selected, setSelected] = useState<string[]>([]);
 
 <Viewport.Content>
+  <Viewport.Padding edge="block-start" />
   <List.Root editing>
     <List.Section>
       <CheckboxGroup
@@ -122,6 +134,7 @@ const toolbarCode = `const [selected, setSelected] = useState<string[]>([]);
       </CheckboxGroup>
     </List.Section>
   </List.Root>
+  <Viewport.Padding edge="block-end" />
 </Viewport.Content>
 <Viewport.BlockEnd>
   <Toolbar.Root>
@@ -162,12 +175,13 @@ const Shell: FunctionComponent = () => {
         ) => addLog(`value change: ${String(value)}/${reason}`)}
       >
         <Viewport.Content>
+          <Viewport.Padding edge="block-start" />
           {phoneTabs.map(([tab, label]) => (
             <TabBar.Panel
               key={tab}
               value={tab}
             >
-              <List.Root className="viewport-demo-list">
+              <List.Root>
                 <List.Section>
                   <List.Group>
                     {names.map((name) => (
@@ -181,6 +195,7 @@ const Shell: FunctionComponent = () => {
               </List.Root>
             </TabBar.Panel>
           ))}
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
         <Viewport.BlockEnd keyboard="cover">
           <TabBar.List>
@@ -218,9 +233,11 @@ const Message: FunctionComponent = () => {
       stage="phone"
       title="Viewport with a message field"
     >
-      <>
+      {/* Tracking the keyboard over its screen (see Viewport.Provider). */}
+      <Viewport.Provider>
         <Viewport.Content>
-          <List.Root className="viewport-demo-list">
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
             <List.Section>
               <List.Group>
                 {messages.map(({ from, preview }) => (
@@ -232,9 +249,10 @@ const Message: FunctionComponent = () => {
               </List.Group>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
-        <Viewport.BlockEnd className="viewport-demo-surface">
-          <div className="viewport-demo-bar">
+        <Viewport.BlockEnd>
+          <Toolbar.Root>
             <TextField.Root>
               <TextField.Search>
                 <TextField.Control
@@ -250,9 +268,9 @@ const Message: FunctionComponent = () => {
                 <TextField.Clear />
               </TextField.Search>
             </TextField.Root>
-          </div>
+          </Toolbar.Root>
         </Viewport.BlockEnd>
-      </>
+      </Viewport.Provider>
     </Component>
   );
 };
@@ -281,8 +299,9 @@ const CollapseView: FunctionComponent<{
         onValueChange={setValue}
       >
         <Viewport.Content ref={contentRef}>
+          <Viewport.Padding edge="block-start" />
           <TabBar.Panel value="contacts">
-            <List.Root className="viewport-demo-list">
+            <List.Root>
               <List.Section>
                 <List.Group>
                   {names.map((name) => (
@@ -294,6 +313,8 @@ const CollapseView: FunctionComponent<{
               </List.Section>
             </List.Root>
           </TabBar.Panel>
+          {/* (Following the bar as it collapses.) */}
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
         <Viewport.BlockEnd keyboard="cover">
           <TabBar.List collapsed={!atTop && direction === 'down'}>
@@ -321,7 +342,10 @@ const CollapseView: FunctionComponent<{
 
 /** `CollapseView`, in a provider tracking its screen's content layer. */
 const Collapse: FunctionComponent = () => {
-  const contentRef = useLabelledRef<HTMLDivElement>('contentRef');
+  const contentRef = useLabelledRef<HTMLDivElement>(
+    'contentRef',
+    'HTMLDivElement',
+  );
 
   return (
     <Viewport.Provider scroller={contentRef}>
@@ -346,10 +370,8 @@ const Selection: FunctionComponent = () => {
     >
       <>
         <Viewport.Content>
-          <List.Root
-            editing
-            className="viewport-demo-list"
-          >
+          <Viewport.Padding edge="block-start" />
+          <List.Root editing>
             <List.Section>
               <CheckboxGroup
                 render={<List.Group />}
@@ -371,6 +393,7 @@ const Selection: FunctionComponent = () => {
               </CheckboxGroup>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
         <Viewport.BlockEnd>
           <Toolbar.Root>
@@ -467,13 +490,13 @@ export const ViewportComposition: FunctionComponent = () => (
         message stays in view.
       </li>
       <li>
-        The bar’s background on the anchor (the app’s class): the anchor is the
-        surface (see{' '}
+        The field in a{' '}
         <PartLink
-          component="viewport"
-          part="Viewport.Anchor"
-        />
-        ), reaching the screen’s edge below the field.
+          component="toolbar"
+          part="Toolbar.Root"
+        />{' '}
+        in the anchor: the toolbar spaces it and fills its width with it (a text
+        field in a toolbar takes its free space), no styles of the app’s.
       </li>
     </ul>
     <CodeView code={messageCode} />
@@ -519,8 +542,13 @@ export const ViewportComposition: FunctionComponent = () => (
         <GuideLink to="rule-g7">G7</GuideLink>: the list owns it).
       </li>
       <li>
-        Rows scroll beneath it; the list keeps its last rows clear of it
-        (padding).
+        Rows scroll beneath it; a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />{' '}
+        at the content layer’s end keeps its last rows clear of it (and a row
+        scrolled to, e.g. by focus).
       </li>
       <li>
         Entering and leaving edit mode: see the{' '}

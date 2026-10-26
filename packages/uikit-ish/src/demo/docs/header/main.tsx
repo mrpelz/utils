@@ -119,6 +119,7 @@ export const HeaderDemo: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root>
+            <Viewport.Padding edge="block-start" />
             <Header.LargeTitle {...propsLargeTitle}>
               <span>Inbox</span>
             </Header.LargeTitle>
@@ -134,6 +135,7 @@ export const HeaderDemo: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -231,6 +233,7 @@ export const HeaderTitleDemo: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root>
+            <Viewport.Padding edge="block-start" />
             <List.Root>
               <List.Section>
                 <List.Group>
@@ -242,6 +245,7 @@ export const HeaderTitleDemo: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>

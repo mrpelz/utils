@@ -17,6 +17,7 @@ import {
 } from 'react';
 
 import { cn } from '../utils/main.js';
+import { useAnchorSize } from '../viewport/main.js';
 import type {
   HeaderAccessoryProps,
   HeaderContextValue,
@@ -42,7 +43,9 @@ export type {
 // Large Title Emphasized, 16px from the sides, with an optional
 // `Toolbar.Subtitle` in 15px, 510), scrolling with the page. `Root` ties
 // them: around the anchor and the `Page` (or within the page, e.g. a tab's
-// panel rendered as one), its page's content starts below the bar. As the
+// panel rendered as one); the page's content starts below the bar by a
+// `Viewport.Padding` at its start (the app's: e.g. none while the bar is
+// empty). As the
 // large title scrolls under the bar, it fades out and the bar's own
 // `Toolbar.Title` fades in (scroll-driven animations, no scroll
 // listeners): without a large title, the bar's title just shows. Content
@@ -57,9 +60,9 @@ export type {
 //
 // Deviations:
 // - Pulled down, the large title doesn't grow (iOS: it scales up).
-// - The bar is the Figma toolbar's 54px high (below the safe area), and the
-//   page's content starts below that, also with a taller one (e.g. a
-//   two-line title); the accessory sticks there.
+// - The page's content makes room for the bar with a `Viewport.Padding`
+//   (the app's, at the page's start: as high as the bar, live); the large
+//   title and the accessory follow the bar's height too.
 // - The scroll edge effect is an approximation (Figma: none).
 
 const HeaderContext = createContext<HeaderContextValue>({
@@ -83,6 +86,9 @@ const Root: FunctionComponent<HeaderRootProps> = ({ children }) => {
     () => ({ hasLargeTitle: largeTitles > 0, markLargeTitle, timeline }),
     [largeTitles, markLargeTitle, timeline],
   );
+  // Its bar's height (the tallest at the block start, in its scope: see
+  // Viewport.Padding), for its large title and accessory.
+  const barSize = useAnchorSize('block-start');
 
   return (
     <HeaderContext.Provider value={value}>
@@ -90,7 +96,12 @@ const Root: FunctionComponent<HeaderRootProps> = ({ children }) => {
         className="uikit-header-root"
         data-header-part="root"
         data-large-title={value.hasLargeTitle ? '' : undefined}
-        style={{ '--uikit-header-timeline': timeline } as CSSProperties}
+        style={
+          {
+            '--uikit-header-bar': `${String(barSize)}px`,
+            '--uikit-header-timeline': timeline,
+          } as CSSProperties
+        }
       >
         {children}
       </div>

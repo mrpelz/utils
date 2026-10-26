@@ -151,9 +151,12 @@ export {
   type ListRootProps,
   type ListStyle,
   type ListSwipeActionProps,
+  ListSwipeActionsHandle,
   type ListSwipeActionsProps,
+  type ListSwipeActionsTriggerProps,
   type ListGroupProps,
   type ListTextProps,
+  useCreateSwipeActionsHandle,
 } from './list/main.js';
 
 // Menus
@@ -267,10 +270,15 @@ export {
   useSizeClass,
   useViewportScroll,
   useVisualViewport,
+  useAnchorSize,
+  useCreateViewportAnchorHandle,
   Viewport,
+  ViewportAnchorHandle,
+  ViewportScopeContext,
   type ViewportAnchorProps,
   type ViewportContentProps,
   type ViewportEdge,
+  type ViewportPaddingProps,
   type ViewportProviderProps,
   type ViewportSafeArea,
   type SizeClass,

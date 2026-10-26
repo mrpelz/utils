@@ -5,12 +5,20 @@ import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
 import { sfFlagFill } from '@bradleyhodges/sfsymbols/sfFlagFill';
 import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
+import { sfMinus } from '@bradleyhodges/sfsymbols/sfMinus';
 import { sfPersonCropCircleFill } from '@bradleyhodges/sfsymbols/sfPersonCropCircleFill';
+import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
 import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
 import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
 import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 
-import { forwardClick, List, Symbol } from '../../../components/index.js';
+import {
+  Button,
+  forwardClick,
+  List,
+  Symbol,
+  useCreateSwipeActionsHandle,
+} from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
@@ -18,6 +26,7 @@ import {
   commonPropOptions,
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
+import { codeLabel } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
@@ -51,7 +60,9 @@ import {
   listSubtitleRows,
   listSupertitleRows,
   listSwipeActionRows,
+  listSwipeActionsHandleRows,
   listSwipeActionsRows,
+  listSwipeActionsTriggerRows,
   listTextRows,
   listTitleRows,
 } from './docs.js';
@@ -60,7 +71,7 @@ import {
   getPropOptionsAction,
   getPropOptionsButton,
   getPropOptionsCheckboxFirst,
-  getPropOptionsEditButton,
+  getPropOptionsEditButtonDelete,
   getPropOptionsExpandableRoot,
   getPropOptionsExpandableTrigger,
   getPropOptionsGuideExpandable,
@@ -70,6 +81,7 @@ import {
   getPropOptionsSwipeActionOutermost,
   getPropOptionsSwipeActionsTrailing,
   getPropOptionsTitleFirst,
+  mercuryActions,
   propOptionsBlock,
   propOptionsCursor,
   propOptionsHeader,
@@ -77,6 +89,7 @@ import {
   propOptionsIndex,
   propOptionsRadioFirst,
   propOptionsRootAll,
+  propOptionsSwipeActionsTrigger,
   propOptionsText,
 } from './props.js';
 
@@ -1213,17 +1226,22 @@ const RadioPart: FunctionComponent = () => {
   );
 };
 
-/** `List.EditButton` (the first row's), outlined, with its props. */
+/**
+ * `List.EditButton` (the first row's), outlined: deleting rows (a minus in
+ * red), and an insert row adding one (a plus in green).
+ */
 const EditButtonPart: FunctionComponent = () => {
   const id = 'list-parts-edit-button';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
+  const [planetRows, setPlanetRows] = useState<readonly string[]>(rows);
+  const [added, setAdded] = useState(0);
   const [control, props, state] = usePropControl(
     useMemo(
-      () => ({
-        ...getPropOptionsEditButton(addLog),
-        'aria-label': [`Delete ${rows[0] ?? ''}`, 'Remove'] as const,
-      }),
+      () =>
+        getPropOptionsEditButtonDelete(addLog, () =>
+          setPlanetRows(([, ...rest]) => rest),
+        ),
       [addLog],
     ),
     { external, isOpen: true, emphasize: 'outline', title: 'List.EditButton' },
@@ -1242,25 +1260,39 @@ const EditButtonPart: FunctionComponent = () => {
       <List.Root>
         <List.Section>
           <List.Group>
-            {rows.map((name, index) => (
+            {planetRows.map((name, index) => (
               <List.Item key={name}>
-                {index === 0 ? (
-                  <List.EditButton {...props} />
-                ) : (
-                  <List.EditButton aria-label={`Delete ${name}`} />
-                )}
+                <List.EditButton
+                  aria-label={`Delete ${name}`}
+                  tint="var(--color-ios-system-red)"
+                  onClick={() =>
+                    setPlanetRows((current) =>
+                      current.filter((row) => row !== name),
+                    )
+                  }
+                  {...(index === 0 ? props : {})}
+                >
+                  <Symbol icon={sfMinus} />
+                </List.EditButton>
                 <List.Title>{name}</List.Title>
-                <List.SwipeActions>
-                  <List.SwipeAction
-                    label="Delete"
-                    tint="var(--color-ios-system-red)"
-                    onClick={() => addLog(`delete ${name}`)}
-                  >
-                    <Symbol icon={sfTrashFill} />
-                  </List.SwipeAction>
-                </List.SwipeActions>
               </List.Item>
             ))}
+            <List.Item>
+              <List.EditButton
+                aria-label="Add Planet"
+                tint="var(--color-ios-system-green)"
+                onClick={() => {
+                  setPlanetRows((current) => [
+                    ...current,
+                    `Planet ${String(added + 1)}`,
+                  ]);
+                  setAdded(added + 1);
+                }}
+              >
+                <Symbol icon={sfPlus} />
+              </List.EditButton>
+              <List.Title>Add Planet</List.Title>
+            </List.Item>
           </List.Group>
         </List.Section>
       </List.Root>
@@ -1319,6 +1351,199 @@ const SwipeActionsPart: FunctionComponent = () => {
           </List.Group>
         </List.Section>
       </List.Root>
+    </Component>
+  );
+};
+
+/**
+ * `List.SwipeActionsTrigger` (the first row's), outlined: opening its row's
+ * actions on its side (Pin leading, Delete trailing).
+ */
+const SwipeActionsTriggerPart: FunctionComponent = () => {
+  const id = 'list-parts-swipe-actions-trigger';
+  const [log, addLog] = useLog();
+  const [external] = useProvidedState(id);
+  const [control, props, state] = usePropControl(
+    propOptionsSwipeActionsTrigger,
+    {
+      external,
+      isOpen: true,
+      emphasize: 'outline',
+      title: 'List.SwipeActionsTrigger',
+    },
+  );
+
+  return (
+    <Component
+      isInline
+      isStretched
+      controls={[control]}
+      id={id}
+      log={log}
+      state={[state]}
+      title="List.SwipeActionsTrigger"
+    >
+      <List.Root>
+        <List.Section>
+          <List.Group>
+            {rows.map((name, index) => (
+              <List.Item key={name}>
+                {index === 0 ? (
+                  <List.SwipeActionsTrigger
+                    {...props}
+                    render={
+                      <List.EditButton
+                        aria-label={`Delete ${name}`}
+                        tint="var(--color-ios-system-red)"
+                      >
+                        <Symbol icon={sfMinus} />
+                      </List.EditButton>
+                    }
+                  />
+                ) : (
+                  <List.SwipeActionsTrigger
+                    render={
+                      <List.EditButton
+                        aria-label={`Delete ${name}`}
+                        tint="var(--color-ios-system-red)"
+                      >
+                        <Symbol icon={sfMinus} />
+                      </List.EditButton>
+                    }
+                  />
+                )}
+                <List.Title>{name}</List.Title>
+                <List.SwipeActions side="inline-start">
+                  <List.SwipeAction
+                    label="Pin"
+                    onClick={() => addLog(`pin ${name}`)}
+                  >
+                    <Symbol icon={sfFlagFill} />
+                  </List.SwipeAction>
+                </List.SwipeActions>
+                <List.SwipeActions>
+                  <List.SwipeAction
+                    label="Delete"
+                    tint="var(--color-ios-system-red)"
+                    onClick={() => addLog(`delete ${name}`)}
+                  >
+                    <Symbol icon={sfTrashFill} />
+                  </List.SwipeAction>
+                </List.SwipeActions>
+              </List.Item>
+            ))}
+          </List.Group>
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
+
+/**
+ * `List.createSwipeActionsHandle`: Mercury's actions by a module-level
+ * handle, opened by a trigger outside the list, closed imperatively.
+ */
+const CreateSwipeActionsHandlePart: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+
+  return (
+    <Component
+      isInline
+      isStretched
+      id="list-parts-create-swipe-actions-handle"
+      log={log}
+      title="List.createSwipeActionsHandle"
+    >
+      <>
+        <List.SwipeActionsTrigger
+          handle={mercuryActions}
+          render={<Button.Root variant="bordered" />}
+        >
+          <Button.Label>Show Mercury’s Actions</Button.Label>
+        </List.SwipeActionsTrigger>
+        <Button.Root
+          variant="bordered"
+          onClick={() => mercuryActions.close()}
+        >
+          <Button.Label>Close Them</Button.Label>
+        </Button.Root>
+        <List.Root>
+          <List.Section>
+            <List.Group>
+              {rows.map((name, index) => (
+                <List.Item key={name}>
+                  <List.Title>{name}</List.Title>
+                  <List.SwipeActions
+                    handle={index === 0 ? mercuryActions : undefined}
+                  >
+                    <List.SwipeAction
+                      label="Delete"
+                      tint="var(--color-ios-system-red)"
+                      onClick={() => addLog(`delete ${name}`)}
+                    >
+                      <Symbol icon={sfTrashFill} />
+                    </List.SwipeAction>
+                  </List.SwipeActions>
+                </List.Item>
+              ))}
+            </List.Group>
+          </List.Section>
+        </List.Root>
+      </>
+    </Component>
+  );
+};
+
+/**
+ * `useCreateSwipeActionsHandle`: the same, the handle made in the
+ * component.
+ */
+const UseCreateSwipeActionsHandlePart: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const mercuryRowActions = codeLabel(
+    useCreateSwipeActionsHandle(),
+    'mercuryRowActions',
+    'const mercuryRowActions = useCreateSwipeActionsHandle();',
+  );
+
+  return (
+    <Component
+      isInline
+      isStretched
+      id="list-parts-use-create-swipe-actions-handle"
+      log={log}
+      title="useCreateSwipeActionsHandle"
+    >
+      <>
+        <List.SwipeActionsTrigger
+          handle={mercuryRowActions}
+          render={<Button.Root variant="bordered" />}
+        >
+          <Button.Label>Show Mercury’s Actions</Button.Label>
+        </List.SwipeActionsTrigger>
+        <List.Root>
+          <List.Section>
+            <List.Group>
+              {rows.map((name, index) => (
+                <List.Item key={name}>
+                  <List.Title>{name}</List.Title>
+                  <List.SwipeActions
+                    handle={index === 0 ? mercuryRowActions : undefined}
+                  >
+                    <List.SwipeAction
+                      label="Delete"
+                      tint="var(--color-ios-system-red)"
+                      onClick={() => addLog(`delete ${name}`)}
+                    >
+                      <Symbol icon={sfTrashFill} />
+                    </List.SwipeAction>
+                  </List.SwipeActions>
+                </List.Item>
+              ))}
+            </List.Group>
+          </List.Section>
+        </List.Root>
+      </>
     </Component>
   );
 };
@@ -1753,6 +1978,18 @@ export const ListParts: FunctionComponent = () => (
                           </li>
                         </ul>
                       </li>
+                      <li>
+                        <PartLink
+                          component="list"
+                          part="List.SwipeActionsTrigger"
+                        />{' '}
+                        (optional: opening the row’s actions, e.g. rendering its{' '}
+                        <PartLink
+                          component="list"
+                          part="List.EditButton"
+                        />
+                        )
+                      </li>
                     </ul>
                   </li>
                 </ul>
@@ -1790,6 +2027,26 @@ export const ListParts: FunctionComponent = () => (
           part="forwardClick"
         />{' '}
         (a helper: a row’s click handler)
+      </li>
+      <li>
+        Swipe actions handles (optional: a row’s actions’ <code>handle</code>,
+        its triggers’):
+        <ul>
+          <li>
+            <PartLink
+              component="list"
+              part="List.createSwipeActionsHandle"
+            />{' '}
+            (at module level), or
+          </li>
+          <li>
+            <PartLink
+              component="list"
+              part="useCreateSwipeActionsHandle"
+            />{' '}
+            (in a component)
+          </li>
+        </ul>
       </li>
     </ul>
 
@@ -2056,6 +2313,18 @@ export const ListParts: FunctionComponent = () => (
       <li>
         A section’s footer: text below its group (or block), aligned with the
         rows’ text.
+      </li>
+      <li>
+        Or its actions: buttons alone in it, 16px below the group, stacked and
+        centered, as wide as the group at most (a <code>fill</code>{' '}
+        <a href="button">Button</a> spanning it). A section can have both: a
+        footer of text, then one of actions. The gap is the list’s, not the
+        buttons’ (see{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />{' '}
+        for the gap at a scroll container’s end).
       </li>
     </ul>
     <FooterPart />
@@ -2352,10 +2621,21 @@ export const ListParts: FunctionComponent = () => (
       <code>List.EditButton</code>
     </Heading>
     <ul>
-      <li>A leading delete (or insert) button.</li>
       <li>
-        Deleting opens the row’s trailing swipe actions, unless its click
-        handler prevents it.
+        A leading button: a symbol (its child) in a circle of its{' '}
+        <code>tint</code> (UIKit’s editing styles: deleting in red, inserting in
+        green), doing what the app gives it (<code>onClick</code>).
+      </li>
+      <li>
+        Opening the row’s swipe actions instead: rendered by a{' '}
+        <PartLink
+          component="list"
+          part="List.SwipeActionsTrigger"
+        />{' '}
+        (its <code>render</code>).
+      </li>
+      <li>
+        Here: deleting rows (a minus), and an insert row adding one (a plus).
       </li>
     </ul>
     <EditButtonPart />
@@ -2380,6 +2660,104 @@ export const ListParts: FunctionComponent = () => (
     <SwipeActionsPart />
     <h3>Props</h3>
     <PropsTable rows={listSwipeActionsRows} />
+
+    <Heading
+      id="list-swipeactionstrigger"
+      level={2}
+    >
+      <code>List.SwipeActionsTrigger</code>
+    </Heading>
+    <ul>
+      <li>
+        Opens swipe actions when clicked (Base UI’s triggers’ shape): in a row,
+        the row’s own on its <code>side</code>; by a <code>handle</code>, those
+        of any row, from anywhere.
+      </li>
+      <li>
+        Renders a button, or what it’s given (<code>render</code>): e.g. a{' '}
+        <PartLink
+          component="list"
+          part="List.EditButton"
+        />{' '}
+        (the delete sign), a{' '}
+        <PartLink
+          component="button"
+          part="Button.Root"
+        />{' '}
+        outside the list.
+      </li>
+      <li>
+        Here: each row’s sign; Pin on the leading side, Delete on the trailing
+        (switch the first’s <code>side</code>). From outside the row, by a
+        handle: see{' '}
+        <PartLink
+          component="list"
+          part="List.createSwipeActionsHandle"
+        />
+        .
+      </li>
+    </ul>
+    <SwipeActionsTriggerPart />
+    <h3>Props</h3>
+    <PropsTable rows={listSwipeActionsTriggerRows} />
+
+    <Heading
+      id="list-createswipeactionshandle"
+      level={2}
+    >
+      <code>List.createSwipeActionsHandle</code>
+    </Heading>
+    <ul>
+      <li>
+        A handle naming a row’s swipe actions (on one side): given to them (
+        <PartLink
+          component="list"
+          part="List.SwipeActions"
+        />
+        ’s <code>handle</code>) and to the triggers opening them from outside
+        the row (
+        <PartLink
+          component="list"
+          part="List.SwipeActionsTrigger"
+        />
+        ’s), or used imperatively (<code>open()</code>, <code>close()</code>,{' '}
+        <code>isOpen</code>).
+      </li>
+      <li>
+        Made once, e.g. at a module’s top level (in a component:{' '}
+        <PartLink
+          component="list"
+          part="useCreateSwipeActionsHandle"
+        />
+        ). Not needed for a trigger in the row.
+      </li>
+      <li>
+        Here: Mercury’s actions, opened by a trigger above the list, closed by a
+        button calling <code>close()</code>.
+      </li>
+    </ul>
+    <CreateSwipeActionsHandlePart />
+    <h3>Returns</h3>
+    <PropsTable rows={listSwipeActionsHandleRows} />
+
+    <Heading
+      id="usecreateswipeactionshandle"
+      level={2}
+    >
+      <code>useCreateSwipeActionsHandle</code>
+    </Heading>
+    <ul>
+      <li>
+        <PartLink
+          component="list"
+          part="List.createSwipeActionsHandle"
+        />{' '}
+        in a component: made once, for its lifetime.
+      </li>
+    </ul>
+    <UseCreateSwipeActionsHandlePart />
+    <h3>Returns</h3>
+    <PropsTable rows={listSwipeActionsHandleRows} />
 
     <Heading
       id="list-swipeaction"
@@ -2491,6 +2869,9 @@ export const listPartsDemos = [
   RadioPart,
   EditButtonPart,
   SwipeActionsPart,
+  SwipeActionsTriggerPart,
+  CreateSwipeActionsHandlePart,
+  UseCreateSwipeActionsHandlePart,
   SwipeActionPart,
   IndexPart,
   IndexItemPart,

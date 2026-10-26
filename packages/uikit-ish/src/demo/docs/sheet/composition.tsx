@@ -29,15 +29,13 @@ import { names } from '../viewport/content.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 
-const detentsCode = `const screen = useRef<HTMLDivElement>(null);
-
-<div ref={screen} className="screen">
+const detentsCode = `<Viewport.Content>
   <Sheet.Root>
     <Sheet.Trigger render={<Button.Root variant="bordered" />}>
       <Button.Label>Medium</Button.Label>
     </Sheet.Trigger>
     {/* As high as its content: a glass panel. */}
-    <Sheet.Popup compact container={screen} detent="medium">
+    <Sheet.Popup compact detent="medium">
       <Sheet.Header>
         <Sheet.Grabber />…</Sheet.Header>
       <Sheet.Content>…</Sheet.Content>
@@ -48,11 +46,11 @@ const detentsCode = `const screen = useRef<HTMLDivElement>(null);
       <Button.Label>Large</Button.Label>
     </Sheet.Trigger>
     {/* The whole screen but its top. */}
-    <Sheet.Popup background="grouped" compact container={screen}>
+    <Sheet.Popup background="grouped" compact>
       …
     </Sheet.Popup>
   </Sheet.Root>
-</div>`;
+</Viewport.Content>`;
 
 const cancelDoneCode = `const [isOpen, setIsOpen] = useState(false);
 const [isConfirming, setIsConfirming] = useState(false);
@@ -60,6 +58,14 @@ const [name, setName] = useState('');
 const edited = name !== '';
 // Closing (Cancel, Escape, swiped down) while edited: confirm first.
 const close = () => (edited ? setIsConfirming(true) : setIsOpen(false));
+const save = () => {
+  …
+  setIsOpen(false);
+};
+const discard = () => {
+  setName('');
+  setIsOpen(false);
+};
 
 <Sheet.Root
   disablePointerDismissal={edited}
@@ -101,6 +107,7 @@ const close = () => (edited ? setIsConfirming(true) : setIsOpen(false));
 </Sheet.Root>`;
 
 const navigationCode = `const [keys, setKeys] = useState(['settings']);
+const pop = () => setKeys((current) => current.slice(0, -1));
 
 <Sheet.Popup background="grouped">
   {/* Its grabber alone: the navigation has its bars. */}
@@ -132,7 +139,9 @@ const navigationCode = `const [keys, setKeys] = useState(['settings']);
               </Toolbar.Root>
             </Viewport.BlockStart>
             <Page.Root>
+              <Viewport.Padding edge="block-start" />
               <List.Root>…{/* rows pushing a page */}</List.Root>
+              <Viewport.Padding edge="block-end" />
             </Page.Root>
           </Header.Root>
         ))}
@@ -141,11 +150,7 @@ const navigationCode = `const [keys, setKeys] = useState(['settings']);
   </Sheet.Content>
 </Sheet.Popup>`;
 
-const formSheetCode = `<Sheet.Popup
-  background="grouped"
-  compact={false}
-  container={screen}
->
+const formSheetCode = `<Sheet.Popup background="grouped" compact={false}>
   <Sheet.Header>
     <Sheet.Grabber />…</Sheet.Header>
   <Sheet.Content>…</Sheet.Content>
@@ -196,7 +201,7 @@ const Detents: FunctionComponent = () => {
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
-            <Sheet.Content className="sheet-demo-short">
+            <Sheet.Content>
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -213,6 +218,7 @@ const Detents: FunctionComponent = () => {
                   </List.Group>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -257,6 +263,7 @@ const Detents: FunctionComponent = () => {
                   </List.Group>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -351,6 +358,7 @@ const CancelDone: FunctionComponent = () => {
                   </List.Footer>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
             <ActionSheet.Root
               open={isConfirming}
@@ -424,7 +432,7 @@ const WithoutAGrabber: FunctionComponent = () => {
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
-            <Sheet.Content className="sheet-demo-short">
+            <Sheet.Content>
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -436,6 +444,7 @@ const WithoutAGrabber: FunctionComponent = () => {
                   </List.Group>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -530,6 +539,7 @@ const NavigationInside: FunctionComponent = () => {
                         </Toolbar.Root>
                       </Viewport.BlockStart>
                       <Page.Root>
+                        <Viewport.Padding edge="block-start" />
                         <List.Root>
                           <List.Section>
                             <List.Group>
@@ -547,6 +557,7 @@ const NavigationInside: FunctionComponent = () => {
                             </List.Group>
                           </List.Section>
                         </List.Root>
+                        <Viewport.Padding edge="block-end" />
                       </Page.Root>
                     </Header.Root>
                   ))}
@@ -633,6 +644,7 @@ const FormSheet: FunctionComponent = () => {
                   </List.Group>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -656,8 +668,9 @@ export const SheetComposition: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Each view a screen of its own: its sheets in it (<code>container</code>
-        ), compact or not as set (<code>compact</code>), not by the window.
+        Each view a screen of its own: its sheets in it (its portals’ default
+        container, <code>PortalContainerContext</code>), compact or not as set (
+        <code>compact</code>), not by the window.
       </li>
     </ul>
 

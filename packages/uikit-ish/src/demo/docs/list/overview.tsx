@@ -389,7 +389,14 @@ export const ListOverview: FunctionComponent = () => (
         </PartLink>
         ) lead the row, grabbers end it; entering and leaving edit mode (
         <code>editing</code>), they slide in and out from the row’s edges
-        (300ms). A delete button opens the row’s trailing swipe actions (guide{' '}
+        (300ms). A delete button rendered by a{' '}
+        <PartLink
+          component="list"
+          part="List.SwipeActionsTrigger"
+        >
+          SwipeActionsTrigger
+        </PartLink>{' '}
+        opens the row’s trailing swipe actions (guide{' '}
         <GuideLink to="rule-g7">G7</GuideLink>: the list owns the selection).
       </li>
     </ul>

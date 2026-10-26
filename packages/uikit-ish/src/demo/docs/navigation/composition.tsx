@@ -32,7 +32,12 @@ import { propOptionsAdaptiveContent } from './props.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 
-const perTabCode = `const [tab, setTab] = useState('settings');
+const perTabCode = `// The tabs: value, label.
+const tabs = [
+  ['settings', 'Settings'],
+  ['mail', 'Mail'],
+];
+const [tab, setTab] = useState('settings');
 // Each tab's stack, kept while another tab is shown.
 const [stacks, setStacks] = useState({
   settings: ['settings'],
@@ -101,7 +106,24 @@ const popToRoot = (value) =>
   </Viewport.BlockEnd>
 </TabBar.Root>`;
 
-const sidebarCode = `<Layout.Root>
+const sidebarCode = `const [section, setSection] = useState('settings');
+// Each section's stack, kept while another is shown.
+const [stacks, setStacks] = useState({
+  settings: ['settings'],
+  mail: ['mail'],
+});
+const pop = () =>
+  setStacks((current) => ({
+    ...current,
+    [section]: current[section].slice(0, -1),
+  }));
+const popToRoot = (value) =>
+  setStacks((current) => ({
+    ...current,
+    [value]: current[value].slice(0, 1),
+  }));
+
+<Layout.Root>
   <Layout.Column floating aria-label="Sidebar" defaultSize={280}>
     <Sidebar.Root>
       <List.Root listStyle="sidebar">
@@ -147,6 +169,7 @@ const sidebarCode = `<Layout.Root>
 </Layout.Root>`;
 
 const popToRootCode = `const [keys, setKeys] = useState(['settings', 'general', 'about']);
+const pop = () => setKeys((current) => current.slice(0, -1));
 
 <Navigation.Root onBack={pop}>
   <Navigation.SwipeArea />
@@ -179,7 +202,17 @@ const popToRootCode = `const [keys, setKeys] = useState(['settings', 'general', 
   </Navigation.Stack>
 </Navigation.Root>`;
 
-const largeTitlesCode = `<Navigation.Root onBack={pop}>
+const largeTitlesCode = `// Each page: its title.
+const pages = {
+  settings: { title: 'Settings' },
+  general: { title: 'General' },
+  about: { title: 'About' },
+  mail: { title: 'Mailboxes' },
+};
+const [keys, setKeys] = useState(['settings']);
+const pop = () => setKeys((current) => current.slice(0, -1));
+
+<Navigation.Root onBack={pop}>
   <Navigation.SwipeArea />
   <Viewport.BlockStart>…</Viewport.BlockStart>
   <Navigation.Stack>
@@ -194,6 +227,7 @@ const largeTitlesCode = `<Navigation.Root onBack={pop}>
           </Toolbar.Root>
         </Viewport.BlockStart>
         <Page.Root>
+          <Viewport.Padding edge="block-start" />
           {/* The root page's large title; the pages pushed on it, the bar's. */}
           {depth === 0 ? (
             <Header.LargeTitle>
@@ -201,6 +235,7 @@ const largeTitlesCode = `<Navigation.Root onBack={pop}>
             </Header.LargeTitle>
           ) : null}
           …
+          <Viewport.Padding edge="block-end" />
         </Page.Root>
       </Header.Root>
     ))}
@@ -209,6 +244,37 @@ const largeTitlesCode = `<Navigation.Root onBack={pop}>
 
 const adaptiveCode = `// Compact (a phone) or regular (a tablet), by the window's width.
 const isCompact = useSizeClass() === 'compact';
+
+// The sections: value, label.
+const sections = [
+  ['settings', 'Settings'],
+  ['mail', 'Mail'],
+];
+const [section, setSection] = useState('settings');
+// Compact: whether the section is opened (pushed on the sections).
+const [isOpened, setIsOpened] = useState(false);
+// Each section's stack, kept while another is shown.
+const [stacks, setStacks] = useState({
+  settings: ['settings'],
+  mail: ['mail'],
+});
+const open = (value) => {
+  setSection(value);
+  setIsOpened(true);
+};
+// Its root popped (compact): back to the sections.
+const pop = () =>
+  stacks[section].length > 1
+    ? setStacks((current) => ({
+        ...current,
+        [section]: current[section].slice(0, -1),
+      }))
+    : setIsOpened(false);
+const popToRoot = (value) =>
+  setStacks((current) => ({
+    ...current,
+    [value]: current[value].slice(0, 1),
+  }));
 
 // Compact (a phone): the sections are the stack's root page, drilled into.
 const keys = isOpened ? ['sections', ...stacks[section]] : ['sections'];
@@ -234,20 +300,26 @@ isCompact ? (
   <Layout.Root>
     <Layout.Column floating aria-label="Sidebar" defaultSize={280}>
       <Sidebar.Root>
-        …
-        <List.Item selected={section === value}>
-          <List.Title
-            render={<button type="button" />}
-            onClick={() => {
-              // Pressed again (already selected): its stack back to its root.
-              if (section === value) popToRoot(value);
-              else open(value);
-            }}
-          >
-            …
-          </List.Title>
-        </List.Item>
-        …
+        <List.Root listStyle="sidebar">
+          <List.Section>
+            <List.Group>
+              {sections.map(([value, label]) => (
+                <List.Item key={value} selected={section === value}>
+                  <List.Title
+                    render={<button type="button" />}
+                    onClick={() => {
+                      // Pressed again (already selected): back to its root.
+                      if (section === value) popToRoot(value);
+                      else open(value);
+                    }}
+                  >
+                    {label}
+                  </List.Title>
+                </List.Item>
+              ))}
+            </List.Group>
+          </List.Section>
+        </List.Root>
       </Sidebar.Root>
     </Layout.Column>
     <Layout.Column clearFloating>
@@ -344,6 +416,7 @@ const PerTab: FunctionComponent = () => {
                       </Toolbar.Root>
                     </Viewport.BlockStart>
                     <Page.Root>
+                      <Viewport.Padding edge="block-start" />
                       <List.Root>
                         <List.Section>
                           <List.Group>
@@ -361,6 +434,7 @@ const PerTab: FunctionComponent = () => {
                           </List.Group>
                         </List.Section>
                       </List.Root>
+                      <Viewport.Padding edge="block-end" />
                     </Page.Root>
                   </Header.Root>
                 ))}
@@ -500,6 +574,7 @@ const WithSidebar: FunctionComponent = () => {
                       </Toolbar.Root>
                     </Viewport.BlockStart>
                     <Page.Root>
+                      <Viewport.Padding edge="block-start" />
                       <List.Root>
                         <List.Section>
                           <List.Group>
@@ -517,6 +592,7 @@ const WithSidebar: FunctionComponent = () => {
                           </List.Group>
                         </List.Section>
                       </List.Root>
+                      <Viewport.Padding edge="block-end" />
                     </Page.Root>
                   </Header.Root>
                 ))}
@@ -592,6 +668,7 @@ const PopToRoot: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Viewport.BlockStart>
                 <Page.Root>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     <List.Section>
                       <List.Group>
@@ -609,6 +686,7 @@ const PopToRoot: FunctionComponent = () => {
                       </List.Group>
                     </List.Section>
                   </List.Root>
+                  <Viewport.Padding edge="block-end" />
                 </Page.Root>
               </Header.Root>
             ))}
@@ -670,6 +748,7 @@ const LargeTitles: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Viewport.BlockStart>
                 <Page.Root>
+                  <Viewport.Padding edge="block-start" />
                   {depth === 0 ? (
                     <Header.LargeTitle>
                       <span>{pages[key]?.title}</span>
@@ -693,6 +772,7 @@ const LargeTitles: FunctionComponent = () => {
                       </List.Group>
                     </List.Section>
                   </List.Root>
+                  <Viewport.Padding edge="block-end" />
                 </Page.Root>
               </Header.Root>
             ))}
@@ -812,6 +892,7 @@ const Adaptive: FunctionComponent = () => {
                       </Toolbar.Root>
                     </Viewport.BlockStart>
                     <Page.Root>
+                      <Viewport.Padding edge="block-start" />
                       <Header.LargeTitle>
                         <span>Apps</span>
                       </Header.LargeTitle>
@@ -836,6 +917,7 @@ const Adaptive: FunctionComponent = () => {
                           </List.Group>
                         </List.Section>
                       </List.Root>
+                      <Viewport.Padding edge="block-end" />
                     </Page.Root>
                   </Header.Root>
                 ) : (
@@ -848,6 +930,7 @@ const Adaptive: FunctionComponent = () => {
                       </Toolbar.Root>
                     </Viewport.BlockStart>
                     <Page.Root>
+                      <Viewport.Padding edge="block-start" />
                       <List.Root>
                         <List.Section>
                           <List.Group>
@@ -865,6 +948,7 @@ const Adaptive: FunctionComponent = () => {
                           </List.Group>
                         </List.Section>
                       </List.Root>
+                      <Viewport.Padding edge="block-end" />
                     </Page.Root>
                   </Header.Root>
                 ),
@@ -935,6 +1019,7 @@ const Adaptive: FunctionComponent = () => {
                         </Toolbar.Root>
                       </Viewport.BlockStart>
                       <Page.Root>
+                        <Viewport.Padding edge="block-start" />
                         <List.Root>
                           <List.Section>
                             <List.Group>
@@ -952,6 +1037,7 @@ const Adaptive: FunctionComponent = () => {
                             </List.Group>
                           </List.Section>
                         </List.Root>
+                        <Viewport.Padding edge="block-end" />
                       </Page.Root>
                     </Header.Root>
                   ))}

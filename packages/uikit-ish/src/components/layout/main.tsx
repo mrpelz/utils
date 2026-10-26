@@ -11,6 +11,7 @@ import {
 } from 'react';
 
 import { cn, useForwardedRef, withStyle } from '../utils/main.js';
+import { ViewportScopeContext } from '../viewport/main.js';
 import type { LayoutColumnProps, LayoutRootProps } from './props.js';
 
 export type { LayoutColumnProps, LayoutRootProps } from './props.js';
@@ -147,71 +148,76 @@ const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
       style,
     );
 
+    // Its anchors' scope: fixed to it (`contain: layout`, see Viewport.Padding).
+    const [scope] = useState(() => ({}));
+
     return (
-      <div
-        ref={ref}
-        data-clear-floating={clearFloating ? '' : undefined}
-        data-floating={floating ? '' : undefined}
-        data-layout-part="column"
-        data-resizable={resizable ? '' : undefined}
-        style={columnStyle}
-        {...props}
-        className={cn('uikit-layout-column', className)}
-      >
-        {children}
-        {resizable ? (
-          // The divider at a resizable column's end: a 10px hit area over the
-          // hairline (a keyboard-focusable separator).
-          <div
-            aria-orientation="vertical"
-            aria-valuemax={Number.isFinite(maxSize) ? maxSize : undefined}
-            aria-valuemin={minSize}
-            aria-valuenow={size}
-            className="uikit-layout-divider"
-            data-dragging={isDragging ? '' : undefined}
-            data-layout-part="divider"
-            role="separator"
-            tabIndex={0}
-            onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-              const step = event.shiftKey ? keyStepLarge : keyStep;
-              const direction = towardsEnd(event.currentTarget);
-              const current = sizeOf(event.currentTarget);
-              const sizes: Record<string, number> = {
-                ArrowLeft: current - step * direction,
-                ArrowRight: current + step * direction,
-                End: maxSize,
-                Home: minSize,
-              };
-              const next = sizes[event.key];
-              if (next === undefined || !Number.isFinite(next)) return;
-              event.preventDefault();
-              resize(next);
-            }}
-            onLostPointerCapture={() => {
-              dragRef.current = undefined;
-              setIsDragging(false);
-            }}
-            onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
-              if (event.button !== 0) return;
-              event.preventDefault();
-              event.currentTarget.setPointerCapture(event.pointerId);
-              dragRef.current = {
-                pointerId: event.pointerId,
-                size: sizeOf(event.currentTarget),
-                x: event.clientX,
-              };
-              setIsDragging(true);
-            }}
-            onPointerMove={(event: PointerEvent<HTMLDivElement>) => {
-              const { current: drag } = dragRef;
-              if (drag?.pointerId !== event.pointerId) return;
-              const moved =
-                (event.clientX - drag.x) * towardsEnd(event.currentTarget);
-              resize(drag.size + moved);
-            }}
-          />
-        ) : null}
-      </div>
+      <ViewportScopeContext.Provider value={scope}>
+        <div
+          ref={ref}
+          data-clear-floating={clearFloating ? '' : undefined}
+          data-floating={floating ? '' : undefined}
+          data-layout-part="column"
+          data-resizable={resizable ? '' : undefined}
+          style={columnStyle}
+          {...props}
+          className={cn('uikit-layout-column', className)}
+        >
+          {children}
+          {resizable ? (
+            // The divider at a resizable column's end: a 10px hit area over the
+            // hairline (a keyboard-focusable separator).
+            <div
+              aria-orientation="vertical"
+              aria-valuemax={Number.isFinite(maxSize) ? maxSize : undefined}
+              aria-valuemin={minSize}
+              aria-valuenow={size}
+              className="uikit-layout-divider"
+              data-dragging={isDragging ? '' : undefined}
+              data-layout-part="divider"
+              role="separator"
+              tabIndex={0}
+              onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+                const step = event.shiftKey ? keyStepLarge : keyStep;
+                const direction = towardsEnd(event.currentTarget);
+                const current = sizeOf(event.currentTarget);
+                const sizes: Record<string, number> = {
+                  ArrowLeft: current - step * direction,
+                  ArrowRight: current + step * direction,
+                  End: maxSize,
+                  Home: minSize,
+                };
+                const next = sizes[event.key];
+                if (next === undefined || !Number.isFinite(next)) return;
+                event.preventDefault();
+                resize(next);
+              }}
+              onLostPointerCapture={() => {
+                dragRef.current = undefined;
+                setIsDragging(false);
+              }}
+              onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
+                if (event.button !== 0) return;
+                event.preventDefault();
+                event.currentTarget.setPointerCapture(event.pointerId);
+                dragRef.current = {
+                  pointerId: event.pointerId,
+                  size: sizeOf(event.currentTarget),
+                  x: event.clientX,
+                };
+                setIsDragging(true);
+              }}
+              onPointerMove={(event: PointerEvent<HTMLDivElement>) => {
+                const { current: drag } = dragRef;
+                if (drag?.pointerId !== event.pointerId) return;
+                const moved =
+                  (event.clientX - drag.x) * towardsEnd(event.currentTarget);
+                resize(drag.size + moved);
+              }}
+            />
+          ) : null}
+        </div>
+      </ViewportScopeContext.Provider>
     );
   },
 );

@@ -45,13 +45,16 @@ import {
 } from './content.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
-const settingsCode = `<Header.Root>
+const settingsCode = `const [minutes, setMinutes] = useState(5);
+
+<Header.Root>
   <Viewport.BlockStart>
     <Toolbar.Root placement="block-start">
       <Toolbar.Title><span>Settings</span></Toolbar.Title>
     </Toolbar.Root>
   </Viewport.BlockStart>
   <Page.Root>
+    <Viewport.Padding edge="block-start" />
     <Header.LargeTitle><span>Settings</span></Header.LargeTitle>
     <List.Root>
       <List.Section>
@@ -82,16 +85,23 @@ const settingsCode = `<Header.Root>
           <List.Item>
             <List.Title>Auto-Lock</List.Title>
             <List.Detail>{minutes} min</List.Detail>
-            <Stepper.Root value={minutes} onValueChange={…}>…</Stepper.Root>
+            <Stepper.Root value={minutes} onValueChange={setMinutes}>…</Stepper.Root>
           </List.Item>
         </List.Group>
         <List.Footer>…</List.Footer>
       </List.Section>
     </List.Root>
+    <Viewport.Padding edge="block-end" />
   </Page.Root>
 </Header.Root>`;
 
-const drillInCode = `const [keys, setKeys] = useState(['settings']);
+const drillInCode = `// Each page: its title, its rows (title, the page it pushes, detail).
+const pages = {
+  settings: { title: 'Settings', rows: [['General', 'general']] },
+  general: { title: 'General', rows: [['About', 'about'], ['Software Update']] },
+  about: { title: 'About', rows: [['Name', undefined, 'iPhone']] },
+};
+const [keys, setKeys] = useState(['settings']);
 const push = (key) => setKeys((current) => [...current, key]);
 const pop = () => setKeys((current) => current.slice(0, -1));
 
@@ -116,6 +126,7 @@ const pop = () => setKeys((current) => current.slice(0, -1));
           </Toolbar.Root>
         </Viewport.BlockStart>
         <Page.Root>
+          <Viewport.Padding edge="block-start" />
           <List.Root>
             <List.Section>
               <List.Group>
@@ -135,13 +146,15 @@ const pop = () => setKeys((current) => current.slice(0, -1));
               </List.Group>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Page.Root>
       </Header.Root>
     ))}
   </Navigation.Stack>
 </Navigation.Root>`;
 
-const editCode = `const [isEditing, setIsEditing] = useState(false);
+const editCode = `const rows = ['Mercury', 'Venus', 'Earth', 'Mars'];
+const [isEditing, setIsEditing] = useState(false);
 // The list's selection (guide G7: the toolbar reads it).
 const [selected, setSelected] = useState([]);
 
@@ -158,6 +171,7 @@ const [selected, setSelected] = useState([]);
       </Toolbar.Root>
     </Viewport.BlockStart>
     <Page.Root>
+      <Viewport.Padding edge="block-start" />
       {/* In edit mode, the checkboxes and grabbers slide in. */}
       <List.Root editing={isEditing}>
         <List.Section>
@@ -180,6 +194,7 @@ const [selected, setSelected] = useState([]);
           </CheckboxGroup>
         </List.Section>
       </List.Root>
+      <Viewport.Padding edge="block-end" />
     </Page.Root>
   </Header.Root>
 </Viewport.Content>
@@ -197,7 +212,9 @@ const [selected, setSelected] = useState([]);
   </Viewport.BlockEnd>
 ) : null}`;
 
-const inboxCode = `<List.Root listStyle="plain">
+const inboxCode = `const archive = () => {…};
+
+<List.Root listStyle="plain">
   <List.Section>
     <List.Group>
       <List.Item>
@@ -229,7 +246,10 @@ const inboxCode = `<List.Root listStyle="plain">
   </List.Section>
 </List.Root>`;
 
-const indexCode = `{/* The list and its index in one cell, as high as the index at least. */}
+const indexCode = `// The contacts, by their first letter.
+const contacts = { A: ['Aaron', 'Abigail'], B: ['Bella', 'Benjamin'], … };
+
+{/* The list and its index in one cell, as high as the index at least. */}
 <div style={{ display: 'grid', minHeight: '32rem' }}>
   {/* The list fills it, scrolling on its own, without a scroll bar (an
       overlay scroll bar would cover the index). */}
@@ -321,6 +341,7 @@ const SettingsScreen: FunctionComponent = () => {
           </Toolbar.Root>
         </Viewport.BlockStart>
         <Page.Root>
+          <Viewport.Padding edge="block-start" />
           <Header.LargeTitle>
             <span>Settings</span>
           </Header.LargeTitle>
@@ -437,6 +458,7 @@ const SettingsScreen: FunctionComponent = () => {
               </List.Footer>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Page.Root>
       </Header.Root>
     </Component>
@@ -498,6 +520,7 @@ const DrillIn: FunctionComponent = () => {
                     </Toolbar.Root>
                   </Viewport.BlockStart>
                   <Page.Root>
+                    <Viewport.Padding edge="block-start" />
                     <List.Root>
                       <List.Section>
                         <List.Group>
@@ -522,6 +545,7 @@ const DrillIn: FunctionComponent = () => {
                         </List.Group>
                       </List.Section>
                     </List.Root>
+                    <Viewport.Padding edge="block-end" />
                   </Page.Root>
                 </Header.Root>
               );
@@ -586,6 +610,7 @@ const EditMode: FunctionComponent = () => {
               </Toolbar.Root>
             </Viewport.BlockStart>
             <Page.Root>
+              <Viewport.Padding edge="block-start" />
               <List.Root editing={isEditing}>
                 <List.Section>
                   <CheckboxGroup
@@ -629,6 +654,7 @@ const EditMode: FunctionComponent = () => {
                   </CheckboxGroup>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Page.Root>
           </Header.Root>
         </Viewport.Content>

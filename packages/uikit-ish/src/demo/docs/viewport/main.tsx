@@ -3,8 +3,8 @@ import './style.css';
 import { FunctionComponent, useRef } from 'react';
 
 import {
-  List,
   TextField,
+  Toolbar,
   useScrollDirection,
   useViewportScroll,
   useVisualViewport,
@@ -98,21 +98,19 @@ export const ViewportBarDemo: FunctionComponent = () => {
     >
       <Viewport.Provider>
         <ViewportStatus onScrollLog={addLog} />
-        <Viewport.BlockEnd className="viewport-demo-surface">
-          <div className="viewport-demo-bar">
-            <List.Root>
-              <List.Group style={{ marginInline: 0 }}>
-                <TextField.Root render={<List.Item />}>
-                  <TextField.Control
-                    aria-label="Message"
-                    enterKeyHint="send"
-                    placeholder="Message"
-                  />
-                  <TextField.Clear />
-                </TextField.Root>
-              </List.Group>
-            </List.Root>
-          </div>
+        <Viewport.BlockEnd>
+          <Toolbar.Root>
+            <TextField.Root>
+              <TextField.Search>
+                <TextField.Control
+                  aria-label="Message"
+                  enterKeyHint="send"
+                  placeholder="Message"
+                />
+                <TextField.Clear />
+              </TextField.Search>
+            </TextField.Root>
+          </Toolbar.Root>
         </Viewport.BlockEnd>
       </Viewport.Provider>
     </Component>
@@ -192,7 +190,9 @@ export const ViewportAnchorsDemo: FunctionComponent = () => {
       <Viewport.Provider>
         {isLayerShown ? (
           <Viewport.Content {...propsLayer}>
+            <Viewport.Padding edge="block-start" />
             <div className="viewport-demo-layer">Content layer</div>
+            <Viewport.Padding edge="block-end" />
           </Viewport.Content>
         ) : null}
         {isTopShown ? (

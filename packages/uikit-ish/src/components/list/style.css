@@ -582,6 +582,17 @@
     stroke-width: max(0px, (400 - 400) / 326 * 1px);
 
     --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
+
+    /* Its actions (buttons, alone in it): below the group, 16px from it,
+       stacked and centered, as wide as the group at most (a `fill` button
+       spanning it); the gap the list's, not the buttons'. */
+    &:has(> [data-button-part='root']):not(:has(> :not([data-button-part='root']))) {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px var(--uikit-list-inset, 16px) 0;
+      gap: 8px;
+    }
   }
 
   /* An action's reveal (see `StyledSwipeAction`): scaling in, and its parts fading in (see `actionFade`). */
@@ -1226,8 +1237,11 @@
     border: 0;
     margin: 0;
     background: none;
-    background-color: var(--color-ios-system-red);
-    color: #fff;
+    background-color: var(
+      --uikit-list-edit-tint,
+      var(--color-ios-system-gray)
+    );
+    color: var(--uikit-list-edit-text-color, #fff);
     font-family: inherit;
     text-align: inherit;
     text-decoration: none;
@@ -1236,10 +1250,6 @@
 
     @media (hover: hover) {
       cursor: var(--uikit-utils-cursor);
-    }
-
-    &:where([data-editing-style='insert']) {
-      background-color: var(--color-ios-system-green);
     }
 
     &:disabled {

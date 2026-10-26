@@ -189,6 +189,7 @@ const LiveView: FunctionComponent = () => {
                     : undefined
                 }
               >
+                <Viewport.Padding edge="block-start" />
                 <Header.LargeTitle>
                   <span>{rowTitles[selected]}</span>
                 </Header.LargeTitle>
@@ -207,6 +208,7 @@ const LiveView: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>

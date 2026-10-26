@@ -60,14 +60,18 @@ const navigationCode = `<Header.Root>
     </Toolbar.Root>
   </Viewport.BlockStart>
   <Page.Root>
+    <Viewport.Padding edge="block-start" />
     <List.Root>…</List.Root>
+    <Viewport.Padding edge="block-end" />
   </Page.Root>
 </Header.Root>`;
 
-const editCode = `const [selected, setSelected] = useState<string[]>([]);
+const editCode = `const messages = [{ subject: 'Lunch?' }, { subject: 'Photos' }, { subject: 'Invoice' }];
+const [selected, setSelected] = useState<string[]>([]);
 const all = selected.length === messages.length;
 
 <Viewport.Content>
+  <Viewport.Padding edge="block-start" />
   <List.Root editing>
     <List.Section>
       <CheckboxGroup
@@ -84,6 +88,7 @@ const all = selected.length === messages.length;
       </CheckboxGroup>
     </List.Section>
   </List.Root>
+  <Viewport.Padding edge="block-end" />
 </Viewport.Content>
 <Viewport.BlockEnd>
   <Toolbar.Root>
@@ -109,13 +114,15 @@ const all = selected.length === messages.length;
 const searchCode = `const [query, setQuery] = useState('');
 
 <Viewport.Content>
+  <Viewport.Padding edge="block-start" />
   <List.Root>…{/* the rows matching query */}</List.Root>
+  <Viewport.Padding edge="block-end" />
 </Viewport.Content>
 <Viewport.BlockEnd>
   <Toolbar.Root>
     <Toolbar.Button aria-label="Folders" shape="circle">…</Toolbar.Button>
     {/* Taking the bar's free space. */}
-    <TextField.Root style={{ flex: 1 }}>
+    <TextField.Root>
       <TextField.Search>
         <Symbol icon={sfMagnifyingglass} />
         <TextField.Control
@@ -132,7 +139,8 @@ const searchCode = `const [query, setQuery] = useState('');
   </Toolbar.Root>
 </Viewport.BlockEnd>`;
 
-const pagesCode = `const [page, setPage] = useState(0);
+const pagesCode = `const cities = ['Berlin', 'Lisbon', 'Tokyo'];
+const [page, setPage] = useState(0);
 
 <Viewport.Content>…{/* the page */}</Viewport.Content>
 <Viewport.BlockEnd>
@@ -208,6 +216,7 @@ const NavigationBar: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root>
+            <Viewport.Padding edge="block-start" />
             <List.Root>
               <List.Section>
                 <List.Group>
@@ -221,6 +230,7 @@ const NavigationBar: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -244,10 +254,8 @@ const EditMode: FunctionComponent = () => {
     >
       <>
         <Viewport.Content>
-          <List.Root
-            editing
-            className="toolbar-demo-list"
-          >
+          <Viewport.Padding edge="block-start" />
+          <List.Root editing>
             <List.Section>
               <CheckboxGroup
                 render={<List.Group />}
@@ -270,6 +278,7 @@ const EditMode: FunctionComponent = () => {
               </CheckboxGroup>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
         <Viewport.BlockEnd>
           <Toolbar.Root>
@@ -338,7 +347,8 @@ const Search: FunctionComponent = () => {
     >
       <>
         <Viewport.Content>
-          <List.Root className="toolbar-demo-list">
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
             <List.Section>
               <List.Group>
                 {matching.map((name) => (
@@ -349,6 +359,7 @@ const Search: FunctionComponent = () => {
               </List.Group>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
         <Viewport.BlockEnd>
           <Toolbar.Root>
@@ -361,7 +372,7 @@ const Search: FunctionComponent = () => {
                 <Symbol icon={sfFolder} />
               </Button.Icon>
             </Toolbar.Button>
-            <TextField.Root style={{ flex: 1 }}>
+            <TextField.Root>
               <TextField.Search>
                 <Symbol icon={sfMagnifyingglass} />
                 <TextField.Control
@@ -405,7 +416,8 @@ const Pages: FunctionComponent = () => {
     >
       <>
         <Viewport.Content>
-          <List.Root className="toolbar-demo-list">
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
             <List.Section>
               <List.Block>
                 <h2>{cities[page]}</h2>
@@ -416,6 +428,7 @@ const Pages: FunctionComponent = () => {
               </List.Block>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
         <Viewport.BlockEnd>
           <Toolbar.Root>

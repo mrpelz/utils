@@ -42,7 +42,9 @@ const sizes = ['Small', 'Medium', 'Large', 'Extra Large'] as const;
 
 // The time's code (as below).
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
-const timeCode = `const [hour, setHour] = useState(7);
+const timeCode = `const hours = Array.from({ length: 24 }, (_, index) => index);
+const minutes = Array.from({ length: 60 }, (_, index) => index);
+const [hour, setHour] = useState(7);
 const [minute, setMinute] = useState(30);
 
 <Roll.Root>
@@ -55,7 +57,10 @@ const [minute, setMinute] = useState(30);
   </Roll.Column>
 </Roll.Root>`;
 
-const dependentCode = `// The month's days: the rest disabled (e.g. 31 in April).
+const dependentCode = `const days = Array.from({ length: 31 }, (_, index) => index + 1);
+const [month, setMonth] = useState(3);
+const [day, setDay] = useState(30);
+// The month's days: the rest disabled (e.g. 31 in April).
 const length = new Date(2026, month + 1, 0).getDate();
 
 <Roll.Column aria-label="Day" value={day} onValueChange={setDay}>

@@ -42,7 +42,11 @@ const RootPart: FunctionComponent = () => {
   const id = 'drawer-parts-root';
   const [log, addLog] = useLog();
   // Its trigger, in the page's bar (outside the drawer).
-  const contactsDrawer = codeLabel(useCreateDrawerHandle(), 'contactsDrawer');
+  const contactsDrawer = codeLabel(
+    useCreateDrawerHandle(),
+    'contactsDrawer',
+    'const contactsDrawer = useCreateDrawerHandle();',
+  );
   const {
     controls,
     keyRoot,
@@ -87,12 +91,14 @@ const RootPart: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root background="plain">
+            <Viewport.Padding edge="block-start" />
             <List.Root listStyle="plain">
               <List.Block>
                 Swipe the contacts in from the leading edge, or press the
                 button.
               </List.Block>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
         <Drawer.Root
@@ -117,6 +123,7 @@ const RootPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -128,6 +135,7 @@ const RootPart: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Drawer.Popup>
@@ -142,7 +150,11 @@ const SwipeAreaPart: FunctionComponent = () => {
   const id = 'drawer-parts-swipe-area';
   const [log, addLog] = useLog();
   // Its trigger, in the page's bar (outside the drawer).
-  const contactsDrawer = codeLabel(useCreateDrawerHandle(), 'contactsDrawer');
+  const contactsDrawer = codeLabel(
+    useCreateDrawerHandle(),
+    'contactsDrawer',
+    'const contactsDrawer = useCreateDrawerHandle();',
+  );
   const {
     controls,
     keyRoot,
@@ -187,12 +199,14 @@ const SwipeAreaPart: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root background="plain">
+            <Viewport.Padding edge="block-start" />
             <List.Root listStyle="plain">
               <List.Block>
                 Swipe the contacts in from the leading edge, or press the
                 button.
               </List.Block>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
         <Drawer.Root
@@ -217,6 +231,7 @@ const SwipeAreaPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -228,6 +243,7 @@ const SwipeAreaPart: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Drawer.Popup>
@@ -242,7 +258,11 @@ const PopupPart: FunctionComponent = () => {
   const id = 'drawer-parts-popup';
   const [log, addLog] = useLog();
   // Its trigger, in the page's bar (outside the drawer).
-  const contactsDrawer = codeLabel(useCreateDrawerHandle(), 'contactsDrawer');
+  const contactsDrawer = codeLabel(
+    useCreateDrawerHandle(),
+    'contactsDrawer',
+    'const contactsDrawer = useCreateDrawerHandle();',
+  );
   const {
     controls,
     keyRoot,
@@ -287,12 +307,14 @@ const PopupPart: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root background="plain">
+            <Viewport.Padding edge="block-start" />
             <List.Root listStyle="plain">
               <List.Block>
                 Swipe the contacts in from the leading edge, or press the
                 button.
               </List.Block>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
         <Drawer.Root
@@ -317,6 +339,7 @@ const PopupPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -328,6 +351,7 @@ const PopupPart: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Drawer.Popup>
@@ -342,7 +366,11 @@ const TriggerPart: FunctionComponent = () => {
   const id = 'drawer-parts-trigger';
   const [log, addLog] = useLog();
   // Its trigger, in the page's bar (outside the drawer).
-  const contactsDrawer = codeLabel(useCreateDrawerHandle(), 'contactsDrawer');
+  const contactsDrawer = codeLabel(
+    useCreateDrawerHandle(),
+    'contactsDrawer',
+    'const contactsDrawer = useCreateDrawerHandle();',
+  );
   const {
     controls,
     keyRoot,
@@ -387,12 +415,14 @@ const TriggerPart: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root background="plain">
+            <Viewport.Padding edge="block-start" />
             <List.Root listStyle="plain">
               <List.Block>
                 Swipe the contacts in from the leading edge, or press the
                 button.
               </List.Block>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
         <Drawer.Root
@@ -417,6 +447,7 @@ const TriggerPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -428,6 +459,7 @@ const TriggerPart: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Drawer.Popup>
@@ -442,7 +474,11 @@ const ClosePart: FunctionComponent = () => {
   const id = 'drawer-parts-close';
   const [log, addLog] = useLog();
   // Its trigger, in the page's bar (outside the drawer).
-  const contactsDrawer = codeLabel(useCreateDrawerHandle(), 'contactsDrawer');
+  const contactsDrawer = codeLabel(
+    useCreateDrawerHandle(),
+    'contactsDrawer',
+    'const contactsDrawer = useCreateDrawerHandle();',
+  );
   const {
     controls,
     keyRoot,
@@ -487,12 +523,14 @@ const ClosePart: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root background="plain">
+            <Viewport.Padding edge="block-start" />
             <List.Root listStyle="plain">
               <List.Block>
                 Swipe the contacts in from the leading edge, or press the
                 button.
               </List.Block>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
         <Drawer.Root
@@ -517,6 +555,7 @@ const ClosePart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -528,6 +567,7 @@ const ClosePart: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Drawer.Popup>
@@ -538,7 +578,11 @@ const ClosePart: FunctionComponent = () => {
 };
 
 // Its triggers, in the content (outside the drawer): made once, here.
-const favoritesDrawer = codeLabel(Drawer.createHandle(), 'favoritesDrawer');
+const favoritesDrawer = codeLabel(
+  Drawer.createHandle(),
+  'favoritesDrawer',
+  'const favoritesDrawer = Drawer.createHandle(); // (at module level)',
+);
 
 /** The bar's trigger, and a button opening the drawer imperatively. */
 const CreateHandlePart: FunctionComponent = () => {
@@ -561,7 +605,6 @@ const CreateHandlePart: FunctionComponent = () => {
       controls={controls}
       id={id}
       log={log}
-      setup="const favoritesDrawer = Drawer.createHandle(); // (at the module's top level)"
       stage="phone"
       state={state}
       title="Drawer.createHandle"
@@ -588,6 +631,7 @@ const CreateHandlePart: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root background="plain">
+            <Viewport.Padding edge="block-start" />
             <List.Root listStyle="plain">
               <List.Block>
                 <Button.Root
@@ -598,6 +642,7 @@ const CreateHandlePart: FunctionComponent = () => {
                 </Button.Root>
               </List.Block>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
         <Drawer.Root
@@ -622,6 +667,7 @@ const CreateHandlePart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -633,6 +679,7 @@ const CreateHandlePart: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Drawer.Popup>
@@ -651,6 +698,7 @@ const UseCreateDrawerHandlePart: FunctionComponent = () => {
   const peopleDrawer = codeLabel(
     useCreateDrawerHandle<{ title: string }>(),
     'peopleDrawer',
+    'const peopleDrawer = useCreateDrawerHandle<{ title: string }>();',
   );
   const {
     controls,
@@ -733,6 +781,7 @@ const UseCreateDrawerHandlePart: FunctionComponent = () => {
                     </Toolbar.Root>
                   </Viewport.BlockStart>
                   <Page.Root>
+                    <Viewport.Padding edge="block-start" />
                     <List.Root>
                       <List.Section>
                         <List.Group>
@@ -744,6 +793,7 @@ const UseCreateDrawerHandlePart: FunctionComponent = () => {
                         </List.Group>
                       </List.Section>
                     </List.Root>
+                    <Viewport.Padding edge="block-end" />
                   </Page.Root>
                 </Header.Root>
               </Drawer.Popup>

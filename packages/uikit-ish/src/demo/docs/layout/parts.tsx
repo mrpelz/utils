@@ -69,6 +69,7 @@ const RootPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -80,6 +81,7 @@ const RootPart: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -149,6 +151,7 @@ const BackgroundPart: FunctionComponent = () => {
                   </List.Group>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Page.Root>
           </Layout.Column>
           <Layout.Column
@@ -201,6 +204,7 @@ const ColumnPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -212,6 +216,7 @@ const ColumnPart: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>

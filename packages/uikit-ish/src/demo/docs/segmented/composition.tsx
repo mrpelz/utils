@@ -1,5 +1,4 @@
 import '../toolbar/style.css';
-import './style.css';
 
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
@@ -35,11 +34,13 @@ import { propOptionsContentAnchor } from './props.js';
 const contentCode = `const [show, setShow] = useState('all');
 
 <Viewport.Content>
+  <Viewport.Padding edge="block-start" />
   <List.Root>…{/* all, or the favorites */}</List.Root>
+  <Viewport.Padding edge="block-end" />
 </Viewport.Content>
-{/* The anchor is the surface: its class gives it a background. */}
-<Viewport.Anchor className="bar" edge="block-start">
-  <div className="bar-content">
+{/* A toolbar spacing the control, placed as its anchor is. */}
+<Viewport.Anchor edge="block-start">
+  <Toolbar.Root placement="block-start">
     <Segmented.Root
       aria-label="Show"
       value={show}
@@ -49,10 +50,12 @@ const contentCode = `const [show, setShow] = useState('all');
       <Segmented.Item value="favorites">Favorites</Segmented.Item>
       <Segmented.Highlight />
     </Segmented.Root>
-  </div>
+  </Toolbar.Root>
 </Viewport.Anchor>`;
 
-const headerCode = `<Header.Root>
+const headerCode = `const [filter, setFilter] = useState('all');
+
+<Header.Root>
   <Viewport.BlockStart>
     <Toolbar.Root placement="block-start">
       <Segmented.Root
@@ -67,7 +70,9 @@ const headerCode = `<Header.Root>
     </Toolbar.Root>
   </Viewport.BlockStart>
   <Page.Root>
+    <Viewport.Padding edge="block-start" />
     <List.Root>…</List.Root>
+    <Viewport.Padding edge="block-end" />
   </Page.Root>
 </Header.Root>`;
 
@@ -139,7 +144,8 @@ const ContentViews: FunctionComponent = () => {
     >
       <>
         <Viewport.Content>
-          <List.Root className="segmented-demo-list">
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
             <List.Section>
               <List.Group>
                 {(show === 'all' ? names : favorites).map((name) => (
@@ -150,12 +156,11 @@ const ContentViews: FunctionComponent = () => {
               </List.Group>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
-        <Viewport.Anchor
-          className="segmented-demo-bar"
-          {...props}
-        >
-          <div className="segmented-demo-control">
+        <Viewport.Anchor {...props}>
+          {/* A toolbar spacing the control, placed as its anchor is. */}
+          <Toolbar.Root placement={props.edge}>
             <Segmented.Root
               aria-label="Show"
               value={show}
@@ -165,7 +170,7 @@ const ContentViews: FunctionComponent = () => {
               <Segmented.Item value="favorites">Favorites</Segmented.Item>
               <Segmented.Highlight />
             </Segmented.Root>
-          </div>
+          </Toolbar.Root>
         </Viewport.Anchor>
       </>
     </Component>
@@ -201,6 +206,7 @@ const InHeader: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root>
+            <Viewport.Padding edge="block-start" />
             <List.Root>
               <List.Section>
                 <List.Group>
@@ -223,6 +229,7 @@ const InHeader: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -315,8 +322,13 @@ export const SegmentedComposition: FunctionComponent = () => (
           component="viewport"
           part="Viewport.Anchor"
         />{' '}
-        (<code>edge</code>), in the content layer’s place for a bar: the anchor
-        is the surface, its class giving it a background.
+        (<code>edge</code>), in the content layer’s place for a bar, a{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Root"
+        />{' '}
+        in it (its <code>placement</code> the anchor’s edge) spacing the control
+        and giving it the bar’s look: no styles of the app’s.
       </li>
       <li>
         Guide <GuideLink to="section-3-clusters">§3</GuideLink>: segmented

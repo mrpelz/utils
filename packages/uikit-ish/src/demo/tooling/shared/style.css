@@ -39,6 +39,7 @@
     margin: 0;
   }
 
+
   /* A modal's scroll lock (Base UI's, the document's: inline styles on the
      root and the body) undone: the page scrolls on, a demo's modal blocks
      only its own screen (its backdrop covering it). (Important: over the
@@ -46,6 +47,15 @@
   :root,
   body {
     overflow: visible !important;
+  }
+
+  /* A raw demo is an app (see frame/component.tsx): its document never
+     scrolls (its content does, in its layers), nor bounces: on iOS, a drag
+     reaching it (e.g. on a bar) would move the whole app, fixed layers
+     too. As the library's apps should (see Viewport's docs). */
+  :root[data-demo-raw],
+  :root[data-demo-raw] body {
+    overscroll-behavior: none;
   }
 
   /*
@@ -65,6 +75,14 @@
    */
   .demo-phone,
   .demo-tablet {
+    /* The visual viewport within (a provider in it tracks its own, see
+       Viewport.Provider's screen); not the window's (a provider around
+       the frame tracks the page's, its keyboard and offsets not this
+       screen's). */
+    --uikit-viewport-top: 0px;
+    --uikit-viewport-left: 0px;
+    --uikit-viewport-keyboard-inset: 0px;
+
     position: relative;
     display: grid;
     overflow: clip;

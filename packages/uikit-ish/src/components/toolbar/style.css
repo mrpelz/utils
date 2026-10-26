@@ -42,6 +42,13 @@
     align-items: center;
     gap: var(--uikit-toolbar-gap);
 
+    /* A text field in it (e.g. a search or message field): the free space
+       between its buttons. */
+    & > [data-text-field-part='root'] {
+      min-width: 0;
+      flex: 1 1 0;
+    }
+
     &[data-placement='block-end'] {
       --uikit-toolbar-group-height: 48px;
       --uikit-toolbar-group-padding: 6px;

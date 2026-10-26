@@ -5,7 +5,7 @@ import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import { ComponentProps, forwardRef, useState } from 'react';
 
 import { cn, usePortalContainer } from '../utils/main.js';
-import { useSizeClass } from '../viewport/main.js';
+import { useSizeClass, ViewportScopeContext } from '../viewport/main.js';
 import type {
   SheetContentProps,
   SheetGrabberProps,
@@ -65,38 +65,42 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
     // (By the window's size class, see Viewport.)
     const sizeClass = useSizeClass();
     const isCompact = compactProp ?? sizeClass === 'compact';
+    // Its anchors' scope: fixed to it (see Viewport.Padding).
+    const [scope] = useState(() => ({}));
 
     return (
       // (No box of its own: nothing shifts in its container, e.g. a flex
       // layout's gaps.)
-      <BaseDrawer.Portal
-        className="uikit-sheet-portal"
-        container={usePortalContainer(container)}
-      >
-        <BaseDrawer.Backdrop
-          className="uikit-sheet-backdrop"
-          data-sheet-part="backdrop"
-        />
-        <BaseDrawer.Viewport
-          className="uikit-sheet-viewport"
-          data-sheet-part="viewport"
+      <ViewportScopeContext.Provider value={scope}>
+        <BaseDrawer.Portal
+          className="uikit-sheet-portal"
+          container={usePortalContainer(container)}
         >
-          <BaseDrawer.Popup
-            ref={ref}
-            data-background={background}
-            data-compact={isCompact ? '' : undefined}
-            data-detent={detent}
-            data-sheet-part="popup"
-            className={cn(
-              'uikit-sheet-popup',
-              isCompact && detent === 'medium'
-                ? cn('uikit-glass-medium', className)
-                : className,
-            )}
-            {...props}
+          <BaseDrawer.Backdrop
+            className="uikit-sheet-backdrop"
+            data-sheet-part="backdrop"
           />
-        </BaseDrawer.Viewport>
-      </BaseDrawer.Portal>
+          <BaseDrawer.Viewport
+            className="uikit-sheet-viewport"
+            data-sheet-part="viewport"
+          >
+            <BaseDrawer.Popup
+              ref={ref}
+              data-background={background}
+              data-compact={isCompact ? '' : undefined}
+              data-detent={detent}
+              data-sheet-part="popup"
+              className={cn(
+                'uikit-sheet-popup',
+                isCompact && detent === 'medium'
+                  ? cn('uikit-glass-medium', className)
+                  : className,
+              )}
+              {...props}
+            />
+          </BaseDrawer.Viewport>
+        </BaseDrawer.Portal>
+      </ViewportScopeContext.Provider>
     );
   },
 );

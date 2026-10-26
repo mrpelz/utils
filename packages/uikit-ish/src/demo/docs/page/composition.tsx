@@ -35,7 +35,9 @@ const backgroundsCode = `{/* Grouped lists, on the grouped background (the defau
 <Header.Root>
   <Viewport.BlockStart>…</Viewport.BlockStart>
   <Page.Root>
+    <Viewport.Padding edge="block-start" />
     <List.Root>…</List.Root>
+    <Viewport.Padding edge="block-end" />
   </Page.Root>
 </Header.Root>
 
@@ -43,11 +45,16 @@ const backgroundsCode = `{/* Grouped lists, on the grouped background (the defau
 <Header.Root>
   <Viewport.BlockStart>…</Viewport.BlockStart>
   <Page.Root background="plain">
+    <Viewport.Padding edge="block-start" />
     <List.Root listStyle="plain">…</List.Root>
+    <Viewport.Padding edge="block-end" />
   </Page.Root>
 </Header.Root>`;
 
-const stackCode = `<Navigation.Root onBack={pop}>
+const stackCode = `const [keys, setKeys] = useState(['settings']);
+const pop = () => setKeys((current) => current.slice(0, -1));
+
+<Navigation.Root onBack={pop}>
   <Navigation.SwipeArea />
   {/* The back button: staying while the pages move. */}
   <Viewport.BlockStart>
@@ -63,7 +70,9 @@ const stackCode = `<Navigation.Root onBack={pop}>
       <Header.Root key={key}>
         <Viewport.BlockStart>…</Viewport.BlockStart>
         <Page.Root>
+          <Viewport.Padding edge="block-start" />
           <List.Root>…</List.Root>
+          <Viewport.Padding edge="block-end" />
         </Page.Root>
       </Header.Root>
     ))}
@@ -80,7 +89,9 @@ const columnCode = `<Layout.Root>
     <Header.Root>
       <Viewport.BlockStart>…</Viewport.BlockStart>
       <Page.Root>
+        <Viewport.Padding edge="block-start" />
         <List.Root>…</List.Root>
+        <Viewport.Padding edge="block-end" />
       </Page.Root>
     </Header.Root>
   </Layout.Column>
@@ -92,8 +103,10 @@ const viewportCode = `<Viewport.Content safeArea="none">
       <Toolbar.Root placement="block-start">…</Toolbar.Root>
     </Viewport.BlockStart>
     <Page.Root>
-      {/* Clear of the bar over the page's end (anchors don't inset it). */}
-      <List.Root className="clear-end">…</List.Root>
+      <Viewport.Padding edge="block-start" />
+      <List.Root>…</List.Root>
+      {/* Its end scrolling out from under the bar at the bottom. */}
+      <Viewport.Padding edge="block-end" />
     </Page.Root>
   </Header.Root>
 </Viewport.Content>
@@ -123,6 +136,7 @@ const BackgroundGrouped: FunctionComponent = () => (
           </Toolbar.Root>
         </Viewport.BlockStart>
         <Page.Root>
+          <Viewport.Padding edge="block-start" />
           <Header.LargeTitle>
             <span>Settings</span>
           </Header.LargeTitle>
@@ -140,6 +154,7 @@ const BackgroundGrouped: FunctionComponent = () => (
               </List.Group>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Page.Root>
       </Header.Root>
     </Viewport.Content>
@@ -166,6 +181,7 @@ const BackgroundPlain: FunctionComponent = () => (
           </Toolbar.Root>
         </Viewport.BlockStart>
         <Page.Root background="plain">
+          <Viewport.Padding edge="block-start" />
           <Header.LargeTitle>
             <span>Contacts</span>
           </Header.LargeTitle>
@@ -181,6 +197,7 @@ const BackgroundPlain: FunctionComponent = () => (
               </List.Group>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Page.Root>
       </Header.Root>
     </Viewport.Content>
@@ -238,6 +255,7 @@ const InAStack: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Viewport.BlockStart>
                 <Page.Root>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     <List.Section>
                       <List.Group>
@@ -264,6 +282,7 @@ const InAStack: FunctionComponent = () => {
                       </List.Group>
                     </List.Section>
                   </List.Root>
+                  <Viewport.Padding edge="block-end" />
                 </Page.Root>
               </Header.Root>
             ))}
@@ -340,6 +359,7 @@ const InAColumn: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <Header.LargeTitle>
                   <span>{rowTitles[selected]}</span>
                 </Header.LargeTitle>
@@ -355,6 +375,7 @@ const InAColumn: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -389,11 +410,12 @@ const OverAViewport: FunctionComponent = () => {
               </Toolbar.Root>
             </Viewport.BlockStart>
             <Page.Root>
+              <Viewport.Padding edge="block-start" />
               <Header.LargeTitle>
                 <span>Notes</span>
               </Header.LargeTitle>
 
-              <List.Root className="page-demo-clear-end">
+              <List.Root>
                 <List.Section>
                   <List.Group>
                     {names.map((name) => (
@@ -404,6 +426,7 @@ const OverAViewport: FunctionComponent = () => {
                   </List.Group>
                 </List.Section>
               </List.Root>
+              <Viewport.Padding edge="block-end" />
             </Page.Root>
           </Header.Root>
         </Viewport.Content>
@@ -540,8 +563,13 @@ export const PageComposition: FunctionComponent = () => (
         <a href="toolbar">Toolbar</a> floating over the page’s end.
       </li>
       <li>
-        The page keeps its end clear of the bar (anchors don’t inset it): its
-        last list padded (here, a class of the app’s).
+        Its end scrolls out from under the bar: a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />{' '}
+        at the page’s end, as high as the bar (and one at its start, for its
+        header’s bar).
       </li>
     </ul>
     <CodeView code={viewportCode} />

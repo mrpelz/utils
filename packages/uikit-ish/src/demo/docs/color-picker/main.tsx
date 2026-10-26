@@ -164,6 +164,7 @@ export const ColorPickerDemo: FunctionComponent = () => {
                     {...propsPanel}
                   />
                 </ColorPicker.Root>
+                <Viewport.Padding edge="block-end" />
               </Sheet.Content>
             </Sheet.Popup>
           </Sheet.Root>

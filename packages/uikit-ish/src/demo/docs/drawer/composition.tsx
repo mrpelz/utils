@@ -37,7 +37,8 @@ import { useDrawerControls } from './props.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 
-const inspectorCode = `// Their triggers, in the content's bar (outside the drawers).
+const inspectorCode = `const [mailbox, setMailbox] = useState('inbox');
+// Their triggers, in the content's bar (outside the drawers).
 const mailboxesDrawer = useCreateDrawerHandle();
 const inspectorDrawer = useCreateDrawerHandle();
 
@@ -55,6 +56,7 @@ const inspectorDrawer = useCreateDrawerHandle();
           Inbox
         </List.Title>
         …
+        <Viewport.Padding edge="block-end" />
       </Page.Root>
     </Drawer.Popup>
   </Drawer.Root>
@@ -82,7 +84,9 @@ const inspectorDrawer = useCreateDrawerHandle();
         </Toolbar.Root>
       </Viewport.BlockStart>
       <Page.Root>
+        <Viewport.Padding edge="block-start" />
         …
+        <Viewport.Padding edge="block-end" />
       </Page.Root>
     </Header.Root>
   </Layout.Column>
@@ -103,7 +107,9 @@ const inspectorDrawer = useCreateDrawerHandle();
           </Toolbar.Root>
         </Viewport.BlockStart>
         <Page.Root>
+          <Viewport.Padding edge="block-start" />
           …
+          <Viewport.Padding edge="block-end" />
         </Page.Root>
       </Header.Root>
     </Drawer.Popup>
@@ -175,7 +181,11 @@ const Adaptive: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [selected, setSelected] = useState('inbox');
   // Its trigger, in the content's bar (outside the drawer).
-  const mailboxesDrawer = codeLabel(useCreateDrawerHandle(), 'mailboxesDrawer');
+  const mailboxesDrawer = codeLabel(
+    useCreateDrawerHandle(),
+    'mailboxesDrawer',
+    'const mailboxesDrawer = useCreateDrawerHandle();',
+  );
   const [externalContent, externalRoot, externalList, externalDetail] =
     useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
@@ -251,6 +261,7 @@ const Adaptive: FunctionComponent = () => {
                     </Toolbar.Root>
                   </Viewport.BlockStart>
                   <Page.Root>
+                    <Viewport.Padding edge="block-start" />
                     <List.Root>
                       {sidebarSections.map(([title, rows]) => (
                         <List.Section key={title}>
@@ -282,6 +293,7 @@ const Adaptive: FunctionComponent = () => {
                         </List.Section>
                       ))}
                     </List.Root>
+                    <Viewport.Padding edge="block-end" />
                   </Page.Root>
                 </Header.Root>
               </Drawer.Popup>
@@ -302,6 +314,7 @@ const Adaptive: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Viewport.BlockStart>
                 <Page.Root>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     {sidebarSections.map(([title, rows]) => (
                       <List.Section key={title}>
@@ -330,6 +343,7 @@ const Adaptive: FunctionComponent = () => {
                       </List.Section>
                     ))}
                   </List.Root>
+                  <Viewport.Padding edge="block-end" />
                 </Page.Root>
               </Header.Root>
             </Layout.Column>
@@ -361,6 +375,7 @@ const Adaptive: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -372,6 +387,7 @@ const Adaptive: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -387,8 +403,16 @@ const Inspector: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [mailbox, setMailbox] = useState('inbox');
   // Their triggers, in the content's bar (outside the drawers).
-  const mailboxesDrawer = codeLabel(useCreateDrawerHandle(), 'mailboxesDrawer');
-  const inspectorDrawer = codeLabel(useCreateDrawerHandle(), 'inspectorDrawer');
+  const mailboxesDrawer = codeLabel(
+    useCreateDrawerHandle(),
+    'mailboxesDrawer',
+    'const mailboxesDrawer = useCreateDrawerHandle();',
+  );
+  const inspectorDrawer = codeLabel(
+    useCreateDrawerHandle(),
+    'inspectorDrawer',
+    'const inspectorDrawer = useCreateDrawerHandle();',
+  );
   const mailboxes = useDrawerControls(id, addLog, {
     isCloseInRow: true,
     isClosed: true,
@@ -449,6 +473,7 @@ const Inspector: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Viewport.BlockStart>
                 <Page.Root>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     {sidebarSections.map(([title, rows]) => (
                       <List.Section key={title}>
@@ -477,6 +502,7 @@ const Inspector: FunctionComponent = () => {
                       </List.Section>
                     ))}
                   </List.Root>
+                  <Viewport.Padding edge="block-end" />
                 </Page.Root>
               </Header.Root>
             </Drawer.Popup>
@@ -516,6 +542,7 @@ const Inspector: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -527,6 +554,7 @@ const Inspector: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -552,6 +580,7 @@ const Inspector: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Viewport.BlockStart>
                 <Page.Root>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     <List.Section>
                       <List.Group>
@@ -566,6 +595,7 @@ const Inspector: FunctionComponent = () => {
                       </List.Group>
                     </List.Section>
                   </List.Root>
+                  <Viewport.Padding edge="block-end" />
                 </Page.Root>
               </Header.Root>
             </Drawer.Popup>

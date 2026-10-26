@@ -42,20 +42,23 @@ export const useLog = (): [ReactNode, AddLog] => {
 
   const log = (
     <section className="demo-config-section">
-      <summary className="demo-config-heading">Log</summary>
-      {/* (Following its last line, see Tail.) */}
-      <Tail
-        className="demo-log"
-        contentRef={logContainerRef}
-      />
-      <button
-        ref={buttonRef}
-        disabled
-        className="demo-button"
-        onClick={resetLogs}
-      >
-        Clear
-      </button>
+      {/* Collapsible, open at first (its lines kept while closed). */}
+      <details open>
+        <summary className="demo-config-heading">Log</summary>
+        {/* (Following its last line, see Tail.) */}
+        <Tail
+          className="demo-log"
+          contentRef={logContainerRef}
+        />
+        <button
+          ref={buttonRef}
+          disabled
+          className="demo-button"
+          onClick={resetLogs}
+        >
+          Clear
+        </button>
+      </details>
     </section>
   );
 

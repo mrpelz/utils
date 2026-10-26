@@ -1,5 +1,8 @@
 import type { ComponentProps, ReactNode, RefObject } from 'react';
 
+import type { PortalContainer } from '../utils/main.js';
+import type { ViewportAnchorHandle } from './padding.js';
+
 /**
  * The window's horizontal size class (UIKit's): `regular` from 768px (an
  * iPad's window, full or split), `compact` below (a phone's).
@@ -32,6 +35,14 @@ export type Listener = (event: ViewportScrollEvent) => void;
 export type ViewportProviderProps = {
   children?: ReactNode;
   /**
+   * The app's screen, when it isn't the window (e.g. a device's frame in a
+   * page): the visual viewport within it (the keyboard's inset over its
+   * bottom), its custom properties on it.
+   * @default the provided portal container (`PortalContainerContext`), or
+   * none: the window
+   */
+  screen?: PortalContainer | null;
+  /**
    * The scroll container tracked.
    * @default the document's scrolling element
    */
@@ -60,6 +71,12 @@ export type ViewportAnchorProps = ComponentProps<'div'> & {
    */
   edge: ViewportEdge;
   /**
+   * Its handle (see `Viewport.createAnchorHandle`), linking it to the
+   * paddings given it (`anchor`, alone or among others): as high as it, or
+   * the tallest of their anchors.
+   */
+  handle?: ViewportAnchorHandle;
+  /**
    * At the block end: pushed up by the on-screen keyboard (default, e.g.
    * a message field), or covered by it (e.g. a tab bar).
    */
@@ -71,7 +88,41 @@ export type ViewportAnchorProps = ComponentProps<'div'> & {
   safeArea?: ViewportSafeArea;
 };
 
+export type ViewportPaddingProps = Omit<ComponentProps<'div'>, 'children'> & {
+  /**
+   * The anchors it's as high as (the tallest of them): their handles, one
+   * or several (see `Viewport.createAnchorHandle`), wherever they are;
+   * instead of the tallest at its edge. `null`: none, whatever anchors are
+   * in its scope (its margin alone, e.g. a gap of the app's).
+   */
+  anchor?: ViewportAnchorHandle | readonly ViewportAnchorHandle[] | null;
+  /**
+   * The edge whose anchors it makes room for (the tallest of them, in its
+   * scope): its scroll container's start (`block-start`, e.g. a bar) or end
+   * (`block-end`, e.g. a tab bar).
+   * @default 'block-start'
+   */
+  edge?: ViewportEdge;
+  /**
+   * The gap between the content and its container's edge, beyond the
+   * anchors (px, or a CSS length): instead of the library's content margin
+   * (`--uikit-content-margin-block-start`/`-end`, 16px; none before a large
+   * title).
+   */
+  margin?: number | string;
+};
+
 export type ViewportContentProps = ComponentProps<'div'> & {
+  /**
+   * Bouncing even when its content fits (UIKit's `alwaysBounceVertical`):
+   * at least 1px to scroll, so a drag on it is its own (rubber-banding
+   * here, the bars staying), not the document's (on iOS, moving the whole
+   * app). Off: only content taller than it scrolls.
+   * @default while it holds its content itself; not while its child
+   * scrolls on its own (a `Page`, a `Header` around one, a `Layout`, a
+   * `Navigation`: bouncing it would move them whole)
+   */
+  alwaysBounce?: boolean;
   /**
    * With the on-screen keyboard: resized to what's above it (default, so
    * its end scrolls into view), or overlaid by it.

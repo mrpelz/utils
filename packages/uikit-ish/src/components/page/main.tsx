@@ -20,9 +20,13 @@ export type { PageRootProps } from './props.js';
 
 /** A page: its content's scroll container, on the page background. */
 const Root = forwardRef<HTMLDivElement, PageRootProps>(
-  ({ className, background = 'grouped', ...props }, ref) => (
+  (
+    { alwaysBounce = true, className, background = 'grouped', ...props },
+    ref,
+  ) => (
     <div
       ref={ref}
+      data-always-bounce={alwaysBounce ? '' : undefined}
       data-background={background}
       data-page-part="root"
       {...props}

@@ -69,6 +69,7 @@ const LiveView: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   {sidebarSections.map(([title, rows]) => (
                     <List.Section key={title}>
@@ -97,6 +98,7 @@ const LiveView: FunctionComponent = () => {
                     </List.Section>
                   ))}
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -113,6 +115,7 @@ const LiveView: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -124,6 +127,7 @@ const LiveView: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>

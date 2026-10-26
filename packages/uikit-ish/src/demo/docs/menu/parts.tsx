@@ -3094,7 +3094,11 @@ const ShortcutPart: FunctionComponent = () => {
 };
 
 // Its trigger and its button, outside the root: made once, here.
-const optionsMenu = codeLabel(Menu.createHandle(), 'optionsMenu');
+const optionsMenu = codeLabel(
+  Menu.createHandle(),
+  'optionsMenu',
+  'const optionsMenu = Menu.createHandle(); // (at module level)',
+);
 
 /** `Menu.createHandle`: a trigger outside the root, an imperative open. */
 const CreateHandlePart: FunctionComponent = () => {
@@ -3174,6 +3178,7 @@ const UseCreateMenuHandlePart: FunctionComponent = () => {
   const fileMenu = codeLabel(
     useCreateMenuHandle<{ file: string }>(),
     'fileMenu',
+    'const fileMenu = useCreateMenuHandle<{ file: string }>();',
   );
 
   return (

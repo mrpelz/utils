@@ -12,6 +12,7 @@ import {
   type ElementGeometry,
   List,
   Toolbar,
+  useAnchorSize,
   useElementGeometry,
   useElementVisibility,
   useFocusShiftPrevention,
@@ -21,6 +22,7 @@ import {
   useViewportScroll,
   useVisualViewport,
   Viewport,
+  type ViewportAnchorHandle,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
@@ -39,6 +41,8 @@ import {
   preventFocusShiftReturnRows,
   preventFocusShiftRows,
   preventInputZoomRows,
+  useAnchorSizeReturnRows,
+  useAnchorSizeRows,
   useElementGeometryRows,
   useElementVisibilityReturnRows,
   useElementVisibilityRows,
@@ -52,10 +56,12 @@ import {
   viewportBlockEndRows,
   viewportBlockStartRows,
   viewportContentRows,
+  viewportPaddingRows,
   viewportProviderRows,
   viewportScrollEventRows,
 } from './docs.js';
 import {
+  barAnchor,
   propOptionsAnchor,
   propOptionsBlockEnd,
   propOptionsBlockStart,
@@ -63,8 +69,13 @@ import {
   propOptionsElementGeometry,
   propOptionsElementVisibility,
   propOptionsFocusShift,
+  propOptionsHandlePadding,
   propOptionsInputZoom,
+  propOptionsPaddingContent,
+  propOptionsPaddingEnd,
+  propOptionsPaddingStart,
   propOptionsProvider,
+  toastAnchor,
 } from './props.js';
 
 const preventInputZoomCode = `// At the app's start: all its fields, while it runs.
@@ -111,6 +122,7 @@ const ProviderPartFrame: FunctionComponent<{
       }
     >
       <Viewport.Content ref={contentRef}>
+        <Viewport.Padding edge="block-start" />
         <List.Root>
           <List.Section>
             <List.Group>
@@ -122,6 +134,7 @@ const ProviderPartFrame: FunctionComponent<{
             </List.Group>
           </List.Section>
         </List.Root>
+        <Viewport.Padding edge="block-end" />
       </Viewport.Content>
     </Component>
   );
@@ -129,7 +142,10 @@ const ProviderPartFrame: FunctionComponent<{
 
 /** `ProviderPartFrame` in its provider, tracking the screen's content. */
 const ProviderPart: FunctionComponent = () => {
-  const contentRef = useLabelledRef<HTMLDivElement>('contentRef');
+  const contentRef = useLabelledRef<HTMLDivElement>(
+    'contentRef',
+    'HTMLDivElement',
+  );
   const [external] = useProvidedState('viewport-parts-provider');
   const [control, props, state] = usePropControl(
     useMemo(
@@ -178,6 +194,7 @@ const ContentPart: FunctionComponent = () => {
       title="Viewport.Content"
     >
       <Viewport.Content {...props}>
+        <Viewport.Padding edge="block-start" />
         <List.Root>
           <List.Section>
             <List.Group>
@@ -189,6 +206,7 @@ const ContentPart: FunctionComponent = () => {
             </List.Group>
           </List.Section>
         </List.Root>
+        <Viewport.Padding edge="block-end" />
       </Viewport.Content>
     </Component>
   );
@@ -218,7 +236,9 @@ const AnchorPart: FunctionComponent = () => {
     >
       <>
         <Viewport.Content>
-          <List.Root className="viewport-demo-list">
+          {/* Room for it at either end (the margin alone at the other). */}
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
             <List.Section>
               <List.Group>
                 {names.map((name) => (
@@ -229,6 +249,7 @@ const AnchorPart: FunctionComponent = () => {
               </List.Group>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
         {/* The anchor is the surface: its background to the screen's edge,
             its content clear of the insets (its padding). */}
@@ -270,7 +291,8 @@ const BlockStartPart: FunctionComponent = () => {
     >
       <>
         <Viewport.Content>
-          <List.Root className="viewport-demo-list">
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
             <List.Section>
               <List.Group>
                 {names.map((name) => (
@@ -281,6 +303,7 @@ const BlockStartPart: FunctionComponent = () => {
               </List.Group>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
         <Viewport.BlockStart {...props}>
           <Toolbar.Root placement="block-start">
@@ -316,7 +339,8 @@ const BlockEndPart: FunctionComponent = () => {
     >
       <>
         <Viewport.Content>
-          <List.Root className="viewport-demo-list">
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
             <List.Section>
               <List.Group>
                 {names.map((name) => (
@@ -327,6 +351,7 @@ const BlockEndPart: FunctionComponent = () => {
               </List.Group>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
         <Viewport.BlockEnd {...props}>
           <Toolbar.Root>
@@ -339,6 +364,254 @@ const BlockEndPart: FunctionComponent = () => {
     </Component>
   );
 };
+
+/**
+ * `Viewport.Padding`, overlaid: room at the content's ends for its bars,
+ * the bottom one one row or two (its padding following it, live).
+ */
+const PaddingPart: FunctionComponent = () => {
+  const id = 'viewport-parts-padding';
+  const [externalContent, externalStart, externalEnd] = useProvidedState(id);
+  const [controlContent, content, stateContent] = usePropControl(
+    propOptionsPaddingContent,
+    { external: externalContent, isOpen: true, title: '[content]' },
+  );
+  const [controlStart, propsStart, stateStart] = usePropControl(
+    propOptionsPaddingStart,
+    {
+      emphasize: 'overlay',
+      external: externalStart,
+      title: 'Viewport.Padding (start)',
+    },
+  );
+  const [controlEnd, propsEnd, stateEnd] = usePropControl(
+    propOptionsPaddingEnd,
+    {
+      emphasize: 'overlay',
+      external: externalEnd,
+      isOpen: true,
+      title: 'Viewport.Padding (end)',
+    },
+  );
+
+  return (
+    <Component
+      isInline
+      controls={[controlContent, controlStart, controlEnd]}
+      id={id}
+      stage="phone"
+      state={[stateContent, stateStart, stateEnd]}
+      title="Viewport.Padding"
+    >
+      <>
+        <Viewport.BlockStart>
+          <Toolbar.Root placement="block-start">
+            <Toolbar.Title>
+              <span>Contacts</span>
+            </Toolbar.Title>
+          </Toolbar.Root>
+        </Viewport.BlockStart>
+        <Viewport.Content>
+          <Viewport.Padding {...propsStart} />
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {names.map((name) => (
+                  <List.Item key={name}>
+                    <List.Title>{name}</List.Title>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+          <Viewport.Padding {...propsEnd} />
+        </Viewport.Content>
+        <Viewport.BlockEnd className="viewport-demo-surface">
+          {content.rows === 2 ? (
+            <Toolbar.Root>
+              <Toolbar.Title>
+                <span>Updated Just Now</span>
+              </Toolbar.Title>
+            </Toolbar.Root>
+          ) : null}
+          <Toolbar.Root>
+            <Toolbar.Title>
+              <span>{names.length} Contacts</span>
+            </Toolbar.Title>
+          </Toolbar.Root>
+        </Viewport.BlockEnd>
+      </>
+    </Component>
+  );
+};
+
+/**
+ * The end padding's height, and the anchors it may follow (the handle
+ * view's diagnostics, read as in its screen).
+ */
+const HandleSizes: FunctionComponent<{
+  anchor:
+    ViewportAnchorHandle | readonly ViewportAnchorHandle[] | null | undefined;
+  margin: number | string | undefined;
+}> = ({ anchor, margin }) => {
+  const bar = useAnchorSize('block-end', barAnchor);
+  const toast = useAnchorSize('block-end', toastAnchor);
+  const padding = useAnchorSize('block-end', anchor);
+
+  return (
+    <dl className="viewport-demo-metrics">
+      <dt>barAnchor (toolbar)</dt>
+      <dd>{bar}px</dd>
+      <dt>toastAnchor (toast)</dt>
+      <dd>{toast}px</dd>
+      <dt>Padding (end): anchors</dt>
+      <dd>{padding}px</dd>
+      <dt>Padding (end): + margin</dt>
+      <dd>
+        {typeof margin === 'number'
+          ? `${String(margin)}px`
+          : (margin ?? '16px')}
+      </dd>
+    </dl>
+  );
+};
+
+/**
+ * `Viewport.createAnchorHandle`: the end padding by the toolbar alone (its
+ * handle), or by the toolbar and the toast floating above it (both handles;
+ * by edge: the same, the tallest at the bottom).
+ */
+const CreateAnchorHandlePart: FunctionComponent = () => {
+  const id = 'viewport-parts-create-anchor-handle';
+  const [external] = useProvidedState(id);
+  const [control, props, state] = usePropControl(propOptionsHandlePadding, {
+    emphasize: 'overlay',
+    external,
+    isOpen: true,
+    title: 'Viewport.Padding (end)',
+  });
+
+  return (
+    <Component
+      isInline
+      controls={[control]}
+      id={id}
+      stage="phone"
+      state={[state]}
+      title="Viewport.createAnchorHandle"
+      diagnostics={
+        <HandleSizes
+          anchor={props.anchor}
+          margin={props.margin}
+        />
+      }
+    >
+      <>
+        <Viewport.Content>
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {names.map((name) => (
+                  <List.Item key={name}>
+                    <List.Title>{name}</List.Title>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+          <Viewport.Padding {...props} />
+        </Viewport.Content>
+        <Viewport.BlockEnd
+          className="viewport-demo-surface"
+          handle={barAnchor}
+        >
+          <Toolbar.Root>
+            <Toolbar.Title>
+              <span>{names.length} Contacts</span>
+            </Toolbar.Title>
+          </Toolbar.Root>
+        </Viewport.BlockEnd>
+        {/* A toast over the content: room made for it only if linked. */}
+        <Viewport.BlockEnd
+          className="viewport-demo-toast-anchor"
+          handle={toastAnchor}
+        >
+          <div
+            className="viewport-demo-toast"
+            role="status"
+          >
+            Contact deleted.
+          </div>
+        </Viewport.BlockEnd>
+      </>
+    </Component>
+  );
+};
+
+/**
+ * The anchors' sizes (`useAnchorSize`'s view's diagnostics, read as in its
+ * screen).
+ */
+const AnchorSizes: FunctionComponent = () => {
+  const top = useAnchorSize('block-start');
+  const bottom = useAnchorSize('block-end');
+
+  return (
+    <dl className="viewport-demo-metrics">
+      <dt>block-start</dt>
+      <dd>{top}px</dd>
+      <dt>block-end</dt>
+      <dd>{bottom}px</dd>
+    </dl>
+  );
+};
+
+/** `useAnchorSize`: the bars' sizes, in their screen. */
+const UseAnchorSizePart: FunctionComponent = () => (
+  <Component
+    isInline
+    diagnostics={<AnchorSizes />}
+    id="viewport-parts-use-anchor-size"
+    stage="phone"
+    title="useAnchorSize"
+    setup={`// In the anchors' scope (here: the screen):
+const top = useAnchorSize('block-start');
+const bottom = useAnchorSize('block-end');`}
+  >
+    <>
+      <Viewport.BlockStart>
+        <Toolbar.Root placement="block-start">
+          <Toolbar.Title>
+            <span>Contacts</span>
+          </Toolbar.Title>
+        </Toolbar.Root>
+      </Viewport.BlockStart>
+      <Viewport.Content>
+        <Viewport.Padding edge="block-start" />
+        <List.Root>
+          <List.Section>
+            <List.Group>
+              {names.map((name) => (
+                <List.Item key={name}>
+                  <List.Title>{name}</List.Title>
+                </List.Item>
+              ))}
+            </List.Group>
+          </List.Section>
+        </List.Root>
+        <Viewport.Padding edge="block-end" />
+      </Viewport.Content>
+      <Viewport.BlockEnd className="viewport-demo-surface">
+        <Toolbar.Root>
+          <Toolbar.Title>
+            <span>{names.length} Contacts</span>
+          </Toolbar.Title>
+        </Toolbar.Root>
+      </Viewport.BlockEnd>
+    </>
+  </Component>
+);
 
 /** `useVisualViewport`'s readout (inside a provider, see below). */
 const UseVisualViewportView: FunctionComponent = () => {
@@ -403,6 +676,7 @@ const UseViewportScrollView: FunctionComponent<{
       title="useViewportScroll"
     >
       <Viewport.Content ref={contentRef}>
+        <Viewport.Padding edge="block-start" />
         <List.Root>
           <List.Section>
             <List.Group>
@@ -414,6 +688,7 @@ const UseViewportScrollView: FunctionComponent<{
             </List.Group>
           </List.Section>
         </List.Root>
+        <Viewport.Padding edge="block-end" />
       </Viewport.Content>
     </Component>
   );
@@ -421,7 +696,10 @@ const UseViewportScrollView: FunctionComponent<{
 
 /** `UseViewportScrollView`, in a provider tracking its screen's content. */
 const UseViewportScrollPart: FunctionComponent = () => {
-  const contentRef = useLabelledRef<HTMLDivElement>('contentRef');
+  const contentRef = useLabelledRef<HTMLDivElement>(
+    'contentRef',
+    'HTMLDivElement',
+  );
   const [log, addLog] = useLog();
 
   return (
@@ -459,6 +737,7 @@ const UseScrollDirectionView: FunctionComponent<{
       }
     >
       <Viewport.Content ref={contentRef}>
+        <Viewport.Padding edge="block-start" />
         <List.Root>
           <List.Section>
             <List.Group>
@@ -470,6 +749,7 @@ const UseScrollDirectionView: FunctionComponent<{
             </List.Group>
           </List.Section>
         </List.Root>
+        <Viewport.Padding edge="block-end" />
       </Viewport.Content>
     </Component>
   );
@@ -477,7 +757,10 @@ const UseScrollDirectionView: FunctionComponent<{
 
 /** `UseScrollDirectionView`, in a provider tracking its screen's content. */
 const UseScrollDirectionPart: FunctionComponent = () => {
-  const contentRef = useLabelledRef<HTMLDivElement>('contentRef');
+  const contentRef = useLabelledRef<HTMLDivElement>(
+    'contentRef',
+    'HTMLDivElement',
+  );
 
   return (
     <Viewport.Provider scroller={contentRef}>
@@ -799,6 +1082,16 @@ export const ViewportParts: FunctionComponent = () => (
         : the top and the bottom).
       </li>
       <li>
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        >
+          Padding
+        </PartLink>
+        : a scroll container’s content edge, room for the anchors there (by
+        their scope, or by their handles) and the content margin.
+      </li>
+      <li>
         Hooks: what the provider tracks, inside it; and an element’s visibility
         and geometry, anywhere.
       </li>
@@ -820,6 +1113,15 @@ export const ViewportParts: FunctionComponent = () => (
               component="viewport"
               part="Viewport.Content"
             />
+            <ul>
+              <li>
+                <PartLink
+                  component="viewport"
+                  part="Viewport.Padding"
+                />{' '}
+                (at its start and its end: in it, or in a page in it)
+              </li>
+            </ul>
           </li>
           <li>
             <PartLink
@@ -843,6 +1145,26 @@ export const ViewportParts: FunctionComponent = () => (
             </ul>
           </li>
           <li>
+            Anchor handles (optional: an anchor’s <code>handle</code>; one or
+            several in a padding’s <code>anchor</code>):
+            <ul>
+              <li>
+                <PartLink
+                  component="viewport"
+                  part="Viewport.createAnchorHandle"
+                />{' '}
+                (at module level), or
+              </li>
+              <li>
+                <PartLink
+                  component="viewport"
+                  part="useCreateViewportAnchorHandle"
+                />{' '}
+                (in a component)
+              </li>
+            </ul>
+          </li>
+          <li>
             Hooks (anywhere inside):
             <ul>
               <li>
@@ -862,6 +1184,32 @@ export const ViewportParts: FunctionComponent = () => (
                   component="viewport"
                   part="useScrollDirection"
                 />
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        Anchor sizes (by scope, no provider needed):
+        <ul>
+          <li>
+            <PartLink
+              component="viewport"
+              part="ViewportScopeContext"
+            />{' '}
+            (optional: around an element containing fixed layers; set by a{' '}
+            <PartLink
+              component="layout"
+              part="Layout.Column"
+            />
+            , a sheet’s or drawer’s popup)
+            <ul>
+              <li>
+                <PartLink
+                  component="viewport"
+                  part="useAnchorSize"
+                />{' '}
+                (anywhere inside)
               </li>
             </ul>
           </li>
@@ -1067,6 +1415,202 @@ export const ViewportParts: FunctionComponent = () => (
     <BlockEndPart />
     <h3>Props</h3>
     <PropsTable rows={viewportBlockEndRows} />
+
+    <Heading
+      id="viewport-padding"
+      level={2}
+    >
+      <code>Viewport.Padding</code>
+    </Heading>
+    <ul>
+      <li>
+        A scroll container’s content edge, at its start (under a bar) or its end
+        (above a tab bar or toolbar): room for the anchors there, so the content
+        scrolls out from under them, and the content margin beyond.
+      </li>
+      <li>
+        The content margin: the library’s gap between content and its
+        container’s edge (UIKit’s layout margins), 16px by its tokens (
+        <code>--uikit-content-margin-block-start</code>, <code>-end</code>);
+        none before a{' '}
+        <PartLink
+          component="header"
+          part="Header.LargeTitle"
+        />{' '}
+        (it sits right under the bar). <code>margin</code> overrides it per
+        padding. Without anchors in its scope (e.g. a sheet’s content, or no
+        bar), it’s the margin alone: components never space themselves, the
+        padding does.
+      </li>
+      <li>
+        Following no anchors, even with some in its scope:{' '}
+        <code>anchor=&#123;null&#125;</code>, the margin alone (e.g. content
+        meant to scroll under a bar, still spaced from the edge). Not rendering
+        a padding leaves no gap at all.
+      </li>
+      <li>
+        As high as the tallest anchor at its <code>edge</code> in its scope; or,
+        linked to anchors by their handles (<code>anchor</code>: one, or
+        several), as the tallest of those (see{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.createAnchorHandle"
+        />
+        ). Live, as an anchor changes (e.g. a tab bar collapsing; here, the
+        bottom bar’s rows).
+      </li>
+      <li>
+        An anchor’s size without the safe area insets it keeps clear: the scroll
+        container keeps them clear itself (e.g. a{' '}
+        <PartLink
+          component="page"
+          part="Page.Root"
+        />
+        ’s padding), so the two add up.
+      </li>
+      <li>
+        Its scope: where the anchors are fixed to, the screen (the window, or a
+        frame like these views’), or an element containing fixed layers (a{' '}
+        <PartLink
+          component="layout"
+          part="Layout.Column"
+        />
+        , a sheet’s or drawer’s popup; see{' '}
+        <PartLink
+          component="viewport"
+          part="ViewportScopeContext"
+        />
+        ).
+      </li>
+      <li>
+        Sets its scroll container’s scroll padding at its edge (
+        <code>scroll-padding-block-start</code> or <code>-end</code>): the
+        container’s own padding there and its height, so focus moving and{' '}
+        <code>scrollIntoView</code> stop clear of the anchors; while mounted.
+        Its scroll container is its nearest ancestor scrolling (or the
+        document).
+      </li>
+      <li>
+        One per end of a scroll container. Leave it out where nothing should
+        make room (e.g. a picture under the bar, or a bar with nothing in it).
+      </li>
+      <li>
+        Renders a <code>div</code>.
+      </li>
+    </ul>
+    <PaddingPart />
+    <h3>Props</h3>
+    <PropsTable rows={viewportPaddingRows} />
+
+    <Heading
+      id="viewport-createanchorhandle"
+      level={2}
+    >
+      <code>Viewport.createAnchorHandle</code>
+    </Heading>
+    <ul>
+      <li>
+        A handle naming an anchor, to link paddings to it: given to the anchor (
+        <code>handle</code>) and to the paddings (<code>anchor</code>: one
+        handle, or several, the padding as high as the tallest of them). Made
+        once, e.g. at a module’s top level.
+      </li>
+      <li>
+        For a padding that should follow some anchors, not all at its edge: e.g.
+        a toolbar, not a toast floating above it.
+      </li>
+      <li>
+        Here, the end padding’s <code>anchor</code> (the room it makes for
+        anchors in the diagnostics, its 16px margin beyond; the content’s last
+        rows, scrolled to the end, show it):
+        <ul>
+          <li>
+            <code>barAnchor</code>: as high as the toolbar. The toast floats
+            over the last row, as a toast should (it’s brief).
+          </li>
+          <li>
+            <code>[barAnchor, toastAnchor]</code>: as high as the taller of the
+            two, the toast. The last rows stay clear of it too, while it’s
+            shown.
+          </li>
+          <li>
+            Unset: the tallest anchor at its <code>edge</code> (
+            <code>block-end</code>), the toast too: here the same as both
+            linked, but following any anchor added at the bottom.
+          </li>
+          <li>
+            <code>null</code>: none, the margin alone (16px). The last rows
+            scroll under the toolbar and the toast, 16px from the screen’s edge.
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <CreateAnchorHandlePart />
+
+    <Heading
+      id="usecreateviewportanchorhandle"
+      level={2}
+    >
+      <code>useCreateViewportAnchorHandle</code>
+    </Heading>
+    <ul>
+      <li>
+        <PartLink
+          component="viewport"
+          part="Viewport.createAnchorHandle"
+        />{' '}
+        in a component: made once, for its lifetime.
+      </li>
+    </ul>
+
+    <Heading
+      id="useanchorsize"
+      level={2}
+    >
+      <code>useAnchorSize</code>
+    </Heading>
+    <ul>
+      <li>
+        The size of the tallest anchor at an edge in its scope (or of the
+        tallest of those linked by their handles: one, or several), re-rendering
+        as it changes: e.g. to offset what sticks below a bar (a{' '}
+        <PartLink
+          component="header"
+          part="Header.Accessory"
+        />{' '}
+        does).
+      </li>
+    </ul>
+    <UseAnchorSizePart />
+    <h3>Arguments</h3>
+    <PropsTable rows={useAnchorSizeRows} />
+    <h3>Returns</h3>
+    <PropsTable rows={useAnchorSizeReturnRows} />
+
+    <Heading
+      id="viewportscopecontext"
+      level={2}
+    >
+      <code>ViewportScopeContext</code>
+    </Heading>
+    <ul>
+      <li>
+        The anchors’ scope for what’s within: an element’s key that fixed layers
+        are contained by (its value, any object). The library’s containers
+        provide it (
+        <PartLink
+          component="layout"
+          part="Layout.Column"
+        />
+        , sheets’ and drawers’ popups); provide it for an element of the app’s
+        that contains fixed layers (a <code>transform</code>,{' '}
+        <code>contain: layout</code>).
+      </li>
+      <li>
+        Unset: the provided portal container (a device’s frame, see{' '}
+        <code>PortalContainerContext</code>), or the window.
+      </li>
+    </ul>
 
     <Heading
       id="usevisualviewport"
@@ -1338,6 +1882,9 @@ export const viewportPartsDemos = [
   AnchorPart,
   BlockStartPart,
   BlockEndPart,
+  PaddingPart,
+  CreateAnchorHandlePart,
+  UseAnchorSizePart,
   UseVisualViewportPart,
   UseViewportScrollPart,
   UseScrollDirectionPart,

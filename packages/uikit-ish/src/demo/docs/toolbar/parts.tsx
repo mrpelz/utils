@@ -733,6 +733,20 @@ export const ToolbarParts: FunctionComponent = () => (
         , a <code>toolbar</code>): a row, its parts 12px apart (top: 10px).
       </li>
       <li>
+        A{' '}
+        <PartLink
+          component="text-field"
+          part="TextField.Root"
+        />{' '}
+        in it (e.g. a search or message field) takes its free space, between its
+        buttons; other controls (e.g. a{' '}
+        <PartLink
+          component="segmented"
+          part="Segmented.Root"
+        />
+        ) fill it on their own.
+      </li>
+      <li>
         <code>placement</code>: at the bottom (48px capsules, padded for the
         home indicator) or the top (44px capsules, a navigation bar).
       </li>

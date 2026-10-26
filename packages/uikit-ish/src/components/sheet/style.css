@@ -238,11 +238,11 @@
     flex: 1 1 auto;
     overscroll-behavior: contain;
 
-    /* Its end 35px after its content (as between a list's sections: a
-       list's ends are its container's, see List), scrolling clear of the
-       home indicator (its background to the edge; none left for what's in
-       it, see the popup). */
-    padding-block-end: calc(var(--uikit-safe-area-inset-bottom, 0px) + 35px);
+    /* Its end clear of the home indicator (its background to the edge;
+       none left for what's in it, see the popup); the gap to its content
+       is its `Viewport.Padding`'s (a list's ends are its container's, see
+       List). */
+    padding-block-end: var(--uikit-safe-area-inset-bottom, 0);
 
     /* Its header only a grabber (its content's own bars, e.g. a
        navigation's): over the content, which starts at the sheet's top

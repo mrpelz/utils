@@ -149,6 +149,7 @@ const InASheet: FunctionComponent = () => {
               >
                 <ColorPicker.Panel />
               </ColorPicker.Root>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -227,6 +228,7 @@ const InAListRow: FunctionComponent = () => {
                         >
                           <ColorPicker.Panel />
                         </ColorPicker.Root>
+                        <Viewport.Padding edge="block-end" />
                       </Sheet.Content>
                     </Sheet.Popup>
                   </Sheet.Root>

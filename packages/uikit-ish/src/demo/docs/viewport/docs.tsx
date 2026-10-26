@@ -23,6 +23,31 @@ const safeAreaRow: PropRow = [
   </>,
 ];
 
+const anchorHandleRow: PropRow = [
+  'handle',
+  'ViewportAnchorHandle',
+  undefined,
+  <>
+    Its handle (
+    <PartLink
+      component="viewport"
+      part="Viewport.createAnchorHandle"
+    />
+    , in a component{' '}
+    <PartLink
+      component="viewport"
+      part="useCreateViewportAnchorHandle"
+    />
+    ), linking it to the{' '}
+    <PartLink
+      component="viewport"
+      part="Viewport.Padding"
+    />
+    s given it (their <code>anchor</code>, alone or among others’): as high as
+    it, or as the tallest of the anchors they’re linked to.
+  </>,
+];
+
 const anchorKeyboardRow: PropRow = [
   'keyboard',
   union('push', 'cover'),
@@ -59,6 +84,19 @@ export const viewportProviderRows: readonly PropRow[] = [
     </>,
   ],
   [
+    'screen',
+    'HTMLElement | RefObject<HTMLElement | null> | null',
+    'the provided portal container, or the window',
+    <>
+      The app’s screen, when it isn’t the window (e.g. a device’s frame in a
+      page, as here): the visual viewport within it (what the keyboard covers of
+      its bottom, how far its top is scrolled away while the keyboard shows),
+      its custom properties set on it, not the root element. By default, the
+      portal container provided by <code>PortalContainerContext</code> (the
+      app’s screen for its popups, too); <code>null</code>: the window.
+    </>,
+  ],
+  [
     'threshold',
     'number',
     code('8'),
@@ -83,6 +121,21 @@ export const viewportContentRows: readonly PropRow[] = [
     </>,
   ],
   safeAreaRow,
+  [
+    'alwaysBounce',
+    'boolean',
+    'while it holds its content itself',
+    <>
+      Bouncing even when its content fits (UIKit’s{' '}
+      <code>alwaysBounceVertical</code>): it has at least 1px to scroll, so a
+      drag on it is its own (rubber-banding the content layer, the bars
+      staying), not the document’s (on iOS, moving the whole app).{' '}
+      <code>false</code>: only content taller than it scrolls. Unset: not while
+      its child scrolls on its own (a <a href="page">Page</a>, a{' '}
+      <a href="header">Header</a> around one, a <a href="layout">Layout</a>, a{' '}
+      <a href="navigation">Navigation</a>), which bouncing it would move whole.
+    </>,
+  ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
 
@@ -98,6 +151,7 @@ export const viewportAnchorRows: readonly PropRow[] = [
       mirrored right to left).
     </>,
   ],
+  anchorHandleRow,
   anchorKeyboardRow,
   safeAreaRow,
   ...elementRows('div', 'HTMLDivElement'),
@@ -110,14 +164,86 @@ export const viewportBlockStartRows: readonly PropRow[] = [
     code(union('push')),
     'None at the top (an anchor’s prop, effective at the block end).',
   ],
+  anchorHandleRow,
   safeAreaRow,
   ...elementRows('div', 'HTMLDivElement'),
 ];
 
 export const viewportBlockEndRows: readonly PropRow[] = [
+  anchorHandleRow,
   anchorKeyboardRow,
   safeAreaRow,
   ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const viewportPaddingRows: readonly PropRow[] = [
+  [
+    'edge',
+    union('block-start', 'block-end'),
+    code(union('block-start')),
+    <>
+      Where it is in its scroll container: at its start (
+      <code>block-start</code>, e.g. under a header’s bar) or its end (
+      <code>block-end</code>, e.g. above a tab bar); its scroll padding set
+      there. Without an <code>anchor</code>, it makes room for the anchors at
+      that edge: as high as the tallest of them in its scope.
+    </>,
+  ],
+  [
+    'anchor',
+    'ViewportAnchorHandle | ViewportAnchorHandle[] | null',
+    <>all at its edge (in its scope)</>,
+    <>
+      The anchors it makes room for, by their handles (each anchor’s{' '}
+      <code>handle</code>): one, or several (as high as the tallest of them),
+      instead of all at its edge. E.g. a toolbar, not a toast floating over the
+      content above it; or both, for the last rows to stay clear of the toast.{' '}
+      <code>null</code>: none, whatever anchors are in its scope: its{' '}
+      <code>margin</code> alone, a gap of the app’s (e.g. content meant to
+      scroll under a bar, still spaced from the edge).
+    </>,
+  ],
+  [
+    'margin',
+    'number | string',
+    <>
+      <code>16px</code> (<code>--uikit-content-margin-block-start</code>/
+      <code>-end</code>); none before a large title
+    </>,
+    <>
+      The gap between the content and its container’s edge, beyond the anchors
+      (px, or a CSS length): the library’s content margin (UIKit’s layout
+      margins) by default, themed by its tokens. Set it to override one padding
+      (e.g. <code>0</code>).
+    </>,
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+/** `useAnchorSize(edge, handle)`: its arguments. */
+export const useAnchorSizeRows: readonly PropRow[] = [
+  [
+    'edge',
+    union('block-start', 'block-end', 'inline-start', 'inline-end'),
+    undefined,
+    'The edge whose tallest anchor (in its scope) it reads.',
+  ],
+  [
+    'handle',
+    'ViewportAnchorHandle | ViewportAnchorHandle[] | null',
+    undefined,
+    'The anchors it reads instead, by their handles: one, or several (the tallest of them); null: none (0).',
+  ],
+];
+
+/** `useAnchorSize`: what it returns. */
+export const useAnchorSizeReturnRows: readonly PropRow[] = [
+  [
+    '(return)',
+    'number',
+    undefined,
+    'The tallest anchor’s size (px) along its edge’s axis, without the safe area insets it keeps clear; live (e.g. a tab bar collapsing); 0 without one.',
+  ],
 ];
 
 /** `useVisualViewport()`: what it returns (`VisualViewportState`). */

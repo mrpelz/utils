@@ -88,6 +88,7 @@ const LiveView: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Viewport.BlockStart>
                 <Page.Root>
+                  <Viewport.Padding edge="block-start" />
                   <Header.LargeTitle>
                     <span>{pages[key]?.title}</span>
                   </Header.LargeTitle>
@@ -109,6 +110,7 @@ const LiveView: FunctionComponent = () => {
                       </List.Group>
                     </List.Section>
                   </List.Root>
+                  <Viewport.Padding edge="block-end" />
                 </Page.Root>
               </Header.Root>
             ))}

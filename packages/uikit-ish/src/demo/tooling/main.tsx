@@ -1,3 +1,5 @@
+import { Collapsible } from '@base-ui/react/collapsible';
+import { RadioGroup } from '@base-ui/react/radio-group';
 import { ErrorBoundary, LocationProvider, Route, Router } from 'preact-iso';
 import { FunctionComponent, useMemo } from 'react';
 
@@ -20,8 +22,10 @@ import {
 import { startClock } from './shared/clock.js';
 import { startStatusBarTaps } from './shared/status-bar.js';
 
-// (Named for the code shown, see `renderCode`.)
+// (Named for the code shown, see `renderCode`: the library's components,
+// then Base UI's used in demos as they are.)
 nameComponents(components);
+nameComponents({ Collapsible, RadioGroup });
 
 startClock();
 startStatusBarTaps();

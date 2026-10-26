@@ -72,6 +72,7 @@ export const LayoutDemo: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -138,6 +139,7 @@ export const LayoutDemo: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -154,6 +156,7 @@ export const LayoutDemo: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root background="plain">
+                <Viewport.Padding edge="block-start" />
                 <List.Root listStyle="plain">
                   <List.Section>
                     <List.Group>
@@ -177,6 +180,7 @@ export const LayoutDemo: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -193,12 +197,14 @@ export const LayoutDemo: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root background="plain">
+                <Viewport.Padding edge="block-start" />
                 <List.Root listStyle="plain">
                   <List.Block>
                     The detail of {message}, in {folder}: as wide as the columns
                     before it leave.
                   </List.Block>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>

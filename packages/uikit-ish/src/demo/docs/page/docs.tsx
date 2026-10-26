@@ -21,6 +21,18 @@ export const pageRootRows: readonly PropRow[] = [
     </>,
   ],
   [
+    'alwaysBounce',
+    'boolean',
+    code('true'),
+    <>
+      Bouncing even when its content fits (UIKit’s{' '}
+      <code>alwaysBounceVertical</code>): it has at least 1px to scroll, so a
+      drag on it is its own (rubber-banding the page, the bars staying), not the
+      document’s (on iOS, moving the whole app). <code>false</code>: only
+      content taller than it scrolls.
+    </>,
+  ],
+  [
     'children',
     'ReactNode',
     undefined,

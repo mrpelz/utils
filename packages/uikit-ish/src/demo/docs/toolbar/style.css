@@ -1,10 +1,5 @@
 /* Toolbar demos (see main.tsx). */
 
-/* A list in the content layer, clear of the bars floating over its ends. */
-.toolbar-demo-list {
-  padding-block: 64px 96px;
-}
-
 /* A bar of its own (a part's view): a phone's width, on a page's
    background behind its glass. */
 .toolbar-demo-bar {

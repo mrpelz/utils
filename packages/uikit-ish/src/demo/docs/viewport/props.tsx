@@ -1,4 +1,9 @@
-import { commonPropOptions } from '../../tooling/frame/prop-control.js';
+import { Viewport } from '../../../components/index.js';
+import {
+  commonPropOptions,
+  MappedProp,
+} from '../../tooling/frame/prop-control.js';
+import { codeLabel } from '../../tooling/frame/render-code.js';
 
 const safeAreas = [undefined, 'all', 'block', 'inline', 'none'] as const;
 
@@ -23,6 +28,7 @@ export const propOptionsSide = {
 export const propOptionsLayer = {
   shown: [false, true] as const,
   keyboard: [undefined, 'resize', 'overlay'] as const,
+  alwaysBounce: [undefined, true, false] as const,
   safeArea: safeAreas,
 };
 
@@ -36,6 +42,7 @@ const elementOptions = {
 
 export const propOptionsOverviewContent = {
   keyboard: [undefined, 'resize', 'overlay'] as const,
+  alwaysBounce: [undefined, true, false] as const,
   safeArea: safeAreas,
 };
 
@@ -52,23 +59,51 @@ export const propOptionsOverviewBlockEnd = {
 
 export const propOptionsProvider = {
   threshold: [undefined, 0, 8, 50, 200] as const,
+  // (Unset: the provided portal container, e.g. a frame's screen; null: the
+  // window.)
+  screen: [undefined, null] as const,
 };
 
 export const propOptionsContent = {
   ...elementOptions,
   keyboard: [undefined, 'resize', 'overlay'] as const,
+  alwaysBounce: [undefined, true, false] as const,
   safeArea: safeAreas,
 };
+
+/**
+ * The views' anchor handles (see `Viewport.createAnchorHandle`): an
+ * anchor's `handle`, a padding's `anchor` (each view's own, in its screen):
+ * a bar's, a toast's (the handle's view).
+ */
+export const barAnchor = codeLabel(
+  Viewport.createAnchorHandle(),
+  'barAnchor',
+  'const barAnchor = Viewport.createAnchorHandle(); // (at module level)',
+);
+
+export const toastAnchor = codeLabel(
+  Viewport.createAnchorHandle(),
+  'toastAnchor',
+  'const toastAnchor = Viewport.createAnchorHandle(); // (at module level)',
+);
+
+const handleOptions = [
+  undefined,
+  new MappedProp(barAnchor, '[barAnchor]'),
+] as const;
 
 export const propOptionsAnchor = {
   ...elementOptions,
   edge: ['block-end', 'block-start', 'inline-start', 'inline-end'] as const,
+  handle: handleOptions,
   keyboard: [undefined, 'push', 'cover'] as const,
   safeArea: safeAreas,
 };
 
 export const propOptionsBlockStart = {
   ...elementOptions,
+  handle: handleOptions,
   // (An anchor's, effective at the block end only.)
   keyboard: [undefined, 'push', 'cover'] as const,
   safeArea: safeAreas,
@@ -76,8 +111,49 @@ export const propOptionsBlockStart = {
 
 export const propOptionsBlockEnd = {
   ...elementOptions,
+  handle: handleOptions,
   keyboard: [undefined, 'push', 'cover'] as const,
   safeArea: safeAreas,
+};
+
+/**
+ * A view's padding at the content's end (overlaid); `edge` first. (Its
+ * bars by edge: linking them, see the handle's view.)
+ */
+export const propOptionsPaddingEnd = {
+  ...elementOptions,
+  edge: ['block-end', 'block-start'] as const,
+  anchor: [undefined, null] as const,
+  margin: [undefined, 0, 32] as const,
+};
+
+/** A view's padding at the content's start. */
+export const propOptionsPaddingStart = {
+  ...elementOptions,
+  edge: [undefined, 'block-end'] as const,
+  anchor: [undefined, null] as const,
+  margin: [undefined, 0, 32] as const,
+};
+
+/** The padding's view's content: its bottom bar, one row or two. */
+export const propOptionsPaddingContent = {
+  rows: [1, 2] as const,
+};
+
+/**
+ * The handle's view: its end padding by the toolbar alone, by the toolbar
+ * and the toast (the taller), or by edge (all at the bottom: the same).
+ */
+export const propOptionsHandlePadding = {
+  ...elementOptions,
+  edge: ['block-end'] as const,
+  anchor: [
+    new MappedProp(barAnchor, '[barAnchor]'),
+    new MappedProp([barAnchor, toastAnchor], '[[barAnchor, toastAnchor]]'),
+    undefined,
+    null,
+  ] as const,
+  margin: [undefined, 0, 32] as const,
 };
 
 /**

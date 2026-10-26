@@ -73,7 +73,8 @@ const selectingCode = `const [selected, setSelected] = useState('inbox');
   </Layout.Column>
 </Layout.Root>`;
 
-const drawerCode = `// Its trigger, in the content's bar (outside the drawer).
+const drawerCode = `const [selected, setSelected] = useState('inbox');
+// Its trigger, in the content's bar (outside the drawer).
 const sidebarDrawer = useCreateDrawerHandle();
 
 <Layout.Root>
@@ -109,7 +110,9 @@ const sidebarDrawer = useCreateDrawerHandle();
         </Toolbar.Root>
       </Viewport.BlockStart>
       <Page.Root>
+        <Viewport.Padding edge="block-start" />
         …
+        <Viewport.Padding edge="block-end" />
       </Page.Root>
     </Header.Root>
   </Layout.Column>
@@ -210,7 +213,9 @@ const sidebarDrawer = useCreateDrawerHandle();
         </Toolbar.Root>
       </Viewport.BlockStart>
       <Page.Root>
+        <Viewport.Padding edge="block-start" />
         …
+        <Viewport.Padding edge="block-end" />
       </Page.Root>
     </Header.Root>
   </Layout.Column>
@@ -285,6 +290,7 @@ const Selecting: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <Header.LargeTitle>
                   <span>{rowTitles[selected]}</span>
                 </Header.LargeTitle>
@@ -303,6 +309,7 @@ const Selecting: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -317,7 +324,11 @@ const InADrawer: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [selected, setSelected] = useState('inbox');
   // Its trigger, in the content's bar (outside the drawer).
-  const sidebarDrawer = codeLabel(useCreateDrawerHandle(), 'sidebarDrawer');
+  const sidebarDrawer = codeLabel(
+    useCreateDrawerHandle(),
+    'sidebarDrawer',
+    'const sidebarDrawer = useCreateDrawerHandle();',
+  );
 
   return (
     <Component
@@ -405,6 +416,7 @@ const InADrawer: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -419,6 +431,7 @@ const InADrawer: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -643,7 +656,11 @@ const Adaptive: FunctionComponent = () => {
       : content.layout === 'phone';
   const [selected, setSelected] = useState('inbox');
   // Its trigger, in the content's bar (outside the drawer).
-  const adaptiveDrawer = codeLabel(useCreateDrawerHandle(), 'adaptiveDrawer');
+  const adaptiveDrawer = codeLabel(
+    useCreateDrawerHandle(),
+    'adaptiveDrawer',
+    'const adaptiveDrawer = useCreateDrawerHandle();',
+  );
 
   return (
     <Component
@@ -780,6 +797,7 @@ const Adaptive: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -794,6 +812,7 @@ const Adaptive: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>

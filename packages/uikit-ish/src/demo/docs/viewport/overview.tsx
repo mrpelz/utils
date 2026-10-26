@@ -85,7 +85,8 @@ const LiveViewFrame: FunctionComponent<{
           ref={contentRef}
           {...propsContent}
         >
-          <List.Root className="viewport-demo-list">
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
             <List.Section>
               <List.Group>
                 {names.map((name) => (
@@ -96,6 +97,7 @@ const LiveViewFrame: FunctionComponent<{
               </List.Group>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
         {isStartShown ? (
           <Viewport.BlockStart {...propsStart}>
@@ -122,7 +124,10 @@ const LiveViewFrame: FunctionComponent<{
 
 /** `LiveViewFrame`, tracking its screen's content layer. */
 const LiveView: FunctionComponent = () => {
-  const contentRef = useLabelledRef<HTMLDivElement>('contentRef');
+  const contentRef = useLabelledRef<HTMLDivElement>(
+    'contentRef',
+    'HTMLDivElement',
+  );
 
   return (
     <Viewport.Provider scroller={contentRef}>
@@ -298,8 +303,14 @@ export const ViewportOverview: FunctionComponent = () => (
         while nothing in it is (arrow keys, Page Up/Down scroll it).
       </li>
       <li>
-        Anchors cover the content beneath them: keep it clear (e.g. padding), so
-        nothing focusable hides behind a bar.
+        Anchors cover the content beneath them: keep it clear with{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />
+        s, which also set their scroll container’s scroll padding, so focus
+        moving and <code>scrollIntoView</code> stop clear of a bar, not behind
+        it.
       </li>
       <li>It has no animations of its own.</li>
     </ul>
@@ -331,10 +342,12 @@ export const ViewportOverview: FunctionComponent = () => (
           part="Viewport.Provider"
         />{' '}
         tracks the visual viewport (once per frame, as it resizes or scrolls):
-        as custom properties on the root element (
-        <code>--uikit-viewport-width</code>, <code>-height</code>,{' '}
-        <code>-top</code>, <code>-left</code>, <code>-keyboard-inset</code>),
-        which the anchors and the content layer follow, and for{' '}
+        as custom properties on the root element, or on the app’s screen when it
+        isn’t the window (its <code>screen</code>: e.g. these views’ device
+        frames, each tracking its own) (<code>--uikit-viewport-width</code>,{' '}
+        <code>-height</code>, <code>-top</code>, <code>-left</code>,{' '}
+        <code>-keyboard-inset</code>), which the anchors and the content layer
+        follow, and for{' '}
         <PartLink
           component="viewport"
           part="useVisualViewport"
@@ -344,16 +357,44 @@ export const ViewportOverview: FunctionComponent = () => (
       </li>
       <li>
         The keyboard’s height: what the visual viewport doesn’t show of the
-        layout viewport’s bottom.
+        layout viewport’s bottom (of a screen’s: what it covers of the
+        screen’s).
+      </li>
+      <li>
+        A bar pushed up by the keyboard, and a content layer resized by it,
+        follow it in a transition (250ms, none with reduced motion); their
+        safe-area padding at the bottom shrinks by what the keyboard covers (
+        none left while it shows).
+      </li>
+      <li>
+        An app under the device’s safe areas needs{' '}
+        <code>viewport-fit=cover</code> in its viewport meta tag: otherwise the
+        browser keeps them clear, and their insets (
+        <code>env(safe-area-inset-*)</code>) are 0.
+      </li>
+      <li>
+        An app’s document doesn’t scroll (its content does, in the content layer
+        or its pages), so it shouldn’t bounce either:{' '}
+        <code>overscroll-behavior: none</code> on <code>html</code> and{' '}
+        <code>body</code>. Otherwise, on iOS (as a web app, especially), a drag
+        no scroll container takes (e.g. on a bar, or on content too short to
+        scroll) rubber-bands the document, moving the whole app, its bars too.
       </li>
       <li>
         Anchors and the content layer are <code>position: fixed</code>: to the
         window, or to an ancestor with a <code>transform</code> (as this page’s
         phone screens). Anchors (<code>z-index</code> 10) float above the
-        content layer; they don’t inset it. Anchors are layers of their own (
-        <code>transform</code>, so Safari paints them above the scrolling
-        content layer): within one, fixed elements are placed relative to it
-        (overlays are portaled out).
+        content layer; they don’t inset it: room for them is made in the
+        content, by{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />
+        s (at its start, its end; as high as the anchors, live, plus the
+        library’s content margin; its scroll padding following them). Anchors
+        are layers of their own (<code>transform</code>, so Safari paints them
+        above the scrolling content layer): within one, fixed elements are
+        placed relative to it (overlays are portaled out).
       </li>
       <li>
         At the bottom, an anchor moves up with the keyboard (

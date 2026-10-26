@@ -237,6 +237,7 @@ const ASheetOnIPhone: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Sheet.Content>
             </Sheet.Popup>
           </Sheet.Root>

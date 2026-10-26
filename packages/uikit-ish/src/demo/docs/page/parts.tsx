@@ -48,6 +48,7 @@ const RootPart: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root {...props}>
+            <Viewport.Padding edge="block-start" />
             <List.Root>
               <List.Section>
                 <List.Group>
@@ -59,6 +60,7 @@ const RootPart: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -88,6 +90,17 @@ export const PageParts: FunctionComponent = () => (
             <ul>
               <li className="demo-tree-context">
                 <PartLink
+                  component="viewport"
+                  part="Viewport.Padding"
+                />
+                <span>
+                  {' '}
+                  (at its start and its end: room for the bars there, and the
+                  content margin)
+                </span>
+              </li>
+              <li className="demo-tree-context">
+                <PartLink
                   component="header"
                   part="Header.LargeTitle"
                 />
@@ -112,6 +125,15 @@ export const PageParts: FunctionComponent = () => (
       <li>
         Fills its container, scrolling its content, on the page background (
         <code>background</code>).
+      </li>
+      <li>
+        Keeps the safe area insets clear (as padding); the gap to its content,
+        and room for bars, are its{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />
+        s’.
       </li>
       <li>
         Inset at its start beside a floating column (

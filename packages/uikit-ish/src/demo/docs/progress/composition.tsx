@@ -25,7 +25,10 @@ import {
 import { GuideLink } from '../hig-guide/link.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
-const countCode = `<Progress.Root max={12} value={done}>
+const countCode = `// The photos imported so far, of 12.
+const [done, setDone] = useState(0);
+
+<Progress.Root max={12} value={done}>
   <Progress.Label>Importing Photos</Progress.Label>
   <Progress.Value>
     {(formattedValue, value) => \`\${value} of 12\`}
@@ -131,9 +134,11 @@ const LoadingAPage: FunctionComponent = () => (
           </Toolbar.Root>
         </Viewport.BlockStart>
         <Page.Root>
+          <Viewport.Padding edge="block-start" />
           <div className="progress-demo-loading">
             <ActivityIndicator>Loading</ActivityIndicator>
           </div>
+          <Viewport.Padding edge="block-end" />
         </Page.Root>
       </Header.Root>
     </Viewport.Content>

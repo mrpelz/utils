@@ -42,7 +42,11 @@ const LiveView: FunctionComponent = () => {
   const id = 'drawer-overview';
   const [log, addLog] = useLog();
   // Its trigger, in the page's bar (outside the drawer).
-  const contactsDrawer = codeLabel(useCreateDrawerHandle(), 'contactsDrawer');
+  const contactsDrawer = codeLabel(
+    useCreateDrawerHandle(),
+    'contactsDrawer',
+    'const contactsDrawer = useCreateDrawerHandle();',
+  );
   const {
     controls,
     keyRoot,
@@ -87,12 +91,14 @@ const LiveView: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root background="plain">
+            <Viewport.Padding edge="block-start" />
             <List.Root listStyle="plain">
               <List.Block>
                 Swipe the contacts in from the leading edge, or press the
                 button.
               </List.Block>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
         <Drawer.Root
@@ -117,6 +123,7 @@ const LiveView: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -128,6 +135,7 @@ const LiveView: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Drawer.Popup>

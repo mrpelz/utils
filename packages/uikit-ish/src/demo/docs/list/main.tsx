@@ -13,9 +13,11 @@ import { sfEnvelopeOpenFill } from '@bradleyhodges/sfsymbols/sfEnvelopeOpenFill'
 import { sfFlagFill } from '@bradleyhodges/sfsymbols/sfFlagFill';
 import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
+import { sfMinus } from '@bradleyhodges/sfsymbols/sfMinus';
 import { sfPersonCropCircleFill } from '@bradleyhodges/sfsymbols/sfPersonCropCircleFill';
 import { sfPersonFill } from '@bradleyhodges/sfsymbols/sfPersonFill';
 import { sfPinFill } from '@bradleyhodges/sfsymbols/sfPinFill';
+import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
 import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
 import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
 import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
@@ -75,6 +77,7 @@ import {
   propOptionsRadioFirst,
   propOptionsRoot,
   propOptionsRootPlain,
+  propOptionsSwipeActionsTrigger,
   propOptionsText,
 } from './props.js';
 
@@ -460,6 +463,7 @@ export const ListPartsDemo: FunctionComponent = () => {
     externalSwipeAction,
     externalFooter,
     externalBlock,
+    externalSwipeActionsTrigger,
   ] = useProvidedState(id);
 
   const [controlContent, content, stateContent] = usePropControl(
@@ -535,6 +539,14 @@ export const ListPartsDemo: FunctionComponent = () => {
     useMemo(() => getPropOptionsEditButton(addLog), [addLog]),
     { external: externalEditButton, title: 'List.EditButton' },
   );
+  const [
+    controlSwipeActionsTrigger,
+    propsSwipeActionsTrigger,
+    stateSwipeActionsTrigger,
+  ] = usePropControl(propOptionsSwipeActionsTrigger, {
+    external: externalSwipeActionsTrigger,
+    title: 'List.SwipeActionsTrigger',
+  });
   const [controlGrabber, propsGrabber, stateGrabber] = usePropControl(
     propOptionsCursor,
     { external: externalGrabber, title: 'List.Grabber' },
@@ -591,6 +603,7 @@ export const ListPartsDemo: FunctionComponent = () => {
         controlButton,
         controlCheckbox,
         controlEditButton,
+        controlSwipeActionsTrigger,
         controlGrabber,
         controlText,
         controlSwipeActions,
@@ -623,6 +636,7 @@ export const ListPartsDemo: FunctionComponent = () => {
         stateSwipeAction,
         stateFooter,
         stateBlock,
+        stateSwipeActionsTrigger,
       ]}
     >
       <List.Root {...propsRoot}>
@@ -691,9 +705,16 @@ export const ListPartsDemo: FunctionComponent = () => {
               />
             </List.Item>
             <List.Item>
-              <List.EditButton
-                aria-label="Edit"
-                {...propsEditButton}
+              <List.SwipeActionsTrigger
+                {...propsSwipeActionsTrigger}
+                render={
+                  <List.EditButton
+                    aria-label="Edit"
+                    {...propsEditButton}
+                  >
+                    <Symbol icon={sfMinus} />
+                  </List.EditButton>
+                }
               />
               <List.Title>Edit button</List.Title>
               <List.SwipeActions>
@@ -1524,9 +1545,16 @@ export const ListEditDeleteDemo: FunctionComponent = () => {
           <List.Group>
             {rows.map((name, index) => (
               <List.Item key={name}>
-                <List.EditButton
-                  aria-label={`Delete ${name}`}
-                  {...(index === 0 ? propsEditButton : {})}
+                <List.SwipeActionsTrigger
+                  render={
+                    <List.EditButton
+                      aria-label={`Delete ${name}`}
+                      tint="var(--color-ios-system-red)"
+                      {...(index === 0 ? propsEditButton : {})}
+                    >
+                      <Symbol icon={sfMinus} />
+                    </List.EditButton>
+                  }
                 />
                 <List.Title>{name}</List.Title>
                 <List.SwipeActions overswipe>
@@ -1588,7 +1616,16 @@ export const ListEditInsertDemo: FunctionComponent = () => {
           <List.Group>
             {rows.map((name) => (
               <List.Item key={name}>
-                <List.EditButton aria-label={`Delete ${name}`} />
+                <List.SwipeActionsTrigger
+                  render={
+                    <List.EditButton
+                      aria-label={`Delete ${name}`}
+                      tint="var(--color-ios-system-red)"
+                    >
+                      <Symbol icon={sfMinus} />
+                    </List.EditButton>
+                  }
+                />
                 <List.Title>{name}</List.Title>
                 <List.SwipeActions overswipe>
                   <List.SwipeAction
@@ -1609,14 +1646,16 @@ export const ListEditInsertDemo: FunctionComponent = () => {
             <List.Item>
               <List.EditButton
                 aria-label="Add Planet"
-                editingStyle="insert"
+                tint="var(--color-ios-system-green)"
                 onClick={() => {
                   added.current += 1;
                   const row = `New ${added.current}`;
                   addLog(`insert ${row}`);
                   setRows((current) => [...current, row]);
                 }}
-              />
+              >
+                <Symbol icon={sfPlus} />
+              </List.EditButton>
               <List.Title>Add Planet</List.Title>
             </List.Item>
           </List.Group>

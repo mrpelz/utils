@@ -391,21 +391,32 @@ export const listRadioRows: readonly PropRow[] = radioRootRows;
 
 export const listEditButtonRows: readonly PropRow[] = [
   [
-    'editingStyle',
-    union('delete', 'insert'),
-    code(union('delete')),
+    'tint',
+    'string',
+    code('systemGray'),
     <>
-      UIKit <code>UITableViewCell.EditingStyle</code>: a red minus or a green
-      plus.
+      Its circle’s color: e.g. <code>systemRed</code> deleting,{' '}
+      <code>systemGreen</code> inserting (UIKit’s{' '}
+      <code>UITableViewCell.EditingStyle</code>).
     </>,
+  ],
+  [
+    'textColor',
+    'string',
+    'white',
+    'Its symbol’s color, e.g. for a light tint.',
   ],
   [
     'onClick',
     'MouseEventHandler<HTMLElement>',
     undefined,
     <>
-      Deleting, a click opens the row’s trailing swipe actions, unless the
-      handler prevents it (<code>event.preventDefault()</code>).
+      What it does: the app’s, nothing of its own. Deleting, e.g. rendered by a{' '}
+      <PartLink
+        component="list"
+        part="List.SwipeActionsTrigger"
+      />
+      , opening the row’s trailing swipe actions.
     </>,
   ],
   [
@@ -415,7 +426,10 @@ export const listEditButtonRows: readonly PropRow[] = [
     'Its accessible name, e.g. “Delete Mercury”.',
   ],
   secondaryClickRow,
-  childrenRow('a minus (insert: a plus)', 'What it shows.'),
+  childrenRow(
+    undefined,
+    'What it shows: a symbol (e.g. a minus deleting, a plus inserting).',
+  ),
   ...renderRows('button', 'HTMLElement'),
 ];
 
@@ -425,6 +439,24 @@ export const listSwipeActionsRows: readonly PropRow[] = [
     union('inline-end', 'inline-start'),
     code(union('inline-end')),
     'The row’s side the actions are revealed on.',
+  ],
+  [
+    'handle',
+    'ListSwipeActionsHandle',
+    undefined,
+    <>
+      Their handle (
+      <PartLink
+        component="list"
+        part="List.createSwipeActionsHandle"
+      />
+      ): opened and closed by it, from anywhere (e.g. a{' '}
+      <PartLink
+        component="list"
+        part="List.SwipeActionsTrigger"
+      />{' '}
+      outside the row, or imperatively).
+    </>,
   ],
   [
     'overswipe',
@@ -442,6 +474,80 @@ export const listSwipeActionsRows: readonly PropRow[] = [
     </>,
   ],
   ...renderRows('div', 'HTMLElement'),
+];
+
+export const listSwipeActionsTriggerRows: readonly PropRow[] = [
+  [
+    'handle',
+    'ListSwipeActionsHandle',
+    undefined,
+    <>
+      The actions it opens, by their handle (
+      <PartLink
+        component="list"
+        part="List.createSwipeActionsHandle"
+      />
+      ): from anywhere. Unset: its row’s, on its <code>side</code>.
+    </>,
+  ],
+  [
+    'side',
+    union('inline-end', 'inline-start'),
+    code(union('inline-end')),
+    <>
+      In its row, without a <code>handle</code>: the side whose actions it
+      opens.
+    </>,
+  ],
+  [
+    'onClick',
+    'MouseEventHandler<HTMLElement>',
+    undefined,
+    <>
+      Called first; preventing it (<code>event.preventDefault()</code>) keeps
+      the actions closed.
+    </>,
+  ],
+  ...renderRows('button', 'HTMLElement'),
+];
+
+/**
+ * `List.createSwipeActionsHandle()`, `useCreateSwipeActionsHandle()`: what
+ * they return.
+ */
+export const listSwipeActionsHandleRows: readonly PropRow[] = [
+  [
+    '(return)',
+    'ListSwipeActionsHandle',
+    undefined,
+    <>
+      A handle: passed to a row’s{' '}
+      <PartLink
+        component="list"
+        part="List.SwipeActions"
+      />{' '}
+      and to the{' '}
+      <PartLink
+        component="list"
+        part="List.SwipeActionsTrigger"
+      />
+      s opening them (their <code>handle</code>); from the hook, the same for
+      the component’s lifetime.
+    </>,
+  ],
+  [
+    '.isOpen',
+    'boolean',
+    undefined,
+    'Whether the actions are open (false while none are attached to the handle).',
+  ],
+  [
+    '.open()',
+    '() => void',
+    undefined,
+    'Opens them: swipes the row to show them, closing another row’s (in an event handler or an effect).',
+  ],
+  ['.close()', '() => void', undefined, 'Closes them: swipes the row back.'],
 ];
 
 export const listSwipeActionRows: readonly PropRow[] = [

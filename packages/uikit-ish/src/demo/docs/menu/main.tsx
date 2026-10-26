@@ -736,7 +736,10 @@ export const MenuPopUpDemo: FunctionComponent = () => {
 export const MenuOpenDemo: FunctionComponent = () => {
   const id = 'menu-open';
   const [log, addLog] = useLog();
-  const anchorRef = useLabelledRef<HTMLSpanElement>('anchorRef');
+  const anchorRef = useLabelledRef<HTMLSpanElement>(
+    'anchorRef',
+    'HTMLSpanElement',
+  );
 
   const [externalRoot, externalPopup] = useProvidedState(id);
 

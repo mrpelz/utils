@@ -1254,7 +1254,11 @@ const ClosePart: FunctionComponent = () => {
 };
 
 // Its trigger and its button, outside the root: made once, here.
-const displayPopover = codeLabel(Popover.createHandle(), 'displayPopover');
+const displayPopover = codeLabel(
+  Popover.createHandle(),
+  'displayPopover',
+  'const displayPopover = Popover.createHandle(); // (at module level)',
+);
 
 /** `Popover.createHandle`: a trigger outside the root, an imperative open. */
 const CreateHandlePart: FunctionComponent = () => {
@@ -1365,6 +1369,7 @@ const UseCreatePopoverHandlePart: FunctionComponent = () => {
   const optionsPopover = codeLabel(
     useCreatePopoverHandle<{ title: string }>(),
     'optionsPopover',
+    'const optionsPopover = useCreatePopoverHandle<{ title: string }>();',
   );
 
   return (

@@ -69,7 +69,8 @@ const LiveView: FunctionComponent = () => {
     >
       <Fragment key={elementKey}>
         <Viewport.Content>
-          <List.Root className="toolbar-demo-list">
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
             <List.Section>
               <List.Group>
                 {names.map((name) => (
@@ -80,6 +81,7 @@ const LiveView: FunctionComponent = () => {
               </List.Group>
             </List.Section>
           </List.Root>
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
         {top.shown ? (
           <Viewport.BlockStart>

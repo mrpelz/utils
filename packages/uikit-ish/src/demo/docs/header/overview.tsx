@@ -94,6 +94,7 @@ const LiveView: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root>
+            <Viewport.Padding edge="block-start" />
             {content.largeTitle ? (
               <Header.LargeTitle {...propsLargeTitle}>
                 <span>Contacts</span>
@@ -114,6 +115,7 @@ const LiveView: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -254,7 +256,13 @@ export const HeaderOverview: FunctionComponent = () => (
       <li>
         The bar stays where it is (fixed, in its anchor: 54px high below the
         safe area), as the page scrolls under it or bounces; the page’s content
-        starts below it. The header itself has no box.
+        starts below it by a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />{' '}
+        at its start (the app’s: none where the bar is empty, or a picture goes
+        under it). The header itself has no box.
       </li>
       <li>
         The large title (Large Title Emphasized, 16px from the sides, 10px above

@@ -8,6 +8,7 @@ export const propOptionsContent = {
 export const propOptionsRoot = {
   ...commonPropOptions,
   background: [undefined, 'grouped', 'plain'] as const,
+  alwaysBounce: [undefined, false] as const,
 };
 
 // The guide pages' views (see overview.tsx, parts.tsx): the root's props,
@@ -17,6 +18,7 @@ export const propOptionsGuideRoot = {
   className: commonPropOptions.className,
   style: commonPropOptions.style,
   background: [undefined, 'grouped', 'plain'] as const,
+  alwaysBounce: [undefined, false] as const,
 };
 
 /** The overview's content: its list's style. */

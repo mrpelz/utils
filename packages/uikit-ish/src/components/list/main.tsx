@@ -55,6 +55,7 @@ import type {
   ListRootProps,
   ListSwipeActionProps,
   ListSwipeActionsProps,
+  ListSwipeActionsTriggerProps,
   ListTextProps,
   Overswipe,
   PartProps,
@@ -78,8 +79,15 @@ export type {
   ListStyle,
   ListSwipeActionProps,
   ListSwipeActionsProps,
+  ListSwipeActionsTriggerProps,
   ListTextProps,
 } from './props.js';
+import { createSwipeActionsHandle } from './swipe-actions-handle.js';
+
+export {
+  ListSwipeActionsHandle,
+  useCreateSwipeActionsHandle,
+} from './swipe-actions-handle.js';
 
 // Source: Apple iOS 26 Figma (“Lists and tables”: “Row” Height=Regular/Tall,
 // “_Images”, “_Trailing”, “_Edit Buttons”, “_Grabber”, “_Separator”, “Row -
@@ -130,8 +138,9 @@ export type {
 // trailing controls.
 //
 // Deviations:
-// - Focusing a swipe action opens the actions, and the delete edit button opens
-//   the trailing actions.
+// - Focusing a swipe action opens the actions. A trigger opens them
+//   (`SwipeActionsTrigger`: in the row, or by a handle; e.g. rendering the
+//   delete edit button), not the edit button itself.
 // - Header and footer text is aligned with the rows' text (Figma: headers are
 //   laid out for the full width, footers for the rows').
 // - Sticky section titles (plain lists) are opaque (Framework7 contacts list;
@@ -187,21 +196,6 @@ const Lines = () => (
     width="1.06em"
   >
     <path d="M1 1h16M1 6h16M1 11h16" />
-  </svg>
-);
-
-const Sign = ({ isPlus }: { isPlus: boolean }) => (
-  <svg
-    aria-hidden="true"
-    fill="none"
-    height="0.8em"
-    stroke="currentcolor"
-    strokeLinecap="round"
-    strokeWidth="1.8"
-    viewBox="0 0 12 12"
-    width="0.8em"
-  >
-    <path d={isPlus ? 'M2 6h8M6 2v8' : 'M2 6h8'} />
   </svg>
 );
 
@@ -545,6 +539,9 @@ const swipeDuration = 300;
 const swipeThreshold = 8;
 /** A sideways scroll swiping a row ends after this long without scrolling. */
 const scrollEndDelay = 150;
+// How long a wheel (or a trackpad's momentum) is quiet before a row it
+// scrolled open is at rest there (see `settle`).
+const wheelQuiet = 300;
 /**
  * How far a row arms overswiping, with any actions (also fewer, or
  * labelled ones): past 5 circles (5 × (44 + 10) + 16 + 10 + 8px;
@@ -849,6 +846,24 @@ const snapPlaces = (
 const hasScrollEnd = typeof window !== 'undefined' && 'onscrollend' in window;
 
 /**
+ * Whether a row dragged to `offset` (towards `side`) opens its actions
+ * there when released: flicked towards them, or past half their `width`.
+ */
+const opensOnRelease = (
+  drag: Drag,
+  offset: number,
+  side: Side,
+  width: number | undefined,
+) => {
+  const distance = Math.abs(offset);
+  if (width === undefined || distance < 1) return false;
+  const moved = offset - drag.base;
+  const isQuick = performance.now() - drag.time < 300;
+  const isMovedTowards = side === 'leading' ? moved > 10 : moved < -10;
+  return isQuick ? isMovedTowards : distance > width / 2;
+};
+
+/**
  * A row (UIKit `UITableViewCell`), with optional swipe actions. With a click
  * handler, it's pressable itself (e.g. passing the click on to a control in
  * it), but where its own controls are pressed.
@@ -888,6 +903,8 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
   const swipingRef = useRef(false);
   // Open, at rest there (see `overswipable`).
   const restingOpenRef = useRef(false);
+  // The last wheel event's time (scrolled: at rest once the wheel is quiet).
+  const wheelRef = useRef(0);
   const dragRef = useRef<Drag | null>(null);
   const pressRef = useRef<{ pointerId: number; x: number; y: number } | null>(
     null,
@@ -903,8 +920,11 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
 
   const overswipes = (side: Side) => Boolean(overswipeRef.current[side]);
 
-  // The track's room before the row (the leading side's extent).
-  const lead = () => swipeRef.current.extents.leading ?? 0;
+  // The track's room before the row (the leading side's, see `layOut`),
+  // and after it.
+  const leadRef = useRef(0);
+  const trailRef = useRef(0);
+  const lead = () => leadRef.current;
 
   // The row's offset (towards its inline end), from the scroll position.
   const offsetOf = (item: HTMLElement) =>
@@ -918,6 +938,73 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     (openSideRef.current === side && restingOpenRef.current);
   const overswipesNow = (side: Side) => overswipes(side) && overswipable(side);
 
+  const scrollTo = (offset: number, isSmooth: boolean) => {
+    const { current: item } = itemRef;
+    if (!item) return;
+    const isRightToLeft = isRtl(item);
+    const left = isRightToLeft ? offset - lead() : lead() - offset;
+    item.scrollTo({ behavior: isSmooth ? 'smooth' : 'instant', left });
+  };
+
+  // The track's room on a side: the actions' width; across the whole row
+  // only while overswiping it is possible (see `overswipable`), so a scroll
+  // opening the actions stops at them, not past them (snapping back).
+  const roomOf = (side: Side) => {
+    const { [side]: width = 0 } = swipeRef.current.widths;
+    return overswipesNow(side)
+      ? (swipeRef.current.extents[side] ?? width)
+      : width;
+  };
+
+  // Lays the track out for each side's room: its size, the snap points'
+  // places, the actions' reveal; the row kept where it is (the room before
+  // it moving the scroll position). The room grows at once, but narrows at
+  // rest only (`isAtRest`): narrowed, the track re-snaps at once (e.g.
+  // released from a drag, before snapping smoothly), and never less than
+  // where the row is.
+  const layOut = (isAtRest: boolean) => {
+    const { current: item } = itemRef;
+    if (!item) return;
+    const offset = offsetOf(item);
+    const fit = (room: number, current: number, reach: number) =>
+      Math.max(isAtRest ? room : Math.max(room, current), reach);
+    const { current: wasLead } = leadRef;
+    const { current: wasTrail } = trailRef;
+    leadRef.current = fit(roomOf('leading'), leadRef.current, offset);
+    trailRef.current = fit(roomOf('trailing'), trailRef.current, -offset);
+    const isResized =
+      leadRef.current !== wasLead || trailRef.current !== wasTrail;
+    item.style.setProperty('--uikit-list-swipe-lead', `${String(lead())}px`);
+    item.style.setProperty(
+      '--uikit-list-swipe-trail',
+      `${String(trailRef.current)}px`,
+    );
+
+    const places = snapPlaces(swipeRef.current, lead(), overswipes);
+    placesRef.current = places;
+    for (const side of sides) {
+      const { [side]: container } = actionsRef.current;
+      if (!container) continue;
+      revealRanges(container, side, lead());
+      // Safari keeps running its reveal (on the compositor) for the scroll
+      // range it started in, so scaling in out of order and flickering once
+      // the room changed (e.g. as a swipe starts, overswiping): restarted.
+      if (!isResized) continue;
+      for (const animation of container.getAnimations({ subtree: true })) {
+        // (Not the stretched action's transitions.)
+        if (!(animation instanceof CSSAnimation)) continue;
+        animation.cancel();
+        animation.play();
+      }
+    }
+    for (const point of snapPoints) {
+      const snap = snapsRef.current[point];
+      if (snap) snap.style.insetInlineStart = `${String(places[point] ?? 0)}px`;
+    }
+    // (Only if it moved: a scroll on its way, e.g. closing, goes on.)
+    if (offsetOf(item) !== offset) scrollTo(offset, false);
+  };
+
   // The snap points (see `snapPlaces`). Open, the other side's actions
   // don't open (scrolled past closed, the row snaps back closed): only from
   // closed; overswiped, only as above. (They change at rest, or as a touch
@@ -925,9 +1012,11 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
   // snaps to the point at the same place in their order once they change
   // (e.g. armed, shown before closed as a touch starts), so the row is put
   // back where it was.
-  const showSnaps = () => {
+  const showSnaps = (isAtRest = false) => {
     const { current: item } = itemRef;
-    const scrollLeft = item?.scrollLeft;
+    const offset = item ? offsetOf(item) : undefined;
+    // (The room changing with them, see `layOut`.)
+    layOut(isAtRest);
     const { current: openSide } = openSideRef;
     for (const point of snapPoints) {
       const snap = snapsRef.current[point];
@@ -940,17 +1029,9 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         (openSide !== undefined && point !== 'closed' && side !== openSide) ||
         (isOverswiping && !overswipable(side));
     }
-    if (item && scrollLeft !== undefined && item.scrollLeft !== scrollLeft) {
-      item.scrollLeft = scrollLeft;
+    if (item && offset !== undefined && offsetOf(item) !== offset) {
+      scrollTo(offset, false);
     }
-  };
-
-  const scrollTo = (offset: number, isSmooth: boolean) => {
-    const { current: item } = itemRef;
-    if (!item) return;
-    const isRightToLeft = isRtl(item);
-    const left = isRightToLeft ? offset - lead() : lead() - offset;
-    item.scrollTo({ behavior: isSmooth ? 'smooth' : 'instant', left });
   };
 
   // Measures the actions (and the row) for the track's room and snap
@@ -970,26 +1051,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       swipe.extents[side] = overswipes(side) ? item.clientWidth : width;
     }
     swipeRef.current = swipe;
-    item.style.setProperty('--uikit-list-swipe-lead', `${String(lead())}px`);
-    item.style.setProperty(
-      '--uikit-list-swipe-trail',
-      `${String(swipe.extents.trailing ?? 0)}px`,
-    );
-
-    const places = snapPlaces(swipe, lead(), overswipes);
-    placesRef.current = places;
-    for (const side of sides) {
-      const { [side]: container } = actionsRef.current;
-      if (container) revealRanges(container, side, lead());
-    }
-
-    for (const point of snapPoints) {
-      const snap = snapsRef.current[point];
-      if (!snap) continue;
-      const place = places[point];
-      snap.hidden = place === undefined;
-      snap.style.insetInlineStart = `${String(place ?? 0)}px`;
-    }
+    showSnaps(true);
 
     const { current: side } = openSideRef;
     const offset = side
@@ -1032,6 +1094,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         // (Its snap points change once closed, see `settle`.)
         scrollTo(0, true);
       },
+      isOpen: (side) => openSideRef.current === side,
       open: (side) => {
         const { current: item } = itemRef;
         const width = swipeRef.current.widths[side];
@@ -1124,7 +1187,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       swipingRef.current = false;
       restingOpenRef.current = false;
       openSideRef.current = undefined;
-      showSnaps();
+      showSnaps(true);
       if (closeOpenItem === context.close) closeOpenItem = undefined;
       resetRow(item);
       return;
@@ -1143,9 +1206,18 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     swipingRef.current = false;
     if (Math.abs(distance - width) < 1) {
       if (openSideRef.current !== side) context.open(side);
+      // Scrolled open (stopped at the actions, see `roomOf`): at rest only
+      // once the wheel (a trackpad's momentum too) is quiet, so the same
+      // scroll doesn't overswipe.
+      const quiet = performance.now() - wheelRef.current;
+      if (quiet < wheelQuiet) {
+        clearTimeout(settleRef.current);
+        settleRef.current = setTimeout(settle, wheelQuiet - quiet);
+        return;
+      }
       restingOpenRef.current = true;
     }
-    showSnaps();
+    showSnaps(true);
   };
 
   // Scrolled (by any means): the row's actions follow, overswiping arms
@@ -1157,7 +1229,15 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     const side: Side = offset > 0 ? 'leading' : 'trailing';
     if (Math.abs(offset) >= 1) {
       item.dataset.swipe = side;
-      if (closeOpenItem && closeOpenItem !== context.close) closeOpenItem();
+      // (Swiped, it closes another row's; closing, not: e.g. as another
+      // opens by a trigger, which its scroll would close again.)
+      if (
+        !closingRef.current &&
+        closeOpenItem &&
+        closeOpenItem !== context.close
+      ) {
+        closeOpenItem();
+      }
     }
     placeRow(item, actionsRef.current, offset, false, overswipesNow);
 
@@ -1186,6 +1266,9 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     const { current: item } = itemRef;
     if (!item || !isSwipeable) return undefined;
     const onScrollEnd = () => settleNowRef.current();
+    const onWheel = () => {
+      wheelRef.current = performance.now();
+    };
     const onTouchStart = () => {
       touchingRef.current = true;
       // Swiped: overswiping in one go (see `overswipable`).
@@ -1199,11 +1282,13 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       settleRef.current = setTimeout(onScrollEnd, scrollEndDelay);
     };
     item.addEventListener('scrollend', onScrollEnd);
+    item.addEventListener('wheel', onWheel, { passive: true });
     item.addEventListener('touchstart', onTouchStart, { passive: true });
     item.addEventListener('touchend', onTouchEnd);
     item.addEventListener('touchcancel', onTouchEnd);
     return () => {
       item.removeEventListener('scrollend', onScrollEnd);
+      item.removeEventListener('wheel', onWheel);
       item.removeEventListener('touchstart', onTouchStart);
       item.removeEventListener('touchend', onTouchEnd);
       item.removeEventListener('touchcancel', onTouchEnd);
@@ -1319,15 +1404,14 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     // where it's dragged, as far as overswiped).
     swipingRef.current = false;
     showSnaps();
-    item.style.removeProperty('scroll-snap-type');
-    if (isLocked || isCancelled || width === undefined || distance < 1) {
-      context.close();
-      return;
+    const isOpening =
+      !isLocked && !isCancelled && opensOnRelease(drag, offset, side, width);
+    // Snapping again once at rest there (see `settle`): snapping now, the
+    // browser would snap at once, not smoothly. (Already there: now.)
+    if (Math.abs(distance - (isOpening ? (width ?? 0) : 0)) < 1) {
+      item.style.removeProperty('scroll-snap-type');
     }
-    const moved = offset - drag.base;
-    const isQuick = performance.now() - drag.time < 300;
-    const isMovedTowards = side === 'leading' ? moved > 10 : moved < -10;
-    if (isQuick ? isMovedTowards : distance > width / 2) {
+    if (isOpening) {
       context.open(side);
     } else {
       context.close();
@@ -1865,48 +1949,45 @@ const Radio = forwardRef<HTMLElement, RadioRootProps>((props, ref) => (
   />
 ));
 
-const StyledEditButton = forwardRef<HTMLElement, ListEditButtonProps>(
-  ({ className, editingStyle, render, ...props }, ref) =>
-    useRender({
-      defaultTagName: 'button',
-      props: {
-        'data-list-part': 'edit',
-        'data-editing-style': editingStyle,
-        className: cn(
-          'uikit-list-edit-button uikit-checkbox-edit-circle',
-          className,
-        ),
-        type: 'button',
-        ...useSecondaryClick(props),
-      },
-      ref,
-      render,
-    }),
+const StyledEditButton = forwardRef<
+  HTMLElement,
+  Omit<ListEditButtonProps, 'textColor' | 'tint'>
+>(({ className, render, ...props }, ref) =>
+  useRender({
+    defaultTagName: 'button',
+    props: {
+      'data-list-part': 'edit',
+      className: cn(
+        'uikit-list-edit-button uikit-checkbox-edit-circle',
+        className,
+      ),
+      type: 'button',
+      ...useSecondaryClick(props),
+    },
+    ref,
+    render,
+  }),
 );
 
 /**
- * Figma State=Remove/Add; deleting opens the row's trailing swipe actions
- * (unless the click handler prevents it).
+ * Figma State=Remove/Add: a symbol (its child) in a circle of its `tint`,
+ * doing what the app gives it (e.g. deleting the row; or, rendered by a
+ * `SwipeActionsTrigger`, opening its trailing actions).
  */
 const EditButton = forwardRef<HTMLElement, ListEditButtonProps>(
-  ({ children, editingStyle = 'delete', onClick, ...props }, ref) => {
-    const item = useContext(ItemContext);
-
-    return (
-      <StyledEditButton
-        ref={ref}
-        editingStyle={editingStyle}
-        {...props}
-        onClick={(event: MouseEvent<HTMLElement>) => {
-          (onClick as Handler<typeof event>)?.(event);
-          if (event.defaultPrevented || editingStyle !== 'delete') return;
-          item?.open('trailing');
-        }}
-      >
-        {children ?? <Sign isPlus={editingStyle === 'insert'} />}
-      </StyledEditButton>
-    );
-  },
+  ({ style, textColor, tint, ...props }, ref) => (
+    <StyledEditButton
+      ref={ref}
+      style={withStyle(
+        {
+          '--uikit-list-edit-text-color': textColor,
+          '--uikit-list-edit-tint': tint,
+        },
+        style,
+      )}
+      {...props}
+    />
+  ),
 );
 
 // Swipe actions (Figma “Row with Swipe Actions”, “_Swipe Actions”): shapes
@@ -1934,6 +2015,7 @@ const StyledSwipeActions = forwardRef<
 const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
   (
     {
+      handle,
       onFocusCapture,
       onOverswipe,
       overswipe = false,
@@ -1954,6 +2036,17 @@ const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
       onOverswipeRef.current = onOverswipe;
     });
     const hasHandler = onOverswipe !== undefined;
+
+    // Opened and closed by their handle, while mounted.
+    useLayoutEffect(() => {
+      if (!handle || !item) return undefined;
+
+      return handle.attach({
+        close: () => item.close(),
+        isOpen: () => item.isOpen(side),
+        open: () => item.open(side),
+      });
+    }, [handle, item, side]);
 
     useLayoutEffect(() => {
       const { current: element } = elementRef;
@@ -1983,6 +2076,44 @@ const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
       />,
       pin,
     );
+  },
+);
+
+/**
+ * Opens a row's swipe actions when clicked (Base UI's triggers' shape):
+ * those of its `handle`, from anywhere, or, in the row, its own on its
+ * `side`. Renders a button, or what it's given (e.g. the delete
+ * `EditButton`).
+ */
+const SwipeActionsTrigger = forwardRef<
+  HTMLElement,
+  ListSwipeActionsTriggerProps
+>(
+  (
+    { className, handle, onClick, render, side = 'inline-end', ...props },
+    ref,
+  ) => {
+    const item = useContext(ItemContext);
+
+    return useRender({
+      defaultTagName: 'button',
+      props: {
+        className: cn('uikit-list-swipe-actions-trigger', className),
+        type: 'button',
+        ...props,
+        onClick: (event: MouseEvent<HTMLElement>) => {
+          (onClick as Handler<typeof event>)?.(event);
+          if (event.defaultPrevented) return;
+          if (handle) {
+            handle.open();
+            return;
+          }
+          item?.open(side === 'inline-start' ? 'leading' : 'trailing');
+        },
+      },
+      ref,
+      render,
+    });
   },
 );
 
@@ -2242,7 +2373,9 @@ export const List = {
   Radio,
   EditButton,
   SwipeActions,
+  SwipeActionsTrigger,
   SwipeAction,
   Index,
   IndexItem,
+  createSwipeActionsHandle,
 };

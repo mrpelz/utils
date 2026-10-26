@@ -1,12 +1,10 @@
 /* Header demos (see main.tsx). */
 
-/* A picture at the page's top, under its bar (pulled up by the bar's
-   height, 54px). */
+/* A picture at the page's top, under its bar (no padding for it). */
 .header-demo-picture {
   height: 320px;
   background:
     radial-gradient(circle at 30% 35%, #ff9f0a, transparent 45%),
     radial-gradient(circle at 70% 60%, #ff375f, transparent 50%),
     linear-gradient(160deg, #5e5ce6, #1c1c1e);
-  margin-block-start: -54px;
 }

@@ -9,7 +9,13 @@
     display: grid;
     width: 100svw;
     min-height: 100svh;
-    padding: 1rem;
+
+    /* (Clear of the device's safe areas, e.g. a phone's notch in landscape:
+       the page is under them, see webpack.config.js.) */
+    padding: max(1rem, env(safe-area-inset-top))
+      max(1rem, env(safe-area-inset-right))
+      max(1rem, env(safe-area-inset-bottom))
+      max(1rem, env(safe-area-inset-left));
     gap: 1rem;
     grid-auto-columns: 1fr;
     grid-template: 'content config' 1fr / 1fr 25em;
@@ -239,7 +245,9 @@
       border-top: 1px dashed #404040;
     }
 
-    &:last-child {
+    /* (Open, its details, too: e.g. the log's.) */
+    &:last-child,
+    &:last-child > details[open] {
       display: flex;
       flex-direction: column;
       flex-grow: 1;
@@ -250,14 +258,37 @@
     }
   }
 
+  /* A row: its disclosure marker (drawn: a flex summary has none), its
+     title, then what's beside it (e.g. the emphasis toggles), which gives
+     way first: stacking, beside a long title. */
   .demo-config-heading {
     position: sticky;
     top: 0;
+    display: flex;
+    align-items: baseline;
     padding: 0.5rem;
     margin: calc(0.5rem * -1);
     margin-bottom: 0.25rem;
     background-color: light-dark(white, #0a0a0a);
+    column-gap: 0.5rem;
     cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::before {
+      display: list-item;
+      flex: none;
+      content: '';
+      list-style: disclosure-closed inside;
+      margin-inline-end: -0.5rem;
+    }
+
+    details[open] > &::before {
+      list-style-type: disclosure-open;
+    }
 
     @media screen and (width <= 768px) {
       position: static;
@@ -359,10 +390,22 @@
   }
 
   /* In a section's heading (also while it's collapsed). */
+  .demo-config-title {
+    flex: 0 1 auto;
+  }
+
+  .demo-outline-toggles {
+    display: flex;
+    flex: 0 100 auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    column-gap: 0.5rem;
+    margin-inline-start: auto;
+  }
+
   .demo-outline-toggle {
-    float: right;
     font-weight: 400;
-    margin-inline-start: 0.5rem;
+    white-space: nowrap;
   }
 
   /* The frame's buttons (Copy, Clear, Reset) and links as buttons

@@ -490,6 +490,7 @@ export const SidebarDemo: FunctionComponent = () => {
                     : undefined
                 }
               >
+                <Viewport.Padding edge="block-start" />
                 {/* (Its glass by what's behind it: e.g. the picture.) */}
 
                 <Header.LargeTitle>
@@ -511,6 +512,7 @@ export const SidebarDemo: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -1012,6 +1014,7 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                     : undefined
                 }
               >
+                <Viewport.Padding edge="block-start" />
                 {/* (Its glass by what's behind it: e.g. the picture.) */}
 
                 <Header.LargeTitle>
@@ -1033,6 +1036,7 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -1432,6 +1436,7 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root className="sidebar-demo-transparent">
+                <Viewport.Padding edge="block-start" />
                 {/* (Its glass by what's behind it: e.g. the picture.) */}
 
                 <Header.LargeTitle>
@@ -1453,6 +1458,7 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>

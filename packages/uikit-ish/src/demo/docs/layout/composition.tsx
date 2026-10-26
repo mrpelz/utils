@@ -127,6 +127,7 @@ const ThreeColumns: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   {sidebarSections.map(([title, rows]) => (
                     <List.Section key={title}>
@@ -152,6 +153,7 @@ const ThreeColumns: FunctionComponent = () => {
                     </List.Section>
                   ))}
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -170,6 +172,7 @@ const ThreeColumns: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -190,6 +193,7 @@ const ThreeColumns: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -208,6 +212,7 @@ const ThreeColumns: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root background="plain">
+                <Viewport.Padding edge="block-start" />
                 <List.Root listStyle="plain">
                   <List.Section>
                     <List.Block>
@@ -215,6 +220,7 @@ const ThreeColumns: FunctionComponent = () => {
                     </List.Block>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -277,6 +283,7 @@ const Resizable: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -288,6 +295,7 @@ const Resizable: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -401,6 +409,7 @@ const BackgroundBehind: FunctionComponent = () => {
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root className="layout-demo-transparent">
+                <Viewport.Padding edge="block-start" />
                 <Header.LargeTitle>
                   <span>{rowTitles[selected]}</span>
                 </Header.LargeTitle>
@@ -416,6 +425,7 @@ const BackgroundBehind: FunctionComponent = () => {
                     </List.Group>
                   </List.Section>
                 </List.Root>
+                <Viewport.Padding edge="block-end" />
               </Page.Root>
             </Header.Root>
           </Layout.Column>

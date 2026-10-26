@@ -15,7 +15,8 @@ import {
 
 // The toolbar's code (as Weather's, see the toolbar's composition).
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
-const toolbarCode = `const [page, setPage] = useState(0);
+const toolbarCode = `const cities = ['Berlin', 'Lisbon', 'Tokyo'];
+const [page, setPage] = useState(0);
 
 <Viewport.Content>…{/* the page */}</Viewport.Content>
 <Viewport.BlockEnd>
@@ -43,7 +44,7 @@ const steps = [
 const OverPagedContent: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [page, setPage] = useState(0);
-  const pagesRef = useLabelledRef<HTMLDivElement>('pagesRef');
+  const pagesRef = useLabelledRef<HTMLDivElement>('pagesRef', 'HTMLDivElement');
 
   return (
     <Component

@@ -2,12 +2,33 @@
 
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
 
-import { forwardClick } from '../../../components/index.js';
+import { forwardClick, List } from '../../../components/index.js';
 import { AddLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
+import { codeLabel } from '../../tooling/frame/render-code.js';
+
+/**
+ * The views' swipe actions handle (see `List.createSwipeActionsHandle`): the
+ * first row's trailing actions (Mercury's), opened by a trigger outside the
+ * list.
+ */
+export const mercuryActions = codeLabel(
+  List.createSwipeActionsHandle(),
+  'mercuryActions',
+  'const mercuryActions = List.createSwipeActionsHandle(); // (at module level)',
+);
+
+/**
+ * `List.SwipeActionsTrigger`, in its row: its side (by a handle, see the
+ * handle's views).
+ */
+export const propOptionsSwipeActionsTrigger = {
+  ...commonPropOptions,
+  side: [undefined, 'inline-end', 'inline-start'] as const,
+};
 
 export const cursorOptions = [undefined, 'auto', 'pointer', 'copy'] as const;
 
@@ -195,6 +216,12 @@ export const getPropOptionsEditButtonFirst = (addLog: AddLog) => ({
   ...commonPropOptions,
   cursor: cursorOptions,
   disabled: [undefined, false, true] as const,
+  tint: [
+    'var(--color-ios-system-red)',
+    'var(--color-ios-system-green)',
+    undefined,
+  ] as const,
+  textColor: [undefined, 'var(--color-ios-label)'] as const,
   onClick: [
     new MappedProp(() => addLog('edit button clicked'), '[log click]'),
     undefined,
@@ -273,11 +300,31 @@ export const getPropOptionsEditButton = (addLog: AddLog) => ({
   ...commonPropOptions,
   cursor: cursorOptions,
   disabled: [undefined, false, true] as const,
-  editingStyle: [undefined, 'delete', 'insert'] as const,
+  tint: [
+    'var(--color-ios-system-red)',
+    'var(--color-ios-system-green)',
+    undefined,
+  ] as const,
+  textColor: [undefined, 'var(--color-ios-label)'] as const,
   onClick: [logClick(addLog, 'edit button'), undefined] as const,
   onSecondaryClick: [
     undefined,
     logSecondaryClick(addLog, 'edit button'),
+  ] as const,
+});
+
+/** As above, its click deleting its row (logged), as the view's other rows. */
+export const getPropOptionsEditButtonDelete = (
+  addLog: AddLog,
+  onDelete: () => void,
+) => ({
+  ...getPropOptionsEditButton(addLog),
+  onClick: [
+    new MappedProp(() => {
+      addLog('edit button clicked');
+      onDelete();
+    }, '[delete row]'),
+    undefined,
   ] as const,
 });
 

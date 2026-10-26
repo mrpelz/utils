@@ -100,6 +100,7 @@ const RootPart: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Viewport.BlockStart>
                 <Page.Root>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     <List.Section>
                       <List.Group>
@@ -117,6 +118,7 @@ const RootPart: FunctionComponent = () => {
                       </List.Group>
                     </List.Section>
                   </List.Root>
+                  <Viewport.Padding edge="block-end" />
                 </Page.Root>
               </Header.Root>
             ))}
@@ -187,6 +189,7 @@ const StackPart: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Viewport.BlockStart>
                 <Page.Root>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     <List.Section>
                       <List.Group>
@@ -204,6 +207,7 @@ const StackPart: FunctionComponent = () => {
                       </List.Group>
                     </List.Section>
                   </List.Root>
+                  <Viewport.Padding edge="block-end" />
                 </Page.Root>
               </Header.Root>
             ))}
@@ -277,6 +281,7 @@ const SwipeAreaPart: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Viewport.BlockStart>
                 <Page.Root>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     <List.Section>
                       <List.Group>
@@ -294,6 +299,7 @@ const SwipeAreaPart: FunctionComponent = () => {
                       </List.Group>
                     </List.Section>
                   </List.Root>
+                  <Viewport.Padding edge="block-end" />
                 </Page.Root>
               </Header.Root>
             ))}
@@ -364,6 +370,7 @@ const BackPart: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Viewport.BlockStart>
                 <Page.Root>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     <List.Section>
                       <List.Group>
@@ -381,6 +388,7 @@ const BackPart: FunctionComponent = () => {
                       </List.Group>
                     </List.Section>
                   </List.Root>
+                  <Viewport.Padding edge="block-end" />
                 </Page.Root>
               </Header.Root>
             ))}

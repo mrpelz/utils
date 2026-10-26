@@ -120,7 +120,13 @@ const formCode = `<Form onFormSubmit={(values) => …}>
   <Button.Root type="submit">…</Button.Root>
 </Form>`;
 
-const mediaCode = `const [position, setPosition] = useState(0);
+const mediaCode = `// The track's length (seconds), as m:ss; the player's seeking.
+const duration = 245;
+const time = (seconds) =>
+  \`\${Math.floor(seconds / 60)}:\${String(Math.floor(seconds % 60)).padStart(2, '0')}\`;
+const seek = (seconds) => {…};
+
+const [position, setPosition] = useState(0);
 // Playback moves the knob, but not while it's dragged.
 const [isScrubbing, setIsScrubbing] = useState(false);
 

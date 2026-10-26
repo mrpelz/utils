@@ -20,7 +20,9 @@ import {
 } from '../../tooling/guide/sections.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
-const thumbnailsCode = `<ContextualMenu.Root>
+const thumbnailsCode = `const photo = '/photos/beach.jpg';
+
+<ContextualMenu.Root>
   <ContextualMenu.Trigger
     aria-label="Beach"
     render={<button className="thumbnail" type="button" />}
@@ -31,7 +33,7 @@ const thumbnailsCode = `<ContextualMenu.Root>
   <ContextualMenu.Preview>
     <img alt="Beach" src={photo} />
   </ContextualMenu.Preview>
-  <ContextualMenu.Portal container={screen}>
+  <ContextualMenu.Portal>
     <ContextualMenu.Backdrop />
     <ContextualMenu.Positioner>
       <ContextualMenu.Popup>…</ContextualMenu.Popup>
@@ -42,7 +44,7 @@ const thumbnailsCode = `<ContextualMenu.Root>
 const heldCode = `<ContextualMenu.Trigger
   openOn="secondaryClick"
   render={<button className="message" type="button" />}
-  onClick={openMessage}
+  onClick={() => {…}}
 >
   …
 </ContextualMenu.Trigger>`;

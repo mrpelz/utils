@@ -69,6 +69,7 @@ const RootPart: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root>
+            <Viewport.Padding edge="block-start" />
             <Header.LargeTitle {...propsLargeTitle}>
               <span>Contacts</span>
               <Toolbar.Subtitle>{names.length} people</Toolbar.Subtitle>
@@ -94,6 +95,7 @@ const RootPart: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -142,6 +144,7 @@ const LargeTitlePart: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root>
+            <Viewport.Padding edge="block-start" />
             <Header.LargeTitle {...propsLargeTitle}>
               <span>Contacts</span>
               <Toolbar.Subtitle>{names.length} people</Toolbar.Subtitle>
@@ -167,6 +170,7 @@ const LargeTitlePart: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -215,6 +219,7 @@ const AccessoryPart: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root>
+            <Viewport.Padding edge="block-start" />
             <Header.LargeTitle {...propsLargeTitle}>
               <span>Contacts</span>
               <Toolbar.Subtitle>{names.length} people</Toolbar.Subtitle>
@@ -240,6 +245,7 @@ const AccessoryPart: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -338,10 +344,14 @@ export const HeaderParts: FunctionComponent = () => (
           component="viewport"
           part="Viewport.BlockStart"
         />
-        , its child) to its page: the page’s content starts below the bar
-        (54px), the bar’s title fades in as the large title scrolls away, and
-        what scrolls under the bar blurs beneath it (scroll-driven, unique per
-        header).
+        , its child) to its page: the page’s content starts below the bar (a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />{' '}
+        at its start, as high as the bar), the bar’s title fades in as the large
+        title scrolls away, and what scrolls under the bar blurs beneath it
+        (scroll-driven, unique per header).
       </li>
       <li>
         Around the page, or within it (e.g. a tab’s panel rendered as the page):
@@ -400,8 +410,8 @@ export const HeaderParts: FunctionComponent = () => (
         blurred, as under the bar.
       </li>
       <li>
-        It sticks 54px below the safe area (the bar’s height in Figma): a taller
-        bar (a two-line title) would overlap it.
+        It sticks below the bar, by its height (measured, also a taller one: a
+        two-line title).
       </li>
       <li>
         Renders a <code>div</code> (<code>render</code>).

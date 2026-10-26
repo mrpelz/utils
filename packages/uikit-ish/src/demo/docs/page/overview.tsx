@@ -55,6 +55,7 @@ const LiveView: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root {...props}>
+            <Viewport.Padding edge="block-start" />
             <Header.LargeTitle>
               <span>Contacts</span>
             </Header.LargeTitle>
@@ -70,6 +71,7 @@ const LiveView: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
+            <Viewport.Padding edge="block-end" />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -119,8 +121,17 @@ export const PageOverview: FunctionComponent = () => (
       </li>
       <li>
         Under a <a href="header">Header</a>’s bar: the page’s content starts
-        below it, its scroll the bar’s edge effect’s and its large title’s
-        timeline.
+        below it (a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />{' '}
+        at its start; one at its end, above a bottom bar or the screen’s edge),
+        its scroll the bar’s edge effect’s and its large title’s timeline.
+      </li>
+      <li>
+        Its content’s ends spaced by those paddings (the library’s content
+        margin, 16px), not by the page: it keeps only the safe area clear.
       </li>
     </ul>
 

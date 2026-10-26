@@ -139,6 +139,7 @@ const LiveView: FunctionComponent = () => {
                   <ActivityView.Label>Add to Reading List</ActivityView.Label>
                 </ActivityView.Action>
               </ActivityView.Actions>
+              <Viewport.Padding edge="block-end" />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>

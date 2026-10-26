@@ -3,6 +3,7 @@ import type { Properties } from 'csstype';
 import type { JSX, MouseEvent, ReactNode } from 'react';
 
 import type { SecondaryClickProps } from '../utils/main.js';
+import type { ListSwipeActionsHandle } from './swipe-actions-handle.js';
 
 export type ListStyle = 'grouped' | 'insetGrouped' | 'plain' | 'sidebar';
 
@@ -62,6 +63,7 @@ export type ListItemProps = PartProps<'li'> & {
 export type ItemContextValue = {
   /** The item's swipe actions, by side. */
   close: () => void;
+  isOpen: (side: Side) => boolean;
   open: (side: Side) => void;
   /**
    * Sets (or, with `undefined`, removes) the actions of a side, and what
@@ -155,13 +157,24 @@ export type ListButtonProps = PartProps<'button'> & {
 
 export type ListEditButtonProps = PartProps<'button'> & {
   /**
-   * UIKit `UITableViewCell.EditingStyle`.
-   * @default 'delete'
+   * Its symbol's color, e.g. for a light `tint`.
+   * @default white
    */
-  editingStyle?: 'delete' | 'insert';
+  textColor?: string;
+  /**
+   * Its circle's color (e.g. `systemRed` deleting, `systemGreen` inserting:
+   * UIKit's editing styles).
+   * @default `systemGray`
+   */
+  tint?: string;
 };
 
 export type ListSwipeActionsProps = PartProps<'div'> & {
+  /**
+   * Their handle (see `List.createSwipeActionsHandle`): opened and closed by
+   * it, from anywhere (e.g. a `List.SwipeActionsTrigger` outside the row).
+   */
+  handle?: ListSwipeActionsHandle;
   /**
    * Called when released swiped on past the actions (overswiped), instead of
    * triggering the outermost action; enables `overswipe`.
@@ -176,6 +189,20 @@ export type ListSwipeActionsProps = PartProps<'div'> & {
   overswipe?: boolean;
   /**
    * The row's side the actions are revealed on.
+   * @default 'inline-end'
+   */
+  side?: 'inline-end' | 'inline-start';
+};
+
+export type ListSwipeActionsTriggerProps = PartProps<'button'> & {
+  /**
+   * The actions it opens, by their handle (see
+   * `List.createSwipeActionsHandle`): from anywhere. Unset: its row's, on
+   * its `side` (it's in the row).
+   */
+  handle?: ListSwipeActionsHandle;
+  /**
+   * In its row, without a `handle`: the side whose actions it opens.
    * @default 'inline-end'
    */
   side?: 'inline-end' | 'inline-start';

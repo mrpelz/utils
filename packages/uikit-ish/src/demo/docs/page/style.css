@@ -1,7 +1,0 @@
-/* Page demo (see main.tsx). */
-
-/* A page's list clear of a bar floating over the page's end (the app keeps
-   it clear: anchors don't inset the content). */
-.page-demo-clear-end {
-  padding-block-end: 96px;
-}

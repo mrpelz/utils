@@ -37,7 +37,7 @@ const photo = useRef<HTMLButtonElement>(null);
 const AtAnElement: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [isOpen, setIsOpen] = useState(false);
-  const photo = useLabelledRef<HTMLButtonElement>('photo');
+  const photo = useLabelledRef<HTMLButtonElement>('photo', 'HTMLButtonElement');
 
   return (
     <Component
@@ -85,7 +85,7 @@ const AtAnElement: FunctionComponent = () => {
 const ManyActions: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [isOpen, setIsOpen] = useState(false);
-  const word = useLabelledRef<HTMLButtonElement>('word');
+  const word = useLabelledRef<HTMLButtonElement>('word', 'HTMLButtonElement');
 
   return (
     <Component
