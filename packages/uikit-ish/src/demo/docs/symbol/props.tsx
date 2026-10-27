@@ -21,6 +21,7 @@ export const propOptionsSymbol = {
     new MappedProp(sfSquareAndArrowUp, '[square.and.arrow.up]'),
     new MappedProp(sfTrayFill, '[tray.fill]'),
   ] as const,
+  baselineShift: [undefined, 'none', 'optical'] as const,
   // On the symbol: a badge (a count, or a dot).
   children: [
     undefined,
@@ -44,6 +45,7 @@ export const propOptionsContent = {
 /** The overview's: the symbol, and the text style it's in. */
 export const propOptionsOverviewSymbol = {
   icon: propOptionsSymbol.icon,
+  baselineShift: propOptionsSymbol.baselineShift,
 };
 
 export const propOptionsOverviewText = {

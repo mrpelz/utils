@@ -2,10 +2,10 @@ import './style.css';
 
 import { forwardRef, useId } from 'react';
 
-import { cn } from '../utils/main.js';
+import { cn, withStyle } from '../utils/main.js';
 import type { SymbolProps } from './props.js';
 
-export type { SymbolProps } from './props.js';
+export type { SymbolIcon, SymbolProps } from './props.js';
 
 // An SF Symbol, sized like the SF Pro glyph at the current font size, so it
 // can stand in for one (e.g. `􀋃` in Figma). Its weight follows the font
@@ -18,17 +18,24 @@ export type { SymbolProps } from './props.js';
 // scaled by its host (`--uikit-symbol-blend`, `--uikit-symbol-scale`,
 // e.g. a glass button's vibrant content), so they stay solid.
 
-// The catalogue's paths are SF Pro glyphs at 20pt (e.g. `circle` is 19.92
-// wide, the glyph's ink box 0.996em).
-const unitsPerEm = 20;
+// In a line of text, its ink's center on the text's: half the cap height up
+// from the baseline (`baselineShift`, see style.css).
+//
+// SF Symbols' paths are SF Pro glyphs at 20pt (e.g. `circle` is 19.92 wide,
+// the glyph's ink box 0.996em): other icons give their own units.
+const defaultUnitsPerEm = 20;
 
 // Room for strokes beyond the view box (in its units, see `fontWeight`).
 const bleed = 2;
 
-/** An SF Symbol (from `@bradleyhodges/sfsymbols`), with e.g. a `Badge`. */
+/** An icon (e.g. an SF Symbol), with e.g. a `Badge`. */
 export const Symbol = forwardRef<HTMLSpanElement, SymbolProps>(
-  ({ children, className, icon, ...props }, ref) => {
+  (
+    { baselineShift = 'optical', children, className, icon, style, ...props },
+    ref,
+  ) => {
     const mask = `uikit-symbol-${useId().replaceAll(/[^\w-]/gu, '')}`;
+    const unitsPerEm = icon.unitsPerEm ?? defaultUnitsPerEm;
     const [width = 0, height = 0] = icon.viewBox
       .split(' ')
       .slice(2)
@@ -38,7 +45,12 @@ export const Symbol = forwardRef<HTMLSpanElement, SymbolProps>(
     return (
       <span
         ref={ref}
+        data-baseline-shift={baselineShift}
         data-symbol={icon.sourceName}
+        style={withStyle(
+          { '--uikit-symbol-height': `${String(height / unitsPerEm)}em` },
+          style,
+        )}
         {...props}
         className={cn('uikit-symbol', className)}
       >

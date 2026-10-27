@@ -8,8 +8,10 @@ import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
   Contents,
   Heading,
+  PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { Catalog } from './catalog.js';
 import { symbolRows } from './docs.js';
 import { propOptionsOverviewSymbol, propOptionsOverviewText } from './props.js';
 
@@ -49,6 +51,7 @@ const sections: readonly Section[] = [
   ['key-props', 'Key props'],
   ['accessibility', 'Accessibility'],
   ['behavior', 'Behavior'],
+  ['all-symbols', 'All symbols'],
 ];
 
 /** `/symbol`: what a symbol is for, and its props. */
@@ -57,8 +60,9 @@ export const SymbolOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        An SF Symbol, sized as the glyph of the text around it (it can stand in
-        for one, as <code>􀋃</code> in Figma), in its color and weight.
+        An SF Symbol (or any icon’s outlines), sized as the glyph of the text
+        around it (it can stand in for one, as <code>􀋃</code> in Figma), in its
+        color and weight.
       </li>
       <li>
         The components’ symbols: a button’s, a tab’s, a row’s image (Figma “􀋃”).
@@ -107,7 +111,9 @@ export const SymbolOverview: FunctionComponent = () => (
       </li>
     </ul>
     <KeyPropsTable
-      parts={[['Symbol', pickRows(symbolRows, 'icon', 'children')]]}
+      parts={[
+        ['Symbol', pickRows(symbolRows, 'icon', 'baselineShift', 'children')],
+      ]}
     />
 
     <Heading
@@ -136,7 +142,11 @@ export const SymbolOverview: FunctionComponent = () => (
     <ul>
       <li>
         As large as an SF Pro glyph at the font size (with its side bearings),
-        in the text color.
+        in the text color; other icons by their units per em.
+      </li>
+      <li>
+        In a line of text, its ink centered on the text’s: half the cap height
+        up from the baseline (<code>baselineShift</code>).
       </li>
       <li>
         As heavy as the text style’s weight: heavier than regular, stroked;
@@ -147,6 +157,25 @@ export const SymbolOverview: FunctionComponent = () => (
         content; what sits on it (a badge) isn’t.
       </li>
     </ul>
+
+    <Heading
+      id="all-symbols"
+      level={2}
+    >
+      All symbols
+    </Heading>
+    <ul>
+      <li>
+        Every SF Symbol of <code>@bradleyhodges/sfsymbols</code>, each a{' '}
+        <PartLink
+          component="symbol"
+          part="Symbol"
+        />
+        : search by name, keyword or category; click one to copy its import.
+      </li>
+      <li>Loaded on request: all of them at once, a large download.</li>
+    </ul>
+    <Catalog />
   </>
 );
 

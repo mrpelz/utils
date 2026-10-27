@@ -6,6 +6,14 @@
     position: relative;
     display: inline-flex;
     flex: none;
+
+    /* In a line of text, its ink's center on the text's: half the cap
+       height up from the baseline, its ink's bottom (its baseline) half its
+       height below that (`--uikit-symbol-height`, see main.tsx). In a flex
+       or grid container, no effect. */
+    &[data-baseline-shift='optical'] {
+      vertical-align: calc(0.5cap - var(--uikit-symbol-height, 1em) / 2);
+    }
   }
 
   /* Blended and scaled as its host's content (see main.tsx). Strokes (see

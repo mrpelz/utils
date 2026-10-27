@@ -31,8 +31,9 @@ const SymbolPart: FunctionComponent = () => {
       state={[state]}
       title="Symbol"
     >
+      {/* In a line of text (see its baseline shift). */}
       <span className="symbol-demo-large">
-        <Symbol {...props} />
+        <Symbol {...props} /> Inbox
       </span>
     </Component>
   );
@@ -61,8 +62,13 @@ export const SymbolParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its glyph: <code>icon</code>, sized and colored by its text (font size,
-        color), weighted by its text style.
+        Its glyph: <code>icon</code> (an SF Symbol, or any icon’s outlines),
+        sized and colored by its text (font size, color), weighted by its text
+        style.
+      </li>
+      <li>
+        In a line of text, its ink centered on the text’s (
+        <code>baselineShift</code>), or on the baseline. Here: beside a word.
       </li>
       <li>
         Its children sit on it (positioned on the glyph’s box), e.g. a{' '}
