@@ -214,6 +214,55 @@ export const viewportPaddingRows: readonly PropRow[] = [
   ...elementRows('div', 'HTMLDivElement'),
 ];
 
+export const viewportOverscrollRows: readonly PropRow[] = [
+  [
+    'edge',
+    union('block-start', 'block-end'),
+    code(union('block-start')),
+    <>
+      The end it’s past: the content’s start (<code>block-start</code>, e.g.
+      pulling to refresh) or its end (<code>block-end</code>, e.g. pulling on to
+      the next page).
+    </>,
+  ],
+  [
+    'anchor',
+    'ViewportAnchorHandle | ViewportAnchorHandle[] | null',
+    <>all at its edge (in its scope)</>,
+    <>
+      The bars it comes out from under, by their handles (one, or several: the
+      tallest of them), instead of all at its edge, as a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Padding"
+      />
+      ’s. <code>null</code>: none, from the screen’s edge (inside the safe
+      area).
+    </>,
+  ],
+  [
+    'open',
+    'boolean',
+    code('false'),
+    <>
+      Kept shown at rest (UIKit’s content inset), e.g. while refreshing: the{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Padding"
+      />{' '}
+      at its edge makes room for it beyond the bars, the content settling there
+      (300ms), and back once closed.
+    </>,
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'What shows past the end (e.g. an activity indicator, a hint). Its custom properties, inherited: --uikit-viewport-overscroll (the pull at its edge, px) and --uikit-viewport-overscroll-progress (0 to 1, of its own size; open, 1).',
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
 /** `useAnchorSize(edge, handle)`: its arguments. */
 export const useAnchorSizeRows: readonly PropRow[] = [
   [

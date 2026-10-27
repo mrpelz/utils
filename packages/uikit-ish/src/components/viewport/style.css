@@ -13,8 +13,12 @@
 
     height: calc(
       var(--uikit-viewport-padding-size, 0px) +
+        var(--uikit-viewport-overscroll-room) +
         var(--uikit-viewport-padding-margin)
     );
+
+    /* (Room for open overscroll areas, see `Overscroll`: settling.) */
+    transition: --uikit-viewport-overscroll-room 300ms ease;
 
     &[data-edge='block-end'] {
       --uikit-viewport-padding-margin: var(
@@ -31,7 +35,8 @@
   /* The safe area insets kept clear (`data-safe-area`), as padding; at the
      bottom, less what the keyboard covers (where it's kept clear of). */
   .uikit-viewport-anchor,
-  .uikit-viewport-content {
+  .uikit-viewport-content,
+  .uikit-viewport-overscroll {
     /* Following the keyboard as it shows or hides (iOS: about 250ms, easing
        out; the visual viewport's change arrives once, at its end). */
     --uikit-viewport-keyboard-transition: 250ms cubic-bezier(0.2, 0.9, 0.3, 1);
@@ -141,6 +146,72 @@
         padding-right: 0;
         padding-left: var(--uikit-viewport-safe-left);
       }
+    }
+  }
+
+  /* What shows past an end of the scroll container (see `Overscroll`): a
+     layer beneath the content layer (before it), clipped from its edge's
+     bars (`--uikit-viewport-overscroll-inset`, inside the safe area) to the
+     other end; its area just out of it, moved in by the pull
+     (`--uikit-viewport-overscroll`), as the content's end. Where the content
+     stays (`data-overlay`), over it (beneath the anchors, a layer of its
+     own as they are). */
+  .uikit-viewport-overscroll {
+    z-index: 0;
+    overflow: clip;
+    inset-inline: 0;
+    pointer-events: none;
+
+    &[data-edge='block-start'] {
+      top: calc(
+        var(--uikit-viewport-top, 0px) + var(--uikit-viewport-safe-top) +
+          var(--uikit-viewport-overscroll-inset, 0px)
+      );
+      bottom: var(--uikit-viewport-keyboard-inset, 0);
+    }
+
+    &[data-edge='block-end'] {
+      top: var(--uikit-viewport-top, 0);
+      bottom: calc(
+        var(--uikit-viewport-keyboard-inset, 0px) +
+          var(--uikit-viewport-safe-bottom-keyboard) +
+          var(--uikit-viewport-overscroll-inset, 0px)
+      );
+    }
+
+    &[data-overlay] {
+      z-index: 9;
+      transform: translateZ(0);
+    }
+  }
+
+  .uikit-viewport-overscroll-area {
+    position: absolute;
+    box-sizing: border-box;
+    inset-inline: 0;
+    padding-inline: var(--uikit-viewport-safe-left)
+      var(--uikit-viewport-safe-right);
+    pointer-events: auto;
+
+    /* Open: moved in by the room made for it too, as the content. */
+    transition: --uikit-viewport-overscroll-room 300ms ease;
+
+    [data-edge='block-start'] > & {
+      top: 0;
+      translate: 0
+        calc(
+          var(--uikit-viewport-overscroll, 0px) +
+            var(--uikit-viewport-overscroll-room) - 100%
+        );
+    }
+
+    [data-edge='block-end'] > & {
+      bottom: 0;
+      translate: 0
+        calc(
+          100% - var(--uikit-viewport-overscroll, 0px) -
+            var(--uikit-viewport-overscroll-room)
+        );
     }
   }
 

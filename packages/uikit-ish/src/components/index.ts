@@ -278,6 +278,7 @@ export {
   type ViewportAnchorProps,
   type ViewportContentProps,
   type ViewportEdge,
+  type ViewportOverscrollProps,
   type ViewportPaddingProps,
   type ViewportProviderProps,
   type ViewportSafeArea,

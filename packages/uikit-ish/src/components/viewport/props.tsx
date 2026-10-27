@@ -107,6 +107,29 @@ export type ViewportAnchorProps = ComponentProps<'div'> & {
   safeArea?: ViewportSafeArea;
 };
 
+export type ViewportOverscrollProps = ComponentProps<'div'> & {
+  /**
+   * The bars it's below (or above, at the end): their handles, one or
+   * several (the tallest of them, see `Viewport.createAnchorHandle`);
+   * instead of the tallest at its edge. `null`: none (from the screen's
+   * edge, inside the safe area).
+   */
+  anchor?: ViewportAnchorHandle | readonly ViewportAnchorHandle[] | null;
+  /**
+   * The end it's at: past the content's start (e.g. pulling to refresh), or
+   * its end.
+   * @default 'block-start'
+   */
+  edge?: 'block-end' | 'block-start';
+  /**
+   * Kept shown at rest (UIKit's content inset), e.g. while refreshing: the
+   * `Viewport.Padding` at its edge making room for it beyond the bars,
+   * settling there (and back once closed).
+   * @default false
+   */
+  open?: boolean;
+};
+
 export type ViewportPaddingProps = Omit<ComponentProps<'div'>, 'children'> & {
   /**
    * The anchors it's as high as (the tallest of them): their handles, one

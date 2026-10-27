@@ -9,6 +9,7 @@ import {
 } from 'react';
 
 import {
+  ActivityIndicator,
   type ElementGeometry,
   List,
   Toolbar,
@@ -58,6 +59,7 @@ import {
   viewportBlockEndRows,
   viewportBlockStartRows,
   viewportContentRows,
+  viewportOverscrollRows,
   viewportPaddingRows,
   viewportProviderRows,
   viewportScrollEventRows,
@@ -73,6 +75,7 @@ import {
   propOptionsFocusShift,
   propOptionsHandlePadding,
   propOptionsInputZoom,
+  propOptionsOverscroll,
   propOptionsPaddingContent,
   propOptionsPaddingEnd,
   propOptionsPaddingStart,
@@ -368,6 +371,14 @@ const BlockEndPart: FunctionComponent = () => {
   );
 };
 
+/** A length, rounded (or none yet). */
+const px = (value?: number) =>
+  value === undefined ? '—' : `${String(Math.round(value))}px`;
+
+/** A share, as a percentage (or none yet). */
+const percent = (value?: number) =>
+  value === undefined ? '—' : `${String(Math.round(value * 100))}%`;
+
 /**
  * `Viewport.Padding`, overlaid: room at the content's ends for its bars,
  * the bottom one one row or two (its padding following it, live).
@@ -445,6 +456,98 @@ const PaddingPart: FunctionComponent = () => {
         </Viewport.BlockEnd>
       </>
     </Component>
+  );
+};
+
+/**
+ * `Viewport.Overscroll`, outlined: past the content's start (coming out
+ * from under the bar) or its end, as it's pulled there; open, kept shown,
+ * the padding making room (inside a provider tracking the content, see
+ * `OverscrollPart`).
+ */
+const OverscrollView: FunctionComponent<{
+  contentRef: RefObject<HTMLDivElement | null>;
+}> = ({ contentRef }) => {
+  const id = 'viewport-parts-overscroll';
+  const [external] = useProvidedState(id);
+  const [control, props, state] = usePropControl(propOptionsOverscroll, {
+    emphasize: 'outline',
+    external,
+    isOpen: true,
+    title: 'Viewport.Overscroll',
+  });
+  const [scroll, setScroll] = useState({ isHeld: false, overscroll: 0 });
+
+  useViewportScroll(({ isHeld, overscroll }) =>
+    setScroll({ isHeld, overscroll }),
+  );
+
+  return (
+    <Component
+      containsOverscroll
+      isInline
+      controls={[control]}
+      id={id}
+      stage="phone"
+      state={[state]}
+      title="Viewport.Overscroll"
+      diagnostics={
+        <dl className="viewport-demo-metrics">
+          <dt>overscroll</dt>
+          <dd>{px(scroll.overscroll)}</dd>
+          <dt>isHeld</dt>
+          <dd>{String(scroll.isHeld)}</dd>
+        </dl>
+      }
+    >
+      <>
+        {/* Beneath the content layer (before it). */}
+        <Viewport.Overscroll {...props}>
+          <div className="viewport-demo-pull">
+            <ActivityIndicator
+              animating={false}
+              className="viewport-demo-pull-spinner"
+            />
+          </div>
+        </Viewport.Overscroll>
+        <Viewport.Content ref={contentRef}>
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {names.map((name) => (
+                  <List.Item key={name}>
+                    <List.Title>{name}</List.Title>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+          <Viewport.Padding edge="block-end" />
+        </Viewport.Content>
+        <Viewport.BlockStart>
+          <Toolbar.Root placement="block-start">
+            <Toolbar.Title>
+              <span>Contacts</span>
+            </Toolbar.Title>
+          </Toolbar.Root>
+        </Viewport.BlockStart>
+      </>
+    </Component>
+  );
+};
+
+/** `OverscrollView`, in a provider tracking its screen's content. */
+const OverscrollPart: FunctionComponent = () => {
+  const contentRef = useLabelledRef<HTMLDivElement>(
+    'contentRef',
+    'HTMLDivElement',
+  );
+
+  return (
+    <Viewport.Provider scroller={contentRef}>
+      <OverscrollView contentRef={contentRef} />
+    </Viewport.Provider>
   );
 };
 
@@ -650,14 +753,6 @@ const UseVisualViewportPart: FunctionComponent = () => (
     <UseVisualViewportView />
   </Viewport.Provider>
 );
-
-/** A length, rounded (or none yet). */
-const px = (value?: number) =>
-  value === undefined ? '—' : `${String(Math.round(value))}px`;
-
-/** A share, as a percentage (or none yet). */
-const percent = (value?: number) =>
-  value === undefined ? '—' : `${String(Math.round(value * 100))}%`;
 
 /**
  * `useViewportScroll`, logging the screen's content's scrolling (its turns
@@ -1137,6 +1232,16 @@ export const ViewportParts: FunctionComponent = () => (
         their scope, or by their handles) and the content margin.
       </li>
       <li>
+        <PartLink
+          component="viewport"
+          part="Viewport.Overscroll"
+        >
+          Overscroll
+        </PartLink>
+        : what shows past the content’s start or end as it’s pulled there (e.g.
+        a refresh indicator).
+      </li>
+      <li>
         Hooks: what the provider tracks, inside it; and an element’s visibility
         and geometry, anywhere.
       </li>
@@ -1167,6 +1272,13 @@ export const ViewportParts: FunctionComponent = () => (
                 (at its start and its end: in it, or in a page in it)
               </li>
             </ul>
+          </li>
+          <li>
+            <PartLink
+              component="viewport"
+              part="Viewport.Overscroll"
+            />{' '}
+            (optional, one per end: before the content layer, beneath it)
           </li>
           <li>
             <PartLink
@@ -1546,6 +1658,68 @@ export const ViewportParts: FunctionComponent = () => (
     <PaddingPart />
     <h3>Props</h3>
     <PropsTable rows={viewportPaddingRows} />
+
+    <Heading
+      id="viewport-overscroll"
+      level={2}
+    >
+      <code>Viewport.Overscroll</code>
+    </Heading>
+    <ul>
+      <li>
+        What shows past the tracked scroll container’s start (<code>edge</code>{' '}
+        <code>block-start</code>) or end (<code>block-end</code>) as it’s pulled
+        there: e.g. a refresh indicator, a hint to the next page (see the{' '}
+        <a href="viewport/composition#pulling-to-refresh">composition</a>).
+      </li>
+      <li>
+        A layer beneath the content layer (render it before it), from the bars
+        at its edge (as a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />
+        ’s <code>anchor</code>): coming out from under them, moved along by the
+        pull as the content’s end, as if in it.
+      </li>
+      <li>
+        Safari bounces the content past its ends itself: the layer shows through
+        the gap. Where the content stays (other browsers, detected as it’s
+        pulled), it slides in over it, by the pull (
+        <PartLink
+          component="viewport"
+          part="useViewportScroll"
+        />
+        ’s <code>overscroll</code>, rubber-banded; bouncing back once released).
+      </li>
+      <li>
+        Its pull, as custom properties for its content’s styles:{' '}
+        <code>--uikit-viewport-overscroll</code> (px) and{' '}
+        <code>--uikit-viewport-overscroll-progress</code> (0 to 1, of its own
+        size), e.g. fading in, turning. Acting on release:{' '}
+        <PartLink
+          component="viewport"
+          part="useViewportScroll"
+        />
+        ’s <code>isHeld</code>.
+      </li>
+      <li>
+        <code>open</code>: kept shown at rest (e.g. while refreshing), its
+        progress 1; the padding at its edge makes room for it beyond the bars,
+        the content settling there (and back once closed).
+      </li>
+      <li>
+        Inside a provider tracking the scroll container (its{' '}
+        <code>scroller</code>). Here: pull the list past either end (
+        <code>edge</code>), or open it.
+      </li>
+      <li>
+        Renders a <code>div</code> (its area) in a clipping layer.
+      </li>
+    </ul>
+    <OverscrollPart />
+    <h3>Props</h3>
+    <PropsTable rows={viewportOverscrollRows} />
 
     <Heading
       id="viewport-createanchorhandle"
@@ -1942,6 +2116,7 @@ export const viewportPartsDemos = [
   BlockStartPart,
   BlockEndPart,
   PaddingPart,
+  OverscrollPart,
   CreateAnchorHandlePart,
   UseAnchorSizePart,
   UseVisualViewportPart,

@@ -5,6 +5,7 @@ import {
   forwardRef,
   FunctionComponent,
   RefObject,
+  useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -19,11 +20,14 @@ import {
   type PortalContainer,
   useForwardedRef,
   usePortalContainer,
+  withStyle,
 } from '../utils/main.js';
 import {
   createAnchorHandle,
   Padding,
   useAnchorRegistration,
+  useAnchorSize,
+  useOverscrollRoom,
 } from './padding.js';
 import type {
   ElementGeometry,
@@ -33,6 +37,7 @@ import type {
   SizeClass,
   ViewportAnchorProps,
   ViewportContentProps,
+  ViewportOverscrollProps,
   ViewportProviderProps,
   ViewportScrollEvent,
   ViewportScrollOptions,
@@ -58,6 +63,7 @@ export type {
   ViewportAnchorProps,
   ViewportContentProps,
   ViewportEdge,
+  ViewportOverscrollProps,
   ViewportPaddingProps,
   ViewportProviderProps,
   ViewportSafeArea,
@@ -107,9 +113,15 @@ const createScrollStore = () => {
     position: 0,
   };
   const listeners = new Set<ScrollListener>();
+  // Bouncing by itself (seen past an end, see `Provider`).
+  let isNative = false;
 
   return {
     current: () => latest,
+    isNative: () => isNative,
+    setNative: () => {
+      isNative = true;
+    },
     emit: (event: Scroll) => {
       latest = event;
       for (const listener of listeners) listener(event);
@@ -164,6 +176,9 @@ const rubberBand = (distance: number, size: number) =>
 
 // A wheel overscrolling (see `Provider`): held until quiet for this long.
 const wheelQuiet = 150;
+
+// Released, the pull bounces back this long (ms; see `Provider`).
+const bounceDuration = 350;
 
 // A wheel's delta, in pixels (by its `deltaMode`: pixels, lines, pages).
 const wheelPixels = (event: WheelEvent, page: number) =>
@@ -296,8 +311,6 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     if (!element) return undefined;
     const target: EventTarget =
       element === document.scrollingElement ? window : element;
-    // Bouncing by itself (seen past an end): its own overscroll only.
-    let isNative = false;
     // Pulled past an end (px, signed as `overscroll`), from where a touch
     // started pulling (`origin`).
     let pull = 0;
@@ -308,12 +321,22 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     const range = () =>
       Math.max(0, element.scrollHeight - element.clientHeight);
 
+    // A pull's bounce back (see `release`).
+    let bounce = 0;
+
     const emit = () => {
       const end = range();
       const raw = element.scrollTop;
       const position = Math.min(Math.max(raw, 0), end);
-      if (raw !== position) isNative = true;
-      const overscroll = isNative
+      if (raw !== position) scroll.setNative();
+      // Moved away from the end it's pulled past (e.g. scrolled to the top
+      // as the content changes): none left.
+      if ((pull < 0 && position > 0) || (pull > 0 && position < end - 1)) {
+        cancelAnimationFrame(bounce);
+        pull = 0;
+        origin = undefined;
+      }
+      const overscroll = scroll.isNative()
         ? raw - position
         : Math.sign(pull) * rubberBand(Math.abs(pull), element.clientHeight);
 
@@ -326,16 +349,27 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
       });
     };
 
+    // Released: bouncing back (easing out, as Safari's), unless caught
+    // again (a touch, a wheel: on from where it is).
     const release = () => {
-      pull = 0;
       origin = undefined;
-      emit();
+      const from = pull;
+      let start: number | undefined;
+      const step = (now: number) => {
+        start ??= now;
+        const progress = Math.min((now - start) / bounceDuration, 1);
+        pull = progress < 1 ? from * (1 - progress) ** 3 : 0;
+        emit();
+        if (progress < 1) bounce = requestAnimationFrame(step);
+      };
+      cancelAnimationFrame(bounce);
+      bounce = requestAnimationFrame(step);
     };
 
     const onTouchStart = () => {
+      cancelAnimationFrame(bounce);
       isTouching = true;
       origin = undefined;
-      pull = 0;
     };
 
     // Pulling down at the start (or up at the end), from where it started
@@ -346,7 +380,8 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
       const y = touch.clientY;
       const raw = element.scrollTop;
       const isAtEdge = raw <= 0 || raw >= range();
-      origin ??= isAtEdge ? y : undefined;
+      // (Caught bouncing back: on from its pull.)
+      origin ??= isAtEdge ? y + pull : undefined;
       const moved = origin === undefined ? 0 : y - origin;
       if ((raw <= 0 && moved > 0) || (raw >= range() && moved < 0)) {
         pull = -moved;
@@ -365,6 +400,7 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
 
     // Wheeled on past an end (or back), until quiet.
     const onWheel = (event: Event) => {
+      cancelAnimationFrame(bounce);
       const delta = wheelPixels(event as WheelEvent, element.clientHeight);
       const raw = element.scrollTop;
       const isPast = (raw <= 0 && delta < 0) || (raw >= range() && delta > 0);
@@ -393,6 +429,7 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     }
     return () => {
       clearTimeout(wheel);
+      cancelAnimationFrame(bounce);
       for (const [type, listener] of listeners) {
         target.removeEventListener(type, listener);
       }
@@ -699,6 +736,102 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
   ),
 );
 
+/**
+ * What shows past an end of the tracked scroll container as it's pulled
+ * there (needs a `Provider`): e.g. a refresh indicator. A layer beneath the
+ * content layer (rendered before it), from its edge's bars (`anchor`), the
+ * content's end moving it along as it bounces (Safari's own bounce); where
+ * the content stays (other browsers), sliding in over it. Its pull, as
+ * custom properties: `--uikit-viewport-overscroll` (px), and
+ * `--uikit-viewport-overscroll-progress` (0 to 1, of its own size; open, 1).
+ * Open, it's kept shown at rest, the padding at its edge making room for it
+ * (see `useOverscrollRoom`).
+ */
+const Overscroll = forwardRef<HTMLDivElement, ViewportOverscrollProps>(
+  (
+    { anchor, className, edge = 'block-start', open = false, style, ...props },
+    forwardedRef,
+  ) => {
+    const context = useContext(ViewportContext);
+    const ref = useForwardedRef(forwardedRef);
+    const layer = useRef<HTMLDivElement>(null);
+    const inset = useAnchorSize(edge, anchor);
+    const [size, setSize] = useState(0);
+    const isOpen = useRef(open);
+    const pull = useRef(0);
+    useOverscrollRoom(edge, open ? size : 0);
+
+    // Its pull, and how far along (of its size; open, all the way).
+    const update = useCallback(() => {
+      const { current: element } = layer;
+      if (!element) return;
+      const height = ref.current?.offsetHeight ?? 0;
+      const progress = height > 0 ? Math.min(pull.current / height, 1) : 0;
+      element.style.setProperty(
+        '--uikit-viewport-overscroll',
+        `${String(pull.current)}px`,
+      );
+      element.style.setProperty(
+        '--uikit-viewport-overscroll-progress',
+        String(isOpen.current ? 1 : progress),
+      );
+      // Where the content stays: over it.
+      element.toggleAttribute(
+        'data-overlay',
+        !(context?.scroll.isNative() ?? false),
+      );
+    }, [context, ref]);
+
+    useLayoutEffect(() => {
+      isOpen.current = open;
+      update();
+    }, [open, update]);
+
+    useViewportScroll(({ overscroll }) => {
+      pull.current = Math.max(
+        0,
+        edge === 'block-start' ? -overscroll : overscroll,
+      );
+      update();
+    });
+
+    // Its size (the room made for it, open).
+    useLayoutEffect(() => {
+      const { current: element } = ref;
+      if (!element) return undefined;
+      const observer = new ResizeObserver(([record]) => {
+        setSize(Math.round(record?.borderBoxSize[0]?.blockSize ?? 0));
+      });
+      observer.observe(element);
+      return () => observer.disconnect();
+    }, [ref]);
+
+    return (
+      <div
+        ref={layer}
+        className="uikit-viewport-overscroll"
+        data-edge={edge}
+        data-viewport-part="overscroll"
+        style={{ '--uikit-viewport-overscroll-inset': `${String(inset)}px` }}
+      >
+        <div
+          ref={ref}
+          data-open={open ? '' : undefined}
+          style={withStyle(
+            {
+              '--uikit-viewport-overscroll-room': `${String(open ? size : 0)}px`,
+            },
+            style,
+          )}
+          {...props}
+          className={cn('uikit-viewport-overscroll-area', className)}
+          data-viewport-part="overscroll-area"
+        />
+      </div>
+    );
+  },
+);
+
 /** A bar at the block start (the top; an `Anchor`). */
 const BlockStart = forwardRef<
   HTMLDivElement,
@@ -728,6 +861,7 @@ export const Viewport = {
   Content,
   BlockStart,
   BlockEnd,
+  Overscroll,
   Padding,
   createAnchorHandle,
 };

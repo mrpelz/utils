@@ -581,3 +581,12 @@
   initial-value: 0;
   syntax: '<number>';
 }
+
+/* Room made for an open overscroll area (see `Viewport.Overscroll`): a
+   length transitioning as such, the padding making it (and the area,
+   moving along) following every frame. */
+@property --uikit-viewport-overscroll-room {
+  inherits: false;
+  initial-value: 0;
+  syntax: '<length>';
+}

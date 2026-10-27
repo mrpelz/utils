@@ -28,7 +28,9 @@ import type { ViewportEdge, ViewportPaddingProps } from './props.js';
 // `Layout.Column`, a sheet's or drawer's popup: see `ViewportScopeContext`).
 // A `Padding` in the same scope is as high as the tallest anchor at its
 // edge, or the tallest of the anchors linked to it by their handles (one or
-// more), live (e.g. a tab bar collapsing).
+// more), live (e.g. a tab bar collapsing); and, beyond them, the open
+// overscroll areas at its edge (`Viewport.Overscroll`'s `open`, kept shown
+// past the content's end, e.g. refreshing).
 
 /**
  * An anchor, by a handle (`Viewport.createAnchorHandle`, in a component
@@ -61,6 +63,8 @@ export const ViewportScopeContext = createContext<object | undefined>(
 type Entry = {
   edge: ViewportEdge;
   handle: ViewportAnchorHandle | undefined;
+  /** An anchor, or an open overscroll area (adding to them, see above). */
+  kind: 'anchor' | 'overscroll';
   size: number;
 };
 
@@ -82,6 +86,16 @@ const createStore = () => {
       };
     },
     notify,
+    /** The open overscroll areas' sizes at an edge, added up. */
+    room: (edge: ViewportEdge): number => {
+      let room = 0;
+      for (const entry of entries) {
+        if (entry.kind === 'overscroll' && entry.edge === edge) {
+          room += entry.size;
+        }
+      }
+      return room;
+    },
     /** The tallest anchor's size: at an edge, or linked by the handles. */
     size: (
       edge: ViewportEdge,
@@ -89,6 +103,7 @@ const createStore = () => {
     ): number => {
       let size = 0;
       for (const entry of entries) {
+        if (entry.kind !== 'anchor') continue;
         const isMatch = handles
           ? entry.handle !== undefined && handles.includes(entry.handle)
           : entry.edge === edge;
@@ -138,7 +153,7 @@ export const useAnchorRegistration = (
     const { current: element } = ref;
     if (!element) return undefined;
     const isBlock = edge === 'block-start' || edge === 'block-end';
-    const entry: Entry = { edge, handle, size: 0 };
+    const entry: Entry = { edge, handle, kind: 'anchor', size: 0 };
     const remove = store.add(entry);
 
     const observer = new ResizeObserver(([record]) => {
@@ -177,6 +192,33 @@ export const useAnchorSize = (
   return useSyncExternalStore(
     store.subscribe,
     () => store.size(edge, handles),
+    () => 0,
+  );
+};
+
+/**
+ * An open overscroll area's size (`size`, px; 0: closed), registered in its
+ * scope at its edge (see above): the paddings there make room for it.
+ */
+export const useOverscrollRoom = (edge: ViewportEdge, size: number): void => {
+  const store = useStore();
+
+  useLayoutEffect(
+    () =>
+      size <= 0
+        ? undefined
+        : store.add({ edge, handle: undefined, kind: 'overscroll', size }),
+    [edge, size, store],
+  );
+};
+
+/** The room made for the open overscroll areas at an edge (see above). */
+const useRoom = (edge: ViewportEdge): number => {
+  const store = useStore();
+
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.room(edge),
     () => 0,
   );
 };
@@ -256,6 +298,7 @@ export const Padding = forwardRef<HTMLDivElement, ViewportPaddingProps>(
   ) => {
     const ref = useForwardedRef(forwardedRef);
     const size = useAnchorSize(edge, anchor);
+    const room = useRoom(edge);
     useScrollPadding(ref, edge);
 
     return (
@@ -267,6 +310,7 @@ export const Padding = forwardRef<HTMLDivElement, ViewportPaddingProps>(
             '--uikit-viewport-padding-margin':
               typeof margin === 'number' ? `${String(margin)}px` : margin,
             '--uikit-viewport-padding-size': `${String(size)}px`,
+            '--uikit-viewport-overscroll-room': `${String(room)}px`,
           },
           style,
         )}

@@ -131,6 +131,14 @@ export const propOptionsPaddingEnd = {
   margin: [undefined, 0, 32] as const,
 };
 
+/** The overscroll area's view: past the content's start, or its end. */
+export const propOptionsOverscroll = {
+  ...elementOptions,
+  edge: [undefined, 'block-end'] as const,
+  anchor: [undefined, null] as const,
+  open: [undefined, true, false] as const,
+};
+
 /** A view's padding at the content's start. */
 export const propOptionsPaddingStart = {
   ...elementOptions,

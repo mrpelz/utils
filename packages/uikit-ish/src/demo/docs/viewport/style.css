@@ -147,10 +147,10 @@
   pointer-events: auto;
 }
 
-/* A pull's indicator (see the overscroll views): over the content at an
-   edge, coming in as it's pulled (`--viewport-demo-pull`, 0 to 1). Armed
-   (pulled far enough to act on release), its arrow turns; a spinner turns
-   with the pull. */
+/* A pull's indicator (in a `Viewport.Overscroll`, see the overscroll
+   views): fading in with its pull's progress (0 to 1 of its size; open,
+   1), a spinner turning with it.
+   Armed (pulled far enough to act on release), its arrow turns. */
 .viewport-demo-pull {
   display: flex;
   align-items: center;
@@ -159,8 +159,7 @@
   color: var(--color-ios-secondary-label);
   font-size: 15px;
   gap: 6px;
-  opacity: var(--viewport-demo-pull, 0);
-  pointer-events: none;
+  opacity: var(--uikit-viewport-overscroll-progress, 0);
 }
 
 .viewport-demo-pull-arrow {
@@ -172,5 +171,5 @@
 }
 
 .viewport-demo-pull-spinner {
-  rotate: calc(var(--viewport-demo-pull, 0) * 270deg);
+  rotate: calc(var(--uikit-viewport-overscroll-progress, 0) * 270deg);
 }

@@ -1,13 +1,7 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { sfArrowDown } from '@bradleyhodges/sfsymbols/sfArrowDown';
 import { sfArrowUp } from '@bradleyhodges/sfsymbols/sfArrowUp';
-import {
-  CSSProperties,
-  FunctionComponent,
-  RefObject,
-  useRef,
-  useState,
-} from 'react';
+import { FunctionComponent, RefObject, useRef, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -175,13 +169,11 @@ const refreshCode = `const contentRef = useRef<HTMLDivElement>(null);
 // Pulled this far past the top (px), released, it refreshes.
 const refreshDistance = 60;
 const [rows, setRows] = useState(names);
-const [pulled, setPulled] = useState(0);
 const [isRefreshing, setIsRefreshing] = useState(false);
 // Released past the distance: refreshing.
 const isArmed = useRef(false);
 
 useViewportScroll(({ isHeld, overscroll }) => {
-  setPulled(Math.max(0, -overscroll));
   if (isHeld) {
     isArmed.current = -overscroll >= refreshDistance;
     return;
@@ -195,28 +187,35 @@ useViewportScroll(({ isHeld, overscroll }) => {
   }, 1500);
 });
 
-<Viewport.Content ref={contentRef}>
-  {/* Not the indicator's anchor (over the content), but while refreshing. */}
-  <Viewport.Padding
-    anchor={isRefreshing ? undefined : null}
-    edge="block-start"
+{/* Beneath the content layer (before it), coming out past its start;
+    kept shown while refreshing, the content making room for it. */}
+<Viewport.Overscroll
+  className="pull"
+  open={isRefreshing}
+>
+  <ActivityIndicator
+    animating={isRefreshing}
+    className="pull-spinner"
   />
+</Viewport.Overscroll>
+<Viewport.Content ref={contentRef}>
+  <Viewport.Padding edge="block-start" />
   <List.Root>…{/* rows */}</List.Root>
   <Viewport.Padding edge="block-end" />
 </Viewport.Content>
-<Viewport.BlockStart>
-  <div
-    className="pull"
-    style={{
-      '--pull': isRefreshing ? 1 : Math.min(pulled / refreshDistance, 1),
-    }}
-  >
-    <ActivityIndicator
-      animating={isRefreshing}
-      className="pull-spinner"
-    />
-  </div>
-</Viewport.BlockStart>`;
+
+/* Its pull's progress (0 to 1 of its size; open, 1): fading in,
+   turning. */
+.pull {
+  display: flex;
+  justify-content: center;
+  padding: 12px 16px;
+  opacity: var(--uikit-viewport-overscroll-progress);
+}
+
+.pull-spinner {
+  rotate: calc(var(--uikit-viewport-overscroll-progress) * 270deg);
+}`;
 
 const pagesCode = `const contentRef = useRef<HTMLDivElement>(null);
 
@@ -231,11 +230,14 @@ const [index, setIndex] = useState(0);
 const [overscroll, setOverscroll] = useState(0);
 // Released past the distance: the page turned to (-1, 1), or none.
 const turn = useRef(0);
+// Turned: to its top, once it's bounced back (scrolling while it bounces
+// would stop it).
+const toTop = useRef(false);
 const [name, facts] = planets[index];
 const previous = planets[index - 1]?.[0];
 const next = planets[index + 1]?.[0];
 
-useViewportScroll(({ isHeld, overscroll: by }) => {
+useViewportScroll(({ atTop, isHeld, overscroll: by }) => {
   setOverscroll(by);
   if (isHeld) {
     turn.current = 0;
@@ -243,14 +245,39 @@ useViewportScroll(({ isHeld, overscroll: by }) => {
     if (next && by >= turnDistance) turn.current = 1;
     return;
   }
+  if (toTop.current && Math.abs(by) < 1) {
+    toTop.current = false;
+    if (!atTop) contentRef.current?.scrollTo({ top: 0 });
+  }
+  // Released past the distance: turned, the new page bouncing back.
   if (turn.current === 0) return;
   setIndex(index + turn.current);
   turn.current = 0;
-  contentRef.current?.scrollTo({ top: 0 });
+  toTop.current = true;
 });
 
+{/* Beneath the content layer (before it), coming out past its ends. */}
+{previous && (
+  <Viewport.Overscroll
+    className="pull"
+    data-armed={overscroll <= -turnDistance ? '' : undefined}
+  >
+    <Symbol className="pull-arrow" icon={sfArrowDown} />
+    {previous}
+  </Viewport.Overscroll>
+)}
+{next && (
+  <Viewport.Overscroll
+    className="pull"
+    data-armed={overscroll >= turnDistance ? '' : undefined}
+    edge="block-end"
+  >
+    <Symbol className="pull-arrow" icon={sfArrowUp} />
+    {next}
+  </Viewport.Overscroll>
+)}
 <Viewport.Content ref={contentRef}>
-  <Viewport.Padding anchor={null} edge="block-start" />
+  <Viewport.Padding edge="block-start" />
   <List.Root>
     <List.Section>
       <List.Header prominence="extraProminent">
@@ -259,32 +286,26 @@ useViewportScroll(({ isHeld, overscroll: by }) => {
       <List.Group>…{/* facts */}</List.Group>
     </List.Section>
   </List.Root>
-  <Viewport.Padding anchor={null} edge="block-end" />
+  <Viewport.Padding edge="block-end" />
 </Viewport.Content>
-{previous && (
-  <Viewport.BlockStart>
-    <div
-      className="pull"
-      data-armed={overscroll <= -turnDistance ? '' : undefined}
-      style={{ '--pull': Math.min(-overscroll / turnDistance, 1) }}
-    >
-      <Symbol className="pull-arrow" icon={sfArrowDown} />
-      {previous}
-    </div>
-  </Viewport.BlockStart>
-)}
-{next && (
-  <Viewport.BlockEnd>
-    <div
-      className="pull"
-      data-armed={overscroll >= turnDistance ? '' : undefined}
-      style={{ '--pull': Math.min(overscroll / turnDistance, 1) }}
-    >
-      <Symbol className="pull-arrow" icon={sfArrowUp} />
-      {next}
-    </div>
-  </Viewport.BlockEnd>
-)}`;
+
+/* Its pull's progress (0 to 1 of its size): fading in; armed, its arrow
+   turned. */
+.pull {
+  display: flex;
+  justify-content: center;
+  padding: 12px 16px;
+  gap: 6px;
+  opacity: var(--uikit-viewport-overscroll-progress);
+}
+
+.pull-arrow {
+  transition: rotate 200ms;
+}
+
+.pull[data-armed] > .pull-arrow {
+  rotate: 180deg;
+}`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 /** An app's shell: pages in the content layer, a tab bar at the bottom. */
@@ -503,7 +524,6 @@ const RefreshView: FunctionComponent<{
   const [isRefreshing, setIsRefreshing] = useState(false);
   // Released past the distance: refreshing.
   const isArmed = useRef(false);
-  const pulled = Math.max(0, -scroll.overscroll);
 
   useViewportScroll(({ isHeld, overscroll }) => {
     setScroll({ isHeld, overscroll });
@@ -540,18 +560,27 @@ const RefreshView: FunctionComponent<{
           <dt>isHeld</dt>
           <dd>{String(scroll.isHeld)}</dd>
           <dt>armed</dt>
-          <dd>{String(scroll.isHeld && pulled >= refreshDistance)}</dd>
+          <dd>
+            {String(scroll.isHeld && -scroll.overscroll >= refreshDistance)}
+          </dd>
         </dl>
       }
     >
       <>
-        <Viewport.Content ref={contentRef}>
-          {/* Not the indicator's anchor (over the content), but while
-              refreshing. */}
-          <Viewport.Padding
-            anchor={isRefreshing ? undefined : null}
-            edge="block-start"
+        {/* Beneath the content layer (before it), coming out past its
+            start; kept shown while refreshing, the content making room for
+            it. */}
+        <Viewport.Overscroll
+          className="viewport-demo-pull"
+          open={isRefreshing}
+        >
+          <ActivityIndicator
+            animating={isRefreshing}
+            className="viewport-demo-pull-spinner"
           />
+        </Viewport.Overscroll>
+        <Viewport.Content ref={contentRef}>
+          <Viewport.Padding edge="block-start" />
           <List.Root>
             <List.Section>
               <List.Group>
@@ -565,23 +594,6 @@ const RefreshView: FunctionComponent<{
           </List.Root>
           <Viewport.Padding edge="block-end" />
         </Viewport.Content>
-        <Viewport.BlockStart>
-          <div
-            className="viewport-demo-pull"
-            style={
-              {
-                '--viewport-demo-pull': isRefreshing
-                  ? 1
-                  : Math.min(pulled / refreshDistance, 1),
-              } as CSSProperties
-            }
-          >
-            <ActivityIndicator
-              animating={isRefreshing}
-              className="viewport-demo-pull-spinner"
-            />
-          </div>
-        </Viewport.BlockStart>
       </>
     </Component>
   );
@@ -618,12 +630,15 @@ const PagesView: FunctionComponent<{
   const [scroll, setScroll] = useState({ isHeld: false, overscroll: 0 });
   // Released past the distance: the page turned to (-1, 1), or none.
   const turn = useRef(0);
+  // Turned: to its top, once it's bounced back (scrolling while it bounces
+  // would stop it).
+  const toTop = useRef(false);
   const [name, facts] = planets[index] ?? ['', []];
   const previous = planets[index - 1]?.[0];
   const next = planets[index + 1]?.[0];
   const { overscroll } = scroll;
 
-  useViewportScroll(({ isHeld, overscroll: by }) => {
+  useViewportScroll(({ atTop, isHeld, overscroll: by }) => {
     setScroll({ isHeld, overscroll: by });
     if (isHeld) {
       turn.current = 0;
@@ -631,11 +646,16 @@ const PagesView: FunctionComponent<{
       if (next && by >= turnDistance) turn.current = 1;
       return;
     }
+    if (toTop.current && Math.abs(by) < 1) {
+      toTop.current = false;
+      if (!atTop) contentRef.current?.scrollTo({ top: 0 });
+    }
+    // Released past the distance: turned, the new page bouncing back.
     if (turn.current === 0) return;
     addLog(`turned to: ${String(turn.current < 0 ? previous : next)}`);
     setIndex(index + turn.current);
     turn.current = 0;
-    contentRef.current?.scrollTo({ top: 0 });
+    toTop.current = true;
   });
 
   return (
@@ -658,11 +678,35 @@ const PagesView: FunctionComponent<{
       }
     >
       <>
+        {/* Beneath the content layer (before it), coming out past its
+            ends. */}
+        {previous && (
+          <Viewport.Overscroll
+            className="viewport-demo-pull"
+            data-armed={overscroll <= -turnDistance ? '' : undefined}
+          >
+            <Symbol
+              className="viewport-demo-pull-arrow"
+              icon={sfArrowDown}
+            />
+            {previous}
+          </Viewport.Overscroll>
+        )}
+        {next && (
+          <Viewport.Overscroll
+            className="viewport-demo-pull"
+            data-armed={overscroll >= turnDistance ? '' : undefined}
+            edge="block-end"
+          >
+            <Symbol
+              className="viewport-demo-pull-arrow"
+              icon={sfArrowUp}
+            />
+            {next}
+          </Viewport.Overscroll>
+        )}
         <Viewport.Content ref={contentRef}>
-          <Viewport.Padding
-            anchor={null}
-            edge="block-start"
-          />
+          <Viewport.Padding edge="block-start" />
           <List.Root>
             <List.Section>
               <List.Header prominence="extraProminent">
@@ -677,55 +721,8 @@ const PagesView: FunctionComponent<{
               </List.Group>
             </List.Section>
           </List.Root>
-          <Viewport.Padding
-            anchor={null}
-            edge="block-end"
-          />
+          <Viewport.Padding edge="block-end" />
         </Viewport.Content>
-        {previous && (
-          <Viewport.BlockStart>
-            <div
-              className="viewport-demo-pull"
-              data-armed={overscroll <= -turnDistance ? '' : undefined}
-              style={
-                {
-                  '--viewport-demo-pull': Math.min(
-                    -overscroll / turnDistance,
-                    1,
-                  ),
-                } as CSSProperties
-              }
-            >
-              <Symbol
-                className="viewport-demo-pull-arrow"
-                icon={sfArrowDown}
-              />
-              {previous}
-            </div>
-          </Viewport.BlockStart>
-        )}
-        {next && (
-          <Viewport.BlockEnd>
-            <div
-              className="viewport-demo-pull"
-              data-armed={overscroll >= turnDistance ? '' : undefined}
-              style={
-                {
-                  '--viewport-demo-pull': Math.min(
-                    overscroll / turnDistance,
-                    1,
-                  ),
-                } as CSSProperties
-              }
-            >
-              <Symbol
-                className="viewport-demo-pull-arrow"
-                icon={sfArrowUp}
-              />
-              {next}
-            </div>
-          </Viewport.BlockEnd>
-        )}
       </>
     </Component>
   );
@@ -980,19 +977,21 @@ export const ViewportComposition: FunctionComponent = () => (
         The indicator in a{' '}
         <PartLink
           component="viewport"
-          part="Viewport.BlockStart"
-        />{' '}
-        over the content: the{' '}
+          part="Viewport.Overscroll"
+        />
+        : beneath the content, coming out past its start with it, fading in and
+        turning with its pull’s progress (its custom properties). While
+        refreshing, it’s <code>open</code>: kept shown, the{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />{' '}
-        doesn’t keep clear of it (<code>anchor</code> <code>null</code>), but
-        while refreshing.
+        making room for it, the content settling there (and back).
       </li>
       <li>
         Safari bounces past the top by itself; elsewhere, the pull is the
-        touch’s (or the wheel’s), rubber-banded, the content staying.
+        touch’s (or the wheel’s), rubber-banded, the content staying: the
+        indicator slides in over it.
       </li>
     </ul>
     <CodeView code={refreshCode} />
@@ -1010,7 +1009,12 @@ export const ViewportComposition: FunctionComponent = () => (
         released, the next; back past the start, the previous.
       </li>
       <li>
-        A hint at each edge coming in with the pull, its arrow turning once far
+        A hint past each end (a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Overscroll"
+        />{' '}
+        at either edge), coming out with the pull, its arrow turning once far
         enough (released then, it turns the page).
       </li>
       <li>
