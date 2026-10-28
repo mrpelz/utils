@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import { CSSProperties, FunctionComponent } from 'react';
 
 import { Symbol, Typography } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
@@ -13,12 +13,16 @@ import {
 } from '../../tooling/guide/sections.js';
 import { Catalog } from './catalog.js';
 import { symbolRows } from './docs.js';
-import { propOptionsOverviewSymbol, propOptionsOverviewText } from './props.js';
+import {
+  propOptionsOverviewContent,
+  propOptionsOverviewSymbol,
+  propOptionsOverviewText,
+} from './props.js';
 
-/** A symbol in a text style: sized, weighted and colored by it. */
+/** A symbol in a text style: sized and colored by it. */
 const LiveView: FunctionComponent = () => {
   const id = 'symbol-overview';
-  const [externalSymbol, externalText] = useProvidedState(id);
+  const [externalSymbol, externalText, externalContent] = useProvidedState(id);
   const [controlSymbol, propsSymbol, stateSymbol] = usePropControl(
     propOptionsOverviewSymbol,
     { external: externalSymbol, isOpen: true, title: 'Symbol' },
@@ -27,17 +31,29 @@ const LiveView: FunctionComponent = () => {
     propOptionsOverviewText,
     { external: externalText, title: 'Typography' },
   );
+  const [controlContent, content, stateContent] = usePropControl(
+    propOptionsOverviewContent,
+    { external: externalContent, isOpen: true, title: '[content]' },
+  );
 
   return (
     <Component
       isCentered
       isInline
-      controls={[controlSymbol, controlText]}
+      controls={[controlSymbol, controlText, controlContent]}
       id={id}
-      state={[stateSymbol, stateText]}
+      state={[stateSymbol, stateText, stateContent]}
       title="Symbol"
     >
-      <Typography {...propsText}>
+      {/* Emphasized as a host would (e.g. a selected tab). */}
+      <Typography
+        {...propsText}
+        style={
+          content.emphasized
+            ? ({ '--uikit-symbol-emphasis': 1 } as CSSProperties)
+            : undefined
+        }
+      >
         <Symbol {...propsSymbol} /> Notifications
       </Typography>
     </Component>
@@ -51,6 +67,7 @@ const sections: readonly Section[] = [
   ['key-props', 'Key props'],
   ['accessibility', 'Accessibility'],
   ['behavior', 'Behavior'],
+  ['icons', 'Icons'],
   ['all-symbols', 'All symbols'],
 ];
 
@@ -62,7 +79,11 @@ export const SymbolOverview: FunctionComponent = () => (
       <li>
         An SF Symbol (or any icon’s outlines), sized as the glyph of the text
         around it (it can stand in for one, as <code>􀋃</code> in Figma), in its
-        color and weight.
+        color.
+      </li>
+      <li>
+        Emphasized by its host (a selected tab), its filled variant instead: no
+        state of the app’s picks it.
       </li>
       <li>
         The components’ symbols: a button’s, a tab’s, a row’s image (Figma “􀋃”).
@@ -112,7 +133,16 @@ export const SymbolOverview: FunctionComponent = () => (
     </ul>
     <KeyPropsTable
       parts={[
-        ['Symbol', pickRows(symbolRows, 'icon', 'baselineShift', 'children')],
+        [
+          'Symbol',
+          pickRows(
+            symbolRows,
+            'icon',
+            'emphasizedIcon',
+            'baselineShift',
+            'children',
+          ),
+        ],
       ]}
     />
 
@@ -149,12 +179,59 @@ export const SymbolOverview: FunctionComponent = () => (
         up from the baseline (<code>baselineShift</code>).
       </li>
       <li>
-        As heavy as the text style’s weight: heavier than regular, stroked;
-        lighter, thinned.
+        One weight, its outlines’ (SF Symbols’: Regular), whatever the text’s:
+        no stroke thickens it. Layers at their relative opacities (an SF
+        Symbol’s secondary layer half as opaque as its primary).
+      </li>
+      <li>
+        Emphasized, its <code>emphasizedIcon</code> (e.g. the filled variant)
+        fades in over its icon, as far as its host’s{' '}
+        <code>--uikit-symbol-emphasis</code> (0 to 1, inherited): a selected{' '}
+        <a href="tab-bar">Tab bar</a> tab, a checked{' '}
+        <a href="segmented">Segmented</a> item, a selected{' '}
+        <a href="sidebar">Sidebar</a> row. Both icons are given; the host’s
+        state picks one, so an uncontrolled tab bar’s symbols follow it.
       </li>
       <li>
         In a glass control, its glyph is blended and scaled with the control’s
         content; what sits on it (a badge) isn’t.
+      </li>
+    </ul>
+
+    <Heading
+      id="icons"
+      level={2}
+    >
+      Icons
+    </Heading>
+    <ul>
+      <li>
+        Any icon’s outlines: a{' '}
+        <PartLink
+          component="symbol"
+          part="Symbol"
+        />{' '}
+        takes an object of filled paths in a view box (<code>SymbolIcon</code>
+        ). The library depends on no icon package.
+      </li>
+      <li>
+        SF Symbols: <code>@bradleyhodges/sfsymbols</code>’ icons have that
+        shape. Import each by its own path (
+        <code>@bradleyhodges/sfsymbols/sfBell</code>), not the package’s index
+        (every symbol). Mind Apple’s terms: SF Symbols are licensed for Apple
+        platforms only.
+      </li>
+      <li>
+        The package’s own renderer (<code>SFIcon</code>, from{' '}
+        <code>@bradleyhodges/sfsymbols-react</code>) draws a bare SVG, a square
+        an em tall: not sized as SF Pro’s glyph, not centered on the text, its
+        primary layer translucent (its paths’ 0.85), heavier by a stroke,
+        nothing on it, no emphasized variant. A{' '}
+        <PartLink
+          component="symbol"
+          part="Symbol"
+        />{' '}
+        takes the same icon objects and adds those.
       </li>
     </ul>
 
@@ -172,6 +249,10 @@ export const SymbolOverview: FunctionComponent = () => (
           part="Symbol"
         />
         : search by name, keyword or category; click one to copy its import.
+      </li>
+      <li>
+        Also the package’s brand icons (FontAwesome’s, 512 units to an em:{' '}
+        <code>unitsPerEm</code>).
       </li>
       <li>Loaded on request: all of them at once, a large download.</li>
     </ul>

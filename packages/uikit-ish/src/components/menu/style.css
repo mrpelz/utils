@@ -85,11 +85,6 @@
     grid-row: 1 / span 2;
     line-height: var(--uikit-menu-icon-line-height);
     margin-inline-end: 4px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (400 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
   }
 
   .uikit-menu-label {
@@ -102,11 +97,6 @@
     letter-spacing: var(--uikit-menu-label-letter-spacing);
     line-height: var(--uikit-menu-label-line-height);
     padding-inline-start: 4px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (400 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
   }
 
   .uikit-menu-subtitle {
@@ -120,11 +110,6 @@
     grid-row: 2;
     line-height: var(--uikit-menu-subtitle-line-height);
     padding-inline-start: 4px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (400 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
   }
 
   .uikit-menu-shortcut {
@@ -140,11 +125,6 @@
     grid-row: 1 / span 2;
     line-height: 20px;
     margin-inline-start: 4px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
 
     & > span {
       min-width: 14px;
@@ -161,11 +141,6 @@
     letter-spacing: -0.08px;
     line-height: 15px;
     mix-blend-mode: var(--uikit-glass-content-blend);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
   }
 
   .uikit-menu-quick-actions {
@@ -442,13 +417,8 @@
       font-weight: round(down, 510, 100);
       letter-spacing: normal;
       line-height: 18px;
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (510 - 400) / 326 * 1px);
       text-overflow: ellipsis;
       white-space: nowrap;
-
-      --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
     }
   }
 }

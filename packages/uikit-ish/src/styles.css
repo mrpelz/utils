@@ -582,6 +582,14 @@
   syntax: '<number>';
 }
 
+/* A symbol's emphasis (see `Symbol`), set by its host: 0 its icon shown,
+   1 its emphasized one; a number, so a host can transition it. */
+@property --uikit-symbol-emphasis {
+  inherits: true;
+  initial-value: 0;
+  syntax: '<number>';
+}
+
 /* Room made for an open overscroll area (see `Viewport.Overscroll`): a
    length transitioning as such, the padding making it (and the area,
    moving along) following every frame. */

@@ -8,8 +8,12 @@ import type { ComponentProps } from 'react';
 export type SymbolIcon = {
   /** Its name (e.g. `bell`), as its `data-symbol`. */
   sourceName?: string;
-  /** Its outlines (filled). */
-  svgPathData: readonly { d: string }[];
+  /**
+   * Its outlines (filled), each a layer: its opacity relative to the
+   * most opaque one's (SF Symbols' hierarchical layers: 0.85 primary,
+   * 0.425 secondary, 0.2125 tertiary; drawn 1, 0.5, 0.25).
+   */
+  svgPathData: readonly { d: string; fillOpacity?: number }[];
   /**
    * Its view box's units in an em (its size at the font size).
    * @default 20 (SF Symbols' outlines: SF Pro glyphs at 20pt)
@@ -28,6 +32,12 @@ export type SymbolProps = ComponentProps<'span'> & {
    * @default 'optical'
    */
   baselineShift?: 'none' | 'optical';
+  /**
+   * The icon shown emphasized (e.g. `sfBellFill`), in place of `icon`: as
+   * much as its host emphasizes it (`--uikit-symbol-emphasis`, 0 to 1, e.g.
+   * a selected tab's), with no state of its own.
+   */
+  emphasizedIcon?: SymbolIcon;
   /** The icon (see `SymbolIcon`), e.g. `sfBell`. */
   icon: SymbolIcon;
 };

@@ -8,12 +8,13 @@ import {
   useState,
 } from 'react';
 
-import { Symbol } from '../../../components/index.js';
+import { Symbol, type SymbolIcon } from '../../../components/index.js';
 
 // Every SF Symbol of `@bradleyhodges/sfsymbols`, in a grid (no stage): the
 // package's index loaded on request (all of its symbols: a large download),
 // searchable by name, keyword and category; only the rows in view rendered.
-// A symbol clicked, its import is copied.
+// A symbol clicked, its import is copied. Also its brand icons (FontAwesome's:
+// their paths explicitly filled), at their own units.
 
 // A cell's size (px), and the rows rendered beyond the view (each way).
 const cellSize = 96;
@@ -21,6 +22,14 @@ const overscan = 2;
 
 const isIcon = (value: unknown): value is IconDefinition =>
   typeof value === 'object' && value !== null && 'svgPathData' in value;
+
+type CatalogIcon = IconDefinition & SymbolIcon;
+
+/** A brand icon's units: FontAwesome's, 512 to an em. */
+const withUnits = (icon: IconDefinition): CatalogIcon =>
+  icon.svgPathData.some((path) => 'fill' in path)
+    ? { ...icon, unitsPerEm: 512 }
+    : icon;
 
 /** What a symbol is found by: its names, keywords and categories. */
 const searchText = ({
@@ -39,9 +48,9 @@ const importOf = ({ iconName }: IconDefinition) =>
   `import { ${iconName} } from '@bradleyhodges/sfsymbols/${iconName}';`;
 
 /** The symbols, once loaded: searched, virtualized. */
-const Grid: FunctionComponent<{ icons: readonly IconDefinition[] }> = ({
-  icons,
-}) => {
+const Grid: FunctionComponent<{
+  icons: readonly CatalogIcon[];
+}> = ({ icons }) => {
   const [query, setQuery] = useState('');
   const [copied, setCopied] = useState<string>();
   const [scrollTop, setScrollTop] = useState(0);
@@ -144,7 +153,7 @@ const Grid: FunctionComponent<{ icons: readonly IconDefinition[] }> = ({
  * index, see above).
  */
 export const Catalog: FunctionComponent = () => {
-  const [icons, setIcons] = useState<readonly IconDefinition[]>();
+  const [icons, setIcons] = useState<readonly CatalogIcon[]>();
   const [state, setState] = useState<'error' | 'idle' | 'loading'>('idle');
 
   if (icons) return <Grid icons={icons} />;
@@ -158,7 +167,13 @@ export const Catalog: FunctionComponent = () => {
         onClick={() => {
           setState('loading');
           import('@bradleyhodges/sfsymbols')
-            .then((module) => setIcons(Object.values(module).filter(isIcon)))
+            .then((module) =>
+              setIcons(
+                Object.values(module)
+                  .filter(isIcon)
+                  .map((icon) => withUnits(icon)),
+              ),
+            )
             .catch(() => setState('error'));
         }}
       >

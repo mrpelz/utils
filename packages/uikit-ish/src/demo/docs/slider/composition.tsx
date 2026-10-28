@@ -492,6 +492,23 @@ export const SliderComposition: FunctionComponent = () => (
         settings (e.g. a <a href="switch">Switch</a>).
       </li>
       <li>The header doesn’t label the input: name the thumb itself.</li>
+      <li>
+        <strong>Library:</strong> the slider (
+        <PartLink
+          component="slider"
+          part="Slider.Root"
+        />
+        , its track, fill and thumb) across the row, between its ends’ symbols (
+        <PartLink
+          component="slider"
+          part="Slider.Symbol"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the brightness and following its changes
+        (logged).
+      </li>
     </ul>
     <CodeView code={settingsCode} />
     <SettingsRow />
@@ -521,6 +538,18 @@ export const SliderComposition: FunctionComponent = () => (
       <li>
         Inputs’ <code>aria-valuetext</code>: “€40 start range”, “€120 end
         range”.
+      </li>
+      <li>
+        <strong>Library:</strong> two thumbs, <code>minStepsBetweenValues</code>
+        , <code>thumbCollisionBehavior</code> and the value’s formatting (
+        <PartLink
+          component="slider"
+          part="Slider.Value"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the price range and its currency.
       </li>
     </ul>
     <CodeView code={rangeCode} />
@@ -563,6 +592,22 @@ export const SliderComposition: FunctionComponent = () => (
       <li>
         Outside one: the root’s <code>name</code> names its hidden input.
       </li>
+      <li>
+        <strong>Library:</strong> the label (
+        <PartLink
+          component="slider"
+          part="Slider.Label"
+        />
+        ) naming the inputs, its placement, and Base UI’s{' '}
+        <PartLink
+          component="form"
+          part="Form"
+        />{' '}
+        and fields submitting the value by name.
+      </li>
+      <li>
+        <strong>Demo:</strong> the fields’ names and logging what’s submitted.
+      </li>
     </ul>
     <CodeView code={formCode} />
     <InAForm />
@@ -589,6 +634,15 @@ export const SliderComposition: FunctionComponent = () => (
       </li>
       <li>
         Below the playback <a href="button">Buttons</a>: the volume.
+      </li>
+      <li>
+        <strong>Library:</strong> the controlled value,{' '}
+        <code>onValueChange</code>’s reason, <code>onValueCommitted</code> and
+        the input’s <code>getAriaValueText</code>.
+      </li>
+      <li>
+        <strong>Demo:</strong> the “playback” (moving the position), pausing it
+        while scrubbing, the times under the track and the playback buttons.
       </li>
     </ul>
     <ul>

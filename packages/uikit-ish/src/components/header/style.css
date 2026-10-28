@@ -121,12 +121,6 @@
     );
     letter-spacing: var(--font-ios-large-title-tracking);
     line-height: var(--font-ios-large-title-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--font-ios-large-title-weight-emphasized) - 400) / 326 * 1px
-    );
     view-timeline-axis: block;
     view-timeline-inset: calc(
         var(--uikit-header-bar, 0px) + var(--uikit-page-safe-top, 0px)
@@ -134,22 +128,12 @@
       0;
     view-timeline-name: var(--uikit-header-timeline);
 
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-large-title-weight-emphasized)) / 326 * 1px
-    );
-
     & > [data-toolbar-part='subtitle'] {
       font-size: 15px;
       font-variation-settings: 'wght' 510;
       font-weight: round(down, 510, 100);
       letter-spacing: -0.25px;
       line-height: 20px;
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-      --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
     }
   }
 }

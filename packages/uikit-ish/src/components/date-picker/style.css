@@ -10,15 +10,7 @@
       font-weight: round(down, var(--font-ios-body-weight), 100);
       letter-spacing: var(--font-ios-body-tracking);
       line-height: var(--font-ios-body-line-height);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
       -webkit-tap-highlight-color: transparent;
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--font-ios-body-weight)) / 326 * 1px
-      );
     }
 
     &&[data-popup-open],
@@ -52,11 +44,6 @@
     font-weight: round(down, 590, 100);
     letter-spacing: var(--font-ios-body-tracking);
     line-height: var(--font-ios-body-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (590 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
   }
 
   .uikit-date-picker-title-button {
@@ -99,10 +86,15 @@
     }
   }
 
+  /* Its glyphs' ends on the header's inset, as the title's start (a 40px
+     button's glyph 14px in). */
   .uikit-date-picker-arrows {
     display: flex;
     align-items: center;
-    margin-inline-end: -4px;
+    margin-inline-end: -14px;
+
+    /* (Not a row's trailing button's end margin, e.g. in a List.) */
+    --uikit-button-plain-margin-end: 0;
 
     &[hidden] {
       display: flex;
@@ -151,12 +143,7 @@
     line-height: 18px;
     padding-inline: 16px;
     place-items: center;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (590 - 400) / 326 * 1px);
     text-transform: uppercase;
-
-    --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
 
     & > abbr {
       text-decoration: none;
@@ -169,6 +156,12 @@
 
   .uikit-date-picker-pages {
     position: relative;
+
+    /* Swiped (see CalendarPanel): the months beside each other clipped
+       to it, as while sliding. */
+    &:has(> [data-date-picker-part='peek-page']) {
+      overflow: clip;
+    }
   }
 
   .uikit-date-picker-leaving-page {
@@ -185,7 +178,10 @@
     padding-inline: 16px;
     row-gap: 7px;
 
-    /* Ranges are dragged (see CalendarPanel), not scrolled. */
+    /* Ranges are dragged (see CalendarPanel), not scrolled; otherwise
+       swiped sideways to turn the month, scrolled vertically. */
+    touch-action: pan-y;
+
     &[data-range-drag] {
       touch-action: none;
     }
@@ -211,14 +207,6 @@
     letter-spacing: var(--font-ios-body-tracking);
     line-height: var(--font-ios-body-line-height);
     padding-inline: 16px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight)) / 326 * 1px
-    );
   }
 
   .uikit-date-picker-collapsed {
@@ -229,10 +217,15 @@
     vertical-align: middle;
   }
 
+  /* Its content clipped to its corners; with less room than its height
+     (its positioner keeping it clear of the safe areas), scrolling. */
   .uikit-date-picker-popup {
     & > div {
-      overflow: clip;
+      overflow: hidden auto;
+      min-height: 0;
+      flex: 0 1 auto;
       border-radius: inherit;
+      overscroll-behavior: contain;
     }
   }
 
@@ -262,15 +255,7 @@
     line-height: var(--font-ios-title3-line-height);
     outline: none;
     place-items: center;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-title3-weight) - 400) / 326 * 1px);
     -webkit-tap-highlight-color: transparent;
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-title3-weight)) / 326 * 1px
-    );
 
     @media (hover: hover) {
       cursor: pointer;
@@ -301,11 +286,6 @@
       font-size: 24px;
       font-variation-settings: 'wght' 510;
       font-weight: round(down, 510, 100);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-      --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
 
       &::before {
         background-color: color-mix(
@@ -325,11 +305,6 @@
       font-size: var(--font-ios-title3-size);
       font-variation-settings: 'wght' 400;
       font-weight: round(down, 400, 100);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (400 - 400) / 326 * 1px);
-
-      --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
 
       &::before {
         background: none;
@@ -430,14 +405,6 @@
     font-weight: round(down, var(--font-ios-footnote-weight), 100);
     letter-spacing: var(--font-ios-footnote-tracking);
     line-height: var(--font-ios-footnote-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-footnote-weight) - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-footnote-weight)) / 326 * 1px
-    );
 
     &[data-variant='error'] {
       color: var(--color-ios-system-red);

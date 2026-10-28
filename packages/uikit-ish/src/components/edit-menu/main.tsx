@@ -18,7 +18,9 @@ import {
   Menu,
   MenuContext,
   useCloseOutOfView,
+  useKeepOpenInSubmenus,
   useRootActions,
+  useSubmenuToggle,
 } from '../menu/main.js';
 import {
   cn,
@@ -73,19 +75,23 @@ export type { EditMenuPositionerProps, EditMenuRootProps } from './props.js';
  */
 const Root = <Payload,>({
   children,
+  onOpenChange,
   orientation = 'horizontal',
+  size = 'regular',
   ...props
 }: EditMenuRootProps<Payload>): ReactNode => {
   const actionsRef = useRootActions(props.actionsRef);
+  const onRootOpenChange = useKeepOpenInSubmenus(onOpenChange);
 
   return (
-    // (Its submenus are iPad menus, see `Menu.SubmenuRoot`.)
-    <MenuContext.Provider value={{ actionsRef, orientation, size: 'regular' }}>
+    // (Its menus' size, see `Menu.SubmenuRoot`.)
+    <MenuContext.Provider value={{ actionsRef, orientation, size }}>
       <BaseMenu.Root
         modal={false}
         orientation={orientation}
         {...props}
         actionsRef={actionsRef}
+        onOpenChange={onRootOpenChange}
       >
         <BaseMenu.Trigger
           aria-hidden="true"
@@ -372,12 +378,13 @@ const Item = forwardRef<
 const More = forwardRef<
   HTMLElement,
   Omit<BaseMenu.SubmenuTrigger.Props, 'ref'>
->(({ className, children, ...props }, ref) => (
+>(({ className, children, onClick, onPointerDown, ...props }, ref) => (
   // Figma “Menu” (iOS 26's metrics): a 34px circle with the selection and a
-  // chevron (􀆊, 14px, 590).
+  // chevron (􀆊, 14px, 590). Pressed again, it closes its menu.
   <BaseMenu.SubmenuTrigger
     ref={ref}
     aria-label="More"
+    {...useSubmenuToggle({ onClick, onPointerDown })}
     {...props}
     className={cn('uikit-edit-menu-more uikit-menu-toggle-cursor', className)}
     data-edit-menu-part="more"

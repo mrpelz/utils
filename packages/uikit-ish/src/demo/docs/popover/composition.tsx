@@ -493,6 +493,22 @@ export const PopoverComposition: FunctionComponent = () => (
         />
         ’s <code>align=&quot;end&quot;</code>; centered by default).
       </li>
+      <li>
+        <strong>Library:</strong> the popover (
+        <PartLink
+          component="popover"
+          part="Popover.Root"
+        />
+        , its arrow, header and body) and aligning it to the row’s end (
+        <PartLink
+          component="popover"
+          part="Popover.Positioner"
+        />{' '}
+        <code>align</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the row’s item and its details.
+      </li>
     </ul>
     <InAListRow />
 
@@ -527,6 +543,23 @@ export const PopoverComposition: FunctionComponent = () => (
         ).
       </li>
       <li>Resize the window, or choose the presentation.</li>
+      <li>
+        <strong>Library:</strong> the{' '}
+        <PartLink
+          component="popover"
+          part="Popover.Popup"
+        />{' '}
+        and{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Popup"
+        />
+        , and the window’s size class (<code>useSizeClass</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> choosing either by the size class (or the
+        presentation control), with the same content written into both.
+      </li>
     </ul>
     <CodeView code={adaptiveCode} />
     <ASheetOnIPhone />
@@ -547,6 +580,13 @@ export const PopoverComposition: FunctionComponent = () => (
         For commands, or one choice among several, a <a href="menu">Menu</a>{' '}
         instead.
       </li>
+      <li>
+        <strong>Library:</strong> the popover’s trigger rendering the toolbar’s
+        button, and its arrow.
+      </li>
+      <li>
+        <strong>Demo:</strong> the options in it.
+      </li>
     </ul>
     <FromAToolbarButton />
 
@@ -565,6 +605,17 @@ export const PopoverComposition: FunctionComponent = () => (
         />{' '}
         scrolls when the popup reaches its maximum height: the room for it, or
         less (here: 360px, the app’s); its bar stays.
+      </li>
+      <li>
+        <strong>Library:</strong> the body (
+        <PartLink
+          component="popover"
+          part="Popover.Body"
+        />
+        ) scrolling once the popup reaches its maximum height, the bar staying.
+      </li>
+      <li>
+        <strong>Demo:</strong> the maximum height (360px) and the rows.
       </li>
     </ul>
     <ScrollingContent />

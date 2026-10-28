@@ -366,6 +366,28 @@ export const ColorPickerComposition: FunctionComponent = () => (
         ), “Colors”, and a close button.
       </li>
       <li>Controlled: the app holds the color, and the well shows it.</li>
+      <li>
+        <strong>Library:</strong> the well (
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Well"
+        />
+        ) as the popover’s trigger, the picker (
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Panel"
+        />
+        ) and its eyedropper (
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Eyedropper"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the color (the app’s state, shown by the well)
+        and the popover’s header, a toolbar with its close button.
+      </li>
     </ul>
     <InAPopover />
 
@@ -384,6 +406,18 @@ export const ColorPickerComposition: FunctionComponent = () => (
           part="Sheet.Header"
         />
         , the picker in its content.
+      </li>
+      <li>
+        <strong>Library:</strong> the well opening a{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Popup"
+        />{' '}
+        at its medium detent, the picker in its content.
+      </li>
+      <li>
+        <strong>Demo:</strong> the color (the app’s state) and the sheet’s
+        toolbar.
       </li>
     </ul>
     <InASheet />
@@ -408,6 +442,15 @@ export const ColorPickerComposition: FunctionComponent = () => (
         ): a popover aligned to the well’s end (regular), or a sheet (compact);
         here also set (<code>[content]</code>).
       </li>
+      <li>
+        <strong>Library:</strong> the well at the row’s end, the popover or
+        sheet around the picker, and the window’s size class (
+        <code>useSizeClass</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the tint (the app’s state), choosing the popover
+        or the sheet by the size class, and the presentation control.
+      </li>
     </ul>
     <InAListRow />
 
@@ -425,6 +468,14 @@ export const ColorPickerComposition: FunctionComponent = () => (
       </li>
       <li>
         Two pickers sharing them: a color saved in one shows in the other.
+      </li>
+      <li>
+        <strong>Library:</strong> the picker’s saved colors (
+        <code>savedColors</code>, <code>onSavedColorsChange</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> holding the saved colors (e.g. persisted) and
+        sharing them between the two pickers.
       </li>
     </ul>
     <AppHeldSavedColors />

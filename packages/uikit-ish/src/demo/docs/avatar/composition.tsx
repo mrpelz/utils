@@ -136,6 +136,22 @@ export const AvatarComposition: FunctionComponent = () => (
       <li>
         The photo’s <code>alt</code> empty: the row’s title names the person.
       </li>
+      <li>
+        <strong>Library:</strong> the avatar (
+        <PartLink
+          component="avatar"
+          part="Avatar.Root"
+        />
+        , its image or initials) as the row’s image (
+        <PartLink
+          component="list"
+          part="List.Image"
+        />{' '}
+        <code>variant=&quot;circular&quot;</code>), sized by <code>size</code>.
+      </li>
+      <li>
+        <strong>Demo:</strong> the people, their photos and initials.
+      </li>
     </ul>
     <InListRows />
 
@@ -157,6 +173,17 @@ export const AvatarComposition: FunctionComponent = () => (
       <li>
         Hidden from assistive technology here (<code>aria-hidden</code>): the
         row names the conversation and its people.
+      </li>
+      <li>
+        <strong>Library:</strong> several avatars in one circle (
+        <PartLink
+          component="avatar"
+          part="Avatar.Group"
+        />
+        ) as the row’s image.
+      </li>
+      <li>
+        <strong>Demo:</strong> the conversation and its people.
       </li>
     </ul>
     <AConversation />

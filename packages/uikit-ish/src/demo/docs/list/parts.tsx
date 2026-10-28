@@ -71,7 +71,7 @@ import {
   getPropOptionsAction,
   getPropOptionsButton,
   getPropOptionsCheckboxFirst,
-  getPropOptionsEditButtonDelete,
+  getPropOptionsEditButton,
   getPropOptionsExpandableRoot,
   getPropOptionsExpandableTrigger,
   getPropOptionsGuideExpandable,
@@ -89,8 +89,11 @@ import {
   propOptionsIndex,
   propOptionsRadioFirst,
   propOptionsRootAll,
+  propOptionsSection,
   propOptionsSwipeActionsTrigger,
   propOptionsText,
+  propOptionsWhileEditing,
+  whileEditingOptions,
 } from './props.js';
 
 // Every view writes out a small list (planets, settings, messages or
@@ -104,6 +107,7 @@ const propOptionsGrabber = {
   ...propOptionsCursor,
   'aria-label': [`Reorder ${rows[0] ?? ''}`, 'Move'] as const,
   tabIndex: [undefined, -1, 0] as const,
+  whileEditing: whileEditingOptions,
 };
 const propOptionsRadio = {
   ...propOptionsRadioFirst,
@@ -166,7 +170,7 @@ const SectionPart: FunctionComponent = () => {
   const id = 'list-parts-section';
   const [log] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(commonPropOptions, {
+  const [control, props, state] = usePropControl(propOptionsSection, {
     external,
     isOpen: true,
     emphasize: 'outline',
@@ -729,7 +733,7 @@ const DetailPart: FunctionComponent = () => {
   const id = 'list-parts-detail';
   const [log] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(commonPropOptions, {
+  const [control, props, state] = usePropControl(propOptionsWhileEditing, {
     external,
     isOpen: true,
     emphasize: 'outline',
@@ -858,7 +862,7 @@ const CheckmarkPart: FunctionComponent = () => {
   const id = 'list-parts-checkmark';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(commonPropOptions, {
+  const [control, props, state] = usePropControl(propOptionsWhileEditing, {
     external,
     isOpen: true,
     emphasize: 'outline',
@@ -905,7 +909,7 @@ const DrillInPart: FunctionComponent = () => {
   const id = 'list-parts-drill-in';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(commonPropOptions, {
+  const [control, props, state] = usePropControl(propOptionsWhileEditing, {
     external,
     isOpen: true,
     emphasize: 'outline',
@@ -949,7 +953,7 @@ const DisclosurePart: FunctionComponent = () => {
   const id = 'list-parts-disclosure';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(commonPropOptions, {
+  const [control, props, state] = usePropControl(propOptionsWhileEditing, {
     external,
     isOpen: true,
     emphasize: 'outline',
@@ -1234,16 +1238,8 @@ const EditButtonPart: FunctionComponent = () => {
   const id = 'list-parts-edit-button';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [planetRows, setPlanetRows] = useState<readonly string[]>(rows);
-  const [added, setAdded] = useState(0);
   const [control, props, state] = usePropControl(
-    useMemo(
-      () =>
-        getPropOptionsEditButtonDelete(addLog, () =>
-          setPlanetRows(([, ...rest]) => rest),
-        ),
-      [addLog],
-    ),
+    useMemo(() => getPropOptionsEditButton(addLog), [addLog]),
     { external, isOpen: true, emphasize: 'outline', title: 'List.EditButton' },
   );
 
@@ -1260,16 +1256,12 @@ const EditButtonPart: FunctionComponent = () => {
       <List.Root>
         <List.Section>
           <List.Group>
-            {planetRows.map((name, index) => (
+            {rows.map((name, index) => (
               <List.Item key={name}>
                 <List.EditButton
                   aria-label={`Delete ${name}`}
                   tint="var(--color-ios-system-red)"
-                  onClick={() =>
-                    setPlanetRows((current) =>
-                      current.filter((row) => row !== name),
-                    )
-                  }
+                  onClick={() => addLog(`edit button: delete ${name}`)}
                   {...(index === 0 ? props : {})}
                 >
                   <Symbol icon={sfMinus} />
@@ -1281,13 +1273,7 @@ const EditButtonPart: FunctionComponent = () => {
               <List.EditButton
                 aria-label="Add Planet"
                 tint="var(--color-ios-system-green)"
-                onClick={() => {
-                  setPlanetRows((current) => [
-                    ...current,
-                    `Planet ${String(added + 1)}`,
-                  ]);
-                  setAdded(added + 1);
-                }}
+                onClick={() => addLog('edit button: add planet')}
               >
                 <Symbol icon={sfPlus} />
               </List.EditButton>
@@ -2064,8 +2050,14 @@ export const ListParts: FunctionComponent = () => (
       </li>
       <li>Whether its groups are outlined.</li>
       <li>
-        Edit mode: <code>editing</code> (its rows’ edit controls and grabbers
-        slide in).
+        Edit mode: <code>editing</code>, by side (leading edit controls,
+        trailing grabbers, both, none, or not managed), the default its
+        sections, groups and rows override; their parts follow by their{' '}
+        <code>whileEditing</code>. Sections editing separately:{' '}
+        <a href="list/composition#editing-sections-separately">
+          Editing sections separately
+        </a>
+        .
       </li>
       <li>
         Renders a <code>div</code>.
@@ -2635,7 +2627,12 @@ export const ListParts: FunctionComponent = () => (
         (its <code>render</code>).
       </li>
       <li>
-        Here: deleting rows (a minus), and an insert row adding one (a plus).
+        Here: a minus on each row, a plus on an insert row; clicks logged.
+        Deleting and inserting for real:{' '}
+        <a href="list/composition#deleting-and-inserting-rows">
+          Deleting and inserting rows
+        </a>
+        .
       </li>
     </ul>
     <EditButtonPart />

@@ -452,6 +452,23 @@ export const HeaderComposition: FunctionComponent = () => (
         />
         ).
       </li>
+      <li>
+        <strong>Library:</strong> the large title (
+        <PartLink
+          component="header"
+          part="Header.LargeTitle"
+        />
+        ) handing over to the bar’s title as it scrolls, and the bar’s title and
+        subtitle (
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Subtitle"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the titles and the page’s rows.
+      </li>
     </ul>
     <CodeView code={largeTitleCode} />
     <LargeTitle />
@@ -482,6 +499,28 @@ export const HeaderComposition: FunctionComponent = () => (
         <GuideLink to="rule-a11">A11</GuideLink>); on iOS 26 also at the bottom
         (see <a href="toolbar/composition#a-search-field">Toolbar</a>).
       </li>
+      <li>
+        <strong>Library:</strong> the header’s accessory (
+        <PartLink
+          component="header"
+          part="Header.Accessory"
+        />
+        ) scrolling, then staying below the bar, and the search field (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />
+        ,{' '}
+        <PartLink
+          component="text-field"
+          part="TextField.Clear"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the query (the app’s state) and filtering the
+        rows by it.
+      </li>
     </ul>
     <CodeView code={searchCode} />
     <Search />
@@ -506,6 +545,14 @@ export const HeaderComposition: FunctionComponent = () => (
         <code>context=&quot;adaptive&quot;</code>
         ): a dark picture, then the page as it scrolls.
       </li>
+      <li>
+        <strong>Library:</strong> the bar’s adaptive glass (
+        <code>context=&quot;adaptive&quot;</code>) over what’s behind it.
+      </li>
+      <li>
+        <strong>Demo:</strong> the picture at the page’s top and the page’s
+        rows.
+      </li>
     </ul>
     <CodeView code={pictureCode} />
     <OverPicture />
@@ -529,6 +576,18 @@ export const HeaderComposition: FunctionComponent = () => (
       <li>
         In the bar instead, in place of its title: see{' '}
         <a href="segmented/composition#in-a-navigation-bar">Segmented</a>.
+      </li>
+      <li>
+        <strong>Library:</strong> the header’s accessory and the{' '}
+        <PartLink
+          component="segmented"
+          part="Segmented.Root"
+        />{' '}
+        in it.
+      </li>
+      <li>
+        <strong>Demo:</strong> the filter (the app’s state) and the rows it
+        shows.
       </li>
     </ul>
     <CodeView code={controlCode} />

@@ -29,11 +29,6 @@
     font-weight: round(down, 510, 100);
     letter-spacing: 0;
     line-height: 14px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
   }
 
   .uikit-toolbar-root {
@@ -138,13 +133,8 @@
       letter-spacing: 0;
       line-height: 20px;
       scale: var(--uikit-toolbar-content-scale, none);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (510 - 400) / 326 * 1px);
       transition-duration: var(--glass-ios-lens-duration);
       transition-property: background-color, scale;
-
-      --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
     }
 
     /* Not of a classic variant: the capsule's content colors, the selection
@@ -201,19 +191,8 @@
 
     /* Centered without sides, too (they take the free space otherwise). */
     margin-inline: auto;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--font-ios-body-weight-emphasized) - 400) / 326 * 1px
-    );
     text-align: center;
     white-space: nowrap;
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight-emphasized)) / 326 * 1px
-    );
 
     & > * {
       overflow: hidden;

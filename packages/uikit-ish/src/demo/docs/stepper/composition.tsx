@@ -252,6 +252,19 @@ export const StepperComposition: FunctionComponent = () => (
         <a href="list/composition#a-settings-page">settings page</a>{' '}
         (Auto-Lock).
       </li>
+      <li>
+        <strong>Library:</strong> the stepper (
+        <PartLink
+          component="stepper"
+          part="Stepper.Root"
+        />
+        , its halves and input) in the row’s trailing slot, bound by{' '}
+        <code>min</code> and <code>max</code>.
+      </li>
+      <li>
+        <strong>Demo:</strong> the guests and nights (the app’s state), shown in
+        the rows’ details.
+      </li>
     </ul>
     <CodeView code={listRowCode} />
     <InListRows />
@@ -273,6 +286,14 @@ export const StepperComposition: FunctionComponent = () => (
       </li>
       <li>
         Steps needn’t be whole: <code>step</code> 0.25, from 50% to 200%.
+      </li>
+      <li>
+        <strong>Library:</strong> <code>step</code> and <code>format</code> (the
+        input’s text, read by assistive technology).
+      </li>
+      <li>
+        <strong>Demo:</strong> the zoom (the app’s state) and showing it beside
+        the stepper.
       </li>
     </ul>
     <WithItsValueShown />
@@ -303,6 +324,18 @@ export const StepperComposition: FunctionComponent = () => (
       </li>
       <li>
         <code>required</code>: it must hold a value to submit.
+      </li>
+      <li>
+        <strong>Library:</strong> the stepper’s value in Base UI’s{' '}
+        <PartLink
+          component="form"
+          part="Form"
+        />{' '}
+        by its field’s name, and <code>required</code>.
+      </li>
+      <li>
+        <strong>Demo:</strong> the quantity (the app’s state) and logging what’s
+        submitted.
       </li>
     </ul>
     <InForms />

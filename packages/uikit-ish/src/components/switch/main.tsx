@@ -41,7 +41,9 @@ export type { SwitchRootProps } from './props.js';
 //   current side (Framework7: swipes within 300ms toggle).
 // - The browser's default focus ring is kept.
 // - Indeterminate (as a checkbox, which the platform's switches are; UIKit:
-//   none): the knob in the middle, on the off color.
+//   none): the knob in the middle, on the off color; checked, the on color
+//   from the start up to the knob, fading out (so checked and unchecked
+//   differ), faded in and out as the state changes.
 //
 // On/off labels (UIKit's accessibility setting “On/Off Labels”, measured on
 // Apple's illustration): a 9px “I” bar (white) and a 9px “O” ring (tertiary

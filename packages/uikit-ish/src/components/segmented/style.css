@@ -63,17 +63,12 @@
     font-weight: round(down, 510, 100);
     letter-spacing: -0.08px;
     line-height: 18px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (510 - 400) / 326 * 1px);
     text-align: center;
     text-transform: none;
     transform: translate3d(0, 0, 0);
     transition-duration: 100ms;
     -webkit-user-select: none;
     user-select: none;
-
-    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
 
     @media (hover: hover) {
       cursor: var(--uikit-utils-cursor);
@@ -107,11 +102,8 @@
     &[data-checked] {
       font-variation-settings: 'wght' 590;
       font-weight: round(down, 590, 100);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (590 - 400) / 326 * 1px);
 
-      --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
+      --uikit-symbol-emphasis: 1;
     }
 
     &[data-disabled] {
@@ -138,14 +130,9 @@
     font-variation-settings: 'wght' 590;
     font-weight: round(down, 590, 100);
     grid-area: 1 / 1;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (590 - 400) / 326 * 1px);
     text-overflow: ellipsis;
     visibility: hidden;
     white-space: nowrap;
-
-    --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
   }
 
   .uikit-segmented-root {

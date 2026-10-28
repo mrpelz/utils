@@ -25,16 +25,5 @@
     letter-spacing: var(--font-ios-subheadline-tracking);
     line-height: var(--font-ios-subheadline-line-height);
     pointer-events: none;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--font-ios-subheadline-weight) - 400) / 326 * 1px
-    );
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-subheadline-weight)) / 326 * 1px
-    );
   }
 }

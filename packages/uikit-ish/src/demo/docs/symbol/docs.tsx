@@ -14,11 +14,26 @@ export const symbolRows: readonly PropRow[] = [
     undefined,
     <>
       The icon (required): its outlines, filled paths in a view box (
-      <code>svgPathData</code>, <code>viewBox</code>; optionally{' '}
+      <code>svgPathData</code>, each a layer, its <code>fillOpacity</code>{' '}
+      relative to the most opaque one’s; <code>viewBox</code>; optionally{' '}
       <code>sourceName</code>, and <code>unitsPerEm</code>: 20 by default, SF
       Symbols’). E.g. an SF Symbol from <code>@bradleyhodges/sfsymbols</code> (
       <code>sfBell</code>): its icons have this shape, no dependency of the
       library’s (mind Apple’s terms for SF Symbols).
+    </>,
+  ],
+  [
+    'emphasizedIcon',
+    'SymbolIcon',
+    undefined,
+    <>
+      The icon shown when its host emphasizes it, e.g. <code>sfBellFill</code>{' '}
+      on a selected tab: both stacked, faded by the inherited{' '}
+      <code>--uikit-symbol-emphasis</code> (0 to 1). Set by a selected{' '}
+      <a href="tab-bar">Tab bar</a> tab, a checked{' '}
+      <a href="segmented">Segmented</a> item and a selected{' '}
+      <a href="sidebar">Sidebar</a> row; set it in your own CSS for others. No
+      state of the app’s picks the icon.
     </>,
   ],
   [

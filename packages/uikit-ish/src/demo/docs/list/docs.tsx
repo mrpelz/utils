@@ -23,36 +23,70 @@ const childrenRow = (
   description: string,
 ): PropRow => ['children', 'ReactNode', defaultValue, description];
 
+const editingType = union('both', 'leading', 'trailing', 'none', 'ignore');
+
+/** An edit mode's description (Root's, Section's, Item's). */
+const editingDescription = (scope: string, inherited: string | undefined) => (
+  <>
+    {scope} edit mode (UIKit <code>isEditing</code>), by side:{' '}
+    <code>leading</code> slides in the rows’ leading edit controls (
+    <PartLink
+      component="list"
+      part="List.Checkbox"
+    />
+    ,{' '}
+    <PartLink
+      component="list"
+      part="List.Radio"
+    />
+    ,{' '}
+    <PartLink
+      component="list"
+      part="List.EditButton"
+    />
+    ), <code>trailing</code> their trailing ones (
+    <PartLink
+      component="list"
+      part="List.Grabber"
+    />
+    ), <code>both</code> both; <code>none</code>: not editing, all slid out and
+    hidden; <code>ignore</code>: not managed, shown as they are. Other parts
+    follow by their <code>whileEditing</code> (e.g. a{' '}
+    <PartLink
+      component="list"
+      part="List.DrillIn"
+    />{' '}
+    sliding out as a grabber slides in).
+    {inherited ? <> {inherited}</> : null}
+  </>
+);
+
+/** A row part's `whileEditing` (its default per part). */
+const whileEditingRow = (
+  defaultValue: 'hide' | 'show' | 'stay' = 'stay',
+): PropRow => [
+  'whileEditing',
+  union('show', 'hide', 'stay'),
+  code(union(defaultValue)),
+  <>
+    In edit mode, its side’s (see{' '}
+    <PartLink
+      component="list"
+      part="List.Section"
+    />{' '}
+    <code>editing</code>): <code>show</code>, only then (sliding in);{' '}
+    <code>hide</code>, sliding out then (e.g. making way for a grabber);{' '}
+    <code>stay</code>, either way. Other elements in a row (e.g. a{' '}
+    <a href="switch">Switch</a>) take <code>data-while-editing</code>.
+  </>,
+];
+
 export const listRootRows: readonly PropRow[] = [
   [
     'editing',
-    'boolean',
-    'always shown',
-    <>
-      In edit mode (UIKit <code>isEditing</code>): its rows’ edit controls (
-      <PartLink
-        component="list"
-        part="List.Checkbox"
-      >
-        Checkbox
-      </PartLink>
-      ,{' '}
-      <PartLink
-        component="list"
-        part="List.Radio"
-      >
-        Radio
-      </PartLink>
-      ,{' '}
-      <PartLink
-        component="list"
-        part="List.EditButton"
-      >
-        EditButton
-      </PartLink>
-      ) and grabbers are shown, sliding in from the rows’ edges as it changes;
-      out of it (<code>false</code>), they’re collapsed and hidden.
-    </>,
+    editingType,
+    code(union('ignore')),
+    editingDescription('Its sections’', 'Each section’s own overrides it.'),
   ],
   [
     'listStyle',
@@ -74,10 +108,18 @@ export const listRootRows: readonly PropRow[] = [
   ...renderRows('div', 'HTMLElement'),
 ];
 
-export const listSectionRows: readonly PropRow[] = renderRows(
-  'section',
-  'HTMLElement',
-);
+export const listSectionRows: readonly PropRow[] = [
+  [
+    'editing',
+    editingType,
+    'its list’s',
+    editingDescription(
+      'Its groups’',
+      'Each group’s own overrides it: sections edit separately.',
+    ),
+  ],
+  ...renderRows('section', 'HTMLElement'),
+];
 
 export const listHeaderRows: readonly PropRow[] = [
   [
@@ -97,6 +139,12 @@ export const listHeaderRows: readonly PropRow[] = [
 
 export const listGroupRows: readonly PropRow[] = [
   [
+    'editing',
+    editingType,
+    'its section’s',
+    editingDescription('Its rows’', 'Each row’s own overrides it.'),
+  ],
+  [
     'onReorder',
     '(from: number, to: number) => void',
     undefined,
@@ -115,6 +163,15 @@ export const listGroupRows: readonly PropRow[] = [
 ];
 
 export const listItemRows: readonly PropRow[] = [
+  [
+    'editing',
+    editingType,
+    'its group’s',
+    editingDescription(
+      'Its own',
+      'E.g. none or ignore exempting it from its group’s.',
+    ),
+  ],
   [
     'selected',
     'boolean',
@@ -302,10 +359,10 @@ export const listTextRows: readonly PropRow[] = [
   ...renderRows('span', 'HTMLElement'),
 ];
 
-export const listDetailRows: readonly PropRow[] = renderRows(
-  'span',
-  'HTMLElement',
-);
+export const listDetailRows: readonly PropRow[] = [
+  whileEditingRow(),
+  ...renderRows('span', 'HTMLElement'),
+];
 
 export const listImageRows: readonly PropRow[] = [
   [
@@ -319,6 +376,7 @@ export const listImageRows: readonly PropRow[] = [
       <code>canvas</code>.
     </>,
   ],
+  whileEditingRow(),
   ...renderRows('span', 'HTMLElement'),
 ];
 
@@ -333,11 +391,13 @@ export const listAccessoryRows: readonly PropRow[] = [
       <code>aria-label</code>).
     </>,
   ],
+  whileEditingRow(),
   ...renderRows('span', 'HTMLElement').filter(([name]) => name !== 'render'),
 ];
 
 export const listCheckmarkRows: readonly PropRow[] = [
   childrenRow('a checkmark', 'What it shows: by default, the checkmark.'),
+  whileEditingRow(),
   ...renderRows('span', 'HTMLElement'),
 ];
 
@@ -346,6 +406,7 @@ export const listDrillInRows: readonly PropRow[] = [
     'a chevron',
     'What it shows: by default, the chevron. Hidden from assistive technology.',
   ),
+  whileEditingRow('hide'),
   ...renderRows('span', 'HTMLElement'),
 ];
 
@@ -354,6 +415,7 @@ export const listDisclosureRows: readonly PropRow[] = [
     'a chevron',
     'What it shows: by default, the chevron, turned down while open (in an open Base UI Collapsible’s trigger). Hidden from assistive technology.',
   ),
+  whileEditingRow(),
   ...renderRows('span', 'HTMLElement'),
 ];
 
@@ -371,11 +433,13 @@ export const listGrabberRows: readonly PropRow[] = [
     'Focusable: arrow keys move its row by one.',
   ],
   childrenRow('three lines', 'What it shows: by default, three lines.'),
+  whileEditingRow('show'),
   ...renderRows('span', 'HTMLElement'),
 ];
 
 export const listActionRows: readonly PropRow[] = [
   secondaryClickRow,
+  whileEditingRow(),
   ...renderRows('button', 'HTMLElement'),
 ];
 
@@ -385,11 +449,18 @@ export const listButtonRows: readonly PropRow[] = [
   ...renderRows('button', 'HTMLElement'),
 ];
 
-export const listCheckboxRows: readonly PropRow[] = checkboxRootRows;
+export const listCheckboxRows: readonly PropRow[] = [
+  whileEditingRow('show'),
+  ...checkboxRootRows,
+];
 
-export const listRadioRows: readonly PropRow[] = radioRootRows;
+export const listRadioRows: readonly PropRow[] = [
+  whileEditingRow('show'),
+  ...radioRootRows,
+];
 
 export const listEditButtonRows: readonly PropRow[] = [
+  whileEditingRow('show'),
   [
     'tint',
     'string',

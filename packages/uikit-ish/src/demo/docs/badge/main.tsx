@@ -2,9 +2,12 @@ import './style.css';
 
 import { sfBell } from '@bradleyhodges/sfsymbols/sfBell';
 import { sfClock } from '@bradleyhodges/sfsymbols/sfClock';
+import { sfClockFill } from '@bradleyhodges/sfsymbols/sfClockFill';
+import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
 import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
 import { sfPersonCropCircle } from '@bradleyhodges/sfsymbols/sfPersonCropCircle';
+import { sfPersonCropCircleFill } from '@bradleyhodges/sfsymbols/sfPersonCropCircleFill';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -86,7 +89,10 @@ export const BadgeDemo: FunctionComponent = () => {
                 visibleWhenCollapsed={phone?.remains && phone.tab === 0}
               >
                 <TabBar.Icon>
-                  <Symbol icon={sfHeartFill}>
+                  <Symbol
+                    emphasizedIcon={sfHeartFill}
+                    icon={sfHeart}
+                  >
                     <Badge
                       placement="symbol"
                       {...propsRoot}
@@ -100,7 +106,10 @@ export const BadgeDemo: FunctionComponent = () => {
                 visibleWhenCollapsed={phone?.remains && phone.tab === 1}
               >
                 <TabBar.Icon>
-                  <Symbol icon={sfClock} />
+                  <Symbol
+                    emphasizedIcon={sfClockFill}
+                    icon={sfClock}
+                  />
                 </TabBar.Icon>
                 <TabBar.Label>Recents</TabBar.Label>
               </TabBar.Tab>
@@ -109,7 +118,10 @@ export const BadgeDemo: FunctionComponent = () => {
                 visibleWhenCollapsed={phone?.remains && phone.tab === 2}
               >
                 <TabBar.Icon>
-                  <Symbol icon={sfPersonCropCircle}>
+                  <Symbol
+                    emphasizedIcon={sfPersonCropCircleFill}
+                    icon={sfPersonCropCircle}
+                  >
                     <Badge
                       placement="symbol"
                       {...propsRoot}

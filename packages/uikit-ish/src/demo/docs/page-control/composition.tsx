@@ -10,6 +10,7 @@ import { useLabelledRef } from '../../tooling/frame/render-code.js';
 import {
   Contents,
   Heading,
+  PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
 
@@ -172,6 +173,18 @@ export const PageControlComposition: FunctionComponent = () => (
         theirs (<code>onValueChange</code>): a press, a drag or a key.
       </li>
       <li>The pages swipe themselves: the dots are a small target.</li>
+      <li>
+        <strong>Library:</strong> the dots (
+        <PartLink
+          component="page-control"
+          part="PageControl"
+        />
+        ): pressed, dragged or keyed (<code>onValueChange</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the page (the app’s state), the snapping scroller
+        setting it, and scrolling to a page’s dots’ choice.
+      </li>
     </ul>
     <OverPagedContent />
 
@@ -190,6 +203,13 @@ export const PageControlComposition: FunctionComponent = () => (
       <li>
         <code>format</code> words it (“Photo 3 of 24”), also its accessible
         value.
+      </li>
+      <li>
+        <strong>Library:</strong> the momentary tooltip (
+        <code>momentaryTooltip</code>) and its wording (<code>format</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the number of photos.
       </li>
     </ul>
     <WithATooltip />

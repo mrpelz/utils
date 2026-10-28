@@ -11,6 +11,7 @@ import {
   FunctionComponent,
   MouseEvent,
   PointerEvent,
+  RefObject,
   useContext,
   useEffect,
   useId,
@@ -42,9 +43,11 @@ import type {
   ExpandableContextValue,
   Handler,
   ItemContextValue,
+  ListAllowSwipe,
   ListBlockProps,
   ListButtonProps,
   ListEditButtonProps,
+  ListEditing,
   ListExpandableProps,
   ListExpandableRootProps,
   ListGroupProps,
@@ -53,21 +56,26 @@ import type {
   ListIndexProps,
   ListItemProps,
   ListRootProps,
+  ListSectionProps,
   ListSwipeActionProps,
   ListSwipeActionsProps,
   ListSwipeActionsTriggerProps,
   ListTextProps,
+  ListWhileEditing,
   Overswipe,
   PartProps,
   Scrub,
   Side,
   Swipe,
+  WhileEditingProps,
 } from './props.js';
 
 export type {
+  ListAllowSwipe,
   ListBlockProps,
   ListButtonProps,
   ListEditButtonProps,
+  ListEditing,
   ListExpandableProps,
   ListExpandableRootProps,
   ListGroupProps,
@@ -76,11 +84,13 @@ export type {
   ListIndexProps,
   ListItemProps,
   ListRootProps,
+  ListSectionProps,
   ListStyle,
   ListSwipeActionProps,
   ListSwipeActionsProps,
   ListSwipeActionsTriggerProps,
   ListTextProps,
+  ListWhileEditing,
 } from './props.js';
 import { createSwipeActionsHandle } from './swipe-actions-handle.js';
 
@@ -202,13 +212,22 @@ const Lines = () => (
 // Root: the list's style, as custom properties for its parts (their
 // fallbacks are `insetGrouped`'s, for parts outside of a root).
 
-/** A list (UIKit `UITableView`): sections of rows, headers and footers. */
-const Root = forwardRef<HTMLElement, ListRootProps>(
-  ({ className, editing, listStyle, outline, render, ...props }, ref) =>
+// Edit modes: the root's, its sections' (unless their own), their groups'
+// (unless their own), their rows' (unless their own); each row marks its
+// sides (see `Item`), its parts
+// reacting by their `whileEditing` (see style.css).
+const EditingContext = createContext<ListEditing>('ignore');
+
+/** A part's `whileEditing`, as its attribute (see style.css). */
+const whileEditingOf = (whileEditing?: ListWhileEditing) => ({
+  'data-while-editing': whileEditing,
+});
+
+const StyledRoot = forwardRef<HTMLElement, Omit<ListRootProps, 'editing'>>(
+  ({ className, listStyle, outline, render, ...props }, ref) =>
     useRender({
       defaultTagName: 'div',
       props: {
-        'data-editing': editing === undefined ? undefined : String(editing),
         'data-list-part': 'root',
         'data-list-style': listStyle,
         'data-outline': outline ? '' : undefined,
@@ -220,19 +239,48 @@ const Root = forwardRef<HTMLElement, ListRootProps>(
     }),
 );
 
+/** A list (UIKit `UITableView`): sections of rows, headers and footers. */
+const Root = forwardRef<HTMLElement, ListRootProps>(
+  ({ editing = 'ignore', ...props }, ref) => (
+    <EditingContext.Provider value={editing}>
+      <StyledRoot
+        ref={ref}
+        {...props}
+      />
+    </EditingContext.Provider>
+  ),
+);
+
+const StyledSection = forwardRef<
+  HTMLElement,
+  Omit<ListSectionProps, 'editing'>
+>(({ className, render, ...props }, ref) =>
+  useRender({
+    defaultTagName: 'section',
+    props: {
+      'data-list-part': 'section',
+      className: cn('uikit-list-section', className),
+      ...props,
+    },
+    ref,
+    render,
+  }),
+);
+
 /** A section: an optional `Header`, a `Group` or `Block`, a `Footer`. */
-const Section = forwardRef<HTMLElement, PartProps<'section'>>(
-  ({ className, render, ...props }, ref) =>
-    useRender({
-      defaultTagName: 'section',
-      props: {
-        'data-list-part': 'section',
-        className: cn('uikit-list-section', className),
-        ...props,
-      },
-      ref,
-      render,
-    }),
+const Section = forwardRef<HTMLElement, ListSectionProps>(
+  ({ editing, ...props }, ref) => {
+    const inherited = useContext(EditingContext);
+
+    return (
+      <EditingContext.Provider value={editing ?? inherited}>
+        <StyledSection
+          ref={ref}
+          {...props}
+        />
+      </EditingContext.Provider>
+    );
+  },
 );
 
 // Reordering (Framework7 `sortable.js`, `sortable.less`): dragging a row's
@@ -487,15 +535,18 @@ const StyledGroup = forwardRef<HTMLElement, PartProps<'ul'>>(
 );
 
 const Group = forwardRef<HTMLElement, ListGroupProps>(
-  ({ onReorder, ...props }, ref) => {
+  ({ editing, onReorder, ...props }, ref) => {
     const groupRef = useForwardedRef<HTMLElement>(ref);
+    const inherited = useContext(EditingContext);
     useReorder(groupRef, onReorder);
 
     return (
-      <StyledGroup
-        ref={groupRef}
-        {...props}
-      />
+      <EditingContext.Provider value={editing ?? inherited}>
+        <StyledGroup
+          ref={groupRef}
+          {...props}
+        />
+      </EditingContext.Provider>
     );
   },
 );
@@ -531,6 +582,58 @@ const StyledItem = forwardRef<HTMLElement, PartProps<'li'>>(
 );
 
 const ItemContext = createContext<ItemContextValue | undefined>(undefined);
+
+/** A row's side in an edit mode: editing, not, or not managed. */
+const editSide = (editing: ListEditing, side: 'leading' | 'trailing') => {
+  if (editing === 'ignore') return undefined;
+  return editing === side || editing === 'both' ? 'on' : 'off';
+};
+
+// The parts sliding in or out by their width (not edit controls and
+// grabbers: 22px, see style.css).
+const sizedParts =
+  ':scope > [data-list-part="row"] > :is([data-while-editing], [data-list-part="drill-in"]):not([data-list-part="edit"], [data-list-part="grabber"])';
+
+/**
+ * A managed row's parts sliding in or out in edit mode, their widths as
+ * `--uikit-list-part-size` (taking no room while out, see style.css).
+ */
+const useEditingSizes = (
+  itemRef: RefObject<HTMLElement | null>,
+  isManaged: boolean,
+) => {
+  useLayoutEffect(() => {
+    const track = itemRef.current?.querySelector(
+      ':scope > [data-list-part="track"]',
+    );
+    if (!isManaged || !(track instanceof HTMLElement)) return undefined;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const { target } of entries) {
+        if (!(target instanceof HTMLElement)) continue;
+        target.style.setProperty(
+          '--uikit-list-part-size',
+          `${String(target.offsetWidth)}px`,
+        );
+      }
+    });
+    const observe = () => {
+      resizeObserver.disconnect();
+      for (const part of track.querySelectorAll(sizedParts)) {
+        resizeObserver.observe(part);
+      }
+    };
+    observe();
+    const row = track.querySelector('[data-list-part="row"]');
+    const mutationObserver = new MutationObserver(observe);
+    if (row) mutationObserver.observe(row, { childList: true });
+
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, [itemRef, isManaged]);
+};
 
 /** Closes the item whose swipe actions are open (one at a time). */
 let closeOpenItem: (() => void) | undefined;
@@ -884,14 +987,24 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     onPointerDown,
     onPointerMove,
     onPointerUp,
+    editing: itemEditing,
     level,
     selected,
     style,
     ...props
   } = useSecondaryClick(itemProps);
+  const inheritedEditing = useContext(EditingContext);
+  const editing = itemEditing ?? inheritedEditing;
   const itemRef = useForwardedRef<HTMLElement>(ref);
+  useEditingSizes(itemRef, editing !== 'ignore');
   const actionsRef = useRef<Partial<Record<Side, HTMLElement>>>({});
   const overswipeRef = useRef<Partial<Record<Side, Overswipe>>>({});
+  // What swiping does to each side's actions (see `ListAllowSwipe`).
+  const allowRef = useRef<Partial<Record<Side, ListAllowSwipe>>>({});
+  const canReveal = (side: Side) =>
+    ['all', 'reveal'].includes(allowRef.current[side] ?? 'all');
+  const canConceal = (side: Side) =>
+    ['all', 'conceal'].includes(allowRef.current[side] ?? 'all');
   const snapsRef = useRef<Partial<Record<SnapPoint, HTMLElement | null>>>({});
   const swipeRef = useRef<Swipe>({ arms: {}, extents: {}, widths: {} });
   const placesRef = useRef<Partial<Record<SnapPoint, number>>>({});
@@ -950,6 +1063,8 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
   // only while overswiping it is possible (see `overswipable`), so a scroll
   // opening the actions stops at them, not past them (snapping back).
   const roomOf = (side: Side) => {
+    // Not swiped open (see `allowSwipe`): no room, unless open.
+    if (openSideRef.current !== side && !canReveal(side)) return 0;
     const { [side]: width = 0 } = swipeRef.current.widths;
     return overswipesNow(side)
       ? (swipeRef.current.extents[side] ?? width)
@@ -1091,6 +1206,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         openSideRef.current = undefined;
         restingOpenRef.current = false;
         closingRef.current = true;
+        delete itemRef.current?.dataset.swipeLocked;
         // (Its snap points change once closed, see `settle`.)
         scrollTo(0, true);
       },
@@ -1104,10 +1220,13 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         closeOpenItem = value.close;
         if (openSideRef.current !== side) restingOpenRef.current = false;
         openSideRef.current = side;
+        // Not swiped closed (see `allowSwipe`): no scrolling (closed by
+        // scrolling it programmatically only), nor by a press outside.
+        item.toggleAttribute('data-swipe-locked', !canConceal(side));
         showSnaps();
         scrollTo((side === 'leading' ? 1 : -1) * width, true);
 
-        if (outsideRef.current) return;
+        if (outsideRef.current || !canConceal(side)) return;
         outsideRef.current = (event) => {
           if (event.target instanceof Node && item.contains(event.target)) {
             return;
@@ -1118,8 +1237,9 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
           capture: true,
         });
       },
-      setActions: (side, element, overswipe = false) => {
+      setActions: (side, element, overswipe = false, allowSwipe = 'all') => {
         overswipeRef.current[side] = overswipe;
+        allowRef.current[side] = allowSwipe;
         if (element) {
           actionsRef.current[side] = element;
         } else {
@@ -1336,8 +1456,15 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       x: event.clientX,
       y: event.clientY,
     };
-    // Touch scrolls natively; a mouse drags the scroll position.
+    // Touch scrolls natively; a mouse drags the scroll position, as allowed
+    // (see `allowSwipe`; touch: by the room, and the lock, see style.css).
     if (event.pointerType !== 'mouse' || isOwnGesture(item, event)) return;
+    const { current: openSide } = openSideRef;
+    if (
+      openSide ? !canConceal(openSide) : sides.every((side) => !canReveal(side))
+    ) {
+      return;
+    }
     dragRef.current = {
       base: offsetOf(item),
       isMoved: false,
@@ -1468,6 +1595,8 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         ref={itemRef}
         aria-current={selected ? 'true' : undefined}
         data-clickable={props.onClick ? '' : undefined}
+        data-edit-leading={editSide(editing, 'leading')}
+        data-edit-trailing={editSide(editing, 'trailing')}
         data-selected={selected ? '' : undefined}
         data-swipeable={isSwipeable ? '' : undefined}
         style={withStyle(
@@ -1762,12 +1891,13 @@ const Supertitle = forwardRef<HTMLElement, PartProps<'span'>>(
 );
 
 // Figma “Detail”.
-const Detail = forwardRef<HTMLElement, PartProps<'span'>>(
-  ({ className, render, ...props }, ref) =>
+const Detail = forwardRef<HTMLElement, PartProps<'span'> & WhileEditingProps>(
+  ({ className, render, whileEditing, ...props }, ref) =>
     useRender({
       defaultTagName: 'span',
       props: {
         'data-list-part': 'detail',
+        ...whileEditingOf(whileEditing),
         className: cn('uikit-list-detail', className),
         ...props,
       },
@@ -1779,11 +1909,12 @@ const Detail = forwardRef<HTMLElement, PartProps<'span'>>(
 // Figma “_Images”: a symbol, or an image (`img`, `video`, `canvas` filling
 // it, or a symbol) in a rounded, circular or square frame.
 const Image = forwardRef<HTMLElement, ListImageProps>(
-  ({ className, render, variant = 'symbol', ...props }, ref) =>
+  ({ className, render, variant = 'symbol', whileEditing, ...props }, ref) =>
     useRender({
       defaultTagName: 'span',
       props: {
         'data-list-part': 'image',
+        ...whileEditingOf(whileEditing),
         'data-variant': variant,
         className: cn('uikit-list-image', className),
         ...props,
@@ -1795,43 +1926,50 @@ const Image = forwardRef<HTMLElement, ListImageProps>(
 
 // Figma “Symbol” and “Info”: a symbol in the tint color, pressable as a
 // link or button (`render`).
-const Accessory = forwardRef<HTMLElement, PartProps<'span'>>(
-  ({ className, render, ...props }, ref) =>
-    useRender({
-      defaultTagName: 'span',
-      props: {
-        'data-list-part': 'accessory',
-        className: cn('uikit-list-accessory', className),
-        ...props,
-      },
-      ref,
-      render,
-    }),
+const Accessory = forwardRef<
+  HTMLElement,
+  PartProps<'span'> & WhileEditingProps
+>(({ className, render, whileEditing, ...props }, ref) =>
+  useRender({
+    defaultTagName: 'span',
+    props: {
+      'data-list-part': 'accessory',
+      ...whileEditingOf(whileEditing),
+      className: cn('uikit-list-accessory', className),
+      ...props,
+    },
+    ref,
+    render,
+  }),
 );
 
 // Figma “Checkmark” (􀆅, 17px, 590).
-const Checkmark = forwardRef<HTMLElement, PartProps<'span'>>(
-  ({ children, className, render, ...props }, ref) =>
-    useRender({
-      defaultTagName: 'span',
-      props: {
-        'data-list-part': 'checkmark',
-        className: cn('uikit-list-checkmark', className),
-        children: children ?? <Check />,
-        ...props,
-      },
-      ref,
-      render,
-    }),
+const Checkmark = forwardRef<
+  HTMLElement,
+  PartProps<'span'> & WhileEditingProps
+>(({ children, className, render, whileEditing, ...props }, ref) =>
+  useRender({
+    defaultTagName: 'span',
+    props: {
+      'data-list-part': 'checkmark',
+      ...whileEditingOf(whileEditing),
+      className: cn('uikit-list-checkmark', className),
+      children: children ?? <Check />,
+      ...props,
+    },
+    ref,
+    render,
+  }),
 );
 
 // Figma “Drill-in” (􀆊, 17px, 590).
-const DrillIn = forwardRef<HTMLElement, PartProps<'span'>>(
-  ({ children, className, render, ...props }, ref) =>
+const DrillIn = forwardRef<HTMLElement, PartProps<'span'> & WhileEditingProps>(
+  ({ children, className, render, whileEditing, ...props }, ref) =>
     useRender({
       defaultTagName: 'span',
       props: {
         'data-list-part': 'drill-in',
+        ...whileEditingOf(whileEditing),
         className: cn('uikit-list-drill-in', className),
         'aria-hidden': 'true',
         children: children ?? <Chevron />,
@@ -1844,39 +1982,42 @@ const DrillIn = forwardRef<HTMLElement, PartProps<'span'>>(
 
 // Figma “Disclosure” (rows: 17px, headers: 19px, 590, in the tint color),
 // turned down while open (e.g. in a Base UI `Collapsible.Trigger`).
-const Disclosure = forwardRef<HTMLElement, PartProps<'span'>>(
-  ({ children, className, render, ...props }, ref) => {
-    // Turned down while its row's expandable row is open (see
-    // `ExpandableRoot`).
-    const expandable = useContext(ExpandableContext);
+const Disclosure = forwardRef<
+  HTMLElement,
+  PartProps<'span'> & WhileEditingProps
+>(({ children, className, render, whileEditing, ...props }, ref) => {
+  // Turned down while its row's expandable row is open (see
+  // `ExpandableRoot`).
+  const expandable = useContext(ExpandableContext);
 
-    return useRender({
-      defaultTagName: 'span',
-      props: {
-        'data-list-part': 'disclosure',
-        'data-panel-open': expandable?.isOpen ? '' : undefined,
-        className: cn('uikit-list-disclosure', className),
-        'aria-hidden': 'true',
-        children: children ?? <Chevron />,
-        ...props,
-      },
-      ref,
-      render,
-    });
-  },
-);
+  return useRender({
+    defaultTagName: 'span',
+    props: {
+      'data-list-part': 'disclosure',
+      ...whileEditingOf(whileEditing),
+      'data-panel-open': expandable?.isOpen ? '' : undefined,
+      className: cn('uikit-list-disclosure', className),
+      'aria-hidden': 'true',
+      children: children ?? <Chevron />,
+      ...props,
+    },
+    ref,
+    render,
+  });
+});
 
 // Figma “_Grabber” (􀌇, 17px, 400).
 /**
  * Figma “_Grabber”: drags its row to reorder its group (see `Group`
  * `onReorder`); focused, arrow keys move the row.
  */
-const Grabber = forwardRef<HTMLElement, PartProps<'span'>>(
-  ({ children, className, onClick, render, ...props }, ref) =>
+const Grabber = forwardRef<HTMLElement, PartProps<'span'> & WhileEditingProps>(
+  ({ children, className, onClick, render, whileEditing, ...props }, ref) =>
     useRender({
       defaultTagName: 'span',
       props: {
         'data-list-part': 'grabber',
+        ...whileEditingOf(whileEditing),
         className: cn('uikit-list-grabber', className),
         tabIndex: 0,
         children: children ?? <Lines />,
@@ -1896,12 +2037,13 @@ const Grabber = forwardRef<HTMLElement, PartProps<'span'>>(
 
 // Figma Type=Button (rows) and Type=Action (headers): text in the tint
 // color.
-const Action = forwardRef<HTMLElement, PartProps<'button'>>(
-  ({ className, render, ...props }, ref) =>
+const Action = forwardRef<HTMLElement, PartProps<'button'> & WhileEditingProps>(
+  ({ className, render, whileEditing, ...props }, ref) =>
     useRender({
       defaultTagName: 'button',
       props: {
         'data-list-part': 'action',
+        ...whileEditingOf(whileEditing),
         className: cn('uikit-list-action', className),
         type: 'button',
         ...useSecondaryClick(props),
@@ -1929,34 +2071,41 @@ const Button = forwardRef<HTMLElement, ListButtonProps>(
 );
 
 /** Figma State=Selected/Unselected: a checkbox (selecting rows). */
-const Checkbox = forwardRef<HTMLElement, CheckboxRootProps>((props, ref) => (
-  <CheckboxBase.Root
-    ref={ref}
-    data-list-part="edit"
-    {...props}
-  />
-));
+const Checkbox = forwardRef<HTMLElement, CheckboxRootProps & WhileEditingProps>(
+  ({ whileEditing, ...props }, ref) => (
+    <CheckboxBase.Root
+      ref={ref}
+      data-list-part="edit"
+      {...whileEditingOf(whileEditing)}
+      {...props}
+    />
+  ),
+);
 
 /**
  * A radio (selecting one row), as `Checkbox`; its group is a `RadioGroup`
  * (e.g. rendering a `Group`).
  */
-const Radio = forwardRef<HTMLElement, RadioRootProps>((props, ref) => (
-  <RadioBase.Root
-    ref={ref}
-    data-list-part="edit"
-    {...props}
-  />
-));
+const Radio = forwardRef<HTMLElement, RadioRootProps & WhileEditingProps>(
+  ({ whileEditing, ...props }, ref) => (
+    <RadioBase.Root
+      ref={ref}
+      data-list-part="edit"
+      {...whileEditingOf(whileEditing)}
+      {...props}
+    />
+  ),
+);
 
 const StyledEditButton = forwardRef<
   HTMLElement,
   Omit<ListEditButtonProps, 'textColor' | 'tint'>
->(({ className, render, ...props }, ref) =>
+>(({ className, render, whileEditing, ...props }, ref) =>
   useRender({
     defaultTagName: 'button',
     props: {
       'data-list-part': 'edit',
+      ...whileEditingOf(whileEditing),
       className: cn(
         'uikit-list-edit-button uikit-checkbox-edit-circle',
         className,
@@ -2015,6 +2164,7 @@ const StyledSwipeActions = forwardRef<
 const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
   (
     {
+      allowSwipe = 'all',
       handle,
       onFocusCapture,
       onOverswipe,
@@ -2056,10 +2206,11 @@ const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
         side,
         element,
         hasHandler ? () => onOverswipeRef.current?.() : overswipe,
+        allowSwipe,
       );
 
       return () => item.setActions(side, undefined);
-    }, [elementRef, hasHandler, item, overswipe, pin, side]);
+    }, [allowSwipe, elementRef, hasHandler, item, overswipe, pin, side]);
 
     // In the row's pin layer, staying in place as it scrolls (see `Pin`).
     if (!pin) return null;

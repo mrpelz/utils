@@ -442,6 +442,10 @@ export const DatePickerParts: FunctionComponent = () => (
         them tabbable: arrow keys move by a day or week, Page Up and Page Down
         by a month, Home and End to the week’s ends.
       </li>
+      <li>
+        Swiped sideways (a date, not a range: a range is dragged across), the
+        days turn the month, the adjacent one following them in.
+      </li>
     </ul>
     <CalendarPart />
     <h3>Props</h3>

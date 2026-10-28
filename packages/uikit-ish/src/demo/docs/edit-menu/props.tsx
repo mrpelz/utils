@@ -27,6 +27,7 @@ export const propOptionsItem = {
 
 export const getPropOptionsRoot = (addLog: AddLog) => ({
   open: [undefined, true] as const,
+  size: [undefined, 'compact', 'regular'] as const,
   modal: [false, true, undefined] as const,
   loopFocus: [undefined, false, true] as const,
   onOpenChange: [

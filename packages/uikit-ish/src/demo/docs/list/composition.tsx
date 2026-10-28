@@ -5,6 +5,8 @@ import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
 import { sfEnvelopeBadgeFill } from '@bradleyhodges/sfsymbols/sfEnvelopeBadgeFill';
 import { sfEnvelopeOpenFill } from '@bradleyhodges/sfsymbols/sfEnvelopeOpenFill';
 import { sfFlagFill } from '@bradleyhodges/sfsymbols/sfFlagFill';
+import { sfMinus } from '@bradleyhodges/sfsymbols/sfMinus';
+import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
 import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
 import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
 import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
@@ -173,7 +175,7 @@ const [selected, setSelected] = useState([]);
     <Page.Root>
       <Viewport.Padding edge="block-start" />
       {/* In edit mode, the checkboxes and grabbers slide in. */}
-      <List.Root editing={isEditing}>
+      <List.Root editing={isEditing ? 'both' : 'none'}>
         <List.Section>
           <CheckboxGroup
             value={selected}
@@ -211,6 +213,105 @@ const [selected, setSelected] = useState([]);
     </Toolbar.Root>
   </Viewport.BlockEnd>
 ) : null}`;
+
+const editButtonsCode = `const [rows, setRows] = useState(['Mercury', 'Venus', 'Earth', 'Mars']);
+const [added, setAdded] = useState(0);
+
+<List.Root>
+  <List.Section>
+    <List.Group>
+      {rows.map((name) => (
+        <List.Item key={name}>
+          {/* Minus: opens the row's Delete (its trailing swipe actions). */}
+          <List.SwipeActionsTrigger
+            render={
+              <List.EditButton aria-label={\`Delete \${name}\`} tint="var(--color-ios-system-red)">
+                <Symbol icon={sfMinus} />
+              </List.EditButton>
+            }
+          />
+          <List.Title>{name}</List.Title>
+          <List.SwipeActions overswipe>
+            <List.SwipeAction
+              label="Delete"
+              tint="var(--color-ios-system-red)"
+              onClick={() => setRows(rows.filter((row) => row !== name))}
+            >
+              <Symbol icon={sfTrashFill} />
+            </List.SwipeAction>
+          </List.SwipeActions>
+        </List.Item>
+      ))}
+      {/* The whole row inserts: its button; the plus its sign. */}
+      <List.Item>
+        <List.EditButton aria-hidden="true" render={<span />} tint="var(--color-ios-system-green)">
+          <Symbol icon={sfPlus} />
+        </List.EditButton>
+        <List.Button
+          onClick={() => {
+            setRows([...rows, \`Planet \${added + 1}\`]);
+            setAdded(added + 1);
+          }}
+        >
+          Add Planet
+        </List.Button>
+      </List.Item>
+    </List.Group>
+  </List.Section>
+</List.Root>`;
+
+const sectionsCode = `const [inner, setInner] = useState([
+  ['Mercury', '0.39 AU'], ['Venus', '0.72 AU'], ['Earth', '1 AU'], ['Mars', '1.52 AU'],
+]);
+const [outer, setOuter] = useState(['Jupiter', 'Saturn', 'Uranus', 'Neptune']);
+const [isInnerEditing, setIsInnerEditing] = useState(false);
+const [isOuterEditing, setIsOuterEditing] = useState(false);
+
+<List.Root>
+  {/* Reordering: grabbers slide in, details and chevrons out. */}
+  <List.Section editing={isInnerEditing ? 'trailing' : 'none'}>
+    <List.Header>
+      <List.Title>Inner Planets</List.Title>
+      <List.Action onClick={() => setIsInnerEditing(!isInnerEditing)}>
+        {isInnerEditing ? 'Done' : 'Edit'}
+      </List.Action>
+    </List.Header>
+    <List.Group onReorder={(from, to) => setInner(moved(inner, from, to))}>
+      {inner.map(([name, distance]) => (
+        // Home stays where it is: exempt from its section's edit mode.
+        <List.Item key={name} editing={name === 'Earth' ? 'none' : undefined}>
+          <List.Title>{name}</List.Title>
+          <List.Detail whileEditing="hide">{distance}</List.Detail>
+          <List.DrillIn />
+          <List.Grabber aria-label={\`Reorder \${name}\`} />
+        </List.Item>
+      ))}
+    </List.Group>
+  </List.Section>
+  {/* Deleting: minus buttons slide in. */}
+  <List.Section editing={isOuterEditing ? 'leading' : 'none'}>
+    <List.Header>
+      <List.Title>Outer Planets</List.Title>
+      <List.Action onClick={() => setIsOuterEditing(!isOuterEditing)}>
+        {isOuterEditing ? 'Done' : 'Edit'}
+      </List.Action>
+    </List.Header>
+    <List.Group>
+      {outer.map((name) => (
+        <List.Item key={name}>
+          <List.EditButton
+            aria-label={\`Delete \${name}\`}
+            tint="var(--color-ios-system-red)"
+            onClick={() => setOuter(outer.filter((row) => row !== name))}
+          >
+            <Symbol icon={sfMinus} />
+          </List.EditButton>
+          <List.Title>{name}</List.Title>
+        </List.Item>
+      ))}
+    </List.Group>
+  </List.Section>
+</List.Root>`;
 
 const inboxCode = `const archive = () => {…};
 
@@ -310,7 +411,7 @@ const contacts = { A: ['Aaron', 'Abigail'], B: ['Bella', 'Benjamin'], … };
 const unreadStyle = { color: 'var(--color-ios-primary)', fontSize: '10px' };
 
 /** Moves a row (the app's part of reordering, see `List.Group`). */
-const moved = (current: readonly string[], from: number, to: number) => {
+const moved = <T,>(current: readonly T[], from: number, to: number) => {
   const next = [...current];
   const [row] = next.splice(from, 1);
   if (row) next.splice(to, 0, row);
@@ -611,7 +712,7 @@ const EditMode: FunctionComponent = () => {
             </Viewport.BlockStart>
             <Page.Root>
               <Viewport.Padding edge="block-start" />
-              <List.Root editing={isEditing}>
+              <List.Root editing={isEditing ? 'both' : 'none'}>
                 <List.Section>
                   <CheckboxGroup
                     value={selected}
@@ -678,6 +779,230 @@ const EditMode: FunctionComponent = () => {
           </Viewport.BlockEnd>
         ) : null}
       </>
+    </Component>
+  );
+};
+
+/** Planets, deleted by their minus (opening Delete), inserted by a plus. */
+const EditButtons: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [rows, setRows] = useState<readonly string[]>(planets.slice(0, 4));
+  const [added, setAdded] = useState(0);
+
+  return (
+    <Component
+      isInline
+      id="list-composition-edit-buttons"
+      log={log}
+      stage="phone"
+      title="List with edit buttons"
+    >
+      <Viewport.Content safeArea="none">
+        <Header.Root>
+          <Viewport.BlockStart>
+            <Toolbar.Root placement="block-start">
+              <Toolbar.Leading>
+                <Toolbar.Button
+                  onClick={() => {
+                    addLog('reset');
+                    setRows(planets.slice(0, 4));
+                    setAdded(0);
+                  }}
+                >
+                  <Button.Label>Reset</Button.Label>
+                </Toolbar.Button>
+              </Toolbar.Leading>
+              <Toolbar.Title>
+                <span>Planets</span>
+              </Toolbar.Title>
+            </Toolbar.Root>
+          </Viewport.BlockStart>
+          <Page.Root>
+            <Viewport.Padding edge="block-start" />
+            <List.Root>
+              <List.Section>
+                <List.Group>
+                  {rows.map((name) => (
+                    <List.Item key={name}>
+                      <List.SwipeActionsTrigger
+                        render={
+                          <List.EditButton
+                            aria-label={`Delete ${name}`}
+                            tint="var(--color-ios-system-red)"
+                          >
+                            <Symbol icon={sfMinus} />
+                          </List.EditButton>
+                        }
+                      />
+                      <List.Title>{name}</List.Title>
+                      <List.SwipeActions overswipe>
+                        <List.SwipeAction
+                          label="Delete"
+                          tint="var(--color-ios-system-red)"
+                          onClick={() => {
+                            addLog(`delete: ${name}`);
+                            setRows((current) =>
+                              current.filter((row) => row !== name),
+                            );
+                          }}
+                        >
+                          <Symbol icon={sfTrashFill} />
+                        </List.SwipeAction>
+                      </List.SwipeActions>
+                    </List.Item>
+                  ))}
+                  {/* The whole row inserts: its button; the plus its sign. */}
+                  <List.Item>
+                    <List.EditButton
+                      aria-hidden="true"
+                      render={<span />}
+                      tint="var(--color-ios-system-green)"
+                    >
+                      <Symbol icon={sfPlus} />
+                    </List.EditButton>
+                    <List.Button
+                      onClick={() => {
+                        const name = `Planet ${String(added + 1)}`;
+                        addLog(`insert: ${name}`);
+                        setRows((current) => [...current, name]);
+                        setAdded(added + 1);
+                      }}
+                    >
+                      Add Planet
+                    </List.Button>
+                  </List.Item>
+                </List.Group>
+              </List.Section>
+            </List.Root>
+            <Viewport.Padding edge="block-end" />
+          </Page.Root>
+        </Header.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
+/** An inner planet: its name, its distance from the Sun. */
+type InnerPlanet = readonly [string, string];
+
+const innerPlanets = [
+  ['Mercury', '0.39 AU'],
+  ['Venus', '0.72 AU'],
+  ['Earth', '1 AU'],
+  ['Mars', '1.52 AU'],
+] as const;
+const outerPlanets = ['Jupiter', 'Saturn', 'Uranus', 'Neptune'] as const;
+
+/**
+ * Two sections in edit modes of their own: one reordering (its details
+ * and chevrons making way), one deleting; Earth exempt.
+ */
+const EditingSections: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [inner, setInner] = useState<readonly InnerPlanet[]>(innerPlanets);
+  const [outer, setOuter] = useState<readonly string[]>(outerPlanets);
+  const [isInnerEditing, setIsInnerEditing] = useState(false);
+  const [isOuterEditing, setIsOuterEditing] = useState(false);
+
+  return (
+    <Component
+      isInline
+      id="list-composition-editing-sections"
+      log={log}
+      stage="phone"
+      title="List editing sections separately"
+    >
+      <Viewport.Content safeArea="none">
+        <Header.Root>
+          <Viewport.BlockStart>
+            <Toolbar.Root placement="block-start">
+              <Toolbar.Leading>
+                <Toolbar.Button
+                  onClick={() => {
+                    addLog('reset');
+                    setInner(innerPlanets);
+                    setOuter(outerPlanets);
+                  }}
+                >
+                  <Button.Label>Reset</Button.Label>
+                </Toolbar.Button>
+              </Toolbar.Leading>
+              <Toolbar.Title>
+                <span>Planets</span>
+              </Toolbar.Title>
+            </Toolbar.Root>
+          </Viewport.BlockStart>
+          <Page.Root>
+            <Viewport.Padding edge="block-start" />
+            <List.Root>
+              <List.Section editing={isInnerEditing ? 'trailing' : 'none'}>
+                <List.Header>
+                  <List.Title>Inner Planets</List.Title>
+                  <List.Action
+                    onClick={() => {
+                      addLog(`inner: ${isInnerEditing ? 'done' : 'edit'}`);
+                      setIsInnerEditing(!isInnerEditing);
+                    }}
+                  >
+                    {isInnerEditing ? 'Done' : 'Edit'}
+                  </List.Action>
+                </List.Header>
+                <List.Group
+                  onReorder={(from: number, to: number) => {
+                    addLog(`reorder: ${String(from)} → ${String(to)}`);
+                    setInner((current) => moved(current, from, to));
+                  }}
+                >
+                  {inner.map(([name, distance]) => (
+                    <List.Item
+                      key={name}
+                      editing={name === 'Earth' ? 'none' : undefined}
+                    >
+                      <List.Title>{name}</List.Title>
+                      <List.Detail whileEditing="hide">{distance}</List.Detail>
+                      <List.DrillIn />
+                      <List.Grabber aria-label={`Reorder ${name}`} />
+                    </List.Item>
+                  ))}
+                </List.Group>
+              </List.Section>
+              <List.Section editing={isOuterEditing ? 'leading' : 'none'}>
+                <List.Header>
+                  <List.Title>Outer Planets</List.Title>
+                  <List.Action
+                    onClick={() => {
+                      addLog(`outer: ${isOuterEditing ? 'done' : 'edit'}`);
+                      setIsOuterEditing(!isOuterEditing);
+                    }}
+                  >
+                    {isOuterEditing ? 'Done' : 'Edit'}
+                  </List.Action>
+                </List.Header>
+                <List.Group>
+                  {outer.map((name) => (
+                    <List.Item key={name}>
+                      <List.EditButton
+                        aria-label={`Delete ${name}`}
+                        tint="var(--color-ios-system-red)"
+                        onClick={() => {
+                          addLog(`delete: ${name}`);
+                          setOuter((current) =>
+                            current.filter((row) => row !== name),
+                          );
+                        }}
+                      >
+                        <Symbol icon={sfMinus} />
+                      </List.EditButton>
+                      <List.Title>{name}</List.Title>
+                    </List.Item>
+                  ))}
+                </List.Group>
+              </List.Section>
+            </List.Root>
+            <Viewport.Padding edge="block-end" />
+          </Page.Root>
+        </Header.Root>
+      </Viewport.Content>
     </Component>
   );
 };
@@ -869,6 +1194,8 @@ const sections: readonly Section[] = [
   ['a-settings-page', 'A settings page'],
   ['drilling-into-pages', 'Drilling into pages'],
   ['edit-mode-and-a-toolbar', 'Edit mode and a toolbar'],
+  ['deleting-and-inserting-rows', 'Deleting and inserting rows'],
+  ['editing-sections-separately', 'Editing sections separately'],
   ['an-inbox', 'An inbox'],
   ['an-indexed-list', 'An indexed list'],
 ];
@@ -899,6 +1226,29 @@ export const ListComposition: FunctionComponent = () => (
       <li>
         Settings take effect at once (guide{' '}
         <GuideLink to="commit-model">§8.2, commit model</GuideLink>).
+      </li>
+      <li>
+        <strong>Library:</strong> the inset grouped list (
+        <PartLink
+          component="list"
+          part="List.Root"
+        />
+        ) and its rows’ parts (
+        <PartLink
+          component="list"
+          part="List.Detail"
+        />
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.DrillIn"
+        />
+        ), the controls as trailing parts or whole rows, and{' '}
+        <code>forwardClick</code>.
+      </li>
+      <li>
+        <strong>Demo:</strong> the settings, their values (e.g. the minutes) and
+        logging changes.
       </li>
     </ul>
     <CodeView code={settingsCode} />
@@ -932,6 +1282,18 @@ export const ListComposition: FunctionComponent = () => (
         A swipe from the leading edge pops (<code>onBack</code>).
       </li>
       <li>Rows with a detail and no chevron only show a value.</li>
+      <li>
+        <strong>Library:</strong> the navigation (
+        <PartLink
+          component="navigation"
+          part="Navigation.Root"
+        />
+        , its stack, back button and swipe area) and the rows’ drill-in parts.
+      </li>
+      <li>
+        <strong>Demo:</strong> the pages, the stack’s keys (the app’s state),
+        and pushing and popping them.
+      </li>
     </ul>
     <CodeView code={drillInCode} />
     <DrillIn />
@@ -974,9 +1336,172 @@ export const ListComposition: FunctionComponent = () => (
         <GuideLink to="rule-g7">G7</GuideLink>).
       </li>
       <li>Rows still swipe to delete one.</li>
+      <li>
+        <strong>Library:</strong> edit mode (<code>editing</code>: the rows’{' '}
+        <PartLink
+          component="list"
+          part="List.Checkbox"
+        />{' '}
+        and{' '}
+        <PartLink
+          component="list"
+          part="List.Grabber"
+        />{' '}
+        sliding in), reordering (<code>onReorder</code>), the swipe actions and
+        the bottom bar (
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the rows, the edit state and selection (
+        <PartLink
+          component="checkbox"
+          part="CheckboxGroup"
+        />
+        ), reordering and deleting them, and the Reset button.
+      </li>
     </ul>
     <CodeView code={editCode} />
     <EditMode />
+
+    <Heading
+      id="deleting-and-inserting-rows"
+      level={2}
+    >
+      Deleting and inserting rows
+    </Heading>
+    <ul>
+      <li>
+        As UIKit’s editing styles: a red minus before each row, a green plus
+        before the last (
+        <PartLink
+          component="list"
+          part="List.EditButton"
+        />
+        , its <code>tint</code>).
+      </li>
+      <li>
+        The minus deletes nothing itself: rendered by a{' '}
+        <PartLink
+          component="list"
+          part="List.SwipeActionsTrigger"
+        />
+        , it opens the row’s trailing{' '}
+        <PartLink
+          component="list"
+          part="List.SwipeActions"
+        />
+        , whose Delete removes the row. Swiping does the same.
+      </li>
+      <li>
+        The whole insert row is a{' '}
+        <PartLink
+          component="list"
+          part="List.Button"
+        />{' '}
+        (its <code>onClick</code>, the app’s): pressing it anywhere adds a
+        planet. Its plus is a sign only, a{' '}
+        <PartLink
+          component="list"
+          part="List.EditButton"
+        />{' '}
+        rendered as a <code>span</code> (no button of its own).
+      </li>
+      <li>
+        <strong>Library:</strong> the edit buttons (
+        <PartLink
+          component="list"
+          part="List.EditButton"
+        />
+        ), the trigger opening the row’s actions (
+        <PartLink
+          component="list"
+          part="List.SwipeActionsTrigger"
+        />
+        ), the swipe actions (
+        <PartLink
+          component="list"
+          part="List.SwipeActions"
+        />
+        ) and the row-wide button (
+        <PartLink
+          component="list"
+          part="List.Button"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the rows, naming and adding new planets, deleting
+        them, and the Reset button.
+      </li>
+    </ul>
+    <CodeView code={editButtonsCode} />
+    <EditButtons />
+
+    <Heading
+      id="editing-sections-separately"
+      level={2}
+    >
+      Editing sections separately
+    </Heading>
+    <ul>
+      <li>
+        Each section its own edit mode (
+        <PartLink
+          component="list"
+          part="List.Section"
+        />
+        ’s <code>editing</code>), toggled by its header’s action: the inner
+        planets reorder (<code>trailing</code>: grabbers sliding in), the outer
+        ones delete (<code>leading</code>: minus buttons sliding in).
+      </li>
+      <li>
+        Regular parts make way: each inner planet’s distance (
+        <PartLink
+          component="list"
+          part="List.Detail"
+        />{' '}
+        <code>whileEditing=&quot;hide&quot;</code>) and chevron (
+        <PartLink
+          component="list"
+          part="List.DrillIn"
+        />
+        , hidden by default) slide out as its grabber slides in.
+      </li>
+      <li>
+        Earth stays where it is: exempt from its section’s mode (
+        <PartLink
+          component="list"
+          part="List.Item"
+        />
+        ’s <code>editing=&quot;none&quot;</code>). Modes nest: Root, Section,
+        Group, Item, each overriding the one around it.
+      </li>
+      <li>
+        <strong>Library:</strong> the edit modes and their nesting (
+        <code>editing</code>), the parts sliding in and out (
+        <code>whileEditing</code>), reordering (
+        <PartLink
+          component="list"
+          part="List.Grabber"
+        />
+        , <code>onReorder</code>) and the edit buttons (
+        <PartLink
+          component="list"
+          part="List.EditButton"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> each section’s edit state, the planets and their
+        order, deleting them, and the Reset button.
+      </li>
+    </ul>
+    <CodeView code={sectionsCode} />
+    <EditingSections />
 
     <Heading
       id="an-inbox"
@@ -998,6 +1523,24 @@ export const ListComposition: FunctionComponent = () => (
       <li>
         Swiping on past the trailing ones archives the message (
         <code>onOverswipe</code>); the app removes it.
+      </li>
+      <li>
+        <strong>Library:</strong> the media rows (
+        <PartLink
+          component="list"
+          part="List.Subtitle"
+        />
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.Text"
+        />
+        ), swipe actions on both sides and overswiping (<code>onOverswipe</code>
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the messages, their read and archived state, and
+        removing archived ones.
       </li>
     </ul>
     <CodeView code={inboxCode} />
@@ -1030,6 +1573,19 @@ export const ListComposition: FunctionComponent = () => (
         The list scrolls on its own, without a scroll bar (an overlay scroll bar
         would cover the index).
       </li>
+      <li>
+        <strong>Library:</strong> the index (
+        <PartLink
+          component="list"
+          part="List.Index"
+        />
+        ): pressing and scrubbing over its letters, and the sticky section
+        headers.
+      </li>
+      <li>
+        <strong>Demo:</strong> the contacts by letter, scrolling to a letter’s
+        section, and placing the index.
+      </li>
     </ul>
     <CodeView code={indexCode} />
     <Contacts />
@@ -1041,6 +1597,8 @@ export const listCompositionDemos = [
   SettingsScreen,
   DrillIn,
   EditMode,
+  EditButtons,
+  EditingSections,
   Inbox,
   Contacts,
 ];

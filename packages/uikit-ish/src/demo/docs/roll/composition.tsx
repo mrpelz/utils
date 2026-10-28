@@ -1,6 +1,6 @@
 import './style.css';
 
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useRef, useState } from 'react';
 
 import {
   Button,
@@ -55,6 +55,63 @@ const [minute, setMinute] = useState(30);
   <Roll.Column editable loop aria-label="Minutes" value={minute} onValueChange={setMinute}>
     {minutes.map((m) => <Roll.Item key={m} value={m}>{String(m).padStart(2, '0')}</Roll.Item>)}
   </Roll.Column>
+</Roll.Root>`;
+
+const carryCode = `const [hour, setHour] = useState(7);
+const [minute, setMinute] = useState(58);
+
+// The minute row last passing the center (while rolling).
+const passed = useRef(58);
+
+// Rolled past 59 to 00, the next hour; back past 00 to 59, the previous
+// one: at once, as the row passes (the shorter way round; not typed).
+const onMinuteHighlight = (next, { reason }) => {
+  const previous = passed.current;
+  passed.current = next;
+  if (reason === 'input' || Math.abs(next - previous) <= 30) return;
+  setHour((current) => (current + (next < previous ? 1 : 23)) % 24);
+};
+
+<Roll.Root>
+  <Roll.Column editable loop aria-label="Hours" value={hour} onValueChange={setHour}>…</Roll.Column>
+  <Roll.Separator aria-hidden="true">:</Roll.Separator>
+  <Roll.Column
+    editable
+    loop
+    aria-label="Minutes"
+    value={minute}
+    onHighlightChange={onMinuteHighlight}
+    onValueChange={(next) => {
+      passed.current = next;
+      setMinute(next);
+    }}
+  >
+    …
+  </Roll.Column>
+</Roll.Root>`;
+
+const resetCode = `const [hour, setHour] = useState(7);
+const [minute, setMinute] = useState(30);
+
+// Another hour passing the center: its minutes from 00, at once (not only
+// once the hours settle).
+const onHourHighlight = (next) => {
+  if (next !== hour) setMinute(0);
+};
+
+<Roll.Root>
+  <Roll.Column
+    editable
+    loop
+    aria-label="Hours"
+    value={hour}
+    onHighlightChange={onHourHighlight}
+    onValueChange={setHour}
+  >
+    …
+  </Roll.Column>
+  <Roll.Separator aria-hidden="true">:</Roll.Separator>
+  <Roll.Column editable loop aria-label="Minutes" value={minute} onValueChange={setMinute}>…</Roll.Column>
 </Roll.Root>`;
 
 const dependentCode = `const days = Array.from({ length: 31 }, (_, index) => index + 1);
@@ -121,6 +178,161 @@ const ATime: FunctionComponent = () => {
               { reason }: RollChangeEventDetails,
             ) => {
               addLog(`minute: ${String(next)} (${reason})`);
+              setMinute(next);
+            }}
+          >
+            {minutes.map((value) => (
+              <Roll.Item
+                key={value}
+                value={value}
+              >
+                {String(value).padStart(2, '0')}
+              </Roll.Item>
+            ))}
+          </Roll.Column>
+        </Roll.Root>
+      </div>
+    </Component>
+  );
+};
+
+/** A time whose minutes, wrapping, carry over to its hour. */
+const CarryingTheHour: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [hour, setHour] = useState(7);
+  const [minute, setMinute] = useState(58);
+  // The minute row last passing the center (while rolling).
+  const passed = useRef(58);
+
+  return (
+    <Component
+      hasInputGuards
+      isCentered
+      isInline
+      id="roll-composition-carry"
+      log={log}
+      title="Roll carrying the hour"
+    >
+      <div className="roll-demo-stack">
+        <output className="roll-demo-value">
+          {String(hour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
+        </output>
+        <Roll.Root>
+          <Roll.Column
+            editable
+            loop
+            aria-label="Hours"
+            value={hour}
+            onValueChange={(next: RollValue) => {
+              addLog(`hour: ${String(next)}`);
+              setHour(Number(next));
+            }}
+          >
+            {hours.map((value) => (
+              <Roll.Item
+                key={value}
+                value={value}
+              >
+                {String(value).padStart(2, '0')}
+              </Roll.Item>
+            ))}
+          </Roll.Column>
+          <Roll.Separator aria-hidden="true">:</Roll.Separator>
+          <Roll.Column
+            editable
+            loop
+            aria-label="Minutes"
+            value={minute}
+            onHighlightChange={(
+              next: RollValue,
+              { reason }: RollChangeEventDetails,
+            ) => {
+              const value = Number(next);
+              const previous = passed.current;
+              passed.current = value;
+              // Rolled past 59 to 00 (or back), the shorter way round, not
+              // typed: the next or previous hour, at once.
+              if (reason === 'input' || Math.abs(value - previous) <= 30) {
+                return;
+              }
+              const step = value < previous ? 1 : 23;
+              addLog(`carried: hour ${step === 1 ? '+1' : '−1'}`);
+              setHour((current) => (current + step) % 24);
+            }}
+            onValueChange={(next: RollValue) => {
+              addLog(`minute: ${String(next)}`);
+              passed.current = Number(next);
+              setMinute(Number(next));
+            }}
+          >
+            {minutes.map((value) => (
+              <Roll.Item
+                key={value}
+                value={value}
+              >
+                {String(value).padStart(2, '0')}
+              </Roll.Item>
+            ))}
+          </Roll.Column>
+        </Roll.Root>
+      </div>
+    </Component>
+  );
+};
+
+/** A time whose minutes start over at 00 when its hour changes. */
+const ResettingTheMinutes: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [hour, setHour] = useState<RollValue>(7);
+  const [minute, setMinute] = useState<RollValue>(30);
+
+  return (
+    <Component
+      hasInputGuards
+      isCentered
+      isInline
+      id="roll-composition-reset"
+      log={log}
+      title="Roll resetting the minutes"
+    >
+      <div className="roll-demo-stack">
+        <output className="roll-demo-value">
+          {String(hour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
+        </output>
+        <Roll.Root>
+          <Roll.Column
+            editable
+            loop
+            aria-label="Hours"
+            value={hour}
+            onHighlightChange={(next: RollValue) => {
+              // Another hour passing the center: its minutes from 00, at once.
+              if (next === hour || minute === 0) return;
+              addLog(`hour passing ${String(next)}: minutes reset`);
+              setMinute(0);
+            }}
+            onValueChange={(next: RollValue) => {
+              addLog(`hour: ${String(next)}`);
+              setHour(next);
+            }}
+          >
+            {hours.map((value) => (
+              <Roll.Item
+                key={value}
+                value={value}
+              >
+                {String(value).padStart(2, '0')}
+              </Roll.Item>
+            ))}
+          </Roll.Column>
+          <Roll.Separator aria-hidden="true">:</Roll.Separator>
+          <Roll.Column
+            editable
+            loop
+            aria-label="Minutes"
+            value={minute}
+            onValueChange={(next: RollValue) => {
+              addLog(`minute: ${String(next)}`);
               setMinute(next);
             }}
           >
@@ -335,6 +547,8 @@ const InAPopover: FunctionComponent = () => {
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['a-time', 'A time'],
+  ['carrying-over-to-the-hour', 'Carrying over to the hour'],
+  ['resetting-the-minutes', 'Resetting the minutes'],
   ['dependent-columns', 'Dependent columns'],
   ['inline-in-a-list-row', 'Inline in a list row'],
   ['in-a-popover', 'In a popover'],
@@ -369,9 +583,93 @@ export const RollComposition: FunctionComponent = () => (
       <li>
         Controlled: the app holds the time, and shows it (here above the wheel).
       </li>
+      <li>
+        <strong>Library:</strong> the columns (
+        <PartLink
+          component="roll"
+          part="Roll.Column"
+        />
+        , looping and editable), their rows (
+        <PartLink
+          component="roll"
+          part="Roll.Item"
+        />
+        ) and the separator.
+      </li>
+      <li>
+        <strong>Demo:</strong> the time (the app’s state) and showing it above
+        the wheel.
+      </li>
     </ul>
     <CodeView code={timeCode} />
     <ATime />
+
+    <Heading
+      id="carrying-over-to-the-hour"
+      level={2}
+    >
+      Carrying over to the hour
+    </Heading>
+    <ul>
+      <li>
+        As a clock: rolling the minutes past 59 to 00 advances the hour; back
+        past 00 to 59, the hour goes back.
+      </li>
+      <li>
+        At once, as the row passes the center: the minute column’s{' '}
+        <code>onHighlightChange</code> (
+        <PartLink
+          component="roll"
+          part="Roll.Column"
+        />
+        ’s, with its <code>reason</code>), not its <code>onValueChange</code>{' '}
+        (only once settled). A step of more than half the minutes is a wrap, the
+        shorter way round; a typed value (<code>input</code>) carries nothing.
+      </li>
+      <li>
+        The hour column then rolls to its new value, as any controlled column
+        given another <code>value</code>.
+      </li>
+      <li>
+        <strong>Library:</strong> the looping columns and their callbacks:{' '}
+        <code>onHighlightChange</code> as rows pass, <code>onValueChange</code>{' '}
+        once settled, each with its <code>reason</code>.
+      </li>
+      <li>
+        <strong>Demo:</strong> telling a wrap (the shorter way round) and
+        carrying it over to the hour.
+      </li>
+    </ul>
+    <CodeView code={carryCode} />
+    <CarryingTheHour />
+
+    <Heading
+      id="resetting-the-minutes"
+      level={2}
+    >
+      Resetting the minutes
+    </Heading>
+    <ul>
+      <li>
+        Another hour picked, its minutes start over: the minute column rolls
+        back to 00.
+      </li>
+      <li>
+        At once, as another hour passes the center (the hour column’s{' '}
+        <code>onHighlightChange</code>), not only once it settles; the minute
+        column, controlled, rolls to its new value.
+      </li>
+      <li>
+        <strong>Library:</strong> the columns’ callbacks (
+        <code>onHighlightChange</code>, <code>onValueChange</code>) and
+        controlled columns rolling to a new <code>value</code>.
+      </li>
+      <li>
+        <strong>Demo:</strong> resetting the minutes as another hour passes.
+      </li>
+    </ul>
+    <CodeView code={resetCode} />
+    <ResettingTheMinutes />
 
     <Heading
       id="dependent-columns"
@@ -387,6 +685,14 @@ export const RollComposition: FunctionComponent = () => (
       <li>
         Settled on a disabled day (e.g. 31 after turning to April), the column
         moves on to the nearest enabled one, then selects it.
+      </li>
+      <li>
+        <strong>Library:</strong> disabled rows, shown but not selectable, and
+        moving on from a disabled one when settled.
+      </li>
+      <li>
+        <strong>Demo:</strong> the month and day (the app’s state) and disabling
+        the days past the month’s end.
       </li>
     </ul>
     <CodeView code={dependentCode} />
@@ -419,6 +725,23 @@ export const RollComposition: FunctionComponent = () => (
         A date or a time: the <a href="date-picker">Date picker</a> does this
         itself, with a calendar.
       </li>
+      <li>
+        <strong>Library:</strong> the expandable row (
+        <PartLink
+          component="list"
+          part="List.ExpandableRoot"
+        />
+        , its trigger and{' '}
+        <PartLink
+          component="list"
+          part="List.Expandable"
+        />
+        ) and the roll in it.
+      </li>
+      <li>
+        <strong>Demo:</strong> the time (the app’s state) and showing it in the
+        row’s detail.
+      </li>
     </ul>
     <InlineInAListRow />
 
@@ -434,6 +757,18 @@ export const RollComposition: FunctionComponent = () => (
         <a href="popover">Popover</a> with the roll (iOS’s compact pickers).
       </li>
       <li>Each change applies at once; tapping outside closes it.</li>
+      <li>
+        <strong>Library:</strong> the{' '}
+        <PartLink
+          component="popover"
+          part="Popover.Root"
+        />{' '}
+        and the roll in it, applying each change at once.
+      </li>
+      <li>
+        <strong>Demo:</strong> the size (the app’s state) and showing it on the
+        button.
+      </li>
     </ul>
     <InAPopover />
   </>
@@ -442,6 +777,8 @@ export const RollComposition: FunctionComponent = () => (
 /** Its live views, also on the component's page of demos (and `/all`). */
 export const rollCompositionDemos = [
   ATime,
+  CarryingTheHour,
+  ResettingTheMinutes,
   DependentColumns,
   InlineInAListRow,
   InAPopover,

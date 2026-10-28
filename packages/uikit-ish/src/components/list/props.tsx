@@ -20,14 +20,37 @@ export type PartProps<Tag extends IntrinsicTag> = Omit<
 > &
   (Tag extends 'button' | 'li' ? SecondaryClickProps : unknown);
 
+/**
+ * An edit mode (UIKit `isEditing`), by side: `leading` (its rows' leading
+ * edit controls, `Checkbox`, `Radio`, `EditButton`, slid in), `trailing`
+ * (their trailing ones, `Grabber`), `both`, `none` (not editing: all slid
+ * out, hidden), or `ignore` (not managed: shown as they are). Parts react
+ * by their `whileEditing`.
+ */
+export type ListEditing = 'both' | 'ignore' | 'leading' | 'none' | 'trailing';
+
+/**
+ * A row part in edit mode (its side's, see `ListEditing`): `show` (only
+ * while its side edits, sliding in: edit controls' and grabbers' default),
+ * `hide` (sliding out while its side edits, e.g. a `Detail` making way for a
+ * grabber: `DrillIn`'s default), or `stay`. Other elements in a row take
+ * `data-while-editing`.
+ */
+export type ListWhileEditing = 'hide' | 'show' | 'stay';
+
+/** A row part's edit mode behavior (see `ListWhileEditing`). */
+export type WhileEditingProps = {
+  /** In edit mode (its side's): shown only then, hidden then, or as is. */
+  whileEditing?: ListWhileEditing;
+};
+
 export type ListRootProps = PartProps<'div'> & {
   /**
-   * In edit mode (UIKit `isEditing`): its rows' edit controls (`Checkbox`,
-   * `Radio`, `EditButton`) and grabbers are shown, sliding in from the rows'
-   * edges as it changes; out of it (`false`), they're collapsed and hidden.
-   * Without it, they're always shown.
+   * Its sections' edit mode, unless their own (see `ListEditing`; Section,
+   * Group, Item: each overriding the one around it).
+   * @default 'ignore'
    */
-  editing?: boolean;
+  editing?: ListEditing;
   /**
    * UIKit `UITableView.Style`.
    * @default 'insetGrouped'
@@ -41,11 +64,18 @@ export type ListRootProps = PartProps<'div'> & {
 };
 
 export type ListGroupProps = PartProps<'ul'> & {
+  /** Its rows' edit mode, unless their own (see `ListEditing`). */
+  editing?: ListEditing;
   /**
    * Called when a row is moved by its `Grabber` from one index to another
    * (among the group's rows); the app reorders them.
    */
   onReorder?: (from: number, to: number) => void;
+};
+
+export type ListSectionProps = PartProps<'section'> & {
+  /** Its groups' edit mode, unless their own (see `ListEditing`). */
+  editing?: ListEditing;
 };
 
 export type ListItemProps = PartProps<'li'> & {
@@ -54,6 +84,11 @@ export type ListItemProps = PartProps<'li'> & {
    * @default 'pointer' with a click handler
    */
   cursor?: Properties['cursor'];
+  /**
+   * Its edit mode, overriding its group's (see `ListEditing`), e.g.
+   * `none` or `ignore` exempting it.
+   */
+  editing?: ListEditing;
   /** Its level in a hierarchy (indented 20px per level; e.g. a sidebar). */
   level?: number;
   /** Selected (e.g. a sidebar's current section): on a fill. */
@@ -73,8 +108,16 @@ export type ItemContextValue = {
     side: Side,
     element: HTMLElement | undefined,
     overswipe?: Overswipe,
+    allowSwipe?: ListAllowSwipe,
   ) => void;
 };
+
+/**
+ * What swiping does to a side's actions: opens and closes them (`all`),
+ * only opens (`reveal`) or only closes them (`conceal`), or neither
+ * (`none`: only their trigger or handle does).
+ */
+export type ListAllowSwipe = 'all' | 'conceal' | 'none' | 'reveal';
 
 /**
  * What swiping past a side's actions does: nothing (`false`), triggering
@@ -142,34 +185,42 @@ export type ListTextProps = PartProps<'span'> & {
   lines?: number;
 };
 
-export type ListImageProps = PartProps<'span'> & {
-  /**
-   * Figma “_Images” Type.
-   * @default 'symbol'
-   */
-  variant?: 'circular' | 'fill' | 'rounded' | 'symbol';
-};
+export type ListImageProps = PartProps<'span'> &
+  WhileEditingProps & {
+    /**
+     * Figma “_Images” Type.
+     * @default 'symbol'
+     */
+    variant?: 'circular' | 'fill' | 'rounded' | 'symbol';
+  };
 
 export type ListButtonProps = PartProps<'button'> & {
   /** Figma Value=Destructive. */
   destructive?: boolean;
 };
 
-export type ListEditButtonProps = PartProps<'button'> & {
-  /**
-   * Its symbol's color, e.g. for a light `tint`.
-   * @default white
-   */
-  textColor?: string;
-  /**
-   * Its circle's color (e.g. `systemRed` deleting, `systemGreen` inserting:
-   * UIKit's editing styles).
-   * @default `systemGray`
-   */
-  tint?: string;
-};
+export type ListEditButtonProps = PartProps<'button'> &
+  WhileEditingProps & {
+    /**
+     * Its symbol's color, e.g. for a light `tint`.
+     * @default white
+     */
+    textColor?: string;
+    /**
+     * Its circle's color (e.g. `systemRed` deleting, `systemGreen` inserting:
+     * UIKit's editing styles).
+     * @default `systemGray`
+     */
+    tint?: string;
+  };
 
 export type ListSwipeActionsProps = PartProps<'div'> & {
+  /**
+   * What swiping does to them (see `ListAllowSwipe`): with `reveal` or
+   * `none`, open, a press outside the row doesn't close them either.
+   * @default 'all'
+   */
+  allowSwipe?: ListAllowSwipe;
   /**
    * Their handle (see `List.createSwipeActionsHandle`): opened and closed by
    * it, from anywhere (e.g. a `List.SwipeActionsTrigger` outside the row).

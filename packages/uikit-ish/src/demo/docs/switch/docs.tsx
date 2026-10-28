@@ -62,9 +62,11 @@ export const switchRootRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Neither on nor off: the knob in the middle, the track off; its hidden
-      input is indeterminate too. Toggling still flips <code>checked</code>.
-      E.g. while a change is being saved.
+      Neither on nor off: the knob in the middle, the track off; checked, its
+      start half tinted, fading out under the knob (so it shows which way it’s
+      going), faded as it changes. Its hidden input is indeterminate too.
+      Toggling still flips <code>checked</code>. E.g. while a change is being
+      saved.
     </>,
   ],
   [

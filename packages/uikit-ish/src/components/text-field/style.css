@@ -39,17 +39,6 @@
     font-weight: round(down, var(--font-ios-subheadline-weight), 100);
     letter-spacing: var(--font-ios-subheadline-tracking);
     line-height: var(--font-ios-subheadline-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--font-ios-subheadline-weight) - 400) / 326 * 1px
-    );
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-subheadline-weight)) / 326 * 1px
-    );
 
     &[data-disabled] {
       opacity: 0.55;
@@ -74,11 +63,6 @@
     letter-spacing: var(--font-ios-body-tracking);
     line-height: 20px;
     outline: none;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
 
     &::placeholder {
       color: var(--color-ios-placeholder-text);
@@ -142,14 +126,6 @@
     font-weight: round(down, var(--font-ios-caption1-weight), 100);
     letter-spacing: var(--font-ios-caption1-tracking);
     line-height: var(--font-ios-caption1-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-caption1-weight) - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-caption1-weight)) / 326 * 1px
-    );
   }
 
   .uikit-text-field-error {
@@ -161,14 +137,6 @@
     font-weight: round(down, var(--font-ios-caption1-weight), 100);
     letter-spacing: var(--font-ios-caption1-tracking);
     line-height: var(--font-ios-caption1-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-caption1-weight) - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-caption1-weight)) / 326 * 1px
-    );
   }
 
   .uikit-text-field-clear {
@@ -215,11 +183,6 @@
       flex: 1 1 auto;
       font-variation-settings: 'wght' 400;
       font-weight: round(down, 400, 100);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (400 - 400) / 326 * 1px);
-
-      --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
     }
 
     /* Focused by keyboard only (a text field matches :focus-visible however

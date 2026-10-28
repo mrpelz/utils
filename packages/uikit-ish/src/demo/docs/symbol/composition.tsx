@@ -128,6 +128,22 @@ export const SymbolComposition: FunctionComponent = () => (
         (rounded, its background the color), the symbol white in it.
       </li>
       <li>Decorative: the row’s title names it.</li>
+      <li>
+        <strong>Library:</strong> the{' '}
+        <PartLink
+          component="symbol"
+          part="Symbol"
+        />{' '}
+        in the row’s image (
+        <PartLink
+          component="list"
+          part="List.Image"
+        />
+        ), its background the color.
+      </li>
+      <li>
+        <strong>Demo:</strong> the rows, their symbols and colors.
+      </li>
     </ul>
     <RowImages />
 
@@ -143,6 +159,18 @@ export const SymbolComposition: FunctionComponent = () => (
         <code>role=&quot;img&quot;</code>), named (<code>aria-label</code>).
       </li>
       <li>In a row’s detail, in its secondary label color.</li>
+      <li>
+        <strong>Library:</strong> the{' '}
+        <PartLink
+          component="symbol"
+          part="Symbol"
+        />{' '}
+        as an image (<code>role=&quot;img&quot;</code>, named) in the row’s
+        detail.
+      </li>
+      <li>
+        <strong>Demo:</strong> the status it tells and its name.
+      </li>
     </ul>
     <OnItsOwn />
 

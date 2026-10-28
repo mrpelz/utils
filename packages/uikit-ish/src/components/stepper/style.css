@@ -58,15 +58,10 @@
     font-weight: round(down, 590, 100);
     line-height: var(--font-ios-headline-line-height);
     place-items: center;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (590 - 400) / 326 * 1px);
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     -webkit-user-select: none;
     user-select: none;
-
-    --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
 
     /* As `Button`: a `cursor` prop, or the fallback. */
     --uikit-utils-cursor: attr(cursor type(<custom-ident>), pointer);

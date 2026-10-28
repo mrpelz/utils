@@ -45,6 +45,7 @@ import type {
   DayHighlights,
   HourCycle,
   RangeDrag,
+  Swipe,
   TimeRollProps,
 } from './props.js';
 
@@ -669,11 +670,17 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   const [rolled, setRolled] = useState<'monthYear' | 'time' | undefined>(
     props.initialRoll,
   );
-  // The month slid out while another slides in (see below).
+  // The month slid out while another slides in (see below), from where a
+  // swipe left it (`from`, a fraction of the width).
   const [leaving, setLeaving] = useState<
-    { direction: number; month: Date } | undefined
+    { direction: number; from: number; month: Date } | undefined
   >(undefined);
   const leavingRef = useRef<HTMLDivElement>(null);
+  // Swiped (not a range): the adjacent month peeking in on that side (1:
+  // the next, at the inline end), following the days (see below).
+  const [peek, setPeek] = useState(0);
+  const peekRef = useRef<HTMLDivElement>(null);
+  const swipe = useRef<Swipe | undefined>(undefined);
   const pagesRef = useRef<HTMLDivElement>(null);
   const daysRef = useRef<HTMLDivElement>(null);
   const focusNext = useRef<Date | undefined>(undefined);
@@ -762,11 +769,11 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
 
   // Months slide in from the side they're in (next: the inline end), the
   // previous one sliding out (as iOS's).
-  const goTo = (next: Date) => {
+  const goTo = (next: Date, from = 0) => {
     const target = startOfMonth(next);
     const direction = Math.sign(target.getTime() - month.getTime());
     if (direction === 0) return;
-    setLeaving({ direction, month });
+    setLeaving({ direction, from, month });
     setMonth(target);
   };
 
@@ -781,9 +788,16 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
       `translateX(${String(fraction * leaving.direction * rtl * 100)}%)`;
     const options = { duration: 300, easing: 'ease' };
     pages.style.overflow = 'clip';
+    const { from } = leaving;
     const animations = [
-      days.animate([{ transform: shift(1) }, { transform: 'none' }], options),
-      page.animate([{ transform: 'none' }, { transform: shift(-1) }], options),
+      days.animate(
+        [{ transform: shift(1 - from) }, { transform: 'none' }],
+        options,
+      ),
+      page.animate(
+        [{ transform: shift(-from) }, { transform: shift(-1) }],
+        options,
+      ),
     ];
     const [incoming] = animations;
     incoming?.finished
@@ -878,9 +892,131 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     moveTo(move());
   };
 
+  const isPreviousDisabled = Boolean(
+    min && addDays(startOfMonth(month), -1) < startOfDay(min),
+  );
+  const isNextDisabled = Boolean(
+    max && startOfMonth(addMonths(month, 1)) > startOfDay(max),
+  );
+
+  // Not a range: the days swiped sideways turn the month (as iOS's), the
+  // adjacent month following them in; released past a third of the width
+  // (or flicked), it turns, otherwise they spring back. Beyond the limits,
+  // they resist.
+  const swipeShift = (offset: number) => {
+    const { current: days } = daysRef;
+    const { current: page } = peekRef;
+    if (days) days.style.transform = `translateX(${String(offset)}px)`;
+    if (!page || !days) return;
+    const rtl = getComputedStyle(days).direction === 'rtl' ? -1 : 1;
+    const side = Number(page.dataset.side ?? 0);
+    page.style.transform = `translateX(calc(${String(side * rtl * 100)}% + ${String(offset)}px))`;
+  };
+
+  useLayoutEffect(() => {
+    swipeShift(swipe.current?.offset ?? 0);
+  }, [peek]);
+
+  const onSwipeMove = (event: PointerEvent<HTMLDivElement>) => {
+    const { current: swiping } = swipe;
+    if (!swiping || leaving) return;
+    const dx = event.clientX - swiping.x;
+    const dy = event.clientY - swiping.y;
+    if (!swiping.isMoved) {
+      if (Math.hypot(dx, dy) < 8) return;
+      // Scrolled instead (vertically): not a swipe.
+      if (Math.abs(dy) > Math.abs(dx)) {
+        swipe.current = undefined;
+        return;
+      }
+      swiping.isMoved = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    const isRightToLeft =
+      getComputedStyle(event.currentTarget).direction === 'rtl';
+    // Towards the next month: against the inline direction.
+    const side = Math.sign(dx) * (isRightToLeft ? 1 : -1);
+    const isBlocked = side > 0 ? isNextDisabled : isPreviousDisabled;
+    const now = event.timeStamp;
+    swiping.velocity = (dx - swiping.offset) / Math.max(1, now - swiping.time);
+    swiping.time = now;
+    swiping.offset = isBlocked ? dx / 3 : dx;
+    swiping.side = isBlocked ? 0 : side;
+    if (swiping.side !== peek) setPeek(swiping.side);
+    swipeShift(swiping.offset);
+  };
+
+  const onSwipeEnd = () => {
+    const { current: swiping } = swipe;
+    swipe.current = undefined;
+    const { current: days } = daysRef;
+    if (!swiping?.isMoved || !days) return;
+    // Not also the click on the day released on.
+    suppressClick.current = true;
+    setTimeout(() => {
+      suppressClick.current = false;
+    });
+
+    const width = days.offsetWidth || 1;
+    const from = Math.abs(swiping.offset) / width;
+    const isFlicked =
+      Math.abs(swiping.velocity) > 0.4 &&
+      Math.sign(swiping.velocity) === Math.sign(swiping.offset);
+    if (swiping.side !== 0 && (from > 1 / 3 || isFlicked)) {
+      // On from where it was left (see `goTo`).
+      days.style.removeProperty('transform');
+      setPeek(0);
+      const next = addMonths(month, swiping.side);
+      goTo(next, from);
+      setFocused(clampDay(next, min, max));
+      return;
+    }
+
+    // Back.
+    const { current: page } = peekRef;
+    const options = { duration: 250, easing: 'ease' };
+    const back = [
+      days.animate(
+        [{ transform: days.style.transform }, { transform: 'none' }],
+        options,
+      ),
+      ...(page
+        ? [
+            page.animate(
+              [
+                { transform: page.style.transform },
+                {
+                  transform: page.style.transform.replace(
+                    / \+ -?[\d.]+px\)/u,
+                    ' + 0px)',
+                  ),
+                },
+              ],
+              options,
+            ),
+          ]
+        : []),
+    ];
+    days.style.removeProperty('transform');
+    back[0]?.finished.then(() => setPeek(0)).catch(() => undefined);
+  };
+
   // Ranges are also dragged into existence: from the day pressed to the day
   // under the pointer, picked on release (taps pick start and end).
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (!props.range && event.button === 0 && !leaving) {
+      swipe.current = {
+        isMoved: false,
+        offset: 0,
+        side: 0,
+        time: event.timeStamp,
+        velocity: 0,
+        x: event.clientX,
+        y: event.clientY,
+      };
+      return;
+    }
     if (!props.range || event.button !== 0) return;
     const from = dayOf(event.target);
     if (!from || !enabled(from)) return;
@@ -920,6 +1056,10 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (!props.range) {
+      onSwipeMove(event);
+      return;
+    }
     const { current: dragging } = drag;
     if (!dragging) return;
     if (!dragging.isMoved) {
@@ -966,6 +1106,10 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   };
 
   const onPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+    if (!props.range) {
+      onSwipeEnd();
+      return;
+    }
     const { current: dragging } = drag;
     clearTimeout(dragging?.timer);
     drag.current = undefined;
@@ -987,13 +1131,6 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     goTo(next);
     setFocused(clampDay(next, min, max));
   };
-
-  const isPreviousDisabled = Boolean(
-    min && addDays(startOfMonth(month), -1) < startOfDay(min),
-  );
-  const isNextDisabled = Boolean(
-    max && startOfMonth(addMonths(month, 1)) > startOfDay(max),
-  );
 
   const toggle = (roll: 'monthYear' | 'time') => {
     const next = rolled === roll ? undefined : roll;
@@ -1100,6 +1237,28 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
       value: range ?? single,
     }),
   );
+
+  // The adjacent month peeking in while swiped (see above).
+  const peekPage = () =>
+    peek === 0 ? null : (
+      <div
+        ref={peekRef}
+        inert
+        aria-hidden="true"
+        className="uikit-date-picker-leaving-page"
+        data-date-picker-part="peek-page"
+        data-side={peek}
+      >
+        <div
+          className="uikit-date-picker-weeks"
+          data-date-picker-part="weeks"
+        >
+          {monthWeeks(addMonths(month, peek), weekStart)
+            .flat()
+            .map((day) => cell(day, addMonths(month, peek), false))}
+        </div>
+      </div>
+    );
 
   return (
     // Figma “Style=Inline”: the calendar, a separator, the time row.
@@ -1213,6 +1372,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
               </div>
             </div>
           ) : null}
+          {peekPage()}
           <div
             ref={daysRef}
             aria-label={label}

@@ -427,6 +427,24 @@ export const FormComposition: FunctionComponent = () => (
         A server’s errors after submitting: <code>errors</code>, by the fields’
         names (here: <code>taken@example.com</code> is taken).
       </li>
+      <li>
+        <strong>Library:</strong> Base UI’s{' '}
+        <PartLink
+          component="form"
+          part="Form"
+        />{' '}
+        (validating on submit, then on change; its <code>errors</code>), the
+        text fields and their errors (
+        <PartLink
+          component="text-field"
+          part="TextField.Error"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> checking the email against the “server”
+        (taken@example.com), holding its errors and logging what’s submitted.
+      </li>
     </ul>
     <ValidationAndServerErrors />
 
@@ -451,6 +469,24 @@ export const FormComposition: FunctionComponent = () => (
         of <code>type=&quot;submit&quot;</code> with the form’s id (
         <code>form</code>). Submitted (and valid), the app closes the sheet.
       </li>
+      <li>
+        <strong>Library:</strong> the sheet (
+        <PartLink
+          component="sheet"
+          part="Sheet.Root"
+        />
+        ,{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Close"
+        />
+        ), the toolbar’s submit button outside the form (<code>form</code>), the
+        text field and the date picker.
+      </li>
+      <li>
+        <strong>Demo:</strong> the open state, the form’s id, and closing the
+        sheet once submitted.
+      </li>
     </ul>
     <InASheetWithCancelDone />
 
@@ -472,6 +508,19 @@ export const FormComposition: FunctionComponent = () => (
         ’s <code>disabled</code>).
       </li>
       <li>Disabled, its fields can’t be changed.</li>
+      <li>
+        <strong>Library:</strong> the{' '}
+        <PartLink
+          component="switch"
+          part="Switch.Root"
+        />{' '}
+        and the fieldset’s <code>disabled</code>, with Base UI’s fields
+        submitting by name.
+      </li>
+      <li>
+        <strong>Demo:</strong> holding whether to remind and disabling the
+        fieldset by it.
+      </li>
     </ul>
     <ASwitchRevealingAFieldset />
 
@@ -502,6 +551,14 @@ export const FormComposition: FunctionComponent = () => (
         <a href="slider">Slider</a>), an ISO date (
         <a href="date-picker">Date picker</a>), a boolean (
         <a href="switch">Switch</a>).
+      </li>
+      <li>
+        <strong>Library:</strong> each control’s value in the form (text, a
+        number, an ISO date, a boolean) by its field’s name.
+      </li>
+      <li>
+        <strong>Demo:</strong> the fields, the copies count (the app’s state)
+        and logging what’s submitted.
       </li>
     </ul>
     <MixedControls />

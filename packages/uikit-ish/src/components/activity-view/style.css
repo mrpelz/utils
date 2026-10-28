@@ -44,11 +44,6 @@
     font-weight: round(down, 510, 100);
     letter-spacing: -0.23px;
     line-height: 20px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
 
     & + [data-activity-view-part='subtitle'] {
       margin-block-start: -11px;
@@ -63,14 +58,6 @@
     font-weight: round(down, var(--font-ios-footnote-weight), 100);
     letter-spacing: var(--font-ios-footnote-tracking);
     line-height: var(--font-ios-footnote-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-footnote-weight) - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-footnote-weight)) / 326 * 1px
-    );
   }
 
   .uikit-activity-view-message {
@@ -81,14 +68,6 @@
     font-weight: round(down, var(--font-ios-footnote-weight), 100);
     letter-spacing: var(--font-ios-footnote-tracking);
     line-height: var(--font-ios-footnote-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-footnote-weight) - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-footnote-weight)) / 326 * 1px
-    );
   }
 
   .uikit-activity-view-row {
@@ -170,11 +149,6 @@
       font-variation-settings: 'wght' 300;
       font-weight: round(down, 300, 100);
       place-items: center;
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (300 - 400) / 326 * 1px);
-
-      --uikit-symbol-thinning: max(0px, (400 - 300) / 326 * 1px);
     }
 
     &:active > [data-activity-view-part='symbol'] {
@@ -192,17 +166,6 @@
       letter-spacing: var(--font-ios-footnote-tracking);
       -webkit-line-clamp: 2;
       line-height: 15px;
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(
-        0px,
-        (var(--font-ios-footnote-weight) - 400) / 326 * 1px
-      );
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--font-ios-footnote-weight)) / 326 * 1px
-      );
     }
   }
 }

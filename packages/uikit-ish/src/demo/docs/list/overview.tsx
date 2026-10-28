@@ -388,8 +388,11 @@ export const ListOverview: FunctionComponent = () => (
           EditButton
         </PartLink>
         ) lead the row, grabbers end it; entering and leaving edit mode (
-        <code>editing</code>), they slide in and out from the row’s edges
-        (300ms). A delete button rendered by a{' '}
+        <code>editing</code>: per side, set on the list, a section, a group or a
+        row, each overriding the one around it), they slide in and out from the
+        row’s edges (300ms), regular parts making way where told (
+        <code>whileEditing</code>; a chevron by default). A delete button
+        rendered by a{' '}
         <PartLink
           component="list"
           part="List.SwipeActionsTrigger"

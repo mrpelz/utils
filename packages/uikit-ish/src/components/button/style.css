@@ -49,9 +49,6 @@
     gap: 4px;
     letter-spacing: var(--font-ios-subheadline-tracking);
     line-height: var(--font-ios-subheadline-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--uikit-button-font-weight) - 400) / 326 * 1px);
     text-align: center;
     text-decoration: none;
     text-transform: none;
@@ -61,11 +58,6 @@
     user-select: none;
     vertical-align: middle;
     white-space: nowrap;
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--uikit-button-font-weight)) / 326 * 1px
-    );
 
     @media (hover: hover) {
       cursor: var(--uikit-utils-cursor);
@@ -318,17 +310,6 @@
     font-variation-settings: 'wght' var(--uikit-button-icon-font-weight);
     font-weight: round(down, var(--uikit-button-icon-font-weight), 100);
     line-height: var(--uikit-button-icon-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--uikit-button-icon-font-weight) - 400) / 326 * 1px
-    );
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--uikit-button-icon-font-weight)) / 326 * 1px
-    );
   }
 
   .uikit-button-label {

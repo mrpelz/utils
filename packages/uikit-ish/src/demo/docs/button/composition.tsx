@@ -14,6 +14,7 @@ import { useLog } from '../../tooling/frame/log.js';
 import {
   Contents,
   Heading,
+  PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
@@ -338,6 +339,28 @@ export const ButtonComposition: FunctionComponent = () => (
         A symbol alone: <code>shape=&quot;circle&quot;</code>, and an{' '}
         <code>aria-label</code>, its only name.
       </li>
+      <li>
+        <strong>Library:</strong> the button (
+        <PartLink
+          component="button"
+          part="Button.Root"
+        />
+        ) with its symbol (
+        <PartLink
+          component="button"
+          part="Button.Icon"
+        />
+        ) and label (
+        <PartLink
+          component="button"
+          part="Button.Label"
+        />
+        ) in either order, and its circle shape.
+      </li>
+      <li>
+        <strong>Demo:</strong> the labels, the symbols and the{' '}
+        <code>aria-label</code>s; what each does (logged).
+      </li>
     </ul>
     <CodeView code={symbolCode} />
     <SymbolAndLabel />
@@ -360,6 +383,14 @@ export const ButtonComposition: FunctionComponent = () => (
       </li>
       <li>
         Large (50px) buttons at a screen’s bottom, filling its width (HIG).
+      </li>
+      <li>
+        <strong>Library:</strong> the variants (<code>bordered-prominent</code>,
+        borderless), the large size and <code>fill</code>.
+      </li>
+      <li>
+        <strong>Demo:</strong> the two actions, their order and layout, and what
+        each does (logged).
       </li>
     </ul>
     <CodeView code={pairsCode} />
@@ -386,6 +417,22 @@ export const ButtonComposition: FunctionComponent = () => (
         ): for what can be undone, undo instead; for several choices, an{' '}
         <a href="action-sheet">Action sheet</a>.
       </li>
+      <li>
+        <strong>Library:</strong> the destructive button and the{' '}
+        <PartLink
+          component="alert"
+          part="Alert.Root"
+        />{' '}
+        it triggers (rendered as its{' '}
+        <PartLink
+          component="alert"
+          part="Alert.Trigger"
+        />
+        ), with its destructive and cancel actions.
+      </li>
+      <li>
+        <strong>Demo:</strong> what’s deleted, and whether it was (logged).
+      </li>
     </ul>
     <CodeView code={destructiveCode} />
     <DestructiveConfirm />
@@ -409,6 +456,16 @@ export const ButtonComposition: FunctionComponent = () => (
       <li>
         <code>glass-prominent</code>: the tint’s glass, for the likely action
         (Play).
+      </li>
+      <li>
+        <strong>Library:</strong> the glass variants (<code>glass</code>,{' '}
+        <code>glass-prominent</code>) and{' '}
+        <code>context=&quot;adaptive&quot;</code>, sampling the brightness
+        behind.
+      </li>
+      <li>
+        <strong>Demo:</strong> the picture behind and the player’s actions
+        (logged).
       </li>
     </ul>
     <CodeView code={glassCode} />

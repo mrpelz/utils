@@ -280,6 +280,20 @@ export type RangeDrag = {
   y: number;
 };
 
+/** A swipe turning the month (not a range, see `CalendarPanel`). */
+export type Swipe = {
+  isMoved: boolean;
+  /** The days' offset (px), resisted beyond the limits. */
+  offset: number;
+  /** The month peeking in: 1 the next, -1 the previous, 0 none. */
+  side: number;
+  time: number;
+  /** The last move's speed (px per ms). */
+  velocity: number;
+  x: number;
+  y: number;
+};
+
 export type CalendarMessageProps = ComponentProps<'p'> & {
   /**
    * `info` (e.g. what can be picked) in the secondary label color, or

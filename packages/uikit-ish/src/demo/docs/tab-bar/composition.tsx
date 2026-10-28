@@ -36,7 +36,9 @@ import { phoneTabs, phoneTabValues } from './tabs.js';
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 const panelsCode = `<TabBar.Root defaultValue="favorites">
   <Viewport.Content safeArea="none">
+    {/* Kept mounted while hidden: its page keeps its scroll position. */}
     <TabBar.Panel
+      keepMounted
       render={<Page.Root />}
       value="favorites"
     >
@@ -45,6 +47,7 @@ const panelsCode = `<TabBar.Root defaultValue="favorites">
       <Viewport.Padding edge="block-end" />
     </TabBar.Panel>
     <TabBar.Panel
+      keepMounted
       render={<Page.Root />}
       value="recents"
     >
@@ -175,12 +178,24 @@ const [section, setSection] = useState('favorites');
 // Each section's rows (a page's content).
 const rows: Record<string, readonly string[]> = {
   contacts: [
+    'Aaron Black',
+    'Abigail Moss',
     'Anna Haro',
+    'Bella Chen',
+    'Benjamin Ortiz',
+    'Carla Diaz',
     'Daniel Higgins',
     'David Taylor',
+    'Elena Petrova',
+    'Felix Wagner',
+    'Grace Kim',
     'Hank Zakroff',
+    'Isabel Costa',
     'John Appleseed',
     'Kate Bell',
+    'Liam Murphy',
+    'Maya Singh',
+    'Noah Fischer',
   ],
   favorites: ['Anna Haro', 'Kate Bell', 'John Appleseed'],
   recents: [
@@ -192,6 +207,14 @@ const rows: Record<string, readonly string[]> = {
     'David Taylor',
     'Kate Bell',
     'Anna Haro',
+    'Maya Singh',
+    'Daniel Higgins',
+    'Grace Kim',
+    'Kate Bell',
+    'Felix Wagner',
+    'John Appleseed',
+    'Anna Haro',
+    'Noah Fischer',
   ],
   voicemail: ['Daniel Higgins', 'Hank Zakroff'],
 };
@@ -231,6 +254,7 @@ const Panels: FunctionComponent = () => {
           {phoneTabs.map(([tab, label]) => (
             <TabBar.Panel
               key={tab}
+              keepMounted
               render={<Page.Root />}
               value={tab}
             >
@@ -602,8 +626,31 @@ export const TabBarComposition: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Hidden panels unmount; <code>keepMounted</code> keeps them (e.g. for
-        their scroll positions).
+        Each section keeps its place: <code>keepMounted</code> keeps hidden
+        panels (otherwise unmounted), and with them their pages’ scroll
+        positions (scroll Recents, switch away and back).
+      </li>
+      <li>
+        <strong>Library:</strong> the tab bar (
+        <PartLink
+          component="tab-bar"
+          part="TabBar.Root"
+        />
+        , its tabs, indicator and panels kept mounted) floating at the bottom (
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />
+        ), each panel a{' '}
+        <PartLink
+          component="page"
+          part="Page.Root"
+        />
+        .
+      </li>
+      <li>
+        <strong>Demo:</strong> the sections, their rows, and logging the
+        selected one.
       </li>
     </ul>
     <CodeView code={panelsCode} />
@@ -628,6 +675,19 @@ export const TabBarComposition: FunctionComponent = () => (
         <a href="text-field">TextField</a>’s search field.
       </li>
       <li>Choosing the section again expands the bar.</li>
+      <li>
+        <strong>Library:</strong> the search tab’s own group, collapsing the
+        bar, and the accessory (
+        <PartLink
+          component="tab-bar"
+          part="TabBar.Accessory"
+        />
+        ) shown only while collapsed.
+      </li>
+      <li>
+        <strong>Demo:</strong> the value and the section last chosen (the app’s
+        state), and the search field’s query.
+      </li>
     </ul>
     <CodeView code={searchCode} />
     <Search />
@@ -649,6 +709,22 @@ export const TabBarComposition: FunctionComponent = () => (
       <li>
         Guide <GuideLink to="section-7-5">§7.5</GuideLink>: an activity badge on
         a tab item.
+      </li>
+      <li>
+        <strong>Library:</strong> the{' '}
+        <PartLink
+          component="badge"
+          part="Badge"
+        />{' '}
+        on the tab’s{' '}
+        <PartLink
+          component="symbol"
+          part="Symbol"
+        />
+        , solid while the symbol blends with the glass.
+      </li>
+      <li>
+        <strong>Demo:</strong> the counts.
       </li>
     </ul>
     <CodeView code={badgeCode} />
@@ -672,6 +748,19 @@ export const TabBarComposition: FunctionComponent = () => (
         top.
       </li>
       <li>Scroll the screen’s list to see it.</li>
+      <li>
+        <strong>Library:</strong> collapsing the bar (<code>collapsed</code>)
+        and the viewport’s scroll hook (
+        <PartLink
+          component="viewport"
+          part="useViewportScroll"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> collapsing it by the scroll’s direction and
+        position (the app’s state).
+      </li>
     </ul>
     <CodeView code={scrollCode} />
     <OnScroll />
@@ -698,6 +787,18 @@ export const TabBarComposition: FunctionComponent = () => (
       <li>
         The active tab ignores clicks (Base UI’s Tabs): the search tab, clicked
         while searching, sets the section last chosen itself, expanding the bar.
+      </li>
+      <li>
+        <strong>Library:</strong> the accessory after the list (
+        <PartLink
+          component="tab-bar"
+          part="TabBar.Accessory"
+        />
+        ), placed above the groups or between them.
+      </li>
+      <li>
+        <strong>Demo:</strong> the player, the value and the section last
+        chosen.
       </li>
     </ul>
     <CodeView code={accessoryCode} />

@@ -12,11 +12,6 @@
     font-variation-settings: 'wght' 590;
     font-weight: round(down, 590, 100);
     place-items: center;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (590 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
   }
 
   /* Figma State=Selected/Unselected (mixed: as selected). */

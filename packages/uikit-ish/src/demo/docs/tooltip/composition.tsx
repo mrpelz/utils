@@ -171,6 +171,23 @@ export const TooltipComposition: FunctionComponent = () => (
         />
         : once one has shown, moving to the next shows its tooltip at once.
       </li>
+      <li>
+        <strong>Library:</strong> the tooltips (
+        <PartLink
+          component="tooltip"
+          part="Tooltip.Root"
+        />
+        ) on the bar’s buttons, and the provider (
+        <PartLink
+          component="tooltip"
+          part="Tooltip.Provider"
+        />
+        ) showing the next at once.
+      </li>
+      <li>
+        <strong>Demo:</strong> the buttons, their names and what each does
+        (logged).
+      </li>
     </ul>
     <InAToolbar />
 
@@ -192,6 +209,18 @@ export const TooltipComposition: FunctionComponent = () => (
       <li>
         As <a href="slider">Slider</a>’s and <a href="progress">Progress</a>’
         value labels, and a <a href="page-control">Page control</a>’s.
+      </li>
+      <li>
+        <strong>Library:</strong> holding it open (<code>open</code>) at an
+        anchor element (
+        <PartLink
+          component="tooltip"
+          part="Tooltip.Positioner"
+        />{' '}
+        <code>anchor</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the element it’s pinned to (a ref) and its label.
       </li>
     </ul>
     <HeldOpen />

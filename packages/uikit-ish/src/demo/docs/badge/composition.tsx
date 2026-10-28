@@ -19,6 +19,7 @@ import { useLog } from '../../tooling/frame/log.js';
 import {
   Contents,
   Heading,
+  PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
 import { GuideLink } from '../hig-guide/link.js';
@@ -161,6 +162,24 @@ export const BadgeComposition: FunctionComponent = () => (
         pending update.
       </li>
       <li>Read with the row: “General, 1”.</li>
+      <li>
+        <strong>Library:</strong> the inline badge (
+        <PartLink
+          component="badge"
+          part="Badge"
+        />{' '}
+        <code>placement=&quot;inline&quot;</code>) in the row’s detail, before
+        its chevron (
+        <PartLink
+          component="list"
+          part="List.DrillIn"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the count, and the row it’s on (Settings’
+        General).
+      </li>
     </ul>
     <InAListRow />
 
@@ -180,6 +199,14 @@ export const BadgeComposition: FunctionComponent = () => (
         ).
       </li>
       <li>The avatar named with it (“Jane Appleseed, 3 unread”).</li>
+      <li>
+        <strong>Library:</strong> the badge on the avatar’s corner, its count or
+        dot and its <code>tint</code>.
+      </li>
+      <li>
+        <strong>Demo:</strong> the count and the person; naming the avatar with
+        it (<code>aria-label</code>).
+      </li>
     </ul>
     <OnAnAvatar />
 
@@ -198,6 +225,15 @@ export const BadgeComposition: FunctionComponent = () => (
       <li>
         The button named by <code>aria-label</code>: the count said in it too
         (“Mail, 12 unread”).
+      </li>
+      <li>
+        <strong>Library:</strong> the badge on the button’s symbol (
+        <code>placement=&quot;symbol&quot;</code>), not blended with the glass
+        as the symbol is.
+      </li>
+      <li>
+        <strong>Demo:</strong> the count, and naming the button with it (
+        <code>aria-label</code>).
       </li>
     </ul>
     <OnAToolbarButton />

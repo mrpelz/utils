@@ -16,10 +16,9 @@
     }
   }
 
-  /* Blended and scaled as its host's content (see main.tsx). Strokes (see
-     `fontWeight`) extend beyond the view box; the margin is the glyph's side
-     bearing (SF Pro: `circle` 0.087em, `magnifyingglass` 0.112em,
-     `star.fill` 0.096em). */
+  /* Blended and scaled as its host's content (see main.tsx). The margin is
+     the glyph's side bearing (SF Pro: `circle` 0.087em, `magnifyingglass`
+     0.112em, `star.fill` 0.096em). */
   .uikit-symbol-glyph {
     display: inline-flex;
     mix-blend-mode: var(--uikit-symbol-blend, normal);
@@ -29,6 +28,20 @@
     & > svg {
       overflow: visible;
       margin-inline: 0.1em;
+    }
+
+    /* Its regular and emphasized glyphs, stacked (the emphasized one
+       centered on the regular one's box), faded by its host's emphasis. */
+    &[data-variant='regular'] {
+      opacity: calc(1 - var(--uikit-symbol-emphasis));
+    }
+
+    &[data-variant='emphasized'] {
+      position: absolute;
+      align-items: center;
+      justify-content: center;
+      inset: 0;
+      opacity: var(--uikit-symbol-emphasis);
     }
   }
 }

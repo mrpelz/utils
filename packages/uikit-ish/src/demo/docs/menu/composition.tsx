@@ -424,6 +424,18 @@ export const MenuComposition: FunctionComponent = () => (
         />
         .
       </li>
+      <li>
+        <strong>Library:</strong> the menu (
+        <PartLink
+          component="menu"
+          part="Menu.Root"
+        />
+        , its items, separator and popup) and its trigger rendering the
+        toolbar’s button.
+      </li>
+      <li>
+        <strong>Demo:</strong> the actions and what each does (logged).
+      </li>
     </ul>
     <CodeView code={toolbarCode} />
     <FromAToolbarButton />
@@ -453,6 +465,23 @@ export const MenuComposition: FunctionComponent = () => (
         Guide <GuideLink to="choice-family">choice family</GuideLink>: a
         collapsed choice of a few options.
       </li>
+      <li>
+        <strong>Library:</strong> the radio items (
+        <PartLink
+          component="menu"
+          part="Menu.RadioGroup"
+        />
+        ,{' '}
+        <PartLink
+          component="menu"
+          part="Menu.RadioItem"
+        />
+        ), the trigger’s chevrons and aligning the menu to the row’s end.
+      </li>
+      <li>
+        <strong>Demo:</strong> the sort order (the app’s state) shown on the
+        button.
+      </li>
     </ul>
     <CodeView code={popUpCode} />
     <APopUpButton />
@@ -468,6 +497,14 @@ export const MenuComposition: FunctionComponent = () => (
         A back button’s history: a click goes back (the trigger’s own{' '}
         <code>onClick</code>), a held press or a right click shows the pages (
         <code>openOn=&quot;secondaryClick&quot;</code>).
+      </li>
+      <li>
+        <strong>Library:</strong> opening on a held press or a right click (
+        <code>openOn=&quot;secondaryClick&quot;</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the back button’s own click and the history it
+        lists (logged).
       </li>
     </ul>
     <CodeView code={historyCode} />
@@ -499,6 +536,22 @@ export const MenuComposition: FunctionComponent = () => (
         ): the menu stays open while they change.
       </li>
       <li>Every item keeps a column for the checkmark.</li>
+      <li>
+        <strong>Library:</strong> the checkbox and radio items (
+        <PartLink
+          component="menu"
+          part="Menu.CheckboxItem"
+        />
+        ,{' '}
+        <PartLink
+          component="menu"
+          part="Menu.RadioItem"
+        />
+        ), the groups, and the menu staying open while they change.
+      </li>
+      <li>
+        <strong>Demo:</strong> the options offered and logging their changes.
+      </li>
     </ul>
     <ViewOptions />
   </>

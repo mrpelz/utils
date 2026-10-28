@@ -72,7 +72,7 @@ const all = selected.length === messages.length;
 
 <Viewport.Content>
   <Viewport.Padding edge="block-start" />
-  <List.Root editing>
+  <List.Root editing="leading">
     <List.Section>
       <CheckboxGroup
         value={selected}
@@ -255,7 +255,7 @@ const EditMode: FunctionComponent = () => {
       <>
         <Viewport.Content>
           <Viewport.Padding edge="block-start" />
-          <List.Root editing>
+          <List.Root editing="leading">
             <List.Section>
               <CheckboxGroup
                 render={<List.Group />}
@@ -522,6 +522,27 @@ export const ToolbarComposition: FunctionComponent = () => (
         With a large title, the bar’s title fades in as it scrolls away (see{' '}
         <a href="header">Header</a>).
       </li>
+      <li>
+        <strong>Library:</strong> the bar (
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Root"
+        />{' '}
+        <code>placement=&quot;block-start&quot;</code>) in a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockStart"
+        />
+        , its sides, title and subtitle, and the{' '}
+        <PartLink
+          component="header"
+          part="Header.Root"
+        />{' '}
+        tying it to the page.
+      </li>
+      <li>
+        <strong>Demo:</strong> the page’s rows and the bar’s actions (logged).
+      </li>
     </ul>
     <CodeView code={navigationCode} />
     <NavigationBar />
@@ -551,6 +572,23 @@ export const ToolbarComposition: FunctionComponent = () => (
       <li>
         A list’s edit mode: see <a href="list/composition">List</a>; a
         viewport’s bottom bar: see <a href="viewport/composition">Viewport</a>.
+      </li>
+      <li>
+        <strong>Library:</strong> the bottom bar’s sides, its title, and a
+        disabled capsule (
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Group"
+        />{' '}
+        <code>disabled</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the selection (
+        <PartLink
+          component="checkbox"
+          part="CheckboxGroup"
+        />
+        , the app’s state), Select All, and the commands on it (logged).
       </li>
     </ul>
     <CodeView code={editCode} />
@@ -585,6 +623,19 @@ export const ToolbarComposition: FunctionComponent = () => (
         , <code>keyboard=&quot;push&quot;</code>
         ).
       </li>
+      <li>
+        <strong>Library:</strong> the search field taking the bar’s free space,
+        and the bar pushed up by the keyboard (
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />{' '}
+        <code>keyboard=&quot;push&quot;</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the query (the app’s state) and filtering the
+        rows.
+      </li>
     </ul>
     <CodeView code={searchCode} />
     <Search />
@@ -604,6 +655,17 @@ export const ToolbarComposition: FunctionComponent = () => (
       <li>
         A segmented control in a toolbar: see{' '}
         <a href="segmented/composition#in-a-toolbar">Segmented</a>.
+      </li>
+      <li>
+        <strong>Library:</strong> the{' '}
+        <PartLink
+          component="page-control"
+          part="PageControl"
+        />{' '}
+        centered between the bar’s sides, taking its glass context.
+      </li>
+      <li>
+        <strong>Demo:</strong> the page (the app’s state) and the pages.
       </li>
     </ul>
     <CodeView code={pagesCode} />

@@ -68,4 +68,35 @@ export const planets: readonly (readonly [string, readonly string[]])[] = [
       'A year of 29 Earth years',
     ],
   ],
+  [
+    'Uranus',
+    [
+      'Rolls on its side',
+      'Coldest atmosphere of the eight',
+      'Moons named for Shakespeare’s characters',
+      'Dark, faint rings',
+      'A year of 84 Earth years',
+    ],
+  ],
+  [
+    'Neptune',
+    [
+      'Farthest from the Sun',
+      'Fastest winds: 2,100 km/h',
+      'Found by mathematics first',
+      'Triton orbits it backwards',
+      'A year of 165 Earth years',
+    ],
+  ],
+  // (Not one of the eight since 2006: its page drawn otherwise.)
+  [
+    'Pluto',
+    [
+      'A dwarf planet since 2006',
+      'A heart of nitrogen ice',
+      'Charon, half its size',
+      'Smaller than our Moon',
+      'Not one orbit since its discovery',
+    ],
+  ],
 ];

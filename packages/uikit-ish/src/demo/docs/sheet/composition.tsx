@@ -690,6 +690,17 @@ export const SheetComposition: FunctionComponent = () => (
         top.
       </li>
       <li>The detent is the app’s: chosen per sheet, not by swiping.</li>
+      <li>
+        <strong>Library:</strong> the sheet (
+        <PartLink
+          component="sheet"
+          part="Sheet.Root"
+        />
+        ) at its medium or large detent, its grabber, header and content.
+      </li>
+      <li>
+        <strong>Demo:</strong> the options in each sheet.
+      </li>
     </ul>
     <CodeView code={detentsCode} />
     <Detents />
@@ -721,6 +732,20 @@ export const SheetComposition: FunctionComponent = () => (
         (guide <GuideLink to="rule-g3">G3</GuideLink>: one transient surface at
         a time).
       </li>
+      <li>
+        <strong>Library:</strong> the sheet’s controlled <code>open</code> and{' '}
+        <code>onOpenChange</code>, springing back when kept open,{' '}
+        <code>disablePointerDismissal</code>, and the{' '}
+        <PartLink
+          component="action-sheet"
+          part="ActionSheet.Root"
+        />{' '}
+        asking.
+      </li>
+      <li>
+        <strong>Demo:</strong> the name (the app’s state), whether it’s edited,
+        asking before discarding, and saving on Done.
+      </li>
     </ul>
     <CodeView code={cancelDoneCode} />
     <CancelDone />
@@ -743,6 +768,17 @@ export const SheetComposition: FunctionComponent = () => (
       <li>
         The sheet is still swiped down (by any of it, its content scrolled to
         its top), and closed by its Done.
+      </li>
+      <li>
+        <strong>Library:</strong> the sheet without its{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Grabber"
+        />
+        , still swiped down to close.
+      </li>
+      <li>
+        <strong>Demo:</strong> the sheet’s content.
       </li>
     </ul>
     <WithoutAGrabber />
@@ -781,6 +817,18 @@ export const SheetComposition: FunctionComponent = () => (
         Closed, the stack is reset to its root (
         <code>onOpenChangeComplete</code>).
       </li>
+      <li>
+        <strong>Library:</strong> the{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Root"
+        />{' '}
+        as the sheet’s content, the header’s grabber over the pages’ bars, and{' '}
+        <code>onOpenChangeComplete</code>.
+      </li>
+      <li>
+        <strong>Demo:</strong> the stack’s keys, and resetting them once closed.
+      </li>
     </ul>
     <CodeView code={navigationCode} />
     <NavigationInside />
@@ -803,6 +851,16 @@ export const SheetComposition: FunctionComponent = () => (
       <li>
         The same sheet adapts, its task the same (guide{' '}
         <GuideLink to="rule-g4">G4</GuideLink>).
+      </li>
+      <li>
+        <strong>Library:</strong> the form sheet (
+        <code>
+          compact={'{'}false{'}'}
+        </code>
+        ), centered, the page dimmed around it.
+      </li>
+      <li>
+        <strong>Demo:</strong> the form’s fields.
       </li>
     </ul>
     <CodeView code={formSheetCode} />

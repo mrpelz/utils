@@ -338,6 +338,23 @@ export const SegmentedComposition: FunctionComponent = () => (
         The app holds the value (<code>value</code>, <code>onValueChange</code>)
         and renders the content for it.
       </li>
+      <li>
+        <strong>Library:</strong> the control (
+        <PartLink
+          component="segmented"
+          part="Segmented.Root"
+        />
+        ), the anchor at the screen’s edge (
+        <PartLink
+          component="viewport"
+          part="Viewport.Anchor"
+        />
+        ) and the toolbar giving it the bar’s look.
+      </li>
+      <li>
+        <strong>Demo:</strong> the value (the app’s state) and the rows it
+        shows.
+      </li>
     </ul>
     <CodeView code={contentCode} />
     <ContentViews />
@@ -355,6 +372,13 @@ export const SegmentedComposition: FunctionComponent = () => (
       </li>
       <li>
         Inside the <a href="header">Header</a>’s bar, on its glass.
+      </li>
+      <li>
+        <strong>Library:</strong> the control in the header’s bar, on its glass.
+      </li>
+      <li>
+        <strong>Demo:</strong> the filter (the app’s state) and the rows it
+        shows.
       </li>
     </ul>
     <CodeView code={headerCode} />
@@ -374,6 +398,17 @@ export const SegmentedComposition: FunctionComponent = () => (
       <li>
         The buttons act on the content (guide{' '}
         <GuideLink to="rule-g1">G1</GuideLink>: choice and actions stay apart).
+      </li>
+      <li>
+        <strong>Library:</strong> the control between the bottom{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Root"
+        />
+        ’s buttons.
+      </li>
+      <li>
+        <strong>Demo:</strong> the modes and the buttons’ actions (logged).
       </li>
     </ul>
     <CodeView code={toolbarCode} />

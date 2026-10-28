@@ -170,6 +170,53 @@
   }
 }
 
+/* A turned page, sliding in from below (next) or above (previous). */
+.viewport-demo-page[data-turned='next'] {
+  animation: viewport-demo-page-in 400ms ease-out;
+}
+
+.viewport-demo-page[data-turned='previous'] {
+  animation: viewport-demo-page-in 400ms ease-out;
+
+  --viewport-demo-page-from: -1;
+}
+
+@keyframes viewport-demo-page-in {
+  from {
+    opacity: 0;
+    translate: 0 calc(var(--viewport-demo-page-from, 1) * 50%);
+  }
+}
+
+/* Pluto's page (not one of the eight): a night sky, its rows dark
+   (data-color-scheme). */
+.viewport-demo-page[data-color-scheme='dark'] {
+  border-radius: 26px;
+  margin: 0 8px;
+  background:
+    radial-gradient(circle at 20% 30%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 70% 12%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 85% 60%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 40% 80%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 95% 82%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 55% 45%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 75% 52%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 62% 88%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 90% 35%, #fff 1px, transparent 2px),
+    #0b0b1e;
+  color: #fff;
+  padding-block: 8px;
+
+  /* Its rows: the sky showing through. */
+  --uikit-list-group-background: rgb(255 255 255 / 8%);
+
+  /* Its heart: Tombaugh Regio's pale ice. */
+  & h2 > .uikit-symbol {
+    color: #f2d9c8;
+    margin-inline-start: 0.25em;
+  }
+}
+
 .viewport-demo-pull-spinner {
   rotate: calc(var(--uikit-viewport-overscroll-progress, 0) * 270deg);
 }

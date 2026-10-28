@@ -167,7 +167,7 @@ const [checked, setChecked] = useState<string[]>([]);
       </Button.Root>
     ) : null}
   </Sidebar.Toolbar>
-  <List.Root editing={isEditing} listStyle="sidebar">
+  <List.Root editing={isEditing ? 'leading' : 'none'} listStyle="sidebar">
     <List.Section>
       …
       <CheckboxGroup
@@ -573,7 +573,7 @@ const Editing: FunctionComponent = () => {
             ) : null}
           </Sidebar.Toolbar>
           <List.Root
-            editing={isEditing}
+            editing={isEditing ? 'leading' : 'none'}
             listStyle="sidebar"
           >
             {sidebarSections.map(([title, rows]) => (
@@ -872,6 +872,23 @@ export const SidebarComposition: FunctionComponent = () => (
         <code>clearFloating</code>): its page’s content inset, its background
         running underneath.
       </li>
+      <li>
+        <strong>Library:</strong> the selected row (
+        <PartLink
+          component="list"
+          part="List.Item"
+        />{' '}
+        <code>selected</code>), the floating{' '}
+        <PartLink
+          component="sidebar"
+          part="Sidebar.Root"
+        />{' '}
+        and the content column clear of it (<code>clearFloating</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the selection (the app’s state) and the page it
+        picks.
+      </li>
     </ul>
     <CodeView code={selectingCode} />
     <Selecting />
@@ -910,6 +927,23 @@ export const SidebarComposition: FunctionComponent = () => (
         />
         ), its page shown.
       </li>
+      <li>
+        <strong>Library:</strong> the sidebar in a{' '}
+        <PartLink
+          component="drawer"
+          part="Drawer.Root"
+        />
+        , its swipe area and trigger linked by a handle, and closing as a row is
+        chosen (
+        <PartLink
+          component="drawer"
+          part="Drawer.Close"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the selection and the pages.
+      </li>
     </ul>
     <CodeView code={drawerCode} />
     <InADrawer />
@@ -929,6 +963,18 @@ export const SidebarComposition: FunctionComponent = () => (
         />
         , styled by the panel) filtering its rows; sections without matches left
         out.
+      </li>
+      <li>
+        <strong>Library:</strong> the search field (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />
+        ) styled by the sidebar.
+      </li>
+      <li>
+        <strong>Demo:</strong> the query (the app’s state), filtering the rows
+        and leaving out empty sections.
       </li>
     </ul>
     <CodeView code={searchCode} />
@@ -956,6 +1002,28 @@ export const SidebarComposition: FunctionComponent = () => (
         ), a row pressed anywhere toggling its circle.
       </li>
       <li>Delete for the checked rows, disabled while none are checked.</li>
+      <li>
+        <strong>Library:</strong> the sidebar’s toolbar (
+        <PartLink
+          component="sidebar"
+          part="Sidebar.Toolbar"
+        />
+        ) and the rows’ checkboxes (
+        <PartLink
+          component="list"
+          part="List.Checkbox"
+        />
+        ) in a{' '}
+        <PartLink
+          component="checkbox"
+          part="CheckboxGroup"
+        />
+        .
+      </li>
+      <li>
+        <strong>Demo:</strong> the edit state, the checked rows, deleting them,
+        and the selection.
+      </li>
     </ul>
     <CodeView code={editingCode} />
     <Editing />
@@ -993,6 +1061,23 @@ export const SidebarComposition: FunctionComponent = () => (
       <li>
         Compact, the sections as a stack’s root page instead: see{' '}
         <a href="navigation/composition#compact-or-regular">Navigation</a>.
+      </li>
+      <li>
+        <strong>Library:</strong> the{' '}
+        <PartLink
+          component="sidebar"
+          part="Sidebar.Root"
+        />{' '}
+        floating or in a{' '}
+        <PartLink
+          component="drawer"
+          part="Drawer.Root"
+        />
+        , and the window’s size class (<code>useSizeClass</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> choosing either by the size class, and the
+        selection.
       </li>
     </ul>
     <CodeView code={adaptiveCode} />

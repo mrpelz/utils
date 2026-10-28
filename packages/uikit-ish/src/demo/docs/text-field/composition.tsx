@@ -458,6 +458,23 @@ export const TextFieldComposition: FunctionComponent = () => (
         Inline, below the field: the lowest modality that works (guide{' '}
         <GuideLink to="rule-g5">G5</GuideLink>), no alert.
       </li>
+      <li>
+        <strong>Library:</strong> the field’s constraints and{' '}
+        <code>validate</code>, its errors (
+        <PartLink
+          component="text-field"
+          part="TextField.Error"
+        />
+        , one per reason), <code>validationMode</code> and Base UI’s{' '}
+        <PartLink
+          component="form"
+          part="Form"
+        />
+        .
+      </li>
+      <li>
+        <strong>Demo:</strong> the custom rule, and logging what’s submitted.
+      </li>
     </ul>
     <CodeView code={validationCode} />
     <Validation />
@@ -486,6 +503,23 @@ export const TextFieldComposition: FunctionComponent = () => (
         In a page’s header, a toolbar, a sidebar (see{' '}
         <a href="header/composition#a-search-field">Header</a>,{' '}
         <a href="toolbar/composition#a-search-field">Toolbar</a>).
+      </li>
+      <li>
+        <strong>Library:</strong> the search field (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />
+        ): the capsule, magnifier and clear button (
+        <PartLink
+          component="text-field"
+          part="TextField.Clear"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the query (the app’s state), filtering the rows
+        and the footer when nothing’s found.
       </li>
     </ul>
     <CodeView code={searchCode} />
@@ -524,6 +558,18 @@ export const TextFieldComposition: FunctionComponent = () => (
         <code>autoComplete</code>, <code>type</code> and <code>inputMode</code>:
         iOS’s autofill and keyboards; a <code>textarea</code> for notes.
       </li>
+      <li>
+        <strong>Library:</strong> the fields as rows of a grouped list in a{' '}
+        <PartLink
+          component="form"
+          part="Fieldset.Root"
+        />
+        , their labels, <code>autoComplete</code>, <code>type</code> and{' '}
+        <code>inputMode</code>.
+      </li>
+      <li>
+        <strong>Demo:</strong> the fields and their names.
+      </li>
     </ul>
     <CodeView code={formCode} />
     <InAFormList />
@@ -548,6 +594,13 @@ export const TextFieldComposition: FunctionComponent = () => (
       <li>
         <code>autoComplete=&quot;off&quot;</code>: the rows instead of the
         browser’s autofill.
+      </li>
+      <li>
+        <strong>Library:</strong> the field and the list of rows below it.
+      </li>
+      <li>
+        <strong>Demo:</strong> the recipient (the app’s state), matching
+        contacts, and filling the field when a row is pressed.
       </li>
     </ul>
     <CodeView code={suggestionsCode} />

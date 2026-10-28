@@ -15,6 +15,7 @@ import {
 import {
   cn,
   positionerSide,
+  useCollision,
   useForwardedRef,
   usePortalContainer,
 } from '../utils/main.js';
@@ -74,12 +75,19 @@ const Trigger = forwardRef<HTMLButtonElement, TooltipTriggerProps>(
 
 const Positioner = forwardRef<HTMLDivElement, TooltipPositionerProps>(
   (
-    { className, collisionPadding = 8, side, sideOffset = 8, ...props },
+    {
+      className,
+      collisionBoundary,
+      collisionPadding,
+      side,
+      sideOffset = 8,
+      ...props
+    },
     ref,
   ) => (
     <BaseTooltip.Positioner
       ref={ref}
-      collisionPadding={collisionPadding}
+      {...useCollision({ collisionBoundary, collisionPadding })}
       side={positionerSide(side)}
       sideOffset={sideOffset}
       {...props}

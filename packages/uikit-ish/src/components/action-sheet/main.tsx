@@ -17,6 +17,7 @@ import {
 
 import {
   cn,
+  useCollision,
   useForwardedRef,
   useInitialFocus,
   usePortalContainer,
@@ -119,8 +120,8 @@ const Popup = forwardRef<HTMLDivElement, ActionSheetPopupProps>(
     const popupRef = useForwardedRef(ref);
     const focus = useInitialFocus(popupRef);
     const bottom = useMemo(() => bottomAnchor(container), [container]);
-    // Within its container, if one (e.g. the views' frames).
-    const boundary = container ? containerElement(container) : undefined;
+    // Within its container (e.g. the views' frames), clear of its safe area.
+    const collision = useCollision({});
 
     return (
       <BasePopover.Portal
@@ -134,8 +135,7 @@ const Popup = forwardRef<HTMLDivElement, ActionSheetPopupProps>(
         <BasePopover.Positioner
           anchor={trigger ? undefined : bottom}
           className="uikit-action-sheet-positioner"
-          collisionBoundary={boundary}
-          collisionPadding={8}
+          {...collision}
           side={trigger ? 'bottom' : 'top'}
           sideOffset={8}
         >

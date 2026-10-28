@@ -16,17 +16,6 @@
     gap: 6px 8px;
     letter-spacing: var(--font-ios-subheadline-tracking);
     line-height: var(--font-ios-subheadline-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--font-ios-subheadline-weight) - 400) / 326 * 1px
-    );
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-subheadline-weight)) / 326 * 1px
-    );
 
     /* Its label and value (see Label, Value): above the track (by default;
        on a line of their own, the label at its start, the value at its end),
@@ -161,15 +150,7 @@
     gap: 8px;
     letter-spacing: var(--font-ios-body-tracking);
     line-height: var(--font-ios-body-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
     vertical-align: middle;
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight)) / 326 * 1px
-    );
 
     &[data-size='small'] {
       --uikit-progress-activity-size: 22px;

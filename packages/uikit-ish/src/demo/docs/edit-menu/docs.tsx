@@ -48,6 +48,21 @@ export const editMenuRootRows: readonly PropRow[] = [
     'Determines if the menu enters a modal state when open; by default not: the page stays interactive, a press outside reaching it (e.g. clearing the selection) as it closes the menu.',
   ],
   [
+    'size',
+    union('compact', 'regular'),
+    code(union('regular')),
+    <>
+      The UIKit size class of its menus (e.g. the{' '}
+      <PartLink
+        component="edit-menu"
+        part="EditMenu.More"
+      />{' '}
+      button’s): <code>regular</code> (the iPad’s, their submenus beside their
+      trigger) or <code>compact</code> (the iPhone’s, their submenus over it).
+      The capsule is the same either way.
+    </>,
+  ],
+  [
     'orientation',
     union('horizontal', 'vertical'),
     code(union('horizontal')),

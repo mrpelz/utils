@@ -123,18 +123,7 @@
     font-weight: round(down, var(--font-ios-body-weight-emphasized), 100);
     letter-spacing: var(--font-ios-body-tracking);
     line-height: var(--font-ios-body-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--font-ios-body-weight-emphasized) - 400) / 326 * 1px
-    );
     text-align: center;
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight-emphasized)) / 326 * 1px
-    );
   }
 
   .uikit-slider-value {
@@ -149,14 +138,6 @@
     justify-items: end;
     letter-spacing: var(--font-ios-body-tracking);
     line-height: var(--font-ios-body-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight)) / 326 * 1px
-    );
 
     /* In tooltips (see Thumb): for assistive technology only. */
     &[data-slider-placement='tooltip'],
@@ -179,14 +160,6 @@
     font-weight: round(down, var(--font-ios-body-weight), 100);
     letter-spacing: var(--font-ios-body-tracking);
     line-height: var(--font-ios-body-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight)) / 326 * 1px
-    );
   }
 
   .uikit-slider-root {

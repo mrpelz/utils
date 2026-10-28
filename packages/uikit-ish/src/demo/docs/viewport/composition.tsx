@@ -1,6 +1,7 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { sfArrowDown } from '@bradleyhodges/sfsymbols/sfArrowDown';
 import { sfArrowUp } from '@bradleyhodges/sfsymbols/sfArrowUp';
+import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { FunctionComponent, RefObject, useRef, useState } from 'react';
 
 import {
@@ -120,7 +121,7 @@ const toolbarCode = `const [selected, setSelected] = useState<string[]>([]);
 
 <Viewport.Content>
   <Viewport.Padding edge="block-start" />
-  <List.Root editing>
+  <List.Root editing="leading">
     <List.Section>
       <CheckboxGroup
         value={selected}
@@ -227,6 +228,8 @@ const pagesCode = `const contentRef = useRef<HTMLDivElement>(null);
 // Pulled this far past an end (px), released, it turns the page.
 const turnDistance = 80;
 const [index, setIndex] = useState(0);
+// The way it was turned: the page coming in from below (next) or above.
+const [turned, setTurned] = useState();
 const [overscroll, setOverscroll] = useState(0);
 // Released past the distance: the page turned to (-1, 1), or none.
 const turn = useRef(0);
@@ -252,6 +255,7 @@ useViewportScroll(({ atTop, isHeld, overscroll: by }) => {
   // Released past the distance: turned, the new page bouncing back.
   if (turn.current === 0) return;
   setIndex(index + turn.current);
+  setTurned(turn.current < 0 ? 'previous' : 'next');
   turn.current = 0;
   toTop.current = true;
 });
@@ -278,10 +282,20 @@ useViewportScroll(({ atTop, isHeld, overscroll: by }) => {
 )}
 <Viewport.Content ref={contentRef}>
   <Viewport.Padding edge="block-start" />
-  <List.Root>
+  {/* A page each (its key): sliding in the way it was turned. Pluto's, not
+      one of the eight: a night sky, and its heart. */}
+  <List.Root
+    key={name}
+    className="page"
+    data-color-scheme={name === 'Pluto' ? 'dark' : undefined}
+    data-turned={turned}
+  >
     <List.Section>
       <List.Header prominence="extraProminent">
-        <List.Title render={<h2 />}>{name}</List.Title>
+        <List.Title render={<h2 />}>
+          {name}
+          {name === 'Pluto' ? <Symbol icon={sfHeartFill} /> : null}
+        </List.Title>
       </List.Header>
       <List.Group>…{/* facts */}</List.Group>
     </List.Section>
@@ -305,6 +319,49 @@ useViewportScroll(({ atTop, isHeld, overscroll: by }) => {
 
 .pull[data-armed] > .pull-arrow {
   rotate: 180deg;
+}
+
+/* Turned: the page sliding in from below (next) or above (previous). */
+.page[data-turned='next'] {
+  animation: page-in 400ms ease-out;
+}
+
+.page[data-turned='previous'] {
+  animation: page-in 400ms ease-out;
+  --page-from: -1;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    translate: 0 calc(var(--page-from, 1) * 50%);
+  }
+}
+
+/* Pluto's: a night sky (its rows dark: data-color-scheme). */
+.page[data-color-scheme='dark'] {
+  border-radius: 26px;
+  margin: 0 8px;
+  background:
+    radial-gradient(circle at 20% 30%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 70% 12%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 85% 60%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 40% 80%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 95% 82%, #fff 1px, transparent 2px),
+    #0b0b1e;
+  color: #fff;
+  padding-block: 8px;
+}
+
+/* Its rows: the sky showing through. */
+.page[data-color-scheme='dark'] {
+  --uikit-list-group-background: rgb(255 255 255 / 8%);
+}
+
+/* Its heart: Tombaugh Regio's pale ice. */
+.page[data-color-scheme='dark'] h2 > .uikit-symbol {
+  margin-inline-start: 0.25em;
+  color: #f2d9c8;
 }`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
@@ -627,6 +684,8 @@ const PagesView: FunctionComponent<{
 }> = ({ contentRef }) => {
   const [log, addLog] = useLog();
   const [index, setIndex] = useState(0);
+  // The way it was turned: the page coming in from below (next) or above.
+  const [turned, setTurned] = useState<'next' | 'previous'>();
   const [scroll, setScroll] = useState({ isHeld: false, overscroll: 0 });
   // Released past the distance: the page turned to (-1, 1), or none.
   const turn = useRef(0);
@@ -654,6 +713,7 @@ const PagesView: FunctionComponent<{
     if (turn.current === 0) return;
     addLog(`turned to: ${String(turn.current < 0 ? previous : next)}`);
     setIndex(index + turn.current);
+    setTurned(turn.current < 0 ? 'previous' : 'next');
     turn.current = 0;
     toTop.current = true;
   });
@@ -707,10 +767,20 @@ const PagesView: FunctionComponent<{
         )}
         <Viewport.Content ref={contentRef}>
           <Viewport.Padding edge="block-start" />
-          <List.Root>
+          {/* A page each (its key): sliding in the way it was turned.
+              Pluto's, not one of the eight: a night sky, and its heart. */}
+          <List.Root
+            key={name}
+            className="viewport-demo-page"
+            data-color-scheme={name === 'Pluto' ? 'dark' : undefined}
+            data-turned={turned}
+          >
             <List.Section>
               <List.Header prominence="extraProminent">
-                <List.Title render={<h2 />}>{name}</List.Title>
+                <List.Title render={<h2 />}>
+                  {name}
+                  {name === 'Pluto' ? <Symbol icon={sfHeartFill} /> : null}
+                </List.Title>
               </List.Header>
               <List.Group>
                 {facts.map((fact) => (
@@ -759,7 +829,7 @@ const Selection: FunctionComponent = () => {
       <>
         <Viewport.Content>
           <Viewport.Padding edge="block-start" />
-          <List.Root editing>
+          <List.Root editing="leading">
             <List.Section>
               <CheckboxGroup
                 render={<List.Group />}
@@ -856,6 +926,23 @@ export const ViewportComposition: FunctionComponent = () => (
         The panels as pages, with headers: see the{' '}
         <a href="tab-bar/composition">Tab bar’s composition</a>.
       </li>
+      <li>
+        <strong>Library:</strong> the content layer (
+        <PartLink
+          component="viewport"
+          part="Viewport.Content"
+        />
+        ), the bottom anchor (
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />
+        ) with the tab bar, and the keyboard covering it (
+        <code>keyboard=&quot;cover&quot;</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the sections and their rows.
+      </li>
     </ul>
     <CodeView code={shellCode} />
     <Shell />
@@ -888,6 +975,14 @@ export const ViewportComposition: FunctionComponent = () => (
         in the anchor: the toolbar spaces it and fills its width with it (a text
         field in a toolbar takes its free space), no styles of the app’s.
       </li>
+      <li>
+        <strong>Library:</strong> pushing the bottom anchor up with the
+        keyboard, resizing the content layer above it, and the toolbar spacing
+        the field.
+      </li>
+      <li>
+        <strong>Demo:</strong> the messages and the field.
+      </li>
     </ul>
     <CodeView code={messageCode} />
     <Message />
@@ -916,6 +1011,23 @@ export const ViewportComposition: FunctionComponent = () => (
         Tracking the document’s scrolling instead: see the{' '}
         <a href="tab-bar/composition">Tab bar’s composition</a>.
       </li>
+      <li>
+        <strong>Library:</strong> the provider tracking the content layer (
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />{' '}
+        <code>scroller</code>) and the scroll direction hook (
+        <PartLink
+          component="viewport"
+          part="useScrollDirection"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> collapsing the tab bar by it, and the selected
+        tab.
+      </li>
     </ul>
     <CodeView code={collapseCode} />
     <Collapse />
@@ -943,6 +1055,27 @@ export const ViewportComposition: FunctionComponent = () => (
       <li>
         Entering and leaving edit mode: see the{' '}
         <a href="list/composition">List’s composition</a>.
+      </li>
+      <li>
+        <strong>Library:</strong> the bottom anchor (
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />
+        ) and the padding keeping the last rows clear of it (
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the rows, the selection (
+        <PartLink
+          component="checkbox"
+          part="CheckboxGroup"
+        />
+        ) and deleting the selected rows.
       </li>
     </ul>
     <CodeView code={toolbarCode} />
@@ -993,6 +1126,29 @@ export const ViewportComposition: FunctionComponent = () => (
         touch’s (or the wheel’s), rubber-banded, the content staying: the
         indicator slides in over it.
       </li>
+      <li>
+        <strong>Library:</strong> the scroll hook’s <code>overscroll</code> and{' '}
+        <code>isHeld</code> (
+        <PartLink
+          component="viewport"
+          part="useViewportScroll"
+        />
+        ), the overscroll area (
+        <PartLink
+          component="viewport"
+          part="Viewport.Overscroll"
+        />
+        , its <code>open</code> and custom properties) and the{' '}
+        <PartLink
+          component="progress"
+          part="ActivityIndicator"
+        />
+        .
+      </li>
+      <li>
+        <strong>Demo:</strong> the pull distance, arming and refreshing
+        (prepending a row after a while), and the indicator’s styles.
+      </li>
     </ul>
     <CodeView code={refreshCode} />
     <Refresh />
@@ -1033,6 +1189,20 @@ export const ViewportComposition: FunctionComponent = () => (
           part="Viewport.Content"
         />
         ’s <code>alwaysBounce</code>).
+      </li>
+      <li>
+        <strong>Library:</strong> the scroll hook’s <code>overscroll</code> and{' '}
+        <code>isHeld</code>, the overscroll areas at both edges (
+        <PartLink
+          component="viewport"
+          part="Viewport.Overscroll"
+        />
+        ) and the native bounce.
+      </li>
+      <li>
+        <strong>Demo:</strong> the planets, turning the page (its index), the
+        page sliding in (a keyed list’s animation), Pluto’s night sky and the
+        hints’ styles.
       </li>
     </ul>
     <CodeView code={pagesCode} />

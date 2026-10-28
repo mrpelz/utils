@@ -239,6 +239,29 @@ export const ActionSheetComposition: FunctionComponent = () => (
         in its body (an action closes either).
       </li>
       <li>Resize the window, or choose the presentation.</li>
+      <li>
+        <strong>Library:</strong> the action sheet (
+        <PartLink
+          component="action-sheet"
+          part="ActionSheet.Root"
+        />
+        , its trigger, actions and popup), the popover with its arrow (
+        <PartLink
+          component="popover"
+          part="Popover.Popup"
+        />
+        ,{' '}
+        <PartLink
+          component="popover"
+          part="Popover.Arrow"
+        />
+        ), and the window’s size class (<code>useSizeClass</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> choosing between the two by the size class (or
+        the presentation control), the same actions written into both, and
+        logging which was chosen.
+      </li>
     </ul>
     <CodeView code={adaptiveCode} />
     <APopoverOnIPad />
@@ -258,6 +281,16 @@ export const ActionSheetComposition: FunctionComponent = () => (
       <li>
         Its actions, a press outside, or Escape close it (
         <code>onOpenChange</code>, with why).
+      </li>
+      <li>
+        <strong>Library:</strong> opening without a trigger (<code>open</code>),
+        placing it at its container’s bottom above the safe area, and closing it
+        by an action, a press outside or Escape (<code>onOpenChange</code>, with
+        why).
+      </li>
+      <li>
+        <strong>Demo:</strong> the open state and when it’s set (closing the
+        draft), and what each action does (logged).
       </li>
     </ul>
     <OpenedByTheApp />

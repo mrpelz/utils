@@ -74,11 +74,6 @@
     font-variation-settings: 'wght' 590;
     font-weight: round(down, 590, 100);
     line-height: 20px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (590 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
   }
 
   .uikit-color-picker-opacity-row {
@@ -155,17 +150,6 @@
     font-weight: round(down, var(--font-ios-body-weight-emphasized), 100);
     letter-spacing: var(--font-ios-body-tracking);
     line-height: var(--font-ios-body-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--font-ios-body-weight-emphasized) - 400) / 326 * 1px
-    );
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight-emphasized)) / 326 * 1px
-    );
 
     &:has(:focus-visible) {
       outline: 2px solid var(--color-ios-primary);
@@ -266,11 +250,6 @@
       font-variation-settings: 'wght' 510;
       font-weight: round(down, 510, 100);
       place-items: center;
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-      --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
     }
   }
 

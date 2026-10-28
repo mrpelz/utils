@@ -100,12 +100,7 @@
     line-height: 18px;
     mix-blend-mode: var(--uikit-glass-content-blend);
     outline: none;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (400 - 400) / 326 * 1px);
     white-space: nowrap;
-
-    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
 
     &::before {
       position: absolute;

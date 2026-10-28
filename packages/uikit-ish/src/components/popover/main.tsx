@@ -17,6 +17,7 @@ import {
 import {
   cn,
   positionerSide,
+  useCollision,
   useForwardedRef,
   useInitialFocus,
   usePortalContainer,
@@ -89,7 +90,8 @@ const Positioner = forwardRef<HTMLDivElement, PopoverPositionerProps>(
     {
       align = 'center',
       className,
-      collisionPadding = 8,
+      collisionBoundary,
+      collisionPadding,
       side,
       sideOffset,
       ...props
@@ -97,12 +99,13 @@ const Positioner = forwardRef<HTMLDivElement, PopoverPositionerProps>(
     ref,
   ) => {
     const context = useContext(PopoverContext);
+    const collision = useCollision({ collisionBoundary, collisionPadding });
 
     return (
       <BasePopover.Positioner
         ref={ref}
         align={align}
-        collisionPadding={collisionPadding}
+        {...collision}
         side={positionerSide(side)}
         sideOffset={sideOffset ?? 8 + (context?.hasArrow ? arrowDepth : 0)}
         {...props}

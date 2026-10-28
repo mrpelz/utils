@@ -139,9 +139,11 @@ export { Switch, type SwitchRootProps } from './switch/main.js';
 export {
   forwardClick,
   List,
+  type ListAllowSwipe,
   type ListBlockProps,
   type ListButtonProps,
   type ListEditButtonProps,
+  type ListEditing,
   type ListExpandableProps,
   type ListExpandableRootProps,
   type ListHeaderProps,
@@ -149,6 +151,7 @@ export {
   type ListIndexProps,
   type ListItemProps,
   type ListRootProps,
+  type ListSectionProps,
   type ListStyle,
   type ListSwipeActionProps,
   ListSwipeActionsHandle,
@@ -156,6 +159,7 @@ export {
   type ListSwipeActionsTriggerProps,
   type ListGroupProps,
   type ListTextProps,
+  type ListWhileEditing,
   useCreateSwipeActionsHandle,
 } from './list/main.js';
 

@@ -250,6 +250,28 @@ export const ActivityViewComposition: FunctionComponent = () => (
         />
         ).
       </li>
+      <li>
+        <strong>Library:</strong> the activity view’s header and actions row (
+        <PartLink
+          component="activity-view"
+          part="ActivityView.Actions"
+        />
+        ), the{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Popup"
+        />{' '}
+        at its grouped background, and the{' '}
+        <PartLink
+          component="list"
+          part="List.Root"
+        />{' '}
+        of rows with symbols as images.
+      </li>
+      <li>
+        <strong>Demo:</strong> the actions and rows offered, and what choosing
+        one does (logged).
+      </li>
     </ul>
     <MoreActionsAsAList />
 
@@ -273,6 +295,34 @@ export const ActivityViewComposition: FunctionComponent = () => (
         Guide <GuideLink to="primitive-command-set">§5</GuideLink>: the same
         Command set, rendered as a sheet list (compact) or a popover list
         (regular).
+      </li>
+      <li>
+        <strong>Library:</strong> the activity view with its thumbnail and
+        people (
+        <PartLink
+          component="activity-view"
+          part="ActivityView.Thumbnail"
+        />
+        ,{' '}
+        <PartLink
+          component="activity-view"
+          part="ActivityView.People"
+        />
+        ), the{' '}
+        <PartLink
+          component="popover"
+          part="Popover.Popup"
+        />{' '}
+        at the bar’s Share button, and the page’s{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Root"
+        />
+        .
+      </li>
+      <li>
+        <strong>Demo:</strong> the shared item, the people suggested, the
+        actions offered and what each does (logged).
       </li>
     </ul>
     <InAPopover />

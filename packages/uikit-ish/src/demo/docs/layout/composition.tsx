@@ -475,6 +475,19 @@ export const LayoutComposition: FunctionComponent = () => (
         Each a page of its own, scrolling on its own; each at least its{' '}
         <code>minSize</code> (240px, a list’s narrowest).
       </li>
+      <li>
+        <strong>Library:</strong> the layout’s columns (
+        <PartLink
+          component="layout"
+          part="Layout.Column"
+        />
+        : fixed, resizable, flexible, each at least its <code>minSize</code>)
+        and their controls (<code>useLayoutControls</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the mailboxes and messages, and the selected
+        mailbox and message.
+      </li>
     </ul>
     <CodeView code={threeColumnsCode} />
     <ThreeColumns />
@@ -494,6 +507,14 @@ export const LayoutComposition: FunctionComponent = () => (
       <li>
         Controlled here (<code>size</code>, <code>onSizeChange</code>): the app
         holds the size (e.g. to keep it).
+      </li>
+      <li>
+        <strong>Library:</strong> dragging the divider or its keys, within{' '}
+        <code>minSize</code> and <code>maxSize</code>, controlled by{' '}
+        <code>size</code> and <code>onSizeChange</code>.
+      </li>
+      <li>
+        <strong>Demo:</strong> holding the size (e.g. to keep it).
       </li>
     </ul>
     <CodeView code={resizableCode} />
@@ -531,6 +552,23 @@ export const LayoutComposition: FunctionComponent = () => (
       <li>
         The bar’s glass by what’s behind it (
         <code>context=&quot;adaptive&quot;</code>).
+      </li>
+      <li>
+        <strong>Library:</strong> the picture layer behind the columns (
+        <PartLink
+          component="layout"
+          part="Layout.Background"
+        />
+        ), the floating sidebar’s glass (
+        <PartLink
+          component="sidebar"
+          part="Sidebar.Root"
+        />
+        ) and the bar’s adaptive glass.
+      </li>
+      <li>
+        <strong>Demo:</strong> the picture, the sidebar’s rows and the selected
+        one.
       </li>
     </ul>
     <CodeView code={backgroundCode} />

@@ -63,8 +63,12 @@ export const SymbolParts: FunctionComponent = () => (
     <ul>
       <li>
         Its glyph: <code>icon</code> (an SF Symbol, or any icon’s outlines),
-        sized and colored by its text (font size, color), weighted by its text
-        style.
+        sized and colored by its text (font size, color), in its one weight.
+      </li>
+      <li>
+        Emphasized, its <code>emphasizedIcon</code> instead (e.g. the filled
+        variant): as much as its host sets <code>--uikit-symbol-emphasis</code>.
+        Here: on itself (<code>style</code>).
       </li>
       <li>
         In a line of text, its ink centered on the text’s (

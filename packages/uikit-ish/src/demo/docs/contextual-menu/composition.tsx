@@ -216,6 +216,23 @@ export const ContextualMenuComposition: FunctionComponent = () => (
         ), lifted above the blurred page.
       </li>
       <li>The preview aligns as the menu does, and stays in the viewport.</li>
+      <li>
+        <strong>Library:</strong> the menu at each trigger (
+        <PartLink
+          component="contextual-menu"
+          part="ContextualMenu.Root"
+        />
+        ), the lifted, enlarged preview (
+        <PartLink
+          component="contextual-menu"
+          part="ContextualMenu.Preview"
+        />
+        ) over the blurred backdrop, and keeping it in view.
+      </li>
+      <li>
+        <strong>Demo:</strong> the photos, the thumbnails’ buttons and what each
+        item does (logged).
+      </li>
     </ul>
     <CodeView code={thumbnailsCode} />
     <Thumbnails />
@@ -240,6 +257,20 @@ export const ContextualMenuComposition: FunctionComponent = () => (
           part="ContextualMenu.Positioner"
         />
         ’s <code>align</code>).
+      </li>
+      <li>
+        <strong>Library:</strong> opening on a held press or a right click (
+        <code>openOn=&quot;secondaryClick&quot;</code>), lifting the trigger
+        itself, and aligning the menu (
+        <PartLink
+          component="contextual-menu"
+          part="ContextualMenu.Positioner"
+        />
+        ’s <code>align</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the message, what a plain press does (its{' '}
+        <code>onClick</code>) and what each item does (logged).
       </li>
     </ul>
     <CodeView code={heldCode} />

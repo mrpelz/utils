@@ -50,18 +50,7 @@
     );
     mix-blend-mode: var(--uikit-symbol-blend);
     scale: var(--uikit-symbol-scale);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--uikit-tab-bar-icon-weight) - 400) / 326 * 1px
-    );
     transition: scale var(--glass-ios-lens-duration);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--uikit-tab-bar-icon-weight)) / 326 * 1px
-    );
 
     &:has(> .uikit-symbol) {
       mix-blend-mode: normal;
@@ -81,20 +70,10 @@
 
     [data-active] > & {
       --uikit-symbol-blend: normal;
+      --uikit-symbol-emphasis: 1;
 
       font-variation-settings: 'wght' var(--uikit-tab-bar-icon-active-weight);
       font-weight: round(down, var(--uikit-tab-bar-icon-active-weight), 100);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(
-        0px,
-        (var(--uikit-tab-bar-icon-active-weight) - 400) / 326 * 1px
-      );
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--uikit-tab-bar-icon-active-weight)) / 326 * 1px
-      );
     }
   }
 
@@ -131,23 +110,13 @@
     font-variation-settings: 'wght' 510;
     font-weight: round(down, 510, 100);
     grid-area: 1 / 1;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (510 - 400) / 326 * 1px);
     text-overflow: var(--uikit-tab-bar-label-overflow, ellipsis);
     white-space: nowrap;
-
-    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
 
     [data-active] > * > & {
       font-size: var(--uikit-tab-bar-label-active-size);
       font-variation-settings: 'wght' 700;
       font-weight: round(down, 700, 100);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (700 - 400) / 326 * 1px);
-
-      --uikit-symbol-thinning: max(0px, (400 - 700) / 326 * 1px);
     }
   }
 
@@ -157,14 +126,9 @@
     font-variation-settings: 'wght' 700;
     font-weight: round(down, 700, 100);
     grid-area: 1 / 1;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (700 - 400) / 326 * 1px);
     text-overflow: var(--uikit-tab-bar-label-overflow, ellipsis);
     visibility: hidden;
     white-space: nowrap;
-
-    --uikit-symbol-thinning: max(0px, (400 - 700) / 326 * 1px);
   }
 
   .uikit-tab-bar-accessory-content {
@@ -703,11 +667,6 @@
         > * {
         font-variation-settings: 'wght' 510;
         font-weight: round(down, 510, 100);
-        stroke: currentcolor;
-        stroke-linejoin: round;
-        stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-        --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
       }
 
       &&:where(:not([data-collapsed-content]))

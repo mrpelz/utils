@@ -338,6 +338,18 @@ export const CheckboxComposition: FunctionComponent = () => (
         (guide <GuideLink to="rule-g7">G7</GuideLink>).
       </li>
       <li>Name each by its row.</li>
+      <li>
+        <strong>Library:</strong> the row’s checkbox (
+        <PartLink
+          component="list"
+          part="List.Checkbox"
+        />
+        ) and <code>forwardClick</code>, passing the row’s clicks on to it.
+      </li>
+      <li>
+        <strong>Demo:</strong> the rows and which are selected, and what
+        selecting does (logged).
+      </li>
     </ul>
     <CodeView code={rowsCode} />
     <SelectingRows />
@@ -363,6 +375,22 @@ export const CheckboxComposition: FunctionComponent = () => (
         before each row.
       </li>
       <li>One row chosen at a time; arrow keys move between them.</li>
+      <li>
+        <strong>Library:</strong> the radio group (
+        <PartLink
+          component="checkbox"
+          part="RadioGroup"
+        />
+        ) rendering the list’s group, and each row’s radio (
+        <PartLink
+          component="list"
+          part="List.Radio"
+        />
+        ) with its arrow keys.
+      </li>
+      <li>
+        <strong>Demo:</strong> the rows and which is chosen (logged).
+      </li>
     </ul>
     <CodeView code={oneRowCode} />
     <ChoosingOneRow />
@@ -387,6 +415,19 @@ export const CheckboxComposition: FunctionComponent = () => (
         checkbox selects or deselects all.
       </li>
       <li>The parent is mixed (a dash) while only some are selected.</li>
+      <li>
+        <strong>Library:</strong> the checkbox group (
+        <PartLink
+          component="checkbox"
+          part="CheckboxGroup"
+        />
+        , its <code>allValues</code>) and the parent checkbox, mixed while only
+        some are selected.
+      </li>
+      <li>
+        <strong>Demo:</strong> the rows, their names as the group’s values, and
+        the selection (logged).
+      </li>
     </ul>
     <CodeView code={allCode} />
     <SelectAll />
@@ -416,6 +457,28 @@ export const CheckboxComposition: FunctionComponent = () => (
       <li>
         Outside a field: the checkbox’s own <code>name</code> and{' '}
         <code>value</code>, through its hidden input.
+      </li>
+      <li>
+        <strong>Library:</strong> the checkbox and radios (
+        <PartLink
+          component="checkbox"
+          part="Checkbox.Root"
+        />
+        ,{' '}
+        <PartLink
+          component="checkbox"
+          part="Radio.Root"
+        />
+        ) with their labels, and Base UI’s{' '}
+        <PartLink
+          component="form"
+          part="Form"
+        />{' '}
+        and fields submitting them by name.
+      </li>
+      <li>
+        <strong>Demo:</strong> the fields, their names and values, and logging
+        what’s submitted.
       </li>
     </ul>
     <CodeView code={formCode} />

@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/prefer-ternary */
 import './style.css';
 
+import type { Popover as BasePopover } from '@base-ui/react/popover';
 import type { Signalish } from 'preact';
 import {
   createContext,
@@ -145,6 +146,52 @@ export const usePortalContainer = (
   const provided = useContext(PortalContainerContext);
 
   return container === undefined ? provided : container;
+};
+
+type CollisionProps = Pick<
+  BasePopover.Positioner.Props,
+  'collisionBoundary' | 'collisionPadding'
+>;
+
+/**
+ * A positioner's collision defaults (Popover's, Menu's, Tooltip's,
+ * ActionSheet's): within its portal's container (e.g. a device's screen in a
+ * page of demos; else the clipping ancestors), `padding` clear of its safe
+ * area (the container's `--uikit-safe-area-inset-*`, the window's `env()`
+ * by default, see styles.css), so it shifts and shrinks to fit inside it.
+ * Either given, it wins.
+ */
+export const useCollision = (
+  { collisionBoundary, collisionPadding }: CollisionProps,
+  padding = 8,
+): CollisionProps => {
+  const container = usePortalContainer(undefined);
+  const resolved =
+    container && 'current' in container ? container.current : container;
+  const element = resolved instanceof ShadowRoot ? resolved.host : resolved;
+
+  if (collisionPadding !== undefined || typeof document === 'undefined') {
+    return {
+      collisionBoundary: collisionBoundary ?? element ?? undefined,
+      collisionPadding: collisionPadding ?? padding,
+    };
+  }
+
+  const style = getComputedStyle(element ?? document.documentElement);
+  const inset = (side: 'bottom' | 'left' | 'right' | 'top') =>
+    Number.parseFloat(
+      style.getPropertyValue(`--uikit-safe-area-inset-${side}`),
+    ) || 0;
+
+  return {
+    collisionBoundary: collisionBoundary ?? element ?? undefined,
+    collisionPadding: {
+      bottom: padding + inset('bottom'),
+      left: padding + inset('left'),
+      right: padding + inset('right'),
+      top: padding + inset('top'),
+    },
+  };
 };
 
 /** A frame at 60 Hz, in ms: what `edgeScrollDelta`'s speed is per. */

@@ -229,6 +229,20 @@ export const AlertComposition: FunctionComponent = () => (
         Save, the primary action, renames; disabled while the name is empty.
         Cancel closes it, nothing changed.
       </li>
+      <li>
+        <strong>Library:</strong> the alert with its field (
+        <PartLink
+          component="alert"
+          part="Alert.Field"
+        />
+        ), its primary and cancel actions, and its trigger rendered by the row’s
+        button.
+      </li>
+      <li>
+        <strong>Demo:</strong> the folder’s name and the field’s value (the
+        app’s state, reset as it opens), disabling Save while it’s empty, and
+        renaming the row on Save.
+      </li>
     </ul>
     <WithATextField />
 
@@ -251,6 +265,14 @@ export const AlertComposition: FunctionComponent = () => (
         />
         ) does the same without the state.
       </li>
+      <li>
+        <strong>Library:</strong> opening without a trigger (<code>open</code>),
+        its one action closing it (<code>onOpenChange</code>), or a handle doing
+        the same without the state.
+      </li>
+      <li>
+        <strong>Demo:</strong> the open state and the failed save that sets it.
+      </li>
     </ul>
     <OpenedByTheApp />
 
@@ -272,6 +294,17 @@ export const AlertComposition: FunctionComponent = () => (
       <li>
         A choice of what to do with something the person started: often an{' '}
         <a href="action-sheet">Action sheet</a> instead.
+      </li>
+      <li>
+        <strong>Library:</strong> stacking more than two actions (
+        <PartLink
+          component="alert"
+          part="Alert.Actions"
+        />
+        ), as UIKit does.
+      </li>
+      <li>
+        <strong>Demo:</strong> the three choices and what each does (logged).
       </li>
     </ul>
     <ThreeActions />

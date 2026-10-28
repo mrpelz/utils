@@ -188,6 +188,12 @@ export const DatePickerOverview: FunctionComponent = () => (
         arrows go to the previous or next month, sliding.
       </li>
       <li>
+        A date (not a range): the days swiped sideways turn the month, the next
+        one following the finger in; released past a third of the width (or
+        flicked), it turns, otherwise they spring back. Beyond the limits, they
+        resist.
+      </li>
+      <li>
         With a time, the Time row’s button shows the time’s roll in the days’
         place.
       </li>

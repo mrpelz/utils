@@ -502,6 +502,17 @@ export const PageComposition: FunctionComponent = () => (
         Plain lists and other content on the plain background (
         <code>background=&quot;plain&quot;</code>): Contacts’.
       </li>
+      <li>
+        <strong>Library:</strong> the page’s backgrounds (
+        <PartLink
+          component="page"
+          part="Page.Root"
+        />{' '}
+        <code>background</code>) and the lists’ styles.
+      </li>
+      <li>
+        <strong>Demo:</strong> the rows.
+      </li>
     </ul>
     <CodeView code={backgroundsCode} />
     <BackgroundGrouped />
@@ -527,6 +538,13 @@ export const PageComposition: FunctionComponent = () => (
         Under the top one: hidden, kept mounted, so popping back finds it where
         it was scrolled to (scroll Settings, drill in, go back).
       </li>
+      <li>
+        <strong>Library:</strong> pages as a navigation stack’s children, kept
+        mounted under the top one, keeping their scroll positions.
+      </li>
+      <li>
+        <strong>Demo:</strong> the stack’s keys and the pages.
+      </li>
     </ul>
     <CodeView code={stackCode} />
     <InAStack />
@@ -546,6 +564,13 @@ export const PageComposition: FunctionComponent = () => (
       <li>
         Resize the sidebar (its <code>defaultSize</code>, or resizable): the
         inset follows.
+      </li>
+      <li>
+        <strong>Library:</strong> the page clear of a floating column (
+        <code>clearFloating</code>), its content inset by the sidebar’s size.
+      </li>
+      <li>
+        <strong>Demo:</strong> the sidebar’s rows and the selected one.
       </li>
     </ul>
     <CodeView code={columnCode} />
@@ -570,6 +595,22 @@ export const PageComposition: FunctionComponent = () => (
         />{' '}
         at the page’s end, as high as the bar (and one at its start, for its
         header’s bar).
+      </li>
+      <li>
+        <strong>Library:</strong> the bottom bar (
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />
+        ) and the paddings making room for the bars (
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the page’s rows and the bar’s actions (logged).
       </li>
     </ul>
     <CodeView code={viewportCode} />

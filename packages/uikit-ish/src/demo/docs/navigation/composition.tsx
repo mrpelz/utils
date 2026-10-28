@@ -1154,6 +1154,23 @@ export const NavigationComposition: FunctionComponent = () => (
         />
         ’s <code>onClick</code>, cutting the stack to its first key).
       </li>
+      <li>
+        <strong>Library:</strong> the navigation (
+        <PartLink
+          component="navigation"
+          part="Navigation.Root"
+        />
+        , its stack, back button and swipe area), the tab bar (
+        <PartLink
+          component="tab-bar"
+          part="TabBar.Root"
+        />
+        , panels kept mounted) and the transition cutting back to the root.
+      </li>
+      <li>
+        <strong>Demo:</strong> each tab’s stack (the app’s state), pressing the
+        selected tab again to pop it, and the pages.
+      </li>
     </ul>
     <CodeView code={perTabCode} />
     <PerTab />
@@ -1187,6 +1204,19 @@ export const NavigationComposition: FunctionComponent = () => (
         />
         ), as the pages’ bars do.
       </li>
+      <li>
+        <strong>Library:</strong> the navigation in a layout’s column beside a
+        floating{' '}
+        <PartLink
+          component="sidebar"
+          part="Sidebar.Root"
+        />{' '}
+        (<code>clearFloating</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the section and each section’s stack, switching
+        between them, and the pages.
+      </li>
     </ul>
     <CodeView code={sidebarCode} />
     <WithSidebar />
@@ -1207,6 +1237,14 @@ export const NavigationComposition: FunctionComponent = () => (
       <li>
         Done stays beside the back button, in the bar that stays (both shown
         while there’s a page to go back to); only the pages’ titles move.
+      </li>
+      <li>
+        <strong>Library:</strong> one transition from the top page straight to
+        the root when the keys are cut back by several.
+      </li>
+      <li>
+        <strong>Demo:</strong> the stack’s keys and the Done button cutting them
+        back.
       </li>
     </ul>
     <CodeView code={popToRootCode} />
@@ -1230,6 +1268,17 @@ export const NavigationComposition: FunctionComponent = () => (
       <li>
         In a transition, each page’s header moves with it, its bar and large
         title too; the back button stays.
+      </li>
+      <li>
+        <strong>Library:</strong> the root page’s large title (
+        <PartLink
+          component="header"
+          part="Header.LargeTitle"
+        />
+        ) and each page’s header moving with it in a transition.
+      </li>
+      <li>
+        <strong>Demo:</strong> the stack’s keys and the pages.
       </li>
     </ul>
     <CodeView code={largeTitlesCode} />
@@ -1264,6 +1313,19 @@ export const NavigationComposition: FunctionComponent = () => (
       <li>
         Compact, a drawer instead: see <a href="sidebar/composition">Sidebar</a>
         .
+      </li>
+      <li>
+        <strong>Library:</strong> the navigation, the{' '}
+        <PartLink
+          component="sidebar"
+          part="Sidebar.Root"
+        />{' '}
+        in a layout’s column and the window’s size class (
+        <code>useSizeClass</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> choosing the drilled-into or sidebar layout by
+        the size class, the section and its stack.
       </li>
     </ul>
     <CodeView code={adaptiveCode} />

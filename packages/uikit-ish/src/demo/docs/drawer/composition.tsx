@@ -655,6 +655,24 @@ export const DrawerComposition: FunctionComponent = () => (
         ). Resize the window, or choose a layout (its content’s{' '}
         <code>layout</code>).
       </li>
+      <li>
+        <strong>Library:</strong> the drawer (
+        <PartLink
+          component="drawer"
+          part="Drawer.Root"
+        />
+        , its swipe area, trigger and close), the layout’s column (
+        <PartLink
+          component="layout"
+          part="Layout.Column"
+        />
+        ), the window’s size class (<code>useSizeClass</code>) and the drawer’s
+        handle.
+      </li>
+      <li>
+        <strong>Demo:</strong> choosing a column or a drawer by the size class,
+        the mailboxes, and the selected one.
+      </li>
     </ul>
     <CodeView code={adaptiveCode} />
     <Adaptive />
@@ -689,6 +707,23 @@ export const DrawerComposition: FunctionComponent = () => (
         />
         ): a mailbox chosen (its row’s title the close button), the inspector’s
         Done.
+      </li>
+      <li>
+        <strong>Library:</strong> a drawer at each edge, each swiped in (
+        <PartLink
+          component="drawer"
+          part="Drawer.SwipeArea"
+        />
+        ) or opened by a trigger linked by a handle, and closed by its parts (
+        <PartLink
+          component="drawer"
+          part="Drawer.Close"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the mailboxes, the selected one, and the
+        inspector’s content.
       </li>
     </ul>
     <CodeView code={inspectorCode} />

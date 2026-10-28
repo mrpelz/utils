@@ -177,6 +177,18 @@ export const ProgressComposition: FunctionComponent = () => (
         The app sets <code>value</code> as the work advances; the fill grows to
         it.
       </li>
+      <li>
+        <strong>Library:</strong> the bar (
+        <PartLink
+          component="progress"
+          part="Progress.Root"
+        />
+        , its track, fill, label and value) and its value’s wording.
+      </li>
+      <li>
+        <strong>Demo:</strong> advancing the count (the app’s state) as the
+        “work” goes on.
+      </li>
     </ul>
     <CodeView code={countCode} />
     <CountingItems />
@@ -197,6 +209,17 @@ export const ProgressComposition: FunctionComponent = () => (
         A small activity indicator (<code>size</code>) in the{' '}
         <a href="list">List</a> row’s detail, named (<code>aria-label</code>).
       </li>
+      <li>
+        <strong>Library:</strong> the small{' '}
+        <PartLink
+          component="progress"
+          part="ActivityIndicator"
+        />{' '}
+        (<code>size</code>) in the row’s detail.
+      </li>
+      <li>
+        <strong>Demo:</strong> the rows and which are loading.
+      </li>
     </ul>
     <InAListRow />
 
@@ -213,6 +236,18 @@ export const ProgressComposition: FunctionComponent = () => (
         content shows the spinner while it loads.
       </li>
       <li>Labeled by its children (“Loading”).</li>
+      <li>
+        <strong>Library:</strong> the{' '}
+        <PartLink
+          component="progress"
+          part="ActivityIndicator"
+        />{' '}
+        labeled by its children.
+      </li>
+      <li>
+        <strong>Demo:</strong> the page and showing the spinner while it
+        “loads”.
+      </li>
     </ul>
     <LoadingAPage />
   </>

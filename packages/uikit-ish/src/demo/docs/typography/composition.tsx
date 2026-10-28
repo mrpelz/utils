@@ -11,6 +11,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
+  PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
 import { propOptionsCompositionSize } from './props.js';
@@ -148,6 +149,18 @@ export const TypographyComposition: FunctionComponent = () => (
       <li>
         Secondary text in the secondary label color (<code>color</code>).
       </li>
+      <li>
+        <strong>Library:</strong> the text styles (
+        <PartLink
+          component="typography"
+          part="Typography"
+        />{' '}
+        <code>textStyle</code>, <code>emphasized</code>, <code>color</code>) and
+        rendering each as its element (<code>render</code>).
+      </li>
+      <li>
+        <strong>Demo:</strong> the article’s text.
+      </li>
     </ul>
     <AnArticle />
 
@@ -167,6 +180,14 @@ export const TypographyComposition: FunctionComponent = () => (
         The components use the text styles’ tokens, so they follow it (e.g. the
         app’s text size setting around its content).
       </li>
+      <li>
+        <strong>Library:</strong> the Dynamic Type size (
+        <code>dynamicTypeSize</code>) for everything in it, and the components
+        following its tokens.
+      </li>
+      <li>
+        <strong>Demo:</strong> the rows.
+      </li>
     </ul>
     <ASizeForAList />
 
@@ -180,6 +201,17 @@ export const TypographyComposition: FunctionComponent = () => (
       <li>
         A <a href="symbol">Symbol</a> in the text, sized as its glyphs and
         weighted as it (emphasized: heavier), in its color.
+      </li>
+      <li>
+        <strong>Library:</strong> the{' '}
+        <PartLink
+          component="symbol"
+          part="Symbol"
+        />{' '}
+        sized and colored by its text.
+      </li>
+      <li>
+        <strong>Demo:</strong> the text.
       </li>
     </ul>
     <SymbolsInText />

@@ -32,6 +32,30 @@ export const propOptionsSwipeActionsTrigger = {
 
 export const cursorOptions = [undefined, 'auto', 'pointer', 'copy'] as const;
 
+/** A list's, a section's or a row's edit mode (see `ListEditing`). */
+export const editingOptions = [
+  undefined,
+  'both',
+  'leading',
+  'trailing',
+  'none',
+  'ignore',
+] as const;
+
+/** A row part's behavior in edit mode (see `ListWhileEditing`). */
+export const whileEditingOptions = [undefined, 'show', 'hide', 'stay'] as const;
+
+/** A row part's common options, with its edit mode behavior. */
+export const propOptionsWhileEditing = {
+  ...commonPropOptions,
+  whileEditing: whileEditingOptions,
+};
+
+export const propOptionsSection = {
+  ...commonPropOptions,
+  editing: editingOptions,
+};
+
 export const propOptionsContent = {
   image: ['rounded', 'symbol', 'circular', 'fill', 'none'] as const,
   supertitle: [false, true] as const,
@@ -53,6 +77,7 @@ export const propOptionsHeader = {
 export const propOptionsImage = {
   ...commonPropOptions,
   variant: [undefined, 'symbol', 'rounded', 'circular', 'fill'] as const,
+  whileEditing: whileEditingOptions,
 };
 
 export const propOptionsBlock = {
@@ -72,6 +97,7 @@ export const propOptionsCheckbox = {
   uncheckedValue: [undefined, 'unselected'] as const,
   parent: [undefined, true] as const,
   cursor: cursorOptions,
+  whileEditing: whileEditingOptions,
 };
 
 // Rendered as list parts, so without the common `render` option.
@@ -208,6 +234,7 @@ export const getPropOptionsRadioGroup = (addLog: AddLog) => ({
 export const propOptionsRadioFirst = {
   ...commonPropOptions,
   cursor: cursorOptions,
+  whileEditing: whileEditingOptions,
   disabled: [undefined, false, true] as const,
   readOnly: [undefined, false, true] as const,
 };
@@ -215,6 +242,7 @@ export const propOptionsRadioFirst = {
 export const getPropOptionsEditButtonFirst = (addLog: AddLog) => ({
   ...commonPropOptions,
   cursor: cursorOptions,
+  whileEditing: whileEditingOptions,
   disabled: [undefined, false, true] as const,
   tint: [
     'var(--color-ios-system-red)',
@@ -271,6 +299,7 @@ export const getPropOptionsTitleFirst = (addLog: AddLog) => ({
 export const getPropOptionsAccessory = (addLog: AddLog) => ({
   ...commonPropOptions,
   cursor: cursorOptions,
+  whileEditing: whileEditingOptions,
   onClick: [logClick(addLog, 'accessory'), undefined] as const,
   render: [
     new MappedProp(<button type="button" />, '[<button />]'),
@@ -282,6 +311,7 @@ export const getPropOptionsAccessory = (addLog: AddLog) => ({
 export const getPropOptionsAction = (addLog: AddLog) => ({
   ...commonPropOptions,
   cursor: cursorOptions,
+  whileEditing: whileEditingOptions,
   disabled: [undefined, false, true] as const,
   onClick: [logClick(addLog, 'action'), undefined] as const,
   onSecondaryClick: [undefined, logSecondaryClick(addLog, 'action')] as const,
@@ -298,6 +328,7 @@ export const getPropOptionsButton = (addLog: AddLog) => ({
 
 export const getPropOptionsEditButton = (addLog: AddLog) => ({
   ...commonPropOptions,
+  whileEditing: whileEditingOptions,
   cursor: cursorOptions,
   disabled: [undefined, false, true] as const,
   tint: [
@@ -314,20 +345,6 @@ export const getPropOptionsEditButton = (addLog: AddLog) => ({
 });
 
 /** As above, its click deleting its row (logged), as the view's other rows. */
-export const getPropOptionsEditButtonDelete = (
-  addLog: AddLog,
-  onDelete: () => void,
-) => ({
-  ...getPropOptionsEditButton(addLog),
-  onClick: [
-    new MappedProp(() => {
-      addLog('edit button clicked');
-      onDelete();
-    }, '[delete row]'),
-    undefined,
-  ] as const,
-});
-
 export const getPropOptionsSwipeActionOutermost = (addLog: AddLog) => ({
   ...commonPropOptions,
   cursor: cursorOptions,
@@ -376,6 +393,7 @@ export const getPropOptionsGuideExpandable = (addLog: AddLog) => ({
 export const getPropOptionsGuideGroup = (
   reorder: (from: number, to: number) => void,
 ) => ({
+  editing: editingOptions,
   ...commonPropOptions,
   onReorder: [new MappedProp(reorder, '[reorder]'), undefined] as const,
 });
@@ -395,7 +413,7 @@ export const propOptionsOverviewContent = {
 
 export const propOptionsRootAll = {
   ...propOptionsRoot,
-  editing: [false, true, undefined] as const,
+  editing: editingOptions,
   listStyle: [
     undefined,
     'insetGrouped',
@@ -407,6 +425,7 @@ export const propOptionsRootAll = {
 
 export const getPropOptionsGroup = (addLog: AddLog) => ({
   ...commonPropOptions,
+  editing: editingOptions,
   onReorder: [
     new MappedProp(
       (from: number, to: number) => addLog(`reorder: ${from} → ${to}`),
@@ -420,6 +439,7 @@ export const getPropOptionsItem = (addLog: AddLog) => ({
   ...getPropOptionsItemFirst(addLog),
   selected: [undefined, false, true] as const,
   level: [undefined, 0, 1, 2] as const,
+  editing: editingOptions,
 });
 
 export const getPropOptionsExpandableRoot = (addLog: AddLog) => ({

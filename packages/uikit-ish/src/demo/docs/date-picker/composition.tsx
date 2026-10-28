@@ -250,6 +250,18 @@ export const DatePickerComposition: FunctionComponent = () => (
         in a popover.
       </li>
       <li>In a row, the popover aligns to the buttons’ end.</li>
+      <li>
+        <strong>Library:</strong> the compact picker (
+        <PartLink
+          component="date-picker"
+          part="DatePicker.Root"
+        />
+        ): its buttons, the calendar or time popover, and aligning it to the
+        buttons’ end.
+      </li>
+      <li>
+        <strong>Demo:</strong> the row and its default date.
+      </li>
     </ul>
     <InAListRow />
 
@@ -283,6 +295,33 @@ export const DatePickerComposition: FunctionComponent = () => (
         />{' '}
         for the time, sharing the app’s value.
       </li>
+      <li>
+        <strong>Library:</strong> the picker without its popover (
+        <code>
+          popover={'{'}false{'}'}
+        </code>
+        , toggling <code>open</code>), the calendar and time wheel on their own
+        (
+        <PartLink
+          component="date-picker"
+          part="DatePicker.Calendar"
+        />
+        ,{' '}
+        <PartLink
+          component="date-picker"
+          part="DatePicker.TimeRoll"
+        />
+        ) and the expandable rows (
+        <PartLink
+          component="list"
+          part="List.Expandable"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> holding <code>open</code> and the date, and
+        showing each picker in its expandable row.
+      </li>
     </ul>
     <ExpandedBelowARow />
 
@@ -315,6 +354,19 @@ export const DatePickerComposition: FunctionComponent = () => (
       <li>
         <code>max</code>: no birthdays in the future.
       </li>
+      <li>
+        <strong>Library:</strong> the picker’s hidden control (its value an ISO
+        date) in Base UI’s{' '}
+        <PartLink
+          component="form"
+          part="Form"
+        />{' '}
+        and field, and <code>max</code>.
+      </li>
+      <li>
+        <strong>Demo:</strong> the birthday (the app’s state), the field’s name
+        and logging what’s submitted.
+      </li>
     </ul>
     <InAForm />
 
@@ -339,6 +391,19 @@ export const DatePickerComposition: FunctionComponent = () => (
           part="DatePicker.CalendarMessage"
         />
         ), and, while the end is missing, what’s wrong (an error, announced).
+      </li>
+      <li>
+        <strong>Library:</strong> the range (<code>range</code>), disabling days
+        by a rule (<code>isRangeDisabled</code>) and the footer’s message (
+        <PartLink
+          component="date-picker"
+          part="DatePicker.CalendarMessage"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the rule itself (two to seven nights) and its
+        wording.
       </li>
     </ul>
     <ARangeWithRules />
