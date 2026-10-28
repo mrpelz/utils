@@ -3,12 +3,33 @@ import '../typography/style.css';
 import './style.css';
 
 import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip';
-import { ComponentProps, forwardRef } from 'react';
+import {
+  ComponentProps,
+  createContext,
+  forwardRef,
+  ReactElement,
+  useContext,
+  useState,
+} from 'react';
 
-import { cn, positionerSide, useForwardedRef } from '../utils/main.js';
-import type { TooltipPositionerProps, TooltipTriggerProps } from './props.js';
+import {
+  cn,
+  positionerSide,
+  useCollision,
+  useForwardedRef,
+  usePortalContainer,
+} from '../utils/main.js';
+import type {
+  TooltipHandle,
+  TooltipPositionerProps,
+  TooltipTriggerProps,
+} from './props.js';
 
-export type { TooltipPositionerProps, TooltipTriggerProps } from './props.js';
+export type {
+  TooltipHandle,
+  TooltipPositionerProps,
+  TooltipTriggerProps,
+} from './props.js';
 
 // No Figma (iOS has no tooltips; Framework7's: a dark panel, white text,
 // 4px corners): in iOS 26's language, a capsule of the menus' glass (see
@@ -23,15 +44,29 @@ export type { TooltipPositionerProps, TooltipTriggerProps } from './props.js';
 // labels something for good, on touch too (e.g. a slider's thumb, a
 // progress bar's fill).
 
-/** Its trigger, opening it after 300ms (Base UI: 600ms) of hovering. */
+// Whether its trigger is in a `Provider` (its delay the provider's).
+const ProvidedContext = createContext(false);
+
+/** Base UI's provider: its tooltips' delays shared (see `Trigger`). */
+const Provider = (props: BaseTooltip.Provider.Props): ReactElement => (
+  <ProvidedContext.Provider value>
+    <BaseTooltip.Provider {...props} />
+  </ProvidedContext.Provider>
+);
+
+/**
+ * Its trigger, opening it after 300ms (Base UI: 600ms) of hovering; in a
+ * `Provider`, after the provider's delay.
+ */
 const Trigger = forwardRef<HTMLButtonElement, TooltipTriggerProps>(
-  ({ delay = 300, ...props }, ref) => {
+  ({ delay, ...props }, ref) => {
+    const isProvided = useContext(ProvidedContext);
     const triggerRef = useForwardedRef(ref);
 
     return (
       <BaseTooltip.Trigger
         ref={triggerRef}
-        delay={delay}
+        delay={delay ?? (isProvided ? undefined : 300)}
         {...props}
       />
     );
@@ -39,13 +74,24 @@ const Trigger = forwardRef<HTMLButtonElement, TooltipTriggerProps>(
 );
 
 const Positioner = forwardRef<HTMLDivElement, TooltipPositionerProps>(
-  ({ collisionPadding = 8, side, sideOffset = 8, ...props }, ref) => (
+  (
+    {
+      className,
+      collisionBoundary,
+      collisionPadding,
+      side,
+      sideOffset = 8,
+      ...props
+    },
+    ref,
+  ) => (
     <BaseTooltip.Positioner
       ref={ref}
-      collisionPadding={collisionPadding}
+      {...useCollision({ collisionBoundary, collisionPadding })}
       side={positionerSide(side)}
       sideOffset={sideOffset}
       {...props}
+      className={cn('uikit-tooltip-positioner', className)}
     />
   ),
 );
@@ -66,12 +112,49 @@ const Popup = forwardRef<
 ));
 
 /**
+ * A handle linking a tooltip to its triggers outside it, and opening or
+ * closing it imperatively (Base UI's `Tooltip.createHandle`): pass it to
+ * the root's and the triggers' `handle` (in a component, see
+ * `useCreateTooltipHandle`).
+ */
+const createHandle = <Payload = unknown,>(): TooltipHandle<Payload> =>
+  BaseTooltip.createHandle<Payload>();
+
+/** `Tooltip.createHandle`, in a component: made once, for its lifetime. */
+export const useCreateTooltipHandle = <
+  Payload = unknown,
+>(): TooltipHandle<Payload> => {
+  const [handle] = useState(() => createHandle<Payload>());
+  return handle;
+};
+
+/**
  * A tooltip (Base UI's `Tooltip`; no UIKit equivalent): a short label in a
  * glass capsule at its trigger, on hover and focus, or held open.
  */
+/**
+ * Its portal (Base UI's): no box of its own (`display: contents`), so
+ * rendered into a container (e.g. a screen laid out as a flex column) it
+ * doesn't shift its content.
+ */
+const Portal = forwardRef<
+  HTMLDivElement,
+  Omit<BaseTooltip.Portal.Props, 'ref'>
+>(({ className, container, ...props }, ref) => (
+  <BaseTooltip.Portal
+    ref={ref}
+    container={usePortalContainer(container)}
+    {...props}
+    className={cn('uikit-tooltip-portal', className)}
+  />
+));
+
 export const Tooltip = {
   ...BaseTooltip,
+  Provider,
+  Portal,
   Trigger,
   Positioner,
   Popup,
+  createHandle,
 };

@@ -56,22 +56,25 @@ const Root = forwardRef<HTMLElement, Omit<ButtonRootProps, 'ref'>>(
     forwardedRef,
   ) => {
     const ref = useForwardedRef(forwardedRef);
-    const glass = isGlass(variant);
-    const context = useGlassContext(ref, glass ? contextProp : undefined);
-    const pressable =
+    const isGlassVariant = isGlass(variant);
+    const context = useGlassContext(
+      ref,
+      isGlassVariant ? contextProp : undefined,
+    );
+    const isPressable =
       Boolean(props.onClick ?? props.onSecondaryClick) ||
       props.type === 'submit' ||
       props.type === 'reset';
     const rootProps = useSecondaryClick({
       ...props,
-      ...(!pressable && props.disabled === undefined && { disabled: true }),
+      ...(!isPressable && props.disabled === undefined && { disabled: true }),
     });
     return (
       <BaseButton
         ref={ref}
         data-destructive={destructive ? '' : undefined}
         data-fill={fill ? '' : undefined}
-        data-glass-context={glass ? (context ?? 'auto') : undefined}
+        data-glass-context={isGlassVariant ? (context ?? 'auto') : undefined}
         data-shape={shape}
         data-size={size}
         data-variant={variant}
@@ -98,7 +101,7 @@ const Root = forwardRef<HTMLElement, Omit<ButtonRootProps, 'ref'>>(
         className={cn('uikit-button-root', className)}
         data-button-part="root"
       >
-        {glass ? (
+        {isGlassVariant ? (
           // Glass variants draw their material behind the content.
           <>
             <GlassBackground

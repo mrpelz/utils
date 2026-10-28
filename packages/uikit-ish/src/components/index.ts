@@ -7,17 +7,26 @@ export {
 export {
   ActionSheet,
   type ActionSheetActionProps,
+  type ActionSheetActionVariant,
+  type ActionSheetHandle,
+  type ActionSheetPopupProps,
+  useCreateActionSheetHandle,
 } from './action-sheet/main.js';
 export {
   Alert,
   type AlertActionProps,
   type AlertActionsProps,
   type AlertActionVariant,
+  type AlertHandle,
+  type AlertPopupProps,
+  useCreateAlertHandle,
 } from './alert/main.js';
 export {
   Popover,
   type PopoverAlign,
+  type PopoverHandle,
   type PopoverPositionerProps,
+  useCreatePopoverHandle,
 } from './popover/main.js';
 export {
   ActivityIndicator,
@@ -28,12 +37,23 @@ export {
   type ProgressRootProps,
   type ProgressValueProps,
   type ActivityIndicatorMovement,
+  type ActivityIndicatorDisplay,
 } from './progress/main.js';
-export { Sheet, type SheetDetent, type SheetPopupProps } from './sheet/main.js';
+export {
+  Sheet,
+  type SheetContentProps,
+  type SheetGrabberProps,
+  type SheetDetent,
+  type SheetHandle,
+  type SheetPopupProps,
+  useCreateSheetHandle,
+} from './sheet/main.js';
 export {
   Tooltip,
+  type TooltipHandle,
   type TooltipPositionerProps,
   type TooltipTriggerProps,
+  useCreateTooltipHandle,
 } from './tooltip/main.js';
 
 // Buttons & inputs
@@ -41,15 +61,18 @@ export {
   Avatar,
   type AvatarFallbackProps,
   type AvatarGroupProps,
+  type AvatarImageProps,
   type AvatarRootProps,
 } from './avatar/main.js';
-export { Badge, type BadgeProps } from './badge/main.js';
+export { Badge, type BadgePlacement, type BadgeProps } from './badge/main.js';
 export {
   ColorPicker,
+  type ColorPickerChangeEventDetails,
   type ColorPickerEyedropperProps,
   type ColorPickerMode,
   type ColorPickerPanelProps,
   type ColorPickerRootProps,
+  type ColorPickerSavedColorsChangeEventDetails,
   type ColorWellProps,
   defaultSavedColors,
   formatColor,
@@ -65,30 +88,36 @@ export {
   type RadioRootProps,
 } from './checkbox/main.js';
 export {
-  Calendar,
-  CalendarButton,
   type CalendarFooter,
-  CalendarMessage,
   type CalendarMessageProps,
   type CalendarProps,
-  CalendarRow,
-  CalendarTimeRow,
+  type CalendarSwipe,
   DatePicker,
+  type DatePickerChangeEventDetails,
+  type DatePickerExpandableProps,
+  DatePickerHandle,
   type DatePickerMode,
   type DatePickerOpen,
+  type DatePickerOpenChangeEventDetails,
   type DatePickerProps,
   type DatePickerStyle,
   type DateRange,
   type DayHighlight,
   type DayHighlights,
   type HourCycle,
-  TimeRoll,
   type TimeRollProps,
+  useCreateDatePickerHandle,
 } from './date-picker/main.js';
-export { Fieldset, type FieldsetLegendProps, Form } from './form/main.js';
+export {
+  Field,
+  Fieldset,
+  type FieldsetLegendProps,
+  Form,
+} from './form/main.js';
 export { TextField } from './text-field/main.js';
 export {
   Roll,
+  type RollChangeEventDetails,
   type RollColumnProps,
   type RollItemProps,
   type RollValue,
@@ -114,52 +143,76 @@ export { Switch, type SwitchRootProps } from './switch/main.js';
 export {
   forwardClick,
   List,
+  type ListAllowSwipe,
   type ListBlockProps,
   type ListButtonProps,
   type ListEditButtonProps,
-  type ListExpandableProps,
+  type ListEditing,
+  type ListAccordionItemProps,
+  type ListAccordionRootProps,
+  type ListCollapsibleChangeEventDetails,
+  type ListCollapsiblePanelProps,
+  type ListCollapsibleRootProps,
   type ListHeaderProps,
   type ListImageProps,
   type ListIndexProps,
   type ListItemProps,
   type ListRootProps,
+  type ListSectionProps,
   type ListStyle,
   type ListSwipeActionProps,
+  ListSwipeActionsHandle,
   type ListSwipeActionsProps,
+  type ListSwipeActionsTriggerProps,
   type ListGroupProps,
   type ListTextProps,
+  type ListWhileEditing,
+  useCreateSwipeActionsHandle,
 } from './list/main.js';
+export { Accordion } from './accordion/main.js';
+export { Collapsible } from './collapsible/main.js';
 
 // Menus
 export {
   ContextualMenu,
+  type ContextualMenuHandle,
   type ContextualMenuPopupProps,
+  type ContextualMenuPortalProps,
   type ContextualMenuPositionerProps,
   type ContextualMenuPreviewProps,
   type ContextualMenuRootProps,
   type ContextualMenuTriggerProps,
+  useCreateContextualMenuHandle,
 } from './contextual-menu/main.js';
 export {
   EditMenu,
   type SelectionAnchor,
   useSelectionAnchor,
   type EditMenuPositionerProps,
+  type EditMenuRootProps,
 } from './edit-menu/main.js';
 export {
   Menu,
+  type MenuHandle,
   type MenuRootProps,
   type Size as MenuSize,
   type MenuPositionerProps,
+  type MenuTriggerProps,
+  useCreateMenuHandle,
 } from './menu/main.js';
 
 // Bars
 export {
   Header,
-  type HeaderBarProps,
+  type HeaderAccessoryProps,
   type HeaderLargeTitleProps,
   type HeaderRootProps,
 } from './header/main.js';
-export { PageControl, type PageControlProps } from './page-control/main.js';
+export {
+  PageControl,
+  type PageControlChangeEventDetails,
+  type PageControlProps,
+} from './page-control/main.js';
 export {
   Toolbar,
   type ToolbarButtonProps,
@@ -176,6 +229,15 @@ export {
   type LayoutRootProps,
 } from './layout/main.js';
 export {
+  Drawer,
+  type DrawerHandle,
+  type DrawerPopupProps,
+  type DrawerRootProps,
+  type DrawerSide,
+  type DrawerSwipeAreaProps,
+  useCreateDrawerHandle,
+} from './drawer/main.js';
+export {
   Sidebar,
   type SidebarRootProps,
   type SidebarToolbarGroupProps,
@@ -184,7 +246,14 @@ export {
 export { Page, type PageRootProps } from './page/main.js';
 
 // Navigation
-export { Navigation, type NavigationRootProps } from './navigation/main.js';
+export {
+  Navigation,
+  type NavigationBackEventDetails,
+  type NavigationBackProps,
+  type NavigationRootProps,
+  type NavigationStackProps,
+  type NavigationSwipeAreaProps,
+} from './navigation/main.js';
 export {
   type AccessoryVisibility,
   type CollapsedContent,
@@ -201,21 +270,39 @@ export {
 
 // Viewport
 export {
+  type ElementGeometry,
+  type ElementGeometryOptions,
+  type ElementVisibilityOptions,
+  preventFocusShift,
+  preventInputZoom,
+  useElementGeometry,
+  useElementVisibility,
+  useFocusShiftPrevention,
+  useInputZoomPrevention,
   useScrollDirection,
+  useSizeClass,
   useViewportScroll,
   useVisualViewport,
+  useAnchorSize,
+  useCreateViewportAnchorHandle,
   Viewport,
+  ViewportAnchorHandle,
+  ViewportScopeContext,
   type ViewportAnchorProps,
   type ViewportContentProps,
   type ViewportEdge,
+  type ViewportOverscrollProps,
+  type ViewportPaddingProps,
   type ViewportProviderProps,
   type ViewportSafeArea,
+  type SizeClass,
   type ViewportScrollEvent,
+  type ViewportScrollOptions,
   type VisualViewportState,
 } from './viewport/main.js';
 
 // Typography
-export { Symbol, type SymbolProps } from './symbol/main.js';
+export { Symbol, type SymbolIcon, type SymbolProps } from './symbol/main.js';
 export {
   type DynamicTypeSize,
   type TextColor,
@@ -229,5 +316,7 @@ export type { GlassContextValue } from './glass/main.js';
 export type {
   ColorScheme,
   LogicalSide,
+  PortalContainer,
   SecondaryClickProps,
 } from './utils/main.js';
+export { PortalContainerContext } from './utils/main.js';

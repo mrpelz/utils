@@ -16,17 +16,6 @@
     gap: 6px 8px;
     letter-spacing: var(--font-ios-subheadline-tracking);
     line-height: var(--font-ios-subheadline-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--font-ios-subheadline-weight) - 400) / 326 * 1px
-    );
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-subheadline-weight)) / 326 * 1px
-    );
 
     /* Its label and value (see Label, Value): above the track (by default;
        on a line of their own, the label at its start, the value at its end),
@@ -47,12 +36,21 @@
       order: 3;
     }
 
+    /* On a line of their own, the label always first, the value always at
+       the line's end (whichever comes first in the markup, either alone). */
+    & > [data-progress-part='label'][data-progress-placement='block-start'] {
+      order: -4;
+    }
+
+    & > [data-progress-part='value'][data-progress-placement='block-end'] {
+      order: 4;
+    }
+
     &
-      > [data-progress-placement='block-start']
-      + [data-progress-placement='block-start'],
-    &
-      > [data-progress-placement='block-end']
-      + [data-progress-placement='block-end'] {
+      > [data-progress-part='value']:is(
+        [data-progress-placement='block-start'],
+        [data-progress-placement='block-end']
+      ) {
       margin-inline-start: auto;
     }
 
@@ -152,15 +150,31 @@
     gap: 8px;
     letter-spacing: var(--font-ios-body-tracking);
     line-height: var(--font-ios-body-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
     vertical-align: middle;
 
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight)) / 326 * 1px
-    );
+    /* Hidden (see `display`): no room taken. Fading (`movement`), fading
+       out first, and in as it's shown. */
+    &[hidden] {
+      display: none;
+    }
+
+    &[data-movement='fade'] {
+      transition:
+        opacity 300ms ease,
+        display 300ms allow-discrete;
+
+      @starting-style {
+        opacity: 0;
+      }
+
+      &[hidden] {
+        opacity: 0;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
+    }
 
     &[data-size='small'] {
       --uikit-progress-activity-size: 22px;
@@ -223,8 +237,6 @@
     width: var(--uikit-progress-activity-size);
     height: var(--uikit-progress-activity-size);
     flex: none;
-    animation: uikit-progress-spin var(--uikit-progress-activity-duration, 1s)
-      steps(8) infinite;
 
     & > span {
       position: absolute;
@@ -237,27 +249,47 @@
       transform-origin: 50% calc(var(--uikit-progress-activity-size) / 2);
     }
 
+    /* Rotating: the spinner turning, smoothly. */
     [data-movement='rotate'] > & {
-      animation-timing-function: linear;
+      animation: uikit-progress-spin var(--uikit-progress-activity-duration, 1s)
+        linear infinite;
+
+      /* (From where it was: see `progress`.) */
+      animation-delay: calc(
+        var(--uikit-progress-activity-duration, 1s) *
+          var(--uikit-progress-activity-from, 0) * -1
+      );
     }
 
-    /* Fading: the spokes in place, each as far into its fade as its opacity
-       (its phase: a share of a turn behind the brightest). */
-    [data-movement='fade'] > & {
-      animation: none;
-    }
-
-    [data-movement='fade'] > & > span {
+    /* Stepped and fading: the spokes in place (stepped: not the spinner
+       turned a spoke at a time, its spokes resampled at each step's angle,
+       wobbling), each as far into its fade as its opacity (its phase: a
+       share of a turn behind the brightest); stepped, a spoke at a time. */
+    [data-movement='fade'] > & > span,
+    [data-movement='stepped'] > & > span {
       animation: uikit-progress-fade var(--uikit-progress-activity-duration, 1s)
         linear infinite;
       animation-delay: calc(
         var(--uikit-progress-activity-duration, 1s) *
-          var(--uikit-progress-activity-phase) * -1
+          (
+            var(--uikit-progress-activity-phase) +
+              var(--uikit-progress-activity-from, 0)
+          ) * -1
       );
     }
 
-    [data-stopped] > &,
-    [data-stopped] > & > span {
+    [data-movement='stepped'] > & > span {
+      animation-timing-function: steps(8, jump-none);
+    }
+
+    /* Stopped (see `display`): at rest, or frozen where it is. */
+    [data-stopped='reset'] > &,
+    [data-stopped='reset'] > & > span {
+      animation: none;
+    }
+
+    [data-stopped='freeze'] > &,
+    [data-stopped='freeze'] > & > span {
       animation-play-state: paused;
     }
   }

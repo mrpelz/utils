@@ -2,13 +2,19 @@
 /* stylelint-disable no-descending-specificity -- (Overrides by repeated
    classes: see the collapsed styles.) */
 @layer uikit-ish {
+  /* Its own formatting context: containing its list's margin (the room for
+     an accessory above the groups, see List) in any container, not only as
+     a flex or grid item. */
+  .uikit-tab-bar-root {
+    display: flow-root;
+  }
+
   .uikit-tab-bar-tabs {
     position: relative;
     display: flex;
     align-items: center;
     border-radius: 100px;
     overscroll-behavior-x: contain;
-    scrollbar-width: none;
     touch-action: none;
 
     &[data-overflowing] {
@@ -44,18 +50,7 @@
     );
     mix-blend-mode: var(--uikit-symbol-blend);
     scale: var(--uikit-symbol-scale);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--uikit-tab-bar-icon-weight) - 400) / 326 * 1px
-    );
     transition: scale var(--glass-ios-lens-duration);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--uikit-tab-bar-icon-weight)) / 326 * 1px
-    );
 
     &:has(> .uikit-symbol) {
       mix-blend-mode: normal;
@@ -75,20 +70,10 @@
 
     [data-active] > & {
       --uikit-symbol-blend: normal;
+      --uikit-symbol-emphasis: 1;
 
       font-variation-settings: 'wght' var(--uikit-tab-bar-icon-active-weight);
       font-weight: round(down, var(--uikit-tab-bar-icon-active-weight), 100);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(
-        0px,
-        (var(--uikit-tab-bar-icon-active-weight) - 400) / 326 * 1px
-      );
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--uikit-tab-bar-icon-active-weight)) / 326 * 1px
-      );
     }
   }
 
@@ -125,23 +110,13 @@
     font-variation-settings: 'wght' 510;
     font-weight: round(down, 510, 100);
     grid-area: 1 / 1;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (510 - 400) / 326 * 1px);
     text-overflow: var(--uikit-tab-bar-label-overflow, ellipsis);
     white-space: nowrap;
-
-    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
 
     [data-active] > * > & {
       font-size: var(--uikit-tab-bar-label-active-size);
       font-variation-settings: 'wght' 700;
       font-weight: round(down, 700, 100);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (700 - 400) / 326 * 1px);
-
-      --uikit-symbol-thinning: max(0px, (400 - 700) / 326 * 1px);
     }
   }
 
@@ -151,14 +126,9 @@
     font-variation-settings: 'wght' 700;
     font-weight: round(down, 700, 100);
     grid-area: 1 / 1;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (700 - 400) / 326 * 1px);
     text-overflow: var(--uikit-tab-bar-label-overflow, ellipsis);
     visibility: hidden;
     white-space: nowrap;
-
-    --uikit-symbol-thinning: max(0px, (400 - 700) / 326 * 1px);
   }
 
   .uikit-tab-bar-accessory-content {
@@ -171,7 +141,10 @@
     align-self: stretch;
     border-radius: inherit;
     gap: 12px;
-    padding-inline: 16px;
+
+    /* (Shrinking with the accessory: hidden, 0px wide, it overflows nothing,
+       e.g. a page on a phone.) */
+    padding-inline: min(16px, 50%);
     white-space: nowrap;
 
     & > * {
@@ -281,6 +254,7 @@
     transition-duration: var(--glass-ios-lens-duration);
     transition-property:
       width, min-width, min-height, padding, margin, gap, visibility;
+    -webkit-user-select: none;
     user-select: none;
 
     @media (hover: hover) {
@@ -478,6 +452,12 @@
       pointer-events: none;
       visibility: hidden;
     }
+
+    /* A text field in it (e.g. a search field): its whole width. */
+    & > [data-text-field-part='root'] {
+      min-width: 0;
+      flex: 1 1 0;
+    }
   }
 
   .uikit-tab-bar-list {
@@ -486,7 +466,10 @@
     box-sizing: border-box;
     align-items: center;
     justify-content: flex-start;
-    padding: 16px 32px 32px;
+
+    /* (Figma: 32px below, within the home indicator's 34px: the safe area,
+       kept clear by its anchor, see Viewport; none of its own.) */
+    padding: 16px 32px 0;
     gap: var(--uikit-tab-bar-group-gap, 16px);
     interpolate-size: allow-keywords;
     touch-action: none;
@@ -634,7 +617,7 @@
 
       padding: calc(16px + var(--uikit-tab-bar-collapsed-inset))
         calc(32px + var(--uikit-tab-bar-collapsed-inset))
-        calc(32px + var(--uikit-tab-bar-collapsed-inset));
+        var(--uikit-tab-bar-collapsed-inset);
 
       && > div > [data-tab-bar-part='tabs'] > [role='tab'] {
         --uikit-tab-bar-label-size: var(--font-ios-subheadline-size);
@@ -684,11 +667,6 @@
         > * {
         font-variation-settings: 'wght' 510;
         font-weight: round(down, 510, 100);
-        stroke: currentcolor;
-        stroke-linejoin: round;
-        stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-        --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
       }
 
       &&:where(:not([data-collapsed-content]))

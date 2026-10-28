@@ -31,12 +31,6 @@
     letter-spacing: 0;
     line-height: 1;
     place-items: center;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (590 - 400) / 326 * 1px);
-    user-select: none;
-
-    --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
   }
 
   .uikit-avatar-group {

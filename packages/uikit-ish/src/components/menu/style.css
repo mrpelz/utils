@@ -1,5 +1,10 @@
 /* Menu (see main.tsx). */
 @layer uikit-ish {
+  /* Its portal (see Portal): no box of its own. */
+  .uikit-menu-portal {
+    display: contents;
+  }
+
   /* (Shared: edit-menu, popover, tooltip.) */
   .uikit-popup-transition {
     transform-origin: var(--transform-origin);
@@ -80,11 +85,6 @@
     grid-row: 1 / span 2;
     line-height: var(--uikit-menu-icon-line-height);
     margin-inline-end: 4px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (400 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
   }
 
   .uikit-menu-label {
@@ -97,11 +97,6 @@
     letter-spacing: var(--uikit-menu-label-letter-spacing);
     line-height: var(--uikit-menu-label-line-height);
     padding-inline-start: 4px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (400 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
   }
 
   .uikit-menu-subtitle {
@@ -115,11 +110,6 @@
     grid-row: 2;
     line-height: var(--uikit-menu-subtitle-line-height);
     padding-inline-start: 4px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (400 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
   }
 
   .uikit-menu-shortcut {
@@ -135,11 +125,6 @@
     grid-row: 1 / span 2;
     line-height: 20px;
     margin-inline-start: 4px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
 
     & > span {
       min-width: 14px;
@@ -156,11 +141,6 @@
     letter-spacing: -0.08px;
     line-height: 15px;
     mix-blend-mode: var(--uikit-glass-content-blend);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
   }
 
   .uikit-menu-quick-actions {
@@ -192,7 +172,6 @@
     mix-blend-mode: var(--uikit-glass-content-blend);
     outline: none;
     padding-inline-start: calc(8px + var(--uikit-menu-toggle-space));
-    user-select: none;
 
     /* Highlighted (or its submenu open), the popup's moving selection (see
        Popup). Touch: the selection while pressed (no hover highlights). */
@@ -277,6 +256,11 @@
       var(--uikit-menu-radius-block);
     outline: none;
     overflow-y: auto;
+
+    /* (A press anywhere in it, e.g. between items, keeps a selection: an
+       edit menu's submenu stays open.) */
+    -webkit-user-select: none;
+    user-select: none;
 
     /* Its size's metrics (see Size); compact submenus' chevrons turn down
        while open. */
@@ -388,7 +372,6 @@
     gap: var(--uikit-menu-quick-gap);
     mix-blend-mode: var(--uikit-glass-content-blend);
     outline: none;
-    user-select: none;
 
     &::before {
       position: absolute;
@@ -434,13 +417,8 @@
       font-weight: round(down, 510, 100);
       letter-spacing: normal;
       line-height: 18px;
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (510 - 400) / 326 * 1px);
       text-overflow: ellipsis;
       white-space: nowrap;
-
-      --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
     }
   }
 }

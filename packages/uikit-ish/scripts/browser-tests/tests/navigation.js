@@ -39,7 +39,7 @@ const drillInto = async (page, text) => {
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'navigation: a pushed page slides in over the one under it, its header’s bar staying in place',
+    name: 'navigation: a pushed page slides in over the one under it, its header’s bar moving with it',
     run: async (page) => {
       await page.open('navigation');
       assert.deepEqual(await frames(page), [['current', 0]]);
@@ -71,8 +71,8 @@ export const tests = [
         'the one under it moving back',
       );
       assert.ok(
-        moving.every(({ bar }) => Math.abs(bar) <= 1),
-        `the bar in place: ${moving.map(({ bar }) => bar).join(', ')}`,
+        moving.every(({ bar, top }) => Math.abs(bar - top) <= 1),
+        `the bar with its page: ${moving.map(({ bar, top }) => `${String(bar)}/${String(top)}`).join(', ')}`,
       );
 
       await sleep(500);

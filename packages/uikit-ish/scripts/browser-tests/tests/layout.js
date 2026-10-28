@@ -107,7 +107,8 @@ export const tests = [
         background: [0, 0, 1400],
         content: [0, 0, 1400],
         inset: '336px',
-        panel: [8, 8, 320, '20px'],
+        // (Below the tablet's top safe area inset, 24px.)
+        panel: [8, 24, 320, '20px'],
         sidebar: [0, 0, 336, 'absolute'],
         // (Its text 16px in.)
         title: 336,
@@ -204,33 +205,30 @@ export const tests = [
         ['layout-compact', 'Drafts', 'rgb(255, 255, 255)', 2],
         ['sidebar-compact', 'Favorites', 'rgba(0, 0, 0, 0)', 3],
       ])) {
-        for (const drawer of ['inline-start', 'inline-end']) {
+        for (const side of ['inline-start', 'inline-end']) {
           const state = Array.from({ length: at + 1 }, () => null);
           await page.open(id, 'light', {
-            state: Object.assign(state, { [at]: { $rest: true, drawer } }),
+            state: Object.assign(state, { [at]: { $rest: true, side } }),
           });
           await sleep(300);
+          // Its distances to the layout's sides; hidden (closed): none.
           const box = () =>
             page.evaluate(`(() => {
-              const column = document.querySelector('[data-drawer]');
-              const root = column.parentElement.getBoundingClientRect();
+              const column = document.querySelector('[data-layout-part=column][data-side]');
+              if (column.hidden) return null;
+              const root = column.closest('[data-layout-part=root]').getBoundingClientRect();
               const { left, right } = column.getBoundingClientRect();
               return [Math.round(left - root.left), Math.round(root.right - right)];
             })()`);
-          const [left, right] = await box();
-          // Hidden past its side.
-          assert.ok(
-            drawer === 'inline-start'
-              ? right > 0 && left <= -250
-              : left > 0 && right <= -250,
-            `${id} ${drawer} closed: ${String(left)}, ${String(right)}`,
-          );
+          assert.equal(await box(), null, `${id} ${side} closed`);
 
-          // Swiped in from its edge.
-          const edge = await page.rect('[data-layout-part=drawer-edge]');
+          // Swiped in from its edge (its swipe area).
+          const edge = await page.rect(
+            `[data-layout-part=drawer-swipe-area][data-side=${side}]`,
+          );
           const y = edge.y + edge.height / 2;
           const x = edge.x + edge.width / 2;
-          const toward = drawer === 'inline-start' ? 1 : -1;
+          const toward = side === 'inline-start' ? 1 : -1;
           await page.mouse('mousePressed', x, y);
           for (let step = 1; step <= 6; step += 1) {
             await page.mouse('mouseMoved', x + toward * step * 40, y);
@@ -240,30 +238,26 @@ export const tests = [
           await sleep(500);
           const opened = await box();
           assert.equal(
-            opened[drawer === 'inline-start' ? 0 : 1],
+            opened?.[side === 'inline-start' ? 0 : 1],
             0,
-            `${id} ${drawer} open`,
+            `${id} ${side} open`,
           );
           assert.match(await page.log(), /sidebar open: true/u);
           // Its background (floating: none, the sidebar's glass instead).
           const own = await page.evaluate(
-            `getComputedStyle(document.querySelector(${JSON.stringify('[data-drawer]')})).backgroundColor`,
+            `getComputedStyle(document.querySelector(${JSON.stringify('[data-layout-part=column][data-side]')})).backgroundColor`,
           );
           assert.equal(own, background, id);
 
           // Choosing a row closes it.
           const center = await page.evaluate(`(() => {
-            const title = [...document.querySelectorAll('[data-drawer] [data-list-part=title]')].find((element) => element.textContent === ${JSON.stringify(choice)});
+            const title = [...document.querySelectorAll('[data-layout-part=column][data-side] [data-list-part=title]')].find((element) => element.textContent === ${JSON.stringify(choice)});
             const { height, width, x, y } = title.getBoundingClientRect();
             return [x + width / 2, y + height / 2];
           })()`);
           await page.click(/** @type {[number, number]} */ (center));
           await sleep(500);
-          const closed = await box();
-          assert.ok(
-            Math.min(...closed) <= -250,
-            `${id} ${drawer} closed again`,
-          );
+          assert.equal(await box(), null, `${id} ${side} closed again`);
         }
       }
     },
@@ -320,7 +314,7 @@ export const tests = [
     },
   },
   {
-    name: 'layout (compact): an open drawer closes on a tap anywhere outside of it (also over a resizable column)',
+    name: 'layout (compact): an open drawer closes on a tap anywhere outside of it (also over a resizable column; also swiped in)',
     run: async (page) => {
       await page.open('layout-compact', 'light', {
         state: [{ columns: 3 }],
@@ -334,7 +328,7 @@ export const tests = [
       await sleep(500);
       // Over the list column (resizable: raised over the next one).
       const point = await page.evaluate(`(() => {
-        const { right, top } = document.querySelector(${JSON.stringify('[data-layout-part=column][data-resizable]:not([data-drawer])')}).getBoundingClientRect();
+        const { right, top } = document.querySelector(${JSON.stringify('[data-layout-part=column][data-resizable]')}).getBoundingClientRect();
         return [right - 40, top + 300];
       })()`);
       await page.click(/** @type {[number, number]} */ (point));
@@ -350,9 +344,27 @@ export const tests = [
       await page.click([point[0], button.y + button.height / 2]);
       await sleep(500);
       const closed = await page.evaluate(
-        `document.querySelector(${JSON.stringify('[data-drawer]')}).hasAttribute('data-open')`,
+        `document.querySelector(${JSON.stringify('[data-layout-part=column][data-side]')}).hasAttribute('data-open')`,
       );
       assert.equal(closed, false, 'over the bar');
+
+      // Swiped in (not by its button), then a tap outside.
+      const edge = await page.rect('[data-layout-part=drawer-swipe-area]');
+      const y = edge.y + edge.height / 2;
+      await page.mouse('mousePressed', edge.x + edge.width / 2, y);
+      for (let step = 1; step <= 6; step += 1) {
+        await page.mouse('mouseMoved', edge.x + step * 40, y);
+        await sleep(30);
+      }
+      await page.mouse('mouseReleased', edge.x + 240, y);
+      await sleep(500);
+      assert.match(await page.log(), /sidebar open: true \(swipe\)/u);
+      await page.click(/** @type {[number, number]} */ (point));
+      await sleep(500);
+      assert.match(
+        await page.log(),
+        /sidebar open: false \(outside-press\)$/mu,
+      );
     },
   },
   {

@@ -1,0 +1,29 @@
+/* Sidebar demos (see main.tsx). */
+
+/* The layout's background: a picture (here, of gradients). */
+.sidebar-demo-picture {
+  background:
+    radial-gradient(circle at 20% 30%, #ff9f0a, transparent 40%),
+    radial-gradient(circle at 75% 20%, #bf5af2, transparent 45%),
+    radial-gradient(circle at 60% 85%, #30d158, transparent 45%),
+    linear-gradient(135deg, #0a84ff, #5e5ce6);
+}
+
+/* A transparent page (its list's, too): the layout's background shows
+   through. */
+.sidebar-demo-transparent {
+  --uikit-list-container-background: transparent;
+
+  background-color: transparent;
+}
+
+/* A sidebar of its own (a part's view): as wide as in a layout's column,
+   on the layout's picture. */
+.sidebar-demo-panel {
+  display: grid;
+  overflow: hidden;
+  width: 336px;
+  max-width: 100%;
+  height: min(560px, 70vh);
+  border-radius: 24px;
+}

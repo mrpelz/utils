@@ -1,0 +1,14 @@
+/* Tab bar demos (see main.tsx). */
+
+/* The accessory's title, taking the free space. */
+.tab-bar-demo-accessory-title {
+  flex: 1;
+}
+
+/* The parts' panels, above their bar. */
+.tab-bar-demo-panels {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+

@@ -54,7 +54,8 @@ export type {
 //   which alone scales while dragging (Base UI measures the thumb's box for
 //   positioning); only its `transform`, `background-color` and `box-shadow`
 //   transition (Konsta UI `--transition-ios-range-thumb`).
-// - The control's length (Figma example: 280px) is a minimum.
+// - The control's length grows to fill the root (Figma example: 280px), at
+//   least 120px (so it fits a list row between symbols on an iPhone).
 // - The pressed state is driven by Base UI's `data-dragging`.
 // - Vertical sliders put the minimum symbol at the bottom.
 // - The fill is derived from the value (Base UI couples it to the thumb's
@@ -140,9 +141,9 @@ const Indicator = forwardRef<
     data-slider-part="indicator"
     style={(state) => {
       const { max, min, orientation, values } = state;
-      const range = values.length > 1;
+      const isRange = values.length > 1;
 
-      const start = range ? toPercent(values[0] ?? min, min, max) : 0;
+      const start = isRange ? toPercent(values[0] ?? min, min, max) : 0;
       const end = toPercent(values.at(-1) ?? min, min, max);
 
       const geometry: CSSProperties =
@@ -241,7 +242,7 @@ const ValueSymbol = forwardRef<HTMLSpanElement, SliderSymbolProps>(
         const input = edge === 'min' ? inputs[0] : inputs.at(-1);
         if (!(input instanceof HTMLInputElement) || input.disabled) return;
 
-        const focused = input.ownerDocument.activeElement === input;
+        const isFocused = input.ownerDocument.activeElement === input;
         input.dispatchEvent(
           new KeyboardEvent('keydown', {
             bubbles: true,
@@ -249,7 +250,7 @@ const ValueSymbol = forwardRef<HTMLSpanElement, SliderSymbolProps>(
             key: edge === 'min' ? 'Home' : 'End',
           }),
         );
-        if (!focused) input.blur();
+        if (!isFocused) input.blur();
       },
       [edge],
     );

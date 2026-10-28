@@ -52,7 +52,7 @@ export const tests = [
 
       // Saved: the color added.
       await press(page, '[aria-label="Add color"]');
-      assert.match(await page.log(), /saved colors: .*#00A1D880/u);
+      assert.match(await page.log(), /saved colors \(add\): .*#00A1D880/u);
 
       // The spectrum: by arrow keys; its popover not moving (its views as
       // high as each other).
@@ -150,7 +150,7 @@ export const tests = [
       await page.click(/** @type {[number, number]} */ (item));
       await sleep(400);
       assert.deepEqual(await shown(), ['#FF9500', '#A2845E', '#30B0C7']);
-      assert.match(await page.log(), /saved colors: (?!.*#00C7BE)/u);
+      assert.match(await page.log(), /saved colors \(delete\): (?!.*#00C7BE)/u);
     },
   },
   {
@@ -226,6 +226,48 @@ export const tests = [
       await page.key('ArrowRight');
       await sleep(300);
       assert.equal(await adds(), 1, 'not saved');
+    },
+  },
+  {
+    name: 'color picker: changes tell why (a grid swatch: grid); controlled, it shows the app’s color only',
+    run: async (page) => {
+      await page.open('color-picker-parts-root');
+      await page.evaluate(
+        `${page.section}.querySelectorAll('[data-color-picker-part=grid] button')[20].click()`,
+      );
+      await sleep(200);
+      assert.match(await page.log(), /value change: #[\dA-F]{6} \(grid\)/u);
+
+      await page.setState(0, { value: '#34C759' });
+      await sleep(300);
+      await page.evaluate(
+        `${page.section}.querySelectorAll('[data-color-picker-part=grid] button')[30].click()`,
+      );
+      await sleep(200);
+      assert.equal(
+        await page.evaluate(
+          `${page.section}.querySelector('[data-color-picker-part=grid] [aria-pressed=true]')?.getAttribute('aria-label') ?? null`,
+        ),
+        null,
+        'none of the grid’s: the app’s green stays',
+      );
+    },
+  },
+  {
+    name: 'color picker: app-held saved colors are shared, their changes telling why (add)',
+    run: async (page) => {
+      await page.open('color-picker-composition-saved');
+      await page.evaluate(
+        `${page.section}.querySelector('[data-color-picker-part=saved-pages] button[data-add]').click()`,
+      );
+      await sleep(300);
+      assert.deepEqual(
+        await page.evaluate(
+          `[...${page.section}.querySelectorAll('[data-color-picker-part=saved-pages]')].map((pages) => pages.querySelectorAll('button:not([data-add])').length)`,
+        ),
+        [4, 4],
+      );
+      assert.match(await page.log(), /saved \(add, first picker\)/u);
     },
   },
 ];

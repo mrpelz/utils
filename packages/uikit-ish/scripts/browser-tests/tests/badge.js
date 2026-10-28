@@ -138,4 +138,59 @@ export const tests = [
       ]);
     },
   },
+  {
+    name: 'badge: placed only by `placement` (on a symbol: smaller; on its parent’s corner; inline), never by its parent',
+    run: async (page) => {
+      /** @param {string} placement */
+      const placed = async (placement) => {
+        await page.open('badge-parts-badge', 'light', {
+          state: [{ $rest: true, placement }],
+        });
+        return page.evaluate(`(() => {
+          const badge = ${page.section}.querySelector('[data-badge]');
+          const box = badge.getBoundingClientRect();
+          const of = badge.parentElement.getBoundingClientRect();
+          return [badge.dataset.badge, getComputedStyle(badge).position, Math.round(box.height), Math.round(of.right - box.left), Math.round(box.top - of.top)];
+        })()`);
+      };
+
+      // In a `Symbol` all three: its own size and place, each.
+      assert.deepEqual(await placed('symbol'), [
+        'symbol',
+        'absolute',
+        16,
+        5,
+        -4,
+      ]);
+      assert.deepEqual(await placed('corner'), [
+        'corner',
+        'absolute',
+        24,
+        14,
+        -6,
+      ]);
+      const inline = await placed('inline');
+      assert.deepEqual(inline.slice(0, 3), ['inline', 'static', 24]);
+    },
+  },
+  {
+    name: 'badge: on an avatar’s corner, a dot inside it; in a toolbar button’s name',
+    run: async (page) => {
+      await page.open('badge-composition-avatar');
+      const avatars = await page.evaluate(
+        `[...${page.section}.querySelectorAll('[data-badge]')].map((badge) => { const box = badge.getBoundingClientRect(); const of = badge.parentElement.getBoundingClientRect(); return [Math.round(box.width), Math.round(of.right - box.right), Math.round(box.top - of.top)]; })`,
+      );
+      // A count overhanging the corner; a dot inside it, 2px from its edges.
+      assert.deepEqual(avatars, [
+        [24, -10, -6],
+        [10, 2, 2],
+      ]);
+
+      await page.open('badge-composition-toolbar');
+      const button = await page.evaluate(
+        `(() => { const badge = ${page.section}.querySelector('[data-badge]'); return [badge.closest('button').getAttribute('aria-label'), Math.round(badge.getBoundingClientRect().height)]; })()`,
+      );
+      assert.deepEqual(button, ['Mail, 12 unread', 16]);
+    },
+  },
 ];

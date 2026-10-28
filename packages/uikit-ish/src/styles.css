@@ -7,6 +7,17 @@
     color-scheme: light dark;
 
     /*
+     * The safe area insets (the notch or Dynamic Island, the home indicator,
+     * the rounded corners): the device's, or an app's (e.g. a frame
+     * emulating a device). A component keeping a side clear sets it to 0px
+     * for its content (e.g. Viewport's layers, Page, Sheet).
+     */
+    --uikit-safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --uikit-safe-area-inset-right: env(safe-area-inset-right, 0px);
+    --uikit-safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --uikit-safe-area-inset-left: env(safe-area-inset-left, 0px);
+
+    /*
      * Grayscale antialiasing, as on iOS (Framework7 components/app/app.less;
      * Figma renders text the same way)
      */
@@ -457,11 +468,16 @@
     --shadow-ios-list-reorder: 0 2px 8px rgb(0 0 0 / 60%);
   }
 
-  :root[data-color-scheme='light'] {
+  /* A color scheme forced (see `useColorScheme`): on the root element, or
+     on any element, for what's within it. (Forced within one forced
+     otherwise, the dark one's rules win, not the nearer one's.) */
+  [data-color-scheme='light'] {
     color-scheme: light;
+
+    --glass-ios-lens-shadow: var(--glass-ios-bright-lens-shadow);
   }
 
-  :root[data-color-scheme='dark'] {
+  [data-color-scheme='dark'] {
     color-scheme: dark;
 
     --glass-ios-lens-shadow: var(--glass-ios-dim-lens-shadow);
@@ -564,4 +580,21 @@
   inherits: true;
   initial-value: 0;
   syntax: '<number>';
+}
+
+/* A symbol's emphasis (see `Symbol`), set by its host: 0 its icon shown,
+   1 its emphasized one; a number, so a host can transition it. */
+@property --uikit-symbol-emphasis {
+  inherits: true;
+  initial-value: 0;
+  syntax: '<number>';
+}
+
+/* Room made for an open overscroll area (see `Viewport.Overscroll`): a
+   length transitioning as such, the padding making it (and the area,
+   moving along) following every frame. */
+@property --uikit-viewport-overscroll-room {
+  inherits: false;
+  initial-value: 0;
+  syntax: '<length>';
 }

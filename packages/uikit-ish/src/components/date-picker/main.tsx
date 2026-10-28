@@ -5,6 +5,8 @@ import '../roll/style.css';
 import '../typography/style.css';
 import './style.css';
 
+import { Field as BaseField } from '@base-ui/react/field';
+import type { Popover as BasePopover } from '@base-ui/react/popover';
 import {
   ComponentProps,
   CSSProperties,
@@ -22,18 +24,27 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react';
 
 import { Button, ButtonRootProps } from '../button/main.js';
+import { List, useCollapsible, useExpandedOpen } from '../list/main.js';
 import { Popover, type PopoverAlign } from '../popover/main.js';
-import { Roll, RollValue } from '../roll/main.js';
+import { Roll, type RollChangeEventDetails, RollValue } from '../roll/main.js';
 import { cn } from '../utils/main.js';
+import { createHandle } from './handle.js';
+import { useMonthPager } from './pager.js';
 import type {
   CalendarFooter,
   CalendarInternalProps,
   CalendarMessageProps,
   CalendarProps,
+  CalendarSwipe,
+  DatePickerChangeEventDetails,
+  DatePickerExpandableProps,
+  DatePickerMode,
   DatePickerOpen,
+  DatePickerOpenChangeEventDetails,
   DatePickerProps,
   DateRange,
   DayHighlight,
@@ -47,8 +58,12 @@ export type {
   CalendarFooter,
   CalendarMessageProps,
   CalendarProps,
+  CalendarSwipe,
+  DatePickerChangeEventDetails,
+  DatePickerExpandableProps,
   DatePickerMode,
   DatePickerOpen,
+  DatePickerOpenChangeEventDetails,
   DatePickerProps,
   DatePickerStyle,
   DateRange,
@@ -90,6 +105,16 @@ export type {
 //   from the sides.
 // - The collapsed buttons are capsules (or, `buttonShape`, Figma's 6px
 //   corners).
+
+// What swiping the days does (see `swipe`): a range dragged only picking
+// one.
+const swipeOf = (
+  swipe: CalendarSwipe | undefined,
+  isRange: boolean,
+): CalendarSwipe => {
+  const value = swipe ?? (isRange ? 'date-range' : 'month');
+  return value === 'date-range' && !isRange ? 'ignore' : value;
+};
 
 // Dates (local time).
 
@@ -246,7 +271,7 @@ const TimeRow = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ),
 );
 
-const Chevron = ({ next }: { next: boolean }) => (
+const Chevron = ({ isNext }: { isNext: boolean }) => (
   <svg
     aria-hidden="true"
     fill="none"
@@ -258,7 +283,7 @@ const Chevron = ({ next }: { next: boolean }) => (
     viewBox="0 0 12 20"
     width="12"
   >
-    <path d={next ? 'M3 2l7 8-7 8' : 'M9 2l-7 8 7 8'} />
+    <path d={isNext ? 'M3 2l7 8-7 8' : 'M9 2l-7 8 7 8'} />
   </svg>
 );
 
@@ -287,7 +312,7 @@ const timeFormat = (locale?: string, cycle?: HourCycle) => {
   });
   const { hourCycle = 'h23' } = format.resolvedOptions();
   const parts = format.formatToParts(new Date(2000, 0, 1, 21, 41));
-  const periodFirst =
+  const isPeriodFirst =
     parts.findIndex(({ type }) => type === 'dayPeriod') <
     parts.findIndex(({ type }) => type === 'hour');
   const period = (hour: number) =>
@@ -297,7 +322,8 @@ const timeFormat = (locale?: string, cycle?: HourCycle) => {
 
   return {
     hourCycle,
-    periodFirst: periodFirst && parts.some(({ type }) => type === 'dayPeriod'),
+    periodFirst:
+      isPeriodFirst && parts.some(({ type }) => type === 'dayPeriod'),
     periods: [period(9), period(21)] as const,
     twelve: hourCycle === 'h11' || hourCycle === 'h12',
   };
@@ -305,15 +331,28 @@ const timeFormat = (locale?: string, cycle?: HourCycle) => {
 
 /**
  * The time as a roll: hours, minutes and (12 hours) the day period, the
- * numbers editable (e.g. in an expandable list row, see `DatePicker`).
+ * numbers editable (e.g. in an expandable list row, see `DatePicker.Root`).
  */
 const TimeRoll: FunctionComponent<TimeRollProps> = ({
   hourCycle: cycle,
   locale,
+  max,
+  min,
   onValueChange: onChange,
   value,
 }) => {
   const date = value ?? new Date();
+  // Its day at a time, and whether that's beyond the limits.
+  const at = (hour: number, minute: number) => {
+    const next = new Date(date);
+    next.setHours(hour, minute, 0, 0);
+    return next;
+  };
+  const isBeyond = (time: Date) =>
+    (min !== undefined && time < min) || (max !== undefined && time > max);
+  // Some of the hours' minutes (from, to) within the limits.
+  const isWithin = (from: Date, to: Date) =>
+    (min === undefined || to >= min) && (max === undefined || from <= max);
   const { hourCycle, periodFirst, periods, twelve } = useMemo(
     () => timeFormat(locale, cycle),
     [cycle, locale],
@@ -329,7 +368,7 @@ const TimeRoll: FunctionComponent<TimeRollProps> = ({
   );
 
   const hours = date.getHours();
-  const pm = hours >= 12;
+  const isPm = hours >= 12;
   const hourValues = twelve
     ? Array.from({ length: 12 }, (_, index) =>
         hourCycle === 'h12' ? index + 1 : index,
@@ -338,23 +377,43 @@ const TimeRoll: FunctionComponent<TimeRollProps> = ({
   const twelveHour = hourCycle === 'h12' ? hours % 12 || 12 : hours % 12;
   const shownHour = twelve ? twelveHour : hours;
 
-  const set = (hour: number, minute: number) => {
-    const next = new Date(date);
-    next.setHours(hour, minute, 0, 0);
-    onChange(next);
+  // Beyond the limits: the nearest within them (the roll moving back, as
+  // UIKit's).
+  const set = (
+    hour: number,
+    minute: number,
+    { event }: RollChangeEventDetails,
+  ) => {
+    let next = at(hour, minute);
+    if (min !== undefined && next < min) next = new Date(min);
+    if (max !== undefined && next > max) next = new Date(max);
+    onChange(next, { event, reason: 'time' });
   };
+  // A shown hour's (of the shown period, with 12 hours), as 0–23.
+  const hourOf = (hour: number) =>
+    twelve ? (hour % 12) + (isPm ? 12 : 0) : hour;
 
   const period = (
     <Roll.Column
       aria-label="AM/PM"
-      value={pm ? 'pm' : 'am'}
-      onValueChange={(next: RollValue) => {
-        if ((next === 'pm') === pm) return;
-        set((hours + 12) % 24, date.getMinutes());
+      value={isPm ? 'pm' : 'am'}
+      onValueChange={(next: RollValue, details: RollChangeEventDetails) => {
+        if ((next === 'pm') === isPm) return;
+        set((hours + 12) % 24, date.getMinutes(), details);
       }}
     >
-      <Roll.Item value="am">{periods[0]}</Roll.Item>
-      <Roll.Item value="pm">{periods[1]}</Roll.Item>
+      <Roll.Item
+        disabled={!isWithin(at(0, 0), at(11, 59))}
+        value="am"
+      >
+        {periods[0]}
+      </Roll.Item>
+      <Roll.Item
+        disabled={!isWithin(at(12, 0), at(23, 59))}
+        value="pm"
+      >
+        {periods[1]}
+      </Roll.Item>
     </Roll.Column>
   );
 
@@ -366,14 +425,14 @@ const TimeRoll: FunctionComponent<TimeRollProps> = ({
         align="end"
         aria-label="Hours"
         value={shownHour}
-        onValueChange={(next: RollValue) => {
-          const hour = Number(next);
-          set(twelve ? (hour % 12) + (pm ? 12 : 0) : hour, date.getMinutes());
+        onValueChange={(next: RollValue, details: RollChangeEventDetails) => {
+          set(hourOf(Number(next)), date.getMinutes(), details);
         }}
       >
         {hourValues.map((hour) => (
           <Roll.Item
             key={hour}
+            disabled={!isWithin(at(hourOf(hour), 0), at(hourOf(hour), 59))}
             value={hour}
           >
             {numbers.hour.format(hour)}
@@ -385,11 +444,14 @@ const TimeRoll: FunctionComponent<TimeRollProps> = ({
         align="start"
         aria-label="Minutes"
         value={date.getMinutes()}
-        onValueChange={(next: RollValue) => set(hours, Number(next))}
+        onValueChange={(next: RollValue, details: RollChangeEventDetails) =>
+          set(hours, Number(next), details)
+        }
       >
         {Array.from({ length: 60 }, (_, minute) => (
           <Roll.Item
             key={minute}
+            disabled={isBeyond(at(hours, minute))}
             value={minute}
           >
             {numbers.minute.format(minute)}
@@ -505,6 +567,8 @@ const useCalendarValue = (props: CalendarInternalProps) => {
     setDraggedFrom,
     setValue,
     single,
+    // (Either.)
+    value: range ?? single,
   };
 };
 
@@ -519,8 +583,8 @@ const footerOf = ({
   };
 }): CalendarFooter => {
   if (!time) return { ...footer, disabled: false };
-  const { disabled, shape, ...rest } = time;
-  return { ...footer, buttonShape: shape, disabled, time: rest };
+  const { disabled: isDisabled, shape, ...rest } = time;
+  return { ...footer, buttonShape: shape, disabled: isDisabled, time: rest };
 };
 
 /** A day's button's date (see `CalendarPanel`). */
@@ -569,6 +633,50 @@ const rangeReach = (
 const between = (a: Date, b: Date): DateRange =>
   a <= b ? { end: b, start: a } : { end: a, start: b };
 
+const twoDigits = (value: number) => String(value).padStart(2, '0');
+const isoDate = (date: Date) =>
+  `${String(date.getFullYear())}-${twoDigits(date.getMonth() + 1)}-${twoDigits(date.getDate())}`;
+const isoTime = (date: Date) =>
+  `${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())}`;
+
+/**
+ * A value as a form submits it (an input's formats; a range's interval, or
+ * nothing until its end is picked).
+ */
+const formValueOf = (
+  value: Date | DateRange | null,
+  mode: DatePickerMode = 'date',
+) => {
+  if (!value) return '';
+  if (!(value instanceof Date)) {
+    return value.end ? `${isoDate(value.start)}/${isoDate(value.end)}` : '';
+  }
+  if (mode === 'time') return isoTime(value);
+  if (mode === 'dateAndTime') return `${isoDate(value)}T${isoTime(value)}`;
+  return isoDate(value);
+};
+
+/**
+ * Its value's hidden control (Base UI's field control): submitted by its
+ * `name`, or, in a Base UI `Field`, as the field's.
+ */
+const FormValue: FunctionComponent<{
+  form?: string;
+  /** Not rendered (e.g. by the picker's calendar, the picker's is). */
+  isOmitted?: boolean;
+  mode?: DatePickerMode;
+  name?: string;
+  value: Date | DateRange | null;
+}> = ({ form, mode, name, isOmitted = false, value }) =>
+  isOmitted ? null : (
+    <BaseField.Control
+      form={form}
+      name={name}
+      type="hidden"
+      value={formValueOf(value, mode)}
+    />
+  );
+
 /** The calendar (Figma “Style=Inline”), with an optional time row. */
 const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   const {
@@ -592,6 +700,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     setDraggedFrom,
     setValue,
     single,
+    value,
   } = useCalendarValue(props);
 
   const today = startOfDay(new Date());
@@ -604,11 +713,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   const [rolled, setRolled] = useState<'monthYear' | 'time' | undefined>(
     props.initialRoll,
   );
-  // The month slid out while another slides in (see below).
-  const [leaving, setLeaving] = useState<
-    { direction: number; month: Date } | undefined
-  >(undefined);
-  const leavingRef = useRef<HTMLDivElement>(null);
+  const swipes = swipeOf(props.swipe, Boolean(props.range));
   const pagesRef = useRef<HTMLDivElement>(null);
   const daysRef = useRef<HTMLDivElement>(null);
   const focusNext = useRef<Date | undefined>(undefined);
@@ -675,64 +780,69 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     day.focus();
   });
 
-  // Months of more or fewer weeks: the days' height transitions.
-  useLayoutEffect(() => {
-    const { current: days } = daysRef;
-    if (!days) return;
-    const next = days.offsetHeight;
-    const previous = height.current;
-    height.current = next;
-    if (previous === undefined || previous === next) return;
-
-    // Clipped meanwhile (not at rest: it'd clip the focus rings).
-    days.style.overflow = 'clip';
-    const animation = days.animate(
-      [{ height: `${String(previous)}px` }, { height: `${String(next)}px` }],
-      { duration: 300, easing: 'ease' },
-    );
-    animation.finished
-      .then(() => days.style.removeProperty('overflow'))
-      .catch(() => days.style.removeProperty('overflow'));
-  }, [month, weekStart]);
-
-  // Months slide in from the side they're in (next: the inline end), the
-  // previous one sliding out (as iOS's).
-  const goTo = (next: Date) => {
-    const target = startOfMonth(next);
-    const direction = Math.sign(target.getTime() - month.getTime());
-    if (direction === 0) return;
-    setLeaving({ direction, month });
-    setMonth(target);
-  };
-
+  // The strip as high as the shown month's days (its neighbours' clipped),
+  // as they're laid out (not while hidden, e.g. in a closed row: none).
   useLayoutEffect(() => {
     const { current: days } = daysRef;
     const { current: pages } = pagesRef;
-    const { current: page } = leavingRef;
-    if (!leaving || !days || !pages || !page) return undefined;
-
-    const rtl = getComputedStyle(pages).direction === 'rtl' ? -1 : 1;
-    const shift = (fraction: number) =>
-      `translateX(${String(fraction * leaving.direction * rtl * 100)}%)`;
-    const options = { duration: 300, easing: 'ease' };
-    pages.style.overflow = 'clip';
-    const animations = [
-      days.animate([{ transform: shift(1) }, { transform: 'none' }], options),
-      page.animate([{ transform: 'none' }, { transform: shift(-1) }], options),
-    ];
-    const [incoming] = animations;
-    incoming?.finished
-      .then(() => {
-        pages.style.removeProperty('overflow');
-        setLeaving(undefined);
-      })
-      .catch(() => undefined);
-
-    return () => {
-      for (const animation of animations) animation.cancel();
-      pages.style.removeProperty('overflow');
+    if (!days || !pages) return undefined;
+    const fit = () => {
+      if (days.offsetHeight === 0) return;
+      height.current = days.offsetHeight;
+      pages.style.height = `${String(days.offsetHeight)}px`;
     };
-  }, [leaving]);
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(days);
+    return () => observer.disconnect();
+  }, [month]);
+
+  // The months side by side, scrolled sideways (see pager.ts): turned to,
+  // by scrolling, its day focused.
+  const isPreviousDisabled = Boolean(
+    min && addDays(startOfMonth(month), -1) < startOfDay(min),
+  );
+  const isNextDisabled = Boolean(
+    max && startOfMonth(addMonths(month, 1)) > startOfDay(max),
+  );
+  const pager = useMonthPager({
+    // A month's neighbour, not beyond the limits (as the arrows').
+    beside: (shown, step) => {
+      const at = startOfMonth(addMonths(shown, step));
+      const last = addDays(startOfMonth(addMonths(at, 1)), -1);
+      if (min && last < startOfDay(min)) return undefined;
+      if (max && at > startOfDay(max)) return undefined;
+      return at;
+    },
+    isDraggable: swipes === 'month',
+    isInstant: rolled !== undefined,
+    month,
+    onTurn: (next, isScrolled) => {
+      setMonth(next);
+      if (isScrolled) setFocused(clampDay(next, min, max));
+    },
+    pagesRef,
+  });
+  const { goTo } = pager;
+
+  // Months of more or fewer weeks: once settled on one (not while
+  // scrolled: a native touch drag would falter), the strip's height
+  // transitioning (between heights laid out).
+  useLayoutEffect(() => {
+    const { current: days } = daysRef;
+    const { current: pages } = pagesRef;
+    if (!days || !pages) return;
+    const next = days.offsetHeight;
+    const previous = height.current;
+    if (next === 0) return;
+    height.current = next;
+    pages.style.height = `${String(next)}px`;
+    if (previous === undefined || previous === next) return;
+    pages.animate(
+      [{ height: `${String(previous)}px` }, { height: `${String(next)}px` }],
+      { duration: 300, easing: 'ease' },
+    );
+  }, [month, weekStart]);
 
   // Moved by keyboard: on past disabled days (in the direction moved), to
   // one that can be focused.
@@ -750,18 +860,25 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     focusNext.current = target;
   };
 
-  const changeTime = (date: Date) => {
+  const changeTime = (date: Date, details: DatePickerChangeEventDetails) => {
     setValue(date);
-    if (!props.range) props.onValueChange?.(date);
+    if (!props.range) props.onValueChange?.(date, details);
   };
 
-  const commitRange = (next: DateRange) => {
+  const commitRange = (
+    next: DateRange,
+    details: DatePickerChangeEventDetails,
+  ) => {
     if (!props.range) return;
     setValue(next);
-    props.onValueChange?.(next);
+    props.onValueChange?.(next, details);
   };
 
-  const select = (date: Date, withTime = false) => {
+  const select = (
+    date: Date,
+    hasTime: boolean,
+    details: DatePickerChangeEventDetails,
+  ) => {
     setFocused(startOfDay(date));
 
     if (props.range) {
@@ -771,26 +888,28 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
         !range || range.end || !reachable(date)
           ? { end: null, start: date }
           : between(range.start, date),
+        details,
       );
       return;
     }
 
     // Keeps the time of an earlier value (unless taking the date's).
     const next = new Date(date);
-    if (single && !withTime) {
+    if (single && !hasTime) {
       next.setHours(single.getHours(), single.getMinutes(), 0, 0);
     }
     setValue(next);
-    props.onValueChange?.(next);
+    props.onValueChange?.(next, details);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+    const isRightToLeft =
+      getComputedStyle(event.currentTarget).direction === 'rtl';
     const column = (focused.getDay() - weekStart + 7) % 7;
     const moves: Record<string, () => Date> = {
       ArrowDown: () => addDays(focused, 7),
-      ArrowLeft: () => addDays(focused, rtl ? 1 : -1),
-      ArrowRight: () => addDays(focused, rtl ? -1 : 1),
+      ArrowLeft: () => addDays(focused, isRightToLeft ? 1 : -1),
+      ArrowRight: () => addDays(focused, isRightToLeft ? -1 : 1),
       ArrowUp: () => addDays(focused, -7),
       End: () => addDays(focused, 6 - column),
       Home: () => addDays(focused, -column),
@@ -807,13 +926,13 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   // Ranges are also dragged into existence: from the day pressed to the day
   // under the pointer, picked on release (taps pick start and end).
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (!props.range || event.button !== 0) return;
+    if (swipes !== 'date-range' || event.button !== 0) return;
     const from = dayOf(event.target);
     if (!from || !enabled(from)) return;
     drag.current = {
       edge: 0,
       from,
-      moved: false,
+      isMoved: false,
       reachable: reachOf(from),
       x: event.clientX,
       y: event.clientY,
@@ -846,16 +965,17 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (swipes !== 'date-range') return;
     const { current: dragging } = drag;
     if (!dragging) return;
-    if (!dragging.moved) {
+    if (!dragging.isMoved) {
       if (
         Math.hypot(event.clientX - dragging.x, event.clientY - dragging.y) < 6
       ) {
         return;
       }
       // Moves beyond the days are its own, too (the edges, see turnPage).
-      dragging.moved = true;
+      dragging.isMoved = true;
       event.currentTarget.setPointerCapture(event.pointerId);
       setDraggedFrom(dragging.from);
       setDragged(between(dragging.from, dragging.from));
@@ -866,17 +986,24 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     // first: back.
     const { bottom, left, right, top } =
       event.currentTarget.getBoundingClientRect();
-    const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+    const isRightToLeft =
+      getComputedStyle(event.currentTarget).direction === 'rtl';
     const under = document.elementFromPoint(event.clientX, event.clientY);
     const outside =
       under instanceof Element
         ? under.closest<HTMLElement>('[data-outside]')?.dataset.outside
         : undefined;
-    const beyondEnd = rtl ? event.clientX < left : event.clientX > right;
-    const beyondStart = rtl ? event.clientX > right : event.clientX < left;
-    const after = event.clientY > bottom || beyondEnd || outside === 'after';
-    const before = event.clientY < top || beyondStart || outside === 'before';
-    turnPage(Number(after) - Number(before));
+    const isBeyondEnd = isRightToLeft
+      ? event.clientX < left
+      : event.clientX > right;
+    const isBeyondStart = isRightToLeft
+      ? event.clientX > right
+      : event.clientX < left;
+    const isAfter =
+      event.clientY > bottom || isBeyondEnd || outside === 'after';
+    const isBefore =
+      event.clientY < top || isBeyondStart || outside === 'before';
+    turnPage(Number(isAfter) - Number(isBefore));
 
     const over = dayOf(under);
     if (!over || !selectable(over) || !dragging.reachable(over)) return;
@@ -884,12 +1011,13 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     setFocused(over);
   };
 
-  const onPointerEnd = () => {
+  const onPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+    if (swipes !== 'date-range') return;
     const { current: dragging } = drag;
     clearTimeout(dragging?.timer);
     drag.current = undefined;
     setDraggedFrom(null);
-    if (!dragging?.moved || !dragged) {
+    if (!dragging?.isMoved || !dragged) {
       setDragged(null);
       return;
     }
@@ -899,20 +1027,13 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
       suppressClick.current = false;
     });
     setDragged(null);
-    commitRange(dragged);
+    commitRange(dragged, { event, reason: 'drag' });
   };
 
   const showMonth = (next: Date) => {
     goTo(next);
     setFocused(clampDay(next, min, max));
   };
-
-  const previousDisabled = Boolean(
-    min && addDays(startOfMonth(month), -1) < startOfDay(min),
-  );
-  const nextDisabled = Boolean(
-    max && startOfMonth(addMonths(month, 1)) > startOfDay(max),
-  );
 
   const toggle = (roll: 'monthYear' | 'time') => {
     const next = rolled === roll ? undefined : roll;
@@ -925,7 +1046,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   // A day of the grid of `shown` (the month, or the one sliding out, not
   // `interactive`): another month's is blank, or grayed out (see
   // `showAdjacentMonths`); either is marked `data-outside`, for drags.
-  const cell = (day: Date, shown: Date, interactive: boolean) => {
+  const cell = (day: Date, shown: Date, isInteractive: boolean) => {
     const outsideOf = day < shown ? 'before' : ('after' as 'after' | 'before');
     const outside = day.getMonth() === shown.getMonth() ? undefined : outsideOf;
     if (outside && !showAdjacentMonths) {
@@ -951,15 +1072,15 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
       <button
         key={day.getTime()}
         aria-current={isSameDay(day, today) ? 'date' : undefined}
-        aria-label={interactive ? formats.full.format(day) : undefined}
-        data-date={interactive ? day.getTime() : undefined}
+        aria-label={isInteractive ? formats.full.format(day) : undefined}
+        data-date={isInteractive ? day.getTime() : undefined}
         {...attributes}
         className="uikit-date-picker-day"
         data-date-picker-part="day"
         data-outside={outside}
         data-range={rangePlace(day, range)}
         disabled={!enabled(day)}
-        tabIndex={interactive && !outside && isSameDay(day, focused) ? 0 : -1}
+        tabIndex={isInteractive && !outside && isSameDay(day, focused) ? 0 : -1}
         type="button"
         aria-pressed={
           range ? rangePlace(day, range) !== undefined : isSameDay(day, single)
@@ -968,14 +1089,14 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
           (!outside && highlightedWeekdays.includes(day.getDay())) || undefined
         }
         onClick={
-          interactive
-            ? () => {
+          isInteractive
+            ? (event: MouseEvent<HTMLButtonElement>) => {
                 // Another month's day: shows its month (not selected).
                 if (outside) {
                   showMonth(day);
                   return;
                 }
-                select(day);
+                select(day, false, { event, reason: 'day-press' });
               }
             : undefined
         }
@@ -998,9 +1119,12 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
 
   const footerContent = props.footer?.(
     footerOf({
-      select: (date, withTime) => {
+      select: (date, hasTime = false) => {
         goTo(date);
-        select(withTime ? date : startOfDay(date), withTime);
+        select(hasTime ? date : startOfDay(date), hasTime, {
+          event: new Event('select'),
+          reason: 'footer',
+        });
       },
       show: (date) => {
         goTo(date);
@@ -1015,6 +1139,21 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
       },
       value: range ?? single,
     }),
+  );
+
+  // A neighbour's page (see pager.ts): its days, not interactive.
+  const neighbour = (shown: Date) => (
+    <div
+      key={shown.getTime()}
+      inert
+      aria-hidden="true"
+      className="uikit-date-picker-weeks"
+      data-date-picker-part="weeks"
+    >
+      {monthWeeks(shown, weekStart)
+        .flat()
+        .map((day) => cell(day, shown, false))}
+    </div>
   );
 
   return (
@@ -1046,7 +1185,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
             type="button"
             onClick={() => toggle('monthYear')}
           >
-            {formats.month.format(month)}
+            {formats.month.format(pager.shown)}
             <Disclosure />
           </button>
         </h2>
@@ -1061,21 +1200,21 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
             aria-label="Previous month"
             className="uikit-date-picker-arrow"
             data-date-picker-part="arrow"
-            disabled={previousDisabled}
+            disabled={isPreviousDisabled}
             shape="circle"
-            onClick={() => showMonth(addMonths(month, -1))}
+            onClick={() => showMonth(addMonths(pager.shown, -1))}
           >
-            <Chevron next={false} />
+            <Chevron isNext={false} />
           </Button.Root>
           <Button.Root
             aria-label="Next month"
             className="uikit-date-picker-arrow"
             data-date-picker-part="arrow"
-            disabled={nextDisabled}
+            disabled={isNextDisabled}
             shape="circle"
-            onClick={() => showMonth(addMonths(month, 1))}
+            onClick={() => showMonth(addMonths(pager.shown, 1))}
           >
-            <Chevron next />
+            <Chevron isNext />
           </Button.Root>
         </div>
       </div>
@@ -1103,58 +1242,47 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
             </abbr>
           ))}
         </div>
-        {/* The month's days, and, while changing months, the previous one's,
-           sliding out (see CalendarPanel). */}
+        {/* The month's days between its neighbours', scrolled sideways (see
+           pager.ts). */}
         <div
           ref={pagesRef}
           className="uikit-date-picker-pages"
           data-date-picker-part="pages"
+          data-swipe={swipes}
         >
-          {leaving ? (
-            <div
-              ref={leavingRef}
-              inert
-              aria-hidden="true"
-              className="uikit-date-picker-leaving-page"
-              data-date-picker-part="leaving-page"
-            >
-              {/* Figma “Calendar”: 3px above, weeks 7px apart. */}
+          {pager.months.map((shown) =>
+            shown.getTime() === month.getTime() ? (
               <div
+                key={shown.getTime()}
+                ref={daysRef}
+                aria-label={label}
+                aria-labelledby={label ? undefined : titleId}
                 className="uikit-date-picker-weeks"
                 data-date-picker-part="weeks"
+                data-swipe={swipes}
+                role="group"
+                onKeyDown={onKeyDown}
+                onPointerCancel={onPointerEnd}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerEnd}
+                onClickCapture={(event: MouseEvent<HTMLDivElement>) => {
+                  if (!suppressClick.current) return;
+                  suppressClick.current = false;
+                  event.stopPropagation();
+                }}
+                onFocus={(event: FocusEvent<HTMLDivElement>) => {
+                  // The day focused (e.g. pressed): keys move on from it.
+                  const day = dayOf(event.target);
+                  if (day && !isSameDay(day, focused)) setFocused(day);
+                }}
               >
-                {monthWeeks(leaving.month, weekStart)
-                  .flat()
-                  .map((day) => cell(day, leaving.month, false))}
+                {weeks.flat().map((day) => cell(day, month, true))}
               </div>
-            </div>
-          ) : null}
-          <div
-            ref={daysRef}
-            aria-label={label}
-            aria-labelledby={label ? undefined : titleId}
-            className="uikit-date-picker-weeks"
-            data-date-picker-part="weeks"
-            data-range-drag={props.range ? '' : undefined}
-            role="group"
-            onKeyDown={onKeyDown}
-            onPointerCancel={onPointerEnd}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerEnd}
-            onClickCapture={(event: MouseEvent<HTMLDivElement>) => {
-              if (!suppressClick.current) return;
-              suppressClick.current = false;
-              event.stopPropagation();
-            }}
-            onFocus={(event: FocusEvent<HTMLDivElement>) => {
-              // The day focused (e.g. pressed): keys move on from it.
-              const day = dayOf(event.target);
-              if (day && !isSameDay(day, focused)) setFocused(day);
-            }}
-          >
-            {weeks.flat().map((day) => cell(day, month, true))}
-          </div>
+            ) : (
+              neighbour(shown)
+            ),
+          )}
         </div>
         {rolled === undefined ? null : (
           <div
@@ -1174,6 +1302,8 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
               <TimeRoll
                 hourCycle={hourCycle}
                 locale={locale}
+                max={max}
+                min={min}
                 value={single}
                 onValueChange={changeTime}
               />
@@ -1191,6 +1321,12 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
           {footerContent}
         </>
       )}
+      <FormValue
+        form={props.form}
+        isOmitted={props.formControl === false}
+        name={props.name}
+        value={value}
+      />
     </div>
   );
 };
@@ -1258,15 +1394,21 @@ const Calendar: FunctionComponent<CalendarProps & { label?: string }> = (
 /** The calendar's props, of the picker's (its value, and its changes). */
 const calendarPropsOf = (
   props: DatePickerProps,
-  change: (next: Date | DateRange) => void,
+  change: (
+    next: Date | DateRange,
+    details: DatePickerChangeEventDetails,
+  ) => void,
   value: Date | DateRange | null,
 ): CalendarInternalProps => {
   const shared = {
+    // (The picker renders its own.)
+    formControl: false,
     firstDayOfWeek: props.firstDayOfWeek,
     highlighted: props.highlighted,
     highlightedWeekdays: props.highlightedWeekdays,
     isDateDisabled: props.isDateDisabled,
     showAdjacentMonths: props.showAdjacentMonths,
+    swipe: props.swipe,
     hourCycle: props.hourCycle,
     locale: props.locale,
     max: props.max,
@@ -1291,11 +1433,16 @@ const usePickerValue = (props: DatePickerProps) => {
   );
 
   // Only changed to the kind of value it has (a date or a range).
-  const change = (next: Date | DateRange) => {
+  const change = (
+    next: Date | DateRange,
+    details: DatePickerChangeEventDetails,
+  ) => {
     setValue(next);
-    (props.onValueChange as ((changed: typeof next) => void) | undefined)?.(
-      next,
-    );
+    (
+      props.onValueChange as
+        | ((changed: typeof next, eventDetails: typeof details) => void)
+        | undefined
+    )?.(next, details);
   };
 
   return {
@@ -1312,9 +1459,12 @@ const usePickerOpen = (props: DatePickerProps) => {
     props.defaultOpen ?? null,
   );
 
-  const change = (next: DatePickerOpen | null) => {
+  const change = (
+    next: DatePickerOpen | null,
+    details: DatePickerOpenChangeEventDetails,
+  ) => {
     setOpen(next);
-    props.onOpenChange?.(next);
+    props.onOpenChange?.(next, details);
   };
 
   return [open, change] as const;
@@ -1329,23 +1479,26 @@ const defaultFooter = (calendar: CalendarFooter) => (
 const TimePopover: FunctionComponent<
   TimeRollProps & {
     align?: PopoverAlign;
-    disabled: boolean;
+    isDisabled: boolean;
+    isOpen: boolean;
     label: string;
-    onOpenChange: (open: boolean) => void;
-    open: boolean;
+    onOpenChange: (
+      isOpen: boolean,
+      details: BasePopover.Root.ChangeEventDetails,
+    ) => void;
     shape?: DatePickerProps['buttonShape'];
   }
-> = ({ align, disabled, label, onOpenChange, open, shape, ...props }) => {
+> = ({ align, isDisabled, label, onOpenChange, isOpen, shape, ...props }) => {
   const popupRef = useRef<HTMLDivElement>(null);
 
   return (
     <Popover.Root
-      open={open}
+      open={isOpen}
       onOpenChange={onOpenChange}
     >
       <Popover.Trigger
         aria-label="Time"
-        disabled={disabled}
+        disabled={isDisabled}
         render={<CollapsedButton shape={shape} />}
       >
         {label}
@@ -1402,11 +1555,14 @@ const CalendarPopover: FunctionComponent<{
   align?: PopoverAlign;
   children: (
     initialRoll: 'time' | undefined,
-    onTimeShownChange: (shown: boolean) => void,
+    onTimeShownChange: (isShown: boolean) => void,
   ) => ReactNode;
   dateLabel: string;
-  disabled: boolean;
-  onOpenChange: (open: DatePickerOpen | null) => void;
+  isDisabled: boolean;
+  onOpenChange: (
+    open: DatePickerOpen | null,
+    details: DatePickerOpenChangeEventDetails,
+  ) => void;
   open: DatePickerOpen | null;
   shape?: DatePickerProps['buttonShape'];
   timeLabel?: string;
@@ -1414,7 +1570,7 @@ const CalendarPopover: FunctionComponent<{
   align,
   children,
   dateLabel,
-  disabled,
+  isDisabled,
   onOpenChange,
   open,
   shape,
@@ -1426,11 +1582,11 @@ const CalendarPopover: FunctionComponent<{
   const hasTime = timeLabel !== undefined;
   // The time's button is the open one while the time's roll shows (however
   // it was opened, or shown), the date's otherwise.
-  const [timeShown, setTimeShown] = useState(open === 'time');
+  const [isTimeShown, setIsTimeShown] = useState(open === 'time');
   const [openBefore, setOpenBefore] = useState(open);
   if (open !== openBefore) {
     setOpenBefore(open);
-    setTimeShown(open === 'time');
+    setIsTimeShown(open === 'time');
   }
 
   // Positioned at both buttons together, whichever opened it.
@@ -1443,20 +1599,20 @@ const CalendarPopover: FunctionComponent<{
     >
       <Popover.Root
         open={open === 'date' || (hasTime && open === 'time')}
-        triggerId={hasTime && timeShown ? timeTriggerId : dateTriggerId}
-        onOpenChange={(next: boolean, { event }) => {
+        triggerId={hasTime && isTimeShown ? timeTriggerId : dateTriggerId}
+        onOpenChange={(isOpen: boolean, { event, reason }) => {
           const trigger =
             event.target instanceof Element
               ? event.target.closest<HTMLElement>('[data-date-picker-trigger]')
               : null;
           const picker =
             trigger?.dataset.datePickerTrigger === 'time' ? 'time' : 'date';
-          onOpenChange(next ? picker : null);
+          onOpenChange(isOpen ? picker : null, { event, reason });
         }}
       >
         <Popover.Trigger
           data-date-picker-trigger="date"
-          disabled={disabled}
+          disabled={isDisabled}
           id={dateTriggerId}
           render={<CollapsedButton shape={shape} />}
         >
@@ -1466,7 +1622,7 @@ const CalendarPopover: FunctionComponent<{
           <Popover.Trigger
             aria-label="Time"
             data-date-picker-trigger="time"
-            disabled={disabled}
+            disabled={isDisabled}
             id={timeTriggerId}
             render={<CollapsedButton shape={shape} />}
           >
@@ -1484,7 +1640,7 @@ const CalendarPopover: FunctionComponent<{
               data-date-picker-part="popup"
             >
               <Fragment key={open ?? 'closed'}>
-                {children(open === 'time' ? 'time' : undefined, setTimeShown)}
+                {children(open === 'time' ? 'time' : undefined, setIsTimeShown)}
               </Fragment>
             </Popover.Popup>
           </Popover.Positioner>
@@ -1497,26 +1653,45 @@ const CalendarPopover: FunctionComponent<{
 /** The compact style's buttons, toggling `open` (without popovers). */
 const ToggleButtons: FunctionComponent<{
   dateLabel?: string;
-  disabled: boolean;
-  onOpenChange: (open: DatePickerOpen | null) => void;
+  isDisabled: boolean;
+  onOpenChange: (
+    open: DatePickerOpen | null,
+    details: DatePickerOpenChangeEventDetails,
+  ) => void;
   open: DatePickerOpen | null;
   shape?: DatePickerProps['buttonShape'];
   timeLabel?: string;
-}> = ({ dateLabel, disabled, onOpenChange, open, shape, timeLabel }) => {
-  const toggle = (picker: DatePickerOpen) =>
-    onOpenChange(open === picker ? null : picker);
+}> = ({ dateLabel, isDisabled, onOpenChange, open, shape, timeLabel }) => {
+  const toggle = (picker: DatePickerOpen, event: Event) =>
+    onOpenChange(open === picker ? null : picker, {
+      event,
+      reason: 'trigger-press',
+    });
+
+  // Disabled while open (`isDisabled`, or from around it: e.g. a disabled
+  // fieldset's): closed (with a handle, its rows).
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (open === null) return;
+    const button = ref.current?.querySelector('button');
+    if (!isDisabled && !button?.matches(':disabled')) return;
+    onOpenChange(null, { event: new Event('disable'), reason: 'none' });
+  });
 
   return (
     <div
+      ref={ref}
       className="uikit-date-picker-collapsed"
       data-date-picker-part="collapsed"
     >
       {dateLabel === undefined ? null : (
         <CollapsedButton
           aria-expanded={open === 'date'}
-          disabled={disabled}
+          disabled={isDisabled}
           shape={shape}
-          onClick={() => toggle('date')}
+          onClick={(event: MouseEvent<HTMLButtonElement>) =>
+            toggle('date', event)
+          }
         >
           {dateLabel}
         </CollapsedButton>
@@ -1525,9 +1700,11 @@ const ToggleButtons: FunctionComponent<{
         <CollapsedButton
           aria-expanded={open === 'time'}
           aria-label="Time"
-          disabled={disabled}
+          disabled={isDisabled}
           shape={shape}
-          onClick={() => toggle('time')}
+          onClick={(event: MouseEvent<HTMLButtonElement>) =>
+            toggle('time', event)
+          }
         >
           {timeLabel}
         </CollapsedButton>
@@ -1537,12 +1714,54 @@ const ToggleButtons: FunctionComponent<{
 };
 
 /**
+ * A picker in collapsible list rows (see `List.CollapsiblePanel`): closed
+ * with them. With a handle, in a collapsible (e.g. a `List.AccordionItem`,
+ * with its row and `Expandable`): open with it, opening it, closed with it
+ * (e.g. another item opening).
+ */
+const useListSync = (
+  handle: DatePickerProps['handle'],
+  open: DatePickerOpen | null,
+  changeOpen: ReturnType<typeof usePickerOpen>[1],
+) => {
+  const isShown = useExpandedOpen();
+  const collapsible = useCollapsible();
+  const item = handle ? collapsible : undefined;
+  const isPickerOpen = open !== null;
+  const syncRef = useRef({
+    close: () => undefined as void,
+    toggleItem: () => undefined as void,
+  });
+  useLayoutEffect(() => {
+    syncRef.current = {
+      close: () => {
+        if (open === null) return;
+        changeOpen(null, { event: new Event('close'), reason: 'none' });
+      },
+      toggleItem: () => {
+        if (!item || item.isOpen === isPickerOpen) return;
+        item.setOpen(isPickerOpen, {
+          event: new Event('toggle'),
+          reason: 'none',
+        });
+      },
+    };
+  });
+  useEffect(() => {
+    if (isShown === false || item?.isOpen === false) syncRef.current.close();
+  }, [isShown, item?.isOpen]);
+  useEffect(() => {
+    syncRef.current.toggleItem();
+  }, [isPickerOpen]);
+};
+
+/**
  * A date picker (UIKit `UIDatePicker`): a date, a time or both (`mode`), or
  * a range of dates (`range`); collapsed buttons opening the calendar or the
  * time in a popover (or toggling `open`, without `popover`), or the
  * calendar in place (`pickerStyle`).
  */
-const DatePicker: FunctionComponent<DatePickerProps> = (props) => {
+const Root: FunctionComponent<DatePickerProps> = (props) => {
   const {
     buttonShape,
     disabled = false,
@@ -1568,10 +1787,32 @@ const DatePicker: FunctionComponent<DatePickerProps> = (props) => {
 
   const calendarProps = calendarPropsOf(props, change, range ?? single);
 
+  useListSync(props.handle, open, changeOpen);
+
+  // With a handle: its pickers, for its `Expandable`.
+  const { handle } = props;
+  useLayoutEffect(() => {
+    handle?.publish({
+      calendar: hasDate ? <CalendarPanel {...calendarProps} /> : undefined,
+      open,
+      time: hasTime ? (
+        <TimeRoll
+          hourCycle={hourCycle}
+          locale={locale}
+          max={props.max}
+          min={props.min}
+          value={single}
+          onValueChange={change}
+        />
+      ) : undefined,
+    });
+  });
+  useLayoutEffect(() => () => handle?.publish(undefined), [handle]);
+
   // With a time, by default the Time row below.
   const calendar = (
     initialRoll?: 'time',
-    onTimeShownChange?: (shown: boolean) => void,
+    onTimeShownChange?: (isShown: boolean) => void,
   ) => (
     <CalendarPanel
       {...calendarProps}
@@ -1582,22 +1823,43 @@ const DatePicker: FunctionComponent<DatePickerProps> = (props) => {
     />
   );
 
-  if (pickerStyle === 'inline' && hasDate) return calendar();
+  // Its value's hidden control (see `name`), beside what it shows.
+  const formValue = (
+    <FormValue
+      form={props.form}
+      mode={props.range ? 'date' : mode}
+      name={props.name}
+      value={range ?? single}
+    />
+  );
+
+  if (pickerStyle === 'inline' && hasDate) {
+    return (
+      <>
+        {calendar()}
+        {formValue}
+      </>
+    );
+  }
 
   const dateLabel = dateLabelOf(formats.date, range, single);
   const timeLabel = single ? formats.time.format(single) : '–';
 
-  // Without popovers: buttons toggling `open` (for the app to show them).
-  if (!popover) {
+  // Without popovers: buttons toggling `open` (for the app to show them,
+  // or, with a handle, its `Expandable`).
+  if (!popover || props.handle) {
     return (
-      <ToggleButtons
-        dateLabel={hasDate ? dateLabel : undefined}
-        disabled={disabled}
-        open={open}
-        shape={buttonShape}
-        timeLabel={hasTime ? timeLabel : undefined}
-        onOpenChange={changeOpen}
-      />
+      <>
+        <ToggleButtons
+          dateLabel={hasDate ? dateLabel : undefined}
+          isDisabled={disabled}
+          open={open}
+          shape={buttonShape}
+          timeLabel={hasTime ? timeLabel : undefined}
+          onOpenChange={changeOpen}
+        />
+        {formValue}
+      </>
     );
   }
 
@@ -1607,45 +1869,95 @@ const DatePicker: FunctionComponent<DatePickerProps> = (props) => {
         className="uikit-date-picker-collapsed"
         data-date-picker-part="collapsed"
       >
+        {formValue}
         <TimePopover
           align={props.popoverAlign}
-          disabled={disabled}
           hourCycle={hourCycle}
+          isDisabled={disabled}
+          isOpen={open === 'time'}
           label={timeLabel}
           locale={locale}
-          open={open === 'time'}
+          max={props.max}
+          min={props.min}
           shape={buttonShape}
           value={single}
-          onOpenChange={(next) => changeOpen(next ? 'time' : null)}
           onValueChange={change}
+          onOpenChange={(isOpen, { event, reason }) =>
+            changeOpen(isOpen ? 'time' : null, { event, reason })
+          }
         />
       </div>
     );
   }
 
   return (
-    <CalendarPopover
-      align={props.popoverAlign}
-      dateLabel={dateLabel}
-      disabled={disabled}
-      open={open}
-      shape={buttonShape}
-      timeLabel={hasTime ? timeLabel : undefined}
-      onOpenChange={changeOpen}
-    >
-      {(initialRoll, onTimeShownChange) =>
-        calendar(initialRoll, onTimeShownChange)
-      }
-    </CalendarPopover>
+    <>
+      <CalendarPopover
+        align={props.popoverAlign}
+        dateLabel={dateLabel}
+        isDisabled={disabled}
+        open={open}
+        shape={buttonShape}
+        timeLabel={hasTime ? timeLabel : undefined}
+        onOpenChange={changeOpen}
+      >
+        {(initialRoll, onTimeShownChange) =>
+          calendar(initialRoll, onTimeShownChange)
+        }
+      </CalendarPopover>
+      {formValue}
+    </>
   );
 };
 
-export {
+/**
+ * A date picker's pickers in place (see `Root` `handle`): its calendar and
+ * time roll, each in collapsible list rows (`List.CollapsiblePanel`),
+ * opened by its buttons; placed after the picker's row (as iOS's
+ * Calendar). In an `List.AccordionItem` (with its row), one of its items.
+ */
+const Expandable: FunctionComponent<DatePickerExpandableProps> = ({
+  handle,
+}) => {
+  const { calendar, open, time } = useSyncExternalStore(
+    handle.subscribe,
+    handle.getSnapshot,
+  );
+
+  return (
+    <>
+      {calendar === undefined ? null : (
+        <List.CollapsibleRoot open={open === 'date'}>
+          <List.CollapsiblePanel>
+            <List.Item>
+              <List.Span>{calendar}</List.Span>
+            </List.Item>
+          </List.CollapsiblePanel>
+        </List.CollapsibleRoot>
+      )}
+      {time === undefined ? null : (
+        <List.CollapsibleRoot open={open === 'time'}>
+          <List.CollapsiblePanel>
+            <List.Item>
+              <List.Span>{time}</List.Span>
+            </List.Item>
+          </List.CollapsiblePanel>
+        </List.CollapsibleRoot>
+      )}
+    </>
+  );
+};
+
+export { DatePickerHandle, useCreateDatePickerHandle } from './handle.js';
+
+export const DatePicker = {
+  Root,
+  Expandable,
+  createHandle,
   Calendar,
-  CalendarButton,
-  CalendarMessage,
   CalendarRow,
+  CalendarButton,
   CalendarTimeRow,
-  DatePicker,
+  CalendarMessage,
   TimeRoll,
 };

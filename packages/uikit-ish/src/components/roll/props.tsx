@@ -2,14 +2,25 @@ import type { ComponentProps } from 'react';
 
 export type RollValue = number | string;
 
+/**
+ * What changed a column's selection (or highlight), and the event that
+ * started it: a scroll (touch, wheel, a drag), a key, a press on a row, or
+ * a typed value. Selections commit once the column settles, so `event` can
+ * be some time past.
+ */
+export type RollChangeEventDetails = {
+  event: Event;
+  reason: 'input' | 'item-press' | 'keyboard' | 'scroll';
+};
+
 export type Entry = { disabled: boolean; value: RollValue };
 
 export type ColumnContextValue = {
-  editing: boolean;
   entries: WeakMap<Element, Entry>;
   /** The id of a row by its value. */
   idOf: (value: RollValue) => string;
-  select: (element: HTMLElement) => void;
+  isEditing: boolean;
+  select: (element: HTMLElement, event: Event) => void;
   selected: RollValue | undefined;
 };
 
@@ -36,16 +47,29 @@ export type RollColumnProps = Omit<
    * last row, the first follows, and so on.
    */
   loop?: boolean;
-  /** Called as rows pass the center while scrolling (e.g. for haptics). */
-  onHighlightChange?: (value: RollValue) => void;
-  /** Called with the newly selected value, once the column settled. */
-  onValueChange?: (value: RollValue) => void;
+  /**
+   * Called as rows pass the center while scrolling (e.g. for haptics), and
+   * why (see `onValueChange`).
+   */
+  onHighlightChange?: (
+    value: RollValue,
+    eventDetails: RollChangeEventDetails,
+  ) => void;
+  /**
+   * Called with the newly selected value, once the column settled, and why
+   * (`reason`): `scroll` (touch, wheel, a drag), `keyboard`, `item-press`,
+   * or `input` (a typed value).
+   */
+  onValueChange?: (
+    value: RollValue,
+    eventDetails: RollChangeEventDetails,
+  ) => void;
   /** The selected value (controlled). */
   value?: RollValue;
 };
 
 export type Drag = {
-  moved: boolean;
+  isMoved: boolean;
   pointerId: number;
   samples: { time: number; y: number }[];
   startTop: number;

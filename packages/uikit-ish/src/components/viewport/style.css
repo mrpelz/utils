@@ -1,13 +1,54 @@
 /* Viewport (see main.tsx). */
 @layer uikit-ish {
+  /* The content's edge (see padding.tsx): room for the anchors, as high
+     as they are, and the content margin (UIKit's layout margins: the
+     library's gap between content and its container's edge, by token; a
+     `margin` prop, inline, overrides it). None before a large title (it
+     sits right under the bar). */
+  .uikit-viewport-padding {
+    --uikit-viewport-padding-margin: var(
+      --uikit-content-margin-block-start,
+      16px
+    );
+
+    height: calc(
+      var(--uikit-viewport-padding-size, 0px) +
+        var(--uikit-viewport-overscroll-room) +
+        var(--uikit-viewport-padding-margin)
+    );
+
+    /* (Room for open overscroll areas, see `Overscroll`: settling.) */
+    transition: --uikit-viewport-overscroll-room 300ms ease;
+
+    &[data-edge='block-end'] {
+      --uikit-viewport-padding-margin: var(
+        --uikit-content-margin-block-end,
+        16px
+      );
+    }
+
+    &[data-edge='block-start']:has(+ .uikit-header-large-title) {
+      --uikit-viewport-padding-margin: 0px;
+    }
+  }
+
+  /* A content layer's being moved along (see below): its own only. */
+  .uikit-viewport-content > * {
+    --uikit-viewport-bounce: initial;
+  }
+
   /* The safe area insets kept clear (`data-safe-area`), as padding; at the
      bottom, less what the keyboard covers (where it's kept clear of). */
   .uikit-viewport-anchor,
-  .uikit-viewport-content {
-    --uikit-viewport-safe-top: env(safe-area-inset-top, 0px);
-    --uikit-viewport-safe-right: env(safe-area-inset-right, 0px);
-    --uikit-viewport-safe-bottom: env(safe-area-inset-bottom, 0px);
-    --uikit-viewport-safe-left: env(safe-area-inset-left, 0px);
+  .uikit-viewport-content,
+  .uikit-viewport-overscroll {
+    /* Following the keyboard as it shows or hides (iOS: about 250ms, easing
+       out; the visual viewport's change arrives once, at its end). */
+    --uikit-viewport-keyboard-transition: 250ms cubic-bezier(0.2, 0.9, 0.3, 1);
+    --uikit-viewport-safe-top: var(--uikit-safe-area-inset-top, 0px);
+    --uikit-viewport-safe-right: var(--uikit-safe-area-inset-right, 0px);
+    --uikit-viewport-safe-bottom: var(--uikit-safe-area-inset-bottom, 0px);
+    --uikit-viewport-safe-left: var(--uikit-safe-area-inset-left, 0px);
     --uikit-viewport-safe-bottom-keyboard: max(
       0px,
       var(--uikit-viewport-safe-bottom) -
@@ -28,6 +69,17 @@
       --uikit-viewport-safe-top: 0px;
       --uikit-viewport-safe-bottom: 0px;
     }
+
+    /* Kept clear: none left for its content (e.g. a page in it). */
+    &:not([data-safe-area='inline'], [data-safe-area='none']) > * {
+      --uikit-safe-area-inset-top: 0px;
+      --uikit-safe-area-inset-bottom: 0px;
+    }
+
+    &:not([data-safe-area='block'], [data-safe-area='none']) > * {
+      --uikit-safe-area-inset-right: 0px;
+      --uikit-safe-area-inset-left: 0px;
+    }
   }
 
   /* At an edge (`data-edge`): bars at the top and bottom (pushed up by the
@@ -35,6 +87,12 @@
      keyboard's top. */
   .uikit-viewport-anchor {
     z-index: 10;
+
+    /* A layer of its own: Safari paints a composited scroller's content (the
+       content layer's) above uncomposited later siblings, their z-index
+       notwithstanding (e.g. within a transformed ancestor, where fixed is
+       not composited as such). */
+    transform: translateZ(0);
 
     &[data-edge='block-start'] {
       top: var(--uikit-viewport-top, 0);
@@ -51,9 +109,13 @@
       padding-inline: var(--uikit-viewport-safe-left)
         var(--uikit-viewport-safe-right);
 
+      /* (Moving with the keyboard, see below.) */
       &[data-keyboard='push'] {
         bottom: var(--uikit-viewport-keyboard-inset, 0);
         padding-bottom: var(--uikit-viewport-safe-bottom-keyboard);
+        transition:
+          bottom var(--uikit-viewport-keyboard-transition),
+          padding-bottom var(--uikit-viewport-keyboard-transition);
       }
     }
 
@@ -92,8 +154,77 @@
     }
   }
 
+  /* What shows past an end of the scroll container (see `Overscroll`): a
+     layer beneath the content layer (before it), clipped from its edge's
+     bars (`--uikit-viewport-overscroll-inset`, inside the safe area) to the
+     other end; its area just out of it, moved in by the pull
+     (`--uikit-viewport-overscroll`), as the content's end. Where the content
+     stays (`data-overlay`: not bouncing by itself, nor moved along, see
+     below), over it (beneath the anchors, a layer of its own as they are). */
+  .uikit-viewport-overscroll {
+    z-index: 0;
+    overflow: clip;
+    inset-inline: 0;
+    pointer-events: none;
+
+    &[data-edge='block-start'] {
+      top: calc(
+        var(--uikit-viewport-top, 0px) + var(--uikit-viewport-safe-top) +
+          var(--uikit-viewport-overscroll-inset, 0px)
+      );
+      bottom: var(--uikit-viewport-keyboard-inset, 0);
+    }
+
+    &[data-edge='block-end'] {
+      top: var(--uikit-viewport-top, 0);
+      bottom: calc(
+        var(--uikit-viewport-keyboard-inset, 0px) +
+          var(--uikit-viewport-safe-bottom-keyboard) +
+          var(--uikit-viewport-overscroll-inset, 0px)
+      );
+    }
+
+    &[data-overlay] {
+      z-index: 9;
+      transform: translateZ(0);
+    }
+  }
+
+  .uikit-viewport-overscroll-area {
+    position: absolute;
+    box-sizing: border-box;
+    inset-inline: 0;
+    padding-inline: var(--uikit-viewport-safe-left)
+      var(--uikit-viewport-safe-right);
+    pointer-events: auto;
+
+    /* Open: moved in by the room made for it too, as the content. */
+    transition: --uikit-viewport-overscroll-room 300ms ease;
+
+    [data-edge='block-start'] > & {
+      top: 0;
+      translate: 0
+        calc(
+          var(--uikit-viewport-overscroll, 0px) +
+            var(--uikit-viewport-overscroll-room) - 100%
+        );
+    }
+
+    [data-edge='block-end'] > & {
+      bottom: 0;
+      translate: 0
+        calc(
+          100% - var(--uikit-viewport-overscroll, 0px) -
+            var(--uikit-viewport-overscroll-room)
+        );
+    }
+  }
+
   /* The content layer: filling the visual viewport; with the keyboard
-     (`data-keyboard='resize'`), down to its top. */
+     (`data-keyboard='resize'`), down to its top. Pulled past an end where
+     it doesn't bounce by itself (the tracked scroll container: see
+     `Provider`), moved along (`--uikit-viewport-bounce`, set only then: at
+     rest, none, not a containing block), as Safari's; its own only. */
   .uikit-viewport-content {
     top: 0;
     bottom: 0;
@@ -102,11 +233,46 @@
       var(--uikit-viewport-safe-bottom) var(--uikit-viewport-safe-left);
     inset-inline: 0;
     overscroll-behavior: contain;
+    translate: 0 var(--uikit-viewport-bounce);
+
+    /* Bouncing even when its content fits (`alwaysBounce`): a box 1px
+       taller than it (its padding box: absolutely placed, it counts toward
+       its scrollable overflow), unseen. Unset (`auto`): not while its child
+       scrolls on its own (bouncing it would move that whole). */
+    &[data-always-bounce]:not(
+        [data-always-bounce='auto']:has(
+            > :is(
+                .uikit-page-root,
+                .uikit-header-root,
+                .uikit-layout-root,
+                .uikit-navigation-root
+              )
+          )
+      )::after {
+      position: absolute;
+      top: 0;
+      width: 1px;
+      height: calc(100% + 1px);
+      content: '';
+      inset-inline-start: 0;
+      pointer-events: none;
+      visibility: hidden;
+    }
 
     &[data-keyboard='resize'] {
       top: var(--uikit-viewport-top, 0);
       bottom: var(--uikit-viewport-keyboard-inset, 0);
       padding-bottom: var(--uikit-viewport-safe-bottom-keyboard);
+      transition:
+        bottom var(--uikit-viewport-keyboard-transition),
+        padding-bottom var(--uikit-viewport-keyboard-transition);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .uikit-viewport-anchor,
+    .uikit-viewport-content {
+      --uikit-viewport-keyboard-transition: 0s;
     }
   }
 }

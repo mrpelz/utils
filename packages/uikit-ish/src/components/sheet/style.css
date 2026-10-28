@@ -1,95 +1,182 @@
 /* Sheet (see main.tsx). */
 @layer uikit-ish {
+  .uikit-sheet-portal {
+    display: contents;
+  }
+
   .uikit-sheet-backdrop {
     --uikit-sheet-dim: light-dark(rgb(0 0 0 / 20%), rgb(0 0 0 / 48%));
 
     position: fixed;
+
+    /* An overlay: above the page's layers (e.g. Viewport's bars), overlays
+       among themselves in the order they open (see Menu). */
+    z-index: 100;
     background-color: var(--uikit-sheet-dim);
     inset: 0;
-    transition: opacity 350ms;
+
+    /* Lighter as the sheet is swiped down. */
+    opacity: calc(1 - var(--drawer-swipe-progress, 0));
+    transition: opacity 500ms cubic-bezier(0.32, 0.72, 0, 1);
 
     &[data-starting-style],
     &[data-ending-style] {
       opacity: 0;
     }
+
+    &[data-swiping] {
+      transition: none;
+    }
+
+    &[data-ending-style] {
+      transition-duration: calc(var(--drawer-swipe-strength, 1) * 500ms);
+    }
+  }
+
+  /* Where the sheet moves (filling the window, or its container), passing
+     presses through to what's outside the sheet. */
+  .uikit-sheet-viewport {
+    position: fixed;
+    z-index: 100;
+    inset: 0;
+    pointer-events: none;
   }
 
   .uikit-sheet-popup {
+    /* UIKit's elevated level (a modal presentation's): in dark mode, the
+       backgrounds a step lighter, for everything in it (its lists, pages,
+       a navigation's). */
+    --color-ios-system-background: light-dark(rgb(255 255 255), rgb(28 28 30));
+    --color-ios-secondary-system-background: light-dark(
+      rgb(242 242 247),
+      rgb(44 44 46)
+    );
+    --color-ios-tertiary-system-background: light-dark(
+      rgb(255 255 255),
+      rgb(58 58 60)
+    );
+    --color-ios-system-grouped-background: light-dark(
+      rgb(242 242 247),
+      rgb(28 28 30)
+    );
+    --color-ios-secondary-system-grouped-background: light-dark(
+      rgb(255 255 255),
+      rgb(44 44 46)
+    );
+    --color-ios-tertiary-system-grouped-background: light-dark(
+      rgb(242 242 247),
+      rgb(58 58 60)
+    );
+
     position: fixed;
+    z-index: 100;
     display: flex;
     overflow: hidden;
     box-sizing: border-box;
     flex-direction: column;
     color: var(--color-ios-label);
     outline: none;
-    transition: translate 350ms cubic-bezier(0.2, 0.9, 0.3, 1);
-    translate: 0 var(--uikit-sheet-drag, 0);
+    pointer-events: auto;
+
+    /* Close to UIKit's presentation (a critically damped spring); swiped,
+       following the finger (a transform: Base UI's own while it's swiped,
+       overriding this one). */
+    transform: translateY(
+      calc(
+        var(--drawer-snap-point-offset, 0px) +
+          var(--drawer-swipe-movement-y, 0px)
+      )
+    );
+    transition: transform 500ms cubic-bezier(0.32, 0.72, 0, 1);
 
     &[data-starting-style],
     &[data-ending-style] {
-      translate: 0 100%;
+      transform: translateY(100%);
     }
 
-    &[data-dragging] {
+    /* Let go (swiped): as fast as it was flung. */
+    &[data-ending-style] {
+      transition-duration: calc(var(--drawer-swipe-strength, 1) * 500ms);
+    }
+
+    &[data-swiping] {
       transition: none;
+    }
+
+    /* Below the top inset (large), above the bottom one (medium), or clear
+       of both (a form sheet): none left for its content but a large one's
+       bottom (its end scrolling clear of the home indicator). */
+    & > * {
+      --uikit-safe-area-inset-top: 0px;
+      --uikit-safe-area-inset-right: 0px;
+      --uikit-safe-area-inset-left: 0px;
+    }
+
+    /* The screen's bottom inset, for its content (see below). */
+    --uikit-sheet-inset-bottom: var(--uikit-safe-area-inset-bottom, 0px);
+
+    /* Medium (6px from the bottom edge, over the home indicator as iOS's):
+       what's left of it; a form sheet: none. */
+    &[data-detent='medium'] > * {
+      --uikit-safe-area-inset-bottom: max(
+        0px,
+        var(--uikit-sheet-inset-bottom) - 6px
+      );
+    }
+
+    &:not([data-compact]) > * {
+      --uikit-safe-area-inset-bottom: 0px;
+    }
+
+    /* What's in its content (e.g. a page): none left (see the content). */
+    & .uikit-sheet-content > * {
+      --uikit-safe-area-inset-bottom: 0px;
     }
 
     &[data-detent='large'] {
       border-radius: 38px 38px 0 0;
-      background-color: light-dark(
-        var(--color-ios-system-background),
-        var(--color-ios-secondary-system-background)
-      );
+      background-color: var(--color-ios-system-background);
       box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
-      inset: calc(10px + env(safe-area-inset-top)) 0 0;
+      inset: calc(10px + var(--uikit-safe-area-inset-top, 0px)) 0 0;
     }
 
-    &[data-detent='large']:has([data-list-part='root']) {
+    /* Grouped (`background`): on the grouped background, a list in it
+       without its own (which would end with it, the sheet's around it). */
+    &[data-detent='large'][data-background='grouped'] {
       --uikit-list-container-background: transparent;
-      --uikit-list-container-group-background: var(
-        --color-ios-tertiary-system-background
-      );
 
-      background-color: var(--color-ios-secondary-system-background);
+      background-color: var(--color-ios-system-grouped-background);
     }
 
     &[data-detent='medium'] {
       right: 6px;
-      bottom: calc(6px + env(safe-area-inset-bottom));
+      bottom: 6px;
       left: 6px;
       max-height: calc(100% - 64px);
       border-radius: 34px;
       color: var(--uikit-glass-content);
     }
 
-    /* A form sheet (regular width). */
-    @media (width >= 768px) {
-      &&[data-detent] {
-        width: min(936px, calc(100% - 64px));
-        height: min(852px, calc(100% - 64px));
-        border-radius: 38px;
-        background-color: light-dark(
-          var(--color-ios-system-background),
-          var(--color-ios-secondary-system-background)
-        );
-        box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
-        color: var(--color-ios-label);
-        inset: 50% auto auto 50%;
-        translate: -50% calc(-50% + var(--uikit-sheet-drag, 0px));
-      }
+    /* A form sheet (not compact: a regular width, see main.tsx). */
+    &&:not([data-compact]) {
+      width: min(936px, calc(100% - 64px));
+      height: min(852px, calc(100% - 64px));
+      border-radius: 38px;
+      background-color: var(--color-ios-system-background);
+      box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
+      color: var(--color-ios-label);
+      inset: 50% auto auto 50%;
+      translate: -50% -50%;
 
-      &&[data-detent]:has([data-list-part='root']) {
+      &[data-background='grouped'] {
         --uikit-list-container-background: transparent;
-        --uikit-list-container-group-background: var(
-          --color-ios-tertiary-system-background
-        );
 
-        background-color: var(--color-ios-secondary-system-background);
+        background-color: var(--color-ios-system-grouped-background);
       }
 
-      &&[data-starting-style],
-      &&[data-ending-style] {
-        translate: -50% 100vh;
+      &[data-starting-style],
+      &[data-ending-style] {
+        transform: translateY(100vh);
       }
     }
   }
@@ -99,20 +186,49 @@
     flex: none;
     flex-direction: column;
     align-items: stretch;
-    cursor: grab;
     padding-block-end: 10px;
-    touch-action: none;
+    -webkit-user-select: none;
     user-select: none;
 
+    /* Without a grabber: its content where it'd be with one (16px down). */
+    &:not(:has(> .uikit-sheet-grabber)) {
+      padding-block-start: 16px;
+    }
+
+    /* Only a grabber: over the content (its own bars below it). */
+    &:has(> .uikit-sheet-grabber:only-child) {
+      position: absolute;
+      z-index: 1;
+      inset: 0 0 auto;
+      padding-block-end: 0;
+    }
+  }
+
+  /* The grabber, its cursor's area around it (12px wide, 5px and 6px
+     high). */
+  .uikit-sheet-grabber {
+    --uikit-utils-cursor: attr(cursor type(<custom-ident>), grab);
+
+    display: flex;
+    flex: none;
+    align-self: center;
+    padding: 5px 12px 6px;
+
+    /* The bar (its padding the cursor's area around it). */
     &::before {
       width: 36px;
       height: 5px;
-      flex: none;
-      align-self: center;
       border-radius: 100px;
       background-color: #cfcfcf;
       content: '';
-      margin-block: 5px 6px;
+    }
+
+    @media (hover: hover) {
+      cursor: var(--uikit-utils-cursor);
+
+      .uikit-sheet-popup[data-swiping] &:not([cursor]) {
+        cursor: grabbing;
+      }
     }
   }
 
@@ -121,5 +237,21 @@
     min-height: 0;
     flex: 1 1 auto;
     overscroll-behavior: contain;
+
+    /* Its end clear of the home indicator (its background to the edge;
+       none left for what's in it, see the popup); the gap to its content
+       is its `Viewport.Padding`'s (a list's ends are its container's, see
+       List). */
+    padding-block-end: var(--uikit-safe-area-inset-bottom, 0);
+
+    /* Its header only a grabber (its content's own bars, e.g. a
+       navigation's): over the content, which starts at the sheet's top
+       (nothing of those bars clipped), its bars below the grabber. */
+    .uikit-sheet-popup:has(
+        > .uikit-sheet-header > .uikit-sheet-grabber:only-child
+      )
+      > & {
+      --uikit-safe-area-inset-top: 16px;
+    }
   }
 }

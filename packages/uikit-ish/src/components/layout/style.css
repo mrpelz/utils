@@ -1,20 +1,12 @@
 /* Layout (see main.tsx). */
 @layer uikit-ish {
   .uikit-layout-root {
-    /* Which way a drawer at its inline start or end hides (left to right:
-       the start to the left). */
-    --uikit-layout-start-sign: -1;
-    --uikit-layout-end-sign: 1;
-
     position: relative;
     display: flex;
 
-    &:dir(rtl) {
-      --uikit-layout-start-sign: 1;
-      --uikit-layout-end-sign: -1;
-    }
-
-    overflow: hidden;
+    /* (Clipped, not hidden: focus moving into what's within, e.g. a
+       floating column, would scroll it.) */
+    overflow: clip;
     height: 100%;
     min-height: 0;
     box-sizing: border-box;
@@ -54,8 +46,12 @@
     flex: var(--uikit-layout-column-flex, 1 1 0);
     flex-direction: column;
 
-    /* Its content's layers (e.g. a page's sticky bar) kept inside it: below
-       a floating column, drawers and the hairline before it. A resizable
+    /* The containing block of its fixed layers (e.g. a header's bar, a
+       `Viewport` anchor): spanning it, not the screen. */
+    contain: layout;
+
+    /* Its content's layers (e.g. a page's sticky accessory) kept inside
+       it: below a floating column and the hairline before it. A resizable
        one above the next (its divider overhangs it). */
     isolation: isolate;
 
@@ -74,7 +70,7 @@
 
     /* Floating (regular): over the others at the layout's start (sized as
        it's given, or 320px), the hairline after it hidden. */
-    :not([data-compact]) > &[data-floating] {
+    .uikit-layout-root > &[data-floating] {
       position: absolute;
       z-index: 3;
       width: var(--uikit-layout-column-size, 320px);
@@ -86,46 +82,17 @@
       }
     }
 
-    /* Next to a floating column: its content clear of it. */
+    /* Next to a floating column: its content clear of it, its bars' too
+       (their backgrounds running underneath it). */
     &[data-clear-floating] {
       --uikit-layout-inset-start: var(--uikit-layout-floating-size, 0px);
-    }
 
-    /* A drawer (compact): over the others at its side, moved in by its
-       progress (0: closed, 1: open), its sign the side it hides at. */
-    &[data-drawer] {
-      position: absolute;
-      z-index: 5;
-      width: var(--uikit-layout-drawer-size);
-      max-width: calc(100% - 44px);
-      background-color: var(--color-ios-system-background);
-      box-shadow: 0 0 30px
-        rgb(0 0 0 / calc(var(--uikit-layout-drawer-progress) * 20%));
-      inset-block: 0;
-      transition: translate 300ms cubic-bezier(0.2, 0.9, 0.3, 1);
-      translate: calc(
-          (1 - var(--uikit-layout-drawer-progress)) * 100% *
-            var(--uikit-layout-drawer-sign)
-        )
-        0;
-    }
-
-    &[data-drawer='inline-start'] {
-      inset-inline-start: 0;
-    }
-
-    &[data-drawer='inline-end'] {
-      inset-inline-end: 0;
-    }
-
-    &[data-drawer][data-dragging] {
-      transition: none;
-    }
-
-    /* Floating: its content floats itself. */
-    &[data-drawer][data-floating] {
-      background-color: transparent;
-      box-shadow: none;
+      & .uikit-viewport-anchor:is(
+          [data-edge='block-start'],
+          [data-edge='block-end']
+        ) {
+        padding-inline-start: var(--uikit-layout-inset-start);
+      }
     }
 
     /* The hairline between columns. */
@@ -138,11 +105,6 @@
       inset-block: 0;
       inset-inline-start: 0;
       pointer-events: none;
-    }
-
-    /* (None after a drawer, compact: it's over the others.) */
-    [data-compact] > &[data-drawer] + &::before {
-      content: none;
     }
   }
 
@@ -170,39 +132,6 @@
     &:focus-visible::after,
     &[data-dragging]::after {
       opacity: 1;
-    }
-  }
-
-  .uikit-layout-scrim {
-    position: absolute;
-    z-index: 4;
-    background-color: rgb(0 0 0 / 20%);
-    inset: 0;
-    opacity: var(--uikit-layout-drawer-progress);
-    transition: opacity 300ms;
-
-    &[data-dragging] {
-      transition: none;
-    }
-
-    &:not([data-open]) {
-      pointer-events: none;
-    }
-  }
-
-  .uikit-layout-edge {
-    position: absolute;
-    z-index: 4;
-    width: 20px;
-    inset-block: 0;
-    touch-action: pan-y;
-
-    &[data-side='inline-start'] {
-      inset-inline-start: 0;
-    }
-
-    &[data-side='inline-end'] {
-      inset-inline-end: 0;
     }
   }
 }

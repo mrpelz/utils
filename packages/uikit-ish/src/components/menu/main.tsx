@@ -11,9 +11,12 @@ import {
   PointerEvent,
   ReactNode,
   RefObject,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
+  useState,
 } from 'react';
 
 import {
@@ -23,20 +26,29 @@ import {
   frameElapsed,
   MovingHighlight,
   positionerSide,
+  useCollision,
   useForwardedRef,
+  usePortalContainer,
   useSecondaryClick,
 } from '../utils/main.js';
 import type {
   Finger,
   ItemProps,
   MenuContextValue,
+  MenuHandle,
   MenuPositionerProps,
   MenuRootProps,
   SpanProps,
   TriggerProps,
 } from './props.js';
 
-export type { MenuPositionerProps, MenuRootProps, Size } from './props.js';
+export type {
+  MenuHandle,
+  MenuPositionerProps,
+  MenuRootProps,
+  Size,
+  TriggerProps as MenuTriggerProps,
+} from './props.js';
 
 // Source: Apple iOS 26 Figma (“Menus”: “Menu - iPhone”, “Menu - iPad -
 // Actions (and Submenus)”, “Items - iPhone/iPad”, “Section Title”,
@@ -101,33 +113,132 @@ export const useRootActions = (
   return actionsRef ?? ownActionsRef;
 };
 
-const Root = ({ size = 'compact', ...props }: MenuRootProps): ReactNode => {
+/**
+ * A root menu's `onOpenChange`, not closing it for a press in one of its
+ * submenus (in portals): Base UI tells those from presses outside by React's
+ * event bubbling through portals, which Preact's portals lack, so it'd close
+ * the whole menu, e.g. as a submenu's checkbox item is toggled (internal;
+ * Menu's, EditMenu's).
+ */
+export const useKeepOpenInSubmenus = (
+  onOpenChange?: (
+    isOpen: boolean,
+    details: BaseMenu.Root.ChangeEventDetails,
+  ) => void,
+): ((isOpen: boolean, details: BaseMenu.Root.ChangeEventDetails) => void) =>
+  useCallback(
+    (isOpen: boolean, details: BaseMenu.Root.ChangeEventDetails) => {
+      const { event, reason } = details;
+      if (
+        !isOpen &&
+        reason === 'outside-press' &&
+        event.target instanceof Element &&
+        event.target.closest('[role="menu"]') !== null
+      ) {
+        details.cancel();
+        return;
+      }
+      onOpenChange?.(isOpen, details);
+    },
+    [onOpenChange],
+  );
+
+const Root = <Payload,>({
+  onOpenChange,
+  size = 'compact',
+  ...props
+}: MenuRootProps<Payload>): ReactNode => {
   const actionsRef = useRootActions(props.actionsRef);
+  const onRootOpenChange = useKeepOpenInSubmenus(onOpenChange);
 
   return (
     <MenuContext.Provider value={{ actionsRef, orientation: 'vertical', size }}>
       <BaseMenu.Root
         {...props}
         actionsRef={actionsRef}
+        onOpenChange={onRootOpenChange}
       />
     </MenuContext.Provider>
   );
 };
 
-const SubmenuRoot = (props: BaseMenu.SubmenuRoot.Props): ReactNode => {
+// A click this soon (ms) after hovering opened a submenu means to open it
+// (it was on its way), not to close it.
+const hoverConfirm = 400;
+
+type SubmenuPress = { isOpen: boolean; pointerType: string };
+
+/**
+ * A submenu's own actions and how it opened, for its trigger to close it
+ * when pressed again (internal, see `SubmenuTrigger`).
+ */
+type SubmenuToggle = {
+  close: () => void;
+  /** Just opened by hovering (a click then confirms it, see below). */
+  isJustHovered: () => boolean;
+  press: (press: SubmenuPress) => void;
+  /** The last press (once). */
+  takePress: () => SubmenuPress | undefined;
+};
+
+const SubmenuToggleContext = createContext<SubmenuToggle | undefined>(
+  undefined,
+);
+
+const SubmenuRoot = ({
+  actionsRef: actionsRefProp,
+  onOpenChange,
+  ...props
+}: BaseMenu.SubmenuRoot.Props): ReactNode => {
   const { actionsRef, orientation, size } = useContext(MenuContext);
+  const submenuActionsRef = useRootActions(actionsRefProp);
+  // When hovering opened it (ms, the event's time base), if it did.
+  const hoveredOpen = useRef<number | undefined>(undefined);
+  const pressed = useRef<SubmenuPress | undefined>(undefined);
+  const toggle = useMemo(
+    () => ({
+      close: () => submenuActionsRef.current?.close(),
+      isJustHovered: () =>
+        hoveredOpen.current !== undefined &&
+        performance.now() - hoveredOpen.current < hoverConfirm,
+      press: (press: SubmenuPress) => {
+        pressed.current = press;
+      },
+      takePress: () => {
+        const press = pressed.current;
+        pressed.current = undefined;
+        return press;
+      },
+    }),
+    [submenuActionsRef],
+  );
 
   return (
     <MenuContext.Provider
       value={{
         actionsRef,
         orientation: 'vertical',
-        // Menus of edit menus are iPad menus, as they open beside/below.
-        size: orientation === 'horizontal' ? 'regular' : size,
+        // (An edit menu's: its `size`.)
+        size,
         submenu: orientation,
       }}
     >
-      <BaseMenu.SubmenuRoot {...props} />
+      <SubmenuToggleContext.Provider value={toggle}>
+        <BaseMenu.SubmenuRoot
+          {...props}
+          actionsRef={submenuActionsRef}
+          onOpenChange={(
+            isOpen: boolean,
+            details: BaseMenu.SubmenuRoot.ChangeEventDetails,
+          ) => {
+            hoveredOpen.current =
+              isOpen && details.reason === 'trigger-hover'
+                ? performance.now()
+                : undefined;
+            onOpenChange?.(isOpen, details);
+          }}
+        />
+      </SubmenuToggleContext.Provider>
     </MenuContext.Provider>
   );
 };
@@ -162,10 +273,10 @@ const isExpanded = (item: HTMLElement) =>
  */
 const hover = (
   element: HTMLElement,
-  entering: boolean,
+  isEntering: boolean,
   { movementX, movementY, x, y }: Finger,
 ) => {
-  const types = entering
+  const types = isEntering
     ? (['over', 'enter', 'move'] as const)
     : (['out', 'leave'] as const);
 
@@ -204,11 +315,16 @@ const keepScroll = (event: TouchEvent) => {
   if (event.cancelable) event.preventDefault();
 };
 
-// Keeps a (trusted) click from its target.
-const keepTrustedClick = (click: MouseEvent) => {
-  if (!click.isTrusted) return;
-  click.preventDefault();
-  click.stopPropagation();
+// The mouse events a touch emulates after it ends: iOS WebKit sends its
+// mouse down and up (which Base UI's trigger toggles its menu on, closing
+// it again) despite the pointer down's `preventDefault`, then its click.
+const emulatedTypes = ['mousedown', 'mouseup', 'click'] as const;
+
+// Keeps a (trusted) emulated mouse event from its target.
+const keepTrustedMouse = (event: MouseEvent) => {
+  if (!event.isTrusted) return;
+  event.preventDefault();
+  event.stopPropagation();
 };
 
 /** A menu's element scrolling its items (itself, unless it marks one). */
@@ -230,6 +346,9 @@ export const dragOverItems = (
   start?: { x: number; y: number },
 ): void => {
   let item: HTMLElement | undefined;
+  // The open submenu's item the touch began on, if any (see below).
+  let openAtStart: HTMLElement | undefined;
+  let isFirst = true;
   const types = ['pointermove', 'pointerup', 'pointercancel'] as const;
   // The touch's boundary events, kept from Base UI as its moves are.
   const boundaryTypes = [
@@ -253,6 +372,12 @@ export const dragOverItems = (
 
     menu = menuAt(finger.x, finger.y) ?? menu;
     const next = menuItemAt(finger.x, finger.y);
+    if (isFirst) {
+      isFirst = false;
+      if (next && isSubmenuTrigger(next) && isExpanded(next)) {
+        openAtStart = next;
+      }
+    }
     if (next === item) return;
 
     // Leaving an open submenu's item (into it) resets the submenu's
@@ -335,16 +460,27 @@ export const dragOverItems = (
     if (pointerEvent.type !== 'pointerup') return;
 
     // The touch's own click (on the element touched, if released there) is
-    // the drag's to make.
-    document.addEventListener('click', keepTrustedClick, { capture: true });
+    // the drag's to make; its emulated mouse down and up, nobody's.
+    for (const type of emulatedTypes) {
+      document.addEventListener(type, keepTrustedMouse, { capture: true });
+    }
     setTimeout(() => {
-      document.removeEventListener('click', keepTrustedClick, {
-        capture: true,
-      });
+      for (const type of emulatedTypes) {
+        document.removeEventListener(type, keepTrustedMouse, {
+          capture: true,
+        });
+      }
     }, 500);
 
-    // An open submenu stays open (clicking its item would close it).
-    if (item && (!isSubmenuTrigger(item) || !isExpanded(item))) item.click();
+    // An open submenu stays open (clicking its item would close it), unless
+    // it was already open as the touch began on its item: pressed again, it
+    // closes (see `SubmenuTrigger`).
+    if (
+      item &&
+      (!isSubmenuTrigger(item) || !isExpanded(item) || item === openAtStart)
+    ) {
+      item.click();
+    }
   };
 
   for (const type of [...types, ...boundaryTypes]) {
@@ -383,7 +519,7 @@ const openByTrigger = (trigger: HTMLElement, pointerId?: number) => {
 };
 
 /** Opening by a secondary click: the trigger's own mouse down (internal). */
-let openingBySecondaryClick = false;
+let isOpeningBySecondaryClick = false;
 
 /**
  * Opens the menu as Base UI's trigger does, but on touch already on touch
@@ -396,15 +532,15 @@ let openingBySecondaryClick = false;
  */
 const Trigger = forwardRef<HTMLElement, TriggerProps>(
   ({ onClick, onMouseDown, openOn, ...props }, ref) => {
-    const secondary = openOn === 'secondaryClick';
+    const isSecondary = openOn === 'secondaryClick';
     type Handler<E> = ((event: E) => void) | undefined;
     // A secondary click (or a handler for it) opens the menu.
     const triggerProps = useSecondaryClick({
       ...props,
-      onSecondaryClick: secondary
+      onSecondaryClick: isSecondary
         ? (event: ReactMouseEvent<HTMLElement>) => {
             props.onSecondaryClick?.(event);
-            openingBySecondaryClick = true;
+            isOpeningBySecondaryClick = true;
             try {
               // A touch held (a `contextmenu` pointer event): dragged on.
               const { nativeEvent } = event as { nativeEvent?: Event };
@@ -417,7 +553,7 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
                   : undefined,
               );
             } finally {
-              openingBySecondaryClick = false;
+              isOpeningBySecondaryClick = false;
             }
           }
         : props.onSecondaryClick,
@@ -438,11 +574,11 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
         // a click by keys).
         onClick={(event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => {
           (onClick as Handler<typeof event>)?.(event);
-          if (secondary) event.preventBaseUIHandler();
+          if (isSecondary) event.preventBaseUIHandler();
         }}
         onMouseDown={(event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => {
           (onMouseDown as Handler<typeof event>)?.(event);
-          if (secondary && !openingBySecondaryClick) {
+          if (isSecondary && !isOpeningBySecondaryClick) {
             event.preventBaseUIHandler();
           }
         }}
@@ -453,7 +589,7 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
               .onPointerDown as Handler<typeof event>
           )?.(event);
           if (
-            secondary ||
+            isSecondary ||
             event.pointerType !== 'touch' ||
             event.defaultPrevented
           ) {
@@ -471,7 +607,7 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
 );
 
 /**
- * Closes the root menu when a positioner's anchor (Base UI:
+ * Closes the root menu when an open positioner's anchor (Base UI:
  * `data-anchor-hidden`) or the positioner itself leaves the viewport, as
  * UIKit menus close when their source view scrolls away (internal).
  */
@@ -484,7 +620,13 @@ export const useCloseOutOfView = (
     const { current: positioner } = positionerRef;
     if (!positioner) return undefined;
 
-    const close = () => actionsRef?.current?.close();
+    // Only while its own popup is open: a submenu's positioner, hidden as
+    // the submenu closes (e.g. the pointer moving back to its menu's
+    // items), doesn't close the root menu.
+    const close = () => {
+      if (!Object.hasOwn(positioner.dataset, 'open')) return;
+      actionsRef?.current?.close();
+    };
 
     const mutationObserver = new MutationObserver(() => {
       if (Object.hasOwn(positioner.dataset, 'anchorHidden')) close();
@@ -506,14 +648,18 @@ export const useCloseOutOfView = (
 };
 
 const Positioner = forwardRef<HTMLDivElement, MenuPositionerProps>(
-  ({ className, side, ...props }, forwardedRef) => {
+  (
+    { className, collisionBoundary, collisionPadding, side, ...props },
+    forwardedRef,
+  ) => {
     const { size, submenu } = useContext(MenuContext);
     const ref = useForwardedRef(forwardedRef);
+    const collision = useCollision({ collisionBoundary, collisionPadding });
     useCloseOutOfView(ref);
 
     const defaults = ((): Pick<
       MenuPositionerProps,
-      'align' | 'alignOffset' | 'side' | 'sideOffset'
+      'align' | 'alignOffset' | 'collisionAvoidance' | 'side' | 'sideOffset'
     > => {
       if (submenu === 'horizontal') {
         return {
@@ -523,10 +669,17 @@ const Positioner = forwardRef<HTMLDivElement, MenuPositionerProps>(
           sideOffset: 12,
         };
       }
+      // (Over its parent's items, below its trigger, which stays in view to
+      // close it again: not flipped above it; without room, it scrolls.)
       if (submenu && size === 'compact') {
         return {
           align: 'start',
           alignOffset: -8,
+          collisionAvoidance: {
+            align: 'shift',
+            fallbackAxisSide: 'none',
+            side: 'none',
+          },
           side: 'block-end',
           sideOffset: 0,
         };
@@ -550,6 +703,7 @@ const Positioner = forwardRef<HTMLDivElement, MenuPositionerProps>(
       // items' z-indexes, bars at 10), which would otherwise show through it.
       <BaseMenu.Positioner
         ref={ref}
+        {...collision}
         {...props}
         align={props.align ?? defaults.align}
         alignOffset={props.alignOffset ?? defaults.alignOffset}
@@ -557,6 +711,9 @@ const Positioner = forwardRef<HTMLDivElement, MenuPositionerProps>(
         data-menu-part="positioner"
         side={positionerSide(side ?? defaults.side)}
         sideOffset={props.sideOffset ?? defaults.sideOffset}
+        collisionAvoidance={
+          props.collisionAvoidance ?? defaults.collisionAvoidance
+        }
       />
     );
   },
@@ -576,12 +733,12 @@ const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
       ? undefined
       : (closeType: string) => closeType === 'keyboard';
     // Compact submenus cover their parent's items: as wide as its popup.
-    const overlay = submenu === 'vertical' && size === 'compact';
+    const isOverlay = submenu === 'vertical' && size === 'compact';
 
     return (
       <BaseMenu.Popup
         ref={ref}
-        data-overlay={overlay ? '' : undefined}
+        data-overlay={isOverlay ? '' : undefined}
         data-size={size}
         {...props}
         data-menu-part="popup"
@@ -710,48 +867,95 @@ const RadioItemIndicator = forwardRef<
   </BaseMenu.RadioItemIndicator>
 ));
 
-/** An item opening a submenu, with a chevron. */
+/**
+ * A submenu trigger's handlers: pressed again, it closes its open submenu
+ * (a compact submenu covers its parent's other items); a mouse's click just
+ * as hovering opened it keeps it open (internal; `SubmenuTrigger`'s,
+ * EditMenu's `More`'s).
+ */
+export const useSubmenuToggle = ({
+  onClick,
+  onPointerDown,
+}: Pick<BaseMenu.SubmenuTrigger.Props, 'onClick' | 'onPointerDown'>): {
+  onClick: (event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => void;
+  onPointerDown: (event: PointerEvent<HTMLElement>) => void;
+} => {
+  const toggle = useContext(SubmenuToggleContext);
+  type Handler<E> = ((event: E) => void) | undefined;
+
+  return {
+    onClick: (event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => {
+      (onClick as Handler<typeof event>)?.(event);
+      if (!toggle) return;
+      const pressed = toggle.takePress();
+      // Open before this press (not by it), or by keys (no press).
+      const wasOpen =
+        pressed?.isOpen ??
+        event.currentTarget.getAttribute('aria-expanded') === 'true';
+      if (!wasOpen) return;
+      if (toggle.isJustHovered() && pressed?.pointerType === 'mouse') return;
+      event.preventBaseUIHandler();
+      toggle.close();
+    },
+    onPointerDown: (event: PointerEvent<HTMLElement>) => {
+      (onPointerDown as Handler<typeof event>)?.(event);
+      toggle?.press({
+        isOpen: event.currentTarget.getAttribute('aria-expanded') === 'true',
+        pointerType: event.pointerType,
+      });
+    },
+  };
+};
+
+/** An item opening a submenu, with a chevron (see `useSubmenuToggle`). */
 const SubmenuTrigger = forwardRef<
   HTMLElement,
   Omit<BaseMenu.SubmenuTrigger.Props, 'ref'> & ItemProps
->(({ className, children, destructive, ...props }, ref) => {
-  const { orientation, size } = useContext(MenuContext);
+>(
+  (
+    { className, children, destructive, onClick, onPointerDown, ...props },
+    ref,
+  ) => {
+    const { orientation, size } = useContext(MenuContext);
+    const handlers = useSubmenuToggle({ onClick, onPointerDown });
 
-  return (
-    <BaseMenu.SubmenuTrigger
-      ref={ref}
-      data-destructive={destructive ? '' : undefined}
-      // Its submenu covers the parent's items (see `Popup`).
-      data-submenu-overlay={
-        size === 'compact' && orientation === 'vertical' ? '' : undefined
-      }
-      {...props}
-      className={cn('uikit-menu-item uikit-menu-toggle-cursor', className)}
-      data-menu-part="item"
-    >
-      {children as ReactNode}
-      {/* Figma “Submenu” (􀆊 or, compact and open, 􀆈: 15px, 700). */}
-      <span
-        aria-hidden="true"
-        className="uikit-menu-chevron"
-        data-menu-part="chevron"
+    return (
+      <BaseMenu.SubmenuTrigger
+        ref={ref}
+        data-destructive={destructive ? '' : undefined}
+        {...handlers}
+        // Its submenu covers the parent's items (see `Popup`).
+        data-submenu-overlay={
+          size === 'compact' && orientation === 'vertical' ? '' : undefined
+        }
+        {...props}
+        className={cn('uikit-menu-item uikit-menu-toggle-cursor', className)}
+        data-menu-part="item"
       >
-        <svg
-          fill="none"
-          height="15"
-          stroke="currentcolor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2.4"
-          viewBox="0 0 10 16"
-          width="10"
+        {children as ReactNode}
+        {/* Figma “Submenu” (􀆊 or, compact and open, 􀆈: 15px, 700). */}
+        <span
+          aria-hidden="true"
+          className="uikit-menu-chevron"
+          data-menu-part="chevron"
         >
-          <path d="M2.5 2.5L8 8l-5.5 5.5" />
-        </svg>
-      </span>
-    </BaseMenu.SubmenuTrigger>
-  );
-});
+          <svg
+            fill="none"
+            height="15"
+            stroke="currentcolor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2.4"
+            viewBox="0 0 10 16"
+            width="10"
+          >
+            <path d="M2.5 2.5L8 8l-5.5 5.5" />
+          </svg>
+        </span>
+      </BaseMenu.SubmenuTrigger>
+    );
+  },
+);
 
 const Shortcut = forwardRef<HTMLElement, ComponentProps<'kbd'>>(
   ({ className, children, ...props }, ref) => (
@@ -874,15 +1078,50 @@ const Subtitle = forwardRef<HTMLSpanElement, SpanProps>(
   ),
 );
 
+/**
+ * A handle linking a menu to its triggers outside it (detached), and
+ * opening or closing it imperatively (Base UI's `Menu.createHandle`): pass
+ * it to the root's and the triggers' `handle` (in a component, see
+ * `useCreateMenuHandle`).
+ */
+const createHandle = <Payload = unknown,>(): MenuHandle<Payload> =>
+  BaseMenu.createHandle<Payload>();
+
+/** `Menu.createHandle`, in a component: made once, for its lifetime. */
+export const useCreateMenuHandle = <
+  Payload = unknown,
+>(): MenuHandle<Payload> => {
+  const [handle] = useState(() => createHandle<Payload>());
+  return handle;
+};
+
 /** The menu's trigger (also of `ContextualMenu`). */
 export { Trigger as MenuTrigger };
+
+/**
+ * Its portal (Base UI's): no box of its own (\`display: contents\`), so
+ * rendered into a container (e.g. a screen laid out as a flex column) it
+ * doesn't shift its content.
+ */
+const Portal = forwardRef<HTMLDivElement, Omit<BaseMenu.Portal.Props, 'ref'>>(
+  ({ className, container, ...props }, ref) => (
+    <BaseMenu.Portal
+      ref={ref}
+      container={usePortalContainer(container)}
+      {...props}
+      className={cn('uikit-menu-portal', className)}
+    />
+  ),
+);
 
 export const Menu = {
   ...BaseMenu,
   Root,
+  Portal,
   SubmenuRoot,
   Trigger,
   Positioner,
+  createHandle,
   Popup,
   Item,
   LinkItem,

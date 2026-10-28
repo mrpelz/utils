@@ -20,27 +20,66 @@
     }
   }
 
-  .uikit-header-bar {
-    /* In a navigation's transition (see `Navigation`): held in place while
-       its page moves, its content fading (glass by its fade, the title by a
-       filter, as it's animated by the scroll, buttons' content by its
-       opacity); none of it at rest. */
-    --uikit-glass-fade: var(--uikit-navigation-shown, 1);
+  /* Its bar (see Root): the app's toolbar in a `Viewport.BlockStart`, its
+     child. No box of its own; its large title's timeline, and its page's
+     scroll (`--uikit-page-scroll`, see Page) when the page is within it
+     (else the page's own, an ancestor's), for its bar. Its bar's height
+     (`--uikit-header-bar`, measured, see Viewport.Padding) for its large
+     title and accessory. */
+  .uikit-header-root {
+    display: contents;
+    timeline-scope: var(--uikit-header-timeline);
 
+    &:has(.uikit-page-root) {
+      timeline-scope: var(--uikit-header-timeline), --uikit-page-scroll;
+    }
+  }
+
+  /* (In a navigation's transition, it moves with its page, see
+     `Navigation`: its anchor, fixed, within its page's frame.) */
+  .uikit-header-root > .uikit-viewport-anchor[data-edge='block-start'] {
+    /* The scroll edge effect, once content is scrolled under the bar (none
+       while its page can't scroll: its timeline inactive, the animation
+       doesn't apply, Safari leaving it at its own opacity): under the
+       whole anchor, the safe area above the bar too. */
+    &::before {
+      position: absolute;
+      z-index: -1;
+      animation: uikit-header-fade-in linear both;
+      animation-range: 0 16px;
+      animation-timeline: --uikit-page-scroll;
+      backdrop-filter: blur(8px);
+      content: '';
+      inset: 0 0 -16px;
+
+      /* (Under a floating column too, see Layout and Page.) */
+      inset-inline-start: calc(var(--uikit-layout-inset-start, 0px) * -1);
+      mask-image: linear-gradient(#000 50%, transparent);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* With a large title: the bar's title fades in as the large title
+       scrolls under the bar (see Root: the header's timeline). */
+    .uikit-header-root[data-large-title] >
+      &
+      > .uikit-toolbar-root
+      > [data-toolbar-part='title'] {
+      animation: uikit-header-fade-in linear both;
+      animation-range: exit-crossing 50% exit-crossing 100%;
+      animation-timeline: var(--uikit-header-timeline);
+    }
+  }
+
+  /* What stays with the bar (see Accessory): sticking below it (the bar's
+     height past the page's padding edge: its padding the safe area inset,
+     see Page), the content beneath it blurred as beneath the bar. */
+  .uikit-header-accessory {
     position: sticky;
-    z-index: 10;
-    top: 0;
-    translate: var(--uikit-navigation-counter, none);
+    z-index: 9;
+    top: var(--uikit-header-bar, 0);
+    padding: 0 16px 8px;
 
-    & [data-toolbar-part='title'] {
-      filter: var(--uikit-navigation-filter, none);
-    }
-
-    & [data-button-part] {
-      opacity: var(--uikit-navigation-shown, 1);
-    }
-
-    /* The scroll edge effect, once content is scrolled under the bar. */
     &::before {
       position: absolute;
       z-index: -1;
@@ -50,24 +89,15 @@
       backdrop-filter: blur(8px);
       content: '';
       inset: 0 0 -16px;
-
-      /* (Under a floating column too, see Layout and Page.) */
       inset-inline-start: calc(var(--uikit-layout-inset-start, 0px) * -1);
       mask-image: linear-gradient(#000 50%, transparent);
+      opacity: 0;
       pointer-events: none;
-    }
-
-    /* With a large title: the bar's title fades in as the large title scrolls
-       under the bar (see Root: the header's timeline). */
-    &[data-large-title] > [data-toolbar-part='title'] {
-      animation: uikit-header-fade-in linear both;
-      animation-range: exit-crossing 50% exit-crossing 100%;
-      animation-timeline: var(--uikit-header-timeline);
     }
   }
 
-  /* Figma “Title and Subtitle”: 16px from the sides, 10px from the bar (54px
-     high); as it scrolls under the bar, it fades out. */
+  /* Figma “Title and Subtitle”: 16px from the sides, 10px from the bar (its
+     height measured); as it scrolls under the bar, it fades out. */
   .uikit-header-large-title {
     display: flex;
     box-sizing: border-box;
@@ -75,7 +105,10 @@
     padding: 0 16px 10px;
     animation: uikit-header-fade-out linear both;
     animation-range: exit-crossing 0% exit-crossing 50%;
-    animation-timeline: view(block 54px 0);
+    animation-timeline: view(
+      block calc(var(--uikit-header-bar, 0px) + var(--uikit-page-safe-top, 0px))
+        0
+    );
     color: var(--color-ios-label);
     font-size: var(--font-ios-large-title-size);
     font-style: normal;
@@ -88,20 +121,12 @@
     );
     letter-spacing: var(--font-ios-large-title-tracking);
     line-height: var(--font-ios-large-title-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--font-ios-large-title-weight-emphasized) - 400) / 326 * 1px
-    );
     view-timeline-axis: block;
-    view-timeline-inset: 54px 0;
+    view-timeline-inset: calc(
+        var(--uikit-header-bar, 0px) + var(--uikit-page-safe-top, 0px)
+      )
+      0;
     view-timeline-name: var(--uikit-header-timeline);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-large-title-weight-emphasized)) / 326 * 1px
-    );
 
     & > [data-toolbar-part='subtitle'] {
       font-size: 15px;
@@ -109,11 +134,6 @@
       font-weight: round(down, 510, 100);
       letter-spacing: -0.25px;
       line-height: 20px;
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-      --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
     }
   }
 }

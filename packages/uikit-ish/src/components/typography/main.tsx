@@ -1,8 +1,9 @@
 import './style.css';
 
+import { useRender } from '@base-ui/react/use-render';
 import { forwardRef } from 'react';
 
-import { cn, withStyle } from '../utils/main.js';
+import { cn } from '../utils/main.js';
 import type { TypographyProps } from './props.js';
 
 export type {
@@ -28,33 +29,29 @@ export type {
 export const Typography = forwardRef<HTMLElement, TypographyProps>(
   (
     {
-      as = 'span',
       className,
       color,
       dynamicTypeSize: size,
       emphasized,
       italic,
-      style,
-      textStyle: textStyleProp,
-      textWrap,
+      render,
+      textStyle,
       ...props
     },
     ref,
-  ) => {
-    const Tag = as as 'span';
-
-    return (
-      <Tag
-        ref={ref}
-        {...props}
-        className={cn('uikit-typography', className)}
-        data-color={color}
-        data-dynamic-type-size={size}
-        data-emphasized={emphasized ? '' : undefined}
-        data-italic={italic ? '' : undefined}
-        data-text-style={textStyleProp}
-        style={withStyle({ textWrap }, style)}
-      />
-    );
-  },
+  ) =>
+    useRender({
+      defaultTagName: 'span',
+      props: {
+        ...props,
+        className: cn('uikit-typography', className),
+        'data-color': color,
+        'data-dynamic-type-size': size,
+        'data-emphasized': emphasized ? '' : undefined,
+        'data-italic': italic ? '' : undefined,
+        'data-text-style': textStyle,
+      },
+      ref,
+      render,
+    }),
 );

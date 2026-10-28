@@ -116,4 +116,49 @@ export const tests = [
       );
     },
   },
+  {
+    name: 'form: mixed controls submit by their fields’ names (string, numbers, ISO date, boolean)',
+    run: async (page) => {
+      await page.open('form-composition-mixed');
+      await type(page, 'name', 'Ada');
+      await page.evaluate(
+        `${page.section}.querySelector('button[type=submit]').click()`,
+      );
+      await sleep(300);
+      assert.match(
+        await page.log(),
+        /submitted: \{"name":"Ada","copies":1,"quality":80,"delivery":"2025-04-24","gift":false\}/u,
+      );
+    },
+  },
+  {
+    name: 'form: a server’s errors show on their fields; a switch enables a fieldset',
+    run: async (page) => {
+      await page.open('form-composition-validation');
+      await type(page, 'name', 'Ada');
+      await type(page, 'email', 'taken@example.com');
+      await page.evaluate(
+        `${page.section}.querySelector('button[type=submit]').click()`,
+      );
+      await sleep(300);
+      assert.match(
+        await page.evaluate(`${page.section}.textContent`),
+        /This address is taken\./u,
+      );
+
+      await page.open('form-composition-disclosure');
+      await page.evaluate(
+        `${page.section}.querySelector('[role=switch]').click()`,
+      );
+      await sleep(200);
+      await page.evaluate(
+        `${page.section}.querySelector('button[type=submit]').click()`,
+      );
+      await sleep(300);
+      assert.match(
+        await page.log(),
+        /submitted: \{"remind":true,"date":"2025-04-20"\}/u,
+      );
+    },
+  },
 ];

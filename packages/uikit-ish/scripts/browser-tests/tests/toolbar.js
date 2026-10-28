@@ -36,8 +36,9 @@ export const tests = [
       });
       const { bar, buttons, groups } = await geometry(page);
 
-      // 4px 16px 36px; one capsule, 6 × 36px + 5 × 12px + 2 × 6px = 288px.
-      assert.deepEqual(bar, [4, 16, 36, 16]);
+      // 4px 16px 2px (Figma's 36px below, but the home indicator's 34px: its
+      // anchor's); one capsule, 6 × 36px + 5 × 12px + 2 × 6px = 288px.
+      assert.deepEqual(bar, [4, 16, 2, 16]);
       assert.deepEqual(
         groups.map(([, width, height]) => [width, height]),
         [[288, 48]],
@@ -398,6 +399,31 @@ export const tests = [
       const [, background, height] = await first();
       assert.equal(background, tint, 'of its own');
       assert.equal(height, 28, 'small');
+    },
+  },
+  {
+    name: 'header: an accessory scrolls with the large title, then sticks below the bar',
+    run: async (page) => {
+      await page.open('header-composition-control');
+      /** The accessory's top and the bar's bottom, from the screen's top. */
+      const edges = () =>
+        page.evaluate(`(() => {
+          const screen = ${page.section}.querySelector('.demo-phone').getBoundingClientRect();
+          const bar = ${page.section}.querySelector('[data-header-part=bar]').getBoundingClientRect();
+          const accessory = ${page.section}.querySelector('[data-header-part=accessory]').getBoundingClientRect();
+          return { accessory: Math.round(accessory.top - screen.top), bar: Math.round(bar.bottom - screen.top) };
+        })()`);
+
+      const before = await edges();
+      assert.ok(before.accessory > before.bar + 40, 'below the large title');
+
+      await page.evaluate(
+        `${page.section}.querySelector('.uikit-page-root').scrollTop = 600`,
+      );
+      await sleep(300);
+      const after = await edges();
+      // The bar 54px below the status bar (62px), the accessory below it.
+      assert.deepEqual(after, { accessory: 116, bar: 116 });
     },
   },
 ];

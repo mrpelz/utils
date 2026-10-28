@@ -54,13 +54,15 @@ export type {
 // Deviations:
 // - The bar's middle is centered in it while the sides fit (as iOS's
 //   titles; Figma: the title absolutely centered): the sides share the free
-//   space equally; a title aligned to the start (or anything taking the
-//   free space) takes all of it instead.
+//   space equally (a missing side is held by an empty one, so a title
+//   without `Leading` stays centered); a title aligned to the start (or
+//   anything taking the free space) takes all of it instead.
 // - Pressed, a capsule of several buttons turns into a glass lens as the tab
 //   bar's groups do (scaled up by 1.05, measured on iOS 26), the pressed
 //   button showing the selection (Figma: no pressed state).
-// - The bottom bar's padding is Figma's (4px 16px 36px, the home
-//   indicator's 34px included), not the safe area's.
+// - The bottom bar's padding is Figma's (4px 16px 36px) without the home
+//   indicator's 34px in it (2px below): the safe area is its anchor's (a
+//   `Viewport.BlockEnd`, a sheet's), so it sits right above it.
 // - With a subtitle, the title stays in 17px (Figma: 15px), as iOS 26's
 //   (user: not smaller than the rows' text).
 
@@ -142,7 +144,7 @@ const Group = forwardRef<HTMLDivElement, ToolbarGroupProps>(
     { className, children, prominent, style, textColor, tint, ...props },
     ref,
   ) => {
-    const tinted = prominent ?? tint !== undefined;
+    const isTinted = prominent ?? tint !== undefined;
     // With its own tint: the glass context's variables made of it (their
     // tint resolved here, not at the toolbar's).
     const context = useContext(InheritedGlassContext);
@@ -150,7 +152,7 @@ const Group = forwardRef<HTMLDivElement, ToolbarGroupProps>(
     return (
       <BaseToolbar.Group
         ref={ref}
-        data-prominent={tinted ? '' : undefined}
+        data-prominent={isTinted ? '' : undefined}
         data-glass-context={
           tint === undefined ? undefined : (context ?? 'auto')
         }
@@ -169,7 +171,7 @@ const Group = forwardRef<HTMLDivElement, ToolbarGroupProps>(
       >
         <GlassBackground
           kind="button"
-          tinted={tinted}
+          tinted={isTinted}
         />
         <GroupContext.Provider value>{children}</GroupContext.Provider>
       </BaseToolbar.Group>
@@ -205,7 +207,7 @@ const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
     },
     ref,
   ) => {
-    const inGroup = useContext(GroupContext);
+    const isInGroup = useContext(GroupContext);
     // (Alone: the bar's glass context, unless its own.)
     const inherited = useContext(InheritedGlassContext);
     const shared = { cursor, destructive, onSecondaryClick, tint };
@@ -217,7 +219,7 @@ const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
         {...props}
         render={
           render ??
-          (inGroup ? (
+          (isInGroup ? (
             // Figma “Symbol”, “Text”: 36px (symbols: circles, as their 17px
             // glyph and the padding are narrower), the content vibrant (blended
             // with the glass), scaled with the capsule's lens; pressed among

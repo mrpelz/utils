@@ -27,12 +27,18 @@ import type {
   ColumnContextValue,
   Drag,
   Entry,
+  RollChangeEventDetails,
   RollColumnProps,
   RollItemProps,
   RollValue,
 } from './props.js';
 
-export type { RollColumnProps, RollItemProps, RollValue } from './props.js';
+export type {
+  RollChangeEventDetails,
+  RollColumnProps,
+  RollItemProps,
+  RollValue,
+} from './props.js';
 
 // Source: Framework7 (`picker.js`, `picker-ios.less`, `picker-vars.less`),
 // after UIKit's `UIPickerView`: a wheel of columns, the selected row in a
@@ -58,7 +64,6 @@ export type { RollColumnProps, RollItemProps, RollValue } from './props.js';
 // - Rows are 34px (Framework7: 36px), their text 22px (Framework7: 20px),
 //   in a 216px wheel (UIKit's `UIPickerView` height; Framework7: 260px).
 // - The band is `tertiarySystemFill` with 8px corners, 8px from the sides.
-// - Columns don't loop (iOS's time wheels do).
 
 /** Row height and wheel height (see above; also in style.css). */
 const itemHeight = 34;
@@ -139,12 +144,26 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
     const [editing, setEditing] = useState<string | undefined>(undefined);
     const listId = useId();
 
-    const latest = useRef({ onHighlightChange, onValueChange, value });
+    // (Read by listeners added once: the latest render's.)
+    const isControlled = valueProp !== undefined;
+    const latest = useRef({
+      controlled: isControlled,
+      onHighlightChange,
+      onValueChange,
+      value,
+    });
     useLayoutEffect(() => {
-      latest.current = { onHighlightChange, onValueChange, value };
+      latest.current = {
+        controlled: isControlled,
+        onHighlightChange,
+        onValueChange,
+        value,
+      };
     });
 
     const internal = useRef({
+      /** What last moved the column (see `RollChangeEventDetails`). */
+      cause: undefined as RollChangeEventDetails | undefined,
       drag: undefined as Drag | undefined,
       highlighted: undefined as number | undefined,
       mounted: false,
@@ -152,6 +171,8 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       direction: 1,
       /** The scroll position last seen (for `direction`). */
       position: 0,
+      /** Scrolling, until it settles (see `settle`). */
+      scrolling: false,
       /** Moving on from a disabled row (see `settle`). */
       reject: undefined as ReturnType<typeof setTimeout> | undefined,
       /**
@@ -200,7 +221,7 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       return Math.min(Math.max(index, 0), rows.length - 1);
     };
 
-    const scrollToIndex = (index: number, smooth: boolean) => {
+    const scrollToIndex = (index: number, isSmooth: boolean) => {
       const { current: scroller } = scrollerRef;
       const row = items()[index];
       if (!scroller || !row) return;
@@ -212,7 +233,7 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
         scroller.dispatchEvent(new Event('scroll'));
         return;
       }
-      scroller.scrollTo({ behavior: smooth ? 'smooth' : 'instant', top });
+      scroller.scrollTo({ behavior: isSmooth ? 'smooth' : 'instant', top });
     };
 
     // The nearest enabled row to `index` (searching both ways, first in
@@ -231,16 +252,37 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       return -1;
     };
 
+    // Why the column moves (an event: a scroll's otherwise).
+    const details = (): RollChangeEventDetails =>
+      internal.current.cause ?? {
+        event: new Event('scroll'),
+        reason: 'scroll',
+      };
+
+    // Uncontrolled: its own state; controlled, only the app's `value`.
     const commit = (next: RollValue) => {
       if (Object.is(next, latest.current.value)) return;
-      setState(next);
-      latest.current.onValueChange?.(next);
+      if (!latest.current.controlled) setState(next);
+      latest.current.onValueChange?.(next, details());
+      if (!latest.current.controlled) return;
+      // Controlled, the app's value (once it rendered): kept, back to it.
+      setTimeout(() => {
+        const { value: current } = latest.current;
+        if (Object.is(current, next)) return;
+        const index = items().findIndex(
+          (row) =>
+            !Object.hasOwn(row.dataset, 'rollCopy') &&
+            Object.is(entries.get(row)?.value, current),
+        );
+        if (index !== -1) scrollToIndex(index, true);
+      });
     };
 
     const settle = () => {
       const { drag } = internal.current;
       clearTimeout(internal.current.timeout);
       if (drag) return;
+      internal.current.scrolling = false;
 
       const index = centered();
       const { target } = internal.current;
@@ -320,18 +362,20 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
           const row = items()[index];
           const entry = row ? entries.get(row) : undefined;
           if (entry && internal.current.mounted) {
-            latest.current.onHighlightChange?.(entry.value);
+            latest.current.onHighlightChange?.(entry.value, details());
           }
         }
 
         clearTimeout(internal.current.reject);
         clearTimeout(internal.current.timeout);
+        internal.current.scrolling = true;
         internal.current.timeout = setTimeout(settle, settleDelay);
       };
 
       // The user scrolling.
-      const onInput = () => {
+      const onInput = (event: Event) => {
         internal.current.target = undefined;
+        internal.current.cause = { event, reason: 'scroll' };
       };
 
       const { current: refs } = internal;
@@ -351,6 +395,19 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps -- once
     }, []);
+
+    // The row at rest disabled since (e.g. a month's 31st, its month turned
+    // to April): on to the nearest enabled row (as iOS), selecting it.
+    useEffect(() => {
+      const { drag, scrolling, target } = internal.current;
+      if (drag || scrolling || target !== undefined) return;
+      const index = centered();
+      const row = items()[index];
+      if (!row || !entries.get(row)?.disabled) return;
+      internal.current.cause = undefined;
+      const enabled = nearestEnabled(index);
+      if (enabled !== -1 && enabled !== index) scrollToIndex(enabled, true);
+    });
 
     // Moves the selection by `rows` (skipping disabled ones).
     const step = (rows: number) => {
@@ -379,8 +436,9 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       editingRef.current = editing !== undefined;
     }, [editing]);
 
-    const enter = (text: string) => {
+    const enter = (text: string, event: Event) => {
       if (!editingRef.current) return;
+      internal.current.cause = { event, reason: 'input' };
       editingRef.current = false;
       setEditing(undefined);
       const trimmed = text.trim();
@@ -430,17 +488,18 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
 
     const context = useMemo<ColumnContextValue>(
       () => ({
-        editing: editing !== undefined,
+        isEditing: editing !== undefined,
         entries,
         idOf,
-        select: (element) => {
-          if (internal.current.drag?.moved || disabled) return;
+        select: (element, event) => {
+          if (internal.current.drag?.isMoved || disabled) return;
           const index = items().indexOf(element);
           if (index === -1) return;
           if (index === centered() && editable) {
             startEditing(element.textContent ?? '');
             return;
           }
+          internal.current.cause = { event, reason: 'item-press' };
           scrollToIndex(index, true);
         },
         selected: value,
@@ -467,6 +526,7 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       const move = moves[event.key];
       if (move) {
         event.preventDefault();
+        internal.current.cause = { event, reason: 'keyboard' };
         move();
         return;
       }
@@ -484,7 +544,7 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       }
       const { currentTarget } = event;
       internal.current.drag = {
-        moved: false,
+        isMoved: false,
         pointerId: event.pointerId,
         samples: [{ time: event.timeStamp, y: event.clientY }],
         startTop: currentTarget.scrollTop,
@@ -498,9 +558,9 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
 
       const { currentTarget } = event;
       const moved = event.clientY - drag.startY;
-      if (!drag.moved) {
+      if (!drag.isMoved) {
         if (Math.abs(moved) < 4) return;
-        drag.moved = true;
+        drag.isMoved = true;
         currentTarget.setPointerCapture(event.pointerId);
         currentTarget.style.scrollSnapType = 'none';
         currentTarget.dataset.dragging = '';
@@ -523,7 +583,7 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
       setTimeout(() => {
         if (internal.current.drag === drag) internal.current.drag = undefined;
       });
-      if (!drag.moved) {
+      if (!drag.isMoved) {
         internal.current.drag = undefined;
         return;
       }
@@ -539,7 +599,7 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
         Math.max(Math.round(target / itemHeight), 0),
         count - 1,
       );
-      internal.current.drag = { ...drag, moved: true, pointerId: -1 };
+      internal.current.drag = { ...drag, isMoved: true, pointerId: -1 };
       scrollToIndex(index, true);
       setTimeout(() => {
         internal.current.drag = undefined;
@@ -611,12 +671,12 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
               enterKeyHint="done"
               inputMode="numeric"
               onBlur={(event: FocusEvent<HTMLInputElement>) =>
-                enter(event.currentTarget.value)
+                enter(event.currentTarget.value, event)
               }
               onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
                 if (event.key === 'Enter') {
                   event.preventDefault();
-                  enter(event.currentTarget.value);
+                  enter(event.currentTarget.value, event);
                   scrollerRef.current?.focus();
                 }
                 if (event.key === 'Escape') {
@@ -641,7 +701,7 @@ const Item = forwardRef<HTMLDivElement, RollItemProps>(
     ref,
   ) => {
     const context = useContext(ColumnContext);
-    const copy = useContext(CopyContext);
+    const isCopy = useContext(CopyContext);
     const elementRef = useForwardedRef<HTMLDivElement>(ref);
 
     useLayoutEffect(() => {
@@ -649,7 +709,7 @@ const Item = forwardRef<HTMLDivElement, RollItemProps>(
       if (element) context?.entries.set(element, { disabled, value });
     });
 
-    const selected = Object.is(context?.selected, value);
+    const isSelected = Object.is(context?.selected, value);
 
     return (
       // Snapped untransformed (snap areas are transformed boxes); its text
@@ -657,20 +717,24 @@ const Item = forwardRef<HTMLDivElement, RollItemProps>(
       <div
         ref={elementRef}
         aria-disabled={disabled || undefined}
-        aria-selected={selected}
-        data-editing={(selected && !copy && context?.editing) || undefined}
-        id={copy ? undefined : context?.idOf(value)}
+        aria-selected={isSelected}
+        id={isCopy ? undefined : context?.idOf(value)}
         role="option"
+        data-editing={
+          (isSelected && !isCopy && context?.isEditing) || undefined
+        }
         {...props}
-        aria-hidden={copy || undefined}
+        aria-hidden={isCopy || undefined}
         className={cn('uikit-roll-item', className)}
-        data-roll-copy={copy ? '' : undefined}
+        data-roll-copy={isCopy ? '' : undefined}
         data-roll-part="item"
         onClick={(event: MouseEvent<HTMLDivElement>) => {
           (
             onClick as ((event: MouseEvent<HTMLDivElement>) => void) | undefined
           )?.(event);
-          if (!event.defaultPrevented) context?.select(event.currentTarget);
+          if (!event.defaultPrevented) {
+            context?.select(event.currentTarget, event);
+          }
         }}
       >
         <span>{(children as ReactNode) ?? String(value)}</span>

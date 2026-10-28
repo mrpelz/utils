@@ -239,4 +239,65 @@ export const tests = [
       assert.equal(await scroll(-34), 'Cherry');
     },
   },
+  {
+    name: 'roll: changes tell why: a key (keyboard), a pressed row (item-press)',
+    run: async (page) => {
+      await page.open('roll-parts-column');
+      await page.evaluate(
+        `${page.section}.querySelector('[role=listbox]').focus()`,
+      );
+      await page.key('ArrowDown');
+      await sleep(900);
+      assert.match(await page.log(), /hours: 10 \(keyboard\)/u);
+
+      await page.evaluate(
+        `[...${page.section}.querySelectorAll('[role=option]')].find((row) => row.textContent === '13').click()`,
+      );
+      await sleep(1200);
+      assert.match(await page.log(), /hours: 13 \(item-press\)/u);
+    },
+  },
+  {
+    name: 'roll: controlled, a column shows the app’s value: not taken, it turns back',
+    run: async (page) => {
+      await page.open('roll-parts-column', 'light', {
+        state: [{ $rest: true, value: 9 }],
+      });
+      await page.evaluate(
+        `[...${page.section}.querySelectorAll('[role=option]')].find((row) => row.textContent === '13').click()`,
+      );
+      await sleep(1800);
+      assert.match(await page.log(), /hours: 13 \(item-press\)/u);
+      assert.deepEqual(await column(page, 0), ['Hours', '9', true]);
+    },
+  },
+  {
+    name: 'roll: its selected row disabled meanwhile (April’s 31st), a column moves on to the nearest enabled row',
+    run: async (page) => {
+      await page.open('roll-composition-dependent');
+      /** @param {string} label @param {string} text */
+      const press = (label, text) =>
+        page.evaluate(
+          `[...${page.section}.querySelectorAll('[aria-label=${label}] [role=option]')].find((row) => row.textContent === ${JSON.stringify(text)}).click()`,
+        );
+      await press('Month', 'March');
+      await sleep(1200);
+      await press('Day', '31');
+      await sleep(1200);
+      assert.equal(
+        await page.evaluate(
+          `${page.section}.querySelector('output').textContent`,
+        ),
+        'March 31',
+      );
+      await press('Month', 'April');
+      await sleep(2500);
+      assert.equal(
+        await page.evaluate(
+          `${page.section}.querySelector('output').textContent`,
+        ),
+        'April 30',
+      );
+    },
+  },
 ];

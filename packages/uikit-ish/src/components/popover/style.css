@@ -1,11 +1,41 @@
 /* Popover (see main.tsx). */
 @layer uikit-ish {
+  /* Its portal (see Portal): no box of its own. */
+  .uikit-popover-portal {
+    display: contents;
+  }
+
+  .uikit-popover-positioner {
+    /* An overlay: above the page's layers (e.g. Viewport's bars), overlays
+       among themselves in the order they open (see Menu). */
+    z-index: 100;
+  }
+
+  /* Its bar (Figma: 16px from the popover's top, 10px above its content),
+     a toolbar in it a 44px row, its padding the header's (not a bar's). */
+  .uikit-popover-header {
+    padding: 16px 0 10px;
+
+    /* (Over the bar's own: its placement's padding and height.) */
+    & > [data-toolbar-part='root'][data-placement] {
+      min-height: 44px;
+      padding-block: 0;
+    }
+  }
+
+  /* What's below its header, filling the rest of the popup (at most as
+     high as the room for it, see the popup), scrolling. */
   .uikit-popover-body {
     overflow: auto;
-    max-height: inherit;
+    min-height: 0;
     box-sizing: border-box;
+    flex: 0 1 auto;
     border-radius: inherit;
     overscroll-behavior: contain;
+
+    /* Its end 16px after its content, as a list's inset from its sides (a
+       list's ends are its container's, see List). */
+    padding-block-end: 16px;
   }
 
   /* Its material (see main.tsx): its outlines' clip paths by its arrow's
@@ -16,16 +46,27 @@
     --uikit-popover-glow: light-dark(rgb(0 0 0 / 20%), rgb(0 0 0 / 15%));
 
     position: relative;
+
+    /* Its header and body stacked, within the viewport (Base UI's room for
+       it): taller content scrolls in its body (see `Body`). */
+    display: flex;
+    max-height: var(--available-height);
+    flex-direction: column;
     border-radius: 13px;
-    backdrop-filter: none;
     background-color: transparent;
     box-shadow: none;
     color: var(--uikit-glass-content);
     isolation: isolate;
     outline: none;
 
-    /* Its backdrop blur. */
-    &::before {
+    /* Its backdrop blur: without an arrow, its own, rounded (WebKit draws
+       none through a clip path); with one, as one with its wedge (by its
+       outline's clip path). */
+    &:not([data-arrow]) {
+      backdrop-filter: saturate(180%) blur(16px);
+    }
+
+    &[data-arrow]::before {
       position: absolute;
       z-index: -1;
       backdrop-filter: saturate(180%) blur(16px);

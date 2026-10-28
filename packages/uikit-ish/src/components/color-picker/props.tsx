@@ -1,12 +1,28 @@
+import type { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import type { ComponentProps, ReactElement } from 'react';
 
 import type { ButtonRootProps } from '../button/main.js';
 
 export type Rgba = { a: number; b: number; g: number; r: number };
 
+/**
+ * Why the color changed, and the event: its grid, spectrum or sliders, the
+ * opacity (slider or percentage), a saved color pressed, or the eyedropper.
+ */
+export type ColorPickerChangeEventDetails = {
+  event: Event;
+  reason: 'eyedropper' | 'grid' | 'opacity' | 'saved' | 'sliders' | 'spectrum';
+};
+
+/** Why the saved colors changed (one added, or deleted), and the event. */
+export type ColorPickerSavedColorsChangeEventDetails = {
+  event: Event;
+  reason: 'add' | 'delete';
+};
+
 export type PickerState = {
   color: Rgba;
-  setColor: (color: Rgba) => void;
+  setColor: (color: Rgba, eventDetails: ColorPickerChangeEventDetails) => void;
 };
 
 export type ColorPickerMode = 'grid' | 'sliders' | 'spectrum';
@@ -17,8 +33,11 @@ export type ColorPickerRootProps = Omit<
 > & {
   /** The initial color (uncontrolled; a hex string). */
   defaultValue?: string;
-  /** Called with the picked color (a hex string). */
-  onValueChange?: (value: string) => void;
+  /** Called with the picked color (a hex string), and why. */
+  onValueChange?: (
+    value: string,
+    eventDetails: ColorPickerChangeEventDetails,
+  ) => void;
   /** The color (controlled; a hex string). */
   value?: string;
 };
@@ -33,10 +52,16 @@ export type ColorPickerPanelProps = Omit<ComponentProps<'div'>, 'children'> & {
   defaultSavedColors?: string[];
   /** The view (controlled). */
   mode?: ColorPickerMode;
-  /** Called with the view chosen. */
-  onModeChange?: (mode: ColorPickerMode) => void;
-  /** Called with the saved colors, as one is added or deleted. */
-  onSavedColorsChange?: (colors: string[]) => void;
+  /** Called with the view chosen (its segmented control's details). */
+  onModeChange?: (
+    mode: ColorPickerMode,
+    eventDetails: BaseRadioGroup.ChangeEventDetails,
+  ) => void;
+  /** Called with the saved colors, as one is added or deleted, and why. */
+  onSavedColorsChange?: (
+    colors: string[],
+    eventDetails: ColorPickerSavedColorsChangeEventDetails,
+  ) => void;
   /** The saved colors (controlled). */
   savedColors?: string[];
 };

@@ -9,6 +9,7 @@ import {
   MouseEvent,
   PointerEvent,
   useContext,
+  useRef,
   useState,
 } from 'react';
 
@@ -18,9 +19,15 @@ import {
   useGlassContext,
 } from '../glass/main.js';
 import { cn, useForwardedRef } from '../utils/main.js';
-import type { PageControlProps } from './props.js';
+import type {
+  PageControlChangeEventDetails,
+  PageControlProps,
+} from './props.js';
 
-export type { PageControlProps } from './props.js';
+export type {
+  PageControlChangeEventDetails,
+  PageControlProps,
+} from './props.js';
 
 // Source: Apple iOS 26 Figma (“Toolbars”: “_Page control”, Dots 1 to 8+,
 // BG Context Dim/Bright): a glass capsule, 48px high, 24px from its ends,
@@ -29,8 +36,9 @@ export type { PageControlProps } from './props.js';
 // dots show at a time: the dots before and after them (if any) are hinted
 // at by the outermost two shrinking (6px and 4px, in 8px and 6px slots).
 // Behavior after UIKit's `UIPageControl`: a press on either side of the
-// current dot goes to the previous or next page; an adjustable control
-// (arrow keys, Home and End).
+// current dot goes to the previous or next page; dragged along (scrubbing,
+// UIKit's continuous interaction), a page per dot passed; an adjustable
+// control (arrow keys, Home and End).
 //
 // Its plain variant: Figma “Page Controls” (UIKit's, over content): a
 // capsule 24px high, 12px from its ends, the current page's dot in the
@@ -73,12 +81,12 @@ const windowStart = (start: number, page: number, count: number) => {
 const dotSize = (index: number, start: number, count: number) => {
   if (count <= fullDots) return 8;
   const place = index - start;
-  const before = start > 0;
-  const after = start + windowSize < count;
-  if (before && place === 0) return 4;
-  if (before && place === 1) return 6;
-  if (after && place === windowSize - 1) return 4;
-  if (after && place === windowSize - 2) return 6;
+  const isBefore = start > 0;
+  const isAfter = start + windowSize < count;
+  if (isBefore && place === 0) return 4;
+  if (isBefore && place === 1) return 6;
+  if (isAfter && place === windowSize - 1) return 4;
+  if (isAfter && place === windowSize - 2) return 6;
   return 8;
 };
 
@@ -101,6 +109,7 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       onKeyDown,
       onPointerCancel,
       onPointerDown,
+      onPointerMove,
       onPointerUp,
       onValueChange,
       value: valueProp,
@@ -113,7 +122,7 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
     const inherited = useContext(InheritedGlassContext);
     const resolved = useGlassContext(ref, context);
     const [state, setState] = useState(defaultValue);
-    const [pressed, setPressed] = useState(false);
+    const [isPressed, setIsPressed] = useState(false);
     const pages = Math.max(0, Math.floor(count));
     const value = Math.min(Math.max(valueProp ?? state, 0), pages - 1);
     // The window's start, kept between renders (it only moves as needed).
@@ -121,31 +130,48 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
     const nextStart = windowStart(start, value, pages);
     if (nextStart !== start) setStart(nextStart);
 
-    const go = (page: number) => {
+    // Uncontrolled: its own state; controlled, only the app's `value`.
+    const go = (page: number, eventDetails: PageControlChangeEventDetails) => {
       const next = Math.min(Math.max(page, 0), pages - 1);
       if (disabled || next === value) return;
-      setState(next);
-      onValueChange?.(next);
+      if (valueProp === undefined) setState(next);
+      onValueChange?.(next, eventDetails);
     };
+
+    // Scrubbing: from where it was pressed, a page per dot (16px: a dot and
+    // its gap) passed; once it's moved, its click doesn't page.
+    const scrub = useRef<
+      { isScrubbed: boolean; page: number; x: number } | undefined
+    >(undefined);
+    const scrubbed = useRef(false);
 
     // A press before or after the current dot (in reading order).
     const handleClick = (event: MouseEvent<HTMLDivElement>) => {
       onClick?.(event);
+      if (scrubbed.current) {
+        scrubbed.current = false;
+        return;
+      }
       const current = event.currentTarget.querySelector('[data-current]');
       if (!current) return;
       const { left, width } = current.getBoundingClientRect();
-      const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
-      const after = event.clientX > left + width / 2;
-      go(value + (after === rtl ? -1 : 1));
+      const isRightToLeft =
+        getComputedStyle(event.currentTarget).direction === 'rtl';
+      const isAfter = event.clientX > left + width / 2;
+      go(value + (isAfter === isRightToLeft ? -1 : 1), {
+        event,
+        reason: 'track-press',
+      });
     };
 
     const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
       onKeyDown?.(event);
-      const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+      const isRightToLeft =
+        getComputedStyle(event.currentTarget).direction === 'rtl';
       const moves: Record<string, number> = {
         ArrowDown: value - 1,
-        ArrowLeft: value + (rtl ? 1 : -1),
-        ArrowRight: value + (rtl ? -1 : 1),
+        ArrowLeft: value + (isRightToLeft ? 1 : -1),
+        ArrowRight: value + (isRightToLeft ? -1 : 1),
         ArrowUp: value + 1,
         End: pages - 1,
         Home: 0,
@@ -153,21 +179,39 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       const page = moves[event.key];
       if (page === undefined) return;
       event.preventDefault();
-      go(page);
+      go(page, { event, reason: 'keyboard' });
     };
 
     // Pressed (also by touch, which doesn't hover): its tooltip shown.
     const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
       onPointerDown?.(event);
-      setPressed(true);
+      setIsPressed(true);
+      scrubbed.current = false;
+      if (disabled || event.button !== 0) return;
+      scrub.current = { page: value, isScrubbed: false, x: event.clientX };
+      event.currentTarget.setPointerCapture(event.pointerId);
+    };
+    const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+      onPointerMove?.(event);
+      const from = scrub.current;
+      if (!from) return;
+      const isRightToLeft =
+        getComputedStyle(event.currentTarget).direction === 'rtl';
+      const dx = (event.clientX - from.x) * (isRightToLeft ? -1 : 1);
+      if (!from.isScrubbed && Math.abs(dx) < 4) return;
+      from.isScrubbed = true;
+      go(from.page + Math.round(dx / 16), { event, reason: 'drag' });
     };
     const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
       onPointerUp?.(event);
-      setPressed(false);
+      setIsPressed(false);
+      scrubbed.current = scrub.current?.isScrubbed ?? false;
+      scrub.current = undefined;
     };
     const handlePointerCancel = (event: PointerEvent<HTMLDivElement>) => {
       onPointerCancel?.(event);
-      setPressed(false);
+      setIsPressed(false);
+      scrub.current = undefined;
     };
 
     const valueText = format(value, pages);
@@ -187,7 +231,7 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
         aria-valuenow={value + 1}
         aria-valuetext={valueText}
         data-glass-context={resolved ?? inherited ?? 'auto'}
-        data-pressed={pressed ? '' : undefined}
+        data-pressed={isPressed ? '' : undefined}
         data-variant={variant}
         role="slider"
         tabIndex={disabled ? -1 : 0}
@@ -195,6 +239,7 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
         onKeyDown={handleKeyDown}
         onPointerCancel={handlePointerCancel}
         onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         {...props}
         className={cn('uikit-page-control-root', className)}

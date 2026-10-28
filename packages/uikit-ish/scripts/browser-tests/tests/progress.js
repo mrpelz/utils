@@ -106,14 +106,18 @@ export const tests = [
         [[22, 22], [3, 7], '4px'],
       );
 
-      // Its speed, and stopped.
+      // Its speed, and stopped: at rest (by default), or frozen.
+      const timing = () =>
+        page.evaluate(`(() => {
+          const [, root] = ${page.section}.querySelectorAll('[role=progressbar]');
+          const style = getComputedStyle(root.querySelector('[aria-hidden]'));
+          return [style.animationName, style.animationDuration, style.animationPlayState];
+        })()`);
       await page.setState(2, { animating: false, duration: 2 });
-      const timing = await page.evaluate(`(() => {
-        const [, root] = ${page.section}.querySelectorAll('[role=progressbar]');
-        const style = getComputedStyle(root.querySelector('[aria-hidden]'));
-        return [style.animationDuration, style.animationPlayState];
-      })()`);
-      assert.deepEqual(timing, ['2s', 'paused']);
+      const [rest] = await timing();
+      assert.equal(rest, 'none');
+      await page.setState(2, { animating: false, stopBehavior: 'freeze' });
+      assert.deepEqual(await timing(), ['uikit-progress-spin', '2s', 'paused']);
     },
   },
   {
@@ -247,6 +251,86 @@ export const tests = [
       await page.key('Shift');
       await sleep(300);
       assert.equal(await shown(), 1, 'focused by keyboard');
+    },
+  },
+  {
+    name: 'progress: alone or first in the markup, a value above or below the track is at the line’s end, the label at its start',
+    run: async (page) => {
+      /** The value's and the root's inline ends, and the value's top. */
+      const ends = () =>
+        page.evaluate(`(() => {
+          const root = ${page.section}.querySelector('[role=progressbar]');
+          const value = root.querySelector('[data-progress-part=value]').getBoundingClientRect();
+          return [Math.round(value.right), Math.round(root.getBoundingClientRect().right)];
+        })()`);
+
+      // Alone (the parts page's value).
+      await page.open('progress-parts-value');
+      const [alone, rootEnd] = await ends();
+      assert.equal(alone, rootEnd, 'alone');
+
+      await page.open('progress-parts-value', 'light', {
+        state: [{ $rest: true, placement: 'block-end' }],
+      });
+      const [below, belowEnd] = await ends();
+      assert.equal(below, belowEnd, 'below');
+    },
+  },
+  {
+    name: 'progress: counting items, its value told by a function of it',
+    run: async (page) => {
+      await page.open('progress-composition-count');
+      await sleep(1500);
+      const text = await page.evaluate(
+        `${page.section}.querySelector('[data-progress-part=value]').textContent`,
+      );
+      assert.match(text, /^\d+ of 12$/u);
+    },
+  },
+  {
+    name: 'progress: an activity indicator stopped rests at once (reset), freezes where it is (freeze), or finishes its turn first (finish), spinning or fading',
+    run: async (page) => {
+      /**
+       * The running animations' states (the spinner's and its spokes').
+       *
+       * @returns {Promise<string[]>}
+       */
+      const animations = () =>
+        page.evaluate(
+          `[...${page.section}.querySelector('[aria-hidden]').getAnimations({ subtree: true })].map((animation) => animation.playState)`,
+        );
+
+      for (const movement of ['stepped', 'fade']) {
+        await page.open('progress-parts-activity-indicator', 'light', {
+          state: [{ $rest: true, movement }],
+        });
+        const spinning = await animations();
+        assert.ok(spinning.length > 0, `${movement}: spinning`);
+
+        await page.setState(0, { animating: false, stopBehavior: 'reset' });
+        assert.deepEqual(await animations(), [], `${movement}: reset`);
+
+        await page.setState(0, { animating: true });
+        await sleep(400);
+        await page.setState(0, { animating: false, stopBehavior: 'freeze' });
+        const frozen = await animations();
+        assert.ok(
+          frozen.length > 0 && frozen.every((state) => state === 'paused'),
+          `${movement}: freeze ${frozen.join(', ')}`,
+        );
+
+        await page.setState(0, { animating: true });
+        await sleep(400);
+        await page.setState(0, { animating: false, stopBehavior: 'finish' });
+        const finishing = await animations();
+        assert.ok(
+          finishing.includes('running'),
+          `${movement}: finishing ${finishing.join(', ')}`,
+        );
+        // (A turn is a second long.)
+        await sleep(1200);
+        assert.deepEqual(await animations(), [], `${movement}: finished`);
+      }
     },
   },
 ];

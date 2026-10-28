@@ -1,3 +1,4 @@
+import { findPackageJSON } from 'node:module';
 import path from 'node:path';
 
 import {
@@ -12,6 +13,11 @@ import { deepmerge } from 'deepmerge-ts';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import {
+  ModifySourcePlugin,
+  ReplaceOperation,
+} from 'modify-source-webpack-plugin';
+import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 
 const { PUBLIC_PATH: publicPath = '/' } = process.env;
 
@@ -27,10 +33,14 @@ const configDownstream = {
       reconnect: true,
       webSocketURL: 'auto://0.0.0.0:0/ws',
     },
-    historyApiFallback: true,
+    historyApiFallback: { index: `${publicPath}index.html` },
     host: '::1',
     hot: webpackServe,
     liveReload: false,
+    static: {
+      directory: dirDemo,
+      publicPath,
+    },
   },
   optimization: {
     minimize: !webpackServe,
@@ -54,7 +64,7 @@ const configDownstream = {
 /** @type {import('@mrpelz/boilerplate-dom/webpack.config.js').ConfigurationExtended} */
 const config = deepmerge(configUpstream, configDownstream);
 
-config.entry = path.resolve(dirSrc, 'demo/main.tsx');
+config.entry = path.resolve(dirSrc, 'demo.tsx');
 
 if (config.module) {
   config.module.rules = [
@@ -83,7 +93,8 @@ if (config.module) {
       use: [MiniCssExtractPlugin.loader, 'css-loader'],
     },
     {
-      test: /\.(?:png|jpe?g|gif)$/i,
+      // (Also Monaco's icon font, see MonacoWebpackPlugin.)
+      test: /\.(?:png|jpe?g|gif|ttf)$/i,
       type: 'asset/resource',
     },
   ];
@@ -91,11 +102,50 @@ if (config.module) {
 
 config.plugins = [
   // @ts-ignore
+  new ModifySourcePlugin({
+    rules: [
+      {
+        operations: [
+          new ReplaceOperation(
+            'once',
+            // eslint-disable-next-line unicorn/prefer-string-raw
+            String.raw`/** {publicPath} */ '<publicPath>'`,
+            `'${publicPath}'`,
+          ),
+        ],
+        test: new RegExp(`^${path.resolve(dirSrc, 'demo/tooling/env.ts')}$`),
+      },
+    ],
+  }),
+  // @ts-ignore
   new HtmlWebpackPlugin({
+    base: publicPath,
+    // The page under the device's safe areas (the notch, the home
+    // indicator): their insets in `env(safe-area-inset-*)`, kept clear by
+    // the library (see styles.css) and the guide's layout.
+    meta: {
+      viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
+    },
     title: '@mrpelz/uikit-ish',
   }),
   // @ts-ignore
   new MiniCssExtractPlugin(),
+  // Monaco (see src/demo/tooling/frame/code-view.tsx): its editor and worker, with
+  // the TypeScript (and JSX) tokenizer only, as code is only shown.
+  // @ts-ignore
+  new MonacoWebpackPlugin({
+    customLanguages: [
+      {
+        entry: 'vs/languages/definitions/typescript/register',
+        label: 'typescript',
+      },
+    ],
+    languages: [],
+    // (Its package, its files hidden by its exports: found by its package.json.)
+    monacoEditorPath: path.dirname(
+      findPackageJSON('monaco-editor', import.meta.url) ?? '',
+    ),
+  }),
   // @ts-ignore
   new ForkTsCheckerWebpackPlugin(),
 ];

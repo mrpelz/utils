@@ -21,7 +21,8 @@ export const useTouchActive = (): void => {
 /**
  * Forces a color scheme on the whole document while mounted (sets
  * `colorSchemeAttribute` on the root element), or follows the browser's
- * preference (`undefined`).
+ * preference (`undefined`). (For one element and what's within it, the
+ * attribute set on that element.)
  */
 export const useColorScheme = (scheme?: ColorScheme): void => {
   useEffect(() => {

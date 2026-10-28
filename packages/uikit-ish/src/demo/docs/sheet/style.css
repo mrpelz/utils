@@ -1,0 +1,7 @@
+/* Sheet demos (see the guide's views). */
+
+/* A navigation as its content: filling it, its pages scrolling. */
+.sheet-demo-stack {
+  display: grid;
+  overflow: hidden;
+}

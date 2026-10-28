@@ -9,11 +9,49 @@
     background-color: var(--color-ios-system-grouped-background);
     color: var(--color-ios-label);
     overscroll-behavior: contain;
+
+    /* Its ends: clear of the insets; the gap to its content is its
+       `Viewport.Padding`s' (a list's ends are its container's, see List). */
+    padding-block: var(--uikit-page-safe-top) var(--uikit-page-safe-bottom);
     padding-inline-start: var(--uikit-layout-inset-start, 0);
-    scrollbar-width: thin;
+
+    /* Its scrolling, for its header's bar (see Header). */
+    scroll-timeline: --uikit-page-scroll block;
+
+    /* The safe area: its content below the top inset, its end scrolling
+       clear of the bottom inset (the bars anchored over it: room made by
+       `Viewport.Padding`s in its content). None left for its content. */
+    --uikit-page-safe-top: var(--uikit-safe-area-inset-top, 0px);
+    --uikit-page-safe-bottom: var(--uikit-safe-area-inset-bottom, 0px);
+
+    & > * {
+      --uikit-safe-area-inset-top: 0px;
+      --uikit-safe-area-inset-bottom: 0px;
+    }
+
+    /* A header within it: its bar anchored (fixed, not within its padding),
+       the safe areas its own. */
+    & > .uikit-header-root > .uikit-viewport-anchor {
+      --uikit-safe-area-inset-top: var(--uikit-page-safe-top);
+      --uikit-safe-area-inset-bottom: var(--uikit-page-safe-bottom);
+    }
 
     &[data-background='plain'] {
       background-color: var(--color-ios-system-background);
+    }
+
+    /* Bouncing even when its content fits (`alwaysBounce`): a box 1px
+       taller than it (its padding box: absolutely placed, it counts toward
+       its scrollable overflow), unseen. */
+    &[data-always-bounce]::after {
+      position: absolute;
+      top: 0;
+      width: 1px;
+      height: calc(100% + 1px);
+      content: '';
+      inset-inline-start: 0;
+      pointer-events: none;
+      visibility: hidden;
     }
   }
 }

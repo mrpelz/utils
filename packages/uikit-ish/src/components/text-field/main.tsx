@@ -115,18 +115,31 @@ const setValue = (control: HTMLInputElement | HTMLTextAreaElement) => {
 
 /**
  * Empties the field's control (as typing would, so its change handlers run),
- * keeping it focused (UIKit `clearButtonMode = .whileEditing`).
+ * focusing it; shown while it's filled, and (`mode`, UIKit's
+ * `clearButtonMode`) while it's focused, while it isn't, or always.
  */
 const Clear = forwardRef<HTMLButtonElement, ClearProps>(
-  ({ className, children, onClick, onPointerDown, ...props }, ref) => {
+  (
+    {
+      className,
+      children,
+      mode = 'whileEditing',
+      onClick,
+      onPointerDown,
+      ...props
+    },
+    ref,
+  ) => {
     const mask = useId();
 
     return (
-      // Shown while the field is focused and filled (Framework7
-      // `.input-clear-button`, `.input-with-value`); its hit area is 44px.
+      // Shown while the field is filled, and (`mode`) focused or not
+      // (Framework7 `.input-clear-button`, `.input-with-value`); its hit area
+      // is 44px.
       <button
         ref={ref}
         aria-label="Clear text"
+        data-mode={mode}
         data-text-field-part="clear"
         tabIndex={-1}
         type="button"
@@ -182,7 +195,7 @@ const Clear = forwardRef<HTMLButtonElement, ClearProps>(
               cx="8.5"
               cy="8.5"
               fill="currentcolor"
-              mask={`url(#${CSS.escape(mask)})`}
+              mask={`url(#${typeof CSS === 'object' ? CSS.escape(mask) : mask})`}
               r="8.5"
             />
           </svg>
@@ -200,7 +213,7 @@ const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
   ({ className, onBlur, onFocus, onPointerDown, ...props }, ref) => {
     // Focused by a pointer (pressed first), or else by keyboard.
     const pressed = useRef(false);
-    const [keyboard, setKeyboard] = useState(false);
+    const [isKeyboardFocus, setIsKeyboardFocus] = useState(false);
 
     return (
       // Figma “Search Field” (Sidebars, Toolbars): a capsule (36px high, on the
@@ -210,7 +223,7 @@ const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
       // 44px high, on the secondary fill, 11px in, its parts 8px apart.
       <label
         ref={ref}
-        data-keyboard-focus={keyboard ? '' : undefined}
+        data-keyboard-focus={isKeyboardFocus ? '' : undefined}
         data-text-field-part="search"
         onBlur={(event) => {
           onBlur?.(event);
@@ -219,12 +232,12 @@ const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
             !(relatedTarget instanceof Node) ||
             !event.currentTarget.contains(relatedTarget)
           ) {
-            setKeyboard(false);
+            setIsKeyboardFocus(false);
           }
         }}
         onFocus={(event) => {
           onFocus?.(event);
-          setKeyboard(!pressed.current);
+          setIsKeyboardFocus(!pressed.current);
           pressed.current = false;
         }}
         onPointerDown={(event) => {

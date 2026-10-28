@@ -7,8 +7,11 @@ BASE_FILE := $(shell npm ls --parseable --silent "@mrpelz/boilerplate-preact" 2>
 include $(BASE_FILE)/Makefile
 
 PACKAGE_LOCK_LINT_ARGS := $(PACKAGE_LOCK_LINT_ARGS) git.i.wurstsalat.cloud
+ESLINT_ARGS := $(ESLINT_ARGS) --ignore-pattern "demo/**/*"
 
 GIT_BRANCH := $(shell git symbolic-ref --short HEAD)
+
+SSG_DIR := demo/__ssg__
 
 MITM_SLUG := $(shell echo "$(PKG_NAME)/$(GIT_BRANCH)" | sed -r -e 's#@##g' -e 's#/#-#g' 2>/dev/null)
 MITM_URL := https://$(MITM_SLUG).localhost
@@ -16,6 +19,8 @@ MITM_URL := https://$(MITM_SLUG).localhost
 .PHONY: .PHONY \
 	check_browser \
 	transform_build_demo \
+	transform_build_demo_csr \
+	transform_build_demo_ssg \
 	util_clear_demo \
 	util_mitmproxy \
 	watch_dev_proxy
@@ -37,8 +42,18 @@ transform_build:
 	tsc --project tsconfig.build.json
 	scripts/copy-css.sh
 
-transform_build_demo:
+transform_build_demo: \
+	transform_build_demo_csr \
+	transform_build_demo_ssg
+
+transform_build_demo_csr:
 	$(WEBPACK)
+
+transform_build_demo_ssg:
+	$(WEBPACK) --config webpack-ssg.config.js
+	mv "demo/index.html" "demo/template.html"
+	node "$(SSG_DIR)/main.js"
+	rm -rf "$(SSG_DIR)"
 
 transform_prod_demo: \
 	util_clear_demo \

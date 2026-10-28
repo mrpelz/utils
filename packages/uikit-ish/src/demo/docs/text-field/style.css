@@ -1,0 +1,32 @@
+/* Text field demos (see main.tsx). */
+
+/* A phone's width: rows, a form. */
+.text-field-demo-list,
+.text-field-demo-form,
+.text-field-demo-search {
+  width: 402px;
+  max-width: 100%;
+}
+
+/* A form on the list's background (the stage's: a phone's width), 16px
+   below its end as on a page. */
+.text-field-demo-form {
+  background-color: var(--color-ios-system-grouped-background);
+  padding-block-end: 16px;
+}
+
+.text-field-demo-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  & > [data-text-field-part='root'] {
+    margin-inline: 16px;
+  }
+}
+
+/* Standalone: a field of its own. */
+.text-field-demo-standalone {
+  width: 280px;
+  max-width: 100%;
+}

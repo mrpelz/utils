@@ -144,15 +144,15 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
   ) => {
     const handlers = usePointerDrag<HTMLDivElement, { item?: HTMLElement }>(
       {
-        end: (root, state, cancelled) => {
+        end: (root, state, isCancelled) => {
           const { item } = state;
 
-          if (!cancelled && item) {
+          if (!isCancelled && item) {
             if (!Object.hasOwn(item.dataset, 'checked')) item.click();
             item.focus({ preventScroll: true });
           }
 
-          release(root, cancelled ? undefined : item);
+          release(root, isCancelled ? undefined : item);
         },
         move: (root, state, event) => {
           state.item = press(root, event.clientX);

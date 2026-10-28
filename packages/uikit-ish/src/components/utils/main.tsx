@@ -1,8 +1,10 @@
 /* eslint-disable unicorn/prefer-ternary */
 import './style.css';
 
+import type { Popover as BasePopover } from '@base-ui/react/popover';
 import type { Signalish } from 'preact';
 import {
+  createContext,
   CSSProperties,
   forwardRef,
   FunctionComponent,
@@ -10,7 +12,9 @@ import {
   PointerEvent as ReactPointerEvent,
   ReactNode,
   Ref,
+  RefObject,
   useCallback,
+  useContext,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -21,6 +25,7 @@ import type {
   PointerDrag,
   PointerDragHandlers,
   PointerHandler,
+  PortalContainer,
   SecondaryClickHandlers,
   SecondaryClickProps,
 } from './props.js';
@@ -30,6 +35,7 @@ export type {
   LogicalSide,
   PointerDrag,
   PointerDragHandlers,
+  PortalContainer,
   SecondaryClickProps,
 } from './props.js';
 
@@ -116,10 +122,77 @@ export const positionerSide = (
 };
 
 /**
- * Attribute on the root element (`<html>`) that forces a color scheme
- * regardless of the browser's preference (see `Styles`).
+ * Attribute that forces a color scheme regardless of the browser's
+ * preference: on the root element (`<html>`, see `Styles`), or on any
+ * element, for what's within it.
  */
 export const colorSchemeAttribute = 'data-color-scheme';
+
+/**
+ * Where popups given no `container` are portaled into (their portals':
+ * the `Alert`'s, `Sheet`'s, `ActionSheet`'s, `Menu`'s, `Popover`'s,
+ * `Tooltip`'s, `ContextualMenu`'s), for what's within it; none: Base UI's
+ * default, the body. E.g. a device's screen in a page of demos, or an
+ * app's layer above its own.
+ */
+export const PortalContainerContext = createContext<
+  PortalContainer | undefined
+>(undefined);
+
+/** A portal's container: its own, or else the provided one (see above). */
+export const usePortalContainer = (
+  container: PortalContainer | null | undefined,
+): PortalContainer | null | undefined => {
+  const provided = useContext(PortalContainerContext);
+
+  return container === undefined ? provided : container;
+};
+
+type CollisionProps = Pick<
+  BasePopover.Positioner.Props,
+  'collisionBoundary' | 'collisionPadding'
+>;
+
+/**
+ * A positioner's collision defaults (Popover's, Menu's, Tooltip's,
+ * ActionSheet's): within its portal's container (e.g. a device's screen in a
+ * page of demos; else the clipping ancestors), `padding` clear of its safe
+ * area (the container's `--uikit-safe-area-inset-*`, the window's `env()`
+ * by default, see styles.css), so it shifts and shrinks to fit inside it.
+ * Either given, it wins.
+ */
+export const useCollision = (
+  { collisionBoundary, collisionPadding }: CollisionProps,
+  padding = 8,
+): CollisionProps => {
+  const container = usePortalContainer(undefined);
+  const resolved =
+    container && 'current' in container ? container.current : container;
+  const element = resolved instanceof ShadowRoot ? resolved.host : resolved;
+
+  if (collisionPadding !== undefined || typeof document === 'undefined') {
+    return {
+      collisionBoundary: collisionBoundary ?? element ?? undefined,
+      collisionPadding: collisionPadding ?? padding,
+    };
+  }
+
+  const style = getComputedStyle(element ?? document.documentElement);
+  const inset = (side: 'bottom' | 'left' | 'right' | 'top') =>
+    Number.parseFloat(
+      style.getPropertyValue(`--uikit-safe-area-inset-${side}`),
+    ) || 0;
+
+  return {
+    collisionBoundary: collisionBoundary ?? element ?? undefined,
+    collisionPadding: {
+      bottom: padding + inset('bottom'),
+      left: padding + inset('left'),
+      right: padding + inset('right'),
+      top: padding + inset('top'),
+    },
+  };
+};
 
 /** A frame at 60 Hz, in ms: what `edgeScrollDelta`'s speed is per. */
 const frameDuration = 1000 / 60;
@@ -341,6 +414,37 @@ export const withSecondaryClick = <Props extends SecondaryClickProps>(
   )) as FunctionComponent<Props>;
 };
 
+// What a popup's first tabbable element can be (roughly: enabled, in the
+// tab order).
+const tabbable = [
+  'a[href]',
+  'button:not(:disabled)',
+  'input:not(:disabled)',
+  'select:not(:disabled)',
+  'textarea:not(:disabled)',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+/**
+ * A Base UI popup's `initialFocus` as its default (its first tabbable
+ * element; opened by touch, or without one, the popup itself), but not
+ * scrolling: Base UI focuses the element scrolling it into view, which
+ * Safari does before the popup is in place, scrolling its content down.
+ */
+export const useInitialFocus = (
+  popup: RefObject<HTMLElement | null>,
+): ((openType: string) => boolean) =>
+  useCallback(
+    (openType: string) => {
+      if (openType === 'touch') return true;
+      const first = popup.current?.querySelector<HTMLElement>(tabbable);
+      if (!first) return true;
+      first.focus({ preventScroll: true });
+      return false;
+    },
+    [popup],
+  );
+
 /**
  * Returns an internal ref object for a `forwardRef` component's element that
  * is also exposed through the forwarded ref.
@@ -403,18 +507,18 @@ export const usePointerDrag = <T extends HTMLElement, State>(
   }, []);
 
   const finish = useCallback(
-    (element: T, pointerId: number, cancelled: boolean) => {
+    (element: T, pointerId: number, isCancelled: boolean) => {
       const { current: active } = activeRef;
       if (active?.pointerId !== pointerId) return;
 
-      if (cancelled) {
+      if (isCancelled) {
         if (active.frame !== undefined) cancelAnimationFrame(active.frame);
       } else {
         flush(element);
       }
 
       activeRef.current = null;
-      dragRef.current.end(element, active.state, cancelled);
+      dragRef.current.end(element, active.state, isCancelled);
     },
     [flush],
   );
@@ -530,22 +634,22 @@ export const MovingHighlight: FunctionComponent<{
     const { current: highlight } = ref;
     const container = highlight?.parentElement;
     if (!highlight || !container) return undefined;
-    let shown = false;
+    let isShown = false;
     // Between items (e.g. over a separator), it stays a moment: the next
     // highlighted item moves it there.
     let hiding: ReturnType<typeof setTimeout> | undefined;
 
     // Instantly while its items scroll (it scrolls with them).
-    const update = (instant = false) => {
+    const update = (isInstant = false) => {
       const item = key
         .split('\n')
         .map((selector) => container.querySelector<HTMLElement>(selector))
         .find(Boolean);
       if (!item) {
-        if (!shown || hiding !== undefined) return;
+        if (!isShown || hiding !== undefined) return;
         hiding = setTimeout(() => {
           hiding = undefined;
-          shown = false;
+          isShown = false;
           highlight.style.opacity = '0';
         }, hideDelay);
         return;
@@ -574,7 +678,7 @@ export const MovingHighlight: FunctionComponent<{
         width: `${String(rect.width / scaleX)}px`,
       };
       // Appearing (or scrolling): in place, not moving there.
-      if (shown && !instant) {
+      if (isShown && !isInstant) {
         Object.assign(highlight.style, place);
       } else {
         highlight.style.transitionProperty = 'opacity';
@@ -582,7 +686,7 @@ export const MovingHighlight: FunctionComponent<{
         highlight.getBoundingClientRect();
         highlight.style.removeProperty('transition-property');
       }
-      shown = true;
+      isShown = true;
       highlight.style.opacity = '1';
     };
 

@@ -4,7 +4,7 @@
     "declarationMap": true,
     "noEmit": false
   },
-  "exclude": ["**/*.test.ts", "src/demo/**"],
+  "exclude": ["**/*.test.ts", "src/demo/**", "src/demo.tsx", "src/demo-ssg.tsx"],
   "extends": "./tsconfig.json",
   "include": ["src/**/*"]
 }

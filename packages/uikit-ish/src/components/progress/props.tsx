@@ -30,15 +30,18 @@ export type ProgressValueProps = Omit<BaseProgress.Value.Props, 'ref'> & {
 
 export type ActivityIndicatorMovement = 'fade' | 'rotate' | 'stepped';
 
+/**
+ * How it shows (see `display`): spinning; stopped (at rest at once,
+ * frozen where it is, or finishing its turn first); or hidden (once
+ * finished, or at once).
+ */
+export type ActivityIndicatorDisplay =
+  'animate' | 'finish' | 'finish-and-hide' | 'freeze' | 'none' | 'reset';
+
 export type ActivityIndicatorProps = Omit<
   BaseProgress.Root.Props,
   'children' | 'ref' | 'value'
 > & {
-  /**
-   * Spinning (UIKit `startAnimating`, `stopAnimating`); stopped, it rests.
-   * @default true
-   */
-  animating?: boolean;
   /** A label after it (Figma “Label”). */
   children?: ReactNode;
   /**
@@ -46,6 +49,16 @@ export type ActivityIndicatorProps = Omit<
    * @default the secondary label color
    */
   color?: string;
+  /**
+   * How it shows: spinning (`animate`; UIKit `startAnimating`); stopped
+   * (UIKit `stopAnimating`), at rest at once (`reset`, as UIKit's), frozen
+   * where it is (`freeze`), or finishing its turn first, then resting (no
+   * jump: `finish`); finishing, then hidden (`finish-and-hide`; UIKit
+   * `hidesWhenStopped`), or hidden at once (`none`). Hidden, it takes no
+   * room.
+   * @default 'animate'
+   */
+  display?: ActivityIndicatorDisplay;
   /**
    * Seconds a turn takes (its speed).
    * @default 1
@@ -57,6 +70,15 @@ export type ActivityIndicatorProps = Omit<
    * @default 'stepped'
    */
   movement?: ActivityIndicatorMovement;
+  /**
+   * How far along a turn it is (turns: 0 to 1; below 0, turned back; past
+   * 1, further turns): at rest, set by hand (e.g. following a pull, see
+   * `Viewport.Overscroll`); spinning, where it starts from (changes after
+   * not restarting it). Rotating, the spinner turned that far; otherwise
+   * its brightest spoke moved on.
+   * @default 0
+   */
+  progress?: number;
   /**
    * Figma “Size” (Regular: 30px, Small: 22px).
    * @default 'regular'

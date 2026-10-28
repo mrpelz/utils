@@ -76,9 +76,10 @@ export const buildDemo = async (packageDirectory) => {
 export const serve = async (directory) => {
   const server = createServer(async (request, response) => {
     const pathname = new URL(request.url ?? '/', 'http://localhost').pathname;
+    // The demo's routes (paths without an extension) are its page's.
     const file = path.resolve(
       directory,
-      `.${pathname === '/' ? '/index.html' : pathname}`,
+      `.${path.extname(pathname) === '' ? '/index.html' : pathname}`,
     );
 
     if (!file.startsWith(directory) || !existsSync(file)) {
@@ -138,7 +139,12 @@ export const launchBrowser = async () => {
     executable,
     [
       '--headless=new',
-      '--disable-gpu',
+      // GPU compositing (as browsers have it: e.g. backdrop filters render
+      // differently in software), via Vulkan.
+      '--enable-gpu',
+      '--ignore-gpu-blocklist',
+      '--use-angle=vulkan',
+      '--enable-features=Vulkan',
       // A mouse (headless Chrome on Linux has none: no hover, no fine
       // pointer), as on macOS; hover and pointer types 2 and 4: hover, fine.
       '--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4',
@@ -417,10 +423,17 @@ export class Page {
     // Only the hash differs between tests, so leave the page first to get a
     // fresh load instead of a same-document navigation.
     await this.browser.send('Page.navigate', { url: 'about:blank' });
+    // (The page of all demos, the fragment selecting one.)
     await this.browser.send('Page.navigate', {
-      url: `${this.url}#${this.#fragment}`,
+      url: `${this.url}all#${this.#fragment}`,
     });
-    await this.waitFor(`Boolean(${this.section}.firstElementChild)`);
+    // (The demos mount after the page (client only), each near the screen:
+    // with one selected, all of them, the others rendering nothing.)
+    const slot = JSON.stringify('.demo-virtual-slot');
+    const away = JSON.stringify('.demo-virtual-slot[data-away]');
+    await this.waitFor(
+      `Boolean(document.querySelector(${slot})) && !document.querySelector(${away})`,
+    );
     await sleep(300);
   }
 

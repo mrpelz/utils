@@ -70,4 +70,70 @@ export const tests = [
       assert.ok(held.popup, 'held open');
     },
   },
+  {
+    name: 'tooltip: in a provider, its delay the provider’s (the trigger’s 300ms only without one)',
+    run: async (page) => {
+      await page.open('tooltip-parts-provider', 'light', {
+        state: [{ delay: 1000 }],
+      });
+      const button = await page.rect('button');
+      await page.mouse('mouseMoved', 1, 1);
+      await page.mouse(
+        'mouseMoved',
+        button.x + button.width / 2,
+        button.y + button.height / 2,
+      );
+      await sleep(600);
+      const early = await tooltip(page);
+      assert.equal(early.popup, undefined, 'not yet after 600ms');
+      await sleep(900);
+      const late = await tooltip(page);
+      assert.ok(late.popup, 'after the provider’s 1000ms');
+    },
+  },
+  {
+    name: 'tooltip: held open at an element (anchor), without a trigger',
+    run: async (page) => {
+      await page.open('tooltip-composition-held');
+      await sleep(500);
+      const held = await page.evaluate(`(() => {
+        const popup = document.querySelector('[data-side][data-open]:not([role])');
+        const pin = document.querySelector('.tooltip-demo-pin');
+        if (!popup) return null;
+        const [p, a] = [popup, pin].map((element) => element.getBoundingClientRect());
+        // (8px above it, or below it if there's no room above.)
+        return [popup.textContent, Math.round(Math.max(a.top - p.bottom, p.top - a.bottom))];
+      })()`);
+      assert.deepEqual(held, ['You Are Here', 8]);
+    },
+  },
+  {
+    name: 'tooltip: by a handle, two triggers, its text their payloads',
+    run: async (page) => {
+      await page.open('tooltip-parts-use-create-tooltip-handle');
+      /**
+       * Hovers the trigger at `index`, until its tooltip shows `expected`
+       * (its delay varies with the machine's load).
+       *
+       * @param {number} index
+       * @param {string} expected
+       */
+      const shows = async (index, expected) => {
+        const button = await page.rect('button', index);
+        await page.mouse('mouseMoved', 1, 1);
+        await sleep(300);
+        await page.mouse(
+          'mouseMoved',
+          button.x + button.width / 2,
+          button.y + button.height / 2,
+        );
+        await page.waitFor(
+          `document.querySelector(${JSON.stringify('[data-side][data-open]:not([role])')})?.textContent === ${JSON.stringify(expected)}`,
+          3000,
+        );
+      };
+      await shows(1, 'Delete');
+      await shows(0, 'Duplicate');
+    },
+  },
 ];

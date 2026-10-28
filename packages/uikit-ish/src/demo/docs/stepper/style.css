@@ -1,0 +1,26 @@
+/* Stepper demo (see main.tsx). */
+
+/* The value next to the stepper (as apps show it, UIKit's stepper
+   doesn't). */
+.stepper-demo-row {
+  display: flex;
+  align-items: center;
+  color: var(--color-ios-label);
+  font-size: var(--font-ios-body-size);
+  font-variant-numeric: tabular-nums;
+  gap: 16px;
+  line-height: var(--font-ios-body-line-height);
+
+  /* Wide enough for its longest value (“200%”), so the demo doesn't
+     change width as it steps. */
+  & output {
+    min-inline-size: 4ch;
+    text-align: end;
+  }
+}
+
+/* A value in a row's detail (see composition.tsx): its digits as wide as
+   each other, so it doesn't shift as it steps. */
+.stepper-demo-value {
+  font-variant-numeric: tabular-nums;
+}

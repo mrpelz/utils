@@ -6,6 +6,8 @@ import type { LogicalSide, SecondaryClickProps } from '../utils/main.js';
 
 export type Size = 'compact' | 'regular';
 
+export type MenuHandle<Payload = unknown> = BaseMenu.Handle<Payload>;
+
 export type MenuContextValue = {
   /** The root menu's actions (closing it). */
   actionsRef?: RefObject<BaseMenu.Root.Actions | null>;
@@ -16,7 +18,7 @@ export type MenuContextValue = {
   submenu?: 'horizontal' | 'vertical';
 };
 
-export type MenuRootProps = BaseMenu.Root.Props & {
+export type MenuRootProps<Payload = unknown> = BaseMenu.Root.Props<Payload> & {
   /** UIKit size class: `compact` (iPhone, default) or `regular` (iPad). */
   size?: Size;
 };

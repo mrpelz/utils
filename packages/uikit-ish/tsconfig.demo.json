@@ -2,7 +2,7 @@
   "compilerOptions": {
     "noEmit": false
   },
-  "exclude": ["**/*.test.ts", "src/main.ts"],
+  "exclude": ["**/*.test.ts", "src/main.ts", "src/demo-ssg.tsx"],
   "extends": "./tsconfig.json",
   "include": ["src/**/*"]
 }

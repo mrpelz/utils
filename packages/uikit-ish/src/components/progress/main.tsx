@@ -8,13 +8,17 @@ import {
   createContext,
   CSSProperties,
   forwardRef,
+  RefObject,
   useContext,
   useLayoutEffect,
+  useRef,
   useState,
 } from 'react';
 
 import { cn, withStyle } from '../utils/main.js';
 import type {
+  ActivityIndicatorDisplay,
+  ActivityIndicatorMovement,
   ActivityIndicatorProps,
   ProgressLabelProps,
   ProgressRootProps,
@@ -24,6 +28,7 @@ import type {
 export type {
   ActivityIndicatorMovement,
   ActivityIndicatorProps,
+  ActivityIndicatorDisplay,
   ProgressLabelProps,
   ProgressPlacement,
   ProgressRootProps,
@@ -52,24 +57,27 @@ export type {
 //   the bar is hovered or focused by keyboard (it's focusable then).
 // - Indeterminate (Base UI's `value` null), a bar's fill slides along its
 //   track (UIKit has none: use an `ActivityIndicator`).
+// - Stopping, an activity indicator rests at once (UIKit's), freezes where
+//   it is, or finishes its turn first; or hides, once finished (UIKit's
+//   `hidesWhenStopped`) or at once (`display`).
 
 // Registers a momentary tooltip (see `Value`), which makes the bar
 // focusable.
-const RootContext = createContext<((momentary: boolean) => void) | undefined>(
+const RootContext = createContext<((isMomentary: boolean) => void) | undefined>(
   undefined,
 );
 
 /** A progress bar (UIKit `UIProgressView`), its parts Base UI's. */
 const Root = forwardRef<HTMLDivElement, ProgressRootProps>(
   ({ className, style, tabIndex, tint, ...props }, ref) => {
-    const [momentary, setMomentary] = useState(false);
+    const [isMomentary, setIsMomentary] = useState(false);
 
     return (
-      <RootContext.Provider value={setMomentary}>
+      <RootContext.Provider value={setIsMomentary}>
         <BaseProgress.Root
           ref={ref}
           style={withStyle({ '--uikit-progress-tint': tint }, style)}
-          tabIndex={tabIndex ?? (momentary ? 0 : undefined)}
+          tabIndex={tabIndex ?? (isMomentary ? 0 : undefined)}
           {...props}
           className={cn('uikit-progress-root', className)}
           data-progress-part="root"
@@ -117,12 +125,12 @@ const Label = forwardRef<HTMLSpanElement, ProgressLabelProps>(
 const Value = forwardRef<HTMLSpanElement, ProgressValueProps>(
   ({ className, placement = 'block-start', ...props }, ref) => {
     const setMomentary = useContext(RootContext);
-    const momentary = placement === 'momentary-tooltip';
+    const isMomentary = placement === 'momentary-tooltip';
     useLayoutEffect(() => {
-      if (!momentary) return undefined;
+      if (!isMomentary) return undefined;
       setMomentary?.(true);
       return () => setMomentary?.(false);
-    }, [momentary, setMomentary]);
+    }, [isMomentary, setMomentary]);
 
     return (
       <BaseProgress.Value
@@ -131,7 +139,7 @@ const Value = forwardRef<HTMLSpanElement, ProgressValueProps>(
         data-progress-placement={placement}
         className={cn(
           'uikit-progress-value',
-          placement === 'tooltip' || momentary
+          placement === 'tooltip' || isMomentary
             ? cn('uikit-tooltip-surface uikit-glass-medium', className)
             : className,
         )}
@@ -153,6 +161,89 @@ export const Progress = {
 // The spokes' opacities, clockwise from the top.
 const spokes = [1, 0.15, 0.27, 0.39, 0.51, 0.63, 0.75, 0.87];
 
+// A spoke's phase: a share of a turn behind the brightest.
+const phaseOf = (index: number) =>
+  ((spokes.length - index) % spokes.length) / spokes.length;
+
+// A share of a turn (0 to 1), of any number of turns.
+const turnOf = (turns: number) => ((turns % 1) + 1) % 1;
+
+/**
+ * A spoke's opacity at rest, `progress` turns along (see `progress`):
+ * rotating, as it is (the spinner turned); fading, as far into its fade
+ * (1 to 0.15) as its phase; stepped, a spoke at a time.
+ */
+const restingOpacity = (
+  index: number,
+  movement: ActivityIndicatorMovement,
+  progress: number,
+) => {
+  if (movement === 'rotate') return spokes[index];
+  const into = turnOf(phaseOf(index) + progress);
+  const fade =
+    movement === 'fade'
+      ? into
+      : Math.floor(into * spokes.length + 1e-9) / (spokes.length - 1);
+  return 1 - 0.85 * fade;
+};
+
+/**
+ * How a spinner rests while stopped (see `display`): none while it spins
+ * (or finishes its turn); at rest (its animations gone), or frozen.
+ */
+const useStopped = (
+  spinner: RefObject<HTMLElement | null>,
+  display: ActivityIndicatorDisplay,
+  movement: ActivityIndicatorMovement,
+): 'freeze' | 'reset' | undefined => {
+  const isAnimating = display === 'animate';
+  const isFinishing = display === 'finish' || display === 'finish-and-hide';
+  const isHiding = display === 'finish-and-hide';
+  // Whether its last turn is done (stopped from the start: at rest).
+  const [isFinished, setIsFinished] = useState(!isAnimating);
+  const [wasAnimating, setWasAnimating] = useState(isAnimating);
+  if (isAnimating !== wasAnimating) {
+    setWasAnimating(isAnimating);
+    setIsFinished(false);
+  }
+
+  useLayoutEffect(() => {
+    if (!isFinishing) return undefined;
+
+    // Finishing: the turn's animation (rotating, the spinner's; otherwise
+    // the top spoke's) ends with its current iteration, at the top; then at
+    // rest.
+    const element =
+      movement === 'rotate'
+        ? spinner.current
+        : spinner.current?.firstElementChild;
+    const [turn] = element?.getAnimations() ?? [];
+    const iteration = turn?.effect?.getComputedTiming().currentIteration;
+    if (typeof iteration === 'number') {
+      turn?.effect?.updateTiming({ iterations: iteration + 1 });
+    }
+
+    let isCancelled = false;
+    (turn?.finished ?? Promise.resolve())
+      .then(() => {
+        if (isCancelled) return;
+        setIsFinished(true);
+        // Hiding: turning on as it fades out (see `ActivityIndicator`).
+        if (isHiding) turn?.effect?.updateTiming({ iterations: Infinity });
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isCancelled = true;
+      turn?.effect?.updateTiming({ iterations: Infinity });
+    };
+  }, [isFinishing, isHiding, movement, spinner]);
+
+  if (isAnimating) return undefined;
+  if (isFinishing) return isFinished ? 'reset' : undefined;
+  return display === 'freeze' ? 'freeze' : 'reset';
+};
+
 /**
  * An activity indicator (UIKit `UIActivityIndicatorView`, Figma “Progress
  * indicator”): spinning spokes, for progress of unknown length (an
@@ -165,58 +256,88 @@ export const ActivityIndicator = forwardRef<
   (
     {
       className,
-      animating = true,
       children,
       color,
+      display = 'animate',
       duration,
       movement = 'stepped',
+      progress = 0,
       size = 'regular',
       style,
       ...props
     },
     ref,
-  ) => (
-    <BaseProgress.Root
-      ref={ref}
-      data-movement={movement}
-      data-size={size}
-      data-stopped={animating ? undefined : ''}
-      value={null}
-      style={withStyle(
-        {
-          '--uikit-progress-activity-color': color,
-          '--uikit-progress-activity-duration':
-            duration === undefined ? undefined : `${String(duration)}s`,
-        },
-        style,
-      )}
-      {...props}
-      className={cn('uikit-progress-activity-indicator', className)}
-      data-progress-part="activity-indicator"
-    >
-      <span
-        aria-hidden="true"
-        className="uikit-progress-spinner"
-        data-progress-part="spinner"
+  ) => {
+    const spinner = useRef<HTMLSpanElement>(null);
+    const stopped = useStopped(spinner, display, movement);
+    // Spinning, from where it was then (later progress not restarting it).
+    const [from, setFrom] = useState(progress);
+    const [wasDisplay, setWasDisplay] = useState(display);
+    if (display !== wasDisplay) {
+      setWasDisplay(display);
+      if (display === 'animate') setFrom(progress);
+    }
+    // Hidden: at once, or once its turn's finished (see `display`); spinning
+    // on meanwhile (e.g. fading out, see style.css), not at rest.
+    const isHidden =
+      display === 'none' ||
+      (display === 'finish-and-hide' && stopped === 'reset');
+    const shown = isHidden ? undefined : stopped;
+    const isAtRest = shown === 'reset';
+
+    return (
+      <BaseProgress.Root
+        ref={ref}
+        data-movement={movement}
+        data-size={size}
+        data-stopped={shown}
+        hidden={isHidden || undefined}
+        value={null}
+        style={withStyle(
+          {
+            '--uikit-progress-activity-color': color,
+            '--uikit-progress-activity-duration':
+              duration === undefined ? undefined : `${String(duration)}s`,
+            '--uikit-progress-activity-from': String(turnOf(from)),
+          },
+          style,
+        )}
+        {...props}
+        className={cn('uikit-progress-activity-indicator', className)}
+        data-progress-part="activity-indicator"
       >
-        {spokes.map((opacity, index) => (
-          <span
-            key={index}
-            style={
-              {
-                '--uikit-progress-activity-phase': String(
-                  ((spokes.length - index) % spokes.length) / spokes.length,
-                ),
-                opacity,
-                rotate: `${String(index * 45)}deg`,
-              } as CSSProperties
-            }
-          />
-        ))}
-      </span>
-      {children === undefined ? null : (
-        <BaseProgress.Label>{children}</BaseProgress.Label>
-      )}
-    </BaseProgress.Root>
-  ),
+        <span
+          ref={spinner}
+          aria-hidden="true"
+          className="uikit-progress-spinner"
+          data-progress-part="spinner"
+          style={
+            isAtRest && movement === 'rotate'
+              ? { rotate: `${String(progress)}turn` }
+              : undefined
+          }
+        >
+          {spokes.map((_, index) => (
+            <span
+              key={index}
+              style={
+                {
+                  '--uikit-progress-activity-phase': String(phaseOf(index)),
+                  opacity: restingOpacity(
+                    index,
+                    movement,
+                    isAtRest ? progress : 0,
+                  ),
+                  rotate: `${String(index * 45)}deg`,
+                } as CSSProperties
+              }
+            />
+          ))}
+        </span>
+        {children === undefined ? null : (
+          <BaseProgress.Label>{children}</BaseProgress.Label>
+        )}
+      </BaseProgress.Root>
+    );
+  },
 );

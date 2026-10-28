@@ -1,0 +1,12 @@
+/* Form demo (see main.tsx). */
+
+/* A field around a group of rows, without a box of its own. */
+.form-demo-field-contents {
+  display: contents;
+}
+
+/* A stepper's value in its row's detail: its digits as wide as each
+   other, so it doesn't shift as it steps. */
+.form-demo-value {
+  font-variant-numeric: tabular-nums;
+}

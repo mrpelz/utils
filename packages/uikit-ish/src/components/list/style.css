@@ -4,10 +4,22 @@
    placement, whatever their order.) */
 /* stylelint-disable no-descending-specificity */
 @layer uikit-ish {
+  /* Spaced between each other only: at the list's ends, what precedes or
+     follows it (a bar, a large title, a header) or its container spaces it,
+     so their spacing doesn't add up. */
   .uikit-list-section {
     display: block;
     margin-block: var(--uikit-list-section-spacing, 35px);
     scroll-snap-align: var(--uikit-list-section-snap, none);
+
+    /* (By class: a section can be another element, e.g. a fieldset.) */
+    &:not(.uikit-list-section ~ &) {
+      margin-block-start: 0;
+    }
+
+    &:not(:has(~ .uikit-list-section)) {
+      margin-block-end: 0;
+    }
   }
 
   .uikit-list-group {
@@ -24,6 +36,12 @@
     margin-inline: var(--uikit-list-inset, 16px);
   }
 
+  /* A row (see Item): its parts in a line, in their order (a flexbox):
+     leading ones (edit controls, the image, `Leading`), its `Content`
+     (title, subtitle, text: taking the rest), trailing ones (details,
+     chevrons, grabbers, `Trailing`); or a `Span` across it; a `Below` on a
+     line of its own under them. Elements of other components only in these
+     slots. */
   .uikit-list-row {
     --uikit-list-min-height: var(--uikit-list-row-min-height, 52px);
 
@@ -39,15 +57,13 @@
     --uikit-button-plain-symbol-weight: 300;
 
     position: relative;
-    display: grid;
+    display: flex;
     min-height: var(--uikit-list-min-height);
     box-sizing: border-box;
+    flex-wrap: wrap;
     align-content: center;
+    align-items: center;
     padding: var(--uikit-list-row-padding, 12px 16px);
-    grid-auto-columns: auto;
-    grid-auto-flow: column;
-    grid-template-columns: auto auto minmax(0, 1fr);
-    grid-template-rows: auto auto;
 
     /* Indented by its level (see Item). */
     padding-inline-start: calc(
@@ -56,267 +72,280 @@
     );
 
     /* Figma Height=Tall (images keep their regular size) */
-    &:has(> [data-list-part='subtitle']) {
+    &:has(> [data-list-part='content'] > [data-list-part='subtitle']) {
       --uikit-list-min-height: 68px;
-
-      & > [data-list-part='title'] {
-        align-self: end;
-        grid-area: 1 / 3;
-      }
     }
 
-    /* Framework7 media list (Mail): a title row with the trailing parts, the
-       subtitle and text below, spanning the row, the image at the top; the
-       title emphasized (Framework7: 600), trailing details in Subheadline. */
-    &:has(> [data-list-part='text']) {
+    /* Framework7 media list (Mail): the image and the trailing parts at the
+       top, the title emphasized (Framework7: 600), trailing details in
+       Subheadline. */
+    &:has(> [data-list-part='content'] > [data-list-part='text']) {
       --uikit-list-min-height: 0px;
 
       align-content: start;
-      grid-template-rows: auto auto auto;
+      align-items: start;
       padding-block: 10px;
 
-      &::after {
-        grid-area: 1 / 1 / 2 / 4;
-      }
-
-      & > [data-list-part='edit'] {
-        grid-area: 1 / 1 / 4;
-      }
-
-      & > [data-list-part='image'] {
-        align-self: start;
-        grid-area: 1 / 2 / 4;
+      & > [data-list-part='leading'] > [data-list-part='image'] {
         margin-block: 0;
       }
 
-      & > [data-list-part='title'] {
-        align-self: center;
+      & > [data-list-part='leading'],
+      & > [data-list-part='trailing'] {
+        align-self: start;
+      }
+
+      & > [data-list-part='content'] > [data-list-part='title'] {
         font-variation-settings: 'wght' 590;
         font-weight: round(down, 590, 100);
-        grid-area: 1 / 3;
-        stroke: currentcolor;
-        stroke-linejoin: round;
-        stroke-width: max(0px, (590 - 400) / 326 * 1px);
-
-        --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
       }
 
-      & > [data-list-part='subtitle'] {
+      & > [data-list-part='content'] > [data-list-part='subtitle'] {
         color: var(--color-ios-label);
-        grid-area: 2 / 3 / 3 / 99;
       }
 
-      & > [data-list-part='text'] {
-        grid-area: 3 / 3 / 4 / 99;
-      }
-
-      & > [data-list-part='detail'] {
+      & > [data-list-part='trailing'] > [data-list-part='detail'] {
         font-size: var(--font-ios-subheadline-size);
         font-style: normal;
         font-variation-settings: 'wght' var(--font-ios-subheadline-weight);
         font-weight: round(down, var(--font-ios-subheadline-weight), 100);
         letter-spacing: var(--font-ios-subheadline-tracking);
         line-height: var(--font-ios-subheadline-line-height);
-        stroke: currentcolor;
-        stroke-linejoin: round;
-        stroke-width: max(
-          0px,
-          (var(--font-ios-subheadline-weight) - 400) / 326 * 1px
-        );
-
-        --uikit-symbol-thinning: max(
-          0px,
-          (400 - var(--font-ios-subheadline-weight)) / 326 * 1px
-        );
-      }
-
-      &
-        > :not(
-          [data-list-part='edit'],
-          [data-list-part='image'],
-          [data-list-part='title'],
-          [data-list-part='subtitle'],
-          [data-list-part='text'],
-          [data-list-part='button'],
-          [data-list-part='swipe-actions']
-        ) {
-        grid-row: 1;
       }
     }
 
-    /* Fields (see Field, Root rendering the row): the label as the title, in
-       Body, the control filling the rest of the row (the label's column as
-       wide as it, its value at the end), the clear button 8px after it,
-       messages below. */
-    &:has(> [data-text-field-part='control']) {
-      grid-template-columns: auto auto minmax(0, max-content) minmax(0, 1fr);
-      grid-template-rows: auto auto auto;
-
-      & > [data-text-field-part='label'] {
-        align-self: center;
-        color: var(--color-ios-label);
-        font-size: var(--font-ios-body-size);
-        font-style: normal;
-        font-variation-settings: 'wght' var(--font-ios-body-weight);
-        font-weight: round(down, var(--font-ios-body-weight), 100);
-        grid-area: 1 / 3;
-        letter-spacing: var(--font-ios-body-tracking);
-        line-height: var(--font-ios-body-line-height);
-        margin-block: 0;
-        margin-inline: 0 16px;
-        stroke: currentcolor;
-        stroke-linejoin: round;
-        stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
-
-        --uikit-symbol-thinning: max(
-          0px,
-          (400 - var(--font-ios-body-weight)) / 326 * 1px
-        );
+    /* Fields (see TextField, its root rendering the row): its label in the
+       content, in Body, as wide as it; its control in a trailing slot filling
+       the rest of the row (its value at the end), the clear button 8px after
+       it; messages below. */
+    &:has(> [data-list-part='trailing'] > [data-text-field-part='control']) {
+      & > [data-list-part='content'] {
+        flex: none;
+        margin-inline-end: 16px;
       }
 
-      & > [data-text-field-part='control'] {
-        position: relative;
-        align-self: center;
-        margin: 0;
-        grid-area: 1 / 4;
-      }
-
-      & > textarea[data-text-field-part='control'] {
-        align-self: start;
-      }
-
-      &:not(:has(> [data-text-field-part='label']))
-        > [data-text-field-part='control'] {
-        grid-column: 3 / 5;
-      }
-
-      /* After an inline label, the value at the row's end (UIKit forms,
-         Settings). */
-      &:has(> [data-text-field-part='label'])
-        > input[data-text-field-part='control'] {
-        text-align: end;
-      }
-
-      & > [data-text-field-part='clear'] {
-        grid-row: 1;
-        margin-block: 0;
-        margin-inline-start: 8px;
-      }
-
-      & > [data-text-field-part='description'],
-      & > [data-text-field-part='error'] {
-        margin: 4px 0 0;
-        grid-column: 3 / -1;
-      }
-
-      & > [data-text-field-part='description'] {
-        grid-row: 2;
-      }
-
-      & > [data-text-field-part='error'] {
-        grid-row: 3;
+      & > [data-list-part='trailing']:has(> [data-text-field-part='control']) {
+        flex: 1 1 0;
+        margin-inline-start: 0;
       }
     }
 
-    /* Figma “_Separator”, from the text to 16px before the edge */
+    & [data-text-field-part='label'] {
+      color: var(--color-ios-label);
+      font-size: var(--font-ios-body-size);
+      font-style: normal;
+      font-variation-settings: 'wght' var(--font-ios-body-weight);
+      font-weight: round(down, var(--font-ios-body-weight), 100);
+      letter-spacing: var(--font-ios-body-tracking);
+      line-height: var(--font-ios-body-line-height);
+      margin-block: 0;
+    }
+
+    & > [data-list-part='trailing'] > [data-text-field-part='control'] {
+      position: relative;
+      min-width: 0;
+      flex: 1 1 0;
+      margin: 0;
+    }
+
+    & > [data-list-part='trailing'] > textarea[data-text-field-part='control'] {
+      align-self: start;
+    }
+
+    /* After an inline label, the value at the row's end (UIKit forms,
+       Settings). */
+    &:has(> [data-list-part='content'] > [data-text-field-part='label'])
+      > [data-list-part='trailing']
+      > input[data-text-field-part='control'] {
+      text-align: end;
+    }
+
+    & > [data-list-part='trailing'] > [data-text-field-part='clear'] {
+      margin-block: 0;
+      margin-inline-start: 8px;
+    }
+
+    & > [data-list-part='below'] > :is(
+        [data-text-field-part='description'],
+        [data-text-field-part='error']
+      ) {
+      margin: 4px 0 0;
+    }
+
+    /* Figma “_Separator”, from the content (its text) to 16px before the
+       edge: its start anchored to the content (moving with it, e.g. in edit
+       mode); without anchor positioning, or content, the row's padding. */
     &::before {
       position: absolute;
       top: 0;
       border-top: 1px solid var(--color-ios-list-separator);
       content: '';
-
-      /* To the padding edge (auto, as absolutely positioned; line 99 exists
-         in rows spanning to it, e.g. media rows). */
-      grid-column: 3 / auto;
-      inset-inline: 0 16px;
+      inset-inline: var(--uikit-list-row-padding-start, 16px) 16px;
 
       /* Hidden by its row's state (see StyledItem). */
       opacity: var(--uikit-list-separator-opacity, 1);
       transition: opacity 300ms;
     }
 
-    /* Keeps the trailing parts out of the leading and text columns. */
-    &::after {
-      content: '';
-      grid-area: 1 / 1 / 3 / 4;
-      pointer-events: none;
+    @supports (anchor-name: --uikit-list-content) {
+      & > [data-list-part='content'] {
+        anchor-name: --uikit-list-content;
+      }
+
+      &::before {
+        inset-inline-start: anchor(
+          --uikit-list-content start,
+          var(--uikit-list-row-padding-start, 16px)
+        );
+      }
     }
 
-    /* Above a pressable title's hit area, as trailing controls */
-    & > [data-list-part='edit'] {
+    /* Slots before the content: what's in them in a line, above a
+       pressable title's hit area. Figma: an edit control 2px from the
+       start, 17px before what follows; the image 8px; other elements 12px
+       (8px apart). */
+    & > [data-list-part='leading'] {
       position: relative;
       z-index: 1;
-      align-self: center;
-      grid-area: 1 / 1 / 3;
-      margin-inline: 2px 17px;
+      display: flex;
+      flex: none;
+      align-items: center;
+
+      & > [data-list-part='edit'] {
+        margin-inline: 2px 17px;
+      }
+
+      & > [data-list-part='image'] {
+        margin-inline-end: 8px;
+      }
+
+      & > :not([data-list-part='edit'], [data-list-part='image'], input) {
+        margin-inline-end: 12px;
+      }
+
+      & > :not([data-list-part='edit'], [data-list-part='image'], input)
+        + :not([data-list-part='edit'], [data-list-part='image'], input) {
+        margin-inline-start: -4px;
+      }
     }
 
-    & > [data-list-part='image'] {
-      align-self: center;
-      grid-area: 1 / 2 / 3;
-      margin-inline-end: 8px;
+    /* Its text: the title, the subtitle below it, a media row's text;
+       taking the rest of the line. (Not positioned: a pressable title's or
+       button's hit area covers the row.) */
+    & > [data-list-part='content'] {
+      display: flex;
+      min-width: 0;
+      flex: 1 1 0;
+      flex-direction: column;
+      justify-content: center;
     }
 
-    /* Alone, centered across both rows (trailing parts taller than it, e.g. a
-       switch, would grow both). */
-    & > [data-list-part='title'] {
-      align-self: center;
-      grid-area: 1 / 3 / 3;
+    /* Across the row (e.g. a Slider, a Segmented control, an inline
+       calendar): the row's line. */
+    & > [data-list-part='span'] {
+      display: flex;
+      min-width: 0;
+      flex: 1 1 100%;
+      align-items: center;
     }
 
-    & > [data-list-part='subtitle'] {
-      align-self: start;
-      grid-area: 2 / 3;
-    }
-
-    & > [data-list-part='button'] {
-      grid-area: 1 / 3 / 3;
-    }
-
-    /* Figma “Contents - Trailing”: everything else */
-    &
-      > :not(
-        [data-list-part='edit'],
-        [data-list-part='image'],
-        [data-list-part='title'],
-        [data-list-part='subtitle'],
-        [data-list-part='text'],
-        [data-list-part='button'],
-        [data-list-part='swipe-actions']
-      ) {
-      position: relative;
-      z-index: 1;
-      align-self: center;
-      grid-row: 1 / 3;
-      margin-block: -4px;
-      margin-inline-start: 16px;
-    }
-
-    /* A row of a single control (no row part, e.g. a Slider): across the
-       row's content. */
-    &:not(:has(> [data-list-part])) > :only-child {
-      z-index: auto;
-      margin: 0;
-      grid-column: 1 / -1;
-      grid-row: 1 / 3;
-      justify-self: stretch;
-    }
-
-    /* A calendar (DatePicker, inline) has its own insets: across the row. */
-    &:not(:has(> [data-list-part]))
-      > [data-date-picker-part='calendar']:only-child {
+    /* A calendar (DatePicker, inline) has its own insets: across the row,
+       as wide as it is (its days narrower, with less room). */
+    & > [data-list-part='span'] > [data-date-picker-part='calendar'] {
+      min-width: 0;
+      flex: 1 1 auto;
       margin: -12px -16px;
     }
 
-    /* Trailing controls filling their container elsewhere (e.g. Segmented)
-       take their content's width. */
-    & > [role='radiogroup'] {
-      width: auto;
+    /* A roll (e.g. DatePicker's TimeRoll, inline): across the row, its
+       columns centered (iOS). */
+    & > [data-list-part='span'] > [data-roll-part='root'] {
+      flex: 1 1 auto;
     }
 
-    /* Figma “_Grabber” */
-    & > [data-list-part='grabber'] {
-      margin-inline-start: 12px;
+    /* Under the row's line, across it (e.g. a field's messages). Hidden
+       (`hidden`), collapsed: growing and shrinking (its content clipped
+       meanwhile; its track's least none, its content's margins
+       notwithstanding), fading. */
+    & > [data-list-part='below'] {
+      display: grid;
+      overflow: clip;
+      min-width: 0;
+      flex: 1 1 100%;
+      grid-template-rows: minmax(0, 1fr);
+      transition:
+        grid-template-rows 300ms ease,
+        opacity 300ms ease,
+        visibility 300ms;
+
+      &[hidden] {
+        grid-template-rows: minmax(0, 0fr);
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
+    }
+
+    /* Slots after the content (Figma “Contents - Trailing”): what's in them
+       in a line, 16px apart (a grabber 12px), above a pressable title's hit
+       area. */
+    & > [data-list-part='trailing'] {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex: none;
+      align-items: center;
+      margin-block: -4px;
+
+      & > :not(input) {
+        margin-inline-start: 16px;
+      }
+
+      & > [data-list-part='grabber'] {
+        margin-inline-start: 12px;
+      }
+
+      /* Controls filling their container elsewhere (e.g. Segmented) take
+         their content's width. */
+      & > [role='radiogroup'] {
+        width: auto;
+      }
+    }
+
+    /* Edit mode (see Item: its sides, `data-edit-leading` and
+       `-trailing`, on or off; not managed, neither): a side's slots shown
+       only while it edits (`whileEditing="show"`, e.g. edit controls', a
+       grabber's) slide in from the row's edge (the group clips them), the
+       content making room; those hidden then (`hide`, e.g. a chevron's)
+       slide out; others stay (whatever they hold: placing is the slots').
+       Out, a slot takes no room (its margins cancel its width,
+       `--uikit-list-slot-size`, measured), beyond the row's edge, faded and
+       hidden. */
+    [data-sized] > & > :is([data-list-part='leading'], [data-list-part='trailing']) {
+      transition-duration: 300ms;
+      transition-property: margin, opacity, visibility;
+      transition-timing-function: ease;
+    }
+
+    [data-edit-leading='off'] > * > &
+      > [data-list-part='leading'][data-while-editing='show'],
+    [data-edit-leading='on'] > * > &
+      > [data-list-part='leading'][data-while-editing='hide'] {
+      margin-inline: calc(-1 * var(--uikit-list-slot-size, 0px) - 16px) 16px;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    [data-edit-trailing='off'] > * > &
+      > [data-list-part='trailing'][data-while-editing='show'],
+    [data-edit-trailing='on'] > * > &
+      > [data-list-part='trailing'][data-while-editing='hide'] {
+      margin-inline: 16px calc(-1 * var(--uikit-list-slot-size, 0px) - 16px);
+      opacity: 0;
+      visibility: hidden;
     }
   }
 
@@ -383,17 +412,6 @@
     line-height: var(--font-ios-subheadline-line-height);
     overflow-wrap: break-word;
     pointer-events: none;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--font-ios-subheadline-weight) - 400) / 326 * 1px
-    );
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-subheadline-weight)) / 326 * 1px
-    );
   }
 
   .uikit-list-text {
@@ -412,17 +430,6 @@
     line-height: var(--font-ios-subheadline-line-height);
     overflow-wrap: break-word;
     pointer-events: none;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--font-ios-subheadline-weight) - 400) / 326 * 1px
-    );
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-subheadline-weight)) / 326 * 1px
-    );
   }
 
   .uikit-list-supertitle {
@@ -435,11 +442,6 @@
     letter-spacing: -0.45px;
     line-height: 20px;
     overflow-wrap: break-word;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (400 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
   }
 
   .uikit-list-detail {
@@ -451,15 +453,7 @@
     letter-spacing: var(--font-ios-body-tracking);
     line-height: var(--font-ios-body-line-height);
     pointer-events: none;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
     white-space: nowrap;
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight)) / 326 * 1px
-    );
   }
 
   .uikit-list-checkmark {
@@ -472,11 +466,6 @@
     font-weight: round(down, 590, 100);
     place-items: center;
     pointer-events: none;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (590 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
   }
 
   .uikit-list-drill-in {
@@ -489,11 +478,6 @@
     font-weight: round(down, 590, 100);
     place-items: center;
     pointer-events: none;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (590 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
 
     &:dir(rtl) {
       scale: -1 1;
@@ -512,11 +496,6 @@
     font-weight: round(down, 590, 100);
     place-items: center;
     pointer-events: none;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (590 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
 
     &:dir(rtl) {
       --uikit-list-disclosure-turn: -90deg;
@@ -542,11 +521,17 @@
     font-variation-settings: 'wght' 400;
     font-weight: round(down, 400, 100);
     line-height: 18px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (400 - 400) / 326 * 1px);
 
-    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
+    /* Its actions (buttons, alone in it): below the group, 16px from it,
+       stacked and centered, as wide as the group at most (a `fill` button
+       spanning it); the gap the list's, not the buttons'. */
+    &:has(> [data-button-part='root']):not(:has(> :not([data-button-part='root']))) {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px var(--uikit-list-inset, 16px) 0;
+      gap: 8px;
+    }
   }
 
   /* An action's reveal (see `StyledSwipeAction`): scaling in, and its parts fading in (see `actionFade`). */
@@ -602,14 +587,14 @@
         );
       }
 
-      &:where(:root[data-color-scheme='light'] *) {
+      &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
         --uikit-list-selected-background: var(
           --uikit-sidebar-selection,
           rgb(0 0 0 / 7%)
         );
       }
 
-      &:where(:root[data-color-scheme='dark'] *) {
+      &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
         --uikit-list-selected-background: var(
           --uikit-sidebar-selection,
           rgb(255 255 255 / 12%)
@@ -638,32 +623,31 @@
 
       &
         [data-list-part='row']
+        > [data-list-part='leading']
         > [data-list-part='image'][data-variant='symbol'] {
         width: 34px;
         color: var(--color-ios-label);
         margin-inline-end: 4px;
       }
 
-      & [data-selected] [data-list-part='row'] > [data-list-part='title'] {
+      & [data-selected]
+        [data-list-part='row']
+        > [data-list-part='content']
+        > [data-list-part='title'] {
         color: var(--color-ios-primary);
         font-variation-settings: 'wght' 590;
         font-weight: round(down, 590, 100);
-        stroke: currentcolor;
-        stroke-linejoin: round;
-        stroke-width: max(0px, (590 - 400) / 326 * 1px);
-
-        --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
       }
 
-      & [data-selected] [data-list-part='row'] > [data-list-part='image'] {
+      & [data-selected]
+        [data-list-part='row']
+        > [data-list-part='leading']
+        > [data-list-part='image'] {
         color: var(--color-ios-primary);
         font-variation-settings: 'wght' 590;
         font-weight: round(down, 590, 100);
-        stroke: currentcolor;
-        stroke-linejoin: round;
-        stroke-width: max(0px, (590 - 400) / 326 * 1px);
 
-        --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
+        --uikit-symbol-emphasis: 1;
       }
 
       & [data-list-part='header'] {
@@ -680,15 +664,10 @@
         font-weight: round(down, 400, 100);
         letter-spacing: var(--font-ios-body-tracking);
         line-height: var(--font-ios-body-line-height);
-        stroke: currentcolor;
-        stroke-linejoin: round;
-        stroke-width: max(0px, (400 - 400) / 326 * 1px);
-
-        --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
       }
 
       /* Its selection circles (Figma “Edit Button”): 8px before the symbol. */
-      & [data-list-part='row'] > [data-list-part='edit'] {
+      & [data-list-part='row'] > [data-list-part='leading'] > [data-list-part='edit'] {
         margin-inline: 0 8px;
       }
 
@@ -705,6 +684,7 @@
 
       &
         [data-list-part='row']
+        > [data-list-part='trailing']
         > [data-list-part='accessory']:has(> [data-list-part='disclosure']) {
         min-width: 18px;
         margin-inline-end: -4px;
@@ -805,17 +785,25 @@
     touch-action: pan-y;
     transition-duration: 300ms;
     transition-property: background-color;
+    -webkit-user-select: none;
     user-select: none;
+
+    /* Across it (a Span), what scrolls sideways too (e.g. an inline
+       calendar's months). */
+    &:has([data-list-part='span']) {
+      touch-action: pan-x pan-y;
+    }
 
     &[data-swipeable] {
       overflow: auto hidden;
       overscroll-behavior-x: contain;
       scroll-snap-type: x mandatory;
-      scrollbar-width: none;
       touch-action: pan-x pan-y;
 
-      &::-webkit-scrollbar {
-        display: none;
+      /* Open, not swiped closed (see SwipeActions allowSwipe): closed by
+         its trigger or handle only (scrolled programmatically). */
+      &[data-swipe-locked] {
+        overflow-x: hidden;
       }
     }
 
@@ -835,8 +823,10 @@
       --uikit-list-separator-opacity: 0;
     }
 
-    /* While reordering, by their order on screen (see useReorder) */
-    &:first-child:not([data-reorder-edge]),
+    /* The first and last rows shown (closed collapsible rows aside, see
+       CollapsiblePanel); while reordering, by their order on screen (see
+       useReorder). */
+    &:nth-child(1 of :not([data-closed])):not([data-reorder-edge]),
     &[data-reorder-edge~='first'] {
       border-start-end-radius: var(
         --uikit-list-item-radius,
@@ -850,7 +840,7 @@
       --uikit-list-separator-opacity: 0;
     }
 
-    &:last-child:not([data-reorder-edge]),
+    &:nth-last-child(1 of :not([data-closed])):not([data-reorder-edge]),
     &[data-reorder-edge~='last'] {
       border-end-end-radius: var(
         --uikit-list-item-radius,
@@ -864,9 +854,9 @@
 
     /* Pressed: a pressable title or button (a link or button title, or a
        button), or a row with a click handler, pressed itself (see Item). */
-    &:has(> * > * > a[href][data-list-part='title']:active),
-    &:has(> * > * > button[data-list-part='title']:enabled:active),
-    &:has(> * > * > button[data-list-part='button']:enabled:active),
+    &:has(> * > * > * > a[href][data-list-part='title']:active),
+    &:has(> * > * > * > button[data-list-part='title']:enabled:active),
+    &:has(> * > * > * > button[data-list-part='button']:enabled:active),
     &[data-pressed] {
       --uikit-list-row-background: var(
         --uikit-list-pressed-background,
@@ -881,9 +871,9 @@
       }
     }
 
-    &:has(> * > * > a[href][data-list-part='title']:focus-visible),
-    &:has(> * > * > button[data-list-part='title']:enabled:focus-visible),
-    &:has(> * > * > button[data-list-part='button']:enabled:focus-visible) {
+    &:has(> * > * > * > a[href][data-list-part='title']:focus-visible),
+    &:has(> * > * > * > button[data-list-part='title']:enabled:focus-visible),
+    &:has(> * > * > * > button[data-list-part='button']:enabled:focus-visible) {
       outline: 2px solid var(--color-ios-primary);
       outline-offset: -2px;
     }
@@ -919,7 +909,8 @@
       color: var(--uikit-list-selected-title, inherit);
     }
 
-    /* An expandable row, closed (see Expandable): no height, nor separator. */
+    /* A collapsible row, closed (see CollapsiblePanel): no height, nor
+       separator. */
     &[data-closed] {
       overflow: hidden;
       height: 0;
@@ -945,16 +936,8 @@
     letter-spacing: var(--font-ios-body-tracking);
     line-height: var(--font-ios-body-line-height);
     overflow-wrap: break-word;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
     text-align: inherit;
     text-decoration: none;
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight)) / 326 * 1px
-    );
 
     a&,
     button&,
@@ -989,11 +972,6 @@
     font-weight: round(down, 400, 100);
     place-items: center;
     pointer-events: none;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (400 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
 
     &:where([data-variant='circular']) {
       width: 42px;
@@ -1054,19 +1032,24 @@
     font-weight: round(down, 400, 100);
     line-height: var(--font-ios-body-line-height);
     place-items: center;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (400 - 400) / 326 * 1px);
     text-align: inherit;
     text-decoration: none;
-
-    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
 
     &:is(a, button) {
       --uikit-utils-cursor: attr(cursor type(<custom-ident>), pointer);
 
+      position: relative;
+
       @media (hover: hover) {
         cursor: var(--uikit-utils-cursor);
+      }
+
+      /* Hit region: at least 44×44px, centered (its parent's own pressable
+         area beneath, e.g. a row's title's). */
+      &::after {
+        position: absolute;
+        content: '';
+        inset: min(0px, calc(50% - 22px));
       }
     }
 
@@ -1076,6 +1059,7 @@
   }
 
   .uikit-list-grabber {
+    position: relative;
     display: grid;
     min-width: 22px;
     min-height: 25px;
@@ -1084,9 +1068,6 @@
     font-variation-settings: 'wght' 400;
     font-weight: round(down, 400, 100);
     place-items: center;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (400 - 400) / 326 * 1px);
     touch-action: none;
 
     --uikit-utils-cursor: attr(cursor type(<custom-ident>), grab);
@@ -1095,7 +1076,13 @@
       cursor: var(--uikit-utils-cursor);
     }
 
-    --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
+    /* Hit region: at least 44×44px, centered (its parent's own pressable
+       area beneath, e.g. a row's title's). */
+    &::after {
+      position: absolute;
+      content: '';
+      inset: min(0px, calc(50% - 22px));
+    }
   }
 
   .uikit-list-action {
@@ -1111,9 +1098,6 @@
     font-weight: round(down, var(--font-ios-body-weight), 100);
     letter-spacing: var(--font-ios-body-tracking);
     line-height: var(--font-ios-body-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
     text-align: inherit;
     text-decoration: none;
     white-space: nowrap;
@@ -1123,11 +1107,6 @@
     @media (hover: hover) {
       cursor: var(--uikit-utils-cursor);
     }
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight)) / 326 * 1px
-    );
 
     &:disabled {
       --uikit-utils-cursor: attr(cursor type(<custom-ident>), not-allowed);
@@ -1151,16 +1130,9 @@
     letter-spacing: var(--font-ios-body-tracking);
     line-height: var(--font-ios-body-line-height);
     overflow-wrap: break-word;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
     text-align: start;
     text-decoration: none;
 
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight)) / 326 * 1px
-    );
     --uikit-utils-cursor: attr(cursor type(<custom-ident>), pointer);
 
     @media (hover: hover) {
@@ -1189,12 +1161,22 @@
   }
 
   .uikit-list-edit-button {
+    /* Rendered as no button (e.g. a span beside a row's List.Button):
+       its circle only, pressing the row beneath it. */
+    &:not(button) {
+      pointer-events: none;
+    }
+
+    position: relative;
     padding: 0;
     border: 0;
     margin: 0;
     background: none;
-    background-color: var(--color-ios-system-red);
-    color: #fff;
+    background-color: var(
+      --uikit-list-edit-tint,
+      var(--color-ios-system-gray)
+    );
+    color: var(--uikit-list-edit-text-color, #fff);
     font-family: inherit;
     text-align: inherit;
     text-decoration: none;
@@ -1205,14 +1187,18 @@
       cursor: var(--uikit-utils-cursor);
     }
 
-    &:where([data-editing-style='insert']) {
-      background-color: var(--color-ios-system-green);
-    }
-
     &:disabled {
       --uikit-utils-cursor: attr(cursor type(<custom-ident>), not-allowed);
 
       opacity: 0.5;
+    }
+
+    /* Hit region: at least 44×44px, centered (its parent's own pressable
+       area beneath, e.g. a row's title's). */
+    &::after {
+      position: absolute;
+      content: '';
+      inset: min(0px, calc(50% - 22px));
     }
   }
 
@@ -1375,14 +1361,9 @@
       line-height: 20px;
       padding-inline: 10px;
       place-items: center;
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (400 - 400) / 326 * 1px);
       text-transform: uppercase;
       transition: width 150ms;
       white-space: nowrap;
-
-      --uikit-symbol-thinning: max(0px, (400 - 400) / 326 * 1px);
 
       & > svg {
         font-size: var(--font-ios-body-size);
@@ -1420,12 +1401,7 @@
       font-variation-settings: 'wght' 510;
       font-weight: round(down, 510, 100);
       line-height: 16px;
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (510 - 400) / 326 * 1px);
       white-space: nowrap;
-
-      --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
     }
   }
 
@@ -1453,11 +1429,6 @@
         font-weight: round(down, 700, 100);
         letter-spacing: -0.45px;
         line-height: 28px;
-        stroke: currentcolor;
-        stroke-linejoin: round;
-        stroke-width: max(0px, (700 - 400) / 326 * 1px);
-
-        --uikit-symbol-thinning: max(0px, (400 - 700) / 326 * 1px);
       }
     }
 
@@ -1472,11 +1443,6 @@
         font-weight: round(down, 590, 100);
         letter-spacing: var(--uikit-list-nested-tracking, 0);
         line-height: var(--uikit-list-nested-line-height, 22px);
-        stroke: currentcolor;
-        stroke-linejoin: round;
-        stroke-width: max(0px, (590 - 400) / 326 * 1px);
-
-        --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
       }
     }
 
@@ -1491,17 +1457,6 @@
         font-weight: round(down, var(--font-ios-title3-weight-emphasized), 100);
         letter-spacing: var(--font-ios-title3-tracking);
         line-height: var(--font-ios-title3-line-height);
-        stroke: currentcolor;
-        stroke-linejoin: round;
-        stroke-width: max(
-          0px,
-          (var(--font-ios-title3-weight-emphasized) - 400) / 326 * 1px
-        );
-
-        --uikit-symbol-thinning: max(
-          0px,
-          (400 - var(--font-ios-title3-weight-emphasized)) / 326 * 1px
-        );
       }
     }
 
@@ -1610,14 +1565,6 @@
     line-height: var(--font-ios-body-line-height);
     margin-inline: var(--uikit-list-inset, 16px);
     padding-inline: 16px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight)) / 326 * 1px
-    );
 
     &:where([data-strong]) {
       border-radius: var(--uikit-list-radius, 24px);
@@ -1644,6 +1591,7 @@
     justify-content: center;
     gap: 0;
     touch-action: none;
+    -webkit-user-select: none;
     user-select: none;
 
     &:where([data-size='regular']) {
@@ -1666,12 +1614,6 @@
     font-weight: round(down, var(--font-ios-caption1-weight-emphasized), 100);
     letter-spacing: var(--font-ios-caption1-tracking);
     line-height: var(--font-ios-caption1-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--font-ios-caption1-weight-emphasized) - 400) / 326 * 1px
-    );
     text-align: center;
     text-decoration: none;
 
@@ -1680,10 +1622,5 @@
     @media (hover: hover) {
       cursor: var(--uikit-utils-cursor);
     }
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-caption1-weight-emphasized)) / 326 * 1px
-    );
   }
 }

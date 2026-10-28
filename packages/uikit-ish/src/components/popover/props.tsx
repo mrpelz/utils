@@ -4,22 +4,23 @@ import type { LogicalSide } from '../utils/main.js';
 
 export type PopoverAlign = 'center' | 'end' | 'start';
 
-// Its trigger (for its alignment), and whether its popup has an arrow (for
-// its distance).
+// Whether its popup has an arrow (for its distance).
 export type PopoverState = {
-  arrow: boolean;
-  setArrow: (arrow: boolean) => void;
-  setTrigger: (trigger: HTMLElement | null) => void;
-  trigger: HTMLElement | null;
+  hasArrow: boolean;
+  setHasArrow: (hasArrow: boolean) => void;
 };
+
+/** A handle linking a popover to its triggers outside it. */
+export type PopoverHandle<Payload = unknown> = BasePopover.Handle<Payload>;
 
 export type PopoverPositionerProps = Omit<
   BasePopover.Positioner.Props,
   'align' | 'ref' | 'side'
 > & {
   /**
-   * Its alignment to its anchor.
-   * @default its end in a list row, otherwise centered
+   * Its alignment to its anchor (in a list row, iOS aligns it with the
+   * row's end: `end`).
+   * @default 'center'
    */
   align?: PopoverAlign;
   /**

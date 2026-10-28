@@ -78,9 +78,4 @@ if (config.rules) {
 }
 
 /** @type {import('eslint').Linter.Config[]} */
-export default [
-  deepmerge(configMeta, {
-    ignores: ['demo/**/*'],
-  }),
-  config,
-];
+export default [configMeta, config];

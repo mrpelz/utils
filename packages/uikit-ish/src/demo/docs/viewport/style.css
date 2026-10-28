@@ -1,0 +1,229 @@
+/* Viewport demos (see main.tsx). */
+.viewport-demo-metrics {
+  display: grid;
+  margin: 0;
+  color: var(--color-ios-label);
+  column-gap: 16px;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  grid-template-columns: auto auto;
+
+  & > dd {
+    margin: 0;
+  }
+
+  /* A view's diagnostics (its config column's): as the column's text. */
+  .demo-diagnostics > & {
+    color: inherit;
+    font-size: inherit;
+  }
+}
+
+/* A bar above the keyboard: a message field. */
+
+
+/* An anchor's sample content (a bar, or a sidebar), labelled. */
+
+/* An anchor's surface: its background reaching the screen's edge (its
+   padding the safe area insets, its content clear of them). */
+.viewport-demo-surface {
+  background-color: var(--color-ios-secondary-system-grouped-background);
+  box-shadow: 0 0 0 0.5px var(--color-ios-separator);
+}
+
+.viewport-demo-sample {
+  display: grid;
+  min-width: 44px;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  color: var(--color-ios-label);
+  font-size: 15px;
+  place-items: center;
+
+  &[data-side] {
+    width: 200px;
+    height: 100%;
+  }
+}
+
+/* The content layer's sample: long enough to scroll. */
+.viewport-demo-layer {
+  min-height: 200vh;
+  background: linear-gradient(
+    var(--color-ios-system-grouped-background),
+    var(--color-ios-system-gray5)
+  );
+  color: var(--color-ios-label);
+  padding-inline: 16px;
+}
+
+/* A box scrolling both ways (see the element hooks' views): an area twice
+   its size, a card in its middle. */
+.viewport-demo-box {
+  overflow: auto;
+  width: 320px;
+  max-width: 100%;
+  height: 320px;
+  border-radius: 24px;
+  background-color: var(--color-ios-system-grouped-background);
+  overscroll-behavior: contain;
+}
+
+.viewport-demo-area {
+  position: relative;
+  width: 720px;
+  height: 960px;
+}
+
+.viewport-demo-card {
+  position: absolute;
+  top: 400px;
+  left: 260px;
+  display: grid;
+  width: 200px;
+  height: 160px;
+  border-radius: 16px;
+  background-color: var(--color-ios-system-gray);
+  color: #fff;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  place-items: center;
+
+  &[data-visible] {
+    background-color: var(--color-ios-system-green);
+  }
+}
+
+.viewport-demo-card-start {
+  top: 80px;
+  left: 60px;
+}
+
+/* The input guards' fields (see parts.tsx): a phone's width, stacked. */
+.viewport-demo-fields {
+  display: flex;
+  width: 402px;
+  max-width: 100%;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* (Down to the bottom of a screen, where the keyboard would cover them.) */
+.viewport-demo-fields-tall {
+  min-height: 80vh;
+  justify-content: flex-end;
+}
+
+.viewport-demo-field {
+  padding: 8px 12px;
+  border: 1px solid var(--color-ios-separator);
+  border-radius: 10px;
+  background-color: var(--color-ios-secondary-system-background);
+  color: var(--color-ios-label);
+  font-family: inherit;
+}
+
+/* `useSizeClass`'s readout. */
+.viewport-demo-size-class {
+  color: var(--color-ios-label);
+  font-size: var(--font-ios-title2-size);
+}
+
+/* A toast floating over the content, above a toolbar (see the anchor
+   handle's view): the anchor lets taps through to the toolbar beneath. */
+.viewport-demo-toast-anchor {
+  pointer-events: none;
+}
+
+.viewport-demo-toast {
+  /* (Above the toolbar: its height, 54px, and 8px.) */
+  padding: 12px 16px;
+  border-radius: 16px;
+  margin: 0 16px 62px;
+  background-color: var(--color-ios-label);
+  color: var(--color-ios-system-background);
+  font-size: 15px;
+  pointer-events: auto;
+}
+
+/* A pull's indicator (in a `Viewport.Overscroll`, see the overscroll
+   views): fading in with its pull's progress (0 to 1 of its size; open,
+   1), a spinner turning with it.
+   Armed (pulled far enough to act on release), its arrow turns. */
+.viewport-demo-pull {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  color: var(--color-ios-secondary-label);
+  font-size: 15px;
+  gap: 6px;
+  opacity: var(--uikit-viewport-overscroll-progress, 0);
+}
+
+/* Released: gone at once (the page may have turned, its name changing
+   while it snaps back). */
+.viewport-demo-pull[data-released] {
+  opacity: 0;
+}
+
+.viewport-demo-pull-arrow {
+  transition: rotate 200ms;
+
+  [data-armed] > & {
+    rotate: 180deg;
+  }
+}
+
+/* A turned page, sliding in from below (next) or above (previous). */
+.viewport-demo-page[data-turned='next'] {
+  animation: viewport-demo-page-in 400ms ease-out;
+}
+
+.viewport-demo-page[data-turned='previous'] {
+  animation: viewport-demo-page-in 400ms ease-out;
+
+  --viewport-demo-page-from: -1;
+}
+
+/* On from the pull (its turning distance and more), as if scrolled on. */
+@keyframes viewport-demo-page-in {
+  from {
+    opacity: 0;
+    translate: 0 calc(var(--viewport-demo-page-from, 1) * 100px);
+  }
+}
+
+/* Pluto's page (not one of the eight): a night sky, its rows dark
+   (data-color-scheme). */
+.viewport-demo-page[data-color-scheme='dark'] {
+  border-radius: 26px;
+  margin: 0 8px;
+  background:
+    radial-gradient(circle at 20% 30%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 70% 12%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 85% 60%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 40% 80%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 95% 82%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 55% 45%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 75% 52%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 62% 88%, #fff 1px, transparent 2px),
+    radial-gradient(circle at 90% 35%, #fff 1px, transparent 2px),
+    #0b0b1e;
+  color: #fff;
+  padding-block: 8px;
+
+  /* Its rows: the sky showing through. */
+  --uikit-list-group-background: rgb(255 255 255 / 8%);
+
+  /* Its heart: Tombaugh Regio's pale ice. */
+  & h2 > .uikit-symbol {
+    color: #f2d9c8;
+    margin-inline-start: 0.25em;
+  }
+}
+
+.viewport-demo-pull-spinner {
+  rotate: calc(var(--uikit-viewport-overscroll-progress, 0) * 270deg);
+}

@@ -5,6 +5,9 @@
     align-items: flex-start;
     padding: 16px;
     gap: 16px;
+
+    /* Below a sheet's grabber (over it, see Sheet). */
+    padding-block-start: calc(16px + var(--uikit-safe-area-inset-top, 0px));
   }
 
   .uikit-activity-view-thumbnail {
@@ -41,11 +44,6 @@
     font-weight: round(down, 510, 100);
     letter-spacing: -0.23px;
     line-height: 20px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
 
     & + [data-activity-view-part='subtitle'] {
       margin-block-start: -11px;
@@ -60,14 +58,6 @@
     font-weight: round(down, var(--font-ios-footnote-weight), 100);
     letter-spacing: var(--font-ios-footnote-tracking);
     line-height: var(--font-ios-footnote-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-footnote-weight) - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-footnote-weight)) / 326 * 1px
-    );
   }
 
   .uikit-activity-view-message {
@@ -78,14 +68,6 @@
     font-weight: round(down, var(--font-ios-footnote-weight), 100);
     letter-spacing: var(--font-ios-footnote-tracking);
     line-height: var(--font-ios-footnote-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-footnote-weight) - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-footnote-weight)) / 326 * 1px
-    );
   }
 
   .uikit-activity-view-row {
@@ -94,11 +76,6 @@
     padding: 14px 24px 20px;
     gap: 14px;
     overscroll-behavior-inline: contain;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
   }
 
   .uikit-activity-view-name {
@@ -111,7 +88,8 @@
     line-height: 15px;
 
     /* With a count (a group's): on one line, truncated. */
-    &[data-counted] {
+    [data-activity-view-part='item']:has(> [data-activity-view-part='count'])
+      > & {
       display: block;
       max-width: 100%;
       text-overflow: ellipsis;
@@ -161,7 +139,7 @@
   .uikit-activity-view-action {
     gap: 7px;
 
-    & > [data-activity-view-part='action-symbol'] {
+    & > [data-activity-view-part='symbol'] {
       display: grid;
       width: 70px;
       height: 70px;
@@ -171,18 +149,13 @@
       font-variation-settings: 'wght' 300;
       font-weight: round(down, 300, 100);
       place-items: center;
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (300 - 400) / 326 * 1px);
-
-      --uikit-symbol-thinning: max(0px, (400 - 300) / 326 * 1px);
     }
 
-    &:active > [data-activity-view-part='action-symbol'] {
+    &:active > [data-activity-view-part='symbol'] {
       filter: brightness(0.9);
     }
 
-    & > span:last-child {
+    & > [data-activity-view-part='label'] {
       display: -webkit-box;
       overflow: hidden;
       -webkit-box-orient: vertical;
@@ -193,17 +166,6 @@
       letter-spacing: var(--font-ios-footnote-tracking);
       -webkit-line-clamp: 2;
       line-height: 15px;
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(
-        0px,
-        (var(--font-ios-footnote-weight) - 400) / 326 * 1px
-      );
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--font-ios-footnote-weight)) / 326 * 1px
-      );
     }
   }
 }

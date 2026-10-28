@@ -1,109 +1,123 @@
 import './style.css';
 
-import { forwardRef, useId } from 'react';
+import { forwardRef } from 'react';
 
-import { cn } from '../utils/main.js';
-import type { SymbolProps } from './props.js';
+import { cn, withStyle } from '../utils/main.js';
+import type { SymbolIcon, SymbolProps } from './props.js';
 
-export type { SymbolProps } from './props.js';
+export type { SymbolIcon, SymbolProps } from './props.js';
 
 // An SF Symbol, sized like the SF Pro glyph at the current font size, so it
-// can stand in for one (e.g. `􀋃` in Figma). Its weight follows the font
-// weight its host sets (see `fontWeight`): heavier than regular, stroked;
-// lighter, masked by its own outline stroked as much
-// (`--uikit-symbol-thinning`, in its units), which takes as much off its
-// edges.
+// can stand in for one (e.g. `􀋃` in Figma). Its outlines are filled as
+// given (SF Symbols': the Regular weight only, whatever its host's font
+// weight), its layers at their relative opacities.
 //
-// Its children (e.g. a `Badge`) sit on it: the glyph alone is blended and
-// scaled by its host (`--uikit-symbol-blend`, `--uikit-symbol-scale`,
+// Emphasized (e.g. a selected tab's), it shows its `emphasizedIcon` (e.g.
+// the filled variant) instead: both glyphs stacked, faded by
+// `--uikit-symbol-emphasis` (0 to 1, inherited: set by its host, e.g. on
+// its selected state; see styles.css), so no state of the app's needs to
+// pick the icon.
+//
+// Its children (e.g. a `Badge`) sit on it: the glyphs alone are blended
+// and scaled by its host (`--uikit-symbol-blend`, `--uikit-symbol-scale`,
 // e.g. a glass button's vibrant content), so they stay solid.
 
-// The catalogue's paths are SF Pro glyphs at 20pt (e.g. `circle` is 19.92
-// wide, the glyph's ink box 0.996em).
-const unitsPerEm = 20;
+// In a line of text, its ink's center on the text's: half the cap height up
+// from the baseline (`baselineShift`, see style.css).
+//
+// SF Symbols' paths are SF Pro glyphs at 20pt (e.g. `circle` is 19.92 wide,
+// the glyph's ink box 0.996em): other icons give their own units.
+const defaultUnitsPerEm = 20;
 
-// Room for strokes beyond the view box (in its units, see `fontWeight`).
-const bleed = 2;
+/** An icon's size (em), from its view box. */
+const sizeOf = ({ unitsPerEm = defaultUnitsPerEm, viewBox }: SymbolIcon) => {
+  const [width = 0, height = 0] = viewBox.split(' ').slice(2).map(Number);
+  return { height: height / unitsPerEm, width: width / unitsPerEm };
+};
 
-/** An SF Symbol (from `@bradleyhodges/sfsymbols`), with e.g. a `Badge`. */
-export const Symbol = forwardRef<HTMLSpanElement, SymbolProps>(
-  ({ children, className, icon, ...props }, ref) => {
-    const mask = `uikit-symbol-${useId().replaceAll(/[^\w-]/gu, '')}`;
-    const [width = 0, height = 0] = icon.viewBox
-      .split(' ')
-      .slice(2)
-      .map(Number);
-    const paths = icon.svgPathData.map(({ d }) => d);
+// An icon's glyph: its layers, each at its opacity relative to the most
+// opaque one's.
+const Glyph = ({
+  icon,
+  variant,
+}: {
+  icon: SymbolIcon;
+  variant?: 'emphasized' | 'regular';
+}) => {
+  const { height, width } = sizeOf(icon);
+  const opacity = Math.max(
+    ...icon.svgPathData.map(({ fillOpacity = 1 }) => fillOpacity),
+  );
 
-    return (
-      <span
-        ref={ref}
-        data-symbol={icon.sourceName}
-        {...props}
-        className={cn('uikit-symbol', className)}
+  return (
+    // (An element of its own: Chrome keeps a scaled SVG root's overflow,
+    // e.g. in a scroller, once it's unscaled.)
+    <span
+      className="uikit-symbol-glyph"
+      data-symbol-part="glyph"
+      data-variant={variant}
+    >
+      <svg
+        aria-hidden="true"
+        fill="currentcolor"
+        height={`${String(height)}em`}
+        viewBox={icon.viewBox}
+        width={`${String(width)}em`}
       >
-        {/* (An element of its own: Chrome keeps a scaled SVG root's
-            overflow, e.g. in a scroller, once it's unscaled.) */}
-        <span
-          className="uikit-symbol-glyph"
-          data-symbol-part="glyph"
-        >
-          <svg
-            aria-hidden="true"
-            fill="currentcolor"
-            height={`${String(height / unitsPerEm)}em`}
-            viewBox={icon.viewBox}
-            width={`${String(width / unitsPerEm)}em`}
-          >
-            <mask
-              height={height + 2 * bleed}
-              id={mask}
-              maskUnits="userSpaceOnUse"
-              style={{ maskType: 'luminance' }}
-              width={width + 2 * bleed}
-              x={-bleed}
-              y={-bleed}
-            >
-              {/* Its shape (stroked: heavier), its edges taken off (lighter).
-               */}
-              {paths.map((d, index) => (
-                <path
-                  key={index}
-                  d={d}
-                  fill="#fff"
-                  stroke="#fff"
-                />
-              ))}
-              {/* (Unresolved, it takes nothing off: not the symbol's stroke.)
-               */}
-              <g style={{ strokeWidth: 0 }}>
-                {paths.map((d, index) => (
-                  <path
-                    key={index}
-                    d={d}
-                    fill="none"
-                    stroke="#000"
-                    style={{
-                      strokeWidth: 'var(--uikit-symbol-thinning, 0px)',
-                    }}
-                  />
-                ))}
-              </g>
-            </mask>
-            {/* Its color through it (not its own paths: their edges' coverage
-                would count twice, thinning every symbol). */}
-            <rect
-              fill="currentcolor"
-              height={height + 2 * bleed}
-              mask={`url(#${mask})`}
-              width={width + 2 * bleed}
-              x={-bleed}
-              y={-bleed}
-            />
-          </svg>
-        </span>
-        {children}
-      </span>
-    );
-  },
+        {icon.svgPathData.map(({ d, fillOpacity = 1 }, index) => (
+          <path
+            key={index}
+            d={d}
+            fillOpacity={
+              fillOpacity === opacity ? undefined : fillOpacity / opacity
+            }
+          />
+        ))}
+      </svg>
+    </span>
+  );
+};
+
+/** An icon (e.g. an SF Symbol), with e.g. a `Badge`. */
+export const Symbol = forwardRef<HTMLSpanElement, SymbolProps>(
+  (
+    {
+      baselineShift = 'optical',
+      children,
+      className,
+      emphasizedIcon,
+      icon,
+      style,
+      ...props
+    },
+    ref,
+  ) => (
+    <span
+      ref={ref}
+      data-baseline-shift={baselineShift}
+      data-symbol={icon.sourceName}
+      style={withStyle(
+        { '--uikit-symbol-height': `${String(sizeOf(icon).height)}em` },
+        style,
+      )}
+      {...props}
+      className={cn('uikit-symbol', className)}
+    >
+      {emphasizedIcon ? (
+        <>
+          <Glyph
+            icon={icon}
+            variant="regular"
+          />
+          <Glyph
+            icon={emphasizedIcon}
+            variant="emphasized"
+          />
+        </>
+      ) : (
+        <Glyph icon={icon} />
+      )}
+      {children}
+    </span>
+  ),
 );

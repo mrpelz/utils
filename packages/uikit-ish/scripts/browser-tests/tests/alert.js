@@ -70,4 +70,75 @@ export const tests = [
       assert.match(await page.log(), /action: destructive/u);
     },
   },
+  {
+    name: 'alert: in its container (a phone’s screen), centered, its backdrop filling it',
+    run: async (page) => {
+      await page.open('alert-overview', 'light', {
+        state: [null, { defaultOpen: true }],
+      });
+      await sleep(500);
+      const placed = await page.evaluate(`(() => {
+        const popup = document.querySelector('[role=alertdialog]');
+        const screen = document.querySelector('.demo-phone');
+        const backdrop = document.querySelector('[data-alert-part=backdrop]');
+        const [p, s, b] = [popup, screen, backdrop].map((element) => element.getBoundingClientRect());
+        return {
+          backdrop: [b.left, b.top, b.width, b.height].map(Math.round).join() === [s.left, s.top, s.width, s.height].map(Math.round).join(),
+          center: [Math.round(p.left + p.width / 2 - (s.left + s.width / 2)), Math.round(p.top + p.height / 2 - (s.top + s.height / 2))],
+          inside: screen.contains(popup),
+        };
+      })()`);
+      assert.deepEqual(placed, {
+        backdrop: true,
+        center: [0, 0],
+        inside: true,
+      });
+    },
+  },
+  {
+    name: 'alert: a text field’s value, read by its action (renamed), the alert closed',
+    run: async (page) => {
+      await page.open('alert-composition-field');
+      await page.evaluate(`${page.section}.querySelector('button').click()`);
+      await sleep(600);
+      await page.evaluate(`(() => {
+        const input = document.querySelector('[role=alertdialog] input');
+        input.focus();
+        input.select();
+      })()`);
+      await page.browser.send('Input.insertText', { text: 'Desserts' });
+      await sleep(200);
+      await page.evaluate(
+        `[...document.querySelectorAll(${JSON.stringify('[role=alertdialog] button')})].find((button) => button.textContent === ${JSON.stringify('Save')}).click()`,
+      );
+      await sleep(600);
+      assert.match(await page.log(), /renamed: Recipes → Desserts/u);
+      assert.equal(
+        await page.evaluate(
+          `Boolean(document.querySelector(${JSON.stringify('[role=alertdialog]')}))`,
+        ),
+        false,
+      );
+    },
+  },
+  {
+    name: 'alert: by a handle, a trigger outside the root and an imperative open',
+    run: async (page) => {
+      await page.open('alert-parts-create-handle');
+      await page.evaluate(
+        `[...${page.section}.querySelectorAll('button')].find((button) => button.textContent === 'Open Imperatively').click()`,
+      );
+      await sleep(600);
+      assert.equal(
+        await page.evaluate(
+          `document.querySelector(${JSON.stringify('[role=alertdialog] h2')})?.textContent`,
+        ),
+        'Delete Note?',
+      );
+      assert.match(
+        await page.log(),
+        /open change: true \(imperative-action\)/u,
+      );
+    },
+  },
 ];

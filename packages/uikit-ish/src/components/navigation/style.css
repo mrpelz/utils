@@ -4,7 +4,6 @@
     --uikit-navigation-direction: 1;
 
     position: relative;
-    overflow: hidden;
     height: 100%;
     min-height: 0;
     box-sizing: border-box;
@@ -13,6 +12,15 @@
     &:dir(rtl) {
       --uikit-navigation-direction: -1;
     }
+  }
+
+  /* Its pages, filling the root; clipped and layered on their own (under a
+     bar that stays). */
+  .uikit-navigation-stack {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    isolation: isolate;
   }
 
   .uikit-navigation-frame {
@@ -63,21 +71,30 @@
 
     &[data-navigation-role='top'],
     &[data-navigation-role='under'] {
-      --uikit-navigation-counter: calc(-1 * var(--uikit-navigation-x)) 0;
-      --uikit-navigation-filter: opacity(var(--uikit-navigation-shown));
-
       pointer-events: none;
       translate: var(--uikit-navigation-x) 0;
     }
   }
 
-  /* Where a swipe back starts: within 20px of the leading edge. */
-  .uikit-navigation-edge {
+  /* Where a swipe back starts (see SwipeArea): within its width of the
+     leading edge, over the pages. */
+  .uikit-navigation-swipe-area {
     position: absolute;
     z-index: 2;
-    width: 20px;
+    width: var(--uikit-navigation-swipe-area-width);
     inset-block: 0;
     inset-inline-start: 0;
     touch-action: none;
+  }
+
+  /* A bar that stays (in the root, outside the stack, over its pages'
+     bars): only its items take the pointer, the moving bars' own under it. */
+  .uikit-navigation-root > .uikit-viewport-anchor {
+    pointer-events: none;
+
+    & :where(.uikit-toolbar-leading, .uikit-toolbar-trailing) > *,
+    & .uikit-toolbar-title {
+      pointer-events: auto;
+    }
   }
 }

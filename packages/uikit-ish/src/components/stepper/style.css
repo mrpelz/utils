@@ -1,6 +1,6 @@
 /* Stepper (see main.tsx). */
 @layer uikit-ish {
-  .uikit-stepper-hidden-input {
+  .uikit-stepper-input {
     position: absolute;
     overflow: hidden;
     width: 1px;
@@ -58,14 +58,10 @@
     font-weight: round(down, 590, 100);
     line-height: var(--font-ios-headline-line-height);
     place-items: center;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (590 - 400) / 326 * 1px);
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    -webkit-user-select: none;
     user-select: none;
-
-    --uikit-symbol-thinning: max(0px, (400 - 590) / 326 * 1px);
 
     /* As `Button`: a `cursor` prop, or the fallback. */
     --uikit-utils-cursor: attr(cursor type(<custom-ident>), pointer);
@@ -84,11 +80,11 @@
         );
       }
 
-      &:where(:root[data-color-scheme='light'] *) {
+      &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
         background-image: linear-gradient(rgb(0 0 0 / 8%), rgb(0 0 0 / 8%));
       }
 
-      &:where(:root[data-color-scheme='dark'] *) {
+      &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
         background-image: linear-gradient(
           rgb(255 255 255 / 8%),
           rgb(255 255 255 / 8%)

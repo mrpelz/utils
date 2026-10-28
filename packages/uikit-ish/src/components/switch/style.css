@@ -60,6 +60,7 @@
     align-self: center;
     border-radius: 100px;
     touch-action: pan-y;
+    -webkit-user-select: none;
     user-select: none;
     vertical-align: middle;
 
@@ -76,6 +77,26 @@
       inset: 0;
       transform: scale(calc(1 - 0.25 * var(--uikit-switch-pressed)));
       transition-duration: var(--glass-ios-lens-duration);
+    }
+
+    /* Mixed but checked (see below): the on color from its start, fading
+       out halfway (under the knob), faded in. */
+    &::after {
+      position: absolute;
+      z-index: 0;
+      border-radius: inherit;
+      background-color: var(--uikit-switch-on-color);
+      content: '';
+      inset: 0;
+      mask-image: linear-gradient(to right, #000 25%, transparent 50%);
+      opacity: 0;
+      transform: scale(calc(1 - 0.25 * var(--uikit-switch-pressed)));
+      transition-duration: var(--glass-ios-lens-duration);
+      transition-property: opacity, transform;
+    }
+
+    &:dir(rtl)::after {
+      mask-image: linear-gradient(to left, #000 25%, transparent 50%);
     }
 
     &[data-checked] {
@@ -103,12 +124,18 @@
       opacity: 0.55;
     }
 
-    /* Mixed: the knob centered, the track off (over checked, see above). */
+    /* Mixed: the knob centered, the track off (over checked, see above);
+       checked, its start half tinted (see above), so it tells which it'll
+       be. */
     &[data-indeterminate] {
       --uikit-switch-knob-start: calc(50% - var(--uikit-switch-knob-width) / 2);
 
       &::before {
         background-color: var(--uikit-switch-off-color);
+      }
+
+      &[data-checked]::after {
+        opacity: 1;
       }
 
       & > [data-switch-part='label'] {

@@ -1,6 +1,7 @@
 import '../list/style.css';
 import './style.css';
 
+import { Field as BaseField } from '@base-ui/react/field';
 import { Fieldset as BaseFieldset } from '@base-ui/react/fieldset';
 import { Form as BaseForm } from '@base-ui/react/form';
 import { forwardRef } from 'react';
@@ -42,16 +43,19 @@ const FieldsetRoot = forwardRef<
   />
 ));
 
-/** A fieldset's legend (Base UI): its section's header (`List.Header`). */
+/**
+ * A fieldset's legend (Base UI's: it names the fieldset, its
+ * `aria-labelledby`): its section's header (`List.Header`), its parts the
+ * header's (`List.Title`, …); another header by `render` (e.g.
+ * `<List.Header prominence="nested" />`).
+ */
 const FieldsetLegend = forwardRef<HTMLDivElement, FieldsetLegendProps>(
-  ({ children, prominence, ...props }, ref) => (
+  (props, ref) => (
     <BaseFieldset.Legend
       ref={ref}
       {...props}
-      render={props.render ?? <List.Header prominence={prominence} />}
-    >
-      <List.Title>{children}</List.Title>
-    </BaseFieldset.Legend>
+      render={props.render ?? <List.Header />}
+    />
   ),
 );
 
@@ -66,3 +70,11 @@ export const Fieldset = {
  * (e.g. a server's) on them; `onFormSubmit` gets the values.
  */
 export const Form = BaseForm;
+
+/**
+ * Base UI's field (as it is): a form's field by its `name` (`Root`),
+ * its label, control, description, error, validity; e.g. around a control
+ * that isn't a text field (a stepper, a date picker) in a list row
+ * (`render={<List.Item />}`).
+ */
+export const Field = BaseField;

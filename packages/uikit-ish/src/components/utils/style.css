@@ -16,20 +16,17 @@
  *   (`font-variation-settings: 'wght' W`), `font-weight` rounded down to a
  *   static weight (`round(down, W, 100)`; fonts without the axis use that).
  *   Chrome would otherwise match e.g. 510 to the next heavier static face
- *   (Semibold), which the axis can't undo. SVG symbols inside (fill-only
- *   paths at SF Symbols' export scale of 20 units per em, with visible
- *   overflow) are stroked to match: SF Pro glyphs' strokes thicken by 1 unit
- *   per 326 weight above Regular (`stroke-width: max(0px, (W - 400) / 326 *
- *   1px)`); lighter than Regular, symbols' edges are taken off as much
- *   (`--uikit-symbol-thinning`, see Symbol; lengths, not numbers:
- *   engines may reject a number from a custom property in `stroke-width`).
- * - Color schemes: colors as `light-dark(light, dark)`, by the root's
- *   `color-scheme` (the user's preference, or forced by its
- *   `data-color-scheme`, see styles.css). Other values (e.g. blend modes,
- *   shadows): light declarations, the dark ones in
- *   `@media (prefers-color-scheme: dark)`, and both again where
- *   `data-color-scheme` forces either (`&:where(:root[…] *)`: the rule's
- *   specificity kept, after the media query, so they win).
+ *   (Semibold), which the axis can't undo. Symbols inside keep their one
+ *   weight (see Symbol); emphasized (e.g. selected), a host sets
+ *   `--uikit-symbol-emphasis` instead.
+ * - Color schemes: colors as `light-dark(light, dark)`, by the inherited
+ *   `color-scheme` (the user's preference, or forced by a
+ *   `data-color-scheme`, on the root element or any other, see
+ *   styles.css). Other values (e.g. blend modes, shadows): light
+ *   declarations, the dark ones in `@media (prefers-color-scheme: dark)`,
+ *   and both again where `data-color-scheme` forces either
+ *   (`&:where([…], […] *)`: the rule's specificity kept, after the media
+ *   query, so they win).
  * - Cursors, as `Button`'s: a `cursor` attribute (prop), or a fallback
  *   (`--uikit-utils-cursor: attr(cursor type(<custom-ident>), …)`), applied on
  *   devices that hover.
@@ -38,6 +35,20 @@
 
 /* Utils (see main.tsx). */
 @layer uikit-ish {
+  /* Scrollbars, hidden in every component's scroll container (as iOS shows
+     none at rest): they couldn't be lifted above the layers over them
+     (bars, glass, a scroll edge effect), nor kept whole in rounded
+     containers (a sheet's, a popover's corners). Scrolled by touch, a
+     wheel or a trackpad, and the keys. (No specificity: a component's or
+     an app's own rule overrides it.) */
+  :where([class*='uikit-']) {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
   .uikit-utils-reserve-layer {
     grid-area: 1 / 1;
     white-space: nowrap;
@@ -61,8 +72,10 @@
 
     /* Moving (with a pointer hovering the items, or a touch dragging over
        them, see `draggingAttribute`): quick, so it keeps up at normal
-       speeds. Otherwise (keys) it jumps. */
-    @media (hover: hover) {
+       speeds. Otherwise (keys, without a pointer that hovers) it jumps.
+       Any pointer: an iPad's is touch first (`hover: none`), its trackpad
+       hovering all the same. */
+    @media (any-hover: hover) {
       transition-duration: 80ms;
       transition-property: translate, width, height, border-radius, opacity;
       transition-timing-function: ease-out;

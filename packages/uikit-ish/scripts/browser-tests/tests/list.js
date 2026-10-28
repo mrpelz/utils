@@ -1232,11 +1232,14 @@ export const tests = [
       await page.drag(first, target, { duration: 400 });
       await sleep(500);
 
-      // At the top of the scrolled page (raw, the document scrolls).
-      const top = await page.evaluate(
-        'Math.round(document.querySelector(\'[data-letter="J"]\').getBoundingClientRect().top)',
-      );
-      assert.equal(top, 0);
+      // At the top of the list (its own scroll container; the document
+      // doesn't scroll).
+      const [top, documentTop] = await page.evaluate(`(() => {
+        const section = document.querySelector('[data-letter="J"]');
+        const list = section.closest('.list-demo-scroll');
+        return [Math.round(section.getBoundingClientRect().top - list.getBoundingClientRect().top), scrollY];
+      })()`);
+      assert.deepEqual([top, documentTop], [0, 0]);
       await page.screenshot('list-index');
     },
   },

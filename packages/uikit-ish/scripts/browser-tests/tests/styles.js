@@ -67,22 +67,55 @@ export const tests = [
     },
   },
   {
-    name: 'styles: the demo option forces the color scheme',
+    name: 'styles: a color scheme forced on an element overrides the preference within it',
     run: async (page) => {
-      await page.open('segmented');
-      const option = `&colorScheme=${encodeURIComponent(JSON.stringify('dark'))}`;
-      await page.evaluate(`location.hash += ${JSON.stringify(option)}`);
+      for (const [preference, forced, expected] of /** @type {const} */ ([
+        ['light', 'dark', dark],
+        ['dark', 'light', light],
+      ])) {
+        await page.open('segmented', preference);
+        // (On the body, not the root: the root follows the preference.)
+        await page.evaluate(
+          `document.body.setAttribute('data-color-scheme', '${forced}')`,
+        );
+        await sleep(300);
+
+        const { colorScheme, ...actual } = await page.evaluate(
+          probe(page.section),
+        );
+        assert.deepEqual(
+          actual,
+          expected,
+          `preference ${preference}, forced ${forced} on the body`,
+        );
+        assert.equal(colorScheme, 'light dark');
+      }
+    },
+  },
+  {
+    name: 'styles: a demo’s color scheme setting forces it on its stage alone',
+    run: async (page) => {
+      // (Not raw: the frame, its stage, the setting from the URL.)
+      await page.browser.send('Page.navigate', { url: 'about:blank' });
+      await page.browser.send('Page.navigate', {
+        url: `${page.url}all#id=%22segmented%22&settings=${encodeURIComponent(
+          JSON.stringify({ colorScheme: 'dark' }),
+        )}`,
+      });
+      const stage = JSON.stringify('.demo-stage');
+      await page.waitFor(`Boolean(document.querySelector(${stage}))`);
       await sleep(300);
 
-      assert.equal(
-        await page.evaluate('document.documentElement.dataset.colorScheme'),
-        'dark',
-      );
       assert.deepEqual(
-        await page.evaluate(
-          'getComputedStyle(document.documentElement).backgroundColor',
-        ),
-        'rgb(10, 10, 10)',
+        await page.evaluate(`(() => {
+          const stage = document.querySelector('.demo-stage');
+          return [
+            stage.dataset.colorScheme,
+            getComputedStyle(stage).backgroundColor,
+            getComputedStyle(document.documentElement).backgroundColor,
+          ];
+        })()`),
+        ['dark', 'rgb(10, 10, 10)', 'rgb(255, 255, 255)'],
       );
     },
   },

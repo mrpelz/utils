@@ -2,6 +2,12 @@ import type { ComponentProps } from 'react';
 
 import type { GlassContextValue } from '../glass/main.js';
 
+/** Why the page changes (Base UI's slider reasons). */
+export type PageControlChangeEventDetails = {
+  event: Event;
+  reason: 'drag' | 'keyboard' | 'track-press';
+};
+
 export type PageControlProps = Omit<
   ComponentProps<'div'>,
   'defaultValue' | 'onChange'
@@ -28,8 +34,14 @@ export type PageControlProps = Omit<
    * hovered, pressed or focused by keyboard.
    */
   momentaryTooltip?: boolean;
-  /** Called with the page to go to (from 0). */
-  onValueChange?: (page: number) => void;
+  /**
+   * Called with the page to go to (from 0), and why (Base UI's slider
+   * reasons): a press beside the current dot, a drag, or a key.
+   */
+  onValueChange?: (
+    page: number,
+    eventDetails: PageControlChangeEventDetails,
+  ) => void;
   /** The current page (controlled; from 0). */
   value?: number;
   /**

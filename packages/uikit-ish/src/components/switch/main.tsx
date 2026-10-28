@@ -41,7 +41,9 @@ export type { SwitchRootProps } from './props.js';
 //   current side (Framework7: swipes within 300ms toggle).
 // - The browser's default focus ring is kept.
 // - Indeterminate (as a checkbox, which the platform's switches are; UIKit:
-//   none): the knob in the middle, on the off color.
+//   none): the knob in the middle, on the off color; checked, the on color
+//   from the start up to the knob, fading out (so checked and unchecked
+//   differ), faded in and out as the state changes.
 //
 // On/off labels (UIKit's accessibility setting “On/Off Labels”, measured on
 // Apple's illustration): a 9px “I” bar (white) and a 9px “O” ring (tertiary
@@ -111,18 +113,21 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
 
     const handlers = usePointerDrag<HTMLSpanElement, Drag>(
       {
-        end: (root, drag, cancelled) => {
+        end: (root, drag, isCancelled) => {
           for (const property of dragProperties) {
             root.style.removeProperty(property);
           }
-          if (cancelled) return;
+          if (isCancelled) return;
 
-          const quick = performance.now() - drag.startTime < 300;
-          const towardsCurrent = drag.checked ? drag.moved > 0 : drag.moved < 0;
+          const isQuick = performance.now() - drag.startTime < 300;
+          const isTowardsCurrent = drag.isChecked
+            ? drag.moved > 0
+            : drag.moved < 0;
 
           // The native click following this release toggles; suppress it
           // unless the release acts as a tap.
-          suppressClickRef.current = drag.flipped || !quick || towardsCurrent;
+          suppressClickRef.current =
+            drag.isFlipped || !isQuick || isTowardsCurrent;
           setTimeout(() => {
             suppressClickRef.current = false;
           });
@@ -138,10 +143,11 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
           root.style.setProperty('--uikit-switch-knob-move-duration', '0s');
           root.style.setProperty('--uikit-switch-knob-start', `${start}px`);
 
-          const checked = (start - drag.min) / (drag.max - drag.min) > 0.5;
-          if (checked === isChecked(root)) return;
+          const willBeChecked =
+            (start - drag.min) / (drag.max - drag.min) > 0.5;
+          if (willBeChecked === isChecked(root)) return;
 
-          drag.flipped = true;
+          drag.isFlipped = true;
           root.click();
         },
         start: (root, event) => {
@@ -162,9 +168,9 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
           root.style.setProperty('--uikit-switch-pressed', '1');
 
           return {
-            checked: isChecked(root),
+            isChecked: isChecked(root),
             direction,
-            flipped: false,
+            isFlipped: false,
             max: rootRect.width - thumbRect.width - min,
             min,
             moved: 0,

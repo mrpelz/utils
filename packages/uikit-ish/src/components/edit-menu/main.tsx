@@ -15,10 +15,12 @@ import {
 
 import {
   dragOverItems,
+  Menu,
   MenuContext,
-  MenuRootProps,
   useCloseOutOfView,
+  useKeepOpenInSubmenus,
   useRootActions,
+  useSubmenuToggle,
 } from '../menu/main.js';
 import {
   cn,
@@ -26,9 +28,13 @@ import {
   positionerSide,
   useForwardedRef,
 } from '../utils/main.js';
-import type { EditMenuPositionerProps, ItemProps } from './props.js';
+import type {
+  EditMenuPositionerProps,
+  EditMenuRootProps,
+  ItemProps,
+} from './props.js';
 
-export type { EditMenuPositionerProps } from './props.js';
+export type { EditMenuPositionerProps, EditMenuRootProps } from './props.js';
 
 // Source: Apple iOS 26 Figma (“Menus”: “Edit Menu”, “_Edit Menu Item”,
 // Mode=Light and Dark), with the destructive color mapped to `systemRed`; the
@@ -67,21 +73,25 @@ export type { EditMenuPositionerProps } from './props.js';
  * (by default): the page stays interactive, and pressing outside of it
  * reaches the page (e.g. clearing the selection) as it closes the menu.
  */
-const Root = ({
+const Root = <Payload,>({
   children,
+  onOpenChange,
   orientation = 'horizontal',
-  size = 'compact',
+  size = 'regular',
   ...props
-}: MenuRootProps): ReactNode => {
+}: EditMenuRootProps<Payload>): ReactNode => {
   const actionsRef = useRootActions(props.actionsRef);
+  const onRootOpenChange = useKeepOpenInSubmenus(onOpenChange);
 
   return (
+    // (Its menus' size, see `Menu.SubmenuRoot`.)
     <MenuContext.Provider value={{ actionsRef, orientation, size }}>
       <BaseMenu.Root
         modal={false}
         orientation={orientation}
         {...props}
         actionsRef={actionsRef}
+        onOpenChange={onRootOpenChange}
       >
         <BaseMenu.Trigger
           aria-hidden="true"
@@ -192,11 +202,11 @@ const useOverflow = (scrollerRef: { current: HTMLDivElement | null }) => {
 
     const update = () => {
       const [first, last] = ends;
-      const before = first !== undefined && hidden.has(first);
-      const after = last !== undefined && hidden.has(last);
-      actions.toggleAttribute('data-before', before);
-      actions.toggleAttribute('data-after', after);
-      actions.toggleAttribute('data-overflowing', before || after);
+      const isBefore = first !== undefined && hidden.has(first);
+      const isAfter = last !== undefined && hidden.has(last);
+      actions.toggleAttribute('data-before', isBefore);
+      actions.toggleAttribute('data-after', isAfter);
+      actions.toggleAttribute('data-overflowing', isBefore || isAfter);
     };
 
     const observe = () => {
@@ -361,18 +371,20 @@ const Item = forwardRef<
 ));
 
 /**
- * The “more” button, opening a submenu with further actions: place it in a
- * `Menu.SubmenuRoot`, followed by a `Menu.Portal` with the submenu.
+ * The “more” button, opening a submenu with further actions: place it in an
+ * `EditMenu.SubmenuRoot`, followed by an `EditMenu.Portal` with the submenu
+ * (a `Menu`'s positioner and popup).
  */
 const More = forwardRef<
   HTMLElement,
   Omit<BaseMenu.SubmenuTrigger.Props, 'ref'>
->(({ className, children, ...props }, ref) => (
+>(({ className, children, onClick, onPointerDown, ...props }, ref) => (
   // Figma “Menu” (iOS 26's metrics): a 34px circle with the selection and a
-  // chevron (􀆊, 14px, 590).
+  // chevron (􀆊, 14px, 590). Pressed again, it closes its menu.
   <BaseMenu.SubmenuTrigger
     ref={ref}
     aria-label="More"
+    {...useSubmenuToggle({ onClick, onPointerDown })}
     {...props}
     className={cn('uikit-edit-menu-more uikit-menu-toggle-cursor', className)}
     data-edit-menu-part="more"
@@ -422,10 +434,10 @@ export const useSelectionAnchor = (
   const [anchor, setAnchor] = useState<SelectionAnchor | null>(null);
 
   useEffect(() => {
-    let selecting = false;
+    let isSelecting = false;
     let timeout: ReturnType<typeof setTimeout> | undefined;
     let shown: Range | null = null;
-    let changed = false;
+    let isChanged = false;
 
     const current = () => {
       const documentSelection = document.getSelection();
@@ -466,24 +478,24 @@ export const useSelectionAnchor = (
       // Pressing a menu keeps it.
       if (target instanceof Element && target.closest('[role=menu]')) return;
 
-      selecting = true;
-      changed = false;
+      isSelecting = true;
+      isChanged = false;
       hide();
     };
 
     const onPointerUp = () => {
-      if (!selecting) return;
-      selecting = false;
-      if (changed) update();
+      if (!isSelecting) return;
+      isSelecting = false;
+      if (isChanged) update();
     };
 
     const onPointerCancel = () => {
-      selecting = false;
+      isSelecting = false;
     };
 
     const onSelectionChange = () => {
-      if (selecting) changed = true;
-      if (selecting || isShown(current())) return;
+      if (isSelecting) isChanged = true;
+      if (isSelecting || isShown(current())) return;
 
       clearTimeout(timeout);
       hide();
@@ -508,9 +520,16 @@ export const useSelectionAnchor = (
   return [anchor, clear];
 };
 
+// Base UI's menu parts but its handles: an edit menu has no trigger to open
+// at (the app opens it, `open`).
+const { createHandle: _createHandle, ...menuParts } = BaseMenu;
+
 export const EditMenu = {
-  ...BaseMenu,
+  ...menuParts,
   Root,
+  // A menu's (its submenu's: an iPad menu, see `Menu`).
+  Portal: Menu.Portal,
+  SubmenuRoot: Menu.SubmenuRoot,
   Positioner,
   Popup,
   Item,

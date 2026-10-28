@@ -9,7 +9,7 @@ export type { PageRootProps } from './props.js';
 
 // A page (after Framework7's `.page` and `.page-content`; UIKit: a view
 // controller's root view): what a screen shows, filling its container (a
-// `Layout.Column`, a `Navigation.Root`'s page, the viewport's content),
+// `Layout.Column`, a `Navigation.Stack`'s page, the viewport's content),
 // scrolling its content on its own (e.g. a `Header` at its start, then
 // lists), on the page background (`grouped`: `systemGroupedBackground`, as
 // lists of style `insetGrouped` and `grouped` sit on; `plain`:
@@ -20,9 +20,13 @@ export type { PageRootProps } from './props.js';
 
 /** A page: its content's scroll container, on the page background. */
 const Root = forwardRef<HTMLDivElement, PageRootProps>(
-  ({ className, background = 'grouped', ...props }, ref) => (
+  (
+    { alwaysBounce = true, className, background = 'grouped', ...props },
+    ref,
+  ) => (
     <div
       ref={ref}
+      data-always-bounce={alwaysBounce ? '' : undefined}
       data-background={background}
       data-page-part="root"
       {...props}

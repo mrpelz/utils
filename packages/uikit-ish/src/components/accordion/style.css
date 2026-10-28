@@ -1,0 +1,23 @@
+/* Accordion (see main.tsx). */
+@layer uikit-ish {
+  /* Its height (Base UI's, measured) and opacity transitioning, from and to
+     nothing (Base UI's starting and ending styles), as a list's collapsible
+     rows (List.AccordionPanel: 300ms). */
+  .uikit-accordion-panel {
+    overflow: clip;
+    height: var(--accordion-panel-height);
+    transition:
+      height 300ms ease,
+      opacity 300ms ease;
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      height: 0;
+      opacity: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+}

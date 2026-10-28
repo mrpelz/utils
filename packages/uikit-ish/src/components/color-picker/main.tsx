@@ -10,9 +10,11 @@ import {
   cloneElement,
   ComponentProps,
   createContext,
+  FocusEvent,
   forwardRef,
   FunctionComponent,
   KeyboardEvent,
+  MouseEvent,
   PointerEvent,
   ReactNode,
   useContext,
@@ -29,10 +31,12 @@ import { Segmented } from '../segmented/main.js';
 import { Slider } from '../slider/main.js';
 import { cn, withStyle } from '../utils/main.js';
 import type {
+  ColorPickerChangeEventDetails,
   ColorPickerEyedropperProps,
   ColorPickerMode,
   ColorPickerPanelProps,
   ColorPickerRootProps,
+  ColorPickerSavedColorsChangeEventDetails,
   ColorWellProps,
   EyeDropperApi,
   PickerState,
@@ -40,11 +44,13 @@ import type {
 } from './props.js';
 
 export type {
+  ColorPickerChangeEventDetails,
   ColorPickerEyedropperProps,
   ColorPickerMode,
   ColorPickerPanelProps,
   ColorPickerRootProps,
   ColorWellProps,
+  ColorPickerSavedColorsChangeEventDetails,
 } from './props.js';
 
 // Source: Apple iOS 26 Figma (“Color Pickers”, UIKit
@@ -182,10 +188,11 @@ const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
     const state = useMemo(
       () => ({
         color,
-        setColor: (next: Rgba) => {
+        // Uncontrolled: its own state; controlled, only the app's `value`.
+        setColor: (next: Rgba, details: ColorPickerChangeEventDetails) => {
           const hex = formatColor(next);
-          setOwn(hex);
-          onValueChange?.(hex);
+          if (value === undefined) setOwn(hex);
+          onValueChange?.(hex, details);
         },
       }),
       // (By its hex value.)
@@ -227,7 +234,9 @@ const Grid: FunctionComponent = () => {
               aria-pressed={sameColor(swatch, color)}
               style={{ backgroundColor: hex }}
               type="button"
-              onClick={() => setColor({ ...swatch, a: color.a })}
+              onClick={(event: MouseEvent<HTMLButtonElement>) =>
+                setColor({ ...swatch, a: color.a }, { event, reason: 'grid' })
+              }
             />
           );
         }),
@@ -240,22 +249,25 @@ const Spectrum: FunctionComponent = () => {
   const { color, setColor } = useContext(PickerContext);
   const { h, l } = toHsl(color);
 
-  const pick = (element: HTMLElement, x: number, y: number) => {
-    const { height, left, top, width } = element.getBoundingClientRect();
-    const hue = clamp((x - left) / width, 0, 1) * 360;
-    const lightness = 1 - clamp((y - top) / height, 0, 1);
-    setColor({ ...fromHsl(hue % 360, 1, lightness), a: color.a });
+  const pick = (event: PointerEvent<HTMLDivElement>) => {
+    const { height, left, top, width } =
+      event.currentTarget.getBoundingClientRect();
+    const hue = clamp((event.clientX - left) / width, 0, 1) * 360;
+    const lightness = 1 - clamp((event.clientY - top) / height, 0, 1);
+    setColor(
+      { ...fromHsl(hue % 360, 1, lightness), a: color.a },
+      { event, reason: 'spectrum' },
+    );
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    const element = event.currentTarget;
-    element.setPointerCapture(event.pointerId);
-    pick(element, event.clientX, event.clientY);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    pick(event);
   };
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
-    pick(event.currentTarget, event.clientX, event.clientY);
+    pick(event);
   };
 
   // Arrow keys: hue across (5°), lightness down (5%).
@@ -269,10 +281,13 @@ const Spectrum: FunctionComponent = () => {
     const move = moves[event.key];
     if (!move) return;
     event.preventDefault();
-    setColor({
-      ...fromHsl((h + move[0] + 360) % 360, 1, clamp(l + move[1], 0, 1)),
-      a: color.a,
-    });
+    setColor(
+      {
+        ...fromHsl((h + move[0] + 360) % 360, 1, clamp(l + move[1], 0, 1)),
+        a: color.a,
+      },
+      { event, reason: 'spectrum' },
+    );
   };
 
   return (
@@ -321,8 +336,11 @@ const Sliders: FunctionComponent = () => {
           min={0}
           tint={tint}
           value={Math.round(color[channel])}
-          onValueChange={(next) =>
-            setColor({ ...color, [channel]: next as number })
+          onValueChange={(next, { event }) =>
+            setColor(
+              { ...color, [channel]: next as number },
+              { event, reason: 'sliders' },
+            )
           }
         >
           <Slider.Label placement="block-start">{label}</Slider.Label>
@@ -344,11 +362,14 @@ const Opacity: FunctionComponent = () => {
   const percent = Math.round(color.a * 100);
   const [draft, setDraft] = useState<string | undefined>(undefined);
 
-  const commit = () => {
+  const commit = (event: Event) => {
     if (draft === undefined) return;
     const next = Number.parseFloat(draft);
     if (Number.isFinite(next)) {
-      setColor({ ...color, a: clamp(next, 0, 100) / 100 });
+      setColor(
+        { ...color, a: clamp(next, 0, 100) / 100 },
+        { event, reason: 'opacity' },
+      );
     }
     setDraft(undefined);
   };
@@ -372,8 +393,11 @@ const Opacity: FunctionComponent = () => {
           style={{ display: 'contents' }}
           thumbAlignment="center"
           value={percent}
-          onValueChange={(next) =>
-            setColor({ ...color, a: (next as number) / 100 })
+          onValueChange={(next, { event }) =>
+            setColor(
+              { ...color, a: (next as number) / 100 },
+              { event, reason: 'opacity' },
+            )
           }
         >
           {/* The opacity slider: the color fading in over a checkerboard; its
@@ -401,12 +425,12 @@ const Opacity: FunctionComponent = () => {
             aria-label="Opacity percentage"
             inputMode="numeric"
             value={draft ?? String(percent)}
-            onBlur={commit}
+            onBlur={(event: FocusEvent<HTMLInputElement>) => commit(event)}
             onChange={(event) => setDraft(event.currentTarget.value)}
             // Focused, all of it (to type over).
             onFocus={(event) => event.currentTarget.select()}
             onKeyDown={(event) => {
-              if (event.key === 'Enter') commit();
+              if (event.key === 'Enter') commit(event);
             }}
           />
           <span aria-hidden="true">%</span>
@@ -434,7 +458,7 @@ const pageSize = 10;
 
 const SavedSwatch: FunctionComponent<{
   hex: string;
-  onDelete: () => void;
+  onDelete: (event: Event) => void;
 }> = ({ hex, onDelete }) => {
   const { color, setColor } = useContext(PickerContext);
   const swatch = parseColor(hex);
@@ -450,7 +474,9 @@ const SavedSwatch: FunctionComponent<{
             aria-pressed={sameColor(swatch, color) && swatch.a === color.a}
             style={{ backgroundColor: hex }}
             type="button"
-            onClick={() => setColor(swatch)}
+            onClick={(event: MouseEvent<HTMLButtonElement>) =>
+              setColor(swatch, { event, reason: 'saved' })
+            }
           />
         }
       />
@@ -459,7 +485,7 @@ const SavedSwatch: FunctionComponent<{
           <Menu.Popup>
             <Menu.Item
               destructive
-              onClick={onDelete}
+              onClick={(event: MouseEvent<HTMLElement>) => onDelete(event)}
             >
               <Menu.Label>Delete</Menu.Label>
             </Menu.Item>
@@ -502,9 +528,13 @@ const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
     const saved = savedProp ?? ownSaved;
     const opaque = formatColor({ ...color, a: 1 });
 
-    const changeSaved = (next: string[]) => {
-      setOwnSaved(next);
-      onSavedColorsChange?.(next);
+    // Uncontrolled: their own state; controlled, only the app's.
+    const changeSaved = (
+      next: string[],
+      details: ColorPickerSavedColorsChangeEventDetails,
+    ) => {
+      if (savedProp === undefined) setOwnSaved(next);
+      onSavedColorsChange?.(next, details);
     };
 
     // Pages of saved colors, the add button after them (unless the color
@@ -530,10 +560,10 @@ const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
     useLayoutEffect(() => {
       const { current: element } = pagesRef;
       if (!element || scrollTarget === undefined) return undefined;
-      const rtl = getComputedStyle(element).direction === 'rtl';
+      const isRightToLeft = getComputedStyle(element).direction === 'rtl';
       element.scrollTo({
         behavior: 'smooth',
-        left: (rtl ? -1 : 1) * scrollTarget * element.clientWidth,
+        left: (isRightToLeft ? -1 : 1) * scrollTarget * element.clientWidth,
       });
       // (Swipes count again once it's there.)
       const done = () => setScrollTarget(undefined);
@@ -574,9 +604,9 @@ const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
         <Segmented.Root
           aria-label="View"
           value={mode}
-          onValueChange={(next) => {
-            setOwnMode(next as ColorPickerMode);
-            onModeChange?.(next as ColorPickerMode);
+          onValueChange={(next, details) => {
+            if (modeProp === undefined) setOwnMode(next as ColorPickerMode);
+            onModeChange?.(next as ColorPickerMode, details);
           }}
         >
           {modes.map(([value, label]) => (
@@ -631,10 +661,13 @@ const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
                           aria-label="Add color"
                           data-add=""
                           type="button"
-                          onClick={() => {
+                          onClick={(event: MouseEvent<HTMLButtonElement>) => {
                             const next = formatColor(color);
                             if (saved.includes(next)) return;
-                            changeSaved([...saved, next]);
+                            changeSaved([...saved, next], {
+                              event,
+                              reason: 'add',
+                            });
                             // On the page it lands on.
                             goTo(Math.floor(saved.length / pageSize));
                           }}
@@ -645,8 +678,11 @@ const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
                         <SavedSwatch
                           key={hex}
                           hex={hex}
-                          onDelete={() =>
-                            changeSaved(saved.filter((other) => other !== hex))
+                          onDelete={(event: Event) =>
+                            changeSaved(
+                              saved.filter((other) => other !== hex),
+                              { event, reason: 'delete' },
+                            )
                           }
                         />
                       ),
@@ -700,10 +736,15 @@ const Eyedropper: FunctionComponent<ColorPickerEyedropperProps> = ({
   const Picker = eyeDropper();
   if (!Picker) return null;
 
-  const pick = () => {
+  const pick = (event: Event) => {
     new Picker()
       .open()
-      .then(({ sRGBHex }) => setColor({ ...parseColor(sRGBHex), a: color.a }))
+      .then(({ sRGBHex }) =>
+        setColor(
+          { ...parseColor(sRGBHex), a: color.a },
+          { event, reason: 'eyedropper' },
+        ),
+      )
       .catch(() => undefined);
   };
 

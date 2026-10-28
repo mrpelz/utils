@@ -1,0 +1,30 @@
+/* List demos (see main.tsx). */
+
+/* An indexed list and its index, in one cell: at least 32rem high, or as
+   high as the index (the list fills it, scrolling on its own). */
+.list-demo-plain {
+  display: grid;
+  min-height: 32rem;
+}
+
+/* The list, scrolling on its own, without a scroll bar (an overlay scroll
+   bar would cover the index at its edge). */
+.list-demo-scroll {
+  overflow: auto;
+  height: 0;
+  min-height: 100%;
+  grid-area: 1 / 1;
+  scrollbar-width: none;
+}
+
+/* The index at the list's edge, over it, centered on its visible height
+   (not scrolling with it), above the sticky headers. */
+.list-demo-index {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  grid-area: 1 / 1;
+  place-self: center end;
+}
+

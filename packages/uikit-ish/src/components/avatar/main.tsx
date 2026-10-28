@@ -7,12 +7,14 @@ import { cn, withStyle } from '../utils/main.js';
 import type {
   AvatarFallbackProps,
   AvatarGroupProps,
+  AvatarImageProps,
   AvatarRootProps,
 } from './props.js';
 
 export type {
   AvatarFallbackProps,
   AvatarGroupProps,
+  AvatarImageProps,
   AvatarRootProps,
 } from './props.js';
 
@@ -49,6 +51,15 @@ const Root = forwardRef<HTMLSpanElement, AvatarRootProps>(
     />
   ),
 );
+
+/** The person's photo, shown once it has loaded. */
+const Image = forwardRef<HTMLImageElement, AvatarImageProps>((props, ref) => (
+  <BaseAvatar.Image
+    ref={ref}
+    data-avatar-part="image"
+    {...props}
+  />
+));
 
 /** Shown without an image: e.g. the person's initials (the app's). */
 const Fallback = forwardRef<HTMLSpanElement, AvatarFallbackProps>(
@@ -95,6 +106,7 @@ const Group = forwardRef<HTMLSpanElement, AvatarGroupProps>(
 export const Avatar = {
   ...BaseAvatar,
   Root,
+  Image,
   Fallback,
   Group,
 };

@@ -182,4 +182,36 @@ export const tests = [
       ]);
     },
   },
+  {
+    name: 'typography: rendered as another element (render), a heading or paragraph in its style',
+    run: async (page) => {
+      await page.open('typography-composition-article');
+      const elements = await page.evaluate(
+        `[...${page.section}.querySelectorAll('.uikit-typography')].map((element) => [element.tagName, getComputedStyle(element).fontSize])`,
+      );
+      assert.deepEqual(elements, [
+        ['H2', '22px'],
+        ['P', '15px'],
+        ['P', '17px'],
+        ['P', '13px'],
+      ]);
+    },
+  },
+  {
+    name: 'typography: a Dynamic Type size around a list sizes its rows’ text',
+    run: async (page) => {
+      /** The list's first title's font size. */
+      const size = () =>
+        page.evaluate(
+          `getComputedStyle(${page.section}.querySelector('[data-list-part=title]')).fontSize`,
+        );
+
+      await page.open('typography-composition-size');
+      assert.equal(await size(), '17px');
+      await page.setState(0, { dynamicTypeSize: 'ax3' });
+      assert.notEqual(await size(), '17px');
+      await page.setState(0, { dynamicTypeSize: 'xSmall' });
+      assert.equal(await size(), '14px');
+    },
+  },
 ];

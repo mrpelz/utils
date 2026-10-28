@@ -129,6 +129,21 @@
   }
 
   /*
+   * The layers, behind their host's content in the host's own stacking
+   * context: they're composited (backdrop filters), and Safari otherwise
+   * relies on its overlap testing to draw the content after them, which
+   * misses content far down a scrolled document (e.g. a bar in an inline
+   * demo), leaving it under the glass, dimmed.
+   */
+  :where(:has(> [data-glass-part])) {
+    isolation: isolate;
+
+    & > [data-glass-part] {
+      z-index: -1;
+    }
+  }
+
+  /*
    * Glass contexts (see glassContext, useGlassContext): the brightness of
    * what's behind an element's glass, as `data-glass-context`, its
    * `--uikit-glass-*` properties for its glass and content; `auto` (or
@@ -352,7 +367,7 @@
       --uikit-glass-lens-shadow: var(--glass-ios-dim-lens-shadow);
     }
 
-    &:where(:root[data-color-scheme='light'] *) {
+    &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
       --uikit-glass-fill-filter: var(--glass-ios-bright-fill-filter);
       --uikit-glass-content-blend: var(--glass-ios-bright-content-blend);
       --uikit-glass-content-prominent: var(
@@ -374,7 +389,7 @@
       --uikit-glass-lens-shadow: var(--glass-ios-bright-lens-shadow);
     }
 
-    &:where(:root[data-color-scheme='dark'] *) {
+    &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
       --uikit-glass-fill-filter: var(--glass-ios-dim-fill-filter);
       --uikit-glass-content-blend: var(--glass-ios-dim-content-blend);
       --uikit-glass-content-prominent: var(--glass-ios-dim-content-prominent);
@@ -463,7 +478,7 @@
       --uikit-glass-shadow: var(--glass-ios-dim-shadow);
     }
 
-    &:where(:root[data-color-scheme='light'] *) {
+    &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
       --uikit-glass-content-blend: var(--glass-ios-medium-light-content-blend);
       --uikit-glass-content-secondary: var(
         --glass-ios-medium-light-content-secondary
@@ -474,7 +489,7 @@
       --uikit-glass-shadow: var(--glass-ios-bright-shadow);
     }
 
-    &:where(:root[data-color-scheme='dark'] *) {
+    &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
       --uikit-glass-content-blend: var(--glass-ios-medium-dark-content-blend);
       --uikit-glass-content-secondary: var(
         --glass-ios-medium-dark-content-secondary

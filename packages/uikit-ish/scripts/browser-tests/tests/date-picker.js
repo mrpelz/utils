@@ -1148,4 +1148,102 @@ export const tests = [
       assert.deepEqual(await message(), ['Stay at least two nights.', null]);
     },
   },
+  {
+    name: 'date picker: changes tell why: opened by its button (trigger-press), a day pressed (day-press)',
+    run: async (page) => {
+      await page.open('date-picker-parts-root');
+      await page.evaluate(
+        `${page.section}.querySelector('[data-date-picker-part=collapsed-button]').click()`,
+      );
+      await sleep(600);
+      await page.evaluate(
+        `[...document.querySelectorAll(${JSON.stringify('[data-date-picker-part=popup] button[data-date]')})].find((day) => day.textContent.trim() === ${JSON.stringify('22')}).click()`,
+      );
+      await sleep(300);
+      const log = await page.log();
+      assert.match(log, /open change: date \(trigger-press\)/u);
+      assert.match(log, /value change: .*\(day-press\)/u);
+    },
+  },
+  {
+    name: 'date picker: a range’s rules disable the days it can’t end on; the footer tells what’s missing',
+    run: async (page) => {
+      await page.open('date-picker-composition-range');
+      /** @param {string} text */
+      const dayButton = (text) =>
+        `[...${page.section}.querySelectorAll('button[data-date]')].find((day) => day.textContent.trim() === ${JSON.stringify(text)})`;
+      await page.evaluate(`${dayButton('10')}.click()`);
+      await sleep(300);
+      const disabled = await Array.fromAsync(['11', '12', '17', '18'], (text) =>
+        page.evaluate(`${dayButton(text)}.disabled`),
+      );
+      assert.deepEqual(
+        disabled,
+        [true, false, false, true],
+        'two to seven nights',
+      );
+      assert.equal(
+        await page.evaluate(
+          `${page.section}.querySelector('[data-date-picker-part=message]').dataset.variant`,
+        ),
+        'error',
+      );
+      await page.evaluate(`${dayButton('14')}.click()`);
+      await sleep(300);
+      assert.equal(
+        await page.evaluate(
+          `${page.section}.querySelector('[data-date-picker-part=message]').dataset.variant`,
+        ),
+        'info',
+      );
+    },
+  },
+  {
+    name: 'date picker: in a form (a hidden field control), its date is submitted by name, as an ISO date',
+    run: async (page) => {
+      await page.open('date-picker-composition-form');
+      await page.evaluate(
+        `${page.section}.querySelector('[data-date-picker-part=collapsed-button]').click()`,
+      );
+      await sleep(600);
+      const iso = await page.evaluate(
+        `(() => { const day = [...document.querySelectorAll(${JSON.stringify('[data-date-picker-part=popup] button[data-date]')})].find((button) => !button.disabled); day.click(); return new Date(Number(day.dataset.date)).toLocaleDateString(${JSON.stringify('sv-SE')}); })()`,
+      );
+      await sleep(300);
+      await page.evaluate(
+        `${page.section}.querySelector('button[type=submit]').click()`,
+      );
+      await sleep(300);
+      assert.match(
+        await page.log(),
+        new RegExp(String.raw`submitted: \{"birthday":"${String(iso)}"\}`, 'u'),
+      );
+    },
+  },
+  {
+    name: 'date picker: name and form (a form beside it): the picker’s and the calendar’s value is submitted by name; unnamed, nothing',
+    run: async (page) => {
+      for (const part of ['root', 'calendar']) {
+        const form = `date-picker-parts-${part}-form`;
+        await page.open(`date-picker-parts-${part}`);
+        await page.evaluate(
+          `${page.section}.querySelector('button[type=submit]').click()`,
+        );
+        await sleep(300);
+        assert.match(await page.log(), /submitted: \{\}/u);
+
+        await page.setState(0, { form, name: 'date' });
+        await page.evaluate(
+          `${page.section}.querySelector('button[type=submit]').click()`,
+        );
+        await sleep(300);
+        assert.match(
+          await page.log(),
+          part === 'root'
+            ? /submitted: \{"date":"2025-04-20"\}/u
+            : /submitted: \{"date":""\}/u,
+        );
+      }
+    },
+  },
 ];

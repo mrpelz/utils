@@ -39,7 +39,8 @@
       padding: 0;
     }
 
-    &[data-badge='corner'] {
+    &[data-badge='corner'],
+    &[data-badge='symbol'] {
       position: absolute;
       z-index: 1;
       inset-block-start: calc(-1 * var(--uikit-badge-overhang));
@@ -59,7 +60,7 @@
 
   /* On a symbol (in a `Symbol`): in Framework7's size there, starting
      before its end, above it (see main.tsx). */
-  .uikit-symbol > .uikit-badge[data-badge='corner'] {
+  .uikit-badge[data-badge='symbol'] {
     --uikit-badge-height: 16px;
     --uikit-badge-font-size: 10px;
     --uikit-badge-line-height: 12px;

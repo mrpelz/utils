@@ -12,14 +12,6 @@
     font-weight: round(down, var(--font-ios-body-weight), 100);
     letter-spacing: var(--font-ios-body-tracking);
     line-height: var(--font-ios-body-line-height);
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (var(--font-ios-body-weight) - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight)) / 326 * 1px
-    );
 
     &[data-text-style='callout'] {
       font-size: var(--font-ios-callout-size);
@@ -27,17 +19,6 @@
       font-weight: round(down, var(--font-ios-callout-weight), 100);
       letter-spacing: var(--font-ios-callout-tracking);
       line-height: var(--font-ios-callout-line-height);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(
-        0px,
-        (var(--font-ios-callout-weight) - 400) / 326 * 1px
-      );
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--font-ios-callout-weight)) / 326 * 1px
-      );
     }
 
     &[data-text-style='caption1'] {
@@ -46,17 +27,6 @@
       font-weight: round(down, var(--font-ios-caption1-weight), 100);
       letter-spacing: var(--font-ios-caption1-tracking);
       line-height: var(--font-ios-caption1-line-height);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(
-        0px,
-        (var(--font-ios-caption1-weight) - 400) / 326 * 1px
-      );
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--font-ios-caption1-weight)) / 326 * 1px
-      );
     }
 
     &[data-text-style='caption2'] {
@@ -65,17 +35,6 @@
       font-weight: round(down, var(--font-ios-caption2-weight), 100);
       letter-spacing: var(--font-ios-caption2-tracking);
       line-height: var(--font-ios-caption2-line-height);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(
-        0px,
-        (var(--font-ios-caption2-weight) - 400) / 326 * 1px
-      );
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--font-ios-caption2-weight)) / 326 * 1px
-      );
     }
 
     &[data-text-style='footnote'] {
@@ -84,17 +43,6 @@
       font-weight: round(down, var(--font-ios-footnote-weight), 100);
       letter-spacing: var(--font-ios-footnote-tracking);
       line-height: var(--font-ios-footnote-line-height);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(
-        0px,
-        (var(--font-ios-footnote-weight) - 400) / 326 * 1px
-      );
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--font-ios-footnote-weight)) / 326 * 1px
-      );
     }
 
     &[data-text-style='headline'] {
@@ -103,17 +51,6 @@
       font-weight: round(down, var(--font-ios-headline-weight), 100);
       letter-spacing: var(--font-ios-headline-tracking);
       line-height: var(--font-ios-headline-line-height);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(
-        0px,
-        (var(--font-ios-headline-weight) - 400) / 326 * 1px
-      );
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--font-ios-headline-weight)) / 326 * 1px
-      );
     }
 
     &[data-text-style='largeTitle'] {
@@ -122,17 +59,6 @@
       font-weight: round(down, var(--font-ios-large-title-weight), 100);
       letter-spacing: var(--font-ios-large-title-tracking);
       line-height: var(--font-ios-large-title-line-height);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(
-        0px,
-        (var(--font-ios-large-title-weight) - 400) / 326 * 1px
-      );
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--font-ios-large-title-weight)) / 326 * 1px
-      );
     }
 
     &[data-text-style='subheadline'] {
@@ -141,17 +67,6 @@
       font-weight: round(down, var(--font-ios-subheadline-weight), 100);
       letter-spacing: var(--font-ios-subheadline-tracking);
       line-height: var(--font-ios-subheadline-line-height);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(
-        0px,
-        (var(--font-ios-subheadline-weight) - 400) / 326 * 1px
-      );
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--font-ios-subheadline-weight)) / 326 * 1px
-      );
     }
 
     &[data-text-style='title1'] {
@@ -160,14 +75,6 @@
       font-weight: round(down, var(--font-ios-title1-weight), 100);
       letter-spacing: var(--font-ios-title1-tracking);
       line-height: var(--font-ios-title1-line-height);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (var(--font-ios-title1-weight) - 400) / 326 * 1px);
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--font-ios-title1-weight)) / 326 * 1px
-      );
     }
 
     &[data-text-style='title2'] {
@@ -176,14 +83,6 @@
       font-weight: round(down, var(--font-ios-title2-weight), 100);
       letter-spacing: var(--font-ios-title2-tracking);
       line-height: var(--font-ios-title2-line-height);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (var(--font-ios-title2-weight) - 400) / 326 * 1px);
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--font-ios-title2-weight)) / 326 * 1px
-      );
     }
 
     &[data-text-style='title3'] {
@@ -192,14 +91,6 @@
       font-weight: round(down, var(--font-ios-title3-weight), 100);
       letter-spacing: var(--font-ios-title3-tracking);
       line-height: var(--font-ios-title3-line-height);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (var(--font-ios-title3-weight) - 400) / 326 * 1px);
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--font-ios-title3-weight)) / 326 * 1px
-      );
     }
 
     &[data-emphasized] {
@@ -207,17 +98,6 @@
 
       font-variation-settings: 'wght' var(--uikit-typography-emphasized);
       font-weight: round(down, var(--uikit-typography-emphasized), 100);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(
-        0px,
-        (var(--uikit-typography-emphasized) - 400) / 326 * 1px
-      );
-
-      --uikit-symbol-thinning: max(
-        0px,
-        (400 - var(--uikit-typography-emphasized)) / 326 * 1px
-      );
     }
 
     &[data-text-style='callout'][data-emphasized] {

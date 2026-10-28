@@ -29,11 +29,6 @@
     font-weight: round(down, 510, 100);
     letter-spacing: 0;
     line-height: 14px;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(0px, (510 - 400) / 326 * 1px);
-
-    --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
   }
 
   .uikit-toolbar-root {
@@ -42,13 +37,22 @@
     align-items: center;
     gap: var(--uikit-toolbar-gap);
 
+    /* A text field in it (e.g. a search or message field): the free space
+       between its buttons. */
+    & > [data-text-field-part='root'] {
+      min-width: 0;
+      flex: 1 1 0;
+    }
+
     &[data-placement='block-end'] {
       --uikit-toolbar-group-height: 48px;
       --uikit-toolbar-group-padding: 6px;
       --uikit-toolbar-gap: 12px;
       --uikit-toolbar-text-padding: 6px;
 
-      padding: 4px 16px 36px;
+      /* (Figma: 36px below, the home indicator's 34px in it: the safe area,
+         kept clear by its anchor, see Viewport; 2px of its own.) */
+      padding: 4px 16px 2px;
     }
 
     &[data-placement='block-start'] {
@@ -59,6 +63,24 @@
 
       min-height: 54px;
       padding: 0 16px 10px;
+    }
+
+    /* A centered title stays centered without a side: an empty one stands
+       in (the other side would take all the free space); without either,
+       its own margins center it. (Only `::after`: a header's bar has its
+       backdrop in `::before`.) */
+    &:has(> .uikit-toolbar-title:not([data-align-start])) {
+      &:has(> .uikit-toolbar-leading):not(:has(> .uikit-toolbar-trailing)),
+      &:has(> .uikit-toolbar-trailing):not(:has(> .uikit-toolbar-leading)) {
+        &::after {
+          flex: 1 1 0;
+          content: '';
+        }
+      }
+
+      &:not(:has(> .uikit-toolbar-leading))::after {
+        order: -1;
+      }
     }
   }
 
@@ -111,13 +133,8 @@
       letter-spacing: 0;
       line-height: 20px;
       scale: var(--uikit-toolbar-content-scale, none);
-      stroke: currentcolor;
-      stroke-linejoin: round;
-      stroke-width: max(0px, (510 - 400) / 326 * 1px);
       transition-duration: var(--glass-ios-lens-duration);
       transition-property: background-color, scale;
-
-      --uikit-symbol-thinning: max(0px, (400 - 510) / 326 * 1px);
     }
 
     /* Not of a classic variant: the capsule's content colors, the selection
@@ -174,19 +191,8 @@
 
     /* Centered without sides, too (they take the free space otherwise). */
     margin-inline: auto;
-    stroke: currentcolor;
-    stroke-linejoin: round;
-    stroke-width: max(
-      0px,
-      (var(--font-ios-body-weight-emphasized) - 400) / 326 * 1px
-    );
     text-align: center;
     white-space: nowrap;
-
-    --uikit-symbol-thinning: max(
-      0px,
-      (400 - var(--font-ios-body-weight-emphasized)) / 326 * 1px
-    );
 
     & > * {
       overflow: hidden;

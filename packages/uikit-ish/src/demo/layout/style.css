@@ -1,8 +1,0 @@
-/* Layout demos (see main.tsx). */
-
-/* The layout as a screen in the stage (a grid: its content stretched to its
-   height). */
-.layout-demo-screen {
-  display: grid;
-  height: min(640px, 70vh);
-}

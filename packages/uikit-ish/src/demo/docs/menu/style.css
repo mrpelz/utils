@@ -1,0 +1,28 @@
+/* Menu demos (see main.tsx). */
+
+/* Keeps the trigger high in the stage, with room for the menu below
+   it. */
+.menu-demo-trigger-space {
+  margin-bottom: 560px;
+}
+
+/* Where the open menu sits in the stage (no trigger: an empty anchor). */
+.menu-demo-anchor {
+  display: block;
+  margin-bottom: 320px;
+}
+
+/* Triggers side by side (the handles' views). */
+.menu-demo-triggers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* A list as wide as a phone's (the stage shrinks to its content). */
+.menu-demo-list {
+  width: 360px;
+  max-width: 100%;
+}

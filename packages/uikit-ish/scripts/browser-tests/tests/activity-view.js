@@ -20,7 +20,7 @@ export const tests = [
         const people = [...document.querySelectorAll('[data-activity-view-part=people] > [role=listitem] > button')];
         const actions = [...document.querySelectorAll('[data-activity-view-part=actions] > [role=listitem] > button')];
         return {
-          action: size(actions[0].querySelector('[data-activity-view-part=action-symbol]')),
+          action: size(actions[0].querySelector('[data-activity-view-part=symbol]')),
           actions: actions.map((action) => action.textContent),
           count: people[2].textContent,
           person: [size(people[0]), size(people[0].querySelector('[data-avatar-part=root]'))],

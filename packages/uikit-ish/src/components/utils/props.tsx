@@ -1,7 +1,11 @@
-import type { MouseEventHandler, PointerEventHandler } from 'react';
+import type { MouseEventHandler, PointerEventHandler, RefObject } from 'react';
 
 /** Color schemes that `colorSchemeAttribute` on the root element forces. */
 export type ColorScheme = 'dark' | 'light';
+
+/** Where popups are portaled into (as Base UI's portals' `container`). */
+export type PortalContainer =
+  HTMLElement | ShadowRoot | RefObject<HTMLElement | ShadowRoot | null>;
 
 /** A side, logical (as CSS'): the start or end, along the block or inline axis. */
 export type LogicalSide =
@@ -45,7 +49,7 @@ export type PointerDrag<T extends HTMLElement, State> = {
    * Called on `pointerup` (`cancelled: false`), or on `pointercancel` and
    * `lostpointercapture` (`cancelled: true`).
    */
-  end: (element: T, state: State, cancelled: boolean) => void;
+  end: (element: T, state: State, isCancelled: boolean) => void;
   /**
    * Called with the element and the latest pointer event of the drag, at
    * most once per animation frame, and once more before `end`.

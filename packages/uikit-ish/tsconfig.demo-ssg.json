@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "noEmit": false,
+    "types": ["node"]
+  },
+  "exclude": ["**/*.test.ts", "src/main.ts", "src/demo.tsx"],
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*"]
+}
