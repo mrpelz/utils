@@ -40,29 +40,35 @@ const settingsCode = `<List.Section>
   </List.Header>
   <List.Group>
     <List.Item>
-      <Slider.Root
-        defaultValue={60}
-        onValueChange={(value) => …}
-      >
-        <Slider.Symbol edge="min">
-          <Symbol icon={sfSunMin} />
-        </Slider.Symbol>
-        <Slider.Control>
-          <Slider.Track>
-            <Slider.Indicator />
-            <Slider.Thumb aria-label="Brightness" />
-          </Slider.Track>
-        </Slider.Control>
-        <Slider.Symbol edge="max">
-          <Symbol icon={sfSunMax} />
-        </Slider.Symbol>
-      </Slider.Root>
+      <List.Span>
+        <Slider.Root
+          defaultValue={60}
+          onValueChange={(value) => …}
+        >
+          <Slider.Symbol edge="min">
+            <Symbol icon={sfSunMin} />
+          </Slider.Symbol>
+          <Slider.Control>
+            <Slider.Track>
+              <Slider.Indicator />
+              <Slider.Thumb aria-label="Brightness" />
+            </Slider.Track>
+          </Slider.Control>
+          <Slider.Symbol edge="max">
+            <Symbol icon={sfSunMax} />
+          </Slider.Symbol>
+        </Slider.Root>
+      </List.Span>
     </List.Item>
     <List.Item onClick={forwardClick('[role=switch]')}>
-      <List.Title>True Tone</List.Title>
-      <Switch.Root aria-label="True Tone">
-        <Switch.Thumb />
-      </Switch.Root>
+      <List.Content>
+        <List.Title>True Tone</List.Title>
+      </List.Content>
+      <List.Trailing>
+        <Switch.Root aria-label="True Tone">
+          <Switch.Thumb />
+        </Switch.Root>
+      </List.Trailing>
     </List.Item>
   </List.Group>
 </List.Section>`;
@@ -182,37 +188,43 @@ const SettingsRow: FunctionComponent = () => {
           </List.Header>
           <List.Group>
             <List.Item>
-              <Slider.Root
-                defaultValue={60}
-                onValueChange={(value: number | readonly number[]) =>
-                  addLog(`brightness: ${String(value)}`)
-                }
-              >
-                <Slider.Symbol edge="min">
-                  <Symbol icon={sfSunMin} />
-                </Slider.Symbol>
-                <Slider.Control>
-                  <Slider.Track>
-                    <Slider.Indicator />
-                    <Slider.Thumb aria-label="Brightness" />
-                  </Slider.Track>
-                </Slider.Control>
-                <Slider.Symbol edge="max">
-                  <Symbol icon={sfSunMax} />
-                </Slider.Symbol>
-              </Slider.Root>
+              <List.Span>
+                <Slider.Root
+                  defaultValue={60}
+                  onValueChange={(value: number | readonly number[]) =>
+                    addLog(`brightness: ${String(value)}`)
+                  }
+                >
+                  <Slider.Symbol edge="min">
+                    <Symbol icon={sfSunMin} />
+                  </Slider.Symbol>
+                  <Slider.Control>
+                    <Slider.Track>
+                      <Slider.Indicator />
+                      <Slider.Thumb aria-label="Brightness" />
+                    </Slider.Track>
+                  </Slider.Control>
+                  <Slider.Symbol edge="max">
+                    <Symbol icon={sfSunMax} />
+                  </Slider.Symbol>
+                </Slider.Root>
+              </List.Span>
             </List.Item>
             <List.Item onClick={forwardClick('[role=switch]')}>
-              <List.Title>True Tone</List.Title>
-              <Switch.Root
-                defaultChecked
-                aria-label="True Tone"
-                onCheckedChange={(isChecked: boolean) =>
-                  addLog(`true tone: ${String(isChecked)}`)
-                }
-              >
-                <Switch.Thumb />
-              </Switch.Root>
+              <List.Content>
+                <List.Title>True Tone</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <Switch.Root
+                  defaultChecked
+                  aria-label="True Tone"
+                  onCheckedChange={(isChecked: boolean) =>
+                    addLog(`true tone: ${String(isChecked)}`)
+                  }
+                >
+                  <Switch.Thumb />
+                </Switch.Root>
+              </List.Trailing>
             </List.Item>
           </List.Group>
         </List.Section>

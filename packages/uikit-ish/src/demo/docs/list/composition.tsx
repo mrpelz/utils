@@ -15,6 +15,7 @@ import { FunctionComponent, useState } from 'react';
 import {
   Button,
   CheckboxGroup,
+  DatePicker,
   forwardClick,
   Header,
   List,
@@ -26,6 +27,7 @@ import {
   Switch,
   Symbol,
   Toolbar,
+  useCreateDatePickerHandle,
   Viewport,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
@@ -62,15 +64,29 @@ const settingsCode = `const [minutes, setMinutes] = useState(5);
       <List.Section>
         <List.Group>
           <List.Item onClick={forwardClick('[role=switch]')}>
-            <List.Image style={{ backgroundColor: … }} variant="rounded">…</List.Image>
-            <List.Title>Airplane Mode</List.Title>
-            <Switch.Root aria-label="Airplane Mode"><Switch.Thumb /></Switch.Root>
+            <List.Leading>
+              <List.Image style={{ backgroundColor: … }} variant="rounded">…</List.Image>
+            </List.Leading>
+            <List.Content>
+              <List.Title>Airplane Mode</List.Title>
+            </List.Content>
+            <List.Trailing>
+              <Switch.Root aria-label="Airplane Mode"><Switch.Thumb /></Switch.Root>
+            </List.Trailing>
           </List.Item>
           <List.Item>
-            <List.Image …>…</List.Image>
-            <List.Title render={<button type="button" />} onClick={…}>Wi-Fi</List.Title>
-            <List.Detail>Home</List.Detail>
-            <List.DrillIn />
+            <List.Leading>
+              <List.Image …>…</List.Image>
+            </List.Leading>
+            <List.Content>
+              <List.Title render={<button type="button" />} onClick={…}>Wi-Fi</List.Title>
+            </List.Content>
+            <List.Trailing>
+              <List.Detail>Home</List.Detail>
+            </List.Trailing>
+            <List.Trailing>
+              <List.DrillIn />
+            </List.Trailing>
           </List.Item>
         </List.Group>
       </List.Section>
@@ -78,16 +94,28 @@ const settingsCode = `const [minutes, setMinutes] = useState(5);
         <List.Header prominence="nested"><List.Title render={<h3 />}>Display</List.Title></List.Header>
         <List.Group>
           <List.Item>
-            <List.Title>Text Size</List.Title>
-            <Segmented.Root aria-label="Text Size" defaultValue="M">…</Segmented.Root>
+            <List.Content>
+              <List.Title>Text Size</List.Title>
+            </List.Content>
+            <List.Trailing>
+              <Segmented.Root aria-label="Text Size" defaultValue="M">…</Segmented.Root>
+            </List.Trailing>
           </List.Item>
           <List.Item>
-            <Slider.Root defaultValue={60}>…</Slider.Root>
+            <List.Span>
+              <Slider.Root defaultValue={60}>…</Slider.Root>
+            </List.Span>
           </List.Item>
           <List.Item>
-            <List.Title>Auto-Lock</List.Title>
-            <List.Detail>{minutes} min</List.Detail>
-            <Stepper.Root value={minutes} onValueChange={setMinutes}>…</Stepper.Root>
+            <List.Content>
+              <List.Title>Auto-Lock</List.Title>
+            </List.Content>
+            <List.Trailing>
+              <List.Detail>{minutes} min</List.Detail>
+            </List.Trailing>
+            <List.Trailing>
+              <Stepper.Root value={minutes} onValueChange={setMinutes}>…</Stepper.Root>
+            </List.Trailing>
           </List.Item>
         </List.Group>
         <List.Footer>…</List.Footer>
@@ -96,6 +124,72 @@ const settingsCode = `const [minutes, setMinutes] = useState(5);
     <Viewport.Padding edge="block-end" />
   </Page.Root>
 </Header.Root>`;
+
+const scheduleCode = `const [isScheduled, setIsScheduled] = useState(false);
+// It ends once it has started.
+const [fromTime, setFromTime] = useState(new Date(2025, 3, 20, 19, 0));
+const [toTime, setToTime] = useState(new Date(2025, 3, 20, 23, 0));
+const from = useCreateDatePickerHandle();
+const to = useCreateDatePickerHandle();
+
+<List.Root>
+  <List.Section>
+    <List.Group>
+      {/* The switch opens the rows below it, together. */}
+      <List.CollapsibleRoot open={isScheduled}>
+        <List.Item onClick={forwardClick('[role=switch]')}>
+          <List.Content>
+            <List.Title>Scheduled</List.Title>
+          </List.Content>
+          <List.Trailing>
+            <Switch.Root aria-label="Scheduled" checked={isScheduled} onCheckedChange={setIsScheduled}>
+              <Switch.Thumb />
+            </Switch.Root>
+          </List.Trailing>
+        </List.Item>
+        <List.CollapsiblePanel>
+          {/* One time's roll open at a time. */}
+          <List.AccordionRoot>
+            <List.AccordionItem value="from">
+              {/* The whole row toggles the picker's roll. */}
+              <List.Item onClick={forwardClick('[data-date-picker-part=collapsed-button]')}>
+                <List.Content>
+                  <List.Title>From</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <DatePicker.Root handle={from} mode="time" value={fromTime} onValueChange={setFromTime} />
+                </List.Trailing>
+              </List.Item>
+              {/* Its time roll, below it (closed with the rows around it). */}
+              <DatePicker.Expandable handle={from} />
+            </List.AccordionItem>
+            <List.AccordionItem value="to">
+              <List.Item onClick={forwardClick('[data-date-picker-part=collapsed-button]')}>
+                <List.Content>
+                  <List.Title>To</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <DatePicker.Root handle={to} min={fromTime} mode="time" value={toTime} onValueChange={setToTime} />
+                </List.Trailing>
+              </List.Item>
+              <DatePicker.Expandable handle={to} />
+            </List.AccordionItem>
+          </List.AccordionRoot>
+        </List.CollapsiblePanel>
+      </List.CollapsibleRoot>
+      <List.Item onClick={forwardClick('[role=switch]')}>
+        <List.Content>
+          <List.Title>Manually Enable Until Tomorrow</List.Title>
+        </List.Content>
+        <List.Trailing>
+          <Switch.Root aria-label="Manually Enable Until Tomorrow">
+            <Switch.Thumb />
+          </Switch.Root>
+        </List.Trailing>
+      </List.Item>
+    </List.Group>
+  </List.Section>
+</List.Root>`;
 
 const drillInCode = `// Each page: its title, its rows (title, the page it pushes, detail).
 const pages = {
@@ -134,15 +228,21 @@ const pop = () => setKeys((current) => current.slice(0, -1));
               <List.Group>
                 {pages[key].rows.map(([title, page, detail]) => (
                   <List.Item key={title}>
-                    {page ? (
-                      <List.Title render={<button type="button" />} onClick={() => push(page)}>
-                        {title}
-                      </List.Title>
-                    ) : (
-                      <List.Title>{title}</List.Title>
-                    )}
-                    {detail ? <List.Detail>{detail}</List.Detail> : null}
-                    {page ? <List.DrillIn /> : null}
+                    <List.Content>
+                      {page ? (
+                        <List.Title render={<button type="button" />} onClick={() => push(page)}>
+                          {title}
+                        </List.Title>
+                      ) : (
+                        <List.Title>{title}</List.Title>
+                      )}
+                    </List.Content>
+                    <List.Trailing>
+                      {detail ? <List.Detail>{detail}</List.Detail> : null}
+                    </List.Trailing>
+                    <List.Trailing>
+                      {page ? <List.DrillIn /> : null}
+                    </List.Trailing>
                   </List.Item>
                 ))}
               </List.Group>
@@ -187,9 +287,15 @@ const [selected, setSelected] = useState([]);
                 key={name}
                 onClick={isEditing ? forwardClick('[role=checkbox]') : undefined}
               >
-                <List.Checkbox aria-label={name} value={name} />
-                <List.Title>{name}</List.Title>
-                <List.Grabber aria-label={\`Reorder \${name}\`} />
+                <List.Leading whileEditing="show">
+                  <List.Checkbox aria-label={name} value={name} />
+                </List.Leading>
+                <List.Content>
+                  <List.Title>{name}</List.Title>
+                </List.Content>
+                <List.Trailing whileEditing="show">
+                  <List.Grabber aria-label={\`Reorder \${name}\`} />
+                </List.Trailing>
                 <List.SwipeActions overswipe>…</List.SwipeActions>
               </List.Item>
             ))}
@@ -222,16 +328,21 @@ const [added, setAdded] = useState(0);
     <List.Group>
       {rows.map((name) => (
         <List.Item key={name}>
-          {/* Minus: opens the row's Delete (its trailing swipe actions). */}
-          <List.SwipeActionsTrigger
-            render={
-              <List.EditButton aria-label={\`Delete \${name}\`} tint="var(--color-ios-system-red)">
-                <Symbol icon={sfMinus} />
-              </List.EditButton>
-            }
-          />
-          <List.Title>{name}</List.Title>
-          <List.SwipeActions overswipe>
+          <List.Leading>
+            {/* Minus: opens the row's Delete (its trailing swipe actions). */}
+            <List.SwipeActionsTrigger
+              render={
+                <List.EditButton aria-label={\`Delete \${name}\`} tint="var(--color-ios-system-red)">
+                  <Symbol icon={sfMinus} />
+                </List.EditButton>
+              }
+            />
+          </List.Leading>
+          <List.Content>
+            <List.Title>{name}</List.Title>
+          </List.Content>
+          {/* Opened by the minus only; swiping closes it. */}
+          <List.SwipeActions overswipe allowSwipe="conceal">
             <List.SwipeAction
               label="Delete"
               tint="var(--color-ios-system-red)"
@@ -244,17 +355,21 @@ const [added, setAdded] = useState(0);
       ))}
       {/* The whole row inserts: its button; the plus its sign. */}
       <List.Item>
-        <List.EditButton aria-hidden="true" render={<span />} tint="var(--color-ios-system-green)">
-          <Symbol icon={sfPlus} />
-        </List.EditButton>
-        <List.Button
-          onClick={() => {
-            setRows([...rows, \`Planet \${added + 1}\`]);
-            setAdded(added + 1);
-          }}
-        >
-          Add Planet
-        </List.Button>
+        <List.Leading>
+          <List.EditButton aria-hidden="true" render={<span />} tint="var(--color-ios-system-green)">
+            <Symbol icon={sfPlus} />
+          </List.EditButton>
+        </List.Leading>
+        <List.Content>
+          <List.Button
+            onClick={() => {
+              setRows([...rows, \`Planet \${added + 1}\`]);
+              setAdded(added + 1);
+            }}
+          >
+            Add Planet
+          </List.Button>
+        </List.Content>
       </List.Item>
     </List.Group>
   </List.Section>
@@ -280,10 +395,18 @@ const [isOuterEditing, setIsOuterEditing] = useState(false);
       {inner.map(([name, distance]) => (
         // Home stays where it is: exempt from its section's edit mode.
         <List.Item key={name} editing={name === 'Earth' ? 'none' : undefined}>
-          <List.Title>{name}</List.Title>
-          <List.Detail whileEditing="hide">{distance}</List.Detail>
-          <List.DrillIn />
-          <List.Grabber aria-label={\`Reorder \${name}\`} />
+          <List.Content>
+            <List.Title>{name}</List.Title>
+          </List.Content>
+          <List.Trailing whileEditing="hide">
+            <List.Detail>{distance}</List.Detail>
+          </List.Trailing>
+          <List.Trailing whileEditing="hide">
+            <List.DrillIn />
+          </List.Trailing>
+          <List.Trailing whileEditing="show">
+            <List.Grabber aria-label={\`Reorder \${name}\`} />
+          </List.Trailing>
         </List.Item>
       ))}
     </List.Group>
@@ -299,14 +422,18 @@ const [isOuterEditing, setIsOuterEditing] = useState(false);
     <List.Group>
       {outer.map((name) => (
         <List.Item key={name}>
-          <List.EditButton
-            aria-label={\`Delete \${name}\`}
-            tint="var(--color-ios-system-red)"
-            onClick={() => setOuter(outer.filter((row) => row !== name))}
-          >
-            <Symbol icon={sfMinus} />
-          </List.EditButton>
-          <List.Title>{name}</List.Title>
+          <List.Leading whileEditing="show">
+            <List.EditButton
+              aria-label={\`Delete \${name}\`}
+              tint="var(--color-ios-system-red)"
+              onClick={() => setOuter(outer.filter((row) => row !== name))}
+            >
+              <Symbol icon={sfMinus} />
+            </List.EditButton>
+          </List.Leading>
+          <List.Content>
+            <List.Title>{name}</List.Title>
+          </List.Content>
         </List.Item>
       ))}
     </List.Group>
@@ -319,91 +446,93 @@ const inboxCode = `const archive = () => {…};
   <List.Section>
     <List.Group>
       <List.Item>
-        {/* Unread: a dot in the image's place. */}
-        <List.Image
-          aria-label="Unread"
-          role="img"
-          style={{ color: 'var(--color-ios-primary)', fontSize: '10px' }}
-        >
-          <Symbol icon={sfCircleFill} />
-        </List.Image>
-        <List.Title render={<button type="button" />} onClick={…}>Kate Bell</List.Title>
-        <List.Detail>09:41</List.Detail>
-        <List.DrillIn />
-        <List.Subtitle>Weekend photos</List.Subtitle>
-        <List.Text>Hi! The photos from the weekend …</List.Text>
-        <List.SwipeActions side="inline-start" overswipe>
-          <List.SwipeAction showLabel label="Read" tint="var(--color-ios-system-blue)" onClick={…}>
-            <Symbol icon={sfEnvelopeOpenFill} />
-          </List.SwipeAction>
-        </List.SwipeActions>
-        <List.SwipeActions onOverswipe={archive}>
-          <List.SwipeAction showLabel label="More" onClick={…}>…</List.SwipeAction>
-          <List.SwipeAction showLabel label="Flag" tint="var(--color-ios-system-orange)" onClick={…}>…</List.SwipeAction>
-          <List.SwipeAction showLabel label="Archive" tint="var(--color-ios-system-purple)" onClick={archive}>…</List.SwipeAction>
-        </List.SwipeActions>
-      </List.Item>
-    </List.Group>
-  </List.Section>
-</List.Root>`;
+        <List.Span>
+          {/* Unread: a dot in the image's place. */}
+          <List.Image
+            aria-label="Unread"
+            role="img"
+            style={{ color: 'var(--color-ios-primary)', fontSize: '10px' }}
+          >
+            <Symbol icon={sfCircleFill} />
+          </List.Image>
+          <List.Title render={<button type="button" />} onClick={…}>Kate Bell</List.Title>
+          <List.Detail>09:41</List.Detail>
+          <List.DrillIn />
+          <List.Subtitle>Weekend photos</List.Subtitle>
+          <List.Text>Hi! The photos from the weekend …</List.Text>
+          <List.SwipeActions side="inline-start" overswipe>
+            <List.SwipeAction showLabel label="Read" tint="var(--color-ios-system-blue)" onClick={…}>
+              <Symbol icon={sfEnvelopeOpenFill} />
+            </List.SwipeAction>
+          </List.SwipeActions>
+          <List.SwipeActions onOverswipe={archive}>
+            <List.SwipeAction showLabel label="More" onClick={…}>…</List.SwipeAction>
+            <List.SwipeAction showLabel label="Flag" tint="var(--color-ios-system-orange)" onClick={…}>…</List.SwipeAction>
+            <List.SwipeAction showLabel label="Archive" tint="var(--color-ios-system-purple)" onClick={archive}>…</List.SwipeAction>
+          </List.SwipeActions>
+        </List.Item>
+      </List.Group>
+    </List.Section>
+  </List.Root>`;
 
 const indexCode = `// The contacts, by their first letter.
-const contacts = { A: ['Aaron', 'Abigail'], B: ['Bella', 'Benjamin'], … };
-
-{/* The list and its index in one cell, as high as the index at least. */}
-<div style={{ display: 'grid', minHeight: '32rem' }}>
-  {/* The list fills it, scrolling on its own, without a scroll bar (an
-      overlay scroll bar would cover the index). */}
-  <div
-    id="contacts"
-    style={{
-      gridArea: '1 / 1',
-      height: 0,
-      minHeight: '100%',
-      overflow: 'auto',
-      scrollbarWidth: 'none',
-    }}
-  >
-    <List.Root listStyle="plain">
-      {Object.entries(contacts).map(([letter, names]) => (
-        <List.Section key={letter} id={\`contacts-\${letter}\`}>
-          <List.Header prominence="nested">
-            <List.Title>{letter}</List.Title>
-          </List.Header>
-          <List.Group>…</List.Group>
-        </List.Section>
-      ))}
-    </List.Root>
-  </div>
-  {/* At the list's edge, centered on its visible height. */}
-  <div
-    style={{
-      alignSelf: 'center',
-      gridArea: '1 / 1',
-      justifySelf: 'end',
-      position: 'relative',
-      zIndex: 3,
-    }}
-  >
-    <List.Index aria-label="Index">
-      {Object.keys(contacts).map((letter) => (
-        <List.IndexItem
-          key={letter}
-          onClick={() => {
-            // The section at the top of the list.
-            const list = document.querySelector('#contacts');
-            const section = document.querySelector(\`#contacts-\${letter}\`);
-            if (!list || !section) return;
-            list.scrollTo({
-              top: list.scrollTop + section.getBoundingClientRect().top - list.getBoundingClientRect().top,
-            });
-          }}
-        >
-          {letter}
-        </List.IndexItem>
-      ))}
-    </List.Index>
-  </div>
+  const contacts = { A: ['Aaron', 'Abigail'], B: ['Bella', 'Benjamin'], … };
+  
+  {/* The list and its index in one cell, as high as the index at least. */}
+  <div style={{ display: 'grid', minHeight: '32rem' }}>
+    {/* The list fills it, scrolling on its own, without a scroll bar (an
+        overlay scroll bar would cover the index). */}
+    <div
+      id="contacts"
+      style={{
+        gridArea: '1 / 1',
+        height: 0,
+        minHeight: '100%',
+        overflow: 'auto',
+        scrollbarWidth: 'none',
+      }}
+    >
+      <List.Root listStyle="plain">
+        {Object.entries(contacts).map(([letter, names]) => (
+          <List.Section key={letter} id={\`contacts-\${letter}\`}>
+            <List.Header prominence="nested">
+              <List.Title>{letter}</List.Title>
+            </List.Header>
+            <List.Group>…</List.Group>
+          </List.Section>
+        ))}
+      </List.Root>
+    </div>
+    {/* At the list's edge, centered on its visible height. */}
+          <div
+      style={{
+        alignSelf: 'center',
+        gridArea: '1 / 1',
+        justifySelf: 'end',
+        position: 'relative',
+        zIndex: 3,
+      }}
+    >
+      <List.Index aria-label="Index">
+        {Object.keys(contacts).map((letter) => (
+          <List.IndexItem
+            key={letter}
+            onClick={() => {
+              // The section at the top of the list.
+              const list = document.querySelector('#contacts');
+              const section = document.querySelector(\`#contacts-\${letter}\`);
+              if (!list || !section) return;
+              list.scrollTo({
+                top: list.scrollTop + section.getBoundingClientRect().top - list.getBoundingClientRect().top,
+              });
+            }}
+          >
+            {letter}
+          </List.IndexItem>
+        ))}
+      </List.Index>
+    </div>
+        </List.Span>
 </div>`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
@@ -456,38 +585,52 @@ const SettingsScreen: FunctionComponent = () => {
                       key={title}
                       onClick={forwardClick('[role=switch]')}
                     >
-                      <List.Image
-                        style={{ backgroundColor: color }}
-                        variant="rounded"
-                      >
-                        <Symbol icon={icon} />
-                      </List.Image>
-                      <List.Title>{title}</List.Title>
-                      <Switch.Root
-                        aria-label={title}
-                        onCheckedChange={(isChecked: boolean) =>
-                          addLog(`${title}: ${String(isChecked)}`)
-                        }
-                      >
-                        <Switch.Thumb />
-                      </Switch.Root>
+                      <List.Leading>
+                        <List.Image
+                          style={{ backgroundColor: color }}
+                          variant="rounded"
+                        >
+                          <Symbol icon={icon} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title>{title}</List.Title>
+                      </List.Content>
+                      <List.Trailing>
+                        <Switch.Root
+                          aria-label={title}
+                          onCheckedChange={(isChecked: boolean) =>
+                            addLog(`${title}: ${String(isChecked)}`)
+                          }
+                        >
+                          <Switch.Thumb />
+                        </Switch.Root>
+                      </List.Trailing>
                     </List.Item>
                   ) : (
                     <List.Item key={title}>
-                      <List.Image
-                        style={{ backgroundColor: color }}
-                        variant="rounded"
-                      >
-                        <Symbol icon={icon} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => addLog(`${title} clicked`)}
-                      >
-                        {title}
-                      </List.Title>
-                      <List.Detail>{detail}</List.Detail>
-                      <List.DrillIn />
+                      <List.Leading>
+                        <List.Image
+                          style={{ backgroundColor: color }}
+                          variant="rounded"
+                        >
+                          <Symbol icon={icon} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => addLog(`${title} clicked`)}
+                        >
+                          {title}
+                        </List.Title>
+                      </List.Content>
+                      <List.Trailing>
+                        <List.Detail>{detail}</List.Detail>
+                      </List.Trailing>
+                      <List.Trailing>
+                        <List.DrillIn />
+                      </List.Trailing>
                     </List.Item>
                   ),
                 )}
@@ -499,59 +642,71 @@ const SettingsScreen: FunctionComponent = () => {
               </List.Header>
               <List.Group>
                 <List.Item>
-                  <List.Title>Text Size</List.Title>
-                  <Segmented.Root
-                    aria-label="Text Size"
-                    defaultValue="M"
-                    onValueChange={(value: unknown) =>
-                      addLog(`text size: ${String(value)}`)
-                    }
-                  >
-                    <Segmented.Item value="S">S</Segmented.Item>
-                    <Segmented.Item value="M">M</Segmented.Item>
-                    <Segmented.Item value="L">L</Segmented.Item>
-                    <Segmented.Highlight />
-                  </Segmented.Root>
+                  <List.Content>
+                    <List.Title>Text Size</List.Title>
+                  </List.Content>
+                  <List.Trailing>
+                    <Segmented.Root
+                      aria-label="Text Size"
+                      defaultValue="M"
+                      onValueChange={(value: unknown) =>
+                        addLog(`text size: ${String(value)}`)
+                      }
+                    >
+                      <Segmented.Item value="S">S</Segmented.Item>
+                      <Segmented.Item value="M">M</Segmented.Item>
+                      <Segmented.Item value="L">L</Segmented.Item>
+                      <Segmented.Highlight />
+                    </Segmented.Root>
+                  </List.Trailing>
                 </List.Item>
                 <List.Item>
-                  <Slider.Root
-                    defaultValue={60}
-                    onValueCommitted={(value: number | readonly number[]) =>
-                      addLog(`brightness: ${String(value)}`)
-                    }
-                  >
-                    <Slider.Symbol edge="min">
-                      <Symbol icon={sfSunMin} />
-                    </Slider.Symbol>
-                    <Slider.Control>
-                      <Slider.Track>
-                        <Slider.Indicator />
-                        <Slider.Thumb aria-label="Brightness" />
-                      </Slider.Track>
-                    </Slider.Control>
-                    <Slider.Symbol edge="max">
-                      <Symbol icon={sfSunMax} />
-                    </Slider.Symbol>
-                  </Slider.Root>
+                  <List.Span>
+                    <Slider.Root
+                      defaultValue={60}
+                      onValueCommitted={(value: number | readonly number[]) =>
+                        addLog(`brightness: ${String(value)}`)
+                      }
+                    >
+                      <Slider.Symbol edge="min">
+                        <Symbol icon={sfSunMin} />
+                      </Slider.Symbol>
+                      <Slider.Control>
+                        <Slider.Track>
+                          <Slider.Indicator />
+                          <Slider.Thumb aria-label="Brightness" />
+                        </Slider.Track>
+                      </Slider.Control>
+                      <Slider.Symbol edge="max">
+                        <Symbol icon={sfSunMax} />
+                      </Slider.Symbol>
+                    </Slider.Root>
+                  </List.Span>
                 </List.Item>
                 <List.Item>
-                  <List.Title>Auto-Lock</List.Title>
-                  <List.Detail>{minutes} min</List.Detail>
-                  <Stepper.Root
-                    max={10}
-                    min={1}
-                    value={minutes}
-                    onValueChange={(value: number | null) => {
-                      addLog(`auto-lock: ${String(value)}`);
-                      setMinutes(value ?? 1);
-                    }}
-                  >
-                    <Stepper.Group>
-                      <Stepper.Input aria-label="Auto-Lock" />
-                      <Stepper.Decrement />
-                      <Stepper.Increment />
-                    </Stepper.Group>
-                  </Stepper.Root>
+                  <List.Content>
+                    <List.Title>Auto-Lock</List.Title>
+                  </List.Content>
+                  <List.Trailing>
+                    <List.Detail>{minutes} min</List.Detail>
+                  </List.Trailing>
+                  <List.Trailing>
+                    <Stepper.Root
+                      max={10}
+                      min={1}
+                      value={minutes}
+                      onValueChange={(value: number | null) => {
+                        addLog(`auto-lock: ${String(value)}`);
+                        setMinutes(value ?? 1);
+                      }}
+                    >
+                      <Stepper.Group>
+                        <Stepper.Input aria-label="Auto-Lock" />
+                        <Stepper.Decrement />
+                        <Stepper.Increment />
+                      </Stepper.Group>
+                    </Stepper.Root>
+                  </List.Trailing>
                 </List.Item>
               </List.Group>
               <List.Footer>
@@ -562,6 +717,123 @@ const SettingsScreen: FunctionComponent = () => {
           <Viewport.Padding edge="block-end" />
         </Page.Root>
       </Header.Root>
+    </Component>
+  );
+};
+
+/**
+ * Night Shift's schedule: its switch shows (or hides) the From and To rows
+ * together, below it; their time rolls below them in turn.
+ */
+const Schedule: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [isScheduled, setIsScheduled] = useState(false);
+  // It ends once it has started.
+  const [fromTime, setFromTime] = useState(() => new Date(2025, 3, 20, 19, 0));
+  const [toTime, setToTime] = useState(() => new Date(2025, 3, 20, 23, 0));
+  const from = useCreateDatePickerHandle();
+  const to = useCreateDatePickerHandle();
+
+  return (
+    <Component
+      hasInputGuards
+      isCentered
+      isInline
+      id="list-composition-schedule"
+      log={log}
+      title="List with rows expanding together"
+    >
+      <List.Root style={{ width: 'min(402px, 100%)' }}>
+        <List.Section>
+          <List.Group>
+            <List.CollapsibleRoot open={isScheduled}>
+              <List.Item onClick={forwardClick('[role=switch]')}>
+                <List.Content>
+                  <List.Title>Scheduled</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <Switch.Root
+                    aria-label="Scheduled"
+                    checked={isScheduled}
+                    onCheckedChange={(isChecked: boolean) => {
+                      addLog(`scheduled: ${String(isChecked)}`);
+                      setIsScheduled(isChecked);
+                    }}
+                  >
+                    <Switch.Thumb />
+                  </Switch.Root>
+                </List.Trailing>
+              </List.Item>
+              <List.CollapsiblePanel>
+                <List.AccordionRoot>
+                  <List.AccordionItem value="from">
+                    <List.Item
+                      onClick={forwardClick(
+                        '[data-date-picker-part=collapsed-button]',
+                      )}
+                    >
+                      <List.Content>
+                        <List.Title>From</List.Title>
+                      </List.Content>
+                      <List.Trailing>
+                        <DatePicker.Root
+                          handle={from}
+                          mode="time"
+                          value={fromTime}
+                          onValueChange={(next: Date) => {
+                            addLog(`from: ${next.toLocaleTimeString()}`);
+                            setFromTime(next);
+                          }}
+                        />
+                      </List.Trailing>
+                    </List.Item>
+                    <DatePicker.Expandable handle={from} />
+                  </List.AccordionItem>
+                  <List.AccordionItem value="to">
+                    <List.Item
+                      onClick={forwardClick(
+                        '[data-date-picker-part=collapsed-button]',
+                      )}
+                    >
+                      <List.Content>
+                        <List.Title>To</List.Title>
+                      </List.Content>
+                      <List.Trailing>
+                        <DatePicker.Root
+                          handle={to}
+                          min={fromTime}
+                          mode="time"
+                          value={toTime}
+                          onValueChange={(next: Date) => {
+                            addLog(`to: ${next.toLocaleTimeString()}`);
+                            setToTime(next);
+                          }}
+                        />
+                      </List.Trailing>
+                    </List.Item>
+                    <DatePicker.Expandable handle={to} />
+                  </List.AccordionItem>
+                </List.AccordionRoot>
+              </List.CollapsiblePanel>
+            </List.CollapsibleRoot>
+            <List.Item onClick={forwardClick('[role=switch]')}>
+              <List.Content>
+                <List.Title>Manually Enable Until Tomorrow</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <Switch.Root
+                  aria-label="Manually Enable Until Tomorrow"
+                  onCheckedChange={(isChecked: boolean) =>
+                    addLog(`manually: ${String(isChecked)}`)
+                  }
+                >
+                  <Switch.Thumb />
+                </Switch.Root>
+              </List.Trailing>
+            </List.Item>
+          </List.Group>
+        </List.Section>
+      </List.Root>
     </Component>
   );
 };
@@ -627,20 +899,26 @@ const DrillIn: FunctionComponent = () => {
                         <List.Group>
                           {page.rows.map(([title, target, detail]) => (
                             <List.Item key={title}>
-                              {target ? (
-                                <List.Title
-                                  render={<button type="button" />}
-                                  onClick={() => push(target)}
-                                >
-                                  {title}
-                                </List.Title>
-                              ) : (
-                                <List.Title>{title}</List.Title>
-                              )}
-                              {detail ? (
-                                <List.Detail>{detail}</List.Detail>
-                              ) : null}
-                              {target ? <List.DrillIn /> : null}
+                              <List.Content>
+                                {target ? (
+                                  <List.Title
+                                    render={<button type="button" />}
+                                    onClick={() => push(target)}
+                                  >
+                                    {title}
+                                  </List.Title>
+                                ) : (
+                                  <List.Title>{title}</List.Title>
+                                )}
+                              </List.Content>
+                              <List.Trailing>
+                                {detail ? (
+                                  <List.Detail>{detail}</List.Detail>
+                                ) : null}
+                              </List.Trailing>
+                              <List.Trailing>
+                                {target ? <List.DrillIn /> : null}
+                              </List.Trailing>
                             </List.Item>
                           ))}
                         </List.Group>
@@ -735,12 +1013,18 @@ const EditMode: FunctionComponent = () => {
                             : undefined
                         }
                       >
-                        <List.Checkbox
-                          aria-label={name}
-                          value={name}
-                        />
-                        <List.Title>{name}</List.Title>
-                        <List.Grabber aria-label={`Reorder ${name}`} />
+                        <List.Leading whileEditing="show">
+                          <List.Checkbox
+                            aria-label={name}
+                            value={name}
+                          />
+                        </List.Leading>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
+                        <List.Trailing whileEditing="show">
+                          <List.Grabber aria-label={`Reorder ${name}`} />
+                        </List.Trailing>
                         <List.SwipeActions overswipe>
                           <List.SwipeAction
                             label="Delete"
@@ -824,18 +1108,25 @@ const EditButtons: FunctionComponent = () => {
                 <List.Group>
                   {rows.map((name) => (
                     <List.Item key={name}>
-                      <List.SwipeActionsTrigger
-                        render={
-                          <List.EditButton
-                            aria-label={`Delete ${name}`}
-                            tint="var(--color-ios-system-red)"
-                          >
-                            <Symbol icon={sfMinus} />
-                          </List.EditButton>
-                        }
-                      />
-                      <List.Title>{name}</List.Title>
-                      <List.SwipeActions overswipe>
+                      <List.Leading>
+                        <List.SwipeActionsTrigger
+                          render={
+                            <List.EditButton
+                              aria-label={`Delete ${name}`}
+                              tint="var(--color-ios-system-red)"
+                            >
+                              <Symbol icon={sfMinus} />
+                            </List.EditButton>
+                          }
+                        />
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title>{name}</List.Title>
+                      </List.Content>
+                      <List.SwipeActions
+                        overswipe
+                        allowSwipe="conceal"
+                      >
                         <List.SwipeAction
                           label="Delete"
                           tint="var(--color-ios-system-red)"
@@ -853,23 +1144,27 @@ const EditButtons: FunctionComponent = () => {
                   ))}
                   {/* The whole row inserts: its button; the plus its sign. */}
                   <List.Item>
-                    <List.EditButton
-                      aria-hidden="true"
-                      render={<span />}
-                      tint="var(--color-ios-system-green)"
-                    >
-                      <Symbol icon={sfPlus} />
-                    </List.EditButton>
-                    <List.Button
-                      onClick={() => {
-                        const name = `Planet ${String(added + 1)}`;
-                        addLog(`insert: ${name}`);
-                        setRows((current) => [...current, name]);
-                        setAdded(added + 1);
-                      }}
-                    >
-                      Add Planet
-                    </List.Button>
+                    <List.Leading>
+                      <List.EditButton
+                        aria-hidden="true"
+                        render={<span />}
+                        tint="var(--color-ios-system-green)"
+                      >
+                        <Symbol icon={sfPlus} />
+                      </List.EditButton>
+                    </List.Leading>
+                    <List.Content>
+                      <List.Button
+                        onClick={() => {
+                          const name = `Planet ${String(added + 1)}`;
+                          addLog(`insert: ${name}`);
+                          setRows((current) => [...current, name]);
+                          setAdded(added + 1);
+                        }}
+                      >
+                        Add Planet
+                      </List.Button>
+                    </List.Content>
                   </List.Item>
                 </List.Group>
               </List.Section>
@@ -958,10 +1253,18 @@ const EditingSections: FunctionComponent = () => {
                       key={name}
                       editing={name === 'Earth' ? 'none' : undefined}
                     >
-                      <List.Title>{name}</List.Title>
-                      <List.Detail whileEditing="hide">{distance}</List.Detail>
-                      <List.DrillIn />
-                      <List.Grabber aria-label={`Reorder ${name}`} />
+                      <List.Content>
+                        <List.Title>{name}</List.Title>
+                      </List.Content>
+                      <List.Trailing whileEditing="hide">
+                        <List.Detail>{distance}</List.Detail>
+                      </List.Trailing>
+                      <List.Trailing whileEditing="hide">
+                        <List.DrillIn />
+                      </List.Trailing>
+                      <List.Trailing whileEditing="show">
+                        <List.Grabber aria-label={`Reorder ${name}`} />
+                      </List.Trailing>
                     </List.Item>
                   ))}
                 </List.Group>
@@ -981,19 +1284,23 @@ const EditingSections: FunctionComponent = () => {
                 <List.Group>
                   {outer.map((name) => (
                     <List.Item key={name}>
-                      <List.EditButton
-                        aria-label={`Delete ${name}`}
-                        tint="var(--color-ios-system-red)"
-                        onClick={() => {
-                          addLog(`delete: ${name}`);
-                          setOuter((current) =>
-                            current.filter((row) => row !== name),
-                          );
-                        }}
-                      >
-                        <Symbol icon={sfMinus} />
-                      </List.EditButton>
-                      <List.Title>{name}</List.Title>
+                      <List.Leading whileEditing="show">
+                        <List.EditButton
+                          aria-label={`Delete ${name}`}
+                          tint="var(--color-ios-system-red)"
+                          onClick={() => {
+                            addLog(`delete: ${name}`);
+                            setOuter((current) =>
+                              current.filter((row) => row !== name),
+                            );
+                          }}
+                        >
+                          <Symbol icon={sfMinus} />
+                        </List.EditButton>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title>{name}</List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
@@ -1040,30 +1347,38 @@ const Inbox: FunctionComponent = () => {
               .filter(({ from }) => !archived.includes(from))
               .map(({ date, from, preview, subject }) => (
                 <List.Item key={from}>
-                  {read.includes(from) ? (
-                    <List.Image style={unreadStyle} />
-                  ) : (
-                    <List.Image
-                      aria-label="Unread"
-                      role="img"
-                      style={unreadStyle}
+                  <List.Leading>
+                    {read.includes(from) ? (
+                      <List.Image style={unreadStyle} />
+                    ) : (
+                      <List.Image
+                        aria-label="Unread"
+                        role="img"
+                        style={unreadStyle}
+                      >
+                        <Symbol icon={sfCircleFill} />
+                      </List.Image>
+                    )}
+                  </List.Leading>
+                  <List.Content>
+                    <List.Title
+                      render={<button type="button" />}
+                      onClick={() => {
+                        addLog(`open: ${from}`);
+                        if (!read.includes(from)) toggleRead(from);
+                      }}
                     >
-                      <Symbol icon={sfCircleFill} />
-                    </List.Image>
-                  )}
-                  <List.Title
-                    render={<button type="button" />}
-                    onClick={() => {
-                      addLog(`open: ${from}`);
-                      if (!read.includes(from)) toggleRead(from);
-                    }}
-                  >
-                    {from}
-                  </List.Title>
-                  <List.Detail>{date}</List.Detail>
-                  <List.DrillIn />
-                  <List.Subtitle>{subject}</List.Subtitle>
-                  <List.Text>{preview}</List.Text>
+                      {from}
+                    </List.Title>
+                    <List.Subtitle>{subject}</List.Subtitle>
+                    <List.Text>{preview}</List.Text>
+                  </List.Content>
+                  <List.Trailing>
+                    <List.Detail>{date}</List.Detail>
+                  </List.Trailing>
+                  <List.Trailing>
+                    <List.DrillIn />
+                  </List.Trailing>
                   <List.SwipeActions
                     overswipe
                     side="inline-start"
@@ -1146,12 +1461,14 @@ const Contacts: FunctionComponent = () => {
                 <List.Group>
                   {names.map((name) => (
                     <List.Item key={name}>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => addLog(`open: ${name}`)}
-                      >
-                        {name}
-                      </List.Title>
+                      <List.Content>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => addLog(`open: ${name}`)}
+                        >
+                          {name}
+                        </List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
@@ -1192,6 +1509,7 @@ const Contacts: FunctionComponent = () => {
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['a-settings-page', 'A settings page'],
+  ['rows-expanding-together', 'Rows expanding together'],
   ['drilling-into-pages', 'Drilling into pages'],
   ['edit-mode-and-a-toolbar', 'Edit mode and a toolbar'],
   ['deleting-and-inserting-rows', 'Deleting and inserting rows'],
@@ -1253,6 +1571,116 @@ export const ListComposition: FunctionComponent = () => (
     </ul>
     <CodeView code={settingsCode} />
     <SettingsScreen />
+
+    <Heading
+      id="rows-expanding-together"
+      level={2}
+    >
+      Rows expanding together
+    </Heading>
+    <ul>
+      <li>
+        As Night Shift’s schedule: turning on Scheduled slides in its From and
+        To rows below it, together; turning it off slides them out, the rows
+        below following.
+      </li>
+      <li>
+        The rows are a{' '}
+        <PartLink
+          component="list"
+          part="List.CollapsiblePanel"
+        />{' '}
+        among the group’s rows, open as its{' '}
+        <PartLink
+          component="list"
+          part="List.CollapsibleRoot"
+        />{' '}
+        is (here by the switch, <code>open</code>), without elements of their
+        own: each row stays a row of the group (its separator, its corners as
+        the group’s first or last).
+      </li>
+      <li>
+        Their times open as in iOS’s Calendar: each picker’s button toggles its
+        time roll in a row below it (
+        <PartLink
+          component="date-picker"
+          part="DatePicker.Expandable"
+        />
+        , by a handle), within the rows around, closed with them.
+      </li>
+      <li>
+        One roll at a time: each time’s row and roll are an{' '}
+        <PartLink
+          component="list"
+          part="List.AccordionItem"
+        />{' '}
+        of an{' '}
+        <PartLink
+          component="list"
+          part="List.AccordionRoot"
+        />
+        ; opening one picker closes the other (as Base UI’s Accordion), no app
+        state.
+      </li>
+      <li>
+        It ends once it has started: To’s earliest time is From’s (
+        <code>min</code>), earlier ones disabled in its roll.
+      </li>
+      <li>
+        Each time’s row is pressable as a whole, its press forwarded to the
+        picker’s button (
+        <PartLink
+          component="list"
+          part="forwardClick"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Library:</strong> the collapsible rows (
+        <PartLink
+          component="list"
+          part="List.CollapsibleRoot"
+        />
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.CollapsiblePanel"
+        />
+        ), the accordion (
+        <PartLink
+          component="list"
+          part="List.AccordionRoot"
+        />
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.AccordionItem"
+        />
+        ), the switches (
+        <PartLink
+          component="switch"
+          part="Switch.Root"
+        />
+        ) and the time pickers with their rows (
+        <PartLink
+          component="date-picker"
+          part="DatePicker.Root"
+        />
+        ,{' '}
+        <PartLink
+          component="date-picker"
+          part="DatePicker.Expandable"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> holding whether it’s scheduled and both times,
+        limiting To by From, the rows forwarding their presses, and the pickers’
+        handles.
+      </li>
+    </ul>
+    <CodeView code={scheduleCode} />
+    <Schedule />
 
     <Heading
       id="drilling-into-pages"
@@ -1394,7 +1822,12 @@ export const ListComposition: FunctionComponent = () => (
           component="list"
           part="List.SwipeActions"
         />
-        , whose Delete removes the row. Swiping does the same.
+        , whose Delete removes the row.
+      </li>
+      <li>
+        As in UIKit’s edit mode, swiping doesn’t open it, but closes it again (
+        <code>allowSwipe=&quot;conceal&quot;</code>), as a press outside the row
+        does.
       </li>
       <li>
         The whole insert row is a{' '}
@@ -1595,6 +2028,7 @@ export const ListComposition: FunctionComponent = () => (
 /** Its live views, also on the component's page of demos (and `/all`). */
 export const listCompositionDemos = [
   SettingsScreen,
+  Schedule,
   DrillIn,
   EditMode,
   EditButtons,

@@ -129,11 +129,15 @@ const toolbarCode = `const [selected, setSelected] = useState<string[]>([]);
         onValueChange={setSelected}
       >
         <List.Item onClick={forwardClick('[role=checkbox]')}>
-          <List.Checkbox
-            aria-label="Aaron"
-            value="Aaron"
-          />
-          <List.Title>Aaron</List.Title>
+          <List.Leading>
+            <List.Checkbox
+              aria-label="Aaron"
+              value="Aaron"
+            />
+          </List.Leading>
+          <List.Content>
+            <List.Title>Aaron</List.Title>
+          </List.Content>
         </List.Item>
         …
       </CheckboxGroup>
@@ -233,31 +237,27 @@ const [turned, setTurned] = useState();
 const [overscroll, setOverscroll] = useState(0);
 // Released past the distance: the page turned to (-1, 1), or none.
 const turn = useRef(0);
-// Turned: to its top, once it's bounced back (scrolling while it bounces
-// would stop it).
-const toTop = useRef(false);
+const [isHeld, setIsHeld] = useState(false);
 const [name, facts] = planets[index];
 const previous = planets[index - 1]?.[0];
 const next = planets[index + 1]?.[0];
 
-useViewportScroll(({ atTop, isHeld, overscroll: by }) => {
+useViewportScroll(({ isHeld: isHeldNow, overscroll: by }) => {
   setOverscroll(by);
-  if (isHeld) {
+  setIsHeld(isHeldNow);
+  if (isHeldNow) {
     turn.current = 0;
     if (previous && by <= -turnDistance) turn.current = -1;
     if (next && by >= turnDistance) turn.current = 1;
     return;
   }
-  if (toTop.current && Math.abs(by) < 1) {
-    toTop.current = false;
-    if (!atTop) contentRef.current?.scrollTo({ top: 0 });
-  }
-  // Released past the distance: turned, the new page bouncing back.
+  // Released past the distance: turned at once, at its top (ending the old
+  // page's bounce back), the new page sliding in on from the pull.
   if (turn.current === 0) return;
   setIndex(index + turn.current);
   setTurned(turn.current < 0 ? 'previous' : 'next');
   turn.current = 0;
-  toTop.current = true;
+  contentRef.current?.scrollTo({ top: 0 });
 });
 
 {/* Beneath the content layer (before it), coming out past its ends. */}
@@ -265,6 +265,7 @@ useViewportScroll(({ atTop, isHeld, overscroll: by }) => {
   <Viewport.Overscroll
     className="pull"
     data-armed={overscroll <= -turnDistance ? '' : undefined}
+    data-released={isHeld ? undefined : ''}
   >
     <Symbol className="pull-arrow" icon={sfArrowDown} />
     {previous}
@@ -274,6 +275,7 @@ useViewportScroll(({ atTop, isHeld, overscroll: by }) => {
   <Viewport.Overscroll
     className="pull"
     data-armed={overscroll >= turnDistance ? '' : undefined}
+    data-released={isHeld ? undefined : ''}
     edge="block-end"
   >
     <Symbol className="pull-arrow" icon={sfArrowUp} />
@@ -321,6 +323,12 @@ useViewportScroll(({ atTop, isHeld, overscroll: by }) => {
   rotate: 180deg;
 }
 
+/* Released: gone at once (the page may have turned, its name changing
+   while it snaps back). */
+.pull[data-released] {
+  opacity: 0;
+}
+
 /* Turned: the page sliding in from below (next) or above (previous). */
 .page[data-turned='next'] {
   animation: page-in 400ms ease-out;
@@ -334,7 +342,7 @@ useViewportScroll(({ atTop, isHeld, overscroll: by }) => {
 @keyframes page-in {
   from {
     opacity: 0;
-    translate: 0 calc(var(--page-from, 1) * 50%);
+    translate: 0 calc(var(--page-from, 1) * 100px);
   }
 }
 
@@ -396,8 +404,12 @@ const Shell: FunctionComponent = () => {
                   <List.Group>
                     {names.map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
-                        <List.Detail>{label}</List.Detail>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <List.Detail>{label}</List.Detail>
+                        </List.Trailing>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -452,8 +464,10 @@ const Message: FunctionComponent = () => {
               <List.Group>
                 {messages.map(({ from, preview }) => (
                   <List.Item key={from}>
-                    <List.Title>{from}</List.Title>
-                    <List.Text lines={3}>{preview}</List.Text>
+                    <List.Content>
+                      <List.Title>{from}</List.Title>
+                      <List.Text lines={3}>{preview}</List.Text>
+                    </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
@@ -516,7 +530,9 @@ const CollapseView: FunctionComponent<{
                 <List.Group>
                   {names.map((name) => (
                     <List.Item key={name}>
-                      <List.Title>{name}</List.Title>
+                      <List.Content>
+                        <List.Title>{name}</List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
@@ -643,7 +659,9 @@ const RefreshView: FunctionComponent<{
               <List.Group>
                 {rows.map((name) => (
                   <List.Item key={name}>
-                    <List.Title>{name}</List.Title>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
@@ -689,15 +707,12 @@ const PagesView: FunctionComponent<{
   const [scroll, setScroll] = useState({ isHeld: false, overscroll: 0 });
   // Released past the distance: the page turned to (-1, 1), or none.
   const turn = useRef(0);
-  // Turned: to its top, once it's bounced back (scrolling while it bounces
-  // would stop it).
-  const toTop = useRef(false);
   const [name, facts] = planets[index] ?? ['', []];
   const previous = planets[index - 1]?.[0];
   const next = planets[index + 1]?.[0];
   const { overscroll } = scroll;
 
-  useViewportScroll(({ atTop, isHeld, overscroll: by }) => {
+  useViewportScroll(({ isHeld, overscroll: by }) => {
     setScroll({ isHeld, overscroll: by });
     if (isHeld) {
       turn.current = 0;
@@ -705,17 +720,14 @@ const PagesView: FunctionComponent<{
       if (next && by >= turnDistance) turn.current = 1;
       return;
     }
-    if (toTop.current && Math.abs(by) < 1) {
-      toTop.current = false;
-      if (!atTop) contentRef.current?.scrollTo({ top: 0 });
-    }
-    // Released past the distance: turned, the new page bouncing back.
+    // Released past the distance: turned at once, at its top (ending the
+    // old page's bounce back), the new page sliding in on from the pull.
     if (turn.current === 0) return;
     addLog(`turned to: ${String(turn.current < 0 ? previous : next)}`);
     setIndex(index + turn.current);
     setTurned(turn.current < 0 ? 'previous' : 'next');
     turn.current = 0;
-    toTop.current = true;
+    contentRef.current?.scrollTo({ top: 0 });
   });
 
   return (
@@ -744,6 +756,7 @@ const PagesView: FunctionComponent<{
           <Viewport.Overscroll
             className="viewport-demo-pull"
             data-armed={overscroll <= -turnDistance ? '' : undefined}
+            data-released={scroll.isHeld ? undefined : ''}
           >
             <Symbol
               className="viewport-demo-pull-arrow"
@@ -756,6 +769,7 @@ const PagesView: FunctionComponent<{
           <Viewport.Overscroll
             className="viewport-demo-pull"
             data-armed={overscroll >= turnDistance ? '' : undefined}
+            data-released={scroll.isHeld ? undefined : ''}
             edge="block-end"
           >
             <Symbol
@@ -785,7 +799,9 @@ const PagesView: FunctionComponent<{
               <List.Group>
                 {facts.map((fact) => (
                   <List.Item key={fact}>
-                    <List.Title>{fact}</List.Title>
+                    <List.Content>
+                      <List.Title>{fact}</List.Title>
+                    </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
@@ -841,11 +857,15 @@ const Selection: FunctionComponent = () => {
                     key={name}
                     onClick={forwardClick('[role=checkbox]')}
                   >
-                    <List.Checkbox
-                      aria-label={name}
-                      value={name}
-                    />
-                    <List.Title>{name}</List.Title>
+                    <List.Leading>
+                      <List.Checkbox
+                        aria-label={name}
+                        value={name}
+                      />
+                    </List.Leading>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
                   </List.Item>
                 ))}
               </CheckboxGroup>

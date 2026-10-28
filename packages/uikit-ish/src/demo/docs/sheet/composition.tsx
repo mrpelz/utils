@@ -207,12 +207,14 @@ const Detents: FunctionComponent = () => {
                   <List.Group>
                     {['First Name', 'Last Name', 'Company'].map((order) => (
                       <List.Item key={order}>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => addLog(`sort: ${order}`)}
-                        >
-                          {order}
-                        </List.Title>
+                        <List.Content>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => addLog(`sort: ${order}`)}
+                          >
+                            {order}
+                          </List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -257,7 +259,9 @@ const Detents: FunctionComponent = () => {
                   <List.Group>
                     {names.map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -344,13 +348,15 @@ const CancelDone: FunctionComponent = () => {
                 <List.Section>
                   <List.Group>
                     <TextField.Root render={<List.Item />}>
-                      <TextField.Control
-                        aria-label="Name"
-                        placeholder="Name"
-                        value={name}
-                        onValueChange={setName}
-                      />
-                      <TextField.Clear />
+                      <List.Trailing>
+                        <TextField.Control
+                          aria-label="Name"
+                          placeholder="Name"
+                          value={name}
+                          onValueChange={setName}
+                        />
+                        <TextField.Clear />
+                      </List.Trailing>
                     </TextField.Root>
                   </List.Group>
                   <List.Footer>
@@ -438,7 +444,9 @@ const WithoutAGrabber: FunctionComponent = () => {
                   <List.Group>
                     {['Unread', 'Flagged', 'With Attachments'].map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -545,13 +553,17 @@ const NavigationInside: FunctionComponent = () => {
                             <List.Group>
                               {pages[key]?.children.map((child) => (
                                 <List.Item key={child}>
-                                  <List.Title
-                                    render={<button type="button" />}
-                                    onClick={() => push(child)}
-                                  >
-                                    {pages[child]?.title}
-                                  </List.Title>
-                                  <List.DrillIn />
+                                  <List.Content>
+                                    <List.Title
+                                      render={<button type="button" />}
+                                      onClick={() => push(child)}
+                                    >
+                                      {pages[child]?.title}
+                                    </List.Title>
+                                  </List.Content>
+                                  <List.Trailing>
+                                    <List.DrillIn />
+                                  </List.Trailing>
                                 </List.Item>
                               ))}
                             </List.Group>
@@ -632,14 +644,22 @@ const FormSheet: FunctionComponent = () => {
                 <List.Section>
                   <List.Group>
                     <TextField.Root render={<List.Item />}>
-                      <TextField.Label>Name</TextField.Label>
-                      <TextField.Control placeholder="Required" />
-                      <TextField.Clear />
+                      <List.Content>
+                        <TextField.Label>Name</TextField.Label>
+                      </List.Content>
+                      <List.Trailing>
+                        <TextField.Control placeholder="Required" />
+                        <TextField.Clear />
+                      </List.Trailing>
                     </TextField.Root>
                     <TextField.Root render={<List.Item />}>
-                      <TextField.Label>Phone</TextField.Label>
-                      <TextField.Control type="tel" />
-                      <TextField.Clear />
+                      <List.Content>
+                        <TextField.Label>Phone</TextField.Label>
+                      </List.Content>
+                      <List.Trailing>
+                        <TextField.Control type="tel" />
+                        <TextField.Clear />
+                      </List.Trailing>
                     </TextField.Root>
                   </List.Group>
                 </List.Section>

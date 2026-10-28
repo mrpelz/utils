@@ -271,22 +271,30 @@ const Adaptive: FunctionComponent = () => {
                           <List.Group>
                             {rows.map(([value, rowTitle, icon]) => (
                               <List.Item key={value}>
-                                <List.Image variant="symbol">
-                                  <Symbol icon={icon} />
-                                </List.Image>
-                                {/* (Chosen: its drawer closes.) */}
-                                <List.Title
-                                  render={
-                                    <Drawer.Close {...drawer.propsClose} />
-                                  }
-                                  onClick={() => {
-                                    addLog(`select: ${value}`);
-                                    setSelected(value);
-                                  }}
-                                >
-                                  {rowTitle}
-                                </List.Title>
-                                {selected === value ? <List.Checkmark /> : null}
+                                <List.Leading>
+                                  <List.Image variant="symbol">
+                                    <Symbol icon={icon} />
+                                  </List.Image>
+                                </List.Leading>
+                                <List.Content>
+                                  {/* (Chosen: its drawer closes.) */}
+                                  <List.Title
+                                    render={
+                                      <Drawer.Close {...drawer.propsClose} />
+                                    }
+                                    onClick={() => {
+                                      addLog(`select: ${value}`);
+                                      setSelected(value);
+                                    }}
+                                  >
+                                    {rowTitle}
+                                  </List.Title>
+                                </List.Content>
+                                <List.Trailing>
+                                  {selected === value ? (
+                                    <List.Checkmark />
+                                  ) : null}
+                                </List.Trailing>
                               </List.Item>
                             ))}
                           </List.Group>
@@ -324,19 +332,25 @@ const Adaptive: FunctionComponent = () => {
                         <List.Group>
                           {rows.map(([value, rowTitle, icon]) => (
                             <List.Item key={value}>
-                              <List.Image variant="symbol">
-                                <Symbol icon={icon} />
-                              </List.Image>
-                              <List.Title
-                                render={<button type="button" />}
-                                onClick={() => {
-                                  addLog(`select: ${value}`);
-                                  setSelected(value);
-                                }}
-                              >
-                                {rowTitle}
-                              </List.Title>
-                              {selected === value ? <List.Checkmark /> : null}
+                              <List.Leading>
+                                <List.Image variant="symbol">
+                                  <Symbol icon={icon} />
+                                </List.Image>
+                              </List.Leading>
+                              <List.Content>
+                                <List.Title
+                                  render={<button type="button" />}
+                                  onClick={() => {
+                                    addLog(`select: ${value}`);
+                                    setSelected(value);
+                                  }}
+                                >
+                                  {rowTitle}
+                                </List.Title>
+                              </List.Content>
+                              <List.Trailing>
+                                {selected === value ? <List.Checkmark /> : null}
+                              </List.Trailing>
                             </List.Item>
                           ))}
                         </List.Group>
@@ -381,7 +395,9 @@ const Adaptive: FunctionComponent = () => {
                     <List.Group>
                       {names.map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -480,22 +496,28 @@ const Inspector: FunctionComponent = () => {
                         <List.Group>
                           {rows.map(([value, rowTitle, icon]) => (
                             <List.Item key={value}>
-                              <List.Image variant="symbol">
-                                <Symbol icon={icon} />
-                              </List.Image>
-                              {/* (Chosen: its drawer closes.) */}
-                              <List.Title
-                                render={
-                                  <Drawer.Close {...mailboxes.propsClose} />
-                                }
-                                onClick={() => {
-                                  addLog(`mailbox: ${value}`);
-                                  setMailbox(value);
-                                }}
-                              >
-                                {rowTitle}
-                              </List.Title>
-                              {mailbox === value ? <List.Checkmark /> : null}
+                              <List.Leading>
+                                <List.Image variant="symbol">
+                                  <Symbol icon={icon} />
+                                </List.Image>
+                              </List.Leading>
+                              <List.Content>
+                                {/* (Chosen: its drawer closes.) */}
+                                <List.Title
+                                  render={
+                                    <Drawer.Close {...mailboxes.propsClose} />
+                                  }
+                                  onClick={() => {
+                                    addLog(`mailbox: ${value}`);
+                                    setMailbox(value);
+                                  }}
+                                >
+                                  {rowTitle}
+                                </List.Title>
+                              </List.Content>
+                              <List.Trailing>
+                                {mailbox === value ? <List.Checkmark /> : null}
+                              </List.Trailing>
                             </List.Item>
                           ))}
                         </List.Group>
@@ -548,7 +570,9 @@ const Inspector: FunctionComponent = () => {
                     <List.Group>
                       {names.map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -585,12 +609,20 @@ const Inspector: FunctionComponent = () => {
                     <List.Section>
                       <List.Group>
                         <List.Item>
-                          <List.Title>Mailbox</List.Title>
-                          <List.Detail>{rowTitles[mailbox]}</List.Detail>
+                          <List.Content>
+                            <List.Title>Mailbox</List.Title>
+                          </List.Content>
+                          <List.Trailing>
+                            <List.Detail>{rowTitles[mailbox]}</List.Detail>
+                          </List.Trailing>
                         </List.Item>
                         <List.Item>
-                          <List.Title>Messages</List.Title>
-                          <List.Detail>{names.length}</List.Detail>
+                          <List.Content>
+                            <List.Title>Messages</List.Title>
+                          </List.Content>
+                          <List.Trailing>
+                            <List.Detail>{names.length}</List.Detail>
+                          </List.Trailing>
                         </List.Item>
                       </List.Group>
                     </List.Section>

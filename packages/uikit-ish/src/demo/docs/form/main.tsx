@@ -127,87 +127,119 @@ export const FormDemo: FunctionComponent = () => {
                 name="name"
                 render={<List.Item />}
               >
-                <TextField.Label>Name</TextField.Label>
-                <TextField.Control
-                  required
-                  autoComplete="name"
-                  placeholder="Name"
-                />
-                <TextField.Clear />
-                <TextField.Description>
-                  As shown to others.
-                </TextField.Description>
-                <TextField.Error>Please enter a name.</TextField.Error>
+                <List.Content>
+                  <TextField.Label>Name</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control
+                    required
+                    autoComplete="name"
+                    placeholder="Name"
+                  />
+                  <TextField.Clear />
+                </List.Trailing>
+                <List.Below>
+                  <TextField.Description>
+                    As shown to others.
+                  </TextField.Description>
+                  <TextField.Error>Please enter a name.</TextField.Error>
+                </List.Below>
               </TextField.Root>
               <TextField.Root
                 name="email"
                 render={<List.Item />}
               >
-                <TextField.Label>Email</TextField.Label>
-                <TextField.Control
-                  autoComplete="email"
-                  placeholder="Email"
-                  type="email"
-                />
-                <TextField.Clear />
-                <TextField.Error>
-                  Please enter an email address.
-                </TextField.Error>
-                {/* A server's error (see the form's `errors`). */}
-                <TextField.Error match="customError" />
+                <List.Content>
+                  <TextField.Label>Email</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control
+                    autoComplete="email"
+                    placeholder="Email"
+                    type="email"
+                  />
+                  <TextField.Clear />
+                </List.Trailing>
+                <List.Below>
+                  <TextField.Error>
+                    Please enter an email address.
+                  </TextField.Error>
+                  {/* A server's error (see the form's `errors`). */}
+                  <TextField.Error match="customError" />
+                </List.Below>
               </TextField.Root>
               <TextField.Root
                 name="phone"
                 render={<List.Item />}
               >
-                <TextField.Label>Phone</TextField.Label>
-                <TextField.Control
-                  autoComplete="tel"
-                  placeholder="Phone"
-                  type="tel"
-                />
-                <TextField.Clear />
+                <List.Content>
+                  <TextField.Label>Phone</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control
+                    autoComplete="tel"
+                    placeholder="Phone"
+                    type="tel"
+                  />
+                  <TextField.Clear />
+                </List.Trailing>
               </TextField.Root>
               <TextField.Root
                 name="website"
                 render={<List.Item />}
               >
-                <TextField.Label>Website</TextField.Label>
-                <TextField.Control
-                  autoComplete="url"
-                  placeholder="Website"
-                  type="url"
-                />
-                <TextField.Clear />
+                <List.Content>
+                  <TextField.Label>Website</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control
+                    autoComplete="url"
+                    placeholder="Website"
+                    type="url"
+                  />
+                  <TextField.Clear />
+                </List.Trailing>
               </TextField.Root>
               <TextField.Root
                 name="age"
                 render={<List.Item />}
               >
-                <TextField.Label>Age</TextField.Label>
-                <TextField.Control
-                  inputMode="numeric"
-                  max={130}
-                  min={0}
-                  placeholder="Age"
-                  type="number"
-                />
-                <TextField.Clear />
-                <TextField.Error>Between 0 and 130.</TextField.Error>
+                <List.Content>
+                  <TextField.Label>Age</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control
+                    inputMode="numeric"
+                    max={130}
+                    min={0}
+                    placeholder="Age"
+                    type="number"
+                  />
+                  <TextField.Clear />
+                </List.Trailing>
+                <List.Below>
+                  <TextField.Error>Between 0 and 130.</TextField.Error>
+                </List.Below>
               </TextField.Root>
               <TextField.Root
                 name="password"
                 render={<List.Item />}
               >
-                <TextField.Label>Password</TextField.Label>
-                <TextField.Control
-                  autoComplete="new-password"
-                  minLength={8}
-                  placeholder="Password"
-                  type="password"
-                />
-                <TextField.Clear />
-                <TextField.Error>At least 8 characters.</TextField.Error>
+                <List.Content>
+                  <TextField.Label>Password</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control
+                    autoComplete="new-password"
+                    minLength={8}
+                    placeholder="Password"
+                    type="password"
+                  />
+                  <TextField.Clear />
+                </List.Trailing>
+                <List.Below>
+                  <TextField.Error>At least 8 characters.</TextField.Error>
+                </List.Below>
               </TextField.Root>
               {/* A date: the date picker (its value, as an ISO date, in its
                     hidden control: the field's by name). */}
@@ -215,16 +247,20 @@ export const FormDemo: FunctionComponent = () => {
                 name="birthday"
                 render={<List.Item />}
               >
-                <List.Title>Birthday</List.Title>
-                <DatePicker.Root
-                  max={new Date()}
-                  popoverAlign="end"
-                  value={birthday}
-                  onValueChange={(next: Date) => {
-                    addLog(`birthday: ${next.toLocaleDateString()}`);
-                    setBirthday(next);
-                  }}
-                />
+                <List.Content>
+                  <List.Title>Birthday</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <DatePicker.Root
+                    max={new Date()}
+                    popoverAlign="end"
+                    value={birthday}
+                    onValueChange={(next: Date) => {
+                      addLog(`birthday: ${next.toLocaleDateString()}`);
+                      setBirthday(next);
+                    }}
+                  />
+                </List.Trailing>
               </Field.Root>
             </List.Group>
           </Fieldset.Root>
@@ -246,26 +282,38 @@ export const FormDemo: FunctionComponent = () => {
                 render={<List.Group />}
               >
                 <List.Item onClick={forwardClick('[role=checkbox]')}>
-                  <List.Checkbox
-                    aria-label="messages"
-                    value="messages"
-                    {...propsCheckbox}
-                  />
-                  <List.Title>Messages</List.Title>
+                  <List.Leading>
+                    <List.Checkbox
+                      aria-label="messages"
+                      value="messages"
+                      {...propsCheckbox}
+                    />
+                  </List.Leading>
+                  <List.Content>
+                    <List.Title>Messages</List.Title>
+                  </List.Content>
                 </List.Item>
                 <List.Item onClick={forwardClick('[role=checkbox]')}>
-                  <List.Checkbox
-                    aria-label="mentions"
-                    value="mentions"
-                  />
-                  <List.Title>Mentions</List.Title>
+                  <List.Leading>
+                    <List.Checkbox
+                      aria-label="mentions"
+                      value="mentions"
+                    />
+                  </List.Leading>
+                  <List.Content>
+                    <List.Title>Mentions</List.Title>
+                  </List.Content>
                 </List.Item>
                 <List.Item onClick={forwardClick('[role=checkbox]')}>
-                  <List.Checkbox
-                    aria-label="reminders"
-                    value="reminders"
-                  />
-                  <List.Title>Reminders</List.Title>
+                  <List.Leading>
+                    <List.Checkbox
+                      aria-label="reminders"
+                      value="reminders"
+                    />
+                  </List.Leading>
+                  <List.Content>
+                    <List.Title>Reminders</List.Title>
+                  </List.Content>
                 </List.Item>
               </CheckboxGroup>
             </Field.Root>
@@ -286,26 +334,38 @@ export const FormDemo: FunctionComponent = () => {
                 render={<List.Group />}
               >
                 <List.Item onClick={forwardClick('[role=radio]')}>
-                  <List.Radio
-                    aria-label="light"
-                    value="light"
-                    {...propsRadio}
-                  />
-                  <List.Title>Light</List.Title>
+                  <List.Leading>
+                    <List.Radio
+                      aria-label="light"
+                      value="light"
+                      {...propsRadio}
+                    />
+                  </List.Leading>
+                  <List.Content>
+                    <List.Title>Light</List.Title>
+                  </List.Content>
                 </List.Item>
                 <List.Item onClick={forwardClick('[role=radio]')}>
-                  <List.Radio
-                    aria-label="dark"
-                    value="dark"
-                  />
-                  <List.Title>Dark</List.Title>
+                  <List.Leading>
+                    <List.Radio
+                      aria-label="dark"
+                      value="dark"
+                    />
+                  </List.Leading>
+                  <List.Content>
+                    <List.Title>Dark</List.Title>
+                  </List.Content>
                 </List.Item>
                 <List.Item onClick={forwardClick('[role=radio]')}>
-                  <List.Radio
-                    aria-label="automatic"
-                    value="automatic"
-                  />
-                  <List.Title>Automatic</List.Title>
+                  <List.Leading>
+                    <List.Radio
+                      aria-label="automatic"
+                      value="automatic"
+                    />
+                  </List.Leading>
+                  <List.Content>
+                    <List.Title>Automatic</List.Title>
+                  </List.Content>
                 </List.Item>
               </RadioGroup>
             </Field.Root>

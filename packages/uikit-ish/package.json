@@ -44,7 +44,7 @@
     "monaco-editor": "0.57.0",
     "monaco-editor-webpack-plugin": "7.1.1",
     "preact-iso": "2.12.2",
-    "preact-render-to-string": "6.8.0",
+    "preact-render-to-string": "6.8.1",
     "source-map-loader": "5.0.0"
   }
 }

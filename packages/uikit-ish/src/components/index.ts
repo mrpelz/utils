@@ -93,6 +93,8 @@ export {
   type CalendarProps,
   DatePicker,
   type DatePickerChangeEventDetails,
+  type DatePickerExpandableProps,
+  DatePickerHandle,
   type DatePickerMode,
   type DatePickerOpen,
   type DatePickerOpenChangeEventDetails,
@@ -103,6 +105,7 @@ export {
   type DayHighlights,
   type HourCycle,
   type TimeRollProps,
+  useCreateDatePickerHandle,
 } from './date-picker/main.js';
 export {
   Field,
@@ -144,8 +147,11 @@ export {
   type ListButtonProps,
   type ListEditButtonProps,
   type ListEditing,
-  type ListExpandableProps,
-  type ListExpandableRootProps,
+  type ListAccordionItemProps,
+  type ListAccordionRootProps,
+  type ListCollapsibleChangeEventDetails,
+  type ListCollapsiblePanelProps,
+  type ListCollapsibleRootProps,
   type ListHeaderProps,
   type ListImageProps,
   type ListIndexProps,
@@ -162,6 +168,8 @@ export {
   type ListWhileEditing,
   useCreateSwipeActionsHandle,
 } from './list/main.js';
+export { Accordion } from './accordion/main.js';
+export { Collapsible } from './collapsible/main.js';
 
 // Menus
 export {

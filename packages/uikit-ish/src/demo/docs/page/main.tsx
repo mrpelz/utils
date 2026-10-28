@@ -73,7 +73,9 @@ export const PageDemo: FunctionComponent = () => {
                 <List.Group>
                   {Array.from({ length: 30 }, (_, index) => (
                     <List.Item key={index}>
-                      <List.Title>Row {index + 1}</List.Title>
+                      <List.Content>
+                        <List.Title>Row {index + 1}</List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>

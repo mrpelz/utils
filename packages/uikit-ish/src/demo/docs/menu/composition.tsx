@@ -54,28 +54,32 @@ const popUpCode = `const labels = { date: 'Date', name: 'Name', size: 'Size' };
 const [sort, setSort] = useState('date');
 
 <List.Item>
-  <List.Title>Sort By</List.Title>
-  <Menu.Root>
-    <Menu.Trigger render={<Button.Root />}>
-      <Button.Label>{labels[sort]}</Button.Label>
-      <Button.Icon>
-        <Symbol icon={sfChevronUpChevronDown} />
-      </Button.Icon>
-    </Menu.Trigger>
-    <Menu.Portal>
-      <Menu.Positioner align="end">
-        <Menu.Popup>
-          <Menu.RadioGroup value={sort} onValueChange={setSort}>
-            <Menu.RadioItem value="date">
-              <Menu.RadioItemIndicator />
-              <Menu.Label>Date</Menu.Label>
-            </Menu.RadioItem>
-            …
-          </Menu.RadioGroup>
-        </Menu.Popup>
-      </Menu.Positioner>
-    </Menu.Portal>
-  </Menu.Root>
+  <List.Content>
+    <List.Title>Sort By</List.Title>
+  </List.Content>
+  <List.Trailing>
+    <Menu.Root>
+      <Menu.Trigger render={<Button.Root />}>
+        <Button.Label>{labels[sort]}</Button.Label>
+        <Button.Icon>
+          <Symbol icon={sfChevronUpChevronDown} />
+        </Button.Icon>
+      </Menu.Trigger>
+      <Menu.Portal>
+        <Menu.Positioner align="end">
+          <Menu.Popup>
+            <Menu.RadioGroup value={sort} onValueChange={setSort}>
+              <Menu.RadioItem value="date">
+                <Menu.RadioItemIndicator />
+                <Menu.Label>Date</Menu.Label>
+              </Menu.RadioItem>
+              …
+            </Menu.RadioGroup>
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
+  </List.Trailing>
 </List.Item>`;
 
 const historyCode = `<Menu.Root>
@@ -166,8 +170,10 @@ const FromAToolbarButton: FunctionComponent = () => {
               <List.Section>
                 <List.Group>
                   <List.Item>
-                    <List.Title>Groceries</List.Title>
-                    <List.Subtitle>Milk, eggs, bread</List.Subtitle>
+                    <List.Content>
+                      <List.Title>Groceries</List.Title>
+                      <List.Subtitle>Milk, eggs, bread</List.Subtitle>
+                    </List.Content>
                   </List.Item>
                 </List.Group>
               </List.Section>
@@ -200,41 +206,45 @@ const APopUpButton: FunctionComponent = () => {
           <List.Section>
             <List.Group>
               <List.Item>
-                <List.Title>Sort By</List.Title>
-                <Menu.Root>
-                  <Menu.Trigger render={<Button.Root />}>
-                    <Button.Label>{sortLabels[sort]}</Button.Label>
-                    <Button.Icon>
-                      <Symbol icon={sfChevronUpChevronDown} />
-                    </Button.Icon>
-                  </Menu.Trigger>
-                  <Menu.Portal>
-                    <Menu.Positioner align="end">
-                      <Menu.Popup>
-                        <Menu.RadioGroup
-                          value={sort}
-                          onValueChange={(value: unknown) => {
-                            addLog(`sort: ${String(value)}`);
-                            setSort(String(value));
-                          }}
-                        >
-                          <Menu.RadioItem value="date">
-                            <Menu.RadioItemIndicator />
-                            <Menu.Label>Date</Menu.Label>
-                          </Menu.RadioItem>
-                          <Menu.RadioItem value="name">
-                            <Menu.RadioItemIndicator />
-                            <Menu.Label>Name</Menu.Label>
-                          </Menu.RadioItem>
-                          <Menu.RadioItem value="size">
-                            <Menu.RadioItemIndicator />
-                            <Menu.Label>Size</Menu.Label>
-                          </Menu.RadioItem>
-                        </Menu.RadioGroup>
-                      </Menu.Popup>
-                    </Menu.Positioner>
-                  </Menu.Portal>
-                </Menu.Root>
+                <List.Content>
+                  <List.Title>Sort By</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <Menu.Root>
+                    <Menu.Trigger render={<Button.Root />}>
+                      <Button.Label>{sortLabels[sort]}</Button.Label>
+                      <Button.Icon>
+                        <Symbol icon={sfChevronUpChevronDown} />
+                      </Button.Icon>
+                    </Menu.Trigger>
+                    <Menu.Portal>
+                      <Menu.Positioner align="end">
+                        <Menu.Popup>
+                          <Menu.RadioGroup
+                            value={sort}
+                            onValueChange={(value: unknown) => {
+                              addLog(`sort: ${String(value)}`);
+                              setSort(String(value));
+                            }}
+                          >
+                            <Menu.RadioItem value="date">
+                              <Menu.RadioItemIndicator />
+                              <Menu.Label>Date</Menu.Label>
+                            </Menu.RadioItem>
+                            <Menu.RadioItem value="name">
+                              <Menu.RadioItemIndicator />
+                              <Menu.Label>Name</Menu.Label>
+                            </Menu.RadioItem>
+                            <Menu.RadioItem value="size">
+                              <Menu.RadioItemIndicator />
+                              <Menu.Label>Size</Menu.Label>
+                            </Menu.RadioItem>
+                          </Menu.RadioGroup>
+                        </Menu.Popup>
+                      </Menu.Positioner>
+                    </Menu.Portal>
+                  </Menu.Root>
+                </List.Trailing>
               </List.Item>
             </List.Group>
           </List.Section>
@@ -298,8 +308,10 @@ const AHistory: FunctionComponent = () => {
               <List.Section>
                 <List.Group>
                   <List.Item>
-                    <List.Title>Kate Bell</List.Title>
-                    <List.Subtitle>Weekend photos</List.Subtitle>
+                    <List.Content>
+                      <List.Title>Kate Bell</List.Title>
+                      <List.Subtitle>Weekend photos</List.Subtitle>
+                    </List.Content>
                   </List.Item>
                 </List.Group>
               </List.Section>

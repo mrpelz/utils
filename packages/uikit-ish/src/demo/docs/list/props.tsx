@@ -2,7 +2,11 @@
 
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
 
-import { forwardClick, List } from '../../../components/index.js';
+import {
+  forwardClick,
+  List,
+  type ListCollapsibleChangeEventDetails,
+} from '../../../components/index.js';
 import { AddLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
@@ -45,8 +49,8 @@ export const editingOptions = [
 /** A row part's behavior in edit mode (see `ListWhileEditing`). */
 export const whileEditingOptions = [undefined, 'show', 'hide', 'stay'] as const;
 
-/** A row part's common options, with its edit mode behavior. */
-export const propOptionsWhileEditing = {
+/** A row slot's options: its edit mode behavior. */
+export const propOptionsSlot = {
   ...commonPropOptions,
   whileEditing: whileEditingOptions,
 };
@@ -77,7 +81,6 @@ export const propOptionsHeader = {
 export const propOptionsImage = {
   ...commonPropOptions,
   variant: [undefined, 'symbol', 'rounded', 'circular', 'fill'] as const,
-  whileEditing: whileEditingOptions,
 };
 
 export const propOptionsBlock = {
@@ -97,7 +100,6 @@ export const propOptionsCheckbox = {
   uncheckedValue: [undefined, 'unselected'] as const,
   parent: [undefined, true] as const,
   cursor: cursorOptions,
-  whileEditing: whileEditingOptions,
 };
 
 // Rendered as list parts, so without the common `render` option.
@@ -172,6 +174,7 @@ export const getPropOptionsSwipeActionsTrailing = (addLog: AddLog) => ({
     undefined,
     new MappedProp(() => addLog('overswiped'), '[log overswipe]'),
   ] as const,
+  allowSwipe: [undefined, 'all', 'reveal', 'conceal', 'none'] as const,
 });
 
 export const getPropOptionsSwipeActionsFirstLeading = (addLog: AddLog) => ({
@@ -181,6 +184,7 @@ export const getPropOptionsSwipeActionsFirstLeading = (addLog: AddLog) => ({
     undefined,
     new MappedProp(() => addLog('overswiped'), '[log overswipe]'),
   ] as const,
+  allowSwipe: [undefined, 'all', 'reveal', 'conceal', 'none'] as const,
 });
 
 export const getPropOptionsSwipeActionFirst = (addLog: AddLog) => ({
@@ -234,7 +238,6 @@ export const getPropOptionsRadioGroup = (addLog: AddLog) => ({
 export const propOptionsRadioFirst = {
   ...commonPropOptions,
   cursor: cursorOptions,
-  whileEditing: whileEditingOptions,
   disabled: [undefined, false, true] as const,
   readOnly: [undefined, false, true] as const,
 };
@@ -242,7 +245,6 @@ export const propOptionsRadioFirst = {
 export const getPropOptionsEditButtonFirst = (addLog: AddLog) => ({
   ...commonPropOptions,
   cursor: cursorOptions,
-  whileEditing: whileEditingOptions,
   disabled: [undefined, false, true] as const,
   tint: [
     'var(--color-ios-system-red)',
@@ -299,7 +301,6 @@ export const getPropOptionsTitleFirst = (addLog: AddLog) => ({
 export const getPropOptionsAccessory = (addLog: AddLog) => ({
   ...commonPropOptions,
   cursor: cursorOptions,
-  whileEditing: whileEditingOptions,
   onClick: [logClick(addLog, 'accessory'), undefined] as const,
   render: [
     new MappedProp(<button type="button" />, '[<button />]'),
@@ -311,7 +312,6 @@ export const getPropOptionsAccessory = (addLog: AddLog) => ({
 export const getPropOptionsAction = (addLog: AddLog) => ({
   ...commonPropOptions,
   cursor: cursorOptions,
-  whileEditing: whileEditingOptions,
   disabled: [undefined, false, true] as const,
   onClick: [logClick(addLog, 'action'), undefined] as const,
   onSecondaryClick: [undefined, logSecondaryClick(addLog, 'action')] as const,
@@ -328,7 +328,6 @@ export const getPropOptionsButton = (addLog: AddLog) => ({
 
 export const getPropOptionsEditButton = (addLog: AddLog) => ({
   ...commonPropOptions,
-  whileEditing: whileEditingOptions,
   cursor: cursorOptions,
   disabled: [undefined, false, true] as const,
   tint: [
@@ -368,24 +367,6 @@ export const getPropOptionsSwipeActionOutermost = (addLog: AddLog) => ({
   onSecondaryClick: [
     undefined,
     logSecondaryClick(addLog, 'swipe action'),
-  ] as const,
-});
-
-export const propOptionsExpandable = {
-  ...commonPropOptions,
-  open: [undefined, false, true] as const,
-};
-
-/** `List.Expandable` in the guide's view: a row's props too, logged. */
-export const getPropOptionsGuideExpandable = (addLog: AddLog) => ({
-  ...propOptionsExpandable,
-  selected: [undefined, false, true] as const,
-  level: [undefined, 1, 2] as const,
-  cursor: cursorOptions,
-  onClick: [undefined, logClick(addLog, 'expandable')] as const,
-  onSecondaryClick: [
-    undefined,
-    logSecondaryClick(addLog, 'expandable'),
   ] as const,
 });
 
@@ -442,19 +423,48 @@ export const getPropOptionsItem = (addLog: AddLog) => ({
   editing: editingOptions,
 });
 
-export const getPropOptionsExpandableRoot = (addLog: AddLog) => ({
+export const getPropOptionsListCollapsibleRoot = (addLog: AddLog) => ({
   defaultOpen: [true, false, undefined] as const,
   open: [undefined, false, true] as const,
+  disabled: [undefined, false, true] as const,
   onOpenChange: [
     new MappedProp(
-      (isOpen: boolean) => addLog(`open change: ${String(isOpen)}`),
+      (isOpen: boolean, { reason }: ListCollapsibleChangeEventDetails) =>
+        addLog(`open change: ${String(isOpen)} (${reason})`),
       '[log change]',
     ),
     undefined,
   ] as const,
 });
 
-export const getPropOptionsExpandableTrigger = (addLog: AddLog) => ({
+export const getPropOptionsListAccordionRoot = (addLog: AddLog) => ({
+  defaultValue: [['repeat'], [], undefined] as const,
+  value: [undefined, [], ['repeat'], ['alert']] as const,
+  multiple: [undefined, false, true] as const,
+  disabled: [undefined, false, true] as const,
+  onValueChange: [
+    new MappedProp(
+      (value: unknown[], { reason }: ListCollapsibleChangeEventDetails) =>
+        addLog(`value change: ${JSON.stringify(value)} (${reason})`),
+      '[log change]',
+    ),
+    undefined,
+  ] as const,
+});
+
+export const getPropOptionsListAccordionItem = (addLog: AddLog) => ({
+  disabled: [undefined, false, true] as const,
+  onOpenChange: [
+    undefined,
+    new MappedProp(
+      (isOpen: boolean, { reason }: ListCollapsibleChangeEventDetails) =>
+        addLog(`repeat open change: ${String(isOpen)} (${reason})`),
+      '[log change]',
+    ),
+  ] as const,
+});
+
+export const getPropOptionsListCollapsibleTrigger = (addLog: AddLog) => ({
   ...propOptionsCursor,
   onClick: [undefined, logClick(addLog, 'trigger')] as const,
   onSecondaryClick: [undefined, logSecondaryClick(addLog, 'trigger')] as const,

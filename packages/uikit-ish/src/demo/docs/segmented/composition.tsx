@@ -150,7 +150,9 @@ const ContentViews: FunctionComponent = () => {
               <List.Group>
                 {(show === 'all' ? names : favorites).map((name) => (
                   <List.Item key={name}>
-                    <List.Title>{name}</List.Title>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
@@ -214,16 +216,20 @@ const InHeader: FunctionComponent = () => {
                     .filter((call) => filter === 'all' || call[2])
                     .map(([name, kind, isMissed], index) => (
                       <List.Item key={index}>
-                        <List.Title
-                          style={
-                            isMissed
-                              ? { color: 'var(--color-ios-system-red)' }
-                              : undefined
-                          }
-                        >
-                          {name}
-                        </List.Title>
-                        <List.Detail>{kind}</List.Detail>
+                        <List.Content>
+                          <List.Title
+                            style={
+                              isMissed
+                                ? { color: 'var(--color-ios-system-red)' }
+                                : undefined
+                            }
+                          >
+                            {name}
+                          </List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <List.Detail>{kind}</List.Detail>
+                        </List.Trailing>
                       </List.Item>
                     ))}
                 </List.Group>

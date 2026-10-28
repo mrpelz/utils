@@ -8,6 +8,7 @@ import { useState } from 'react';
 /** What a row's swipe actions on one side do for their handle. */
 export type SwipeActionsTarget = {
   close: () => void;
+  focus: () => void;
   isOpen: () => boolean;
   open: () => void;
 };
@@ -40,6 +41,14 @@ export class ListSwipeActionsHandle {
   /** Closes them (the row swiped back). */
   close(): void {
     this.#target?.close();
+  }
+
+  /**
+   * Focuses the first of them, open (see `SwipeActionsTrigger`).
+   * @internal
+   */
+  focus(): void {
+    this.#target?.focus();
   }
 
   /** Opens them (the row swiped to show them; another row's close). */

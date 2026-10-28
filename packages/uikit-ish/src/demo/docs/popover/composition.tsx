@@ -50,58 +50,70 @@ const InAListRow: FunctionComponent = () => {
         <List.Section>
           <List.Group>
             <List.Item>
-              <List.Title>Home Network</List.Title>
-              <Popover.Root
-                onOpenChange={(isOpen: boolean) =>
-                  addLog(`details: ${String(isOpen)}`)
-                }
-              >
-                <Popover.Trigger
-                  aria-label="Details"
-                  render={
-                    <Button.Root
-                      shape="circle"
-                      variant="borderless"
-                    />
+              <List.Content>
+                <List.Title>Home Network</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <Popover.Root
+                  onOpenChange={(isOpen: boolean) =>
+                    addLog(`details: ${String(isOpen)}`)
                   }
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfICircle} />
-                  </Button.Icon>
-                </Popover.Trigger>
-                <Popover.Portal>
-                  <Popover.Positioner align="end">
-                    <Popover.Popup className="popover-demo-popup">
-                      <Popover.Arrow />
-                      <Popover.Header>
-                        <Toolbar.Root placement="block-start">
-                          <Toolbar.Title>
-                            <Popover.Title render={<span />}>
-                              Home Network
-                            </Popover.Title>
-                          </Toolbar.Title>
-                        </Toolbar.Root>
-                      </Popover.Header>
-                      <Popover.Body>
-                        <List.Root>
-                          <List.Section>
-                            <List.Group>
-                              <List.Item>
-                                <List.Title>IP Address</List.Title>
-                                <List.Detail>192.168.1.24</List.Detail>
-                              </List.Item>
-                              <List.Item>
-                                <List.Title>Router</List.Title>
-                                <List.Detail>192.168.1.1</List.Detail>
-                              </List.Item>
-                            </List.Group>
-                          </List.Section>
-                        </List.Root>
-                      </Popover.Body>
-                    </Popover.Popup>
-                  </Popover.Positioner>
-                </Popover.Portal>
-              </Popover.Root>
+                  <Popover.Trigger
+                    aria-label="Details"
+                    render={
+                      <Button.Root
+                        shape="circle"
+                        variant="borderless"
+                      />
+                    }
+                  >
+                    <Button.Icon>
+                      <Symbol icon={sfICircle} />
+                    </Button.Icon>
+                  </Popover.Trigger>
+                  <Popover.Portal>
+                    <Popover.Positioner align="end">
+                      <Popover.Popup className="popover-demo-popup">
+                        <Popover.Arrow />
+                        <Popover.Header>
+                          <Toolbar.Root placement="block-start">
+                            <Toolbar.Title>
+                              <Popover.Title render={<span />}>
+                                Home Network
+                              </Popover.Title>
+                            </Toolbar.Title>
+                          </Toolbar.Root>
+                        </Popover.Header>
+                        <Popover.Body>
+                          <List.Root>
+                            <List.Section>
+                              <List.Group>
+                                <List.Item>
+                                  <List.Content>
+                                    <List.Title>IP Address</List.Title>
+                                  </List.Content>
+                                  <List.Trailing>
+                                    <List.Detail>192.168.1.24</List.Detail>
+                                  </List.Trailing>
+                                </List.Item>
+                                <List.Item>
+                                  <List.Content>
+                                    <List.Title>Router</List.Title>
+                                  </List.Content>
+                                  <List.Trailing>
+                                    <List.Detail>192.168.1.1</List.Detail>
+                                  </List.Trailing>
+                                </List.Item>
+                              </List.Group>
+                            </List.Section>
+                          </List.Root>
+                        </Popover.Body>
+                      </Popover.Popup>
+                    </Popover.Positioner>
+                  </Popover.Portal>
+                </Popover.Root>
+              </List.Trailing>
             </List.Item>
           </List.Group>
         </List.Section>
@@ -220,19 +232,27 @@ const ASheetOnIPhone: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                   </List.Section>
@@ -288,19 +308,27 @@ const ASheetOnIPhone: FunctionComponent = () => {
                     <List.Section>
                       <List.Group>
                         <List.Item onClick={forwardClick('[role=switch]')}>
-                          <List.Title>Show Completed</List.Title>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
-                          </Switch.Root>
+                          <List.Content>
+                            <List.Title>Show Completed</List.Title>
+                          </List.Content>
+                          <List.Trailing>
+                            <Switch.Root aria-label="Show completed">
+                              <Switch.Thumb />
+                            </Switch.Root>
+                          </List.Trailing>
                         </List.Item>
                         <List.Item onClick={forwardClick('[role=switch]')}>
-                          <List.Title>Show Notes</List.Title>
-                          <Switch.Root
-                            defaultChecked
-                            aria-label="Show notes"
-                          >
-                            <Switch.Thumb />
-                          </Switch.Root>
+                          <List.Content>
+                            <List.Title>Show Notes</List.Title>
+                          </List.Content>
+                          <List.Trailing>
+                            <Switch.Root
+                              defaultChecked
+                              aria-label="Show notes"
+                            >
+                              <Switch.Thumb />
+                            </Switch.Root>
+                          </List.Trailing>
                         </List.Item>
                       </List.Group>
                     </List.Section>
@@ -361,26 +389,34 @@ const FromAToolbarButton: FunctionComponent = () => {
                         <List.Section>
                           <List.Group>
                             <List.Item onClick={forwardClick('[role=switch]')}>
-                              <List.Title>Unread</List.Title>
-                              <Switch.Root
-                                aria-label="Unread"
-                                onCheckedChange={(isChecked: boolean) =>
-                                  addLog(`unread: ${String(isChecked)}`)
-                                }
-                              >
-                                <Switch.Thumb />
-                              </Switch.Root>
+                              <List.Content>
+                                <List.Title>Unread</List.Title>
+                              </List.Content>
+                              <List.Trailing>
+                                <Switch.Root
+                                  aria-label="Unread"
+                                  onCheckedChange={(isChecked: boolean) =>
+                                    addLog(`unread: ${String(isChecked)}`)
+                                  }
+                                >
+                                  <Switch.Thumb />
+                                </Switch.Root>
+                              </List.Trailing>
                             </List.Item>
                             <List.Item onClick={forwardClick('[role=switch]')}>
-                              <List.Title>Flagged</List.Title>
-                              <Switch.Root
-                                aria-label="Flagged"
-                                onCheckedChange={(isChecked: boolean) =>
-                                  addLog(`flagged: ${String(isChecked)}`)
-                                }
-                              >
-                                <Switch.Thumb />
-                              </Switch.Root>
+                              <List.Content>
+                                <List.Title>Flagged</List.Title>
+                              </List.Content>
+                              <List.Trailing>
+                                <Switch.Root
+                                  aria-label="Flagged"
+                                  onCheckedChange={(isChecked: boolean) =>
+                                    addLog(`flagged: ${String(isChecked)}`)
+                                  }
+                                >
+                                  <Switch.Thumb />
+                                </Switch.Root>
+                              </List.Trailing>
                             </List.Item>
                           </List.Group>
                         </List.Section>
@@ -441,12 +477,14 @@ const ScrollingContent: FunctionComponent = () => {
                     <List.Group>
                       {names.map((name) => (
                         <List.Item key={name}>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => addLog(`share with ${name}`)}
-                          >
-                            {name}
-                          </List.Title>
+                          <List.Content>
+                            <List.Title
+                              render={<button type="button" />}
+                              onClick={() => addLog(`share with ${name}`)}
+                            >
+                              {name}
+                            </List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>

@@ -25,20 +25,26 @@ import {
 const listRowCode = `const [guests, setGuests] = useState(2);
 
 <List.Item>
-  <List.Title>Guests</List.Title>
-  <List.Detail>{guests}</List.Detail>
-  <Stepper.Root
-    max={8}
-    min={1}
-    value={guests}
-    onValueChange={(value) => setGuests(value ?? 1)}
-  >
-    <Stepper.Group>
-      <Stepper.Input aria-label="Guests" />
-      <Stepper.Decrement />
-      <Stepper.Increment />
-    </Stepper.Group>
-  </Stepper.Root>
+  <List.Content>
+    <List.Title>Guests</List.Title>
+  </List.Content>
+  <List.Trailing>
+    <List.Detail>{guests}</List.Detail>
+  </List.Trailing>
+  <List.Trailing>
+    <Stepper.Root
+      max={8}
+      min={1}
+      value={guests}
+      onValueChange={(value) => setGuests(value ?? 1)}
+    >
+      <Stepper.Group>
+        <Stepper.Input aria-label="Guests" />
+        <Stepper.Decrement />
+        <Stepper.Increment />
+      </Stepper.Group>
+    </Stepper.Root>
+  </List.Trailing>
 </List.Item>`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
@@ -61,42 +67,58 @@ const InListRows: FunctionComponent = () => {
         <List.Section>
           <List.Group>
             <List.Item>
-              <List.Title>Guests</List.Title>
-              <List.Detail className="stepper-demo-value">{guests}</List.Detail>
-              <Stepper.Root
-                max={8}
-                min={1}
-                value={guests}
-                onValueChange={(value: number | null) => {
-                  addLog(`guests: ${String(value)}`);
-                  setGuests(value ?? 1);
-                }}
-              >
-                <Stepper.Group>
-                  <Stepper.Input aria-label="Guests" />
-                  <Stepper.Decrement />
-                  <Stepper.Increment />
-                </Stepper.Group>
-              </Stepper.Root>
+              <List.Content>
+                <List.Title>Guests</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail className="stepper-demo-value">
+                  {guests}
+                </List.Detail>
+              </List.Trailing>
+              <List.Trailing>
+                <Stepper.Root
+                  max={8}
+                  min={1}
+                  value={guests}
+                  onValueChange={(value: number | null) => {
+                    addLog(`guests: ${String(value)}`);
+                    setGuests(value ?? 1);
+                  }}
+                >
+                  <Stepper.Group>
+                    <Stepper.Input aria-label="Guests" />
+                    <Stepper.Decrement />
+                    <Stepper.Increment />
+                  </Stepper.Group>
+                </Stepper.Root>
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.Title>Nights</List.Title>
-              <List.Detail className="stepper-demo-value">{nights}</List.Detail>
-              <Stepper.Root
-                max={14}
-                min={1}
-                value={nights}
-                onValueChange={(value: number | null) => {
-                  addLog(`nights: ${String(value)}`);
-                  setNights(value ?? 1);
-                }}
-              >
-                <Stepper.Group>
-                  <Stepper.Input aria-label="Nights" />
-                  <Stepper.Decrement />
-                  <Stepper.Increment />
-                </Stepper.Group>
-              </Stepper.Root>
+              <List.Content>
+                <List.Title>Nights</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail className="stepper-demo-value">
+                  {nights}
+                </List.Detail>
+              </List.Trailing>
+              <List.Trailing>
+                <Stepper.Root
+                  max={14}
+                  min={1}
+                  value={nights}
+                  onValueChange={(value: number | null) => {
+                    addLog(`nights: ${String(value)}`);
+                    setNights(value ?? 1);
+                  }}
+                >
+                  <Stepper.Group>
+                    <Stepper.Input aria-label="Nights" />
+                    <Stepper.Decrement />
+                    <Stepper.Increment />
+                  </Stepper.Group>
+                </Stepper.Root>
+              </List.Trailing>
             </List.Item>
           </List.Group>
         </List.Section>
@@ -179,23 +201,29 @@ const InForms: FunctionComponent = () => {
                 name="quantity"
                 render={<List.Item />}
               >
-                <List.Title>Quantity</List.Title>
-                <List.Detail className="stepper-demo-value">
-                  {quantity ?? '–'}
-                </List.Detail>
-                <Stepper.Root
-                  required
-                  max={9}
-                  min={1}
-                  value={quantity}
-                  onValueChange={(value: number | null) => setQuantity(value)}
-                >
-                  <Stepper.Group>
-                    <Stepper.Input aria-label="Quantity" />
-                    <Stepper.Decrement />
-                    <Stepper.Increment />
-                  </Stepper.Group>
-                </Stepper.Root>
+                <List.Content>
+                  <List.Title>Quantity</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Detail className="stepper-demo-value">
+                    {quantity ?? '–'}
+                  </List.Detail>
+                </List.Trailing>
+                <List.Trailing>
+                  <Stepper.Root
+                    required
+                    max={9}
+                    min={1}
+                    value={quantity}
+                    onValueChange={(value: number | null) => setQuantity(value)}
+                  >
+                    <Stepper.Group>
+                      <Stepper.Input aria-label="Quantity" />
+                      <Stepper.Decrement />
+                      <Stepper.Increment />
+                    </Stepper.Group>
+                  </Stepper.Root>
+                </List.Trailing>
               </Field.Root>
             </List.Group>
           </Fieldset.Root>

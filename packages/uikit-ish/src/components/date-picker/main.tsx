@@ -24,18 +24,22 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react';
 
 import { Button, ButtonRootProps } from '../button/main.js';
+import { List, useCollapsible, useExpandedOpen } from '../list/main.js';
 import { Popover, type PopoverAlign } from '../popover/main.js';
 import { Roll, type RollChangeEventDetails, RollValue } from '../roll/main.js';
 import { cn } from '../utils/main.js';
+import { createHandle } from './handle.js';
 import type {
   CalendarFooter,
   CalendarInternalProps,
   CalendarMessageProps,
   CalendarProps,
   DatePickerChangeEventDetails,
+  DatePickerExpandableProps,
   DatePickerMode,
   DatePickerOpen,
   DatePickerOpenChangeEventDetails,
@@ -54,6 +58,7 @@ export type {
   CalendarMessageProps,
   CalendarProps,
   DatePickerChangeEventDetails,
+  DatePickerExpandableProps,
   DatePickerMode,
   DatePickerOpen,
   DatePickerOpenChangeEventDetails,
@@ -319,10 +324,23 @@ const timeFormat = (locale?: string, cycle?: HourCycle) => {
 const TimeRoll: FunctionComponent<TimeRollProps> = ({
   hourCycle: cycle,
   locale,
+  max,
+  min,
   onValueChange: onChange,
   value,
 }) => {
   const date = value ?? new Date();
+  // Its day at a time, and whether that's beyond the limits.
+  const at = (hour: number, minute: number) => {
+    const next = new Date(date);
+    next.setHours(hour, minute, 0, 0);
+    return next;
+  };
+  const isBeyond = (time: Date) =>
+    (min !== undefined && time < min) || (max !== undefined && time > max);
+  // Some of the hours' minutes (from, to) within the limits.
+  const isWithin = (from: Date, to: Date) =>
+    (min === undefined || to >= min) && (max === undefined || from <= max);
   const { hourCycle, periodFirst, periods, twelve } = useMemo(
     () => timeFormat(locale, cycle),
     [cycle, locale],
@@ -347,15 +365,21 @@ const TimeRoll: FunctionComponent<TimeRollProps> = ({
   const twelveHour = hourCycle === 'h12' ? hours % 12 || 12 : hours % 12;
   const shownHour = twelve ? twelveHour : hours;
 
+  // Beyond the limits: the nearest within them (the roll moving back, as
+  // UIKit's).
   const set = (
     hour: number,
     minute: number,
     { event }: RollChangeEventDetails,
   ) => {
-    const next = new Date(date);
-    next.setHours(hour, minute, 0, 0);
+    let next = at(hour, minute);
+    if (min !== undefined && next < min) next = new Date(min);
+    if (max !== undefined && next > max) next = new Date(max);
     onChange(next, { event, reason: 'time' });
   };
+  // A shown hour's (of the shown period, with 12 hours), as 0–23.
+  const hourOf = (hour: number) =>
+    twelve ? (hour % 12) + (isPm ? 12 : 0) : hour;
 
   const period = (
     <Roll.Column
@@ -366,8 +390,18 @@ const TimeRoll: FunctionComponent<TimeRollProps> = ({
         set((hours + 12) % 24, date.getMinutes(), details);
       }}
     >
-      <Roll.Item value="am">{periods[0]}</Roll.Item>
-      <Roll.Item value="pm">{periods[1]}</Roll.Item>
+      <Roll.Item
+        disabled={!isWithin(at(0, 0), at(11, 59))}
+        value="am"
+      >
+        {periods[0]}
+      </Roll.Item>
+      <Roll.Item
+        disabled={!isWithin(at(12, 0), at(23, 59))}
+        value="pm"
+      >
+        {periods[1]}
+      </Roll.Item>
     </Roll.Column>
   );
 
@@ -380,17 +414,13 @@ const TimeRoll: FunctionComponent<TimeRollProps> = ({
         aria-label="Hours"
         value={shownHour}
         onValueChange={(next: RollValue, details: RollChangeEventDetails) => {
-          const hour = Number(next);
-          set(
-            twelve ? (hour % 12) + (isPm ? 12 : 0) : hour,
-            date.getMinutes(),
-            details,
-          );
+          set(hourOf(Number(next)), date.getMinutes(), details);
         }}
       >
         {hourValues.map((hour) => (
           <Roll.Item
             key={hour}
+            disabled={!isWithin(at(hourOf(hour), 0), at(hourOf(hour), 59))}
             value={hour}
           >
             {numbers.hour.format(hour)}
@@ -409,6 +439,7 @@ const TimeRoll: FunctionComponent<TimeRollProps> = ({
         {Array.from({ length: 60 }, (_, minute) => (
           <Roll.Item
             key={minute}
+            disabled={isBeyond(at(hours, minute))}
             value={minute}
           >
             {numbers.minute.format(minute)}
@@ -1418,6 +1449,8 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
               <TimeRoll
                 hourCycle={hourCycle}
                 locale={locale}
+                max={max}
+                min={min}
                 value={single}
                 onValueChange={changeTime}
               />
@@ -1816,6 +1849,48 @@ const ToggleButtons: FunctionComponent<{
 };
 
 /**
+ * A picker in collapsible list rows (see `List.CollapsiblePanel`): closed
+ * with them. With a handle, in a collapsible (e.g. a `List.AccordionItem`,
+ * with its row and `Expandable`): open with it, opening it, closed with it
+ * (e.g. another item opening).
+ */
+const useListSync = (
+  handle: DatePickerProps['handle'],
+  open: DatePickerOpen | null,
+  changeOpen: ReturnType<typeof usePickerOpen>[1],
+) => {
+  const isShown = useExpandedOpen();
+  const collapsible = useCollapsible();
+  const item = handle ? collapsible : undefined;
+  const isPickerOpen = open !== null;
+  const syncRef = useRef({
+    close: () => undefined as void,
+    toggleItem: () => undefined as void,
+  });
+  useLayoutEffect(() => {
+    syncRef.current = {
+      close: () => {
+        if (open === null) return;
+        changeOpen(null, { event: new Event('close'), reason: 'none' });
+      },
+      toggleItem: () => {
+        if (!item || item.isOpen === isPickerOpen) return;
+        item.setOpen(isPickerOpen, {
+          event: new Event('toggle'),
+          reason: 'none',
+        });
+      },
+    };
+  });
+  useEffect(() => {
+    if (isShown === false || item?.isOpen === false) syncRef.current.close();
+  }, [isShown, item?.isOpen]);
+  useEffect(() => {
+    syncRef.current.toggleItem();
+  }, [isPickerOpen]);
+};
+
+/**
  * A date picker (UIKit `UIDatePicker`): a date, a time or both (`mode`), or
  * a range of dates (`range`); collapsed buttons opening the calendar or the
  * time in a popover (or toggling `open`, without `popover`), or the
@@ -1846,6 +1921,28 @@ const Root: FunctionComponent<DatePickerProps> = (props) => {
   const hasTime = !props.range && mode !== 'date';
 
   const calendarProps = calendarPropsOf(props, change, range ?? single);
+
+  useListSync(props.handle, open, changeOpen);
+
+  // With a handle: its pickers, for its `Expandable`.
+  const { handle } = props;
+  useLayoutEffect(() => {
+    handle?.publish({
+      calendar: hasDate ? <CalendarPanel {...calendarProps} /> : undefined,
+      open,
+      time: hasTime ? (
+        <TimeRoll
+          hourCycle={hourCycle}
+          locale={locale}
+          max={props.max}
+          min={props.min}
+          value={single}
+          onValueChange={change}
+        />
+      ) : undefined,
+    });
+  });
+  useLayoutEffect(() => () => handle?.publish(undefined), [handle]);
 
   // With a time, by default the Time row below.
   const calendar = (
@@ -1883,8 +1980,9 @@ const Root: FunctionComponent<DatePickerProps> = (props) => {
   const dateLabel = dateLabelOf(formats.date, range, single);
   const timeLabel = single ? formats.time.format(single) : '–';
 
-  // Without popovers: buttons toggling `open` (for the app to show them).
-  if (!popover) {
+  // Without popovers: buttons toggling `open` (for the app to show them,
+  // or, with a handle, its `Expandable`).
+  if (!popover || props.handle) {
     return (
       <>
         <ToggleButtons
@@ -1914,6 +2012,8 @@ const Root: FunctionComponent<DatePickerProps> = (props) => {
           isOpen={open === 'time'}
           label={timeLabel}
           locale={locale}
+          max={props.max}
+          min={props.min}
           shape={buttonShape}
           value={single}
           onValueChange={change}
@@ -1945,8 +2045,50 @@ const Root: FunctionComponent<DatePickerProps> = (props) => {
   );
 };
 
+/**
+ * A date picker's pickers in place (see `Root` `handle`): its calendar and
+ * time roll, each in collapsible list rows (`List.CollapsiblePanel`),
+ * opened by its buttons; placed after the picker's row (as iOS's
+ * Calendar). In an `List.AccordionItem` (with its row), one of its items.
+ */
+const Expandable: FunctionComponent<DatePickerExpandableProps> = ({
+  handle,
+}) => {
+  const { calendar, open, time } = useSyncExternalStore(
+    handle.subscribe,
+    handle.getSnapshot,
+  );
+
+  return (
+    <>
+      {calendar === undefined ? null : (
+        <List.CollapsibleRoot open={open === 'date'}>
+          <List.CollapsiblePanel>
+            <List.Item>
+              <List.Span>{calendar}</List.Span>
+            </List.Item>
+          </List.CollapsiblePanel>
+        </List.CollapsibleRoot>
+      )}
+      {time === undefined ? null : (
+        <List.CollapsibleRoot open={open === 'time'}>
+          <List.CollapsiblePanel>
+            <List.Item>
+              <List.Span>{time}</List.Span>
+            </List.Item>
+          </List.CollapsiblePanel>
+        </List.CollapsibleRoot>
+      )}
+    </>
+  );
+};
+
+export { DatePickerHandle, useCreateDatePickerHandle } from './handle.js';
+
 export const DatePicker = {
   Root,
+  Expandable,
+  createHandle,
   Calendar,
   CalendarRow,
   CalendarButton,

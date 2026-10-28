@@ -148,7 +148,9 @@ const BackgroundGrouped: FunctionComponent = () => (
                   .slice(0, 5)
                   .map(({ title }) => (
                     <List.Item key={title}>
-                      <List.Title>{title}</List.Title>
+                      <List.Content>
+                        <List.Title>{title}</List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
               </List.Group>
@@ -191,7 +193,9 @@ const BackgroundPlain: FunctionComponent = () => (
               <List.Group>
                 {names.slice(0, 12).map((name) => (
                   <List.Item key={name}>
-                    <List.Title>{name}</List.Title>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
@@ -261,13 +265,17 @@ const InAStack: FunctionComponent = () => {
                       <List.Group>
                         {pages[key]?.children.map((child) => (
                           <List.Item key={child}>
-                            <List.Title
-                              render={<button type="button" />}
-                              onClick={() => push(child)}
-                            >
-                              {pages[child]?.title}
-                            </List.Title>
-                            <List.DrillIn />
+                            <List.Content>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => push(child)}
+                              >
+                                {pages[child]?.title}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              <List.DrillIn />
+                            </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
@@ -276,7 +284,9 @@ const InAStack: FunctionComponent = () => {
                       <List.Group>
                         {names.map((name) => (
                           <List.Item key={name}>
-                            <List.Title>{name}</List.Title>
+                            <List.Content>
+                              <List.Title>{name}</List.Title>
+                            </List.Content>
                           </List.Item>
                         ))}
                       </List.Group>
@@ -327,18 +337,22 @@ const InAColumn: FunctionComponent = () => {
                           key={value}
                           selected={selected === value}
                         >
-                          <List.Image variant="symbol">
-                            <Symbol icon={icon} />
-                          </List.Image>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => {
-                              addLog(`select: ${value}`);
-                              setSelected(value);
-                            }}
-                          >
-                            {rowTitle}
-                          </List.Title>
+                          <List.Leading>
+                            <List.Image variant="symbol">
+                              <Symbol icon={icon} />
+                            </List.Image>
+                          </List.Leading>
+                          <List.Content>
+                            <List.Title
+                              render={<button type="button" />}
+                              onClick={() => {
+                                addLog(`select: ${value}`);
+                                setSelected(value);
+                              }}
+                            >
+                              {rowTitle}
+                            </List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -369,7 +383,9 @@ const InAColumn: FunctionComponent = () => {
                     <List.Group>
                       {names.map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -420,7 +436,9 @@ const OverAViewport: FunctionComponent = () => {
                   <List.Group>
                     {names.map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{`Note for ${name}`}</List.Title>
+                        <List.Content>
+                          <List.Title>{`Note for ${name}`}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>

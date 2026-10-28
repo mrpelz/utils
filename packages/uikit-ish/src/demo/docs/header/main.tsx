@@ -129,7 +129,9 @@ export const HeaderDemo: FunctionComponent = () => {
                 <List.Group>
                   {Array.from({ length: 30 }, (_, index) => (
                     <List.Item key={index}>
-                      <List.Title>Message {index + 1}</List.Title>
+                      <List.Content>
+                        <List.Title>Message {index + 1}</List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
@@ -239,7 +241,9 @@ export const HeaderTitleDemo: FunctionComponent = () => {
                 <List.Group>
                   {Array.from({ length: 30 }, (_, index) => (
                     <List.Item key={index}>
-                      <List.Title>Message {index + 1}</List.Title>
+                      <List.Content>
+                        <List.Title>Message {index + 1}</List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>

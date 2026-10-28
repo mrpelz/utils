@@ -40,37 +40,51 @@ const InAListRow: FunctionComponent = () => {
         <List.Section>
           <List.Group>
             <List.Item>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-gray)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfGearshapeFill} />
-              </List.Image>
-              <List.Title
-                render={<button type="button" />}
-                onClick={() => addLog('general clicked')}
-              >
-                General
-              </List.Title>
-              <List.Detail>
-                <Badge placement="inline">1</Badge>
-              </List.Detail>
-              <List.DrillIn />
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-gray)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfGearshapeFill} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button type="button" />}
+                  onClick={() => addLog('general clicked')}
+                >
+                  General
+                </List.Title>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail>
+                  <Badge placement="inline">1</Badge>
+                </List.Detail>
+              </List.Trailing>
+              <List.Trailing>
+                <List.DrillIn />
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-red)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfBellFill} />
-              </List.Image>
-              <List.Title
-                render={<button type="button" />}
-                onClick={() => addLog('notifications clicked')}
-              >
-                Notifications
-              </List.Title>
-              <List.DrillIn />
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-red)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfBellFill} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button type="button" />}
+                  onClick={() => addLog('notifications clicked')}
+                >
+                  Notifications
+                </List.Title>
+              </List.Content>
+              <List.Trailing>
+                <List.DrillIn />
+              </List.Trailing>
             </List.Item>
           </List.Group>
         </List.Section>

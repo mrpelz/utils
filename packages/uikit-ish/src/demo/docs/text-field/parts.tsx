@@ -56,10 +56,16 @@ const RootPart: FunctionComponent = () => {
               key={elementKey}
               {...props}
             >
-              <TextField.Label>Name</TextField.Label>
-              <TextField.Control placeholder="Required" />
-              <TextField.Clear />
-              <TextField.Error />
+              <List.Content>
+                <TextField.Label>Name</TextField.Label>
+              </List.Content>
+              <List.Trailing>
+                <TextField.Control placeholder="Required" />
+                <TextField.Clear />
+              </List.Trailing>
+              <List.Below>
+                <TextField.Error />
+              </List.Below>
             </TextField.Root>
           </List.Group>
         </List.Section>
@@ -127,13 +133,19 @@ const ControlPart: FunctionComponent = () => {
         <List.Section>
           <List.Group>
             <TextField.Root render={<List.Item />}>
-              <TextField.Label>Name</TextField.Label>
-              <TextField.Control
-                key={elementKey}
-                {...props}
-              />
-              <TextField.Clear />
-              <TextField.Error />
+              <List.Content>
+                <TextField.Label>Name</TextField.Label>
+              </List.Content>
+              <List.Trailing>
+                <TextField.Control
+                  key={elementKey}
+                  {...props}
+                />
+                <TextField.Clear />
+              </List.Trailing>
+              <List.Below>
+                <TextField.Error />
+              </List.Below>
             </TextField.Root>
           </List.Group>
         </List.Section>
@@ -173,14 +185,20 @@ const DescriptionPart: FunctionComponent = () => {
         <List.Section>
           <List.Group>
             <TextField.Root render={<List.Item />}>
-              <TextField.Label>Email</TextField.Label>
-              <TextField.Control
-                placeholder="name@example.com"
-                type="email"
-              />
-              <TextField.Description {...props}>
-                Used for receipts only.
-              </TextField.Description>
+              <List.Content>
+                <TextField.Label>Email</TextField.Label>
+              </List.Content>
+              <List.Trailing>
+                <TextField.Control
+                  placeholder="name@example.com"
+                  type="email"
+                />
+              </List.Trailing>
+              <List.Below>
+                <TextField.Description {...props}>
+                  Used for receipts only.
+                </TextField.Description>
+              </List.Below>
             </TextField.Root>
           </List.Group>
         </List.Section>
@@ -217,18 +235,24 @@ const ErrorPart: FunctionComponent = () => {
               render={<List.Item />}
               validationMode="onBlur"
             >
-              <TextField.Label>Email</TextField.Label>
-              <TextField.Control
-                required
-                defaultValue="kate@"
-                type="email"
-              />
-              <TextField.Error
-                key={elementKey}
-                {...props}
-              >
-                Not an email address.
-              </TextField.Error>
+              <List.Content>
+                <TextField.Label>Email</TextField.Label>
+              </List.Content>
+              <List.Trailing>
+                <TextField.Control
+                  required
+                  defaultValue="kate@"
+                  type="email"
+                />
+              </List.Trailing>
+              <List.Below>
+                <TextField.Error
+                  key={elementKey}
+                  {...props}
+                >
+                  Not an email address.
+                </TextField.Error>
+              </List.Below>
             </TextField.Root>
           </List.Group>
         </List.Section>
@@ -262,9 +286,13 @@ const ClearPart: FunctionComponent = () => {
         <List.Section>
           <List.Group>
             <TextField.Root render={<List.Item />}>
-              <TextField.Label>Name</TextField.Label>
-              <TextField.Control defaultValue="Kate Bell" />
-              <TextField.Clear {...props} />
+              <List.Content>
+                <TextField.Label>Name</TextField.Label>
+              </List.Content>
+              <List.Trailing>
+                <TextField.Control defaultValue="Kate Bell" />
+                <TextField.Clear {...props} />
+              </List.Trailing>
             </TextField.Root>
           </List.Group>
         </List.Section>

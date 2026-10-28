@@ -11,7 +11,9 @@ import {
   FunctionComponent,
   MouseEvent,
   PointerEvent,
+  ReactNode,
   RefObject,
+  useCallback,
   useContext,
   useEffect,
   useId,
@@ -39,17 +41,20 @@ import {
   withStyle,
 } from '../utils/main.js';
 import type {
+  AccordionContextValue,
+  CollapsibleContextValue,
   Drag,
-  ExpandableContextValue,
   Handler,
   ItemContextValue,
+  ListAccordionItemProps,
+  ListAccordionRootProps,
   ListAllowSwipe,
   ListBlockProps,
   ListButtonProps,
+  ListCollapsiblePanelProps,
+  ListCollapsibleRootProps,
   ListEditButtonProps,
   ListEditing,
-  ListExpandableProps,
-  ListExpandableRootProps,
   ListGroupProps,
   ListHeaderProps,
   ListImageProps,
@@ -63,6 +68,7 @@ import type {
   ListTextProps,
   ListWhileEditing,
   Overswipe,
+  PanelContextValue,
   PartProps,
   Scrub,
   Side,
@@ -76,8 +82,11 @@ export type {
   ListButtonProps,
   ListEditButtonProps,
   ListEditing,
-  ListExpandableProps,
-  ListExpandableRootProps,
+  ListAccordionItemProps,
+  ListAccordionRootProps,
+  ListCollapsibleChangeEventDetails,
+  ListCollapsiblePanelProps,
+  ListCollapsibleRootProps,
   ListGroupProps,
   ListHeaderProps,
   ListImageProps,
@@ -589,14 +598,47 @@ const editSide = (editing: ListEditing, side: 'leading' | 'trailing') => {
   return editing === side || editing === 'both' ? 'on' : 'off';
 };
 
-// The parts sliding in or out by their width (not edit controls and
-// grabbers: 22px, see style.css).
+// The slots sliding in or out by their width (see style.css).
 const sizedParts =
-  ':scope > [data-list-part="row"] > :is([data-while-editing], [data-list-part="drill-in"]):not([data-list-part="edit"], [data-list-part="grabber"])';
+  ':scope > [data-list-part="row"] > :is([data-list-part="leading"], [data-list-part="trailing"])';
+
+// A row's slots: its only children (see style.css).
+const slots = new Set(['below', 'content', 'leading', 'span', 'trailing']);
+
+// Rows already told about their foreign elements (see `useStrictSlots`).
+const toldRows = new WeakSet<Element>();
 
 /**
- * A managed row's parts sliding in or out in edit mode, their widths as
- * `--uikit-list-part-size` (taking no room while out, see style.css).
+ * Warns (once per row) about elements of other components placed in a row
+ * directly, not in one of its slots (`Leading`, `Content`, `Trailing`,
+ * `Span`, `Below`): the row places only its own parts.
+ */
+const useStrictSlots = (itemRef: RefObject<HTMLElement | null>) => {
+  useLayoutEffect(() => {
+    const row = itemRef.current?.querySelector<HTMLElement>(
+      ':scope > [data-list-part="track"] > [data-list-part="row"]',
+    );
+    if (!row || toldRows.has(row)) return;
+    const foreign = [...row.children].filter(
+      (child) =>
+        !(
+          child instanceof HTMLElement &&
+          slots.has(child.dataset.listPart ?? '')
+        ),
+    );
+    if (foreign.length === 0) return;
+    toldRows.add(row);
+    // eslint-disable-next-line no-console -- a misuse, told to the developer
+    console.warn(
+      'List.Item: a row holds only slots (List.Leading, List.Content, List.Trailing, List.Span, List.Below); parts and other elements go in them:',
+      foreign,
+    );
+  });
+};
+
+/**
+ * A managed row's slots sliding in or out in edit mode, their widths as
+ * `--uikit-list-slot-size` (taking no room while out, see style.css).
  */
 const useEditingSizes = (
   itemRef: RefObject<HTMLElement | null>,
@@ -612,7 +654,7 @@ const useEditingSizes = (
       for (const { target } of entries) {
         if (!(target instanceof HTMLElement)) continue;
         target.style.setProperty(
-          '--uikit-list-part-size',
+          '--uikit-list-slot-size',
           `${String(target.offsetWidth)}px`,
         );
       }
@@ -966,6 +1008,325 @@ const opensOnRelease = (
   return isQuick ? isMovedTowards : distance > width / 2;
 };
 
+/** How long a collapsible row opens or closes (as swiping). */
+const expandDuration = 300;
+
+// Rows opening and closing in place, as Base UI's Collapsible and Accordion
+// (without elements of their own: a group's rows stay its children, a list
+// having no other elements among them). A `CollapsibleRoot` (or an
+// `AccordionItem`, its `AccordionRoot` holding which are open) holds the
+// state, its `CollapsibleTrigger` (e.g. a row's title, `render`) toggles
+// it, its `CollapsiblePanel` shows its rows.
+const CollapsibleContext = createContext<CollapsibleContextValue | undefined>(
+  undefined,
+);
+
+// A collapsible's rows' ids (see `useExpandedRow`), in mounting order: its
+// trigger's `aria-controls`.
+const useControls = () => {
+  const [ids, setIds] = useState<readonly string[]>([]);
+  const register = useCallback((id: string) => {
+    setIds((current) => [...current, id]);
+    return () => setIds((current) => current.filter((other) => other !== id));
+  }, []);
+
+  return [ids.join(' ') || undefined, register] as const;
+};
+
+/**
+ * Rows' state (Base UI `Collapsible.Root`), for their trigger and them; no
+ * element of its own.
+ */
+const CollapsibleRoot: FunctionComponent<ListCollapsibleRootProps> = ({
+  children,
+  defaultOpen = false,
+  disabled = false,
+  onOpenChange,
+  open: openProp,
+}) => {
+  const [isUncontrolled, setIsUncontrolled] = useState(defaultOpen);
+  const isOpen = openProp ?? isUncontrolled;
+  const [controls, register] = useControls();
+  const context = useMemo<CollapsibleContextValue>(
+    () => ({
+      controls,
+      disabled,
+      isOpen,
+      register,
+      setOpen: (isNextOpen, eventDetails) => {
+        onOpenChange?.(isNextOpen, eventDetails);
+        if (openProp === undefined) setIsUncontrolled(isNextOpen);
+      },
+    }),
+    [controls, disabled, isOpen, onOpenChange, openProp, register],
+  );
+
+  return (
+    <CollapsibleContext.Provider value={context}>
+      {children}
+    </CollapsibleContext.Provider>
+  );
+};
+
+/**
+ * Toggles its collapsible's rows (Base UI `Collapsible.Trigger`,
+ * `Accordion.Trigger`): a button (e.g. rendered by a row's `Title`, making
+ * the row pressable), with `aria-expanded` and `aria-controls`.
+ */
+const CollapsibleTrigger = forwardRef<HTMLElement, PartProps<'button'>>(
+  ({ onClick, render, ...props }, ref) => {
+    const collapsible = useContext(CollapsibleContext);
+
+    return useRender({
+      defaultTagName: 'button',
+      props: {
+        'aria-controls': collapsible?.controls,
+        'aria-expanded': collapsible?.isOpen ?? false,
+        'data-disabled': collapsible?.disabled ? '' : undefined,
+        'data-list-part': 'collapsible-trigger',
+        'data-panel-open': collapsible?.isOpen ? '' : undefined,
+        disabled: collapsible?.disabled,
+        type: 'button',
+        ...props,
+        onClick: (event: MouseEvent<HTMLElement>) => {
+          (onClick as Handler<typeof event>)?.(event);
+          if (event.defaultPrevented || !collapsible || collapsible.disabled) {
+            return;
+          }
+          collapsible.setOpen(!collapsible.isOpen, {
+            event: event as unknown as Event,
+            reason: 'trigger-press',
+          });
+        },
+      },
+      ref,
+      render,
+    });
+  },
+);
+
+// The rows of a `CollapsiblePanel` (see `Item`): shown or not.
+const PanelContext = createContext<PanelContextValue | undefined>(undefined);
+
+/**
+ * Its collapsible's rows (Base UI `Collapsible.Panel`, `Accordion.Panel`),
+ * shown or not, opening and closing in place, together (each its height),
+ * e.g. an inline `Calendar` or `TimeRoll` below a row with a `DatePicker`
+ * (see `DatePicker.Expandable`, as iOS's Calendar). Placed among a group's
+ * rows (no element of its own: the group's rows stay its children), or
+ * among another's (closed with it). Closed, they're inert.
+ */
+const CollapsiblePanel: FunctionComponent<ListCollapsiblePanelProps> = ({
+  children,
+}) => {
+  const collapsible = useContext(CollapsibleContext);
+  // In another's rows: closed with it.
+  const outer = useContext(PanelContext);
+  const isOpen = (collapsible?.isOpen ?? false) && (outer?.isOpen ?? true);
+  const register = collapsible?.register;
+  const context = useMemo<PanelContextValue>(
+    () => ({ isOpen, register }),
+    [isOpen, register],
+  );
+
+  // Its rows aren't its collapsible's triggers (nor a picker's, see
+  // `useCollapsible`): theirs are their own collapsibles'.
+  return (
+    <CollapsibleContext.Provider value={undefined}>
+      <PanelContext.Provider value={context}>{children}</PanelContext.Provider>
+    </CollapsibleContext.Provider>
+  );
+};
+
+const AccordionContext = createContext<AccordionContextValue | undefined>(
+  undefined,
+);
+
+/**
+ * Collapsibles, one open at a time (unless `multiple`), as Base UI
+ * `Accordion.Root`: its `AccordionItem`s, by their `value`; no element of
+ * its own.
+ */
+const AccordionRoot = <Value,>({
+  children,
+  defaultValue = [],
+  disabled = false,
+  multiple = false,
+  onValueChange,
+  value: valueProp,
+}: ListAccordionRootProps<Value>): ReactNode => {
+  const [uncontrolled, setUncontrolled] =
+    useState<readonly Value[]>(defaultValue);
+  const value = valueProp ?? uncontrolled;
+  const context = useMemo<AccordionContextValue>(
+    () => ({
+      disabled,
+      isOpen: (item) => value.includes(item as Value),
+      setOpen: (item, isOpen, eventDetails) => {
+        const others = value.filter((open) => open !== item);
+        const next = isOpen
+          ? [...(multiple ? others : []), item as Value]
+          : others;
+        onValueChange?.(next, eventDetails);
+        if (valueProp === undefined) setUncontrolled(next);
+      },
+    }),
+    [disabled, multiple, onValueChange, value, valueProp],
+  );
+
+  return (
+    <AccordionContext.Provider value={context}>
+      {children}
+    </AccordionContext.Provider>
+  );
+};
+
+/**
+ * A collapsible of its `AccordionRoot` (Base UI `Accordion.Item`), open as
+ * its root holds (by its `value`): its trigger and panel as a
+ * `CollapsibleRoot`'s; no element of its own.
+ */
+const AccordionItem = <Value,>({
+  children,
+  disabled: disabledProp,
+  onOpenChange,
+  value: valueProp,
+}: ListAccordionItemProps<Value>): ReactNode => {
+  const accordion = useContext(AccordionContext);
+  const ownValue = useId();
+  const value = valueProp ?? ownValue;
+  const isOpen = accordion?.isOpen(value) ?? false;
+  const disabled = disabledProp ?? accordion?.disabled ?? false;
+  const [controls, register] = useControls();
+  const context = useMemo<CollapsibleContextValue>(
+    () => ({
+      controls,
+      disabled,
+      isOpen,
+      register,
+      setOpen: (isNextOpen, eventDetails) => {
+        onOpenChange?.(isNextOpen, eventDetails);
+        accordion?.setOpen(value, isNextOpen, eventDetails);
+      },
+    }),
+    [accordion, controls, disabled, isOpen, onOpenChange, register, value],
+  );
+
+  return (
+    <CollapsibleContext.Provider value={context}>
+      {children}
+    </CollapsibleContext.Provider>
+  );
+};
+
+/**
+ * The collapsible around (a `CollapsibleRoot`, an `AccordionItem`; not in
+ * its panel): whether it's open, and opening or closing it (e.g. for a
+ * control opening rows of its own, see `DatePicker` `handle`).
+ */
+export const useCollapsible = ():
+  Pick<CollapsibleContextValue, 'isOpen' | 'setOpen'> | undefined =>
+  useContext(CollapsibleContext);
+
+/**
+ * Whether the collapsible rows around (see `CollapsiblePanel`) are open;
+ * `undefined` outside any (e.g. for a control closing its popups with
+ * them, see `DatePicker`).
+ */
+export const useExpandedOpen = (): boolean | undefined =>
+  useContext(PanelContext)?.isOpen;
+
+/**
+ * A row of a `CollapsiblePanel`: shown or not (`isOpen`, unset outside
+ * one), its height and padding transitioning; its id (given, or its own)
+ * one its `CollapsibleTrigger` controls.
+ */
+const useExpandedRow = (
+  itemRef: RefObject<HTMLElement | null>,
+  idProp: ListItemProps['id'],
+) => {
+  const expanded = useContext(PanelContext);
+  const isOpen = expanded?.isOpen;
+  const ownId = useId();
+  const id =
+    expanded && (idProp === undefined || typeof idProp === 'string')
+      ? (idProp ?? ownId)
+      : undefined;
+  const register = expanded?.register;
+  const shown = useRef<boolean | undefined>(undefined);
+
+  useLayoutEffect(
+    () => (!register || id === undefined ? undefined : register(id)),
+    [id, register],
+  );
+
+  useLayoutEffect(() => {
+    const { current: item } = itemRef;
+    if (!item || isOpen === undefined) return undefined;
+    const wasShown = shown.current;
+    shown.current = isOpen;
+
+    const settle = () => {
+      item.toggleAttribute('data-closed', !isOpen);
+      item.inert = !isOpen;
+    };
+    if (wasShown === undefined || wasShown === isOpen) {
+      settle();
+      return undefined;
+    }
+
+    // From its height as it is, to the other state's. Opening, it's
+    // measured open; closing, it closes once the animation finishes (its
+    // content shrinking at once, a scroll container could scroll back).
+    // eslint-disable-next-line unicorn/no-unnecessary-parameters
+    const box = (element: HTMLElement) => {
+      const style = getComputedStyle(element);
+      return {
+        height: `${String(element.offsetHeight)}px`,
+        paddingBottom: style.paddingBottom,
+        paddingTop: style.paddingTop,
+      };
+    };
+    const closed = { height: '0px', paddingBottom: '0px', paddingTop: '0px' };
+    const from = isOpen ? closed : box(item);
+    if (isOpen) settle();
+    const to = isOpen ? box(item) : closed;
+    item.inert = !isOpen;
+
+    item.style.overflow = 'clip';
+    const animation = item.animate(
+      [
+        {
+          ...from,
+          minHeight: '0px',
+          opacity: isOpen ? 0 : 1,
+          visibility: 'visible',
+        },
+        {
+          ...to,
+          minHeight: '0px',
+          opacity: isOpen ? 1 : 0,
+          visibility: 'visible',
+        },
+      ],
+      { duration: expandDuration, easing: 'ease' },
+    );
+    const done = () => {
+      item.style.removeProperty('overflow');
+      if (!isOpen) settle();
+    };
+    animation.finished.then(done).catch(() => undefined);
+
+    return () => {
+      animation.cancel();
+      item.style.removeProperty('overflow');
+      settle();
+    };
+  }, [itemRef, isOpen]);
+
+  return id ?? idProp;
+};
+
 /**
  * A row (UIKit `UITableViewCell`), with optional swipe actions. With a click
  * handler, it's pressable itself (e.g. passing the click on to a control in
@@ -988,6 +1349,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     onPointerMove,
     onPointerUp,
     editing: itemEditing,
+    id: idProp,
     level,
     selected,
     style,
@@ -996,7 +1358,9 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
   const inheritedEditing = useContext(EditingContext);
   const editing = itemEditing ?? inheritedEditing;
   const itemRef = useForwardedRef<HTMLElement>(ref);
+  const id = useExpandedRow(itemRef, idProp);
   useEditingSizes(itemRef, editing !== 'ignore');
+  useStrictSlots(itemRef);
   const actionsRef = useRef<Partial<Record<Side, HTMLElement>>>({});
   const overswipeRef = useRef<Partial<Record<Side, Overswipe>>>({});
   // What swiping does to each side's actions (see `ListAllowSwipe`).
@@ -1193,6 +1557,21 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     item.style.removeProperty('clip-path');
   };
 
+  // As allowed (see `allowSwipe`), keyboards too: open, not swiped closed,
+  // no scrolling (closed by scrolling it programmatically only); closed,
+  // not swiped open, its actions inert (not revealed by focusing them).
+  const lock = () => {
+    const { current: openSide } = openSideRef;
+    itemRef.current?.toggleAttribute(
+      'data-swipe-locked',
+      openSide !== undefined && !canConceal(openSide),
+    );
+    for (const side of sides) {
+      const { [side]: container } = actionsRef.current;
+      if (container) container.inert = openSide !== side && !canReveal(side);
+    }
+  };
+
   const context = useMemo<ItemContextValue>(() => {
     const value: ItemContextValue = {
       close: () => {
@@ -1206,9 +1585,16 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         openSideRef.current = undefined;
         restingOpenRef.current = false;
         closingRef.current = true;
-        delete itemRef.current?.dataset.swipeLocked;
+        lock();
         // (Its snap points change once closed, see `settle`.)
         scrollTo(0, true);
+      },
+      focus: (side) => {
+        if (openSideRef.current !== side) return;
+        // (The row scrolling to show them on its own.)
+        actionsRef.current[side]
+          ?.querySelector<HTMLElement>('button:not(:disabled)')
+          ?.focus({ preventScroll: true });
       },
       isOpen: (side) => openSideRef.current === side,
       open: (side) => {
@@ -1220,15 +1606,17 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         closeOpenItem = value.close;
         if (openSideRef.current !== side) restingOpenRef.current = false;
         openSideRef.current = side;
-        // Not swiped closed (see `allowSwipe`): no scrolling (closed by
-        // scrolling it programmatically only), nor by a press outside.
-        item.toggleAttribute('data-swipe-locked', !canConceal(side));
+        lock();
         showSnaps();
         scrollTo((side === 'leading' ? 1 : -1) * width, true);
 
-        if (outsideRef.current || !canConceal(side)) return;
+        if (outsideRef.current) return;
         outsideRef.current = (event) => {
-          if (event.target instanceof Node && item.contains(event.target)) {
+          // Not swiped closed (see `allowSwipe`): nor by a press outside.
+          if (
+            (event.target instanceof Node && item.contains(event.target)) ||
+            (openSideRef.current && !canConceal(openSideRef.current))
+          ) {
             return;
           }
           value.close();
@@ -1245,6 +1633,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         } else {
           delete actionsRef.current[side];
         }
+        lock();
         setIsSwipeable(
           Boolean(actionsRef.current.leading ?? actionsRef.current.trailing),
         );
@@ -1289,6 +1678,27 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     if (container) outermostAction(container, side)?.click();
   };
 
+  // Not swiped closed (see `allowSwipe`): nor scrolled closed otherwise
+  // (e.g. by the browser, focusing the row's content), open again.
+  const reopen = () => {
+    const { current: openSide } = openSideRef;
+    if (!openSide || canConceal(openSide)) return false;
+    const { [openSide]: width = 0 } = swipeRef.current.widths;
+    scrollTo((openSide === 'leading' ? 1 : -1) * width, true);
+    return true;
+  };
+
+  // Closed, at rest.
+  const restClosed = (item: HTMLElement) => {
+    swipingRef.current = false;
+    restingOpenRef.current = false;
+    openSideRef.current = undefined;
+    lock();
+    showSnaps(true);
+    if (closeOpenItem === context.close) closeOpenItem = undefined;
+    resetRow(item);
+  };
+
   // The scroll at rest (not touched): overswiped (armed, or across the
   // whole row: triggering there), open or closed.
   const settle = () => {
@@ -1302,14 +1712,10 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     const { [side]: extent = 0 } = swipeRef.current.extents;
     const { [side]: arm = Infinity } = swipeRef.current.arms;
 
+    const { current: isClosing } = closingRef;
     closingRef.current = false;
     if (distance < 1) {
-      swipingRef.current = false;
-      restingOpenRef.current = false;
-      openSideRef.current = undefined;
-      showSnaps(true);
-      if (closeOpenItem === context.close) closeOpenItem = undefined;
-      resetRow(item);
+      if (isClosing || !reopen()) restClosed(item);
       return;
     }
     if (overswipesNow(side) && distance > arm) {
@@ -1570,10 +1976,15 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     (onBlurCapture as Handler<typeof event>)?.(event);
 
     const { current: item } = itemRef;
-    if (!openSideRef.current || !item) return;
+    const { current: openSide } = openSideRef;
+    // Not swiped closed (see `allowSwipe`): nor by focus leaving it.
+    if (!openSide || !item || !canConceal(openSide)) return;
 
+    // Focus moving elsewhere only (e.g. tabbing on): not to nothing, as
+    // WebKit's, pressing a button (its actions' too) not focusing it (a
+    // press outside closes it, see `open`).
     const { relatedTarget } = event;
-    if (relatedTarget instanceof Node && item.contains(relatedTarget)) {
+    if (!(relatedTarget instanceof Node) || item.contains(relatedTarget)) {
       return;
     }
 
@@ -1599,6 +2010,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         data-edit-trailing={editSide(editing, 'trailing')}
         data-selected={selected ? '' : undefined}
         data-swipeable={isSwipeable ? '' : undefined}
+        id={id}
         style={withStyle(
           {
             '--uikit-list-level':
@@ -1672,159 +2084,99 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
   );
 });
 
-/** How long an expandable row opens or closes (as swiping). */
-const expandDuration = 300;
+// Row slots (see style.css): a row's parts in a line, in their order;
+// elements of other components only in these.
 
 /**
- * An expandable row: a row shown or not (`open`), opening and closing in
- * place, e.g. an inline `Calendar` or `TimeRoll` below a row with a
- * `DatePicker` (without popovers, as iOS's Calendar). Closed, it's inert.
+ * Any elements before a row's content (e.g. a spinner, an avatar), in a
+ * line; several per row; sliding in or out in edit mode (`whileEditing`).
  */
-// Uncontrolled (or controlled) expandable rows: `ExpandableRoot` holds the
-// state (no element of its own, so its rows stay a group's children), its
-// `ExpandableTrigger` (e.g. the row's title, `render`) toggles it, its
-// `Expandable` shows it.
-const ExpandableContext = createContext<ExpandableContextValue | undefined>(
-  undefined,
-);
-
-/** An expandable row's state, for its trigger and the row (no element). */
-const ExpandableRoot: FunctionComponent<ListExpandableRootProps> = ({
-  children,
-  defaultOpen = false,
-  onOpenChange,
-  open: openProp,
-}) => {
-  const id = useId();
-  const [isUncontrolled, setIsUncontrolled] = useState(defaultOpen);
-  const isOpen = openProp ?? isUncontrolled;
-  const context = useMemo<ExpandableContextValue>(
-    () => ({
-      id,
-      isOpen,
-      setOpen: (isNextOpen, event) => {
-        onOpenChange?.(isNextOpen, event);
-        if (openProp === undefined) setIsUncontrolled(isNextOpen);
-      },
-    }),
-    [id, onOpenChange, isOpen, openProp],
-  );
-
-  return (
-    <ExpandableContext.Provider value={context}>
-      {children}
-    </ExpandableContext.Provider>
-  );
-};
-
-/**
- * Toggles its `ExpandableRoot`'s row: a button (e.g. rendered by a row's
- * `Title`, making the row pressable), with `aria-expanded` and
- * `aria-controls`.
- */
-const ExpandableTrigger = forwardRef<HTMLElement, PartProps<'button'>>(
-  ({ onClick, render, ...props }, ref) => {
-    const expandable = useContext(ExpandableContext);
-
-    return useRender({
-      defaultTagName: 'button',
+const Leading = forwardRef<HTMLElement, PartProps<'span'> & WhileEditingProps>(
+  ({ className, render, whileEditing, ...props }, ref) =>
+    useRender({
+      defaultTagName: 'span',
       props: {
-        'aria-controls': expandable?.id,
-        'aria-expanded': expandable?.isOpen ?? false,
-        'data-list-part': 'expandable-trigger',
-        type: 'button',
+        'data-list-part': 'leading',
+        ...whileEditingOf(whileEditing),
+        className: cn('uikit-list-leading', className),
         ...props,
-        onClick: (event: MouseEvent<HTMLElement>) => {
-          (onClick as Handler<typeof event>)?.(event);
-          if (event.defaultPrevented || !expandable) return;
-          expandable.setOpen(!expandable.isOpen, event);
-        },
       },
       ref,
       render,
-    });
-  },
+    }),
 );
 
-const Expandable = forwardRef<HTMLElement, ListExpandableProps>(
-  ({ id, open: openProp, ...props }, ref) => {
-    const expandable = useContext(ExpandableContext);
-    const isOpen = openProp ?? expandable?.isOpen ?? false;
-    const itemRef = useForwardedRef<HTMLElement>(ref);
-    const shown = useRef<boolean | undefined>(undefined);
+/**
+ * Any elements after a row's content (e.g. a `Switch`, a `Stepper`), in a
+ * line; several per row; sliding in or out in edit mode (`whileEditing`).
+ */
+const Trailing = forwardRef<HTMLElement, PartProps<'span'> & WhileEditingProps>(
+  ({ className, render, whileEditing, ...props }, ref) =>
+    useRender({
+      defaultTagName: 'span',
+      props: {
+        'data-list-part': 'trailing',
+        ...whileEditingOf(whileEditing),
+        className: cn('uikit-list-trailing', className),
+        ...props,
+      },
+      ref,
+      render,
+    }),
+);
 
-    useLayoutEffect(() => {
-      const { current: item } = itemRef;
-      if (!item) return undefined;
-      const wasShown = shown.current;
-      shown.current = isOpen;
+/**
+ * A row's text (its `Title`, `Subtitle`, `Text`; or a field's label),
+ * taking the rest of its line; every row has one (or a `Span`).
+ */
+const Content = forwardRef<HTMLElement, PartProps<'span'>>(
+  ({ className, render, ...props }, ref) =>
+    useRender({
+      defaultTagName: 'span',
+      props: {
+        'data-list-part': 'content',
+        className: cn('uikit-list-content', className),
+        ...props,
+      },
+      ref,
+      render,
+    }),
+);
 
-      const settle = () => {
-        item.toggleAttribute('data-closed', !isOpen);
-        item.inert = !isOpen;
-      };
-      if (wasShown === undefined || wasShown === isOpen) {
-        settle();
-        return undefined;
-      }
+/**
+ * Content across a row's whole line (e.g. a `Slider` between its symbols,
+ * a `Segmented` control, an inline calendar).
+ */
+const Span = forwardRef<HTMLElement, PartProps<'span'>>(
+  ({ className, render, ...props }, ref) =>
+    useRender({
+      defaultTagName: 'span',
+      props: {
+        'data-list-part': 'span',
+        className: cn('uikit-list-span', className),
+        ...props,
+      },
+      ref,
+      render,
+    }),
+);
 
-      // From its height as it is, to the other state's. Opening, it's
-      // measured open; closing, it closes once the animation finishes (its
-      // content shrinking at once, a scroll container could scroll back).
-      // eslint-disable-next-line unicorn/no-unnecessary-parameters
-      const box = (element: HTMLElement) => {
-        const style = getComputedStyle(element);
-        return {
-          height: `${String(element.offsetHeight)}px`,
-          paddingBottom: style.paddingBottom,
-          paddingTop: style.paddingTop,
-        };
-      };
-      const closed = { height: '0px', paddingBottom: '0px', paddingTop: '0px' };
-      const from = isOpen ? closed : box(item);
-      if (isOpen) settle();
-      const to = isOpen ? box(item) : closed;
-      item.inert = !isOpen;
-
-      item.style.overflow = 'clip';
-      const animation = item.animate(
-        [
-          {
-            ...from,
-            minHeight: '0px',
-            opacity: isOpen ? 0 : 1,
-            visibility: 'visible',
-          },
-          {
-            ...to,
-            minHeight: '0px',
-            opacity: isOpen ? 1 : 0,
-            visibility: 'visible',
-          },
-        ],
-        { duration: expandDuration, easing: 'ease' },
-      );
-      const done = () => {
-        item.style.removeProperty('overflow');
-        if (!isOpen) settle();
-      };
-      animation.finished.then(done).catch(() => undefined);
-
-      return () => {
-        animation.cancel();
-        item.style.removeProperty('overflow');
-        settle();
-      };
-    }, [itemRef, isOpen]);
-
-    return (
-      <Item
-        ref={itemRef}
-        id={id ?? expandable?.id}
-        {...props}
-      />
-    );
-  },
+/**
+ * A line under a row's line, across it (e.g. a field's description and
+ * error); last in its row.
+ */
+const Below = forwardRef<HTMLElement, PartProps<'div'>>(
+  ({ className, render, ...props }, ref) =>
+    useRender({
+      defaultTagName: 'div',
+      props: {
+        'data-list-part': 'below',
+        className: cn('uikit-list-below', className),
+        ...props,
+      },
+      ref,
+      render,
+    }),
 );
 
 // Figma “Title”; as a link or button (`render`), it makes the row pressable.
@@ -1891,13 +2243,12 @@ const Supertitle = forwardRef<HTMLElement, PartProps<'span'>>(
 );
 
 // Figma “Detail”.
-const Detail = forwardRef<HTMLElement, PartProps<'span'> & WhileEditingProps>(
-  ({ className, render, whileEditing, ...props }, ref) =>
+const Detail = forwardRef<HTMLElement, PartProps<'span'>>(
+  ({ className, render, ...props }, ref) =>
     useRender({
       defaultTagName: 'span',
       props: {
         'data-list-part': 'detail',
-        ...whileEditingOf(whileEditing),
         className: cn('uikit-list-detail', className),
         ...props,
       },
@@ -1909,12 +2260,11 @@ const Detail = forwardRef<HTMLElement, PartProps<'span'> & WhileEditingProps>(
 // Figma “_Images”: a symbol, or an image (`img`, `video`, `canvas` filling
 // it, or a symbol) in a rounded, circular or square frame.
 const Image = forwardRef<HTMLElement, ListImageProps>(
-  ({ className, render, variant = 'symbol', whileEditing, ...props }, ref) =>
+  ({ className, render, variant = 'symbol', ...props }, ref) =>
     useRender({
       defaultTagName: 'span',
       props: {
         'data-list-part': 'image',
-        ...whileEditingOf(whileEditing),
         'data-variant': variant,
         className: cn('uikit-list-image', className),
         ...props,
@@ -1929,12 +2279,11 @@ const Image = forwardRef<HTMLElement, ListImageProps>(
 const Accessory = forwardRef<
   HTMLElement,
   PartProps<'span'> & WhileEditingProps
->(({ className, render, whileEditing, ...props }, ref) =>
+>(({ className, render, ...props }, ref) =>
   useRender({
     defaultTagName: 'span',
     props: {
       'data-list-part': 'accessory',
-      ...whileEditingOf(whileEditing),
       className: cn('uikit-list-accessory', className),
       ...props,
     },
@@ -1947,12 +2296,11 @@ const Accessory = forwardRef<
 const Checkmark = forwardRef<
   HTMLElement,
   PartProps<'span'> & WhileEditingProps
->(({ children, className, render, whileEditing, ...props }, ref) =>
+>(({ children, className, render, ...props }, ref) =>
   useRender({
     defaultTagName: 'span',
     props: {
       'data-list-part': 'checkmark',
-      ...whileEditingOf(whileEditing),
       className: cn('uikit-list-checkmark', className),
       children: children ?? <Check />,
       ...props,
@@ -1963,13 +2311,12 @@ const Checkmark = forwardRef<
 );
 
 // Figma “Drill-in” (􀆊, 17px, 590).
-const DrillIn = forwardRef<HTMLElement, PartProps<'span'> & WhileEditingProps>(
-  ({ children, className, render, whileEditing, ...props }, ref) =>
+const DrillIn = forwardRef<HTMLElement, PartProps<'span'>>(
+  ({ children, className, render, ...props }, ref) =>
     useRender({
       defaultTagName: 'span',
       props: {
         'data-list-part': 'drill-in',
-        ...whileEditingOf(whileEditing),
         className: cn('uikit-list-drill-in', className),
         'aria-hidden': 'true',
         children: children ?? <Chevron />,
@@ -1982,42 +2329,39 @@ const DrillIn = forwardRef<HTMLElement, PartProps<'span'> & WhileEditingProps>(
 
 // Figma “Disclosure” (rows: 17px, headers: 19px, 590, in the tint color),
 // turned down while open (e.g. in a Base UI `Collapsible.Trigger`).
-const Disclosure = forwardRef<
-  HTMLElement,
-  PartProps<'span'> & WhileEditingProps
->(({ children, className, render, whileEditing, ...props }, ref) => {
-  // Turned down while its row's expandable row is open (see
-  // `ExpandableRoot`).
-  const expandable = useContext(ExpandableContext);
+const Disclosure = forwardRef<HTMLElement, PartProps<'span'>>(
+  ({ children, className, render, ...props }, ref) => {
+    // Turned down while its row's collapsible is open (see
+    // `CollapsibleRoot`, `AccordionItem`).
+    const collapsible = useContext(CollapsibleContext);
 
-  return useRender({
-    defaultTagName: 'span',
-    props: {
-      'data-list-part': 'disclosure',
-      ...whileEditingOf(whileEditing),
-      'data-panel-open': expandable?.isOpen ? '' : undefined,
-      className: cn('uikit-list-disclosure', className),
-      'aria-hidden': 'true',
-      children: children ?? <Chevron />,
-      ...props,
-    },
-    ref,
-    render,
-  });
-});
+    return useRender({
+      defaultTagName: 'span',
+      props: {
+        'data-list-part': 'disclosure',
+        'data-panel-open': collapsible?.isOpen ? '' : undefined,
+        className: cn('uikit-list-disclosure', className),
+        'aria-hidden': 'true',
+        children: children ?? <Chevron />,
+        ...props,
+      },
+      ref,
+      render,
+    });
+  },
+);
 
 // Figma “_Grabber” (􀌇, 17px, 400).
 /**
  * Figma “_Grabber”: drags its row to reorder its group (see `Group`
  * `onReorder`); focused, arrow keys move the row.
  */
-const Grabber = forwardRef<HTMLElement, PartProps<'span'> & WhileEditingProps>(
-  ({ children, className, onClick, render, whileEditing, ...props }, ref) =>
+const Grabber = forwardRef<HTMLElement, PartProps<'span'>>(
+  ({ children, className, onClick, render, ...props }, ref) =>
     useRender({
       defaultTagName: 'span',
       props: {
         'data-list-part': 'grabber',
-        ...whileEditingOf(whileEditing),
         className: cn('uikit-list-grabber', className),
         tabIndex: 0,
         children: children ?? <Lines />,
@@ -2037,13 +2381,12 @@ const Grabber = forwardRef<HTMLElement, PartProps<'span'> & WhileEditingProps>(
 
 // Figma Type=Button (rows) and Type=Action (headers): text in the tint
 // color.
-const Action = forwardRef<HTMLElement, PartProps<'button'> & WhileEditingProps>(
-  ({ className, render, whileEditing, ...props }, ref) =>
+const Action = forwardRef<HTMLElement, PartProps<'button'>>(
+  ({ className, render, ...props }, ref) =>
     useRender({
       defaultTagName: 'button',
       props: {
         'data-list-part': 'action',
-        ...whileEditingOf(whileEditing),
         className: cn('uikit-list-action', className),
         type: 'button',
         ...useSecondaryClick(props),
@@ -2086,26 +2429,22 @@ const Checkbox = forwardRef<HTMLElement, CheckboxRootProps & WhileEditingProps>(
  * A radio (selecting one row), as `Checkbox`; its group is a `RadioGroup`
  * (e.g. rendering a `Group`).
  */
-const Radio = forwardRef<HTMLElement, RadioRootProps & WhileEditingProps>(
-  ({ whileEditing, ...props }, ref) => (
-    <RadioBase.Root
-      ref={ref}
-      data-list-part="edit"
-      {...whileEditingOf(whileEditing)}
-      {...props}
-    />
-  ),
-);
+const Radio = forwardRef<HTMLElement, RadioRootProps>((props, ref) => (
+  <RadioBase.Root
+    ref={ref}
+    data-list-part="edit"
+    {...props}
+  />
+));
 
 const StyledEditButton = forwardRef<
   HTMLElement,
   Omit<ListEditButtonProps, 'textColor' | 'tint'>
->(({ className, render, whileEditing, ...props }, ref) =>
+>(({ className, render, ...props }, ref) =>
   useRender({
     defaultTagName: 'button',
     props: {
       'data-list-part': 'edit',
-      ...whileEditingOf(whileEditing),
       className: cn(
         'uikit-list-edit-button uikit-checkbox-edit-circle',
         className,
@@ -2193,6 +2532,7 @@ const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
 
       return handle.attach({
         close: () => item.close(),
+        focus: () => item.focus(side),
         isOpen: () => item.isOpen(side),
         open: () => item.open(side),
       });
@@ -2233,8 +2573,8 @@ const SwipeActions = forwardRef<HTMLElement, ListSwipeActionsProps>(
 /**
  * Opens a row's swipe actions when clicked (Base UI's triggers' shape):
  * those of its `handle`, from anywhere, or, in the row, its own on its
- * `side`. Renders a button, or what it's given (e.g. the delete
- * `EditButton`).
+ * `side`; focusing the first of them. Renders a button, or what it's given
+ * (e.g. the delete `EditButton`).
  */
 const SwipeActionsTrigger = forwardRef<
   HTMLElement,
@@ -2255,11 +2595,16 @@ const SwipeActionsTrigger = forwardRef<
         onClick: (event: MouseEvent<HTMLElement>) => {
           (onClick as Handler<typeof event>)?.(event);
           if (event.defaultPrevented) return;
+          // Moving focus to the actions it opened (as Base UI's triggers
+          // to their popups).
           if (handle) {
             handle.open();
+            handle.focus();
             return;
           }
-          item?.open(side === 'inline-start' ? 'leading' : 'trailing');
+          const itemSide = side === 'inline-start' ? 'leading' : 'trailing';
+          item?.open(itemSide);
+          item?.focus(itemSide);
         },
       },
       ref,
@@ -2502,9 +2847,19 @@ export const List = {
   Header,
   Group,
   Item,
-  ExpandableRoot,
-  ExpandableTrigger,
-  Expandable,
+  Leading,
+  Content,
+  Trailing,
+  Span,
+  Below,
+  CollapsibleRoot,
+  CollapsibleTrigger,
+  CollapsiblePanel,
+  AccordionRoot,
+  AccordionItem,
+  // (Base UI's names in an accordion: the same parts.)
+  AccordionTrigger: CollapsibleTrigger,
+  AccordionPanel: CollapsiblePanel,
   Footer,
   Block,
   Title,

@@ -75,7 +75,9 @@ const RootPart: FunctionComponent = () => {
                     <List.Group>
                       {names.map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -145,7 +147,9 @@ const BackgroundPart: FunctionComponent = () => {
                   <List.Group>
                     {names.slice(0, 8).map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -210,7 +214,9 @@ const ColumnPart: FunctionComponent = () => {
                     <List.Group>
                       {names.map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>

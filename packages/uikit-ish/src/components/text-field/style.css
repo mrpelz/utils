@@ -25,6 +25,7 @@
       &[data-list-part]
         > *
         > [data-list-part='row']
+        > [data-list-part='trailing']
         > [data-text-field-part='clear'] {
         display: none;
       }

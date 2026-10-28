@@ -211,74 +211,98 @@ export const ActivityViewDemo: FunctionComponent = () => {
                 <List.Section>
                   <List.Group>
                     <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfEyeglasses} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => addLog('action: Add to Reading List')}
-                      >
-                        Add to Reading List
-                      </List.Title>
+                      <List.Leading>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfEyeglasses} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => addLog('action: Add to Reading List')}
+                        >
+                          Add to Reading List
+                        </List.Title>
+                      </List.Content>
                     </List.Item>
                     <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfBook} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => addLog('action: Add Bookmark')}
-                      >
-                        Add Bookmark
-                      </List.Title>
+                      <List.Leading>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfBook} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => addLog('action: Add Bookmark')}
+                        >
+                          Add Bookmark
+                        </List.Title>
+                      </List.Content>
                     </List.Item>
                     <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfHeart} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => addLog('action: Add to Favorites')}
-                      >
-                        Add to Favorites
-                      </List.Title>
+                      <List.Leading>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfHeart} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => addLog('action: Add to Favorites')}
+                        >
+                          Add to Favorites
+                        </List.Title>
+                      </List.Content>
                     </List.Item>
                     <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfPlusSquare} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => addLog('action: Add to Home Screen')}
-                      >
-                        Add to Home Screen
-                      </List.Title>
+                      <List.Leading>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfPlusSquare} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => addLog('action: Add to Home Screen')}
+                        >
+                          Add to Home Screen
+                        </List.Title>
+                      </List.Content>
                     </List.Item>
                   </List.Group>
                 </List.Section>
                 <List.Section>
                   <List.Group>
                     <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfPencilTipCropCircle} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => addLog('action: Markup')}
-                      >
-                        Markup
-                      </List.Title>
+                      <List.Leading>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfPencilTipCropCircle} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => addLog('action: Markup')}
+                        >
+                          Markup
+                        </List.Title>
+                      </List.Content>
                     </List.Item>
                     <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfPrinter} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => addLog('action: Print')}
-                      >
-                        Print
-                      </List.Title>
+                      <List.Leading>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfPrinter} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => addLog('action: Print')}
+                        >
+                          Print
+                        </List.Title>
+                      </List.Content>
                     </List.Item>
                   </List.Group>
                   <List.Footer>
@@ -472,74 +496,100 @@ export const ActivityViewPopoverDemo: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfEyeglasses} />
-                        </List.Image>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => addLog('action: Add to Reading List')}
-                        >
-                          Add to Reading List
-                        </List.Title>
+                        <List.Leading>
+                          <List.Image variant="symbol">
+                            <Symbol icon={sfEyeglasses} />
+                          </List.Image>
+                        </List.Leading>
+                        <List.Content>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() =>
+                              addLog('action: Add to Reading List')
+                            }
+                          >
+                            Add to Reading List
+                          </List.Title>
+                        </List.Content>
                       </List.Item>
                       <List.Item>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfBook} />
-                        </List.Image>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => addLog('action: Add Bookmark')}
-                        >
-                          Add Bookmark
-                        </List.Title>
+                        <List.Leading>
+                          <List.Image variant="symbol">
+                            <Symbol icon={sfBook} />
+                          </List.Image>
+                        </List.Leading>
+                        <List.Content>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => addLog('action: Add Bookmark')}
+                          >
+                            Add Bookmark
+                          </List.Title>
+                        </List.Content>
                       </List.Item>
                       <List.Item>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfHeart} />
-                        </List.Image>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => addLog('action: Add to Favorites')}
-                        >
-                          Add to Favorites
-                        </List.Title>
+                        <List.Leading>
+                          <List.Image variant="symbol">
+                            <Symbol icon={sfHeart} />
+                          </List.Image>
+                        </List.Leading>
+                        <List.Content>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => addLog('action: Add to Favorites')}
+                          >
+                            Add to Favorites
+                          </List.Title>
+                        </List.Content>
                       </List.Item>
                       <List.Item>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfPlusSquare} />
-                        </List.Image>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => addLog('action: Add to Home Screen')}
-                        >
-                          Add to Home Screen
-                        </List.Title>
+                        <List.Leading>
+                          <List.Image variant="symbol">
+                            <Symbol icon={sfPlusSquare} />
+                          </List.Image>
+                        </List.Leading>
+                        <List.Content>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => addLog('action: Add to Home Screen')}
+                          >
+                            Add to Home Screen
+                          </List.Title>
+                        </List.Content>
                       </List.Item>
                     </List.Group>
                   </List.Section>
                   <List.Section>
                     <List.Group>
                       <List.Item>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfPencilTipCropCircle} />
-                        </List.Image>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => addLog('action: Markup')}
-                        >
-                          Markup
-                        </List.Title>
+                        <List.Leading>
+                          <List.Image variant="symbol">
+                            <Symbol icon={sfPencilTipCropCircle} />
+                          </List.Image>
+                        </List.Leading>
+                        <List.Content>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => addLog('action: Markup')}
+                          >
+                            Markup
+                          </List.Title>
+                        </List.Content>
                       </List.Item>
                       <List.Item>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfPrinter} />
-                        </List.Image>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => addLog('action: Print')}
-                        >
-                          Print
-                        </List.Title>
+                        <List.Leading>
+                          <List.Image variant="symbol">
+                            <Symbol icon={sfPrinter} />
+                          </List.Image>
+                        </List.Leading>
+                        <List.Content>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => addLog('action: Print')}
+                          >
+                            Print
+                          </List.Title>
+                        </List.Content>
                       </List.Item>
                     </List.Group>
                     <List.Footer>

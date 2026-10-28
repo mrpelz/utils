@@ -7,6 +7,7 @@ import {
   forwardClick,
   Header,
   List,
+  type ListEditing,
   Page,
   Switch,
   Symbol,
@@ -26,27 +27,34 @@ import {
 // A row's code (as Airplane Mode's in the list below).
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
 const listRowCode = `<List.Item onClick={forwardClick('[role=switch]')}>
-  <List.Image
-    style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
-    variant="rounded"
-  >
-    <Symbol icon={sfAirplane} />
-  </List.Image>
-  <List.Title>Airplane Mode</List.Title>
-  <Switch.Root
-    aria-label="Airplane Mode"
-    tint="var(--color-ios-system-orange)"
-  >
-    <Switch.Thumb />
-  </Switch.Root>
+  <List.Leading>
+    <List.Image
+      style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
+      variant="rounded"
+    >
+      <Symbol icon={sfAirplane} />
+    </List.Image>
+  </List.Leading>
+  <List.Content>
+    <List.Title>Airplane Mode</List.Title>
+  </List.Content>
+  <List.Trailing>
+    <Switch.Root
+      aria-label="Airplane Mode"
+      tint="var(--color-ios-system-orange)"
+    >
+      <Switch.Thumb />
+    </Switch.Root>
+  </List.Trailing>
 </List.Item>`;
 
-const delayedCode = `// A setting applied after \`delay\` ms (e.g. by a device): its requested
-// state at once, its applied one later; slow past a second.
+const delayedCode = `// A setting a device applies after a while, how long not known: the switch
+// shows what was asked for at once; waiting longer, the row says so more.
 const useDelayedSetting = (delay, initial = false) => {
   const [value, setValue] = useState(initial);
   const [target, setTarget] = useState(initial);
-  const [isSlow, setIsSlow] = useState(false);
+  // 'idle', 'pending', 'slow' (past 0.5s), 'stalled' (past 2s).
+  const [stage, setStage] = useState('idle');
   const timers = useRef([]);
   const clear = () => timers.current.forEach(clearTimeout);
   useEffect(() => clear, []);
@@ -54,58 +62,77 @@ const useDelayedSetting = (delay, initial = false) => {
   const change = (next) => {
     clear();
     setTarget(next);
-    setIsSlow(false);
     if (delay === 0) {
       setValue(next);
       return;
     }
+    setStage('pending');
     timers.current = [
-      setTimeout(() => setIsSlow(true), 1000),
+      setTimeout(() => setStage('slow'), 500),
+      setTimeout(() => setStage('stalled'), 2000),
+      // (The device, done.)
       setTimeout(() => {
         clear();
         setValue(next);
-        setIsSlow(false);
+        setStage('idle');
       }, delay),
     ];
   };
 
-  return { change, isPending: target !== value, isSlow, target, value };
+  return { change, isPending: target !== value, stage, target, value };
 };
 
-const airDrop = useDelayedSetting(4000);
+// Slow: a spinner sliding in from the row's end; stalled: from its start
+// instead (the end's sliding out), the switch disabled.
+const editingOf = { idle: 'none', pending: 'none', slow: 'trailing', stalled: 'leading' };
 
-{/* While slow: a spinner sliding in from the row's end (its edit mode),
-    the switch sliding out (data-while-editing: no list part). */}
+const airDrop = useDelayedSetting(8000);
+
 <List.Item
-  editing={airDrop.isSlow ? 'trailing' : 'none'}
+  editing={editingOf[airDrop.stage]}
   onClick={forwardClick('[role=switch]')}
 >
-  <List.Title>AirDrop: {airDrop.value ? 'On' : 'Off'}</List.Title>
-  {/* The requested state; indeterminate until it's applied. */}
-  <Switch.Root
-    aria-label="AirDrop"
-    checked={airDrop.target}
-    data-while-editing="hide"
-    indeterminate={airDrop.isPending}
-    onCheckedChange={airDrop.change}
-  >
-    <Switch.Thumb />
-  </Switch.Root>
-  {/* Last: sliding in from the row's end, pushing the switch over. */}
-  <List.Detail whileEditing="show">
-    <ActivityIndicator aria-label="Applying" size="small" />
-  </List.Detail>
+  <List.Leading whileEditing="show">
+    <List.Image>
+      <ActivityIndicator aria-label="Applying" size="small" />
+    </List.Image>
+  </List.Leading>
+  <List.Content>
+    <List.Title>AirDrop: {airDrop.value ? 'On' : 'Off'}</List.Title>
+  </List.Content>
+  <List.Trailing>
+    {/* The requested state; indeterminate (and read-only) until applied. */}
+    <Switch.Root
+      aria-label="AirDrop"
+      checked={airDrop.target}
+      disabled={airDrop.stage === 'stalled'}
+      indeterminate={airDrop.isPending}
+      readOnly={airDrop.isPending}
+      onCheckedChange={airDrop.change}
+    >
+      <Switch.Thumb />
+    </Switch.Root>
+  </List.Trailing>
+  <List.Trailing whileEditing="show">
+    <List.Detail>
+      <ActivityIndicator aria-label="Applying" size="small" />
+    </List.Detail>
+  </List.Trailing>
 </List.Item>`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
+/** How long a change has been waiting to apply. */
+type Stage = 'idle' | 'pending' | 'slow' | 'stalled';
+
 /**
- * A setting applied after `delay` ms (e.g. by a device): its requested
- * state at once, its applied one later; slow past a second.
+ * A setting a device applies after `delay` ms (unknown to the app): the
+ * switch shows what was asked for at once; waiting longer (past 0.5s, past
+ * 2s), the row says so more.
  */
 const useDelayedSetting = (delay: number, initial = false) => {
   const [value, setValue] = useState(initial);
   const [target, setTarget] = useState(initial);
-  const [isSlow, setIsSlow] = useState(false);
+  const [stage, setStage] = useState<Stage>('idle');
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   useEffect(
     () => () => {
@@ -117,33 +144,46 @@ const useDelayedSetting = (delay: number, initial = false) => {
   const change = (next: boolean) => {
     for (const timer of timers.current) clearTimeout(timer);
     setTarget(next);
-    setIsSlow(false);
     if (delay === 0) {
       setValue(next);
       return;
     }
+    setStage('pending');
     timers.current = [
-      setTimeout(() => setIsSlow(true), 1000),
+      setTimeout(() => setStage('slow'), 500),
+      setTimeout(() => setStage('stalled'), 2000),
+      // (The device, done.)
       setTimeout(() => {
         for (const timer of timers.current) clearTimeout(timer);
         setValue(next);
-        setIsSlow(false);
+        setStage('idle');
       }, delay),
     ];
   };
 
-  return { change, isPending: target !== value, isSlow, target, value };
+  return { change, isPending: target !== value, stage, target, value };
 };
 
-/** Three settings applied at once, shortly, or slowly. */
+// Slow: a spinner sliding in from the row's end; stalled: from its start
+// instead (the end's sliding out), the switch disabled.
+const editingOf = {
+  idle: 'none',
+  pending: 'none',
+  slow: 'trailing',
+  stalled: 'leading',
+} as const satisfies Record<Stage, ListEditing>;
+
+/**
+ * Four settings applied after different, unknown waits: each row says so
+ * the same way, as far as its wait gets.
+ */
 const DelayedStates: FunctionComponent = () => {
   const [log, addLog] = useLog();
-  // Its label, its setting, and whether it hides its switch while slow.
   const settings = [
-    ['Wi-Fi', useDelayedSetting(0, true), false],
-    ['Hotspot', useDelayedSetting(600), false],
-    ['Bluetooth', useDelayedSetting(2500), false],
-    ['AirDrop', useDelayedSetting(4000), true],
+    ['Wi-Fi', useDelayedSetting(0, true)],
+    ['Hotspot', useDelayedSetting(400)],
+    ['Bluetooth', useDelayedSetting(1500)],
+    ['AirDrop', useDelayedSetting(8000)],
   ] as const;
 
   return (
@@ -168,35 +208,50 @@ const DelayedStates: FunctionComponent = () => {
             <List.Root>
               <List.Section>
                 <List.Group>
-                  {settings.map(([label, setting, isHidingSwitch]) => (
+                  {settings.map(([label, setting]) => (
                     <List.Item
                       key={label}
-                      editing={setting.isSlow ? 'trailing' : 'none'}
+                      editing={editingOf[setting.stage]}
                       onClick={forwardClick('[role=switch]')}
                     >
-                      <List.Title>
-                        {label}: {setting.value ? 'On' : 'Off'}
-                      </List.Title>
-                      <Switch.Root
-                        aria-label={label}
-                        checked={setting.target}
-                        data-while-editing={isHidingSwitch ? 'hide' : undefined}
-                        indeterminate={setting.isPending}
-                        onCheckedChange={(isChecked: boolean) => {
-                          addLog(
-                            `${label}: ${isChecked ? 'on' : 'off'} requested`,
-                          );
-                          setting.change(isChecked);
-                        }}
-                      >
-                        <Switch.Thumb />
-                      </Switch.Root>
-                      <List.Detail whileEditing="show">
-                        <ActivityIndicator
-                          aria-label="Applying"
-                          size="small"
-                        />
-                      </List.Detail>
+                      <List.Leading whileEditing="show">
+                        <List.Image>
+                          <ActivityIndicator
+                            aria-label="Applying"
+                            size="small"
+                          />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title>
+                          {label}: {setting.value ? 'On' : 'Off'}
+                        </List.Title>
+                      </List.Content>
+                      <List.Trailing>
+                        <Switch.Root
+                          aria-label={label}
+                          checked={setting.target}
+                          disabled={setting.stage === 'stalled'}
+                          indeterminate={setting.isPending}
+                          readOnly={setting.isPending}
+                          onCheckedChange={(isChecked: boolean) => {
+                            addLog(
+                              `${label}: ${isChecked ? 'on' : 'off'} requested`,
+                            );
+                            setting.change(isChecked);
+                          }}
+                        >
+                          <Switch.Thumb />
+                        </Switch.Root>
+                      </List.Trailing>
+                      <List.Trailing whileEditing="show">
+                        <List.Detail>
+                          <ActivityIndicator
+                            aria-label="Applying"
+                            size="small"
+                          />
+                        </List.Detail>
+                      </List.Trailing>
                     </List.Item>
                   ))}
                 </List.Group>
@@ -226,40 +281,52 @@ const InAList: FunctionComponent = () => {
         <List.Section>
           <List.Group>
             <List.Item onClick={forwardClick('[role=switch]')}>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfAirplane} />
-              </List.Image>
-              <List.Title>Airplane Mode</List.Title>
-              <Switch.Root
-                aria-label="Airplane Mode"
-                tint="var(--color-ios-system-orange)"
-                onCheckedChange={(isChecked: boolean) =>
-                  addLog(`airplane mode: ${String(isChecked)}`)
-                }
-              >
-                <Switch.Thumb />
-              </Switch.Root>
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfAirplane} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title>Airplane Mode</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <Switch.Root
+                  aria-label="Airplane Mode"
+                  tint="var(--color-ios-system-orange)"
+                  onCheckedChange={(isChecked: boolean) =>
+                    addLog(`airplane mode: ${String(isChecked)}`)
+                  }
+                >
+                  <Switch.Thumb />
+                </Switch.Root>
+              </List.Trailing>
             </List.Item>
             <List.Item onClick={forwardClick('[role=switch]')}>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-red)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfBellFill} />
-              </List.Image>
-              <List.Title>Notifications</List.Title>
-              <Switch.Root
-                defaultChecked
-                aria-label="Notifications"
-                onCheckedChange={(isChecked: boolean) =>
-                  addLog(`notifications: ${String(isChecked)}`)
-                }
-              >
-                <Switch.Thumb />
-              </Switch.Root>
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-red)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfBellFill} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title>Notifications</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <Switch.Root
+                  defaultChecked
+                  aria-label="Notifications"
+                  onCheckedChange={(isChecked: boolean) =>
+                    addLog(`notifications: ${String(isChecked)}`)
+                  }
+                >
+                  <Switch.Thumb />
+                </Switch.Root>
+              </List.Trailing>
             </List.Item>
           </List.Group>
         </List.Section>
@@ -321,34 +388,38 @@ export const SwitchComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Settings that take a while to apply (e.g. on a device): the switch shows
-        what was asked for (<code>checked</code>), the row’s title what’s
-        applied.
+        Settings that take a while to apply (e.g. on a device), how long not
+        known: the switch shows what was asked for (<code>checked</code>), the
+        row’s title what’s applied. Every row behaves the same, saying more the
+        longer it waits.
       </li>
       <li>
-        Wi-Fi applies at once. The hotspot shortly (0.6s): meanwhile its switch
-        is indeterminate (<code>indeterminate</code>), its knob in the middle,
-        its track half tinted while turning on.
+        Asked: the switch indeterminate (<code>indeterminate</code>, its track
+        half tinted while turning on) and read-only (<code>readOnly</code>): the
+        hotspot (0.4s) gets no further.
       </li>
       <li>
-        Bluetooth slowly (2.5s): past a second, an{' '}
-        <a href="progress">activity indicator</a> slides in from the row’s end,
-        pushing the switch over (the row’s edit mode,{' '}
-        <code>editing=&quot;trailing&quot;</code>, showing its{' '}
+        Past half a second: an <a href="progress">activity indicator</a> slides
+        in from the row’s end, pushing the switch over (the row’s edit mode{' '}
+        <code>trailing</code>, its{' '}
         <PartLink
           component="list"
           part="List.Detail"
         />{' '}
-        <code>whileEditing=&quot;show&quot;</code>), and out again once applied.
+        <code>whileEditing=&quot;show&quot;</code>): Bluetooth (1.5s).
       </li>
       <li>
-        AirDrop extra slowly (4s): the same, the switch sliding out meanwhile (
-        <code>data-while-editing=&quot;hide&quot;</code>: an element that isn’t
-        a list part), the spinner in its place.
+        Past two seconds: the indicator moves to the row’s start (
+        <code>leading</code>: its{' '}
+        <PartLink
+          component="list"
+          part="List.Image"
+        />{' '}
+        sliding in, the end’s sliding out), the switch disabled: AirDrop (4s).
       </li>
       <li>
-        <strong>Library:</strong> the switch’s <code>indeterminate</code> state
-        (
+        <strong>Library:</strong> the switch’s <code>indeterminate</code>,{' '}
+        <code>readOnly</code> and <code>disabled</code> states (
         <PartLink
           component="switch"
           part="Switch.Root"
@@ -362,8 +433,8 @@ export const SwitchComposition: FunctionComponent = () => (
         <a href="progress">ActivityIndicator</a>.
       </li>
       <li>
-        <strong>Demo:</strong> the delays, the requested and applied states (
-        <code>useDelayedSetting</code>), the one-second threshold and the
+        <strong>Demo:</strong> the delays, the requested and applied states and
+        the stages (<code>useDelayedSetting</code>), the thresholds and the
         titles.
       </li>
     </ul>

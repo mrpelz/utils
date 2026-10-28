@@ -66,26 +66,38 @@ const ValidationAndServerErrors: FunctionComponent = () => {
                 name="name"
                 render={<List.Item />}
               >
-                <TextField.Label>Name</TextField.Label>
-                <TextField.Control
-                  required
-                  placeholder="Required"
-                />
-                <TextField.Error match="valueMissing">
-                  Enter a name.
-                </TextField.Error>
+                <List.Content>
+                  <TextField.Label>Name</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control
+                    required
+                    placeholder="Required"
+                  />
+                </List.Trailing>
+                <List.Below>
+                  <TextField.Error match="valueMissing">
+                    Enter a name.
+                  </TextField.Error>
+                </List.Below>
               </TextField.Root>
               <TextField.Root
                 name="email"
                 render={<List.Item />}
               >
-                <TextField.Label>Email</TextField.Label>
-                <TextField.Control
-                  required
-                  placeholder="taken@example.com"
-                  type="email"
-                />
-                <TextField.Error />
+                <List.Content>
+                  <TextField.Label>Email</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control
+                    required
+                    placeholder="taken@example.com"
+                    type="email"
+                  />
+                </List.Trailing>
+                <List.Below>
+                  <TextField.Error />
+                </List.Below>
               </TextField.Root>
             </List.Group>
           </Fieldset.Root>
@@ -180,25 +192,33 @@ const InASheetWithCancelDone: FunctionComponent = () => {
                         name="title"
                         render={<List.Item />}
                       >
-                        <TextField.Control
-                          required
-                          aria-label="Title"
-                          placeholder="Title"
-                        />
-                        <TextField.Error match="valueMissing">
-                          Enter a title.
-                        </TextField.Error>
+                        <List.Span>
+                          <TextField.Control
+                            required
+                            aria-label="Title"
+                            placeholder="Title"
+                          />
+                        </List.Span>
+                        <List.Below>
+                          <TextField.Error match="valueMissing">
+                            Enter a title.
+                          </TextField.Error>
+                        </List.Below>
                       </TextField.Root>
                       <Field.Root
                         name="starts"
                         render={<List.Item />}
                       >
-                        <List.Title>Starts</List.Title>
-                        <DatePicker.Root
-                          defaultValue={new Date(2025, 3, 20, 9, 41)}
-                          mode="dateAndTime"
-                          popoverAlign="end"
-                        />
+                        <List.Content>
+                          <List.Title>Starts</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <DatePicker.Root
+                            defaultValue={new Date(2025, 3, 20, 9, 41)}
+                            mode="dateAndTime"
+                            popoverAlign="end"
+                          />
+                        </List.Trailing>
                       </Field.Root>
                     </List.Group>
                   </List.Section>
@@ -240,16 +260,20 @@ const ASwitchRevealingAFieldset: FunctionComponent = () => {
                 name="remind"
                 render={<List.Item onClick={forwardClick('[role=switch]')} />}
               >
-                <List.Title>Remind Me</List.Title>
-                <Switch.Root
-                  aria-label="Remind me"
-                  checked={isReminding}
-                  onCheckedChange={(isChecked: boolean) =>
-                    setIsReminding(isChecked)
-                  }
-                >
-                  <Switch.Thumb />
-                </Switch.Root>
+                <List.Content>
+                  <List.Title>Remind Me</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <Switch.Root
+                    aria-label="Remind me"
+                    checked={isReminding}
+                    onCheckedChange={(isChecked: boolean) =>
+                      setIsReminding(isChecked)
+                    }
+                  >
+                    <Switch.Thumb />
+                  </Switch.Root>
+                </List.Trailing>
               </Field.Root>
             </List.Group>
           </List.Section>
@@ -262,11 +286,15 @@ const ASwitchRevealingAFieldset: FunctionComponent = () => {
                 name="date"
                 render={<List.Item />}
               >
-                <List.Title>Date</List.Title>
-                <DatePicker.Root
-                  defaultValue={new Date(2025, 3, 20)}
-                  popoverAlign="end"
-                />
+                <List.Content>
+                  <List.Title>Date</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <DatePicker.Root
+                    defaultValue={new Date(2025, 3, 20)}
+                    popoverAlign="end"
+                  />
+                </List.Trailing>
               </Field.Root>
             </List.Group>
           </Fieldset.Root>
@@ -318,62 +346,82 @@ const MixedControls: FunctionComponent = () => {
                 name="name"
                 render={<List.Item />}
               >
-                <TextField.Label>Name</TextField.Label>
-                <TextField.Control placeholder="Name" />
+                <List.Content>
+                  <TextField.Label>Name</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control placeholder="Name" />
+                </List.Trailing>
               </TextField.Root>
               <Field.Root
                 name="copies"
                 render={<List.Item />}
               >
-                <List.Title>Copies</List.Title>
-                <List.Detail className="form-demo-value">
-                  {copies ?? '–'}
-                </List.Detail>
-                <Stepper.Root
-                  min={1}
-                  value={copies}
-                  onValueChange={(next: number | null) => setCopies(next)}
-                >
-                  <Stepper.Group>
-                    <Stepper.Input aria-label="Copies" />
-                    <Stepper.Decrement />
-                    <Stepper.Increment />
-                  </Stepper.Group>
-                </Stepper.Root>
+                <List.Content>
+                  <List.Title>Copies</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Detail className="form-demo-value">
+                    {copies ?? '–'}
+                  </List.Detail>
+                </List.Trailing>
+                <List.Trailing>
+                  <Stepper.Root
+                    min={1}
+                    value={copies}
+                    onValueChange={(next: number | null) => setCopies(next)}
+                  >
+                    <Stepper.Group>
+                      <Stepper.Input aria-label="Copies" />
+                      <Stepper.Decrement />
+                      <Stepper.Increment />
+                    </Stepper.Group>
+                  </Stepper.Root>
+                </List.Trailing>
               </Field.Root>
               <Field.Root
                 name="quality"
                 render={<List.Item />}
               >
-                <Slider.Root defaultValue={80}>
-                  <Slider.Label placement="block-start">Quality</Slider.Label>
-                  <Slider.Value placement="block-start" />
-                  <Slider.Control>
-                    <Slider.Track>
-                      <Slider.Indicator />
-                      <Slider.Thumb />
-                    </Slider.Track>
-                  </Slider.Control>
-                </Slider.Root>
+                <List.Span>
+                  <Slider.Root defaultValue={80}>
+                    <Slider.Label placement="block-start">Quality</Slider.Label>
+                    <Slider.Value placement="block-start" />
+                    <Slider.Control>
+                      <Slider.Track>
+                        <Slider.Indicator />
+                        <Slider.Thumb />
+                      </Slider.Track>
+                    </Slider.Control>
+                  </Slider.Root>
+                </List.Span>
               </Field.Root>
               <Field.Root
                 name="delivery"
                 render={<List.Item />}
               >
-                <List.Title>Delivery</List.Title>
-                <DatePicker.Root
-                  defaultValue={new Date(2025, 3, 24)}
-                  popoverAlign="end"
-                />
+                <List.Content>
+                  <List.Title>Delivery</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <DatePicker.Root
+                    defaultValue={new Date(2025, 3, 24)}
+                    popoverAlign="end"
+                  />
+                </List.Trailing>
               </Field.Root>
               <Field.Root
                 name="gift"
                 render={<List.Item onClick={forwardClick('[role=switch]')} />}
               >
-                <List.Title>Gift Wrap</List.Title>
-                <Switch.Root aria-label="Gift wrap">
-                  <Switch.Thumb />
-                </Switch.Root>
+                <List.Content>
+                  <List.Title>Gift Wrap</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <Switch.Root aria-label="Gift wrap">
+                    <Switch.Thumb />
+                  </Switch.Root>
+                </List.Trailing>
               </Field.Root>
             </List.Group>
           </Fieldset.Root>

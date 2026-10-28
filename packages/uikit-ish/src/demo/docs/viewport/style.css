@@ -162,6 +162,12 @@
   opacity: var(--uikit-viewport-overscroll-progress, 0);
 }
 
+/* Released: gone at once (the page may have turned, its name changing
+   while it snaps back). */
+.viewport-demo-pull[data-released] {
+  opacity: 0;
+}
+
 .viewport-demo-pull-arrow {
   transition: rotate 200ms;
 
@@ -181,10 +187,11 @@
   --viewport-demo-page-from: -1;
 }
 
+/* On from the pull (its turning distance and more), as if scrolled on. */
 @keyframes viewport-demo-page-in {
   from {
     opacity: 0;
-    translate: 0 calc(var(--viewport-demo-page-from, 1) * 50%);
+    translate: 0 calc(var(--viewport-demo-page-from, 1) * 100px);
   }
 }
 

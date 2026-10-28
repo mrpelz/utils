@@ -134,19 +134,25 @@ const ThreeColumns: FunctionComponent = () => {
                       <List.Group>
                         {rows.map(([value, rowTitle, icon]) => (
                           <List.Item key={value}>
-                            <List.Image variant="symbol">
-                              <Symbol icon={icon} />
-                            </List.Image>
-                            <List.Title
-                              render={<button type="button" />}
-                              onClick={() => {
-                                addLog(`mailbox: ${value}`);
-                                setMailbox(value);
-                              }}
-                            >
-                              {rowTitle}
-                            </List.Title>
-                            {mailbox === value ? <List.Checkmark /> : null}
+                            <List.Leading>
+                              <List.Image variant="symbol">
+                                <Symbol icon={icon} />
+                              </List.Image>
+                            </List.Leading>
+                            <List.Content>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => {
+                                  addLog(`mailbox: ${value}`);
+                                  setMailbox(value);
+                                }}
+                              >
+                                {rowTitle}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              {mailbox === value ? <List.Checkmark /> : null}
+                            </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
@@ -178,16 +184,20 @@ const ThreeColumns: FunctionComponent = () => {
                     <List.Group>
                       {names.map((name) => (
                         <List.Item key={name}>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => {
-                              addLog(`message: ${name}`);
-                              setMessage(name);
-                            }}
-                          >
-                            {name}
-                          </List.Title>
-                          {message === name ? <List.Checkmark /> : null}
+                          <List.Content>
+                            <List.Title
+                              render={<button type="button" />}
+                              onClick={() => {
+                                addLog(`message: ${name}`);
+                                setMessage(name);
+                              }}
+                            >
+                              {name}
+                            </List.Title>
+                          </List.Content>
+                          <List.Trailing>
+                            {message === name ? <List.Checkmark /> : null}
+                          </List.Trailing>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -289,7 +299,9 @@ const Resizable: FunctionComponent = () => {
                     <List.Group>
                       {names.map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -371,18 +383,22 @@ const BackgroundBehind: FunctionComponent = () => {
                           key={value}
                           selected={selected === value}
                         >
-                          <List.Image variant="symbol">
-                            <Symbol icon={icon} />
-                          </List.Image>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => {
-                              addLog(`select: ${value}`);
-                              setSelected(value);
-                            }}
-                          >
-                            {rowTitle}
-                          </List.Title>
+                          <List.Leading>
+                            <List.Image variant="symbol">
+                              <Symbol icon={icon} />
+                            </List.Image>
+                          </List.Leading>
+                          <List.Content>
+                            <List.Title
+                              render={<button type="button" />}
+                              onClick={() => {
+                                addLog(`select: ${value}`);
+                                setSelected(value);
+                              }}
+                            >
+                              {rowTitle}
+                            </List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -419,7 +435,9 @@ const BackgroundBehind: FunctionComponent = () => {
                     <List.Group>
                       {names.map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>

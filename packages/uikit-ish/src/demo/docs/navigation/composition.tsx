@@ -130,17 +130,21 @@ const popToRoot = (value) =>
         <List.Section>
           <List.Group>
             <List.Item selected={section === 'settings'}>
-              <List.Image variant="symbol">…</List.Image>
-              <List.Title
-                render={<button type="button" />}
-                onClick={() => {
-                  // Pressed again (already selected): back to its root.
-                  if (section === 'settings') popToRoot('settings');
-                  else setSection('settings');
-                }}
-              >
-                Settings
-              </List.Title>
+              <List.Leading>
+                <List.Image variant="symbol">…</List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button type="button" />}
+                  onClick={() => {
+                    // Pressed again (already selected): back to its root.
+                    if (section === 'settings') popToRoot('settings');
+                    else setSection('settings');
+                  }}
+                >
+                  Settings
+                </List.Title>
+              </List.Content>
             </List.Item>
             …
           </List.Group>
@@ -305,16 +309,18 @@ isCompact ? (
             <List.Group>
               {sections.map(([value, label]) => (
                 <List.Item key={value} selected={section === value}>
-                  <List.Title
-                    render={<button type="button" />}
-                    onClick={() => {
-                      // Pressed again (already selected): back to its root.
-                      if (section === value) popToRoot(value);
-                      else open(value);
-                    }}
-                  >
-                    {label}
-                  </List.Title>
+                  <List.Content>
+                    <List.Title
+                      render={<button type="button" />}
+                      onClick={() => {
+                        // Pressed again (already selected): back to its root.
+                        if (section === value) popToRoot(value);
+                        else open(value);
+                      }}
+                    >
+                      {label}
+                    </List.Title>
+                  </List.Content>
                 </List.Item>
               ))}
             </List.Group>
@@ -422,13 +428,17 @@ const PerTab: FunctionComponent = () => {
                           <List.Group>
                             {pages[key]?.children.map((child) => (
                               <List.Item key={child}>
-                                <List.Title
-                                  render={<button type="button" />}
-                                  onClick={() => push(section, child)}
-                                >
-                                  {pages[child]?.title}
-                                </List.Title>
-                                <List.DrillIn />
+                                <List.Content>
+                                  <List.Title
+                                    render={<button type="button" />}
+                                    onClick={() => push(section, child)}
+                                  >
+                                    {pages[child]?.title}
+                                  </List.Title>
+                                </List.Content>
+                                <List.Trailing>
+                                  <List.DrillIn />
+                                </List.Trailing>
                               </List.Item>
                             ))}
                           </List.Group>
@@ -528,15 +538,19 @@ const WithSidebar: FunctionComponent = () => {
                         key={value}
                         selected={section === value}
                       >
-                        <List.Image variant="symbol">
-                          <Symbol icon={icon} />
-                        </List.Image>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => select(value)}
-                        >
-                          {label}
-                        </List.Title>
+                        <List.Leading>
+                          <List.Image variant="symbol">
+                            <Symbol icon={icon} />
+                          </List.Image>
+                        </List.Leading>
+                        <List.Content>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => select(value)}
+                          >
+                            {label}
+                          </List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -580,13 +594,17 @@ const WithSidebar: FunctionComponent = () => {
                           <List.Group>
                             {pages[key]?.children.map((child) => (
                               <List.Item key={child}>
-                                <List.Title
-                                  render={<button type="button" />}
-                                  onClick={() => push(child)}
-                                >
-                                  {pages[child]?.title}
-                                </List.Title>
-                                <List.DrillIn />
+                                <List.Content>
+                                  <List.Title
+                                    render={<button type="button" />}
+                                    onClick={() => push(child)}
+                                  >
+                                    {pages[child]?.title}
+                                  </List.Title>
+                                </List.Content>
+                                <List.Trailing>
+                                  <List.DrillIn />
+                                </List.Trailing>
                               </List.Item>
                             ))}
                           </List.Group>
@@ -674,13 +692,17 @@ const PopToRoot: FunctionComponent = () => {
                       <List.Group>
                         {pages[key]?.children.map((child) => (
                           <List.Item key={child}>
-                            <List.Title
-                              render={<button type="button" />}
-                              onClick={() => push(child)}
-                            >
-                              {pages[child]?.title}
-                            </List.Title>
-                            <List.DrillIn />
+                            <List.Content>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => push(child)}
+                              >
+                                {pages[child]?.title}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              <List.DrillIn />
+                            </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
@@ -760,13 +782,17 @@ const LargeTitles: FunctionComponent = () => {
                       <List.Group>
                         {pages[key]?.children.map((child) => (
                           <List.Item key={child}>
-                            <List.Title
-                              render={<button type="button" />}
-                              onClick={() => push(child)}
-                            >
-                              {pages[child]?.title}
-                            </List.Title>
-                            <List.DrillIn />
+                            <List.Content>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => push(child)}
+                              >
+                                {pages[child]?.title}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              <List.DrillIn />
+                            </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
@@ -902,16 +928,22 @@ const Adaptive: FunctionComponent = () => {
                           <List.Group>
                             {sections.map(([value, label, icon]) => (
                               <List.Item key={value}>
-                                <List.Image variant="symbol">
-                                  <Symbol icon={icon} />
-                                </List.Image>
-                                <List.Title
-                                  render={<button type="button" />}
-                                  onClick={() => open(value)}
-                                >
-                                  {label}
-                                </List.Title>
-                                <List.DrillIn />
+                                <List.Leading>
+                                  <List.Image variant="symbol">
+                                    <Symbol icon={icon} />
+                                  </List.Image>
+                                </List.Leading>
+                                <List.Content>
+                                  <List.Title
+                                    render={<button type="button" />}
+                                    onClick={() => open(value)}
+                                  >
+                                    {label}
+                                  </List.Title>
+                                </List.Content>
+                                <List.Trailing>
+                                  <List.DrillIn />
+                                </List.Trailing>
                               </List.Item>
                             ))}
                           </List.Group>
@@ -936,13 +968,17 @@ const Adaptive: FunctionComponent = () => {
                           <List.Group>
                             {pages[key]?.children.map((child) => (
                               <List.Item key={child}>
-                                <List.Title
-                                  render={<button type="button" />}
-                                  onClick={() => push(child)}
-                                >
-                                  {pages[child]?.title}
-                                </List.Title>
-                                <List.DrillIn />
+                                <List.Content>
+                                  <List.Title
+                                    render={<button type="button" />}
+                                    onClick={() => push(child)}
+                                  >
+                                    {pages[child]?.title}
+                                  </List.Title>
+                                </List.Content>
+                                <List.Trailing>
+                                  <List.DrillIn />
+                                </List.Trailing>
                               </List.Item>
                             ))}
                           </List.Group>
@@ -973,15 +1009,19 @@ const Adaptive: FunctionComponent = () => {
                           key={value}
                           selected={section === value}
                         >
-                          <List.Image variant="symbol">
-                            <Symbol icon={icon} />
-                          </List.Image>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => select(value)}
-                          >
-                            {label}
-                          </List.Title>
+                          <List.Leading>
+                            <List.Image variant="symbol">
+                              <Symbol icon={icon} />
+                            </List.Image>
+                          </List.Leading>
+                          <List.Content>
+                            <List.Title
+                              render={<button type="button" />}
+                              onClick={() => select(value)}
+                            >
+                              {label}
+                            </List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -1025,13 +1065,17 @@ const Adaptive: FunctionComponent = () => {
                             <List.Group>
                               {pages[key]?.children.map((child) => (
                                 <List.Item key={child}>
-                                  <List.Title
-                                    render={<button type="button" />}
-                                    onClick={() => push(child)}
-                                  >
-                                    {pages[child]?.title}
-                                  </List.Title>
-                                  <List.DrillIn />
+                                  <List.Content>
+                                    <List.Title
+                                      render={<button type="button" />}
+                                      onClick={() => push(child)}
+                                    >
+                                      {pages[child]?.title}
+                                    </List.Title>
+                                  </List.Content>
+                                  <List.Trailing>
+                                    <List.DrillIn />
+                                  </List.Trailing>
                                 </List.Item>
                               ))}
                             </List.Group>

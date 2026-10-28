@@ -129,7 +129,9 @@ const LiveView: FunctionComponent = () => {
                     <List.Group>
                       {names.slice(0, 8).map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>

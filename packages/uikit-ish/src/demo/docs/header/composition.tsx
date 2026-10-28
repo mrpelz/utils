@@ -186,7 +186,9 @@ const LargeTitle: FunctionComponent = () => {
                 <List.Group>
                   {names.map((name) => (
                     <List.Item key={name}>
-                      <List.Title>{name}</List.Title>
+                      <List.Content>
+                        <List.Title>{name}</List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
@@ -252,7 +254,9 @@ const Search: FunctionComponent = () => {
                 <List.Group>
                   {matching.map((name) => (
                     <List.Item key={name}>
-                      <List.Title>{name}</List.Title>
+                      <List.Content>
+                        <List.Title>{name}</List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
@@ -322,7 +326,9 @@ const OverPicture: FunctionComponent = () => {
                 <List.Group>
                   {names.slice(0, 16).map((name, index) => (
                     <List.Item key={name}>
-                      <List.Title>{`${String(index + 1)}. ${name}`}</List.Title>
+                      <List.Content>
+                        <List.Title>{`${String(index + 1)}. ${name}`}</List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
@@ -388,7 +394,9 @@ const ControlBelow: FunctionComponent = () => {
                 <List.Group>
                   {shown.map((name) => (
                     <List.Item key={name}>
-                      <List.Title>{name}</List.Title>
+                      <List.Content>
+                        <List.Title>{name}</List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>

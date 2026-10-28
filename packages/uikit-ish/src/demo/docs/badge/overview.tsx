@@ -76,13 +76,17 @@ const LiveView: FunctionComponent = () => {
           <List.Section>
             <List.Group>
               <List.Item>
-                <List.Title>Inbox</List.Title>
-                <List.Detail>
-                  <Badge
-                    placement="inline"
-                    {...props}
-                  />
-                </List.Detail>
+                <List.Content>
+                  <List.Title>Inbox</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Detail>
+                    <Badge
+                      placement="inline"
+                      {...props}
+                    />
+                  </List.Detail>
+                </List.Trailing>
               </List.Item>
             </List.Group>
           </List.Section>

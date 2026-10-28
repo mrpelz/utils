@@ -106,13 +106,17 @@ const RootPart: FunctionComponent = () => {
                       <List.Group>
                         {pages[key]?.children.map((child) => (
                           <List.Item key={child}>
-                            <List.Title
-                              render={<button type="button" />}
-                              onClick={() => push(child)}
-                            >
-                              {pages[child]?.title}
-                            </List.Title>
-                            <List.DrillIn />
+                            <List.Content>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => push(child)}
+                              >
+                                {pages[child]?.title}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              <List.DrillIn />
+                            </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
@@ -195,13 +199,17 @@ const StackPart: FunctionComponent = () => {
                       <List.Group>
                         {pages[key]?.children.map((child) => (
                           <List.Item key={child}>
-                            <List.Title
-                              render={<button type="button" />}
-                              onClick={() => push(child)}
-                            >
-                              {pages[child]?.title}
-                            </List.Title>
-                            <List.DrillIn />
+                            <List.Content>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => push(child)}
+                              >
+                                {pages[child]?.title}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              <List.DrillIn />
+                            </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
@@ -287,13 +295,17 @@ const SwipeAreaPart: FunctionComponent = () => {
                       <List.Group>
                         {pages[key]?.children.map((child) => (
                           <List.Item key={child}>
-                            <List.Title
-                              render={<button type="button" />}
-                              onClick={() => push(child)}
-                            >
-                              {pages[child]?.title}
-                            </List.Title>
-                            <List.DrillIn />
+                            <List.Content>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => push(child)}
+                              >
+                                {pages[child]?.title}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              <List.DrillIn />
+                            </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
@@ -376,13 +388,17 @@ const BackPart: FunctionComponent = () => {
                       <List.Group>
                         {pages[key]?.children.map((child) => (
                           <List.Item key={child}>
-                            <List.Title
-                              render={<button type="button" />}
-                              onClick={() => push(child)}
-                            >
-                              {pages[child]?.title}
-                            </List.Title>
-                            <List.DrillIn />
+                            <List.Content>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => push(child)}
+                              >
+                                {pages[child]?.title}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              <List.DrillIn />
+                            </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>

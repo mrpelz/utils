@@ -134,7 +134,9 @@ const ProviderPartFrame: FunctionComponent<{
             <List.Group>
               {names.map((name) => (
                 <List.Item key={name}>
-                  <List.Title>{name}</List.Title>
+                  <List.Content>
+                    <List.Title>{name}</List.Title>
+                  </List.Content>
                 </List.Item>
               ))}
             </List.Group>
@@ -206,7 +208,9 @@ const ContentPart: FunctionComponent = () => {
             <List.Group>
               {names.map((name) => (
                 <List.Item key={name}>
-                  <List.Title>{name}</List.Title>
+                  <List.Content>
+                    <List.Title>{name}</List.Title>
+                  </List.Content>
                 </List.Item>
               ))}
             </List.Group>
@@ -249,7 +253,9 @@ const AnchorPart: FunctionComponent = () => {
               <List.Group>
                 {names.map((name) => (
                   <List.Item key={name}>
-                    <List.Title>{name}</List.Title>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
@@ -303,7 +309,9 @@ const BlockStartPart: FunctionComponent = () => {
               <List.Group>
                 {names.map((name) => (
                   <List.Item key={name}>
-                    <List.Title>{name}</List.Title>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
@@ -351,7 +359,9 @@ const BlockEndPart: FunctionComponent = () => {
               <List.Group>
                 {names.map((name) => (
                   <List.Item key={name}>
-                    <List.Title>{name}</List.Title>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
@@ -432,7 +442,9 @@ const PaddingPart: FunctionComponent = () => {
               <List.Group>
                 {names.map((name) => (
                   <List.Item key={name}>
-                    <List.Title>{name}</List.Title>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
@@ -517,7 +529,9 @@ const OverscrollView: FunctionComponent<{
               <List.Group>
                 {names.map((name) => (
                   <List.Item key={name}>
-                    <List.Title>{name}</List.Title>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
@@ -620,7 +634,9 @@ const CreateAnchorHandlePart: FunctionComponent = () => {
               <List.Group>
                 {names.map((name) => (
                   <List.Item key={name}>
-                    <List.Title>{name}</List.Title>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
@@ -700,7 +716,9 @@ const bottom = useAnchorSize('block-end');`}
             <List.Group>
               {names.map((name) => (
                 <List.Item key={name}>
-                  <List.Title>{name}</List.Title>
+                  <List.Content>
+                    <List.Title>{name}</List.Title>
+                  </List.Content>
                 </List.Item>
               ))}
             </List.Group>
@@ -817,7 +835,9 @@ const UseViewportScrollView: FunctionComponent<{
             <List.Group>
               {names.map((name) => (
                 <List.Item key={name}>
-                  <List.Title>{name}</List.Title>
+                  <List.Content>
+                    <List.Title>{name}</List.Title>
+                  </List.Content>
                 </List.Item>
               ))}
             </List.Group>
@@ -891,7 +911,9 @@ const UseScrollDirectionView: FunctionComponent<{
             <List.Group>
               {names.map((name) => (
                 <List.Item key={name}>
-                  <List.Title>{name}</List.Title>
+                  <List.Content>
+                    <List.Title>{name}</List.Title>
+                  </List.Content>
                 </List.Item>
               ))}
             </List.Group>

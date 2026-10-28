@@ -196,42 +196,46 @@ const InAListRow: FunctionComponent = () => {
             <List.Section>
               <List.Group>
                 <List.Item>
-                  <List.Title>Tint</List.Title>
-                  <Sheet.Root>
-                    <Sheet.Trigger
-                      render={
-                        <ColorPicker.Well
-                          aria-label="Tint"
-                          color={tint}
-                        />
-                      }
-                    />
-                    <Sheet.Popup
-                      compact
-                      detent="medium"
-                    >
-                      <Sheet.Header>
-                        <Sheet.Grabber />
-                        <Toolbar.Root placement="block-start">
-                          <Toolbar.Title>
-                            <span>Tint</span>
-                          </Toolbar.Title>
-                        </Toolbar.Root>
-                      </Sheet.Header>
-                      <Sheet.Content>
-                        <ColorPicker.Root
-                          value={tint}
-                          onValueChange={(next: string) => {
-                            addLog(`tint: ${next}`);
-                            setTint(next);
-                          }}
-                        >
-                          <ColorPicker.Panel />
-                        </ColorPicker.Root>
-                        <Viewport.Padding edge="block-end" />
-                      </Sheet.Content>
-                    </Sheet.Popup>
-                  </Sheet.Root>
+                  <List.Content>
+                    <List.Title>Tint</List.Title>
+                  </List.Content>
+                  <List.Trailing>
+                    <Sheet.Root>
+                      <Sheet.Trigger
+                        render={
+                          <ColorPicker.Well
+                            aria-label="Tint"
+                            color={tint}
+                          />
+                        }
+                      />
+                      <Sheet.Popup
+                        compact
+                        detent="medium"
+                      >
+                        <Sheet.Header>
+                          <Sheet.Grabber />
+                          <Toolbar.Root placement="block-start">
+                            <Toolbar.Title>
+                              <span>Tint</span>
+                            </Toolbar.Title>
+                          </Toolbar.Root>
+                        </Sheet.Header>
+                        <Sheet.Content>
+                          <ColorPicker.Root
+                            value={tint}
+                            onValueChange={(next: string) => {
+                              addLog(`tint: ${next}`);
+                              setTint(next);
+                            }}
+                          >
+                            <ColorPicker.Panel />
+                          </ColorPicker.Root>
+                          <Viewport.Padding edge="block-end" />
+                        </Sheet.Content>
+                      </Sheet.Popup>
+                    </Sheet.Root>
+                  </List.Trailing>
                 </List.Item>
               </List.Group>
             </List.Section>
@@ -242,32 +246,36 @@ const InAListRow: FunctionComponent = () => {
           <List.Section>
             <List.Group>
               <List.Item>
-                <List.Title>Tint</List.Title>
-                <Popover.Root>
-                  <Popover.Trigger
-                    render={
-                      <ColorPicker.Well
-                        aria-label="Tint"
-                        color={tint}
-                      />
-                    }
-                  />
-                  <Popover.Portal>
-                    <Popover.Positioner align="end">
-                      <Popover.Popup style={{ width: 'min(402px, 100vw)' }}>
-                        <ColorPicker.Root
-                          value={tint}
-                          onValueChange={(next: string) => {
-                            addLog(`tint: ${next}`);
-                            setTint(next);
-                          }}
-                        >
-                          <ColorPicker.Panel />
-                        </ColorPicker.Root>
-                      </Popover.Popup>
-                    </Popover.Positioner>
-                  </Popover.Portal>
-                </Popover.Root>
+                <List.Content>
+                  <List.Title>Tint</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <Popover.Root>
+                    <Popover.Trigger
+                      render={
+                        <ColorPicker.Well
+                          aria-label="Tint"
+                          color={tint}
+                        />
+                      }
+                    />
+                    <Popover.Portal>
+                      <Popover.Positioner align="end">
+                        <Popover.Popup style={{ width: 'min(402px, 100vw)' }}>
+                          <ColorPicker.Root
+                            value={tint}
+                            onValueChange={(next: string) => {
+                              addLog(`tint: ${next}`);
+                              setTint(next);
+                            }}
+                          >
+                            <ColorPicker.Panel />
+                          </ColorPicker.Root>
+                        </Popover.Popup>
+                      </Popover.Positioner>
+                    </Popover.Portal>
+                  </Popover.Root>
+                </List.Trailing>
               </List.Item>
             </List.Group>
           </List.Section>

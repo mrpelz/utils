@@ -113,18 +113,24 @@ export const NavigationDemo: FunctionComponent = () => {
                         <List.Group>
                           {page.children.map((child) => (
                             <List.Item key={child}>
-                              <List.Title
-                                render={<button type="button" />}
-                                onClick={() => push(child)}
-                              >
-                                {pages[child]?.title ?? child}
-                              </List.Title>
-                              <List.DrillIn />
+                              <List.Content>
+                                <List.Title
+                                  render={<button type="button" />}
+                                  onClick={() => push(child)}
+                                >
+                                  {pages[child]?.title ?? child}
+                                </List.Title>
+                              </List.Content>
+                              <List.Trailing>
+                                <List.DrillIn />
+                              </List.Trailing>
                             </List.Item>
                           ))}
                           {Array.from({ length: 12 }, (_, index) => (
                             <List.Item key={index}>
-                              <List.Title>Row {index + 1}</List.Title>
+                              <List.Content>
+                                <List.Title>Row {index + 1}</List.Title>
+                              </List.Content>
                             </List.Item>
                           ))}
                         </List.Group>

@@ -10,6 +10,7 @@ import {
   Fieldset,
   Form,
   List,
+  useCreateDatePickerHandle,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
@@ -42,25 +43,33 @@ const InAListRow: FunctionComponent = () => {
         <List.Section>
           <List.Group>
             <List.Item>
-              <List.Title>Date</List.Title>
-              <DatePicker.Root
-                defaultValue={example}
-                popoverAlign="end"
-                onValueChange={(next: Date) =>
-                  addLog(`date: ${next.toLocaleDateString()}`)
-                }
-              />
+              <List.Content>
+                <List.Title>Date</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <DatePicker.Root
+                  defaultValue={example}
+                  popoverAlign="end"
+                  onValueChange={(next: Date) =>
+                    addLog(`date: ${next.toLocaleDateString()}`)
+                  }
+                />
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.Title>Reminder</List.Title>
-              <DatePicker.Root
-                defaultValue={example}
-                mode="time"
-                popoverAlign="end"
-                onValueChange={(next: Date) =>
-                  addLog(`reminder: ${next.toLocaleTimeString()}`)
-                }
-              />
+              <List.Content>
+                <List.Title>Reminder</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <DatePicker.Root
+                  defaultValue={example}
+                  mode="time"
+                  popoverAlign="end"
+                  onValueChange={(next: Date) =>
+                    addLog(`reminder: ${next.toLocaleTimeString()}`)
+                  }
+                />
+              </List.Trailing>
             </List.Item>
           </List.Group>
         </List.Section>
@@ -69,11 +78,13 @@ const InAListRow: FunctionComponent = () => {
   );
 };
 
-/** An event's start: its buttons toggle the pickers, below the row. */
+/**
+ * An event's start: its buttons toggle the pickers, in expandable rows
+ * below the row (by a handle).
+ */
 const ExpandedBelowARow: FunctionComponent = () => {
   const [log, addLog] = useLog();
-  const [starts, setStarts] = useState<Date>(example);
-  const [open, setOpen] = useState<DatePickerOpen | null>(null);
+  const starts = useCreateDatePickerHandle();
 
   return (
     <Component
@@ -88,37 +99,24 @@ const ExpandedBelowARow: FunctionComponent = () => {
         <List.Section>
           <List.Group>
             <List.Item>
-              <List.Title>Starts</List.Title>
-              <DatePicker.Root
-                mode="dateAndTime"
-                open={open}
-                popover={false}
-                value={starts}
-                onValueChange={(next: Date) => setStarts(next)}
-                onOpenChange={(next: DatePickerOpen | null) => {
-                  addLog(`open: ${String(next)}`);
-                  setOpen(next);
-                }}
-              />
+              <List.Content>
+                <List.Title>Starts</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <DatePicker.Root
+                  defaultValue={example}
+                  handle={starts}
+                  mode="dateAndTime"
+                  onOpenChange={(next: DatePickerOpen | null) =>
+                    addLog(`open: ${String(next)}`)
+                  }
+                  onValueChange={(next: Date) =>
+                    addLog(`starts: ${next.toLocaleString()}`)
+                  }
+                />
+              </List.Trailing>
             </List.Item>
-            <List.Expandable open={open === 'date'}>
-              <DatePicker.Calendar
-                value={starts}
-                onValueChange={(next: Date) => {
-                  addLog(`starts: ${next.toLocaleString()}`);
-                  setStarts(next);
-                }}
-              />
-            </List.Expandable>
-            <List.Expandable open={open === 'time'}>
-              <DatePicker.TimeRoll
-                value={starts}
-                onValueChange={(next: Date) => {
-                  addLog(`starts: ${next.toLocaleString()}`);
-                  setStarts(next);
-                }}
-              />
-            </List.Expandable>
+            <DatePicker.Expandable handle={starts} />
           </List.Group>
         </List.Section>
       </List.Root>
@@ -156,13 +154,17 @@ const InAForm: FunctionComponent = () => {
                 name="birthday"
                 render={<List.Item />}
               >
-                <List.Title>Birthday</List.Title>
-                <DatePicker.Root
-                  max={new Date()}
-                  popoverAlign="end"
-                  value={birthday}
-                  onValueChange={(next: Date) => setBirthday(next)}
-                />
+                <List.Content>
+                  <List.Title>Birthday</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <DatePicker.Root
+                    max={new Date()}
+                    popoverAlign="end"
+                    value={birthday}
+                    onValueChange={(next: Date) => setBirthday(next)}
+                  />
+                </List.Trailing>
               </Field.Root>
             </List.Group>
           </Fieldset.Root>
@@ -273,54 +275,55 @@ export const DatePickerComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As iOS’s Calendar edits an event: without <code>popover</code>, the
-        buttons toggle <code>open</code>, and the app shows the picker below the
-        row (
+        As iOS’s Calendar edits an event: the buttons toggle the calendar and
+        the time wheel, each in an expandable row below the row (
         <PartLink
           component="list"
-          part="List.Expandable"
+          part="List.CollapsiblePanel"
         />
-        ).
+        ), pushing the rows below down.
       </li>
       <li>
-        The pickers on their own:{' '}
+        The picker and its pickers are linked by a handle (
         <PartLink
           component="date-picker"
-          part="DatePicker.Calendar"
-        />{' '}
-        for the date,{' '}
+          part="DatePicker.createHandle"
+        />
+        , in a component <code>useCreateDatePickerHandle</code>): given to the
+        picker in the row and to the{' '}
         <PartLink
           component="date-picker"
-          part="DatePicker.TimeRoll"
+          part="DatePicker.Expandable"
         />{' '}
-        for the time, sharing the app’s value.
+        placed after it. No app state: the picker keeps its value and which
+        picker is open.
       </li>
       <li>
-        <strong>Library:</strong> the picker without its popover (
-        <code>
-          popover={'{'}false{'}'}
-        </code>
-        , toggling <code>open</code>), the calendar and time wheel on their own
-        (
+        <strong>Library:</strong> the picker’s buttons toggling its pickers (
         <PartLink
           component="date-picker"
-          part="DatePicker.Calendar"
-        />
-        ,{' '}
+          part="DatePicker.Root"
+        />{' '}
+        <code>handle</code>), the handle (
         <PartLink
           component="date-picker"
-          part="DatePicker.TimeRoll"
+          part="DatePicker.createHandle"
         />
         ) and the expandable rows (
         <PartLink
+          component="date-picker"
+          part="DatePicker.Expandable"
+        />
+        ,{' '}
+        <PartLink
           component="list"
-          part="List.Expandable"
+          part="List.CollapsiblePanel"
         />
         ).
       </li>
       <li>
-        <strong>Demo:</strong> holding <code>open</code> and the date, and
-        showing each picker in its expandable row.
+        <strong>Demo:</strong> the row, its default date, and the handle linking
+        the picker to its expandable rows.
       </li>
     </ul>
     <ExpandedBelowARow />

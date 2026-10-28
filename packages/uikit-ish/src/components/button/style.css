@@ -256,19 +256,21 @@
       inset: min(0px, calc(50% - 22px));
     }
 
-    &:active:not([data-disabled]) {
+    /* Disabled (Base UI's), or by a disabled fieldset around it (native). */
+    &[data-disabled],
+    &:disabled {
+      --uikit-utils-cursor: attr(cursor type(<custom-ident>), not-allowed);
+
+      background-color: var(--uikit-button-background-disabled);
+      color: var(--uikit-button-color-disabled);
+    }
+
+    &:active:not([data-disabled], :disabled) {
       --uikit-glass-pressed: 1;
       --uikit-glass-scale: var(--glass-ios-lens-scale);
       --uikit-button-content-scale: var(--glass-ios-lens-content-scale);
 
       background-color: var(--uikit-button-background-pressed);
-    }
-
-    &[data-disabled] {
-      --uikit-utils-cursor: attr(cursor type(<custom-ident>), not-allowed);
-
-      background-color: var(--uikit-button-background-disabled);
-      color: var(--uikit-button-color-disabled);
     }
   }
 

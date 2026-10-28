@@ -81,12 +81,16 @@ const RootPart: FunctionComponent = () => {
                       key={value}
                       selected={value === 'inbox'}
                     >
-                      <List.Image variant="symbol">
-                        <Symbol icon={icon} />
-                      </List.Image>
-                      <List.Title render={<button type="button" />}>
-                        {rowTitle}
-                      </List.Title>
+                      <List.Leading>
+                        <List.Image variant="symbol">
+                          <Symbol icon={icon} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title render={<button type="button" />}>
+                          {rowTitle}
+                        </List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
@@ -152,12 +156,16 @@ const ToolbarPart: FunctionComponent = () => {
                 <List.Group>
                   {rows.map(([value, rowTitle, icon]) => (
                     <List.Item key={value}>
-                      <List.Image variant="symbol">
-                        <Symbol icon={icon} />
-                      </List.Image>
-                      <List.Title render={<button type="button" />}>
-                        {rowTitle}
-                      </List.Title>
+                      <List.Leading>
+                        <List.Image variant="symbol">
+                          <Symbol icon={icon} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title render={<button type="button" />}>
+                          {rowTitle}
+                        </List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
@@ -236,12 +244,16 @@ const ToolbarGroupPart: FunctionComponent = () => {
                 <List.Group>
                   {rows.map(([value, rowTitle, icon]) => (
                     <List.Item key={value}>
-                      <List.Image variant="symbol">
-                        <Symbol icon={icon} />
-                      </List.Image>
-                      <List.Title render={<button type="button" />}>
-                        {rowTitle}
-                      </List.Title>
+                      <List.Leading>
+                        <List.Image variant="symbol">
+                          <Symbol icon={icon} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title render={<button type="button" />}>
+                          {rowTitle}
+                        </List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>

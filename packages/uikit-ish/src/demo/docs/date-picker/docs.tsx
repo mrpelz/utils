@@ -226,6 +226,25 @@ export const datePickerRootRows: readonly PropRow[] = [
     </>,
   ],
   [
+    'handle',
+    'DatePickerHandle',
+    undefined,
+    <>
+      Its pickers’ handle (
+      <PartLink
+        component="date-picker"
+        part="DatePicker.createHandle"
+      />
+      ): the compact style’s buttons toggle them (no popovers), shown in place
+      by a{' '}
+      <PartLink
+        component="date-picker"
+        part="DatePicker.Expandable"
+      />{' '}
+      given it (e.g. after the picker’s list row).
+    </>,
+  ],
+  [
     'popoverAlign',
     union('start', 'center', 'end'),
     code(union('center')),
@@ -255,6 +274,54 @@ export const datePickerCalendarRows: readonly PropRow[] = [
     'string',
     'its month’s title',
     'The days’ accessible name (a group).',
+  ],
+];
+
+export const datePickerExpandableRows: readonly PropRow[] = [
+  [
+    'handle',
+    'DatePickerHandle',
+    undefined,
+    <>
+      The pickers’ handle (required), given to their{' '}
+      <PartLink
+        component="date-picker"
+        part="DatePicker.Root"
+      />{' '}
+      too.
+    </>,
+  ],
+];
+
+/**
+ * `DatePicker.createHandle()`, `useCreateDatePickerHandle()`: what they
+ * return.
+ */
+export const datePickerHandleRows: readonly PropRow[] = [
+  [
+    '(return)',
+    'DatePickerHandle',
+    undefined,
+    <>
+      A handle: passed to a{' '}
+      <PartLink
+        component="date-picker"
+        part="DatePicker.Root"
+      />{' '}
+      and to the{' '}
+      <PartLink
+        component="date-picker"
+        part="DatePicker.Expandable"
+      />{' '}
+      showing its pickers (their <code>handle</code>); from the hook, the same
+      for the component’s lifetime.
+    </>,
+  ],
+  [
+    '.open',
+    `${union('date', 'time')} | null`,
+    undefined,
+    'The open picker (null while none is, or no picker is given the handle).',
   ],
 ];
 

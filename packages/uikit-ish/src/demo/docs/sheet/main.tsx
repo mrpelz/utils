@@ -119,7 +119,9 @@ export const SheetDemo: FunctionComponent = () => {
                   <List.Group>
                     {Array.from({ length: 6 }, (_, index) => (
                       <List.Item key={index}>
-                        <List.Title>Row {index + 1}</List.Title>
+                        <List.Content>
+                          <List.Title>Row {index + 1}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>

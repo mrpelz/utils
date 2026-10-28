@@ -144,21 +144,27 @@ const LiveView: FunctionComponent = () => {
                           key={value}
                           selected={selected === value}
                         >
-                          <List.Image variant="symbol">
-                            <Symbol icon={icon} />
-                          </List.Image>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => {
-                              addLog(`select: ${value}`);
-                              setSelected(value);
-                            }}
-                          >
-                            {rowTitle}
-                          </List.Title>
-                          {count === undefined ? null : (
-                            <List.Detail>{count}</List.Detail>
-                          )}
+                          <List.Leading>
+                            <List.Image variant="symbol">
+                              <Symbol icon={icon} />
+                            </List.Image>
+                          </List.Leading>
+                          <List.Content>
+                            <List.Title
+                              render={<button type="button" />}
+                              onClick={() => {
+                                addLog(`select: ${value}`);
+                                setSelected(value);
+                              }}
+                            >
+                              {rowTitle}
+                            </List.Title>
+                          </List.Content>
+                          <List.Trailing>
+                            {count === undefined ? null : (
+                              <List.Detail>{count}</List.Detail>
+                            )}
+                          </List.Trailing>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -202,7 +208,9 @@ const LiveView: FunctionComponent = () => {
                         (_, index) => `Item ${index + 1}`,
                       ).map((item) => (
                         <List.Item key={item}>
-                          <List.Title>{item}</List.Title>
+                          <List.Content>
+                            <List.Title>{item}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>

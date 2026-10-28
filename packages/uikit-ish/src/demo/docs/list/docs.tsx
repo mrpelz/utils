@@ -50,34 +50,41 @@ const editingDescription = (scope: string, inherited: string | undefined) => (
       part="List.Grabber"
     />
     ), <code>both</code> both; <code>none</code>: not editing, all slid out and
-    hidden; <code>ignore</code>: not managed, shown as they are. Other parts
+    hidden; <code>ignore</code>: not managed, shown as they are. Rows’ slots
     follow by their <code>whileEditing</code> (e.g. a{' '}
     <PartLink
       component="list"
       part="List.DrillIn"
-    />{' '}
-    sliding out as a grabber slides in).
+    />
+    ’s sliding out as a grabber’s slides in).
     {inherited ? <> {inherited}</> : null}
   </>
 );
 
-/** A row part's `whileEditing` (its default per part). */
-const whileEditingRow = (
-  defaultValue: 'hide' | 'show' | 'stay' = 'stay',
-): PropRow => [
+/** A row slot's `whileEditing`. */
+const whileEditingRow = (): PropRow => [
   'whileEditing',
   union('show', 'hide', 'stay'),
-  code(union(defaultValue)),
+  code(union('stay')),
   <>
     In edit mode, its side’s (see{' '}
     <PartLink
       component="list"
       part="List.Section"
     />{' '}
-    <code>editing</code>): <code>show</code>, only then (sliding in);{' '}
-    <code>hide</code>, sliding out then (e.g. making way for a grabber);{' '}
-    <code>stay</code>, either way. Other elements in a row (e.g. a{' '}
-    <a href="switch">Switch</a>) take <code>data-while-editing</code>.
+    <code>editing</code>): <code>show</code>, only then (sliding in: e.g. edit
+    controls’, a{' '}
+    <PartLink
+      component="list"
+      part="List.Grabber"
+    />
+    ’s); <code>hide</code>, sliding out then (e.g. a{' '}
+    <PartLink
+      component="list"
+      part="List.DrillIn"
+    />
+    ’s, making way for a grabber); <code>stay</code>, either way, whatever it
+    holds. Parts sliding separately: in slots of their own.
   </>,
 ];
 
@@ -210,41 +217,9 @@ export const listItemRows: readonly PropRow[] = [
   ...renderRows('li', 'HTMLElement'),
 ];
 
-export const listExpandableRows: readonly PropRow[] = [
-  [
-    'open',
-    'boolean',
-    <>
-      its{' '}
-      <PartLink
-        component="list"
-        part="List.ExpandableRoot"
-      >
-        ExpandableRoot
-      </PartLink>
-      ’s state, or <code>false</code>
-    </>,
-    'Shown; changing, its height and padding transition (300ms). Closed, it’s inert.',
-  ],
-  [
-    'id',
-    'string',
-    <>
-      its{' '}
-      <PartLink
-        component="list"
-        part="List.ExpandableRoot"
-      >
-        ExpandableRoot
-      </PartLink>
-      ’s (its trigger’s <code>aria-controls</code>)
-    </>,
-    'The row’s id.',
-  ],
-  ...listItemRows,
-];
+const changeDetails = `{ event: Event, reason: ${union('trigger-press', 'none')} }`;
 
-export const listExpandableRootRows: readonly PropRow[] = [
+export const listCollapsibleRootRows: readonly PropRow[] = [
   [
     'defaultOpen',
     'boolean',
@@ -253,10 +228,8 @@ export const listExpandableRootRows: readonly PropRow[] = [
       Initially open (uncontrolled: its{' '}
       <PartLink
         component="list"
-        part="List.ExpandableTrigger"
-      >
-        ExpandableTrigger
-      </PartLink>{' '}
+        part="List.CollapsibleTrigger"
+      />{' '}
       toggles it).
     </>,
   ],
@@ -270,10 +243,11 @@ export const listExpandableRootRows: readonly PropRow[] = [
   ],
   [
     'onOpenChange',
-    '(open: boolean, event: MouseEvent<HTMLElement>) => void',
+    `(open: boolean, eventDetails: ${changeDetails}) => void`,
     undefined,
-    'Called when its trigger opens or closes it.',
+    'Called when its trigger opens or closes it, and why (Base UI’s reasons).',
   ],
+  ['disabled', 'boolean', code('false'), 'Its trigger ignores presses.'],
   [
     'children',
     'ReactNode',
@@ -282,16 +256,134 @@ export const listExpandableRootRows: readonly PropRow[] = [
       The row with its trigger, and the{' '}
       <PartLink
         component="list"
-        part="List.Expandable"
-      >
-        Expandable
-      </PartLink>
+        part="List.CollapsiblePanel"
+      />
       . It renders no element, so they stay its group’s children.
     </>,
   ],
 ];
 
-export const listExpandableTriggerRows: readonly PropRow[] = [
+export const listCollapsiblePanelRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its rows (
+      <PartLink
+        component="list"
+        part="List.Item"
+      />
+      s), among the group’s, shown while its collapsible is open (their height
+      and padding transitioning, 300ms, together; closed, inert). It renders no
+      element, so they stay its group’s children; each a row of its own (its
+      separator, first and last as the group’s), and each controlled by its{' '}
+      <PartLink
+        component="list"
+        part="List.CollapsibleTrigger"
+      />{' '}
+      (<code>aria-controls</code>, their ids, given or their own).
+    </>,
+  ],
+];
+
+export const listAccordionRootRows: readonly PropRow[] = [
+  [
+    'defaultValue',
+    'Value[]',
+    code('[]'),
+    <>
+      Its items open initially (uncontrolled), by their <code>value</code>.
+    </>,
+  ],
+  [
+    'value',
+    'Value[]',
+    undefined,
+    <>
+      Its items open (controlled, with <code>onValueChange</code>).
+    </>,
+  ],
+  [
+    'onValueChange',
+    `(value: Value[], eventDetails: ${changeDetails}) => void`,
+    undefined,
+    'Called when an item opens or closes, with the items open, and why.',
+  ],
+  [
+    'multiple',
+    'boolean',
+    code('false'),
+    'Several items open at once; otherwise, opening one closes the others.',
+  ],
+  ['disabled', 'boolean', code('false'), 'Its items’ triggers ignore presses.'],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its{' '}
+      <PartLink
+        component="list"
+        part="List.AccordionItem"
+      />
+      s, among the group’s rows. It renders no element.
+    </>,
+  ],
+];
+
+export const listAccordionItemRows: readonly PropRow[] = [
+  ['value', 'Value', 'its own', 'Its value, among its root’s.'],
+  [
+    'onOpenChange',
+    `(open: boolean, eventDetails: ${changeDetails}) => void`,
+    undefined,
+    'Called when it opens or closes, and why.',
+  ],
+  [
+    'disabled',
+    'boolean',
+    <>
+      its root’s <code>disabled</code>
+    </>,
+    'Its trigger ignores presses.',
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      As a{' '}
+      <PartLink
+        component="list"
+        part="List.CollapsibleRoot"
+      />
+      ’s: the row with its trigger (
+      <PartLink
+        component="list"
+        part="List.AccordionTrigger"
+      />
+      ), and its panel (
+      <PartLink
+        component="list"
+        part="List.AccordionPanel"
+      />
+      ); or a{' '}
+      <PartLink
+        component="date-picker"
+        part="DatePicker.Root"
+      />
+      ’s row with a <code>handle</code>, and its{' '}
+      <PartLink
+        component="date-picker"
+        part="DatePicker.Expandable"
+      />
+      . It renders no element.
+    </>,
+  ],
+];
+
+export const listCollapsibleTriggerRows: readonly PropRow[] = [
   [
     'render',
     'ReactElement | ((props) => ReactElement)',
@@ -300,9 +392,9 @@ export const listExpandableTriggerRows: readonly PropRow[] = [
       Rendered by a row’s title (
       <PartLink
         component="list"
-        part="List.ExpandableTrigger"
+        part="List.CollapsibleTrigger"
       >
-        {'<List.Title render={<List.ExpandableTrigger />}>'}
+        {'<List.Title render={<List.CollapsibleTrigger />}>'}
       </PartLink>
       ), the whole row toggles it.
     </>,
@@ -329,6 +421,31 @@ export const listBlockRows: readonly PropRow[] = [
   ['strong', 'boolean', code('false'), 'On the rows’ background (as a group).'],
   ...renderRows('div', 'HTMLElement'),
 ];
+
+export const listLeadingRows: readonly PropRow[] = [
+  whileEditingRow(),
+  ...renderRows('span', 'HTMLElement'),
+];
+
+export const listContentRows: readonly PropRow[] = renderRows(
+  'span',
+  'HTMLElement',
+);
+
+export const listTrailingRows: readonly PropRow[] = [
+  whileEditingRow(),
+  ...renderRows('span', 'HTMLElement'),
+];
+
+export const listSpanRows: readonly PropRow[] = renderRows(
+  'span',
+  'HTMLElement',
+);
+
+export const listBelowRows: readonly PropRow[] = renderRows(
+  'div',
+  'HTMLElement',
+);
 
 export const listTitleRows: readonly PropRow[] = [
   [
@@ -360,7 +477,6 @@ export const listTextRows: readonly PropRow[] = [
 ];
 
 export const listDetailRows: readonly PropRow[] = [
-  whileEditingRow(),
   ...renderRows('span', 'HTMLElement'),
 ];
 
@@ -376,7 +492,6 @@ export const listImageRows: readonly PropRow[] = [
       <code>canvas</code>.
     </>,
   ],
-  whileEditingRow(),
   ...renderRows('span', 'HTMLElement'),
 ];
 
@@ -391,13 +506,11 @@ export const listAccessoryRows: readonly PropRow[] = [
       <code>aria-label</code>).
     </>,
   ],
-  whileEditingRow(),
   ...renderRows('span', 'HTMLElement').filter(([name]) => name !== 'render'),
 ];
 
 export const listCheckmarkRows: readonly PropRow[] = [
   childrenRow('a checkmark', 'What it shows: by default, the checkmark.'),
-  whileEditingRow(),
   ...renderRows('span', 'HTMLElement'),
 ];
 
@@ -406,7 +519,6 @@ export const listDrillInRows: readonly PropRow[] = [
     'a chevron',
     'What it shows: by default, the chevron. Hidden from assistive technology.',
   ),
-  whileEditingRow('hide'),
   ...renderRows('span', 'HTMLElement'),
 ];
 
@@ -415,7 +527,6 @@ export const listDisclosureRows: readonly PropRow[] = [
     'a chevron',
     'What it shows: by default, the chevron, turned down while open (in an open Base UI Collapsible’s trigger). Hidden from assistive technology.',
   ),
-  whileEditingRow(),
   ...renderRows('span', 'HTMLElement'),
 ];
 
@@ -433,13 +544,11 @@ export const listGrabberRows: readonly PropRow[] = [
     'Focusable: arrow keys move its row by one.',
   ],
   childrenRow('three lines', 'What it shows: by default, three lines.'),
-  whileEditingRow('show'),
   ...renderRows('span', 'HTMLElement'),
 ];
 
 export const listActionRows: readonly PropRow[] = [
   secondaryClickRow,
-  whileEditingRow(),
   ...renderRows('button', 'HTMLElement'),
 ];
 
@@ -449,18 +558,11 @@ export const listButtonRows: readonly PropRow[] = [
   ...renderRows('button', 'HTMLElement'),
 ];
 
-export const listCheckboxRows: readonly PropRow[] = [
-  whileEditingRow('show'),
-  ...checkboxRootRows,
-];
+export const listCheckboxRows: readonly PropRow[] = [...checkboxRootRows];
 
-export const listRadioRows: readonly PropRow[] = [
-  whileEditingRow('show'),
-  ...radioRootRows,
-];
+export const listRadioRows: readonly PropRow[] = [...radioRootRows];
 
 export const listEditButtonRows: readonly PropRow[] = [
-  whileEditingRow('show'),
   [
     'tint',
     'string',
@@ -542,6 +644,24 @@ export const listSwipeActionsRows: readonly PropRow[] = [
     <>
       Called when released swiped on past the actions (overswiped), instead of
       triggering the outermost action; enables <code>overswipe</code>.
+    </>,
+  ],
+  [
+    'allowSwipe',
+    union('all', 'conceal', 'none', 'reveal'),
+    code(union('all')),
+    <>
+      What the user does to them, swiping (or by keyboard): opens and closes
+      them (<code>all</code>), only opens (<code>reveal</code>) or only closes
+      them (<code>conceal</code>, e.g. in edit mode, opened by a{' '}
+      <PartLink
+        component="list"
+        part="List.SwipeActionsTrigger"
+      />
+      ), or neither (<code>none</code>: only their trigger or handle does).
+      Keyboards too: not revealed by swiping, closed, they can’t be focused; not
+      concealed by swiping, open, neither focus leaving the row nor a press
+      outside it closes them.
     </>,
   ],
   ...renderRows('div', 'HTMLElement'),

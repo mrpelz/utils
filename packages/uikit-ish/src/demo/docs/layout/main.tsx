@@ -77,64 +77,88 @@ export const LayoutDemo: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfFolderFill} />
-                        </List.Image>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => {
-                            addLog('folder: Inbox');
-                            setFolder('Inbox');
-                          }}
-                        >
-                          Inbox
-                        </List.Title>
-                        {folder === 'Inbox' ? <List.Checkmark /> : null}
+                        <List.Leading>
+                          <List.Image variant="symbol">
+                            <Symbol icon={sfFolderFill} />
+                          </List.Image>
+                        </List.Leading>
+                        <List.Content>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => {
+                              addLog('folder: Inbox');
+                              setFolder('Inbox');
+                            }}
+                          >
+                            Inbox
+                          </List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          {folder === 'Inbox' ? <List.Checkmark /> : null}
+                        </List.Trailing>
                       </List.Item>
                       <List.Item>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfFolderFill} />
-                        </List.Image>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => {
-                            addLog('folder: Drafts');
-                            setFolder('Drafts');
-                          }}
-                        >
-                          Drafts
-                        </List.Title>
-                        {folder === 'Drafts' ? <List.Checkmark /> : null}
+                        <List.Leading>
+                          <List.Image variant="symbol">
+                            <Symbol icon={sfFolderFill} />
+                          </List.Image>
+                        </List.Leading>
+                        <List.Content>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => {
+                              addLog('folder: Drafts');
+                              setFolder('Drafts');
+                            }}
+                          >
+                            Drafts
+                          </List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          {folder === 'Drafts' ? <List.Checkmark /> : null}
+                        </List.Trailing>
                       </List.Item>
                       <List.Item>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfFolderFill} />
-                        </List.Image>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => {
-                            addLog('folder: Sent');
-                            setFolder('Sent');
-                          }}
-                        >
-                          Sent
-                        </List.Title>
-                        {folder === 'Sent' ? <List.Checkmark /> : null}
+                        <List.Leading>
+                          <List.Image variant="symbol">
+                            <Symbol icon={sfFolderFill} />
+                          </List.Image>
+                        </List.Leading>
+                        <List.Content>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => {
+                              addLog('folder: Sent');
+                              setFolder('Sent');
+                            }}
+                          >
+                            Sent
+                          </List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          {folder === 'Sent' ? <List.Checkmark /> : null}
+                        </List.Trailing>
                       </List.Item>
                       <List.Item>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfFolderFill} />
-                        </List.Image>
-                        <List.Title
-                          render={<button type="button" />}
-                          onClick={() => {
-                            addLog('folder: Archive');
-                            setFolder('Archive');
-                          }}
-                        >
-                          Archive
-                        </List.Title>
-                        {folder === 'Archive' ? <List.Checkmark /> : null}
+                        <List.Leading>
+                          <List.Image variant="symbol">
+                            <Symbol icon={sfFolderFill} />
+                          </List.Image>
+                        </List.Leading>
+                        <List.Content>
+                          <List.Title
+                            render={<button type="button" />}
+                            onClick={() => {
+                              addLog('folder: Archive');
+                              setFolder('Archive');
+                            }}
+                          >
+                            Archive
+                          </List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          {folder === 'Archive' ? <List.Checkmark /> : null}
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                   </List.Section>
@@ -165,16 +189,20 @@ export const LayoutDemo: FunctionComponent = () => {
                         (_, index) => `Message ${index + 1}`,
                       ).map((name) => (
                         <List.Item key={name}>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => {
-                              addLog(`message: ${name}`);
-                              setMessage(name);
-                            }}
-                          >
-                            {name}
-                          </List.Title>
-                          {name === message ? <List.Checkmark /> : null}
+                          <List.Content>
+                            <List.Title
+                              render={<button type="button" />}
+                              onClick={() => {
+                                addLog(`message: ${name}`);
+                                setMessage(name);
+                              }}
+                            >
+                              {name}
+                            </List.Title>
+                          </List.Content>
+                          <List.Trailing>
+                            {name === message ? <List.Checkmark /> : null}
+                          </List.Trailing>
                         </List.Item>
                       ))}
                     </List.Group>

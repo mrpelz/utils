@@ -1,6 +1,5 @@
 import './style.css';
 
-import { Collapsible } from '@base-ui/react/collapsible';
 import { RadioGroup } from '@base-ui/react/radio-group';
 import { sfAirplane } from '@bradleyhodges/sfsymbols/sfAirplane';
 import { sfArchiveboxFill } from '@bradleyhodges/sfsymbols/sfArchiveboxFill';
@@ -28,8 +27,8 @@ import { FunctionComponent, useMemo, useRef, useState } from 'react';
 
 import {
   Button,
+  Collapsible,
   DatePicker,
-  DatePickerOpen,
   forwardClick,
   List,
   Menu,
@@ -39,6 +38,7 @@ import {
   Switch,
   Symbol,
   TextField,
+  useCreateDatePickerHandle,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
@@ -57,6 +57,7 @@ import {
   getPropOptionsEditButton,
   getPropOptionsEditButtonFirst,
   getPropOptionsItemFirst,
+  getPropOptionsListCollapsibleRoot,
   getPropOptionsRadioGroup,
   getPropOptionsSwipeActionFirst,
   getPropOptionsSwipeActionOutermost,
@@ -67,7 +68,6 @@ import {
   propOptionsCheckbox,
   propOptionsCollapsible,
   propOptionsCursor,
-  propOptionsExpandable,
   propOptionsHeader,
   propOptionsImage,
   propOptionsIndex,
@@ -146,112 +146,138 @@ export const ListDemo: FunctionComponent = () => {
           </List.Header>
           <List.Group>
             <List.Item {...propsItem}>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfAirplane} />
-              </List.Image>
-              <List.Title>Airplane Mode</List.Title>
-              <Switch.Root
-                aria-label="Airplane Mode"
-                tint="var(--color-ios-system-orange)"
-                onCheckedChange={(isChecked: boolean) =>
-                  addLog(`airplane mode: ${isChecked}`)
-                }
-              >
-                <Switch.Thumb />
-              </Switch.Root>
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfAirplane} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title>Airplane Mode</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <Switch.Root
+                  aria-label="Airplane Mode"
+                  tint="var(--color-ios-system-orange)"
+                  onCheckedChange={(isChecked: boolean) =>
+                    addLog(`airplane mode: ${isChecked}`)
+                  }
+                >
+                  <Switch.Thumb />
+                </Switch.Root>
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfWifi} />
-              </List.Image>
-              <List.Title
-                render={<button />}
-                onClick={() => addLog('Wi-Fi clicked')}
-              >
-                Wi-Fi
-              </List.Title>
-              <List.Detail>Home</List.Detail>
-              <List.DrillIn />
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfWifi} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => addLog('Wi-Fi clicked')}
+                >
+                  Wi-Fi
+                </List.Title>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail>Home</List.Detail>
+              </List.Trailing>
+              <List.Trailing>
+                <List.DrillIn />
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-red)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfBellFill} />
-              </List.Image>
-              <List.Title
-                render={<button />}
-                onClick={() => addLog('Notifications clicked')}
-              >
-                Notifications
-              </List.Title>
-              <List.Subtitle>Banners, Sounds</List.Subtitle>
-              <List.DrillIn />
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-red)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfBellFill} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => addLog('Notifications clicked')}
+                >
+                  Notifications
+                </List.Title>
+                <List.Subtitle>Banners, Sounds</List.Subtitle>
+              </List.Content>
+              <List.Trailing>
+                <List.DrillIn />
+              </List.Trailing>
             </List.Item>
             {/* A pop-up button (see “Menu (Pop-up Button)”): gray, in a
                 row. */}
             <List.Item onClick={forwardClick('[aria-haspopup]')}>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-gray)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfPersonFill} />
-              </List.Image>
-              <List.Title>Show Previews</List.Title>
-              <Menu.Root>
-                <Menu.Trigger
-                  render={
-                    <Button.Root tint="var(--color-ios-secondary-label)" />
-                  }
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-gray)' }}
+                  variant="rounded"
                 >
-                  <Button.Label>{previews}</Button.Label>
-                  <Button.Icon>
-                    <Symbol icon={sfChevronUpChevronDown} />
-                  </Button.Icon>
-                </Menu.Trigger>
-                <Menu.Portal>
-                  <Menu.Positioner align="end">
-                    <Menu.Popup>
-                      <Menu.RadioGroup
-                        value={previews}
-                        onValueChange={(next: unknown) => {
-                          addLog(`show previews: ${String(next)}`);
-                          setPreviews(String(next));
-                        }}
-                      >
-                        <Menu.RadioItem
-                          closeOnClick
-                          value="Automatic"
+                  <Symbol icon={sfPersonFill} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title>Show Previews</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <Menu.Root>
+                  <Menu.Trigger
+                    render={
+                      <Button.Root tint="var(--color-ios-secondary-label)" />
+                    }
+                  >
+                    <Button.Label>{previews}</Button.Label>
+                    <Button.Icon>
+                      <Symbol icon={sfChevronUpChevronDown} />
+                    </Button.Icon>
+                  </Menu.Trigger>
+                  <Menu.Portal>
+                    <Menu.Positioner align="end">
+                      <Menu.Popup>
+                        <Menu.RadioGroup
+                          value={previews}
+                          onValueChange={(next: unknown) => {
+                            addLog(`show previews: ${String(next)}`);
+                            setPreviews(String(next));
+                          }}
                         >
-                          <Menu.RadioItemIndicator />
-                          <Menu.Label>Automatic</Menu.Label>
-                        </Menu.RadioItem>
-                        <Menu.RadioItem
-                          closeOnClick
-                          value="Always"
-                        >
-                          <Menu.RadioItemIndicator />
-                          <Menu.Label>Always</Menu.Label>
-                        </Menu.RadioItem>
-                        <Menu.RadioItem
-                          closeOnClick
-                          value="Never"
-                        >
-                          <Menu.RadioItemIndicator />
-                          <Menu.Label>Never</Menu.Label>
-                        </Menu.RadioItem>
-                      </Menu.RadioGroup>
-                    </Menu.Popup>
-                  </Menu.Positioner>
-                </Menu.Portal>
-              </Menu.Root>
+                          <Menu.RadioItem
+                            closeOnClick
+                            value="Automatic"
+                          >
+                            <Menu.RadioItemIndicator />
+                            <Menu.Label>Automatic</Menu.Label>
+                          </Menu.RadioItem>
+                          <Menu.RadioItem
+                            closeOnClick
+                            value="Always"
+                          >
+                            <Menu.RadioItemIndicator />
+                            <Menu.Label>Always</Menu.Label>
+                          </Menu.RadioItem>
+                          <Menu.RadioItem
+                            closeOnClick
+                            value="Never"
+                          >
+                            <Menu.RadioItemIndicator />
+                            <Menu.Label>Never</Menu.Label>
+                          </Menu.RadioItem>
+                        </Menu.RadioGroup>
+                      </Menu.Popup>
+                    </Menu.Positioner>
+                  </Menu.Portal>
+                </Menu.Root>
+              </List.Trailing>
             </List.Item>
             <List.Item
               onClick={({ target }) => {
@@ -262,80 +288,102 @@ export const ListDemo: FunctionComponent = () => {
                 setIsFavorite(!isFavorite);
               }}
             >
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-pink)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfHeartFill} />
-              </List.Image>
-              <List.Title>Favorite</List.Title>
-              <List.Accessory
-                aria-label="Info"
-                render={<button type="button" />}
-                onClick={() => addLog('info clicked')}
-              >
-                <Symbol icon={sfICircle} />
-              </List.Accessory>
-              {isFavorite ? <List.Checkmark /> : null}
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-pink)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfHeartFill} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title>Favorite</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <List.Accessory
+                  aria-label="Info"
+                  render={<button type="button" />}
+                  onClick={() => addLog('info clicked')}
+                >
+                  <Symbol icon={sfICircle} />
+                </List.Accessory>
+                {isFavorite ? <List.Checkmark /> : null}
+              </List.Trailing>
             </List.Item>
             <List.Item onClick={forwardClick('[data-list-part=action]')}>
-              <List.Title>Button</List.Title>
-              <List.Action onClick={() => addLog('action clicked')}>
-                Button
-              </List.Action>
+              <List.Content>
+                <List.Title>Button</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <List.Action onClick={() => addLog('action clicked')}>
+                  Button
+                </List.Action>
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.Title>Text Size</List.Title>
-              <Segmented.Root
-                aria-label="Text Size"
-                defaultValue="M"
-                onValueChange={(value: unknown) =>
-                  addLog(`text size: ${String(value)}`)
-                }
-              >
-                <Segmented.Item value="S">S</Segmented.Item>
-                <Segmented.Item value="M">M</Segmented.Item>
-                <Segmented.Item value="L">L</Segmented.Item>
-                <Segmented.Highlight />
-              </Segmented.Root>
+              <List.Content>
+                <List.Title>Text Size</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <Segmented.Root
+                  aria-label="Text Size"
+                  defaultValue="M"
+                  onValueChange={(value: unknown) =>
+                    addLog(`text size: ${String(value)}`)
+                  }
+                >
+                  <Segmented.Item value="S">S</Segmented.Item>
+                  <Segmented.Item value="M">M</Segmented.Item>
+                  <Segmented.Item value="L">L</Segmented.Item>
+                  <Segmented.Highlight />
+                </Segmented.Root>
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.Title>Quantity</List.Title>
-              <List.Detail>{quantity}</List.Detail>
-              <Stepper.Root
-                value={quantity}
-                onValueChange={(value: number | null) => {
-                  addLog(`quantity: ${String(value)}`);
-                  setQuantity(value ?? 0);
-                }}
-              >
-                <Stepper.Group>
-                  <Stepper.Input aria-label="Quantity" />
-                  <Stepper.Decrement />
-                  <Stepper.Increment />
-                </Stepper.Group>
-              </Stepper.Root>
+              <List.Content>
+                <List.Title>Quantity</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail>{quantity}</List.Detail>
+              </List.Trailing>
+              <List.Trailing>
+                <Stepper.Root
+                  value={quantity}
+                  onValueChange={(value: number | null) => {
+                    addLog(`quantity: ${String(value)}`);
+                    setQuantity(value ?? 0);
+                  }}
+                >
+                  <Stepper.Group>
+                    <Stepper.Input aria-label="Quantity" />
+                    <Stepper.Decrement />
+                    <Stepper.Increment />
+                  </Stepper.Group>
+                </Stepper.Root>
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <Slider.Root
-                defaultValue={60}
-                onValueCommitted={(value: number | readonly number[]) =>
-                  addLog(`brightness: ${String(value)}`)
-                }
-              >
-                <Slider.Symbol edge="min">
-                  <Symbol icon={sfSunMin} />
-                </Slider.Symbol>
-                <Slider.Control>
-                  <Slider.Track>
-                    <Slider.Indicator />
-                    <Slider.Thumb aria-label="Brightness" />
-                  </Slider.Track>
-                </Slider.Control>
-                <Slider.Symbol edge="max">
-                  <Symbol icon={sfSunMax} />
-                </Slider.Symbol>
-              </Slider.Root>
+              <List.Span>
+                <Slider.Root
+                  defaultValue={60}
+                  onValueCommitted={(value: number | readonly number[]) =>
+                    addLog(`brightness: ${String(value)}`)
+                  }
+                >
+                  <Slider.Symbol edge="min">
+                    <Symbol icon={sfSunMin} />
+                  </Slider.Symbol>
+                  <Slider.Control>
+                    <Slider.Track>
+                      <Slider.Indicator />
+                      <Slider.Thumb aria-label="Brightness" />
+                    </Slider.Track>
+                  </Slider.Control>
+                  <Slider.Symbol edge="max">
+                    <Symbol icon={sfSunMax} />
+                  </Slider.Symbol>
+                </Slider.Root>
+              </List.Span>
             </List.Item>
           </List.Group>
           <List.Footer>Footer text, aligned with the rows’ text.</List.Footer>
@@ -361,31 +409,43 @@ export const ListDemo: FunctionComponent = () => {
           </Collapsible.Trigger>
           <Collapsible.Panel render={<List.Group />}>
             <List.Item>
-              <List.Title
-                render={<button />}
-                onClick={() => setPreviews('Automatic')}
-              >
-                Automatic
-              </List.Title>
-              {previews === 'Automatic' ? <List.Checkmark /> : null}
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => setPreviews('Automatic')}
+                >
+                  Automatic
+                </List.Title>
+              </List.Content>
+              <List.Trailing>
+                {previews === 'Automatic' ? <List.Checkmark /> : null}
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.Title
-                render={<button />}
-                onClick={() => setPreviews('Always')}
-              >
-                Always
-              </List.Title>
-              {previews === 'Always' ? <List.Checkmark /> : null}
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => setPreviews('Always')}
+                >
+                  Always
+                </List.Title>
+              </List.Content>
+              <List.Trailing>
+                {previews === 'Always' ? <List.Checkmark /> : null}
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.Title
-                render={<button />}
-                onClick={() => setPreviews('Never')}
-              >
-                Never
-              </List.Title>
-              {previews === 'Never' ? <List.Checkmark /> : null}
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => setPreviews('Never')}
+                >
+                  Never
+                </List.Title>
+              </List.Content>
+              <List.Trailing>
+                {previews === 'Never' ? <List.Checkmark /> : null}
+              </List.Trailing>
             </List.Item>
           </Collapsible.Panel>
         </Collapsible.Root>
@@ -393,20 +453,26 @@ export const ListDemo: FunctionComponent = () => {
         <List.Section>
           <List.Group>
             <List.Item>
-              <List.Button onClick={() => addLog('action clicked')}>
-                Action
-              </List.Button>
+              <List.Content>
+                <List.Button onClick={() => addLog('action clicked')}>
+                  Action
+                </List.Button>
+              </List.Content>
             </List.Item>
             <List.Item>
-              <List.Button
-                destructive
-                onClick={() => addLog('destructive clicked')}
-              >
-                Action
-              </List.Button>
+              <List.Content>
+                <List.Button
+                  destructive
+                  onClick={() => addLog('destructive clicked')}
+                >
+                  Action
+                </List.Button>
+              </List.Content>
             </List.Item>
             <List.Item>
-              <List.Button disabled>Action</List.Button>
+              <List.Content>
+                <List.Button disabled>Action</List.Button>
+              </List.Content>
             </List.Item>
           </List.Group>
         </List.Section>
@@ -659,64 +725,92 @@ export const ListPartsDemo: FunctionComponent = () => {
           </List.Header>
           <List.Group {...propsGroup}>
             <List.Item {...propsItem}>
-              <List.Image
-                {...propsImage}
-                variant={propsImage.variant ?? 'rounded'}
-                style={{
-                  backgroundColor: 'var(--color-ios-system-blue)',
-                  ...propsImage.style,
-                }}
-              >
-                <Symbol icon={sfWifi} />
-              </List.Image>
-              <List.Title {...propsTitle}>Title</List.Title>
-              <List.Subtitle {...propsSubtitle}>Subtitle</List.Subtitle>
-              <List.Detail {...propsDetail}>Detail</List.Detail>
-              <List.DrillIn {...propsDrillIn} />
+              <List.Leading>
+                <List.Image
+                  {...propsImage}
+                  variant={propsImage.variant ?? 'rounded'}
+                  style={{
+                    backgroundColor: 'var(--color-ios-system-blue)',
+                    ...propsImage.style,
+                  }}
+                >
+                  <Symbol icon={sfWifi} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title {...propsTitle}>Title</List.Title>
+                <List.Subtitle {...propsSubtitle}>Subtitle</List.Subtitle>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail {...propsDetail}>Detail</List.Detail>
+              </List.Trailing>
+              <List.Trailing>
+                <List.DrillIn {...propsDrillIn} />
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.Title>Accessory, checkmark</List.Title>
-              <List.Accessory
-                aria-label="Info"
-                {...propsAccessory}
-              >
-                <Symbol icon={sfICircle} />
-              </List.Accessory>
-              <List.Checkmark {...propsCheckmark} />
+              <List.Content>
+                <List.Title>Accessory, checkmark</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <List.Accessory
+                  aria-label="Info"
+                  {...propsAccessory}
+                >
+                  <Symbol icon={sfICircle} />
+                </List.Accessory>
+                <List.Checkmark {...propsCheckmark} />
+              </List.Trailing>
             </List.Item>
             {/* Rows with a single control pass their clicks on to it. */}
             <List.Item onClick={forwardClick('[data-list-part=action]')}>
-              <List.Title>Action</List.Title>
-              <List.Action {...propsAction}>Action</List.Action>
+              <List.Content>
+                <List.Title>Action</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <List.Action {...propsAction}>Action</List.Action>
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.Button {...propsButton}>Button</List.Button>
+              <List.Content>
+                <List.Button {...propsButton}>Button</List.Button>
+              </List.Content>
             </List.Item>
             <List.Item onClick={forwardClick('[role=checkbox]')}>
-              <List.Checkbox
-                key={keyCheckbox}
-                aria-label="Checkbox"
-                {...propsCheckbox}
-              />
-              <List.Title>Checkbox, grabber</List.Title>
-              <List.Grabber
-                aria-label="Reorder"
-                {...propsGrabber}
-              />
+              <List.Leading>
+                <List.Checkbox
+                  key={keyCheckbox}
+                  aria-label="Checkbox"
+                  {...propsCheckbox}
+                />
+              </List.Leading>
+              <List.Content>
+                <List.Title>Checkbox, grabber</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <List.Grabber
+                  aria-label="Reorder"
+                  {...propsGrabber}
+                />
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.SwipeActionsTrigger
-                {...propsSwipeActionsTrigger}
-                render={
-                  <List.EditButton
-                    aria-label="Edit"
-                    {...propsEditButton}
-                  >
-                    <Symbol icon={sfMinus} />
-                  </List.EditButton>
-                }
-              />
-              <List.Title>Edit button</List.Title>
+              <List.Leading>
+                <List.SwipeActionsTrigger
+                  {...propsSwipeActionsTrigger}
+                  render={
+                    <List.EditButton
+                      aria-label="Edit"
+                      {...propsEditButton}
+                    >
+                      <Symbol icon={sfMinus} />
+                    </List.EditButton>
+                  }
+                />
+              </List.Leading>
+              <List.Content>
+                <List.Title>Edit button</List.Title>
+              </List.Content>
               <List.SwipeActions>
                 <List.SwipeAction
                   label="Delete"
@@ -728,16 +822,22 @@ export const ListPartsDemo: FunctionComponent = () => {
               </List.SwipeActions>
             </List.Item>
             <List.Item>
-              <List.Image variant="circular">
-                <Symbol icon={sfPersonCropCircleFill} />
-              </List.Image>
-              <List.Title>Swipe actions</List.Title>
-              <List.Detail>09:41</List.Detail>
-              <List.Subtitle>Text, swipe actions</List.Subtitle>
-              <List.Text {...propsText}>
-                A multi-line row: body text below the title and subtitle, at
-                most two lines by default. Swipe it either way.
-              </List.Text>
+              <List.Leading>
+                <List.Image variant="circular">
+                  <Symbol icon={sfPersonCropCircleFill} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title>Swipe actions</List.Title>
+                <List.Subtitle>Text, swipe actions</List.Subtitle>
+                <List.Text {...propsText}>
+                  A multi-line row: body text below the title and subtitle, at
+                  most two lines by default. Swipe it either way.
+                </List.Text>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail>09:41</List.Detail>
+              </List.Trailing>
               <List.SwipeActions
                 overswipe
                 side="inline-start"
@@ -790,8 +890,8 @@ export const ListPartsDemo: FunctionComponent = () => {
 
 /**
  * A collapsible section (Base UI `Collapsible`: its header the trigger, its
- * group the panel), and an expandable row (`List.Expandable`, toggled by
- * the row above it: `List.ExpandableRoot`, its title the trigger).
+ * group the panel), and an expandable row (`List.CollapsiblePanel`, toggled by
+ * the row above it: `List.CollapsibleRoot`, its title the trigger).
  */
 export const ListCollapsibleDemo: FunctionComponent = () => {
   const id = 'list-collapsible';
@@ -802,7 +902,7 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
     externalTrigger,
     externalPanel,
     externalDisclosure,
-    externalExpandable,
+    externalListCollapsible,
   ] = useProvidedState(id);
 
   const [selection, setSelection] = useState('Automatic');
@@ -829,10 +929,15 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
     commonPropOptions,
     { external: externalDisclosure, title: 'List.Disclosure' },
   );
-  const [controlExpandable, propsExpandable, stateExpandable] = usePropControl(
-    propOptionsExpandable,
-    { external: externalExpandable, isOpen: true, title: 'List.Expandable' },
-  );
+  const [controlListCollapsible, propsListCollapsible, stateListCollapsible] =
+    usePropControl(
+      useMemo(() => getPropOptionsListCollapsibleRoot(addLog), [addLog]),
+      {
+        external: externalListCollapsible,
+        isOpen: true,
+        title: 'List.CollapsibleRoot',
+      },
+    );
 
   return (
     <Component
@@ -845,14 +950,14 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
         controlTrigger,
         controlPanel,
         controlDisclosure,
-        controlExpandable,
+        controlListCollapsible,
       ]}
       state={[
         stateCollapsible,
         stateTrigger,
         statePanel,
         stateDisclosure,
-        stateExpandable,
+        stateListCollapsible,
       ]}
     >
       <List.Root>
@@ -879,58 +984,80 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
             render={<List.Group />}
           >
             <List.Item>
-              <List.Title
-                render={<button />}
-                onClick={() => setSelection('Automatic')}
-              >
-                Automatic
-              </List.Title>
-              {selection === 'Automatic' ? <List.Checkmark /> : null}
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => setSelection('Automatic')}
+                >
+                  Automatic
+                </List.Title>
+              </List.Content>
+              <List.Trailing>
+                {selection === 'Automatic' ? <List.Checkmark /> : null}
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.Title
-                render={<button />}
-                onClick={() => setSelection('Always')}
-              >
-                Always
-              </List.Title>
-              {selection === 'Always' ? <List.Checkmark /> : null}
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => setSelection('Always')}
+                >
+                  Always
+                </List.Title>
+              </List.Content>
+              <List.Trailing>
+                {selection === 'Always' ? <List.Checkmark /> : null}
+              </List.Trailing>
             </List.Item>
             <List.Item>
-              <List.Title
-                render={<button />}
-                onClick={() => setSelection('Never')}
-              >
-                Never
-              </List.Title>
-              {selection === 'Never' ? <List.Checkmark /> : null}
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => setSelection('Never')}
+                >
+                  Never
+                </List.Title>
+              </List.Content>
+              <List.Trailing>
+                {selection === 'Never' ? <List.Checkmark /> : null}
+              </List.Trailing>
             </List.Item>
           </Collapsible.Panel>
         </Collapsible.Root>
 
         <List.Section>
           <List.Group>
-            <List.ExpandableRoot
-              onOpenChange={(isOpen: boolean) => addLog(`expanded: ${isOpen}`)}
-            >
+            <List.CollapsibleRoot {...propsListCollapsible}>
               <List.Item>
-                <List.Title render={<List.ExpandableTrigger />}>
-                  Expandable row
-                </List.Title>
-                <List.Disclosure />
+                <List.Content>
+                  <List.Title render={<List.CollapsibleTrigger />}>
+                    Collapsible row
+                  </List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Disclosure />
+                </List.Trailing>
               </List.Item>
-              <List.Expandable {...propsExpandable}>
-                <List.Image variant="rounded">
-                  <Symbol icon={sfWifi} />
-                </List.Image>
-                <List.Title>Expanded</List.Title>
-                <List.Subtitle>
-                  Shown below the row above, opening and closing in place.
-                </List.Subtitle>
-              </List.Expandable>
-            </List.ExpandableRoot>
+              <List.CollapsiblePanel>
+                <List.Item>
+                  <List.Leading>
+                    <List.Image variant="rounded">
+                      <Symbol icon={sfWifi} />
+                    </List.Image>
+                  </List.Leading>
+                  <List.Content>
+                    <List.Title>Expanded</List.Title>
+                    <List.Subtitle>
+                      Shown below the row above, opening and closing in place.
+                    </List.Subtitle>
+                  </List.Content>
+                </List.Item>
+              </List.CollapsiblePanel>
+            </List.CollapsibleRoot>
             <List.Item>
-              <List.Title>Below</List.Title>
+              <List.Content>
+                <List.Title>Below</List.Title>
+              </List.Content>
             </List.Item>
           </List.Group>
         </List.Section>
@@ -984,20 +1111,28 @@ export const ListSwipeDemo: FunctionComponent = () => {
         <List.Section>
           <List.Group>
             <List.Item>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfEnvelopeFill} />
-              </List.Image>
-              <List.Title
-                render={<button />}
-                onClick={() => addLog('Regular clicked')}
-              >
-                Regular
-              </List.Title>
-              <List.Detail>Detail</List.Detail>
-              <List.DrillIn />
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfEnvelopeFill} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => addLog('Regular clicked')}
+                >
+                  Regular
+                </List.Title>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail>Detail</List.Detail>
+              </List.Trailing>
+              <List.Trailing>
+                <List.DrillIn />
+              </List.Trailing>
               <List.SwipeActions
                 side="inline-start"
                 {...propsSwipeActions}
@@ -1050,21 +1185,29 @@ export const ListSwipeDemo: FunctionComponent = () => {
               </List.SwipeActions>
             </List.Item>
             <List.Item>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfEnvelopeFill} />
-              </List.Image>
-              <List.Title
-                render={<button />}
-                onClick={() => addLog('Tall clicked')}
-              >
-                Tall
-              </List.Title>
-              <List.Subtitle>Swipe either way</List.Subtitle>
-              <List.Detail>Detail</List.Detail>
-              <List.DrillIn />
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfEnvelopeFill} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => addLog('Tall clicked')}
+                >
+                  Tall
+                </List.Title>
+                <List.Subtitle>Swipe either way</List.Subtitle>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail>Detail</List.Detail>
+              </List.Trailing>
+              <List.Trailing>
+                <List.DrillIn />
+              </List.Trailing>
               <List.SwipeActions
                 overswipe
                 side="inline-start"
@@ -1115,25 +1258,33 @@ export const ListSwipeDemo: FunctionComponent = () => {
               </List.SwipeActions>
             </List.Item>
             <List.Item>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfEnvelopeFill} />
-              </List.Image>
-              <List.Title
-                render={<button />}
-                onClick={() => addLog('Multi-line clicked')}
-              >
-                Multi-line
-              </List.Title>
-              <List.Subtitle>Swipe either way</List.Subtitle>
-              <List.Text>
-                Swipe on past the actions to trigger the outermost one, on
-                either side; let go before to keep them open.
-              </List.Text>
-              <List.Detail>Detail</List.Detail>
-              <List.DrillIn />
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfEnvelopeFill} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => addLog('Multi-line clicked')}
+                >
+                  Multi-line
+                </List.Title>
+                <List.Subtitle>Swipe either way</List.Subtitle>
+                <List.Text>
+                  Swipe on past the actions to trigger the outermost one, on
+                  either side; let go before to keep them open.
+                </List.Text>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail>Detail</List.Detail>
+              </List.Trailing>
+              <List.Trailing>
+                <List.DrillIn />
+              </List.Trailing>
               <List.SwipeActions
                 overswipe
                 side="inline-start"
@@ -1190,25 +1341,33 @@ export const ListSwipeDemo: FunctionComponent = () => {
               </List.SwipeActions>
             </List.Item>
             <List.Item>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfEnvelopeFill} />
-              </List.Image>
-              <List.Title
-                render={<button />}
-                onClick={() => addLog('Rounded rectangles clicked')}
-              >
-                Rounded rectangles
-              </List.Title>
-              <List.Subtitle>Swipe either way</List.Subtitle>
-              <List.Text>
-                Swipe on past the actions to trigger the outermost one, on
-                either side; let go before to keep them open.
-              </List.Text>
-              <List.Detail>Detail</List.Detail>
-              <List.DrillIn />
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfEnvelopeFill} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => addLog('Rounded rectangles clicked')}
+                >
+                  Rounded rectangles
+                </List.Title>
+                <List.Subtitle>Swipe either way</List.Subtitle>
+                <List.Text>
+                  Swipe on past the actions to trigger the outermost one, on
+                  either side; let go before to keep them open.
+                </List.Text>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail>Detail</List.Detail>
+              </List.Trailing>
+              <List.Trailing>
+                <List.DrillIn />
+              </List.Trailing>
               <List.SwipeActions
                 overswipe
                 side="inline-start"
@@ -1273,21 +1432,29 @@ export const ListSwipeDemo: FunctionComponent = () => {
             {/* The outermost (Pin, Done) rounded rectangles, the others
                circles. */}
             <List.Item>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfEnvelopeFill} />
-              </List.Image>
-              <List.Title
-                render={<button />}
-                onClick={() => addLog('Mixed clicked')}
-              >
-                Mixed
-              </List.Title>
-              <List.Subtitle>Swipe either way</List.Subtitle>
-              <List.Detail>Detail</List.Detail>
-              <List.DrillIn />
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfEnvelopeFill} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => addLog('Mixed clicked')}
+                >
+                  Mixed
+                </List.Title>
+                <List.Subtitle>Swipe either way</List.Subtitle>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail>Detail</List.Detail>
+              </List.Trailing>
+              <List.Trailing>
+                <List.DrillIn />
+              </List.Trailing>
               <List.SwipeActions
                 overswipe
                 side="inline-start"
@@ -1344,21 +1511,29 @@ export const ListSwipeDemo: FunctionComponent = () => {
               </List.SwipeActions>
             </List.Item>
             <List.Item>
-              <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
-                variant="rounded"
-              >
-                <Symbol icon={sfEnvelopeFill} />
-              </List.Image>
-              <List.Title
-                render={<button />}
-                onClick={() => addLog('Text clicked')}
-              >
-                Text
-              </List.Title>
-              <List.Subtitle>Swipe either way</List.Subtitle>
-              <List.Detail>Detail</List.Detail>
-              <List.DrillIn />
+              <List.Leading>
+                <List.Image
+                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  variant="rounded"
+                >
+                  <Symbol icon={sfEnvelopeFill} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button />}
+                  onClick={() => addLog('Text clicked')}
+                >
+                  Text
+                </List.Title>
+                <List.Subtitle>Swipe either way</List.Subtitle>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail>Detail</List.Detail>
+              </List.Trailing>
+              <List.Trailing>
+                <List.DrillIn />
+              </List.Trailing>
               <List.SwipeActions
                 overswipe
                 side="inline-start"
@@ -1474,11 +1649,15 @@ export const ListEditDemo: FunctionComponent = () => {
           >
             {rows.map((name, index) => (
               <List.Item key={name}>
-                <List.Title>{name}</List.Title>
-                <List.Grabber
-                  aria-label={`Reorder ${name}`}
-                  {...(index === 0 ? propsGrabber : {})}
-                />
+                <List.Content>
+                  <List.Title>{name}</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Grabber
+                    aria-label={`Reorder ${name}`}
+                    {...(index === 0 ? propsGrabber : {})}
+                  />
+                </List.Trailing>
                 <List.SwipeActions overswipe>
                   <List.SwipeAction
                     label="Delete"
@@ -1545,18 +1724,22 @@ export const ListEditDeleteDemo: FunctionComponent = () => {
           <List.Group>
             {rows.map((name, index) => (
               <List.Item key={name}>
-                <List.SwipeActionsTrigger
-                  render={
-                    <List.EditButton
-                      aria-label={`Delete ${name}`}
-                      tint="var(--color-ios-system-red)"
-                      {...(index === 0 ? propsEditButton : {})}
-                    >
-                      <Symbol icon={sfMinus} />
-                    </List.EditButton>
-                  }
-                />
-                <List.Title>{name}</List.Title>
+                <List.Leading>
+                  <List.SwipeActionsTrigger
+                    render={
+                      <List.EditButton
+                        aria-label={`Delete ${name}`}
+                        tint="var(--color-ios-system-red)"
+                        {...(index === 0 ? propsEditButton : {})}
+                      >
+                        <Symbol icon={sfMinus} />
+                      </List.EditButton>
+                    }
+                  />
+                </List.Leading>
+                <List.Content>
+                  <List.Title>{name}</List.Title>
+                </List.Content>
                 <List.SwipeActions overswipe>
                   <List.SwipeAction
                     label="Delete"
@@ -1616,17 +1799,21 @@ export const ListEditInsertDemo: FunctionComponent = () => {
           <List.Group>
             {rows.map((name) => (
               <List.Item key={name}>
-                <List.SwipeActionsTrigger
-                  render={
-                    <List.EditButton
-                      aria-label={`Delete ${name}`}
-                      tint="var(--color-ios-system-red)"
-                    >
-                      <Symbol icon={sfMinus} />
-                    </List.EditButton>
-                  }
-                />
-                <List.Title>{name}</List.Title>
+                <List.Leading>
+                  <List.SwipeActionsTrigger
+                    render={
+                      <List.EditButton
+                        aria-label={`Delete ${name}`}
+                        tint="var(--color-ios-system-red)"
+                      >
+                        <Symbol icon={sfMinus} />
+                      </List.EditButton>
+                    }
+                  />
+                </List.Leading>
+                <List.Content>
+                  <List.Title>{name}</List.Title>
+                </List.Content>
                 <List.SwipeActions overswipe>
                   <List.SwipeAction
                     label="Delete"
@@ -1644,19 +1831,23 @@ export const ListEditInsertDemo: FunctionComponent = () => {
               </List.Item>
             ))}
             <List.Item>
-              <List.EditButton
-                aria-label="Add Planet"
-                tint="var(--color-ios-system-green)"
-                onClick={() => {
-                  added.current += 1;
-                  const row = `New ${added.current}`;
-                  addLog(`insert ${row}`);
-                  setRows((current) => [...current, row]);
-                }}
-              >
-                <Symbol icon={sfPlus} />
-              </List.EditButton>
-              <List.Title>Add Planet</List.Title>
+              <List.Leading>
+                <List.EditButton
+                  aria-label="Add Planet"
+                  tint="var(--color-ios-system-green)"
+                  onClick={() => {
+                    added.current += 1;
+                    const row = `New ${added.current}`;
+                    addLog(`insert ${row}`);
+                    setRows((current) => [...current, row]);
+                  }}
+                >
+                  <Symbol icon={sfPlus} />
+                </List.EditButton>
+              </List.Leading>
+              <List.Content>
+                <List.Title>Add Planet</List.Title>
+              </List.Content>
             </List.Item>
           </List.Group>
         </List.Section>
@@ -1706,16 +1897,20 @@ export const ListEditSelectDemo: FunctionComponent = () => {
                 key={name}
                 onClick={forwardClick('[role=checkbox]')}
               >
-                {index === 0 ? (
-                  <List.Checkbox
-                    key={keyCheckbox}
-                    aria-label={name}
-                    {...propsCheckbox}
-                  />
-                ) : (
-                  <List.Checkbox aria-label={name} />
-                )}
-                <List.Title>{name}</List.Title>
+                <List.Leading>
+                  {index === 0 ? (
+                    <List.Checkbox
+                      key={keyCheckbox}
+                      aria-label={name}
+                      {...propsCheckbox}
+                    />
+                  ) : (
+                    <List.Checkbox aria-label={name} />
+                  )}
+                </List.Leading>
+                <List.Content>
+                  <List.Title>{name}</List.Title>
+                </List.Content>
               </List.Item>
             ))}
           </List.Group>
@@ -1793,13 +1988,19 @@ export const ListEditSelectSingleDemo: FunctionComponent = () => {
                 key={name}
                 onClick={forwardClick('[role=radio]')}
               >
-                <List.Radio
-                  aria-label={name}
-                  value={name}
-                  {...(index === 0 ? propsRadio : {})}
-                />
-                <List.Title>{name}</List.Title>
-                <List.Grabber aria-label={`Reorder ${name}`} />
+                <List.Leading>
+                  <List.Radio
+                    aria-label={name}
+                    value={name}
+                    {...(index === 0 ? propsRadio : {})}
+                  />
+                </List.Leading>
+                <List.Content>
+                  <List.Title>{name}</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Grabber aria-label={`Reorder ${name}`} />
+                </List.Trailing>
               </List.Item>
             ))}
           </RadioGroup>
@@ -1871,13 +2072,17 @@ export const ListSegmentedDemo: FunctionComponent = () => {
             {['Planning', 'Offsite', 'Release 1.3', 'Retrospective'].map(
               (name) => (
                 <List.Item key={name}>
-                  <List.Title
-                    render={<button />}
-                    onClick={() => addLog(`${name} clicked`)}
-                  >
-                    {name}
-                  </List.Title>
-                  <List.DrillIn />
+                  <List.Content>
+                    <List.Title
+                      render={<button />}
+                      onClick={() => addLog(`${name} clicked`)}
+                    >
+                      {name}
+                    </List.Title>
+                  </List.Content>
+                  <List.Trailing>
+                    <List.DrillIn />
+                  </List.Trailing>
                 </List.Item>
               ),
             )}
@@ -1889,13 +2094,17 @@ export const ListSegmentedDemo: FunctionComponent = () => {
           >
             {['Design Review', 'Team Lunch', 'Release 1.2'].map((name) => (
               <List.Item key={name}>
-                <List.Title
-                  render={<button />}
-                  onClick={() => addLog(`${name} clicked`)}
-                >
-                  {name}
-                </List.Title>
-                <List.DrillIn />
+                <List.Content>
+                  <List.Title
+                    render={<button />}
+                    onClick={() => addLog(`${name} clicked`)}
+                  >
+                    {name}
+                  </List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.DrillIn />
+                </List.Trailing>
               </List.Item>
             ))}
           </List.Group>
@@ -1909,7 +2118,7 @@ export const ListSegmentedDemo: FunctionComponent = () => {
  * A form (Framework7 list inputs): fields as rows, with inline labels, a
  * clear button while editing, a placeholder-only row, validation (an email
  * field's error shows once it's left invalid), dates and times picked in
- * expandable rows (`List.Expandable`, one picker at a time), and a
+ * expandable rows (`List.CollapsiblePanel`, one picker at a time), and a
  * textarea.
  */
 export const ListFormDemo: FunctionComponent = () => {
@@ -1918,20 +2127,14 @@ export const ListFormDemo: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [externalRoot] = useProvidedState(id);
 
-  const [starts, setStarts] = useState(() => new Date(2025, 3, 20, 9, 41));
-  const [ends, setEnds] = useState(() => new Date(2025, 3, 21, 18, 0));
-  // The open picker: of which row, the date's or the time's.
-  const [open, setOpen] = useState<
-    readonly ['ends' | 'starts', DatePickerOpen] | null
-  >(null);
+  // The rows' pickers, below them (see `DatePicker.Expandable`).
+  const startsPicker = useCreateDatePickerHandle();
+  const endsPicker = useCreateDatePickerHandle();
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
     external: externalRoot,
     title: 'List.Root',
   });
-
-  const startsOpen = open?.[0] === 'starts' ? open[1] : null;
-  const endsOpen = open?.[0] === 'ends' ? open[1] : null;
 
   return (
     <Component
@@ -1949,38 +2152,50 @@ export const ListFormDemo: FunctionComponent = () => {
           </List.Header>
           <List.Group>
             <TextField.Root render={<List.Item />}>
-              <TextField.Label>Name</TextField.Label>
-              <TextField.Control
-                autoComplete="name"
-                defaultValue="Kate Bell"
-                placeholder="Required"
-                onValueChange={(value: string) => addLog(`name: ${value}`)}
-              />
-              <TextField.Clear />
+              <List.Content>
+                <TextField.Label>Name</TextField.Label>
+              </List.Content>
+              <List.Trailing>
+                <TextField.Control
+                  autoComplete="name"
+                  defaultValue="Kate Bell"
+                  placeholder="Required"
+                  onValueChange={(value: string) => addLog(`name: ${value}`)}
+                />
+                <TextField.Clear />
+              </List.Trailing>
             </TextField.Root>
             <TextField.Root
               render={<List.Item />}
               validationMode="onBlur"
             >
-              <TextField.Label>Email</TextField.Label>
-              <TextField.Control
-                placeholder="name@example.com"
-                type="email"
-              />
-              <TextField.Clear />
-              <TextField.Description>
-                Used for receipts only.
-              </TextField.Description>
-              <TextField.Error match="typeMismatch">
-                Not an email address.
-              </TextField.Error>
+              <List.Content>
+                <TextField.Label>Email</TextField.Label>
+              </List.Content>
+              <List.Trailing>
+                <TextField.Control
+                  placeholder="name@example.com"
+                  type="email"
+                />
+                <TextField.Clear />
+              </List.Trailing>
+              <List.Below>
+                <TextField.Description>
+                  Used for receipts only.
+                </TextField.Description>
+                <TextField.Error match="typeMismatch">
+                  Not an email address.
+                </TextField.Error>
+              </List.Below>
             </TextField.Root>
             <TextField.Root render={<List.Item />}>
-              <TextField.Control
-                aria-label="Company"
-                placeholder="Company"
-              />
-              <TextField.Clear />
+              <List.Trailing>
+                <TextField.Control
+                  aria-label="Company"
+                  placeholder="Company"
+                />
+                <TextField.Clear />
+              </List.Trailing>
             </TextField.Root>
           </List.Group>
         </List.Section>
@@ -1989,60 +2204,46 @@ export const ListFormDemo: FunctionComponent = () => {
             <List.Title>Event</List.Title>
           </List.Header>
           {/* The date's and the time's buttons open their pickers in
-              expandable rows below (as iOS's Calendar). */}
+              expandable rows below (as iOS's Calendar), one at a time. */}
           <List.Group>
-            <List.Item>
-              <List.Title>Starts</List.Title>
-              <DatePicker.Root
-                mode="dateAndTime"
-                open={startsOpen}
-                popover={false}
-                value={starts}
-                onOpenChange={(next) => setOpen(next ? ['starts', next] : null)}
-                onValueChange={(next: Date) => {
-                  addLog(`starts: ${next.toLocaleString()}`);
-                  setStarts(next);
-                }}
-              />
-            </List.Item>
-            <List.Expandable open={startsOpen === 'date'}>
-              <DatePicker.Calendar
-                value={starts}
-                onValueChange={setStarts}
-              />
-            </List.Expandable>
-            <List.Expandable open={startsOpen === 'time'}>
-              <DatePicker.TimeRoll
-                value={starts}
-                onValueChange={setStarts}
-              />
-            </List.Expandable>
-            <List.Item>
-              <List.Title>Ends</List.Title>
-              <DatePicker.Root
-                mode="dateAndTime"
-                open={endsOpen}
-                popover={false}
-                value={ends}
-                onOpenChange={(next) => setOpen(next ? ['ends', next] : null)}
-                onValueChange={(next: Date) => {
-                  addLog(`ends: ${next.toLocaleString()}`);
-                  setEnds(next);
-                }}
-              />
-            </List.Item>
-            <List.Expandable open={endsOpen === 'date'}>
-              <DatePicker.Calendar
-                value={ends}
-                onValueChange={setEnds}
-              />
-            </List.Expandable>
-            <List.Expandable open={endsOpen === 'time'}>
-              <DatePicker.TimeRoll
-                value={ends}
-                onValueChange={setEnds}
-              />
-            </List.Expandable>
+            <List.AccordionRoot>
+              <List.AccordionItem value="starts">
+                <List.Item>
+                  <List.Content>
+                    <List.Title>Starts</List.Title>
+                  </List.Content>
+                  <List.Trailing>
+                    <DatePicker.Root
+                      defaultValue={new Date(2025, 3, 20, 9, 41)}
+                      handle={startsPicker}
+                      mode="dateAndTime"
+                      onValueChange={(next: Date) =>
+                        addLog(`starts: ${next.toLocaleString()}`)
+                      }
+                    />
+                  </List.Trailing>
+                </List.Item>
+                <DatePicker.Expandable handle={startsPicker} />
+              </List.AccordionItem>
+              <List.AccordionItem value="ends">
+                <List.Item>
+                  <List.Content>
+                    <List.Title>Ends</List.Title>
+                  </List.Content>
+                  <List.Trailing>
+                    <DatePicker.Root
+                      defaultValue={new Date(2025, 3, 21, 18, 0)}
+                      handle={endsPicker}
+                      mode="dateAndTime"
+                      onValueChange={(next: Date) =>
+                        addLog(`ends: ${next.toLocaleString()}`)
+                      }
+                    />
+                  </List.Trailing>
+                </List.Item>
+                <DatePicker.Expandable handle={endsPicker} />
+              </List.AccordionItem>
+            </List.AccordionRoot>
           </List.Group>
         </List.Section>
         <List.Section>
@@ -2051,11 +2252,13 @@ export const ListFormDemo: FunctionComponent = () => {
           </List.Header>
           <List.Group>
             <TextField.Root render={<List.Item />}>
-              <TextField.Control
-                aria-label="Notes"
-                placeholder="Anything else?"
-                render={<textarea />}
-              />
+              <List.Span>
+                <TextField.Control
+                  aria-label="Notes"
+                  placeholder="Anything else?"
+                  render={<textarea />}
+                />
+              </List.Span>
             </TextField.Root>
           </List.Group>
           <List.Footer>Fields as list rows, after Framework7.</List.Footer>
@@ -2126,12 +2329,14 @@ export const ListIndexDemo: FunctionComponent = () => {
                 <List.Group>
                   {names.map((name) => (
                     <List.Item key={name}>
-                      <List.Title
-                        render={<button />}
-                        onClick={() => addLog(`${name} clicked`)}
-                      >
-                        {name}
-                      </List.Title>
+                      <List.Content>
+                        <List.Title
+                          render={<button />}
+                          onClick={() => addLog(`${name} clicked`)}
+                        >
+                          {name}
+                        </List.Title>
+                      </List.Content>
                       <List.SwipeActions overswipe>
                         <List.SwipeAction
                           label="Delete"
@@ -2228,19 +2433,27 @@ export const ListMailDemo: FunctionComponent = () => {
               .filter(({ from }) => !archived.includes(from))
               .map(({ date, from, preview, subject }) => (
                 <List.Item key={from}>
-                  <List.Image variant="circular">
-                    <Symbol icon={sfPersonCropCircleFill} />
-                  </List.Image>
-                  <List.Title
-                    render={<button />}
-                    onClick={() => addLog(`${from} clicked`)}
-                  >
-                    {from}
-                  </List.Title>
-                  <List.Detail>{date}</List.Detail>
-                  <List.DrillIn />
-                  <List.Subtitle>{subject}</List.Subtitle>
-                  <List.Text {...propsText}>{preview}</List.Text>
+                  <List.Leading>
+                    <List.Image variant="circular">
+                      <Symbol icon={sfPersonCropCircleFill} />
+                    </List.Image>
+                  </List.Leading>
+                  <List.Content>
+                    <List.Title
+                      render={<button />}
+                      onClick={() => addLog(`${from} clicked`)}
+                    >
+                      {from}
+                    </List.Title>
+                    <List.Subtitle>{subject}</List.Subtitle>
+                    <List.Text {...propsText}>{preview}</List.Text>
+                  </List.Content>
+                  <List.Trailing>
+                    <List.Detail>{date}</List.Detail>
+                  </List.Trailing>
+                  <List.Trailing>
+                    <List.DrillIn />
+                  </List.Trailing>
                   <List.SwipeActions
                     overswipe
                     side="inline-start"

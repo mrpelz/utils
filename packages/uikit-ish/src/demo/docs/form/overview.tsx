@@ -53,34 +53,46 @@ const LiveView: FunctionComponent = () => {
                 name="name"
                 render={<List.Item />}
               >
-                <TextField.Label>Name</TextField.Label>
-                <TextField.Control
-                  required
-                  placeholder="Required"
-                />
-                <TextField.Error match="valueMissing">
-                  Enter a name.
-                </TextField.Error>
+                <List.Content>
+                  <TextField.Label>Name</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control
+                    required
+                    placeholder="Required"
+                  />
+                </List.Trailing>
+                <List.Below>
+                  <TextField.Error match="valueMissing">
+                    Enter a name.
+                  </TextField.Error>
+                </List.Below>
               </TextField.Root>
               <Field.Root
                 name="copies"
                 render={<List.Item />}
               >
-                <List.Title>Copies</List.Title>
-                <List.Detail className="form-demo-value">
-                  {copies ?? '–'}
-                </List.Detail>
-                <Stepper.Root
-                  min={1}
-                  value={copies}
-                  onValueChange={(next: number | null) => setCopies(next)}
-                >
-                  <Stepper.Group>
-                    <Stepper.Input aria-label="Copies" />
-                    <Stepper.Decrement />
-                    <Stepper.Increment />
-                  </Stepper.Group>
-                </Stepper.Root>
+                <List.Content>
+                  <List.Title>Copies</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Detail className="form-demo-value">
+                    {copies ?? '–'}
+                  </List.Detail>
+                </List.Trailing>
+                <List.Trailing>
+                  <Stepper.Root
+                    min={1}
+                    value={copies}
+                    onValueChange={(next: number | null) => setCopies(next)}
+                  >
+                    <Stepper.Group>
+                      <Stepper.Input aria-label="Copies" />
+                      <Stepper.Decrement />
+                      <Stepper.Increment />
+                    </Stepper.Group>
+                  </Stepper.Root>
+                </List.Trailing>
               </Field.Root>
             </List.Group>
           </Fieldset.Root>

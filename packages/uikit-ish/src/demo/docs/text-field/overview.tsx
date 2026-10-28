@@ -61,19 +61,25 @@ const LiveView: FunctionComponent = () => {
               render={<List.Item />}
               {...propsRoot}
             >
-              {content.label ? <TextField.Label>Name</TextField.Label> : null}
-              <TextField.Control
-                aria-label={content.label ? undefined : 'Name'}
-                {...propsControl}
-                onValueChange={(value: string) => addLog(`value: ${value}`)}
-              />
-              <TextField.Clear />
-              {content.description ? (
-                <TextField.Description>
-                  As shown to others.
-                </TextField.Description>
-              ) : null}
-              <TextField.Error>Please enter a name.</TextField.Error>
+              <List.Content>
+                {content.label ? <TextField.Label>Name</TextField.Label> : null}
+              </List.Content>
+              <List.Trailing>
+                <TextField.Control
+                  aria-label={content.label ? undefined : 'Name'}
+                  {...propsControl}
+                  onValueChange={(value: string) => addLog(`value: ${value}`)}
+                />
+                <TextField.Clear />
+              </List.Trailing>
+              <List.Below>
+                {content.description ? (
+                  <TextField.Description>
+                    As shown to others.
+                  </TextField.Description>
+                ) : null}
+                <TextField.Error>Please enter a name.</TextField.Error>
+              </List.Below>
             </TextField.Root>
           </List.Group>
         </List.Section>

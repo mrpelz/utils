@@ -37,16 +37,28 @@ const validationCode = `const taken = ['admin', 'root'];
           }
           validationMode="onBlur"
         >
-          <TextField.Label>Username</TextField.Label>
-          <TextField.Control required minLength={3} />
-          <TextField.Error match="valueMissing">Required.</TextField.Error>
-          <TextField.Error match="tooShort">At least 3 characters.</TextField.Error>
-          <TextField.Error match="customError" />
+          <List.Content>
+            <TextField.Label>Username</TextField.Label>
+          </List.Content>
+          <List.Trailing>
+            <TextField.Control required minLength={3} />
+          </List.Trailing>
+          <List.Below>
+            <TextField.Error match="valueMissing">Required.</TextField.Error>
+            <TextField.Error match="tooShort">At least 3 characters.</TextField.Error>
+            <TextField.Error match="customError" />
+          </List.Below>
         </TextField.Root>
         <TextField.Root name="email" render={<List.Item />} validationMode="onBlur">
-          <TextField.Label>Email</TextField.Label>
-          <TextField.Control required type="email" />
-          <TextField.Error match="typeMismatch">Not an email address.</TextField.Error>
+          <List.Content>
+            <TextField.Label>Email</TextField.Label>
+          </List.Content>
+          <List.Trailing>
+            <TextField.Control required type="email" />
+          </List.Trailing>
+          <List.Below>
+            <TextField.Error match="typeMismatch">Not an email address.</TextField.Error>
+          </List.Below>
         </TextField.Root>
       </List.Group>
       <List.Footer>Try “kate” as a username.</List.Footer>
@@ -84,14 +96,22 @@ const formCode = `<List.Root>
     </Fieldset.Legend>
     <List.Group>
       <TextField.Root render={<List.Item />}>
-        <TextField.Label>Name</TextField.Label>
-        <TextField.Control autoComplete="name" placeholder="Required" />
-        <TextField.Clear />
+        <List.Content>
+          <TextField.Label>Name</TextField.Label>
+        </List.Content>
+        <List.Trailing>
+          <TextField.Control autoComplete="name" placeholder="Required" />
+          <TextField.Clear />
+        </List.Trailing>
       </TextField.Root>
       <TextField.Root render={<List.Item />}>
-        <TextField.Label>Phone</TextField.Label>
-        <TextField.Control autoComplete="tel" type="tel" />
-        <TextField.Clear />
+        <List.Content>
+          <TextField.Label>Phone</TextField.Label>
+        </List.Content>
+        <List.Trailing>
+          <TextField.Control autoComplete="tel" type="tel" />
+          <TextField.Clear />
+        </List.Trailing>
       </TextField.Root>
     </List.Group>
   </Fieldset.Root>
@@ -102,11 +122,13 @@ const formCode = `<List.Root>
     <List.Group>
       {/* No label: the placeholder shows, aria-label names it. */}
       <TextField.Root render={<List.Item />}>
-        <TextField.Control
-          aria-label="Notes"
-          placeholder="Anything else?"
-          render={<textarea />}
-        />
+        <List.Span>
+          <TextField.Control
+            aria-label="Notes"
+            placeholder="Anything else?"
+            render={<textarea />}
+          />
+        </List.Span>
       </TextField.Root>
     </List.Group>
   </Fieldset.Root>
@@ -123,20 +145,26 @@ const [to, setTo] = useState('');
 const matching = to ? contacts.filter((name) => matches(name, to)) : [];
 
 <TextField.Root render={<List.Item />}>
-  <TextField.Label>To:</TextField.Label>
-  <TextField.Control
-    aria-autocomplete="list"
-    autoComplete="off"
-    value={to}
-    onValueChange={setTo}
-  />
-  <TextField.Clear />
+  <List.Content>
+    <TextField.Label>To:</TextField.Label>
+  </List.Content>
+  <List.Trailing>
+    <TextField.Control
+      aria-autocomplete="list"
+      autoComplete="off"
+      value={to}
+      onValueChange={setTo}
+    />
+    <TextField.Clear />
+  </List.Trailing>
 </TextField.Root>
 {matching.map((name) => (
   <List.Item key={name}>
-    <List.Title render={<button type="button" />} onClick={() => setTo(name)}>
-      {name}
-    </List.Title>
+    <List.Content>
+      <List.Title render={<button type="button" />} onClick={() => setTo(name)}>
+        {name}
+      </List.Title>
+    </List.Content>
   </List.Item>
 ))}`;
 
@@ -177,40 +205,52 @@ const Validation: FunctionComponent = () => {
                     : null
                 }
               >
-                <TextField.Label>Username</TextField.Label>
-                <TextField.Control
-                  required
-                  autoCapitalize="none"
-                  autoComplete="username"
-                  minLength={3}
-                />
-                <TextField.Clear />
-                <TextField.Error match="valueMissing">
-                  Required.
-                </TextField.Error>
-                <TextField.Error match="tooShort">
-                  At least 3 characters.
-                </TextField.Error>
-                <TextField.Error match="customError" />
+                <List.Content>
+                  <TextField.Label>Username</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control
+                    required
+                    autoCapitalize="none"
+                    autoComplete="username"
+                    minLength={3}
+                  />
+                  <TextField.Clear />
+                </List.Trailing>
+                <List.Below>
+                  <TextField.Error match="valueMissing">
+                    Required.
+                  </TextField.Error>
+                  <TextField.Error match="tooShort">
+                    At least 3 characters.
+                  </TextField.Error>
+                  <TextField.Error match="customError" />
+                </List.Below>
               </TextField.Root>
               <TextField.Root
                 name="email"
                 render={<List.Item />}
                 validationMode="onBlur"
               >
-                <TextField.Label>Email</TextField.Label>
-                <TextField.Control
-                  required
-                  autoComplete="email"
-                  type="email"
-                />
-                <TextField.Clear />
-                <TextField.Error match="valueMissing">
-                  Required.
-                </TextField.Error>
-                <TextField.Error match="typeMismatch">
-                  Not an email address.
-                </TextField.Error>
+                <List.Content>
+                  <TextField.Label>Email</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control
+                    required
+                    autoComplete="email"
+                    type="email"
+                  />
+                  <TextField.Clear />
+                </List.Trailing>
+                <List.Below>
+                  <TextField.Error match="valueMissing">
+                    Required.
+                  </TextField.Error>
+                  <TextField.Error match="typeMismatch">
+                    Not an email address.
+                  </TextField.Error>
+                </List.Below>
               </TextField.Root>
             </List.Group>
             <List.Footer>Try “kate” as a username.</List.Footer>
@@ -265,7 +305,9 @@ const SearchWithClear: FunctionComponent = () => {
             <List.Group>
               {matching.map((name) => (
                 <List.Item key={name}>
-                  <List.Title>{name}</List.Title>
+                  <List.Content>
+                    <List.Title>{name}</List.Title>
+                  </List.Content>
                 </List.Item>
               ))}
             </List.Group>
@@ -299,22 +341,30 @@ const InAFormList: FunctionComponent = () => {
           </Fieldset.Legend>
           <List.Group>
             <TextField.Root render={<List.Item />}>
-              <TextField.Label>Name</TextField.Label>
-              <TextField.Control
-                autoComplete="name"
-                placeholder="Required"
-                onValueChange={(value: string) => addLog(`name: ${value}`)}
-              />
-              <TextField.Clear />
+              <List.Content>
+                <TextField.Label>Name</TextField.Label>
+              </List.Content>
+              <List.Trailing>
+                <TextField.Control
+                  autoComplete="name"
+                  placeholder="Required"
+                  onValueChange={(value: string) => addLog(`name: ${value}`)}
+                />
+                <TextField.Clear />
+              </List.Trailing>
             </TextField.Root>
             <TextField.Root render={<List.Item />}>
-              <TextField.Label>Phone</TextField.Label>
-              <TextField.Control
-                autoComplete="tel"
-                type="tel"
-                onValueChange={(value: string) => addLog(`phone: ${value}`)}
-              />
-              <TextField.Clear />
+              <List.Content>
+                <TextField.Label>Phone</TextField.Label>
+              </List.Content>
+              <List.Trailing>
+                <TextField.Control
+                  autoComplete="tel"
+                  type="tel"
+                  onValueChange={(value: string) => addLog(`phone: ${value}`)}
+                />
+                <TextField.Clear />
+              </List.Trailing>
             </TextField.Root>
           </List.Group>
         </Fieldset.Root>
@@ -324,21 +374,25 @@ const InAFormList: FunctionComponent = () => {
           </Fieldset.Legend>
           <List.Group>
             <TextField.Root render={<List.Item />}>
-              <TextField.Control
-                aria-label="Street"
-                autoComplete="street-address"
-                placeholder="Street"
-              />
-              <TextField.Clear />
+              <List.Trailing>
+                <TextField.Control
+                  aria-label="Street"
+                  autoComplete="street-address"
+                  placeholder="Street"
+                />
+                <TextField.Clear />
+              </List.Trailing>
             </TextField.Root>
             <TextField.Root render={<List.Item />}>
-              <TextField.Control
-                aria-label="Postal code"
-                autoComplete="postal-code"
-                inputMode="numeric"
-                placeholder="Postal code"
-              />
-              <TextField.Clear />
+              <List.Trailing>
+                <TextField.Control
+                  aria-label="Postal code"
+                  autoComplete="postal-code"
+                  inputMode="numeric"
+                  placeholder="Postal code"
+                />
+                <TextField.Clear />
+              </List.Trailing>
             </TextField.Root>
           </List.Group>
         </Fieldset.Root>
@@ -348,11 +402,13 @@ const InAFormList: FunctionComponent = () => {
           </Fieldset.Legend>
           <List.Group>
             <TextField.Root render={<List.Item />}>
-              <TextField.Control
-                aria-label="Notes"
-                placeholder="Anything else?"
-                render={<textarea />}
-              />
+              <List.Span>
+                <TextField.Control
+                  aria-label="Notes"
+                  placeholder="Anything else?"
+                  render={<textarea />}
+                />
+              </List.Span>
             </TextField.Root>
           </List.Group>
         </Fieldset.Root>
@@ -383,26 +439,32 @@ const Suggestions: FunctionComponent = () => {
         <List.Section>
           <List.Group>
             <TextField.Root render={<List.Item />}>
-              <TextField.Label>To:</TextField.Label>
-              <TextField.Control
-                aria-autocomplete="list"
-                autoComplete="off"
-                value={to}
-                onValueChange={setTo}
-              />
-              <TextField.Clear />
+              <List.Content>
+                <TextField.Label>To:</TextField.Label>
+              </List.Content>
+              <List.Trailing>
+                <TextField.Control
+                  aria-autocomplete="list"
+                  autoComplete="off"
+                  value={to}
+                  onValueChange={setTo}
+                />
+                <TextField.Clear />
+              </List.Trailing>
             </TextField.Root>
             {matching.map((name) => (
               <List.Item key={name}>
-                <List.Title
-                  render={<button type="button" />}
-                  onClick={() => {
-                    addLog(`to: ${name}`);
-                    setTo(name);
-                  }}
-                >
-                  {name}
-                </List.Title>
+                <List.Content>
+                  <List.Title
+                    render={<button type="button" />}
+                    onClick={() => {
+                      addLog(`to: ${name}`);
+                      setTo(name);
+                    }}
+                  >
+                    {name}
+                  </List.Title>
+                </List.Content>
               </List.Item>
             ))}
           </List.Group>

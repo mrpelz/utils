@@ -50,16 +50,22 @@ const selectingCode = `const [selected, setSelected] = useState('inbox');
           </List.Header>
           <List.Group>
             <List.Item selected={selected === 'inbox'}>
-              <List.Image variant="symbol">
-                <Symbol icon={sfTray} />
-              </List.Image>
-              <List.Title
-                render={<button type="button" />}
-                onClick={() => setSelected('inbox')}
-              >
-                Inbox
-              </List.Title>
-              <List.Detail>12</List.Detail>
+              <List.Leading>
+                <List.Image variant="symbol">
+                  <Symbol icon={sfTray} />
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button type="button" />}
+                  onClick={() => setSelected('inbox')}
+                >
+                  Inbox
+                </List.Title>
+              </List.Content>
+              <List.Trailing>
+                <List.Detail>12</List.Detail>
+              </List.Trailing>
             </List.Item>
             …
           </List.Group>
@@ -176,7 +182,10 @@ const [checked, setChecked] = useState<string[]>([]);
         onValueChange={setChecked}
       >
         <List.Item onClick={isEditing ? forwardClick('[role=checkbox]') : undefined}>
-          {isEditing ? <List.Checkbox aria-label="Inbox" value="inbox" /> : null}
+          <List.Leading whileEditing="show">
+            {isEditing ? <List.Checkbox aria-label="Inbox" value="inbox" /> : null}
+          </List.Leading>
+          
           …
         </List.Item>
       </CheckboxGroup>
@@ -257,21 +266,27 @@ const Selecting: FunctionComponent = () => {
                           key={value}
                           selected={selected === value}
                         >
-                          <List.Image variant="symbol">
-                            <Symbol icon={icon} />
-                          </List.Image>
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => {
-                              addLog(`select: ${value}`);
-                              setSelected(value);
-                            }}
-                          >
-                            {rowTitle}
-                          </List.Title>
-                          {count === undefined ? null : (
-                            <List.Detail>{count}</List.Detail>
-                          )}
+                          <List.Leading>
+                            <List.Image variant="symbol">
+                              <Symbol icon={icon} />
+                            </List.Image>
+                          </List.Leading>
+                          <List.Content>
+                            <List.Title
+                              render={<button type="button" />}
+                              onClick={() => {
+                                addLog(`select: ${value}`);
+                                setSelected(value);
+                              }}
+                            >
+                              {rowTitle}
+                            </List.Title>
+                          </List.Content>
+                          <List.Trailing>
+                            {count === undefined ? null : (
+                              <List.Detail>{count}</List.Detail>
+                            )}
+                          </List.Trailing>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -303,7 +318,9 @@ const Selecting: FunctionComponent = () => {
                         (_, index) => `${rowTitles[selected]} ${index + 1}`,
                       ).map((item) => (
                         <List.Item key={item}>
-                          <List.Title>{item}</List.Title>
+                          <List.Content>
+                            <List.Title>{item}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -364,22 +381,28 @@ const InADrawer: FunctionComponent = () => {
                             key={value}
                             selected={selected === value}
                           >
-                            <List.Image variant="symbol">
-                              <Symbol icon={icon} />
-                            </List.Image>
-                            {/* (Chosen: its drawer closes.) */}
-                            <List.Title
-                              render={<Drawer.Close />}
-                              onClick={() => {
-                                addLog(`select: ${value}`);
-                                setSelected(value);
-                              }}
-                            >
-                              {rowTitle}
-                            </List.Title>
-                            {count === undefined ? null : (
-                              <List.Detail>{count}</List.Detail>
-                            )}
+                            <List.Leading>
+                              <List.Image variant="symbol">
+                                <Symbol icon={icon} />
+                              </List.Image>
+                            </List.Leading>
+                            <List.Content>
+                              {/* (Chosen: its drawer closes.) */}
+                              <List.Title
+                                render={<Drawer.Close />}
+                                onClick={() => {
+                                  addLog(`select: ${value}`);
+                                  setSelected(value);
+                                }}
+                              >
+                                {rowTitle}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              {count === undefined ? null : (
+                                <List.Detail>{count}</List.Detail>
+                              )}
+                            </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
@@ -425,7 +448,9 @@ const InADrawer: FunctionComponent = () => {
                         (_, index) => `${rowTitles[selected]} ${index + 1}`,
                       ).map((item) => (
                         <List.Item key={item}>
-                          <List.Title>{item}</List.Title>
+                          <List.Content>
+                            <List.Title>{item}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -491,21 +516,27 @@ const Search: FunctionComponent = () => {
                       key={value}
                       selected={selected === value}
                     >
-                      <List.Image variant="symbol">
-                        <Symbol icon={icon} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => {
-                          addLog(`select: ${value}`);
-                          setSelected(value);
-                        }}
-                      >
-                        {rowTitle}
-                      </List.Title>
-                      {count === undefined ? null : (
-                        <List.Detail>{count}</List.Detail>
-                      )}
+                      <List.Leading>
+                        <List.Image variant="symbol">
+                          <Symbol icon={icon} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => {
+                            addLog(`select: ${value}`);
+                            setSelected(value);
+                          }}
+                        >
+                          {rowTitle}
+                        </List.Title>
+                      </List.Content>
+                      <List.Trailing>
+                        {count === undefined ? null : (
+                          <List.Detail>{count}</List.Detail>
+                        )}
+                      </List.Trailing>
                     </List.Item>
                   ))}
                 </List.Group>
@@ -598,31 +629,39 @@ const Editing: FunctionComponent = () => {
                             : undefined
                         }
                       >
-                        {isEditing ? (
-                          <List.Checkbox
-                            aria-label={rowTitle}
-                            value={value}
-                          />
-                        ) : null}
-                        <List.Image variant="symbol">
-                          <Symbol icon={icon} />
-                        </List.Image>
-                        {isEditing ? (
-                          <List.Title>{rowTitle}</List.Title>
-                        ) : (
-                          <List.Title
-                            render={<button type="button" />}
-                            onClick={() => {
-                              addLog(`select: ${value}`);
-                              setSelected(value);
-                            }}
-                          >
-                            {rowTitle}
-                          </List.Title>
-                        )}
-                        {count === undefined ? null : (
-                          <List.Detail>{count}</List.Detail>
-                        )}
+                        <List.Leading whileEditing="show">
+                          {isEditing ? (
+                            <List.Checkbox
+                              aria-label={rowTitle}
+                              value={value}
+                            />
+                          ) : null}
+                        </List.Leading>
+                        <List.Leading>
+                          <List.Image variant="symbol">
+                            <Symbol icon={icon} />
+                          </List.Image>
+                        </List.Leading>
+                        <List.Content>
+                          {isEditing ? (
+                            <List.Title>{rowTitle}</List.Title>
+                          ) : (
+                            <List.Title
+                              render={<button type="button" />}
+                              onClick={() => {
+                                addLog(`select: ${value}`);
+                                setSelected(value);
+                              }}
+                            >
+                              {rowTitle}
+                            </List.Title>
+                          )}
+                        </List.Content>
+                        <List.Trailing>
+                          {count === undefined ? null : (
+                            <List.Detail>{count}</List.Detail>
+                          )}
+                        </List.Trailing>
                       </List.Item>
                     ))}
                 </CheckboxGroup>
@@ -701,22 +740,28 @@ const Adaptive: FunctionComponent = () => {
                               key={value}
                               selected={selected === value}
                             >
-                              <List.Image variant="symbol">
-                                <Symbol icon={icon} />
-                              </List.Image>
-                              {/* (Chosen: its drawer closes.) */}
-                              <List.Title
-                                render={<Drawer.Close />}
-                                onClick={() => {
-                                  addLog(`select: ${value}`);
-                                  setSelected(value);
-                                }}
-                              >
-                                {rowTitle}
-                              </List.Title>
-                              {count === undefined ? null : (
-                                <List.Detail>{count}</List.Detail>
-                              )}
+                              <List.Leading>
+                                <List.Image variant="symbol">
+                                  <Symbol icon={icon} />
+                                </List.Image>
+                              </List.Leading>
+                              <List.Content>
+                                {/* (Chosen: its drawer closes.) */}
+                                <List.Title
+                                  render={<Drawer.Close />}
+                                  onClick={() => {
+                                    addLog(`select: ${value}`);
+                                    setSelected(value);
+                                  }}
+                                >
+                                  {rowTitle}
+                                </List.Title>
+                              </List.Content>
+                              <List.Trailing>
+                                {count === undefined ? null : (
+                                  <List.Detail>{count}</List.Detail>
+                                )}
+                              </List.Trailing>
                             </List.Item>
                           ))}
                         </List.Group>
@@ -745,21 +790,27 @@ const Adaptive: FunctionComponent = () => {
                             key={value}
                             selected={selected === value}
                           >
-                            <List.Image variant="symbol">
-                              <Symbol icon={icon} />
-                            </List.Image>
-                            <List.Title
-                              render={<button type="button" />}
-                              onClick={() => {
-                                addLog(`select: ${value}`);
-                                setSelected(value);
-                              }}
-                            >
-                              {rowTitle}
-                            </List.Title>
-                            {count === undefined ? null : (
-                              <List.Detail>{count}</List.Detail>
-                            )}
+                            <List.Leading>
+                              <List.Image variant="symbol">
+                                <Symbol icon={icon} />
+                              </List.Image>
+                            </List.Leading>
+                            <List.Content>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => {
+                                  addLog(`select: ${value}`);
+                                  setSelected(value);
+                                }}
+                              >
+                                {rowTitle}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              {count === undefined ? null : (
+                                <List.Detail>{count}</List.Detail>
+                              )}
+                            </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
@@ -806,7 +857,9 @@ const Adaptive: FunctionComponent = () => {
                         (_, index) => `${rowTitles[selected]} ${index + 1}`,
                       ).map((item) => (
                         <List.Item key={item}>
-                          <List.Title>{item}</List.Title>
+                          <List.Content>
+                            <List.Title>{item}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>

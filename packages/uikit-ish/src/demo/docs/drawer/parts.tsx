@@ -129,7 +129,9 @@ const RootPart: FunctionComponent = () => {
                     <List.Group>
                       {names.slice(0, 8).map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -237,7 +239,9 @@ const SwipeAreaPart: FunctionComponent = () => {
                     <List.Group>
                       {names.slice(0, 8).map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -345,7 +349,9 @@ const PopupPart: FunctionComponent = () => {
                     <List.Group>
                       {names.slice(0, 8).map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -453,7 +459,9 @@ const TriggerPart: FunctionComponent = () => {
                     <List.Group>
                       {names.slice(0, 8).map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -561,7 +569,9 @@ const ClosePart: FunctionComponent = () => {
                     <List.Group>
                       {names.slice(0, 8).map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -673,7 +683,9 @@ const CreateHandlePart: FunctionComponent = () => {
                     <List.Group>
                       {names.slice(0, 4).map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
@@ -787,7 +799,9 @@ const UseCreateDrawerHandlePart: FunctionComponent = () => {
                         <List.Group>
                           {names.slice(0, 8).map((name) => (
                             <List.Item key={name}>
-                              <List.Title>{name}</List.Title>
+                              <List.Content>
+                                <List.Title>{name}</List.Title>
+                              </List.Content>
                             </List.Item>
                           ))}
                         </List.Group>

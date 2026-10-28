@@ -109,27 +109,35 @@ const LiveView: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root
-                          aria-label="Show completed"
-                          onCheckedChange={(isChecked: boolean) =>
-                            addLog(`show completed: ${String(isChecked)}`)
-                          }
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            aria-label="Show completed"
+                            onCheckedChange={(isChecked: boolean) =>
+                              addLog(`show completed: ${String(isChecked)}`)
+                            }
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                          onCheckedChange={(isChecked: boolean) =>
-                            addLog(`show notes: ${String(isChecked)}`)
-                          }
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                            onCheckedChange={(isChecked: boolean) =>
+                              addLog(`show notes: ${String(isChecked)}`)
+                            }
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>

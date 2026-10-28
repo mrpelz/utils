@@ -2,6 +2,7 @@ import type { Popover as BasePopover } from '@base-ui/react/popover';
 import type { ComponentProps, ReactNode } from 'react';
 
 import type { PopoverAlign } from '../popover/main.js';
+import type { DatePickerHandle } from './handle.js';
 
 export type DatePickerMode = 'date' | 'dateAndTime' | 'time';
 
@@ -125,9 +126,9 @@ export type CalendarProps = {
   isDateDisabled?: (date: Date) => boolean;
   /** Locale of names, numerals, the hour cycle and the week's first day. */
   locale?: string;
-  /** The latest selectable day. */
+  /** The latest selectable day (and, with a time, time). */
   max?: Date;
-  /** The earliest selectable day. */
+  /** The earliest selectable day (and, with a time, time). */
   min?: Date;
   /**
    * Its value's name in a form: submitted by a hidden control (as an
@@ -188,6 +189,12 @@ export type DatePickerProps = CalendarProps & {
   /** Disables all of it. */
   disabled?: boolean;
   /**
+   * Its pickers' handle (see `DatePicker.createHandle`): the compact
+   * style's buttons toggle them (no popovers), shown in place by a
+   * `DatePicker.Expandable` given it (e.g. after the picker's list row).
+   */
+  handle?: DatePickerHandle;
+  /**
    * 12 or 24 hours.
    * @default the locale's
    */
@@ -235,6 +242,13 @@ export type TimeRollProps = {
   hourCycle?: HourCycle;
   /** Locale of numerals, the hour cycle and the day period. */
   locale?: string;
+  /**
+   * The latest selectable time (UIKit `maximumDate`): later hours, minutes
+   * and day periods disabled, a later selection moved back to it.
+   */
+  max?: Date;
+  /** The earliest selectable time (UIKit `minimumDate`), as `max`. */
+  min?: Date;
   /** Called with the date at the newly selected time (`reason`: `time`). */
   onValueChange: (
     date: Date,
@@ -301,4 +315,9 @@ export type CalendarMessageProps = ComponentProps<'p'> & {
    * @default 'info'
    */
   variant?: 'error' | 'info';
+};
+
+export type DatePickerExpandableProps = {
+  /** The pickers' handle, given to their `DatePicker.Root` too. */
+  handle: DatePickerHandle;
 };

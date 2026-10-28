@@ -82,12 +82,20 @@ const ASizeForAList: FunctionComponent = () => {
           <List.Section>
             <List.Group>
               <List.Item>
-                <List.Title>Text Size</List.Title>
-                <List.Detail>{props.dynamicTypeSize}</List.Detail>
+                <List.Content>
+                  <List.Title>Text Size</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Detail>{props.dynamicTypeSize}</List.Detail>
+                </List.Trailing>
               </List.Item>
               <List.Item>
-                <List.Title>Bold Text</List.Title>
-                <List.Detail>Off</List.Detail>
+                <List.Content>
+                  <List.Title>Bold Text</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Detail>Off</List.Detail>
+                </List.Trailing>
               </List.Item>
             </List.Group>
           </List.Section>

@@ -93,26 +93,34 @@ const MoreActionsAsAList: FunctionComponent = () => {
                 <List.Section>
                   <List.Group>
                     <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfBook} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => addLog('action: Add Bookmark')}
-                      >
-                        Add Bookmark
-                      </List.Title>
+                      <List.Leading>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfBook} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => addLog('action: Add Bookmark')}
+                        >
+                          Add Bookmark
+                        </List.Title>
+                      </List.Content>
                     </List.Item>
                     <List.Item>
-                      <List.Image variant="symbol">
-                        <Symbol icon={sfPrinter} />
-                      </List.Image>
-                      <List.Title
-                        render={<button type="button" />}
-                        onClick={() => addLog('action: Print')}
-                      >
-                        Print
-                      </List.Title>
+                      <List.Leading>
+                        <List.Image variant="symbol">
+                          <Symbol icon={sfPrinter} />
+                        </List.Image>
+                      </List.Leading>
+                      <List.Content>
+                        <List.Title
+                          render={<button type="button" />}
+                          onClick={() => addLog('action: Print')}
+                        >
+                          Print
+                        </List.Title>
+                      </List.Content>
                     </List.Item>
                   </List.Group>
                 </List.Section>

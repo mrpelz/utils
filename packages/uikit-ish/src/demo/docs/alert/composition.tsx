@@ -34,52 +34,56 @@ const WithATextField: FunctionComponent = () => {
           <List.Section>
             <List.Group>
               <List.Item>
-                <List.Title>{folder}</List.Title>
-                <Alert.Root
-                  onOpenChange={(isOpen: boolean) => {
-                    if (isOpen) setName(folder);
-                  }}
-                >
-                  <Alert.Trigger
-                    render={
-                      <Button.Root
-                        size="small"
-                        variant="borderless"
-                      />
-                    }
+                <List.Content>
+                  <List.Title>{folder}</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <Alert.Root
+                    onOpenChange={(isOpen: boolean) => {
+                      if (isOpen) setName(folder);
+                    }}
                   >
-                    <Button.Label>Rename</Button.Label>
-                  </Alert.Trigger>
-                  <Alert.Popup>
-                    <Alert.Header>
-                      <Alert.Title>Rename Folder</Alert.Title>
-                      <Alert.Description>
-                        Enter a name for this folder.
-                      </Alert.Description>
-                    </Alert.Header>
-                    <Alert.Fields>
-                      <Alert.Field
-                        aria-label="Name"
-                        placeholder="Name"
-                        value={name}
-                        onValueChange={(value: string) => setName(value)}
-                      />
-                    </Alert.Fields>
-                    <Alert.Actions>
-                      <Alert.Action>Cancel</Alert.Action>
-                      <Alert.Action
-                        disabled={name.trim() === ''}
-                        variant="primary"
-                        onClick={() => {
-                          addLog(`renamed: ${folder} → ${name}`);
-                          setFolder(name);
-                        }}
-                      >
-                        Save
-                      </Alert.Action>
-                    </Alert.Actions>
-                  </Alert.Popup>
-                </Alert.Root>
+                    <Alert.Trigger
+                      render={
+                        <Button.Root
+                          size="small"
+                          variant="borderless"
+                        />
+                      }
+                    >
+                      <Button.Label>Rename</Button.Label>
+                    </Alert.Trigger>
+                    <Alert.Popup>
+                      <Alert.Header>
+                        <Alert.Title>Rename Folder</Alert.Title>
+                        <Alert.Description>
+                          Enter a name for this folder.
+                        </Alert.Description>
+                      </Alert.Header>
+                      <Alert.Fields>
+                        <Alert.Field
+                          aria-label="Name"
+                          placeholder="Name"
+                          value={name}
+                          onValueChange={(value: string) => setName(value)}
+                        />
+                      </Alert.Fields>
+                      <Alert.Actions>
+                        <Alert.Action>Cancel</Alert.Action>
+                        <Alert.Action
+                          disabled={name.trim() === ''}
+                          variant="primary"
+                          onClick={() => {
+                            addLog(`renamed: ${folder} → ${name}`);
+                            setFolder(name);
+                          }}
+                        >
+                          Save
+                        </Alert.Action>
+                      </Alert.Actions>
+                    </Alert.Popup>
+                  </Alert.Root>
+                </List.Trailing>
               </List.Item>
             </List.Group>
           </List.Section>

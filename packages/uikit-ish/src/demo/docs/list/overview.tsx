@@ -73,50 +73,62 @@ const LiveView: FunctionComponent = () => {
                     : undefined
                 }
               >
-                {content.image === 'none' ? null : (
-                  <List.Image
-                    variant={content.image}
-                    style={
-                      content.image === 'symbol'
-                        ? undefined
-                        : { backgroundColor: color }
-                    }
-                  >
-                    <Symbol icon={icon} />
-                  </List.Image>
-                )}
-                {content.trailing === 'drillIn' ||
-                content.trailing === 'checkmark' ? (
-                  <List.Title
-                    render={<button type="button" />}
-                    onClick={() => {
-                      addLog(`${title} clicked`);
-                      setChosen(title);
-                    }}
-                  >
-                    {title}
-                  </List.Title>
-                ) : (
-                  <List.Title>{title}</List.Title>
-                )}
-                {content.subtitle ? (
-                  <List.Subtitle>{subtitle}</List.Subtitle>
-                ) : null}
-                {content.detail ? <List.Detail>{detail}</List.Detail> : null}
-                {content.trailing === 'drillIn' ? <List.DrillIn /> : null}
-                {content.trailing === 'switch' ? (
-                  <Switch.Root
-                    aria-label={title}
-                    onCheckedChange={(isChecked: boolean) =>
-                      addLog(`${title}: ${String(isChecked)}`)
-                    }
-                  >
-                    <Switch.Thumb />
-                  </Switch.Root>
-                ) : null}
-                {content.trailing === 'checkmark' && chosen === title ? (
-                  <List.Checkmark />
-                ) : null}
+                <List.Leading>
+                  {content.image === 'none' ? null : (
+                    <List.Image
+                      variant={content.image}
+                      style={
+                        content.image === 'symbol'
+                          ? undefined
+                          : { backgroundColor: color }
+                      }
+                    >
+                      <Symbol icon={icon} />
+                    </List.Image>
+                  )}
+                </List.Leading>
+                <List.Content>
+                  {content.trailing === 'drillIn' ||
+                  content.trailing === 'checkmark' ? (
+                    <List.Title
+                      render={<button type="button" />}
+                      onClick={() => {
+                        addLog(`${title} clicked`);
+                        setChosen(title);
+                      }}
+                    >
+                      {title}
+                    </List.Title>
+                  ) : (
+                    <List.Title>{title}</List.Title>
+                  )}
+                  {content.subtitle ? (
+                    <List.Subtitle>{subtitle}</List.Subtitle>
+                  ) : null}
+                </List.Content>
+                <List.Trailing>
+                  {content.detail ? <List.Detail>{detail}</List.Detail> : null}
+                </List.Trailing>
+                <List.Trailing>
+                  {content.trailing === 'drillIn' ? <List.DrillIn /> : null}
+                </List.Trailing>
+                <List.Trailing>
+                  {content.trailing === 'switch' ? (
+                    <Switch.Root
+                      aria-label={title}
+                      onCheckedChange={(isChecked: boolean) =>
+                        addLog(`${title}: ${String(isChecked)}`)
+                      }
+                    >
+                      <Switch.Thumb />
+                    </Switch.Root>
+                  ) : null}
+                </List.Trailing>
+                <List.Trailing>
+                  {content.trailing === 'checkmark' && chosen === title ? (
+                    <List.Checkmark />
+                  ) : null}
+                </List.Trailing>
               </List.Item>
             ))}
           </List.Group>
@@ -291,7 +303,7 @@ export const ListOverview: FunctionComponent = () => (
         <code>label</code>; focusing one opens its row’s actions. A closed{' '}
         <PartLink
           component="list"
-          part="List.Expandable"
+          part="List.CollapsiblePanel"
         />{' '}
         is inert.
       </li>

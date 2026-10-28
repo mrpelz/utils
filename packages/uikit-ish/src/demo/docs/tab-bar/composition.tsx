@@ -278,7 +278,9 @@ const Panels: FunctionComponent = () => {
                   <List.Group>
                     {rows[tab]?.map((name, index) => (
                       <List.Item key={index}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -466,7 +468,9 @@ const OnScrollView: FunctionComponent<{
               <List.Group>
                 {names.map((name) => (
                   <List.Item key={name}>
-                    <List.Title>{name}</List.Title>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
                   </List.Item>
                 ))}
               </List.Group>

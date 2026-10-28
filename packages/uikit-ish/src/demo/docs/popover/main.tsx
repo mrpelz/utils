@@ -126,49 +126,53 @@ export const PopoverDemo: FunctionComponent = () => {
           <List.Section>
             <List.Group>
               <List.Item>
-                <List.Title>In a row</List.Title>
-                <Popover.Root>
-                  <Popover.Trigger
-                    aria-label="Info"
-                    render={
-                      <Button.Root
-                        shape="circle"
-                        variant="borderless"
-                      />
-                    }
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfICircle} />
-                    </Button.Icon>
-                  </Popover.Trigger>
-                  <Popover.Portal>
-                    <Popover.Positioner align="end">
-                      <Popover.Popup className="popover-demo-popup">
-                        {propsContent.arrow ? <Popover.Arrow /> : null}
-                        <Popover.Header>
-                          <Toolbar.Root placement="block-start">
-                            <Toolbar.Title>
-                              <Popover.Title render={<span />}>
-                                In a Row
-                              </Popover.Title>
-                            </Toolbar.Title>
-                          </Toolbar.Root>
-                        </Popover.Header>
-                        <Popover.Body>
-                          <List.Root>
-                            <List.Section>
-                              <List.Footer>
-                                <Popover.Description>
-                                  Aligned with the row’s end.
-                                </Popover.Description>
-                              </List.Footer>
-                            </List.Section>
-                          </List.Root>
-                        </Popover.Body>
-                      </Popover.Popup>
-                    </Popover.Positioner>
-                  </Popover.Portal>
-                </Popover.Root>
+                <List.Content>
+                  <List.Title>In a row</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <Popover.Root>
+                    <Popover.Trigger
+                      aria-label="Info"
+                      render={
+                        <Button.Root
+                          shape="circle"
+                          variant="borderless"
+                        />
+                      }
+                    >
+                      <Button.Icon>
+                        <Symbol icon={sfICircle} />
+                      </Button.Icon>
+                    </Popover.Trigger>
+                    <Popover.Portal>
+                      <Popover.Positioner align="end">
+                        <Popover.Popup className="popover-demo-popup">
+                          {propsContent.arrow ? <Popover.Arrow /> : null}
+                          <Popover.Header>
+                            <Toolbar.Root placement="block-start">
+                              <Toolbar.Title>
+                                <Popover.Title render={<span />}>
+                                  In a Row
+                                </Popover.Title>
+                              </Toolbar.Title>
+                            </Toolbar.Root>
+                          </Popover.Header>
+                          <Popover.Body>
+                            <List.Root>
+                              <List.Section>
+                                <List.Footer>
+                                  <Popover.Description>
+                                    Aligned with the row’s end.
+                                  </Popover.Description>
+                                </List.Footer>
+                              </List.Section>
+                            </List.Root>
+                          </Popover.Body>
+                        </Popover.Popup>
+                      </Popover.Positioner>
+                    </Popover.Portal>
+                  </Popover.Root>
+                </List.Trailing>
               </List.Item>
             </List.Group>
           </List.Section>

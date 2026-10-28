@@ -95,15 +95,21 @@ export const TextFieldDemo: FunctionComponent = () => {
               {...propsRoot}
               render={<List.Item />}
             >
-              <TextField.Label {...propsLabel}>Name</TextField.Label>
-              <TextField.Control {...propsControl} />
-              <TextField.Clear {...propsClear} />
-              <TextField.Description {...propsDescription}>
-                As shown to others.
-              </TextField.Description>
-              <TextField.Error {...propsError}>
-                Please enter a name.
-              </TextField.Error>
+              <List.Content>
+                <TextField.Label {...propsLabel}>Name</TextField.Label>
+              </List.Content>
+              <List.Trailing>
+                <TextField.Control {...propsControl} />
+                <TextField.Clear {...propsClear} />
+              </List.Trailing>
+              <List.Below>
+                <TextField.Description {...propsDescription}>
+                  As shown to others.
+                </TextField.Description>
+                <TextField.Error {...propsError}>
+                  Please enter a name.
+                </TextField.Error>
+              </List.Below>
             </TextField.Root>
           </List.Group>
         </List.Section>

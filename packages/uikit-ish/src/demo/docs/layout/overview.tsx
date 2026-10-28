@@ -79,19 +79,25 @@ const LiveView: FunctionComponent = () => {
                       <List.Group>
                         {rows.map(([value, rowTitle, icon]) => (
                           <List.Item key={value}>
-                            <List.Image variant="symbol">
-                              <Symbol icon={icon} />
-                            </List.Image>
-                            <List.Title
-                              render={<button type="button" />}
-                              onClick={() => {
-                                addLog(`select: ${value}`);
-                                setSelected(value);
-                              }}
-                            >
-                              {rowTitle}
-                            </List.Title>
-                            {selected === value ? <List.Checkmark /> : null}
+                            <List.Leading>
+                              <List.Image variant="symbol">
+                                <Symbol icon={icon} />
+                              </List.Image>
+                            </List.Leading>
+                            <List.Content>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => {
+                                  addLog(`select: ${value}`);
+                                  setSelected(value);
+                                }}
+                              >
+                                {rowTitle}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              {selected === value ? <List.Checkmark /> : null}
+                            </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
@@ -121,7 +127,9 @@ const LiveView: FunctionComponent = () => {
                     <List.Group>
                       {names.map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>

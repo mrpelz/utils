@@ -65,7 +65,9 @@ const LiveView: FunctionComponent = () => {
                 <List.Group>
                   {names.map((name) => (
                     <List.Item key={name}>
-                      <List.Title>{name}</List.Title>
+                      <List.Content>
+                        <List.Title>{name}</List.Title>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>

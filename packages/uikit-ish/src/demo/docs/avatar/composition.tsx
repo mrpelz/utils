@@ -30,34 +30,42 @@ const InListRows: FunctionComponent = () => {
         <List.Section>
           <List.Group>
             <List.Item>
-              <List.Image variant="circular">
-                <Avatar.Root size={42}>
-                  <Avatar.Image
-                    alt=""
-                    src={photo(200)}
-                  />
-                  <Avatar.Fallback>AH</Avatar.Fallback>
-                </Avatar.Root>
-              </List.Image>
-              <List.Title
-                render={<button type="button" />}
-                onClick={() => addLog('Anna Haro clicked')}
-              >
-                Anna Haro
-              </List.Title>
+              <List.Leading>
+                <List.Image variant="circular">
+                  <Avatar.Root size={42}>
+                    <Avatar.Image
+                      alt=""
+                      src={photo(200)}
+                    />
+                    <Avatar.Fallback>AH</Avatar.Fallback>
+                  </Avatar.Root>
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button type="button" />}
+                  onClick={() => addLog('Anna Haro clicked')}
+                >
+                  Anna Haro
+                </List.Title>
+              </List.Content>
             </List.Item>
             <List.Item>
-              <List.Image variant="circular">
-                <Avatar.Root size={42}>
-                  <Avatar.Fallback>KB</Avatar.Fallback>
-                </Avatar.Root>
-              </List.Image>
-              <List.Title
-                render={<button type="button" />}
-                onClick={() => addLog('Kate Bell clicked')}
-              >
-                Kate Bell
-              </List.Title>
+              <List.Leading>
+                <List.Image variant="circular">
+                  <Avatar.Root size={42}>
+                    <Avatar.Fallback>KB</Avatar.Fallback>
+                  </Avatar.Root>
+                </List.Image>
+              </List.Leading>
+              <List.Content>
+                <List.Title
+                  render={<button type="button" />}
+                  onClick={() => addLog('Kate Bell clicked')}
+                >
+                  Kate Bell
+                </List.Title>
+              </List.Content>
             </List.Item>
           </List.Group>
         </List.Section>
@@ -79,25 +87,29 @@ const AConversation: FunctionComponent = () => (
       <List.Section>
         <List.Group>
           <List.Item>
-            <List.Image variant="circular">
-              <Avatar.Group
-                aria-hidden="true"
-                size={42}
-              >
-                <Avatar.Root>
-                  <Avatar.Image
-                    alt=""
-                    src={photo(200)}
-                  />
-                  <Avatar.Fallback>AH</Avatar.Fallback>
-                </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>KB</Avatar.Fallback>
-                </Avatar.Root>
-              </Avatar.Group>
-            </List.Image>
-            <List.Title>Weekend Trip</List.Title>
-            <List.Subtitle>Anna Haro, Kate Bell</List.Subtitle>
+            <List.Leading>
+              <List.Image variant="circular">
+                <Avatar.Group
+                  aria-hidden="true"
+                  size={42}
+                >
+                  <Avatar.Root>
+                    <Avatar.Image
+                      alt=""
+                      src={photo(200)}
+                    />
+                    <Avatar.Fallback>AH</Avatar.Fallback>
+                  </Avatar.Root>
+                  <Avatar.Root>
+                    <Avatar.Fallback>KB</Avatar.Fallback>
+                  </Avatar.Root>
+                </Avatar.Group>
+              </List.Image>
+            </List.Leading>
+            <List.Content>
+              <List.Title>Weekend Trip</List.Title>
+              <List.Subtitle>Anna Haro, Kate Bell</List.Subtitle>
+            </List.Content>
           </List.Item>
         </List.Group>
       </List.Section>

@@ -430,60 +430,68 @@ const InlineInAListRow: FunctionComponent = () => {
       <List.Root style={{ width: 'min(402px, 100%)' }}>
         <List.Section>
           <List.Group>
-            <List.ExpandableRoot
+            <List.CollapsibleRoot
               onOpenChange={(isOpen: boolean) => addLog(`expanded: ${isOpen}`)}
             >
               <List.Item>
-                <List.Title render={<List.ExpandableTrigger />}>
-                  Alarm
-                </List.Title>
-                <List.Detail className="roll-demo-value">
-                  {String(hour).padStart(2, '0')}:
-                  {String(minute).padStart(2, '0')}
-                </List.Detail>
+                <List.Content>
+                  <List.Title render={<List.CollapsibleTrigger />}>
+                    Alarm
+                  </List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Detail className="roll-demo-value">
+                    {String(hour).padStart(2, '0')}:
+                    {String(minute).padStart(2, '0')}
+                  </List.Detail>
+                </List.Trailing>
               </List.Item>
-              <List.Expandable>
-                <Roll.Root>
-                  <Roll.Column
-                    loop
-                    aria-label="Hours"
-                    value={hour}
-                    onValueChange={(next: RollValue) => {
-                      addLog(`hour: ${String(next)}`);
-                      setHour(next);
-                    }}
-                  >
-                    {hours.map((value) => (
-                      <Roll.Item
-                        key={value}
-                        value={value}
+              <List.CollapsiblePanel>
+                <List.Item>
+                  <List.Span>
+                    <Roll.Root>
+                      <Roll.Column
+                        loop
+                        aria-label="Hours"
+                        value={hour}
+                        onValueChange={(next: RollValue) => {
+                          addLog(`hour: ${String(next)}`);
+                          setHour(next);
+                        }}
                       >
-                        {String(value).padStart(2, '0')}
-                      </Roll.Item>
-                    ))}
-                  </Roll.Column>
-                  <Roll.Separator aria-hidden="true">:</Roll.Separator>
-                  <Roll.Column
-                    loop
-                    aria-label="Minutes"
-                    value={minute}
-                    onValueChange={(next: RollValue) => {
-                      addLog(`minute: ${String(next)}`);
-                      setMinute(next);
-                    }}
-                  >
-                    {minutes.map((value) => (
-                      <Roll.Item
-                        key={value}
-                        value={value}
+                        {hours.map((value) => (
+                          <Roll.Item
+                            key={value}
+                            value={value}
+                          >
+                            {String(value).padStart(2, '0')}
+                          </Roll.Item>
+                        ))}
+                      </Roll.Column>
+                      <Roll.Separator aria-hidden="true">:</Roll.Separator>
+                      <Roll.Column
+                        loop
+                        aria-label="Minutes"
+                        value={minute}
+                        onValueChange={(next: RollValue) => {
+                          addLog(`minute: ${String(next)}`);
+                          setMinute(next);
+                        }}
                       >
-                        {String(value).padStart(2, '0')}
-                      </Roll.Item>
-                    ))}
-                  </Roll.Column>
-                </Roll.Root>
-              </List.Expandable>
-            </List.ExpandableRoot>
+                        {minutes.map((value) => (
+                          <Roll.Item
+                            key={value}
+                            value={value}
+                          >
+                            {String(value).padStart(2, '0')}
+                          </Roll.Item>
+                        ))}
+                      </Roll.Column>
+                    </Roll.Root>
+                  </List.Span>
+                </List.Item>
+              </List.CollapsiblePanel>
+            </List.CollapsibleRoot>
           </List.Group>
         </List.Section>
       </List.Root>
@@ -709,14 +717,14 @@ export const RollComposition: FunctionComponent = () => (
         Below a <a href="list">List</a> row, in place: its title opens it (
         <PartLink
           component="list"
-          part="List.ExpandableTrigger"
+          part="List.CollapsibleTrigger"
         >
-          {'<List.Title render={<List.ExpandableTrigger />}>'}
+          {'<List.Title render={<List.CollapsibleTrigger />}>'}
         </PartLink>
         ), the roll in{' '}
         <PartLink
           component="list"
-          part="List.Expandable"
+          part="List.CollapsiblePanel"
         />
         .
       </li>
@@ -729,12 +737,12 @@ export const RollComposition: FunctionComponent = () => (
         <strong>Library:</strong> the expandable row (
         <PartLink
           component="list"
-          part="List.ExpandableRoot"
+          part="List.CollapsibleRoot"
         />
         , its trigger and{' '}
         <PartLink
           component="list"
-          part="List.Expandable"
+          part="List.CollapsiblePanel"
         />
         ) and the roll in it.
       </li>

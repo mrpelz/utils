@@ -154,13 +154,17 @@ export const BadgeDemo: FunctionComponent = () => {
           <List.Section>
             <List.Group>
               <List.Item>
-                <List.Title>Inbox</List.Title>
-                <List.Detail>
-                  <Badge
-                    {...propsRoot}
-                    placement="inline"
-                  />
-                </List.Detail>
+                <List.Content>
+                  <List.Title>Inbox</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Detail>
+                    <Badge
+                      {...propsRoot}
+                      placement="inline"
+                    />
+                  </List.Detail>
+                </List.Trailing>
               </List.Item>
             </List.Group>
           </List.Section>

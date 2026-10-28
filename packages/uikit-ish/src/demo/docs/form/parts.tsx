@@ -63,33 +63,43 @@ const FormPart: FunctionComponent = () => {
                 name="email"
                 render={<List.Item />}
               >
-                <TextField.Control
-                  required
-                  aria-label="Email"
-                  placeholder="Email"
-                  type="email"
-                />
-                <TextField.Error />
+                <List.Span>
+                  <TextField.Control
+                    required
+                    aria-label="Email"
+                    placeholder="Email"
+                    type="email"
+                  />
+                </List.Span>
+                <List.Below>
+                  <TextField.Error />
+                </List.Below>
               </TextField.Root>
               <Field.Root
                 name="quantity"
                 render={<List.Item />}
               >
-                <List.Title>Quantity</List.Title>
-                <List.Detail className="form-demo-value">
-                  {quantity ?? '–'}
-                </List.Detail>
-                <Stepper.Root
-                  min={1}
-                  value={quantity}
-                  onValueChange={(next: number | null) => setQuantity(next)}
-                >
-                  <Stepper.Group>
-                    <Stepper.Input aria-label="Quantity" />
-                    <Stepper.Decrement />
-                    <Stepper.Increment />
-                  </Stepper.Group>
-                </Stepper.Root>
+                <List.Content>
+                  <List.Title>Quantity</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Detail className="form-demo-value">
+                    {quantity ?? '–'}
+                  </List.Detail>
+                </List.Trailing>
+                <List.Trailing>
+                  <Stepper.Root
+                    min={1}
+                    value={quantity}
+                    onValueChange={(next: number | null) => setQuantity(next)}
+                  >
+                    <Stepper.Group>
+                      <Stepper.Input aria-label="Quantity" />
+                      <Stepper.Decrement />
+                      <Stepper.Increment />
+                    </Stepper.Group>
+                  </Stepper.Root>
+                </List.Trailing>
               </Field.Root>
             </List.Group>
           </Fieldset.Root>
@@ -150,8 +160,12 @@ const FieldsetRootPart: FunctionComponent = () => {
                 name="name"
                 render={<List.Item />}
               >
-                <TextField.Label>Name</TextField.Label>
-                <TextField.Control placeholder="Name" />
+                <List.Content>
+                  <TextField.Label>Name</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control placeholder="Name" />
+                </List.Trailing>
               </TextField.Root>
             </List.Group>
           </Fieldset.Root>
@@ -205,8 +219,12 @@ const FieldsetLegendPart: FunctionComponent = () => {
                 name="name"
                 render={<List.Item />}
               >
-                <TextField.Label>Name</TextField.Label>
-                <TextField.Control placeholder="Name" />
+                <List.Content>
+                  <TextField.Label>Name</TextField.Label>
+                </List.Content>
+                <List.Trailing>
+                  <TextField.Control placeholder="Name" />
+                </List.Trailing>
               </TextField.Root>
             </List.Group>
           </Fieldset.Root>
@@ -253,21 +271,25 @@ const FieldPart: FunctionComponent = () => {
                 key={elementKey}
                 {...props}
               >
-                <List.Title>Quantity</List.Title>
+                <List.Content>
+                  <List.Title>Quantity</List.Title>
+                </List.Content>
                 <List.Detail className="form-demo-value">
                   {quantity ?? '–'}
                 </List.Detail>
-                <Stepper.Root
-                  min={1}
-                  value={quantity}
-                  onValueChange={(next: number | null) => setQuantity(next)}
-                >
-                  <Stepper.Group>
-                    <Stepper.Input aria-label="Quantity" />
-                    <Stepper.Decrement />
-                    <Stepper.Increment />
-                  </Stepper.Group>
-                </Stepper.Root>
+                <List.Trailing>
+                  <Stepper.Root
+                    min={1}
+                    value={quantity}
+                    onValueChange={(next: number | null) => setQuantity(next)}
+                  >
+                    <Stepper.Group>
+                      <Stepper.Input aria-label="Quantity" />
+                      <Stepper.Decrement />
+                      <Stepper.Increment />
+                    </Stepper.Group>
+                  </Stepper.Root>
+                </List.Trailing>
               </Field.Root>
             </List.Group>
           </List.Section>

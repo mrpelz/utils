@@ -81,8 +81,12 @@ const all = selected.length === messages.length;
       >
         {messages.map(({ subject }) => (
           <List.Item key={subject} onClick={forwardClick('[role=checkbox]')}>
-            <List.Checkbox aria-label={subject} value={subject} />
-            <List.Title>{subject}</List.Title>
+            <List.Leading>
+              <List.Checkbox aria-label={subject} value={subject} />
+            </List.Leading>
+            <List.Content>
+              <List.Title>{subject}</List.Title>
+            </List.Content>
           </List.Item>
         ))}
       </CheckboxGroup>
@@ -222,9 +226,11 @@ const NavigationBar: FunctionComponent = () => {
                 <List.Group>
                   {messages.map(({ from, preview, subject }) => (
                     <List.Item key={subject}>
-                      <List.Title>{from}</List.Title>
-                      <List.Subtitle>{subject}</List.Subtitle>
-                      <List.Text lines={2}>{preview}</List.Text>
+                      <List.Content>
+                        <List.Title>{from}</List.Title>
+                        <List.Subtitle>{subject}</List.Subtitle>
+                        <List.Text lines={2}>{preview}</List.Text>
+                      </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
@@ -267,12 +273,16 @@ const EditMode: FunctionComponent = () => {
                     key={subject}
                     onClick={forwardClick('[role=checkbox]')}
                   >
-                    <List.Checkbox
-                      aria-label={subject}
-                      value={subject}
-                    />
-                    <List.Title>{subject}</List.Title>
-                    <List.Subtitle>{from}</List.Subtitle>
+                    <List.Leading>
+                      <List.Checkbox
+                        aria-label={subject}
+                        value={subject}
+                      />
+                    </List.Leading>
+                    <List.Content>
+                      <List.Title>{subject}</List.Title>
+                      <List.Subtitle>{from}</List.Subtitle>
+                    </List.Content>
                   </List.Item>
                 ))}
               </CheckboxGroup>
@@ -353,7 +363,9 @@ const Search: FunctionComponent = () => {
               <List.Group>
                 {matching.map((name) => (
                   <List.Item key={name}>
-                    <List.Title>{name}</List.Title>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
                   </List.Item>
                 ))}
               </List.Group>

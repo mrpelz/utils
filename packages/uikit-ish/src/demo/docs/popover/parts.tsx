@@ -117,19 +117,27 @@ const RootPart: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>
@@ -203,19 +211,27 @@ const TriggerPart: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>
@@ -296,19 +312,27 @@ const PortalPart: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>
@@ -390,19 +414,27 @@ const BackdropPart: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>
@@ -483,19 +515,27 @@ const PositionerPart: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>
@@ -576,19 +616,27 @@ const PopupPart: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>
@@ -669,19 +717,27 @@ const ArrowPart: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>
@@ -762,19 +818,27 @@ const HeaderPart: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>
@@ -855,19 +919,27 @@ const BodyPart: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>
@@ -949,19 +1021,27 @@ const ViewportPart: FunctionComponent = () => {
                     <List.Section>
                       <List.Group>
                         <List.Item onClick={forwardClick('[role=switch]')}>
-                          <List.Title>Show Completed</List.Title>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
-                          </Switch.Root>
+                          <List.Content>
+                            <List.Title>Show Completed</List.Title>
+                          </List.Content>
+                          <List.Trailing>
+                            <Switch.Root aria-label="Show completed">
+                              <Switch.Thumb />
+                            </Switch.Root>
+                          </List.Trailing>
                         </List.Item>
                         <List.Item onClick={forwardClick('[role=switch]')}>
-                          <List.Title>Show Notes</List.Title>
-                          <Switch.Root
-                            defaultChecked
-                            aria-label="Show notes"
-                          >
-                            <Switch.Thumb />
-                          </Switch.Root>
+                          <List.Content>
+                            <List.Title>Show Notes</List.Title>
+                          </List.Content>
+                          <List.Trailing>
+                            <Switch.Root
+                              defaultChecked
+                              aria-label="Show notes"
+                            >
+                              <Switch.Thumb />
+                            </Switch.Root>
+                          </List.Trailing>
                         </List.Item>
                       </List.Group>
                       <List.Footer>
@@ -1043,19 +1123,27 @@ const TitlePart: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>
@@ -1136,19 +1224,27 @@ const DescriptionPart: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>
@@ -1222,19 +1318,27 @@ const ClosePart: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>
@@ -1330,19 +1434,27 @@ const CreateHandlePart: FunctionComponent = () => {
                   <List.Section>
                     <List.Group>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Completed</List.Title>
-                        <Switch.Root aria-label="Show completed">
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Completed</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root aria-label="Show completed">
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                       <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Title>Show Notes</List.Title>
-                        <Switch.Root
-                          defaultChecked
-                          aria-label="Show notes"
-                        >
-                          <Switch.Thumb />
-                        </Switch.Root>
+                        <List.Content>
+                          <List.Title>Show Notes</List.Title>
+                        </List.Content>
+                        <List.Trailing>
+                          <Switch.Root
+                            defaultChecked
+                            aria-label="Show notes"
+                          >
+                            <Switch.Thumb />
+                          </Switch.Root>
+                        </List.Trailing>
                       </List.Item>
                     </List.Group>
                     <List.Footer>
@@ -1446,19 +1558,27 @@ const UseCreatePopoverHandlePart: FunctionComponent = () => {
                     <List.Section>
                       <List.Group>
                         <List.Item onClick={forwardClick('[role=switch]')}>
-                          <List.Title>Show Completed</List.Title>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
-                          </Switch.Root>
+                          <List.Content>
+                            <List.Title>Show Completed</List.Title>
+                          </List.Content>
+                          <List.Trailing>
+                            <Switch.Root aria-label="Show completed">
+                              <Switch.Thumb />
+                            </Switch.Root>
+                          </List.Trailing>
                         </List.Item>
                         <List.Item onClick={forwardClick('[role=switch]')}>
-                          <List.Title>Show Notes</List.Title>
-                          <Switch.Root
-                            defaultChecked
-                            aria-label="Show notes"
-                          >
-                            <Switch.Thumb />
-                          </Switch.Root>
+                          <List.Content>
+                            <List.Title>Show Notes</List.Title>
+                          </List.Content>
+                          <List.Trailing>
+                            <Switch.Root
+                              defaultChecked
+                              aria-label="Show notes"
+                            >
+                              <Switch.Thumb />
+                            </Switch.Root>
+                          </List.Trailing>
                         </List.Item>
                       </List.Group>
                       <List.Footer>

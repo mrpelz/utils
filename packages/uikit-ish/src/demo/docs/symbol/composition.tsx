@@ -26,23 +26,33 @@ const RowImages: FunctionComponent = () => (
       <List.Section>
         <List.Group>
           <List.Item>
-            <List.Image
-              style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
-              variant="rounded"
-            >
-              <Symbol icon={sfAirplane} />
-            </List.Image>
-            <List.Title>Airplane Mode</List.Title>
+            <List.Leading>
+              <List.Image
+                style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
+                variant="rounded"
+              >
+                <Symbol icon={sfAirplane} />
+              </List.Image>
+            </List.Leading>
+            <List.Content>
+              <List.Title>Airplane Mode</List.Title>
+            </List.Content>
           </List.Item>
           <List.Item>
-            <List.Image
-              style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
-              variant="rounded"
-            >
-              <Symbol icon={sfWifi} />
-            </List.Image>
-            <List.Title>Wi-Fi</List.Title>
-            <List.Detail>Home</List.Detail>
+            <List.Leading>
+              <List.Image
+                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                variant="rounded"
+              >
+                <Symbol icon={sfWifi} />
+              </List.Image>
+            </List.Leading>
+            <List.Content>
+              <List.Title>Wi-Fi</List.Title>
+            </List.Content>
+            <List.Trailing>
+              <List.Detail>Home</List.Detail>
+            </List.Trailing>
           </List.Item>
         </List.Group>
       </List.Section>
@@ -62,14 +72,18 @@ const OnItsOwn: FunctionComponent = () => (
       <List.Section>
         <List.Group>
           <List.Item>
-            <List.Title>Notes</List.Title>
-            <List.Detail>
-              <Symbol
-                aria-label="Not synced"
-                icon={sfIcloudSlash}
-                role="img"
-              />
-            </List.Detail>
+            <List.Content>
+              <List.Title>Notes</List.Title>
+            </List.Content>
+            <List.Trailing>
+              <List.Detail>
+                <Symbol
+                  aria-label="Not synced"
+                  icon={sfIcloudSlash}
+                  role="img"
+                />
+              </List.Detail>
+            </List.Trailing>
           </List.Item>
         </List.Group>
       </List.Section>

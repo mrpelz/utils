@@ -104,7 +104,9 @@ const RootPart: FunctionComponent = () => {
                   <List.Group>
                     {names.slice(0, 3).map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -190,7 +192,9 @@ const TriggerPart: FunctionComponent = () => {
                   <List.Group>
                     {names.slice(0, 3).map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -274,7 +278,9 @@ const PopupPart: FunctionComponent = () => {
                   <List.Group>
                     {names.slice(0, 3).map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -360,7 +366,9 @@ const HeaderPart: FunctionComponent = () => {
                   <List.Group>
                     {names.slice(0, 3).map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -446,7 +454,9 @@ const GrabberPart: FunctionComponent = () => {
                   <List.Group>
                     {names.slice(0, 3).map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -532,7 +542,9 @@ const ContentPart: FunctionComponent = () => {
                   <List.Group>
                     {names.slice(0, 3).map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -623,7 +635,9 @@ const TitlePart: FunctionComponent = () => {
                   <List.Group>
                     {names.slice(0, 3).map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -709,7 +723,9 @@ const DescriptionPart: FunctionComponent = () => {
                   <List.Group>
                     {names.slice(0, 3).map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -798,7 +814,9 @@ const ClosePart: FunctionComponent = () => {
                   <List.Group>
                     {names.slice(0, 3).map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -887,7 +905,9 @@ const CreateHandlePart: FunctionComponent = () => {
                   <List.Group>
                     {names.slice(0, 3).map((name) => (
                       <List.Item key={name}>
-                        <List.Title>{name}</List.Title>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
@@ -980,7 +1000,9 @@ const UseCreateSheetHandlePart: FunctionComponent = () => {
                     <List.Group>
                       {names.slice(0, 3).map((name) => (
                         <List.Item key={name}>
-                          <List.Title>{name}</List.Title>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>

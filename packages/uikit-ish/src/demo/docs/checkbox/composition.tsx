@@ -25,8 +25,12 @@ import { GuideLink } from '../hig-guide/link.js';
 
 const rowsCode = `<List.Group>
   <List.Item onClick={forwardClick('[role=checkbox]')}>
-    <List.Checkbox aria-label="Anna Haro" />
-    <List.Title>Anna Haro</List.Title>
+    <List.Leading>
+      <List.Checkbox aria-label="Anna Haro" />
+    </List.Leading>
+    <List.Content>
+      <List.Title>Anna Haro</List.Title>
+    </List.Content>
   </List.Item>
   …
 </List.Group>`;
@@ -37,11 +41,15 @@ const oneRowCode = `<RadioGroup
   render={<List.Group />}
 >
   <List.Item onClick={forwardClick('[role=radio]')}>
-    <List.Radio
-      aria-label="iCloud"
-      value="icloud"
-    />
-    <List.Title>iCloud</List.Title>
+    <List.Leading>
+      <List.Radio
+        aria-label="iCloud"
+        value="icloud"
+      />
+    </List.Leading>
+    <List.Content>
+      <List.Title>iCloud</List.Title>
+    </List.Content>
   </List.Item>
   …
 </RadioGroup>`;
@@ -52,18 +60,26 @@ const allCode = `<CheckboxGroup
   render={<List.Group />}
 >
   <List.Item onClick={forwardClick('[role=checkbox]')}>
-    <List.Checkbox
-      parent
-      aria-label="All"
-    />
-    <List.Title>All</List.Title>
+    <List.Leading>
+      <List.Checkbox
+        parent
+        aria-label="All"
+      />
+    </List.Leading>
+    <List.Content>
+      <List.Title>All</List.Title>
+    </List.Content>
   </List.Item>
   <List.Item onClick={forwardClick('[role=checkbox]')}>
-    <List.Checkbox
-      aria-label="Messages"
-      value="messages"
-    />
-    <List.Title>Messages</List.Title>
+    <List.Leading>
+      <List.Checkbox
+        aria-label="Messages"
+        value="messages"
+      />
+    </List.Leading>
+    <List.Content>
+      <List.Title>Messages</List.Title>
+    </List.Content>
   </List.Item>
   …
 </CheckboxGroup>`;
@@ -133,13 +149,17 @@ const SelectingRows: FunctionComponent = () => {
                 key={name}
                 onClick={forwardClick('[role=checkbox]')}
               >
-                <List.Checkbox
-                  aria-label={name}
-                  onCheckedChange={(isChecked: boolean) =>
-                    addLog(`${name}: ${String(isChecked)}`)
-                  }
-                />
-                <List.Title>{name}</List.Title>
+                <List.Leading>
+                  <List.Checkbox
+                    aria-label={name}
+                    onCheckedChange={(isChecked: boolean) =>
+                      addLog(`${name}: ${String(isChecked)}`)
+                    }
+                  />
+                </List.Leading>
+                <List.Content>
+                  <List.Title>{name}</List.Title>
+                </List.Content>
               </List.Item>
             ))}
           </List.Group>
@@ -180,11 +200,15 @@ const ChoosingOneRow: FunctionComponent = () => {
                 key={value}
                 onClick={forwardClick('[role=radio]')}
               >
-                <List.Radio
-                  aria-label={label}
-                  value={value}
-                />
-                <List.Title>{label}</List.Title>
+                <List.Leading>
+                  <List.Radio
+                    aria-label={label}
+                    value={value}
+                  />
+                </List.Leading>
+                <List.Content>
+                  <List.Title>{label}</List.Title>
+                </List.Content>
               </List.Item>
             ))}
           </RadioGroup>
@@ -220,22 +244,30 @@ const SelectAll: FunctionComponent = () => {
             }
           >
             <List.Item onClick={forwardClick('[role=checkbox]')}>
-              <List.Checkbox
-                parent
-                aria-label="All"
-              />
-              <List.Title>All</List.Title>
+              <List.Leading>
+                <List.Checkbox
+                  parent
+                  aria-label="All"
+                />
+              </List.Leading>
+              <List.Content>
+                <List.Title>All</List.Title>
+              </List.Content>
             </List.Item>
             {notifications.map(([value, label]) => (
               <List.Item
                 key={value}
                 onClick={forwardClick('[role=checkbox]')}
               >
-                <List.Checkbox
-                  aria-label={label}
-                  value={value}
-                />
-                <List.Title>{label}</List.Title>
+                <List.Leading>
+                  <List.Checkbox
+                    aria-label={label}
+                    value={value}
+                  />
+                </List.Leading>
+                <List.Content>
+                  <List.Title>{label}</List.Title>
+                </List.Content>
               </List.Item>
             ))}
           </CheckboxGroup>

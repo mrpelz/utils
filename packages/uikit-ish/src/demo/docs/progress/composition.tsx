@@ -101,13 +101,17 @@ const InAListRow: FunctionComponent = () => (
       <List.Section>
         <List.Group>
           <List.Item>
-            <List.Title>Software Update</List.Title>
-            <List.Detail>
-              <ActivityIndicator
-                aria-label="Checking for Update"
-                size="small"
-              />
-            </List.Detail>
+            <List.Content>
+              <List.Title>Software Update</List.Title>
+            </List.Content>
+            <List.Trailing>
+              <List.Detail>
+                <ActivityIndicator
+                  aria-label="Checking for Update"
+                  size="small"
+                />
+              </List.Detail>
+            </List.Trailing>
           </List.Item>
         </List.Group>
       </List.Section>
