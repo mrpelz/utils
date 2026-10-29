@@ -1,4 +1,4 @@
-import { FunctionComponent, RefObject } from 'react';
+import { FunctionComponent, RefObject, useRef } from 'react';
 
 import {
   List,
@@ -36,7 +36,8 @@ import {
  */
 const LiveViewFrame: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
-}> = ({ contentRef }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, contentRef }) => {
   const id = 'viewport-overview';
   const [externalContent, externalStart, externalEnd] = useProvidedState(id);
   const [controlContent, propsContent, stateContent] = usePropControl(
@@ -62,6 +63,7 @@ const LiveViewFrame: FunctionComponent<{
       isInline
       controls={[controlContent, controlStart, controlEnd]}
       id={id}
+      screenRef={screenRef}
       stage="phone"
       state={[stateContent, stateStart, stateEnd]}
       title="Viewport"
@@ -130,10 +132,17 @@ const LiveView: FunctionComponent = () => {
     'contentRef',
     'HTMLDivElement',
   );
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
-      <LiveViewFrame contentRef={contentRef} />
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
+      <LiveViewFrame
+        contentRef={contentRef}
+        screenRef={screenRef}
+      />
     </Viewport.Provider>
   );
 };

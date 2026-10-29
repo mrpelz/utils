@@ -4,7 +4,7 @@ import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
 import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
 import { sfPlayFill } from '@bradleyhodges/sfsymbols/sfPlayFill';
-import { FunctionComponent, RefObject, useState } from 'react';
+import { FunctionComponent, RefObject, useRef, useState } from 'react';
 
 import {
   Badge,
@@ -439,7 +439,8 @@ const Badges: FunctionComponent = () => {
  */
 const OnScrollView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
-}> = ({ contentRef }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, contentRef }) => {
   const [log, addLog] = useLog();
   const [value, onValueChange] = useValue(addLog);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -454,6 +455,7 @@ const OnScrollView: FunctionComponent<{
       isInline
       id="tab-bar-composition-scroll"
       log={log}
+      screenRef={screenRef}
       stage="phone"
       title="Tab bar collapsing on scroll"
     >
@@ -508,10 +510,17 @@ const OnScroll: FunctionComponent = () => {
     'contentRef',
     'HTMLDivElement',
   );
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
-      <OnScrollView contentRef={contentRef} />
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
+      <OnScrollView
+        contentRef={contentRef}
+        screenRef={screenRef}
+      />
     </Viewport.Provider>
   );
 };

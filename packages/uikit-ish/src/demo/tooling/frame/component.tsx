@@ -207,20 +207,39 @@ const InlineDemo: FunctionComponent<{
   </div>
 );
 
+/** Its device's screen's ref: the one given, or its own. */
+const useScreenRef = (given?: RefObject<HTMLDivElement | null>) => {
+  const own = useRef<HTMLDivElement>(null);
+  return given ?? own;
+};
+
+/** Raw: as the URL has it, on a demos' page only (see `EntryDemos`). */
+const useIsRaw = () => {
+  const { raw } = useOptions();
+  const pagePath = useContext(PagePathContext);
+  return raw && pagePath === '';
+};
+
 /**
  * Raw, the demo is the app (its screen the window's): the document marked,
- * so it doesn't bounce (see shared/style.css).
+ * so it doesn't bounce (see shared/style.css); titled as the demo. (Added
+ * to the Home Screen as itself, see scripts/demo-head.js: decided as the
+ * page loads.)
  */
-const useRawDocument = (isRaw: boolean, isHidden: boolean) => {
+const useRawDocument = (isRaw: boolean, isHidden: boolean, title: string) => {
   const isRawShown = isRaw && !isHidden;
   useLayoutEffect(() => {
     if (!isRawShown) return undefined;
     const { documentElement: root } = document;
     root.dataset.demoRaw = '';
+    const { title: documentTitle } = document;
+    document.title = title;
+
     return () => {
       delete root.dataset.demoRaw;
+      document.title = documentTitle;
     };
-  }, [isRawShown]);
+  }, [isRawShown, title]);
 };
 
 /**
@@ -526,6 +545,12 @@ export const Component: FunctionComponent<{
    */
   screen?: 'centered' | 'flow';
   /**
+   * Its device's screen's element, for what's around the demo (e.g. a
+   * `Viewport.Provider` wrapping its view, given it as its `screen`, so it
+   * tracks the screen, not the window); raw, none (the window's).
+   */
+  screenRef?: RefObject<HTMLDivElement | null>;
+  /**
    * Its code's start, above its JSX: the state and hooks the JSX uses
    * (e.g. a `useState` wiring parts in controlled mode).
    */
@@ -554,12 +579,14 @@ export const Component: FunctionComponent<{
   isStretched = false,
   log,
   screen,
+  screenRef: screenRefProp,
   setup,
   stage,
   state,
   title,
 }) => {
-  const { back: isBack, id: showId, raw: isRaw } = useOptions();
+  const { back: isBack, id: showId } = useOptions();
+  const isRaw = useIsRaw();
   const entry = useEntry();
   // (Inline on a guide page only, see guide/pages.tsx.)
   const pagePath = useContext(PagePathContext);
@@ -610,7 +637,7 @@ export const Component: FunctionComponent<{
   const inlineRef = useRef<HTMLDivElement>(null);
   // (Its device's screen: its content's portal container, see `Screen`;
   // also its diagnostics', read as in it, e.g. its anchors' sizes.)
-  const screenRef = useRef<HTMLDivElement>(null);
+  const screenRef = useScreenRef(screenRefProp);
   const canExpand = useCanExpand(inlineRef);
   // (Its own: closed at first, not kept, nor shared with other views.)
   const [isCodeOpen, setIsCodeOpen] = useState(false);
@@ -631,7 +658,7 @@ export const Component: FunctionComponent<{
 
   const config = useGuards(isHidden, hasInputGuards, isRaw);
 
-  useRawDocument(isRaw, isHidden);
+  useRawDocument(isRaw, isHidden, title);
 
   if (isHidden) return null;
   if (isRaw) return children;

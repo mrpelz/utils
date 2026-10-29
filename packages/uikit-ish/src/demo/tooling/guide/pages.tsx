@@ -39,31 +39,27 @@ const entryInfo = (entry: CatalogEntry): EntryInfo => ({
 /**
  * Components' demos, one after another, each with its component's settings
  * and headers (see nav.tsx); client only (see `ClientOnly`: prerendered, an
- * empty shell), mounted while near the screen (see `VirtualList`).
+ * empty shell), mounted while near the screen (see `VirtualList`). Raw, as
+ * they are: the one shown alone (see frame/component.tsx).
  */
 const EntryDemos: FunctionComponent<{ entries: readonly CatalogEntry[] }> = ({
   entries,
 }) => {
   const { raw } = useOptions();
 
-  return (
-    <ClientOnly>
-      <VirtualList
-        isSnapPoint={!raw}
-        items={entries.flatMap((entry) => {
-          const info = entryInfo(entry);
-          return entry.demos.map((Demo, index) => (
-            <EntryContext.Provider
-              key={index}
-              value={info}
-            >
-              <Demo />
-            </EntryContext.Provider>
-          ));
-        })}
-      />
-    </ClientOnly>
-  );
+  const demos = entries.flatMap((entry) => {
+    const info = entryInfo(entry);
+    return entry.demos.map((Demo, index) => (
+      <EntryContext.Provider
+        key={`${entry.id}-${String(index)}`}
+        value={info}
+      >
+        <Demo />
+      </EntryContext.Provider>
+    ));
+  });
+
+  return <ClientOnly>{raw ? demos : <VirtualList items={demos} />}</ClientOnly>;
 };
 
 /** A component's page of prose (overview, parts). */

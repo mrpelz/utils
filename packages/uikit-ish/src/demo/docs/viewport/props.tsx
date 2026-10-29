@@ -137,6 +137,7 @@ export const propOptionsOverscroll = {
   edge: [undefined, 'block-end'] as const,
   anchor: [undefined, null] as const,
   open: [undefined, true, false] as const,
+  safeArea: safeAreas,
 };
 
 /** A view's padding at the content's start. */

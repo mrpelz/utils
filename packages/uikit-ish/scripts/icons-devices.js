@@ -2,8 +2,8 @@
 
 // The iPhones' and iPads' screens (portrait, CSS px, and their pixel ratio),
 // for the Home Screen app's splash screens (`apple-touch-startup-image`):
-// made by scripts/icons.js, linked by the demo's template (see
-// webpack.config.js). As pwa-asset-generator's (see iot-webinterface).
+// made by scripts/icons.js, linked from the demo's head (see
+// scripts/demo-head.js). As pwa-asset-generator's (see iot-webinterface).
 
 /** @type {readonly (readonly [number, number, number])[]} */
 export const devices = [

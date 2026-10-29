@@ -255,6 +255,20 @@ export const viewportOverscrollRows: readonly PropRow[] = [
     </>,
   ],
   [
+    'safeArea',
+    union('all', 'block', 'inline', 'none'),
+    code(union('all')),
+    <>
+      The safe area insets it shows only clear of while pulled in: all, those of
+      the block dimension (top, bottom) or the inline one (left, right) only, or
+      none. Not kept clear, it shows in the inset too (e.g. behind the status
+      bar, as iOS’ refresh control), there even at rest, just past the content’s
+      end (e.g. faded by its progress,{' '}
+      <code>--uikit-viewport-overscroll-progress</code>); open, it rests clear
+      of it all the same.
+    </>,
+  ],
+  [
     'children',
     'ReactNode',
     undefined,

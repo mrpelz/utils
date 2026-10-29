@@ -97,8 +97,9 @@ const remove = preventFocusShift(document.getElementById('app'));`;
 const ProviderPartFrame: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
   control: ReactNode;
+  screenRef: RefObject<HTMLDivElement | null>;
   state: object;
-}> = ({ contentRef, control, state }) => {
+}> = ({ contentRef, control, screenRef, state }) => {
   const id = 'viewport-parts-provider';
   const visual = useVisualViewport();
   const { atBottom, atTop, direction = '–' } = useScrollDirection();
@@ -109,6 +110,7 @@ const ProviderPartFrame: FunctionComponent<{
       isInline
       controls={[control]}
       id={id}
+      screenRef={screenRef}
       stage="phone"
       state={[state]}
       title="Viewport.Provider"
@@ -169,12 +171,19 @@ const ProviderPart: FunctionComponent = () => {
     ),
     { external, title: 'Viewport.Provider' },
   );
+  // (Around the demo, outside its screen: unset, given the screen, as a
+  // provider within it would be, see `propOptionsProvider`.)
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider {...props}>
+    <Viewport.Provider
+      {...props}
+      screen={props.screen === null ? null : screenRef}
+    >
       <ProviderPartFrame
         contentRef={contentRef}
         control={control}
+        screenRef={screenRef}
         state={state}
       />
     </Viewport.Provider>
@@ -479,7 +488,8 @@ const PaddingPart: FunctionComponent = () => {
  */
 const OverscrollView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
-}> = ({ contentRef }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, contentRef }) => {
   const id = 'viewport-parts-overscroll';
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(propOptionsOverscroll, {
@@ -500,6 +510,7 @@ const OverscrollView: FunctionComponent<{
       isInline
       controls={[control]}
       id={id}
+      screenRef={screenRef}
       stage="phone"
       state={[state]}
       title="Viewport.Overscroll"
@@ -557,10 +568,17 @@ const OverscrollPart: FunctionComponent = () => {
     'contentRef',
     'HTMLDivElement',
   );
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
-      <OverscrollView contentRef={contentRef} />
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
+      <OverscrollView
+        contentRef={contentRef}
+        screenRef={screenRef}
+      />
     </Viewport.Provider>
   );
 };
@@ -780,7 +798,8 @@ const UseViewportScrollView: FunctionComponent<{
   addLog: AddLog;
   contentRef: RefObject<HTMLDivElement | null>;
   log: ReactNode;
-}> = ({ addLog, contentRef, log }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, addLog, contentRef, log }) => {
   const id = 'viewport-parts-use-viewport-scroll';
   const calls = useRef(0);
   const [external] = useProvidedState(id);
@@ -808,6 +827,7 @@ const UseViewportScrollView: FunctionComponent<{
       controls={[control]}
       id={id}
       log={log}
+      screenRef={screenRef}
       stage="phone"
       state={[state]}
       title="useViewportScroll"
@@ -856,13 +876,18 @@ const UseViewportScrollPart: FunctionComponent = () => {
     'HTMLDivElement',
   );
   const [log, addLog] = useLog();
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
       <UseViewportScrollView
         addLog={addLog}
         contentRef={contentRef}
         log={log}
+        screenRef={screenRef}
       />
     </Viewport.Provider>
   );
@@ -871,7 +896,8 @@ const UseViewportScrollPart: FunctionComponent = () => {
 /** `useScrollDirection`'s readout (inside a provider, see below). */
 const UseScrollDirectionView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
-}> = ({ contentRef }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, contentRef }) => {
   const id = 'viewport-parts-use-scroll-direction';
   const [external] = useProvidedState(id);
   const [control, options, state] = usePropControl(propOptionsScrollOptions, {
@@ -890,6 +916,7 @@ const UseScrollDirectionView: FunctionComponent<{
       isInline
       controls={[control]}
       id={id}
+      screenRef={screenRef}
       stage="phone"
       state={[state]}
       title="useScrollDirection"
@@ -931,10 +958,17 @@ const UseScrollDirectionPart: FunctionComponent = () => {
     'contentRef',
     'HTMLDivElement',
   );
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
-      <UseScrollDirectionView contentRef={contentRef} />
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
+      <UseScrollDirectionView
+        contentRef={contentRef}
+        screenRef={screenRef}
+      />
     </Viewport.Provider>
   );
 };
@@ -1478,6 +1512,15 @@ export const ViewportParts: FunctionComponent = () => (
           part="useScrollDirection"
         />
         : each takes its own <code>threshold</code>.
+      </li>
+      <li>
+        Tracking the window (as do the layers in it, outside a device’s screen):
+        marks the root as an app’s (<code>data-uikit-viewport-window</code>),
+        its background the app’s beneath the layers. In an iOS Home Screen app,
+        also makes the document as tall as the screen (
+        <code>data-uikit-viewport-standalone</code>): iOS 26 otherwise gives a
+        document no taller than its window a layout viewport short by the status
+        bar’s height, painting nothing below it (WebKit bug 301108).
       </li>
       <li>Here: tracking the screen’s content layer, the readout below it.</li>
     </ul>
@@ -2089,7 +2132,12 @@ export const ViewportParts: FunctionComponent = () => (
         iOS scrolls the page (its layout viewport) to a text field it focuses,
         to keep it clear of the keyboard, shifting a fixed layout (e.g. a{' '}
         <a href="viewport">Viewport</a>’s bars). Guarded, a field touched in its
-        target is focused without scrolling (as the touch ends).
+        target is focused without scrolling (as the tap ends).
+      </li>
+      <li>
+        Also tapped just beside it (within about a finger’s width, touching no
+        other control) or on its label: iOS focuses it then, too (adjusting the
+        touch to the nearest control).
       </li>
       <li>
         The touch’s click doesn’t follow, and the caret goes where the field

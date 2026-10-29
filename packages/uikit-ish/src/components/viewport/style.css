@@ -1,5 +1,26 @@
 /* Viewport (see main.tsx). */
 @layer uikit-ish {
+  /* iOS 26, a Home Screen app (marked by its layers, see main.tsx; under
+     a translucent status bar, the page under the safe areas): a document no
+     taller than its window gets a layout viewport short by the status
+     bar's height (WebKit bug 301108), nothing painted below it (the
+     layers neither). As tall as the screen, the document gets the full one
+     (then, as tall as it, nothing to scroll; at most the status bar's
+     height more where it's opaque). */
+  :root[data-uikit-viewport-standalone] {
+    min-height: min(100lvh, calc(100% + env(safe-area-inset-top, 0px)));
+  }
+
+  /* The window an app's (its layers in it, or a provider tracking it, see
+     main.tsx): its
+     background, where nothing paints its own (a page's default, see Page):
+     beneath the layers, the content layer without one of its own (its
+     overscroll areas beneath it), behind the safe areas and past its
+     content's ends. */
+  :root[data-uikit-viewport-window] {
+    background-color: var(--color-ios-system-grouped-background);
+  }
+
   /* The content's edge (see padding.tsx): room for the anchors, as high
      as they are, and the content margin (UIKit's layout margins: the
      library's gap between content and its container's edge, by token; a
@@ -162,6 +183,19 @@
      stays (`data-overlay`: not bouncing by itself, nor moved along, see
      below), over it (beneath the anchors, a layer of its own as they are). */
   .uikit-viewport-overscroll {
+    /* Its area's rest past the insets not kept clear (`data-safe-area`, see
+       above): clear of them all the same (where it's open). */
+    --uikit-viewport-overscroll-rest-start: calc(
+      var(--uikit-safe-area-inset-top, 0px) - var(--uikit-viewport-safe-top)
+    );
+    --uikit-viewport-overscroll-rest-end: calc(
+      max(
+          0px,
+          var(--uikit-safe-area-inset-bottom, 0px) -
+            var(--uikit-viewport-keyboard-inset, 0px)
+        ) - var(--uikit-viewport-safe-bottom-keyboard)
+    );
+
     z-index: 0;
     overflow: clip;
     inset-inline: 0;
@@ -206,7 +240,8 @@
       translate: 0
         calc(
           var(--uikit-viewport-overscroll, 0px) +
-            var(--uikit-viewport-overscroll-room) - 100%
+            var(--uikit-viewport-overscroll-room) +
+            var(--uikit-viewport-overscroll-rest-start) - 100%
         );
     }
 
@@ -215,7 +250,8 @@
       translate: 0
         calc(
           100% - var(--uikit-viewport-overscroll, 0px) -
-            var(--uikit-viewport-overscroll-room)
+            var(--uikit-viewport-overscroll-room) -
+            var(--uikit-viewport-overscroll-rest-end)
         );
     }
   }

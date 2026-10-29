@@ -128,6 +128,17 @@ export type ViewportOverscrollProps = ComponentProps<'div'> & {
    * @default false
    */
   open?: boolean;
+  /**
+   * The safe area insets it shows only clear of while pulled in (as
+   * `Content`'s: all, those of the block dimension, top and bottom, or the
+   * inline one, left and right, only, or none). Not kept clear, it shows in
+   * the inset too (e.g. behind the status bar), there even at rest, just
+   * past the content's end (e.g. faded by its progress, see
+   * `--uikit-viewport-overscroll-progress`); open, it rests clear of it all
+   * the same.
+   * @default 'all'
+   */
+  safeArea?: ViewportSafeArea;
 };
 
 export type ViewportPaddingProps = Omit<ComponentProps<'div'>, 'children'> & {

@@ -257,6 +257,44 @@ const elementOf = (
   return element instanceof HTMLElement ? element : null;
 };
 
+/**
+ * The root's markers (see style.css): the window an app's (its layers in
+ * it, or a provider tracking it), and an iOS Home Screen app's.
+ */
+const windowAttribute = 'data-uikit-viewport-window';
+const standaloneAttribute = 'data-uikit-viewport-standalone';
+
+/** Holds of the window's markers (see `useWindowHold`). */
+let windowHolds = 0;
+
+/**
+ * The window held as an app's while mounted, unless in a screen (its
+ * portal container, e.g. a device's frame): the root marked (its
+ * background beneath the layers, see style.css); in an iOS Home Screen app
+ * (`navigator.standalone`; its display mode `browser` without a web app
+ * manifest), its document as tall as the screen (WebKit's layout viewport
+ * short otherwise). Unmarked with the last hold.
+ */
+const useWindowHold = (screen: PortalContainer | null | undefined) => {
+  useLayoutEffect(() => {
+    if (elementOf(screen)) return undefined;
+    const root = document.documentElement;
+    if (windowHolds === 0) {
+      root.setAttribute(windowAttribute, '');
+      if ((navigator as { standalone?: boolean }).standalone === true) {
+        root.setAttribute(standaloneAttribute, '');
+      }
+    }
+    windowHolds += 1;
+    return () => {
+      windowHolds -= 1;
+      if (windowHolds > 0) return;
+      root.removeAttribute(windowAttribute);
+      root.removeAttribute(standaloneAttribute);
+    };
+  }, [screen]);
+};
+
 /** Provides the visual viewport and scroll tracking (see above). */
 const Provider: FunctionComponent<ViewportProviderProps> = ({
   children,
@@ -268,6 +306,9 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
   const screen = usePortalContainer(ownScreen);
   const [visual, setVisual] = useState(() => readVisual());
   const [scroll] = useState(createScrollStore);
+
+  // Tracking the window: it's an app's.
+  useWindowHold(screen);
 
   // The visual viewport (once per frame), as custom properties, too: on
   // the root element, or its screen.
@@ -781,6 +822,7 @@ const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
     const ref = useForwardedRef(forwardedRef);
     // Its size, for the paddings making room for it (see `Padding`).
     useAnchorRegistration(ref, edge, handle);
+    useWindowHold(usePortalContainer(undefined));
 
     return (
       <div
@@ -818,17 +860,21 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
       ...props
     },
     ref,
-  ) => (
-    <div
-      ref={ref}
-      data-always-bounce={bounceAttribute(alwaysBounce)}
-      data-keyboard={keyboard}
-      data-safe-area={safeArea}
-      {...props}
-      className={cn('uikit-viewport-content', className)}
-      data-viewport-part="content"
-    />
-  ),
+  ) => {
+    useWindowHold(usePortalContainer(undefined));
+
+    return (
+      <div
+        ref={ref}
+        data-always-bounce={bounceAttribute(alwaysBounce)}
+        data-keyboard={keyboard}
+        data-safe-area={safeArea}
+        {...props}
+        className={cn('uikit-viewport-content', className)}
+        data-viewport-part="content"
+      />
+    );
+  },
 );
 
 /**
@@ -845,7 +891,15 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
  */
 const Overscroll = forwardRef<HTMLDivElement, ViewportOverscrollProps>(
   (
-    { anchor, className, edge = 'block-start', open = false, style, ...props },
+    {
+      anchor,
+      className,
+      edge = 'block-start',
+      open = false,
+      safeArea = 'all',
+      style,
+      ...props
+    },
     forwardedRef,
   ) => {
     const context = useContext(ViewportContext);
@@ -856,6 +910,7 @@ const Overscroll = forwardRef<HTMLDivElement, ViewportOverscrollProps>(
     const isOpen = useRef(open);
     const pull = useRef(0);
     useOverscrollRoom(edge, open ? size : 0);
+    useWindowHold(usePortalContainer(undefined));
 
     // Its pull, and how far along (of its size; open, all the way).
     const update = useCallback(() => {
@@ -908,6 +963,7 @@ const Overscroll = forwardRef<HTMLDivElement, ViewportOverscrollProps>(
         ref={layer}
         className="uikit-viewport-overscroll"
         data-edge={edge}
+        data-safe-area={safeArea}
         data-viewport-part="overscroll"
         style={{ '--uikit-viewport-overscroll-inset': `${String(inset)}px` }}
       >

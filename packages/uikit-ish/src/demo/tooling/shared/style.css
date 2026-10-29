@@ -43,9 +43,9 @@
   /* A modal's scroll lock (Base UI's, the document's: inline styles on the
      root and the body) undone: the page scrolls on, a demo's modal blocks
      only its own screen (its backdrop covering it). (Important: over the
-     inline styles; the library's apps keep the lock.) */
-  :root,
-  body {
+     inline styles; the library's apps, and raw demos, keep the lock.) */
+  :root:not([data-demo-raw]),
+  :root:not([data-demo-raw]) body {
     overflow: visible !important;
   }
 
@@ -246,4 +246,13 @@
       40% var(--demo-wallpaper-height),
       calc(100% - 32px) var(--demo-wallpaper-height);
   }
+}
+
+/* The guide's pages keep their background (see above), also where a demo's
+   provider tracks the window, its root marked an app's (see
+   components/viewport/style.css: the app's background): unlayered, over the
+   components' layer. Raw, the demo is the app: its background the
+   library's. */
+:root:not([data-demo-raw]) {
+  background-color: light-dark(white, #0a0a0a);
 }

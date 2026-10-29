@@ -19,7 +19,7 @@ import {
 } from 'modify-source-webpack-plugin';
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 
-import { splashes } from './scripts/icons-devices.js';
+import { links, manifest, meta } from './scripts/demo-head.js';
 
 const { PUBLIC_PATH: publicPath = '/' } = process.env;
 
@@ -49,6 +49,15 @@ const configDownstream = {
   },
   output: {
     assetModuleFilename: 'assets/[name][ext]',
+    // The demo's icons and web app manifest (see scripts/demo-head.js).
+    copy: [
+      {
+        context: path.resolve(dirSrc, 'demo/assets'),
+        filename: '[base]',
+        from: ['icon-rounded.svg', 'manifest.webmanifest', 'icons/*.png'],
+        to: 'assets',
+      },
+    ],
     path: dirDemo,
     publicPath,
   },
@@ -95,9 +104,8 @@ if (config.module) {
       use: [MiniCssExtractPlugin.loader, 'css-loader'],
     },
     {
-      // (Also Monaco's icon font, see MonacoWebpackPlugin; the demo's icons
-      // and web app manifest, see src/demo/assets/main.ts.)
-      test: /\.(?:png|jpe?g|gif|ttf|svg|webmanifest)$/i,
+      // (Also Monaco's icon font, see MonacoWebpackPlugin.)
+      test: /\.(?:png|jpe?g|gif|ttf)$/i,
       type: 'asset/resource',
     },
   ];
@@ -123,17 +131,13 @@ config.plugins = [
   // @ts-ignore
   new HtmlWebpackPlugin({
     base: publicPath,
-    // Its head's tags placed by the template (its base first), its icons'
-    // links (the splash screens', see scripts/icons-devices.js).
     inject: false,
-    // The page under the device's safe areas (the notch, the home
-    // indicator): their insets in `env(safe-area-inset-*)`, kept clear by
-    // the library (see styles.css) and the guide's layout.
-    meta: {
-      viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
-    },
-    splashes: splashes(),
-    template: path.resolve(dirSrc, 'demo/index.html'),
+    meta,
+    // Its page: its head's tags (its base first), then its manifest and
+    // links (relative to it, see scripts/demo-head.js); its body empty,
+    // filled by prerendering (see src/demo-ssg.tsx).
+    templateContent: ({ htmlWebpackPlugin }) =>
+      `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${htmlWebpackPlugin.options.title}</title>${htmlWebpackPlugin.tags.headTags}${manifest}${links}</head><body></body></html>`,
     title: '@mrpelz/uikit-ish',
   }),
   // @ts-ignore

@@ -67,23 +67,105 @@ const textField = [
   '[contenteditable]:not([contenteditable=false])',
 ].join(', ');
 
+/** What a touch activates itself (not a text field near it, see below). */
+const control = [
+  'a[href]',
+  'button',
+  'input',
+  'select',
+  'textarea',
+  '[contenteditable]:not([contenteditable=false])',
+  '[role=button]',
+  '[role=link]',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+/**
+ * How far from a text field a touch still focuses it (px): iOS adjusts a
+ * touch to the control nearest it, within about a finger's width.
+ */
+const touchReach = 24;
+
+/** How far a tap's touch may move (px; farther, it's a drag). */
+const tapSlop = 10;
+
+/** The distance from a point to a rect (0 within it). */
+const distance = (x: number, y: number, rect: DOMRect) =>
+  Math.hypot(
+    Math.max(rect.left - x, 0, x - rect.right),
+    Math.max(rect.top - y, 0, y - rect.bottom),
+  );
+
+/**
+ * The text field a touch focuses: the one touched (or within it), a
+ * label's, or, touching no control, the nearest within reach (iOS
+ * adjusting the touch to it).
+ */
+const touchedField = (
+  event: TouchEvent,
+  root: Document | HTMLElement,
+): HTMLElement | null => {
+  const { target } = event;
+  if (!(target instanceof Element)) return null;
+
+  const field = target.closest<HTMLElement>(textField);
+  if (field) return field;
+
+  const labelled = target.closest('label')?.control;
+  if (labelled) {
+    return labelled.matches(textField) ? (labelled as HTMLElement) : null;
+  }
+
+  const touch = event.changedTouches[0];
+  if (!touch || target.closest(control)) return null;
+  const { clientX: x, clientY: y } = touch;
+
+  let nearest: HTMLElement | null = null;
+  let nearestDistance = touchReach;
+  for (const candidate of root.querySelectorAll<HTMLElement>(textField)) {
+    const candidateDistance = distance(x, y, candidate.getBoundingClientRect());
+    if (!(candidateDistance <= nearestDistance)) {
+      continue;
+    }
+
+    nearest = candidate;
+    nearestDistance = candidateDistance;
+  }
+  return nearest;
+};
+
 /**
  * iOS: a text field touched in `target` focused without scrolling (its
  * touch's end: the field focused, `preventScroll`, instead of the
- * browser's focusing, which scrolls the layout viewport). The touch's
- * click doesn't follow, and the caret goes where the field puts it, not
- * where it was touched. Until the returned function removes it.
+ * browser's focusing, which scrolls the layout viewport); also touched
+ * just beside it (see `touchedField`). The touch's click doesn't follow,
+ * and the caret goes where the field puts it, not where it was touched.
+ * Until the returned function removes it.
  */
 export const preventFocusShift = (
   target: Document | HTMLElement = document,
 ): (() => void) => {
   if (!isIos()) return noop;
 
+  // Where the touch started: a tap's (not a drag's, e.g. scrolling) end
+  // focuses.
+  let start: Touch | undefined;
+  const onTouchStart = (event: Event) => {
+    start =
+      (event as TouchEvent).touches.length === 1
+        ? (event as TouchEvent).touches[0]
+        : undefined;
+  };
+
   const onTouchEnd = (event: Event) => {
-    const field =
-      event.target instanceof Element
-        ? event.target.closest<HTMLElement>(textField)
-        : null;
+    const end = (event as TouchEvent).changedTouches[0];
+    const isTap =
+      start !== undefined &&
+      end !== undefined &&
+      Math.hypot(end.clientX - start.clientX, end.clientY - start.clientY) <=
+        tapSlop;
+    start = undefined;
+    const field = isTap ? touchedField(event as TouchEvent, target) : null;
     if (
       !field ||
       field === document.activeElement ||
@@ -96,12 +178,18 @@ export const preventFocusShift = (
     field.focus({ preventScroll: true });
   };
 
-  target.addEventListener('touchend', onTouchEnd, {
-    capture: true,
-    passive: false,
-  });
-  return () =>
-    target.removeEventListener('touchend', onTouchEnd, { capture: true });
+  const listeners: [string, (event: Event) => void][] = [
+    ['touchstart', onTouchStart],
+    ['touchend', onTouchEnd],
+  ];
+  for (const [type, listener] of listeners) {
+    target.addEventListener(type, listener, { capture: true, passive: false });
+  }
+  return () => {
+    for (const [type, listener] of listeners) {
+      target.removeEventListener(type, listener, { capture: true });
+    }
+  };
 };
 
 /**

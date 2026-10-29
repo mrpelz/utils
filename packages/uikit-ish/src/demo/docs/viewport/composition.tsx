@@ -201,6 +201,7 @@ useViewportScroll(({ isHeld, overscroll }) => {
 <Viewport.Overscroll
   className="pull"
   open={isRefreshing}
+  safeArea="inline"
 >
   {/* Pulled, turning along (a turn to the refresh distance);
       refreshing, spinning on from there. */}
@@ -267,6 +268,7 @@ useViewportScroll(({ isHeld: isHeldNow, overscroll: by }) => {
     className="pull"
     data-armed={overscroll <= -turnDistance ? '' : undefined}
     data-released={isHeld ? undefined : ''}
+    safeArea="inline"
   >
     <Symbol className="pull-arrow" icon={sfArrowDown} />
     {previous}
@@ -278,6 +280,7 @@ useViewportScroll(({ isHeld: isHeldNow, overscroll: by }) => {
     data-armed={overscroll >= turnDistance ? '' : undefined}
     data-released={isHeld ? undefined : ''}
     edge="block-end"
+    safeArea="inline"
   >
     <Symbol className="pull-arrow" icon={sfArrowUp} />
     {next}
@@ -506,7 +509,8 @@ const Message: FunctionComponent = () => {
  */
 const CollapseView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
-}> = ({ contentRef }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, contentRef }) => {
   const { atTop, direction } = useScrollDirection();
   const [value, setValue] = useState('contacts');
   // Collapsed, its selected tab remains.
@@ -516,6 +520,7 @@ const CollapseView: FunctionComponent<{
     <Component
       isInline
       id="viewport-composition-collapse"
+      screenRef={screenRef}
       stage="phone"
       title="Viewport collapsing a tab bar"
     >
@@ -573,10 +578,17 @@ const Collapse: FunctionComponent = () => {
     'contentRef',
     'HTMLDivElement',
   );
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
-      <CollapseView contentRef={contentRef} />
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
+      <CollapseView
+        contentRef={contentRef}
+        screenRef={screenRef}
+      />
     </Viewport.Provider>
   );
 };
@@ -591,7 +603,8 @@ const refreshDistance = 60;
  */
 const RefreshView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
-}> = ({ contentRef }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, contentRef }) => {
   const [log, addLog] = useLog();
   const [rows, setRows] = useState<readonly string[]>(names);
   const [scroll, setScroll] = useState({ isHeld: false, overscroll: 0 });
@@ -626,6 +639,7 @@ const RefreshView: FunctionComponent<{
       isInline
       id="viewport-composition-refresh"
       log={log}
+      screenRef={screenRef}
       stage="phone"
       title="Viewport pulled to refresh"
       diagnostics={
@@ -648,6 +662,7 @@ const RefreshView: FunctionComponent<{
         <Viewport.Overscroll
           className="viewport-demo-pull"
           open={isRefreshing}
+          safeArea="inline"
         >
           {/* Pulled, turning along (a turn to the refresh distance);
               refreshing, spinning on from there. */}
@@ -684,10 +699,17 @@ const Refresh: FunctionComponent = () => {
     'contentRef',
     'HTMLDivElement',
   );
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
-      <RefreshView contentRef={contentRef} />
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
+      <RefreshView
+        contentRef={contentRef}
+        screenRef={screenRef}
+      />
     </Viewport.Provider>
   );
 };
@@ -703,7 +725,8 @@ const turnDistance = 80;
  */
 const PagesView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
-}> = ({ contentRef }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, contentRef }) => {
   const [log, addLog] = useLog();
   const [index, setIndex] = useState(0);
   // The way it was turned: the page coming in from below (next) or above.
@@ -740,6 +763,7 @@ const PagesView: FunctionComponent<{
       isInline
       id="viewport-composition-pages"
       log={log}
+      screenRef={screenRef}
       stage="phone"
       title="Viewport pulled to turn pages"
       diagnostics={
@@ -761,6 +785,7 @@ const PagesView: FunctionComponent<{
             className="viewport-demo-pull"
             data-armed={overscroll <= -turnDistance ? '' : undefined}
             data-released={scroll.isHeld ? undefined : ''}
+            safeArea="inline"
           >
             <Symbol
               className="viewport-demo-pull-arrow"
@@ -775,6 +800,7 @@ const PagesView: FunctionComponent<{
             data-armed={overscroll >= turnDistance ? '' : undefined}
             data-released={scroll.isHeld ? undefined : ''}
             edge="block-end"
+            safeArea="inline"
           >
             <Symbol
               className="viewport-demo-pull-arrow"
@@ -824,10 +850,17 @@ const Pages: FunctionComponent = () => {
     'contentRef',
     'HTMLDivElement',
   );
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
-      <PagesView contentRef={contentRef} />
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
+      <PagesView
+        contentRef={contentRef}
+        screenRef={screenRef}
+      />
     </Viewport.Provider>
   );
 };
@@ -1154,6 +1187,11 @@ export const ViewportComposition: FunctionComponent = () => (
         Safari’s.
       </li>
       <li>
+        The indicator comes in from the screen’s edge, showing behind the status
+        bar (<code>safeArea=&quot;inline&quot;</code>: only the side insets kept
+        clear); refreshing, it rests clear of it.
+      </li>
+      <li>
         <strong>Library:</strong> the scroll hook’s <code>overscroll</code> and{' '}
         <code>isHeld</code> (
         <PartLink
@@ -1165,7 +1203,8 @@ export const ViewportComposition: FunctionComponent = () => (
           component="viewport"
           part="Viewport.Overscroll"
         />
-        , its <code>open</code> and custom properties) and the{' '}
+        , its <code>open</code>, <code>safeArea</code> and custom properties)
+        and the{' '}
         <PartLink
           component="progress"
           part="ActivityIndicator"
@@ -1217,6 +1256,10 @@ export const ViewportComposition: FunctionComponent = () => (
           part="Viewport.Content"
         />
         ’s <code>alwaysBounce</code>).
+      </li>
+      <li>
+        The hints come in from the screen’s edges, showing behind the status bar
+        and the home indicator (<code>safeArea=&quot;inline&quot;</code>).
       </li>
       <li>
         <strong>Library:</strong> the scroll hook’s <code>overscroll</code> and{' '}
