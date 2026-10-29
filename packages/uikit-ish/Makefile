@@ -21,6 +21,7 @@ MITM_URL := https://$(MITM_SLUG).localhost
 	transform_build_demo \
 	transform_build_demo_csr \
 	transform_build_demo_ssg \
+	transform_icons \
 	util_clear_demo \
 	util_mitmproxy \
 	watch_dev_proxy
@@ -54,6 +55,10 @@ transform_build_demo_ssg:
 	mv "demo/index.html" "demo/template.html"
 	node "$(SSG_DIR)/main.js"
 	rm -rf "$(SSG_DIR)"
+
+# The demo's icons, from src/demo/assets/icon.svg (needs Chrome).
+transform_icons:
+	node scripts/icons.js
 
 transform_prod_demo: \
 	util_clear_demo \

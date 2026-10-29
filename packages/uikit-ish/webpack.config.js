@@ -19,6 +19,8 @@ import {
 } from 'modify-source-webpack-plugin';
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 
+import { splashes } from './scripts/icons-devices.js';
+
 const { PUBLIC_PATH: publicPath = '/' } = process.env;
 
 export const dirDemo = path.resolve(dirBase, 'demo');
@@ -93,8 +95,9 @@ if (config.module) {
       use: [MiniCssExtractPlugin.loader, 'css-loader'],
     },
     {
-      // (Also Monaco's icon font, see MonacoWebpackPlugin.)
-      test: /\.(?:png|jpe?g|gif|ttf)$/i,
+      // (Also Monaco's icon font, see MonacoWebpackPlugin; the demo's icons
+      // and web app manifest, see src/demo/assets/main.ts.)
+      test: /\.(?:png|jpe?g|gif|ttf|svg|webmanifest)$/i,
       type: 'asset/resource',
     },
   ];
@@ -120,12 +123,17 @@ config.plugins = [
   // @ts-ignore
   new HtmlWebpackPlugin({
     base: publicPath,
+    // Its head's tags placed by the template (its base first), its icons'
+    // links (the splash screens', see scripts/icons-devices.js).
+    inject: false,
     // The page under the device's safe areas (the notch, the home
     // indicator): their insets in `env(safe-area-inset-*)`, kept clear by
     // the library (see styles.css) and the guide's layout.
     meta: {
       viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
     },
+    splashes: splashes(),
+    template: path.resolve(dirSrc, 'demo/index.html'),
     title: '@mrpelz/uikit-ish',
   }),
   // @ts-ignore

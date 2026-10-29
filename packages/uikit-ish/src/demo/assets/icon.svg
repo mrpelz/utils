@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- uikit-ish: a switch, on (UIKit's), approximately (≈: “-ish”), on the
+       open web. Full bleed: platforms round it themselves (its content
+       within the maskable safe zone, a circle 80% across). The variants are
+       made from it: scripts/icons.js. -->
+  <defs>
+    <linearGradient id="background" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#3ADB68" />
+      <stop offset="1" stop-color="#0A9A55" />
+    </linearGradient>
+    <linearGradient id="knob" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" />
+      <stop offset="1" stop-color="#E9E9EF" />
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="20" flood-color="#00401F" flood-opacity="0.35" stdDeviation="26" />
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#background)" />
+  <g filter="url(#shadow)">
+    <!-- The track, glassy. -->
+    <rect x="176" y="344" width="672" height="336" rx="168" fill="#FFFFFF" fill-opacity="0.28" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="10" />
+    <!-- ≈ in its free half. -->
+    <path d="M282 478c30-30 60-30 90 0s60 30 90 0M282 546c30-30 60-30 90 0s60 30 90 0" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-width="40" />
+    <!-- The knob, on: a check. -->
+    <circle cx="680" cy="512" r="140" fill="url(#knob)" />
+    <path d="M618 514l42 42 80-88" fill="none" stroke="#0A9A55" stroke-linecap="round" stroke-linejoin="round" stroke-width="40" />
+  </g>
+</svg>
