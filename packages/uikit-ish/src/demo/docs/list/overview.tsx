@@ -228,7 +228,7 @@ export const ListOverview: FunctionComponent = () => (
       parts={[
         ['List.Root', pickRows(listRootRows, 'listStyle', 'editing')],
         ['List.Header', pickRows(listHeaderRows, 'prominence')],
-        ['List.Group', pickRows(listGroupRows, 'onReorder')],
+        ['List.Group', pickRows(listGroupRows, 'reorderHandle')],
         ['List.Item', pickRows(listItemRows, 'onClick', 'selected')],
         ['List.Title', pickRows(listTitleRows, 'render')],
         ['List.Image', pickRows(listImageRows, 'variant')],
@@ -373,9 +373,13 @@ export const ListOverview: FunctionComponent = () => (
         >
           Grabber
         </PartLink>{' '}
-        reorders it in its group (<code>onReorder</code>; the app reorders its
-        rows). Plain lists’ section titles stick to the top while their section
-        scrolls.
+        moves it where its reorder handle allows (
+        <PartLink
+          component="list"
+          part="List.createReorderHandle"
+        />
+        , across groups too; the app reorders its rows). Plain lists’ section
+        titles stick to the top while their section scrolls.
       </li>
       <li>
         Edit controls (

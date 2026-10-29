@@ -31,6 +31,7 @@ import {
   DatePicker,
   forwardClick,
   List,
+  type ListReorderChange,
   Menu,
   Segmented,
   Slider,
@@ -39,6 +40,7 @@ import {
   Symbol,
   TextField,
   useCreateDatePickerHandle,
+  useCreateReorderHandle,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
@@ -1602,7 +1604,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
 
 /**
  * Editing (UIKit `UITableView` editing): rows reordered by their grabbers
- * (the group's `onReorder`; the app reorders its rows), deleted by swiping.
+ * (a reorder handle; the app reorders its rows), deleted by swiping.
  */
 export const ListEditDemo: FunctionComponent = () => {
   const id = 'list-edit';
@@ -1611,6 +1613,14 @@ export const ListEditDemo: FunctionComponent = () => {
   const [externalRoot, externalGrabber] = useProvidedState(id);
 
   const [rows, setRows] = useState<readonly string[]>(planets);
+  const reorderRows = useCreateReorderHandle({
+    onReorder: (change: ListReorderChange) => {
+      addLog(
+        `reorder: ${String(change.items[0]?.name)} after ${change.target.after ?? '(start)'}`,
+      );
+      setRows((current) => List.reorder(current, change, (row: string) => row));
+    },
+  });
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
     external: externalRoot,
@@ -1636,19 +1646,13 @@ export const ListEditDemo: FunctionComponent = () => {
             <List.Title>Planets</List.Title>
             <List.Action onClick={() => setRows(planets)}>Reset</List.Action>
           </List.Header>
-          <List.Group
-            onReorder={(from, to) => {
-              addLog(`reorder: ${from} → ${to}`);
-              setRows((current) => {
-                const next = [...current];
-                const [moved] = next.splice(from, 1);
-                if (moved) next.splice(to, 0, moved);
-                return next;
-              });
-            }}
-          >
+          <List.Group reorderHandle={reorderRows}>
             {rows.map((name, index) => (
-              <List.Item key={name}>
+              <List.Item
+                key={name}
+                dropName={name}
+                reorderHandle={reorderRows}
+              >
                 <List.Content>
                   <List.Title>{name}</List.Title>
                 </List.Content>
@@ -1932,6 +1936,14 @@ export const ListEditSelectSingleDemo: FunctionComponent = () => {
     useProvidedState(id);
 
   const [rows, setRows] = useState<readonly string[]>(planets);
+  const reorderRows = useCreateReorderHandle({
+    onReorder: (change: ListReorderChange) => {
+      addLog(
+        `reorder: ${String(change.items[0]?.name)} after ${change.target.after ?? '(start)'}`,
+      );
+      setRows((current) => List.reorder(current, change, (row: string) => row));
+    },
+  });
 
   const [controlRoot, propsRoot, stateRoot] = usePropControl(propOptionsRoot, {
     external: externalRoot,
@@ -1969,23 +1981,13 @@ export const ListEditSelectSingleDemo: FunctionComponent = () => {
             key={keyRadioGroup}
             aria-label="Planet"
             {...propsRadioGroup}
-            render={
-              <List.Group
-                onReorder={(from, to) => {
-                  addLog(`reorder: ${from} → ${to}`);
-                  setRows((current) => {
-                    const next = [...current];
-                    const [moved] = next.splice(from, 1);
-                    if (moved) next.splice(to, 0, moved);
-                    return next;
-                  });
-                }}
-              />
-            }
+            render={<List.Group reorderHandle={reorderRows} />}
           >
             {rows.map((name, index) => (
               <List.Item
                 key={name}
+                dropName={name}
+                reorderHandle={reorderRows}
                 onClick={forwardClick('[role=radio]')}
               >
                 <List.Leading>

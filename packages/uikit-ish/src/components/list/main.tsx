@@ -9,6 +9,7 @@ import {
   FocusEvent,
   forwardRef,
   FunctionComponent,
+  KeyboardEvent,
   MouseEvent,
   PointerEvent,
   ReactNode,
@@ -33,8 +34,6 @@ import {
 } from '../checkbox/main.js';
 import {
   cn,
-  edgeScrollDelta,
-  frameElapsed,
   useForwardedRef,
   usePointerDrag,
   useSecondaryClick,
@@ -53,6 +52,8 @@ import type {
   ListButtonProps,
   ListCollapsiblePanelProps,
   ListCollapsibleRootProps,
+  ListDropGroupProps,
+  ListDropTargetProps,
   ListEditButtonProps,
   ListEditing,
   ListGroupProps,
@@ -87,6 +88,8 @@ export type {
   ListCollapsibleChangeEventDetails,
   ListCollapsiblePanelProps,
   ListCollapsibleRootProps,
+  ListDropGroupProps,
+  ListDropTargetProps,
   ListGroupProps,
   ListHeaderProps,
   ListImageProps,
@@ -101,8 +104,29 @@ export type {
   ListTextProps,
   ListWhileEditing,
 } from './props.js';
+import {
+  createReorderHandle,
+  ListReorderHandle,
+  reorder,
+  reorderByKey,
+  type ReorderItemEntry,
+  type ReorderTargetEntry,
+  setItemEntry,
+  startReorderDrag,
+} from './reorder.js';
 import { createSwipeActionsHandle } from './swipe-actions-handle.js';
 
+export {
+  type ListReorderChange,
+  type ListReorderEventDetails,
+  ListReorderHandle,
+  type ListReorderItem,
+  type ListReorderOptions,
+  type ListReorderPart,
+  type ListReorderReason,
+  type ListReorderTarget,
+  useCreateReorderHandle,
+} from './reorder.js';
 export {
   ListSwipeActionsHandle,
   useCreateSwipeActionsHandle,
@@ -132,7 +156,7 @@ export {
 //   others, which follow the row, and arms overswiping (see `armDistance`;
 //   Framework7: past 1.2 times the actions), triggering it on release; armed,
 //   its symbol moves to the row's end, its label hides (150ms)
-// - reordering rows by their grabbers (`sortable.js`, see `useReorder`),
+// - reordering rows by their grabbers (`sortable.js`, see `reorder.ts`),
 //   independent of the leading edit controls (`Checkbox`, `Radio`,
 //   `EditButton`); entering and leaving edit mode (`Root` `editing`; UIKit
 //   `setEditing(_:animated:)`), they slide in and out from the rows' edges
@@ -292,239 +316,72 @@ const Section = forwardRef<HTMLElement, ListSectionProps>(
   },
 );
 
-// Reordering (Framework7 `sortable.js`, `sortable.less`): dragging a row's
-// grabber lifts the row, which follows the pointer within its group, the
-// other rows making room (300ms); near an end of the scroll container, it
-// scrolls (as the tab bar's lens does). Released, the row settles into its
-// place, and the group's `onReorder` is called; the app reorders its rows.
-// Until their order changes (or, if it doesn't, the rows slide back), they
-// keep their offsets. Arrow keys on a focused grabber move its row by one.
-const reorderDuration = 300;
+// Reordering (see `reorder.ts`): the rows of a range (`DropGroup`, `Group`
+// given a `reorderHandle`) register with it, its gaps between them.
+type RangeContextValue = ReorderTargetEntry['members'];
+const RangeContext = createContext<RangeContextValue>(undefined);
 
-const isItem = (element: Element): element is HTMLElement =>
-  element instanceof HTMLElement && element.matches('[data-list-part=item]');
-
-// The nearest ancestor scrolling vertically, or the document's.
-const scrollContainerOf = (element: HTMLElement) => {
-  for (
-    let current = element.parentElement;
-    current;
-    current = current.parentElement
-  ) {
-    const { overflowY } = getComputedStyle(current);
-    if (
-      (overflowY === 'auto' || overflowY === 'scroll') &&
-      current.scrollHeight > current.clientHeight
-    ) {
-      return current;
-    }
-  }
-
-  return element.ownerDocument.scrollingElement ?? element.ownerDocument.body;
+const handlesOf = (
+  handle: ListReorderHandle | readonly ListReorderHandle[] | undefined,
+): readonly ListReorderHandle[] => {
+  if (handle === undefined) return [];
+  return handle instanceof ListReorderHandle ? [handle] : handle;
 };
 
-const setOffset = (item: HTMLElement, offset: number, isAnimated: boolean) => {
-  item.style.transition = isAnimated
-    ? `transform ${reorderDuration}ms`
-    : 'none';
-  item.style.transform = offset === 0 ? '' : `translateY(${offset}px)`;
-};
-
-/** Reorders a group's rows by their grabbers (see above). */
-const useReorder = (
-  groupRef: { current: HTMLElement | null },
-  onReorder: ((from: number, to: number) => void) | undefined,
+/**
+ * Keeps an entry in its handles' sets (`pick`: which), as they change, until
+ * unmounted.
+ */
+const useHandleEntry = <Entry,>(
+  entry: Entry,
+  handles: readonly ListReorderHandle[],
+  pick: (handle: ListReorderHandle) => Set<Entry>,
 ) => {
-  const onReorderRef = useRef(onReorder);
+  const registered = useRef<readonly ListReorderHandle[]>([]);
   useLayoutEffect(() => {
-    onReorderRef.current = onReorder;
+    for (const handle of registered.current) {
+      if (!handles.includes(handle)) pick(handle).delete(entry);
+    }
+    for (const handle of handles) pick(handle).add(entry);
+    registered.current = handles;
   });
+  useLayoutEffect(
+    () => () => {
+      for (const handle of registered.current) pick(handle).delete(entry);
+      registered.current = [];
+    },
+    [entry, pick],
+  );
+};
 
-  useEffect(() => {
-    const { current: group } = groupRef;
-    if (!group) return undefined;
+const targetsOf = (handle: ListReorderHandle) => handle.targets;
+const itemsOf = (handle: ListReorderHandle) => handle.items;
 
-    const grabberOf = (target: EventTarget | null) => {
-      const grabber =
-        target instanceof Element
-          ? target.closest<HTMLElement>('[data-list-part=grabber]')
-          : null;
-      const item = grabber?.closest<HTMLElement>('[data-list-part=item]');
-      return grabber && item && item.parentElement === group
-        ? { grabber, item }
-        : undefined;
-    };
+/**
+ * A range's gaps as targets of its handles (see `DropGroup`, `Group`): its
+ * rows' set, for them to register with.
+ */
+const useRange = (
+  part: 'DropGroup' | 'Group',
+  reorderHandle: ListReorderHandle | readonly ListReorderHandle[] | undefined,
+  dropName: string | undefined,
+  ref?: { readonly current: HTMLElement | null },
+): RangeContextValue => {
+  const latest = useRef({ dropName, reorderHandle });
+  useLayoutEffect(() => {
+    latest.current = { dropName, reorderHandle };
+  });
+  const [entry] = useState<ReorderTargetEntry>(() => ({
+    handles: () => handlesOf(latest.current.reorderHandle),
+    members: new Set(),
+    name: () => latest.current.dropName,
+    part,
+    ref,
+  }));
+  const handles = handlesOf(reorderHandle);
+  useHandleEntry(entry, handles, targetsOf);
 
-    // Clears the rows' offsets once their order changed, or slides them
-    // back if it doesn't.
-    const commit = (items: HTMLElement[], from: number, to: number) => {
-      const settle = { observer: undefined as MutationObserver | undefined };
-      let timeout: ReturnType<typeof setTimeout> | undefined;
-      const clearOffsets = (isAnimated: boolean) => {
-        settle.observer?.disconnect();
-        clearTimeout(timeout);
-        for (const element of items) {
-          setOffset(element, 0, isAnimated);
-          delete element.dataset.reordering;
-          delete element.dataset.reorderEdge;
-        }
-      };
-      settle.observer = new MutationObserver(() => clearOffsets(false));
-      settle.observer.observe(group, { childList: true });
-      timeout = setTimeout(() => clearOffsets(true), reorderDuration);
-
-      if (from === to) {
-        clearOffsets(true);
-        return;
-      }
-      onReorderRef.current?.(from, to);
-    };
-
-    const onPointerDown = (event: globalThis.PointerEvent) => {
-      if (event.button !== 0) return;
-      const target = grabberOf(event.target);
-      if (!target) return;
-
-      const { grabber, item } = target;
-      const items = [...group.children].filter(isItem);
-      const from = items.indexOf(item);
-      const origin = group.getBoundingClientRect().top;
-      // Relative to the group, which may scroll.
-      const tops = items.map(
-        (element) => element.getBoundingClientRect().top - origin,
-      );
-      const heights = items.map((element) => element.offsetHeight);
-      const height = heights[from] ?? 0;
-      const top = tops[from] ?? 0;
-      const bottomLimit =
-        (tops.at(-1) ?? 0) + (heights.at(-1) ?? 0) - top - height;
-      const startY = event.clientY - origin;
-      let clientY = event.clientY;
-      let to = from;
-
-      event.preventDefault();
-      grabber.setPointerCapture(event.pointerId);
-      item.dataset.reordering = '';
-      const scroller = scrollContainerOf(group);
-
-      // The rows' corners and separators follow their order on screen.
-      const markEdges = (place: number) => {
-        const order = items.filter((element) => element !== item);
-        order.splice(place, 0, item);
-        for (const [index, element] of order.entries()) {
-          element.dataset.reorderEdge = [
-            index === 0 ? 'first' : '',
-            index === order.length - 1 ? 'last' : '',
-            order[index - 1] === item ? 'after' : '',
-          ]
-            .filter(Boolean)
-            .join(' ');
-        }
-      };
-      markEdges(from);
-
-      const update = () => {
-        const groupTop = group.getBoundingClientRect().top;
-        const offset = Math.min(
-          Math.max(clientY - groupTop - startY, -top),
-          bottomLimit,
-        );
-        setOffset(item, offset, false);
-
-        // The row's place: its leading edge past the middle of the rows
-        // it's moved over (so it reaches the group's ends at any heights).
-        to = from;
-        for (const [index, rowTop] of tops.entries()) {
-          const middle = rowTop + (heights[index] ?? 0) / 2;
-          if (index < from && top + offset <= middle) to = Math.min(to, index);
-          if (index > from && top + height + offset >= middle) {
-            to = Math.max(to, index);
-          }
-        }
-        for (const [index, element] of items.entries()) {
-          if (index === from) continue;
-          const isBelow = index > from && index <= to;
-          const isAbove = index < from && index >= to;
-          setOffset(
-            element,
-            (isAbove ? height : 0) - (isBelow ? height : 0),
-            true,
-          );
-        }
-        markEdges(to);
-      };
-
-      const elapsedOf = frameElapsed();
-      let frame = requestAnimationFrame(function scroll(time) {
-        frame = requestAnimationFrame(scroll);
-        const elapsed = elapsedOf(time);
-        const { bottom, top: scrollerTop } =
-          scroller === scroller.ownerDocument.scrollingElement
-            ? { bottom: window.innerHeight, top: 0 }
-            : scroller.getBoundingClientRect();
-        const delta = edgeScrollDelta(clientY, scrollerTop, bottom, elapsed);
-        if (delta === 0) return;
-
-        const before = scroller.scrollTop;
-        scroller.scrollTop += delta;
-        if (scroller.scrollTop !== before) update();
-      });
-
-      const onMove = (moveEvent: globalThis.PointerEvent) => {
-        if (moveEvent.pointerId !== event.pointerId) return;
-        clientY = moveEvent.clientY;
-        update();
-      };
-
-      const onEnd = (endEvent: globalThis.PointerEvent) => {
-        if (endEvent.pointerId !== event.pointerId) return;
-        cancelAnimationFrame(frame);
-        grabber.removeEventListener('pointermove', onMove);
-        grabber.removeEventListener('pointerup', onEnd);
-        grabber.removeEventListener('pointercancel', onEnd);
-
-        // Settles into its place, then commits.
-        const place =
-          to > from
-            ? (tops[to] ?? 0) + (heights[to] ?? 0) - top - height
-            : (tops[to] ?? 0) - top;
-        const committed = endEvent.type === 'pointercancel' ? from : to;
-        if (committed === from) {
-          for (const element of items) setOffset(element, 0, true);
-        } else {
-          setOffset(item, place, true);
-        }
-        markEdges(committed);
-        setTimeout(() => commit(items, from, committed), reorderDuration);
-      };
-
-      grabber.addEventListener('pointermove', onMove);
-      grabber.addEventListener('pointerup', onEnd);
-      grabber.addEventListener('pointercancel', onEnd);
-    };
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
-      const target = grabberOf(event.target);
-      if (!target) return;
-
-      const items = [...group.children].filter(isItem);
-      const from = items.indexOf(target.item);
-      const to = from + (event.key === 'ArrowUp' ? -1 : 1);
-      if (to < 0 || to >= items.length) return;
-
-      event.preventDefault();
-      onReorderRef.current?.(from, to);
-    };
-
-    group.addEventListener('pointerdown', onPointerDown);
-    group.addEventListener('keydown', onKeyDown);
-
-    return () => {
-      group.removeEventListener('pointerdown', onPointerDown);
-      group.removeEventListener('keydown', onKeyDown);
-    };
-  }, [groupRef]);
+  return handles.length === 0 ? undefined : entry.members;
 };
 
 /** The rows of a section, on the list's background (inset: a card). */
@@ -544,19 +401,82 @@ const StyledGroup = forwardRef<HTMLElement, PartProps<'ul'>>(
 );
 
 const Group = forwardRef<HTMLElement, ListGroupProps>(
-  ({ editing, onReorder, ...props }, ref) => {
+  ({ dropName, editing, reorderHandle, ...props }, ref) => {
     const groupRef = useForwardedRef<HTMLElement>(ref);
     const inherited = useContext(EditingContext);
-    useReorder(groupRef, onReorder);
+    const range = useRange('Group', reorderHandle, dropName, groupRef);
 
     return (
       <EditingContext.Provider value={editing ?? inherited}>
-        <StyledGroup
-          ref={groupRef}
-          {...props}
-        />
+        <RangeContext.Provider value={range}>
+          <StyledGroup
+            ref={groupRef}
+            {...props}
+          />
+        </RangeContext.Provider>
       </EditingContext.Provider>
     );
+  },
+);
+
+/**
+ * A range of rows' gaps, targets of its handles (as a `Group` given a
+ * `reorderHandle`: before, between and after its rows), with no element of
+ * its own (only an empty, hidden one marking where it is, its gap once
+ * emptied): its rows stay its group's.
+ */
+const DropGroup: FunctionComponent<ListDropGroupProps> = ({
+  children,
+  dropName,
+  reorderHandle,
+}) => {
+  // Where it is, emptied: an empty, hidden element (as a `DropTarget`'s).
+  const markerRef = useRef<HTMLLIElement>(null);
+  const range = useRange('DropGroup', reorderHandle, dropName, markerRef);
+
+  return (
+    <RangeContext.Provider value={range}>
+      <li
+        ref={markerRef}
+        aria-hidden
+        className="uikit-list-drop-target"
+        data-list-part="drop-target"
+      />
+      {children}
+    </RangeContext.Provider>
+  );
+};
+
+/**
+ * A gap rows of its handles can be dropped into, where it's placed among a
+ * group's rows: an empty, hidden element (no height), only marking it.
+ */
+const DropTarget = forwardRef<HTMLElement, ListDropTargetProps>(
+  ({ className, dropName, render, reorderHandle, ...props }, ref) => {
+    const targetRef = useForwardedRef<HTMLElement>(ref);
+    const latest = useRef({ dropName, reorderHandle });
+    useLayoutEffect(() => {
+      latest.current = { dropName, reorderHandle };
+    });
+    const [entry] = useState<ReorderTargetEntry>(() => ({
+      handles: () => handlesOf(latest.current.reorderHandle),
+      name: () => latest.current.dropName,
+      part: 'DropTarget',
+      ref: targetRef,
+    }));
+    useHandleEntry(entry, handlesOf(reorderHandle), targetsOf);
+
+    return useRender({
+      defaultTagName: 'li',
+      props: {
+        'aria-hidden': true,
+        'data-list-part': 'drop-target',
+        className: cn('uikit-list-drop-target', className),
+        ...props,
+      },
+      ref: targetRef,
+      render,
+    });
   },
 );
 
@@ -1338,6 +1258,42 @@ const useExpandedRow = (
 };
 
 /**
+ * A row in reordering (see `reorder.ts`): its name, its handles; in a
+ * range, one of its rows.
+ */
+const useReorderItem = (
+  itemRef: { readonly current: HTMLElement | null },
+  reorderHandle: ListReorderHandle | readonly ListReorderHandle[] | undefined,
+  dropName: string | undefined,
+) => {
+  const range = useContext(RangeContext);
+  useLayoutEffect(() => {
+    if (!range) return undefined;
+    range.add(itemRef);
+    return () => {
+      range.delete(itemRef);
+    };
+  }, [itemRef, range]);
+
+  const latest = useRef({ dropName, reorderHandle });
+  useLayoutEffect(() => {
+    latest.current = { dropName, reorderHandle };
+  });
+  const [entry] = useState<ReorderItemEntry>(() => ({
+    handles: () => handlesOf(latest.current.reorderHandle),
+    name: () => latest.current.dropName,
+    ref: itemRef,
+  }));
+  useHandleEntry(entry, handlesOf(reorderHandle), itemsOf);
+  useLayoutEffect(() => {
+    const { current: element } = itemRef;
+    if (!element) return undefined;
+    setItemEntry(element, entry);
+    return () => setItemEntry(element, undefined);
+  }, [entry, itemRef]);
+};
+
+/**
  * A row (UIKit `UITableViewCell`), with optional swipe actions. With a click
  * handler, it's pressable itself (e.g. passing the click on to a control in
  * it), but where its own controls are pressed.
@@ -1358,9 +1314,11 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     onPointerDown,
     onPointerMove,
     onPointerUp,
+    dropName,
     editing: itemEditing,
     id: idProp,
     level,
+    reorderHandle,
     selected,
     style,
     ...props
@@ -1368,6 +1326,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
   const inheritedEditing = useContext(EditingContext);
   const editing = itemEditing ?? inheritedEditing;
   const itemRef = useForwardedRef<HTMLElement>(ref);
+  useReorderItem(itemRef, reorderHandle, dropName);
   const id = useExpandedRow(itemRef, idProp);
   useEditingSizes(itemRef, editing !== 'ignore');
   useStrictSlots(itemRef);
@@ -2364,11 +2323,23 @@ const Disclosure = forwardRef<HTMLElement, PartProps<'span'>>(
 
 // Figma “_Grabber” (􀌇, 17px, 400).
 /**
- * Figma “_Grabber”: drags its row to reorder its group (see `Group`
- * `onReorder`); focused, arrow keys move the row.
+ * Figma “_Grabber”: drags its row to reorder it (see `Item`
+ * `reorderHandle`); focused, arrow keys move the row (grabbed by the app:
+ * from target to target, Enter or Space dropping it).
  */
 const Grabber = forwardRef<HTMLElement, PartProps<'span'>>(
-  ({ children, className, onClick, render, ...props }, ref) =>
+  (
+    {
+      children,
+      className,
+      onClick,
+      onKeyDown,
+      onPointerDown,
+      render,
+      ...props
+    },
+    ref,
+  ) =>
     useRender({
       defaultTagName: 'span',
       props: {
@@ -2377,7 +2348,23 @@ const Grabber = forwardRef<HTMLElement, PartProps<'span'>>(
         tabIndex: 0,
         children: children ?? <Lines />,
         ...props,
-        // The click ending a drag (captured by the grabber, see `useReorder`)
+        onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
+          (onKeyDown as Handler<typeof event>)?.(event);
+          if (event.defaultPrevented) return;
+          reorderByKey(
+            event as unknown as globalThis.KeyboardEvent,
+            event.currentTarget,
+          );
+        },
+        onPointerDown: (event: PointerEvent<HTMLElement>) => {
+          (onPointerDown as Handler<typeof event>)?.(event);
+          if (event.defaultPrevented) return;
+          startReorderDrag(
+            event as unknown as globalThis.PointerEvent,
+            event.currentTarget,
+          );
+        },
+        // The click ending a drag (captured by the grabber, see `reorder.ts`)
         // stays with it: its row doesn't act on it (e.g. pass it on to its
         // checkbox, see `forwardClick`).
         onClick: (event: MouseEvent<HTMLElement>) => {
@@ -2857,6 +2844,8 @@ export const List = {
   Section,
   Header,
   Group,
+  DropGroup,
+  DropTarget,
   Item,
   Leading,
   Content,
@@ -2895,4 +2884,6 @@ export const List = {
   Index,
   IndexItem,
   createSwipeActionsHandle,
+  createReorderHandle,
+  reorder,
 };

@@ -3,6 +3,7 @@ import type { Properties } from 'csstype';
 import type { JSX, ReactNode } from 'react';
 
 import type { SecondaryClickProps } from '../utils/main.js';
+import type { ListReorderHandle } from './reorder.js';
 import type { ListSwipeActionsHandle } from './swipe-actions-handle.js';
 
 export type ListStyle = 'grouped' | 'insetGrouped' | 'plain' | 'sidebar';
@@ -64,13 +65,30 @@ export type ListRootProps = PartProps<'div'> & {
 };
 
 export type ListGroupProps = PartProps<'ul'> & {
+  /** Its name, the target's, for its gaps (see `reorderHandle`). */
+  dropName?: string;
   /** Its rows' edit mode, unless their own (see `ListEditing`). */
   editing?: ListEditing;
   /**
-   * Called when a row is moved by its `Grabber` from one index to another
-   * (among the group's rows); the app reorders them.
+   * Handles whose rows can be dropped before, between and after its rows (as
+   * a `DropGroup` around them; see `List.createReorderHandle`).
    */
-  onReorder?: (from: number, to: number) => void;
+  reorderHandle?: ListReorderHandle | readonly ListReorderHandle[];
+};
+
+export type ListDropGroupProps = {
+  children?: ReactNode;
+  /** Its name, the target's, for its gaps. */
+  dropName?: string;
+  /** Handles whose rows can be dropped before, between and after its rows. */
+  reorderHandle: ListReorderHandle | readonly ListReorderHandle[];
+};
+
+export type ListDropTargetProps = PartProps<'li'> & {
+  /** Its name, the target's. */
+  dropName?: string;
+  /** Handles whose rows can be dropped where it's placed. */
+  reorderHandle: ListReorderHandle | readonly ListReorderHandle[];
 };
 
 export type ListSectionProps = PartProps<'section'> & {
@@ -88,9 +106,21 @@ export type ListItemProps = PartProps<'li'> & {
    * Its edit mode, overriding its group's (see `ListEditing`), e.g.
    * `none` or `ignore` exempting it.
    */
+  /**
+   * Its name in reordering: the moved rows' (`ListReorderItem`), and a gap's
+   * neighbours' (`ListReorderTarget` `after`, `before`).
+   */
+  dropName?: string;
   editing?: ListEditing;
   /** Its level in a hierarchy (indented 20px per level; e.g. a sidebar). */
   level?: number;
+  /**
+   * Handles it's reordered by (see `List.createReorderHandle`), by priority:
+   * dropped where several of them are targets, the first of those (grabbed
+   * with other rows, of the handles all of them have, by the first row's
+   * order).
+   */
+  reorderHandle?: ListReorderHandle | readonly ListReorderHandle[];
   /** Selected (e.g. a sidebar's current section): on a fill. */
   selected?: boolean;
 };

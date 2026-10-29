@@ -22,7 +22,17 @@
     }
   }
 
+  /* Only marking a gap rows can be dropped into (see DropTarget). */
+  .uikit-list-drop-target {
+    display: block;
+    height: 0;
+    list-style: none;
+  }
+
+  /* Its rows' margins stay within it (reordered rows' room, see reorder.ts,
+     closing at its ends too). */
   .uikit-list-group {
+    display: flow-root;
     overflow: clip visible;
     padding: 0;
     border-radius: var(--uikit-list-radius, 24px);
@@ -34,6 +44,13 @@
     list-style: none;
     margin-block: 0;
     margin-inline: var(--uikit-list-inset, 16px);
+
+    /* Reordering (see reorder.ts): not clipping its lifted rows (no row is
+       swiped meanwhile; WebKit may clip them, composited, in a scrolled
+       container). */
+    &[data-reorder-active] {
+      overflow: visible;
+    }
   }
 
   /* A row (see Item): its parts in a line, in their order (a flexbox):
@@ -807,7 +824,7 @@
       }
     }
 
-    /* Lifted while reordered (see useReorder), opaque (Framework7: 80%, the
+    /* Lifted while reordered (see reorder.ts), opaque (Framework7: 80%, the
        rows beneath showing through), its separators hidden */
     &[data-reordering] {
       z-index: 2;
@@ -824,9 +841,11 @@
     }
 
     /* The first and last rows shown (closed collapsible rows aside, see
-       CollapsiblePanel); while reordering, by their order on screen (see
-       useReorder). */
-    &:nth-child(1 of :not([data-closed])):not([data-reorder-edge]),
+       CollapsiblePanel; drop targets aside); while reordering, by their
+       order on screen (see reorder.ts). */
+    &:nth-child(
+        1 of :not([data-closed], [data-list-part='drop-target'])
+      ):not([data-reorder-edge]),
     &[data-reorder-edge~='first'] {
       border-start-end-radius: var(
         --uikit-list-item-radius,
@@ -840,7 +859,9 @@
       --uikit-list-separator-opacity: 0;
     }
 
-    &:nth-last-child(1 of :not([data-closed])):not([data-reorder-edge]),
+    &:nth-last-child(
+        1 of :not([data-closed], [data-list-part='drop-target'])
+      ):not([data-reorder-edge]),
     &[data-reorder-edge~='last'] {
       border-end-end-radius: var(
         --uikit-list-item-radius,

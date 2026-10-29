@@ -9,7 +9,7 @@ import { sfPersonCropCircleFill } from '@bradleyhodges/sfsymbols/sfPersonCropCir
 import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
 import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
 import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
-import { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -17,9 +17,12 @@ import {
   Collapsible,
   forwardClick,
   List,
+  type ListReorderChange,
+  type ListReorderHandle,
   Slider,
   Switch,
   Symbol,
+  useCreateReorderHandle,
   useCreateSwipeActionsHandle,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
@@ -52,6 +55,8 @@ import {
   listDetailRows,
   listDisclosureRows,
   listDrillInRows,
+  listDropGroupRows,
+  listDropTargetRows,
   listEditButtonRows,
   listFooterRows,
   listGrabberRows,
@@ -63,6 +68,8 @@ import {
   listItemRows,
   listLeadingRows,
   listRadioRows,
+  listReorderHandleRows,
+  listReorderRows,
   listRootRows,
   listSectionRows,
   listSpanRows,
@@ -81,6 +88,7 @@ import {
   getPropOptionsAction,
   getPropOptionsButton,
   getPropOptionsCheckboxFirst,
+  getPropOptionsDropTarget,
   getPropOptionsEditButton,
   getPropOptionsGuideGroup,
   getPropOptionsIndexItem,
@@ -122,14 +130,6 @@ const propOptionsRadio = {
   ...propOptionsRadioFirst,
   value: [rows[0] ?? '', 'Pluto'] as const,
   required: [undefined, false, true] as const,
-};
-
-/** Moves a row (the app's part of reordering, see `List.Group`). */
-const moved = (current: readonly string[], from: number, to: number) => {
-  const next = [...current];
-  const [row] = next.splice(from, 1);
-  if (row) next.splice(to, 0, row);
-  return next;
 };
 
 /** `List.Root`, outlined, with its props. */
@@ -278,15 +278,18 @@ const GroupPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
   const [order, setOrder] = useState<readonly string[]>(rows);
-  const reorder = useCallback(
-    (from: number, to: number) => {
-      addLog(`reorder: ${String(from)} → ${String(to)}`);
-      setOrder((current) => moved(current, from, to));
+  const reorderRows = useCreateReorderHandle({
+    onReorder: (change: ListReorderChange) => {
+      addLog(
+        `reorder: ${String(change.items[0]?.name)} after ${change.target.after ?? '(start)'}`,
+      );
+      setOrder((current) =>
+        List.reorder(current, change, (row: string) => row),
+      );
     },
-    [addLog],
-  );
+  });
   const [control, props, state] = usePropControl(
-    useMemo(() => getPropOptionsGuideGroup(reorder), [reorder]),
+    useMemo(() => getPropOptionsGuideGroup(reorderRows), [reorderRows]),
     { external, isOpen: true, emphasize: 'outline', title: 'List.Group' },
   );
 
@@ -304,7 +307,11 @@ const GroupPart: FunctionComponent = () => {
         <List.Section>
           <List.Group {...props}>
             {order.map((name) => (
-              <List.Item key={name}>
+              <List.Item
+                key={name}
+                dropName={name}
+                reorderHandle={reorderRows}
+              >
                 <List.Content>
                   <List.Title>{name}</List.Title>
                 </List.Content>
@@ -1469,6 +1476,267 @@ const DisclosurePart: FunctionComponent = () => {
   );
 };
 
+/** A row with a grabber, reordered by a handle (for the parts below). */
+const ReorderRow: FunctionComponent<{
+  readonly handle: ListReorderHandle;
+  readonly name: string;
+}> = ({ handle, name }) => (
+  <List.Item
+    dropName={name}
+    reorderHandle={handle}
+  >
+    <List.Content>
+      <List.Title>{name}</List.Title>
+    </List.Content>
+    <List.Trailing>
+      <List.Grabber aria-label={`Reorder ${name}`} />
+    </List.Trailing>
+  </List.Item>
+);
+
+/** `List.DropGroup`: Venus to Mars reordered among themselves only. */
+const DropGroupPart: FunctionComponent = () => {
+  const id = 'list-parts-drop-group';
+  const [log, addLog] = useLog();
+  const [external] = useProvidedState(id);
+  const [order, setOrder] = useState<readonly string[]>(planets.slice(1, 4));
+  const reorderRows = useCreateReorderHandle({
+    onReorder: (change: ListReorderChange) => {
+      addLog(
+        `reorder: ${String(change.items[0]?.name)} after ${change.target.after ?? '–'} (${change.target.part} ${String(change.target.name)})`,
+      );
+      setOrder((current) =>
+        List.reorder(current, change, (row: string) => row),
+      );
+    },
+  });
+  const [control, props, state] = usePropControl(
+    useMemo(
+      () => getPropOptionsDropTarget(reorderRows, 'middle'),
+      [reorderRows],
+    ),
+    { external, isOpen: true, title: 'List.DropGroup' },
+  );
+
+  return (
+    <Component
+      isInline
+      isStretched
+      controls={[control]}
+      id={id}
+      log={log}
+      state={[state]}
+      title="List.DropGroup"
+    >
+      <List.Root>
+        <List.Section>
+          <List.Group>
+            <List.Item dropName="Mercury">
+              <List.Content>
+                <List.Title>Mercury</List.Title>
+              </List.Content>
+            </List.Item>
+            <List.DropGroup {...props}>
+              {order.map((name) => (
+                <ReorderRow
+                  key={name}
+                  handle={reorderRows}
+                  name={name}
+                />
+              ))}
+            </List.DropGroup>
+            <List.Item dropName="Jupiter">
+              <List.Content>
+                <List.Title>Jupiter</List.Title>
+              </List.Content>
+            </List.Item>
+          </List.Group>
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
+
+/** `List.DropTarget`: rows moved to the top only. */
+const DropTargetPart: FunctionComponent = () => {
+  const id = 'list-parts-drop-target';
+  const [log, addLog] = useLog();
+  const [external] = useProvidedState(id);
+  const [order, setOrder] = useState<readonly string[]>(rows);
+  const reorderRows = useCreateReorderHandle({
+    onReorder: (change: ListReorderChange) => {
+      addLog(
+        `reorder: ${String(change.items[0]?.name)} before ${change.target.before ?? '–'} (${change.target.part} ${String(change.target.name)})`,
+      );
+      setOrder((current) =>
+        List.reorder(current, change, (row: string) => row),
+      );
+    },
+  });
+  const [control, props, state] = usePropControl(
+    useMemo(() => getPropOptionsDropTarget(reorderRows, 'top'), [reorderRows]),
+    { external, isOpen: true, title: 'List.DropTarget' },
+  );
+
+  return (
+    <Component
+      isInline
+      isStretched
+      controls={[control]}
+      id={id}
+      log={log}
+      state={[state]}
+      title="List.DropTarget"
+    >
+      <List.Root>
+        <List.Section>
+          <List.Group>
+            <List.DropTarget {...props} />
+            {order.map((name) => (
+              <ReorderRow
+                key={name}
+                handle={reorderRows}
+                name={name}
+              />
+            ))}
+          </List.Group>
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
+
+/**
+ * `List.createReorderHandle`: the planets' handle, its rows grabbed and
+ * moved by buttons (imperatively), or dragged.
+ */
+const CreateReorderHandlePart: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [order, setOrder] = useState<readonly string[]>(planets);
+  const [reorderPlanets] = useState(() =>
+    codeLabel(
+      List.createReorderHandle({
+        onReorder: (change: ListReorderChange) => {
+          addLog(
+            `reorder (${change.items.map((item) => String(item.name)).join(', ')}) after ${change.target.after ?? '–'}`,
+          );
+          setOrder((current) =>
+            List.reorder(current, change, (row: string) => row),
+          );
+        },
+      }),
+      'reorderPlanets',
+      'const [reorderPlanets] = useState(() => List.createReorderHandle({ onReorder: … }));',
+    ),
+  );
+
+  return (
+    <Component
+      isInline
+      isStretched
+      id="list-parts-create-reorder-handle"
+      log={log}
+      title="List.createReorderHandle"
+    >
+      <>
+        <Button.Root
+          variant="bordered"
+          onClick={() => reorderPlanets.grab(['Venus', 'Earth'])}
+        >
+          <Button.Label>Grab Venus and Earth</Button.Label>
+        </Button.Root>
+        <Button.Root
+          variant="bordered"
+          onClick={() => reorderPlanets.move('previous')}
+        >
+          <Button.Label>Move Up</Button.Label>
+        </Button.Root>
+        <Button.Root
+          variant="bordered"
+          onClick={() => reorderPlanets.move('next')}
+        >
+          <Button.Label>Move Down</Button.Label>
+        </Button.Root>
+        <Button.Root
+          variant="bordered"
+          onClick={() => reorderPlanets.drop()}
+        >
+          <Button.Label>Drop</Button.Label>
+        </Button.Root>
+        <Button.Root
+          variant="bordered"
+          onClick={() => reorderPlanets.cancel()}
+        >
+          <Button.Label>Cancel</Button.Label>
+        </Button.Root>
+        <List.Root>
+          <List.Section>
+            <List.Group reorderHandle={reorderPlanets}>
+              {order.map((name) => (
+                <ReorderRow
+                  key={name}
+                  handle={reorderPlanets}
+                  name={name}
+                />
+              ))}
+            </List.Group>
+          </List.Section>
+        </List.Root>
+      </>
+    </Component>
+  );
+};
+
+/** `useCreateReorderHandle`: the handle made in the component. */
+const UseCreateReorderHandlePart: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [order, setOrder] = useState<readonly string[]>(rows);
+  const reorderRows = codeLabel(
+    useCreateReorderHandle({
+      onReorder: (change: ListReorderChange) => {
+        addLog(
+          `reorder: ${String(change.items[0]?.name)} after ${change.target.after ?? '–'}`,
+        );
+        setOrder((current) =>
+          List.reorder(current, change, (row: string) => row),
+        );
+      },
+    }),
+    'reorderRows',
+    'const reorderRows = useCreateReorderHandle({ onReorder: … });',
+  );
+
+  return (
+    <Component
+      isInline
+      isStretched
+      id="list-parts-use-create-reorder-handle"
+      log={log}
+      title="useCreateReorderHandle"
+    >
+      <List.Root>
+        <List.Section>
+          <List.Group reorderHandle={reorderRows}>
+            {order.map((name) => (
+              <ReorderRow
+                key={name}
+                handle={reorderRows}
+                name={name}
+              />
+            ))}
+          </List.Group>
+        </List.Section>
+      </List.Root>
+    </Component>
+  );
+};
+
+const reorderCode = `const [planets, setPlanets] = useState({ inner: ['Mercury', 'Venus'], outer: ['Jupiter'] });
+const reorderPlanets = useCreateReorderHandle({
+  onReorder: (change) =>
+    setPlanets((current) => List.reorder(current, change, (name) => name)),
+});`;
+
 /** `List.Grabber` (the first row's), outlined, with its props. */
 const GrabberPart: FunctionComponent = () => {
   const id = 'list-parts-grabber';
@@ -1481,6 +1749,16 @@ const GrabberPart: FunctionComponent = () => {
     title: 'List.Grabber',
   });
   const [order, setOrder] = useState<readonly string[]>(rows);
+  const reorderRows = useCreateReorderHandle({
+    onReorder: (change: ListReorderChange) => {
+      addLog(
+        `reorder: ${String(change.items[0]?.name)} after ${change.target.after ?? '(start)'}`,
+      );
+      setOrder((current) =>
+        List.reorder(current, change, (row: string) => row),
+      );
+    },
+  });
 
   return (
     <Component
@@ -1494,14 +1772,13 @@ const GrabberPart: FunctionComponent = () => {
     >
       <List.Root>
         <List.Section>
-          <List.Group
-            onReorder={(from: number, to: number) => {
-              addLog(`reorder: ${String(from)} → ${String(to)}`);
-              setOrder((current) => moved(current, from, to));
-            }}
-          >
+          <List.Group reorderHandle={reorderRows}>
             {order.map((name, index) => (
-              <List.Item key={name}>
+              <List.Item
+                key={name}
+                dropName={name}
+                reorderHandle={reorderRows}
+              >
                 <List.Content>
                   <List.Title>{name}</List.Title>
                 </List.Content>
@@ -2744,20 +3021,72 @@ export const ListParts: FunctionComponent = () => (
       </li>
       <li>Inset with rounded corners, full width, or plain.</li>
       <li>
-        Rows with a{' '}
+        Given a reorder handle (
+        <PartLink
+          component="list"
+          part="List.createReorderHandle"
+        />
+        ), its rows’ gaps are targets: rows of the handle (dragged by their{' '}
         <PartLink
           component="list"
           part="List.Grabber"
         >
           Grabber
-        </PartLink>{' '}
-        reorder within it: it calls <code>onReorder</code>; the app reorders its
-        rows.
+        </PartLink>
+        ) can be dropped before, between and after them; the handle’s{' '}
+        <code>onReorder</code> is called, the app reorders its rows.
       </li>
     </ul>
     <GroupPart />
     <h3>Props</h3>
     <PropsTable rows={listGroupRows} />
+
+    <Heading
+      id="list-dropgroup"
+      level={2}
+    >
+      <code>List.DropGroup</code>
+    </Heading>
+    <ul>
+      <li>
+        A range of rows whose gaps are targets of its reorder handles (as a{' '}
+        <PartLink
+          component="list"
+          part="List.Group"
+        />{' '}
+        given one): before, between and after its rows.
+      </li>
+      <li>
+        No element of its own: placed around some of a group’s rows, they stay
+        the group’s (its separators, its corners); the rows around it aren’t
+        targets. Only an empty, hidden element marks where it is: emptied, it’s
+        still a target there.
+      </li>
+      <li>
+        Here: Mercury and Jupiter stay where they are; Venus to Mars are
+        reordered between them.
+      </li>
+    </ul>
+    <DropGroupPart />
+    <h3>Props</h3>
+    <PropsTable rows={listDropGroupRows} />
+
+    <Heading
+      id="list-droptarget"
+      level={2}
+    >
+      <code>List.DropTarget</code>
+    </Heading>
+    <ul>
+      <li>
+        A gap rows of its reorder handles can be dropped into, where it’s placed
+        among a group’s rows (an empty, hidden element only marking it).
+      </li>
+      <li>Here: the only target, at the top: rows can only be moved there.</li>
+    </ul>
+    <DropTargetPart />
+    <h3>Props</h3>
+    <PropsTable rows={listDropTargetRows} />
 
     <Heading
       id="list-item"
@@ -3346,20 +3675,117 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A trailing handle dragging its row to reorder its group (see{' '}
+        A trailing handle dragging its row (given a reorder handle,{' '}
         <PartLink
           component="list"
-          part="List.Group"
-        >
-          Group
-        </PartLink>
-        ).
+          part="List.Item"
+        />
+        ’s <code>reorderHandle</code>) to its handle’s targets.
       </li>
-      <li>Focused: arrow keys move the row by one.</li>
+      <li>
+        Focused: arrow keys move the row to the previous or next target (across
+        groups too), announced.
+      </li>
     </ul>
     <GrabberPart />
     <h3>Props</h3>
     <PropsTable rows={listGrabberRows} />
+
+    <Heading
+      id="list-createreorderhandle"
+      level={2}
+    >
+      <code>List.createReorderHandle</code>
+    </Heading>
+    <ul>
+      <li>
+        A reordering: given to the rows it moves (
+        <PartLink
+          component="list"
+          part="List.Item"
+        />
+        ’s <code>reorderHandle</code>, named by their <code>dropName</code>) and
+        to where they can be dropped (
+        <PartLink
+          component="list"
+          part="List.Group"
+        />
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.DropGroup"
+        />
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.DropTarget"
+        />
+        ), anywhere in the list; its <code>onReorder</code> tells the app what
+        moved and where.
+      </li>
+      <li>
+        A row can be given several (its <code>reorderHandle</code> an array, by
+        priority), as can a target: dropped where several are targets, the row’s
+        first one there is called.
+      </li>
+      <li>
+        The app grabs rows itself (<code>grab</code>, by their names: e.g.
+        several selected ones, dragged together by one of their grabbers), and
+        moves them (<code>move</code>, <code>drop</code>, <code>cancel</code>).
+      </li>
+      <li>
+        Here: made once in the component’s state (in a component, rather{' '}
+        <PartLink
+          component="list"
+          part="useCreateReorderHandle"
+        />
+        ), Venus and Earth grabbed and moved by the buttons.
+      </li>
+    </ul>
+    <CreateReorderHandlePart />
+    <h3>Options, returns</h3>
+    <PropsTable rows={listReorderHandleRows} />
+
+    <Heading
+      id="usecreatereorderhandle"
+      level={2}
+    >
+      <code>useCreateReorderHandle</code>
+    </Heading>
+    <ul>
+      <li>
+        <PartLink
+          component="list"
+          part="List.createReorderHandle"
+        />{' '}
+        in a component: made once, for its lifetime, its options the latest.
+      </li>
+    </ul>
+    <UseCreateReorderHandlePart />
+    <h3>Options, returns</h3>
+    <PropsTable rows={listReorderHandleRows} />
+
+    <Heading
+      id="list-reorder"
+      level={2}
+    >
+      <code>List.reorder</code>
+    </Heading>
+    <ul>
+      <li>
+        Applies a reorder handle’s change to the app’s rows: a list, or lists by
+        their group’s (or drop group’s) <code>dropName</code>, e.g. one per
+        section.
+      </li>
+      <li>
+        By names, not indexes: the moved rows taken out, put after the row
+        before the gap (rows the app doesn’t hold, e.g. a pinned one, taken as
+        those around), or into an empty list by its name.
+      </li>
+    </ul>
+    <CodeView code={reorderCode} />
+    <h3>Arguments and return</h3>
+    <PropsTable rows={listReorderRows} />
 
     <Heading
       id="list-action"
@@ -3696,6 +4122,8 @@ export const listPartsDemos = [
   SectionPart,
   HeaderPart,
   GroupPart,
+  DropGroupPart,
+  DropTargetPart,
   ItemPart,
   CollapsibleRootPart,
   CollapsibleTriggerPart,
@@ -3720,6 +4148,8 @@ export const listPartsDemos = [
   DrillInPart,
   DisclosurePart,
   GrabberPart,
+  CreateReorderHandlePart,
+  UseCreateReorderHandlePart,
   ActionPart,
   ButtonPart,
   CheckboxPart,

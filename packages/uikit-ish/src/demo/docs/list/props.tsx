@@ -6,6 +6,7 @@ import {
   forwardClick,
   List,
   type ListCollapsibleChangeEventDetails,
+  type ListReorderHandle,
 } from '../../../components/index.js';
 import { AddLog } from '../../tooling/frame/log.js';
 import {
@@ -370,13 +371,24 @@ export const getPropOptionsSwipeActionOutermost = (addLog: AddLog) => ({
   ] as const,
 });
 
-/** `List.Group` in the guide's view: reordering (`reorder`: its rows'). */
-export const getPropOptionsGuideGroup = (
-  reorder: (from: number, to: number) => void,
-) => ({
+/**
+ * `List.Group` in the guide's view: reordering (`handle`: its rows'; its
+ * gaps, targets).
+ */
+export const getPropOptionsGuideGroup = (handle: ListReorderHandle) => ({
   editing: editingOptions,
   ...commonPropOptions,
-  onReorder: [new MappedProp(reorder, '[reorder]'), undefined] as const,
+  reorderHandle: [new MappedProp(handle, '[rows]'), undefined] as const,
+  dropName: [undefined, 'planets'] as const,
+});
+
+/** `List.DropGroup`, `List.DropTarget`: their handle, their name. */
+export const getPropOptionsDropTarget = (
+  handle: ListReorderHandle,
+  name: string,
+) => ({
+  reorderHandle: [new MappedProp(handle, '[rows]')] as const,
+  dropName: [undefined, name] as const,
 });
 
 /** The overview's list: its style. */
@@ -403,18 +415,6 @@ export const propOptionsRootAll = {
     'sidebar',
   ] as const,
 };
-
-export const getPropOptionsGroup = (addLog: AddLog) => ({
-  ...commonPropOptions,
-  editing: editingOptions,
-  onReorder: [
-    new MappedProp(
-      (from: number, to: number) => addLog(`reorder: ${from} → ${to}`),
-      '[log reorder]',
-    ),
-    undefined,
-  ] as const,
-});
 
 export const getPropOptionsItem = (addLog: AddLog) => ({
   ...getPropOptionsItemFirst(addLog),
