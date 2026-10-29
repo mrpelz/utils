@@ -99,7 +99,7 @@ const isStalled = airDrop.stage === 'stalled';
         applied, finishing its turn, then fading out. */}
     <ActivityIndicator
       aria-label="Applying"
-      display={isSlow ? 'animate' : 'finish-and-hide'}
+      display={isSlow ? 'animate' : 'none'}
       movement="fade"
       size="small"
     />
@@ -221,7 +221,7 @@ const DelayedStates: FunctionComponent = () => {
                         <List.Trailing>
                           <ActivityIndicator
                             aria-label="Applying"
-                            display={isSlow ? 'animate' : 'finish-and-hide'}
+                            display={isSlow ? 'animate' : 'none'}
                             movement="fade"
                             size="small"
                           />
@@ -404,8 +404,8 @@ export const SwitchComposition: FunctionComponent = () => (
         fades in beside the switch, at its start (not sliding in: its{' '}
         <code>display</code>, <code>animate</code>; <code>movement</code>,{' '}
         <code>fade</code>, its spokes fading in place); applied, it finishes its
-        turn, then fades out (<code>finish-and-hide</code>), taking no room:
-        Bluetooth (1.5s).
+        turn, then fades out (<code>none</code>), taking no room: Bluetooth
+        (1.5s).
       </li>
       <li>
         Past two seconds, not responding: the switch slides out at the row’s end

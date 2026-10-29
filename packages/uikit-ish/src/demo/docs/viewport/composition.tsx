@@ -1127,8 +1127,9 @@ export const ViewportComposition: FunctionComponent = () => (
           part="useViewportScroll"
         />
         ’s <code>overscroll</code> (negative past the top) and{' '}
-        <code>isHeld</code> (still pulled: a touch, or a wheel until quiet);
-        released past the distance, it refreshes.
+        <code>isHeld</code> (still pulled: a touch, or a wheel’s fingers until
+        quiet or its inertia starts: inertia never pulls); released past the
+        distance, it refreshes.
       </li>
       <li>
         The indicator in a{' '}

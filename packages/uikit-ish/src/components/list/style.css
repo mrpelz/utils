@@ -80,7 +80,7 @@
     flex-wrap: wrap;
     align-content: center;
     align-items: center;
-    padding: var(--uikit-list-row-padding, 12px 16px);
+    padding: var(--uikit-list-row-padding-block, 12px) 16px;
 
     /* Indented by its level (see Item). */
     padding-inline-start: calc(
@@ -278,6 +278,16 @@
        columns centered (iOS). */
     & > [data-list-part='span'] > [data-roll-part='root'] {
       flex: 1 1 auto;
+    }
+
+    /* With a line under it (a Below): its own line keeps the row's least
+       height, so the line under it only adds to it (the row's lines,
+       centered, would move up as it grows). */
+    &:has(> [data-list-part='below'])
+      > :is([data-list-part='content'], [data-list-part='span']) {
+      min-height: calc(
+        var(--uikit-list-min-height) - 2 * var(--uikit-list-row-padding-block, 12px)
+      );
     }
 
     /* Under the row's line, across it (e.g. a field's messages). Hidden
@@ -627,7 +637,7 @@
       --uikit-list-outline-shadow: none;
       --uikit-list-separator-opacity: 0;
       --uikit-list-row-min-height: 44px;
-      --uikit-list-row-padding: 0 16px;
+      --uikit-list-row-padding-block: 0px;
       --uikit-list-row-padding-start: 10px;
       --uikit-list-selected-title: var(--color-ios-primary);
 

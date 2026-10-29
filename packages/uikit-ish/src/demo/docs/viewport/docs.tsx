@@ -366,13 +366,13 @@ export const viewportScrollEventRows: readonly PropRow[] = [
     'overscroll',
     'number',
     undefined,
-    'How far it’s pulled past an end (px), rubber-banded: negative past the start (e.g. pulling to refresh), positive past the end; 0 within. Safari’s own bounce; elsewhere, a touch or a wheel pulling at an end (damped as UIKit’s), the content staying.',
+    'How far it’s pulled past an end (px), rubber-banded: negative past the start (e.g. pulling to refresh), positive past the end; 0 within. Safari’s own bounce; elsewhere, a touch or a wheel pulling at an end (damped as UIKit’s; a wheel’s stiffer, at most half the container’s height), the content staying. A wheel’s inertia (its fingers lifted: told by the browser, WheelEvent momentum, or by its deceleration, then back to before the fling) never pulls.',
   ],
   [
     'isHeld',
     'boolean',
     undefined,
-    'Overscrolling held: a touch, or a wheel until quiet (150ms), still pulling. Once not, it’s released (e.g. to act then), bouncing back.',
+    'Overscrolling held: a touch, or a wheel’s fingers until quiet (150ms) or until its inertia starts, still pulling. Once not, it’s released (e.g. to act then), bouncing back.',
   ],
 ];
 

@@ -14,6 +14,7 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react';
+import { type WheelEventState, WheelGestures } from 'wheel-gestures';
 
 import {
   cn,
@@ -174,6 +175,16 @@ const trackDirection = (threshold: number, start: number) => {
   };
 };
 
+// A wheel pulling (see `Provider`): held until quiet for this long (its
+// gesture's own end, adapting to its events' pace, comes as soon as a
+// finger pauses).
+const wheelQuiet = 150;
+
+// A fling's start, told apart as inertia after a few deltas (see
+// `Provider`): its first delta at least this much of the largest (uneven,
+// e.g. interpolated, its largest isn't always its first).
+const flingStart = 0.75;
+
 /**
  * Rubber-banding (UIKit's): how far content moves pulled `distance` px past
  * an end, in a scroll container `size` px high (never as far as that).
@@ -181,21 +192,16 @@ const trackDirection = (threshold: number, start: number) => {
 const rubberBand = (distance: number, size: number) =>
   size > 0 ? (1 - 1 / ((distance * 0.55) / size + 1)) * size : 0;
 
-// A wheel overscrolling (see `Provider`): held until quiet for this long.
-const wheelQuiet = 150;
-
-// A wheel coasting (fingers lifted, the browser's inertia: e.g. Chrome's
-// fling): this many deltas in a row shrinking, each within this long (ms)
-// of the last.
-const wheelDecays = 4;
-const wheelInterval = 50;
+/**
+ * A wheel's rubber-banding (a trackpad's, a wheel's): stiffer, reaching half
+ * as far (wheel deltas aren't a finger's distance on the screen, and
+ * inertia is told apart only after a few of them, see `Provider`).
+ */
+const wheelRubberBand = (distance: number, size: number) =>
+  size > 0 ? (1 - 1 / ((distance * 0.4) / (size / 2) + 1)) * (size / 2) : 0;
 
 // Released, the pull bounces back this long (ms; see `Provider`).
 const bounceDuration = 350;
-
-// A wheel's delta, in pixels (by its `deltaMode`: pixels, lines, pages).
-const wheelPixels = (event: WheelEvent, page: number) =>
-  event.deltaY * ([1, 16, page][event.deltaMode] ?? 1);
 
 const clamp = (value: number, max: number) =>
   Math.round(Math.min(Math.max(value, 0), max));
@@ -331,7 +337,14 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     let pull = 0;
     let origin: number | undefined;
     let isTouching = false;
-    let wheel: ReturnType<typeof setTimeout> | undefined;
+    // A wheel gesture pulling (fingers on a trackpad, a wheel turning; not
+    // its inertia), until it ends (see `onGesture`).
+    let isWheeling = false;
+    let quiet: ReturnType<typeof setTimeout> | undefined;
+    // Pulled by a wheel (see `wheelRubberBand`), not a touch.
+    let isWheelPull = false;
+    // The held gesture's deltas, and the pull before each (see `onGesture`).
+    let history: { delta: number; pull: number }[] = [];
 
     const range = () =>
       Math.max(0, element.scrollHeight - element.clientHeight);
@@ -354,7 +367,11 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
       }
       const overscroll = scroll.isNative()
         ? raw - position
-        : Math.sign(pull) * rubberBand(Math.abs(pull), element.clientHeight);
+        : Math.sign(pull) *
+          (isWheelPull ? wheelRubberBand : rubberBand)(
+            Math.abs(pull),
+            element.clientHeight,
+          );
       const by = scroll.isMoved() ? -overscroll : 0;
       if (by !== shifted && element instanceof HTMLElement) {
         shifted = by;
@@ -369,7 +386,7 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
       scroll.emit({
         atBottom: position >= end - 1,
         atTop: position <= 0,
-        isHeld: isTouching || wheel !== undefined,
+        isHeld: isTouching || isWheeling,
         overscroll,
         position,
       });
@@ -395,6 +412,7 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     const onTouchStart = () => {
       cancelAnimationFrame(bounce);
       isTouching = true;
+      isWheelPull = false;
       origin = undefined;
     };
 
@@ -424,54 +442,69 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
       release();
     };
 
-    // A wheel's last delta and when, and how many shrank in a row; coasting
-    // (see `wheelDecays`) until it turns or goes quiet (not as a delta grows:
-    // an interpolated inertia's, e.g. Chrome's, uneven, would pull again,
-    // e.g. turning a second page).
-    let last = { delta: 0, time: 0 };
-    let decays = 0;
-    let isCoasting = false;
-
-    // Coasting: released at once (inertia doesn't pull on, as no finger
-    // does), none of it pulling again.
-    const coast = (event: WheelEvent, delta: number) => {
-      const isTurned = Math.sign(delta) !== Math.sign(last.delta);
-      const isQuiet = event.timeStamp - last.time > wheelQuiet;
-      const isShrinking = Math.abs(delta) < Math.abs(last.delta);
-      decays =
-        isShrinking && event.timeStamp - last.time < wheelInterval
-          ? decays + 1
-          : 0;
-      if (isTurned || isQuiet) isCoasting = false;
-      if (decays >= wheelDecays) isCoasting = true;
-      last = { delta, time: event.timeStamp };
-      if (!isCoasting) return false;
-      if (wheel !== undefined) {
-        clearTimeout(wheel);
-        wheel = undefined;
+    // Wheel gestures (`wheel-gestures`: where they start and end, and when
+    // they're inertia, the fingers lifted, e.g. Chrome's interpolated
+    // fling): pulling on past an end (or back) while held; inertia never
+    // pulls (as no finger does), releasing at once; quiet, released (see
+    // `wheelQuiet`).
+    // Inertia is told apart only after a few of its deltas: those pulled
+    // too, so once it is, the pull goes back to where it was before the
+    // fling started (the fingers lifting: see `flingStart`), told while
+    // still held (e.g. no longer armed), then released. (Where browsers
+    // tell inertia, `WheelEvent.momentum`, e.g. Chrome, from its first.)
+    // eslint-disable-next-line new-cap -- the library's factory
+    const gestures = WheelGestures({
+      preventWheelAction: false,
+      reverseSign: false,
+    });
+    const onGesture = ({
+      axisDelta,
+      event,
+      isEnding,
+      isMomentum,
+    }: WheelEventState) => {
+      if (isEnding) return;
+      if (isMomentum) {
+        if (!isWheeling) return;
+        clearTimeout(quiet);
+        // Told apart late (no `momentum`): back to before the fling.
+        if (typeof (event as { momentum?: unknown }).momentum !== 'boolean') {
+          const largest = Math.max(
+            ...history.map(({ delta }) => Math.abs(delta)),
+          );
+          const start = history.find(
+            ({ delta }) => Math.abs(delta) >= largest * flingStart,
+          );
+          pull = start?.pull ?? pull;
+          emit();
+        }
+        isWheeling = false;
+        history = [];
         release();
+        return;
       }
-      return true;
-    };
-
-    // Wheeled on past an end (or back), until quiet.
-    const onWheel = (event: Event) => {
-      const delta = wheelPixels(event as WheelEvent, element.clientHeight);
-      if (coast(event as WheelEvent, delta)) return;
       cancelAnimationFrame(bounce);
+      if (!isWheeling) history = [];
+      isWheeling = true;
+      clearTimeout(quiet);
+      quiet = setTimeout(() => {
+        isWheeling = false;
+        history = [];
+        release();
+      }, wheelQuiet);
+      isWheelPull = true;
+      const [, delta] = axisDelta;
+      history.push({ delta, pull });
       const raw = element.scrollTop;
       const isPast = (raw <= 0 && delta < 0) || (raw >= range() && delta > 0);
       if (isPast || pull !== 0) {
         const next = pull + delta;
         pull = pull !== 0 && Math.sign(next) !== Math.sign(pull) ? 0 : next;
       }
-      clearTimeout(wheel);
-      wheel = setTimeout(() => {
-        wheel = undefined;
-        release();
-      }, wheelQuiet);
       emit();
     };
+    const off = gestures.on('wheel', onGesture);
+    const onWheel = (event: Event) => gestures.feedWheel(event as WheelEvent);
 
     const listeners: [string, (event: Event) => void][] = [
       ['scroll', emit],
@@ -485,7 +518,9 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
       target.addEventListener(type, listener, { passive: true });
     }
     return () => {
-      clearTimeout(wheel);
+      off();
+      gestures.disconnect();
+      clearTimeout(quiet);
       cancelAnimationFrame(bounce);
       for (const [type, listener] of listeners) {
         target.removeEventListener(type, listener);
