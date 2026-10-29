@@ -1,16 +1,5 @@
 /* Contextual-menu (see main.tsx). */
 @layer uikit-ish {
-  .uikit-contextual-menu-scroller {
-    position: fixed;
-
-    /* An overlay: above the page's layers (e.g. Viewport's bars), overlays
-       among themselves in the order they open (see Menu). */
-    z-index: 100;
-    overflow: hidden auto;
-    inset: 0;
-    overscroll-behavior: contain;
-  }
-
   .uikit-contextual-menu-trigger {
     display: inline-flex;
 
@@ -18,11 +7,13 @@
       transition-duration: 300ms;
       transition-property: translate, opacity;
       transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
-      translate: 0 calc(var(--uikit-contextual-menu-lift, 0) * -1px);
+      translate: var(--uikit-contextual-menu-lift-x, 0)
+        var(--uikit-contextual-menu-lift-y, 0);
     }
 
-    /* Lifted: above the backdrop (an overlay at 100, see Menu), as far as
-       its ancestors' stacking contexts let it (see main.tsx). */
+    /* Lifted onto the preview's slot (see main.tsx): above the backdrop and
+       the menu (overlays at 100, see Menu), as far as its ancestors'
+       stacking contexts let it. */
     &[data-lifted] {
       position: relative;
       z-index: 101;
@@ -30,11 +21,6 @@
 
     &[data-previewed] > * {
       opacity: 0;
-    }
-
-    /* Scrolled (too tall, see Root): following it at once. */
-    &[data-overflowing] > * {
-      transition-property: opacity;
     }
   }
 
@@ -52,32 +38,72 @@
     }
   }
 
-  /* Over the page and the backdrop, at the lifted place; scaling in from the
-     trigger's top. (Max sizes: 2 × `margin`, see main.tsx.) */
-  .uikit-contextual-menu-preview {
-    position: fixed;
+  /* The stack (see main.tsx): the preview's slot, then the menu, aligned
+     to the trigger as the menu is (`data-align`). */
+  .uikit-contextual-menu-positioner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 
-    /* Above the backdrop (an overlay at 100, see Menu). */
-    z-index: 101;
-    max-width: calc(100vw - 16px);
-    max-height: calc(100vh - 16px);
+    &[data-align='start'] {
+      align-items: flex-start;
+    }
 
-    /* Shown as the trigger is pressed: the release is the trigger's (Base UI
-       cancels opening a menu released elsewhere). */
+    &[data-align='end'] {
+      align-items: flex-end;
+    }
+
+    /* The menu: the room left below the slot (taller, it scrolls). */
+    & > .uikit-menu-popup {
+      max-height: calc(
+        var(--available-height) - var(--uikit-contextual-menu-slot, 0px) -
+          8px
+      );
+    }
+  }
+
+  .uikit-contextual-menu-slot {
+    display: flex;
+    max-width: var(--available-width);
+    flex: none;
+    justify-content: center;
+  }
+
+  /* (Not pressed, as the preview isn't: outside the menu, see Menu's
+     positioner.) */
+  .uikit-contextual-menu-positioner > .uikit-contextual-menu-slot {
     pointer-events: none;
+  }
+
+  /* In the slot: at most the room the menu leaves (or, the menu taller,
+     half of it), clipped; scaling in from the trigger's place, out as the
+     menu closes. Shown as the trigger is pressed: the release is the
+     trigger's (Base UI cancels opening a menu released elsewhere). */
+  .uikit-contextual-menu-preview {
+    overflow: clip;
+    max-width: var(--available-width);
+    max-height: calc(
+      var(--available-height) - 8px -
+        min(
+          var(--uikit-contextual-menu-popup, 0px),
+          var(--available-height) / 2
+        )
+    );
+    pointer-events: none;
+    transform-origin: top;
     transition-duration: 300ms;
-    transition-property: translate, scale, opacity;
+    transition-property: scale, opacity;
     transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
-    translate: 0 calc(var(--uikit-contextual-menu-lift, 0) * -1px);
 
     @starting-style {
       opacity: 0;
       scale: 0.8;
     }
 
-    /* Scrolled (too tall, see Root): following it at once. */
-    &[data-overflowing] {
-      transition-property: scale, opacity;
+    .uikit-contextual-menu-positioner[data-closed] & {
+      opacity: 0;
+      scale: 0.8;
     }
   }
 }

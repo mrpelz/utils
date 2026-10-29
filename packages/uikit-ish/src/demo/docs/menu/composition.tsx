@@ -18,11 +18,13 @@ import {
   Page,
   Symbol,
   Toolbar,
+  useTextActionsPrevention,
   Viewport,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { useLabelledRef } from '../../tooling/frame/render-code.js';
 import {
   Contents,
   Heading,
@@ -82,9 +84,14 @@ const [sort, setSort] = useState('date');
   </List.Trailing>
 </List.Item>`;
 
-const historyCode = `<Menu.Root>
+const historyCode = `const back = useRef<HTMLButtonElement>(null);
+// A held press selects no text (no browser text menu).
+useTextActionsPrevention(back);
+
+<Menu.Root>
   {/* A click goes back; a held press (or a right click) shows the pages. */}
   <Menu.Trigger
+    ref={back}
     aria-label="Back"
     openOn="secondaryClick"
     render={<Toolbar.Button shape="circle" />}
@@ -257,6 +264,8 @@ const APopUpButton: FunctionComponent = () => {
 /** A back button: a click goes back, a held press shows the history. */
 const AHistory: FunctionComponent = () => {
   const [log, addLog] = useLog();
+  const back = useLabelledRef<HTMLButtonElement>('back', 'HTMLButtonElement');
+  useTextActionsPrevention(back);
 
   return (
     <Component
@@ -274,6 +283,7 @@ const AHistory: FunctionComponent = () => {
               <Toolbar.Leading>
                 <Menu.Root>
                   <Menu.Trigger
+                    ref={back}
                     aria-label="Back"
                     openOn="secondaryClick"
                     render={<Toolbar.Button shape="circle" />}

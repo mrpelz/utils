@@ -387,6 +387,10 @@ export const ViewportOverview: FunctionComponent = () => (
         <code>body</code>. Otherwise, on iOS (as a web app, especially), a drag
         no scroll container takes (e.g. on a bar, or on content too short to
         scroll) rubber-bands the document, moving the whole app, its bars too.
+        Only on iOS (e.g. in{' '}
+        <code>@supports (-webkit-touch-callout: none)</code>): elsewhere, e.g.
+        Chrome on macOS, it also ends a trackpad’s inertia in the scroll
+        containers within.
       </li>
       <li>
         Anchors and the content layer are <code>position: fixed</code>: to the

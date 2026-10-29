@@ -19,6 +19,7 @@ import {
   positionerSide,
   useCollision,
   useForwardedRef,
+  useGrowAvoidance,
   useInitialFocus,
   usePortalContainer,
   withStyle,
@@ -96,16 +97,20 @@ const Positioner = forwardRef<HTMLDivElement, PopoverPositionerProps>(
       sideOffset,
       ...props
     },
-    ref,
+    forwardedRef,
   ) => {
     const context = useContext(PopoverContext);
+    const ref = useForwardedRef(forwardedRef);
     const collision = useCollision({ collisionBoundary, collisionPadding });
+    // Growing rather than scrolling (unless its own is given).
+    const [grow, growRef] = useGrowAvoidance({}, ref);
 
     return (
       <BasePopover.Positioner
-        ref={ref}
+        ref={growRef}
         align={align}
         {...collision}
+        collisionAvoidance={grow}
         side={positionerSide(side)}
         sideOffset={sideOffset ?? 8 + (context?.hasArrow ? arrowDepth : 0)}
         {...props}

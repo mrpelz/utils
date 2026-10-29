@@ -227,3 +227,28 @@
 .viewport-demo-pull-spinner {
   rotate: calc(var(--uikit-viewport-overscroll-progress, 0) * 270deg);
 }
+
+/* A message to hold (see `UseTextActionsPreventionPart`). */
+.viewport-demo-sticky {
+  position: sticky;
+  z-index: 11;
+  display: flex;
+  justify-content: center;
+  padding: 8px 16px;
+}
+
+.viewport-demo-filter {
+  padding: 6px 14px;
+  border-radius: 100px;
+  background-color: var(--color-ios-secondary-system-grouped-background);
+  color: var(--color-ios-label);
+}
+
+.viewport-demo-message {
+  max-width: 280px;
+  padding: 12px 16px;
+  border-radius: 20px;
+  margin: 0;
+  background-color: var(--color-ios-secondary-system-grouped-background);
+  color: var(--color-ios-label);
+}

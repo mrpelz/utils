@@ -97,9 +97,19 @@ const handleOptions = [
   new MappedProp(barAnchor, '[barAnchor]'),
 ] as const;
 
+/** An anchor's edge effect, and a tint (red: recording; blue: a state). */
+const edgeEffects = [undefined, 'soft', 'hard', 'none'] as const;
+const edgeTints = [
+  undefined,
+  'rgb(255 59 48 / 35%)',
+  'rgb(0 122 255 / 30%)',
+] as const;
+
 export const propOptionsAnchor = {
   ...elementOptions,
   edge: ['block-end', 'block-start', 'inline-start', 'inline-end'] as const,
+  edgeEffect: edgeEffects,
+  edgeTint: edgeTints,
   handle: handleOptions,
   keyboard: [undefined, 'push', 'cover'] as const,
   safeArea: safeAreas,
@@ -107,6 +117,8 @@ export const propOptionsAnchor = {
 
 export const propOptionsBlockStart = {
   ...elementOptions,
+  edgeEffect: edgeEffects,
+  edgeTint: edgeTints,
   handle: handleOptions,
   // (An anchor's, effective at the block end only.)
   keyboard: [undefined, 'push', 'cover'] as const,
@@ -115,6 +127,8 @@ export const propOptionsBlockStart = {
 
 export const propOptionsBlockEnd = {
   ...elementOptions,
+  edgeEffect: edgeEffects,
+  edgeTint: edgeTints,
   handle: handleOptions,
   keyboard: [undefined, 'push', 'cover'] as const,
   safeArea: safeAreas,
@@ -186,6 +200,10 @@ export const propOptionsElementGeometry = {
 
 /** The input guards' hooks' arguments (see parts.tsx). */
 export const propOptionsInputZoom = {
+  enabled: [true, false] as const,
+};
+
+export const propOptionsTextActions = {
   enabled: [true, false] as const,
 };
 

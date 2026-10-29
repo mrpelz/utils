@@ -389,6 +389,8 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
  * Where a swipe back starts (touch, or a mouse): a strip at the leading
  * edge (`width`, 20px), over the pages, while there's a page to go back to
  * (and an `onBack`); in its `Root`. Without one, pages aren't swiped back.
+ * Its swipes are its own: nothing scrolls meanwhile (`touch-action`), and
+ * a sheet around it isn't swiped along (Base UI's swipe ignore).
  */
 const SwipeArea = forwardRef<HTMLDivElement, NavigationSwipeAreaProps>(
   ({ className, style, width = 20, ...props }, ref) => {
@@ -398,6 +400,7 @@ const SwipeArea = forwardRef<HTMLDivElement, NavigationSwipeAreaProps>(
     return (
       <div
         ref={ref}
+        data-base-ui-swipe-ignore=""
         data-navigation-part="swipe-area"
         style={withStyle(
           { '--uikit-navigation-swipe-area-width': `${String(width)}px` },

@@ -195,12 +195,18 @@
       padding-block-start: 16px;
     }
 
-    /* Only a grabber: over the content (its own bars below it). */
+    /* Only a grabber: over the content (its own bars below it). Composited
+       itself: the content scrolls (iOS composites it), and Safari otherwise
+       relies on its overlap testing to draw the header after it, which
+       misses it far down a scrolled document (e.g. an inline demo), leaving
+       the grabber hidden (until something recomposites, e.g. a button's
+       press). */
     &:has(> .uikit-sheet-grabber:only-child) {
       position: absolute;
       z-index: 1;
       inset: 0 0 auto;
       padding-block-end: 0;
+      will-change: transform;
     }
   }
 

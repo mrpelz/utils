@@ -16,8 +16,8 @@ import {
   useState,
 } from 'react';
 
-import { cn } from '../utils/main.js';
-import { useAnchorSize } from '../viewport/main.js';
+import { cn, useForwardedRef } from '../utils/main.js';
+import { useAnchorSize, useViewportEdgeElement } from '../viewport/main.js';
 import type {
   HeaderAccessoryProps,
   HeaderContextValue,
@@ -49,9 +49,8 @@ export type {
 // large title scrolls under the bar, it fades out and the bar's own
 // `Toolbar.Title` fades in (scroll-driven animations, no scroll
 // listeners): without a large title, the bar's title just shows. Content
-// scrolled under the bar blurs beneath it (iOS 26's scroll edge effect, a
-// soft one: a backdrop blur, fading out downwards), whatever the page's
-// background.
+// scrolled under the bar blurs beneath it (iOS 26's scroll edge effect:
+// its anchor's, see `Viewport`; its accessory, stuck, covered too).
 //
 // An accessory (`Accessory`: a search field, a segmented control) scrolls
 // with the large title, then sticks below the bar (UIKit: a search
@@ -63,7 +62,7 @@ export type {
 // - The page's content makes room for the bar with a `Viewport.Padding`
 //   (the app's, at the page's start: as high as the bar, live); the large
 //   title and the accessory follow the bar's height too.
-// - The scroll edge effect is an approximation (Figma: none).
+// - The scroll edge effect (the anchor's) is an approximation (Figma: none).
 
 const HeaderContext = createContext<HeaderContextValue>({
   hasLargeTitle: false,
@@ -139,8 +138,12 @@ const LargeTitle = forwardRef<HTMLDivElement, HeaderLargeTitleProps>(
  * with it, then sticking below the bar, the content beneath it blurred.
  */
 const Accessory = forwardRef<HTMLDivElement, HeaderAccessoryProps>(
-  ({ className, render, ...props }, ref) =>
-    useRender({
+  ({ className, render, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    // Stuck below the bar: the bar's edge effect reaching under it.
+    useViewportEdgeElement(ref, 'block-start');
+
+    return useRender({
       defaultTagName: 'div',
       props: {
         'data-header-part': 'accessory',
@@ -149,7 +152,8 @@ const Accessory = forwardRef<HTMLDivElement, HeaderAccessoryProps>(
       },
       ref,
       render,
-    }),
+    });
+  },
 );
 
 export const Header = {

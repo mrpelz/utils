@@ -59,18 +59,55 @@ const anchorKeyboardRow: PropRow = [
   </>,
 ];
 
+const edgeEffectRow: PropRow = [
+  'edgeEffect',
+  union('soft', 'hard', 'none'),
+  code(union('soft')),
+  <>
+    At the block start or end: its scroll edge effect (iOS 26’s), as content
+    scrolls under it: <code>soft</code>, a blur fading out away from the edge;{' '}
+    <code>hard</code>, a solid backing with a dividing line. Drawn by the
+    scroller beneath (a <a href="page">Page</a>, a sheet’s content, the{' '}
+    <PartLink
+      component="viewport"
+      part="Viewport.Content"
+    />
+    ): one per edge, as tall as the tallest anchor there, also under what’s
+    stuck to it (
+    <PartLink
+      component="viewport"
+      part="useViewportEdgeElement"
+    />
+    ).
+  </>,
+];
+
+const edgeTintRow: PropRow = [
+  'edgeTint',
+  'string',
+  undefined,
+  <>
+    At the block start or end: a CSS color for its edge effect (e.g. to tell a
+    state for a while: recording), shown at rest too; <code>soft</code>, under
+    its fade; <code>hard</code>, as its backing. Changes crossfade. Not the only
+    sign of the state: pair it with a label or a symbol.
+  </>,
+];
+
 export const viewportProviderRows: readonly PropRow[] = [
   [
     'scroller',
     'RefObject<HTMLElement | null>',
-    'the document’s scrolling element',
+    'the page filling its screen, or the document’s scrolling element',
     <>
-      The scroll container tracked (e.g. a{' '}
+      The scroll container tracked. Unset: the scroller filling its screen (a{' '}
+      <a href="page">Page</a>, a sheet’s content, a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Content"
       />
-      ’s ref): its direction and edges, for{' '}
+      : registered as they mount; the innermost, as pages show and hide, e.g. a
+      tab’s), or the document’s. Its direction and edges, for{' '}
       <PartLink
         component="viewport"
         part="useViewportScroll"
@@ -80,7 +117,13 @@ export const viewportProviderRows: readonly PropRow[] = [
         component="viewport"
         part="useScrollDirection"
       />
-      .
+      . Pulled past an end where it doesn’t bounce by itself (not Safari), it’s
+      moved along only while a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Overscroll"
+      />{' '}
+      is shown; otherwise, the browser’s own scrolling is left as it is.
     </>,
   ],
   [
@@ -145,6 +188,8 @@ export const viewportAnchorRows: readonly PropRow[] = [
       mirrored right to left).
     </>,
   ],
+  edgeEffectRow,
+  edgeTintRow,
   anchorHandleRow,
   anchorKeyboardRow,
   safeAreaRow,
@@ -158,12 +203,16 @@ export const viewportBlockStartRows: readonly PropRow[] = [
     code(union('push')),
     'None at the top (an anchor’s prop, effective at the block end).',
   ],
+  edgeEffectRow,
+  edgeTintRow,
   anchorHandleRow,
   safeAreaRow,
   ...elementRows('div', 'HTMLDivElement'),
 ];
 
 export const viewportBlockEndRows: readonly PropRow[] = [
+  edgeEffectRow,
+  edgeTintRow,
   anchorHandleRow,
   anchorKeyboardRow,
   safeAreaRow,
@@ -380,7 +429,7 @@ export const viewportScrollEventRows: readonly PropRow[] = [
     'overscroll',
     'number',
     undefined,
-    'How far it’s pulled past an end (px), rubber-banded: negative past the start (e.g. pulling to refresh), positive past the end; 0 within. Safari’s own bounce; elsewhere, a touch or a wheel pulling at an end (damped as UIKit’s; a wheel’s stiffer, at most half the container’s height), the content staying. A wheel’s inertia (its fingers lifted: told by the browser, WheelEvent momentum, or by its deceleration, then back to before the fling) never pulls.',
+    'How far it’s pulled past an end (px), rubber-banded: negative past the start (e.g. pulling to refresh), positive past the end; 0 within. Safari’s own bounce; elsewhere, a touch or a wheel pulling at an end (damped as UIKit’s; a wheel’s stiffer, at most half the container’s height): the content moved along only while a Viewport.Overscroll is shown, else staying. A wheel’s inertia (its fingers lifted: told by the browser, WheelEvent momentum, or by its deceleration, then back to before the fling) never pulls.',
   ],
   [
     'isHeld',
@@ -568,6 +617,34 @@ export const useFocusShiftPreventionRows: readonly PropRow[] = [
   ['enabled', 'boolean', code('true'), 'Whether it guards (while mounted).'],
 ];
 
+export const preventTextActionsRows: readonly PropRow[] = [
+  [
+    'target',
+    'HTMLElement',
+    undefined,
+    'Where a held press selects no text and shows no browser text menu (its user-select and -webkit-touch-callout, none).',
+  ],
+];
+
+export const preventTextActionsReturnRows: readonly PropRow[] = [
+  [
+    '(return)',
+    '() => void',
+    undefined,
+    'Restores its own values (once; more calls do nothing).',
+  ],
+];
+
+export const useTextActionsPreventionRows: readonly PropRow[] = [
+  [
+    'target',
+    'RefObject<HTMLElement | null>',
+    undefined,
+    'Where a held press selects no text and shows no browser text menu.',
+  ],
+  ['enabled', 'boolean', code('true'), 'Whether it applies (while mounted).'],
+];
+
 export const useSizeClassReturnRows: readonly PropRow[] = [
   [
     '(returns)',
@@ -578,5 +655,20 @@ export const useSizeClassReturnRows: readonly PropRow[] = [
       iPad’s window), <code>compact</code> below (a phone’s); before hydration
       (server rendering), <code>compact</code>.
     </>,
+  ],
+];
+
+export const useViewportEdgeElementRows: readonly PropRow[] = [
+  [
+    'ref',
+    'RefObject<HTMLElement | null>',
+    undefined,
+    'What sticks to the edge’s bars (e.g. a sticky search field below the top bar).',
+  ],
+  [
+    'edge',
+    union('block-start', 'block-end'),
+    undefined,
+    'The edge whose bars it sticks to.',
   ],
 ];

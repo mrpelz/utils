@@ -14,12 +14,13 @@ import {
   Menu,
   Symbol,
   useCreateMenuHandle,
+  useTextActionsPrevention,
   Viewport,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
-import { codeLabel } from '../../tooling/frame/render-code.js';
+import { codeLabel, useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
@@ -205,6 +206,13 @@ const TriggerPart: FunctionComponent = () => {
     useMemo(() => getPropOptionsGuideTrigger(addLog), [addLog]),
     { external, isOpen: true, emphasize: 'outline', title: 'Menu.Trigger' },
   );
+  // Opened by a held press: selecting no text (no browser text menu).
+  const trigger = useLabelledRef<HTMLButtonElement>(
+    'trigger',
+    'HTMLButtonElement',
+  );
+  const isHeld = props.openOn === 'secondaryClick';
+  useTextActionsPrevention(trigger, isHeld);
 
   return (
     <Component
@@ -215,13 +223,17 @@ const TriggerPart: FunctionComponent = () => {
       id={id}
       log={log}
       screen="centered"
+      setup={isHeld ? 'useTextActionsPrevention(trigger);' : undefined}
       stage="phone"
       state={[state]}
       title="Menu.Trigger"
     >
       <Viewport.Content>
         <Menu.Root>
-          <Menu.Trigger {...props}>
+          <Menu.Trigger
+            ref={trigger}
+            {...props}
+          >
             <Button.Label>Options</Button.Label>
           </Menu.Trigger>
           <Menu.Portal>
@@ -3707,7 +3719,8 @@ export const MenuParts: FunctionComponent = () => (
     <ul>
       <li>
         An item opening its submenu, a chevron at its end; on hover too (
-        <code>openOnHover</code>).
+        <code>openOnHover</code>), by default only regular: compact, its submenu
+        covering the menu, it’s pressed (an iPhone’s menu has no hover).
       </li>
       <li>Regular: while its submenu is open, it keeps the selection.</li>
       <li>

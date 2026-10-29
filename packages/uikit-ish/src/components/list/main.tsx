@@ -2131,13 +2131,59 @@ const Span = forwardRef<HTMLElement, PartProps<'span'>>(
 );
 
 /**
- * A line under a row's line, across it (e.g. a field's description and
- * error, a status); last in its row. Hidden (`hidden`), it collapses:
- * growing and shrinking as it's shown and hidden (kept rendered).
+ * A `Below`'s start: its row's content's (after the leading parts, e.g. an
+ * image, edit controls), as `--uikit-list-below-start`; measured, again as
+ * the row's parts resize (e.g. entering edit mode).
+ */
+const useBelowStart = (below: { current: HTMLElement | null }) => {
+  useLayoutEffect(() => {
+    const { current: element } = below;
+    const row = element?.parentElement;
+    const content = row?.querySelector<HTMLElement>(
+      ':scope > :is([data-list-part="content"], [data-list-part="span"])',
+    );
+    if (!element || !row || !content) return undefined;
+
+    const measure = () => {
+      const style = getComputedStyle(row);
+      const rowRect = row.getBoundingClientRect();
+      const contentRect = content.getBoundingClientRect();
+      const offset =
+        style.direction === 'rtl'
+          ? rowRect.right - contentRect.right
+          : contentRect.left - rowRect.left;
+      const start = Math.max(
+        offset - Number.parseFloat(style.paddingInlineStart),
+        0,
+      );
+      element.style.setProperty(
+        '--uikit-list-below-start',
+        `${String(start)}px`,
+      );
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(row);
+    observer.observe(content);
+    return () => {
+      observer.disconnect();
+    };
+  }, [below]);
+};
+
+/**
+ * A line under a row's line, across it from where its content starts (e.g.
+ * a field's description and error, a status, a message's preview); last in
+ * its row. Hidden (`hidden`), it collapses: growing and shrinking as it's
+ * shown and hidden (kept rendered).
  */
 const Below = forwardRef<HTMLElement, PartProps<'div'>>(
-  ({ className, render, ...props }, ref) =>
-    useRender({
+  ({ className, render, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    useBelowStart(ref);
+
+    return useRender({
       defaultTagName: 'div',
       props: {
         'data-list-part': 'below',
@@ -2146,7 +2192,8 @@ const Below = forwardRef<HTMLElement, PartProps<'div'>>(
       },
       ref,
       render,
-    }),
+    });
+  },
 );
 
 // Figma “Title”; as a link or button (`render`), it makes the row pressable.

@@ -571,6 +571,15 @@ export const NavigationParts: FunctionComponent = () => (
         transition done); otherwise it settles back.
       </li>
       <li>
+        Its swipes are its own: nothing scrolls meanwhile, and a{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Root"
+        />{' '}
+        around it isn’t swiped down along (Base UI’s{' '}
+        <code>data-base-ui-swipe-ignore</code>).
+      </li>
+      <li>
         Renders a <code>div</code>: nothing of its own to see, so overlaid here.
       </li>
     </ul>

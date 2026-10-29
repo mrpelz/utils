@@ -74,7 +74,15 @@ export const contextualMenuTriggerRows: readonly PropRow[] = [
     <>
       What opens the menu: a press (on touch, as the finger goes down; drag on
       to an item to choose it), or a secondary click (a right click, a touch
-      held), a click then being the trigger’s own (e.g. opening the photo).
+      held), a click then being the trigger’s own (e.g. opening the photo). On
+      touch, a held press also selects the trigger’s text (and shows the
+      browser’s text menu): unless it should stay selectable, turn that off on
+      the trigger (
+      <PartLink
+        component="viewport"
+        part="useTextActionsPrevention"
+      />
+      ), as the demos do.
     </>,
   ],
   ...menuTriggerRows.filter(([name]) => name !== 'openOn' && name !== 'handle'),
@@ -97,7 +105,7 @@ export const contextualMenuPortalRows: readonly PropRow[] = [
     <>
       <code>document.body</code>
     </>,
-    'A parent element to render the portal element into; also the screen the trigger lifts within (else the viewport).',
+    'A parent element to render the portal element into; also the screen the menu fits in (else the viewport).',
   ],
   [
     'keepMounted',
@@ -118,13 +126,7 @@ export const contextualMenuPositionerRows: readonly PropRow[] = [
     'align',
     union('start', 'center', 'end'),
     code(union('center')),
-    'How to align the menu with the trigger (or preview), which aligns with it; shifted to stay in the viewport.',
-  ],
-  [
-    'sideOffset',
-    'number | ((data) => number)',
-    code('8'),
-    'Distance between the lifted trigger (or preview) and the menu in pixels.',
+    'How to align the menu with the trigger, the preview (or the lifted trigger) aligning with it; shifted to stay in its screen.',
   ],
   [
     'collisionPadding',
@@ -133,7 +135,10 @@ export const contextualMenuPositionerRows: readonly PropRow[] = [
     'Additional space to maintain from the edge of the collision boundary.',
   ],
   ...anchorPositioningRows.filter(
-    ([name]) => name !== 'anchor' && name !== 'collisionAvoidance',
+    ([name]) =>
+      name !== 'anchor' &&
+      name !== 'collisionAvoidance' &&
+      name !== 'sideOffset',
   ),
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -151,8 +156,8 @@ export const contextualMenuPopupRows: readonly PropRow[] = menuPopupRows.map(
               component="menu"
               part="Menu.Item"
             />
-            s, groups, separators, quick actions); taller than the viewport with
-            the trigger, they scroll together.
+            s, groups, separators, quick actions); taller than the room below
+            the preview, they scroll.
           </>,
         ]
       : row,

@@ -68,7 +68,9 @@ export type ViewportProviderProps = {
   screen?: PortalContainer | null;
   /**
    * The scroll container tracked.
-   * @default the document's scrolling element
+   * @default the page filling its screen (the registered scroller there:
+   * a `Page.Root`, a sheet's content, the content layer), or the
+   * document's scrolling element
    */
   scroller?: RefObject<HTMLElement | null>;
 };
@@ -83,12 +85,31 @@ export type ViewportEdge =
  */
 export type ViewportSafeArea = 'all' | 'block' | 'inline' | 'none';
 
+/**
+ * A bar's scroll edge effect (iOS 26's), as content scrolls under it:
+ * `soft`, a blur fading out away from the edge; `hard`, a solid backing
+ * with a dividing line; `none`.
+ */
+export type ViewportEdgeEffect = 'hard' | 'none' | 'soft';
+
 export type ViewportAnchorProps = ComponentProps<'div'> & {
   /**
    * The edge it floats at (e.g. `block-start`: a toolbar; `block-end`: a tab
    * bar).
    */
   edge: ViewportEdge;
+  /**
+   * At the block start or end: its scroll edge effect, as content scrolls
+   * under it (and under what's stuck to it, see `useViewportEdgeElement`).
+   * @default 'soft'
+   */
+  edgeEffect?: ViewportEdgeEffect;
+  /**
+   * At the block start or end: a color for its edge effect (e.g. to tell a
+   * state for a while), shown at rest too: `soft`, under its fade; `hard`,
+   * as its backing. Changes crossfade.
+   */
+  edgeTint?: string;
   /**
    * Its handle (see `Viewport.createAnchorHandle`), linking it to the
    * paddings given it (`anchor`, alone or among others): as high as it, or

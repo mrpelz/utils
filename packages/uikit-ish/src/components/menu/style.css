@@ -28,6 +28,15 @@
 
   .uikit-menu-positioner {
     z-index: 100;
+
+    /* Pressed only on its popup: a press beside it (in the positioner's
+       box, but not the popup's) is outside it (Base UI's: inside the
+       positioner), closing it. */
+    pointer-events: none;
+
+    & > * {
+      pointer-events: auto;
+    }
   }
 
   .uikit-menu-checkbox-item-indicator {
@@ -317,7 +326,10 @@
       --uikit-menu-toggle-space: 28px;
     }
 
-    /* While a compact submenu covers it, all but its trigger fade (iOS). */
+    /* While a compact submenu covers it, all but its trigger fade (iOS),
+       neither hovered (highlighting one would close the submenu) nor
+       pressed: a press there, on the popup, closes the submenu alone (see
+       useSubmenuOutsidePress). */
     & > *,
     & > [role='group'] > * {
       transition: opacity 200ms;
@@ -330,6 +342,7 @@
       > [role='group']
       > :not([data-popup-open]) {
       opacity: 0.2;
+      pointer-events: none;
     }
   }
 

@@ -228,12 +228,13 @@ export const ContextualMenuOverview: FunctionComponent = () => (
           component="contextual-menu"
           part="ContextualMenu.Preview"
         />
-        ) lifts as far as the menu needs to fit below it; closing, it settles
-        back.
+        ) and the menu are one popup, from the trigger’s place: shifted as far
+        as they need to fit in the screen (as menus grow); closing, the trigger
+        settles back.
       </li>
       <li>
-        Too tall for the viewport together, the preview and the menu scroll
-        together, opened with the menu in view.
+        Too tall for the screen together, the menu scrolls; the preview takes at
+        most the room the menu leaves (or half of it).
       </li>
     </ul>
   </>

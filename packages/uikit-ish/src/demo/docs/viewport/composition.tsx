@@ -163,6 +163,33 @@ const toolbarCode = `const [selected, setSelected] = useState<string[]>([]);
   </Toolbar.Root>
 </Viewport.BlockEnd>`;
 
+const tintCode = `const [isRecording, setIsRecording] = useState(false);
+
+<Viewport.Content>
+  <Viewport.Padding edge="block-start" />
+  <List.Root>…</List.Root>
+  <Viewport.Padding edge="block-end" />
+</Viewport.Content>
+{/* Recording: the bottom edge tinted red (at rest too). */}
+<Viewport.BlockEnd
+  edgeTint={isRecording ? 'rgb(255 59 48 / 35%)' : undefined}
+>
+  <Toolbar.Root>
+    <Toolbar.Leading />
+    <Toolbar.Title>
+      <span>{isRecording ? 'Recording…' : '12 Recordings'}</span>
+    </Toolbar.Title>
+    <Toolbar.Trailing>
+      <Toolbar.Button
+        destructive={isRecording}
+        onClick={() => setIsRecording((current) => !current)}
+      >
+        <Button.Label>{isRecording ? 'Stop' : 'Record'}</Button.Label>
+      </Toolbar.Button>
+    </Toolbar.Trailing>
+  </Toolbar.Root>
+</Viewport.BlockEnd>`;
+
 const refreshCode = `const contentRef = useRef<HTMLDivElement>(null);
 
 // Tracking the content layer's scrolling, not the document's.
@@ -938,12 +965,74 @@ const Selection: FunctionComponent = () => {
   );
 };
 
+/** Recording: the bottom edge tinted while it goes on (see `edgeTint`). */
+const Tint: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [isRecording, setIsRecording] = useState(false);
+
+  return (
+    <Component
+      isInline
+      id="viewport-composition-tint"
+      log={log}
+      stage="phone"
+      title="Viewport with a tinted edge"
+    >
+      <>
+        <Viewport.Content>
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {names.map((name) => (
+                  <List.Item key={name}>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+          <Viewport.Padding edge="block-end" />
+        </Viewport.Content>
+        <Viewport.BlockEnd
+          edgeTint={isRecording ? 'rgb(255 59 48 / 35%)' : undefined}
+        >
+          <Toolbar.Root>
+            <Toolbar.Leading />
+            <Toolbar.Title>
+              <span>
+                {isRecording
+                  ? 'Recording…'
+                  : `${String(names.length)} Recordings`}
+              </span>
+            </Toolbar.Title>
+            <Toolbar.Trailing>
+              <Toolbar.Button
+                destructive={isRecording}
+                onClick={() => {
+                  addLog(isRecording ? 'stop' : 'record');
+                  setIsRecording((current) => !current);
+                }}
+              >
+                <Button.Label>{isRecording ? 'Stop' : 'Record'}</Button.Label>
+              </Toolbar.Button>
+            </Toolbar.Trailing>
+          </Toolbar.Root>
+        </Viewport.BlockEnd>
+      </>
+    </Component>
+  );
+};
+
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['an-app-shell-with-a-tab-bar', 'An app shell with a tab bar'],
   ['a-message-field-over-the-keyboard', 'A message field over the keyboard'],
   ['a-bar-collapsing-on-scroll', 'A bar collapsing on scroll'],
   ['a-bottom-toolbar-over-a-list', 'A bottom toolbar over a list'],
+  ['a-tinted-edge', 'A tinted edge'],
   ['pulling-to-refresh', 'Pulling to refresh'],
   ['pulling-to-turn-pages', 'Pulling to turn pages'],
 ];
@@ -1139,6 +1228,46 @@ export const ViewportComposition: FunctionComponent = () => (
     <Selection />
 
     <Heading
+      id="a-tinted-edge"
+      level={2}
+    >
+      A tinted edge
+    </Heading>
+    <ul>
+      <li>
+        A state told at the screen’s edge for a while (here: recording): the
+        bottom bar’s edge effect tinted red, shown at rest too, crossfading as
+        it comes and goes.
+      </li>
+      <li>
+        Not the only sign of it (color alone isn’t seen by everyone): the bar’s
+        title says so, and its button changes.
+      </li>
+      <li>
+        Scrolled, the rows blur beneath the bar as at any edge (its{' '}
+        <code>edgeEffect</code>, <code>soft</code> by default).
+      </li>
+      <li>
+        <strong>Library:</strong> the bottom anchor’s <code>edgeTint</code> (
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />
+        ), drawn by the content layer beneath it (
+        <PartLink
+          component="viewport"
+          part="Viewport.Content"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the recording state, its tint, title and button.
+      </li>
+    </ul>
+    <CodeView code={tintCode} />
+    <Tint />
+
+    <Heading
       id="pulling-to-refresh"
       level={2}
     >
@@ -1184,7 +1313,8 @@ export const ViewportComposition: FunctionComponent = () => (
       <li>
         Safari bounces past the top by itself; elsewhere, the pull is the
         touch’s (or the wheel’s), rubber-banded, the content moved along as
-        Safari’s.
+        Safari’s (only while an overscroll area is shown: without one, the
+        browser’s own scrolling is left as it is).
       </li>
       <li>
         The indicator comes in from the screen’s edge, showing behind the status
@@ -1287,6 +1417,7 @@ export const viewportCompositionDemos = [
   Message,
   Collapse,
   Selection,
+  Tint,
   Refresh,
   Pages,
 ];

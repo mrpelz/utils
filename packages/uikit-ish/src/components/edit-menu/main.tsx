@@ -14,19 +14,24 @@ import {
 } from 'react';
 
 import {
+  createOpenSubmenus,
   dragOverItems,
   Menu,
   MenuContext,
+  OpenSubmenusContext,
   useCloseOutOfView,
   useKeepOpenInSubmenus,
   useRootActions,
+  useSubmenuOutsidePress,
   useSubmenuToggle,
 } from '../menu/main.js';
 import {
   cn,
   MovingHighlight,
   positionerSide,
+  useCollision,
   useForwardedRef,
+  useGrowAvoidance,
 } from '../utils/main.js';
 import type {
   EditMenuPositionerProps,
@@ -81,47 +86,68 @@ const Root = <Payload,>({
   ...props
 }: EditMenuRootProps<Payload>): ReactNode => {
   const actionsRef = useRootActions(props.actionsRef);
-  const onRootOpenChange = useKeepOpenInSubmenus(onOpenChange);
+  // A press outside its submenus closes them one by one (see Menu's
+  // `OpenSubmenus`), the innermost first.
+  const [submenus] = useState(() => createOpenSubmenus(true));
+  useSubmenuOutsidePress(submenus);
+  const onRootOpenChange = useKeepOpenInSubmenus(onOpenChange, submenus);
 
   return (
     // (Its menus' size, see `Menu.SubmenuRoot`.)
     <MenuContext.Provider value={{ actionsRef, orientation, size }}>
-      <BaseMenu.Root
-        modal={false}
-        orientation={orientation}
-        {...props}
-        actionsRef={actionsRef}
-        onOpenChange={onRootOpenChange}
-      >
-        <BaseMenu.Trigger
-          aria-hidden="true"
-          nativeButton={false}
-          tabIndex={-1}
-          render={
-            // Base UI positions a menu only for a trigger element; an edit menu
-            // opens at its anchor (e.g. a selection) instead, and pressing its
-            // content (e.g. to select text) must not open it. It's an inert,
-            // hidden element.
-            <span className="uikit-edit-menu-hidden-trigger" />
-          }
-        />
-        {children as ReactNode}
-      </BaseMenu.Root>
+      <OpenSubmenusContext.Provider value={submenus}>
+        <BaseMenu.Root
+          modal={false}
+          orientation={orientation}
+          {...props}
+          actionsRef={actionsRef}
+          onOpenChange={onRootOpenChange}
+        >
+          <BaseMenu.Trigger
+            aria-hidden="true"
+            nativeButton={false}
+            tabIndex={-1}
+            render={
+              // Base UI positions a menu only for a trigger element; an edit menu
+              // opens at its anchor (e.g. a selection) instead, and pressing its
+              // content (e.g. to select text) must not open it. It's an inert,
+              // hidden element.
+              <span className="uikit-edit-menu-hidden-trigger" />
+            }
+          />
+          {children as ReactNode}
+        </BaseMenu.Root>
+      </OpenSubmenusContext.Provider>
     </MenuContext.Provider>
   );
 };
 
 const Positioner = forwardRef<HTMLDivElement, EditMenuPositionerProps>(
-  ({ className, side = 'block-start', ...props }, forwardedRef) => {
+  (
+    {
+      className,
+      collisionBoundary,
+      collisionPadding,
+      side = 'block-start',
+      ...props
+    },
+    forwardedRef,
+  ) => {
     const ref = useForwardedRef(forwardedRef);
     useCloseOutOfView(ref);
+    // Within its container (e.g. the views' frames), clear of its safe area;
+    // growing rather than scrolling (unless its own is given).
+    const collision = useCollision({ collisionBoundary, collisionPadding });
+    const [grow, growRef] = useGrowAvoidance({}, ref);
 
     return (
       // Positions the capsule above its anchor (e.g. a text selection). */
       // Above the page's own stacking (e.g. list rows' and segmented items'
       // z-indexes, bars at 10), which would otherwise show through it.
       <BaseMenu.Positioner
-        ref={ref}
+        ref={growRef}
+        {...collision}
+        collisionAvoidance={grow}
         {...props}
         className={cn('uikit-edit-menu-positioner', className)}
         data-edit-menu-part="positioner"
@@ -378,34 +404,49 @@ const Item = forwardRef<
 const More = forwardRef<
   HTMLElement,
   Omit<BaseMenu.SubmenuTrigger.Props, 'ref'>
->(({ className, children, onClick, onPointerDown, ...props }, ref) => (
-  // Figma “Menu” (iOS 26's metrics): a 34px circle with the selection and a
-  // chevron (􀆊, 14px, 590). Pressed again, it closes its menu.
-  <BaseMenu.SubmenuTrigger
-    ref={ref}
-    aria-label="More"
-    {...useSubmenuToggle({ onClick, onPointerDown })}
-    {...props}
-    className={cn('uikit-edit-menu-more uikit-menu-toggle-cursor', className)}
-    data-edit-menu-part="more"
-  >
-    {(children as ReactNode) ?? (
-      <svg
-        aria-hidden="true"
-        fill="none"
-        height="14"
-        stroke="currentcolor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2.2"
-        viewBox="0 0 10 16"
-        width="9"
-      >
-        <path d="M2.5 2.5L8 8l-5.5 5.5" />
-      </svg>
-    )}
-  </BaseMenu.SubmenuTrigger>
-));
+>(
+  (
+    {
+      className,
+      children,
+      onClick,
+      onPointerDown,
+      onPointerEnter,
+      openOnHover = false,
+      ...props
+    },
+    ref,
+  ) => (
+    // Figma “Menu” (iOS 26's metrics): a 34px circle with the selection and a
+    // chevron (􀆊, 14px, 590). Pressed again, it closes its menu.
+    <BaseMenu.SubmenuTrigger
+      aria-label="More"
+      {...useSubmenuToggle({ onClick, onPointerDown, onPointerEnter, ref })}
+      {...props}
+      className={cn('uikit-edit-menu-more uikit-menu-toggle-cursor', className)}
+      data-edit-menu-part="more"
+      // Pressed, not hovered, by default (as a button: a pointer passing
+      // over the capsule doesn't open its menu).
+      openOnHover={openOnHover}
+    >
+      {(children as ReactNode) ?? (
+        <svg
+          aria-hidden="true"
+          fill="none"
+          height="14"
+          stroke="currentcolor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2.2"
+          viewBox="0 0 10 16"
+          width="9"
+        >
+          <path d="M2.5 2.5L8 8l-5.5 5.5" />
+        </svg>
+      )}
+    </BaseMenu.SubmenuTrigger>
+  ),
+);
 
 /** A text selection as a positioner's anchor (see `useSelectionAnchor`). */
 export type SelectionAnchor = { getBoundingClientRect: () => DOMRect };

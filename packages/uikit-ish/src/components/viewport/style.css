@@ -175,6 +175,127 @@
     }
   }
 
+  /* A scroller's edge effect (see EdgeEffects), fixed at its edge as its
+     bars are (beneath them, a layer of its own: Safari's overlap testing,
+     see above), as tall as the tallest (`--uikit-viewport-edge-size`, its
+     safe area too) and what's stuck to them (`--uikit-viewport-edge-extent`).
+     Showing as content scrolls under the bars
+     (`--uikit-viewport-edge-progress`, measured). */
+  .uikit-viewport-edge-effect {
+    --uikit-viewport-edge-reach: calc(
+      var(--uikit-viewport-edge-size) + var(--uikit-viewport-edge-extent, 0px)
+    );
+
+    position: fixed;
+    z-index: 9;
+    height: var(--uikit-viewport-edge-reach);
+    inset-inline: 0;
+    pointer-events: none;
+    transform: translateZ(0);
+
+    &[data-edge='block-start'] {
+      top: var(--uikit-viewport-top, 0);
+    }
+
+    &[data-edge='block-end'] {
+      bottom: 0;
+
+      &[data-keyboard='push'] {
+        bottom: var(--uikit-viewport-keyboard-inset, 0);
+        transition: bottom var(--uikit-viewport-keyboard-transition, 250ms);
+      }
+    }
+
+    &::before,
+    &::after {
+      position: absolute;
+      content: '';
+      inset: 0;
+    }
+
+    &::before {
+      opacity: var(--uikit-viewport-edge-progress, 0);
+    }
+
+    /* Soft: a blur fading out away from the edge (16px further), the tint
+       under the same fade. */
+    &[data-edge-effect='soft'] {
+      height: calc(var(--uikit-viewport-edge-reach) + 16px);
+
+      &::before {
+        backdrop-filter: blur(8px);
+      }
+
+      &::after {
+        background-color: var(--uikit-viewport-edge-tint, transparent);
+        transition: background-color 300ms;
+      }
+
+      /* (Masked each, not the layer: masked, it would be the blur's
+         backdrop root, the blur seeing nothing behind it.) */
+      &[data-edge='block-start']::before,
+      &[data-edge='block-start']::after {
+        mask-image: linear-gradient(#000 50%, transparent);
+      }
+
+      &[data-edge='block-end']::before,
+      &[data-edge='block-end']::after {
+        mask-image: linear-gradient(transparent, #000 50%);
+      }
+    }
+
+    /* Hard: a solid backing (the tint, or the background), a line at its
+       inner side; tinted, at rest too. */
+    &[data-edge-effect='hard'] {
+      &::before {
+        background-color: var(
+          --uikit-viewport-edge-tint,
+          var(--color-ios-system-background)
+        );
+        transition: background-color 300ms;
+      }
+
+      &[data-edge-tinted]::before {
+        opacity: 1;
+      }
+
+      &::after {
+        content: none;
+      }
+
+      &[data-edge='block-start']::before {
+        border-bottom: 1px solid var(--color-ios-separator);
+      }
+
+      &[data-edge='block-end']::before {
+        border-top: 1px solid var(--color-ios-separator);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      &::before,
+      &::after {
+        transition: none;
+      }
+    }
+  }
+
+  /* The bars' inner side (see EdgeEffects: what's stuck to them, measured
+     from it). */
+  .uikit-viewport-edge-line {
+    position: absolute;
+    height: 0;
+    inset-inline: 0;
+
+    [data-edge='block-start'] > & {
+      top: var(--uikit-viewport-edge-size);
+    }
+
+    [data-edge='block-end'] > & {
+      bottom: var(--uikit-viewport-edge-size);
+    }
+  }
+
   /* What shows past an end of the scroll container (see `Overscroll`): a
      layer beneath the content layer (before it), clipped from its edge's
      bars (`--uikit-viewport-overscroll-inset`, inside the safe area) to the
@@ -259,7 +380,8 @@
   /* The content layer: filling the visual viewport; with the keyboard
      (`data-keyboard='resize'`), down to its top. Pulled past an end where
      it doesn't bounce by itself (the tracked scroll container: see
-     `Provider`), moved along (`--uikit-viewport-bounce`, set only then: at
+     `Provider`), moved along while an overscroll area is shown
+     (`--uikit-viewport-bounce`, set only then: at
      rest, none, not a containing block), as Safari's; its own only. */
   .uikit-viewport-content {
     top: 0;

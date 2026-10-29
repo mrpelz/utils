@@ -52,10 +52,14 @@
   /* A raw demo is an app (see frame/component.tsx): its document never
      scrolls (its content does, in its layers), nor bounces: on iOS, a drag
      reaching it (e.g. on a bar) would move the whole app, fixed layers
-     too. As the library's apps should (see Viewport's docs). */
-  :root[data-demo-raw],
-  :root[data-demo-raw] body {
-    overscroll-behavior: none;
+     too. iOS only (the touch callout): elsewhere, e.g. Chrome on macOS, it
+     ends a trackpad's inertia in the layers' scrollers too. As the
+     library's apps should (see Viewport's docs). */
+  @supports (-webkit-touch-callout: none) {
+    :root[data-demo-raw],
+    :root[data-demo-raw] body {
+      overscroll-behavior: none;
+    }
   }
 
   /*

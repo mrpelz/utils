@@ -284,8 +284,11 @@ export const MenuOverview: FunctionComponent = () => (
         ).
       </li>
       <li>
-        With toggles, every item keeps a column for the checkmark; a popup
-        taller than the room for it scrolls.
+        With toggles, every item keeps a column for the checkmark. A popup
+        taller than the room beside its trigger grows over it (flipped if it
+        fits on the other side, else shifted); only taller than the screen, it
+        scrolls. A compact submenu without room below its trigger covers it; a
+        press outside it closes it alone.
       </li>
       <li>It closes once its trigger scrolls out of view.</li>
     </ul>

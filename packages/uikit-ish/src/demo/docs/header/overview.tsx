@@ -275,8 +275,12 @@ export const HeaderOverview: FunctionComponent = () => (
       <li>Without a large title, the bar’s title shows at once.</li>
       <li>
         Content scrolled under the bar blurs beneath it (iOS 26’s scroll edge
-        effect, approximated: a backdrop blur fading out downwards), once
-        scrolled 16px; under a floating column too.
+        effect, approximated: the bar’s anchor’s, see{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Anchor"
+        />
+        ), once scrolled 16px; under its accessory too, as it’s stuck.
       </li>
       <li>Pulled down, the large title doesn’t grow (iOS: it scales up).</li>
       <li>

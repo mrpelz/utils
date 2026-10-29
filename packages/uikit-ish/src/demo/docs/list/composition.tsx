@@ -592,7 +592,7 @@ const inboxCode = `const archive = () => {…};
   <List.Section>
     <List.Group>
       <List.Item>
-        <List.Span>
+        <List.Leading>
           {/* Unread: a dot in the image's place. */}
           <List.Image
             aria-label="Unread"
@@ -601,12 +601,22 @@ const inboxCode = `const archive = () => {…};
           >
             <Symbol icon={sfCircleFill} />
           </List.Image>
+        </List.Leading>
+        <List.Content>
           <List.Title render={<button type="button" />} onClick={…}>Kate Bell</List.Title>
-          <List.Detail>09:41</List.Detail>
-          <List.DrillIn />
           <List.Subtitle>Weekend photos</List.Subtitle>
+        </List.Content>
+        <List.Trailing>
+          <List.Detail>09:41</List.Detail>
+        </List.Trailing>
+        <List.Trailing>
+          <List.DrillIn />
+        </List.Trailing>
+        {/* The preview, across the row (under the date too). */}
+        <List.Below>
           <List.Text>Hi! The photos from the weekend …</List.Text>
-          <List.SwipeActions side="inline-start" overswipe>
+        </List.Below>
+        <List.SwipeActions side="inline-start" overswipe>
             <List.SwipeAction showLabel label="Read" tint="var(--color-ios-system-blue)" onClick={…}>
               <Symbol icon={sfEnvelopeOpenFill} />
             </List.SwipeAction>
@@ -1803,7 +1813,6 @@ const Inbox: FunctionComponent = () => {
                       {from}
                     </List.Title>
                     <List.Subtitle>{subject}</List.Subtitle>
-                    <List.Text>{preview}</List.Text>
                   </List.Content>
                   <List.Trailing>
                     <List.Detail>{date}</List.Detail>
@@ -1811,6 +1820,9 @@ const Inbox: FunctionComponent = () => {
                   <List.Trailing>
                     <List.DrillIn />
                   </List.Trailing>
+                  <List.Below>
+                    <List.Text>{preview}</List.Text>
+                  </List.Below>
                   <List.SwipeActions
                     overswipe
                     side="inline-start"
@@ -2597,7 +2609,12 @@ export const ListComposition: FunctionComponent = () => (
           component="list"
           part="List.Text"
         />{' '}
-        preview below the subject.
+        preview below the subject, across the row (in a{' '}
+        <PartLink
+          component="list"
+          part="List.Below"
+        />
+        : from the sender’s name to the row’s end, under the date too).
       </li>
       <li>An unread dot in the image’s place.</li>
       <li>Swipe actions on both sides, labels shown.</li>
@@ -2615,9 +2632,14 @@ export const ListComposition: FunctionComponent = () => (
         <PartLink
           component="list"
           part="List.Text"
-        />
-        ), swipe actions on both sides and overswiping (<code>onOverswipe</code>
-        ).
+        />{' '}
+        in a{' '}
+        <PartLink
+          component="list"
+          part="List.Below"
+        />{' '}
+        aligned with the content), swipe actions on both sides and overswiping (
+        <code>onOverswipe</code>).
       </li>
       <li>
         <strong>Demo:</strong> the messages, their read and archived state, and

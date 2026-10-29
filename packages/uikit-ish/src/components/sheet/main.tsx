@@ -2,10 +2,15 @@ import '../glass/style.css';
 import './style.css';
 
 import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
-import { ComponentProps, forwardRef, useState } from 'react';
+import { ComponentProps, forwardRef, ReactNode, useState } from 'react';
 
-import { cn, usePortalContainer } from '../utils/main.js';
-import { useSizeClass, ViewportScopeContext } from '../viewport/main.js';
+import { cn, useForwardedRef, usePortalContainer } from '../utils/main.js';
+import {
+  EdgeEffects,
+  useScrollerRegistration,
+  useSizeClass,
+  ViewportScopeContext,
+} from '../viewport/main.js';
 import type {
   SheetContentProps,
   SheetGrabberProps,
@@ -138,17 +143,27 @@ const Grabber = forwardRef<HTMLDivElement, SheetGrabberProps>(
 
 /**
  * Its content, scrolling (Base UI's `Drawer.Content`: its text selectable by
- * a mouse without swiping the sheet).
+ * a mouse without swiping the sheet); a scroller (registered), drawing its
+ * bars' edge effects (see `Viewport`).
  */
 const Content = forwardRef<HTMLDivElement, SheetContentProps>(
-  ({ className, ...props }, ref) => (
-    <BaseDrawer.Content
-      ref={ref}
-      className={cn('uikit-sheet-content', className)}
-      data-sheet-part="content"
-      {...props}
-    />
-  ),
+  ({ children, className, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    useScrollerRegistration(ref);
+
+    return (
+      <BaseDrawer.Content
+        ref={ref}
+        className={cn('uikit-sheet-content', className)}
+        data-sheet-part="content"
+        data-viewport-scroller=""
+        {...props}
+      >
+        {children as ReactNode}
+        <EdgeEffects scroller={ref} />
+      </BaseDrawer.Content>
+    );
+  },
 );
 
 /**

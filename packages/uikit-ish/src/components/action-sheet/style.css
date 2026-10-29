@@ -4,6 +4,15 @@
     /* An overlay: above the page's layers (e.g. Viewport's bars), overlays
        among themselves in the order they open (see Menu). */
     z-index: 100;
+
+    /* Pressed only on its popup: a press beside it (in the positioner's
+       box, but not the popup's) is outside it (Base UI's: inside the
+       positioner), closing it. */
+    pointer-events: none;
+
+    & > * {
+      pointer-events: auto;
+    }
   }
 
   /* Its panel: within the room for it (not its positioner's width), its

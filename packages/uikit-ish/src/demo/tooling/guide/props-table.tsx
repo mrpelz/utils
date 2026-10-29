@@ -126,7 +126,11 @@ export const anchorPositioningRows: readonly PropRow[] = [
       <code>side</code> (<code>flip</code>, <code>shift</code>,{' '}
       <code>none</code>) on the side’s axis, <code>align</code> (the same) on
       the alignment axis, <code>fallbackAxisSide</code> (<code>start</code>,{' '}
-      <code>end</code>, <code>none</code>) to the perpendicular axis.
+      <code>end</code>, <code>none</code>) to the perpendicular axis. Unset,
+      menus, popovers, action sheets and edit menus grow rather than scroll:
+      flipped to the other side if they fit there, else shifted over their
+      trigger as far as they need (<code>side: shift</code>), scrolling only
+      taller than the screen. Given, it’s used as is.
     </>,
   ],
   [

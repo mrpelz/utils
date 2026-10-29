@@ -31,8 +31,8 @@ import {
 
 /**
  * A contextual menu (UIKit `UIContextMenuInteraction`): opening, the
- * trigger lifts (as far as the menu needs to fit below it), turning into a
- * preview of the photo the menu acts on.
+ * trigger turns into a preview of the photo the menu acts on, the menu
+ * below it (shifted as far as they need to fit).
  */
 export const ContextualMenuDemo: FunctionComponent = () => {
   const id = 'contextual-menu';

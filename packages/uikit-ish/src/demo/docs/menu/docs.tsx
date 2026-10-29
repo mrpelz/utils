@@ -267,7 +267,15 @@ export const menuTriggerRows: readonly PropRow[] = [
       What opens the menu: a click, or a secondary click (a right click; a touch
       held, then dragged on to the items), a click then being the trigger’s own
       (UIKit <code>UIButton.menu</code> without{' '}
-      <code>showsMenuAsPrimaryAction</code>, e.g. a back button’s history).
+      <code>showsMenuAsPrimaryAction</code>, e.g. a back button’s history). On
+      touch, a held press also selects the trigger’s text (and shows the
+      browser’s text menu): unless it should stay selectable, turn that off on
+      the trigger (
+      <PartLink
+        component="viewport"
+        part="useTextActionsPrevention"
+      />
+      ), as the demos do.
     </>,
   ],
   [
@@ -433,7 +441,7 @@ export const menuPopupRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'Its items, groups, separators, quick actions; taller than the room for it, it scrolls.',
+    'Its items, groups, separators, quick actions; taller than the room beside its trigger, it grows over it (see the positioner’s collisionAvoidance), scrolling only taller than the screen.',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -616,7 +624,9 @@ export const menuSubmenuTriggerRows: readonly PropRow[] = [
   [
     'openOnHover',
     'boolean',
-    code('true'),
+    <>
+      <code>false</code> (compact), <code>true</code> (regular)
+    </>,
     'Whether the submenu should also open when the trigger is hovered.',
   ],
   [

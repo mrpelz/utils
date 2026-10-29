@@ -226,9 +226,21 @@ export const editMenuMoreRows: readonly PropRow[] = [
     'What the 34px circle shows (Figma: 􀆊, drawn as a stroke).',
   ],
   ['aria-label', 'string', code('More'), 'Its name (it has no text).'],
-  ...menuSubmenuTriggerRows.filter(
-    ([name]) => !['destructive', 'cursor', 'label', 'children'].includes(name),
-  ),
+  ...menuSubmenuTriggerRows
+    .filter(
+      ([name]) =>
+        !['destructive', 'cursor', 'label', 'children'].includes(name),
+    )
+    .map((row): PropRow =>
+      row[0] === 'openOnHover'
+        ? [
+            row[0],
+            row[1],
+            code('false'),
+            'Whether the submenu should also open when the button is hovered (not by default: a button, pressed).',
+          ]
+        : row,
+    ),
 ];
 
 /** `useSelectionAnchor(container)`: its argument. */

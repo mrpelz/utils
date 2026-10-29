@@ -19,6 +19,7 @@ import {
   cn,
   useCollision,
   useForwardedRef,
+  useGrowAvoidance,
   useInitialFocus,
   usePortalContainer,
 } from '../utils/main.js';
@@ -120,8 +121,10 @@ const Popup = forwardRef<HTMLDivElement, ActionSheetPopupProps>(
     const popupRef = useForwardedRef(ref);
     const focus = useInitialFocus(popupRef);
     const bottom = useMemo(() => bottomAnchor(container), [container]);
-    // Within its container (e.g. the views' frames), clear of its safe area.
+    // Within its container (e.g. the views' frames), clear of its safe area;
+    // growing rather than scrolling (see `useGrowAvoidance`).
     const collision = useCollision({});
+    const [grow, growRef] = useGrowAvoidance();
 
     return (
       <BasePopover.Portal
@@ -133,9 +136,11 @@ const Popup = forwardRef<HTMLDivElement, ActionSheetPopupProps>(
           data-action-sheet-part="backdrop"
         />
         <BasePopover.Positioner
+          ref={growRef}
           anchor={trigger ? undefined : bottom}
           className="uikit-action-sheet-positioner"
           {...collision}
+          collisionAvoidance={grow}
           side={trigger ? 'bottom' : 'top'}
           sideOffset={8}
         >

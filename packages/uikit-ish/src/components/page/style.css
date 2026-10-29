@@ -15,9 +15,6 @@
     padding-block: var(--uikit-page-safe-top) var(--uikit-page-safe-bottom);
     padding-inline-start: var(--uikit-layout-inset-start, 0);
 
-    /* Its scrolling, for its header's bar (see Header). */
-    scroll-timeline: --uikit-page-scroll block;
-
     /* The safe area: its content below the top inset, its end scrolling
        clear of the bottom inset (the bars anchored over it: room made by
        `Viewport.Padding`s in its content). None left for its content. */

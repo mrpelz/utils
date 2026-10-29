@@ -3498,7 +3498,12 @@ export const ListParts: FunctionComponent = () => (
     <ul>
       <li>
         A line under a row’s line, across it (e.g. a field’s description and
-        error, a status); last in its row.
+        error, a status, a message’s preview); last in its row.
+      </li>
+      <li>
+        It starts where the row’s content does (after its leading parts, e.g. an
+        image; measured, also as edit mode moves it), and runs to the row’s end,
+        under its trailing parts too.
       </li>
       <li>
         Hidden (<code>hidden</code>), it collapses: growing and shrinking as

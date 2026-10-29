@@ -59,8 +59,13 @@
   }
 
   /* On a symbol (in a `Symbol`): in Framework7's size there, starting
-     before its end, above it (see main.tsx). */
+     before its end, above it (see main.tsx). Over the glyph by its order
+     (after it), not its own stacking context: z-index'd (a tab's symbol's),
+     Safari composited it apart, drawing it over the pressed tab bar's lens
+     and the tab dark under it. */
   .uikit-badge[data-badge='symbol'] {
+    z-index: auto;
+
     --uikit-badge-height: 16px;
     --uikit-badge-font-size: 10px;
     --uikit-badge-line-height: 12px;

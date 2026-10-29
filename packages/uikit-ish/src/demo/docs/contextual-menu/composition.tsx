@@ -2,16 +2,29 @@ import '../sheet/style.css';
 import './style.css';
 
 import { sfArrowshapeTurnUpLeft } from '@bradleyhodges/sfsymbols/sfArrowshapeTurnUpLeft';
+import { sfBackwardFill } from '@bradleyhodges/sfsymbols/sfBackwardFill';
+import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
 import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
+import { sfOpticaldisc } from '@bradleyhodges/sfsymbols/sfOpticaldisc';
+import { sfPauseFill } from '@bradleyhodges/sfsymbols/sfPauseFill';
+import { sfPersonCropCircle } from '@bradleyhodges/sfsymbols/sfPersonCropCircle';
 import { sfPhoto } from '@bradleyhodges/sfsymbols/sfPhoto';
+import { sfPlusCircle } from '@bradleyhodges/sfsymbols/sfPlusCircle';
 import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
+import { sfTextBadgePlus } from '@bradleyhodges/sfsymbols/sfTextBadgePlus';
 import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent } from 'react';
 
-import { ContextualMenu, Symbol, Viewport } from '../../../components/index.js';
+import {
+  ContextualMenu,
+  Symbol,
+  useTextActionsPrevention,
+  Viewport,
+} from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { useLabelledRef } from '../../tooling/frame/render-code.js';
 import {
   Contents,
   Heading,
@@ -41,13 +54,61 @@ const thumbnailsCode = `const photo = '/photos/beach.jpg';
   </ContextualMenu.Portal>
 </ContextualMenu.Root>`;
 
-const heldCode = `<ContextualMenu.Trigger
+const heldCode = `const message = useRef<HTMLButtonElement>(null);
+// A held press opens the menu, selecting no text (no browser text menu).
+useTextActionsPrevention(message);
+
+<ContextualMenu.Trigger
+  ref={message}
   openOn="secondaryClick"
   render={<button className="message" type="button" />}
   onClick={() => {…}}
 >
   …
 </ContextualMenu.Trigger>`;
+
+const liveCode = `const tile = useRef<HTMLButtonElement>(null);
+// A held press selects no text (no browser text menu).
+useTextActionsPrevention(tile);
+
+<ContextualMenu.Root>
+  {/* No preview: the trigger itself lifts, its bars moving on. */}
+  <ContextualMenu.Trigger
+    ref={tile}
+    render={<button className="playing" type="button" />}
+  >
+    <span aria-hidden className="bars">
+      <span />
+      <span />
+      <span />
+      <span />
+    </span>
+    <span>
+      <strong>Now Playing</strong>
+      <span>Clair de Lune</span>
+    </span>
+  </ContextualMenu.Trigger>
+  <ContextualMenu.Portal>
+    <ContextualMenu.Backdrop />
+    <ContextualMenu.Positioner>
+      <ContextualMenu.Popup>…</ContextualMenu.Popup>
+    </ContextualMenu.Positioner>
+  </ContextualMenu.Portal>
+</ContextualMenu.Root>
+
+/* Each bar rising and falling, on its own beat. */
+.bars > span {
+  animation: bar 900ms ease-in-out infinite alternate;
+}
+
+.bars > span:nth-child(2) { animation-delay: -300ms; }
+.bars > span:nth-child(3) { animation-delay: -600ms; }
+.bars > span:nth-child(4) { animation-delay: -150ms; }
+
+@keyframes bar {
+  from { scale: 1 0.2; }
+  to { scale: 1 1; }
+}`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 // Photos (their names, their colors).
@@ -137,6 +198,11 @@ const Thumbnails: FunctionComponent = () => {
 /** A message: a press opens it, a held press shows its menu. */
 const OnAHeldPress: FunctionComponent = () => {
   const [log, addLog] = useLog();
+  const message = useLabelledRef<HTMLButtonElement>(
+    'message',
+    'HTMLButtonElement',
+  );
+  useTextActionsPrevention(message);
 
   return (
     <Component
@@ -152,6 +218,7 @@ const OnAHeldPress: FunctionComponent = () => {
       <Viewport.Content>
         <ContextualMenu.Root>
           <ContextualMenu.Trigger
+            ref={message}
             className="contextual-menu-demo-message"
             openOn="secondaryClick"
             render={<button type="button" />}
@@ -188,10 +255,127 @@ const OnAHeldPress: FunctionComponent = () => {
   );
 };
 
+/** A playing song's tile, its bars moving: it lifts as itself. */
+const LiveTrigger: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const tile = useLabelledRef<HTMLButtonElement>('tile', 'HTMLButtonElement');
+  useTextActionsPrevention(tile);
+
+  return (
+    <Component
+      hasWallpaper
+      isInline
+      baseUiId="menu"
+      id="contextual-menu-composition-live"
+      log={log}
+      screen="centered"
+      stage="phone"
+      title="Contextual menu on a live trigger"
+    >
+      <Viewport.Content>
+        <ContextualMenu.Root>
+          <ContextualMenu.Trigger
+            ref={tile}
+            className="contextual-menu-demo-playing"
+            render={<button type="button" />}
+          >
+            <span
+              aria-hidden
+              className="contextual-menu-demo-bars"
+            >
+              <span />
+              <span />
+              <span />
+              <span />
+            </span>
+            <span>
+              <strong>Now Playing</strong>
+              <span>Clair de Lune</span>
+            </span>
+          </ContextualMenu.Trigger>
+          <ContextualMenu.Portal>
+            <ContextualMenu.Backdrop />
+            <ContextualMenu.Positioner>
+              <ContextualMenu.Popup>
+                <ContextualMenu.Item onClick={() => addLog('Previous clicked')}>
+                  <ContextualMenu.Icon>
+                    <Symbol icon={sfBackwardFill} />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label>Previous</ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Item onClick={() => addLog('Pause clicked')}>
+                  <ContextualMenu.Icon>
+                    <Symbol icon={sfPauseFill} />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label>Pause</ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Item onClick={() => addLog('Next clicked')}>
+                  <ContextualMenu.Icon>
+                    <Symbol icon={sfForwardFill} />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label>Next</ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Separator />
+                <ContextualMenu.Item
+                  onClick={() => addLog('Add to Library clicked')}
+                >
+                  <ContextualMenu.Icon>
+                    <Symbol icon={sfPlusCircle} />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label>Add to Library</ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Item onClick={() => addLog('Love clicked')}>
+                  <ContextualMenu.Icon>
+                    <Symbol icon={sfHeart} />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label>Love</ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Item
+                  onClick={() => addLog('Play Last clicked')}
+                >
+                  <ContextualMenu.Icon>
+                    <Symbol icon={sfTextBadgePlus} />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label>Play Last</ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Separator />
+                <ContextualMenu.Item
+                  onClick={() => addLog('Go to Album clicked')}
+                >
+                  <ContextualMenu.Icon>
+                    <Symbol icon={sfOpticaldisc} />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label>Go to Album</ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Item
+                  onClick={() => addLog('Go to Artist clicked')}
+                >
+                  <ContextualMenu.Icon>
+                    <Symbol icon={sfPersonCropCircle} />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label>Go to Artist</ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Separator />
+                <ContextualMenu.Item onClick={() => addLog('Share clicked')}>
+                  <ContextualMenu.Icon>
+                    <Symbol icon={sfSquareAndArrowUp} />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label>Share</ContextualMenu.Label>
+                </ContextualMenu.Item>
+              </ContextualMenu.Popup>
+            </ContextualMenu.Positioner>
+          </ContextualMenu.Portal>
+        </ContextualMenu.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['thumbnails-previewed', 'Thumbnails, previewed'],
   ['on-a-held-press', 'On a held press'],
+  ['a-live-trigger', 'A live trigger'],
 ];
 
 /** `/contextual-menu/composition`: contextual menus on content. */
@@ -275,8 +459,63 @@ export const ContextualMenuComposition: FunctionComponent = () => (
     </ul>
     <CodeView code={heldCode} />
     <OnAHeldPress />
+
+    <Heading
+      id="a-live-trigger"
+      level={2}
+    >
+      A live trigger
+    </Heading>
+    <ul>
+      <li>
+        A playing song’s tile, its bars moving: without a{' '}
+        <PartLink
+          component="contextual-menu"
+          part="ContextualMenu.Preview"
+        />
+        , the trigger itself lifts, the menu below it.
+      </li>
+      <li>
+        It’s moved, not copied or re-inserted: its bars move on, never starting
+        over (as a playing video, a running timer or a chart drawn in place
+        would).
+      </li>
+      <li>
+        Inside a <a href="viewport">Viewport</a>’s content layer (its own
+        stacking context), it shows through the blurred page all the same (the
+        backdrop cut out where it is).
+      </li>
+      <li>
+        <strong>Library:</strong> lifting the live trigger (
+        <PartLink
+          component="contextual-menu"
+          part="ContextualMenu.Trigger"
+        />
+        ) with the menu (
+        <PartLink
+          component="contextual-menu"
+          part="ContextualMenu.Positioner"
+        />
+        ), and the backdrop’s cutout (
+        <PartLink
+          component="contextual-menu"
+          part="ContextualMenu.Backdrop"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the tile, its bars’ animation and what each item
+        does (logged).
+      </li>
+    </ul>
+    <CodeView code={liveCode} />
+    <LiveTrigger />
   </>
 );
 
 /** Its live views, also on the component's page of demos (and `/all`). */
-export const contextualMenuCompositionDemos = [Thumbnails, OnAHeldPress];
+export const contextualMenuCompositionDemos = [
+  Thumbnails,
+  OnAHeldPress,
+  LiveTrigger,
+];

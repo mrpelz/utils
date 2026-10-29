@@ -129,7 +129,12 @@ export const PageOverview: FunctionComponent = () => (
           part="Viewport.Padding"
         />{' '}
         at its start; one at its end, above a bottom bar or the screen’s edge),
-        its scroll the bar’s edge effect’s and its large title’s timeline.
+        its scroll followed by the bar’s edge effect (a scroller, see{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Anchor"
+        />
+        ).
       </li>
       <li>
         Its content’s ends spaced by those paddings (the library’s content

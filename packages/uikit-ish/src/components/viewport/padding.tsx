@@ -4,6 +4,8 @@ import {
   RefObject,
   useContext,
   useLayoutEffect,
+  useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from 'react';
@@ -14,7 +16,12 @@ import {
   useForwardedRef,
   withStyle,
 } from '../utils/main.js';
-import type { ViewportEdge, ViewportPaddingProps } from './props.js';
+import type {
+  ViewportAnchorProps,
+  ViewportEdge,
+  ViewportEdgeEffect,
+  ViewportPaddingProps,
+} from './props.js';
 
 // Padding for the anchors (see `Padding`): the content layer (or a page in
 // it) scrolls under the anchors floating over it, so its content needs room
@@ -62,10 +69,25 @@ export const ViewportScopeContext = createContext<object | undefined>(
 
 type Entry = {
   edge: ViewportEdge;
+  /** An anchor's edge effect, and its tint (see `EdgeEffects`). */
+  effect?: ViewportEdgeEffect;
   handle: ViewportAnchorHandle | undefined;
+  keyboard?: ViewportAnchorProps['keyboard'];
   /** An anchor, or an open overscroll area (adding to them, see above). */
   kind: 'anchor' | 'overscroll';
+  /** Its border box's (the safe area it keeps clear too), for its effect. */
+  outer?: number;
   size: number;
+  tint?: string;
+};
+
+/** An edge's effect, from its anchors (see `useEdgeEffectOf`). */
+export type EdgeEffect = {
+  effect: Exclude<ViewportEdgeEffect, 'none'>;
+  keyboard: ViewportAnchorProps['keyboard'];
+  /** The tallest anchor's border box (px). */
+  size: number;
+  tint: string | undefined;
 };
 
 /** A scope's anchors, and who's told of their changes. */
@@ -111,6 +133,37 @@ const createStore = () => {
       }
       return size;
     },
+    /**
+     * An edge's effect (see `useEdgeEffectOf`), as a snapshot (a string,
+     * stable while unchanged): as tall as its tallest anchor having one;
+     * hard if any is, else soft; tinted by the first tinted one.
+     */
+    effect: (edge: ViewportEdge): string => {
+      let size = -1;
+      let effect: ViewportEdgeEffect = 'none';
+      let tint: string | undefined;
+      let keyboard: ViewportAnchorProps['keyboard'];
+      for (const entry of entries) {
+        const { effect: entryEffect = 'none' } = entry;
+        const hasEffect =
+          entry.kind === 'anchor' &&
+          entry.edge === edge &&
+          entryEffect !== 'none';
+        if (!hasEffect) continue;
+        if (entryEffect === 'hard' || effect === 'none') effect = entryEffect;
+        tint ??= entry.tint;
+        const outer = entry.outer ?? 0;
+        if (!(outer > size)) {
+          continue;
+        }
+
+        size = outer;
+        keyboard = entry.keyboard;
+      }
+      return effect === 'none'
+        ? ''
+        : JSON.stringify({ effect, keyboard, size, tint });
+    },
     subscribe: (listener: () => void) => {
       listeners.add(listener);
       return () => {
@@ -139,39 +192,93 @@ const useStore = (): Store => {
 };
 
 /**
- * An anchor's size (its content box's, along its edge's axis), registered
+ * An anchor's size (its content box's, along its edge's axis), and its
+ * edge effect (its style, tint, and how it meets the keyboard), registered
  * in its scope while it's mounted (see above).
  */
 export const useAnchorRegistration = (
   ref: RefObject<HTMLElement | null>,
   edge: ViewportEdge,
   handle: ViewportAnchorHandle | undefined,
+  { effect, keyboard, tint }: Pick<Entry, 'effect' | 'keyboard' | 'tint'> = {},
 ): void => {
   const store = useStore();
+  // Its entry while registered: its effect updated in place (not
+  // registered again, its size measured anew).
+  const entryRef = useRef<Entry | undefined>(undefined);
+
+  useLayoutEffect(() => {
+    const { current: entry } = entryRef;
+    if (!entry) return;
+    if (
+      entry.effect === effect &&
+      entry.keyboard === keyboard &&
+      entry.tint === tint
+    ) {
+      return;
+    }
+    Object.assign(entry, { effect, keyboard, tint });
+    store.notify();
+  }, [effect, keyboard, store, tint]);
 
   useLayoutEffect(() => {
     const { current: element } = ref;
     if (!element) return undefined;
     const isBlock = edge === 'block-start' || edge === 'block-end';
-    const entry: Entry = { edge, handle, kind: 'anchor', size: 0 };
+    const entry: Entry = {
+      edge,
+      effect,
+      handle,
+      keyboard,
+      kind: 'anchor',
+      size: 0,
+      tint,
+    };
+    entryRef.current = entry;
     const remove = store.add(entry);
 
     const observer = new ResizeObserver(([record]) => {
       const box = record?.contentBoxSize[0];
+      const border = record?.borderBoxSize[0];
       const size = Math.round(
         (isBlock ? box?.blockSize : box?.inlineSize) ?? 0,
       );
-      if (size === entry.size) return;
+      const outer = Math.round(
+        (isBlock ? border?.blockSize : border?.inlineSize) ?? 0,
+      );
+      if (size === entry.size && outer === entry.outer) return;
       entry.size = size;
+      entry.outer = outer;
       store.notify();
     });
     observer.observe(element);
 
     return () => {
       observer.disconnect();
+      entryRef.current = undefined;
       remove();
     };
+    // (Its effect updated in place, above.)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [edge, handle, ref, store]);
+};
+
+/**
+ * An edge's scroll edge effect in its scope, from its anchors (see
+ * `Store.effect`): none without one having it.
+ */
+export const useEdgeEffectOf = (edge: ViewportEdge): EdgeEffect | undefined => {
+  const store = useStore();
+  const snapshot = useSyncExternalStore(
+    store.subscribe,
+    () => store.effect(edge),
+    () => '',
+  );
+
+  return useMemo(
+    () => (snapshot ? (JSON.parse(snapshot) as EdgeEffect) : undefined),
+    [snapshot],
+  );
 };
 
 /**

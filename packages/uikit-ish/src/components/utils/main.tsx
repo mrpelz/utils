@@ -18,6 +18,7 @@ import {
   useImperativeHandle,
   useLayoutEffect,
   useRef,
+  useState,
 } from 'react';
 
 import type {
@@ -192,6 +193,70 @@ export const useCollision = (
       top: padding + inset('top'),
     },
   };
+};
+
+type CollisionAvoidance = BasePopover.Positioner.Props['collisionAvoidance'];
+
+/**
+ * A positioner's growing (Menu's, Popover's, ActionSheet's, EditMenu's):
+ * rather than scroll in the room on its side, its popup grows. On its
+ * side if it fits there, else on the other (Base UI's flip, by `base`);
+ * fitting on neither (its popup held at its room's height,
+ * `--available-height`), shifted instead (`side: 'shift'`, while that
+ * positioner is shown): in its collision boundary (see `useCollision`),
+ * over its anchor as far as it needs, as tall as the boundary lets it be
+ * (taller, it scrolls after all). Returns its collision avoidance and its
+ * ref (also setting `ref`, if given: e.g. the component's own).
+ */
+export const useGrowAvoidance = (
+  base: CollisionAvoidance = {},
+  ref?: { current: HTMLElement | null },
+): [CollisionAvoidance, (element: HTMLElement | null) => void] => {
+  const [positioner, setPositioner] = useState<HTMLElement | null>(null);
+  // The positioner shifted (another one, e.g. reopened: not yet).
+  const [shifted, setShifted] = useState<HTMLElement | null>(null);
+  const isShifted = shifted !== null && shifted === positioner;
+
+  const setRef = useCallback(
+    (element: HTMLElement | null) => {
+      if (ref) ref.current = element;
+      setPositioner(element);
+    },
+    [ref],
+  );
+
+  useLayoutEffect(() => {
+    if (isShifted || !positioner) return undefined;
+    const check = () => {
+      // (Measured, in px: not yet, Base UI's seed, `100vh`.)
+      const value = positioner.style.getPropertyValue('--available-height');
+      const room = value.endsWith('px') ? Number.parseFloat(value) : 0;
+      // Its popup: its tallest child (beside focus guards).
+      const popup = Math.max(
+        0,
+        ...[...positioner.children].map((child) =>
+          child instanceof HTMLElement ? child.offsetHeight : 0,
+        ),
+      );
+      if (room > 0 && popup >= room - 1) setShifted(positioner);
+    };
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(positioner);
+    return () => observer.disconnect();
+  }, [isShifted, positioner]);
+
+  // (Shifting on its side, its alignment shifts too, or stays.)
+  return [
+    isShifted
+      ? {
+          align: base.align === 'none' ? 'none' : 'shift',
+          fallbackAxisSide: base.fallbackAxisSide,
+          side: 'shift',
+        }
+      : base,
+    setRef,
+  ];
 };
 
 /** A frame at 60 Hz, in ms: what `edgeScrollDelta`'s speed is per. */

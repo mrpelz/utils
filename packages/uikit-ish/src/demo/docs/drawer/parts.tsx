@@ -940,6 +940,10 @@ export const DrawerParts: FunctionComponent = () => (
         not configurable).
       </li>
       <li>
+        A touch moving sideways first is the swipe: nothing scrolls until it
+        ends. Moving vertically first, it scrolls the page, as anywhere.
+      </li>
+      <li>
         Renders a <code>div</code> (Base UI’s <code>Drawer.SwipeArea</code>):
         nothing of its own to see, so overlaid here.
       </li>

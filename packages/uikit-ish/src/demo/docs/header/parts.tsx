@@ -356,8 +356,13 @@ export const HeaderParts: FunctionComponent = () => (
           part="Viewport.Padding"
         />{' '}
         at its start, as high as the bar), the bar’s title fades in as the large
-        title scrolls away, and what scrolls under the bar blurs beneath it
-        (scroll-driven, unique per header).
+        title scrolls away, and what scrolls under the bar blurs beneath it (the
+        bar’s anchor’s edge effect, see{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Anchor"
+        />
+        ).
       </li>
       <li>
         Around the page, or within it (e.g. a tab’s panel rendered as the page):
@@ -412,8 +417,13 @@ export const HeaderParts: FunctionComponent = () => (
         search bar with <code>hidesSearchBarWhenScrolling</code> false).
       </li>
       <li>
-        16px from the sides, 8px above the content; what scrolls under it
-        blurred, as under the bar.
+        16px from the sides, 8px above the content; stuck, the bar’s edge effect
+        reaches under it too (
+        <PartLink
+          component="viewport"
+          part="useViewportEdgeElement"
+        />
+        ), what scrolls under it blurred, as under the bar.
       </li>
       <li>
         It sticks below the bar, by its height (measured, also a taller one: a

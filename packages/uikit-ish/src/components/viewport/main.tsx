@@ -24,6 +24,13 @@ import {
   withStyle,
 } from '../utils/main.js';
 import {
+  registerScroller,
+  scrollerUnder,
+  subscribeScrollers,
+  useScrollerRegistration,
+} from './edge.js';
+import { EdgeEffects } from './edge-effect.js';
+import {
   createAnchorHandle,
   Padding,
   useAnchorRegistration,
@@ -48,9 +55,13 @@ import type {
 export {
   preventFocusShift,
   preventInputZoom,
+  preventTextActions,
   useFocusShiftPrevention,
   useInputZoomPrevention,
+  useTextActionsPrevention,
 } from './input.js';
+export { useScrollerRegistration, useViewportEdgeElement } from './edge.js';
+export { EdgeEffects } from './edge-effect.js';
 export {
   useAnchorSize,
   useCreateViewportAnchorHandle,
@@ -64,6 +75,7 @@ export type {
   ViewportAnchorProps,
   ViewportContentProps,
   ViewportEdge,
+  ViewportEdgeEffect,
   ViewportOverscrollProps,
   ViewportPaddingProps,
   ViewportProviderProps,
@@ -104,6 +116,9 @@ type Scroll = Omit<ViewportScrollEvent, 'direction'>;
 
 type ScrollListener = (scroll: Scroll) => void;
 
+/** Nothing to tell (no provider tracking, see `createScrollStore`). */
+const noRefresh = () => undefined;
+
 /** The latest scroll, and its listeners. */
 const createScrollStore = () => {
   let latest: Scroll = {
@@ -117,15 +132,33 @@ const createScrollStore = () => {
   // Bouncing by itself (seen past an end, see `Provider`).
   let isNative = false;
   // Otherwise moved along as it's pulled (not the document's, see
-  // `Provider`).
+  // `Provider`), while an overscroll area holds it (see `Overscroll`):
+  // without one, nothing's moved (the browser's own scrolling untouched).
   let isMoved = false;
+  let holds = 0;
+  // The provider's, told as holds come and go (see `Provider`).
+  let refresh: () => void = noRefresh;
 
   return {
     current: () => latest,
-    isMoved: () => isMoved && !isNative,
+    hold: () => {
+      holds += 1;
+      refresh();
+      let isHeld = true;
+      return () => {
+        if (!isHeld) return;
+        isHeld = false;
+        holds -= 1;
+        refresh();
+      };
+    },
+    isMoved: () => isMoved && !isNative && holds > 0,
     isNative: () => isNative,
     setMoved: (value: boolean) => {
       isMoved = value;
+    },
+    setRefresh: (listener: () => void) => {
+      refresh = listener;
     },
     setNative: () => {
       isNative = true;
@@ -306,6 +339,32 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
   const screen = usePortalContainer(ownScreen);
   const [visual, setVisual] = useState(() => readVisual());
   const [scroll] = useState(createScrollStore);
+  // Tracked without a `scroller`: the page filling its screen (see
+  // edge.ts), or the document's.
+  const [filling, setFilling] = useState<Element | undefined>(undefined);
+
+  useLayoutEffect(() => {
+    if (scroller) return undefined;
+    const element = elementOf(screen);
+    const resolve = () => {
+      const rect = element
+        ? element.getBoundingClientRect()
+        : new DOMRect(0, 0, innerWidth, innerHeight);
+      setFilling(scrollerUnder(rect, element));
+    };
+    resolve();
+    const unsubscribe = subscribeScrollers(resolve);
+    // The document's, in the window: a scroller too (an app's own anchors'
+    // without pages).
+    const unregister =
+      element || !document.scrollingElement
+        ? undefined
+        : registerScroller(document.scrollingElement);
+    return () => {
+      unsubscribe();
+      unregister?.();
+    };
+  }, [screen, scroller]);
 
   // Tracking the window: it's an app's.
   useWindowHold(screen);
@@ -365,10 +424,11 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
   // Scroll tracking: the position (within the scroll range), and how far
   // it's overscrolled: Safari's own bounce (the position past an end), or,
   // where browsers keep it in range, touches and wheels pulling at an end
-  // (rubber-banded, as Safari's), moving it along (its
-  // `--uikit-viewport-bounce`, see style.css; not the document's).
+  // (rubber-banded, as Safari's), moving it along while an overscroll area
+  // holds it (its `--uikit-viewport-bounce`, see style.css; not the
+  // document's; without one, the browser's own scrolling untouched).
   useEffect(() => {
-    const element = scroller?.current ?? document.scrollingElement;
+    const element = scroller?.current ?? filling ?? document.scrollingElement;
     if (!element) return undefined;
     const isDocument = element === document.scrollingElement;
     const target: EventTarget = isDocument ? window : element;
@@ -558,7 +618,12 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     for (const [type, listener] of listeners) {
       target.addEventListener(type, listener, { passive: true });
     }
+    // Its state at once (e.g. another page tracked, scrolled already),
+    // and again as overscroll areas come and go (moving it, or not).
+    emit();
+    scroll.setRefresh(emit);
     return () => {
+      scroll.setRefresh(noRefresh);
       off();
       gestures.disconnect();
       clearTimeout(quiet);
@@ -570,7 +635,7 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
         element.style.removeProperty('--uikit-viewport-bounce');
       }
     };
-  }, [scroll, scroller]);
+  }, [filling, scroll, scroller]);
 
   const value = useMemo<ViewportContextValue>(
     () => ({ scroll, visual }),
@@ -816,12 +881,27 @@ export const useElementGeometry = (
  */
 const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
   (
-    { className, edge, handle, keyboard = 'push', safeArea = 'all', ...props },
+    {
+      className,
+      edge,
+      edgeEffect = 'soft',
+      edgeTint,
+      handle,
+      keyboard = 'push',
+      safeArea = 'all',
+      style,
+      ...props
+    },
     forwardedRef,
   ) => {
     const ref = useForwardedRef(forwardedRef);
-    // Its size, for the paddings making room for it (see `Padding`).
-    useAnchorRegistration(ref, edge, handle);
+    // Its size, for the paddings making room for it (see `Padding`); its
+    // edge effect, for the scrollers drawing it (see `EdgeEffects`).
+    useAnchorRegistration(ref, edge, handle, {
+      effect: edgeEffect,
+      keyboard,
+      tint: edgeTint,
+    });
     useWindowHold(usePortalContainer(undefined));
 
     return (
@@ -830,6 +910,7 @@ const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
         data-edge={edge}
         data-keyboard={keyboard}
         data-safe-area={safeArea}
+        style={style}
         {...props}
         className={cn('uikit-viewport-anchor', className)}
         data-viewport-part="anchor"
@@ -846,22 +927,26 @@ const bounceAttribute = (alwaysBounce: boolean | undefined) => {
 };
 
 /**
- * The content layer: filling the viewport, scrolling its content (track it
- * with `Provider`'s `scroller`), below the anchors; its safe area insets
- * kept clear (as padding).
+ * The content layer: filling the viewport, scrolling its content (a
+ * scroller, tracked by its `Provider` unless a page within it fills the
+ * screen, see edge.ts), below the anchors; its safe area insets kept clear
+ * (as padding).
  */
 const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
   (
     {
       alwaysBounce,
+      children,
       className,
       keyboard = 'resize',
       safeArea = 'all',
       ...props
     },
-    ref,
+    forwardedRef,
   ) => {
+    const ref = useForwardedRef(forwardedRef);
     useWindowHold(usePortalContainer(undefined));
+    useScrollerRegistration(ref);
 
     return (
       <div
@@ -872,7 +957,11 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
         {...props}
         className={cn('uikit-viewport-content', className)}
         data-viewport-part="content"
-      />
+        data-viewport-scroller=""
+      >
+        {children}
+        <EdgeEffects scroller={ref} />
+      </div>
     );
   },
 );
@@ -882,7 +971,8 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
  * there (needs a `Provider`): e.g. a refresh indicator. A layer beneath the
  * content layer (rendered before it), from its edge's bars (`anchor`), the
  * content's end moving it along as it bounces (Safari's own bounce; other
- * browsers', the scroll container moved along as it's pulled); where the
+ * browsers', the scroll container moved along as it's pulled, while an
+ * overscroll area is shown: it holds that); where the
  * content stays (the document's, there), sliding in over it. Its pull, as
  * custom properties: `--uikit-viewport-overscroll` (px), and
  * `--uikit-viewport-overscroll-progress` (0 to 1, of its own size; open, 1).
@@ -911,6 +1001,9 @@ const Overscroll = forwardRef<HTMLDivElement, ViewportOverscrollProps>(
     const pull = useRef(0);
     useOverscrollRoom(edge, open ? size : 0);
     useWindowHold(usePortalContainer(undefined));
+    // The content moved along as it's pulled, while it's shown (see
+    // `Provider`).
+    useLayoutEffect(() => context?.scroll.hold(), [context]);
 
     // Its pull, and how far along (of its size; open, all the way).
     const update = useCallback(() => {

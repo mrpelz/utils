@@ -7,34 +7,18 @@ import type {
   MenuTriggerProps,
 } from '../menu/main.js';
 
-export type Box = { height: number; left: number; top: number; width: number };
-
-export type Align = 'center' | 'end' | 'start';
-
-/** A portal's container (Base UI's `container` prop). */
-export type PortalContainer = NonNullable<BaseMenu.Portal.Props['container']>;
-
 export type ContextualMenuContextValue = {
-  align: Align;
-  /** The lifted box (the trigger's, or the preview's) at its lifted place. */
-  anchor?: {
-    contextElement?: Element;
-    getBoundingClientRect: () => DOMRect;
-  };
-  /** The lifted box (the trigger's, or the preview's) before lifting. */
-  box?: Box;
+  /** The backdrop, shown (its cutout: the lifted trigger, see `Trigger`). */
+  backdrop?: HTMLElement;
   isOpen: boolean;
-  /** Too tall for the viewport: scrolled together (see `Root`). */
-  isOverflowing: boolean;
+  /** A `Preview` is given (else the trigger is lifted, see `Trigger`). */
   isPreview: boolean;
-  lift: number;
-  origin?: Box;
-  scrollerRef: { current: HTMLDivElement | null };
-  setAlign: (align: Align) => void;
-  /** Its portal's container: the screen it lifts within (see `Portal`). */
-  setContainer: (container: PortalContainer | undefined) => void;
-  setPopupHeight: (height: number) => void;
-  setPreviewSize: (size: { height: number; width: number } | undefined) => void;
+  setBackdrop: (backdrop: HTMLElement | undefined) => void;
+  setIsPreview: (isPreview: boolean) => void;
+  setSlot: (slot: HTMLElement | undefined) => void;
+  /** The preview's slot in the positioned stack, while shown. */
+  slot?: HTMLElement;
+  /** The trigger's wrapper: the menu's anchor (see `Positioner`). */
   triggerRef: { current: HTMLElement | null };
 };
 
@@ -52,7 +36,7 @@ export type ContextualMenuPreviewProps = ComponentProps<'div'>;
 
 export type ContextualMenuPositionerProps = Omit<
   BaseMenu.Positioner.Props,
-  'anchor' | 'ref' | 'side'
+  'anchor' | 'collisionAvoidance' | 'ref' | 'side' | 'sideOffset'
 >;
 
 export type ContextualMenuPortalProps = Omit<BaseMenu.Portal.Props, 'ref'>;

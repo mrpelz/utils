@@ -10,6 +10,15 @@
 
   .uikit-edit-menu-positioner {
     z-index: 100;
+
+    /* Pressed only on its popup: a press beside it (in the positioner's
+       box, but not the popup's) is outside it (Base UI's: inside the
+       positioner), closing it. */
+    pointer-events: none;
+
+    & > * {
+      pointer-events: auto;
+    }
   }
 
   .uikit-edit-menu-popup {

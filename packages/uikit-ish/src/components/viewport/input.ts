@@ -4,7 +4,9 @@ import { RefObject, useEffect } from 'react';
 // smaller than 16px is focused, and scrolls the layout viewport to keep a
 // field it focuses clear of the keyboard (shifting a fixed layout, e.g. a
 // `Viewport`'s bars). Two guards against them, each also a hook (made, and
-// let go of, with the component); elsewhere, they do nothing.
+// let go of, with the component); elsewhere, they do nothing. A third
+// keeps a held press from selecting text (and showing the browser's text
+// menu), e.g. on a menu's trigger.
 
 /** Whether this is iOS' WebKit (the touch callout: iOS only). */
 const isIos = () =>
@@ -205,4 +207,57 @@ export const useFocusShiftPrevention = (
       isEnabled ? preventFocusShift(target?.current ?? document) : undefined,
     [isEnabled, target],
   );
+};
+
+/** The properties `preventTextActions` sets (to `none`). */
+const textActionProperties = [
+  '-webkit-touch-callout',
+  '-webkit-user-select',
+  'user-select',
+] as const;
+
+/**
+ * A held press in `target` (e.g. a menu's trigger opened by it, its
+ * `openOn="secondaryClick"`) selects no text in it and shows no callout
+ * nor the browser's own text menu (iOS: its `user-select` and
+ * `-webkit-touch-callout`, `none`). Until the returned function restores
+ * them. (An app's choice: the text may well stay selectable.)
+ */
+export const preventTextActions = (target: HTMLElement): (() => void) => {
+  const { style } = target;
+  const previous = textActionProperties.map(
+    (property) =>
+      [
+        property,
+        style.getPropertyValue(property),
+        style.getPropertyPriority(property),
+      ] as const,
+  );
+  for (const property of textActionProperties) {
+    style.setProperty(property, 'none');
+  }
+
+  let isHeld = true;
+  return () => {
+    if (!isHeld) return;
+    isHeld = false;
+    for (const [property, value, priority] of previous) {
+      if (value) style.setProperty(property, value, priority);
+      else style.removeProperty(property);
+    }
+  };
+};
+
+/**
+ * `preventTextActions` on `target`, while the component is mounted (and
+ * `enabled`).
+ */
+export const useTextActionsPrevention = (
+  target: RefObject<HTMLElement | null>,
+  isEnabled = true,
+): void => {
+  useEffect(() => {
+    const { current: element } = target;
+    return isEnabled && element ? preventTextActions(element) : undefined;
+  }, [isEnabled, target]);
 };

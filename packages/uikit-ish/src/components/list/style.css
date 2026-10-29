@@ -95,8 +95,12 @@
 
     /* Framework7 media list (Mail): the image and the trailing parts at the
        top, the title emphasized (Framework7: 600), trailing details in
-       Subheadline. */
-    &:has(> [data-list-part='content'] > [data-list-part='text']) {
+       Subheadline; its text in the content, or below it (across the row,
+       under the trailing parts too, as Mail's preview). */
+    &:has(
+      > :is([data-list-part='content'], [data-list-part='below'])
+        > [data-list-part='text']
+    ) {
       --uikit-list-min-height: 0px;
 
       align-content: start;
@@ -290,7 +294,8 @@
       );
     }
 
-    /* Under the row's line, across it (e.g. a field's messages). Hidden
+    /* Under the row's line, across it from where the content starts (see
+       Below; e.g. a field's messages, a message's preview). Hidden
        (`hidden`), collapsed: growing and shrinking (its content clipped
        meanwhile; its track's least none, its content's margins
        notwithstanding), fading. */
@@ -300,6 +305,7 @@
       min-width: 0;
       flex: 1 1 100%;
       grid-template-rows: minmax(0, 1fr);
+      margin-inline-start: var(--uikit-list-below-start, 0);
       transition:
         grid-template-rows 300ms ease,
         opacity 300ms ease,

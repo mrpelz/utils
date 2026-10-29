@@ -6,10 +6,16 @@ import {
   forwardRef,
   ReactElement,
   useContext,
+  useEffect,
   useState,
 } from 'react';
 
-import { cn, usePortalContainer, withStyle } from '../utils/main.js';
+import {
+  cn,
+  useForwardedRef,
+  usePortalContainer,
+  withStyle,
+} from '../utils/main.js';
 import { ViewportScopeContext } from '../viewport/main.js';
 import type {
   DrawerHandle,
@@ -122,14 +128,62 @@ const Popup = forwardRef<HTMLDivElement, DrawerPopupProps>(
   },
 );
 
+/** How far a touch moves before its axis is taken (px, as Base UI's). */
+const axisSlop = 6;
+
+/**
+ * A touch on `area` moving sideways first is a swipe, scrolling nothing
+ * until it ends (its moves cancelled); moving vertically first, it scrolls
+ * the page. Base UI leaves the area's vertical panning to the browser
+ * (`touch-action: pan-y`), not cancelling a swipe's moves either, so the
+ * swipe's vertical drift scrolled the page.
+ */
+const useSwipeScrollLock = (area: { current: HTMLElement | null }) => {
+  useEffect(() => {
+    const { current: element } = area;
+    if (!element) return undefined;
+
+    let start: Touch | undefined;
+    let isSwipe: boolean | undefined;
+
+    const onTouchStart = (event: TouchEvent) => {
+      start = event.touches.length === 1 ? event.touches[0] : undefined;
+      isSwipe = undefined;
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (!start || !touch) return;
+
+      if (isSwipe === undefined) {
+        const x = Math.abs(touch.clientX - start.clientX);
+        const y = Math.abs(touch.clientY - start.clientY);
+        if (Math.max(x, y) < axisSlop) return;
+        isSwipe = x > y;
+      }
+      if (isSwipe && event.cancelable) event.preventDefault();
+    };
+
+    element.addEventListener('touchstart', onTouchStart, { passive: true });
+    element.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => {
+      element.removeEventListener('touchstart', onTouchStart);
+      element.removeEventListener('touchmove', onTouchMove);
+    };
+  }, [area]);
+};
+
 /**
  * A strip at its drawer's edge (`width`, 20px) it's swiped in from (where
  * it's rendered: e.g. the app's root, or a layout's); without one, a drawer
- * isn't swiped in.
+ * isn't swiped in. Swiped, nothing scrolls meanwhile (see
+ * `useSwipeScrollLock`).
  */
 const SwipeArea = forwardRef<HTMLDivElement, DrawerSwipeAreaProps>(
-  ({ className, style, width = 20, ...props }, ref) => {
+  ({ className, style, width = 20, ...props }, forwardedRef) => {
     const side = useContext(SideContext);
+    const ref = useForwardedRef(forwardedRef);
+    useSwipeScrollLock(ref);
 
     return (
       <BaseDrawer.SwipeArea
