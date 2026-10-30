@@ -261,6 +261,7 @@ export {
   Navigation,
   type NavigationBackEventDetails,
   type NavigationBackProps,
+  type NavigationPersistentProps,
   type NavigationRootProps,
   type NavigationStackProps,
   type NavigationSwipeAreaProps,

@@ -58,19 +58,21 @@ const pop = () => setKeys((current) => current.slice(0, -1));
 
 <Navigation.Root onBack={pop}>
   <Navigation.SwipeArea />
-  {/* The back button: staying while the pages move. */}
-  <Viewport.BlockStart>
-    <Toolbar.Root placement="block-start">
-      <Toolbar.Leading>
-        {keys.length > 1 ? <Navigation.Back … /> : null}
-      </Toolbar.Leading>
-    </Toolbar.Root>
-  </Viewport.BlockStart>
   <Navigation.Stack>
-    {keys.map((key) => (
+    {keys.map((key, index) => (
       // Under the top one: hidden, kept (its scroll position too).
       <Header.Root key={key}>
-        <Viewport.BlockStart>…</Viewport.BlockStart>
+        <Viewport.BlockStart>
+          <Toolbar.Root placement="block-start">
+            {/* Each pushed page's back button: staying put between them. */}
+            {index > 0 ? (
+              <Toolbar.Leading>
+                <Navigation.Back … />
+              </Toolbar.Leading>
+            ) : null}
+            <Toolbar.Title>…</Toolbar.Title>
+          </Toolbar.Root>
+        </Viewport.BlockStart>
         <Page.Root>
           <Viewport.Padding edge="block-start" />
           <List.Root>…</List.Root>
@@ -234,27 +236,23 @@ const InAStack: FunctionComponent = () => {
       <Viewport.Content safeArea="none">
         <Navigation.Root onBack={pop}>
           <Navigation.SwipeArea />
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
-                {keys.length > 1 ? (
-                  <Navigation.Back
-                    aria-label={pages[keys.at(-2) ?? '']?.title}
-                    render={<Toolbar.Button shape="circle" />}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfChevronBackward} />
-                    </Button.Icon>
-                  </Navigation.Back>
-                ) : null}
-              </Toolbar.Leading>
-            </Toolbar.Root>
-          </Viewport.BlockStart>
           <Navigation.Stack>
-            {keys.map((key) => (
+            {keys.map((key, index) => (
               <Header.Root key={key}>
                 <Viewport.BlockStart>
                   <Toolbar.Root placement="block-start">
+                    {index > 0 ? (
+                      <Toolbar.Leading>
+                        <Navigation.Back
+                          aria-label={pages[keys[index - 1] ?? '']?.title}
+                          render={<Toolbar.Button shape="circle" />}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Navigation.Back>
+                      </Toolbar.Leading>
+                    ) : null}
                     <Toolbar.Title>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
@@ -552,7 +550,7 @@ export const PageComposition: FunctionComponent = () => (
           part="Navigation.Stack"
         />
         ’s children, one per level, each scrolling on its own; the back button
-        in a bar that stays, beside the stack.
+        in each pushed page’s bar, staying put between them.
       </li>
       <li>
         Under the top one: hidden, kept mounted, so popping back finds it where

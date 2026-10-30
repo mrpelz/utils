@@ -61,27 +61,23 @@ const LiveView: FunctionComponent = () => {
       <Viewport.Content safeArea="none">
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
-                {keys.length > 1 ? (
-                  <Navigation.Back
-                    aria-label={pages[keys.at(-2) ?? '']?.title}
-                    {...propsBack}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfChevronBackward} />
-                    </Button.Icon>
-                  </Navigation.Back>
-                ) : null}
-              </Toolbar.Leading>
-            </Toolbar.Root>
-          </Viewport.BlockStart>
           <Navigation.Stack {...propsStack}>
-            {keys.map((key) => (
+            {keys.map((key, index) => (
               <Header.Root key={key}>
                 <Viewport.BlockStart>
                   <Toolbar.Root placement="block-start">
+                    {index > 0 ? (
+                      <Toolbar.Leading>
+                        <Navigation.Back
+                          aria-label={pages[keys[index - 1] ?? '']?.title}
+                          {...propsBack}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Navigation.Back>
+                      </Toolbar.Leading>
+                    ) : null}
                     <Toolbar.Title>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
@@ -270,25 +266,13 @@ export const NavigationOverview: FunctionComponent = () => (
       </li>
       <li>
         A page’s <a href="header">Header</a> moves with its page, its bar and
-        title too; the back button stays (a <a href="toolbar">Toolbar</a> in a{' '}
-        <a href="viewport">Viewport</a>’s{' '}
-        <PartLink
-          component="viewport"
-          part="Viewport.BlockStart"
-        >
-          BlockStart
-        </PartLink>{' '}
-        in the{' '}
+        title too; the back button, in each pushed page’s bar, stays put between
+        pushed pages (a persistent item, see{' '}
         <PartLink
           component="navigation"
-          part="Navigation.Root"
+          part="Navigation.Persistent"
         />
-        , outside its{' '}
-        <PartLink
-          component="navigation"
-          part="Navigation.Stack"
-        />
-        ), over the pages’ bars.
+        ), sliding in and out with the first.
       </li>
       <li>
         Swiping back starts within 20px of the leading edge (touch or mouse):

@@ -22,6 +22,7 @@ import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import type {
   NavigationBackEventDetails,
   NavigationBackProps,
+  NavigationPersistentProps,
   NavigationRootProps,
   NavigationStackProps,
   NavigationSwipeAreaProps,
@@ -32,6 +33,7 @@ import type {
 export type {
   NavigationBackEventDetails,
   NavigationBackProps,
+  NavigationPersistentProps,
   NavigationRootProps,
   NavigationStackProps,
   NavigationSwipeAreaProps,
@@ -57,13 +59,16 @@ export type {
 // calls `onBack` too, the app's pop transitioning as any.
 //
 // Pages under the top one stay mounted (their state and scroll positions
-// kept), hidden. A page's `Header` moves with its page, its bar too; what
-// stays (e.g. the back button: a toolbar in a `Viewport.BlockStart`) is in
-// the `Root`, outside its `Stack`.
+// kept), hidden. A page's `Header` moves with its page, its bar too; its
+// persistent items (e.g. its back button, see `Persistent`) stay put while
+// the other page moving has them too. What stays regardless (e.g. a bar of
+// the app's) is in the `Root`, outside its `Stack`.
 //
 // Also:
 // - Each page's bar moves with it, its title too; the back button stays, in a bar of
-//   the app's outside the stack (see above).
+//   the app's outside the stack (see above), or in each page's bar, a
+//   persistent item (see `Persistent`): staying put between pages having
+//   one, moving with a page where only it has one.
 
 /** Pushing and popping (350ms, an ease-out curve). */
 const duration = 350;
@@ -152,6 +157,12 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
         ? `--uikit-navigation-progress ${String(duration)}ms ${easing}`
         : 'none';
       root.style.setProperty('--uikit-navigation-progress', String(progress));
+      // (Its width as a length: moved by it, persistent items stay put, see
+      // `Persistent`.)
+      root.style.setProperty(
+        '--uikit-navigation-width',
+        `${String(root.clientWidth)}px`,
+      );
     };
 
     // Animates the progress, then calls `done` (once it's there).
@@ -169,6 +180,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
       const { current: root } = ref;
       root?.style.removeProperty('transition');
       root?.style.removeProperty('--uikit-navigation-progress');
+      root?.style.removeProperty('--uikit-navigation-width');
       setTransition(null);
     };
 
@@ -287,7 +299,8 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
  * popped, or replaced as the app's keys change.
  */
 const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
-  ({ className, children, ...props }, ref) => {
+  ({ className, children, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
     const { stack } = useContext(NavigationContext);
     const pages = Children.toArray(children).filter(
       (child): child is ReactElement => isValidElement(child),
@@ -336,6 +349,36 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
       // (On a change of the stack's keys only, compared above.)
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [keys.join('\n')]);
+
+    // In a transition, the persistent items both moving pages have (by
+    // their ids, see `Persistent`): shared, staying put (see style.css).
+    useLayoutEffect(() => {
+      const { current: element } = ref;
+      if (!element || !transition) return undefined;
+      const itemsOf = (role: Role) => [
+        ...element.querySelectorAll<HTMLElement>(
+          `:scope > [data-navigation-role="${CSS.escape(role)}"] [data-navigation-persistent]`,
+        ),
+      ];
+      const top = itemsOf('top');
+      const under = itemsOf('under');
+      const idsOf = (items: HTMLElement[]) =>
+        new Set(items.map((item) => item.dataset.navigationPersistent));
+      const topIds = idsOf(top);
+      const underIds = idsOf(under);
+      const shared = [
+        ...top.filter((item) =>
+          underIds.has(item.dataset.navigationPersistent),
+        ),
+        ...under.filter((item) =>
+          topIds.has(item.dataset.navigationPersistent),
+        ),
+      ];
+      for (const item of shared) item.dataset.navigationShared = '';
+      return () => {
+        for (const item of shared) delete item.dataset.navigationShared;
+      };
+    }, [ref, transition]);
 
     const roleOf = (key: string, index: number, count: number): Role => {
       if (transition) {
@@ -419,13 +462,14 @@ const SwipeArea = forwardRef<HTMLDivElement, NavigationSwipeAreaProps>(
  * root page (nothing to go back to), disabled.
  */
 const Back = forwardRef<HTMLButtonElement, NavigationBackProps>(
-  ({ disabled, onClick, render, ...props }, ref) => {
+  ({ disabled, onClick, persistentId = 'back', render, ...props }, ref) => {
     const { back } = useContext(NavigationContext);
 
     return useRender({
       defaultTagName: 'button',
       props: {
         'data-navigation-part': 'back',
+        'data-navigation-persistent': persistentId || undefined,
         disabled: disabled ?? !back,
         type: 'button',
         ...props,
@@ -441,9 +485,32 @@ const Back = forwardRef<HTMLButtonElement, NavigationBackProps>(
   },
 );
 
+/**
+ * An item of a page's bar (e.g. a toolbar button, `render`) that stays put
+ * through a transition while both pages moving have one of its id
+ * (`persistentId`), the upper page's shown; otherwise moving with its page.
+ * E.g. a back button (`Back` is one, by default): sliding in with the first
+ * page to have one, staying put on to deeper pages and back, sliding out
+ * with the first again.
+ */
+const Persistent = forwardRef<HTMLDivElement, NavigationPersistentProps>(
+  ({ persistentId, render, ...props }, ref) =>
+    useRender({
+      defaultTagName: 'div',
+      props: {
+        'data-navigation-part': 'persistent',
+        'data-navigation-persistent': persistentId,
+        ...props,
+      },
+      ref,
+      render,
+    }),
+);
+
 export const Navigation = {
   Root,
   Stack,
   SwipeArea,
   Back,
+  Persistent,
 };

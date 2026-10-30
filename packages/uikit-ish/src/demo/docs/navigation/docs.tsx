@@ -98,6 +98,21 @@ export const navigationSwipeAreaRows: readonly PropRow[] = [
 
 export const navigationBackRows: readonly PropRow[] = [
   [
+    'persistentId',
+    'string | false',
+    code(union('back')),
+    <>
+      Its id as a persistent item (see{' '}
+      <PartLink
+        component="navigation"
+        part="Navigation.Persistent"
+      />
+      ): in each page’s bar, staying put between pages that both have one,
+      sliding with a page where only it has one; <code>false</code>, always
+      moving with its page.
+    </>,
+  ],
+  [
     'disabled',
     'boolean',
     'on the root page',
@@ -135,9 +150,29 @@ export const navigationBackRows: readonly PropRow[] = [
             >
               {'<Toolbar.Button shape="circle" />'}
             </PartLink>{' '}
-            in a bar that stays.
+            in each pushed page’s bar.
           </>,
         ]
       : row,
   ),
+];
+
+export const navigationPersistentRows: readonly PropRow[] = [
+  [
+    'persistentId',
+    'string',
+    undefined,
+    <>
+      Its id (required): in a transition (pushed, popped, swiped back), while
+      both moving pages have an item of this id, it stays put (the upper page’s
+      shown); otherwise it moves with its page.
+    </>,
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'The item, or its content (rendering the item itself, by its render).',
+  ],
+  ...renderRows('div', 'HTMLDivElement'),
 ];

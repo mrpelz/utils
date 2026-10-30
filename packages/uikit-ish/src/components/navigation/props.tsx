@@ -36,4 +36,21 @@ export type NavigationSwipeAreaProps = ComponentProps<'div'> & {
   width?: number;
 };
 
-export type NavigationBackProps = useRender.ComponentProps<'button'>;
+export type NavigationBackProps = useRender.ComponentProps<'button'> & {
+  /**
+   * Its id as a persistent item (see `Navigation.Persistent`): staying put
+   * while its page and the other one moving both have it (e.g. pushed from
+   * a page with a back button); `false`, always moving with its page.
+   * @default 'back'
+   */
+  persistentId?: false | string;
+};
+
+export type NavigationPersistentProps = useRender.ComponentProps<'div'> & {
+  /**
+   * Its id: in a transition (pushed, popped, swiped back), while both
+   * pages moving have an item of this id, it stays put (the upper page's
+   * shown); otherwise, it moves with its page.
+   */
+  persistentId: string;
+};

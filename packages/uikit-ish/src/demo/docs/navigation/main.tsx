@@ -73,30 +73,26 @@ export const NavigationDemo: FunctionComponent = () => {
       <Viewport.Content safeArea="none">
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
-                {keys.length > 1 ? (
-                  <Navigation.Back
-                    aria-label={pages[keys.at(-2) ?? '']?.title}
-                    {...propsBack}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfChevronBackward} />
-                    </Button.Icon>
-                  </Navigation.Back>
-                ) : null}
-              </Toolbar.Leading>
-            </Toolbar.Root>
-          </Viewport.BlockStart>
           <Navigation.Stack {...propsStack}>
-            {keys.map((key) => {
+            {keys.map((key, depth) => {
               const page = pages[key] ?? { children: [], title: key };
 
               return (
                 <Header.Root key={key}>
                   <Viewport.BlockStart>
                     <Toolbar.Root placement="block-start">
+                      {depth > 0 ? (
+                        <Toolbar.Leading>
+                          <Navigation.Back
+                            aria-label={pages[keys[depth - 1] ?? '']?.title}
+                            {...propsBack}
+                          >
+                            <Button.Icon>
+                              <Symbol icon={sfChevronBackward} />
+                            </Button.Icon>
+                          </Navigation.Back>
+                        </Toolbar.Leading>
+                      ) : null}
                       <Toolbar.Title>
                         <span>{page.title}</span>
                       </Toolbar.Title>

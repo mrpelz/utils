@@ -19,6 +19,7 @@ import { sfChevronBackward } from '../../tooling/icons.js';
 import { pages } from './content.js';
 import {
   navigationBackRows,
+  navigationPersistentRows,
   navigationRootRows,
   navigationStackRows,
   navigationSwipeAreaRows,
@@ -26,9 +27,9 @@ import {
 import { useNavigationControls } from './props.js';
 
 // Each part's view: a phone's stack of Settings' pages (a pushed one, for
-// the swipe area's and the back button's), the back button in a bar that
-// stays (outside the stack), every part's props, the part's own open and
-// emphasized.
+// the swipe area's and the back button's), the back button in each pushed
+// page's bar (staying put between them), every part's props, the part's own
+// open and emphasized.
 
 /** The views' code's start: the stack (the app's), pushed and popped. */
 const setup = `const [keys, setKeys] = useState(['settings']);
@@ -40,7 +41,7 @@ const setupPushed = `const [keys, setKeys] = useState(['settings', 'general']);
 const push = (key) => setKeys((current) => [...current, key]);
 const pop = () => setKeys((current) => current.slice(0, -1));`;
 
-/** `Navigation.Root`, outlined: Settings' stack, its bar that stays. */
+/** `Navigation.Root`, outlined: Settings' stack. */
 const RootPart: FunctionComponent = () => {
   const id = 'navigation-parts-root';
   const [log, addLog] = useLog();
@@ -73,27 +74,23 @@ const RootPart: FunctionComponent = () => {
       <Viewport.Content safeArea="none">
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
-                {keys.length > 1 ? (
-                  <Navigation.Back
-                    aria-label={pages[keys.at(-2) ?? '']?.title}
-                    {...propsBack}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfChevronBackward} />
-                    </Button.Icon>
-                  </Navigation.Back>
-                ) : null}
-              </Toolbar.Leading>
-            </Toolbar.Root>
-          </Viewport.BlockStart>
           <Navigation.Stack {...propsStack}>
-            {keys.map((key) => (
+            {keys.map((key, index) => (
               <Header.Root key={key}>
                 <Viewport.BlockStart>
                   <Toolbar.Root placement="block-start">
+                    {index > 0 ? (
+                      <Toolbar.Leading>
+                        <Navigation.Back
+                          aria-label={pages[keys[index - 1] ?? '']?.title}
+                          {...propsBack}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Navigation.Back>
+                      </Toolbar.Leading>
+                    ) : null}
                     <Toolbar.Title>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
@@ -166,27 +163,23 @@ const StackPart: FunctionComponent = () => {
       <Viewport.Content safeArea="none">
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
-                {keys.length > 1 ? (
-                  <Navigation.Back
-                    aria-label={pages[keys.at(-2) ?? '']?.title}
-                    {...propsBack}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfChevronBackward} />
-                    </Button.Icon>
-                  </Navigation.Back>
-                ) : null}
-              </Toolbar.Leading>
-            </Toolbar.Root>
-          </Viewport.BlockStart>
           <Navigation.Stack {...propsStack}>
-            {keys.map((key) => (
+            {keys.map((key, index) => (
               <Header.Root key={key}>
                 <Viewport.BlockStart>
                   <Toolbar.Root placement="block-start">
+                    {index > 0 ? (
+                      <Toolbar.Leading>
+                        <Navigation.Back
+                          aria-label={pages[keys[index - 1] ?? '']?.title}
+                          {...propsBack}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Navigation.Back>
+                      </Toolbar.Leading>
+                    ) : null}
                     <Toolbar.Title>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
@@ -262,27 +255,23 @@ const SwipeAreaPart: FunctionComponent = () => {
       <Viewport.Content safeArea="none">
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
-                {keys.length > 1 ? (
-                  <Navigation.Back
-                    aria-label={pages[keys.at(-2) ?? '']?.title}
-                    {...propsBack}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfChevronBackward} />
-                    </Button.Icon>
-                  </Navigation.Back>
-                ) : null}
-              </Toolbar.Leading>
-            </Toolbar.Root>
-          </Viewport.BlockStart>
           <Navigation.Stack {...propsStack}>
-            {keys.map((key) => (
+            {keys.map((key, index) => (
               <Header.Root key={key}>
                 <Viewport.BlockStart>
                   <Toolbar.Root placement="block-start">
+                    {index > 0 ? (
+                      <Toolbar.Leading>
+                        <Navigation.Back
+                          aria-label={pages[keys[index - 1] ?? '']?.title}
+                          {...propsBack}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Navigation.Back>
+                      </Toolbar.Leading>
+                    ) : null}
                     <Toolbar.Title>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
@@ -322,7 +311,7 @@ const SwipeAreaPart: FunctionComponent = () => {
   );
 };
 
-/** `Navigation.Back`, outlined: the back button, in the bar that stays. */
+/** `Navigation.Back`, outlined: the back button, in each pushed page's bar. */
 const BackPart: FunctionComponent = () => {
   const id = 'navigation-parts-back';
   const [log, addLog] = useLog();
@@ -355,30 +344,140 @@ const BackPart: FunctionComponent = () => {
       <Viewport.Content safeArea="none">
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
-                {keys.length > 1 ? (
-                  <Navigation.Back
-                    aria-label={pages[keys.at(-2) ?? '']?.title}
-                    {...propsBack}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfChevronBackward} />
-                    </Button.Icon>
-                  </Navigation.Back>
-                ) : null}
-              </Toolbar.Leading>
-            </Toolbar.Root>
-          </Viewport.BlockStart>
           <Navigation.Stack {...propsStack}>
-            {keys.map((key) => (
+            {keys.map((key, index) => (
               <Header.Root key={key}>
                 <Viewport.BlockStart>
                   <Toolbar.Root placement="block-start">
+                    {index > 0 ? (
+                      <Toolbar.Leading>
+                        <Navigation.Back
+                          aria-label={pages[keys[index - 1] ?? '']?.title}
+                          {...propsBack}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Navigation.Back>
+                      </Toolbar.Leading>
+                    ) : null}
                     <Toolbar.Title>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
+                  </Toolbar.Root>
+                </Viewport.BlockStart>
+                <Page.Root>
+                  <Viewport.Padding edge="block-start" />
+                  <List.Root>
+                    <List.Section>
+                      <List.Group>
+                        {pages[key]?.children.map((child) => (
+                          <List.Item key={child}>
+                            <List.Content>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => push(child)}
+                              >
+                                {pages[child]?.title}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              <List.DrillIn />
+                            </List.Trailing>
+                          </List.Item>
+                        ))}
+                      </List.Group>
+                    </List.Section>
+                  </List.Root>
+                  <Viewport.Padding edge="block-end" />
+                </Page.Root>
+              </Header.Root>
+            ))}
+          </Navigation.Stack>
+        </Navigation.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
+/**
+ * `Navigation.Persistent`, outlined: each page's bar with a back button
+ * (from the second page) and a Select button (on every page), staying put
+ * between pages sharing them.
+ */
+const PersistentPart: FunctionComponent = () => {
+  const id = 'navigation-parts-persistent';
+  const [log, addLog] = useLog();
+  const [keys, setKeys] = useState(['settings']);
+  const push = (key: string) => {
+    addLog(`push: ${key}`);
+    setKeys((current) => [...current, key]);
+  };
+  const pop = useCallback(
+    ({ reason }: NavigationBackEventDetails) => {
+      addLog(`pop (${reason})`);
+      setKeys((current) => current.slice(0, -1));
+    },
+    [addLog],
+  );
+  const {
+    controls,
+    propsBack,
+    propsPersistent,
+    propsRoot,
+    propsStack,
+    propsSwipeArea,
+    state,
+  } = useNavigationControls(id, addLog, pop, { featured: 'Persistent' });
+  const { persistentId, ...persistent } = propsPersistent;
+
+  return (
+    <Component
+      isInline
+      controls={controls}
+      id={id}
+      log={log}
+      setup={setup}
+      stage="phone"
+      state={state}
+      title="Navigation.Persistent"
+    >
+      <Viewport.Content safeArea="none">
+        <Navigation.Root {...propsRoot}>
+          <Navigation.SwipeArea {...propsSwipeArea} />
+          <Navigation.Stack {...propsStack}>
+            {keys.map((key, index) => (
+              <Header.Root key={key}>
+                <Viewport.BlockStart>
+                  <Toolbar.Root placement="block-start">
+                    <Toolbar.Leading>
+                      {index > 0 ? (
+                        <Navigation.Back
+                          aria-label={pages[keys[index - 1] ?? '']?.title}
+                          {...propsBack}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Navigation.Back>
+                      ) : null}
+                    </Toolbar.Leading>
+                    <Toolbar.Title>
+                      <span>{pages[key]?.title}</span>
+                    </Toolbar.Title>
+                    <Toolbar.Trailing>
+                      <Navigation.Persistent
+                        persistentId={
+                          typeof persistentId === 'function'
+                            ? persistentId(key)
+                            : persistentId
+                        }
+                        {...persistent}
+                        onClick={() => addLog(`select: ${key}`)}
+                      >
+                        <Button.Label>Select</Button.Label>
+                      </Navigation.Persistent>
+                    </Toolbar.Trailing>
                   </Toolbar.Root>
                 </Viewport.BlockStart>
                 <Page.Root>
@@ -421,8 +520,8 @@ export const NavigationParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         The root, holding the stack’s state; in it, the stack (the app’s pages,
-        keyed) and what stays as they move: a bar with the back button, the
-        swipe area.
+        keyed, each with its bar: from the first pushed page, the back button)
+        and the swipe area.
       </li>
       <li>
         Around each page, a frame of its own (moved in transitions); at the
@@ -445,7 +544,10 @@ export const NavigationParts: FunctionComponent = () => (
                 can be popped)
               </li>
               <li className="demo-tree-context">
-                <span>A bar that stays (optional), e.g. a </span>
+                <span>
+                  A bar outside the stack (optional, instead of the pages’ own
+                  back buttons), e.g. a{' '}
+                </span>
                 <PartLink
                   component="viewport"
                   part="Viewport.BlockStart"
@@ -479,6 +581,13 @@ export const NavigationParts: FunctionComponent = () => (
                       part="Page.Root"
                     />
                     <span>s, their bars moving with them</span>
+                    <ul>
+                      <li>
+                        <PartLink part="Navigation.Back" />,{' '}
+                        <PartLink part="Navigation.Persistent" /> (optional, in
+                        a page’s bar: staying put between pages sharing them)
+                      </li>
+                    </ul>
                   </li>
                 </ul>
               </li>
@@ -502,8 +611,8 @@ export const NavigationParts: FunctionComponent = () => (
         <PartLink part="Navigation.SwipeArea" />, and its stack.
       </li>
       <li>
-        What stays while pages move goes in it, outside the stack: a bar with
-        the back button (a{' '}
+        What stays while pages move can go in it, outside the stack: e.g. a bar
+        of its own (a{' '}
         <PartLink
           component="toolbar"
           part="Toolbar.Root"
@@ -600,8 +709,16 @@ export const NavigationParts: FunctionComponent = () => (
         popped as any change of it).
       </li>
       <li>
-        Anywhere in its root: e.g. in a bar that stays (as here), still while
-        the pages move; rendered while there’s a page to go back to.
+        In each pushed page’s bar (as here): a persistent item (
+        <code>persistentId</code>, <code>back</code> by default, see{' '}
+        <PartLink part="Navigation.Persistent" />
+        ), sliding in with the first pushed page, staying put on deeper ones and
+        back, sliding out with the first again.
+      </li>
+      <li>
+        Or anywhere in its root: e.g. in a bar of its own outside the stack,
+        still while the pages move (rendered while there’s a page to go back
+        to).
       </li>
       <li>
         On the root page (nothing to go back to), or without <code>onBack</code>
@@ -619,6 +736,41 @@ export const NavigationParts: FunctionComponent = () => (
     <BackPart />
     <h3>Props</h3>
     <PropsTable rows={navigationBackRows} />
+
+    <Heading
+      id="navigation-persistent"
+      level={2}
+    >
+      <code>Navigation.Persistent</code>
+    </Heading>
+    <ul>
+      <li>
+        An item of a page’s bar (e.g. a{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Button"
+        />{' '}
+        by its <code>render</code>) that stays put through a transition (pushed,
+        popped, swiped back) while both moving pages have an item of its{' '}
+        <code>persistentId</code>: the upper page’s shown, unmoved.
+      </li>
+      <li>
+        Only one of them having it, it moves with its page: e.g. a back button
+        (a <PartLink part="Navigation.Back" /> is one, by default) slides in
+        with the first page to have one, and out with it.
+      </li>
+      <li>
+        Here, Select (on every page) stays put throughout; each page’s own id (
+        <code>persistentId</code>), it moves with its page.
+      </li>
+      <li>
+        Renders a <code>div</code> (its item’s box), or its item itself by its{' '}
+        <code>render</code>.
+      </li>
+    </ul>
+    <PersistentPart />
+    <h3>Props</h3>
+    <PropsTable rows={navigationPersistentRows} />
   </>
 );
 
@@ -628,4 +780,5 @@ export const navigationPartsDemos = [
   StackPart,
   SwipeAreaPart,
   BackPart,
+  PersistentPart,
 ];
