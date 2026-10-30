@@ -1,7 +1,5 @@
 import './style.css';
 
-import { sfCheckmarkCircleFill } from '@bradleyhodges/sfsymbols/sfCheckmarkCircleFill';
-import { sfCloudFill } from '@bradleyhodges/sfsymbols/sfCloudFill';
 import { FunctionComponent } from 'react';
 
 import { List, Symbol, Typography } from '../../../components/index.js';
@@ -14,6 +12,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfCheckmarkCircleFill, sfCloudFill } from '../../tooling/icons.js';
 import { propOptionsCompositionSize } from './props.js';
 
 /** An article's heading, paragraphs and caption, as their elements. */

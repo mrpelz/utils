@@ -1,6 +1,3 @@
-import { sfFolderBadgePlus } from '@bradleyhodges/sfsymbols/sfFolderBadgePlus';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
@@ -25,6 +22,11 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfFolderBadgePlus,
+  sfMagnifyingglass,
+  sfSquareAndPencil,
+} from '../../tooling/icons.js';
 import { rowTitles, sidebarSections } from './content.js';
 import { sidebarRootRows, sidebarToolbarRows } from './docs.js';
 import {

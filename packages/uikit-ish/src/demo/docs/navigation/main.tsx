@@ -1,6 +1,5 @@
 import './style.css';
 
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
 import { FunctionComponent, useCallback, useState } from 'react';
 
 import {
@@ -17,6 +16,7 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { sfChevronBackward } from '../../tooling/icons.js';
 import { pages } from './content.js';
 import { useNavigationControls } from './props.js';
 

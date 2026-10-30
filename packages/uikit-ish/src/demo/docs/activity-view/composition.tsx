@@ -1,11 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfBook } from '@bradleyhodges/sfsymbols/sfBook';
-import { sfDocumentOnDocument } from '@bradleyhodges/sfsymbols/sfDocumentOnDocument';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfPrinter } from '@bradleyhodges/sfsymbols/sfPrinter';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
 import { FunctionComponent } from 'react';
 
 import {
@@ -29,6 +24,13 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfBook,
+  sfDocumentOnDocument,
+  sfHeart,
+  sfPrinter,
+  sfSquareAndArrowUp,
+} from '../../tooling/icons.js';
 import { photo } from '../avatar/props.js';
 import { GuideLink } from '../hig-guide/link.js';
 

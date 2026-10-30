@@ -1,6 +1,5 @@
 import './style.css';
 
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { Fragment, FunctionComponent, ReactNode, useMemo } from 'react';
 
 import { Button, ButtonRootProps, Symbol } from '../../../components/index.js';
@@ -11,6 +10,7 @@ import {
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { sfHeartFill } from '../../tooling/icons.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,

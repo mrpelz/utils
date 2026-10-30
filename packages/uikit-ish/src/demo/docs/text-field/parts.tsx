@@ -1,4 +1,3 @@
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
 import { FunctionComponent, useMemo } from 'react';
 
 import { List, Symbol, TextField } from '../../../components/index.js';
@@ -8,6 +7,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfMagnifyingglass } from '../../tooling/icons.js';
 import {
   textFieldClearRows,
   textFieldControlRows,

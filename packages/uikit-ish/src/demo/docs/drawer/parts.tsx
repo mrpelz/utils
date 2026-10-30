@@ -1,5 +1,3 @@
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
 import { FunctionComponent } from 'react';
 
 import {
@@ -18,6 +16,7 @@ import { useLog } from '../../tooling/frame/log.js';
 import { codeLabel } from '../../tooling/frame/render-code.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfHeart, sfListBullet } from '../../tooling/icons.js';
 import { names } from '../viewport/content.js';
 import {
   drawerCloseRows,

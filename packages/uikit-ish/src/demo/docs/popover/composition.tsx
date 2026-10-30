@@ -2,9 +2,6 @@ import '../sheet/style.css';
 import '../toolbar/style.css';
 import './style.css';
 
-import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
-import { sfLine3HorizontalDecreaseCircle } from '@bradleyhodges/sfsymbols/sfLine3HorizontalDecreaseCircle';
-import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent } from 'react';
 
 import {
@@ -30,6 +27,11 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfICircle,
+  sfLine3HorizontalDecreaseCircle,
+  sfXmark,
+} from '../../tooling/icons.js';
 import { names } from '../viewport/content.js';
 import { propOptionsPresentation } from './props.js';
 

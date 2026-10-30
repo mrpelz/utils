@@ -1,8 +1,6 @@
 import '../toolbar/style.css';
 
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfLocationFill } from '@bradleyhodges/sfsymbols/sfLocationFill';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -26,6 +24,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfEllipsis, sfLocationFill } from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { names } from '../viewport/content.js';
 import { propOptionsContentAnchor } from './props.js';

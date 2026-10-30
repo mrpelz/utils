@@ -1,12 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfMap } from '@bradleyhodges/sfsymbols/sfMap';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -31,6 +22,17 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfChevronBackward,
+  sfEllipsis,
+  sfFolder,
+  sfListBullet,
+  sfMagnifyingglass,
+  sfMap,
+  sfSquareAndArrowUp,
+  sfSquareAndPencil,
+  sfTrash,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { messages } from '../list/content.js';
 import { names } from '../viewport/content.js';

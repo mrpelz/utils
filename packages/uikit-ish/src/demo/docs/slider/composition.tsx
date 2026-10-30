@@ -1,14 +1,6 @@
 import './style.css';
 
 import { Slider as BaseSlider } from '@base-ui/react/slider';
-import { sfBackwardFill } from '@bradleyhodges/sfsymbols/sfBackwardFill';
-import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
-import { sfPauseFill } from '@bradleyhodges/sfsymbols/sfPauseFill';
-import { sfPlayFill } from '@bradleyhodges/sfsymbols/sfPlayFill';
-import { sfSpeakerFill } from '@bradleyhodges/sfsymbols/sfSpeakerFill';
-import { sfSpeakerWave3Fill } from '@bradleyhodges/sfsymbols/sfSpeakerWave3Fill';
-import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
-import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
 import { FunctionComponent, useEffect, useState } from 'react';
 
 import {
@@ -30,6 +22,16 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfBackwardFill,
+  sfForwardFill,
+  sfPauseFill,
+  sfPlayFill,
+  sfSpeakerFill,
+  sfSpeakerWave3Fill,
+  sfSunMax,
+  sfSunMin,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { time } from './content.js';
 

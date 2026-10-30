@@ -1,5 +1,3 @@
-import { sfAirplane } from '@bradleyhodges/sfsymbols/sfAirplane';
-import { sfBellFill } from '@bradleyhodges/sfsymbols/sfBellFill';
 import { FunctionComponent, useEffect, useRef, useState } from 'react';
 
 import {
@@ -22,6 +20,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfAirplane, sfBellFill } from '../../tooling/icons.js';
 
 // A row's code (as Airplane Mode's in the list below).
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */

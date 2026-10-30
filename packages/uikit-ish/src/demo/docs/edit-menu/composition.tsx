@@ -1,13 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfBold } from '@bradleyhodges/sfsymbols/sfBold';
-import { sfItalic } from '@bradleyhodges/sfsymbols/sfItalic';
-import { sfPhoto } from '@bradleyhodges/sfsymbols/sfPhoto';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTextformat } from '@bradleyhodges/sfsymbols/sfTextformat';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
-import { sfUnderline } from '@bradleyhodges/sfsymbols/sfUnderline';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -27,6 +20,15 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfBold,
+  sfItalic,
+  sfPhoto,
+  sfSquareAndArrowUp,
+  sfTextformat,
+  sfTrash,
+  sfUnderline,
+} from '../../tooling/icons.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 const elementCode = `const [isOpen, setIsOpen] = useState(false);

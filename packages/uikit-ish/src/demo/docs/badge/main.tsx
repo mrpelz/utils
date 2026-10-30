@@ -1,13 +1,5 @@
 import './style.css';
 
-import { sfBell } from '@bradleyhodges/sfsymbols/sfBell';
-import { sfClock } from '@bradleyhodges/sfsymbols/sfClock';
-import { sfClockFill } from '@bradleyhodges/sfsymbols/sfClockFill';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfPersonCropCircle } from '@bradleyhodges/sfsymbols/sfPersonCropCircle';
-import { sfPersonCropCircleFill } from '@bradleyhodges/sfsymbols/sfPersonCropCircleFill';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -21,6 +13,16 @@ import {
 import { Component } from '../../tooling/frame/component.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import {
+  sfBell,
+  sfClock,
+  sfClockFill,
+  sfHeart,
+  sfHeartFill,
+  sfMagnifyingglass,
+  sfPersonCropCircle,
+  sfPersonCropCircleFill,
+} from '../../tooling/icons.js';
 import { propOptionsContent, propOptionsRoot } from './props.js';
 
 /**

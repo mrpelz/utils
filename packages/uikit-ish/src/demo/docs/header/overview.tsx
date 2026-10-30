@@ -1,5 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
 import { FunctionComponent } from 'react';
 
 import {
@@ -22,6 +20,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfChevronBackward, sfSquareAndPencil } from '../../tooling/icons.js';
 import { names } from '../viewport/content.js';
 import {
   headerAccessoryRows,

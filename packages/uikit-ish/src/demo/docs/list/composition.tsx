@@ -1,15 +1,3 @@
-import { sfArchiveboxFill } from '@bradleyhodges/sfsymbols/sfArchiveboxFill';
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { sfCircleFill } from '@bradleyhodges/sfsymbols/sfCircleFill';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfEnvelopeBadgeFill } from '@bradleyhodges/sfsymbols/sfEnvelopeBadgeFill';
-import { sfEnvelopeOpenFill } from '@bradleyhodges/sfsymbols/sfEnvelopeOpenFill';
-import { sfFlagFill } from '@bradleyhodges/sfsymbols/sfFlagFill';
-import { sfMinus } from '@bradleyhodges/sfsymbols/sfMinus';
-import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
-import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
-import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
-import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -41,6 +29,20 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfArchiveboxFill,
+  sfChevronBackward,
+  sfCircleFill,
+  sfEllipsis,
+  sfEnvelopeBadgeFill,
+  sfEnvelopeOpenFill,
+  sfFlagFill,
+  sfMinus,
+  sfPlus,
+  sfSunMax,
+  sfSunMin,
+  sfTrashFill,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   contacts,

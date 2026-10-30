@@ -1,9 +1,6 @@
 import './style.css';
 
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
-import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfPlayFill } from '@bradleyhodges/sfsymbols/sfPlayFill';
 import { FunctionComponent, RefObject, useRef, useState } from 'react';
 
 import {
@@ -29,6 +26,11 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfForwardFill,
+  sfMagnifyingglass,
+  sfPlayFill,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { names } from '../viewport/content.js';
 import { phoneTabs, phoneTabValues } from './tabs.js';

@@ -1,9 +1,11 @@
-import { sfClock } from '@bradleyhodges/sfsymbols/sfClock';
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfPhoto } from '@bradleyhodges/sfsymbols/sfPhoto';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
-import { sfTray } from '@bradleyhodges/sfsymbols/sfTray';
+import {
+  sfClock,
+  sfFolder,
+  sfHeart,
+  sfPhoto,
+  sfTrash,
+  sfTray,
+} from '../../tooling/icons.js';
 
 // Content for the sidebar's guide pages (see overview.tsx, …). Data only:
 // the views write out their lists, so their code shows as it'd be used.

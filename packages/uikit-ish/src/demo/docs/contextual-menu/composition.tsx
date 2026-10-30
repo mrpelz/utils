@@ -1,18 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfArrowshapeTurnUpLeft } from '@bradleyhodges/sfsymbols/sfArrowshapeTurnUpLeft';
-import { sfBackwardFill } from '@bradleyhodges/sfsymbols/sfBackwardFill';
-import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfOpticaldisc } from '@bradleyhodges/sfsymbols/sfOpticaldisc';
-import { sfPauseFill } from '@bradleyhodges/sfsymbols/sfPauseFill';
-import { sfPersonCropCircle } from '@bradleyhodges/sfsymbols/sfPersonCropCircle';
-import { sfPhoto } from '@bradleyhodges/sfsymbols/sfPhoto';
-import { sfPlusCircle } from '@bradleyhodges/sfsymbols/sfPlusCircle';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTextBadgePlus } from '@bradleyhodges/sfsymbols/sfTextBadgePlus';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent } from 'react';
 
 import {
@@ -31,6 +19,20 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfArrowshapeTurnUpLeft,
+  sfBackwardFill,
+  sfForwardFill,
+  sfHeart,
+  sfOpticaldisc,
+  sfPauseFill,
+  sfPersonCropCircle,
+  sfPhoto,
+  sfPlusCircle,
+  sfSquareAndArrowUp,
+  sfTextBadgePlus,
+  sfTrash,
+} from '../../tooling/icons.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 const thumbnailsCode = `const photo = '/photos/beach.jpg';

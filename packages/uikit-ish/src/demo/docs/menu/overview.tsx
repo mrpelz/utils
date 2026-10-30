@@ -1,12 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfPencil } from '@bradleyhodges/sfsymbols/sfPencil';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent } from 'react';
 
 import {
@@ -27,6 +21,14 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfEllipsis,
+  sfFolder,
+  sfHeart,
+  sfPencil,
+  sfSquareAndArrowUp,
+  sfTrash,
+} from '../../tooling/icons.js';
 import {
   menuItemRows,
   menuPositionerRows,

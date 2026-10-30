@@ -1,10 +1,5 @@
 import './style.css';
 
-import { sfChevronUpChevronDown } from '@bradleyhodges/sfsymbols/sfChevronUpChevronDown';
-import { sfLockFill } from '@bradleyhodges/sfsymbols/sfLockFill';
-import { sfPinFill } from '@bradleyhodges/sfsymbols/sfPinFill';
-import { sfSquare } from '@bradleyhodges/sfsymbols/sfSquare';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import { Button, Menu, Symbol } from '../../../components/index.js';
@@ -13,6 +8,13 @@ import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import {
+  sfChevronUpChevronDown,
+  sfLockFill,
+  sfPinFill,
+  sfSquare,
+  sfSquareAndArrowUp,
+} from '../../tooling/icons.js';
 import {
   getPropOptionsCheckboxItems,
   getPropOptionsItem,

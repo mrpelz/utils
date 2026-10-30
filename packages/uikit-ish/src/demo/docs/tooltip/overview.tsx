@@ -1,6 +1,5 @@
 import './style.css';
 
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
 import { FunctionComponent, useMemo } from 'react';
 
 import { Button, Symbol, Tooltip } from '../../../components/index.js';
@@ -15,6 +14,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfSquareAndArrowUp } from '../../tooling/icons.js';
 import {
   tooltipPositionerRows,
   tooltipProviderRows,

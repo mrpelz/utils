@@ -1,5 +1,4 @@
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
-import { sfCheckmark } from '@bradleyhodges/sfsymbols/sfCheckmark';
 import { FunctionComponent, useMemo } from 'react';
 
 import { Segmented, Symbol } from '../../../components/index.js';
@@ -9,6 +8,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfCheckmark } from '../../tooling/icons.js';
 import { periods } from './content.js';
 import {
   segmentedHighlightRows,

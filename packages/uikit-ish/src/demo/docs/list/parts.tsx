@@ -1,14 +1,4 @@
 import { RadioGroup } from '@base-ui/react/radio-group';
-import { sfArchiveboxFill } from '@bradleyhodges/sfsymbols/sfArchiveboxFill';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfFlagFill } from '@bradleyhodges/sfsymbols/sfFlagFill';
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
-import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
-import { sfMinus } from '@bradleyhodges/sfsymbols/sfMinus';
-import { sfPersonCropCircleFill } from '@bradleyhodges/sfsymbols/sfPersonCropCircleFill';
-import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
-import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
@@ -36,6 +26,18 @@ import { codeLabel } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import {
+  sfArchiveboxFill,
+  sfEllipsis,
+  sfFlagFill,
+  sfHeartFill,
+  sfICircle,
+  sfMinus,
+  sfPersonCropCircleFill,
+  sfPlus,
+  sfSquareAndPencil,
+  sfTrashFill,
+} from '../../tooling/icons.js';
 import { contacts, messages, planets, settings } from './content.js';
 import {
   forwardClickRows,

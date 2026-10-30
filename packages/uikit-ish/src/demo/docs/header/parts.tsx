@@ -1,4 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
 import { FunctionComponent } from 'react';
 
 import {
@@ -15,6 +14,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfChevronBackward } from '../../tooling/icons.js';
 import { names } from '../viewport/content.js';
 import {
   headerAccessoryRows,

@@ -1,7 +1,4 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
-import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfPlayFill } from '@bradleyhodges/sfsymbols/sfPlayFill';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
@@ -16,6 +13,11 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import {
+  sfForwardFill,
+  sfMagnifyingglass,
+  sfPlayFill,
+} from '../../tooling/icons.js';
 import {
   collapsedSelectionRows,
   tabBarAccessoryRows,

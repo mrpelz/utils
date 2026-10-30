@@ -1,8 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
 import { Fragment, FunctionComponent } from 'react';
 
 import {
@@ -23,6 +18,13 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfChevronBackward,
+  sfEllipsis,
+  sfFolder,
+  sfSquareAndArrowUp,
+  sfSquareAndPencil,
+} from '../../tooling/icons.js';
 import { names } from '../viewport/content.js';
 import {
   toolbarButtonRows,

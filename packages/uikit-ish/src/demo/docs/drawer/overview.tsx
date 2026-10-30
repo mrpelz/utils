@@ -1,4 +1,3 @@
-import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
 import { FunctionComponent } from 'react';
 
 import {
@@ -22,6 +21,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfListBullet } from '../../tooling/icons.js';
 import { names } from '../viewport/content.js';
 import {
   drawerPopupRows,

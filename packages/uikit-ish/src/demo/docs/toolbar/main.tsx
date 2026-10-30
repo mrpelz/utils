@@ -1,12 +1,5 @@
 import './style.css';
 
-import { sfArchivebox } from '@bradleyhodges/sfsymbols/sfArchivebox';
-import { sfArrowshapeTurnUpLeft } from '@bradleyhodges/sfsymbols/sfArrowshapeTurnUpLeft';
-import { sfFlag } from '@bradleyhodges/sfsymbols/sfFlag';
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -20,6 +13,15 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import {
+  sfArchivebox,
+  sfArrowshapeTurnUpLeft,
+  sfFlag,
+  sfFolder,
+  sfSquareAndArrowUp,
+  sfSquareAndPencil,
+  sfTrash,
+} from '../../tooling/icons.js';
 import {
   getPropOptionsButton,
   getPropOptionsPageControl,

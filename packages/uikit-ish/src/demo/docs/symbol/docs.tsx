@@ -17,9 +17,10 @@ export const symbolRows: readonly PropRow[] = [
       <code>svgPathData</code>, each a layer, its <code>fillOpacity</code>{' '}
       relative to the most opaque one’s; <code>viewBox</code>; optionally{' '}
       <code>sourceName</code>, and <code>unitsPerEm</code>: 20 by default, SF
-      Symbols’). E.g. an SF Symbol from <code>@bradleyhodges/sfsymbols</code> (
-      <code>sfBell</code>): its icons have this shape, no dependency of the
-      library’s (mind Apple’s terms for SF Symbols).
+      Symbols’). The library ships no icons: e.g. an SF Symbol from{' '}
+      <code>@bradleyhodges/sfsymbols</code> (<code>sfBell</code>) has this shape
+      (Apple’s, licensed for Apple platforms only; no dependency of the
+      library’s).
     </>,
   ],
   [

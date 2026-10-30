@@ -7,8 +7,9 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { propOptionsContent, propOptionsSymbol } from './props.js';
 
 /**
- * An SF Symbol (from `@bradleyhodges/sfsymbols`), sized as the glyph of
- * the text around it, in its color; optionally with a badge on it.
+ * An icon (an SF Symbol: not the library's, loaded from unpkg, see
+ * tooling/icons.ts), sized as the glyph of the text around it, in its
+ * color; optionally with a badge on it.
  */
 export const SymbolDemo: FunctionComponent = () => {
   const id = 'symbol';

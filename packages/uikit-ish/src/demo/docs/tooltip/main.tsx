@@ -1,4 +1,3 @@
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
 import { FunctionComponent, useMemo } from 'react';
 
 import { Button, Symbol, Tooltip } from '../../../components/index.js';
@@ -6,6 +5,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { sfSquareAndArrowUp } from '../../tooling/icons.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,

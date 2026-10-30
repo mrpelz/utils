@@ -1,7 +1,6 @@
 import './style.css';
 
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -21,6 +20,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfMagnifyingglass } from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   tabBarAccessoryRows,

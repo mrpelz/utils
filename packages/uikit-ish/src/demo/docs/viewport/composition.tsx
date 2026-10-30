@@ -1,7 +1,4 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
-import { sfArrowDown } from '@bradleyhodges/sfsymbols/sfArrowDown';
-import { sfArrowUp } from '@bradleyhodges/sfsymbols/sfArrowUp';
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { FunctionComponent, RefObject, useRef, useState } from 'react';
 
 import {
@@ -29,6 +26,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfArrowDown, sfArrowUp, sfHeartFill } from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { messages } from '../list/content.js';
 import { phoneTabs, phoneTabValues } from '../tab-bar/tabs.js';

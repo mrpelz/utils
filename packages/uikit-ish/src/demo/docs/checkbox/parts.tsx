@@ -1,5 +1,4 @@
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -15,6 +14,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfHeartFill } from '../../tooling/icons.js';
 import {
   checkboxGroupRows,
   checkboxIndicatorRows,

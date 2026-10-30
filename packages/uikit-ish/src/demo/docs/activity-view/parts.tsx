@@ -1,8 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfDocumentOnDocument } from '@bradleyhodges/sfsymbols/sfDocumentOnDocument';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -17,6 +15,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfDocumentOnDocument, sfHeart } from '../../tooling/icons.js';
 import { photo } from '../avatar/props.js';
 import {
   activityViewActionRows,

@@ -1,6 +1,5 @@
 import './style.css';
 
-import { sfBell } from '@bradleyhodges/sfsymbols/sfBell';
 import { FunctionComponent } from 'react';
 
 import {
@@ -21,6 +20,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfBell } from '../../tooling/icons.js';
 import { badgeRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 

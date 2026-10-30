@@ -1,28 +1,6 @@
 import './style.css';
 
 import { RadioGroup } from '@base-ui/react/radio-group';
-import { sfAirplane } from '@bradleyhodges/sfsymbols/sfAirplane';
-import { sfArchiveboxFill } from '@bradleyhodges/sfsymbols/sfArchiveboxFill';
-import { sfBellFill } from '@bradleyhodges/sfsymbols/sfBellFill';
-import { sfCheckmarkCircleFill } from '@bradleyhodges/sfsymbols/sfCheckmarkCircleFill';
-import { sfChevronUpChevronDown } from '@bradleyhodges/sfsymbols/sfChevronUpChevronDown';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfEnvelopeFill } from '@bradleyhodges/sfsymbols/sfEnvelopeFill';
-import { sfEnvelopeOpenFill } from '@bradleyhodges/sfsymbols/sfEnvelopeOpenFill';
-import { sfFlagFill } from '@bradleyhodges/sfsymbols/sfFlagFill';
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
-import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
-import { sfMinus } from '@bradleyhodges/sfsymbols/sfMinus';
-import { sfPersonCropCircleFill } from '@bradleyhodges/sfsymbols/sfPersonCropCircleFill';
-import { sfPersonFill } from '@bradleyhodges/sfsymbols/sfPersonFill';
-import { sfPinFill } from '@bradleyhodges/sfsymbols/sfPinFill';
-import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
-import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
-import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
-import { sfTagFill } from '@bradleyhodges/sfsymbols/sfTagFill';
-import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
-import { sfWifi } from '@bradleyhodges/sfsymbols/sfWifi';
 import { FunctionComponent, useMemo, useRef, useState } from 'react';
 
 import {
@@ -49,6 +27,30 @@ import {
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import {
+  sfAirplane,
+  sfArchiveboxFill,
+  sfBellFill,
+  sfCheckmarkCircleFill,
+  sfChevronUpChevronDown,
+  sfEllipsis,
+  sfEnvelopeFill,
+  sfEnvelopeOpenFill,
+  sfFlagFill,
+  sfHeartFill,
+  sfICircle,
+  sfMinus,
+  sfPersonCropCircleFill,
+  sfPersonFill,
+  sfPinFill,
+  sfPlus,
+  sfSquareAndPencil,
+  sfSunMax,
+  sfSunMin,
+  sfTagFill,
+  sfTrashFill,
+  sfWifi,
+} from '../../tooling/icons.js';
 import { contacts, messages, planets } from './content.js';
 import {
   getPropOptionsAccessory,

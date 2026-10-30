@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
-
-import { sfChevronUpChevronDown } from '@bradleyhodges/sfsymbols/sfChevronUpChevronDown';
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
-import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
-
 import { Symbol } from '../../../components/index.js';
 import { AddLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
+import {
+  sfChevronUpChevronDown,
+  sfHeartFill,
+  sfPlus,
+} from '../../tooling/icons.js';
 
 export const propOptionsContent = {
   symbol: [

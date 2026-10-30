@@ -1,9 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfPhoto } from '@bradleyhodges/sfsymbols/sfPhoto';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent } from 'react';
 
 import {
@@ -24,6 +21,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfPhoto, sfSquareAndArrowUp, sfTrash } from '../../tooling/icons.js';
 import { propOptionsOverviewRoot } from '../menu/props.js';
 import {
   contextualMenuPositionerRows,

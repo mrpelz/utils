@@ -205,6 +205,12 @@ export const IndexPage: FunctionComponent = () => (
         </span>
       </a>
     </nav>
+    <p>
+      No icons ship with the library. The demos show SF Symbols, which are
+      Apple’s and licensed for Apple platforms only: they are not part of the
+      library or its dependencies, and the demos load each from unpkg as they’re
+      shown. <a href="symbol#icons">Symbol</a> draws any icon’s outlines.
+    </p>
     <p>The components, grouped by what they&apos;re for:</p>
     <Contents
       sections={(Object.keys(categories) as Category[]).map((category) => [

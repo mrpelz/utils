@@ -1,10 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfDocumentOnDocument } from '@bradleyhodges/sfsymbols/sfDocumentOnDocument';
-import { sfEyeglasses } from '@bradleyhodges/sfsymbols/sfEyeglasses';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent } from 'react';
 
 import {
@@ -24,6 +20,12 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfDocumentOnDocument,
+  sfEyeglasses,
+  sfHeart,
+  sfXmark,
+} from '../../tooling/icons.js';
 import { photo } from '../avatar/props.js';
 import {
   activityViewActionRows,

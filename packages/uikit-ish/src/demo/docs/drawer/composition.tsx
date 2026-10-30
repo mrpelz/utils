@@ -1,5 +1,3 @@
-import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
-import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
@@ -27,6 +25,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfICircle, sfListBullet } from '../../tooling/icons.js';
 import {
   getPropOptionsGuideColumn,
   propOptionsGuideRoot,

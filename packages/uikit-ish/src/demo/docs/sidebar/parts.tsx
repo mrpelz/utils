@@ -1,6 +1,3 @@
-import { sfFolderBadgePlus } from '@bradleyhodges/sfsymbols/sfFolderBadgePlus';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
 import { FunctionComponent } from 'react';
 
 import {
@@ -16,6 +13,11 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import {
+  sfFolderBadgePlus,
+  sfMagnifyingglass,
+  sfSquareAndPencil,
+} from '../../tooling/icons.js';
 import { sidebarSections } from './content.js';
 import {
   sidebarRootRows,

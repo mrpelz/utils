@@ -1,8 +1,5 @@
 import './style.css';
 
-import { sfAirplane } from '@bradleyhodges/sfsymbols/sfAirplane';
-import { sfIcloudSlash } from '@bradleyhodges/sfsymbols/sfIcloudSlash';
-import { sfWifi } from '@bradleyhodges/sfsymbols/sfWifi';
 import { FunctionComponent } from 'react';
 
 import { List, Symbol } from '../../../components/index.js';
@@ -13,6 +10,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfAirplane, sfIcloudSlash, sfWifi } from '../../tooling/icons.js';
 
 /** Settings' rows: each a symbol, white on its color, as its image. */
 const RowImages: FunctionComponent = () => (

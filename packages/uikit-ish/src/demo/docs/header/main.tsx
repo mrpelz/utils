@@ -1,9 +1,5 @@
 import './style.css';
 
-import { sfCheckmark } from '@bradleyhodges/sfsymbols/sfCheckmark';
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
 import { FunctionComponent } from 'react';
 
 import {
@@ -22,6 +18,12 @@ import {
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import {
+  sfCheckmark,
+  sfChevronBackward,
+  sfEllipsis,
+  sfSquareAndArrowUp,
+} from '../../tooling/icons.js';
 import {
   propOptionsBar,
   propOptionsLargeTitle,

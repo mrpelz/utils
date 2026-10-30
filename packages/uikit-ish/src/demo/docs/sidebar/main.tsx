@@ -1,21 +1,5 @@
 import './style.css';
 
-import { sfCalendar } from '@bradleyhodges/sfsymbols/sfCalendar';
-import { sfClock } from '@bradleyhodges/sfsymbols/sfClock';
-import { sfDocument } from '@bradleyhodges/sfsymbols/sfDocument';
-import { sfEye } from '@bradleyhodges/sfsymbols/sfEye';
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfFolderBadgePlus } from '@bradleyhodges/sfsymbols/sfFolderBadgePlus';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
-import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfPerson2 } from '@bradleyhodges/sfsymbols/sfPerson2';
-import { sfPhoto } from '@bradleyhodges/sfsymbols/sfPhoto';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
-import { sfTextformat } from '@bradleyhodges/sfsymbols/sfTextformat';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
-import { sfTray } from '@bradleyhodges/sfsymbols/sfTray';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
@@ -38,6 +22,24 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import {
+  sfCalendar,
+  sfClock,
+  sfDocument,
+  sfEye,
+  sfFolder,
+  sfFolderBadgePlus,
+  sfHeart,
+  sfICircle,
+  sfListBullet,
+  sfMagnifyingglass,
+  sfPerson2,
+  sfPhoto,
+  sfSquareAndPencil,
+  sfTextformat,
+  sfTrash,
+  sfTray,
+} from '../../tooling/icons.js';
 import { propOptionsPopup } from '../drawer/props.js';
 import {
   getPropOptionsSidebarColumn,

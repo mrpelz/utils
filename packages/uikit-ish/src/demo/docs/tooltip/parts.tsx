@@ -1,8 +1,5 @@
 import './style.css';
 
-import { sfPlusSquareOnSquare } from '@bradleyhodges/sfsymbols/sfPlusSquareOnSquare';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -18,6 +15,11 @@ import { codeLabel } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import {
+  sfPlusSquareOnSquare,
+  sfSquareAndArrowUp,
+  sfTrash,
+} from '../../tooling/icons.js';
 import {
   tooltipHandleRows,
   tooltipHandleTypeRows,

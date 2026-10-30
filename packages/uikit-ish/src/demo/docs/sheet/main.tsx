@@ -1,7 +1,5 @@
 import './style.css';
 
-import { sfArrowUp } from '@bradleyhodges/sfsymbols/sfArrowUp';
-import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -16,6 +14,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { sfArrowUp, sfXmark } from '../../tooling/icons.js';
 import { getPropOptionsRoot, propOptionsPopup } from './props.js';
 
 /**

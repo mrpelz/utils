@@ -1,4 +1,3 @@
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { FunctionComponent } from 'react';
 
 import { Button, Symbol } from '../../../components/index.js';
@@ -12,6 +11,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfHeartFill } from '../../tooling/icons.js';
 import { buttonRootRows } from './docs.js';
 import {
   propOptionsOverviewContent,

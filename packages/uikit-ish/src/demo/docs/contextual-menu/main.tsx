@@ -1,9 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfPhoto } from '@bradleyhodges/sfsymbols/sfPhoto';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -16,6 +13,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { sfPhoto, sfSquareAndArrowUp, sfTrash } from '../../tooling/icons.js';
 import {
   getPropOptionsItem as getPropOptionsMenuItem,
   propOptionsItemDestructive as propOptionsMenuItemDestructive,

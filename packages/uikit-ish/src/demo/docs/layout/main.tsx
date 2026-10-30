@@ -1,6 +1,5 @@
 import './style.css';
 
-import { sfFolderFill } from '@bradleyhodges/sfsymbols/sfFolderFill';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -14,6 +13,7 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { sfFolderFill } from '../../tooling/icons.js';
 import { useLayoutControls } from './props.js';
 
 /**

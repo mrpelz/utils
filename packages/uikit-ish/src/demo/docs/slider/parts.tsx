@@ -1,6 +1,4 @@
 import { Slider as BaseSlider } from '@base-ui/react/slider';
-import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
-import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
 import { FunctionComponent, useMemo } from 'react';
 
 import { Slider, Symbol } from '../../../components/index.js';
@@ -13,6 +11,7 @@ import {
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfSunMax, sfSunMin } from '../../tooling/icons.js';
 import {
   sliderControlRows,
   sliderIndicatorRows,

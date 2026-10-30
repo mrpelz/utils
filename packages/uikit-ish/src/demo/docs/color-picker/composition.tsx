@@ -1,7 +1,5 @@
 import '../sheet/style.css';
 
-import { sfEyedropper } from '@bradleyhodges/sfsymbols/sfEyedropper';
-import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -26,6 +24,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfEyedropper, sfXmark } from '../../tooling/icons.js';
 import { propOptionsPresentation } from './props.js';
 
 /** The regular pattern: a well opening the picker in a popover. */

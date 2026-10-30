@@ -1,7 +1,3 @@
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -34,6 +30,12 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfFolder,
+  sfListBullet,
+  sfMagnifyingglass,
+  sfTrash,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { rowTitles, sidebarSections } from './content.js';
 import { propOptionsAdaptiveContent } from './props.js';

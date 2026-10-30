@@ -1,7 +1,9 @@
-import { sfClockFill } from '@bradleyhodges/sfsymbols/sfClockFill';
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
-import { sfPersonCropCircleFill } from '@bradleyhodges/sfsymbols/sfPersonCropCircleFill';
-import { sfRecordingtape } from '@bradleyhodges/sfsymbols/sfRecordingtape';
+import {
+  sfClockFill,
+  sfHeartFill,
+  sfPersonCropCircleFill,
+  sfRecordingtape,
+} from '../../tooling/icons.js';
 
 /**
  * The guide pages' tabs, Phone's: value, label, symbol. Data only:

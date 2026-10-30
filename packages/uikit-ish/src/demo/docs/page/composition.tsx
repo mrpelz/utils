@@ -1,6 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -24,6 +21,11 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfChevronBackward,
+  sfFolder,
+  sfSquareAndPencil,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { pages } from '../navigation/content.js';
 import { rowTitles, sidebarSections } from '../sidebar/content.js';

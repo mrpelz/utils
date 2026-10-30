@@ -1,12 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfLink } from '@bradleyhodges/sfsymbols/sfLink';
-import { sfPencil } from '@bradleyhodges/sfsymbols/sfPencil';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -24,6 +18,14 @@ import { codeLabel, useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import {
+  sfFolder,
+  sfHeart,
+  sfLink,
+  sfPencil,
+  sfSquareAndArrowUp,
+  sfTrash,
+} from '../../tooling/icons.js';
 import {
   menuBackdropRows,
   menuCheckboxItemRows,

@@ -1,4 +1,3 @@
-import { sfEyedropper } from '@bradleyhodges/sfsymbols/sfEyedropper';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -14,6 +13,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfEyedropper } from '../../tooling/icons.js';
 import {
   colorPickerEyedropperRows,
   colorPickerHeaderRows,

@@ -1,9 +1,6 @@
 import '../toolbar/style.css';
 import './style.css';
 
-import { sfBellFill } from '@bradleyhodges/sfsymbols/sfBellFill';
-import { sfEnvelopeFill } from '@bradleyhodges/sfsymbols/sfEnvelopeFill';
-import { sfGearshapeFill } from '@bradleyhodges/sfsymbols/sfGearshapeFill';
 import { FunctionComponent } from 'react';
 
 import {
@@ -22,6 +19,11 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfBellFill,
+  sfEnvelopeFill,
+  sfGearshapeFill,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 /** Settings' rows: a pending update counted in its row. */

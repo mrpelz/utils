@@ -1,6 +1,5 @@
 import './style.css';
 
-import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -23,6 +22,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfXmark } from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   popoverPositionerRows,

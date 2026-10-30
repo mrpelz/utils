@@ -1,4 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
 import { FunctionComponent, useCallback, useState } from 'react';
 
 import {
@@ -21,6 +20,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfChevronBackward } from '../../tooling/icons.js';
 import { pages } from './content.js';
 import { navigationRootRows, navigationStackRows } from './docs.js';
 import { useNavigationControls } from './props.js';

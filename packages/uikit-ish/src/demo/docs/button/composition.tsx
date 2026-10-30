@@ -1,10 +1,3 @@
-import { sfChevronUpChevronDown } from '@bradleyhodges/sfsymbols/sfChevronUpChevronDown';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfPlayFill } from '@bradleyhodges/sfsymbols/sfPlayFill';
-import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
-import { sfShuffle } from '@bradleyhodges/sfsymbols/sfShuffle';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
-import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent } from 'react';
 
 import { Alert, Button, Symbol } from '../../../components/index.js';
@@ -17,6 +10,15 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfChevronUpChevronDown,
+  sfEllipsis,
+  sfPlayFill,
+  sfPlus,
+  sfShuffle,
+  sfTrash,
+  sfXmark,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */

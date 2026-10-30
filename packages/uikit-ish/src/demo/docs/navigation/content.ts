@@ -1,5 +1,4 @@
-import { sfEnvelope } from '@bradleyhodges/sfsymbols/sfEnvelope';
-import { sfGearshape } from '@bradleyhodges/sfsymbols/sfGearshape';
+import { sfEnvelope, sfGearshape } from '../../tooling/icons.js';
 
 // Content for the navigation's demos (see main.tsx, overview.tsx, …).
 

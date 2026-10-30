@@ -1,8 +1,5 @@
+import { sfAirplane, sfBellFill, sfWifi } from '../../tooling/icons.js';
 // The List pages' content (data only), shared by its demos.
-
-import { sfAirplane } from '@bradleyhodges/sfsymbols/sfAirplane';
-import { sfBellFill } from '@bradleyhodges/sfsymbols/sfBellFill';
-import { sfWifi } from '@bradleyhodges/sfsymbols/sfWifi';
 
 /** Settings rows: title, symbol, the image's color, detail, subtitle. */
 export const settings = [

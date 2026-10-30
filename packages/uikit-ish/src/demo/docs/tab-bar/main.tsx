@@ -1,11 +1,6 @@
 import './style.css';
 
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
-import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
-import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfPlayFill } from '@bradleyhodges/sfsymbols/sfPlayFill';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
@@ -19,6 +14,13 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import {
+  sfForwardFill,
+  sfHeartFill,
+  sfListBullet,
+  sfMagnifyingglass,
+  sfPlayFill,
+} from '../../tooling/icons.js';
 import {
   getPropOptionsTab,
   propOptionsAccessoryContent,

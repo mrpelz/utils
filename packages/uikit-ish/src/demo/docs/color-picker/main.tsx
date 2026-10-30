@@ -1,7 +1,5 @@
 import '../sheet/style.css';
 
-import { sfEyedropper } from '@bradleyhodges/sfsymbols/sfEyedropper';
-import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent, ReactNode, useMemo, useState } from 'react';
 
 import {
@@ -18,6 +16,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { sfEyedropper, sfXmark } from '../../tooling/icons.js';
 import {
   getPropOptionsPanel,
   getPropOptionsRoot,
