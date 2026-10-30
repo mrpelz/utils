@@ -5,7 +5,14 @@ import { Radio as BaseRadio } from '@base-ui/react/radio';
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import { ComponentProps, forwardRef } from 'react';
 
-import { cn, usePointerDrag, useSecondaryClick } from '../utils/main.js';
+import {
+  cn,
+  type DelayedLens,
+  delayLens,
+  isKeyboardFocus,
+  usePointerDrag,
+  useSecondaryClick,
+} from '../utils/main.js';
 import type { SegmentedItemProps, SegmentedRootProps } from './props.js';
 
 export type { SegmentedItemProps, SegmentedRootProps } from './props.js';
@@ -33,14 +40,17 @@ export type { SegmentedItemProps, SegmentedRootProps } from './props.js';
 // - Chained sibling combinators replace Framework7's `:nth-child()`, as Base UI
 //   renders a hidden `<input>` next to each radio.
 // - The highlight is hidden while no item is checked.
-// - The browser's default focus ring is kept (Framework7 removes it).
-// - Pressing an item turns the selection into a glass lens that follows the
-//   pointer and checks the closest item on release (Framework7 has no lens
-//   here; it's the tab bar's, see `tab-bar/main.tsx`). It replaces
-//   Framework7's pressed background. The lens is drawn above the items and
-//   outside the track, so the track doesn't clip its content; the highlight
-//   clips itself (and its shadow) to the track. Sideways, it
-//   grows by at most twice as much as vertically (wide items).
+// - The browser's default focus ring is kept (Framework7 removes it), on
+//   keyboard focus only (an item focused when pressed matches :focus-visible
+//   on touch).
+// - Pressing an item (held a moment or dragged; a quick tap only checks it)
+//   turns the selection into a glass lens that follows the pointer and
+//   checks the closest item on release (Framework7 has no lens here; it's
+//   the tab bar's, see `tab-bar/main.tsx`). It replaces Framework7's pressed
+//   background. The lens is drawn above the items and outside the track, so
+//   the track doesn't clip its content; the highlight clips itself (and its
+//   shadow) to the track. Sideways, it grows by at most twice as much as
+//   vertically (wide items).
 
 const isEnabled = (item: HTMLElement) =>
   !Object.hasOwn(item.dataset, 'disabled');
@@ -130,19 +140,25 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
       className,
       children,
       hideSeparators,
+      onFocus,
       onLostPointerCapture,
       onPointerCancel,
       onPointerDown,
       onPointerMove,
       onPointerUp,
+      onTouchMove,
       ...props
     },
     ref,
   ) => {
-    const handlers = usePointerDrag<HTMLDivElement, { item?: HTMLElement }>(
+    const handlers = usePointerDrag<
+      HTMLDivElement,
+      { item?: HTMLElement; lens: DelayedLens }
+    >(
       {
         end: (root, state, isCancelled) => {
-          const { item } = state;
+          const { item, lens } = state;
+          lens.cancel();
 
           if (!isCancelled && item) {
             if (!Object.hasOwn(item.dataset, 'checked')) item.click();
@@ -151,7 +167,13 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
 
           release(root, isCancelled ? undefined : item);
         },
+        // Held (its lens shown), the touch doesn't scroll.
+        isHolding: ({ lens }, position) => {
+          lens.move(position);
+          return lens.isShown();
+        },
         move: (root, state, event) => {
+          state.lens.move(event);
           state.item = press(root, event.clientX);
         },
         start: (root, event) => {
@@ -162,13 +184,15 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
           }
 
           // Place the lens at the pointer without a transition, then let it
-          // follow without delay; only opacity and scale animate.
+          // follow without delay; only opacity and scale animate. Shown a
+          // moment later (a quick tap only selects, see `delayLens`).
           root.style.setProperty('--uikit-segmented-lens-move-duration', '0s');
           const item = press(root, event.clientX);
-          root.getBoundingClientRect();
-          root.style.setProperty('--uikit-segmented-pressed', '1');
+          const lens = delayLens(event, () =>
+            root.style.setProperty('--uikit-segmented-pressed', '1'),
+          );
 
-          return { item };
+          return { item, lens };
         },
       },
       {
@@ -177,6 +201,7 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
         onPointerDown,
         onPointerMove,
         onPointerUp,
+        onTouchMove,
       },
     );
 
@@ -185,9 +210,18 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
         ref={ref}
         data-glass-context="auto"
         data-hide-separators={hideSeparators ? '' : undefined}
+        // Focused by a pointer (its item pressed, see `end`), no ring.
+        onFocus={(event) => {
+          onFocus?.(event);
+          if (isKeyboardFocus()) {
+            delete event.currentTarget.dataset.pointerFocus;
+          } else event.currentTarget.dataset.pointerFocus = '';
+        }}
         {...props}
         {...handlers}
         className={cn('uikit-segmented-root', className)}
+        // Its drags don't swipe a sheet (or drawer) away.
+        data-base-ui-swipe-ignore=""
         data-segmented-part="root"
       >
         {children}

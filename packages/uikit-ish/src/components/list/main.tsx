@@ -2808,6 +2808,7 @@ const Index = forwardRef<HTMLElement, ListIndexProps>(
       onPointerDown,
       onPointerMove,
       onPointerUp,
+      onTouchMove,
       ...props
     },
     ref,
@@ -2831,6 +2832,7 @@ const Index = forwardRef<HTMLElement, ListIndexProps>(
         onPointerDown,
         onPointerMove,
         onPointerUp,
+        onTouchMove,
       },
     );
 

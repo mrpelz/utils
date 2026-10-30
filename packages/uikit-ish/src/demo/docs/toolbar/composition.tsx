@@ -54,7 +54,7 @@ const navigationCode = `<Header.Root>
         <Toolbar.Subtitle>3 unread</Toolbar.Subtitle>
       </Toolbar.Title>
       <Toolbar.Trailing>
-        <Toolbar.Group>
+        <Toolbar.Group gap={20}>
           <Toolbar.Button aria-label="Share" shape="circle">…</Toolbar.Button>
           <Toolbar.Button aria-label="More" shape="circle">…</Toolbar.Button>
         </Toolbar.Group>
@@ -198,7 +198,7 @@ const NavigationBar: FunctionComponent = () => {
                 <Toolbar.Subtitle>{messages.length} unread</Toolbar.Subtitle>
               </Toolbar.Title>
               <Toolbar.Trailing>
-                <Toolbar.Group>
+                <Toolbar.Group gap={20}>
                   <Toolbar.Button
                     aria-label="Share"
                     shape="circle"
@@ -530,7 +530,8 @@ export const ToolbarComposition: FunctionComponent = () => (
       </li>
       <li>
         Back at its start, the page’s title (a subtitle below it) centered, the
-        page’s actions in a capsule at its end.
+        page’s actions in a capsule at its end, set wider apart than the default
+        12px (<code>gap</code>), as the bar has room.
       </li>
       <li>
         With a large title, the bar’s title fades in as it scrolls away (see{' '}
@@ -547,7 +548,12 @@ export const ToolbarComposition: FunctionComponent = () => (
           component="viewport"
           part="Viewport.BlockStart"
         />
-        , its sides, title and subtitle, and the{' '}
+        , its sides, title and subtitle, the capsule’s spacing (
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Group"
+        />{' '}
+        <code>gap</code>), and the{' '}
         <PartLink
           component="header"
           part="Header.Root"

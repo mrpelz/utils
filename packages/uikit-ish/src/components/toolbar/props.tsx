@@ -23,6 +23,12 @@ export type ToolbarRootProps = Omit<BaseToolbar.Root.Props, 'ref'> & {
 export type ToolbarSideProps = useRender.ComponentProps<'div'>;
 
 export type ToolbarGroupProps = Omit<BaseToolbar.Group.Props, 'ref'> & {
+  /**
+   * The space between its buttons (a length; a number: px), not at its
+   * ends (`--uikit-toolbar-group-gap`).
+   * @default 12
+   */
+  gap?: number | string;
   /** A tinted capsule. */
   prominent?: boolean;
   /**

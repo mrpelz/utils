@@ -34,6 +34,7 @@ export const propOptionsRoot = {
 
 export const propOptionsGroup = {
   ...commonPropOptions,
+  gap: [undefined, 0, 6, 24, '1em'] as const,
   prominent: [undefined, false, true] as const,
   // Over the tint: dark, light, or custom.
   textColor: [

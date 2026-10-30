@@ -109,6 +109,15 @@ export const toolbarSpacerRows: readonly PropRow[] = elementRows(
 
 export const toolbarGroupRows: readonly PropRow[] = [
   [
+    'gap',
+    'number | string',
+    code('12'),
+    <>
+      The space between its buttons (a length; a number: px), not at its ends
+      (also <code>--uikit-toolbar-group-gap</code>).
+    </>,
+  ],
+  [
     'prominent',
     'boolean',
     code('false'),

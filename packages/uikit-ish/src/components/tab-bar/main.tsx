@@ -19,6 +19,8 @@ import {
 import { GlassBackground } from '../glass/main.js';
 import {
   cn,
+  type DelayedLens,
+  delayLens,
   edgeScrollDelta,
   frameElapsed,
   useForwardedRef,
@@ -101,7 +103,8 @@ export type {
 //   pointer and activates the closest tab on release, as in Framework7
 //   `components/toolbar/tabbar-highlight.js` and `toolbar-ios.less`
 //   (`.tab-link-highlight-pressed`); unlike Framework7 for all pointer types,
-//   not only touch. The lens belongs to the list, so it moves (and can be
+//   not only touch, and only once held a moment or dragged (a quick tap
+//   only selects, see `delayLens`). The lens belongs to the list, so it moves (and can be
 //   dragged) between groups, and is drawn above the tabs, as it has to be above
 //   the groups' glass. While dragging, it follows the pointer without a
 //   transition (Framework7: 300ms ease-out).
@@ -1025,6 +1028,7 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
       onPointerDown,
       onPointerMove,
       onPointerUp,
+      onTouchMove,
       size = 'compact',
       style,
       ...props
@@ -1268,9 +1272,13 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
       [collapsed, collapsedPosition, markGroup, markedGroups],
     );
 
-    const handlers = usePointerDrag<HTMLDivElement, { tab?: HTMLElement }>(
+    const handlers = usePointerDrag<
+      HTMLDivElement,
+      { clientX: number; lens: DelayedLens; tab?: HTMLElement }
+    >(
       {
         end: (list, state, isCancelled) => {
+          state.lens.cancel();
           dragRef.current = undefined;
           stopScrollingRef.current?.();
 
@@ -1292,25 +1300,48 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
           reveal(state.tab);
         },
         move: (list, state, event) => {
+          state.clientX = event.clientX;
+          state.lens.move(event);
+          if (!state.lens.isShown()) return;
+
           state.tab = press(list, event.clientX);
           dragRef.current = { clientX: event.clientX, state };
         },
         start: (list, event) => {
           if (!(event.target instanceof Element)) return undefined;
-          if (!event.target.closest('[role="tab"]')) return undefined;
+          const tab = event.target.closest('[role="tab"]');
+          if (!(tab instanceof HTMLElement)) return undefined;
 
-          // Place (and size) the lens at the pointer without a transition,
-          // then let it follow without delay; only opacity and scale animate.
-          list.style.setProperty('--uikit-tab-bar-lens-move-duration', '0s');
-          list.style.setProperty('--uikit-tab-bar-lens-size-duration', '0s');
-          const tab = press(list, event.clientX);
-          list.getBoundingClientRect();
-          list.style.removeProperty('--uikit-tab-bar-lens-size-duration');
-          list.style.setProperty('--uikit-tab-bar-pressed', '1');
+          // The press (the lens, its group grown) a moment later: a quick
+          // tap only selects its tab (see `delayLens`).
+          const state: {
+            clientX: number;
+            lens: DelayedLens;
+            tab?: HTMLElement;
+          } = {
+            clientX: event.clientX,
+            lens: delayLens(event, () => {
+              // Place (and size) the lens at the pointer without a
+              // transition, then let it follow without delay; only opacity
+              // and scale animate.
+              list.style.setProperty(
+                '--uikit-tab-bar-lens-move-duration',
+                '0s',
+              );
+              list.style.setProperty(
+                '--uikit-tab-bar-lens-size-duration',
+                '0s',
+              );
+              state.tab = press(list, state.clientX);
+              list.getBoundingClientRect();
+              list.style.removeProperty('--uikit-tab-bar-lens-size-duration');
+              list.style.setProperty('--uikit-tab-bar-pressed', '1');
 
-          const state = { tab };
-          dragRef.current = { clientX: event.clientX, state };
-          stopScrollingRef.current = autoScroll(dragRef);
+              dragRef.current = { clientX: state.clientX, state };
+              stopScrollingRef.current = autoScroll(dragRef);
+            }),
+            tab,
+          };
           return state;
         },
       },
@@ -1320,6 +1351,7 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
         onPointerDown,
         onPointerMove,
         onPointerUp,
+        onTouchMove,
       },
     );
 
@@ -1338,6 +1370,8 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
           {...props}
           {...handlers}
           className={cn('uikit-tab-bar-list', className)}
+          // Its drags don't swipe a sheet (or drawer) away.
+          data-base-ui-swipe-ignore=""
           data-tab-bar-part="list"
           onClickCapture={(event: MouseEvent<HTMLDivElement>) => {
             (

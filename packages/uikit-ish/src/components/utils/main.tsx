@@ -10,9 +10,11 @@ import {
   FunctionComponent,
   MouseEvent as ReactMouseEvent,
   PointerEvent as ReactPointerEvent,
+  PointerEventHandler,
   ReactNode,
   Ref,
   RefObject,
+  TouchEventHandler,
   useCallback,
   useContext,
   useImperativeHandle,
@@ -22,10 +24,12 @@ import {
 } from 'react';
 
 import type {
+  DelayedLens,
   LogicalSide,
   PointerDrag,
   PointerDragHandlers,
   PointerHandler,
+  PointerPosition,
   PortalContainer,
   SecondaryClickHandlers,
   SecondaryClickProps,
@@ -33,6 +37,7 @@ import type {
 
 export type {
   ColorScheme,
+  DelayedLens,
   LogicalSide,
   PointerDrag,
   PointerDragHandlers,
@@ -510,6 +515,34 @@ export const useInitialFocus = (
     [popup],
   );
 
+// The last input: a key pressed (Tab, arrows), or a pointer down (also a
+// touch, wherever it focuses: e.g. beside a field, see
+// `preventFocusShift`). Tracked from the module's load, in a browser.
+let isKeyboardLast = false;
+if (typeof window !== 'undefined') {
+  window.addEventListener(
+    'keydown',
+    () => {
+      isKeyboardLast = true;
+    },
+    { capture: true },
+  );
+  window.addEventListener(
+    'pointerdown',
+    () => {
+      isKeyboardLast = false;
+    },
+    { capture: true },
+  );
+}
+
+/**
+ * Whether a focus now is the keyboard's (a key pressed last, not a
+ * pointer): for a ring on keyboard focus only where `:focus-visible` can't
+ * tell (a text field matches it however it's focused).
+ */
+export const isKeyboardFocus = (): boolean => isKeyboardLast;
+
 /**
  * Returns an internal ref object for a `forwardRef` component's element that
  * is also exposed through the forwarded ref.
@@ -522,6 +555,101 @@ export const useForwardedRef = <T,>(
   useImperativeHandle(forwardedRef, () => ref.current as T, []);
 
   return ref;
+};
+
+// How long a press waits before its glass lens shows (ms), and how far (px)
+// its pointer moves to show it at once: a quick tap (also a click, e.g. a
+// trackpad pressed down) only selects; held or dragged, the lens shows.
+const lensDelay = 120;
+const lensSlop = 4;
+
+/**
+ * Calls `show` (showing a press's lens) after `lensDelay`, or once the
+ * pointer, down at `start`, moved past `lensSlop` along `axis` (mostly: not
+ * a swipe across it, e.g. scrolling); unless cancelled first.
+ */
+export const delayLens = (
+  start: PointerPosition,
+  show: () => void,
+  axis: 'x' | 'y' = 'x',
+): DelayedLens => {
+  let isShown = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const showNow = () => {
+    clearTimeout(timer);
+    if (isShown) return;
+    isShown = true;
+    show();
+  };
+  timer = setTimeout(showNow, lensDelay);
+
+  return {
+    cancel: () => clearTimeout(timer),
+    isShown: () => isShown,
+    move: ({ clientX, clientY }) => {
+      const along = Math.abs(
+        axis === 'x' ? clientX - start.clientX : clientY - start.clientY,
+      );
+      const across = Math.abs(
+        axis === 'x' ? clientY - start.clientY : clientX - start.clientX,
+      );
+      if (along > lensSlop && along >= across) showNow();
+    },
+  };
+};
+
+/** Handlers of a touch hold (see `useTouchHold`). */
+type TouchHoldHandlers<T extends HTMLElement> = {
+  onPointerCancel?: PointerEventHandler<T>;
+  onPointerDown?: PointerEventHandler<T>;
+  onPointerUp?: PointerEventHandler<T>;
+  onTouchMove?: TouchEventHandler<T>;
+};
+
+/**
+ * Handlers keeping a touch held on an element (a moment, or dragged along
+ * `axis`, see `delayLens`) from scrolling, for a drag whose `touch-action`
+ * lets a swipe across it scroll (e.g. a slider's). They call the given
+ * `handlers` (e.g. the component's own props) first.
+ */
+export const useTouchHold = <T extends HTMLElement>(
+  axis: 'x' | 'y',
+  {
+    onPointerCancel,
+    onPointerDown,
+    onPointerUp,
+    onTouchMove,
+  }: TouchHoldHandlers<T> = {},
+): Required<TouchHoldHandlers<T>> => {
+  const hold = useRef<DelayedLens>(undefined);
+  const release = () => {
+    hold.current?.cancel();
+    hold.current = undefined;
+  };
+
+  return {
+    onPointerCancel: (event) => {
+      onPointerCancel?.(event);
+      release();
+    },
+    onPointerDown: (event) => {
+      onPointerDown?.(event);
+      release();
+      if (event.pointerType === 'mouse') return;
+      hold.current = delayLens(event, () => undefined, axis);
+    },
+    onPointerUp: (event) => {
+      onPointerUp?.(event);
+      release();
+    },
+    onTouchMove: (event) => {
+      onTouchMove?.(event);
+      const [touch] = event.changedTouches;
+      if (!hold.current || !touch || !event.cancelable) return;
+      hold.current.move(touch);
+      if (hold.current.isShown()) event.preventDefault();
+    },
+  };
 };
 
 /**
@@ -550,10 +678,14 @@ export const usePointerDrag = <T extends HTMLElement, State>(
   } | null>(null);
 
   const call = useCallback(
-    (
-      name: keyof PointerDragHandlers<T>,
-      event: Parameters<PointerHandler<T>>[0],
-    ) => (handlersRef.current[name] as PointerHandler<T> | undefined)?.(event),
+    <Name extends keyof PointerDragHandlers<T>>(
+      name: Name,
+      event: Parameters<PointerDragHandlers<T>[Name]>[0],
+    ) =>
+      (
+        handlersRef.current[name] as
+          ((handledEvent: typeof event) => void) | undefined
+      )?.(event),
     [],
   );
 
@@ -641,12 +773,27 @@ export const usePointerDrag = <T extends HTMLElement, State>(
     [call, finish],
   );
 
+  const onTouchMove = useCallback<TouchEventHandler<T>>(
+    (event) => {
+      call('onTouchMove', event);
+
+      const { current: active } = activeRef;
+      const [touch] = event.changedTouches;
+      if (!active || !touch || !event.cancelable) return;
+      if (dragRef.current.isHolding?.(active.state, touch)) {
+        event.preventDefault();
+      }
+    },
+    [call],
+  );
+
   return {
     onLostPointerCapture,
     onPointerCancel,
     onPointerDown,
     onPointerMove,
     onPointerUp,
+    onTouchMove,
   };
 };
 

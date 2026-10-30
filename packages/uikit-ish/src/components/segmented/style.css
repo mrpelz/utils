@@ -74,6 +74,11 @@
       cursor: var(--uikit-utils-cursor);
     }
 
+    /* The browser's ring, on keyboard focus only (see main.tsx). */
+    [data-pointer-focus] &:focus-visible {
+      outline: none;
+    }
+
     [role='radio'] ~ &::before {
       position: absolute;
       top: 0;

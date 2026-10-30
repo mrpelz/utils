@@ -12,7 +12,7 @@ import {
   useRef,
 } from 'react';
 
-import { cn, usePointerDrag, withStyle } from '../utils/main.js';
+import { cn, delayLens, usePointerDrag, withStyle } from '../utils/main.js';
 import type { Drag, SwitchRootProps } from './props.js';
 
 export type { SwitchRootProps } from './props.js';
@@ -60,8 +60,8 @@ const BaseRoot = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
   ),
 );
 
-// The pressed state is set here too, as `:active` is lost when the state
-// flips during a drag.
+// The pressed state is set here (not by `:active`: lost when the state flips
+// during a drag; and a quick tap shows no lens, see `delayLens`).
 const dragProperties = [
   '--uikit-switch-knob-move-duration',
   '--uikit-switch-knob-start',
@@ -80,6 +80,7 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
       onPointerDown,
       onPointerMove,
       onPointerUp,
+      onTouchMove,
       children,
       indeterminate = false,
       inputRef,
@@ -111,6 +112,7 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
     const handlers = usePointerDrag<HTMLSpanElement, Drag>(
       {
         end: (root, drag, isCancelled) => {
+          drag.lens.cancel();
           for (const property of dragProperties) {
             root.style.removeProperty(property);
           }
@@ -129,7 +131,13 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
             suppressClickRef.current = false;
           });
         },
+        // Held (its lens shown), the touch doesn't scroll.
+        isHolding: ({ lens }, position) => {
+          lens.move(position);
+          return lens.isShown();
+        },
         move: (root, drag, event) => {
+          drag.lens.move(event);
           drag.moved = (event.clientX - drag.startX) * drag.direction;
 
           const start = Math.max(
@@ -162,12 +170,16 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
           const direction = getComputedStyle(root).direction === 'rtl' ? -1 : 1;
           const min = Number.parseFloat(getComputedStyle(thumb).top);
 
-          root.style.setProperty('--uikit-switch-pressed', '1');
+          // (A quick tap only toggles: no lens, see `delayLens`.)
+          const lens = delayLens(event, () =>
+            root.style.setProperty('--uikit-switch-pressed', '1'),
+          );
 
           return {
             isChecked: isChecked(root),
             direction,
             isFlipped: false,
+            lens,
             max: rootRect.width - thumbRect.width - min,
             min,
             moved: 0,
@@ -186,6 +198,7 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
         onPointerDown,
         onPointerMove,
         onPointerUp,
+        onTouchMove,
       },
     );
 
@@ -212,6 +225,8 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
         {...props}
         {...handlers}
         className={cn('uikit-switch-root', className)}
+        // Its drags don't swipe a sheet (or drawer) away.
+        data-base-ui-swipe-ignore=""
         data-switch-part="root"
         onClickCapture={handleClickCapture}
       >

@@ -16,7 +16,7 @@ import {
   useState,
 } from 'react';
 
-import { cn, Reserve, withStyle } from '../utils/main.js';
+import { cn, Reserve, useTouchHold, withStyle } from '../utils/main.js';
 import type {
   RootContextValue,
   SliderLabelProps,
@@ -75,8 +75,26 @@ export type {
 const RootContext = createContext<RootContextValue>({});
 
 const Root = forwardRef<HTMLDivElement, Omit<SliderRootProps, 'ref'>>(
-  ({ className, style, thumbAlignment = 'edge', tint, ...props }, ref) => {
-    const { format, locale, max, min, step } = props;
+  (
+    {
+      className,
+      onPointerCancel,
+      onPointerDown,
+      onPointerUp,
+      onTouchMove,
+      style,
+      thumbAlignment = 'edge',
+      tint,
+      ...props
+    },
+    ref,
+  ) => {
+    const { format, locale, max, min, orientation, step } = props;
+    // Held, its touch doesn't scroll (see `useTouchHold`).
+    const holdHandlers = useTouchHold<HTMLDivElement>(
+      orientation === 'vertical' ? 'y' : 'x',
+      { onPointerCancel, onPointerDown, onPointerUp, onTouchMove },
+    );
     const [valueTooltip, setValueTooltip] = useState<ValueTooltip>(undefined);
     const context = useMemo(
       () => ({ format, locale, max, min, setValueTooltip, step, valueTooltip }),
@@ -87,11 +105,14 @@ const Root = forwardRef<HTMLDivElement, Omit<SliderRootProps, 'ref'>>(
       <RootContext.Provider value={context}>
         <BaseSlider.Root
           ref={ref}
+          // Its drags don't swipe a sheet (or drawer) away.
+          data-base-ui-swipe-ignore=""
           data-slider-part="root"
           // (Also for its ticks.)
           data-thumb-alignment={thumbAlignment}
           style={withStyle({ '--uikit-slider-tint': tint }, style)}
           thumbAlignment={thumbAlignment}
+          {...holdHandlers}
           {...props}
           className={cn('uikit-slider-root', className)}
         />

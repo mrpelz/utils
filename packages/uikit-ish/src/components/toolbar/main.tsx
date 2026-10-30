@@ -37,7 +37,7 @@ export type {
 //
 // A toolbar holds glass capsules (`Group`) of buttons (`Button`): at the
 // bottom (default) 48px high, their buttons 36px, 6px from the capsule's
-// ends and 12px apart; at the top (`placement`, a navigation bar) 44px high,
+// ends and 12px apart (`gap`); at the top (`placement`, a navigation bar) 44px high,
 // 4px from the ends. Capsules sit at the bar's start (`Leading`) and end
 // (`Trailing`), 12px (top: 10px) apart, anything else (a `Title`, a page
 // control, a field) between them. A button of its own is a glass `Button`
@@ -138,7 +138,7 @@ const GroupContext = createContext(false);
  */
 const Group = forwardRef<HTMLDivElement, ToolbarGroupProps>(
   (
-    { className, children, prominent, style, textColor, tint, ...props },
+    { className, children, gap, prominent, style, textColor, tint, ...props },
     ref,
   ) => {
     const isTinted = prominent ?? tint !== undefined;
@@ -156,6 +156,8 @@ const Group = forwardRef<HTMLDivElement, ToolbarGroupProps>(
         style={withStyle(
           {
             '--uikit-glass-tint': tint,
+            '--uikit-toolbar-group-gap':
+              typeof gap === 'number' ? `${String(gap)}px` : gap,
             '--uikit-toolbar-content': textColor,
             '--uikit-toolbar-content-blend':
               textColor === undefined ? undefined : 'normal',

@@ -8,11 +8,10 @@ import {
   PointerEvent,
   ReactNode,
   useId,
-  useRef,
   useState,
 } from 'react';
 
-import { cn } from '../utils/main.js';
+import { cn, isKeyboardFocus } from '../utils/main.js';
 import type { ClearProps } from './props.js';
 
 // Text fields, light and dark, in the semantic colors: 52px rows (padding
@@ -210,10 +209,10 @@ const Clear = forwardRef<HTMLButtonElement, ClearProps>(
  * `TextField.Control` (e.g. `type="search"`), and its buttons.
  */
 const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
-  ({ className, onBlur, onFocus, onPointerDown, ...props }, ref) => {
-    // Focused by a pointer (pressed first), or else by keyboard.
-    const pressed = useRef(false);
-    const [isKeyboardFocus, setIsKeyboardFocus] = useState(false);
+  ({ className, onBlur, onFocus, ...props }, ref) => {
+    // Focused by keyboard, or by a pointer (pressed anywhere: also beside
+    // it, see `preventFocusShift`).
+    const [isKeyboard, setIsKeyboard] = useState(false);
 
     return (
       // A search field (sidebars, toolbars): a capsule (36px high, on the
@@ -223,7 +222,7 @@ const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
       // 44px high, on the secondary fill, 11px in, its parts 8px apart.
       <label
         ref={ref}
-        data-keyboard-focus={isKeyboardFocus ? '' : undefined}
+        data-keyboard-focus={isKeyboard ? '' : undefined}
         data-text-field-part="search"
         onBlur={(event) => {
           onBlur?.(event);
@@ -232,17 +231,12 @@ const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
             !(relatedTarget instanceof Node) ||
             !event.currentTarget.contains(relatedTarget)
           ) {
-            setIsKeyboardFocus(false);
+            setIsKeyboard(false);
           }
         }}
         onFocus={(event) => {
           onFocus?.(event);
-          setIsKeyboardFocus(!pressed.current);
-          pressed.current = false;
-        }}
-        onPointerDown={(event) => {
-          onPointerDown?.(event);
-          pressed.current = true;
+          setIsKeyboard(isKeyboardFocus());
         }}
         {...props}
         className={cn('uikit-text-field-search', className)}

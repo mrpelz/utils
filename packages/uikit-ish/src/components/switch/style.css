@@ -109,10 +109,6 @@
       }
     }
 
-    &:active {
-      --uikit-switch-pressed: 1;
-    }
-
     &[data-disabled],
     &[data-readonly] {
       --uikit-switch-pressed: 0;

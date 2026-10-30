@@ -10,6 +10,7 @@ import {
   cloneElement,
   ComponentProps,
   createContext,
+  CSSProperties,
   FocusEvent,
   forwardRef,
   FunctionComponent,
@@ -29,7 +30,7 @@ import { Menu } from '../menu/main.js';
 import { PageControl } from '../page-control/main.js';
 import { Segmented } from '../segmented/main.js';
 import { Slider } from '../slider/main.js';
-import { cn, withStyle } from '../utils/main.js';
+import { cn, useTouchHold, withStyle } from '../utils/main.js';
 import type {
   ColorPickerChangeEventDetails,
   ColorPickerEyedropperProps,
@@ -295,6 +296,8 @@ const Spectrum: FunctionComponent = () => {
       aria-label="Spectrum"
       aria-valuetext={formatColor({ ...color, a: 1 })}
       className="uikit-color-picker-spectrum"
+      // Its drags don't swipe a sheet (or drawer) away.
+      data-base-ui-swipe-ignore=""
       data-color-picker-part="spectrum"
       role="slider"
       tabIndex={0}
@@ -360,6 +363,8 @@ const Opacity: FunctionComponent = () => {
   const { color, setColor } = useContext(PickerContext);
   const percent = Math.round(color.a * 100);
   const [draft, setDraft] = useState<string | undefined>(undefined);
+  // Held, its touch doesn't scroll (see `useTouchHold`).
+  const holdHandlers = useTouchHold<HTMLDivElement>('x');
 
   const commit = (event: Event) => {
     if (draft === undefined) return;
@@ -405,7 +410,15 @@ const Opacity: FunctionComponent = () => {
              throw off), over a track inset by half a knob. */}
           <BaseSlider.Control
             className="uikit-color-picker-opacity-control"
+            // Its drags don't swipe a sheet (or drawer) away.
+            data-base-ui-swipe-ignore=""
             data-color-picker-part="opacity"
+            // (Its thumb's place, for the hole in its gradient: the slider's
+            // value, not the color's alpha, which is rounded otherwise.)
+            style={
+              { '--uikit-color-picker-alpha': percent / 100 } as CSSProperties
+            }
+            {...holdHandlers}
           >
             <BaseSlider.Track>
               <BaseSlider.Thumb
