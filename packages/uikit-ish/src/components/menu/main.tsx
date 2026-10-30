@@ -504,6 +504,9 @@ const menuAt = (x: number, y: number) =>
 
 const pixels = (value: string) => Number.parseFloat(value) || 0;
 
+// How far (px) a finger moves before it's dragging (see `dragOverItems`).
+const dragSlop = 10;
+
 // Keeps a touch from scrolling (dragging over menus).
 const keepScroll = (event: TouchEvent) => {
   if (event.cancelable) event.preventDefault();
@@ -555,12 +558,16 @@ const scrollerOf = (menu: HTMLElement) =>
  * `submenuDwell`), to drag on into; released, the item
  * there is clicked. Held near an end of a menu that scrolls (either way), the
  * finger scrolls it (as the tab bar's lens does). The touch's own clicks are
- * kept from the items (internal; Menu's trigger, EditMenu).
+ * kept from the items (internal; Menu's trigger, EditMenu). Released outside
+ * every menu after dragging (moved past `dragSlop`, or over a menu), it calls
+ * `onReleaseOutside` (e.g. closing the menu, as Base UI does for a mouse
+ * pressed on the trigger and released elsewhere).
  */
 export const dragOverItems = (
   document: Document,
   pointerId: number,
   start?: { x: number; y: number },
+  onReleaseOutside?: (x: number, y: number) => void,
 ): void => {
   let item: HTMLElement | undefined;
   // The open submenu's item the touch began on, if any (see below).
@@ -578,6 +585,9 @@ export const dragOverItems = (
     'pointerleave',
   ] as const;
   let finger: Finger | undefined;
+  // Where the finger first moved, and whether it has dragged since.
+  let origin: { x: number; y: number } | undefined;
+  let hasDragged = false;
   // The menu the finger was last over, which it scrolls beyond its ends.
   let menu: HTMLElement | undefined;
   document.documentElement.setAttribute(draggingAttribute, '');
@@ -591,6 +601,10 @@ export const dragOverItems = (
     if (!finger) return;
 
     menu = menuAt(finger.x, finger.y) ?? menu;
+    origin ??= { x: finger.x, y: finger.y };
+    hasDragged ||=
+      menu !== undefined ||
+      Math.hypot(finger.x - origin.x, finger.y - origin.y) > dragSlop;
     const next = menuItemAt(finger.x, finger.y);
     if (isFirst) {
       isFirst = false;
@@ -653,6 +667,22 @@ export const dragOverItems = (
     }
   });
 
+  // Released: the item there clicked; dragged out of the menus and released
+  // there, nothing chosen.
+  const release = ({ clientX: x, clientY: y }: globalThis.PointerEvent) => {
+    if (!item) {
+      if (hasDragged && !menuAt(x, y)) onReleaseOutside?.(x, y);
+      return;
+    }
+
+    // An open submenu stays open (clicking its item would close it), unless
+    // it was already open as the touch began on its item: pressed again, it
+    // closes (see `SubmenuTrigger`).
+    if (!isSubmenuTrigger(item) || !isExpanded(item) || item === openAtStart) {
+      pressClick(item);
+    }
+  };
+
   const listener = (pointerEvent: globalThis.PointerEvent) => {
     // Not the drag's own (synthetic) hovering.
     if (!pointerEvent.isTrusted) return;
@@ -701,15 +731,7 @@ export const dragOverItems = (
       }
     }, 500);
 
-    // An open submenu stays open (clicking its item would close it), unless
-    // it was already open as the touch began on its item: pressed again, it
-    // closes (see `SubmenuTrigger`).
-    if (
-      item &&
-      (!isSubmenuTrigger(item) || !isExpanded(item) || item === openAtStart)
-    ) {
-      pressClick(item);
-    }
+    release(pointerEvent);
   };
 
   for (const type of [...types, ...boundaryTypes]) {
@@ -722,24 +744,30 @@ export const dragOverItems = (
 };
 
 /**
+ * Presses a menu's trigger as a mouse does (Base UI opens, or closes, its
+ * menu on a mouse down).
+ */
+const pressTrigger = (trigger: HTMLElement) => {
+  trigger.dispatchEvent(
+    new MouseEvent('mousedown', {
+      bubbles: true,
+      button: 0,
+      cancelable: true,
+      // (A press, not a screen reader's: Base UI takes a mouse down
+      // without a click count for one, highlighting the first item.)
+      detail: 1,
+      view: trigger.ownerDocument.defaultView,
+    }),
+  );
+};
+
+/**
  * Opens a menu by its trigger (`trigger`) as Base UI does on a mouse down;
  * a touch (`pointerId`) then drags over its items (see `dragOverItems`).
  */
 const openByTrigger = (trigger: HTMLElement, pointerId?: number) => {
   const document = trigger.ownerDocument;
-  if (trigger.getAttribute('aria-expanded') !== 'true') {
-    trigger.dispatchEvent(
-      new MouseEvent('mousedown', {
-        bubbles: true,
-        button: 0,
-        cancelable: true,
-        // (A press, not a screen reader's: Base UI takes a mouse down
-        // without a click count for one, highlighting the first item.)
-        detail: 1,
-        view: document.defaultView,
-      }),
-    );
-  }
+  if (trigger.getAttribute('aria-expanded') !== 'true') pressTrigger(trigger);
   if (pointerId === undefined) return;
 
   // Touch captures the pointer to the trigger; the menu's items are
@@ -747,7 +775,11 @@ const openByTrigger = (trigger: HTMLElement, pointerId?: number) => {
   if (trigger.hasPointerCapture(pointerId)) {
     trigger.releasePointerCapture(pointerId);
   }
-  dragOverItems(document, pointerId);
+  // Dragged out and released elsewhere (also back on the trigger): closed,
+  // as Base UI closes it for a mouse.
+  dragOverItems(document, pointerId, undefined, () => {
+    if (trigger.getAttribute('aria-expanded') === 'true') pressTrigger(trigger);
+  });
 };
 
 /** Opening by a secondary click: the trigger's own mouse down (internal). */
@@ -766,6 +798,10 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
   ({ onClick, onMouseDown, openOn, ...props }, ref) => {
     const isSecondary = openOn === 'secondaryClick';
     type Handler<E> = ((event: E) => void) | undefined;
+    // Pressed by a touch (opened or closed on its touch down, see below):
+    // its emulated mouse down and click aren't Base UI's (which would open
+    // the menu again; iOS emulates them after a tap, not after a drag).
+    const isTouchPress = useRef(false);
     // A secondary click (or a handler for it) opens the menu.
     const triggerProps = useSecondaryClick({
       ...props,
@@ -806,11 +842,15 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
         // a click by keys).
         onClick={(event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => {
           (onClick as Handler<typeof event>)?.(event);
-          if (isSecondary) event.preventBaseUIHandler();
+          if (isSecondary || isTouchPress.current) event.preventBaseUIHandler();
+          isTouchPress.current = false;
         }}
         onMouseDown={(event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => {
           (onMouseDown as Handler<typeof event>)?.(event);
-          if (isSecondary && !isOpeningBySecondaryClick) {
+          if (
+            (isSecondary && !isOpeningBySecondaryClick) ||
+            (isTouchPress.current && event.isTrusted)
+          ) {
             event.preventBaseUIHandler();
           }
         }}
@@ -820,6 +860,7 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
             (triggerProps as { onPointerDown?: unknown })
               .onPointerDown as Handler<typeof event>
           )?.(event);
+          isTouchPress.current = false;
           if (event.pointerType !== 'touch') return;
           // (Not Base UI's own: iOS' touches have no size, which it takes
           // for a screen reader's, highlighting the first item.)
@@ -827,8 +868,14 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
           if (isSecondary || event.defaultPrevented) return;
 
           // No emulated mouse events after the touch: Base UI opens and
-          // closes a menu on mouse down. Opens on touch down.
+          // closes a menu on mouse down. Opens on touch down; open, closes
+          // (as Base UI's mouse down does).
           event.preventDefault();
+          isTouchPress.current = true;
+          if (event.currentTarget.getAttribute('aria-expanded') === 'true') {
+            pressTrigger(event.currentTarget);
+            return;
+          }
           openByTrigger(event.currentTarget, event.pointerId);
         }}
         onPointerEnter={(event: BaseUIEvent<PointerEvent<HTMLElement>>) => {

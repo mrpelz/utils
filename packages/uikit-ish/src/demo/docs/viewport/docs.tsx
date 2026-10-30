@@ -377,6 +377,12 @@ export const useVisualViewportRows: readonly PropRow[] = [
     undefined,
     'What the visual viewport doesn’t show of the layout viewport’s bottom (px, rounded): the on-screen keyboard’s height (0 without one).',
   ],
+  [
+    'isHidden',
+    'boolean',
+    undefined,
+    'Whether the page is hidden (the Page Visibility API: another tab, the app left, also a Home Screen app’s). Meanwhile the rest is kept as it was (e.g. the keyboard’s height: the focus-shift guard focuses its field again as the page is shown); shown, it’s read anew once the keyboard has settled.',
+  ],
 ];
 
 const thresholdRow: PropRow = [
@@ -599,7 +605,7 @@ export const preventFocusShiftRows: readonly PropRow[] = [
     'target',
     'Document | HTMLElement',
     code('document'),
-    'Where touched text fields are focused without scrolling (its descendants).',
+    'Where touched text fields are focused without scrolling (its descendants), and the one focused as the page hides is focused again as it’s shown.',
   ],
 ];
 
@@ -610,7 +616,7 @@ export const useFocusShiftPreventionRows: readonly PropRow[] = [
     'target',
     'RefObject<HTMLElement | null>',
     'the document',
-    'Where touched text fields are focused without scrolling.',
+    'Where touched text fields are focused without scrolling, and the one focused as the page hides is focused again as it’s shown.',
   ],
   ['enabled', 'boolean', code('true'), 'Whether it guards (while mounted).'],
 ];

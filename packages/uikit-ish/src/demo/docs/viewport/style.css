@@ -160,12 +160,18 @@
   font-size: 15px;
   gap: 6px;
   opacity: var(--uikit-viewport-overscroll-progress, 0);
+
+  /* A layer of its own: its opacity and movement composited, not
+     repainted (WebKit otherwise kept its text painted, frozen where it was,
+     once released while moving). */
+  will-change: opacity, translate;
 }
 
 /* Released: gone at once (the page may have turned, its name changing
-   while it snaps back). */
+   while it snaps back); not painted at all. */
 .viewport-demo-pull[data-released] {
   opacity: 0;
+  visibility: hidden;
 }
 
 .viewport-demo-pull-arrow {

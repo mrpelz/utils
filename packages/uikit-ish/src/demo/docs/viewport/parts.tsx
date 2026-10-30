@@ -848,6 +848,8 @@ const UseVisualViewportView: FunctionComponent = () => {
           </dd>
           <dt>keyboardInset</dt>
           <dd>{visual.keyboardInset}</dd>
+          <dt>isHidden</dt>
+          <dd>{String(visual.isHidden)}</dd>
         </dl>
       }
     ></Component>
@@ -2324,6 +2326,18 @@ export const ViewportParts: FunctionComponent = () => (
       <li>
         The touch’s click doesn’t follow, and the caret goes where the field
         puts it (not where it was touched). Elsewhere, it does nothing.
+      </li>
+      <li>
+        The page hidden with a field focused in its target (another tab, a Home
+        Screen app left with the keyboard shown) and shown again: the field is
+        focused again without scrolling (its selection as it was), the page’s
+        scroll put back, so the keyboard returns with the bars where they were
+        (the{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />{' '}
+        keeps their push meanwhile).
       </li>
       <li>Until its returned function removes it.</li>
     </ul>

@@ -58,6 +58,7 @@ export const propOptionsIndicator = {
   ] as const,
   progress: [undefined, 0.25, 0.5, -0.25, 1.5] as const,
   duration: [undefined, 0.5, 2] as const,
+  synchronized: [undefined, false, true] as const,
   color: [
     undefined,
     'var(--color-ui-label)',
@@ -71,6 +72,7 @@ export const propOptionsGuideRoot = {
   ...propOptionsBar,
   min: [undefined, 0, 20] as const,
   max: [undefined, 100, 200] as const,
+  synchronized: [undefined, false, true] as const,
   format: [
     undefined,
     new MappedProp<Intl.NumberFormatOptions>(

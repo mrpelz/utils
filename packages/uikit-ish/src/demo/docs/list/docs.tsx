@@ -112,6 +112,22 @@ export const listRootRows: readonly PropRow[] = [
     code('false'),
     'Outlines its groups: hairlines above and below, or a border around inset ones.',
   ],
+  [
+    'dragToSelect',
+    'boolean',
+    code('true'),
+    <>
+      Its checkboxes (
+      <PartLink
+        component="list"
+        part="List.Checkbox"
+      />
+      ) pressed and dragged along the rows, selecting them as the first one
+      flips (on, or off), rows dragged back over returning; scrolling along near
+      the scroll container’s ends. Dragging from a checkbox, the page doesn’t
+      scroll (nor a sheet swipe away).
+    </>,
+  ],
   ...renderRows('div', 'HTMLElement'),
 ];
 

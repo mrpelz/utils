@@ -225,6 +225,12 @@ const rangePlace = (day: Date, range: DateRange | null) => {
   return undefined;
 };
 
+/**
+ * How long (ms) after a month settled (a swipe's scroll ending) the
+ * calendar's height changes (see `CalendarPanel`).
+ */
+const resizeDelay = 200;
+
 /** Controlled or uncontrolled state (as Base UI's components). */
 const useControlled = <T,>(
   value: T | undefined,
@@ -718,7 +724,10 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     monthRef.current = month;
   });
   const suppressClick = useRef(false);
-  const height = useRef<number | undefined>(undefined);
+  // The body's height, and its transition running (see below).
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const bodyHeight = useRef<number | undefined>(undefined);
+  const transition = useRef<Animation | undefined>(undefined);
   const titleId = useId();
   const rollId = useId();
 
@@ -776,20 +785,72 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
 
   // The strip as high as the shown month's days (its neighbours' clipped),
   // as they're laid out (not while hidden, e.g. in a closed row: none).
+  // Months of more or fewer weeks: the strip resized at once, the body
+  // around it transitioning (its content clipped meanwhile), a moment after
+  // the month settled (`resizeDelay`: resized as a swipe settled, it
+  // faltered). Under a roll, kept as it was (no shifts mid-roll):
+  // transitioning once the roll closes, at once.
+  const isRolled = rolled !== undefined;
+  const wasRolled = useRef(isRolled);
   useLayoutEffect(() => {
     const { current: days } = daysRef;
     const { current: pages } = pagesRef;
-    if (!days || !pages) return undefined;
+    const { current: body } = bodyRef;
+    const isClosing = wasRolled.current && !isRolled;
+    wasRolled.current = isRolled;
+    if (!days || !pages || !body || isRolled) return undefined;
+    let isPending = false;
+
     const fit = () => {
-      if (days.offsetHeight === 0) return;
-      height.current = days.offsetHeight;
+      if (days.offsetHeight === 0) return false;
       pages.style.height = `${String(days.offsetHeight)}px`;
+      return true;
     };
-    fit();
-    const observer = new ResizeObserver(fit);
+    const resize = () => {
+      isPending = false;
+      if (!fit()) return;
+      const next = body.offsetHeight;
+      const previous = bodyHeight.current;
+      bodyHeight.current = next;
+      if (previous === undefined || previous === next) return;
+      transition.current?.cancel();
+      body.style.overflow = 'clip';
+      const animation = body.animate(
+        [{ height: `${String(previous)}px` }, { height: `${String(next)}px` }],
+        { duration: 300, easing: 'ease' },
+      );
+      transition.current = animation;
+      const done = () => {
+        if (transition.current === animation) {
+          body.style.removeProperty('overflow');
+        }
+      };
+      animation.addEventListener('finish', done);
+      animation.addEventListener('cancel', done);
+    };
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    if (bodyHeight.current === undefined || isClosing) {
+      resize();
+    } else {
+      isPending = true;
+      timer = setTimeout(resize, resizeDelay);
+    }
+
+    // Resized otherwise (e.g. the text size): at once, the body's height
+    // as it is (not mid-transition: its own then).
+    const observer = new ResizeObserver(() => {
+      if (isPending) return;
+      fit();
+      if (transition.current?.playState === 'running') return;
+      bodyHeight.current = body.offsetHeight;
+    });
     observer.observe(days);
-    return () => observer.disconnect();
-  }, [month]);
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [isRolled, month, weekStart]);
 
   // The months side by side, scrolled sideways (see pager.ts): turned to,
   // by scrolling, its day focused.
@@ -818,25 +879,6 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     pagesRef,
   });
   const { goTo } = pager;
-
-  // Months of more or fewer weeks: once settled on one (not while
-  // scrolled: a native touch drag would falter), the strip's height
-  // transitioning (between heights laid out).
-  useLayoutEffect(() => {
-    const { current: days } = daysRef;
-    const { current: pages } = pagesRef;
-    if (!days || !pages) return;
-    const next = days.offsetHeight;
-    const previous = height.current;
-    if (next === 0) return;
-    height.current = next;
-    pages.style.height = `${String(next)}px`;
-    if (previous === undefined || previous === next) return;
-    pages.animate(
-      [{ height: `${String(previous)}px` }, { height: `${String(next)}px` }],
-      { duration: 300, easing: 'ease' },
-    );
-  }, [month, weekStart]);
 
   // Moved by keyboard: on past disabled days (in the direction moved), to
   // one that can be focused.
@@ -1215,6 +1257,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
       {/* The weekdays and days, or a roll in their place (keeping their size).
        */}
       <div
+        ref={bodyRef}
         className="uikit-date-picker-body"
         data-date-picker-part="body"
         data-rolled={rolled === undefined ? undefined : ''}

@@ -136,13 +136,20 @@ const touchedField = (
   return nearest;
 };
 
+/** The layout viewport scrolled back to `scroll` (see `preventFocusShift`). */
+const restoreScroll = (scroll: number) => {
+  if (Math.abs(window.scrollY - scroll) >= 1) window.scrollTo(0, scroll);
+};
+
 /**
  * iOS: a text field touched in `target` focused without scrolling (its
  * touch's end: the field focused, `preventScroll`, instead of the
  * browser's focusing, which scrolls the layout viewport); also touched
  * just beside it (see `touchedField`). The touch's click doesn't follow,
  * and the caret goes where the field puts it, not where it was touched.
- * Until the returned function removes it.
+ * The page hidden with one focused and shown again (e.g. a Home Screen app
+ * left and reopened), it's focused again without scrolling, the layout
+ * viewport's scroll as it was. Until the returned function removes it.
  */
 export const preventFocusShift = (
   target: Document | HTMLElement = document,
@@ -180,6 +187,66 @@ export const preventFocusShift = (
     field.focus({ preventScroll: true });
   };
 
+  // The page hidden with a text field focused in `target` (e.g. a Home
+  // Screen app left with the keyboard shown): that field, its selection
+  // and the layout viewport's scroll. Shown again, iOS may focus it anew
+  // itself, scrolling (or drop the keyboard): it's focused again here
+  // without scrolling (its selection as it was), the scroll put back, also
+  // a frame and a moment later (iOS' scrolling may follow).
+  let hidden:
+    | {
+        field: HTMLElement;
+        scroll: number;
+        selection?: [number | null, number | null];
+      }
+    | undefined;
+  let restores: ReturnType<typeof setTimeout>[] = [];
+  const onVisibility = () => {
+    for (const restore of restores) clearTimeout(restore);
+    restores = [];
+    if (document.visibilityState === 'hidden') {
+      const { activeElement } = document;
+      hidden =
+        activeElement instanceof HTMLElement &&
+        activeElement.matches(textField) &&
+        target.contains(activeElement)
+          ? {
+              field: activeElement,
+              scroll: window.scrollY,
+              selection:
+                activeElement instanceof HTMLInputElement ||
+                activeElement instanceof HTMLTextAreaElement
+                  ? [activeElement.selectionStart, activeElement.selectionEnd]
+                  : undefined,
+            }
+          : undefined;
+      return;
+    }
+
+    if (!hidden) return;
+    const { field, scroll, selection } = hidden;
+    hidden = undefined;
+    if (!field.isConnected || field.matches(':disabled')) return;
+    if (field === document.activeElement) field.blur();
+    field.focus({ preventScroll: true });
+    if (
+      selection &&
+      (field instanceof HTMLInputElement ||
+        field instanceof HTMLTextAreaElement)
+    ) {
+      try {
+        field.setSelectionRange(...selection);
+      } catch {
+        // (Fields without a selection, e.g. `type="email"`.)
+      }
+    }
+    restoreScroll(scroll);
+    requestAnimationFrame(() => restoreScroll(scroll));
+    restores = [100, 300].map((delay) =>
+      setTimeout(() => restoreScroll(scroll), delay),
+    );
+  };
+
   const listeners: [string, (event: Event) => void][] = [
     ['touchstart', onTouchStart],
     ['touchend', onTouchEnd],
@@ -187,10 +254,13 @@ export const preventFocusShift = (
   for (const [type, listener] of listeners) {
     target.addEventListener(type, listener, { capture: true, passive: false });
   }
+  document.addEventListener('visibilitychange', onVisibility);
   return () => {
     for (const [type, listener] of listeners) {
       target.removeEventListener(type, listener, { capture: true });
     }
+    document.removeEventListener('visibilitychange', onVisibility);
+    for (const restore of restores) clearTimeout(restore);
   };
 };
 

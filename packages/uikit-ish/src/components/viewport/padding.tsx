@@ -90,12 +90,41 @@ export type EdgeEffect = {
   tint: string | undefined;
 };
 
-/** A scope's anchors, and who's told of their changes. */
+/**
+ * A scope's anchors, and who's told of their changes. Their sizes measured
+ * by one observer, all at once (told once): one anchor shown as another's
+ * hidden (e.g. a tab's panel's bar), never none in between.
+ */
 const createStore = () => {
   const entries = new Set<Entry>();
   const listeners = new Set<() => void>();
   const notify = () => {
     for (const listener of listeners) listener();
+  };
+
+  const measured = new Map<Element, Entry>();
+  let observer: ResizeObserver | undefined;
+  const onResize = (records: ResizeObserverEntry[]) => {
+    let isChanged = false;
+    for (const record of records) {
+      const entry = measured.get(record.target);
+      if (!entry) continue;
+      const isBlock =
+        entry.edge === 'block-start' || entry.edge === 'block-end';
+      const box = record.contentBoxSize[0];
+      const border = record.borderBoxSize[0];
+      const size = Math.round(
+        (isBlock ? box?.blockSize : box?.inlineSize) ?? 0,
+      );
+      const outer = Math.round(
+        (isBlock ? border?.blockSize : border?.inlineSize) ?? 0,
+      );
+      if (size === entry.size && outer === entry.outer) continue;
+      entry.size = size;
+      entry.outer = outer;
+      isChanged = true;
+    }
+    if (isChanged) notify();
   };
 
   return {
@@ -105,6 +134,16 @@ const createStore = () => {
       return () => {
         entries.delete(entry);
         notify();
+      };
+    },
+    /** An anchor's element, its size measured into its entry (see above). */
+    measure: (element: Element, entry: Entry) => {
+      observer ??= new ResizeObserver(onResize);
+      measured.set(element, entry);
+      observer.observe(element);
+      return () => {
+        measured.delete(element);
+        observer?.unobserve(element);
       };
     },
     notify,
@@ -224,7 +263,6 @@ export const useAnchorRegistration = (
   useLayoutEffect(() => {
     const { current: element } = ref;
     if (!element) return undefined;
-    const isBlock = edge === 'block-start' || edge === 'block-end';
     const entry: Entry = {
       edge,
       effect,
@@ -236,25 +274,10 @@ export const useAnchorRegistration = (
     };
     entryRef.current = entry;
     const remove = store.add(entry);
-
-    const observer = new ResizeObserver(([record]) => {
-      const box = record?.contentBoxSize[0];
-      const border = record?.borderBoxSize[0];
-      const size = Math.round(
-        (isBlock ? box?.blockSize : box?.inlineSize) ?? 0,
-      );
-      const outer = Math.round(
-        (isBlock ? border?.blockSize : border?.inlineSize) ?? 0,
-      );
-      if (size === entry.size && outer === entry.outer) return;
-      entry.size = size;
-      entry.outer = outer;
-      store.notify();
-    });
-    observer.observe(element);
+    const unmeasure = store.measure(element, entry);
 
     return () => {
-      observer.disconnect();
+      unmeasure();
       entryRef.current = undefined;
       remove();
     };

@@ -7,6 +7,17 @@
       gap: 4px;
     }
 
+    /* Its search field beside tabs, or filling the glass it's in (see
+       Search's `variant`): taking the free space, as high as its container. */
+    &:has(> [data-variant='tab-bar']),
+    &:has(> [data-variant='tab-bar-collapsed']),
+    &:has(> [data-variant='toolbar']) {
+      min-width: 0;
+      flex: 1 1 0;
+      align-self: stretch;
+      justify-content: center;
+    }
+
     /* The clear button, only while filled, and by its mode (`data-mode`):
        while focused, while not, or either way; in a list row (in its
        content), taking no room until then, so a value aligned to the end
@@ -184,6 +195,69 @@
       flex: 1 1 auto;
       font-variation-settings: 'wght' 400;
       font-weight: round(down, 400, 100);
+    }
+
+    /* As a list row (inset grouped, see List): its background, height,
+       insets and corners. */
+    &[data-variant='row'] {
+      --uikit-text-field-search-height: 52px;
+      --uikit-text-field-search-padding: 16px;
+      --uikit-text-field-search-fill: var(
+        --color-ui-secondary-system-grouped-background
+      );
+
+      border-radius: var(--uikit-list-radius, 24px);
+    }
+
+    /* As a tab bar's (see TabBar) or a toolbar's (see Toolbar): on its
+       glass, in its content color. */
+    &[data-variant='tab-bar'],
+    &[data-variant='tab-bar-collapsed'],
+    &[data-variant='toolbar'] {
+      --uikit-text-field-search-fill: transparent;
+
+      color: var(--uikit-glass-content);
+
+      & > input::placeholder {
+        color: var(--uikit-glass-content);
+      }
+    }
+
+    /* A group's glass capsule (see GlassBackground), as high as its tabs
+       (collapsed too), or a toolbar group's, as its buttons; its content
+       above the glass. */
+    &[data-variant='tab-bar'],
+    &[data-variant='toolbar'] {
+      --uikit-text-field-search-padding: 16px;
+
+      position: relative;
+      flex: 1 1 0;
+
+      & > :not([data-glass-part]) {
+        position: relative;
+      }
+    }
+
+    &[data-variant='tab-bar'] {
+      --uikit-text-field-search-height: var(--uikit-tab-bar-tab-height, 54px);
+    }
+
+    /* (Its glass flush with its box, as the buttons'; a tab bar group's
+       extends beyond, as the groups'.) */
+    &[data-variant='toolbar'] {
+      --uikit-glass-outset: 0px;
+      --uikit-text-field-search-height: var(
+        --uikit-toolbar-group-height,
+        48px
+      );
+    }
+
+    /* Collapsed: on the glass it's in (e.g. an accessory's), filling it, no
+       insets of its own (the accessory's). */
+    &[data-variant='tab-bar-collapsed'] {
+      --uikit-text-field-search-padding: 0px;
+
+      flex: 1 1 auto;
     }
 
     /* Focused by keyboard only (a text field matches :focus-visible however

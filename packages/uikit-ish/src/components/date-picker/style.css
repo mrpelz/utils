@@ -178,6 +178,10 @@
     display: flex;
     overflow: auto hidden;
     box-sizing: content-box;
+
+    /* Its own height (at once), not the body's while that transitions
+       (see main.tsx). */
+    flex: none;
     align-items: start;
 
     /* (Not as wide as its months: as wide as the calendar, e.g. a

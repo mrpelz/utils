@@ -322,7 +322,11 @@ const SearchPart: FunctionComponent = () => {
       state={[state]}
       title="TextField.Search"
     >
-      <TextField.Root className="text-field-demo-standalone">
+      {/* (On glass's colors, as in a bar: its glass looks.) */}
+      <TextField.Root
+        className="text-field-demo-standalone"
+        data-glass-context="auto"
+      >
         <TextField.Search {...props}>
           <Symbol icon={sfMagnifyingglass} />
           <TextField.Control
@@ -562,6 +566,12 @@ export const TextFieldParts: FunctionComponent = () => (
       <li>
         Pressed anywhere, it focuses its control; focused by keyboard, an
         outline in the tint.
+      </li>
+      <li>
+        Its look (<code>variant</code>), by where it sits: the capsule; a list
+        row’s; a tab bar group’s glass capsule; on a collapsed tab bar’s glass;
+        a toolbar’s glass capsule (see{' '}
+        <a href="text-field/composition#a-search-field">Composition</a>).
       </li>
       <li>
         Renders a <code>label</code>.

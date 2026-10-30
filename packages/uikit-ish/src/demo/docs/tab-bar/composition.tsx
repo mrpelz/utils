@@ -2,6 +2,7 @@ import './style.css';
 
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { FunctionComponent, RefObject, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 import {
   Badge,
@@ -28,6 +29,7 @@ import {
 } from '../../tooling/guide/sections.js';
 import {
   sfForwardFill,
+  sfHeartFill,
   sfMagnifyingglass,
   sfPlayFill,
 } from '../../tooling/icons.js';
@@ -76,12 +78,23 @@ const [value, setValue] = useState('favorites');
 // The section last chosen, remaining while searching.
 const [section, setSection] = useState('favorites');
 const [sections] = collapsedSelection([sectionValues], section);
+const field = useRef(null);
 
+{/* Tracking the keyboard over its screen. */}
+<Viewport.Provider>
 <TabBar.Root
   value={value}
   onValueChange={(next) => {
-    setValue(next);
-    if (next !== 'search') setSection(next);
+    if (next !== 'search') {
+      setValue(next);
+      setSection(next);
+      return;
+    }
+    // Collapsed at once (its accessory shown), the field focused in the
+    // press (iOS shows the keyboard only then), not scrolled to (iOS
+    // would shift the bars).
+    flushSync(() => setValue(next));
+    field.current?.focus({ preventScroll: true });
   }}
 >
   {/* Searching, the bar collapses: its section remains. */}
@@ -109,9 +122,11 @@ const [sections] = collapsedSelection([sectionValues], section);
   {/* The search field, in the collapsed bar. */}
   <TabBar.Accessory visibleIn="collapsed">
     <TextField.Root>
-      <TextField.Search>
+      {/* On the accessory's glass, as the collapsed bar's. */}
+      <TextField.Search variant="tab-bar-collapsed">
         <Symbol icon={sfMagnifyingglass} />
         <TextField.Control
+          ref={field}
           aria-label="Search"
           placeholder="Search"
           type="search"
@@ -120,7 +135,46 @@ const [sections] = collapsedSelection([sectionValues], section);
       </TextField.Search>
     </TextField.Root>
   </TabBar.Accessory>
-</TabBar.Root>`;
+</TabBar.Root>
+</Viewport.Provider>`;
+
+const searchBesideCode = `const [query, setQuery] = useState('');
+
+{/* Tracking the keyboard over its screen. */}
+<Viewport.Provider>
+  <TabBar.Root defaultValue="favorites">
+    <Viewport.Content>…{/* the rows matching query */}</Viewport.Content>
+    <Viewport.BlockEnd>
+      <TabBar.List>
+        <TabBar.Group>
+          <TabBar.Indicator />
+          {/* Its only tab: a circle, nothing to choose (no selection). */}
+          <TabBar.Tab
+            aria-label="Favorites"
+            shape="circle"
+            value="favorites"
+          >
+            …
+          </TabBar.Tab>
+        </TabBar.Group>
+        {/* Beside the group, as a group's glass capsule. */}
+        <TextField.Root>
+          <TextField.Search variant="tab-bar">
+            <Symbol icon={sfMagnifyingglass} />
+            <TextField.Control
+              aria-label="Search"
+              placeholder="Search"
+              type="search"
+              value={query}
+              onValueChange={setQuery}
+            />
+            <TextField.Clear />
+          </TextField.Search>
+        </TextField.Root>
+      </TabBar.List>
+    </Viewport.BlockEnd>
+  </TabBar.Root>
+</Viewport.Provider>`;
 
 const badgeCode = `<TabBar.Tab value="recents">
   <TabBar.Icon>
@@ -321,6 +375,7 @@ const Search: FunctionComponent = () => {
   const [value, setValue] = useState<unknown>('favorites');
   const [section, setSection] = useState<unknown>('favorites');
   const [sections] = collapsedSelection([phoneTabValues], section);
+  const field = useRef<HTMLInputElement>(null);
 
   return (
     <Component
@@ -331,61 +386,151 @@ const Search: FunctionComponent = () => {
       stage="phone"
       title="Tab bar with search"
     >
-      <TabBar.Root
-        value={value}
-        onValueChange={(
-          next: unknown,
-          { reason }: BaseTabs.Root.ChangeEventDetails,
-        ) => {
-          addLog(`value change: ${String(next)}/${reason}`);
-          setValue(next);
-          if (next !== 'search') setSection(next);
-        }}
-      >
-        <Viewport.BlockEnd>
-          <TabBar.List collapsed={value === 'search'}>
-            <TabBar.Group visibleWhenCollapsed>
-              <TabBar.Indicator />
-              {phoneTabs.map(([tab, label, icon], index) => (
+      {/* Tracking the keyboard over its screen (see Viewport.Provider). */}
+      <Viewport.Provider>
+        <TabBar.Root
+          value={value}
+          onValueChange={(
+            next: unknown,
+            { reason }: BaseTabs.Root.ChangeEventDetails,
+          ) => {
+            addLog(`value change: ${String(next)}/${reason}`);
+            if (next !== 'search') {
+              setValue(next);
+              setSection(next);
+              return;
+            }
+            // Searching: the bar collapsed (its accessory shown) at once, its
+            // field focused, still in the press (iOS shows the keyboard
+            // only then).
+            flushSync(() => setValue(next));
+            field.current?.focus({ preventScroll: true });
+          }}
+        >
+          <Viewport.BlockEnd>
+            <TabBar.List collapsed={value === 'search'}>
+              <TabBar.Group visibleWhenCollapsed>
+                <TabBar.Indicator />
+                {phoneTabs.map(([tab, label, icon], index) => (
+                  <TabBar.Tab
+                    key={tab}
+                    value={tab}
+                    visibleWhenCollapsed={sections?.tab === index}
+                  >
+                    <TabBar.Icon>
+                      <Symbol icon={icon} />
+                    </TabBar.Icon>
+                    <TabBar.Label>{label}</TabBar.Label>
+                  </TabBar.Tab>
+                ))}
+              </TabBar.Group>
+              <TabBar.Group>
+                <TabBar.Indicator />
                 <TabBar.Tab
-                  key={tab}
-                  value={tab}
-                  visibleWhenCollapsed={sections?.tab === index}
+                  aria-label="Search"
+                  value="search"
                 >
                   <TabBar.Icon>
-                    <Symbol icon={icon} />
+                    <Symbol icon={sfMagnifyingglass} />
                   </TabBar.Icon>
-                  <TabBar.Label>{label}</TabBar.Label>
                 </TabBar.Tab>
-              ))}
-            </TabBar.Group>
-            <TabBar.Group>
-              <TabBar.Indicator />
-              <TabBar.Tab
-                aria-label="Search"
-                value="search"
-              >
-                <TabBar.Icon>
+              </TabBar.Group>
+            </TabBar.List>
+            <TabBar.Accessory visibleIn="collapsed">
+              <TextField.Root>
+                <TextField.Search variant="tab-bar-collapsed">
                   <Symbol icon={sfMagnifyingglass} />
-                </TabBar.Icon>
-              </TabBar.Tab>
-            </TabBar.Group>
-          </TabBar.List>
-          <TabBar.Accessory visibleIn="collapsed">
-            <TextField.Root>
-              <TextField.Search>
-                <Symbol icon={sfMagnifyingglass} />
-                <TextField.Control
-                  aria-label="Search"
-                  placeholder="Search"
-                  type="search"
-                />
-                <TextField.Clear />
-              </TextField.Search>
-            </TextField.Root>
-          </TabBar.Accessory>
-        </Viewport.BlockEnd>
-      </TabBar.Root>
+                  <TextField.Control
+                    ref={field}
+                    aria-label="Search"
+                    placeholder="Search"
+                    type="search"
+                  />
+                  <TextField.Clear />
+                </TextField.Search>
+              </TextField.Root>
+            </TabBar.Accessory>
+          </Viewport.BlockEnd>
+        </TabBar.Root>
+      </Viewport.Provider>
+    </Component>
+  );
+};
+
+/** A search field beside the tabs: a group's glass capsule, filtering. */
+const SearchBeside: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [query, setQuery] = useState('');
+  const matching = names.filter((name) =>
+    name.toLowerCase().includes(query.toLowerCase()),
+  );
+
+  return (
+    <Component
+      hasInputGuards
+      isInline
+      id="tab-bar-composition-search-beside"
+      log={log}
+      stage="phone"
+      title="Tab bar with a search field beside it"
+    >
+      {/* Tracking the keyboard over its screen (see Viewport.Provider). */}
+      <Viewport.Provider>
+        <TabBar.Root
+          defaultValue="favorites"
+          onValueChange={(
+            next: unknown,
+            { reason }: BaseTabs.Root.ChangeEventDetails,
+          ) => addLog(`value change: ${String(next)}/${reason}`)}
+        >
+          <Viewport.Content>
+            <Viewport.Padding edge="block-start" />
+            <List.Root>
+              <List.Section>
+                <List.Group>
+                  {matching.map((name) => (
+                    <List.Item key={name}>
+                      <List.Content>
+                        <List.Title>{name}</List.Title>
+                      </List.Content>
+                    </List.Item>
+                  ))}
+                </List.Group>
+              </List.Section>
+            </List.Root>
+            <Viewport.Padding edge="block-end" />
+          </Viewport.Content>
+          <Viewport.BlockEnd>
+            <TabBar.List>
+              <TabBar.Group>
+                <TabBar.Indicator />
+                <TabBar.Tab
+                  aria-label="Favorites"
+                  shape="circle"
+                  value="favorites"
+                >
+                  <TabBar.Icon>
+                    <Symbol icon={sfHeartFill} />
+                  </TabBar.Icon>
+                </TabBar.Tab>
+              </TabBar.Group>
+              <TextField.Root>
+                <TextField.Search variant="tab-bar">
+                  <Symbol icon={sfMagnifyingglass} />
+                  <TextField.Control
+                    aria-label="Search"
+                    placeholder="Search"
+                    type="search"
+                    value={query}
+                    onValueChange={(value: string) => setQuery(value)}
+                  />
+                  <TextField.Clear />
+                </TextField.Search>
+              </TextField.Root>
+            </TabBar.List>
+          </Viewport.BlockEnd>
+        </TabBar.Root>
+      </Viewport.Provider>
     </Component>
   );
 };
@@ -606,6 +751,7 @@ const MiniPlayer: FunctionComponent = () => {
 const sections: readonly Section[] = [
   ['switching-an-app-s-sections', 'Switching an app’s sections'],
   ['search', 'Search'],
+  ['a-search-field-beside-the-tabs', 'A search field beside the tabs'],
   ['badges-on-tabs', 'Badges on tabs'],
   ['collapsing-on-scroll', 'Collapsing on scroll'],
   ['a-mini-player', 'A mini player'],
@@ -687,7 +833,19 @@ export const TabBarComposition: FunctionComponent = () => (
       <li>
         The search field appears beside it: an accessory shown only while
         collapsed (<code>visibleIn</code>), holding a{' '}
-        <a href="text-field">TextField</a>’s search field.
+        <a href="text-field">TextField</a>’s search field, on the accessory’s
+        glass as the collapsed bar’s (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />{' '}
+        <code>variant=&quot;tab-bar-collapsed&quot;</code>).
+      </li>
+      <li>
+        Choosing search focuses the field at once, opening the keyboard (the
+        app’s: rendering the collapsed bar synchronously, <code>flushSync</code>
+        , then focusing, still in the press, without scrolling to it:{' '}
+        <code>preventScroll</code>).
       </li>
       <li>Choosing the section again expands the bar.</li>
       <li>
@@ -697,7 +855,13 @@ export const TabBarComposition: FunctionComponent = () => (
           component="tab-bar"
           part="TabBar.Accessory"
         />
-        ) shown only while collapsed.
+        ) shown only while collapsed, its search field in the collapsed bar’s
+        look (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />{' '}
+        <code>variant</code>).
       </li>
       <li>
         <strong>Demo:</strong> the value and the section last chosen (the app’s
@@ -706,6 +870,67 @@ export const TabBarComposition: FunctionComponent = () => (
     </ul>
     <CodeView code={searchCode} />
     <Search />
+
+    <Heading
+      id="a-search-field-beside-the-tabs"
+      level={2}
+    >
+      A search field beside the tabs
+    </Heading>
+    <ul>
+      <li>
+        A search field always at hand: in the bar, beside the tab’s group,
+        taking the bar’s free space.
+      </li>
+      <li>
+        The bar’s only tab: a circle (<code>shape=&quot;circle&quot;</code>),
+        without a selection (nothing to choose).
+      </li>
+      <li>
+        It looks like a group: a glass capsule as high as the tabs (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />{' '}
+        <code>variant=&quot;tab-bar&quot;</code>).
+      </li>
+      <li>
+        Pushed up by the on-screen keyboard with the bar (
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />
+        ; the keyboard tracked by a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Library:</strong> the search field’s tab bar look (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />{' '}
+        <code>variant</code>) beside a{' '}
+        <PartLink
+          component="tab-bar"
+          part="TabBar.Group"
+        />{' '}
+        in the{' '}
+        <PartLink
+          component="tab-bar"
+          part="TabBar.List"
+        />
+        .
+      </li>
+      <li>
+        <strong>Demo:</strong> the query (the app’s state), filtering the rows.
+      </li>
+    </ul>
+    <CodeView code={searchBesideCode} />
+    <SearchBeside />
 
     <Heading
       id="badges-on-tabs"
@@ -825,6 +1050,7 @@ export const TabBarComposition: FunctionComponent = () => (
 export const tabBarCompositionDemos = [
   Panels,
   Search,
+  SearchBeside,
   Badges,
   OnScroll,
   MiniPlayer,

@@ -191,5 +191,13 @@ export const propOptionsGuideLabel = {
 
 export const propOptionsGuideSearch = {
   ...propOptionsPart,
+  variant: [
+    undefined,
+    'fill',
+    'row',
+    'tab-bar',
+    'tab-bar-collapsed',
+    'toolbar',
+  ] as const,
   disabled: [undefined, false, true] as const,
 };

@@ -1660,3 +1660,15 @@
     }
   }
 }
+
+@layer uikit-ish {
+  /* Dragging to select (see `select.ts`): from a checkbox, the page not
+     scrolling; while dragging, no text selected. */
+  .uikit-list-root [data-drag-to-select] {
+    touch-action: none;
+  }
+
+  .uikit-list-root[data-selecting] {
+    user-select: none;
+  }
+}

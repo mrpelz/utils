@@ -14,6 +14,7 @@ import {
   PointerEvent,
   ReactNode,
   RefObject,
+  TouchEvent as ReactTouchEvent,
   useCallback,
   useContext,
   useEffect,
@@ -114,6 +115,7 @@ import {
   setItemEntry,
   startReorderDrag,
 } from './reorder.js';
+import { dragToSelect } from './select.js';
 import { createSwipeActionsHandle } from './swipe-actions-handle.js';
 
 export {
@@ -265,15 +267,23 @@ const StyledRoot = forwardRef<HTMLElement, Omit<ListRootProps, 'editing'>>(
     }),
 );
 
+// Dragging to select (see `select.ts`): the root's, for its checkboxes.
+const DragToSelectContext = createContext(true);
+
 /** A list: sections of rows, headers and footers. */
 const Root = forwardRef<HTMLElement, ListRootProps>(
-  ({ editing = 'ignore', ...props }, ref) => (
-    <EditingContext.Provider value={editing}>
-      <StyledRoot
-        ref={ref}
-        {...props}
-      />
-    </EditingContext.Provider>
+  (
+    { dragToSelect: isDragToSelect = true, editing = 'ignore', ...props },
+    ref,
+  ) => (
+    <DragToSelectContext.Provider value={isDragToSelect}>
+      <EditingContext.Provider value={editing}>
+        <StyledRoot
+          ref={ref}
+          {...props}
+        />
+      </EditingContext.Provider>
+    </DragToSelectContext.Provider>
   ),
 );
 
@@ -2451,16 +2461,41 @@ const Button = forwardRef<HTMLElement, ListButtonProps>(
     }),
 );
 
-/** A checkbox (selecting rows). */
+/**
+ * A checkbox (selecting rows); pressed and dragged along the rows,
+ * selecting them (see `select.ts`, `Root`'s `dragToSelect`): neither
+ * scrolling nor swiping a sheet away then.
+ */
 const Checkbox = forwardRef<HTMLElement, CheckboxRootProps & WhileEditingProps>(
-  ({ whileEditing, ...props }, ref) => (
-    <CheckboxBase.Root
-      ref={ref}
-      data-list-part="edit"
-      {...whileEditingOf(whileEditing)}
-      {...props}
-    />
-  ),
+  ({ onPointerDown, onTouchMove, whileEditing, ...props }, ref) => {
+    const isDragToSelect = useContext(DragToSelectContext);
+
+    return (
+      <CheckboxBase.Root
+        ref={ref}
+        data-base-ui-swipe-ignore={isDragToSelect ? '' : undefined}
+        data-drag-to-select={isDragToSelect ? '' : undefined}
+        data-list-part="edit"
+        onPointerDown={(event: PointerEvent<HTMLElement>) => {
+          (onPointerDown as Handler<typeof event> | undefined)?.(event);
+          const { button, currentTarget, isPrimary } = event;
+          const root = currentTarget.closest<HTMLElement>(
+            '[data-list-part=root]',
+          );
+          if (!isDragToSelect || !isPrimary || button !== 0 || !root) return;
+          dragToSelect(currentTarget, root, event);
+        }}
+        // Not scrolling where `touch-action` isn't kept (seen on iOS): on
+        // the element itself, cancelable.
+        onTouchMove={(event: ReactTouchEvent<HTMLElement>) => {
+          (onTouchMove as Handler<typeof event> | undefined)?.(event);
+          if (isDragToSelect && event.cancelable) event.preventDefault();
+        }}
+        {...whileEditingOf(whileEditing)}
+        {...props}
+      />
+    );
+  },
 );
 
 /**

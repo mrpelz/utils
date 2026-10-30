@@ -441,15 +441,16 @@
     font-size: var(--font-ui-subheadline-size);
     letter-spacing: var(--font-ui-subheadline-tracking);
     line-height: var(--font-ui-subheadline-line-height);
-    transition-duration: var(--glass-ui-lens-duration);
-    transition-property: visibility;
 
-    /* Hidden in the state it isn't shown in (see visibleIn), fading. */
+    /* Hidden in the state it isn't shown in (see visibleIn), fading (shown
+       at once: e.g. its field focused right away). */
     &[data-visible-in='expanded'][data-collapsed],
     &[data-visible-in='collapsed']:not([data-collapsed]) {
       --uikit-glass-fade: 0;
 
       pointer-events: none;
+      transition-duration: var(--glass-ui-lens-duration);
+      transition-property: visibility;
       visibility: hidden;
     }
 
@@ -467,13 +468,43 @@
     align-items: center;
     justify-content: flex-start;
 
+    /* Its sides clear of the screen's rounded corners (32px); pushed up by
+       the keyboard (see Viewport.BlockEnd's `keyboard`), away from them, its
+       groups' glass as wide as a toolbar's (16px from the sides, as the
+       keyboard's own bar: the glass extends 4px beyond), collapsed too. */
+    --uikit-tab-bar-side: 32px;
+
     /* (None below: the safe area, kept clear by its anchor, see Viewport.) */
-    padding: 16px 32px 0;
+    padding: 16px var(--uikit-tab-bar-side) 0;
     gap: var(--uikit-tab-bar-group-gap, 16px);
     interpolate-size: allow-keywords;
     touch-action: none;
     transition-duration: var(--glass-ui-lens-duration);
     transition-property: padding, gap;
+
+    /* (Any keyboard height: 20px, collapsed without its inset; as the
+       padding transitions.) */
+    [data-keyboard='push'] > & {
+      --uikit-tab-bar-side: calc(
+        32px -
+          clamp(0px, var(--uikit-viewport-keyboard-inset, 0px) * 1000, 12px)
+      );
+      --uikit-tab-bar-collapsed-side-inset: calc(
+        var(--uikit-tab-bar-collapsed-inset) -
+          clamp(
+            0px,
+            var(--uikit-viewport-keyboard-inset, 0px) * 1000,
+            var(--uikit-tab-bar-collapsed-inset)
+          )
+      );
+    }
+
+    /* A single tab: nothing to choose, no selection (nor the active
+       tab's tint; pressed, its lens all the same). */
+    &[data-single-tab] {
+      --uikit-tab-bar-selection-shown: 0;
+      --uikit-tab-bar-active-color: currentcolor;
+    }
 
     /* Room for its accessory above the groups (see placeAccessory), in the
        bar's layout: its height and gap above the groups (at the padding),
@@ -615,7 +646,13 @@
       --uikit-tab-bar-label-min-width: 0;
 
       padding: calc(16px + var(--uikit-tab-bar-collapsed-inset))
-        calc(32px + var(--uikit-tab-bar-collapsed-inset))
+        calc(
+          var(--uikit-tab-bar-side) +
+            var(
+              --uikit-tab-bar-collapsed-side-inset,
+              var(--uikit-tab-bar-collapsed-inset)
+            )
+        )
         var(--uikit-tab-bar-collapsed-inset);
 
       && > div > [data-tab-bar-part='tabs'] > [role='tab'] {

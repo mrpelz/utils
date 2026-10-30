@@ -47,6 +47,14 @@ export type WhileEditingProps = {
 
 export type ListRootProps = PartProps<'div'> & {
   /**
+   * Its checkboxes pressed and dragged along the rows, selecting them (as
+   * the first one flips: on, or off), rows dragged back over returning;
+   * scrolling along near the scroll container's ends. Dragging from a
+   * checkbox, the page doesn't scroll (nor a sheet swipe away).
+   * @default true
+   */
+  dragToSelect?: boolean;
+  /**
    * Its sections' edit mode, unless their own (see `ListEditing`; Section,
    * Group, Item: each overriding the one around it).
    * @default 'ignore'

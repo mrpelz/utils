@@ -366,6 +366,15 @@ export const CheckboxComposition: FunctionComponent = () => (
         whole row selects.
       </li>
       <li>
+        Dragged from a checkbox along the rows, it selects them all (or
+        deselects, as the first one flips), scrolling along near the ends (
+        <PartLink
+          component="list"
+          part="List.Root"
+        />{' '}
+        <code>dragToSelect</code>).
+      </li>
+      <li>
         The list owns the selection; actions on it go elsewhere, e.g. a toolbar
         (guide <GuideLink to="rule-g7">G7</GuideLink>).
       </li>
@@ -376,7 +385,13 @@ export const CheckboxComposition: FunctionComponent = () => (
           component="list"
           part="List.Checkbox"
         />
-        ) and <code>forwardClick</code>, passing the row’s clicks on to it.
+        ) and <code>forwardClick</code>, passing the row’s clicks on to it;
+        dragging to select (
+        <PartLink
+          component="list"
+          part="List.Root"
+        />{' '}
+        <code>dragToSelect</code>).
       </li>
       <li>
         <strong>Demo:</strong> the rows and which are selected, and what

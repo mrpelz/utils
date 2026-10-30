@@ -1,8 +1,8 @@
+import '../glass/style.css';
 import './style.css';
 
 import { Field as BaseField } from '@base-ui/react/field';
 import {
-  ComponentProps,
   forwardRef,
   MouseEvent,
   PointerEvent,
@@ -11,8 +11,9 @@ import {
   useState,
 } from 'react';
 
+import { GlassBackground } from '../glass/main.js';
 import { cn, isKeyboardFocus } from '../utils/main.js';
-import type { ClearProps } from './props.js';
+import type { ClearProps, SearchProps } from './props.js';
 
 // Text fields, light and dark, in the semantic colors: 52px rows (padding
 // 0 16px),
@@ -208,8 +209,11 @@ const Clear = forwardRef<HTMLButtonElement, ClearProps>(
  * A search field's capsule: its symbol, a
  * `TextField.Control` (e.g. `type="search"`), and its buttons.
  */
-const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
-  ({ className, onBlur, onFocus, ...props }, ref) => {
+const Search = forwardRef<HTMLLabelElement, SearchProps>(
+  (
+    { children, className, onBlur, onFocus, variant = 'fill', ...props },
+    ref,
+  ) => {
     // Focused by keyboard, or by a pointer (pressed anywhere: also beside
     // it, see `preventFocusShift`).
     const [isKeyboard, setIsKeyboard] = useState(false);
@@ -220,10 +224,13 @@ const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
       // color), the field (Body, regular), and e.g. a dictation button; pressed
       // anywhere, it focuses the field (a label). In a sidebar (see `Sidebar`):
       // 44px high, on the secondary fill, 11px in, its parts 8px apart.
+      // Otherwise looking like a list row, a tab bar's or a toolbar's
+      // (`variant`).
       <label
         ref={ref}
         data-keyboard-focus={isKeyboard ? '' : undefined}
         data-text-field-part="search"
+        data-variant={variant}
         onBlur={(event) => {
           onBlur?.(event);
           const { relatedTarget } = event;
@@ -240,7 +247,12 @@ const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
         }}
         {...props}
         className={cn('uikit-text-field-search', className)}
-      />
+      >
+        {variant === 'tab-bar' || variant === 'toolbar' ? (
+          <GlassBackground kind={variant === 'toolbar' ? 'button' : 'bar'} />
+        ) : null}
+        {children}
+      </label>
     );
   },
 );

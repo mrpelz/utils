@@ -560,9 +560,13 @@ const collapsedCenter = (center: number, open: number, height: number) =>
 type Mode =
   | {
       clientY: number;
+      /** Where the rows were as the pointer took them (gathering, see `start`). */
+      from: readonly number[];
       kind: 'pointer';
       offset: number;
       pointerId: number;
+      /** When it took them: gathered into the stack over `duration`. */
+      start: number;
     }
   | {
       from: readonly number[];
@@ -721,8 +725,17 @@ const createSession = (layout: Layout, initial: Mode): Session => {
     );
     if (delta !== 0) scroller.scrollTop += delta;
 
+    // Stacked behind the first, gathering there from where they were (as
+    // they spread out, settling).
     const lead = pointer.clientY - pointer.offset;
-    place(items.map((_, index) => lead + index * stackOffset));
+    const t = Math.min(1, (time - pointer.start) / duration);
+    place(
+      items.map((_, index) => {
+        const at = lead + index * stackOffset;
+        const from = pointer.from[index] ?? at;
+        return from + (at - from) * ease(t);
+      }),
+    );
     choose(contentY(scroller, lead) + (heights[0] ?? 0) / 2);
   };
 
@@ -815,9 +828,11 @@ const createSession = (layout: Layout, initial: Mode): Session => {
       const leadTop = items[0]?.getBoundingClientRect().top ?? 0;
       mode = {
         clientY: event.clientY,
+        from: tops(),
         kind: 'pointer',
         offset: event.clientY - leadTop,
         pointerId: event.pointerId,
+        start: performance.now(),
       };
     },
     layout,

@@ -61,6 +61,12 @@ export const progressRootRows: readonly PropRow[] = [
   ...formatRows,
   ['tint', 'string (a CSS color)', 'system blue', 'The fill’s color.'],
   [
+    'synchronized',
+    'boolean',
+    code('true'),
+    'Indeterminate, its fill sliding in sync with every other indeterminate bar’s on the page (wherever each is along, whenever it started), or on its own.',
+  ],
+  [
     'children',
     'ReactNode',
     undefined,
@@ -180,6 +186,16 @@ export const activityIndicatorRows: readonly PropRow[] = [
     'How it spins: a spoke at a time, smoothly, or its spokes staying in place, fading in turn.',
   ],
   ['duration', 'number', code('1'), 'Seconds a turn takes (its speed).'],
+  [
+    'synchronized',
+    'boolean',
+    code('true'),
+    <>
+      Spinning in sync with every other activity indicator on the page (alike at
+      once, whenever each started), or on its own; with its own{' '}
+      <code>progress</code> or <code>duration</code>, always on its own.
+    </>,
+  ],
   [
     'color',
     'string (a CSS color)',

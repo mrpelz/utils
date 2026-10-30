@@ -12,6 +12,13 @@ export type SizeClass = 'compact' | 'regular';
 /** The visual viewport, and the keyboard's height (0 without one). */
 export type VisualViewportState = {
   height: number;
+  /**
+   * The page hidden (the Page Visibility API: e.g. another tab, the app
+   * left, also a Home Screen app's). Meanwhile the rest is kept as it was
+   * (e.g. the keyboard's height: its field focused again as it's shown, see
+   * `preventFocusShift`); shown, read anew once the keyboard has settled.
+   */
+  isHidden: boolean;
   /** What the visual viewport doesn't show of the layout viewport's bottom. */
   keyboardInset: number;
   left: number;

@@ -15,7 +15,7 @@ import {
   useState,
 } from 'react';
 
-import { cn, withStyle } from '../utils/main.js';
+import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import type {
   ActivityIndicatorDisplay,
   ActivityIndicatorMovement,
@@ -59,6 +59,29 @@ export type {
 // - Stopping, an activity indicator rests at once, freezes where it is, or
 //   finishes its turn first; or hides, once finished or at once
 //   (`display`).
+// - Spinning activity indicators (without their own progress or speed), and
+//   indeterminate bars' fills, all in sync: at once alike, whenever each
+//   started (`synchronized`).
+
+/**
+ * Synchronized (see `synchronized`): its animations (CSS's) on the page's
+ * clock (each started at its origin), not each on its own (started as
+ * applied), so all show alike at once; again as they restart (`restart`
+ * changing).
+ */
+const useSynchronized = (
+  element: RefObject<HTMLElement | null>,
+  isSynchronized: boolean,
+  restart: unknown,
+) => {
+  useLayoutEffect(() => {
+    if (!isSynchronized) return;
+    for (const animation of element.current?.getAnimations({ subtree: true }) ??
+      []) {
+      if (animation instanceof CSSAnimation) animation.startTime = 0;
+    }
+  }, [element, isSynchronized, restart]);
+};
 
 // Registers a momentary tooltip (see `Value`), which makes the bar
 // focusable.
@@ -68,8 +91,15 @@ const RootContext = createContext<((isMomentary: boolean) => void) | undefined>(
 
 /** A progress bar, its parts Base UI's. */
 const Root = forwardRef<HTMLDivElement, ProgressRootProps>(
-  ({ className, style, tabIndex, tint, ...props }, ref) => {
+  (
+    { className, style, synchronized = true, tabIndex, tint, value, ...props },
+    forwardedRef,
+  ) => {
     const [isMomentary, setIsMomentary] = useState(false);
+    const ref = useForwardedRef(forwardedRef);
+    // Indeterminate, its fill sliding (see `synchronized`).
+    const isIndeterminate = value === null;
+    useSynchronized(ref, synchronized && isIndeterminate, isIndeterminate);
 
     return (
       <RootContext.Provider value={setIsMomentary}>
@@ -77,6 +107,7 @@ const Root = forwardRef<HTMLDivElement, ProgressRootProps>(
           ref={ref}
           style={withStyle({ '--uikit-progress-tint': tint }, style)}
           tabIndex={tabIndex ?? (isMomentary ? 0 : undefined)}
+          value={value}
           {...props}
           className={cn('uikit-progress-root', className)}
           data-progress-part="root"
@@ -259,13 +290,16 @@ export const ActivityIndicator = forwardRef<
       display = 'animate',
       duration,
       movement = 'stepped',
-      progress = 0,
+      progress: setProgress,
       size = 'regular',
       style,
+      synchronized = true,
       ...props
     },
-    ref,
+    forwardedRef,
   ) => {
+    const ref = useForwardedRef(forwardedRef);
+    const progress = setProgress ?? 0;
     const spinner = useRef<HTMLSpanElement>(null);
     const stopped = useStopped(spinner, display, movement);
     // Spinning, from where it was then (later progress not restarting it).
@@ -282,6 +316,12 @@ export const ActivityIndicator = forwardRef<
       (display === 'finish-and-hide' && stopped === 'reset');
     const shown = isHidden ? undefined : stopped;
     const isAtRest = shown === 'reset';
+    // (Not with its own progress or speed: see `synchronized`.)
+    useSynchronized(
+      ref,
+      synchronized && setProgress === undefined && duration === undefined,
+      `${display} ${movement} ${String(shown)}`,
+    );
 
     return (
       <BaseProgress.Root

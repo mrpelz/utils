@@ -119,31 +119,34 @@ const all = selected.length === messages.length;
 
 const searchCode = `const [query, setQuery] = useState('');
 
-<Viewport.Content>
-  <Viewport.Padding edge="block-start" />
-  <List.Root>…{/* the rows matching query */}</List.Root>
-  <Viewport.Padding edge="block-end" />
-</Viewport.Content>
-<Viewport.BlockEnd>
-  <Toolbar.Root>
-    <Toolbar.Button aria-label="Folders" shape="circle">…</Toolbar.Button>
-    {/* Taking the bar's free space. */}
-    <TextField.Root>
-      <TextField.Search>
-        <Symbol icon={sfMagnifyingglass} />
-        <TextField.Control
-          aria-label="Search"
-          placeholder="Search"
-          type="search"
-          value={query}
-          onValueChange={setQuery}
-        />
-        <TextField.Clear />
-      </TextField.Search>
-    </TextField.Root>
-    <Toolbar.Button aria-label="New contact" shape="circle">…</Toolbar.Button>
-  </Toolbar.Root>
-</Viewport.BlockEnd>`;
+{/* Tracking the keyboard over its screen. */}
+<Viewport.Provider>
+  <Viewport.Content>
+    <Viewport.Padding edge="block-start" />
+    <List.Root>…{/* the rows matching query */}</List.Root>
+    <Viewport.Padding edge="block-end" />
+  </Viewport.Content>
+  <Viewport.BlockEnd>
+    <Toolbar.Root>
+      <Toolbar.Button aria-label="Folders" shape="circle">…</Toolbar.Button>
+      {/* Taking the bar's free space, a glass capsule as its buttons. */}
+      <TextField.Root>
+        <TextField.Search variant="toolbar">
+          <Symbol icon={sfMagnifyingglass} />
+          <TextField.Control
+            aria-label="Search"
+            placeholder="Search"
+            type="search"
+            value={query}
+            onValueChange={setQuery}
+          />
+          <TextField.Clear />
+        </TextField.Search>
+      </TextField.Root>
+      <Toolbar.Button aria-label="New contact" shape="circle">…</Toolbar.Button>
+    </Toolbar.Root>
+  </Viewport.BlockEnd>
+</Viewport.Provider>`;
 
 const pagesCode = `const cities = ['Berlin', 'Lisbon', 'Tokyo'];
 const [page, setPage] = useState(0);
@@ -357,7 +360,8 @@ const Search: FunctionComponent = () => {
       stage="phone"
       title="Toolbar with a search field"
     >
-      <>
+      {/* Tracking the keyboard over its screen (see Viewport.Provider). */}
+      <Viewport.Provider>
         <Viewport.Content>
           <Viewport.Padding edge="block-start" />
           <List.Root>
@@ -387,7 +391,7 @@ const Search: FunctionComponent = () => {
               </Button.Icon>
             </Toolbar.Button>
             <TextField.Root>
-              <TextField.Search>
+              <TextField.Search variant="toolbar">
                 <Symbol icon={sfMagnifyingglass} />
                 <TextField.Control
                   aria-label="Search"
@@ -410,7 +414,7 @@ const Search: FunctionComponent = () => {
             </Toolbar.Button>
           </Toolbar.Root>
         </Viewport.BlockEnd>
-      </>
+      </Viewport.Provider>
     </Component>
   );
 };
@@ -635,6 +639,14 @@ export const ToolbarComposition: FunctionComponent = () => (
         their size.
       </li>
       <li>
+        It looks like the bar’s capsules: glass, as high as its buttons (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />{' '}
+        <code>variant=&quot;toolbar&quot;</code>).
+      </li>
+      <li>
         Pushed up by the on-screen keyboard with its bar (
         <PartLink
           component="viewport"
@@ -644,13 +656,23 @@ export const ToolbarComposition: FunctionComponent = () => (
         ).
       </li>
       <li>
-        <strong>Library:</strong> the search field taking the bar’s free space,
-        and the bar pushed up by the keyboard (
+        <strong>Library:</strong> the search field taking the bar’s free space
+        in the bar’s look (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />{' '}
+        <code>variant</code>), and the bar pushed up by the keyboard (
         <PartLink
           component="viewport"
           part="Viewport.BlockEnd"
         />{' '}
-        <code>keyboard=&quot;push&quot;</code>).
+        <code>keyboard=&quot;push&quot;</code>; the keyboard tracked by a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />
+        ).
       </li>
       <li>
         <strong>Demo:</strong> the query (the app’s state) and filtering the

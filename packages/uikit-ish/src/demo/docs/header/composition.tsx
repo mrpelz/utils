@@ -70,7 +70,8 @@ const searchCode = `const [query, setQuery] = useState('');
     {/* Scrolling with the large title, then staying below the bar. */}
     <Header.Accessory>
       <TextField.Root>
-        <TextField.Search>
+        {/* Looking like the list's rows below it. */}
+        <TextField.Search variant="row">
           <Symbol icon={sfMagnifyingglass} />
           <TextField.Control
             aria-label="Search"
@@ -237,7 +238,7 @@ const Search: FunctionComponent = () => {
             </Header.LargeTitle>
             <Header.Accessory>
               <TextField.Root>
-                <TextField.Search>
+                <TextField.Search variant="row">
                   <Symbol icon={sfMagnifyingglass} />
                   <TextField.Control
                     aria-label="Search"
@@ -505,6 +506,10 @@ export const HeaderComposition: FunctionComponent = () => (
         staying below the bar.
       </li>
       <li>
+        It looks like the list’s rows below it: their background, height and
+        corners (<code>variant=&quot;row&quot;</code>), still a search field.
+      </li>
+      <li>
         Search sits with the page’s Region (guide{' '}
         <GuideLink to="rule-a11">A11</GuideLink>); also at the bottom (see{' '}
         <a href="toolbar/composition#a-search-field">Toolbar</a>).
@@ -515,12 +520,13 @@ export const HeaderComposition: FunctionComponent = () => (
           component="header"
           part="Header.Accessory"
         />
-        ) scrolling, then staying below the bar, and the search field (
+        ) scrolling, then staying below the bar, and the search field in a row’s
+        look (
         <PartLink
           component="text-field"
           part="TextField.Search"
-        />
-        ,{' '}
+        />{' '}
+        <code>variant</code>,{' '}
         <PartLink
           component="text-field"
           part="TextField.Clear"

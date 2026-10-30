@@ -786,6 +786,10 @@ const morphAccessory = (list: HTMLElement, isCollapsed: boolean) => {
   if (morph?.isCollapsed === isCollapsed) return;
 
   const accessory = accessories.get(list);
+  // Its state at once (not at the next frame's placing, see
+  // `placeAccessory`): shown in it as the list renders, e.g. its field
+  // focused right away.
+  accessory?.toggleAttribute('data-collapsed', isCollapsed);
   accessoryMorphs.set(list, {
     isCollapsed,
     // From where it is (also mid-morph); placed right away the first time.
@@ -1044,6 +1048,16 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
       setList?.(listRef.current);
       return () => setList?.(null);
     }, [listRef, setList]);
+
+    // A single tab, in all its groups (see style.css: no selection), as
+    // rendered.
+    useLayoutEffect(() => {
+      const { current: list } = listRef;
+      list?.toggleAttribute(
+        'data-single-tab',
+        list.querySelectorAll('[role="tab"]').length === 1,
+      );
+    });
     const expandedWidthRef = useRef<number | undefined>(undefined);
     const resizingRef = useRef(collapsed);
     const wasCollapsedRef = useRef(collapsed);

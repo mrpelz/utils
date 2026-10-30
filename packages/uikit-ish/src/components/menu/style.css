@@ -360,12 +360,14 @@
       height: var(--uikit-menu-separator-height-quick-actions);
     }
 
+    /* Its line: translucent, as the glass' separator blended (multiplied
+       light, added dark) would be, but not blended: WebKit drew blended
+       lines only where a moving highlight was (see MovingHighlight). */
     &::before {
       height: 1px;
       flex: 1;
-      background-color: var(--uikit-glass-separator);
+      background-color: light-dark(rgb(0 0 0 / 10%), rgb(255 255 255 / 10%));
       content: '';
-      mix-blend-mode: var(--uikit-glass-content-blend);
     }
   }
 

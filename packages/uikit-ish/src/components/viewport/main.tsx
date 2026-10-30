@@ -88,8 +88,9 @@ export type {
 
 // The viewport, for app logic (the Visual Viewport API):
 //
-// - The visual viewport (`Provider`, `useVisualViewport`): its size, offset
-//   and the keyboard's height (what it covers of the layout viewport), as
+// - The visual viewport (`Provider`, `useVisualViewport`): its size, offset,
+//   the keyboard's height (what it covers of the layout viewport) and
+//   whether the page is hidden (Page Visibility; meanwhile kept as it was), as
 //   custom properties on the root element (`--uikit-viewport-height`,
 //   `-width`, `-top`, `-left`, `-keyboard-inset`) and a hook.
 // - Scroll tracking (`Provider`, `useViewportScroll`, `useScrollDirection`):
@@ -247,9 +248,17 @@ const clamp = (value: number, max: number) =>
  */
 const readVisual = (screen?: HTMLElement | null): VisualViewportState => {
   if (typeof window === 'undefined') {
-    return { height: 0, keyboardInset: 0, left: 0, top: 0, width: 0 };
+    return {
+      height: 0,
+      isHidden: false,
+      keyboardInset: 0,
+      left: 0,
+      top: 0,
+      width: 0,
+    };
   }
   const { visualViewport: viewport } = window;
+  const isHidden = document.visibilityState === 'hidden';
   const height = viewport?.height ?? window.innerHeight;
   const top = viewport?.offsetTop ?? 0;
   const keyboardInset = Math.max(
@@ -259,6 +268,7 @@ const readVisual = (screen?: HTMLElement | null): VisualViewportState => {
   if (!screen) {
     return {
       height,
+      isHidden,
       keyboardInset,
       left: viewport?.offsetLeft ?? 0,
       top,
@@ -275,6 +285,7 @@ const readVisual = (screen?: HTMLElement | null): VisualViewportState => {
 
   return {
     height: Math.max(0, Math.round(rect.height) - screenTop - screenKeyboard),
+    isHidden,
     keyboardInset: screenKeyboard,
     left: 0,
     top: screenTop,
@@ -376,30 +387,49 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     const root = element ?? document.documentElement;
     let frame = 0;
 
+    const apply = () => {
+      const next = readVisual(element);
+      for (const [name, value] of [
+        ['height', next.height],
+        ['width', next.width],
+        ['top', next.top],
+        ['left', next.left],
+        ['keyboard-inset', next.keyboardInset],
+      ] as const) {
+        root.style.setProperty(`--uikit-viewport-${name}`, `${value}px`);
+      }
+      setVisual((current) =>
+        (Object.keys(next) as (keyof VisualViewportState)[]).every(
+          (key) => current[key] === next[key],
+        )
+          ? current
+          : next,
+      );
+    };
     const update = () => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const next = readVisual(element);
-        for (const [name, value] of [
-          ['height', next.height],
-          ['width', next.width],
-          ['top', next.top],
-          ['left', next.left],
-          ['keyboard-inset', next.keyboardInset],
-        ] as const) {
-          root.style.setProperty(`--uikit-viewport-${name}`, `${value}px`);
-        }
-        setVisual((current) =>
-          (Object.keys(next) as (keyof VisualViewportState)[]).every(
-            (key) => current[key] === next[key],
-          )
-            ? current
-            : next,
-        );
-      });
+      frame = requestAnimationFrame(apply);
+    };
+    // Hidden or shown (see `isHidden`): told at once (no frames while
+    // hidden), the rest kept as it was (e.g. the keyboard's push: its field
+    // focused again as it's shown, see `preventFocusShift`); shown, read
+    // anew once the keyboard has settled (not back after all: none).
+    let recheck: ReturnType<typeof setTimeout> | undefined;
+    const onVisibility = () => {
+      clearTimeout(recheck);
+      const isHidden = document.visibilityState === 'hidden';
+      setVisual((current) =>
+        current.isHidden === isHidden ? current : { ...current, isHidden },
+      );
+      if (isHidden) {
+        cancelAnimationFrame(frame);
+        return;
+      }
+      recheck = setTimeout(update, 500);
     };
 
     update();
+    document.addEventListener('visibilitychange', onVisibility);
     const { visualViewport: viewport } = window;
     viewport?.addEventListener('resize', update);
     viewport?.addEventListener('scroll', update);
@@ -410,6 +440,8 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     }
     return () => {
       cancelAnimationFrame(frame);
+      document.removeEventListener('visibilitychange', onVisibility);
+      clearTimeout(recheck);
       viewport?.removeEventListener('resize', update);
       viewport?.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);

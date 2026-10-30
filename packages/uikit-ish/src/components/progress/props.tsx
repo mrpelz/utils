@@ -3,6 +3,13 @@ import type { ReactNode } from 'react';
 
 export type ProgressRootProps = Omit<BaseProgress.Root.Props, 'ref'> & {
   /**
+   * Indeterminate (`value` null), its fill sliding in sync with every other
+   * indeterminate bar's on the page (wherever each is along, whenever it
+   * started), or on its own.
+   * @default true
+   */
+  synchronized?: boolean;
+  /**
    * The fill's color.
    * @default system blue
    */
@@ -84,4 +91,11 @@ export type ActivityIndicatorProps = Omit<
    * @default 'regular'
    */
   size?: 'regular' | 'small';
+  /**
+   * Spinning in sync with every other activity indicator on the page
+   * (alike at once, whenever each started), or on its own; with its own
+   * `progress` or `duration`, always on its own.
+   * @default true
+   */
+  synchronized?: boolean;
 };

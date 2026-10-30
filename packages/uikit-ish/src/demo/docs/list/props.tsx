@@ -71,6 +71,7 @@ export const propOptionsRoot = {
   ...commonPropOptions,
   listStyle: [undefined, 'insetGrouped', 'grouped', 'plain'] as const,
   outline: [undefined, false, true] as const,
+  dragToSelect: [undefined, false, true] as const,
 };
 
 export const propOptionsHeader = {
