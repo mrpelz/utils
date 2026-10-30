@@ -186,14 +186,8 @@ export const IndexPage: FunctionComponent = () => (
       <h1 className="demo-page-title">uikit-ish</h1>
     </header>
     <p className="demo-lead">
-      iOS 26 (UIKit) components for the web, built on Base UI: Apple&apos;s
-      Figma kit and Human Interface Guidelines, with Framework7&apos;s behavior
-      where they leave off.
-    </p>
-    <p className="demo-index-tagline">
-      Approximately UIKit, actually free: built on the open Web Platform. No
-      developer account, no annual fee, no review queue, and no mysterious
-      re-renders or memory leaks (looking at you, SwiftUI).
+      App components for the web, touch first, built on Base UI, with
+      Framework7&apos;s behavior as a reference.
     </p>
     <nav className="demo-index-links">
       <a href={guideHref()}>

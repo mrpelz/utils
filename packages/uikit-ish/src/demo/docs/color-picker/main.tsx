@@ -26,9 +26,8 @@ import {
 } from './props.js';
 
 /**
- * A color picker (UIKit `UIColorPickerViewController`, `UIColorWell`, Figma
- * “Color Pickers”): from a color well, in a popover (iPad) or a sheet
- * (iPhone), its header the app's (eyedropper, title, close).
+ * A color picker: from a color well, in a popover (regular) or a sheet
+ * (compact), its header the app's (eyedropper, title, close).
  */
 export const ColorPickerDemo: FunctionComponent = () => {
   const id = 'color-picker';

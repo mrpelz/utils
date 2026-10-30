@@ -338,7 +338,7 @@ export const Reserve: FunctionComponent<{
   </>
 );
 
-/** How long a touch is held for a secondary click (iOS: a long press). */
+/** How long a touch is held for a secondary click (a long press). */
 const longPressDuration = 500;
 /** How far (px) a long press may move (farther, it's a drag or a scroll). */
 const longPressSlop = 10;
@@ -651,8 +651,8 @@ export const usePointerDrag = <T extends HTMLElement, State>(
 };
 
 /**
- * SF Symbols' `chevron.up.chevron.down` (􀆏), as SVG strokes at the current
- * font size (pop-up buttons).
+ * Up and down chevrons, as SVG strokes at the current font size (pop-up
+ * buttons).
  */
 export const UpDownChevrons: FunctionComponent = () => (
   <svg
@@ -683,7 +683,7 @@ export const draggingAttribute = 'data-dragging-items';
 /**
  * The selection of a popup's highlighted item (the first of `selectors`
  * found, in order, e.g. `[data-highlighted]`), as one pill moving from item
- * to item (iOS) instead of each item showing its own. Rendered last in the
+ * to item instead of each item showing its own. Rendered last in the
  * items' container (in a stacking context), it takes the item's place, size
  * and corners (those of its `::before`, where the items draw their selection
  * otherwise); it fades out in place when none is highlighted, and in where

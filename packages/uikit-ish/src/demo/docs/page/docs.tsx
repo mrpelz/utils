@@ -14,7 +14,7 @@ export const pageRootRows: readonly PropRow[] = [
     union('grouped', 'plain'),
     code(union('grouped')),
     <>
-      The page background: <code>grouped</code> (UIKit’s grouped background) for
+      The page background: <code>grouped</code> (the grouped background) for
       grouped lists (<code>insetGrouped</code>, <code>grouped</code>);{' '}
       <code>plain</code> (the system background) for plain lists and other
       content.
@@ -25,8 +25,7 @@ export const pageRootRows: readonly PropRow[] = [
     'boolean',
     code('true'),
     <>
-      Bouncing even when its content fits (UIKit’s{' '}
-      <code>alwaysBounceVertical</code>): it has at least 1px to scroll, so a
+      Bouncing even when its content fits: it has at least 1px to scroll, so a
       drag on it is its own (rubber-banding the page, the bars staying), not the
       document’s (on iOS, moving the whole app). <code>false</code>: only
       content taller than it scrolls.

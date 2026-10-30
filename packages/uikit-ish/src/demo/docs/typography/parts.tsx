@@ -63,7 +63,7 @@ export const TypographyParts: FunctionComponent = () => (
         <code>italic</code>, <code>color</code>.
       </li>
       <li>
-        Size: <code>dynamicTypeSize</code>, for its text and everything in it.
+        Size: <code>textSize</code>, for its text and everything in it.
       </li>
       <li>
         Renders a <code>span</code>, without a role; another element (a heading,

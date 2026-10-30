@@ -126,18 +126,12 @@ export const TabBarOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <ul className="demo-lead">
-      <li>
-        Switches between an app’s top-level sections (UIKit{' '}
-        <code>UITabBar</code>).
-      </li>
+      <li>Switches between an app’s top-level sections.</li>
       <li>
         A glass capsule of tabs, floating at the window’s bottom; the selection
         slides to the tab chosen.
       </li>
-      <li>
-        Can collapse to its active tab (UIKit{' '}
-        <code>tabBarMinimizeBehavior</code>).
-      </li>
+      <li>Can collapse to its active tab.</li>
       <li>Can carry an accessory, e.g. a mini player.</li>
       <li>Base UI’s Tabs: controls the sections’ panels.</li>
     </ul>
@@ -154,7 +148,7 @@ export const TabBarOverview: FunctionComponent = () => (
         For two to five top-level sections people switch between, each keeping
         its own place (e.g. Phone’s Favorites, Recents, Contacts, Voicemail).
       </li>
-      <li>Search can take a group of its own, beside the tabs (iOS 26).</li>
+      <li>Search can take a group of its own, beside the tabs.</li>
       <li>
         Tabs stay put: don’t add, remove or hide them as the app’s state changes
         (guide <GuideLink to="rule-g2">G2</GuideLink>).

@@ -17,7 +17,7 @@ import { useLog } from '../../tooling/frame/log.js';
 import { useLayoutControls } from './props.js';
 
 /**
- * A layout (UIKit `UISplitViewController`), regular (e.g. an iPad):
+ * A layout, regular (e.g. a tablet):
  * columns side by side (a sidebar, a list, a detail), each a page of its
  * own; the sidebar and the list resizable by their dividers (or arrow keys
  * on them).

@@ -141,13 +141,13 @@ export type CalendarProps = {
   name?: string;
   /**
    * Shows the adjacent months' days filling the first and last weeks, grayed
-   * out (Framework7 `calendarDayPrev`/`Next`; UIKit: none); pressed, they
+   * out (Framework7 `calendarDayPrev`/`Next`); pressed, they
    * show their month.
    */
   showAdjacentMonths?: boolean;
   /**
-   * What swiping the days sideways does: `'month'` turns the month (as
-   * iOS's), following the finger; `'date-range'` drags a range (picking a
+   * What swiping the days sideways does: `'month'` turns the month,
+   * following the finger; `'date-range'` drags a range (picking a
    * range; otherwise as `'ignore'`); `'ignore'`: neither (left to what's
    * around it, e.g. a swipeable page). Scrolling sideways (e.g. a
    * trackpad's) turns the month, but with `'ignore'`.
@@ -192,7 +192,7 @@ export type HourCycle = 'h12' | 'h23';
 
 export type DatePickerProps = CalendarProps & {
   /**
-   * The collapsed buttons' shape (`roundedRectangle`: Figma's 6px corners).
+   * The collapsed buttons' shape (`roundedRectangle`: 6px corners).
    * @default 'capsule'
    */
   buttonShape?: 'capsule' | 'roundedRectangle';
@@ -212,8 +212,7 @@ export type DatePickerProps = CalendarProps & {
    */
   hourCycle?: HourCycle;
   /**
-   * Date, time, or both (UIKit `UIDatePicker.Mode`); a `range` is of dates
-   * only.
+   * Date, time, or both; a `range` is of dates only.
    * @default 'date'
    */
   mode?: DatePickerMode;
@@ -228,7 +227,8 @@ export type DatePickerProps = CalendarProps & {
   /** The open picker of the compact style (controlled). */
   open?: DatePickerOpen | null;
   /**
-   * UIKit `UIDatePickerStyle`.
+   * Collapsed buttons opening a popover (`compact`), or the calendar in
+   * place (`inline`).
    * @default 'compact'
    */
   pickerStyle?: DatePickerStyle;
@@ -240,7 +240,7 @@ export type DatePickerProps = CalendarProps & {
   popover?: boolean;
   /**
    * How the compact style's popover aligns to its buttons (in a list row,
-   * which they end, iOS aligns it with their end: `end`).
+   * which they end, aligned with their end: `end`).
    * @default 'center'
    */
   popoverAlign?: PopoverAlign;
@@ -255,11 +255,11 @@ export type TimeRollProps = {
   /** Locale of numerals, the hour cycle and the day period. */
   locale?: string;
   /**
-   * The latest selectable time (UIKit `maximumDate`): later hours, minutes
+   * The latest selectable time: later hours, minutes
    * and day periods disabled, a later selection moved back to it.
    */
   max?: Date;
-  /** The earliest selectable time (UIKit `minimumDate`), as `max`. */
+  /** The earliest selectable time, as `max`. */
   min?: Date;
   /** Called with the date at the newly selected time (`reason`: `time`). */
   onValueChange: (

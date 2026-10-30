@@ -23,7 +23,7 @@ import { useNavigationControls } from './props.js';
 type Stack = 'mail' | 'settings';
 
 /**
- * Navigation (UIKit `UINavigationController`): the app's stacks of pages
+ * Navigation: the app's stacks of pages
  * (its state, no router): drilling into a row pushes a page, the back button
  * (or swiping from the leading edge) pops it, each page's header moving
  * with it, the back button staying; switching between the stacks (e.g.

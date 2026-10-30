@@ -18,12 +18,11 @@
      overscroll areas beneath it), behind the safe areas and past its
      content's ends. */
   :root[data-uikit-viewport-window] {
-    background-color: var(--color-ios-system-grouped-background);
+    background-color: var(--color-ui-system-grouped-background);
   }
 
   /* The content's edge (see padding.tsx): room for the anchors, as high
-     as they are, and the content margin (UIKit's layout margins: the
-     library's gap between content and its container's edge, by token; a
+     as they are, and the content margin (the library's gap between content and its container's edge, by token; a
      `margin` prop, inline, overrides it). None before a large title (it
      sits right under the bar). */
   .uikit-viewport-padding {
@@ -250,7 +249,7 @@
       &::before {
         background-color: var(
           --uikit-viewport-edge-tint,
-          var(--color-ios-system-background)
+          var(--color-ui-system-background)
         );
         transition: background-color 300ms;
       }
@@ -264,11 +263,11 @@
       }
 
       &[data-edge='block-start']::before {
-        border-bottom: 1px solid var(--color-ios-separator);
+        border-bottom: 1px solid var(--color-ui-separator);
       }
 
       &[data-edge='block-end']::before {
-        border-top: 1px solid var(--color-ios-separator);
+        border-top: 1px solid var(--color-ui-separator);
       }
     }
 

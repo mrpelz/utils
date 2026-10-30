@@ -255,7 +255,7 @@ const drillInCode = `// Each page: its title, its rows (title, the page it pushe
 const pages = {
   settings: { title: 'Settings', rows: [['General', 'general']] },
   general: { title: 'General', rows: [['About', 'about'], ['Software Update']] },
-  about: { title: 'About', rows: [['Name', undefined, 'iPhone']] },
+  about: { title: 'About', rows: [['Name', undefined, 'My Phone']] },
 };
 const [keys, setKeys] = useState(['settings']);
 const push = (key) => setKeys((current) => [...current, key]);
@@ -398,7 +398,7 @@ const [added, setAdded] = useState(0);
             {/* Minus: opens the row's Delete (its trailing swipe actions). */}
             <List.SwipeActionsTrigger
               render={
-                <List.EditButton aria-label={\`Delete \${name}\`} tint="var(--color-ios-system-red)">
+                <List.EditButton aria-label={\`Delete \${name}\`} tint="var(--color-ui-system-red)">
                   <Symbol icon={sfMinus} />
                 </List.EditButton>
               }
@@ -411,7 +411,7 @@ const [added, setAdded] = useState(0);
           <List.SwipeActions overswipe allowSwipe="conceal">
             <List.SwipeAction
               label="Delete"
-              tint="var(--color-ios-system-red)"
+              tint="var(--color-ui-system-red)"
               onClick={() => setRows(rows.filter((row) => row !== name))}
             >
               <Symbol icon={sfTrashFill} />
@@ -422,7 +422,7 @@ const [added, setAdded] = useState(0);
       {/* The whole row inserts: its button; the plus its sign. */}
       <List.Item>
         <List.Leading>
-          <List.EditButton aria-hidden="true" render={<span />} tint="var(--color-ios-system-green)">
+          <List.EditButton aria-hidden="true" render={<span />} tint="var(--color-ui-system-green)">
             <Symbol icon={sfPlus} />
           </List.EditButton>
         </List.Leading>
@@ -499,7 +499,7 @@ const [isOuterEditing, setIsOuterEditing] = useState(false);
           <List.Leading whileEditing="show">
             <List.EditButton
               aria-label={\`Delete \${name}\`}
-              tint="var(--color-ios-system-red)"
+              tint="var(--color-ui-system-red)"
               onClick={() => setOuter(outer.filter((row) => row !== name))}
             >
               <Symbol icon={sfMinus} />
@@ -597,17 +597,17 @@ const inboxCode = `const archive = () => {…};
           <List.Image
             aria-label="Unread"
             role="img"
-            style={{ color: 'var(--color-ios-primary)', fontSize: '10px' }}
+            style={{ color: 'var(--color-ui-primary)', fontSize: '10px' }}
           >
             <Symbol icon={sfCircleFill} />
           </List.Image>
         </List.Leading>
         <List.Content>
-          <List.Title render={<button type="button" />} onClick={…}>Kate Bell</List.Title>
+          <List.Title render={<button type="button" />} onClick={…}>Kate Brown</List.Title>
           <List.Subtitle>Weekend photos</List.Subtitle>
         </List.Content>
         <List.Trailing>
-          <List.Detail>09:41</List.Detail>
+          <List.Detail>10:00</List.Detail>
         </List.Trailing>
         <List.Trailing>
           <List.DrillIn />
@@ -617,14 +617,14 @@ const inboxCode = `const archive = () => {…};
           <List.Text>Hi! The photos from the weekend …</List.Text>
         </List.Below>
         <List.SwipeActions side="inline-start" overswipe>
-            <List.SwipeAction showLabel label="Read" tint="var(--color-ios-system-blue)" onClick={…}>
+            <List.SwipeAction showLabel label="Read" tint="var(--color-ui-system-blue)" onClick={…}>
               <Symbol icon={sfEnvelopeOpenFill} />
             </List.SwipeAction>
           </List.SwipeActions>
           <List.SwipeActions onOverswipe={archive}>
             <List.SwipeAction showLabel label="More" onClick={…}>…</List.SwipeAction>
-            <List.SwipeAction showLabel label="Flag" tint="var(--color-ios-system-orange)" onClick={…}>…</List.SwipeAction>
-            <List.SwipeAction showLabel label="Archive" tint="var(--color-ios-system-purple)" onClick={archive}>…</List.SwipeAction>
+            <List.SwipeAction showLabel label="Flag" tint="var(--color-ui-system-orange)" onClick={…}>…</List.SwipeAction>
+            <List.SwipeAction showLabel label="Archive" tint="var(--color-ui-system-purple)" onClick={archive}>…</List.SwipeAction>
           </List.SwipeActions>
         </List.Item>
       </List.Group>
@@ -693,7 +693,7 @@ const indexCode = `// The contacts, by their first letter.
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 /** A small dot in the tint, in the image's place (Mail's unread mark). */
-const unreadStyle = { color: 'var(--color-ios-primary)', fontSize: '10px' };
+const unreadStyle = { color: 'var(--color-ui-primary)', fontSize: '10px' };
 
 /** A settings page: switches, drill-ins, and controls in rows. */
 const SettingsScreen: FunctionComponent = () => {
@@ -1296,7 +1296,7 @@ const EditMode: FunctionComponent = () => {
                         <List.SwipeActions overswipe>
                           <List.SwipeAction
                             label="Delete"
-                            tint="var(--color-ios-system-red)"
+                            tint="var(--color-ui-system-red)"
                             onClick={() => remove([name])}
                           >
                             <Symbol icon={sfTrashFill} />
@@ -1381,7 +1381,7 @@ const EditButtons: FunctionComponent = () => {
                           render={
                             <List.EditButton
                               aria-label={`Delete ${name}`}
-                              tint="var(--color-ios-system-red)"
+                              tint="var(--color-ui-system-red)"
                             >
                               <Symbol icon={sfMinus} />
                             </List.EditButton>
@@ -1397,7 +1397,7 @@ const EditButtons: FunctionComponent = () => {
                       >
                         <List.SwipeAction
                           label="Delete"
-                          tint="var(--color-ios-system-red)"
+                          tint="var(--color-ui-system-red)"
                           onClick={() => {
                             addLog(`delete: ${name}`);
                             setRows((current) =>
@@ -1416,7 +1416,7 @@ const EditButtons: FunctionComponent = () => {
                       <List.EditButton
                         aria-hidden="true"
                         render={<span />}
-                        tint="var(--color-ios-system-green)"
+                        tint="var(--color-ui-system-green)"
                       >
                         <Symbol icon={sfPlus} />
                       </List.EditButton>
@@ -1562,7 +1562,7 @@ const EditingSections: FunctionComponent = () => {
                       <List.Leading whileEditing="show">
                         <List.EditButton
                           aria-label={`Delete ${name}`}
-                          tint="var(--color-ios-system-red)"
+                          tint="var(--color-ui-system-red)"
                           onClick={() => {
                             addLog(`delete: ${name}`);
                             setOuter((current) =>
@@ -1830,7 +1830,7 @@ const Inbox: FunctionComponent = () => {
                     <List.SwipeAction
                       showLabel
                       label={read.includes(from) ? 'Unread' : 'Read'}
-                      tint="var(--color-ios-system-blue)"
+                      tint="var(--color-ui-system-blue)"
                       onClick={() => toggleRead(from)}
                     >
                       <Symbol
@@ -1853,7 +1853,7 @@ const Inbox: FunctionComponent = () => {
                     <List.SwipeAction
                       showLabel
                       label="Flag"
-                      tint="var(--color-ios-system-orange)"
+                      tint="var(--color-ui-system-orange)"
                       onClick={() => addLog(`flag: ${from}`)}
                     >
                       <Symbol icon={sfFlagFill} />
@@ -1861,7 +1861,7 @@ const Inbox: FunctionComponent = () => {
                     <List.SwipeAction
                       showLabel
                       label="Archive"
-                      tint="var(--color-ios-system-purple)"
+                      tint="var(--color-ui-system-purple)"
                       onClick={() => archive(from)}
                     >
                       <Symbol icon={sfArchiveboxFill} />
@@ -1976,7 +1976,7 @@ export const ListComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As iOS’s Settings: an inset grouped list in a <a href="page">Page</a>,
+        As a settings app: an inset grouped list in a <a href="page">Page</a>,
         under its <a href="header">Header</a>.
       </li>
       <li>
@@ -2055,7 +2055,7 @@ export const ListComposition: FunctionComponent = () => (
         the group’s first or last).
       </li>
       <li>
-        Their times open as in iOS’s Calendar: each picker’s button toggles its
+        Their times open as in a calendar app: each picker’s button toggles its
         time roll in a row below it (
         <PartLink
           component="date-picker"
@@ -2145,7 +2145,7 @@ export const ListComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A hierarchy (as UIKit’s outlines, e.g. Files’ folders): each row’s{' '}
+        A hierarchy (an outline, e.g. a file manager’s folders): each row’s{' '}
         <code>level</code> (
         <PartLink
           component="list"
@@ -2339,8 +2339,8 @@ export const ListComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As UIKit’s editing styles: a red minus before each row, a green plus
-        before the last (
+        Editing styles: a red minus before each row, a green plus before the
+        last (
         <PartLink
           component="list"
           part="List.EditButton"
@@ -2361,7 +2361,7 @@ export const ListComposition: FunctionComponent = () => (
         , whose Delete removes the row.
       </li>
       <li>
-        As in UIKit’s edit mode, swiping doesn’t open it, but closes it again (
+        In edit mode, swiping doesn’t open it, but closes it again (
         <code>allowSwipe=&quot;conceal&quot;</code>), as a press outside the row
         does.
       </li>

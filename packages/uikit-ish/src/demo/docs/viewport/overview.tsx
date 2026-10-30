@@ -180,10 +180,7 @@ export const ViewportOverview: FunctionComponent = () => (
         much of it shows); see{' '}
         <a href="viewport/parts#useelementvisibility">Parts</a>.
       </li>
-      <li>
-        This library’s own; no Base UI component, no UIKit counterpart (UIKit: a
-        window’s safe area and keyboard layout guides).
-      </li>
+      <li>This library’s own; no Base UI component.</li>
     </ul>
     <LiveView />
 
@@ -252,7 +249,7 @@ export const ViewportOverview: FunctionComponent = () => (
         title): a <a href="header">Header</a> in a <a href="page">Page</a>.
       </li>
       <li>
-        Columns side by side (a sidebar beside the content, on iPad): a{' '}
+        Columns side by side (a sidebar beside the content, on a tablet): a{' '}
         <a href="layout">Layout</a> (in{' '}
         <PartLink
           component="viewport"

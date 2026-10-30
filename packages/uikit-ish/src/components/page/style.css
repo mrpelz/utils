@@ -6,8 +6,8 @@
     height: 100%;
     min-height: 0;
     box-sizing: border-box;
-    background-color: var(--color-ios-system-grouped-background);
-    color: var(--color-ios-label);
+    background-color: var(--color-ui-system-grouped-background);
+    color: var(--color-ui-label);
     overscroll-behavior: contain;
 
     /* Its ends: clear of the insets; the gap to its content is its
@@ -34,7 +34,7 @@
     }
 
     &[data-background='plain'] {
-      background-color: var(--color-ios-system-background);
+      background-color: var(--color-ui-system-background);
     }
 
     /* Bouncing even when its content fits (`alwaysBounce`): a box 1px

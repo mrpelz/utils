@@ -36,17 +36,16 @@ export type {
   ActionSheetPopupProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Action Sheets”): an alert's panel (see
-// `Alert`) of a title and description and its actions, stacked (Secondary
-// and Destructive types: on a gray fill, the label's color, red). As iOS
-// 26's: at the control that presented it (below it, above it if there's no
+// An alert's panel (see `Alert`) of a title and description and its
+// actions, stacked (secondary and destructive: on a gray fill, the label's
+// color, red), at the control that presented it (below it, above it if there's no
 // room; Base UI's `Popover`, positioned as a popover without an arrow,
 // scaling in from it as menus); presented without one (e.g. by `open`), at
 // its container's bottom, above its safe area. Modal: the page dimmed
-// behind it (Figma has none), dismissed by a press outside it.
+// behind it, dismissed by a press outside it.
 //
-// iPad shows action sheets as popovers (with an arrow): the app's choice
-// (see `Popover`).
+// In a regular width, a popover (with an arrow) may suit better: the app's
+// choice (see `Popover`).
 
 // The trigger it opened from (its change's), if any (see `Popup`).
 const ActionSheetContext = createContext<Element | null>(null);
@@ -241,8 +240,7 @@ export const useCreateActionSheetHandle = <
 };
 
 /**
- * An action sheet (UIKit `UIAlertController`, style `actionSheet`; Base
- * UI's `Popover`, modal): choices for an action, at the control that
+ * An action sheet (Base UI's `Popover`, modal): choices for an action, at the control that
  * presented it.
  */
 export const ActionSheet = {

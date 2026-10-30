@@ -98,7 +98,7 @@ const matrixColumns = [false, true].flatMap((isDisabled) =>
   matrixLabelTypes.map((labelType) => ({ disabled: isDisabled, labelType })),
 );
 
-// All Figma permutations (Style, Size, Label Type, Enabled) at once, with
+// All permutations (style, size, label type, enabled) at once, with
 // Destructive and the glass context as controls.
 export const ButtonMatrixDemo: FunctionComponent = () => {
   const id = 'button-matrix';

@@ -7,8 +7,8 @@
   border-radius: 16px;
   background-image: linear-gradient(
     135deg,
-    var(--color-ios-system-orange),
-    var(--color-ios-system-pink)
+    var(--color-ui-system-orange),
+    var(--color-ui-system-pink)
   );
   color: #fff;
   font-size: 48px;
@@ -51,15 +51,15 @@
   padding: 12px 16px;
   border: 0;
   border-radius: 20px;
-  background-color: var(--color-ios-secondary-system-grouped-background);
-  color: var(--color-ios-label);
+  background-color: var(--color-ui-secondary-system-grouped-background);
+  color: var(--color-ui-label);
   cursor: pointer;
   font: inherit;
   gap: 2px;
   text-align: start;
 
   & > span {
-    color: var(--color-ios-secondary-label);
+    color: var(--color-ui-secondary-label);
   }
 }
 
@@ -75,7 +75,7 @@
     height: 100%;
     border-radius: 2px;
     animation: contextual-menu-demo-bar 900ms ease-in-out infinite alternate;
-    background-color: var(--color-ios-system-pink);
+    background-color: var(--color-ui-system-pink);
     transform-origin: bottom;
   }
 
@@ -111,8 +111,8 @@
   padding: 12px 16px;
   border: 0;
   border-radius: 20px;
-  background-color: var(--color-ios-secondary-system-grouped-background);
-  color: var(--color-ios-label);
+  background-color: var(--color-ui-secondary-system-grouped-background);
+  color: var(--color-ui-label);
   cursor: pointer;
   font: inherit;
   gap: 12px;
@@ -123,7 +123,7 @@
     gap: 2px;
 
     & > span {
-      color: var(--color-ios-secondary-label);
+      color: var(--color-ui-secondary-label);
     }
   }
 }

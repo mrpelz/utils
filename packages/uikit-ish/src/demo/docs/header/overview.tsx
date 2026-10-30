@@ -140,9 +140,9 @@ export const HeaderOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A page’s header (UIKit’s navigation bar, with large titles): a bar at
-        the top, staying where it is as the page scrolls under it, and a large
-        title below it, scrolling with the page.
+        A page’s header (a navigation bar, with large titles): a bar at the top,
+        staying where it is as the page scrolls under it, and a large title
+        below it, scrolling with the page.
       </li>
       <li>
         As the large title scrolls under the bar, it fades out and the bar’s own
@@ -274,15 +274,15 @@ export const HeaderOverview: FunctionComponent = () => (
       </li>
       <li>Without a large title, the bar’s title shows at once.</li>
       <li>
-        Content scrolled under the bar blurs beneath it (iOS 26’s scroll edge
-        effect, approximated: the bar’s anchor’s, see{' '}
+        Content scrolled under the bar blurs beneath it (the scroll edge effect,
+        approximated: the bar’s anchor’s, see{' '}
         <PartLink
           component="viewport"
           part="Viewport.Anchor"
         />
         ), once scrolled 16px; under its accessory too, as it’s stuck.
       </li>
-      <li>Pulled down, the large title doesn’t grow (iOS: it scales up).</li>
+      <li>Pulled down, the large title doesn’t grow.</li>
       <li>
         In a <a href="navigation">Navigation</a>’s transition: moving with its
         page, its bar too (its anchor within the page’s frame); in a{' '}

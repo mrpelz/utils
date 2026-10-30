@@ -14,8 +14,7 @@ import {
 } from './edge.js';
 import { useEdgeEffectOf } from './padding.js';
 
-// A scroller's scroll edge effects (iOS 26's: a scroll view's, its bars
-// reaching them): one at each block edge where its scope's anchors have one
+// A scroller's scroll edge effects (its bars reaching them): one at each block edge where its scope's anchors have one
 // (see `Anchor`'s `edgeEffect`), drawn by the scroller (`Page.Root`, a
 // sheet's content, the content layer: within it, fixed at its edge, as the
 // anchors are, beneath them), as tall as the tallest of them; one, however

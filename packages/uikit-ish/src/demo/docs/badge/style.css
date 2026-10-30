@@ -29,6 +29,6 @@
   justify-content: center;
   padding: 16px;
   border-radius: 12px;
-  background-color: var(--color-ios-secondary-system-fill);
+  background-color: var(--color-ui-secondary-system-fill);
   font-size: 34px;
 }

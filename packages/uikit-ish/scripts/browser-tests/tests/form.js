@@ -54,11 +54,11 @@ export const tests = [
       await submit();
       assert.doesNotMatch(await page.log(), /submitted/u, 'invalid');
 
-      await type(page, 'name', 'Kate Bell');
+      await type(page, 'name', 'Kate Brown');
       await type(page, 'email', '@example.com');
       await submit();
       const log = await page.log();
-      assert.match(log, /submitted: .*"name":"Kate Bell"/u);
+      assert.match(log, /submitted: .*"name":"Kate Brown"/u);
       assert.match(log, /"email":"kate@example.com"/u);
       assert.match(log, /"appearance":"automatic"/u);
     },
@@ -106,13 +106,13 @@ export const tests = [
       assert.deepEqual(await checked(), ['false', 'false', 'false']);
 
       await page.open('text-field');
-      await page.setState(2, { defaultValue: 'Kate Bell' });
+      await page.setState(2, { defaultValue: 'Kate Brown' });
       await sleep(300);
       assert.equal(
         await page.evaluate(
           `document.querySelector(${JSON.stringify('[data-text-field-part=control]')}).value`,
         ),
-        'Kate Bell',
+        'Kate Brown',
       );
     },
   },

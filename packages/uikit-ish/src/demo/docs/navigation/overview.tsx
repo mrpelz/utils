@@ -143,8 +143,8 @@ export const NavigationOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A stack of pages (UIKit <code>UINavigationController</code>): drilling
-        in pushes a page over the one before, going back pops it.
+        A stack of pages: drilling in pushes a page over the one before, going
+        back pops it.
       </li>
       <li>
         The app’s stack, rendered as its{' '}
@@ -156,8 +156,8 @@ export const NavigationOverview: FunctionComponent = () => (
         its own).
       </li>
       <li>
-        Swiping from the leading edge goes back, as on iOS; pages under the top
-        one stay mounted, their state and scroll positions kept.
+        Swiping from the leading edge goes back; pages under the top one stay
+        mounted, their state and scroll positions kept.
       </li>
       <li>
         This library’s own, after Framework7’s views; no Base UI component.

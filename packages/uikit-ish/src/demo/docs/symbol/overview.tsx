@@ -78,16 +78,13 @@ export const SymbolOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         An SF Symbol (or any icon’s outlines), sized as the glyph of the text
-        around it (it can stand in for one, as <code>􀋃</code> in Figma), in its
-        color.
+        around it (it can stand in for one), in its color.
       </li>
       <li>
         Emphasized by its host (a selected tab), its filled variant instead: no
         state of the app’s picks it.
       </li>
-      <li>
-        The components’ symbols: a button’s, a tab’s, a row’s image (Figma “􀋃”).
-      </li>
+      <li>The components’ symbols: a button’s, a tab’s, a row’s image.</li>
     </ul>
     <LiveView />
 

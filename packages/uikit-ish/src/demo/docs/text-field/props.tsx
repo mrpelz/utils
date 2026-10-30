@@ -29,8 +29,8 @@ export const suggestionsId = 'text-field-suggestions';
 export const propOptionsControl = {
   ...commonPropOptions,
   placeholder: ['Name', undefined, 'A longer placeholder'] as const,
-  defaultValue: [undefined, 'Kate Bell'] as const,
-  value: [undefined, 'Kate Bell'] as const,
+  defaultValue: [undefined, 'Kate Brown'] as const,
+  value: [undefined, 'Kate Brown'] as const,
   // The input types (MDN `<input>`): their keyboards and validation (email,
   // url: `typeMismatch`; number, dates: `rangeUnderflow`, `rangeOverflow`,
   // `stepMismatch`), native pickers for dates and times.
@@ -166,7 +166,7 @@ export const propOptionsOverviewRoot = {
 export const propOptionsOverviewControl = {
   placeholder: ['Required', undefined] as const,
   type: [undefined, 'email', 'tel', 'password', 'number'] as const,
-  defaultValue: [undefined, 'Kate Bell'] as const,
+  defaultValue: [undefined, 'Kate Brown'] as const,
 };
 
 export const propOptionsPart = {

@@ -38,7 +38,7 @@ const badges = (page) =>
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'badge: on a symbol (as Framework7’s), the tabs’ alike; inline as Figma’s; a dot without content; tinted',
+    name: 'badge: on a symbol (as Framework7’s), the tabs’ alike; inline; a dot without content; tinted',
     run: async (page) => {
       await page.open('badge', 'light', {
         state: [{ $rest: true, children: 3 }],
@@ -66,7 +66,7 @@ export const tests = [
         '12px',
         '2px',
       ]);
-      // Inline: Figma's (a circle for a digit).
+      // Inline (a circle for a digit).
       assert.deepEqual(digit.inline, [
         'static',
         24,
@@ -86,7 +86,7 @@ export const tests = [
       assert.deepEqual(dot.button, { end: 5, height: 10, top: -5, width: 10 });
       assert.ok(Math.abs(dot.inlineCenter) <= 1, `${dot.inlineCenter}`);
 
-      await page.setState(0, { tint: 'var(--color-ios-system-blue)' });
+      await page.setState(0, { tint: 'var(--color-ui-system-blue)' });
       const tinted = await badges(page);
       assert.equal(tinted.style[0], 'rgb(0, 136, 255)');
 

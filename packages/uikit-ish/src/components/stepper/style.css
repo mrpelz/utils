@@ -27,7 +27,7 @@
       left: calc(50% - 0.5px);
       width: 1px;
       border-radius: 8px;
-      background-color: var(--color-ios-tertiary-label);
+      background-color: var(--color-ui-tertiary-label);
       content: '';
       pointer-events: none;
     }
@@ -35,12 +35,12 @@
     /* Focused by keyboard only: a text input is always :focus-visible,
        also when pressing a half focuses it (see Group). */
     &:not([data-pointer-focus]):has(input:focus-visible) {
-      outline: 2px solid var(--color-ios-primary);
+      outline: 2px solid var(--color-ui-primary);
       outline-offset: 2px;
     }
   }
 
-  /* Figma “_Decrement”, “_Increment”: 46×32px, the symbol in Headline;
+  /* The halves: 46×32px, the symbol in Headline;
      pressed, 8% darker; disabled, the symbol in `tertiaryLabel`. */
   .uikit-stepper-half {
     display: grid;
@@ -50,13 +50,13 @@
     border: 0;
     margin: 0;
     appearance: none;
-    background-color: var(--color-ios-quaternary-system-fill);
-    color: var(--color-ios-label);
+    background-color: var(--color-ui-quaternary-system-fill);
+    color: var(--color-ui-label);
     font-family: inherit;
-    font-size: var(--font-ios-headline-size);
+    font-size: var(--font-ui-headline-size);
     font-variation-settings: 'wght' 590;
     font-weight: round(down, 590, 100);
-    line-height: var(--font-ios-headline-line-height);
+    line-height: var(--font-ui-headline-line-height);
     place-items: center;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -95,7 +95,7 @@
     &[data-disabled] {
       --uikit-utils-cursor: attr(cursor type(<custom-ident>), not-allowed);
 
-      color: var(--color-ios-tertiary-label);
+      color: var(--color-ui-tertiary-label);
     }
   }
 

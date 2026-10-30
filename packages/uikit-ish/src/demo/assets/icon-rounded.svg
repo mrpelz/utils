@@ -6,7 +6,7 @@
     </clipPath>
   </defs>
   <g clip-path="url(#corners)">
-  <!-- uikit-ish: a switch, on (UIKit's), approximately (≈: “-ish”), on the
+  <!-- uikit-ish: a switch, on, approximately (≈: “-ish”), on the
        open web. Full bleed: platforms round it themselves (its content
        within the maskable safe zone, a circle 80% across). The variants are
        made from it: scripts/icons.js. -->

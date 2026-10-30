@@ -28,7 +28,7 @@ import {
 const listRowCode = `<List.Item onClick={forwardClick('[role=switch]')}>
   <List.Leading>
     <List.Image
-      style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
+      style={{ backgroundColor: 'var(--color-ui-system-orange)' }}
       variant="rounded"
     >
       <Symbol icon={sfAirplane} />
@@ -40,7 +40,7 @@ const listRowCode = `<List.Item onClick={forwardClick('[role=switch]')}>
   <List.Trailing>
     <Switch.Root
       aria-label="Airplane Mode"
-      tint="var(--color-ios-system-orange)"
+      tint="var(--color-ui-system-orange)"
     >
       <Switch.Thumb />
     </Switch.Root>
@@ -280,7 +280,7 @@ const InAList: FunctionComponent = () => {
             <List.Item onClick={forwardClick('[role=switch]')}>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-orange)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfAirplane} />
@@ -292,7 +292,7 @@ const InAList: FunctionComponent = () => {
               <List.Trailing>
                 <Switch.Root
                   aria-label="Airplane Mode"
-                  tint="var(--color-ios-system-orange)"
+                  tint="var(--color-ui-system-orange)"
                   onCheckedChange={(isChecked: boolean) =>
                     addLog(`airplane mode: ${String(isChecked)}`)
                   }
@@ -304,7 +304,7 @@ const InAList: FunctionComponent = () => {
             <List.Item onClick={forwardClick('[role=switch]')}>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-red)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-red)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfBellFill} />
@@ -351,7 +351,7 @@ export const SwitchComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        On iOS: in the trailing slot of <a href="list">List</a> rows.
+        Typically: in the trailing slot of <a href="list">List</a> rows.
       </li>
       <li>
         The row passes its clicks on to the switch (

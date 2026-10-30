@@ -4,7 +4,7 @@
     display: flex;
     box-sizing: border-box;
     flex-direction: column;
-    color: var(--color-ios-label);
+    color: var(--color-ui-label);
   }
 
   .uikit-color-picker-grid {
@@ -127,7 +127,7 @@
     outline-offset: 2px;
 
     &:has(:focus-visible) {
-      outline: 2px solid var(--color-ios-primary);
+      outline: 2px solid var(--color-ui-primary);
     }
   }
 
@@ -141,18 +141,18 @@
     justify-content: center;
     padding: 9px 14px;
     border-radius: 8px;
-    background-color: var(--color-ios-system-fill);
+    background-color: var(--color-ui-system-fill);
     cursor: text;
-    font-size: var(--font-ios-body-size);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
     font-variant-numeric: tabular-nums;
-    font-variation-settings: 'wght' var(--font-ios-body-weight-emphasized);
-    font-weight: round(down, var(--font-ios-body-weight-emphasized), 100);
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    font-variation-settings: 'wght' var(--font-ui-body-weight-emphasized);
+    font-weight: round(down, var(--font-ui-body-weight-emphasized), 100);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
 
     &:has(:focus-visible) {
-      outline: 2px solid var(--color-ios-primary);
+      outline: 2px solid var(--color-ui-primary);
       outline-offset: 2px;
     }
 
@@ -229,7 +229,7 @@
       border: 0;
       border-radius: 50%;
       margin: 0;
-      color: var(--color-ios-label);
+      color: var(--color-ui-label);
       cursor: pointer;
       outline-offset: 2px;
       -webkit-touch-callout: none;
@@ -245,7 +245,7 @@
 
     & > [data-add] {
       display: grid;
-      background-color: var(--color-ios-system-fill);
+      background-color: var(--color-ui-system-fill);
       font-size: 17px;
       font-variation-settings: 'wght' 510;
       font-weight: round(down, 510, 100);
@@ -280,7 +280,7 @@
   .uikit-color-picker-header {
     padding: 16px 0 10px;
 
-    /* A toolbar in it: Figma's 44px row, its padding the header's (not a
+    /* A toolbar in it: a 44px row, its padding the header's (not a
        bar's). */
 
     /* (Over the bar's own: its placement's padding and height.) */
@@ -341,7 +341,7 @@
     /* The color (translucent: over a checkerboard, as the panel's). */
     &[data-color]::after {
       position: absolute;
-      border: 2px solid var(--color-ios-system-background);
+      border: 2px solid var(--color-ui-system-background);
       border-radius: 50%;
       background:
         linear-gradient(

@@ -46,7 +46,7 @@
     max-width: calc(100% - 44px);
     box-sizing: border-box;
     flex-direction: column;
-    background-color: var(--color-ios-system-background);
+    background-color: var(--color-ui-system-background);
     box-shadow: 0 0 30px rgb(0 0 0 / 20%);
     inset-block: 0;
     outline: none;

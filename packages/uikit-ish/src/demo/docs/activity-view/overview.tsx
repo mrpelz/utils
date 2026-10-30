@@ -92,12 +92,12 @@ const LiveView: FunctionComponent = () => {
               <ActivityView.Separator />
               <ActivityView.People aria-label="People">
                 <ActivityView.Person
-                  onClick={() => addLog('person: Kate Bell')}
+                  onClick={() => addLog('person: Kate Brown')}
                 >
                   <Avatar.Root>
                     <Avatar.Fallback>KB</Avatar.Fallback>
                   </Avatar.Root>
-                  <ActivityView.Name>Kate Bell</ActivityView.Name>
+                  <ActivityView.Name>Kate Brown</ActivityView.Name>
                 </ActivityView.Person>
                 <ActivityView.Person
                   onClick={() => addLog('person: Gary and Fatima')}
@@ -163,13 +163,12 @@ export const ActivityViewOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Sharing something: what’s shared, people to share with, actions on it
-        (UIKit <code>UIActivityViewController</code>, the share sheet; Figma
-        “Activity Views”).
+        Sharing something: what’s shared, people to share with, actions on it (a
+        share sheet).
       </li>
       <li>
-        Parts in the app’s <a href="sheet">Sheet</a> (iPhone) or{' '}
-        <a href="popover">Popover</a> (iPad).
+        Parts in the app’s <a href="sheet">Sheet</a> (compact) or{' '}
+        <a href="popover">Popover</a> (regular).
       </li>
     </ul>
     <LiveView />
@@ -258,7 +257,7 @@ export const ActivityViewOverview: FunctionComponent = () => (
           component="activity-view"
           part="ActivityView.Count"
         />
-        ) takes one line, truncated (iOS scales it down instead).
+        ) takes one line, truncated.
       </li>
       <li>
         An action’s circle darkens while pressed; pressing does the action, the

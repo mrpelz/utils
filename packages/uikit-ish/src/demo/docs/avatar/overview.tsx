@@ -45,7 +45,7 @@ const LiveView: FunctionComponent = () => {
         <Avatar.Root>
           {content.image ? (
             <Avatar.Image
-              alt="Anna Haro"
+              alt="Anna Hall"
               src={photo(200)}
             />
           ) : null}
@@ -56,7 +56,7 @@ const LiveView: FunctionComponent = () => {
           <Avatar.Root>
             {content.image ? (
               <Avatar.Image
-                alt="Anna Haro"
+                alt="Anna Hall"
                 src={photo(200)}
               />
             ) : null}
@@ -65,7 +65,7 @@ const LiveView: FunctionComponent = () => {
           <Avatar.Root>
             {content.image ? (
               <Avatar.Image
-                alt="Kate Bell"
+                alt="Kate Brown"
                 src={photo(290)}
               />
             ) : null}
@@ -98,9 +98,9 @@ export const AvatarOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         A person: their photo in a circle, or, without one, their initials (Base
-        UI’s <code>Avatar</code>; Figma “Contact”).
+        UI’s <code>Avatar</code>).
       </li>
-      <li>Several people in one circle (Figma “Group”): a conversation’s.</li>
+      <li>Several people in one circle: a conversation’s.</li>
     </ul>
     <LiveView />
 
@@ -186,7 +186,7 @@ export const AvatarOverview: FunctionComponent = () => (
       </li>
       <li>
         70px by default (<code>size</code>), the initials 40% of it, semibold,
-        white on iOS contacts’ gray.
+        white on a gray gradient.
       </li>
       <li>
         In a group: the first person large at the top start, the second smaller

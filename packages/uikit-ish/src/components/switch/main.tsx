@@ -17,15 +17,13 @@ import type { Drag, SwitchRootProps } from './props.js';
 
 export type { SwitchRootProps } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Toggle - Switch”, light and dark appearance),
-// with Figma colors mapped to UIKit semantic colors: on `systemGreen` (or
-// `tint`, UIKit `onTintColor`), off `systemFill`; the knob (`#fff`) has no
-// semantic equivalent.
-// The pressed glass effect and everything Figma does not specify come from
-// Framework7 `components/toggle/toggle.less`, `toggle-ios.less` (iOS values,
-// `.toggle-active-state`): transitions, pressed scales, glow, glass shadow.
+// The switch, light and dark, in the semantic colors: on `systemGreen` (or
+// `tint`), off `systemFill`; the knob (`#fff`) has no semantic equivalent.
+// The pressed glass effect comes from Framework7
+// `components/toggle/toggle.less`, `toggle-ios.less` (its iOS theme's
+// values, `.toggle-active-state`): transitions, pressed scales, glow, glass shadow.
 //
-// Deviations:
+// Also:
 // - The track's end cap (Framework7 `.toggle::after`) is omitted, as it shows
 //   as a separate circle while the pressed track shrinks.
 // - Track size (64×28) is a minimum, not a fixed size; the knob is positioned
@@ -40,13 +38,12 @@ export type { SwitchRootProps } from './props.js';
 //   not flip the state act as a tap (toggling), unless they flick towards the
 //   current side (Framework7: swipes within 300ms toggle).
 // - The browser's default focus ring is kept.
-// - Indeterminate (as a checkbox, which the platform's switches are; UIKit:
-//   none): the knob in the middle, on the off color; checked, the on color
+// - Indeterminate (as a checkbox, which the platform's switches are): the
+//   knob in the middle, on the off color; checked, the on color
 //   from the start up to the knob, fading out (so checked and unchecked
 //   differ), faded in and out as the state changes.
 //
-// On/off labels (UIKit's accessibility setting “On/Off Labels”, measured on
-// Apple's illustration): a 9px “I” bar (white) and a 9px “O” ring (tertiary
+// On/off labels (an accessibility setting): a 9px “I” bar (white) and a 9px “O” ring (tertiary
 // label), 1px strokes, each centered in the track beside the knob on its
 // side; the knob covers the other (both hidden while indeterminate, and
 // while pressed, as the knob is a lens).

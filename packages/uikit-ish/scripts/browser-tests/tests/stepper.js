@@ -14,7 +14,7 @@ const output = (page) =>
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'stepper: matches Figma',
+    name: 'stepper: matches the spec',
     run: async (page) => {
       for (const scheme of /** @type {const} */ (['light', 'dark'])) {
         await page.open('stepper', scheme);

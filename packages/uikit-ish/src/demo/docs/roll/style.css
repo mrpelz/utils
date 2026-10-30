@@ -3,7 +3,7 @@
 /* A roll, and its value (the app's) above it. */
 .roll-demo-stack {
   display: grid;
-  color: var(--color-ios-label);
+  color: var(--color-ui-label);
   gap: 8px;
   justify-items: center;
 }
@@ -11,7 +11,7 @@
 /* The value: its digits as wide as each other, so it doesn't shift as the
    roll turns. */
 .roll-demo-value {
-  font-size: var(--font-ios-headline-size);
+  font-size: var(--font-ui-headline-size);
   font-variant-numeric: tabular-nums;
-  line-height: var(--font-ios-headline-line-height);
+  line-height: var(--font-ui-headline-line-height);
 }

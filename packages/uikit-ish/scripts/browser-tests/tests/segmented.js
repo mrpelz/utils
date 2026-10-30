@@ -144,7 +144,7 @@ export const tests = [
     },
   },
   {
-    name: 'segmented: geometry matches Figma',
+    name: 'segmented: geometry matches the spec',
     run: async (page) => {
       await page.open('segmented', 'light', {
         state: [{ $rest: true, count: 5 }],

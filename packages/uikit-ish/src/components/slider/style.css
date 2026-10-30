@@ -22,7 +22,7 @@
     width: 100%;
     height: var(--uikit-slider-bar-size);
     border-radius: 3px;
-    background-color: var(--color-ios-system-fill);
+    background-color: var(--color-ui-system-fill);
 
     &[data-orientation='vertical'] {
       width: var(--uikit-slider-bar-size);
@@ -89,7 +89,7 @@
       width: 4px;
       height: 4px;
       border-radius: 50%;
-      background-color: var(--color-ios-quaternary-label);
+      background-color: var(--color-ui-quaternary-label);
       translate: -50% 0;
     }
 
@@ -116,28 +116,28 @@
     align-items: center;
     align-self: stretch;
     justify-content: center;
-    color: var(--color-ios-secondary-label);
-    font-size: var(--font-ios-body-size);
+    color: var(--color-ui-secondary-label);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-body-weight-emphasized);
-    font-weight: round(down, var(--font-ios-body-weight-emphasized), 100);
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    font-variation-settings: 'wght' var(--font-ui-body-weight-emphasized);
+    font-weight: round(down, var(--font-ui-body-weight-emphasized), 100);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
     text-align: center;
   }
 
   .uikit-slider-value {
     display: grid;
     flex: none;
-    color: var(--color-ios-secondary-label);
-    font-size: var(--font-ios-body-size);
+    color: var(--color-ui-secondary-label);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
     font-variant-numeric: tabular-nums;
-    font-variation-settings: 'wght' var(--font-ios-body-weight);
-    font-weight: round(down, var(--font-ios-body-weight), 100);
+    font-variation-settings: 'wght' var(--font-ui-body-weight);
+    font-weight: round(down, var(--font-ui-body-weight), 100);
     justify-items: end;
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
 
     /* In tooltips (see Thumb): for assistive technology only. */
     &[data-slider-placement='tooltip'],
@@ -153,13 +153,13 @@
 
   .uikit-slider-label {
     flex: none;
-    color: var(--color-ios-label);
-    font-size: var(--font-ios-body-size);
+    color: var(--color-ui-label);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-body-weight);
-    font-weight: round(down, var(--font-ios-body-weight), 100);
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    font-variation-settings: 'wght' var(--font-ui-body-weight);
+    font-weight: round(down, var(--font-ui-body-weight), 100);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
   }
 
   .uikit-slider-root {
@@ -169,7 +169,7 @@
     --uikit-slider-knob-width: 38px;
     --uikit-slider-knob-height: 24px;
     --uikit-slider-min-length: 120px;
-    --uikit-slider-tint: var(--color-ios-primary);
+    --uikit-slider-tint: var(--color-ui-primary);
 
     position: relative;
     display: flex;
@@ -270,7 +270,7 @@
         color-mix(in srgb, var(--uikit-slider-tint) 75%, transparent);
       content: '';
       opacity: 0;
-      transition-duration: var(--glass-ios-lens-duration);
+      transition-duration: var(--glass-ui-lens-duration);
     }
 
     &::after {
@@ -282,7 +282,7 @@
         0 6px 13px rgb(0 0 0 / 12%);
       content: '';
       inset: 0;
-      transition-duration: var(--glass-ios-lens-duration);
+      transition-duration: var(--glass-ui-lens-duration);
       transition-property: transform, background-color, box-shadow;
     }
 
@@ -309,10 +309,10 @@
       &::after {
         background-color: transparent;
         box-shadow:
-          var(--glass-ios-lens-shadow),
+          var(--glass-ui-lens-shadow),
           0 0.5px 4px rgb(0 0 0 / 12%),
           0 6px 13px rgb(0 0 0 / 12%);
-        transform: scale(var(--glass-ios-lens-scale));
+        transform: scale(var(--glass-ui-lens-scale));
       }
     }
   }

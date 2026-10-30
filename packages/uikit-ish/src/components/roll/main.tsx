@@ -40,11 +40,11 @@ export type {
   RollValue,
 } from './props.js';
 
-// Source: Framework7 (`picker.js`, `picker-ios.less`, `picker-vars.less`),
-// after UIKit's `UIPickerView`: a wheel of columns, the selected row in a
+// Source: Framework7 (`picker.js`, `picker-ios.less`, `picker-vars.less`): a
+// wheel of columns, the selected row in a
 // band across them.
 //
-// A roll (UIKit `UIPickerView`): `Root` holds `Column`s of `Item`s and,
+// A roll: `Root` holds `Column`s of `Item`s and,
 // between them, `Separator`s (e.g. “:”). Columns scroll natively (touch,
 // wheel, momentum), snapping to their rows; dragged with a mouse, they
 // follow it; when settled, the centered row is selected. The rows turn on a
@@ -53,16 +53,16 @@ export type {
 // listbox: arrow keys, Page Up/Down and Home/End move its selection, and a
 // press on a row scrolls to it. Disabled rows (e.g. days past a maximum)
 // can be scrolled (or dragged, or pressed) to; settled on one a moment, a
-// column moves to the nearest enabled row (as iOS), unless scrolled on.
+// column moves to the nearest enabled row, unless scrolled on.
 //
 // `editable` columns (e.g. numbers) take typed values: pressing their
 // selected row (or typing a digit while focused) shows a numeric text field
-// in its place (as iOS's time wheels); entered, the row matching the text
+// in its place; entered, the row matching the text
 // (its text, or its number) is selected.
 //
-// Deviations:
+// Also:
 // - Rows are 34px (Framework7: 36px), their text 22px (Framework7: 20px),
-//   in a 216px wheel (UIKit's `UIPickerView` height; Framework7: 260px).
+//   in a 216px wheel (Framework7: 260px).
 // - The band is `tertiarySystemFill` with 8px corners, 8px from the sides.
 
 /** Row height and wheel height (see above; also in style.css). */
@@ -93,7 +93,7 @@ const CopyContext = createContext(false);
 const copiesOf = (rows: number) =>
   Math.max(2, Math.ceil(60 / Math.max(rows, 1)));
 
-// Figma none (see Source): the wheel, the band behind its center.
+// The wheel, the band behind its center.
 const Root = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -105,7 +105,7 @@ const Root = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ),
 );
 
-// Figma none: text between columns (e.g. “:”), at the band.
+// Text between columns (e.g. “:”), at the band.
 const Separator = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -397,7 +397,7 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
     }, []);
 
     // The row at rest disabled since (e.g. a month's 31st, its month turned
-    // to April): on to the nearest enabled row (as iOS), selecting it.
+    // to April): on to the nearest enabled row, selecting it.
     useEffect(() => {
       const { drag, scrolling, target } = internal.current;
       if (drag || scrolling || target !== undefined) return;

@@ -504,8 +504,8 @@ export const HeaderComposition: FunctionComponent = () => (
       </li>
       <li>
         Search sits with the page’s Region (guide{' '}
-        <GuideLink to="rule-a11">A11</GuideLink>); on iOS 26 also at the bottom
-        (see <a href="toolbar/composition#a-search-field">Toolbar</a>).
+        <GuideLink to="rule-a11">A11</GuideLink>); also at the bottom (see{' '}
+        <a href="toolbar/composition#a-search-field">Toolbar</a>).
       </li>
       <li>
         <strong>Library:</strong> the header’s accessory (

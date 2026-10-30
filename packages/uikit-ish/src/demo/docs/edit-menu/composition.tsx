@@ -501,9 +501,9 @@ export const EditMenuComposition: FunctionComponent = () => (
           component="edit-menu"
           part="EditMenu.Root"
         />
-        ’s <code>size</code>): Format’s submenu covers its trigger’s menu, as an
-        iPhone’s; regular (the default), beside it. Toggling keeps the menus
-        open, an action closes them all.
+        ’s <code>size</code>): Format’s submenu covers its trigger’s menu, as a
+        compact one’s; regular (the default), beside it. Toggling keeps the
+        menus open, an action closes them all.
       </li>
       <li>
         Without room below their triggers, the menus grow rather than scroll:

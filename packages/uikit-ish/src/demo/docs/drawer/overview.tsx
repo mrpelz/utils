@@ -204,8 +204,8 @@ export const DrawerOverview: FunctionComponent = () => (
         Room for it: a <a href="layout">Layout</a>’s column, side by side.
       </li>
       <li>
-        Drilling into a list: a <a href="navigation">Navigation</a> (iOS’
-        compact split view: one column at a time).
+        Drilling into a list: a <a href="navigation">Navigation</a> (one column
+        at a time).
       </li>
       <li>
         A scoped task over the page: a <a href="sheet">Sheet</a>.

@@ -15,8 +15,8 @@ export type AlertHandle<Payload = unknown> = BaseAlertDialog.Handle<Payload>;
 
 export type AlertActionsProps = ComponentProps<'div'> & {
   /**
-   * Stacked (e.g. two long labels; UIKit stacks more than two buttons
-   * itself, as this does).
+   * Stacked (e.g. two long labels; more than two buttons stack by
+   * themselves).
    * @default with more than two buttons, otherwise side by side
    */
   stacked?: boolean;
@@ -26,7 +26,7 @@ export type AlertActionVariant = 'destructive' | 'primary' | 'secondary';
 
 export type AlertActionProps = Omit<BaseAlertDialog.Close.Props, 'ref'> & {
   /**
-   * Figma “Type”.
+   * Its kind: primary (in the tint), secondary or destructive.
    * @default 'secondary'
    */
   variant?: AlertActionVariant;

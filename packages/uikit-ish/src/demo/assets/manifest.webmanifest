@@ -1,7 +1,7 @@
 {
   "name": "uikit-ish",
   "short_name": "uikit-ish",
-  "description": "iOS 26 (UIKit) components for the web, built on Base UI.",
+  "description": "App components for the web, touch first, built on Base UI.",
   "icons": [
     {
       "src": "manifest-icon-192.maskable.png",

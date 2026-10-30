@@ -19,8 +19,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { getPropOptionsRoot, propOptionsPopup } from './props.js';
 
 /**
- * A sheet (UIKit `UISheetPresentationController`, Figma “Sheets”, Base UI's
- * `Drawer`): a scoped task from the bottom (large or medium), a form sheet
+ * A sheet (Base UI's `Drawer`): a scoped task from the bottom (large or medium), a form sheet
  * in a regular width; swiped down to dismiss it.
  */
 export const SheetDemo: FunctionComponent = () => {

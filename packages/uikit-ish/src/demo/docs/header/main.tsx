@@ -29,8 +29,7 @@ import {
 } from './props.js';
 
 /**
- * A page's header (UIKit `UINavigationBar`, Figma “Toobar - Top - iPhone”,
- * Style=Large Title): its top toolbar anchored above the page; the large
+ * A page's header: its top toolbar anchored above the page; the large
  * title sits below its buttons and scrolls away under it, the bar's title
  * fading in between them.
  */
@@ -147,7 +146,7 @@ export const HeaderDemo: FunctionComponent = () => {
 
 /**
  * A page's header without a large title: the bar's title shows, with a
- * subtitle (Figma Style=Title 2 Line); centered, or at its start.
+ * subtitle; centered, or at its start.
  */
 export const HeaderTitleDemo: FunctionComponent = () => {
   const id = 'header-title';

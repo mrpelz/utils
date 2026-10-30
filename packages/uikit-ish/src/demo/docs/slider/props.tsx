@@ -78,8 +78,8 @@ export const propOptionsRoot = {
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
   tint: [
     undefined,
-    'var(--color-ios-system-orange)',
-    'var(--color-ios-system-green)',
+    'var(--color-ui-system-orange)',
+    'var(--color-ui-system-green)',
   ] as const,
 };
 

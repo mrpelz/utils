@@ -100,7 +100,7 @@ export const TooltipInformationArchitecture: FunctionComponent = () => (
       <li>
         Its delays (300ms here; a provider’s, then at once between tooltips).
       </li>
-      <li>Its look: iOS 26’s glass, as a capsule (no Figma).</li>
+      <li>Its look: glass, as a capsule.</li>
     </ul>
   </>
 );

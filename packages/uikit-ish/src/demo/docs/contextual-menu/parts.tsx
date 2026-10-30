@@ -773,7 +773,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
       </li>
       <li>
         Released off the trigger (it lifted away under the finger), the menu
-        stays open (as iOS’).
+        stays open.
       </li>
       <li>Renders no element.</li>
     </ul>
@@ -824,7 +824,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
         contexts of its ancestors (e.g. a <a href="viewport">Viewport</a>’s
         layers), it can’t rise above the backdrop; give it a preview there.
       </li>
-      <li>Takes no pointer events (iOS: pressing it would commit).</li>
+      <li>Takes no pointer events (pressing it would commit).</li>
       <li>
         Here: open the menu (a long press on its trigger, or its secondary
         click) to see it (one menu opens at a time).
@@ -870,7 +870,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
     <ul>
       <li>
         The page blurred and dimmed behind the lifted trigger and the menu
-        (iOS’); optional.
+        (optional).
       </li>
       <li>
         Here: open the menu (a long press on its trigger, or its secondary

@@ -28,8 +28,8 @@ const editingType = union('both', 'leading', 'trailing', 'none', 'ignore');
 /** An edit mode's description (Root's, Section's, Item's). */
 const editingDescription = (scope: string, inherited: string | undefined) => (
   <>
-    {scope} edit mode (UIKit <code>isEditing</code>), by side:{' '}
-    <code>leading</code> slides in the rows’ leading edit controls (
+    {scope} edit mode, by side: <code>leading</code> slides in the rows’ leading
+    edit controls (
     <PartLink
       component="list"
       part="List.Checkbox"
@@ -100,8 +100,8 @@ export const listRootRows: readonly PropRow[] = [
     union('insetGrouped', 'grouped', 'plain', 'sidebar'),
     code(union('insetGrouped')),
     <>
-      UIKit <code>UITableView.Style</code>: groups inset 16px with 24px corners
-      (<code>insetGrouped</code>), full width (<code>grouped</code>), plain rows
+      The list’s style: groups inset 16px with 24px corners (
+      <code>insetGrouped</code>), full width (<code>grouped</code>), plain rows
       with sticky section titles (<code>plain</code>), or a sidebar’s capsule
       rows (<code>sidebar</code>).
     </>,
@@ -133,7 +133,7 @@ export const listHeaderRows: readonly PropRow[] = [
     'prominence',
     union('prominent', 'nested', 'extraProminent'),
     code(union('prominent')),
-    'The header’s type (Figma “Header”): nested headers of plain lists are section titles (sticky).',
+    'The header’s type: nested headers of plain lists are section titles (sticky).',
   ],
   cursorRow(
     <>
@@ -283,7 +283,7 @@ export const listItemRows: readonly PropRow[] = [
     <>
       A click on the row: e.g.{' '}
       <PartLink part="forwardClick">forwardClick(selector)</PartLink>, passing
-      it on to a control in the row (a switch, a checkbox), as iOS rows do.
+      it on to a control in the row (a switch, a checkbox).
     </>,
   ],
   secondaryClickRow,
@@ -577,10 +577,9 @@ export const listImageRows: readonly PropRow[] = [
     union('symbol', 'rounded', 'circular', 'fill'),
     code(union('symbol')),
     <>
-      The image’s frame (Figma “_Images” Type): a symbol alone, a rounded or
-      circular frame (e.g. a symbol on a <code>backgroundColor</code>), or a
-      square filled by an <code>img</code>, <code>video</code> or{' '}
-      <code>canvas</code>.
+      The image’s frame: a symbol alone, a rounded or circular frame (e.g. a
+      symbol on a <code>backgroundColor</code>), or a square filled by an{' '}
+      <code>img</code>, <code>video</code> or <code>canvas</code>.
     </>,
   ],
   ...renderRows('span', 'HTMLElement'),
@@ -664,8 +663,7 @@ export const listEditButtonRows: readonly PropRow[] = [
     code('systemGray'),
     <>
       Its circle’s color: e.g. <code>systemRed</code> deleting,{' '}
-      <code>systemGreen</code> inserting (UIKit’s{' '}
-      <code>UITableViewCell.EditingStyle</code>).
+      <code>systemGreen</code> inserting.
     </>,
   ],
   [
@@ -730,7 +728,7 @@ export const listSwipeActionsRows: readonly PropRow[] = [
     'overswipe',
     'boolean',
     code('false'),
-    'Swiping on past the actions stretches the outermost one up to the others (following the row), and, past 304px, triggers it on release (UIKit performsFirstActionWithFullSwipe).',
+    'Swiping on past the actions stretches the outermost one up to the others (following the row), and, past 304px, triggers it on release.',
   ],
   [
     'onOverswipe',
@@ -899,7 +897,7 @@ export const listIndexRows: readonly PropRow[] = [
     'size',
     union('compact', 'regular'),
     code(union('compact')),
-    'UIKit size class: compact (iPhone) or regular (iPad).',
+    'A size class: compact (a phone) or regular (a tablet).',
   ],
   [
     'aria-label',

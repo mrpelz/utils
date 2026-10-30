@@ -29,7 +29,7 @@ export const tests = [
       });
       await sleep(600);
 
-      // A swatch (Figma's grid: the 6th row's 1st).
+      // A swatch (the grid's 6th row's 1st).
       await press(page, '[role=group][aria-label=Grid] [aria-label="#00A1D8"]');
       assert.match(await page.log(), /value change: #00A1D8/u);
       const state = await page.evaluate(`(() => ({

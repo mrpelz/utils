@@ -219,7 +219,7 @@ const wheelQuiet = 150;
 const flingStart = 0.75;
 
 /**
- * Rubber-banding (UIKit's): how far content moves pulled `distance` px past
+ * Rubber-banding: how far content moves pulled `distance` px past
  * an end, in a scroll container `size` px high (never as far as that).
  */
 const rubberBand = (distance: number, size: number) =>
@@ -661,7 +661,7 @@ const subscribeRegular = (onChange: () => void) => {
 
 /**
  * The window's horizontal size class (no `Provider` needed): e.g. a sheet
- * on `compact` (a phone), a popover on `regular` (an iPad); `compact` before
+ * on `compact` (a phone), a popover on `regular` (a tablet); `compact` before
  * hydration (server rendering).
  */
 export const useSizeClass = (): SizeClass =>

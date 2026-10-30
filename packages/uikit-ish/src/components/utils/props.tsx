@@ -14,8 +14,8 @@ export type LogicalSide =
 export type SecondaryClickProps = {
   /**
    * A secondary click: a right click (or Control-click: the `contextmenu`
-   * event, whose menu it replaces), or a touch held for 500ms (iOS: a long
-   * press; a `contextmenu` pointer event of the touch), whose click then
+   * event, whose menu it replaces), or a touch held for 500ms (a long press;
+   * a `contextmenu` pointer event of the touch), whose click then
    * doesn't follow. Not while disabled.
    */
   onSecondaryClick?: MouseEventHandler<HTMLElement>;

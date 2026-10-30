@@ -11,8 +11,8 @@
  *
  * Recurring patterns:
  *
- * - Font weights, also between the static weights of the system font (SF
- *   Pro 510, 590 in Figma): the exact weight on the variable weight axis
+ * - Font weights, also between the static weights of the system font (e.g.
+ *   510, 590): the exact weight on the variable weight axis
  *   (`font-variation-settings: 'wght' W`), `font-weight` rounded down to a
  *   static weight (`round(down, W, 100)`; fonts without the axis use that).
  *   Chrome would otherwise match e.g. 510 to the next heavier static face
@@ -35,8 +35,8 @@
 
 /* Utils (see main.tsx). */
 @layer uikit-ish {
-  /* Scrollbars, hidden in every component's scroll container (as iOS shows
-     none at rest): they couldn't be lifted above the layers over them
+  /* Scrollbars, hidden in every component's scroll container (none at
+     rest): they couldn't be lifted above the layers over them
      (bars, glass, a scroll edge effect), nor kept whole in rounded
      containers (a sheet's, a popover's corners). Scrolled by touch, a
      wheel or a trackpad, and the keys. (No specificity: a component's or

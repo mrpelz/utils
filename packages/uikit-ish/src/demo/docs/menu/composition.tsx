@@ -319,7 +319,7 @@ const AHistory: FunctionComponent = () => {
                 <List.Group>
                   <List.Item>
                     <List.Content>
-                      <List.Title>Kate Bell</List.Title>
+                      <List.Title>Kate Brown</List.Title>
                       <List.Subtitle>Weekend photos</List.Subtitle>
                     </List.Content>
                   </List.Item>
@@ -471,8 +471,8 @@ export const MenuComposition: FunctionComponent = () => (
     <ul>
       <li>
         A choice shown on its button: the trigger’s label the chosen option,
-        chevrons after it (UIKit’s pop-up button), at a <a href="list">List</a>{' '}
-        row’s end.
+        chevrons after it (a pop-up button), at a <a href="list">List</a> row’s
+        end.
       </li>
       <li>
         A{' '}

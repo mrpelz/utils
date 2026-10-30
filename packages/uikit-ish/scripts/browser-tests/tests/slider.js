@@ -323,7 +323,7 @@ export const tests = [
     name: 'slider: its tint fills it',
     run: async (page) => {
       await page.open('slider', 'light', {
-        state: [null, { $rest: true, tint: 'var(--color-ios-system-orange)' }],
+        state: [null, { $rest: true, tint: 'var(--color-ui-system-orange)' }],
       });
       const fill = await page.evaluate(`(() => {
         const track = ${page.section}.querySelector('input[type=range]').closest('[data-orientation]').parentElement;

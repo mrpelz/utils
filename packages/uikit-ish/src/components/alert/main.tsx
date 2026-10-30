@@ -22,24 +22,22 @@ export type {
   AlertPopupProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Alerts”, Type=Side-by-Side and Stacked; also
-// “Action Sheets”, see `ActionSheet`): a glass panel 300px wide, 14px in,
+// Alerts (buttons side by side or stacked; also action sheets, see
+// `ActionSheet`): a glass panel 300px wide, 14px in,
 // its corners 34px, its parts 10px apart: its title (Headline) and
 // description (Body), 8px in, 24px above what follows; text fields (Body,
 // medium, 52px high, 16px in, between separators, on a gray fill with 26px
 // corners, 19px above the buttons); capsule buttons 48px high (Body,
-// medium): Secondary and Destructive on a gray fill (the label's color, red),
-// Primary in the tint (white); side by side 16px apart, or stacked 10px
+// medium): secondary and destructive on a gray fill (the label's color,
+// red), primary in the tint (white); side by side 16px apart, or stacked 10px
 // apart (more than two, or `stacked`). Base UI's `AlertDialog`: modal, its
 // buttons closing it.
 //
-// Deviations:
-// - The panel is the menus' glass (`glassMedium`, see `Menu`; Figma: the
-//   glass fill, blended with what's behind, which a popup, positioned by a
-//   transform and animated, can't be); its fills unblended (Figma:
-//   plus-darker, plus-lighter in dark mode), as the system fills.
-// - Behind it, the page dims (black, 20%; 40% in dark mode; Figma has
-//   none); it scales in from 110% as it fades in.
+// Also:
+// - The panel is the menus' glass (`glassMedium`, see `Menu`: not blended
+//   with what's behind, which a popup, positioned by a transform and
+//   animated, can't be); its fills unblended, as the system fills.
+// - Behind it, the page dims (black, 20%; 40% in dark mode); it scales in from 110% as it fades in.
 
 /**
  * The alert at the viewport's center (or its `container`'s, if that's a
@@ -68,7 +66,7 @@ const Popup = forwardRef<HTMLDivElement, AlertPopupProps>(
   ),
 );
 
-/** Its title and description (Figma “Title and Description”). */
+/** Its title and description. */
 export const AlertHeader = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     // Its title and description, 24px above what follows.
@@ -118,7 +116,7 @@ const Fields = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ),
 );
 
-/** A text field (Figma “Text Field”; Base UI's `Input`), in `Alert.Fields`. */
+/** A text field (Base UI's `Input`), in `Alert.Fields`. */
 const Field = forwardRef<HTMLElement, Omit<BaseInput.Props, 'ref'>>(
   ({ className, ...props }, ref) => (
     <BaseInput
@@ -174,8 +172,7 @@ export const useCreateAlertHandle = <
 };
 
 /**
- * An alert (UIKit `UIAlertController`, style `alert`; Base UI's
- * `AlertDialog`): a modal panel with a title and description, optionally
+ * An alert (Base UI's `AlertDialog`): a modal panel with a title and description, optionally
  * text fields, and its buttons.
  */
 export const Alert = {

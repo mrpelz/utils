@@ -57,7 +57,7 @@
     padding: 0 16px 8px;
   }
 
-  /* Figma “Title and Subtitle”: 16px from the sides, 10px from the bar (its
+  /* A large title (and subtitle): 16px from the sides, 10px from the bar (its
      height measured); as it scrolls under the bar, it fades out. */
   .uikit-header-large-title {
     display: flex;
@@ -70,18 +70,18 @@
       block calc(var(--uikit-header-bar, 0px) + var(--uikit-page-safe-top, 0px))
         0
     );
-    color: var(--color-ios-label);
-    font-size: var(--font-ios-large-title-size);
+    color: var(--color-ui-label);
+    font-size: var(--font-ui-large-title-size);
     font-style: normal;
     font-variation-settings: 'wght'
-      var(--font-ios-large-title-weight-emphasized);
+      var(--font-ui-large-title-weight-emphasized);
     font-weight: round(
       down,
-      var(--font-ios-large-title-weight-emphasized),
+      var(--font-ui-large-title-weight-emphasized),
       100
     );
-    letter-spacing: var(--font-ios-large-title-tracking);
-    line-height: var(--font-ios-large-title-line-height);
+    letter-spacing: var(--font-ui-large-title-tracking);
+    line-height: var(--font-ui-large-title-line-height);
     view-timeline-axis: block;
     view-timeline-inset: calc(
         var(--uikit-header-bar, 0px) + var(--uikit-page-safe-top, 0px)

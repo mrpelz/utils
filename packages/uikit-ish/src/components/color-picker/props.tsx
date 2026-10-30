@@ -47,7 +47,7 @@ export type ColorPickerPanelProps = Omit<ComponentProps<'div'>, 'children'> & {
   defaultMode?: ColorPickerMode;
   /**
    * The initial saved colors (uncontrolled).
-   * @default Figma's
+   * @default ten colors (see `defaultSavedColors`)
    */
   defaultSavedColors?: string[];
   /** The view (controlled). */
@@ -84,7 +84,7 @@ export type ColorWellProps = ComponentProps<'button'> & {
   /** Its color (a hex string; without one: the hues only). */
   color?: string;
   /**
-   * Figma “Size” (Small: 28px, Large: 36px).
+   * Its size (small: 28px, large: 36px).
    * @default 'small'
    */
   size?: 'large' | 'small';

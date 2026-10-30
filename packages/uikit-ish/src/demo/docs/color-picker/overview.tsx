@@ -199,14 +199,10 @@ export const ColorPickerOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Picks a color (UIKit <code>UIColorPickerViewController</code>): from a
-        grid, a spectrum, or red, green and blue sliders; its opacity; saved
-        colors.
+        Picks a color: from a grid, a spectrum, or red, green and blue sliders;
+        its opacity; saved colors.
       </li>
-      <li>
-        Opened from a color well (UIKit <code>UIColorWell</code>), in a popover
-        or a sheet.
-      </li>
+      <li>Opened from a color well, in a popover or a sheet.</li>
     </ul>
     <LiveView />
 

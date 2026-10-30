@@ -38,7 +38,7 @@ parseColor('#007AFF80'); // { r: 0, g: 122, b: 255, a: 0.502 }`;
 const formatColorCode = `formatColor({ r: 0, g: 122, b: 255, a: 1 }); // '#007AFF'
 formatColor({ r: 0, g: 122, b: 255, a: 0.5 }); // '#007AFF80'`;
 
-const defaultSavedColorsCode = `// Figma's, and the app's own after them.
+const defaultSavedColorsCode = `// The defaults, and the app's own after them.
 <ColorPicker.Panel defaultSavedColors={[...defaultSavedColors, '#5856D6']} />`;
 
 /** `ColorPicker.Root`, outlined, with its props (its panel inside). */
@@ -310,7 +310,7 @@ export const ColorPickerParts: FunctionComponent = () => (
     <ul>
       <li>
         The color, a hex string (<code>#rrggbbaa</code> with opacity), for its
-        parts; in the app’s popover (iPad) or sheet (iPhone).
+        parts; in the app’s popover (regular) or sheet (compact).
       </li>
       <li>
         State: <code>value</code> or <code>defaultValue</code>,{' '}
@@ -332,8 +332,8 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The app’s header above the panel (Figma: 16px from the popover’s top,
-        10px above the panel): e.g. a <a href="toolbar">Toolbar</a>.
+        The app’s header above the panel (16px from the popover’s top, 10px
+        above the panel): e.g. a <a href="toolbar">Toolbar</a>.
       </li>
       <li>
         In a sheet, its{' '}
@@ -418,8 +418,8 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A color well (UIKit <code>UIColorWell</code>): a disk of hues around its
-        color; the trigger opening the picker (e.g. a{' '}
+        A color well: a disk of hues around its color; the trigger opening the
+        picker (e.g. a{' '}
         <code>{'<Popover.Trigger render={<ColorPicker.Well />} />'}</code>
         ).
       </li>
@@ -472,7 +472,7 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Figma’s saved colors: the <PartLink part="ColorPicker.Panel" />
+        The default saved colors: the <PartLink part="ColorPicker.Panel" />
         ’s by default; to start from them, adding the app’s.
       </li>
     </ul>

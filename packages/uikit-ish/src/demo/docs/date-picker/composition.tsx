@@ -22,8 +22,8 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 
-// Figma's example: April 20, 2025, 9:41.
-const example = new Date(2025, 3, 20, 9, 41);
+// An example date: April 20, 2025, 10:00.
+const example = new Date(2025, 3, 20, 10, 0);
 
 const day = 24 * 60 * 60 * 1000;
 
@@ -285,7 +285,7 @@ export const DatePickerComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As iOS’s Calendar edits an event: the buttons toggle the calendar and
+        As a calendar app edits an event: the buttons toggle the calendar and
         the time wheel, each in an expandable row below the row (
         <PartLink
           component="list"

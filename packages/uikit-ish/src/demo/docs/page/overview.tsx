@@ -96,14 +96,13 @@ export const PageOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        What a screen shows (UIKit: a view controller’s root view): its
-        content’s scroll container, filling its place, on the page background.
+        What a screen shows: its content’s scroll container, filling its place,
+        on the page background.
       </li>
       <li>
         Under a <a href="header">Header</a>’s bar (its large title at its
-        start), then lists or other content; <code>grouped</code> (UIKit’s
-        grouped background) for grouped lists, <code>plain</code> for plain
-        ones.
+        start), then lists or other content; <code>grouped</code> (the grouped
+        background) for grouped lists, <code>plain</code> for plain ones.
       </li>
       <li>After Framework7’s pages; no Base UI component.</li>
     </ul>

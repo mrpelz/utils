@@ -80,8 +80,7 @@ export const CollapsibleOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         Content shown or hidden by a trigger, opening and closing in place (Base
-        UI’s <code>Collapsible</code>; SwiftUI <code>DisclosureGroup</code>, a
-        sidebar’s collapsible sections).
+        UI’s <code>Collapsible</code>; e.g. a sidebar’s collapsible sections).
       </li>
       <li>
         Its parts render what they collapse and toggle: here a{' '}

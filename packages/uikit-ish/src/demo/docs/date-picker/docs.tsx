@@ -183,7 +183,7 @@ export const datePickerRootRows: readonly PropRow[] = [
     'mode',
     union('date', 'dateAndTime', 'time'),
     code('date'),
-    'A date, a time, or both (UIKit UIDatePicker.Mode).',
+    'A date, a time, or both.',
   ],
   [
     'pickerStyle',
@@ -262,13 +262,13 @@ export const datePickerRootRows: readonly PropRow[] = [
     'popoverAlign',
     union('start', 'center', 'end'),
     code(union('center')),
-    'How the compact style’s popover aligns to its buttons (in a list row, which they end, iOS aligns it with their end: end).',
+    'How the compact style’s popover aligns to its buttons (in a list row, which they end, aligned with their end: end).',
   ],
   [
     'buttonShape',
     union('capsule', 'roundedRectangle'),
     code('capsule'),
-    'The compact style’s buttons’ shape (roundedRectangle: Figma’s 6px corners).',
+    'The compact style’s buttons’ shape (roundedRectangle: 6px corners).',
   ],
   [
     'hourCycle',
@@ -374,7 +374,7 @@ export const datePickerCalendarRowRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'Its content: a title and buttons (e.g. Figma’s Time row).',
+    'Its content: a title and buttons (e.g. a time row).',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];

@@ -41,13 +41,12 @@ import type {
 
 export type { EditMenuPositionerProps, EditMenuRootProps } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Menus”: “Edit Menu”, “_Edit Menu Item”,
-// Mode=Light and Dark), with the destructive color mapped to `systemRed`; the
-// “Medium” glass material and vibrant content colors are tokens in
-// `styles.css`, used via `glass/style.css` (`uikit-glass-medium`). Its metrics
-// are iOS 26's own edit menu's, measured on an iPhone (see Deviations).
+// The edit menu and its items, light and dark, with the destructive color
+// mapped to `systemRed`; the “Medium” glass material and vibrant content
+// colors are tokens in `styles.css`, used via `glass/style.css`
+// (`uikit-glass-medium`).
 //
-// A Base UI menu in a horizontal glass capsule (UIKit `UIEditMenuInteraction`):
+// A Base UI menu in a horizontal glass capsule:
 // its actions are items, and `EditMenu.More` opens a submenu (a `Menu` popup)
 // with further actions. It's opened by the app (`open`) at an anchor (the
 // positioner's `anchor`, e.g. a selection), not by a trigger.
@@ -61,14 +60,13 @@ export type { EditMenuPositionerProps, EditMenuRootProps } from './props.js';
 // on release; held near an end, they scroll the actions (as the tab bar's lens
 // and menus do).
 //
-// Deviations:
-// - More actions open in a menu below the capsule, an iPad (`regular`) menu
-//   (UIKit: pages of the capsule).
+// Also:
+// - More actions open in a menu below the capsule, a `regular` menu (not
+//   pages of the capsule).
 // - Highlighted actions (pointer, keyboard) show the selection, as the “more”
-//   button does (Figma: no highlighted actions).
-// - The chevron is an SVG stroke (Figma: SF Symbols glyph 􀆊).
-// - Metrics of iOS 26's own edit menu (measured): 42px high, 14px labels, 16px
-//   dividers, a 34px “more” button (Figma: 44px, 15px, 18px, 36px).
+//   button does.
+// - The chevron is an SVG stroke.
+// - 42px high, 14px labels, 16px dividers, a 34px “more” button.
 // - The capsule is Framework7's popover glass, as the menu's popup (see
 //   `Menu`).
 
@@ -329,7 +327,7 @@ const useTouchDrag = (popupRef: { current: HTMLDivElement | null }) => {
 
 const highlightSelectors = [':scope > [data-highlighted]:not([aria-haspopup])'];
 
-/** The edit menu's glass capsule (Figma “Liquid Glass”, Medium). */
+/** The edit menu's glass capsule (the medium glass). */
 const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
   ({ className, children, ...props }, forwardedRef) => {
     const ref = useForwardedRef(forwardedRef);
@@ -339,7 +337,7 @@ const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
     useTouchDrag(ref);
 
     return (
-      // iOS 26 (measured): 42px high, actions from 20px, the “more” button 4px
+      // 42px high, actions from 20px, the “more” button 4px
       // from the end; at most as wide as the space Base UI's positioner finds.
       <BaseMenu.Popup
         ref={ref}
@@ -381,7 +379,7 @@ const Item = forwardRef<
   HTMLElement,
   Omit<BaseMenu.Item.Props, 'ref'> & ItemProps
 >(({ className, children, destructive, ...props }, ref) => (
-  // Figma “_Edit Menu Item” (iOS 26's metrics): a label with a 16px high, 1px
+  // An action: a label with a 16px high, 1px
   // divider before it (except the first), 16px apart; the dividers next to the
   // highlighted action hide.
   <BaseMenu.Item
@@ -417,8 +415,8 @@ const More = forwardRef<
     },
     ref,
   ) => (
-    // Figma “Menu” (iOS 26's metrics): a 34px circle with the selection and a
-    // chevron (􀆊, 14px, 590). Pressed again, it closes its menu.
+    // The “more” button: a 34px circle with the selection and a
+    // chevron (14px, 590). Pressed again, it closes its menu.
     <BaseMenu.SubmenuTrigger
       aria-label="More"
       {...useSubmenuToggle({ onClick, onPointerDown, onPointerEnter, ref })}
@@ -568,7 +566,7 @@ const { createHandle: _createHandle, ...menuParts } = BaseMenu;
 export const EditMenu = {
   ...menuParts,
   Root,
-  // A menu's (its submenu's: an iPad menu, see `Menu`).
+  // A menu's (its submenu's: a `regular` menu, see `Menu`).
   Portal: Menu.Portal,
   SubmenuRoot: Menu.SubmenuRoot,
   Positioner,

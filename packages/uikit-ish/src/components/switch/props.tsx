@@ -12,11 +12,10 @@ export type SwitchRootProps = BaseSwitch.Root.Props & {
    * input): the knob in the middle. Toggling still flips `checked`.
    */
   indeterminate?: boolean;
-  /** Shows “I” and “O” on the track (UIKit's “On/Off Labels”). */
+  /** Shows “I” and “O” on the track (on/off labels). */
   onOffLabels?: boolean;
   /**
-   * The track's color while on, and the pressed knob's glow (UIKit
-   * `onTintColor`).
+   * The track's color while on, and the pressed knob's glow.
    * @default `systemGreen`
    */
   tint?: string;

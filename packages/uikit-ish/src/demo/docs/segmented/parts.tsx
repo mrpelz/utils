@@ -336,7 +336,7 @@ export const SegmentedParts: FunctionComponent = () => (
         Rendered while its item is chosen (always, with <code>keepMounted</code>
         ), e.g. for a mark beside the label (here).
       </li>
-      <li>Not used by iOS’s segmented controls.</li>
+      <li>Not used by these segmented controls.</li>
     </ul>
     <IndicatorPart />
     <h3>Props</h3>

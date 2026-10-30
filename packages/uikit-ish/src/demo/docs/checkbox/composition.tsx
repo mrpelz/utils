@@ -26,10 +26,10 @@ import { GuideLink } from '../hig-guide/link.js';
 const rowsCode = `<List.Group>
   <List.Item onClick={forwardClick('[role=checkbox]')}>
     <List.Leading>
-      <List.Checkbox aria-label="Anna Haro" />
+      <List.Checkbox aria-label="Anna Hall" />
     </List.Leading>
     <List.Content>
-      <List.Title>Anna Haro</List.Title>
+      <List.Title>Anna Hall</List.Title>
     </List.Content>
   </List.Item>
   …
@@ -106,7 +106,7 @@ const formCode = `<Form onFormSubmit={(values) => …}>
   <Button.Root type="submit">…</Button.Root>
 </Form>`;
 
-const people = ['Anna Haro', 'Daniel Higgins', 'John Appleseed', 'Kate Bell'];
+const people = ['Anna Hall', 'Daniel Hughes', 'John Doe', 'Kate Brown'];
 
 const accounts = [
   ['icloud', 'iCloud'],
@@ -349,7 +349,7 @@ export const CheckboxComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Where iOS shows them: before a <a href="list">List</a>’s rows, as{' '}
+        Where they show: before a <a href="list">List</a>’s rows, as{' '}
         <PartLink
           component="list"
           part="List.Checkbox"

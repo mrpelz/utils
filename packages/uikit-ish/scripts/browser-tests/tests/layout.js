@@ -146,7 +146,7 @@ export const tests = [
     },
   },
   {
-    name: 'sidebar: its list as Figma’s (capsule rows, selected on a fill, emphasized in the tint; indented by level)',
+    name: 'sidebar: its list (capsule rows, selected on a fill, emphasized in the tint; indented by level)',
     run: async (page) => {
       await page.open('sidebar');
       await sleep(300);
@@ -302,7 +302,7 @@ export const tests = [
           const style = getComputedStyle(document.documentElement);
           // (Colors computed: the build's CSS may write them otherwise.)
           const color = (value) => { const probe = document.createElement('span'); probe.style.color = value; document.body.append(probe); const computed = getComputedStyle(probe).color; probe.remove(); return computed; };
-          return ['--glass-ios-bright-fill', '--glass-ios-background-dim-fill', '--glass-ios-medium-light-background'].map((token) => color(style.getPropertyValue(token)));
+          return ['--glass-ui-bright-fill', '--glass-ui-background-dim-fill', '--glass-ui-medium-light-background'].map((token) => color(style.getPropertyValue(token)));
         })()`);
         assert.deepEqual(
           fills,

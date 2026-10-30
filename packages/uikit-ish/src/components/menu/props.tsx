@@ -19,7 +19,7 @@ export type MenuContextValue = {
 };
 
 export type MenuRootProps<Payload = unknown> = BaseMenu.Root.Props<Payload> & {
-  /** UIKit size class: `compact` (iPhone, default) or `regular` (iPad). */
+  /** A size class: `compact` (a phone, default) or `regular` (a tablet). */
   size?: Size;
 };
 
@@ -37,8 +37,7 @@ export type TriggerProps = Omit<BaseMenu.Trigger.Props, 'ref'> &
      * What opens the menu: a click (default), or a secondary click (a right
      * click, or a touch held, then dragged on to the items; see
      * `useSecondaryClick`), a click then being the trigger's own (e.g. a
-     * back button's, its menu the history; UIKit `UIButton.menu` without
-     * `showsMenuAsPrimaryAction`, or a context menu).
+     * back button's, its menu the history, or a context menu).
      */
     openOn?: 'click' | 'secondaryClick';
   };
@@ -61,7 +60,7 @@ export type ItemProps = {
    * triggers: always), otherwise or while disabled 'not-allowed'
    */
   cursor?: Properties['cursor'];
-  /** Red content (Figma State=Destructive). */
+  /** Red content (destructive). */
   destructive?: boolean;
 };
 

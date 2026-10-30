@@ -123,9 +123,8 @@ export const AlertOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Important information that needs a response now (UIKit{' '}
-        <code>UIAlertController</code>, style <code>alert</code>): a title, a
-        message, optionally text fields, its actions.
+        Important information that needs a response now: a title, a message,
+        optionally text fields, its actions.
       </li>
       <li>Modal: the app waits, the page dimmed, until an action is chosen.</li>
     </ul>

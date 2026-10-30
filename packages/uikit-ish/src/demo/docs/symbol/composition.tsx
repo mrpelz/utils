@@ -28,7 +28,7 @@ const RowImages: FunctionComponent = () => (
           <List.Item>
             <List.Leading>
               <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
+                style={{ backgroundColor: 'var(--color-ui-system-orange)' }}
                 variant="rounded"
               >
                 <Symbol icon={sfAirplane} />
@@ -41,7 +41,7 @@ const RowImages: FunctionComponent = () => (
           <List.Item>
             <List.Leading>
               <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                 variant="rounded"
               >
                 <Symbol icon={sfWifi} />

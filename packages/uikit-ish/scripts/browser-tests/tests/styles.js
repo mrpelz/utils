@@ -18,7 +18,7 @@ const probe = (/** @type {string} */ section) => `(() => {
     colorScheme: root.colorScheme,
     glass: color(getComputedStyle(group).getPropertyValue('--uikit-glass-content')),
     highlight: highlight ? getComputedStyle(highlight).backgroundColor : undefined,
-    label: color(root.getPropertyValue('--color-ios-label')),
+    label: color(root.getPropertyValue('--color-ui-label')),
   };
 })()`;
 

@@ -64,8 +64,8 @@ const edgeEffectRow: PropRow = [
   union('soft', 'hard', 'none'),
   code(union('soft')),
   <>
-    At the block start or end: its scroll edge effect (iOS 26’s), as content
-    scrolls under it: <code>soft</code>, a blur fading out away from the edge;{' '}
+    At the block start or end: its scroll edge effect, as content scrolls under
+    it: <code>soft</code>, a blur fading out away from the edge;{' '}
     <code>hard</code>, a solid backing with a dividing line. Drawn by the
     scroller beneath (a <a href="page">Page</a>, a sheet’s content, the{' '}
     <PartLink
@@ -163,8 +163,7 @@ export const viewportContentRows: readonly PropRow[] = [
     'boolean',
     'while it holds its content itself',
     <>
-      Bouncing even when its content fits (UIKit’s{' '}
-      <code>alwaysBounceVertical</code>): it has at least 1px to scroll, so a
+      Bouncing even when its content fits: it has at least 1px to scroll, so a
       drag on it is its own (rubber-banding the content layer, the bars
       staying), not the document’s (on iOS, moving the whole app).{' '}
       <code>false</code>: only content taller than it scrolls. Unset: not while
@@ -255,9 +254,8 @@ export const viewportPaddingRows: readonly PropRow[] = [
     </>,
     <>
       The gap between the content and its container’s edge, beyond the anchors
-      (px, or a CSS length): the library’s content margin (UIKit’s layout
-      margins) by default, themed by its tokens. Set it to override one padding
-      (e.g. <code>0</code>).
+      (px, or a CSS length): the library’s content margin by default, themed by
+      its tokens. Set it to override one padding (e.g. <code>0</code>).
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -294,7 +292,7 @@ export const viewportOverscrollRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Kept shown at rest (UIKit’s content inset), e.g. while refreshing: the{' '}
+      Kept shown at rest, e.g. while refreshing: the{' '}
       <PartLink
         component="viewport"
         part="Viewport.Padding"
@@ -311,7 +309,7 @@ export const viewportOverscrollRows: readonly PropRow[] = [
       The safe area insets it shows only clear of while pulled in: all, those of
       the block dimension (top, bottom) or the inline one (left, right) only, or
       none. Not kept clear, it shows in the inset too (e.g. behind the status
-      bar, as iOS’ refresh control), there even at rest, just past the content’s
+      bar, as a refresh control), there even at rest, just past the content’s
       end (e.g. faded by its progress,{' '}
       <code>--uikit-viewport-overscroll-progress</code>); open, it rests clear
       of it all the same.
@@ -429,7 +427,7 @@ export const viewportScrollEventRows: readonly PropRow[] = [
     'overscroll',
     'number',
     undefined,
-    'How far it’s pulled past an end (px), rubber-banded: negative past the start (e.g. pulling to refresh), positive past the end; 0 within. Safari’s own bounce; elsewhere, a touch or a wheel pulling at an end (damped as UIKit’s; a wheel’s stiffer, at most half the container’s height): the content moved along only while a Viewport.Overscroll is shown, else staying. A wheel’s inertia (its fingers lifted: told by the browser, WheelEvent momentum, or by its deceleration, then back to before the fling) never pulls.',
+    'How far it’s pulled past an end (px), rubber-banded: negative past the start (e.g. pulling to refresh), positive past the end; 0 within. Safari’s own bounce; elsewhere, a touch or a wheel pulling at an end (damped; a wheel’s stiffer, at most half the container’s height): the content moved along only while a Viewport.Overscroll is shown, else staying. A wheel’s inertia (its fingers lifted: told by the browser, WheelEvent momentum, or by its deceleration, then back to before the fling) never pulls.',
   ],
   [
     'isHeld',
@@ -651,8 +649,8 @@ export const useSizeClassReturnRows: readonly PropRow[] = [
     union('compact', 'regular'),
     undefined,
     <>
-      The window’s horizontal size class: <code>regular</code> from 768px (an
-      iPad’s window), <code>compact</code> below (a phone’s); before hydration
+      The window’s horizontal size class: <code>regular</code> from 768px (a
+      tablet’s window), <code>compact</code> below (a phone’s); before hydration
       (server rendering), <code>compact</code>.
     </>,
   ],

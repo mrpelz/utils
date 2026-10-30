@@ -8,7 +8,7 @@ import { mapped, rightClick, sleep, withTouch } from '../lib.js';
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'button: heights match Figma per size and variant',
+    name: 'button: heights match the spec per size and variant',
     run: async (page) => {
       await page.open('button');
 

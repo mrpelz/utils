@@ -63,7 +63,7 @@ export const propOptionsOverviewList = {
   size: [undefined, 'regular'] as const,
 };
 
-/** The iPad's list (regular first). */
+/** The tablet's list (regular first). */
 export const propOptionsListRegular = {
   ...propOptionsList,
   size: ['regular', 'compact', undefined] as const,
@@ -81,7 +81,7 @@ export const propOptionsGroup = {
     'center',
     'inline-end',
   ] as const,
-  // Marked to remain while collapsed (otherwise, as iOS: see the demos).
+  // Marked to remain while collapsed (otherwise `collapsedSelection`'s).
   visibleWhenCollapsed: [undefined, false, true] as const,
 };
 

@@ -9,8 +9,7 @@ export type SliderRootProps = BaseSlider.Root.Props & {
    */
   cursor?: Properties['cursor'];
   /**
-   * The fill's color, and the pressed knob's glow (UIKit
-   * `minimumTrackTintColor`).
+   * The fill's color, and the pressed knob's glow.
    * @default the app's tint
    */
   tint?: string;

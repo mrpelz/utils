@@ -37,8 +37,8 @@ import {
   propOptionsTimeRoll,
 } from './props.js';
 
-// Figma's example: April 20, 2025, 9:41.
-const example = new Date(2025, 3, 20, 9, 41);
+// An example date: April 20, 2025, 10:00.
+const example = new Date(2025, 3, 20, 10, 0);
 
 /** `DatePicker.Root`, with its props. */
 const RootPart: FunctionComponent = () => {
@@ -525,7 +525,7 @@ export const DatePickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A picker’s calendar and time wheel in place, as iOS’s Calendar edits an
+        A picker’s calendar and time wheel in place, as a calendar app edits an
         event: each in an expandable list row (
         <PartLink
           component="list"
@@ -625,8 +625,8 @@ export const DatePickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The inline calendar (Figma “Style=Inline”), on its own: its month’s
-        days, its title opening a month and year roll.
+        The inline calendar, on its own: its month’s days, its title opening a
+        month and year roll.
       </li>
       <li>
         A date or a range (<code>range</code>), limits, disabled and highlighted
@@ -675,7 +675,7 @@ export const DatePickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A footer row (Figma “Time”’s, 52px): a title, and buttons at its end.
+        A footer row (a time row’s, 52px): a title, and buttons at its end.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -713,8 +713,8 @@ export const DatePickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The Time row (Figma “Time”): the time’s button, showing its roll over
-        the days; a picker’s default footer, with a time.
+        The time row: the time’s button, showing its roll over the days; a
+        picker’s default footer, with a time.
       </li>
       <li>
         Takes the footer’s argument (<code>calendar</code>); renders nothing

@@ -53,9 +53,8 @@ export type {
   ColorPickerSavedColorsChangeEventDetails,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Color Pickers”, UIKit
-// `UIColorPickerViewController`, `UIColorWell`), in the app's popover
-// (iPad) or sheet (iPhone), its header the app's (a `Toolbar`: the
+// A color picker and a color well, in the app's popover (a regular width)
+// or sheet (compact), its header the app's (a `Toolbar`: the
 // eyedropper, “Colors”, close):
 // - a segmented control (Grid, Spectrum, Sliders), 24px above the view;
 // - Grid: 12 by 10 swatches (a gray row, then hues by lightness), its
@@ -73,7 +72,7 @@ export type {
 // A color well (`ColorPicker.Well`): a 28px (or 36px) disk of hues around
 // white; with a color, the hues as a ring around it.
 //
-// Deviations:
+// Also:
 // - Colors are hex strings (`#rrggbb`, `#rrggbbaa` with opacity).
 // - The eyedropper (`ColorPicker.Eyedropper`) is the browser's
 //   (`EyeDropper`; not where it has none, e.g. Safari).
@@ -137,7 +136,7 @@ const toHsl = ({ b, g, r }: Rgba) => {
   return { h: (h * 60 + 360) % 360, l, s };
 };
 
-/** Figma's grid: a gray row, then hues by lightness. */
+/** The grid: a gray row, then hues by lightness. */
 const grid = [
   '#FEFFFE #EBEBEB #D6D6D6 #C2C2C2 #ADADAD #999999 #858585 #707070 #5C5C5C #474747 #333333 #000000',
   '#00374A #011D57 #11053B #2E063D #3C071B #5C0701 #5A1C00 #583300 #563D00 #666100 #4F5504 #263E0F',
@@ -151,7 +150,7 @@ const grid = [
   '#CBF0FF #D2E2FE #D8C9FE #EFCAFE #F9D3E0 #FFDAD8 #FFE2D6 #FEECD4 #FEF1D5 #FDFBDD #F6FADB #DEEED4',
 ].map((row) => row.split(' '));
 
-/** Figma's saved colors. */
+/** The default saved colors. */
 export const defaultSavedColors = [
   '#000000',
   '#007AFF',
@@ -175,7 +174,7 @@ const PickerContext = createContext<PickerState>({
 });
 
 /**
- * A color picker (UIKit `UIColorPickerViewController`): its color, for its
+ * A color picker: its color, for its
  * parts (`Panel`, `Eyedropper`), in the app's popover or sheet.
  */
 const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
@@ -316,9 +315,9 @@ const Spectrum: FunctionComponent = () => {
 
 // Each in its color.
 const channels = [
-  ['r', 'Red', 'var(--color-ios-system-red)'],
-  ['g', 'Green', 'var(--color-ios-system-green)'],
-  ['b', 'Blue', 'var(--color-ios-system-blue)'],
+  ['r', 'Red', 'var(--color-ui-system-red)'],
+  ['g', 'Green', 'var(--color-ui-system-green)'],
+  ['b', 'Blue', 'var(--color-ui-system-blue)'],
 ] as const;
 
 const Sliders: FunctionComponent = () => {
@@ -440,7 +439,7 @@ const Opacity: FunctionComponent = () => {
   );
 };
 
-// A page of saved colors: 2 rows of 5 (Figma), always as high (so its
+// A page of saved colors: 2 rows of 5, always as high (so its
 // popover doesn't move).
 const Saved = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
@@ -705,8 +704,8 @@ const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
   },
 );
 
-// Its header (Figma “Toolbar” in the panel's popover: 16px from its top,
-// 10px above the panel): the app's (e.g. a `Toolbar`: eyedropper, title,
+// Its header (in the panel's popover: 16px from its top, 10px above the
+// panel): the app's (e.g. a `Toolbar`: eyedropper, title,
 // close); in a sheet, its `Sheet.Header` instead.
 const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
@@ -724,7 +723,7 @@ const eyeDropper = () =>
   (globalThis as { EyeDropper?: new () => EyeDropperApi }).EyeDropper;
 
 /**
- * Its eyedropper (Figma's leading button): a `Button` (or what it
+ * Its eyedropper (the leading button): a `Button` (or what it
  * renders), picking a color off the screen (the browser's `EyeDropper`;
  * none without it).
  */
@@ -763,7 +762,7 @@ const Eyedropper: FunctionComponent<ColorPickerEyedropperProps> = ({
   );
 };
 
-/** A color well (UIKit `UIColorWell`): its color, opening the picker. */
+/** A color well: its color, opening the picker. */
 const Well = forwardRef<HTMLButtonElement, ColorWellProps>(
   ({ className, color, size = 'small', style, ...props }, ref) => (
     <button

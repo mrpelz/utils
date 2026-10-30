@@ -44,7 +44,7 @@ const RootPart: FunctionComponent = () => {
     >
       <Avatar.Root {...props}>
         <Avatar.Image
-          alt="Anna Haro"
+          alt="Anna Hall"
           src={photo(200)}
         />
         <Avatar.Fallback>AH</Avatar.Fallback>
@@ -132,14 +132,14 @@ const GroupPart: FunctionComponent = () => {
       <Avatar.Group {...props}>
         <Avatar.Root>
           <Avatar.Image
-            alt="Anna Haro"
+            alt="Anna Hall"
             src={photo(200)}
           />
           <Avatar.Fallback>AH</Avatar.Fallback>
         </Avatar.Root>
         <Avatar.Root>
           <Avatar.Image
-            alt="Kate Bell"
+            alt="Kate Brown"
             src={photo(290)}
           />
           <Avatar.Fallback>KB</Avatar.Fallback>
@@ -259,8 +259,8 @@ export const AvatarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Several people in one circle on the system fill (Figma “Group”): the
-        first at 53% of it, the second 31%, a third 26%.
+        Several people in one circle on the system fill: the first at 53% of it,
+        the second 31%, a third 26%.
       </li>
       <li>
         It sizes its people: theirs (<code>size</code>) would override it. From

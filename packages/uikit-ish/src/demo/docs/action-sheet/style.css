@@ -9,7 +9,7 @@
   gap: 12px;
 }
 
-/* A popover's actions (iPad): an action sheet's width. */
+/* A popover's actions (regular): an action sheet's width. */
 .action-sheet-demo-popup {
   width: 300px;
   padding: 14px;

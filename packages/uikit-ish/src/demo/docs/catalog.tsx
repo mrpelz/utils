@@ -579,7 +579,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: TypographyOverview,
     Parts: TypographyParts,
     summary:
-      'Text in iOS’s text styles, Large Title to Caption 2: emphasized or italic, in a label color, at a Dynamic Type size.',
+      'Text in the text styles, Large Title to Caption 2: emphasized or italic, in a label color, at a text size.',
     title: 'Typography',
   },
   {
@@ -600,7 +600,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: ButtonOverview,
     Parts: ButtonParts,
     summary:
-      'Performs an action at once: a label, a symbol or both, borderless, on a fill or the tint, or Liquid Glass over content.',
+      'Performs an action at once: a label, a symbol or both, borderless, on a fill or the tint, or glass over content.',
     title: 'Button',
   },
   {
@@ -661,7 +661,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: CheckboxOverview,
     Parts: CheckboxParts,
     summary:
-      'Selection circles, as iOS selects items: checkboxes for several, radios for one, before a list’s rows or with labels.',
+      'Selection circles: checkboxes for several, radios for one, before a list’s rows or with labels.',
     title: 'Checkbox',
   },
   {
@@ -741,7 +741,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: FormOverview,
     Parts: FormParts,
     summary:
-      'Fields filled in and submitted together, as iOS lays them out: a list, its sections fieldsets, its rows fields; validated, their values by name.',
+      'Fields filled in and submitted together, laid out as a list: its sections fieldsets, its rows fields; validated, their values by name.',
     title: 'Form',
   },
   {
@@ -1004,7 +1004,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: SymbolOverview,
     Parts: SymbolParts,
     summary:
-      'An SF Symbol sized, weighted and colored as the text around it: a button’s, a tab’s, a row’s image; a badge on it.',
+      'An icon sized, weighted and colored as the text around it: a button’s, a tab’s, a row’s image; a badge on it.',
     title: 'Symbol',
   },
   {
@@ -1062,7 +1062,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: PopoverOverview,
     Parts: PopoverParts,
     summary:
-      'A transient view at the control that shows it, its arrow pointing at it: a small task or a few settings, on iPad (a sheet on iPhone).',
+      'A transient view at the control that shows it, its arrow pointing at it: a small task or a few settings, in a regular width (a sheet in a compact one).',
     title: 'Popover',
   },
   {
@@ -1102,7 +1102,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: ActionSheetOverview,
     Parts: ActionSheetParts,
     summary:
-      'Choices about an action the person just started, at its control: a destructive one first; a popover on iPad.',
+      'Choices about an action the person just started, at its control: a destructive one first; a popover in a regular width.',
     title: 'Action sheet',
   },
   {
@@ -1179,7 +1179,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: ActivityViewOverview,
     Parts: ActivityViewParts,
     summary:
-      'Sharing: what’s shared, people to share with and actions, in rows; in a sheet on iPhone, a popover on iPad.',
+      'Sharing: what’s shared, people to share with and actions, in rows; in a sheet (compact) or a popover (regular).',
     title: 'Activity view',
   },
   {
@@ -1202,7 +1202,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: MenuOverview,
     Parts: MenuParts,
     summary:
-      'Actions and choices behind a control, in a glass popup at it: the iPhone’s or the iPad’s, with submenus, toggles and quick actions.',
+      'Actions and choices behind a control, in a glass popup at it: compact or regular, with submenus, toggles and quick actions.',
     title: 'Menu',
   },
   {

@@ -28,7 +28,7 @@ import {
 } from '../../tooling/guide/sections.js';
 import { propOptionsPresentation } from './props.js';
 
-/** The iPad pattern: a well opening the picker in a popover. */
+/** The regular pattern: a well opening the picker in a popover. */
 const InAPopover: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [color, setColor] = useState('#AF52DE');
@@ -95,7 +95,7 @@ const InAPopover: FunctionComponent = () => {
   );
 };
 
-/** The iPhone pattern: a well opening the picker in a sheet. */
+/** The compact pattern: a well opening the picker in a sheet. */
 const InASheet: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [color, setColor] = useState('#007AFF');
@@ -355,7 +355,7 @@ export const ColorPickerComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As on iPad: a well (
+        In a regular width: a well (
         <PartLink
           component="color-picker"
           part="ColorPicker.Well"
@@ -407,8 +407,8 @@ export const ColorPickerComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As on iPhone: the well opens a <a href="sheet">Sheet</a> (its medium
-        detent), the toolbar in its{' '}
+        In a compact width: the well opens a <a href="sheet">Sheet</a> (its
+        medium detent), the toolbar in its{' '}
         <PartLink
           component="sheet"
           part="Sheet.Header"

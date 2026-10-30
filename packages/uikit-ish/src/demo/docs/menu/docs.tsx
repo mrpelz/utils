@@ -17,7 +17,7 @@ const itemRows: readonly PropRow[] = [
     'destructive',
     'boolean',
     code('false'),
-    'Red content (Figma State=Destructive), e.g. Delete.',
+    'Red content (destructive), e.g. Delete.',
   ],
   [
     'cursor',
@@ -68,7 +68,7 @@ const itemChildrenRow: PropRow = [
       component="menu"
       part="Menu.Shortcut"
     />
-    , placed in Figma’s item layout whatever their order.
+    , placed in the item’s layout whatever their order.
   </>,
 ];
 
@@ -78,10 +78,9 @@ export const menuRootRows: readonly PropRow[] = [
     union('compact', 'regular'),
     code(union('compact')),
     <>
-      The UIKit size class, for all its popups: <code>compact</code> (the
-      iPhone’s menu: 40px items, submenus over their trigger) or{' '}
-      <code>regular</code> (the iPad’s: 36px items, submenus beside it). E.g.
-      from{' '}
+      The size class, for all its popups: <code>compact</code> (a phone’s menu:
+      40px items, submenus over their trigger) or <code>regular</code> (a
+      tablet’s: 36px items, submenus beside it). E.g. from{' '}
       <PartLink
         component="viewport"
         part="useSizeClass"
@@ -253,7 +252,7 @@ export const menuSubmenuRootRows: readonly PropRow[] = [
         part="Menu.SubmenuTrigger"
       />{' '}
       and its portal (its own positioner and popup). Its size: its root menu’s;
-      in an <a href="edit-menu">Edit menu</a>, the iPad’s.
+      in an <a href="edit-menu">Edit menu</a>, <code>regular</code>.
     </>,
   ],
 ];
@@ -266,11 +265,9 @@ export const menuTriggerRows: readonly PropRow[] = [
     <>
       What opens the menu: a click, or a secondary click (a right click; a touch
       held, then dragged on to the items), a click then being the trigger’s own
-      (UIKit <code>UIButton.menu</code> without{' '}
-      <code>showsMenuAsPrimaryAction</code>, e.g. a back button’s history). On
-      touch, a held press also selects the trigger’s text (and shows the
-      browser’s text menu): unless it should stay selectable, turn that off on
-      the trigger (
+      (e.g. a back button’s history). On touch, a held press also selects the
+      trigger’s text (and shows the browser’s text menu): unless it should stay
+      selectable, turn that off on the trigger (
       <PartLink
         component="viewport"
         part="useTextActionsPrevention"
@@ -536,7 +533,7 @@ export const menuItemIndicatorRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     'a checkmark',
-    'What shows while checked (Figma: 􀆅, drawn as a stroke).',
+    'What shows while checked (a checkmark, drawn as a stroke).',
   ],
   ...baseUiRows('span', 'HTMLSpanElement'),
 ];
@@ -678,7 +675,7 @@ export const menuGroupLabelRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'The section’s title (Figma “Section Title”), naming its group.',
+    'The section’s title, naming its group.',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -704,7 +701,7 @@ export const menuQuickActionsRows: readonly PropRow[] = [
         component="menu"
         part="Menu.QuickAction"
       />
-      s (Figma: 2 to 4), in a row at the popup’s top.
+      s (2 to 4), in a row at the popup’s top.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -784,7 +781,7 @@ export const menuShortcutRows: readonly PropRow[] = [
     undefined,
     <>
       The keyboard shortcut (e.g. <code>⌘C</code>): a string’s glyphs each in a
-      14px cell (Figma “_Shortcuts”). Shown only; the app handles the keys.
+      14px cell. Shown only; the app handles the keys.
     </>,
   ],
   ...elementRows('kbd', 'HTMLElement'),

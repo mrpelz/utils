@@ -10,7 +10,7 @@ const scrolls = (element: Element) => {
 
 /**
  * The devices' status bars, tapped (a click in a screen's top inset):
- * what scrolls below it scrolled to its top, smoothly, as on iOS (the
+ * what scrolls below it scrolled to its top, smoothly (the
  * topmost element there, or its nearest ancestor scrolling, within the
  * screen: e.g. a page, or a sheet open over it; nothing, if a modal's
  * backdrop covers it). The click goes no further (the status bar's).

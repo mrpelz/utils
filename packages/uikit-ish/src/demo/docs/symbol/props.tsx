@@ -50,8 +50,8 @@ export const propOptionsContent = {
   fontSize: ['17px', '28px', '48px', '11px'] as const,
   color: [
     undefined,
-    'var(--color-ios-primary)',
-    'var(--color-ios-secondary-label)',
+    'var(--color-ui-primary)',
+    'var(--color-ui-secondary-label)',
   ] as const,
 };
 

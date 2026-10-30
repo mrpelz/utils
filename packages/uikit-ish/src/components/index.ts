@@ -319,7 +319,7 @@ export {
 // Typography
 export { Symbol, type SymbolIcon, type SymbolProps } from './symbol/main.js';
 export {
-  type DynamicTypeSize,
+  type TextSize,
   type TextColor,
   type TextStyle,
   Typography,

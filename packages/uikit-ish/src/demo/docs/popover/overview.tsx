@@ -171,13 +171,16 @@ export const PopoverOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A transient view above the page, at the control that shows it (UIKit{' '}
-        <code>UIPopoverPresentationController</code>), its arrow pointing at it.
+        A transient view above the page, at the control that shows it, its arrow
+        pointing at it.
       </li>
       <li>
-        On iPad (a regular width); on iPhone, the same content usually in a{' '}
+        In a regular width; in a compact one, the same content usually in a{' '}
         <a href="sheet">Sheet</a> (see{' '}
-        <a href="popover/composition#a-sheet-on-iphone">A sheet on iPhone</a>).
+        <a href="popover/composition#a-sheet-in-a-compact-width">
+          A sheet in a compact width
+        </a>
+        ).
       </li>
     </ul>
     <LiveView />
@@ -213,8 +216,8 @@ export const PopoverOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A list of commands or of choices: a <a href="menu">Menu</a> (iOS shows
-        menus, not popovers, for those).
+        A list of commands or of choices: a <a href="menu">Menu</a> (menus, not
+        popovers, for those).
       </li>
       <li>
         A focused task that must be finished or canceled (a new item, a form): a{' '}
@@ -311,8 +314,8 @@ export const PopoverOverview: FunctionComponent = () => (
     <ul>
       <li>
         Below its trigger by default (<code>side</code>), centered on it (
-        <code>align</code>; in a <a href="list">List</a> row, iOS aligns it with
-        the row’s end: <code>align=&quot;end&quot;</code>); on the other side if
+        <code>align</code>; in a <a href="list">List</a> row, aligned with the
+        row’s end: <code>align=&quot;end&quot;</code>); on the other side if
         there’s no room, 8px from the screen’s edges.
       </li>
       <li>

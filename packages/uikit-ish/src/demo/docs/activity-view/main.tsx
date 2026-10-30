@@ -31,9 +31,8 @@ import { photo } from '../avatar/props.js';
 import { propOptionsContent } from './props.js';
 
 /**
- * An activity view (UIKit `UIActivityViewController`, Figma “Activity
- * Views”): what's shared, people to share with, actions; in a sheet
- * (iPhone).
+ * An activity view: what's shared, people to share with, actions; in a
+ * sheet (compact).
  */
 export const ActivityViewDemo: FunctionComponent = () => {
   const id = 'activity-view';
@@ -324,7 +323,7 @@ export const ActivityViewDemo: FunctionComponent = () => {
   );
 };
 
-/** The activity view in a popover (iPad). */
+/** The activity view in a popover (regular). */
 export const ActivityViewPopoverDemo: FunctionComponent = () => {
   const id = 'activity-view-popover';
 

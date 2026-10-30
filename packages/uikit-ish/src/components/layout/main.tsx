@@ -16,7 +16,7 @@ import type { LayoutColumnProps, LayoutRootProps } from './props.js';
 
 export type { LayoutColumnProps, LayoutRootProps } from './props.js';
 
-// Layouts (UIKit `UISplitViewController`, iPadOS' columns): columns side by
+// Layouts: columns side by
 // side, filling their container (e.g. `Viewport.Content`): a sidebar, a list, a
 // detail; each its own scroll container (put a `Page` in it). A column takes a
 // size (the app's, in px; between `minSize` and `maxSize`), or shares the free
@@ -24,12 +24,12 @@ export type { LayoutColumnProps, LayoutRootProps } from './props.js';
 // its divider (or arrow keys on it). Columns are divided by a hairline in
 // `separator`.
 //
-// Compact (e.g. on an iPhone, by the size class, `useSizeClass`: the app's
+// Compact (e.g. on a phone, by the size class, `useSizeClass`: the app's
 // choice), a column can be a `Drawer` instead (e.g. a sidebar), over the
 // others from its side, hidden until opened: the app renders one or the
 // other.
 //
-// Floating (a column's `floating`, e.g. for a `Sidebar`, iPadOS 26), a column
+// Floating (a column's `floating`, e.g. for a `Sidebar`), a column
 // floats over the others at the layout's start, which span the whole layout
 // underneath it; a column next to it can keep its content clear of it
 // (`clearFloating`: its pages' content and its bars' inset by the floating
@@ -41,8 +41,8 @@ export type { LayoutColumnProps, LayoutRootProps } from './props.js';
 // Each column is the containing block of its fixed layers (e.g. a header's
 // bar, in a `Viewport.BlockStart`): they span it, not the screen.
 //
-// Deviations:
-// - Resizable (iPadOS: fixed column widths, chosen by the system).
+// Also:
+// - Resizable.
 
 // Behind its columns, filling it: its children layered, each filling it
 // (images and videos covering it).

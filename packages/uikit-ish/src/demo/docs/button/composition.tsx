@@ -446,7 +446,7 @@ export const ButtonComposition: FunctionComponent = () => (
     <ul>
       <li>
         Glass buttons float over content, as a player’s or a map’s controls
-        (Liquid Glass, 48px high).
+        (glass, 48px high).
       </li>
       <li>
         <code>context=&quot;adaptive&quot;</code>: the glass by the brightness

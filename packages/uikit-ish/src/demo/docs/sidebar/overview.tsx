@@ -241,8 +241,8 @@ export const SidebarOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        An app’s sections in a floating glass panel at its leading edge (iPadOS
-        26): a toolbar, a search field and a list, scrolling inside it.
+        An app’s sections in a floating glass panel at its leading edge: a
+        toolbar, a search field and a list, scrolling inside it.
       </li>
       <li>
         Placed by a <a href="layout">Layout</a>: its floating first column

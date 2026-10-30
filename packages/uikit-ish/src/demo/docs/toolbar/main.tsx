@@ -30,7 +30,7 @@ import {
 } from './props.js';
 
 /**
- * A toolbar (UIKit `UIToolbar`, Figma “Toolbar - Bottom”, Type=Buttons):
+ * A toolbar:
  * three glass buttons at each side.
  */
 export const ToolbarDemo: FunctionComponent = () => {
@@ -210,7 +210,7 @@ export const ToolbarPageDotsDemo: FunctionComponent = () => {
   );
 };
 
-/** A capsule of 2 to 6 symbols (Figma “_Button - Bottom”). */
+/** A capsule of 2 to 6 symbols. */
 export const ToolbarSymbolsDemo: FunctionComponent = () => {
   const id = 'toolbar-symbols';
 
@@ -321,7 +321,7 @@ export const ToolbarSymbolsDemo: FunctionComponent = () => {
   );
 };
 
-/** Text buttons (Figma Text and Text - Primary). */
+/** Text buttons (plain and tinted). */
 export const ToolbarTextDemo: FunctionComponent = () => {
   const id = 'toolbar-text';
 

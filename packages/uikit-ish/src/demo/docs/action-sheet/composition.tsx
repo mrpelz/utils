@@ -23,7 +23,7 @@ import {
 } from '../../tooling/guide/sections.js';
 import { propOptionsPresentation } from './props.js';
 
-const adaptiveCode = `// An action sheet in a compact width (iPhone), a popover in a regular one.
+const adaptiveCode = `// An action sheet in a compact width, a popover in a regular one.
 const sheet = useSizeClass() === 'compact';
 
 sheet ? (
@@ -208,7 +208,7 @@ const OpenedByTheApp: FunctionComponent = () => {
 
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
-  ['a-popover-on-ipad', 'A popover on iPad'],
+  ['a-popover-in-a-regular-width', 'A popover in a regular width'],
   ['opened-by-the-app', 'Opened by the app'],
 ];
 
@@ -218,14 +218,14 @@ export const ActionSheetComposition: FunctionComponent = () => (
     <Contents sections={sections} />
 
     <Heading
-      id="a-popover-on-ipad"
+      id="a-popover-in-a-regular-width"
       level={2}
     >
-      A popover on iPad
+      A popover in a regular width
     </Heading>
     <ul>
       <li>
-        In a regular width, iOS shows an action sheet as a popover (guide{' '}
+        In a regular width, an action sheet shows as a popover (guide{' '}
         <a href="hig-guide#rule-a6">A6</a>): the app’s choice here, by{' '}
         <PartLink
           component="viewport"

@@ -74,16 +74,15 @@ export const ProgressOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Work going on: a bar filling as it advances (UIKit{' '}
-        <code>UIProgressView</code>, Base UI’s <code>Progress</code>), or, of
-        unknown length, spinning spokes (<code>UIActivityIndicatorView</code>:{' '}
+        Work going on: a bar filling as it advances (Base UI’s{' '}
+        <code>Progress</code>), or, of unknown length, spinning spokes (
         <PartLink
           component="progress"
           part="ActivityIndicator"
         />
         ).
       </li>
-      <li>Figma “Progress Indicators”: Progress bar, Progress indicator.</li>
+      <li>Progress indicators: a progress bar, an activity indicator.</li>
     </ul>
     <LiveView />
 
@@ -120,8 +119,8 @@ export const ProgressOverview: FunctionComponent = () => (
         Something new waiting, counted: a <a href="badge">Badge</a>.
       </li>
       <li>
-        A bar of unknown length (Base UI’s indeterminate): UIKit has none,
-        prefer an activity indicator.
+        A bar of unknown length (Base UI’s indeterminate): prefer an activity
+        indicator.
       </li>
     </ul>
 

@@ -8,7 +8,7 @@ import type { SymbolIcon, SymbolProps } from './props.js';
 export type { SymbolIcon, SymbolProps } from './props.js';
 
 // An SF Symbol, sized like the SF Pro glyph at the current font size, so it
-// can stand in for one (e.g. `􀋃` in Figma). Its outlines are filled as
+// can stand in for one. Its outlines are filled as
 // given (SF Symbols': the Regular weight only, whatever its host's font
 // weight), its layers at their relative opacities.
 //

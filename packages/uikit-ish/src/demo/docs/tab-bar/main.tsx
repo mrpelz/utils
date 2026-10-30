@@ -29,14 +29,13 @@ import {
   propOptionsRoot,
 } from './props.js';
 
-// The tab bars' tabs: `heart.fill` and a label (Figma: `star.fill`, not in
-// the symbols' catalogue), `tab-1` and on; search (`secondary-1`) in a group
+// The tab bars' tabs: `heart.fill` and a label, `tab-1` and on; search (`secondary-1`) in a group
 // of its own. What remains while collapsed is the app's (here, the demo's):
-// the tabs and groups marked by their controls, if any are; otherwise as
-// iOS (`collapsedSelection`): the active tab and its group.
+// the tabs and groups marked by their controls, if any are; otherwise
+// `collapsedSelection`'s: the active tab and its group.
 
 /**
- * A tab bar (UIKit `UITabBar`, Figma “Tab Bar - iPhone”): a glass capsule of
+ * A tab bar (compact): a glass capsule of
  * tabs, the selection sliding between them, a lens under the pointer;
  * collapsed (the list's control), the active tab remains, and a click on
  * the group expands the bar again.
@@ -220,8 +219,7 @@ export const TabBarDemo: FunctionComponent = () => {
 };
 
 /**
- * A tab bar with search in a group of its own (Figma “Tab Bar - iPhone”,
- * Search): the app (here, the demo) collapses the bar on search, a click
+ * A tab bar with search in a group of its own: the app (here, the demo) collapses the bar on search, a click
  * on a collapsed group expands it; the selection fades between groups.
  */
 // eslint-disable-next-line complexity -- its tabs, written out
@@ -451,7 +449,7 @@ export const TabBarSearchDemo: FunctionComponent = () => {
 };
 
 /**
- * A tab bar's accessory (UIKit `bottomAccessory`, e.g. Music's mini player):
+ * A tab bar's accessory (e.g. a music app's mini player):
  * above the groups, collapsed between them; in either state, or both
  * (morphing between its places).
  */
@@ -599,7 +597,7 @@ export const TabBarAccessoryDemo: FunctionComponent = () => {
 };
 
 /**
- * A tab bar collapsing as the page scrolls down (as iOS's), expanding as it
+ * A tab bar collapsing as the page scrolls down, expanding as it
  * scrolls up (`useViewportScroll`): inside the viewport's provider (see
  * `TabBarScrollDemo`), so its code is the bar's own.
  */
@@ -676,7 +674,7 @@ export const TabBarScrollDemo: FunctionComponent = () => (
 );
 
 /**
- * The iPad's tab bar (Figma “Tab Bar - iPad”, the list's `size` regular): a
+ * The regular tab bar (the list's `size` regular): a
  * single group whose tabs only have labels, between a sidebar and a search
  * tab that only have symbols.
  */
@@ -724,7 +722,7 @@ export const TabBarRegularDemo: FunctionComponent = () => {
       id={id}
       log={log}
       state={[stateRoot, stateGroup, stateList, stateTab1]}
-      title="Tab Bar (iPad)"
+      title="Tab Bar (regular)"
     >
       <TabBar.Root
         {...propsRoot}

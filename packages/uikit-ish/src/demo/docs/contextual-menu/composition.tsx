@@ -113,9 +113,9 @@ useTextActionsPrevention(tile);
 
 // Photos (their names, their colors).
 const photos = [
-  ['Beach', 'var(--color-ios-system-orange)'],
-  ['Forest', 'var(--color-ios-system-green)'],
-  ['Lake', 'var(--color-ios-system-blue)'],
+  ['Beach', 'var(--color-ui-system-orange)'],
+  ['Forest', 'var(--color-ui-system-green)'],
+  ['Lake', 'var(--color-ui-system-blue)'],
 ] as const;
 
 /** Photos' thumbnails: each lifting into its preview, its menu below. */
@@ -224,7 +224,7 @@ const OnAHeldPress: FunctionComponent = () => {
             render={<button type="button" />}
             onClick={() => addLog('message opened')}
           >
-            <strong>Kate Bell</strong>
+            <strong>Kate Brown</strong>
             <span>Here are the photos from the weekend!</span>
           </ContextualMenu.Trigger>
           <ContextualMenu.Portal>

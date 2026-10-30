@@ -43,9 +43,9 @@ export type {
 // which of its content shows as a drawer, and which side by side (e.g. by
 // the size class, `useSizeClass`), is the app's choice.
 //
-// Deviations:
-// - Drawers (iOS: a compact split view shows one column at a time, pushed as
-//   a navigation stack; Framework7's panels swipe in).
+// Also:
+// - Drawers (as Framework7's panels, swiping in), not a column at a time
+//   pushed as a navigation stack.
 
 /** A drawer's side, for its parts. */
 const SideContext = createContext<DrawerSide>('inline-start');

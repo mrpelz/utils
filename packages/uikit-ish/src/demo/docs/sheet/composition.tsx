@@ -861,7 +861,7 @@ export const SheetComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a regular width (an iPad’s), a form sheet: centered, up to 936px by
+        In a regular width (a tablet’s), a form sheet: centered, up to 936px by
         852px, the page dimmed around it.
       </li>
       <li>

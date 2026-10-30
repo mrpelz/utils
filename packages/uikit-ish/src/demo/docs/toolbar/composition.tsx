@@ -614,7 +614,7 @@ export const ToolbarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        iOS 26’s search at the bottom (Mail, Contacts): a{' '}
+        Search at the bottom (e.g. a mail app’s): a{' '}
         <a href="text-field">Text field</a>’s{' '}
         <PartLink
           component="text-field"

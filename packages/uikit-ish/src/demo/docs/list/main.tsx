@@ -84,7 +84,7 @@ import {
 } from './props.js';
 
 /**
- * Lists: a settings-like inset grouped list (Figma “Lists and tables”) with
+ * Lists: a settings-like inset grouped list with
  * a switch, drill-ins, a pop-up (a menu, its trigger a button), an info
  * button, a segmented control, a stepper and a slider, a collapsible
  * section (Base UI Collapsible), buttons and a content block. Rows with a
@@ -150,7 +150,7 @@ export const ListDemo: FunctionComponent = () => {
             <List.Item {...propsItem}>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-orange)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfAirplane} />
@@ -162,7 +162,7 @@ export const ListDemo: FunctionComponent = () => {
               <List.Trailing>
                 <Switch.Root
                   aria-label="Airplane Mode"
-                  tint="var(--color-ios-system-orange)"
+                  tint="var(--color-ui-system-orange)"
                   onCheckedChange={(isChecked: boolean) =>
                     addLog(`airplane mode: ${isChecked}`)
                   }
@@ -174,7 +174,7 @@ export const ListDemo: FunctionComponent = () => {
             <List.Item>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfWifi} />
@@ -198,7 +198,7 @@ export const ListDemo: FunctionComponent = () => {
             <List.Item>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-red)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-red)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfBellFill} />
@@ -222,7 +222,7 @@ export const ListDemo: FunctionComponent = () => {
             <List.Item onClick={forwardClick('[aria-haspopup]')}>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-gray)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-gray)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfPersonFill} />
@@ -235,7 +235,7 @@ export const ListDemo: FunctionComponent = () => {
                 <Menu.Root>
                   <Menu.Trigger
                     render={
-                      <Button.Root tint="var(--color-ios-secondary-label)" />
+                      <Button.Root tint="var(--color-ui-secondary-label)" />
                     }
                   >
                     <Button.Label>{previews}</Button.Label>
@@ -292,7 +292,7 @@ export const ListDemo: FunctionComponent = () => {
             >
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-pink)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-pink)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfHeartFill} />
@@ -732,7 +732,7 @@ export const ListPartsDemo: FunctionComponent = () => {
                   {...propsImage}
                   variant={propsImage.variant ?? 'rounded'}
                   style={{
-                    backgroundColor: 'var(--color-ios-system-blue)',
+                    backgroundColor: 'var(--color-ui-system-blue)',
                     ...propsImage.style,
                   }}
                 >
@@ -816,7 +816,7 @@ export const ListPartsDemo: FunctionComponent = () => {
               <List.SwipeActions>
                 <List.SwipeAction
                   label="Delete"
-                  tint="var(--color-ios-system-red)"
+                  tint="var(--color-ui-system-red)"
                   onClick={() => addLog('delete clicked')}
                 >
                   <Symbol icon={sfTrashFill} />
@@ -838,7 +838,7 @@ export const ListPartsDemo: FunctionComponent = () => {
                 </List.Text>
               </List.Content>
               <List.Trailing>
-                <List.Detail>09:41</List.Detail>
+                <List.Detail>10:00</List.Detail>
               </List.Trailing>
               <List.SwipeActions
                 overswipe
@@ -847,7 +847,7 @@ export const ListPartsDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   showLabel
                   label="Unread"
-                  tint="var(--color-ios-system-blue)"
+                  tint="var(--color-ui-system-blue)"
                   onClick={() => addLog('unread clicked')}
                 >
                   <Symbol icon={sfEnvelopeOpenFill} />
@@ -864,7 +864,7 @@ export const ListPartsDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   showLabel
                   label="Flag"
-                  tint="var(--color-ios-system-orange)"
+                  tint="var(--color-ui-system-orange)"
                   onClick={() => addLog('flag clicked')}
                 >
                   <Symbol icon={sfFlagFill} />
@@ -1069,7 +1069,7 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
 };
 
 /**
- * Swipe actions (Figma “Row with Swipe Actions”): regular and tall rows
+ * Swipe actions: regular and tall rows
  * (circles), a multi-line row (labelled), rounded rectangles, both mixed,
  * and text instead of symbols; with actions on both sides (leading orange,
  * gray, red; trailing purple, indigo, green), overswipeable either way.
@@ -1115,7 +1115,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
             <List.Item>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfEnvelopeFill} />
@@ -1143,7 +1143,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                   {...propsSwipeAction}
                   label={propsSwipeAction.label ?? 'Pin'}
                   tint={
-                    propsSwipeAction.tint ?? 'var(--color-ios-system-orange)'
+                    propsSwipeAction.tint ?? 'var(--color-ui-system-orange)'
                   }
                 >
                   <Symbol icon={sfPinFill} />
@@ -1156,7 +1156,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 </List.SwipeAction>
                 <List.SwipeAction
                   label="Delete"
-                  tint="var(--color-ios-system-red)"
+                  tint="var(--color-ui-system-red)"
                   onClick={() => addLog('Delete clicked')}
                 >
                   <Symbol icon={sfTrashFill} />
@@ -1165,21 +1165,21 @@ export const ListSwipeDemo: FunctionComponent = () => {
               <List.SwipeActions overswipe>
                 <List.SwipeAction
                   label="Tag"
-                  tint="var(--color-ios-system-purple)"
+                  tint="var(--color-ui-system-purple)"
                   onClick={() => addLog('Tag clicked')}
                 >
                   <Symbol icon={sfTagFill} />
                 </List.SwipeAction>
                 <List.SwipeAction
                   label="Mail"
-                  tint="var(--color-ios-system-indigo)"
+                  tint="var(--color-ui-system-indigo)"
                   onClick={() => addLog('Mail clicked')}
                 >
                   <Symbol icon={sfEnvelopeFill} />
                 </List.SwipeAction>
                 <List.SwipeAction
                   label="Done"
-                  tint="var(--color-ios-system-green)"
+                  tint="var(--color-ui-system-green)"
                   onClick={() => addLog('Done clicked')}
                 >
                   <Symbol icon={sfCheckmarkCircleFill} />
@@ -1189,7 +1189,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
             <List.Item>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfEnvelopeFill} />
@@ -1216,7 +1216,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
               >
                 <List.SwipeAction
                   label="Pin"
-                  tint="var(--color-ios-system-orange)"
+                  tint="var(--color-ui-system-orange)"
                   onClick={() => addLog('Pin clicked')}
                 >
                   <Symbol icon={sfPinFill} />
@@ -1229,7 +1229,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 </List.SwipeAction>
                 <List.SwipeAction
                   label="Delete"
-                  tint="var(--color-ios-system-red)"
+                  tint="var(--color-ui-system-red)"
                   onClick={() => addLog('Delete clicked')}
                 >
                   <Symbol icon={sfTrashFill} />
@@ -1238,21 +1238,21 @@ export const ListSwipeDemo: FunctionComponent = () => {
               <List.SwipeActions overswipe>
                 <List.SwipeAction
                   label="Tag"
-                  tint="var(--color-ios-system-purple)"
+                  tint="var(--color-ui-system-purple)"
                   onClick={() => addLog('Tag clicked')}
                 >
                   <Symbol icon={sfTagFill} />
                 </List.SwipeAction>
                 <List.SwipeAction
                   label="Mail"
-                  tint="var(--color-ios-system-indigo)"
+                  tint="var(--color-ui-system-indigo)"
                   onClick={() => addLog('Mail clicked')}
                 >
                   <Symbol icon={sfEnvelopeFill} />
                 </List.SwipeAction>
                 <List.SwipeAction
                   label="Done"
-                  tint="var(--color-ios-system-green)"
+                  tint="var(--color-ui-system-green)"
                   onClick={() => addLog('Done clicked')}
                 >
                   <Symbol icon={sfCheckmarkCircleFill} />
@@ -1262,7 +1262,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
             <List.Item>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfEnvelopeFill} />
@@ -1294,7 +1294,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   showLabel
                   label="Pin"
-                  tint="var(--color-ios-system-orange)"
+                  tint="var(--color-ui-system-orange)"
                   onClick={() => addLog('Pin clicked')}
                 >
                   <Symbol icon={sfPinFill} />
@@ -1309,7 +1309,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   showLabel
                   label="Delete"
-                  tint="var(--color-ios-system-red)"
+                  tint="var(--color-ui-system-red)"
                   onClick={() => addLog('Delete clicked')}
                 >
                   <Symbol icon={sfTrashFill} />
@@ -1319,7 +1319,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   showLabel
                   label="Tag"
-                  tint="var(--color-ios-system-purple)"
+                  tint="var(--color-ui-system-purple)"
                   onClick={() => addLog('Tag clicked')}
                 >
                   <Symbol icon={sfTagFill} />
@@ -1327,7 +1327,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   showLabel
                   label="Mail"
-                  tint="var(--color-ios-system-indigo)"
+                  tint="var(--color-ui-system-indigo)"
                   onClick={() => addLog('Mail clicked')}
                 >
                   <Symbol icon={sfEnvelopeFill} />
@@ -1335,7 +1335,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   showLabel
                   label="Done"
-                  tint="var(--color-ios-system-green)"
+                  tint="var(--color-ui-system-green)"
                   onClick={() => addLog('Done clicked')}
                 >
                   <Symbol icon={sfCheckmarkCircleFill} />
@@ -1345,7 +1345,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
             <List.Item>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfEnvelopeFill} />
@@ -1378,7 +1378,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                   showLabel
                   label="Pin"
                   shape="roundedRectangle"
-                  tint="var(--color-ios-system-orange)"
+                  tint="var(--color-ui-system-orange)"
                   onClick={() => addLog('Pin clicked')}
                 >
                   <Symbol icon={sfPinFill} />
@@ -1395,7 +1395,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                   showLabel
                   label="Delete"
                   shape="roundedRectangle"
-                  tint="var(--color-ios-system-red)"
+                  tint="var(--color-ui-system-red)"
                   onClick={() => addLog('Delete clicked')}
                 >
                   <Symbol icon={sfTrashFill} />
@@ -1406,7 +1406,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                   showLabel
                   label="Tag"
                   shape="roundedRectangle"
-                  tint="var(--color-ios-system-purple)"
+                  tint="var(--color-ui-system-purple)"
                   onClick={() => addLog('Tag clicked')}
                 >
                   <Symbol icon={sfTagFill} />
@@ -1415,7 +1415,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                   showLabel
                   label="Mail"
                   shape="roundedRectangle"
-                  tint="var(--color-ios-system-indigo)"
+                  tint="var(--color-ui-system-indigo)"
                   onClick={() => addLog('Mail clicked')}
                 >
                   <Symbol icon={sfEnvelopeFill} />
@@ -1424,7 +1424,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                   showLabel
                   label="Done"
                   shape="roundedRectangle"
-                  tint="var(--color-ios-system-green)"
+                  tint="var(--color-ui-system-green)"
                   onClick={() => addLog('Done clicked')}
                 >
                   <Symbol icon={sfCheckmarkCircleFill} />
@@ -1436,7 +1436,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
             <List.Item>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfEnvelopeFill} />
@@ -1464,7 +1464,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   label="Pin"
                   shape="roundedRectangle"
-                  tint="var(--color-ios-system-orange)"
+                  tint="var(--color-ui-system-orange)"
                   onClick={() => addLog('Pin clicked')}
                 >
                   <Symbol icon={sfPinFill} />
@@ -1479,7 +1479,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   label="Delete"
                   shape="circle"
-                  tint="var(--color-ios-system-red)"
+                  tint="var(--color-ui-system-red)"
                   onClick={() => addLog('Delete clicked')}
                 >
                   <Symbol icon={sfTrashFill} />
@@ -1489,7 +1489,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   label="Tag"
                   shape="circle"
-                  tint="var(--color-ios-system-purple)"
+                  tint="var(--color-ui-system-purple)"
                   onClick={() => addLog('Tag clicked')}
                 >
                   <Symbol icon={sfTagFill} />
@@ -1497,7 +1497,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   label="Mail"
                   shape="circle"
-                  tint="var(--color-ios-system-indigo)"
+                  tint="var(--color-ui-system-indigo)"
                   onClick={() => addLog('Mail clicked')}
                 >
                   <Symbol icon={sfEnvelopeFill} />
@@ -1505,7 +1505,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   label="Done"
                   shape="roundedRectangle"
-                  tint="var(--color-ios-system-green)"
+                  tint="var(--color-ui-system-green)"
                   onClick={() => addLog('Done clicked')}
                 >
                   <Symbol icon={sfCheckmarkCircleFill} />
@@ -1515,7 +1515,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
             <List.Item>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfEnvelopeFill} />
@@ -1543,7 +1543,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   label="Pin"
                   shape="roundedRectangle"
-                  tint="var(--color-ios-system-orange)"
+                  tint="var(--color-ui-system-orange)"
                   onClick={() => addLog('Pin clicked')}
                 >
                   Pin
@@ -1558,7 +1558,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   label="Delete"
                   shape="roundedRectangle"
-                  tint="var(--color-ios-system-red)"
+                  tint="var(--color-ui-system-red)"
                   onClick={() => addLog('Delete clicked')}
                 >
                   Delete
@@ -1568,7 +1568,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   label="Tag"
                   shape="roundedRectangle"
-                  tint="var(--color-ios-system-purple)"
+                  tint="var(--color-ui-system-purple)"
                   onClick={() => addLog('Tag clicked')}
                 >
                   Tag
@@ -1576,7 +1576,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   label="Mail"
                   shape="roundedRectangle"
-                  tint="var(--color-ios-system-indigo)"
+                  tint="var(--color-ui-system-indigo)"
                   onClick={() => addLog('Mail clicked')}
                 >
                   Mail
@@ -1584,7 +1584,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                 <List.SwipeAction
                   label="Done"
                   shape="roundedRectangle"
-                  tint="var(--color-ios-system-green)"
+                  tint="var(--color-ui-system-green)"
                   onClick={() => addLog('Done clicked')}
                 >
                   Done
@@ -1603,7 +1603,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
 };
 
 /**
- * Editing (UIKit `UITableView` editing): rows reordered by their grabbers
+ * Editing: rows reordered by their grabbers
  * (a reorder handle; the app reorders its rows), deleted by swiping.
  */
 export const ListEditDemo: FunctionComponent = () => {
@@ -1665,7 +1665,7 @@ export const ListEditDemo: FunctionComponent = () => {
                 <List.SwipeActions overswipe>
                   <List.SwipeAction
                     label="Delete"
-                    tint="var(--color-ios-system-red)"
+                    tint="var(--color-ui-system-red)"
                     onClick={() => {
                       addLog(`delete ${name}`);
                       setRows((current) =>
@@ -1686,7 +1686,7 @@ export const ListEditDemo: FunctionComponent = () => {
 };
 
 /**
- * Deleting rows (UIKit editing style `.delete`): each row's edit button
+ * Deleting rows: each row's edit button
  * opens its trailing swipe actions.
  */
 export const ListEditDeleteDemo: FunctionComponent = () => {
@@ -1733,7 +1733,7 @@ export const ListEditDeleteDemo: FunctionComponent = () => {
                     render={
                       <List.EditButton
                         aria-label={`Delete ${name}`}
-                        tint="var(--color-ios-system-red)"
+                        tint="var(--color-ui-system-red)"
                         {...(index === 0 ? propsEditButton : {})}
                       >
                         <Symbol icon={sfMinus} />
@@ -1747,7 +1747,7 @@ export const ListEditDeleteDemo: FunctionComponent = () => {
                 <List.SwipeActions overswipe>
                   <List.SwipeAction
                     label="Delete"
-                    tint="var(--color-ios-system-red)"
+                    tint="var(--color-ui-system-red)"
                     onClick={() => {
                       addLog(`delete ${name}`);
                       setRows((current) =>
@@ -1768,8 +1768,7 @@ export const ListEditDeleteDemo: FunctionComponent = () => {
 };
 
 /**
- * Deleting rows, with an insert row at the end (UIKit: editing style
- * `.insert` on the last row).
+ * Deleting rows, with an insert row at the end.
  */
 export const ListEditInsertDemo: FunctionComponent = () => {
   const id = 'list-edit-insert';
@@ -1808,7 +1807,7 @@ export const ListEditInsertDemo: FunctionComponent = () => {
                     render={
                       <List.EditButton
                         aria-label={`Delete ${name}`}
-                        tint="var(--color-ios-system-red)"
+                        tint="var(--color-ui-system-red)"
                       >
                         <Symbol icon={sfMinus} />
                       </List.EditButton>
@@ -1821,7 +1820,7 @@ export const ListEditInsertDemo: FunctionComponent = () => {
                 <List.SwipeActions overswipe>
                   <List.SwipeAction
                     label="Delete"
-                    tint="var(--color-ios-system-red)"
+                    tint="var(--color-ui-system-red)"
                     onClick={() => {
                       addLog(`delete ${name}`);
                       setRows((current) =>
@@ -1838,7 +1837,7 @@ export const ListEditInsertDemo: FunctionComponent = () => {
               <List.Leading>
                 <List.EditButton
                   aria-label="Add Planet"
-                  tint="var(--color-ios-system-green)"
+                  tint="var(--color-ui-system-green)"
                   onClick={() => {
                     added.current += 1;
                     const row = `New ${added.current}`;
@@ -2013,8 +2012,8 @@ export const ListEditSelectSingleDemo: FunctionComponent = () => {
 };
 
 /**
- * A full-width segmented control switching between two groups of rows (as
- * iOS apps switch views): the segments are radios (Base UI `RadioGroup`),
+ * A full-width segmented control switching between two groups of rows: the
+ * segments are radios (Base UI `RadioGroup`),
  * each controlling its group (`aria-controls`), the other one hidden.
  */
 export const ListSegmentedDemo: FunctionComponent = () => {
@@ -2160,7 +2159,7 @@ export const ListFormDemo: FunctionComponent = () => {
               <List.Trailing>
                 <TextField.Control
                   autoComplete="name"
-                  defaultValue="Kate Bell"
+                  defaultValue="Kate Brown"
                   placeholder="Required"
                   onValueChange={(value: string) => addLog(`name: ${value}`)}
                 />
@@ -2206,7 +2205,7 @@ export const ListFormDemo: FunctionComponent = () => {
             <List.Title>Event</List.Title>
           </List.Header>
           {/* The date's and the time's buttons open their pickers in
-              expandable rows below (as iOS's Calendar), one at a time. */}
+              expandable rows below, one at a time. */}
           <List.Group>
             <List.AccordionRoot>
               <List.AccordionItem value="starts">
@@ -2216,7 +2215,7 @@ export const ListFormDemo: FunctionComponent = () => {
                   </List.Content>
                   <List.Trailing>
                     <DatePicker.Root
-                      defaultValue={new Date(2025, 3, 20, 9, 41)}
+                      defaultValue={new Date(2025, 3, 20, 10, 0)}
                       handle={startsPicker}
                       mode="dateAndTime"
                       onValueChange={(next: Date) =>
@@ -2273,8 +2272,8 @@ export const ListFormDemo: FunctionComponent = () => {
 // Contacts by their initial (the index's sections).
 
 /**
- * An index list: a plain list with sticky section titles (Figma “Section
- * Title”, always nested) and an index (Figma “Index Bar”) jumping to them.
+ * An index list: a plain list with sticky section titles (always nested)
+ * and an index jumping to them.
  */
 export const ListIndexDemo: FunctionComponent = () => {
   const id = 'list-index';
@@ -2342,7 +2341,7 @@ export const ListIndexDemo: FunctionComponent = () => {
                       <List.SwipeActions overswipe>
                         <List.SwipeAction
                           label="Delete"
-                          tint="var(--color-ios-system-red)"
+                          tint="var(--color-ui-system-red)"
                           onClick={() => addLog(`delete ${name}`)}
                         >
                           <Symbol icon={sfTrashFill} />
@@ -2463,7 +2462,7 @@ export const ListMailDemo: FunctionComponent = () => {
                     <List.SwipeAction
                       showLabel
                       label="Unread"
-                      tint="var(--color-ios-system-blue)"
+                      tint="var(--color-ui-system-blue)"
                       onClick={() => addLog(`unread ${from}`)}
                     >
                       <Symbol icon={sfEnvelopeOpenFill} />
@@ -2485,7 +2484,7 @@ export const ListMailDemo: FunctionComponent = () => {
                     <List.SwipeAction
                       showLabel
                       label="Flag"
-                      tint="var(--color-ios-system-orange)"
+                      tint="var(--color-ui-system-orange)"
                       onClick={() => addLog(`flag ${from}`)}
                     >
                       <Symbol icon={sfFlagFill} />
@@ -2493,7 +2492,7 @@ export const ListMailDemo: FunctionComponent = () => {
                     <List.SwipeAction
                       showLabel
                       label="Archive"
-                      tint="var(--color-ios-system-purple)"
+                      tint="var(--color-ui-system-purple)"
                       onClick={() => addLog(`archived ${from}`)}
                     >
                       <Symbol icon={sfArchiveboxFill} />

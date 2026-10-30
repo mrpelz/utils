@@ -264,8 +264,8 @@ export const StepperComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        On iOS: in the trailing slot of <a href="list">List</a> rows, the value
-        in the row’s detail (the app’s: the stepper shows none).
+        Typically: in the trailing slot of <a href="list">List</a> rows, the
+        value in the row’s detail (the app’s: the stepper shows none).
       </li>
       <li>
         Controlled (<code>value</code>, <code>onValueChange</code>): the row

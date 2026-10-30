@@ -37,35 +37,34 @@ export type {
   SliderValueProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Sliders”, light and dark appearance), with
-// Figma colors mapped to UIKit semantic colors: track `systemFill`, fill the
-// tint (`tint`; default: the app's, `--color-ios-primary`), ticks
+// Sliders, light and dark, in the semantic colors: track `systemFill`, fill
+// the
+// tint (`tint`; default: the app's, `--color-ui-primary`), ticks
 // `quaternaryLabel`, symbols `secondaryLabel`; the knob (`#fff`) has no
 // semantic equivalent. The knob shadow matches Konsta UI `styles/base.css`
 // (`--shadow-ios-thumb`).
-// The pressed glass effect and everything Figma does not specify come from
-// Framework7 `components/range/range.less`, `range-ios.less` (iOS values,
+// The pressed glass effect comes from Framework7
+// `components/range/range.less`, `range-ios.less` (its iOS theme's values,
 // `.range-knob-active-state`): control size, transitions, pressed scale, glow.
 //
-// Deviations:
+// Also:
 // - The track does not clip (`overflow: hidden`), as Base UI renders the
 //   thumb inside it; the indicator inherits the track's radius instead.
 // - The knob surface and glass effect are drawn by the thumb's `::after`,
 //   which alone scales while dragging (Base UI measures the thumb's box for
 //   positioning); only its `transform`, `background-color` and `box-shadow`
 //   transition (Konsta UI `--transition-ios-range-thumb`).
-// - The control's length grows to fill the root (Figma example: 280px), at
-//   least 120px (so it fits a list row between symbols on an iPhone).
+// - The control's length grows to fill the root, at least 120px (so it fits
+//   a list row between symbols on a phone).
 // - The pressed state is driven by Base UI's `data-dragging`.
 // - Vertical sliders put the minimum symbol at the bottom.
 // - The fill is derived from the value (Base UI couples it to the thumb's
 //   center), so it spans the whole track at the maximum.
 // - Focused by keyboard, the knob has a 2px ring in the tint, 2px around
-//   it (Figma: none; Base UI focuses a visually hidden input, which shows no
-//   ring).
-// - `Slider.Value` (not in UIKit or Figma) is in the Body text style (the
+//   it (Base UI focuses a visually hidden input, which shows no ring).
+// - `Slider.Value` is in the Body text style (the
 //   symbols: Body, emphasized), with tabular numerals, and reserves the width
-//   of its widest value. `Slider.Label` (neither) is in Body, in the label
+//   of its widest value. `Slider.Label` is in Body, in the label
 //   color. Both are where they are among the parts, or by `placement`:
 //   before or after them all, or on a line above or below (the label at its
 //   start, the value at its end); the value also in a tooltip (see
@@ -195,13 +194,11 @@ const Thumb = forwardRef<HTMLDivElement, Omit<BaseSlider.Thumb.Props, 'ref'>>(
   },
 );
 
-/** Tick marks (iOS 26), to be rendered inside `Slider.Track`. */
+/** Tick marks, to be rendered inside `Slider.Track`. */
 const Ticks = forwardRef<HTMLDivElement, SliderTicksProps>(
   ({ className, count, ...props }, ref) => (
-    // Round (Figma renders the ticks as circles, the CSS export has no radius).
-    // Where the fill ends at their values, across the whole track (Figma: inset
-    // 16px, at the knob's center; but the fill shows through the knob while
-    // it's dragged, user), whatever the thumb's alignment.
+    // Round. Where the fill ends at their values, across the whole track
+    // (the fill shows through the knob while it's dragged), whatever the thumb's alignment.
     <div
       ref={ref}
       aria-hidden="true"
@@ -224,8 +221,7 @@ const Ticks = forwardRef<HTMLDivElement, SliderTicksProps>(
 );
 
 /**
- * Minimum/maximum value symbol (UIKit `minimumValueImage`,
- * `maximumValueImage`), to be rendered inside `Slider.Root`.
+ * Minimum/maximum value symbol, to be rendered inside `Slider.Root`.
  */
 const ValueSymbol = forwardRef<HTMLSpanElement, SliderSymbolProps>(
   ({ className, edge, onClick, ...props }, ref) => {

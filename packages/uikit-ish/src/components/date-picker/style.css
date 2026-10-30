@@ -3,19 +3,19 @@
   .uikit-date-picker-collapsed-button {
     && {
       padding: 6px 11px;
-      font-size: var(--font-ios-body-size);
+      font-size: var(--font-ui-body-size);
       font-style: normal;
       font-variant-numeric: tabular-nums;
-      font-variation-settings: 'wght' var(--font-ios-body-weight);
-      font-weight: round(down, var(--font-ios-body-weight), 100);
-      letter-spacing: var(--font-ios-body-tracking);
-      line-height: var(--font-ios-body-line-height);
+      font-variation-settings: 'wght' var(--font-ui-body-weight);
+      font-weight: round(down, var(--font-ui-body-weight), 100);
+      letter-spacing: var(--font-ui-body-tracking);
+      line-height: var(--font-ui-body-line-height);
       -webkit-tap-highlight-color: transparent;
     }
 
     &&[data-popup-open],
     &&[aria-expanded='true'] {
-      --uikit-button-color: var(--color-ios-primary);
+      --uikit-button-color: var(--color-ui-primary);
     }
   }
 
@@ -25,7 +25,7 @@
     display: flex;
     min-width: calc(7 * 44px + 2 * 16px);
     flex-direction: column;
-    color: var(--color-ios-label);
+    color: var(--color-ui-label);
     padding-block: 6px;
   }
 
@@ -40,12 +40,12 @@
 
   .uikit-date-picker-month-title {
     margin: 0;
-    font-size: var(--font-ios-body-size);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
     font-variation-settings: 'wght' 590;
     font-weight: round(down, 590, 100);
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
   }
 
   .uikit-date-picker-title-button {
@@ -67,7 +67,7 @@
     }
 
     & > svg {
-      color: var(--color-ios-primary);
+      color: var(--color-ui-primary);
       transition: rotate 200ms;
     }
 
@@ -76,7 +76,7 @@
     }
 
     &[aria-expanded='true'] {
-      color: var(--color-ios-primary);
+      color: var(--color-ui-primary);
 
       & > svg {
         rotate: 90deg;
@@ -137,7 +137,7 @@
   .uikit-date-picker-weekdays {
     display: grid;
     min-height: 20px;
-    color: var(--color-ios-tertiary-label);
+    color: var(--color-ui-tertiary-label);
     font-size: 13px;
     font-variation-settings: 'wght' 590;
     font-weight: round(down, 590, 100);
@@ -152,7 +152,7 @@
     }
 
     & > [data-weekday-highlighted] {
-      color: var(--color-ios-secondary-label);
+      color: var(--color-ui-secondary-label);
     }
   }
 
@@ -208,7 +208,7 @@
   .uikit-date-picker-separator {
     height: 11px;
     box-sizing: border-box;
-    border-block-end: 0.5px solid var(--color-ios-separator);
+    border-block-end: 0.5px solid var(--color-ui-separator);
     margin-inline: 16px;
   }
 
@@ -217,13 +217,13 @@
     min-height: 52px;
     align-items: center;
     justify-content: space-between;
-    font-size: var(--font-ios-body-size);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-body-weight);
-    font-weight: round(down, var(--font-ios-body-weight), 100);
+    font-variation-settings: 'wght' var(--font-ui-body-weight);
+    font-weight: round(down, var(--font-ui-body-weight), 100);
     gap: 16px;
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
     padding-inline: 16px;
   }
 
@@ -261,19 +261,19 @@
     margin: 0;
     appearance: none;
     background: none;
-    color: var(--color-ios-label);
+    color: var(--color-ui-label);
 
     /* (Its circle, as wide as it is, up to 44px.) */
     container-type: inline-size;
     font-family: inherit;
-    font-size: var(--font-ios-title3-size);
+    font-size: var(--font-ui-title3-size);
     font-style: normal;
     font-variant-numeric: tabular-nums;
-    font-variation-settings: 'wght' var(--font-ios-title3-weight);
-    font-weight: round(down, var(--font-ios-title3-weight), 100);
+    font-variation-settings: 'wght' var(--font-ui-title3-weight);
+    font-weight: round(down, var(--font-ui-title3-weight), 100);
     isolation: isolate;
-    letter-spacing: var(--font-ios-title3-tracking);
-    line-height: var(--font-ios-title3-line-height);
+    letter-spacing: var(--font-ui-title3-tracking);
+    line-height: var(--font-ui-title3-line-height);
     outline: none;
     place-items: center;
     -webkit-tap-highlight-color: transparent;
@@ -294,16 +294,16 @@
     }
 
     &:focus-visible::before {
-      outline: 2px solid var(--color-ios-primary);
+      outline: 2px solid var(--color-ui-primary);
       outline-offset: 2px;
     }
 
     &[aria-current='date'] {
-      color: var(--color-ios-primary);
+      color: var(--color-ui-primary);
     }
 
     &[aria-pressed='true'] {
-      color: var(--color-ios-primary);
+      color: var(--color-ui-primary);
       font-size: 24px;
       font-variation-settings: 'wght' 510;
       font-weight: round(down, 510, 100);
@@ -311,7 +311,7 @@
       &::before {
         background-color: color-mix(
           in srgb,
-          var(--color-ios-primary) 12%,
+          var(--color-ui-primary) 12%,
           transparent
         );
       }
@@ -320,10 +320,10 @@
     &[data-range='middle'] {
       background-color: color-mix(
         in srgb,
-        var(--color-ios-primary) 12%,
+        var(--color-ui-primary) 12%,
         transparent
       );
-      font-size: var(--font-ios-title3-size);
+      font-size: var(--font-ui-title3-size);
       font-variation-settings: 'wght' 400;
       font-weight: round(down, 400, 100);
 
@@ -338,7 +338,7 @@
       color: #fff;
 
       &::before {
-        background-color: var(--color-ios-primary);
+        background-color: var(--color-ui-primary);
       }
     }
 
@@ -346,14 +346,14 @@
       background: linear-gradient(
         to var(--uikit-date-picker-end, right),
         transparent 50%,
-        color-mix(in srgb, var(--color-ios-primary) 12%, transparent) 50%
+        color-mix(in srgb, var(--color-ui-primary) 12%, transparent) 50%
       );
     }
 
     &[data-range='end'] {
       background: linear-gradient(
         to var(--uikit-date-picker-end, right),
-        color-mix(in srgb, var(--color-ios-primary) 12%, transparent) 50%,
+        color-mix(in srgb, var(--color-ui-primary) 12%, transparent) 50%,
         transparent 50%
       );
     }
@@ -364,12 +364,12 @@
 
     /* The adjacent months' days (see showAdjacentMonths) */
     &[data-outside]:not([aria-pressed='true'], [data-range]) {
-      color: var(--color-ios-tertiary-label);
+      color: var(--color-ui-tertiary-label);
     }
 
     /* Highlighted weekdays (e.g. the weekend) */
     &[data-weekday-highlighted]:enabled:not([aria-pressed='true']) {
-      color: var(--color-ios-secondary-label);
+      color: var(--color-ui-secondary-label);
     }
 
     /* Highlighted days (see DayHighlight): dots below the date (Framework7
@@ -394,21 +394,21 @@
     }
 
     &[data-highlight-text]:not([aria-pressed='true']) {
-      color: var(--uikit-date-picker-text, var(--color-ios-primary));
+      color: var(--uikit-date-picker-text, var(--color-ui-primary));
     }
 
     &[data-highlight-circle]:not([aria-pressed='true']) {
       &::before {
         background-color: color-mix(
           in srgb,
-          var(--uikit-date-picker-circle, var(--color-ios-primary)) 20%,
+          var(--uikit-date-picker-circle, var(--color-ui-primary)) 20%,
           transparent
         );
       }
     }
 
     &:disabled {
-      color: var(--color-ios-tertiary-label);
+      color: var(--color-ui-tertiary-label);
 
       @media (hover: hover) {
         cursor: not-allowed;
@@ -419,16 +419,16 @@
   .uikit-date-picker-message {
     padding: 12px 16px;
     margin: 0;
-    color: var(--color-ios-secondary-label);
-    font-size: var(--font-ios-footnote-size);
+    color: var(--color-ui-secondary-label);
+    font-size: var(--font-ui-footnote-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-footnote-weight);
-    font-weight: round(down, var(--font-ios-footnote-weight), 100);
-    letter-spacing: var(--font-ios-footnote-tracking);
-    line-height: var(--font-ios-footnote-line-height);
+    font-variation-settings: 'wght' var(--font-ui-footnote-weight);
+    font-weight: round(down, var(--font-ui-footnote-weight), 100);
+    letter-spacing: var(--font-ui-footnote-tracking);
+    line-height: var(--font-ui-footnote-line-height);
 
     &[data-variant='error'] {
-      color: var(--color-ios-system-red);
+      color: var(--color-ui-system-red);
     }
   }
 }

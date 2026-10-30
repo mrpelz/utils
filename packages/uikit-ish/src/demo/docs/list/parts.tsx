@@ -408,7 +408,7 @@ const CollapsibleRootPart: FunctionComponent = () => {
               <List.CollapsiblePanel>
                 <List.Item>
                   <List.Content>
-                    <List.Title>Every day at 9:41</List.Title>
+                    <List.Title>Every day at 10:00</List.Title>
                   </List.Content>
                 </List.Item>
               </List.CollapsiblePanel>
@@ -471,7 +471,7 @@ const CollapsibleTriggerPart: FunctionComponent = () => {
               <List.CollapsiblePanel>
                 <List.Item>
                   <List.Content>
-                    <List.Title>Every day at 9:41</List.Title>
+                    <List.Title>Every day at 10:00</List.Title>
                   </List.Content>
                 </List.Item>
               </List.CollapsiblePanel>
@@ -518,7 +518,7 @@ const CollapsiblePanelPart: FunctionComponent = () => {
               <List.CollapsiblePanel>
                 <List.Item>
                   <List.Content>
-                    <List.Title>Every day at 9:41</List.Title>
+                    <List.Title>Every day at 10:00</List.Title>
                   </List.Content>
                 </List.Item>
                 <List.Item>
@@ -554,7 +554,7 @@ const accordionRows = (
       <List.AccordionPanel>
         <List.Item>
           <List.Content>
-            <List.Title>Every day at 9:41</List.Title>
+            <List.Title>Every day at 10:00</List.Title>
           </List.Content>
         </List.Item>
       </List.AccordionPanel>
@@ -658,7 +658,7 @@ const AccordionItemPart: FunctionComponent = () => {
                 <List.AccordionPanel>
                   <List.Item>
                     <List.Content>
-                      <List.Title>Every day at 9:41</List.Title>
+                      <List.Title>Every day at 10:00</List.Title>
                     </List.Content>
                   </List.Item>
                 </List.AccordionPanel>
@@ -1299,7 +1299,7 @@ const AccessoryPart: FunctionComponent = () => {
             <List.Item>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-pink)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-pink)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfHeartFill} />
@@ -2028,7 +2028,7 @@ const EditButtonPart: FunctionComponent = () => {
                 <List.Leading>
                   <List.EditButton
                     aria-label={`Delete ${name}`}
-                    tint="var(--color-ios-system-red)"
+                    tint="var(--color-ui-system-red)"
                     onClick={() => addLog(`edit button: delete ${name}`)}
                     {...(index === 0 ? props : {})}
                   >
@@ -2044,7 +2044,7 @@ const EditButtonPart: FunctionComponent = () => {
               <List.Leading>
                 <List.EditButton
                   aria-label="Add Planet"
-                  tint="var(--color-ios-system-green)"
+                  tint="var(--color-ui-system-green)"
                   onClick={() => addLog('edit button: add planet')}
                 >
                   <Symbol icon={sfPlus} />
@@ -2103,7 +2103,7 @@ const SwipeActionsPart: FunctionComponent = () => {
                   </List.SwipeAction>
                   <List.SwipeAction
                     label="Delete"
-                    tint="var(--color-ios-system-red)"
+                    tint="var(--color-ui-system-red)"
                     onClick={() => addLog(`delete ${name}`)}
                   >
                     <Symbol icon={sfTrashFill} />
@@ -2158,7 +2158,7 @@ const SwipeActionsTriggerPart: FunctionComponent = () => {
                       render={
                         <List.EditButton
                           aria-label={`Delete ${name}`}
-                          tint="var(--color-ios-system-red)"
+                          tint="var(--color-ui-system-red)"
                         >
                           <Symbol icon={sfMinus} />
                         </List.EditButton>
@@ -2169,7 +2169,7 @@ const SwipeActionsTriggerPart: FunctionComponent = () => {
                       render={
                         <List.EditButton
                           aria-label={`Delete ${name}`}
-                          tint="var(--color-ios-system-red)"
+                          tint="var(--color-ui-system-red)"
                         >
                           <Symbol icon={sfMinus} />
                         </List.EditButton>
@@ -2191,7 +2191,7 @@ const SwipeActionsTriggerPart: FunctionComponent = () => {
                 <List.SwipeActions>
                   <List.SwipeAction
                     label="Delete"
-                    tint="var(--color-ios-system-red)"
+                    tint="var(--color-ui-system-red)"
                     onClick={() => addLog(`delete ${name}`)}
                   >
                     <Symbol icon={sfTrashFill} />
@@ -2247,7 +2247,7 @@ const CreateSwipeActionsHandlePart: FunctionComponent = () => {
                   >
                     <List.SwipeAction
                       label="Delete"
-                      tint="var(--color-ios-system-red)"
+                      tint="var(--color-ui-system-red)"
                       onClick={() => addLog(`delete ${name}`)}
                     >
                       <Symbol icon={sfTrashFill} />
@@ -2303,7 +2303,7 @@ const UseCreateSwipeActionsHandlePart: FunctionComponent = () => {
                   >
                     <List.SwipeAction
                       label="Delete"
-                      tint="var(--color-ios-system-red)"
+                      tint="var(--color-ui-system-red)"
                       onClick={() => addLog(`delete ${name}`)}
                     >
                       <Symbol icon={sfTrashFill} />
@@ -2373,7 +2373,7 @@ const SwipeActionPart: FunctionComponent = () => {
                     <List.SwipeAction
                       showLabel
                       label="Archive"
-                      tint="var(--color-ios-system-purple)"
+                      tint="var(--color-ui-system-purple)"
                       onClick={() => addLog(`archive ${from}`)}
                     >
                       <Symbol icon={sfArchiveboxFill} />
@@ -2905,8 +2905,7 @@ export const ListParts: FunctionComponent = () => (
     <ul>
       <li>The list.</li>
       <li>
-        Style, for all its parts: <code>listStyle</code> (UIKit{' '}
-        <code>UITableView.Style</code>).
+        Style, for all its parts: <code>listStyle</code>.
       </li>
       <li>Whether its groups are outlined.</li>
       <li>
@@ -3193,7 +3192,7 @@ export const ListParts: FunctionComponent = () => (
       <li>
         Rows shown or not (Base UI’s <code>Collapsible.Panel</code>), opening
         and closing in place together, e.g. an inline picker below the row
-        toggling them (iOS’s Calendar).
+        toggling them (as a calendar app’s).
       </li>
       <li>
         A container of{' '}
@@ -3633,7 +3632,7 @@ export const ListParts: FunctionComponent = () => (
     <ul>
       <li>
         A trailing checkmark in the tint color: the chosen row of a list of
-        options (iOS’s settings).
+        options (as a settings app’s).
       </li>
     </ul>
     <CheckmarkPart />
@@ -3884,8 +3883,8 @@ export const ListParts: FunctionComponent = () => (
     <ul>
       <li>
         A leading button: a symbol (its child) in a circle of its{' '}
-        <code>tint</code> (UIKit’s editing styles: deleting in red, inserting in
-        green), doing what the app gives it (<code>onClick</code>).
+        <code>tint</code> (editing styles: deleting in red, inserting in green),
+        doing what the app gives it (<code>onClick</code>).
       </li>
       <li>
         Opening the row’s swipe actions instead: rendered by a{' '}
@@ -4103,8 +4102,8 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A row’s click handler passing the click on to the control in it, as iOS
-        rows do: pressing a switch’s row toggles the switch (see{' '}
+        A row’s click handler passing the click on to the control in it, as
+        native rows do: pressing a switch’s row toggles the switch (see{' '}
         <PartLink part="List.Checkbox" />, <PartLink part="List.Radio" />
         ).
       </li>

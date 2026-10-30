@@ -10,26 +10,23 @@ import type { SegmentedItemProps, SegmentedRootProps } from './props.js';
 
 export type { SegmentedItemProps, SegmentedRootProps } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Segmented control”, light and dark
-// appearance), with Figma colors mapped to UIKit semantic colors where they
+// The segmented control, light and dark, in the semantic colors where they
 // match: track `tertiarySystemFill`, labels `label`, separators `systemGray`.
 // The highlight (`#fff`/`#6c6c71`) has no semantic equivalent.
-// Behavior and everything Figma does not specify come from Framework7
+// Behavior comes from Framework7
 // `components/button/button.less` (`.segmented-strong`,
-// `.segmented-highlight`) and `button-vars.less` (iOS values): disabled
+// `.segmented-highlight`) and `button-vars.less` (its iOS theme's values): disabled
 // opacity, transition durations, `z-index`, item `min-width`
 // (`--f7-button-min-width`).
 // Additions from Konsta UI `shared/classes/SegmentedClasses.js`:
 // `width: 100%`, `pointer-events: none` on the highlight.
 //
-// Deviations:
+// Also:
 // - The track height (36px) is a minimum, not a fixed size.
-// - Items are laid out in equal grid columns (Figma: flex items with
-//   `flex-grow: 1`), so every column fits the widest label when the
+// - Items are laid out in equal grid columns, so every column fits the widest label when the
 //   control sizes to its content.
-// - Items are fully rounded (Figma: 7px radius).
-// - The highlight extends 4px on both sides of its item (Figma: -4px left,
-//   -3.67px right, a rounding artifact of the 117.33px item width).
+// - Items are fully rounded.
+// - The highlight extends 4px on both sides of its item.
 // - Separators are drawn at the start of the following item instead of being
 //   1px flex items of their own; item labels are wrapped in a span that
 //   handles overflow, so the rounded item does not clip its separator.
@@ -38,11 +35,11 @@ export type { SegmentedItemProps, SegmentedRootProps } from './props.js';
 // - The highlight is hidden while no item is checked.
 // - The browser's default focus ring is kept (Framework7 removes it).
 // - Pressing an item turns the selection into a glass lens that follows the
-//   pointer and checks the closest item on release, as iOS does (Framework7
-//   has no lens here; it's the tab bar's, see `tab-bar/main.tsx`). It replaces
+//   pointer and checks the closest item on release (Framework7 has no lens
+//   here; it's the tab bar's, see `tab-bar/main.tsx`). It replaces
 //   Framework7's pressed background. The lens is drawn above the items and
 //   outside the track, so the track doesn't clip its content; the highlight
-//   clips itself (and its shadow) to the track, as in Figma. Sideways, it
+//   clips itself (and its shadow) to the track. Sideways, it
 //   grows by at most twice as much as vertically (wide items).
 
 const isEnabled = (item: HTMLElement) =>
@@ -244,7 +241,7 @@ const Item = forwardRef<HTMLElement, Omit<SegmentedItemProps, 'ref'>>(
   },
 );
 
-// Clipped to the track (Figma clips the shadow there): in the highlight's
+// Clipped to the track (its shadow too): in the highlight's
 // own box, an item is as wide as the highlight minus its outsets, and the
 // track's edges are that many items (plus padding) away. Framework7
 // supports up to 10 buttons: each rule at its end matches when at least

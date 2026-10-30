@@ -26,7 +26,7 @@ const sheet = (page) =>
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'sheet: large (iPhone: from 10px below the top), medium (6px in, its content’s height), a form sheet in a regular width',
+    name: 'sheet: large (compact: from 10px below the top), medium (6px in, its content’s height), a form sheet in a regular width',
     run: async (page) => {
       // (In the demo's phone: compact.)
       await page.open('sheet', 'light', {

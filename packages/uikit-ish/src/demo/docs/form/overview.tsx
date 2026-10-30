@@ -129,8 +129,8 @@ export const FormOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Fields to fill in and submit together, as iOS lays them out (Settings,
-        Contacts): a <a href="list">List</a>, fieldsets its sections, fields its
+        Fields to fill in and submit together, laid out as settings and contacts
+        apps do: a <a href="list">List</a>, fieldsets its sections, fields its
         rows.
       </li>
       <li>

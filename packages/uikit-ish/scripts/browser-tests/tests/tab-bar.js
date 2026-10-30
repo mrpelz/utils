@@ -96,7 +96,7 @@ const openBar = async (page, ...args) => {
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'tab bar: tab widths match Figma in a 402px wide bar',
+    name: 'tab bar: tab widths match the spec in a 402px wide bar',
     run: async (page) => {
       /** @type {[string, number, number[], number[]][]} */
       const cases = [
@@ -146,7 +146,7 @@ export const tests = [
       await page.mouse('mouseReleased', ...second);
       await sleep(500);
 
-      // The pressed group grows (iPhone: 1.05), and the lens with it.
+      // The pressed group grows (compact: 1.05), and the lens with it.
       assert.ok(
         widths.every((lensWidth) => Math.abs(lensWidth - width * 1.05) < 0.5),
         `lens widths ${widths.join(', ')} should all be ${width * 1.05}`,
@@ -271,7 +271,7 @@ export const tests = [
     },
   },
   {
-    name: 'tab bar: the group under the lens grows (iOS: iPhone 1.05, iPad 1.065)',
+    name: 'tab bar: the group under the lens grows (compact 1.05, regular 1.065)',
     run: async (page) => {
       for (const [id, scale] of /** @type {const} */ ([
         [PRIMARY, 1.05],
@@ -639,7 +639,7 @@ export const tests = [
     },
   },
   {
-    name: 'tab bar (iPad): in a container sized by its content, the bar shrinks and its lens stays within',
+    name: 'tab bar (regular): in a container sized by its content, the bar shrinks and its lens stays within',
     run: async (page) => {
       await page.open('tab-bar-regular');
       // Such a container (a grid, scrolling), 420px wide, around the bar.
@@ -1124,7 +1124,7 @@ export const tests = [
     },
   },
   {
-    name: 'tab bar (iPad): released on an outer tab, the lens shrinks onto it around its center',
+    name: 'tab bar (regular): released on an outer tab, the lens shrinks onto it around its center',
     run: async (page) => {
       await openBar(page, 'tab-bar-regular');
       for (const index of [0, 8]) {
@@ -1206,7 +1206,7 @@ export const tests = [
     },
   },
   {
-    name: 'tab bar (iPad): expanding slowly, labels clip and the selection stays on its tab',
+    name: 'tab bar (regular): expanding slowly, labels clip and the selection stays on its tab',
     run: async (page) => {
       await openBar(page, 'tab-bar-regular');
       // Collapsed once laid out (as it keeps its expanded width).
@@ -1296,7 +1296,7 @@ export const tests = [
         }
       };
 
-      // iPhone: the symbol moves up as the label grows in.
+      // Compact: the symbol moves up as the label grows in.
       const compact = await expandSlowly(SECONDARY);
       assert.ok(
         compact.every(
@@ -1307,7 +1307,7 @@ export const tests = [
         `symbol offsets ${compact.map(({ icon }) => icon.toFixed(1)).join(', ')}`,
       );
 
-      // iPad: the label text stays centered.
+      // Regular: the label text stays centered.
       const regular = await expandSlowly('tab-bar-regular');
       assert.ok(
         regular.every(({ text }) => Math.abs(text) < 0.5),
@@ -1316,7 +1316,7 @@ export const tests = [
     },
   },
   {
-    name: 'tab bar (iPad): a collapsed bar keeps its height; a capsule search is no circle',
+    name: 'tab bar (regular): a collapsed bar keeps its height; a capsule search is no circle',
     run: async (page) => {
       await openBar(page, SECONDARY, 'light', {
         state: [null, null, { $rest: true, size: 'regular' }],
@@ -1342,7 +1342,7 @@ export const tests = [
       await page.setState(2, { collapsed: false });
       await sleep(500);
 
-      // Alone in its group: a circle; as a capsule: 50×36 (Figma iPad).
+      // Alone in its group: a circle; as a capsule: 50×36.
       assert.equal(await search(), '36x36');
       // (The secondary group's.)
       await page.setState(7, { shape: 'capsule' });
@@ -1351,7 +1351,7 @@ export const tests = [
     },
   },
   {
-    name: 'tab bar (iPad): circles are circles, symbol capsules 50×36',
+    name: 'tab bar (regular): circles are circles, symbol capsules 50×36',
     run: async (page) => {
       await openBar(page, 'tab-bar-regular');
 
@@ -1394,7 +1394,7 @@ export const tests = [
     },
   },
   {
-    name: 'tab bar (iPad): tabs match Figma',
+    name: 'tab bar (regular): tabs match the spec',
     run: async (page) => {
       await openBar(page, 'tab-bar-regular');
       await page.screenshot('tab-bar-regular');
@@ -1442,7 +1442,7 @@ export const tests = [
     },
   },
   {
-    name: 'tab bar (iPad): selecting a tab does not shift the tabs',
+    name: 'tab bar (regular): selecting a tab does not shift the tabs',
     run: async (page) => {
       await openBar(page, 'tab-bar-regular');
 
@@ -1461,7 +1461,7 @@ export const tests = [
     },
   },
   {
-    name: 'tab bar: symbols take up a line like a glyph (Figma 􀋃)',
+    name: 'tab bar: symbols take up a line like a glyph',
     run: async (page) => {
       await openBar(page, SECONDARY);
 
@@ -1473,7 +1473,7 @@ export const tests = [
           return { gap: Math.round(Math.max(label.top - icon.bottom, label.left - icon.right)), height: icon.height };
         })()`);
 
-      // Figma: 28px line, 1px gap (compact); 20px line, 10px gap (regular).
+      // 28px line, 1px gap (compact); 20px line, 10px gap (regular).
       assert.deepEqual(await icons(), { gap: 1, height: 28 }, 'compact');
       await page.setState(2, { size: 'regular' });
       await sleep(400);
@@ -1481,7 +1481,7 @@ export const tests = [
     },
   },
   {
-    name: 'tab bar: the regular size turns an iPhone bar into an iPad bar',
+    name: 'tab bar: the regular size turns a compact bar into a regular one',
     run: async (page) => {
       await openBar(page, SECONDARY, 'light', {
         state: [null, null, { $rest: true, size: 'regular' }],
@@ -1607,7 +1607,7 @@ export const tests = [
       // The groups' starts and widths, relative to the bar.
       const groups = `(() => { const box = ${list}.getBoundingClientRect(); return [...${list}.querySelectorAll(':scope > div')].map((group) => { const rect = group.getBoundingClientRect(); return { left: Math.round(rect.left - box.left), width: Math.round(rect.width) }; }); })()`;
 
-      // Their own widths (Figma), at the bar's ends.
+      // Their own widths, at the bar's ends.
       assert.deepEqual(await page.evaluate(groups), [
         { left: 32, width: 286 },
         { left: 1000 - 32 - 54, width: 54 },

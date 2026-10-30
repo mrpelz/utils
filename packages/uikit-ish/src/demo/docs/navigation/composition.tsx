@@ -1167,7 +1167,7 @@ export const NavigationComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Each tab its own stack (iOS’s tab bar apps, guide{' '}
+        Each tab its own stack (tab bar apps, guide{' '}
         <GuideLink to="shell-a">shell A</GuideLink>): a{' '}
         <PartLink
           component="tab-bar"
@@ -1191,7 +1191,7 @@ export const NavigationComposition: FunctionComponent = () => (
       </li>
       <li>
         The selected tab pressed again: its stack back to its root page, in one
-        transition (iOS’s; the{' '}
+        transition (the{' '}
         <PartLink
           component="tab-bar"
           part="TabBar.Tab"
@@ -1302,7 +1302,7 @@ export const NavigationComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        iOS’s: the stack’s root page with a large title (
+        The stack’s root page with a large title (
         <PartLink
           component="header"
           part="Header.LargeTitle"

@@ -52,14 +52,14 @@ export const editMenuRootRows: readonly PropRow[] = [
     union('compact', 'regular'),
     code(union('regular')),
     <>
-      The UIKit size class of its menus (e.g. the{' '}
+      The size class of its menus (e.g. the{' '}
       <PartLink
         component="edit-menu"
         part="EditMenu.More"
       />{' '}
-      button’s): <code>regular</code> (the iPad’s, their submenus beside their
-      trigger) or <code>compact</code> (the iPhone’s, their submenus over it).
-      The capsule is the same either way.
+      button’s): <code>regular</code> (their submenus beside their trigger) or{' '}
+      <code>compact</code> (their submenus over it). The capsule is the same
+      either way.
     </>,
   ],
   [
@@ -180,12 +180,7 @@ export const editMenuItemRows: readonly PropRow[] = [
     code('true'),
     'Whether to close the menu when the action is clicked.',
   ],
-  [
-    'destructive',
-    'boolean',
-    code('false'),
-    'A red label (Figma State=Destructive), e.g. Delete.',
-  ],
+  ['destructive', 'boolean', code('false'), 'A red label, e.g. Delete.'],
   [
     'cursor',
     'string (a CSS cursor)',
@@ -223,7 +218,7 @@ export const editMenuMoreRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     'a chevron',
-    'What the 34px circle shows (Figma: 􀆊, drawn as a stroke).',
+    'What the 34px circle shows (a chevron, drawn as a stroke).',
   ],
   ['aria-label', 'string', code('More'), 'Its name (it has no text).'],
   ...menuSubmenuTriggerRows

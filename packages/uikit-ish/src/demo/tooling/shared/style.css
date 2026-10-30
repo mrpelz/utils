@@ -64,8 +64,8 @@
 
   /*
    * Devices' screens, the stages' frames (one style for all, see
-   * frame/component.tsx): a phone's (an iPhone's width), a tablet's (an
-   * iPad's), at most the stage's, sized as a window. Their content is laid
+   * frame/component.tsx): a phone's (402px wide), a tablet's (820px), at
+   * most the stage's, sized as a window. Their content is laid
    * out in one cell (stretched to its height); clipped, not hidden (focus
    * moving into what's within, e.g. a sheet, would scroll it); a transform
    * makes them the containing block of the fixed layers within (a
@@ -99,13 +99,13 @@
     /* An app's background (a page's default, see Page), where nothing paints
        its own (bars, a sheet's trigger), a hairline at its edges (a dark
        screen on the dark stage). */
-    background-color: var(--color-ios-system-grouped-background);
-    box-shadow: 0 0 0 1px var(--color-ios-separator);
+    background-color: var(--color-ui-system-grouped-background);
+    box-shadow: 0 0 0 1px var(--color-ui-separator);
     isolation: isolate;
     transform: translateZ(0);
 
     /* Its safe area insets, as the library's custom properties (the
-       components keep clear of them): an iPhone's (the Dynamic Island, the
+       components keep clear of them): a phone's (the camera cutout, the
        home indicator). */
     --uikit-safe-area-inset-top: 62px;
     --uikit-safe-area-inset-bottom: 34px;
@@ -117,7 +117,7 @@
     --demo-home-indicator: 134px;
   }
 
-  /* An iPad's (the status bar, the home indicator). */
+  /* A tablet's (the status bar, the home indicator). */
   .demo-tablet {
     width: 820px;
 
@@ -130,7 +130,7 @@
   }
 
   /*
-   * Their chrome, over their content (as on iOS): the status bar's time in
+   * Their chrome, over their content: the status bar's time in
    * the top inset, the home indicator in the bottom one (so covered content
    * shows). With the frame's Safe Areas setting, the insets hatched, too
    * (`data-safe-areas` on the stage).
@@ -141,7 +141,7 @@
       position: absolute;
       z-index: 1000;
       box-sizing: border-box;
-      color: var(--color-ios-label);
+      color: var(--color-ui-label);
       inset-inline: 0;
       pointer-events: none;
 
@@ -157,7 +157,7 @@
       display: flex;
       height: var(--uikit-safe-area-inset-top);
       align-items: center;
-      content: var(--demo-time, '9:41');
+      content: var(--demo-time, '10:00');
       font-size: var(--demo-status-font-size);
       font-variation-settings: 'wght' 590;
       font-weight: 500;
@@ -229,16 +229,16 @@
     background-image:
       repeating-linear-gradient(
         transparent 0 43.5px,
-        var(--color-ios-separator) 43.5px 44px
+        var(--color-ui-separator) 43.5px 44px
       ),
       repeating-linear-gradient(
         transparent 0 16px,
-        var(--color-ios-tertiary-system-fill) 16px 28px,
+        var(--color-ui-tertiary-system-fill) 16px 28px,
         transparent 28px 44px
       ),
       linear-gradient(
-        var(--color-ios-secondary-system-grouped-background),
-        var(--color-ios-secondary-system-grouped-background)
+        var(--color-ui-secondary-system-grouped-background),
+        var(--color-ui-secondary-system-grouped-background)
       );
     background-position:
       32px var(--demo-wallpaper-top),

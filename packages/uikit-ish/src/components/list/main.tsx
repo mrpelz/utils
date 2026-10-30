@@ -132,22 +132,20 @@ export {
   useCreateSwipeActionsHandle,
 } from './swipe-actions-handle.js';
 
-// Source: Apple iOS 26 Figma (“Lists and tables”: “Row” Height=Regular/Tall,
-// “_Images”, “_Trailing”, “_Edit Buttons”, “_Grabber”, “_Separator”, “Row -
-// Button”, “Row with Swipe Actions”, “_Swipe Actions”, “Header”, “_Header
-// Trailing Accessories”, “Section Title”, “Grouped Table Footer”, “Index Bar”),
-// with its colors mapped to UIKit semantic colors (the tint, the label colors,
-// `systemRed`, `systemGray2`/`3`/`5`); the separator is a token in
-// `styles.css`. What Figma doesn't define follows Framework7 (`list.less`,
-// `list-ios.less`, `list-vars.less`, `swipeout.less`, `swipeout-ios.less`,
-// `swipeout.js`, `list-index.less`, `block.less`):
-// - list styles (UIKit `UITableView.Style`): `insetGrouped` (the default: 16px
-//   inset, 24px corners), `grouped`, `plain` (Framework7 `.list`,
-//   `.list.inset`); 35px between sections (none at the list's ends: its
-//   neighbors' and container's spacing); optionally outlined
-//   (`.list-outline`)
-// - pressed rows (UIKit's cell selection, `systemGray4`), hiding the separators
-//   around pressed and swiped rows
+// Rows (regular and tall), images, trailing accessories, edit buttons,
+// grabbers, separators, button rows, swipe actions, headers (with trailing
+// accessories), section titles, grouped footers and an index bar, in the
+// semantic colors (the tint, the label colors, `systemRed`,
+// `systemGray2`/`3`/`5`); the separator is a token in `styles.css`. Behavior
+// after Framework7 (`list.less`, `list-ios.less`, `list-vars.less`,
+// `swipeout.less`, `swipeout-ios.less`, `swipeout.js`, `list-index.less`,
+// `block.less`):
+// - list styles: `insetGrouped` (the default: 16px inset, 24px corners),
+//   `grouped`, `plain` (Framework7 `.list`, `.list.inset`); 35px between
+//   sections (none at the list's ends: its neighbors' and container's
+//   spacing); optionally outlined (`.list-outline`)
+// - pressed rows (`systemGray4`), hiding the separators around pressed and
+//   swiped rows
 // - swiping: the row follows the pointer (rubber-banding past its actions) over
 //   its actions, pinned to the list's edge, which scale in one after another
 //   from the edge; it opens on releasing past half the actions, or on a quick
@@ -158,57 +156,52 @@ export {
 //   its symbol moves to the row's end, its label hides (150ms)
 // - reordering rows by their grabbers (`sortable.js`, see `reorder.ts`),
 //   independent of the leading edit controls (`Checkbox`, `Radio`,
-//   `EditButton`); entering and leaving edit mode (`Root` `editing`; UIKit
-//   `setEditing(_:animated:)`), they slide in and out from the rows' edges
-//   (300ms), the rows' content making room
-// - media rows, as in Mail (`.media-list`: a `Text` part)
+//   `EditButton`); entering and leaving edit mode (`Root` `editing`), they
+//   slide in and out from the rows' edges (300ms), the rows' content making
+//   room
+// - media rows, as in a mail app (`.media-list`: a `Text` part)
 // - the Content Block (`Block`)
 //
 // Titles, subtitles and details are in the Body and Subheadline text styles,
 // prominent headers in Title 3 Emphasized, index letters in Caption 1
-// Emphasized; Figma's nested and extra prominent headers, header subtitles and
+// Emphasized; nested and extra prominent headers, header subtitles and
 // details, footers and swipe action labels differ from the text styles in
-// tracking, and are kept.
+// tracking.
 //
 // Rows are grids: [edit control] [image] title/subtitle [trailing …], where
 // everything that is not a leading part, a title or a subtitle is trailing
-// (Figma “Contents - Trailing”: 16px apart), e.g. a `Switch` or a `Menu`
-// trigger; up to 36px high (e.g. a `Stepper` or `Segmented`), they fit regular
-// rows (8px from their edges). Rows with a subtitle are tall (Figma
-// Height=Tall: 68px); others are regular (52px). Both are minimum heights,
-// growing with wrapping text. A row is pressable when its `Title` (or `Button`)
-// is a link or button (`render`): its hit area covers the row, beneath the
-// trailing controls.
+// (16px apart), e.g. a `Switch` or a `Menu` trigger; up to 36px high (e.g. a
+// `Stepper` or `Segmented`), they fit regular rows (8px from their edges).
+// Rows with a subtitle are tall (68px); others are regular (52px). Both are
+// minimum heights, growing with wrapping text. A row is pressable when its
+// `Title` (or `Button`) is a link or button (`render`): its hit area covers
+// the row, beneath the trailing controls.
 //
-// Deviations:
+// Also:
 // - Focusing a swipe action opens the actions. A trigger opens them
 //   (`SwipeActionsTrigger`: in the row, or by a handle; e.g. rendering the
 //   delete edit button), not the edit button itself.
-// - Header and footer text is aligned with the rows' text (Figma: headers are
-//   laid out for the full width, footers for the rows').
-// - Sticky section titles (plain lists) are opaque (Framework7 contacts list;
-//   Figma: a blur only), and sections snap to the top of a scroll container
-//   with `scroll-snap-type` (Framework7: none).
-// - Images keep their regular size (one line's height) in tall rows (Figma
-//   Height=Tall: rounded 44px, circular 60px, fill 68px).
-// - Swiped rows taller than Figma's tall rows (e.g. Mail's) get 34px corners
-//   (Figma: a capsule, which would cut into their content).
+// - Header and footer text is aligned with the rows' text.
+// - Sticky section titles (plain lists) are opaque (Framework7 contacts
+//   list), and sections snap to the top of a scroll container with
+//   `scroll-snap-type` (Framework7: none).
+// - Images keep their regular size (one line's height) in tall rows.
+// - Swiped rows taller than tall rows (e.g. a mail app's) get 34px corners (a
+//   capsule would cut into their content).
 // - Swiped rows keep a round end at their place's edge, their content sliding
-//   away beneath it (iOS; Figma shows rows opened in place only).
-// - Swipe actions are 44px circles, 4px from a regular row's edges (Figma:
-//   52px, the row's height), or rounded rectangles as high as the row (as iOS
-//   notifications'), by action; labels are optional (for multi-line rows), 4px
-//   below the shapes, in 13px (Figma: 50px circles, 3px above 15px labels,
-//   which overflow a 68px row). Symbols can be text, in capitals (regular
-//   weight).
-// - Actions fade in as they scale in, and the others fade out while overswiping
-//   (iOS; Figma: none).
-// - Rounded and circular images size their symbol to the image (Figma: none
-//   given); header buttons are round (Figma PNG; CSS: 10px corners).
+//   away beneath it.
+// - Swipe actions are 44px circles, 4px from a regular row's edges, or
+//   rounded rectangles as high as the row (as notifications'), by action;
+//   labels are optional (for multi-line rows), 4px below the shapes, in 13px.
+//   Symbols can be text, in capitals (regular weight).
+// - Actions fade in as they scale in, and the others fade out while
+//   overswiping.
+// - Rounded and circular images size their symbol to the image; header
+//   buttons are round.
 // - Separators, chevrons and the checkmarks are drawn as CSS borders and SVG
-//   strokes (Figma: SF Symbols glyphs 􀆊, 􀆅, 􀅼, 􀅽, 􀌇, 􀆏).
+//   strokes.
 
-// Glyphs (SF Symbols, as SVG strokes at the current font size).
+// Glyphs (SVG strokes at the current font size).
 
 const Chevron = () => (
   <svg
@@ -226,7 +219,7 @@ const Chevron = () => (
   </svg>
 );
 
-// Figma PNG: 15.2 × 14.5px of ink at 17px (590).
+// 15.2 × 14.5px of ink at 17px (590).
 const Lines = () => (
   <svg
     aria-hidden="true"
@@ -272,7 +265,7 @@ const StyledRoot = forwardRef<HTMLElement, Omit<ListRootProps, 'editing'>>(
     }),
 );
 
-/** A list (UIKit `UITableView`): sections of rows, headers and footers. */
+/** A list: sections of rows, headers and footers. */
 const Root = forwardRef<HTMLElement, ListRootProps>(
   ({ editing = 'ignore', ...props }, ref) => (
     <EditingContext.Provider value={editing}>
@@ -483,7 +476,7 @@ const DropTarget = forwardRef<HTMLElement, ListDropTargetProps>(
 // Rows.
 
 /**
- * A swiped row's corners: a capsule up to Figma's tall rows (68px), taller
+ * A swiped row's corners: a capsule up to tall rows (68px), taller
  * rows (e.g. Mail's) get rounded corners.
  */
 const swipeRadius = 34;
@@ -628,7 +621,7 @@ const overswipeArm = 304;
 const armDuration = 150;
 /**
  * Actions fade in from this opacity as they scale in, and the others fade
- * to it while overswiping, until armed (iOS, measured: shapes, symbols and
+ * to it while overswiping, until armed (measured: shapes, symbols and
  * labels each at 36%).
  */
 const actionFade = 0.36;
@@ -639,7 +632,7 @@ const isRtl = (element: HTMLElement) =>
   getComputedStyle(element).direction === 'rtl';
 
 /**
- * Overswipe (Framework7 iOS): widens the outermost action's shape by
+ * Overswipe (Framework7's iOS theme): widens the outermost action's shape by
  * `extra` px towards the row (`towardsRow`, physical), from the edge (its
  * negative margin keeps the action's size), its symbol and label centered in
  * it, as the row moves (`transition`).
@@ -1042,7 +1035,7 @@ const PanelContext = createContext<PanelContextValue | undefined>(undefined);
  * Its collapsible's rows (Base UI `Collapsible.Panel`, `Accordion.Panel`),
  * shown or not, opening and closing in place, together (each its height),
  * e.g. an inline `Calendar` or `TimeRoll` below a row with a `DatePicker`
- * (see `DatePicker.Expandable`, as iOS's Calendar). Placed among a group's
+ * (see `DatePicker.Expandable`, as a calendar app's). Placed among a group's
  * rows (no element of its own: the group's rows stay its children), or
  * among another's (closed with it). Closed, they're inert.
  */
@@ -1294,7 +1287,7 @@ const useReorderItem = (
 };
 
 /**
- * A row (UIKit `UITableViewCell`), with optional swipe actions. With a click
+ * A row, with optional swipe actions. With a click
  * handler, it's pressable itself (e.g. passing the click on to a control in
  * it), but where its own controls are pressed.
  *
@@ -1844,7 +1837,6 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       base: offsetOf(item),
       isMoved: false,
       pointerId: event.pointerId,
-      scroll: item.scrollLeft,
       time: performance.now(),
       x: event.clientX,
       y: event.clientY,
@@ -1876,8 +1868,9 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       showSnaps();
     }
 
-    // The content follows the pointer.
-    item.scrollLeft = drag.scroll - dx;
+    // The content follows the pointer (by its offset: the room before it
+    // grows as the swipe starts, see `showSnaps`).
+    scrollTo(drag.base + (isRtl(item) ? -dx : dx), false);
   };
 
   // A mouse drag released: overswiped (armed), opened (past half its
@@ -2196,7 +2189,7 @@ const Below = forwardRef<HTMLElement, PartProps<'div'>>(
   },
 );
 
-// Figma “Title”; as a link or button (`render`), it makes the row pressable.
+// A row's title; as a link or button (`render`), it makes the row pressable.
 const Title = forwardRef<HTMLElement, PartProps<'span'>>(
   ({ className, render, ...props }, ref) =>
     useRender({
@@ -2212,7 +2205,7 @@ const Title = forwardRef<HTMLElement, PartProps<'span'>>(
     }),
 );
 
-// Figma “Subtitle” (rows), “Supertitle” and “Subtitle” (headers).
+// A subtitle (rows), or a supertitle or subtitle (headers).
 const Subtitle = forwardRef<HTMLElement, PartProps<'span'>>(
   ({ className, render, ...props }, ref) =>
     useRender({
@@ -2259,7 +2252,7 @@ const Supertitle = forwardRef<HTMLElement, PartProps<'span'>>(
     }),
 );
 
-// Figma “Detail”.
+// A detail (trailing text).
 const Detail = forwardRef<HTMLElement, PartProps<'span'>>(
   ({ className, render, ...props }, ref) =>
     useRender({
@@ -2274,7 +2267,7 @@ const Detail = forwardRef<HTMLElement, PartProps<'span'>>(
     }),
 );
 
-// Figma “_Images”: a symbol, or an image (`img`, `video`, `canvas` filling
+// A symbol, or an image (`img`, `video`, `canvas` filling
 // it, or a symbol) in a rounded, circular or square frame.
 const Image = forwardRef<HTMLElement, ListImageProps>(
   ({ className, render, variant = 'symbol', ...props }, ref) =>
@@ -2291,7 +2284,7 @@ const Image = forwardRef<HTMLElement, ListImageProps>(
     }),
 );
 
-// Figma “Symbol” and “Info”: a symbol in the tint color, pressable as a
+// A symbol (e.g. info) in the tint color, pressable as a
 // link or button (`render`).
 const Accessory = forwardRef<
   HTMLElement,
@@ -2309,7 +2302,7 @@ const Accessory = forwardRef<
   }),
 );
 
-// Figma “Checkmark” (􀆅, 17px, 590).
+// A checkmark (17px, 590).
 const Checkmark = forwardRef<
   HTMLElement,
   PartProps<'span'> & WhileEditingProps
@@ -2327,7 +2320,7 @@ const Checkmark = forwardRef<
   }),
 );
 
-// Figma “Drill-in” (􀆊, 17px, 590).
+// A drill-in chevron (17px, 590).
 const DrillIn = forwardRef<HTMLElement, PartProps<'span'>>(
   ({ children, className, render, ...props }, ref) =>
     useRender({
@@ -2344,7 +2337,7 @@ const DrillIn = forwardRef<HTMLElement, PartProps<'span'>>(
     }),
 );
 
-// Figma “Disclosure” (rows: 17px, headers: 19px, 590, in the tint color),
+// A disclosure chevron (rows: 17px, headers: 19px, 590, in the tint color),
 // turned down while open (e.g. in a Base UI `Collapsible.Trigger`).
 const Disclosure = forwardRef<HTMLElement, PartProps<'span'>>(
   ({ children, className, render, ...props }, ref) => {
@@ -2368,9 +2361,9 @@ const Disclosure = forwardRef<HTMLElement, PartProps<'span'>>(
   },
 );
 
-// Figma “_Grabber” (􀌇, 17px, 400).
+// Three lines (17px, 400).
 /**
- * Figma “_Grabber”: drags its row to reorder it (see `Item`
+ * A grabber: drags its row to reorder it (see `Item`
  * `reorderHandle`); focused, arrow keys move the row (grabbed by the app:
  * from target to target, Enter or Space dropping it).
  */
@@ -2424,7 +2417,7 @@ const Grabber = forwardRef<HTMLElement, PartProps<'span'>>(
     }),
 );
 
-// Figma Type=Button (rows) and Type=Action (headers): text in the tint
+// A button (rows) or an action (headers): text in the tint
 // color.
 const Action = forwardRef<HTMLElement, PartProps<'button'>>(
   ({ className, render, ...props }, ref) =>
@@ -2441,7 +2434,7 @@ const Action = forwardRef<HTMLElement, PartProps<'button'>>(
     }),
 );
 
-// Figma “Row - Button”: a pressable row's title in the tint color.
+// A button row: a pressable row's title in the tint color.
 const Button = forwardRef<HTMLElement, ListButtonProps>(
   ({ className, destructive, render, ...props }, ref) =>
     useRender({
@@ -2458,7 +2451,7 @@ const Button = forwardRef<HTMLElement, ListButtonProps>(
     }),
 );
 
-/** Figma State=Selected/Unselected: a checkbox (selecting rows). */
+/** A checkbox (selecting rows). */
 const Checkbox = forwardRef<HTMLElement, CheckboxRootProps & WhileEditingProps>(
   ({ whileEditing, ...props }, ref) => (
     <CheckboxBase.Root
@@ -2503,7 +2496,7 @@ const StyledEditButton = forwardRef<
 );
 
 /**
- * Figma State=Remove/Add: a symbol (its child) in a circle of its `tint`,
+ * A remove or add button: a symbol (its child) in a circle of its `tint`,
  * doing what the app gives it (e.g. deleting the row; or, rendered by a
  * `SwipeActionsTrigger`, opening its trailing actions).
  */
@@ -2523,7 +2516,7 @@ const EditButton = forwardRef<HTMLElement, ListEditButtonProps>(
   ),
 );
 
-// Swipe actions (Figma “Row with Swipe Actions”, “_Swipe Actions”): shapes
+// Swipe actions: shapes
 // 10px apart, 10px from the row and 16px from the edge.
 
 // Circles centered in the row, rounded rectangles 4px from its edges.
@@ -2716,8 +2709,7 @@ const SwipeAction = forwardRef<HTMLElement, ListSwipeActionProps>(
   },
 );
 
-// Headers (Figma “Header” Type, “Section Title”) and footers (Figma
-// “Grouped Table Footer”).
+// Headers (and section titles) and footers.
 
 const Header = forwardRef<HTMLElement, ListHeaderProps>(
   ({ className, prominence, render, ...props }, ref) =>
@@ -2764,7 +2756,7 @@ const Block = forwardRef<HTMLElement, ListBlockProps>(
     }),
 );
 
-// Index (Figma “Index Bar”; Framework7 “List Index”): letters in the tint
+// Index (Framework7 “List Index”): letters in the tint
 // color, selected by pressing or scrubbing over them (clicking each item).
 // Placing it is up to the page (Framework7: at the page's edge), above the
 // sticky headers of plain lists (z-index 2).
@@ -2869,7 +2861,7 @@ const IndexItem = forwardRef<HTMLElement, PartProps<'button'>>(
 
 /**
  * A row's click handler passing the click on to the control in it
- * (`selector`, e.g. `[role=switch]`), as iOS rows do, unless it was the
+ * (`selector`, e.g. `[role=switch]`), as native rows do, unless it was the
  * control's own: `<List.Item onClick={forwardClick('[role=switch]')}>`. As
  * the click it is: a pointer's (`detail` > 0) or a keyboard's (a control's
  * `click()` would be a keyboard's, so menus would open with their first

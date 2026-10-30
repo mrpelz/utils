@@ -134,7 +134,7 @@ const formCode = `<List.Root>
   </Fieldset.Root>
 </List.Root>`;
 
-const suggestionsCode = `const contacts = ['Anna Haro', 'Daniel Higgins', 'David Taylor', 'Kate Bell'];
+const suggestionsCode = `const contacts = ['Anna Hall', 'Daniel Hughes', 'David Turner', 'Kate Brown'];
 // Its words starting with the text typed.
 const matches = (name, text) =>
   name

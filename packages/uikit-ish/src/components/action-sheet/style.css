@@ -16,7 +16,7 @@
   }
 
   /* Its panel: within the room for it (not its positioner's width), its
-     actions scrolling when they don't fit (as UIKit's). */
+     actions scrolling when they don't fit. */
   .uikit-action-sheet-popup.uikit-alert-panel {
     max-width: var(--available-width);
     max-height: var(--available-height);

@@ -78,10 +78,7 @@ export const SegmentedOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <ul className="demo-lead">
-      <li>
-        Chooses one of a few options, side by side on a track (UIKit{' '}
-        <code>UISegmentedControl</code>).
-      </li>
+      <li>Chooses one of a few options, side by side on a track.</li>
       <li>E.g. a chart’s period, or which of a list’s items to show.</li>
       <li>The chosen one highlighted.</li>
       <li>Base UI’s radio group.</li>

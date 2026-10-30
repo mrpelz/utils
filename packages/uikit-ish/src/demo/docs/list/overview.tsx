@@ -153,9 +153,7 @@ export const ListOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <ul className="demo-lead">
-      <li>
-        Rows of data in sections (UIKit <code>UITableView</code>).
-      </li>
+      <li>Rows of data in sections.</li>
       <li>A section: a group of rows, an optional header and footer.</li>
       <li>
         A row: a grid of parts (an edit control, an image, a title and subtitle,
@@ -200,7 +198,7 @@ export const ListOverview: FunctionComponent = () => (
         pop-up button, which can sit in a row).
       </li>
       <li>
-        An app’s top-level sections on iPhone: a <a href="tab-bar">Tab bar</a>.
+        An app’s top-level sections on a phone: a <a href="tab-bar">Tab bar</a>.
       </li>
       <li>
         Text between rows, without rows: a{' '}
@@ -353,7 +351,7 @@ export const ListOverview: FunctionComponent = () => (
           part="List.Button"
         />
         ) is a button or link: its hit area covers the row, beneath the trailing
-        controls; pressed, the row shows UIKit’s selection gray. A row with a
+        controls; pressed, the row shows the selection gray. A row with a
         control passes its clicks on to it (<code>forwardClick</code>).
       </li>
       <li>

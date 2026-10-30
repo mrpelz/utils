@@ -37,7 +37,7 @@ export type {
   NavigationSwipeAreaProps,
 } from './props.js';
 
-// Navigation (UIKit `UINavigationController`, after Framework7's views and
+// Navigation (after Framework7's views and
 // `router` transitions, without its routing): a stack of pages, the app's
 // (no router of its own). The app renders its stack's pages as its
 // `Stack`'s children, each with a key; the navigation transitions between
@@ -61,12 +61,11 @@ export type {
 // stays (e.g. the back button: a toolbar in a `Viewport.BlockStart`) is in
 // the `Root`, outside its `Stack`.
 //
-// Deviations:
-// - Each page's bar moves with it, its title too (iOS: the title moves to
-//   the back button's place, fading); the back button stays, in a bar of
+// Also:
+// - Each page's bar moves with it, its title too; the back button stays, in a bar of
 //   the app's outside the stack (see above).
 
-/** Pushing and popping (iOS: about 350ms, an ease-out curve). */
+/** Pushing and popping (350ms, an ease-out curve). */
 const duration = 350;
 const easing = 'cubic-bezier(0.2, 0.9, 0.3, 1)';
 /**

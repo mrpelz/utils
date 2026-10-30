@@ -31,15 +31,15 @@ export type {
   TooltipTriggerProps,
 } from './props.js';
 
-// No Figma (iOS has no tooltips; Framework7's: a dark panel, white text,
-// 4px corners): in iOS 26's language, a capsule of the menus' glass (see
+// A capsule of the menus' glass (Framework7's: a dark panel, white text,
+// 4px corners) (see
 // `Menu`), its text Subheadline in the glass' content color, 6px by 12px
 // in (one line: 32px high, its ends round; more: 16px corners); 8px from
 // its trigger, above it (by default), scaling in from it (as menus).
 //
 // Base UI's `Tooltip`: shown on hover (after 300ms, at once between
 // tooltips in a `Tooltip.Provider`) and keyboard focus, not on touch (no
-// hover there: as on iOS, what it says should also be found otherwise, e.g.
+// hover there: what it says should also be found otherwise, e.g.
 // in a popover). Held open (`open`), anchored to any element (`anchor`), it
 // labels something for good, on touch too (e.g. a slider's thumb, a
 // progress bar's fill).
@@ -129,7 +129,7 @@ export const useCreateTooltipHandle = <
 };
 
 /**
- * A tooltip (Base UI's `Tooltip`; no UIKit equivalent): a short label in a
+ * A tooltip (Base UI's `Tooltip`): a short label in a
  * glass capsule at its trigger, on hover and focus, or held open.
  */
 /**

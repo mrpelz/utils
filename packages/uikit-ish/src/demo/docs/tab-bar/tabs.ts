@@ -4,8 +4,7 @@ import { sfPersonCropCircleFill } from '@bradleyhodges/sfsymbols/sfPersonCropCir
 import { sfRecordingtape } from '@bradleyhodges/sfsymbols/sfRecordingtape';
 
 /**
- * The guide pages' tabs, Phone's: value, label, symbol (Figma's `star.fill`
- * for Favorites isn't in the symbols' catalogue: `heart.fill`). Data only:
+ * The guide pages' tabs, Phone's: value, label, symbol. Data only:
  * the views write out their tab bars, so their code shows as it'd be used.
  */
 export const phoneTabs = [

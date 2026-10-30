@@ -180,43 +180,43 @@ const rows: Record<string, readonly string[]> = {
   contacts: [
     'Aaron Black',
     'Abigail Moss',
-    'Anna Haro',
+    'Anna Hall',
     'Bella Chen',
     'Benjamin Ortiz',
     'Carla Diaz',
-    'Daniel Higgins',
-    'David Taylor',
+    'Daniel Hughes',
+    'David Turner',
     'Elena Petrova',
     'Felix Wagner',
     'Grace Kim',
-    'Hank Zakroff',
+    'Hank Zimmer',
     'Isabel Costa',
-    'John Appleseed',
-    'Kate Bell',
+    'John Doe',
+    'Kate Brown',
     'Liam Murphy',
     'Maya Singh',
     'Noah Fischer',
   ],
-  favorites: ['Anna Haro', 'Kate Bell', 'John Appleseed'],
+  favorites: ['Anna Hall', 'Kate Brown', 'John Doe'],
   recents: [
-    'Kate Bell',
-    'Daniel Higgins',
-    'Anna Haro',
-    'John Appleseed',
-    'Hank Zakroff',
-    'David Taylor',
-    'Kate Bell',
-    'Anna Haro',
+    'Kate Brown',
+    'Daniel Hughes',
+    'Anna Hall',
+    'John Doe',
+    'Hank Zimmer',
+    'David Turner',
+    'Kate Brown',
+    'Anna Hall',
     'Maya Singh',
-    'Daniel Higgins',
+    'Daniel Hughes',
     'Grace Kim',
-    'Kate Bell',
+    'Kate Brown',
     'Felix Wagner',
-    'John Appleseed',
-    'Anna Haro',
+    'John Doe',
+    'Anna Hall',
     'Noah Fischer',
   ],
-  voicemail: ['Daniel Higgins', 'Hank Zakroff'],
+  voicemail: ['Daniel Hughes', 'Hank Zimmer'],
 };
 
 /** The value (initially Favorites), logged. */
@@ -677,7 +677,7 @@ export const TabBarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Search: a group of its own after the sections’ (iOS 26; guide{' '}
+        Search: a group of its own after the sections’ (guide{' '}
         <GuideLink to="rule-a11">A11</GuideLink>,{' '}
         <GuideLink to="section-7-6">§7.6</GuideLink>).
       </li>
@@ -750,7 +750,7 @@ export const TabBarComposition: FunctionComponent = () => (
       Collapsing on scroll
     </Heading>
     <ul>
-      <li>iOS’s tab bars minimize while the content scrolls down.</li>
+      <li>The tab bar minimizes while the content scrolls down.</li>
       <li>
         Inside a <a href="viewport">Viewport</a>’s provider,{' '}
         <PartLink

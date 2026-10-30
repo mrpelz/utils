@@ -42,7 +42,7 @@
     height: var(--uikit-avatar-group-size);
     flex: none;
     border-radius: 50%;
-    background-color: var(--color-ios-system-fill);
+    background-color: var(--color-ui-system-fill);
     vertical-align: middle;
 
     & > :nth-child(-n + 3 of [data-avatar-part='root']) {

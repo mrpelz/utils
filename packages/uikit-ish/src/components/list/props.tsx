@@ -22,7 +22,7 @@ export type PartProps<Tag extends IntrinsicTag> = Omit<
   (Tag extends 'button' | 'li' ? SecondaryClickProps : unknown);
 
 /**
- * An edit mode (UIKit `isEditing`), by side: `leading` (its rows' leading
+ * An edit mode, by side: `leading` (its rows' leading
  * edit controls, `Checkbox`, `Radio`, `EditButton`, slid in), `trailing`
  * (their trailing ones, `Grabber`), `both`, `none` (not editing: all slid
  * out, hidden), or `ignore` (not managed: shown as they are). Parts react
@@ -53,7 +53,7 @@ export type ListRootProps = PartProps<'div'> & {
    */
   editing?: ListEditing;
   /**
-   * UIKit `UITableView.Style`.
+   * The list's style: inset grouped, grouped or plain.
    * @default 'insetGrouped'
    */
   listStyle?: ListStyle;
@@ -177,7 +177,6 @@ export type Drag = {
   base: number;
   isMoved: boolean;
   pointerId: number;
-  scroll: number;
   time: number;
   x: number;
   y: number;
@@ -301,14 +300,14 @@ export type ListTextProps = PartProps<'span'> & {
 
 export type ListImageProps = PartProps<'span'> & {
   /**
-   * Figma “_Images” Type.
+   * The image's frame: a symbol's, or a rounded, circular or filling one.
    * @default 'symbol'
    */
   variant?: 'circular' | 'fill' | 'rounded' | 'symbol';
 };
 
 export type ListButtonProps = PartProps<'button'> & {
-  /** Figma Value=Destructive. */
+  /** In the destructive color (`systemRed`). */
   destructive?: boolean;
 };
 
@@ -319,8 +318,7 @@ export type ListEditButtonProps = PartProps<'button'> & {
    */
   textColor?: string;
   /**
-   * Its circle's color (e.g. `systemRed` deleting, `systemGreen` inserting:
-   * UIKit's editing styles).
+   * Its circle's color (e.g. `systemRed` deleting, `systemGreen` inserting).
    * @default `systemGray`
    */
   tint?: string;
@@ -346,8 +344,7 @@ export type ListSwipeActionsProps = PartProps<'div'> & {
   /**
    * Swiping on past the actions stretches the outermost one up to the
    * others (following the row), and, past 304px, triggers it on
-   * release (Framework7 `.swipeout-overswipe`; UIKit
-   * `performsFirstActionWithFullSwipe`).
+   * release (Framework7 `.swipeout-overswipe`).
    */
   overswipe?: boolean;
   /**
@@ -381,7 +378,7 @@ export type ListSwipeActionProps = PartProps<'button'> & {
    */
   shape?: 'circle' | 'roundedRectangle';
   /**
-   * Shows the label below the shape (Figma “Label”). It needs room: for
+   * Shows the label below the shape. It needs room: for
    * multi-line rows (`Text`).
    * @default false
    */
@@ -406,8 +403,8 @@ export type ListHeaderProps = PartProps<'div'> & {
    */
   cursor?: Properties['cursor'];
   /**
-   * Figma “Header” Type; `nested` headers of plain lists are section titles
-   * (Figma “Section Title”).
+   * The header's prominence; `nested` headers of plain lists are section
+   * titles.
    * @default 'prominent'
    */
   prominence?: 'extraProminent' | 'nested' | 'prominent';
@@ -419,7 +416,7 @@ export type ListBlockProps = PartProps<'div'> & {
 };
 
 export type ListIndexProps = PartProps<'nav'> & {
-  /** UIKit size class: `compact` (iPhone, default) or `regular` (iPad). */
+  /** A size class: `compact` (a phone, default) or `regular` (a tablet). */
   size?: 'compact' | 'regular';
 };
 

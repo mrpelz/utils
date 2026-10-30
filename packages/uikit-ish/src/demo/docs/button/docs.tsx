@@ -25,9 +25,9 @@ export const buttonRootRows: readonly PropRow[] = [
     ),
     code(union('borderless')),
     <>
-      Figma “Style”: a label alone (<code>borderless</code>), on a gray fill (
+      Its style: a label alone (<code>borderless</code>), on a gray fill (
       <code>bordered</code>; <code>-secondary</code>, its label in the label
-      color), on the tint (<code>bordered-prominent</code>); Liquid Glass (
+      color), on the tint (<code>bordered-prominent</code>); glass (
       <code>glass</code>; <code>glass-prominent</code>, tinted).
     </>,
   ],
@@ -37,7 +37,7 @@ export const buttonRootRows: readonly PropRow[] = [
     <>
       medium (<code>borderless</code>: its context’s text style)
     </>,
-    'Figma “Size”: 28px, 34px or 50px high (Subheadline; large: Body). Not for glass variants, 48px high.',
+    'Its size: 28px, 34px or 50px high (Subheadline; large: Body). Not for glass variants, 48px high.',
   ],
   [
     'shape',
@@ -53,8 +53,7 @@ export const buttonRootRows: readonly PropRow[] = [
     'string',
     'the primary color',
     <>
-      Its color (labels, fills, tinted glass; UIKit <code>tintColor</code>).{' '}
-      <code>destructive</code> wins.
+      Its color (labels, fills, tinted glass). <code>destructive</code> wins.
     </>,
   ],
   [
@@ -66,12 +65,7 @@ export const buttonRootRows: readonly PropRow[] = [
       <code>tint</code> behind them; unblended on glass).
     </>,
   ],
-  [
-    'destructive',
-    'boolean',
-    code('false'),
-    'Figma “Destructive”: tints the button red.',
-  ],
+  ['destructive', 'boolean', code('false'), 'Tints the button red.'],
   [
     'fill',
     'boolean',

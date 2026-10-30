@@ -9,8 +9,8 @@ export const propOptionsBar = {
   value: [40, 0, 10, 90, 100, null] as const,
   tint: [
     undefined,
-    'var(--color-ios-system-green)',
-    'var(--color-ios-system-orange)',
+    'var(--color-ui-system-green)',
+    'var(--color-ui-system-orange)',
   ] as const,
 };
 
@@ -60,8 +60,8 @@ export const propOptionsIndicator = {
   duration: [undefined, 0.5, 2] as const,
   color: [
     undefined,
-    'var(--color-ios-label)',
-    'var(--color-ios-primary)',
+    'var(--color-ui-label)',
+    'var(--color-ui-primary)',
   ] as const,
   children: [undefined, 'Loading'] as const,
 };

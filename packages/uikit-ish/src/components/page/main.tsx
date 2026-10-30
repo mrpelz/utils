@@ -8,8 +8,7 @@ import type { PageRootProps } from './props.js';
 
 export type { PageRootProps } from './props.js';
 
-// A page (after Framework7's `.page` and `.page-content`; UIKit: a view
-// controller's root view): what a screen shows, filling its container (a
+// A page (after Framework7's `.page` and `.page-content`): what a screen shows, filling its container (a
 // `Layout.Column`, a `Navigation.Stack`'s page, the viewport's content),
 // scrolling its content on its own (e.g. a `Header` at its start, then
 // lists), on the page background (`grouped`: `systemGroupedBackground`, as

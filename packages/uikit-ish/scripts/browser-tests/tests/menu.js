@@ -259,7 +259,7 @@ export const tests = [
     },
   },
   {
-    name: 'menu: items, separators and section titles match Figma',
+    name: 'menu: items, separators and section titles match the spec',
     run: async (page) => {
       /** @type {[string, Record<string, number | number[]>][]} */
       const cases = [
@@ -355,7 +355,7 @@ export const tests = [
     },
   },
   {
-    name: 'edit menu: capsule matches iOS 26 (measured)',
+    name: 'edit menu: capsule metrics',
     run: async (page) => {
       for (const scheme of /** @type {const} */ (['light', 'dark'])) {
         await page.open('edit-menu', scheme);
@@ -603,7 +603,7 @@ export const tests = [
     },
   },
   {
-    name: 'edit menu: its submenu is an iPad menu',
+    name: 'edit menu: its submenu is a regular menu',
     run: async (page) => {
       await page.open('edit-menu', 'light', {
         state: [{ $rest: true, open: true }],

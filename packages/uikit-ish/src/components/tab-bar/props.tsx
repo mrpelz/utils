@@ -53,7 +53,7 @@ export type ListState = {
 
 export type TabBarListProps = BaseTabs.List.Props & {
   /**
-   * Minimized (UIKit `tabBarMinimizeBehavior`): only the groups and tabs
+   * Minimized: only the groups and tabs
    * marked `visibleWhenCollapsed` remain, by default as symbols in circles.
    */
   collapsed?: boolean;
@@ -74,8 +74,8 @@ export type TabBarListProps = BaseTabs.List.Props & {
    */
   context?: GlassContext;
   /**
-   * UIKit size class: `compact` is the iPhone tab bar (content stacked),
-   * `regular` the iPad tab bar (content in a row).
+   * A size class: `compact` is the phone tab bar (content stacked),
+   * `regular` the tablet tab bar (content in a row).
    * @default 'compact'
    */
   size?: Size;

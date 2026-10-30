@@ -41,11 +41,10 @@ export type {
   ContextualMenuTriggerProps,
 } from './props.js';
 
-// A contextual menu (UIKit `UIContextMenuInteraction`): a trigger and its
+// A contextual menu: a trigger and its
 // `Menu`, below it. Opening, what the menu is about is lifted with it, above
 // a blurred `Backdrop`: a `Preview` of it (e.g. a photo to share), or the
-// trigger itself. Source: behavior after iOS (Figma: menus only, see
-// `Menu`).
+// trigger itself.
 //
 // The preview and the menu are one popup (its `Positioner`): a stack, its
 // preview's slot first, placed from the trigger's place (its top, aligned
@@ -55,14 +54,14 @@ export type {
 // than that, the menu scrolls; the preview takes at most what's left of
 // the room beside the menu (or, the menu taller, half of it).
 //
-// Deviations:
+// Also:
 // - Without a `Preview`, the live trigger is lifted onto the preview's slot
 //   (a translation, following it, and above the page by a `z-index`): in
 //   stacking contexts of its ancestors, it can't rise above the backdrop
 //   (there, give it a `Preview`).
 // - Opened as Base UI menus are (a press; on touch already on touch down,
 //   see `MenuTrigger`), not by a long press.
-// - The preview takes no pointer events (iOS: pressing it commits).
+// - The preview takes no pointer events.
 
 const ContextualMenuContext = createContext<ContextualMenuContextValue>({
   isOpen: false,
@@ -112,7 +111,7 @@ const Root = <Payload,>({
         open={isOpen}
         onOpenChange={(isNextOpen, details) => {
           // Released off the trigger (it lifted away under the pointer):
-          // open all the same, as iOS's stays open as the finger lifts.
+          // open all the same, staying open as the finger lifts.
           if (!isNextOpen && details.reason === 'cancel-open') {
             details.cancel();
             return;
@@ -282,7 +281,7 @@ const Portal = forwardRef<HTMLDivElement, ContextualMenuPortalProps>(
   ),
 );
 
-// iOS: the page blurred and dimmed behind the lifted trigger and the menu.
+// The page blurred and dimmed behind the lifted trigger and the menu.
 // (Registered: cut out where the lifted trigger is, see `Trigger`.)
 const Backdrop = forwardRef<
   HTMLDivElement,

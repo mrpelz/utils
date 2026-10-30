@@ -113,7 +113,7 @@ export const colorPickerPanelRows: readonly PropRow[] = [
   [
     'defaultSavedColors',
     'string[]',
-    'Figma’s',
+    'ten colors',
     'The initial saved colors (uncontrolled).',
   ],
   [
@@ -169,12 +169,7 @@ export const colorPickerWellRows: readonly PropRow[] = [
     undefined,
     'Its color (a hex string); without one, the hues only.',
   ],
-  [
-    'size',
-    union('small', 'large'),
-    code('small'),
-    'Figma’s sizes: 28px, or 36px.',
-  ],
+  ['size', union('small', 'large'), code('small'), 'Its sizes: 28px, or 36px.'],
   ...elementRows('button', 'HTMLButtonElement'),
 ];
 
@@ -218,7 +213,7 @@ export const defaultSavedColorsRows: readonly PropRow[] = [
     'string[]',
     undefined,
     <>
-      Figma’s saved colors (hex strings), the panel’s{' '}
+      The default saved colors (hex strings), the panel’s{' '}
       <code>defaultSavedColors</code> by default.
     </>,
   ],

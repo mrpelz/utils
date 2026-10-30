@@ -159,8 +159,7 @@
     margin-inline: calc(10px - var(--uikit-menu-inset));
   }
 
-  /* Figma “Item” (all but quick actions), its selection (Figma “Selection”):
-     a pill. */
+  /* An item (all but quick actions), its selection a pill. */
   .uikit-menu-item {
     &::before {
       position: absolute;
@@ -196,7 +195,7 @@
     }
 
     &[data-destructive]:not([data-disabled]) {
-      --uikit-glass-content: var(--color-ios-system-red);
+      --uikit-glass-content: var(--color-ui-system-red);
 
       mix-blend-mode: normal;
     }
@@ -276,8 +275,8 @@
     &[data-size='compact'] {
       --uikit-menu-inset: 8px;
       --uikit-menu-item-padding-block: 10px;
-      --uikit-menu-icon-size: var(--font-ios-body-size);
-      --uikit-menu-icon-line-height: var(--font-ios-body-line-height);
+      --uikit-menu-icon-size: var(--font-ui-body-size);
+      --uikit-menu-icon-line-height: var(--font-ui-body-line-height);
       --uikit-menu-label-size: 17px;
       --uikit-menu-label-line-height: 20px;
       --uikit-menu-label-letter-spacing: -0.43px;
@@ -297,8 +296,8 @@
     &[data-size='regular'] {
       --uikit-menu-inset: 8px;
       --uikit-menu-item-padding-block: 9px;
-      --uikit-menu-icon-size: var(--font-ios-subheadline-size);
-      --uikit-menu-icon-line-height: var(--font-ios-subheadline-line-height);
+      --uikit-menu-icon-size: var(--font-ui-subheadline-size);
+      --uikit-menu-icon-line-height: var(--font-ui-subheadline-line-height);
       --uikit-menu-label-size: 15px;
       --uikit-menu-label-line-height: 18px;
       --uikit-menu-label-letter-spacing: 0.2px;
@@ -326,7 +325,7 @@
       --uikit-menu-toggle-space: 28px;
     }
 
-    /* While a compact submenu covers it, all but its trigger fade (iOS),
+    /* While a compact submenu covers it, all but its trigger fade,
        neither hovered (highlighting one would close the submenu) nor
        pressed: a press there, on the popup, closes the submenu alone (see
        useSubmenuOutsidePress). */
@@ -408,7 +407,7 @@
     }
 
     &[data-destructive]:not([data-disabled]) {
-      --uikit-glass-content: var(--color-ios-system-red);
+      --uikit-glass-content: var(--color-ui-system-red);
 
       mix-blend-mode: normal;
     }

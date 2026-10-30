@@ -102,12 +102,12 @@ const favorites = names.filter((_, index) => index % 4 === 0);
 
 // Recent calls (as Phone's): name, kind, missed.
 const calls = [
-  ['Kate Bell', 'mobile', false],
-  ['Daniel Higgins', 'home', true],
-  ['Anna Haro', 'mobile', true],
-  ['John Appleseed', 'work', false],
-  ['Hank Zakroff', 'mobile', false],
-  ['David Taylor', 'mobile', true],
+  ['Kate Brown', 'mobile', false],
+  ['Daniel Hughes', 'home', true],
+  ['Anna Hall', 'mobile', true],
+  ['John Doe', 'work', false],
+  ['Hank Zimmer', 'mobile', false],
+  ['David Turner', 'mobile', true],
 ] as const;
 
 const logChange =
@@ -220,7 +220,7 @@ const InHeader: FunctionComponent = () => {
                           <List.Title
                             style={
                               isMissed
-                                ? { color: 'var(--color-ios-system-red)' }
+                                ? { color: 'var(--color-ui-system-red)' }
                                 : undefined
                             }
                           >

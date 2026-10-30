@@ -24,7 +24,7 @@ export const AvatarInformationArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Apple’s catalog: no page of its own (Figma “Activity Views”’ contacts;
+        Apple’s catalog: no page of its own (an activity view’s contacts;
         Contacts’, Messages’ pictures).
       </li>
       <li>
@@ -75,11 +75,8 @@ export const AvatarInformationArchitecture: FunctionComponent = () => (
       What the guide doesn’t cover
     </Heading>
     <ul>
-      <li>
-        The fallback’s look (iOS contacts’ gray, the initials): Figma has photos
-        only.
-      </li>
-      <li>A third person in a group (Figma: two).</li>
+      <li>The fallback’s look (a gray gradient, the initials).</li>
+      <li>A third person in a group.</li>
     </ul>
   </>
 );

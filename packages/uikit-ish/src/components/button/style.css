@@ -1,15 +1,13 @@
 /* Button (see main.tsx). */
 @layer uikit-ish {
   /*
-   * Source: Apple iOS 26 Figma (Button: Size, Style, Label Type, Enabled,
-   * Destructive; Button - Liquid Glass: Tinted, BG Context); see
-   * main.tsx. By its props as attributes: `data-fill`, `data-size`,
+   * See main.tsx. By its props as attributes: `data-fill`, `data-size`,
    * `data-variant`, `data-destructive`, `data-shape` (in that order: later
    * ones over earlier ones); `tint` and `textColor` as properties (inline).
    */
   .uikit-button-root {
     --uikit-utils-cursor: attr(cursor type(<custom-ident>), pointer);
-    --uikit-button-tint: var(--color-ios-primary);
+    --uikit-button-tint: var(--color-ui-primary);
     --uikit-button-background: transparent;
     --uikit-button-background-disabled: var(--uikit-button-background);
     --uikit-button-background-pressed: color-mix(
@@ -18,14 +16,14 @@
       var(--uikit-button-color) 15%
     );
     --uikit-button-color: var(--uikit-button-tint);
-    --uikit-button-color-disabled: var(--color-ios-tertiary-label);
+    --uikit-button-color-disabled: var(--color-ui-tertiary-label);
     --uikit-button-blend: normal;
     --uikit-button-radius: 1000px;
     --uikit-button-size: 34px;
-    --uikit-button-icon-font-size: var(--font-ios-subheadline-size);
+    --uikit-button-icon-font-size: var(--font-ui-subheadline-size);
     --uikit-button-font-weight: 400;
     --uikit-button-icon-font-weight: 400;
-    --uikit-button-icon-line-height: var(--font-ios-subheadline-line-height);
+    --uikit-button-icon-line-height: var(--font-ui-subheadline-line-height);
     --uikit-glass-outset: 0px;
 
     position: relative;
@@ -43,12 +41,12 @@
     background-color: var(--uikit-button-background);
     color: var(--uikit-button-color);
     font-family: inherit;
-    font-size: var(--font-ios-subheadline-size);
+    font-size: var(--font-ui-subheadline-size);
     font-variation-settings: 'wght' var(--uikit-button-font-weight);
     font-weight: round(down, var(--uikit-button-font-weight), 100);
     gap: 4px;
-    letter-spacing: var(--font-ios-subheadline-tracking);
-    line-height: var(--font-ios-subheadline-line-height);
+    letter-spacing: var(--font-ui-subheadline-tracking);
+    line-height: var(--font-ui-subheadline-line-height);
     text-align: center;
     text-decoration: none;
     text-transform: none;
@@ -71,13 +69,13 @@
 
     &[data-size='large'] {
       --uikit-button-size: 50px;
-      --uikit-button-icon-font-size: var(--font-ios-body-size);
-      --uikit-button-icon-line-height: var(--font-ios-body-line-height);
+      --uikit-button-icon-font-size: var(--font-ui-body-size);
+      --uikit-button-icon-line-height: var(--font-ui-body-line-height);
 
       padding: 14px 20px;
-      font-size: var(--font-ios-body-size);
-      letter-spacing: var(--font-ios-body-tracking);
-      line-height: var(--font-ios-body-line-height);
+      font-size: var(--font-ui-body-size);
+      letter-spacing: var(--font-ui-body-tracking);
+      line-height: var(--font-ui-body-line-height);
     }
 
     &[data-size='small'] {
@@ -89,13 +87,13 @@
 
     &[data-variant='bordered'],
     &[data-variant='bordered-secondary'] {
-      --uikit-button-background: var(--color-ios-tertiary-system-fill);
+      --uikit-button-background: var(--color-ui-tertiary-system-fill);
       --uikit-button-color: var(--uikit-button-tint);
-      --uikit-button-color-disabled: var(--color-ios-tertiary-label);
+      --uikit-button-color-disabled: var(--color-ui-tertiary-label);
     }
 
     &[data-variant='bordered-secondary'] {
-      --uikit-button-color: var(--color-ios-label);
+      --uikit-button-color: var(--color-ui-label);
     }
 
     &[data-variant='bordered'][data-destructive],
@@ -155,12 +153,12 @@
         box-shadow: 0 0 40px 15px
           color-mix(
             in srgb,
-            var(--uikit-glass-tint, var(--glass-ios-tint)) 75%,
+            var(--uikit-glass-tint, var(--glass-ui-tint)) 75%,
             transparent
           );
         content: '';
         opacity: var(--uikit-glass-pressed, 0);
-        transition-duration: var(--glass-ios-lens-duration);
+        transition-duration: var(--glass-ui-lens-duration);
       }
     }
 
@@ -196,11 +194,11 @@
       &:not([data-size]) {
         --uikit-button-icon-font-size: var(
           --uikit-button-plain-size,
-          var(--font-ios-subheadline-size)
+          var(--font-ui-subheadline-size)
         );
         --uikit-button-icon-line-height: var(
           --uikit-button-plain-line-height,
-          var(--font-ios-subheadline-line-height)
+          var(--font-ui-subheadline-line-height)
         );
         --uikit-button-icon-font-weight: var(
           --uikit-button-plain-symbol-weight,
@@ -217,16 +215,16 @@
 
         font-size: var(
           --uikit-button-plain-size,
-          var(--font-ios-subheadline-size)
+          var(--font-ui-subheadline-size)
         );
         gap: var(--uikit-button-plain-gap, 4px);
         letter-spacing: var(
           --uikit-button-plain-tracking,
-          var(--font-ios-subheadline-tracking)
+          var(--font-ui-subheadline-tracking)
         );
         line-height: var(
           --uikit-button-plain-line-height,
-          var(--font-ios-subheadline-line-height)
+          var(--font-ui-subheadline-line-height)
         );
         margin-inline-end: var(--uikit-button-plain-margin-end, 0);
         padding-inline: var(--uikit-button-plain-padding-inline, 14px);
@@ -267,8 +265,8 @@
 
     &:active:not([data-disabled], :disabled) {
       --uikit-glass-pressed: 1;
-      --uikit-glass-scale: var(--glass-ios-lens-scale);
-      --uikit-button-content-scale: var(--glass-ios-lens-content-scale);
+      --uikit-glass-scale: var(--glass-ui-lens-scale);
+      --uikit-button-content-scale: var(--glass-ui-lens-content-scale);
 
       background-color: var(--uikit-button-background-pressed);
     }
@@ -288,7 +286,7 @@
     gap: inherit;
     mix-blend-mode: var(--uikit-symbol-blend);
     scale: var(--uikit-symbol-scale);
-    transition-duration: var(--glass-ios-lens-duration);
+    transition-duration: var(--glass-ui-lens-duration);
     transition-property: scale;
 
     &:has(.uikit-symbol) {
@@ -298,7 +296,7 @@
       & > :not(:has(.uikit-symbol)) {
         mix-blend-mode: var(--uikit-symbol-blend);
         scale: var(--uikit-symbol-scale);
-        transition: scale var(--glass-ios-lens-duration);
+        transition: scale var(--glass-ui-lens-duration);
       }
     }
   }

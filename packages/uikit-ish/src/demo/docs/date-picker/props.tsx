@@ -16,9 +16,9 @@ import {
 
 // Highlights of some days, each in its own style and tint.
 const tintedHighlights = new Map<number, DayHighlight>([
-  [3, { tint: 'var(--color-ios-system-red)' }],
-  [14, { style: 'text', tint: 'var(--color-ios-system-orange)' }],
-  [25, { style: 'circle', tint: 'var(--color-ios-system-green)' }],
+  [3, { tint: 'var(--color-ui-system-red)' }],
+  [14, { style: 'text', tint: 'var(--color-ui-system-orange)' }],
+  [25, { style: 'circle', tint: 'var(--color-ui-system-green)' }],
 ]);
 
 // Several highlights on a day: dots side by side, with a text and a circle.
@@ -26,18 +26,18 @@ const severalHighlights = new Map<number, readonly DayHighlight[]>([
   [
     14,
     [
-      { tint: 'var(--color-ios-system-red)' },
-      { tint: 'var(--color-ios-system-blue)' },
-      { tint: 'var(--color-ios-system-green)' },
+      { tint: 'var(--color-ui-system-red)' },
+      { tint: 'var(--color-ui-system-blue)' },
+      { tint: 'var(--color-ui-system-green)' },
     ],
   ],
   [
     22,
     [
-      { tint: 'var(--color-ios-system-orange)' },
+      { tint: 'var(--color-ui-system-orange)' },
       {},
-      { style: 'text', tint: 'var(--color-ios-system-purple)' },
-      { style: 'circle', tint: 'var(--color-ios-system-teal)' },
+      { style: 'text', tint: 'var(--color-ui-system-purple)' },
+      { style: 'circle', tint: 'var(--color-ui-system-teal)' },
     ],
   ],
 ]);
@@ -110,7 +110,7 @@ export const propOptionsCalendar = {
     new MappedProp(
       (date: Date): DayHighlight | undefined =>
         date.getDate() >= 10 && date.getDate() <= 12
-          ? { style: 'text', tint: 'var(--color-ios-system-purple)' }
+          ? { style: 'text', tint: 'var(--color-ui-system-purple)' }
           : undefined,
       '[10th to 12th: purple text]',
     ),

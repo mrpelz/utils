@@ -31,7 +31,7 @@ const alert = (page) =>
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'alert: matches Figma (panel, fields, buttons side by side or stacked); its buttons close it',
+    name: 'alert: matches the spec (panel, fields, buttons side by side or stacked); its buttons close it',
     run: async (page) => {
       await page.open('alert', 'light', {
         state: [{ defaultOpen: true }, { actions: 'two', fields: true }],

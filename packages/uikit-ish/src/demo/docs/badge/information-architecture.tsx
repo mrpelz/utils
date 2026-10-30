@@ -103,14 +103,8 @@ export const BadgeInformationArchitecture: FunctionComponent = () => (
       <li>
         Its row in the trait matrix (none): an Indicator, attached to an item.
       </li>
-      <li>
-        A dot for a state without a count (Figma has none; Mail’s unread, as a
-        symbol).
-      </li>
-      <li>
-        Its sizes: Figma’s on an app icon (24px), Framework7’s on a symbol
-        (16px).
-      </li>
+      <li>A dot for a state without a count (e.g. an unread state).</li>
+      <li>Its sizes: on an element (24px), Framework7’s on a symbol (16px).</li>
     </ul>
   </>
 );

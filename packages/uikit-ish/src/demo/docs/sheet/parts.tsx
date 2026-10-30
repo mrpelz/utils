@@ -1398,14 +1398,13 @@ export const SheetParts: FunctionComponent = () => (
         (its container, the dimmed page, where it’s swiped).
       </li>
       <li>
-        <code>Sheet.SwipeArea</code>: an area a sheet is swiped open from (iOS’
+        <code>Sheet.SwipeArea</code>: an area a sheet is swiped open from (these
         sheets aren’t: presented by the app).
       </li>
       <li>
         <code>Sheet.Provider</code>, <code>Sheet.Indent</code>,{' '}
         <code>Sheet.IndentBackground</code>: the page behind scaled back while a
-        sheet is open (iOS’ stacked look; not used here, see the overview’s
-        deviations).
+        sheet is open (a stacked look; not used here, see the overview).
       </li>
       <li>
         <code>Sheet.VirtualKeyboardProvider</code>: a sheet with fields kept

@@ -1066,7 +1066,7 @@ export const ViewportComposition: FunctionComponent = () => (
       </li>
       <li>
         The keyboard covers the tab bar (<code>keyboard=&quot;cover&quot;</code>
-        ), as iOS’s.
+        ).
       </li>
       <li>
         The panels as pages, with headers: see the{' '}

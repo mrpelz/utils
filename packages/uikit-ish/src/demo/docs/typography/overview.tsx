@@ -56,14 +56,10 @@ export const TypographyOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Text in one of iOS’s text styles (UIKit <code>UIFont.TextStyle</code>
-        ): Large Title to Caption 2, each with its size, line height, weight and
-        tracking.
+        Text in one of the text styles: Large Title to Caption 2, each with its
+        size, line height, weight and tracking.
       </li>
-      <li>
-        Emphasized or italic, in a label color, at a Dynamic Type size (Figma
-        “Typography”).
-      </li>
+      <li>Emphasized or italic, in a label color, at a text size.</li>
     </ul>
     <LiveView />
 
@@ -78,9 +74,7 @@ export const TypographyOverview: FunctionComponent = () => (
         Text of your own (a heading, a paragraph, a caption) that should look
         like the components’ (they use the same styles’ tokens).
       </li>
-      <li>
-        A Dynamic Type size for a part of the page, its components included.
-      </li>
+      <li>A text size for a part of the page, its components included.</li>
     </ul>
 
     <Heading
@@ -142,12 +136,12 @@ export const TypographyOverview: FunctionComponent = () => (
         <code>{'render={<h2 />}'}</code>), as Large Title isn’t one.
       </li>
       <li>
-        Dynamic Type sizes are the app’s to set (e.g. from a setting): the
-        browser’s text size doesn’t change them.
+        Text sizes are the app’s to set (e.g. from a setting): the browser’s
+        text size doesn’t change them.
       </li>
       <li>
         The tertiary and quaternary label colors are for placeholders and
-        watermarks (UIKit’s): too faint for text to be read.
+        watermarks: too faint for text to be read.
       </li>
     </ul>
 
@@ -159,15 +153,15 @@ export const TypographyOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its style’s tokens (<code>--font-ios-*</code>): Body by default, at
-        Large (the default Dynamic Type size).
+        Its style’s tokens (<code>--font-ui-*</code>): Body by default, at Large
+        (the default text size).
       </li>
       <li>
-        Weights are variable (SF Pro’s): a symbol in it follows the weight (see{' '}
-        <a href="symbol">Symbol</a>).
+        Weights are variable (the system font’s): a symbol in it follows the
+        weight (see <a href="symbol">Symbol</a>).
       </li>
       <li>
-        Its color inherited unless set; its Dynamic Type size, for its text and
+        Its color inherited unless set; its text size, for its text and
         everything in it.
       </li>
     </ul>

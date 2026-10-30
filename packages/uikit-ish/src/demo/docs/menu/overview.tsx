@@ -47,7 +47,7 @@ const LiveView: FunctionComponent = () => {
     title: 'Menu.Root',
   });
 
-  // Its device by the size: a phone (compact), an iPad (regular).
+  // Its device by the size: a phone (compact), a tablet (regular).
   const stage = (props.size ?? sizeClass) === 'regular' ? 'tablet' : 'phone';
 
   return (
@@ -157,12 +157,12 @@ export const MenuOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Actions and choices behind a control, in a glass popup at it (UIKit{' '}
-        <code>UIMenu</code>; Base UI’s <code>Menu</code>).
+        Actions and choices behind a control, in a glass popup at it (Base UI’s{' '}
+        <code>Menu</code>).
       </li>
       <li>
-        The iPhone’s menu or the iPad’s (<code>size</code>): its items’ size,
-        where its submenus open.
+        A phone’s menu or a tablet’s (<code>size</code>): its items’ size, where
+        its submenus open.
       </li>
     </ul>
     <LiveView />
@@ -272,7 +272,7 @@ export const MenuOverview: FunctionComponent = () => (
     <ul>
       <li>
         On touch, it opens as the finger goes down: dragging on to an item and
-        lifting chooses it (as iOS’).
+        lifting chooses it.
       </li>
       <li>
         Compact: 40px items, submenus over their trigger; regular: 36px items,

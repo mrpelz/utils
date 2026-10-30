@@ -137,8 +137,8 @@ export const ButtonInformationArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its look: styles, sizes, shapes (Figma’s “Button”, “Button - Liquid
-        Glass”); and its hit region (HIG: 44×44pt).
+        Its look: styles, sizes, shapes (glass too); and its hit region
+        (44×44px).
       </li>
       <li>
         Navigation through a button: going somewhere is a Drill (a row, a link),

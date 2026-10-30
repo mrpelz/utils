@@ -216,7 +216,7 @@ const InASheetWithCancelDone: FunctionComponent = () => {
                         </List.Content>
                         <List.Trailing>
                           <DatePicker.Root
-                            defaultValue={new Date(2025, 3, 20, 9, 41)}
+                            defaultValue={new Date(2025, 3, 20, 10, 0)}
                             handle={starts}
                             mode="dateAndTime"
                           />

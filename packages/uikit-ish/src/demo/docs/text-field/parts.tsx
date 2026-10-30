@@ -151,9 +151,9 @@ const ControlPart: FunctionComponent = () => {
         </List.Section>
         {/* The suggestions of its `list` option. */}
         <datalist id={suggestionsId}>
-          <option value="Kate Bell" />
-          <option value="John Appleseed" />
-          <option value="Anna Haro" />
+          <option value="Kate Brown" />
+          <option value="John Doe" />
+          <option value="Anna Hall" />
         </datalist>
       </List.Root>
     </Component>
@@ -290,7 +290,7 @@ const ClearPart: FunctionComponent = () => {
                 <TextField.Label>Name</TextField.Label>
               </List.Content>
               <List.Trailing>
-                <TextField.Control defaultValue="Kate Bell" />
+                <TextField.Control defaultValue="Kate Brown" />
                 <TextField.Clear {...props} />
               </List.Trailing>
             </TextField.Root>
@@ -556,8 +556,8 @@ export const TextFieldParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A search field’s capsule (Figma “Search Field”): 36px high, on the
-        tertiary fill; a magnifier, the control, a clear button.
+        A search field’s capsule: 36px high, on the tertiary fill; a magnifier,
+        the control, a clear button.
       </li>
       <li>
         Pressed anywhere, it focuses its control; focused by keyboard, an

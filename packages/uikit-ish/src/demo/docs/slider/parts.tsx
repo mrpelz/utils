@@ -655,8 +655,7 @@ export const SliderParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Base UI’s track: the 6px bar, in a fill color (UIKit’s{' '}
-        <code>systemFill</code>).
+        Base UI’s track: the 6px bar, in a fill color (<code>systemFill</code>).
       </li>
       <li>Holds the fill, the ticks and the knobs.</li>
     </ul>
@@ -709,8 +708,8 @@ export const SliderParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Tick marks (iOS 26) inside the track, one per each of the{' '}
-        <code>count</code> values between the ends.
+        Tick marks inside the track, one per each of the <code>count</code>{' '}
+        values between the ends.
       </li>
       <li>
         Where the fill ends at them; match the root’s <code>step</code> to them.
@@ -729,8 +728,7 @@ export const SliderParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A symbol (or text) for an end (UIKit <code>minimumValueImage</code>,{' '}
-        <code>maximumValueImage</code>), by its <code>edge</code>.
+        A symbol (or text) for an end, by its <code>edge</code>.
       </li>
       <li>Clicking it moves the knob to that end.</li>
     </ul>

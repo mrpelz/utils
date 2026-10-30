@@ -374,9 +374,9 @@ export const SidebarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Figma “Toolbar - Top”: its buttons at its two ends, in Body, their
-        highlights 8px from the panel’s top and sides; 54px from the panel’s top
-        to what follows.
+        Its toolbar: its buttons at its two ends, in Body, their highlights 8px
+        from the panel’s top and sides; 54px from the panel’s top to what
+        follows.
       </li>
       <li>
         Renders a <code>div</code>.

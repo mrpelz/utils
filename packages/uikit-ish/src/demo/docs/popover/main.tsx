@@ -22,8 +22,7 @@ import {
 } from './props.js';
 
 /**
- * A popover (UIKit `UIPopoverPresentationController`, Figma “Popovers”, Base
- * UI's `Popover`): a panel at its trigger, its arrow pointing at it; in a
+ * A popover (Base UI's `Popover`): a panel at its trigger, its arrow pointing at it; in a
  * list row, aligned with its end.
  */
 export const PopoverDemo: FunctionComponent = () => {

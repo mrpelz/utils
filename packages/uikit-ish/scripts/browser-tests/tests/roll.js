@@ -48,7 +48,7 @@ const center = (page, index) =>
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'roll: rows and band (Framework7, UIKit metrics), centered selection',
+    name: 'roll: rows and band (Framework7 metrics), centered selection',
     run: async (page) => {
       await page.open('roll');
       const metrics = await page.evaluate(`(() => {

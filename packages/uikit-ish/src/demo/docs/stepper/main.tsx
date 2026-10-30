@@ -16,8 +16,8 @@ import {
 } from './props.js';
 
 /**
- * A stepper (UIKit `UIStepper`, a Base UI number field): its value is shown
- * next to it by the app, as UIKit's isn't.
+ * A stepper (a Base UI number field): its value is shown next to it by the
+ * app, as the stepper doesn't show it.
  */
 export const StepperDemo: FunctionComponent = () => {
   const id = 'stepper';

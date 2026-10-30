@@ -292,7 +292,7 @@ export const actionSheetActionRows: readonly PropRow[] = [
     'variant',
     union('secondary', 'destructive'),
     code(union('secondary')),
-    'Its kind (Figma “Type”): secondary (the label’s color), destructive (red, e.g. Delete). No primary: an action sheet has no preferred action.',
+    'Its kind: secondary (the label’s color), destructive (red, e.g. Delete). No primary: an action sheet has no preferred action.',
   ],
   [
     'children',

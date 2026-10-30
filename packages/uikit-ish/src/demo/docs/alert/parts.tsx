@@ -909,10 +909,7 @@ export const AlertParts: FunctionComponent = () => (
       <code>Alert.Header</code>
     </Heading>
     <ul>
-      <li>
-        Its title and description, at its start, 24px above what follows (Figma
-        “Title and Description”).
-      </li>
+      <li>Its title and description, at its start, 24px above what follows.</li>
       <li>
         Renders a <code>div</code>.
       </li>
@@ -967,8 +964,7 @@ export const AlertParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional: its text fields, between separators, 19px above its actions
-        (UIKit’s <code>addTextField</code>).
+        Optional: its text fields, between separators, 19px above its actions.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1011,8 +1007,8 @@ export const AlertParts: FunctionComponent = () => (
     <ul>
       <li>
         Its actions: two side by side, 16px apart; more than two stacked, 10px
-        apart (UIKit’s rule, by itself); <code>stacked</code> for two whose
-        labels don’t fit.
+        apart (by themselves); <code>stacked</code> for two whose labels don’t
+        fit.
       </li>
       <li>
         Renders a <code>div</code>.

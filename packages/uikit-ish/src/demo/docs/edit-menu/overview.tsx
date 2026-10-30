@@ -106,7 +106,7 @@ export const EditMenuOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         Actions on a selection (Cut, Copy, Paste, …) in a horizontal glass
-        capsule above it (UIKit <code>UIEditMenuInteraction</code>).
+        capsule above it.
       </li>
       <li>
         Opened by the app at an anchor: the selection (

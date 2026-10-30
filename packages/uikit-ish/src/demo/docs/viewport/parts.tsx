@@ -1202,7 +1202,7 @@ const GuardFields: FunctionComponent = () => (
       style={{ fontSize: 12 }}
     />
     <datalist id="viewport-demo-suggestions">
-      <option value="Cupertino" />
+      <option value="Portland" />
       <option value="San Francisco" />
       <option value="Zurich" />
     </datalist>
@@ -1801,7 +1801,7 @@ export const ViewportParts: FunctionComponent = () => (
       </li>
       <li>
         The content margin: the library’s gap between content and its
-        container’s edge (UIKit’s layout margins), 16px by its tokens (
+        container’s edge, 16px by its tokens (
         <code>--uikit-content-margin-block-start</code>, <code>-end</code>);
         none before a{' '}
         <PartLink
@@ -2041,7 +2041,7 @@ export const ViewportParts: FunctionComponent = () => (
           component="viewport"
           part="Viewport.Anchor"
         />
-        ) reaches beyond the bars to cover it too, as iOS’ does.
+        ) reaches beyond the bars to cover it too.
       </li>
       <li>
         Above the effect (a <code>z-index</code> over 9, the effect’s), so
@@ -2234,12 +2234,12 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The window’s horizontal size class (UIKit’s): <code>regular</code> from
-        768px, <code>compact</code> below; re-rendering as it changes.
+        The window’s horizontal size class: <code>regular</code> from 768px,{' '}
+        <code>compact</code> below; re-rendering as it changes.
       </li>
       <li>
         For presentations by size: e.g. a sheet on <code>compact</code> (a
-        phone), a popover on <code>regular</code> (an iPad), as{' '}
+        phone), a popover on <code>regular</code> (a tablet), as{' '}
         <PartLink
           component="sheet"
           part="Sheet.Popup"

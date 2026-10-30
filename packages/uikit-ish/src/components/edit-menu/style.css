@@ -156,7 +156,7 @@
     }
 
     &[data-destructive]:not([data-disabled]) {
-      --uikit-glass-content: var(--color-ios-system-red);
+      --uikit-glass-content: var(--color-ui-system-red);
 
       mix-blend-mode: normal;
     }

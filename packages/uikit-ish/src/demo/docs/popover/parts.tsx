@@ -1821,8 +1821,8 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional: a layer under the popup, over the page (unstyled: iOS doesn’t
-        dim the page for a popover). Outlined here, to see it.
+        Optional: a layer under the popup, over the page (unstyled: a popover
+        doesn’t dim the page). Outlined here, to see it.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1842,8 +1842,8 @@ export const PopoverParts: FunctionComponent = () => (
       <li>
         Places the popup at its trigger (or <code>anchor</code>): its{' '}
         <code>side</code> (below by default; logical), its <code>align</code>{' '}
-        (centered by default; in a <a href="list">List</a> row, iOS aligns it
-        with the row’s end: <code>end</code>).
+        (centered by default; in a <a href="list">List</a> row, aligned with the
+        row’s end: <code>end</code>).
       </li>
       <li>
         8px from it (with an arrow, the arrow’s tip) and from the screen’s
@@ -1869,9 +1869,8 @@ export const PopoverParts: FunctionComponent = () => (
         outline; scaling in from its trigger.
       </li>
       <li>
-        As wide as its content (here: 320px, the app’s, UIKit’s{' '}
-        <code>preferredContentSize</code>); at most as high as the room for it,
-        its{' '}
+        As wide as its content (here: 320px, the app’s); at most as high as the
+        room for it, its{' '}
         <PartLink
           component="popover"
           part="Popover.Body"
@@ -1894,9 +1893,9 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional: Figma’s arrow (a rounded wedge, 56px wide, 13px deep),
-        pointing at the trigger’s center from whichever side the popup ends up
-        on; the popup moves out by its depth.
+        Optional: an arrow (a rounded wedge, 56px wide, 13px deep), pointing at
+        the trigger’s center from whichever side the popup ends up on; the popup
+        moves out by its depth.
       </li>
       <li>
         Drawn by the popup (its outline); renders an empty <code>div</code>{' '}
@@ -1915,8 +1914,8 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional: its bar, as Figma’s (16px from the top, 10px above the
-        content): a <a href="toolbar">Toolbar</a> (
+        Optional: its bar (16px from the top, 10px above the content): a{' '}
+        <a href="toolbar">Toolbar</a> (
         <code>placement=&quot;block-start&quot;</code>), its title (
         <PartLink
           component="popover"

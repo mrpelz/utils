@@ -111,8 +111,8 @@ export const BadgeOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A count (or a word) in a red capsule, or a dot: something new to look at
-        (UIKit <code>badgeValue</code>, Figma “_Badge”).
+        A count (or a word) in a red capsule, or a dot: something new to look
+        at.
       </li>
       <li>
         On a symbol (a tab’s, a button’s), on an element’s corner (an avatar’s),

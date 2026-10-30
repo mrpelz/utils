@@ -1,4 +1,4 @@
-import { DynamicTypeSize, TextStyle } from '../../../components/index.js';
+import { TextSize, TextStyle } from '../../../components/index.js';
 import {
   commonPropOptions,
   MappedProp,
@@ -18,7 +18,7 @@ export const textStyles: [TextStyle, string][] = [
   ['caption2', 'Caption 2'],
 ];
 
-export const dynamicTypeSizes: DynamicTypeSize[] = [
+export const textSizes: TextSize[] = [
   'xSmall',
   'small',
   'medium',
@@ -46,7 +46,7 @@ export const propOptionsTypography = {
   emphasized: [undefined, false, true] as const,
   italic: [undefined, false, true] as const,
   color: [undefined, 'primary', 'secondary', 'tertiary', 'quaternary'] as const,
-  dynamicTypeSize: [undefined, ...dynamicTypeSizes] as const,
+  textSize: [undefined, ...textSizes] as const,
   render: [
     undefined,
     new MappedProp(<p />, '[<p />]'),
@@ -56,10 +56,7 @@ export const propOptionsTypography = {
 
 export const propOptionsMatrix = {
   color: ['primary', 'secondary', 'tertiary', 'quaternary'] as const,
-  dynamicTypeSize: [
-    'large',
-    ...dynamicTypeSizes.filter((size) => size !== 'large'),
-  ] as const,
+  textSize: ['large', ...textSizes.filter((size) => size !== 'large')] as const,
 };
 
 export const propOptionsSizes = {
@@ -77,8 +74,5 @@ export const propOptionsOverview = {
 
 /** The composition's: the size of a list's text, set around it. */
 export const propOptionsCompositionSize = {
-  dynamicTypeSize: [
-    'large',
-    ...dynamicTypeSizes.filter((size) => size !== 'large'),
-  ] as const,
+  textSize: ['large', ...textSizes.filter((size) => size !== 'large')] as const,
 };

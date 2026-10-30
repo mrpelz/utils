@@ -834,8 +834,8 @@ export const ToolbarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A glass capsule of several buttons (Figma “Button Group”), 6px in from
-        its ends (top: 4px), its buttons 12px apart.
+        A glass capsule of several buttons, 6px in from its ends (top: 4px), its
+        buttons 12px apart.
       </li>
       <li>
         Pressed, a glass lens (scaled by 1.05), the pressed button on the
@@ -953,7 +953,7 @@ export const ToolbarParts: FunctionComponent = () => (
         assistive technology), vertical in a horizontal bar.
       </li>
       <li>
-        No styles here (iOS’s bars separate by space): empty, as wide as styled.
+        No styles here (the bars separate by space): empty, as wide as styled.
       </li>
     </ul>
     <SeparatorPart />
@@ -996,7 +996,7 @@ export const ToolbarParts: FunctionComponent = () => (
         navigation (the arrow keys move within its text first).
       </li>
       <li>
-        No styles here: for iOS’s search field, a{' '}
+        No styles here: for a search field, a{' '}
         <a href="text-field">Text field</a>’s{' '}
         <PartLink
           component="text-field"

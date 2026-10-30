@@ -104,12 +104,9 @@ export const TooltipOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         A short label at a control, on hover and keyboard focus (Base UI’s{' '}
-        <code>Tooltip</code>; iOS has none: iPadOS’s pointer, macOS’s help
-        tags).
+        <code>Tooltip</code>; for pointers and keyboards).
       </li>
-      <li>
-        In iOS 26’s language: a capsule of the menus’ glass, above its control.
-      </li>
+      <li>A capsule of the menus’ glass, above its control.</li>
     </ul>
     <LiveView />
 

@@ -4,8 +4,8 @@ import type { PortalContainer } from '../utils/main.js';
 import type { ViewportAnchorHandle } from './padding.js';
 
 /**
- * The window's horizontal size class (UIKit's): `regular` from 768px (an
- * iPad's window, full or split), `compact` below (a phone's).
+ * The window's horizontal size class: `regular` from 768px (a tablet's
+ * window, full or split), `compact` below (a phone's).
  */
 export type SizeClass = 'compact' | 'regular';
 
@@ -86,7 +86,7 @@ export type ViewportEdge =
 export type ViewportSafeArea = 'all' | 'block' | 'inline' | 'none';
 
 /**
- * A bar's scroll edge effect (iOS 26's), as content scrolls under it:
+ * A bar's scroll edge effect, as content scrolls under it:
  * `soft`, a blur fading out away from the edge; `hard`, a solid backing
  * with a dividing line; `none`.
  */
@@ -143,7 +143,7 @@ export type ViewportOverscrollProps = ComponentProps<'div'> & {
    */
   edge?: 'block-end' | 'block-start';
   /**
-   * Kept shown at rest (UIKit's content inset), e.g. while refreshing: the
+   * Kept shown at rest, e.g. while refreshing: the
    * `Viewport.Padding` at its edge making room for it beyond the bars,
    * settling there (and back once closed).
    * @default false
@@ -188,7 +188,7 @@ export type ViewportPaddingProps = Omit<ComponentProps<'div'>, 'children'> & {
 
 export type ViewportContentProps = ComponentProps<'div'> & {
   /**
-   * Bouncing even when its content fits (UIKit's `alwaysBounceVertical`):
+   * Bouncing even when its content fits:
    * at least 1px to scroll, so a drag on it is its own (rubber-banding
    * here, the bars staying), not the document's (on iOS, moving the whole
    * app). Off: only content taller than it scrolls.

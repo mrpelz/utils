@@ -80,10 +80,10 @@
     }
 
     &[data-variant='plain'] {
-      --uikit-glass-content: var(--color-ios-label);
+      --uikit-glass-content: var(--color-ui-label);
       --uikit-glass-content-disabled: color-mix(
         in srgb,
-        var(--color-ios-label) 30%,
+        var(--color-ui-label) 30%,
         transparent
       );
       --uikit-glass-content-blend: normal;

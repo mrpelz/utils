@@ -413,8 +413,7 @@ export const HeaderParts: FunctionComponent = () => (
     <ul>
       <li>
         What stays with the bar (a search field, a segmented control): after the
-        large title, scrolling with it, then sticking below the bar (UIKit: a
-        search bar with <code>hidesSearchBarWhenScrolling</code> false).
+        large title, scrolling with it, then sticking below the bar.
       </li>
       <li>
         16px from the sides, 8px above the content; stuck, the bar’s edge effect

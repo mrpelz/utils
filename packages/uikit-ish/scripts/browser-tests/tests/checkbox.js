@@ -32,7 +32,7 @@ const circles = (page) =>
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'checkbox: a 22px selection circle (Figma “_Edit Buttons”): unselected in a gray border, selected in the tint with a checkmark, mixed with a dash; clicking toggles it',
+    name: 'checkbox: a 22px selection circle: unselected in a gray border, selected in the tint with a checkmark, mixed with a dash; clicking toggles it',
     run: async (page) => {
       await page.open('checkbox', 'light', {
         state: [{ $rest: true, onCheckedChange: mapped('[log change]') }],

@@ -12,6 +12,6 @@
 
 /* An element a tooltip is held open at (a map's pin). */
 .tooltip-demo-pin {
-  color: var(--color-ios-system-red);
+  color: var(--color-ui-system-red);
   font-size: 34px;
 }

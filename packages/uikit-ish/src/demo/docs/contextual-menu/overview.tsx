@@ -120,8 +120,7 @@ export const ContextualMenuOverview: FunctionComponent = () => (
       <li>
         Actions on a piece of content, summoned from it: the content lifts above
         the blurred page (or turns into a preview of itself), a{' '}
-        <a href="menu">Menu</a> below it (UIKit{' '}
-        <code>UIContextMenuInteraction</code>).
+        <a href="menu">Menu</a> below it.
       </li>
     </ul>
     <LiveView />

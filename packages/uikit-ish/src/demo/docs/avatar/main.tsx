@@ -12,7 +12,7 @@ import {
 } from './props.js';
 
 /**
- * An avatar (Figma “Activity Views”: “Contact”, Base UI's `Avatar`): a
+ * An avatar (Base UI's `Avatar`): a
  * person's photo, or their initials; several people in one circle; badged.
  */
 export const AvatarDemo: FunctionComponent = () => {

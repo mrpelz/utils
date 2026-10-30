@@ -313,7 +313,7 @@ export const alertActionsRows: readonly PropRow[] = [
     'stacked',
     'boolean',
     'with more than two actions',
-    'Its actions stacked, full width; otherwise side by side (two). UIKit stacks more than two itself, as this does; stack two whose labels don’t fit side by side.',
+    'Its actions stacked, full width; otherwise side by side (two). More than two stack by themselves; stack two whose labels don’t fit side by side.',
   ],
   [
     'children',
@@ -336,7 +336,7 @@ export const alertActionRows: readonly PropRow[] = [
     'variant',
     union('secondary', 'primary', 'destructive'),
     code(union('secondary')),
-    'Its kind (Figma “Type”): secondary (on a gray fill, e.g. Cancel), primary (in the tint, the default action), destructive (red text, e.g. Delete).',
+    'Its kind: secondary (on a gray fill, e.g. Cancel), primary (in the tint, the default action), destructive (red text, e.g. Delete).',
   ],
   [
     'children',

@@ -49,9 +49,9 @@ import {
 } from './props.js';
 
 /**
- * A sidebar (Figma “Sidebars”, iPadOS 26): a floating glass panel (a
+ * A sidebar: a floating glass panel (a
  * `Sidebar`, its list of style `sidebar`) in a `Layout`'s first column,
- * regular (an iPad): the layout's `floating` column over the others, the
+ * regular (a tablet): the layout's `floating` column over the others, the
  * content's column clear of it (`clearFloating`: its page's content inset,
  * its background running underneath).
  */
@@ -572,7 +572,7 @@ export const SidebarDemo: FunctionComponent = () => {
 };
 
 /**
- * The sidebar, compact (an iPhone): a drawer, swiped in from its edge (the
+ * The sidebar, compact (a phone): a drawer, swiped in from its edge (the
  * layout's), or opened by the content's button.
  */
 export const SidebarCompactDemo: FunctionComponent = () => {
@@ -1145,7 +1145,7 @@ export const SidebarCompactDemo: FunctionComponent = () => {
 };
 
 /**
- * The sidebar while editing (Figma “Edit Button”): its rows selected by
+ * The sidebar while editing: its rows selected by
  * selection circles before their symbols.
  */
 export const SidebarEditingDemo: FunctionComponent = () => {

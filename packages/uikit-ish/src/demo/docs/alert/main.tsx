@@ -10,8 +10,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { getPropOptionsRoot, propOptionsContent } from './props.js';
 
 /**
- * An alert (UIKit `UIAlertController`, Figma “Alerts”, Base UI's
- * `AlertDialog`): a title and description, optionally text fields, and its
+ * An alert (Base UI's `AlertDialog`): a title and description, optionally text fields, and its
  * buttons, side by side or stacked.
  */
 export const AlertDemo: FunctionComponent = () => {

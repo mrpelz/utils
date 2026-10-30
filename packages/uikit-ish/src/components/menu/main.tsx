@@ -52,52 +52,46 @@ export type {
   TriggerProps as MenuTriggerProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Menus”: “Menu - iPhone”, “Menu - iPad -
-// Actions (and Submenus)”, “Items - iPhone/iPad”, “Section Title”,
-// “Separator”, “Quick Action”, “_Shortcuts”, Mode=Light and Dark), with the
-// destructive color mapped to `systemRed`; the “Medium” glass material and
-// the vibrant content colors are tokens in `styles.css`, used via
-// `glass/main.tsx` (`glassMedium`).
+// Menus (compact and regular): items, section titles, separators, quick
+// actions and shortcuts, light and dark, with the destructive color mapped
+// to `systemRed`; the “Medium” glass material and the vibrant content
+// colors are tokens in `styles.css`, used via `glass/main.tsx`
+// (`glassMedium`).
 //
-// Menus close when their anchor or popup leaves the viewport (UIKit: when
-// the source view scrolls away); popups taller than the space beside their
-// trigger grow over it (see `useGrowAvoidance`), scrolling only taller than
-// the screen (Framework7 `popover.less`: `.popover-inner`).
+// Menus close when their anchor or popup leaves the viewport; popups taller
+// than the space beside their trigger grow over it (see
+// `useGrowAvoidance`), scrolling only taller than the screen (Framework7
+// `popover.less`: `.popover-inner`).
 //
 // Symbols are in the Body (compact) and Subheadline (regular) text styles;
-// Figma's labels, subtitles, section titles, shortcuts and quick action labels
-// differ from the text styles in line height or tracking, and are kept.
+// labels, subtitles, section titles, shortcuts and quick action labels
+// differ from the text styles in line height or tracking.
 //
-// Deviations:
-// - The root's `size` (UIKit size class) switches between the iPhone
-//   (`compact`) and the iPad (`regular`) menu, for all its popups:
+// Also:
+// - The root's `size` (a size class) switches between the phone
+//   (`compact`) and the tablet (`regular`) menu, for all its popups:
 //   - `compact`: 40px items with 17px labels; submenus open over their
 //     trigger (which stays visible, its chevron turned down; without room
-//     below it, covered), covering the items below it (Figma “Submenu
-//     Open”: chevron.down); a press outside one closes it alone. Items are inset
-//     8px from the popup's edge, as on iPad (Figma: 16px, but no highlighted
-//     items).
+//     below it, covered), covering the items below it; a press outside one
+//     closes it alone. Items are inset 8px from the popup's edge.
 //   - `regular`: 36px items with 15px labels; submenus open beside their
 //     trigger, which shows the selection while open.
-// - Popups are at least 238px wide (Figma: 238px).
+// - Popups are at least 238px wide.
 // - A checkmark column is reserved in all items of a popup containing
-//   checkbox or radio items (Figma “Menu has Toggles”).
+//   checkbox or radio items.
 // - Highlighted items and quick actions (pointer, keyboard) show the
-//   selection (Figma: one item or quick action, and the open submenu).
-// - The popup's corners are concentric with the item selections (pills,
-//   iOS 26 concentric shapes): the pill's radius plus the insets, 28px/30px
-//   (compact) and 26px/28px (regular) on the inline/block axes (Figma: 34px);
-//   quick actions 10px less (Figma: 20px).
+//   selection.
+// - The popup's corners are concentric with the item selections (pills):
+//   the pill's radius plus the insets, 28px/30px (compact) and 26px/28px
+//   (regular) on the inline/block axes; quick actions 10px less.
 // - While a compact submenu covers its parent, the parent's items but the
-//   trigger fade (as on iOS), and the submenu has no background of its own
-//   (it's on its parent's glass, whose background it would compound).
-// - Quick action symbols are 17px (compact) and 15px (regular), as rendered
-//   in the Figma PNG export (Figma CSS: 13px text in 22px and 19px boxes).
-// - The checkmark and chevrons are drawn as SVG strokes (Figma: SF Symbols
-//   glyphs 􀆅, 􀆊, 􀆈).
+//   trigger fade, and the submenu has no background of its own (it's on its
+//   parent's glass, whose background it would compound).
+// - Quick action symbols are 17px (compact) and 15px (regular).
+// - The checkmark and chevrons are drawn as SVG strokes.
 // - The popup is Framework7's popover glass (background, backdrop blur and
-//   glass effect, see `glassMedium`), not Figma's blended fills, and scales
-//   in and out as a Framework7 popover.
+//   glass effect, see `glassMedium`), and scales in and out as a Framework7
+//   popover.
 
 /** Shared by `Menu` and `EditMenu` (internal). */
 export const MenuContext = createContext<MenuContextValue>({
@@ -527,6 +521,28 @@ const keepTrustedMouse = (event: MouseEvent) => {
   event.stopPropagation();
 };
 
+/**
+ * How long (ms) a finger rests on a submenu's item before it opens (see
+ * `dragOverItems`): longer than Base UI's hover delay, so a submenu that
+ * opens on hover (regular) has by then.
+ */
+const submenuDwell = 300;
+
+/** A press's click (see `dragOverItems`). */
+const pressClick = (item: HTMLElement) => {
+  // (Not `click()`'s: Base UI takes a click without a click count for a
+  // screen reader's, highlighting a submenu's first item as it opens.)
+  item.dispatchEvent(
+    new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      detail: 1,
+      view: item.ownerDocument.defaultView,
+    }),
+  );
+};
+
 /** A menu's element scrolling its items (itself, unless it marks one). */
 const scrollerOf = (menu: HTMLElement) =>
   menu.querySelector<HTMLElement>('[data-menu-part=scroller]') ?? menu;
@@ -535,7 +551,8 @@ const scrollerOf = (menu: HTMLElement) =>
  * Drags a touch (`pointerId`) over menus' items, from `start` (if given, it
  * hovers the item there right away): the finger hovers the items as a mouse
  * would (see `hover`), so only the item under it is highlighted, and resting
- * on a submenu's item opens the submenu, to drag on into; released, the item
+ * on a submenu's item opens the submenu (by hover, or else pressed after
+ * `submenuDwell`), to drag on into; released, the item
  * there is clicked. Held near an end of a menu that scrolls (either way), the
  * finger scrolls it (as the tab bar's lens does). The touch's own clicks are
  * kept from the items (internal; Menu's trigger, EditMenu).
@@ -548,6 +565,9 @@ export const dragOverItems = (
   let item: HTMLElement | undefined;
   // The open submenu's item the touch began on, if any (see below).
   let openAtStart: HTMLElement | undefined;
+  // Resting on a submenu's item that hover doesn't open (compact): opening
+  // it (see `submenuDwell`).
+  let dwell: ReturnType<typeof setTimeout> | undefined;
   let isFirst = true;
   const types = ['pointermove', 'pointerup', 'pointercancel'] as const;
   // The touch's boundary events, kept from Base UI as its moves are.
@@ -586,7 +606,15 @@ export const dragOverItems = (
       hover(item, false, finger);
     }
     item = next;
-    if (item) hover(item, true, finger);
+    clearTimeout(dwell);
+    if (!item) return;
+    hover(item, true, finger);
+    if (isSubmenuTrigger(item) && !isExpanded(item)) {
+      const rested = item;
+      dwell = setTimeout(() => {
+        if (rested === item && !isExpanded(rested)) pressClick(rested);
+      }, submenuDwell);
+    }
   };
 
   const elapsedOf = frameElapsed();
@@ -652,6 +680,7 @@ export const dragOverItems = (
     }
 
     cancelAnimationFrame(frame);
+    clearTimeout(dwell);
     for (const type of [...types, ...boundaryTypes]) {
       document.removeEventListener(type, listener, { capture: true });
     }
@@ -679,18 +708,7 @@ export const dragOverItems = (
       item &&
       (!isSubmenuTrigger(item) || !isExpanded(item) || item === openAtStart)
     ) {
-      // (A press's click, not `click()`'s: Base UI takes a click without a
-      // click count for a screen reader's, highlighting a submenu's first
-      // item as it opens.)
-      item.dispatchEvent(
-        new MouseEvent('click', {
-          bubbles: true,
-          cancelable: true,
-          composed: true,
-          detail: 1,
-          view: item.ownerDocument.defaultView,
-        }),
-      );
+      pressClick(item);
     }
   };
 
@@ -737,7 +755,7 @@ let isOpeningBySecondaryClick = false;
 
 /**
  * Opens the menu as Base UI's trigger does, but on touch already on touch
- * down, as on iOS; dragging on, the item under the finger is highlighted
+ * down; dragging on, the item under the finger is highlighted
  * and chosen where it's released, as Base UI does for the mouse (pressing
  * the trigger, releasing on an item): the finger hovers the items as a
  * mouse would, so only the item under it is highlighted, and resting on a
@@ -809,7 +827,7 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
           if (isSecondary || event.defaultPrevented) return;
 
           // No emulated mouse events after the touch: Base UI opens and
-          // closes a menu on mouse down. Opens on touch down, as on iOS.
+          // closes a menu on mouse down. Opens on touch down.
           event.preventDefault();
           openByTrigger(event.currentTarget, event.pointerId);
         }}
@@ -829,7 +847,7 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
 /**
  * Closes the root menu when an open positioner's anchor (Base UI:
  * `data-anchor-hidden`) or the positioner itself leaves the viewport, as
- * UIKit menus close when their source view scrolls away (internal).
+ * Menus close when their source view scrolls away (internal).
  */
 export const useCloseOutOfView = (
   positionerRef: RefObject<HTMLDivElement | null>,
@@ -947,7 +965,7 @@ const Positioner = forwardRef<HTMLDivElement, MenuPositionerProps>(
 
 const highlightSelectors = ['[data-highlighted]', '[data-popup-open]'];
 
-/** The menu's glass popup (Figma “Liquid Glass - Medium”). */
+/** The menu's glass popup (the medium glass). */
 const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
   ({ className, children, ...props }, ref) => {
     const { size, submenu } = useContext(MenuContext);
@@ -999,7 +1017,7 @@ const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
   },
 );
 
-// Figma “Item”: [checkmark] [symbol] label/subtitle [shortcut | chevron]
+// An item: [checkmark] [symbol] label/subtitle [shortcut | chevron]
 // (see style.css).
 
 const Item = forwardRef<
@@ -1199,7 +1217,7 @@ const SubmenuTrigger = forwardRef<
         {...handlers}
         // Its submenu covers the parent's items (see `Popup`).
         data-submenu-overlay={isOverlay ? '' : undefined}
-        // Covering, pressed, not hovered, by default (an iPhone's menu: no
+        // Covering, pressed, not hovered, by default (a compact menu: no
         // hover; Base UI ignores clicks on a hover-opened one, so leaving it
         // would close it); otherwise Base UI's.
         openOnHover={openOnHover ?? (isOverlay ? false : undefined)}
@@ -1208,7 +1226,7 @@ const SubmenuTrigger = forwardRef<
         data-menu-part="item"
       >
         {children as ReactNode}
-        {/* Figma “Submenu” (􀆊 or, compact and open, 􀆈: 15px, 700). */}
+        {/* A chevron (right or, compact and open, down: 15px, 700). */}
         <span
           aria-hidden="true"
           className="uikit-menu-chevron"
@@ -1234,7 +1252,7 @@ const SubmenuTrigger = forwardRef<
 
 const Shortcut = forwardRef<HTMLElement, ComponentProps<'kbd'>>(
   ({ className, children, ...props }, ref) => (
-    // Figma “_Shortcuts”: modifier and key glyphs (e.g. “⌘A”), each centered in
+    // Shortcuts: modifier and key glyphs (e.g. “⌘A”), each centered in
     // a 14px cell, 1px apart.
     <kbd
       ref={ref}
@@ -1257,8 +1275,8 @@ const Shortcut = forwardRef<HTMLElement, ComponentProps<'kbd'>>(
   ),
 );
 
-// Figma “Separator”: a hairline, inset 8px; on iPad 16px high, 17px before
-// a section, 21px after quick actions (iPhone: 21px).
+// A separator: a hairline, inset 8px; regular, 16px high, 17px before a
+// section, 21px after quick actions (compact: 21px).
 const StyledSeparator = forwardRef<
   HTMLDivElement,
   Omit<ComponentProps<typeof BaseMenu.Separator>, 'ref'>
@@ -1273,7 +1291,7 @@ const StyledSeparator = forwardRef<
 
 const Separator = StyledSeparator;
 
-// Figma “Section Title”.
+// A section title.
 const GroupLabel = forwardRef<
   HTMLDivElement,
   Omit<ComponentProps<typeof BaseMenu.GroupLabel>, 'ref'>
@@ -1288,7 +1306,7 @@ const GroupLabel = forwardRef<
 
 const QuickActions = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
-    // Figma “Quick Actions”: a row of tiles, inset 10px from the popup's edge.
+    // Quick actions: a row of tiles, inset 10px from the popup's edge.
     <div
       ref={ref}
       data-menu-part="quick-actions"
@@ -1302,8 +1320,8 @@ const QuickAction = forwardRef<
   HTMLElement,
   Omit<BaseMenu.Item.Props, 'ref'> & ItemProps
 >(({ className, destructive, ...props }, ref) => (
-  // Figma “Quick Action”: a tile with a symbol above a label, and the
-  // selection (“BG”) while highlighted; concentric with the popup, 10px in.
+  // A quick action: a tile with a symbol above a label, and the
+  // selection while highlighted; concentric with the popup, 10px in.
   <BaseMenu.Item
     ref={ref}
     data-clickable={props.onClick ? '' : undefined}
@@ -1319,7 +1337,7 @@ const QuickAction = forwardRef<
 
 const Icon = forwardRef<HTMLSpanElement, SpanProps>(
   ({ className, ...props }, ref) => (
-    // Figma “Symbol”: 28px wide, hidden (with its gap) when absent.
+    // A symbol: 28px wide, hidden (with its gap) when absent.
     <span
       ref={ref}
       data-menu-part="icon"
@@ -1331,7 +1349,7 @@ const Icon = forwardRef<HTMLSpanElement, SpanProps>(
 
 const Label = forwardRef<HTMLSpanElement, SpanProps>(
   ({ className, ...props }, ref) => (
-    // Figma “Label and Subtitle”: the text is padded (10px or 9px), not the
+    // A label and subtitle: the text is padded (10px or 9px), not the
     // item, whose symbol is taller than the label.
     <span
       ref={ref}

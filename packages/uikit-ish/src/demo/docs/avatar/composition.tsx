@@ -44,9 +44,9 @@ const InListRows: FunctionComponent = () => {
               <List.Content>
                 <List.Title
                   render={<button type="button" />}
-                  onClick={() => addLog('Anna Haro clicked')}
+                  onClick={() => addLog('Anna Hall clicked')}
                 >
-                  Anna Haro
+                  Anna Hall
                 </List.Title>
               </List.Content>
             </List.Item>
@@ -61,9 +61,9 @@ const InListRows: FunctionComponent = () => {
               <List.Content>
                 <List.Title
                   render={<button type="button" />}
-                  onClick={() => addLog('Kate Bell clicked')}
+                  onClick={() => addLog('Kate Brown clicked')}
                 >
-                  Kate Bell
+                  Kate Brown
                 </List.Title>
               </List.Content>
             </List.Item>
@@ -108,7 +108,7 @@ const AConversation: FunctionComponent = () => (
             </List.Leading>
             <List.Content>
               <List.Title>Weekend Trip</List.Title>
-              <List.Subtitle>Anna Haro, Kate Bell</List.Subtitle>
+              <List.Subtitle>Anna Hall, Kate Brown</List.Subtitle>
             </List.Content>
           </List.Item>
         </List.Group>

@@ -222,11 +222,6 @@
     filter: drop-shadow(0 4px 10px rgb(0 0 0 / 15%));
   }
 
-  .demo-index-tagline {
-    color: var(--color-ios-secondary-label);
-    font-style: italic;
-  }
-
   /* A parts tree's levels around the component's (an app's: e.g. its
      viewport's content layer): greyed, the component's own parts within
      them in full. */

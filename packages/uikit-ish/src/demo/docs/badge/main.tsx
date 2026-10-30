@@ -24,7 +24,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { propOptionsContent, propOptionsRoot } from './props.js';
 
 /**
- * A badge (UIKit `badgeValue`, Figma “_Badge”): a count in a capsule (a
+ * A badge: a count in a capsule (a
  * circle for a digit), or a dot; on a symbol (a `Symbol`'s child: of a
  * button, of tabs), or inline (e.g. a list row's detail).
  */
@@ -32,7 +32,7 @@ export const BadgeDemo: FunctionComponent = () => {
   const id = 'badge';
 
   const [tab, setTab] = useState('favorites');
-  // Collapsed, the active tab and its group remain (as iOS's).
+  // Collapsed, the active tab and its group remain (`collapsedSelection`'s).
   const [phone, search] = collapsedSelection(
     [['favorites', 'recents', 'contacts'], ['search']],
     tab,

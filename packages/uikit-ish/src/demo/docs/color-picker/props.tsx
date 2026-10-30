@@ -110,7 +110,7 @@ export const propOptionsGuideWell = {
 };
 
 export const propOptionsContent = {
-  // In a popover (iPad), or a sheet (iPhone); by default, by the window's
+  // In a popover (regular), or a sheet (compact); by default, by the window's
   // size class (see Viewport's `useSizeClass`).
   container: [undefined, 'popover', 'sheet'] as const,
   defaultOpen: [false, true] as const,

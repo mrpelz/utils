@@ -766,8 +766,7 @@ export const TooltipParts: FunctionComponent = () => (
         ):
       </li>
       <li>
-        <code>Tooltip.Arrow</code>: not used (iOS 26’s glass capsules have
-        none).
+        <code>Tooltip.Arrow</code>: not used (these glass capsules have none).
       </li>
       <li>
         <code>Tooltip.Viewport</code>: around content that changes between
