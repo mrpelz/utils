@@ -181,7 +181,28 @@
     border-radius: inherit;
 
     [data-overflow='scroll'] > & {
+      --uikit-segmented-fade: to right;
+
       overflow: auto hidden;
+
+      /* Faded at the ends with more items beyond (as EditMenu's actions),
+         by its own scroll: the start's fade in over its first 16px, the
+         end's out over its last. Not scrolled (or without scroll
+         timelines), none. */
+      animation:
+        uikit-segmented-fade-start linear both,
+        uikit-segmented-fade-end linear both;
+      animation-range:
+        0 16px,
+        calc(100% - 16px) 100%;
+      animation-timeline: scroll(self inline);
+      mask-image: linear-gradient(
+        var(--uikit-segmented-fade),
+        transparent,
+        #000 var(--uikit-segmented-fade-start),
+        #000 calc(100% - var(--uikit-segmented-fade-end)),
+        transparent
+      );
       overscroll-behavior-inline: contain;
 
       /* (Snapped by their start, past the previous item's peek; scrolled to
@@ -195,6 +216,10 @@
 
       &::-webkit-scrollbar {
         display: none;
+      }
+
+      &:dir(rtl) {
+        --uikit-segmented-fade: to left;
       }
     }
 
@@ -489,4 +514,37 @@
       --uikit-segmented-active: 9;
     }
   }
+
+  @keyframes uikit-segmented-fade-start {
+    from {
+      --uikit-segmented-fade-start: 0px;
+    }
+
+    to {
+      --uikit-segmented-fade-start: 16px;
+    }
+  }
+
+  @keyframes uikit-segmented-fade-end {
+    from {
+      --uikit-segmented-fade-end: 16px;
+    }
+
+    to {
+      --uikit-segmented-fade-end: 0px;
+    }
+  }
+}
+
+/* (Lengths, so its fades animate; see the scroller.) */
+@property --uikit-segmented-fade-start {
+  inherits: false;
+  initial-value: 0;
+  syntax: '<length>';
+}
+
+@property --uikit-segmented-fade-end {
+  inherits: false;
+  initial-value: 0;
+  syntax: '<length>';
 }

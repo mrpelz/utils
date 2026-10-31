@@ -160,8 +160,9 @@ export const editMenuPopupRows: readonly PropRow[] = menuPopupRows.map(
               component="edit-menu"
               part="EditMenu.More"
             />{' '}
-            button, last; too many for its width, the actions scroll (by touch
-            drags, the wheel), faded at the ends with more beyond.
+            button, last; too many for its width, the actions scroll (a swipe, a
+            touch held and dragged to an end, the wheel), snapping with a peek
+            of those beyond, faded at the ends.
           </>,
         ]
       : row,

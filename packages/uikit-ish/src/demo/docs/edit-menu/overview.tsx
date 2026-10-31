@@ -208,8 +208,10 @@ export const EditMenuOverview: FunctionComponent = () => (
         closes the menu.
       </li>
       <li>
-        Too many actions for its width: they scroll, faded at the ends; touch
-        drags highlight the action under the finger, lifting chooses it.
+        Too many actions for its width: they scroll, faded at the ends, resting
+        on an action with a peek of those beyond. A swipe pans them; a touch
+        held, then dragged, highlights the action under the finger, lifting
+        chooses it.
       </li>
       <li>
         It keeps the selection while it has focus, and closes once its anchor

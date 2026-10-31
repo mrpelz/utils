@@ -443,7 +443,8 @@ export const EditMenuComposition: FunctionComponent = () => (
     <ul>
       <li>
         More actions than the screen is wide: they scroll in the capsule, faded
-        at the ends with more beyond (drag them by touch, or scroll).
+        at the ends with more beyond, a peek of them showing (swipe them, drag
+        over them held, or scroll).
       </li>
       <li>
         Or fewer, the rest behind the “more” button (

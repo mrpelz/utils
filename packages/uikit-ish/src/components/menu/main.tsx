@@ -507,6 +507,179 @@ const pixels = (value: string) => Number.parseFloat(value) || 0;
 // How far (px) a finger moves before it's dragging (see `dragOverItems`).
 const dragSlop = 10;
 
+// Panning a scroller (see `dragOverItems`' `pan`): how soon (ms) and how far
+// (px) a finger moves to pan instead of dragging over its items (as the
+// segmented control's lens and scroll; see `Segmented`), how fast a fling
+// slows (per ms, as UIKit's normal deceleration), and how recent (ms) the
+// moves its speed is taken from.
+const panDelay = 120;
+const panSlop = 8;
+const flingDecay = 0.998;
+const flingWindow = 100;
+
+// Marks a scroller scrolled by a drag (panned, flung, or near its ends):
+// not snapped (back) each frame, until settled (see `settle`).
+const unsnappedAttribute = 'data-unsnapped';
+
+// Scrollers settling, their frames (a touch stops them, see
+// `dragOverItems`).
+const settling = new Map<HTMLElement, number>();
+
+// How long (ms) a scroller settles (see `settle`): at most, at least, and
+// unflung; and how much of a scroll padding (its peek) a hint shows at least.
+const settleLongest = 900;
+const settleShortest = 200;
+const settleUnflung = 300;
+const hintShare = 0.75;
+
+/**
+ * Where a sideways scroller rests nearest to `natural` (a `scrollLeft`): its
+ * snap positions (its children's starts, beside its scroll padding; its
+ * ends), those hinting at the items beyond its ends first (a peek of them,
+ * most of its scroll padding wide); as a `scrollLeft`.
+ */
+const restingPosition = (scroller: HTMLElement, natural: number) => {
+  const style = getComputedStyle(scroller);
+  const isRtl = style.direction === 'rtl';
+  const sign = isRtl ? -1 : 1;
+  const shown = scroller.getBoundingClientRect();
+  const width = scroller.clientWidth;
+  const max = scroller.scrollWidth - width;
+  // (Logical: from its start, RTL too.)
+  const scrolled = Math.abs(scroller.scrollLeft);
+  const left = pixels(style.scrollPaddingLeft);
+  const right = pixels(style.scrollPaddingRight);
+  const [paddingStart, paddingEnd] = isRtl ? [right, left] : [left, right];
+  const items = [...scroller.children]
+    .filter((child) => getComputedStyle(child).scrollSnapAlign === 'start')
+    .map((child) => {
+      const rect = child.getBoundingClientRect();
+      const start =
+        scrolled + (isRtl ? shown.right - rect.right : rect.left - shown.left);
+      return { end: start + rect.width, start };
+    });
+  const clamp = (at: number) => Math.min(max, Math.max(0, at));
+  if (items.length === 0) return sign * clamp(sign * natural);
+
+  // How much of the item across an edge shows (none across it: none).
+  const crossing = (edge: number) =>
+    items.find((item) => item.start < edge && item.end > edge);
+  const isHinting = (at: number) => {
+    const before = crossing(at);
+    const after = crossing(at + width);
+    return (
+      (at < 0.5 ||
+        (before !== undefined &&
+          before.end - at >= paddingStart * hintShare)) &&
+      (at > max - 0.5 ||
+        (after !== undefined &&
+          at + width - after.start >= paddingEnd * hintShare))
+    );
+  };
+
+  // (Its ends always: as far as it goes.)
+  const snaps = [
+    0,
+    max,
+    ...items.map(({ start }) => start - paddingStart),
+  ].filter((at) => at >= 0 && at <= max);
+  const hinting = snaps.filter(
+    (at) => at < 0.5 || at > max - 0.5 || isHinting(at),
+  );
+  const target = clamp(sign * natural);
+  let nearest: number | undefined;
+  for (const at of hinting.length > 0 ? hinting : snaps) {
+    if (
+      nearest === undefined ||
+      Math.abs(at - target) < Math.abs(nearest - target)
+    ) {
+      nearest = at;
+    }
+  }
+
+  return sign * (nearest ?? target);
+};
+
+/**
+ * Scrolls a sideways scroller on (`velocity`, px per ms, as its
+ * `scrollLeft`), to rest where it'd stop flung (see `restingPosition`),
+ * easing out from that speed (within `settleShortest` and `settleLongest`);
+ * then it snaps again.
+ */
+const settle = (scroller: HTMLElement, velocity = 0) => {
+  const from = scroller.scrollLeft;
+  const rate = -Math.log(flingDecay);
+  const distance = restingPosition(scroller, from + velocity / rate) - from;
+  // (An ease-out cubic starts at three times its average speed.)
+  const isFlung = velocity !== 0 && Math.sign(velocity) === Math.sign(distance);
+  const duration = isFlung
+    ? Math.min(
+        settleLongest,
+        Math.max(settleShortest, (3 * Math.abs(distance)) / Math.abs(velocity)),
+      )
+    : settleUnflung;
+  let startedAt: number | undefined;
+
+  const step = (time: number) => {
+    startedAt ??= time;
+    const progress = Math.min(1, (time - startedAt) / duration);
+    scroller.scrollLeft = from + distance * (1 - (1 - progress) ** 3);
+    if (progress < 1) {
+      settling.set(scroller, requestAnimationFrame(step));
+      return;
+    }
+    settling.delete(scroller);
+    scroller.removeAttribute(unsnappedAttribute);
+  };
+  scroller.setAttribute(unsnappedAttribute, '');
+  settling.set(scroller, requestAnimationFrame(step));
+};
+
+/**
+ * A touch in a sideways scroller, from `start`: moving sideways first (past
+ * `panSlop`, within `panDelay`), it pans it (`track`: `start` as it begins,
+ * `pan` after), unless held or moved otherwise first (`undefined`). Its
+ * speed (px per ms, as its `scrollLeft`), from its recent moves.
+ */
+const createPan = (scroller: HTMLElement, start: { x: number; y: number }) => {
+  const startedAt = performance.now();
+  let isPannable = true;
+  let from: { scrollLeft: number; x: number } | undefined;
+  let moves: { time: number; x: number }[] = [];
+
+  const track = (x: number, y: number, time: number) => {
+    if (from) {
+      scroller.scrollLeft = from.scrollLeft - (x - from.x);
+      moves = [...moves, { time, x }];
+      return 'pan' as const;
+    }
+    if (!isPannable) return undefined;
+    if (time - startedAt > panDelay) {
+      isPannable = false;
+      return undefined;
+    }
+    if (Math.hypot(x - start.x, y - start.y) <= panSlop) return undefined;
+
+    isPannable = false;
+    if (Math.abs(x - start.x) < Math.abs(y - start.y)) return undefined;
+    scroller.setAttribute(unsnappedAttribute, '');
+    from = { scrollLeft: scroller.scrollLeft, x };
+    moves = [{ time, x }];
+    return 'start' as const;
+  };
+
+  const velocity = (time: number) => {
+    const recent = moves.filter((move) => time - move.time <= flingWindow);
+    const [first] = recent;
+    const last = recent.at(-1);
+    return first && last && last.time > first.time
+      ? -(last.x - first.x) / (last.time - first.time)
+      : 0;
+  };
+
+  return { isPanning: () => from !== undefined, track, velocity };
+};
+
 // Keeps a touch from scrolling (dragging over menus).
 const keepScroll = (event: TouchEvent) => {
   if (event.cancelable) event.preventDefault();
@@ -561,13 +734,18 @@ const scrollerOf = (menu: HTMLElement) =>
  * kept from the items (internal; Menu's trigger, EditMenu). Released outside
  * every menu after dragging (moved past `dragSlop`, or over a menu), it calls
  * `onReleaseOutside` (e.g. closing the menu, as Base UI does for a mouse
- * pressed on the trigger and released elsewhere).
+ * pressed on the trigger and released elsewhere). Begun in `pan` (a
+ * scroller, sideways, overflowing; e.g. EditMenu's actions), a finger moving
+ * sideways first (past `panSlop`, within `panDelay`) pans it instead,
+ * flung on release, nothing chosen (its touches don't scroll natively, see
+ * EditMenu).
  */
 export const dragOverItems = (
   document: Document,
   pointerId: number,
   start?: { x: number; y: number },
   onReleaseOutside?: (x: number, y: number) => void,
+  pan?: HTMLElement,
 ): void => {
   let item: HTMLElement | undefined;
   // The open submenu's item the touch began on, if any (see below).
@@ -590,6 +768,17 @@ export const dragOverItems = (
   let hasDragged = false;
   // The menu the finger was last over, which it scrolls beyond its ends.
   let menu: HTMLElement | undefined;
+  // Panning `pan` (see `createPan`), and the scrollers the drag scrolled
+  // sideways (each settled as it ends; those settling stopped, too).
+  const panning =
+    start && pan && pan.scrollWidth > pan.clientWidth
+      ? createPan(pan, start)
+      : undefined;
+  const scrolled = new Set(settling.keys());
+  for (const [scroller, frame] of settling) {
+    cancelAnimationFrame(frame);
+    settling.delete(scroller);
+  }
   document.documentElement.setAttribute(draggingAttribute, '');
   // No scrolling while dragging (e.g. from a trigger held: see `Trigger`).
   document.addEventListener('touchmove', keepScroll, {
@@ -635,20 +824,31 @@ export const dragOverItems = (
   let frame = requestAnimationFrame(function scroll(time) {
     frame = requestAnimationFrame(scroll);
     const elapsed = elapsedOf(time);
-    if (!finger || !menu?.isConnected) return;
+    if (!finger || panning?.isPanning() || !menu?.isConnected) return;
 
-    // Its ends are inside its scroll padding (e.g. EditMenu's “more”).
+    // Its ends are inside its scroll padding (e.g. EditMenu's peeks: held
+    // over the actions peeking beyond them).
     const scroller = scrollerOf(menu);
     const { bottom, left, right, top } = scroller.getBoundingClientRect();
     const style = getComputedStyle(scroller);
     const { scrollLeft, scrollTop } = scroller;
     if (scroller.scrollWidth > scroller.clientWidth) {
-      scroller.scrollLeft += edgeScrollDelta(
+      const delta = edgeScrollDelta(
         finger.x,
         left + pixels(style.scrollPaddingLeft),
         right - pixels(style.scrollPaddingRight),
         elapsed,
       );
+      if (delta !== 0) {
+        const before = scroller.scrollLeft;
+        scroller.setAttribute(unsnappedAttribute, '');
+        scroller.scrollLeft += delta;
+        // (Already at that end: not scrolled, nothing to settle.)
+        if (scroller.scrollLeft !== before) scrolled.add(scroller);
+        else if (!scrolled.has(scroller)) {
+          scroller.removeAttribute(unsnappedAttribute);
+        }
+      }
     }
     if (scroller.scrollHeight > scroller.clientHeight) {
       scroller.scrollTop += edgeScrollDelta(
@@ -670,6 +870,7 @@ export const dragOverItems = (
   // Released: the item there clicked; dragged out of the menus and released
   // there, nothing chosen.
   const release = ({ clientX: x, clientY: y }: globalThis.PointerEvent) => {
+    if (panning?.isPanning()) return;
     if (!item) {
       if (hasDragged && !menuAt(x, y)) onReleaseOutside?.(x, y);
       return;
@@ -680,6 +881,25 @@ export const dragOverItems = (
     // closes (see `SubmenuTrigger`).
     if (!isSubmenuTrigger(item) || !isExpanded(item) || item === openAtStart) {
       pressClick(item);
+    }
+  };
+
+  // Panning (see `createPan`): its items no longer hovered.
+  const panTo = (x: number, y: number, time: number) => {
+    const panned = panning?.track(x, y, time);
+    if (panned === 'start') {
+      clearTimeout(dwell);
+      if (item && finger) hover(item, false, finger);
+      item = undefined;
+    }
+    return panned !== undefined;
+  };
+
+  // The scrollers it scrolled come to rest, snapping again (panned: flung).
+  const rest = (time: number) => {
+    if (pan && panning?.isPanning()) scrolled.add(pan);
+    for (const scroller of scrolled) {
+      settle(scroller, scroller === pan ? panning?.velocity(time) : 0);
     }
   };
 
@@ -698,6 +918,7 @@ export const dragOverItems = (
 
       const x = pointerEvent.clientX;
       const y = pointerEvent.clientY;
+      if (panTo(x, y, pointerEvent.timeStamp)) return;
       finger = {
         // At least a pixel, also when only scrolling moves the items.
         movementX: x - (finger?.x ?? x) || 1,
@@ -716,6 +937,7 @@ export const dragOverItems = (
     }
     document.documentElement.removeAttribute(draggingAttribute);
     document.removeEventListener('touchmove', keepScroll, { capture: true });
+    rest(pointerEvent.timeStamp);
     if (pointerEvent.type !== 'pointerup') return;
 
     // The touch's own click (on the element touched, if released there) is

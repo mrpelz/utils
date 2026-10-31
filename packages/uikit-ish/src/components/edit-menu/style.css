@@ -44,6 +44,10 @@
     --uikit-edit-menu-fade-end: 0px;
     --uikit-edit-menu-more: 0px;
 
+    /* Overflowing: how much of the actions beyond its ends shows, hinting
+       at them (their padding, then their labels, under the fades). */
+    --uikit-edit-menu-peek: 40px;
+
     display: flex;
     min-width: 0;
     flex: 1 1 auto;
@@ -90,6 +94,16 @@
 
     [data-overflowing] > & {
       overflow: auto hidden;
+
+      /* Snapped by their start, past the previous action's peek; shown by
+         focus, a peek of the next beside it, too. Scrolled by a drag (or
+         settling after it), unsnapped (see Menu's dragOverItems). */
+      scroll-padding-inline: var(--uikit-edit-menu-peek);
+      scroll-snap-type: x proximity;
+    }
+
+    [data-overflowing] > &[data-unsnapped] {
+      scroll-snap-type: none;
     }
   }
 
@@ -109,6 +123,9 @@
     line-height: 18px;
     mix-blend-mode: var(--uikit-glass-content-blend);
     outline: none;
+
+    /* (Snapped by, overflowing: see the scroller.) */
+    scroll-snap-align: start;
     white-space: nowrap;
 
     &::before {

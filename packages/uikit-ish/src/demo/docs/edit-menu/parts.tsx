@@ -794,9 +794,10 @@ export const EditMenuParts: FunctionComponent = () => (
         at its end.
       </li>
       <li>
-        Too many actions: they scroll (touch drags highlight the one under the
-        finger, held near an end scrolling on), faded at the ends with more
-        beyond.
+        Too many actions: they scroll (a swipe pans them, flung on release;
+        held, then dragged, a touch highlights the one under the finger, held
+        near an end scrolling on), faded at the ends with more beyond. They rest
+        on an action, a peek of those beyond each end showing.
       </li>
       <li>Keeps the selection while it has focus (WebKit would clear it).</li>
     </ul>
