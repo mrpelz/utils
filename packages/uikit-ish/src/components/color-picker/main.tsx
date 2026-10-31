@@ -322,6 +322,8 @@ const Modes = forwardRef<HTMLDivElement, ColorPickerModesProps>(
       <Segmented.Root
         ref={ref}
         aria-label="Mode"
+        // (Its modes, however many, scrolled when they don't fit.)
+        overflow="scroll"
         {...props}
         value={mode}
         onValueChange={(next, details) => setMode(String(next), details)}

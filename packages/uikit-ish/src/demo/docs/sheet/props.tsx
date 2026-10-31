@@ -57,7 +57,7 @@ export const getPropOptionsGuideRoot = (addLog: AddLog) => ({
   open: [undefined, false, true] as const,
   modal: [undefined, false, 'trap-focus'] as const,
   disablePointerDismissal: [undefined, false, true] as const,
-  swipeDirection: [undefined, 'down', 'up', 'left', 'right'] as const,
+  swipeDirection: [undefined, 'down', 'up', 'left', 'right', 'none'] as const,
   snapPoints: [undefined, [0.5, 1] as number[]] as const,
   defaultSnapPoint: [undefined, 0.5, 1] as const,
   snapPoint: [undefined, 0.5, 1] as const,

@@ -4,6 +4,25 @@ import type { ComponentProps } from 'react';
 
 export type SheetDetent = 'large' | 'medium';
 
+/**
+ * The direction a sheet is swiped away in (Base UI's `Drawer`'s), or
+ * `none`: not swiped away at all.
+ */
+export type SheetSwipeDirection = 'down' | 'left' | 'none' | 'right' | 'up';
+
+export type SheetRootProps<Payload = unknown> = Omit<
+  BaseDrawer.Root.Props<Payload>,
+  'swipeDirection'
+> & {
+  /**
+   * The direction it's swiped away in (also its exit then: following the
+   * flick, out through that edge), or `none`: not swiped away (closed by
+   * a press outside it, Escape, or its close button only).
+   * @default 'down'
+   */
+  swipeDirection?: SheetSwipeDirection;
+};
+
 export type SheetPopupProps = Omit<BaseDrawer.Popup.Props, 'ref'> & {
   /**
    * Its background (as a page's, see `Page.Root`): `grouped` for grouped

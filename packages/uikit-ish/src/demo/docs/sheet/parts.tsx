@@ -1127,6 +1127,12 @@ export const SheetParts: FunctionComponent = () => (
         Its state: open (<code>open</code> or <code>defaultOpen</code>,{' '}
         <code>onOpenChange</code>), modal, dismissed by outside presses or not.
       </li>
+      <li>
+        Base UI’s <code>Drawer.Root</code>, its <code>swipeDirection</code> also{' '}
+        <code>none</code>: not swiped away at all (its popup ignored by its
+        swipes). Swiped away in another direction than down, it leaves through
+        that edge.
+      </li>
       <li>Renders no element.</li>
     </ul>
     <RootPart />
@@ -1249,8 +1255,8 @@ export const SheetParts: FunctionComponent = () => (
       </li>
       <li>
         Its end scrolls clear of the home indicator (padded by the bottom safe
-        area inset; medium, 6px from the screen’s edge, what’s left of it), the
-        sheet’s background reaching the edge.
+        area inset; medium, on it, none), the sheet’s background reaching the
+        edge.
       </li>
       <li>
         Renders a <code>div</code>.

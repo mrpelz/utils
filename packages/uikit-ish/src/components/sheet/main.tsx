@@ -2,7 +2,14 @@ import '../glass/style.css';
 import './style.css';
 
 import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
-import { ComponentProps, forwardRef, ReactNode, useState } from 'react';
+import {
+  ComponentProps,
+  createContext,
+  forwardRef,
+  ReactNode,
+  useContext,
+  useState,
+} from 'react';
 
 import { cn, useForwardedRef, usePortalContainer } from '../utils/main.js';
 import {
@@ -16,6 +23,7 @@ import type {
   SheetGrabberProps,
   SheetHandle,
   SheetPopupProps,
+  SheetRootProps,
 } from './props.js';
 
 export type {
@@ -24,14 +32,17 @@ export type {
   SheetGrabberProps,
   SheetHandle,
   SheetPopupProps,
+  SheetRootProps,
+  SheetSwipeDirection,
 } from './props.js';
 
 // Sheets, over the page dimmed (black, 20%; dark: 48%):
 // - large: opaque (elevated background:
 //   white; dark: #1c1c1e), from 10px below the top to the bottom, its top
 //   corners 38px, its shadow 0 15px 75px at 18%;
-// - medium: glass, 6px from the sides and the
-//   bottom, as high as its content, its corners 34px;
+// - medium: glass, 6px from the sides, on the bottom safe area (the home
+//   indicator below it; without one, 6px from the bottom), as high as its
+//   content, its corners 34px;
 // - in a regular width (the window from 768px, or not `compact`), a form
 //   sheet: opaque, centered, up to 936px by 852px, its
 //   corners 38px.
@@ -53,6 +64,25 @@ export type {
 // the elevated backgrounds (dark mode: #1c1c1e, groups #2c2c2e), as
 // tokens for all its content (e.g. a navigation's pages).
 
+/** Its root's `swipeDirection`: `none`, not swiped away at all. */
+const NoSwipeContext = createContext(false);
+
+/**
+ * Base UI's `Drawer.Root`, its `swipeDirection` also `none`: its popup
+ * then ignored by its swipes (Base UI's swipe ignore, see `Popup`).
+ */
+const Root = <Payload,>({
+  swipeDirection,
+  ...props
+}: SheetRootProps<Payload>): ReactNode => (
+  <NoSwipeContext.Provider value={swipeDirection === 'none'}>
+    <BaseDrawer.Root
+      swipeDirection={swipeDirection === 'none' ? undefined : swipeDirection}
+      {...props}
+    />
+  </NoSwipeContext.Provider>
+);
+
 /** The sheet, the page dimmed behind it. */
 const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
   (
@@ -68,6 +98,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
   ) => {
     // (By the window's size class, see Viewport.)
     const sizeClass = useSizeClass();
+    const isNotSwiped = useContext(NoSwipeContext);
     const isCompact = compactProp ?? sizeClass === 'compact';
     // Its anchors' scope: fixed to it (see Viewport.Padding).
     const [scope] = useState(() => ({}));
@@ -91,6 +122,8 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
             <BaseDrawer.Popup
               ref={ref}
               data-background={background}
+              // (Not swiped away: none of its swipes start, see `Root`.)
+              data-base-ui-swipe-ignore={isNotSwiped ? '' : undefined}
               data-compact={isCompact ? '' : undefined}
               data-detent={detent}
               data-sheet-part="popup"
@@ -190,6 +223,7 @@ export const useCreateSheetHandle = <
  */
 export const Sheet = {
   ...BaseDrawer,
+  Root,
   Popup,
   Header,
   Grabber,

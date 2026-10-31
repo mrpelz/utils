@@ -16,8 +16,6 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { AddLog, useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
-import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -26,32 +24,20 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfEllipsis, sfLocationFill } from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
-import { names } from '../viewport/content.js';
-import { propOptionsContentAnchor } from './props.js';
+
+/** A news app's sections: more than a phone's width holds. */
+const newsSections = [
+  'Top Stories',
+  'World',
+  'Business',
+  'Technology',
+  'Science',
+  'Health',
+  'Sports',
+  'Entertainment',
+] as const;
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
-const contentCode = `const [show, setShow] = useState('all');
-
-<Viewport.Content>
-  <Viewport.Padding edge="block-start" />
-  <List.Root>…{/* all, or the favorites */}</List.Root>
-  <Viewport.Padding edge="block-end" />
-</Viewport.Content>
-{/* A toolbar spacing the control, placed as its anchor is. */}
-<Viewport.Anchor edge="block-start">
-  <Toolbar.Root placement="block-start">
-    <Segmented.Root
-      aria-label="Show"
-      value={show}
-      onValueChange={setShow}
-    >
-      <Segmented.Item value="all">All</Segmented.Item>
-      <Segmented.Item value="favorites">Favorites</Segmented.Item>
-      <Segmented.Highlight />
-    </Segmented.Root>
-  </Toolbar.Root>
-</Viewport.Anchor>`;
-
 const headerCode = `const [filter, setFilter] = useState('all');
 
 <Header.Root>
@@ -70,6 +56,9 @@ const headerCode = `const [filter, setFilter] = useState('all');
   </Viewport.BlockStart>
   <Page.Root>
     <Viewport.Padding edge="block-start" />
+    <Header.LargeTitle>
+      <span>Recents</span>
+    </Header.LargeTitle>
     <List.Root>…</List.Root>
     <Viewport.Padding edge="block-end" />
   </Page.Root>
@@ -96,9 +85,6 @@ const toolbarCode = `<Viewport.BlockEnd>
 </Viewport.BlockEnd>`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
-// Some of the contacts, as favorites.
-const favorites = names.filter((_, index) => index % 4 === 0);
-
 // Recent calls (as Phone's): name, kind, missed.
 const calls = [
   ['Kate Brown', 'mobile', false],
@@ -117,68 +103,9 @@ const logChange =
   };
 
 /**
- * Contacts, all or the favorites, chosen on an anchor (the screen's top or
- * bottom edge) over the scrolling list.
+ * Recents (as Phone's): its large title in the page, its filter in the bar
+ * in place of the title.
  */
-const ContentViews: FunctionComponent = () => {
-  const id = 'segmented-composition-content';
-  const [log, addLog] = useLog();
-  const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(propOptionsContentAnchor, {
-    external,
-    isOpen: true,
-    title: 'Viewport.Anchor',
-  });
-  const [show, setShow] = useState('all');
-
-  return (
-    <Component
-      isInline
-      controls={[control]}
-      id={id}
-      log={log}
-      stage="phone"
-      state={[state]}
-      title="Segmented switching content"
-    >
-      <>
-        <Viewport.Content>
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Group>
-                {(show === 'all' ? names : favorites).map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
-                    </List.Content>
-                  </List.Item>
-                ))}
-              </List.Group>
-            </List.Section>
-          </List.Root>
-          <Viewport.Padding edge="block-end" />
-        </Viewport.Content>
-        <Viewport.Anchor {...props}>
-          {/* A toolbar spacing the control, placed as its anchor is. */}
-          <Toolbar.Root placement={props.edge}>
-            <Segmented.Root
-              aria-label="Show"
-              value={show}
-              onValueChange={logChange(addLog, setShow)}
-            >
-              <Segmented.Item value="all">All</Segmented.Item>
-              <Segmented.Item value="favorites">Favorites</Segmented.Item>
-              <Segmented.Highlight />
-            </Segmented.Root>
-          </Toolbar.Root>
-        </Viewport.Anchor>
-      </>
-    </Component>
-  );
-};
-
-/** Recents, filtered in the navigation bar. */
 const InHeader: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [filter, setFilter] = useState('all');
@@ -208,6 +135,9 @@ const InHeader: FunctionComponent = () => {
           </Viewport.BlockStart>
           <Page.Root>
             <Viewport.Padding edge="block-start" />
+            <Header.LargeTitle>
+              <span>Recents</span>
+            </Header.LargeTitle>
             <List.Root>
               <List.Section>
                 <List.Group>
@@ -297,11 +227,73 @@ const InToolbar: FunctionComponent = () => {
   );
 };
 
+/** News sections: more than a phone's width, scrolled sideways. */
+const Overflowing: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [section, setSection] = useState<string>(newsSections[0]);
+
+  return (
+    <Component
+      isInline
+      id="segmented-composition-overflow"
+      log={log}
+      stage="phone"
+      title="Segmented, scrolled"
+    >
+      <Viewport.BlockStart>
+        <Toolbar.Root placement="block-start">
+          <Segmented.Root
+            aria-label="Section"
+            overflow="scroll"
+            value={section}
+            onValueChange={(
+              value: unknown,
+              { reason }: BaseRadioGroup.ChangeEventDetails,
+            ) => {
+              addLog(`value change: ${String(value)}/${reason}`);
+              setSection(String(value));
+            }}
+          >
+            {newsSections.map((name) => (
+              <Segmented.Item
+                key={name}
+                value={name}
+              >
+                {name}
+              </Segmented.Item>
+            ))}
+            <Segmented.Highlight />
+          </Segmented.Root>
+        </Toolbar.Root>
+      </Viewport.BlockStart>
+      <Viewport.Content>
+        <Viewport.Padding edge="block-start" />
+        <List.Root>
+          <List.Section>
+            <List.Group>
+              {Array.from({ length: 12 }, (_, index) => (
+                <List.Item key={index}>
+                  <List.Content>
+                    <List.Title>
+                      {section}: story {index + 1}
+                    </List.Title>
+                  </List.Content>
+                </List.Item>
+              ))}
+            </List.Group>
+          </List.Section>
+        </List.Root>
+        <Viewport.Padding edge="block-end" />
+      </Viewport.Content>
+    </Component>
+  );
+};
+
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
-  ['switching-a-view-s-content', 'Switching a view’s content'],
   ['in-a-navigation-bar', 'In a navigation bar'],
   ['in-a-toolbar', 'In a toolbar'],
+  ['more-than-fit', 'More than fit'],
   ['in-forms', 'In forms'],
 ];
 
@@ -309,61 +301,6 @@ const sections: readonly Section[] = [
 export const SegmentedComposition: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
-    <Heading
-      id="switching-a-view-s-content"
-      level={2}
-    >
-      Switching a view’s content
-    </Heading>
-    <ul>
-      <li>
-        At the screen’s top or bottom edge, over the content it filters or
-        rearranges (all contacts, or the favorites), staying as the list scrolls
-        under it.
-      </li>
-      <li>
-        A{' '}
-        <PartLink
-          component="viewport"
-          part="Viewport.Anchor"
-        />{' '}
-        (<code>edge</code>), in the content layer’s place for a bar, a{' '}
-        <PartLink
-          component="toolbar"
-          part="Toolbar.Root"
-        />{' '}
-        in it (its <code>placement</code> the anchor’s edge) spacing the control
-        and giving it the bar’s look: no styles of the app’s.
-      </li>
-      <li>
-        Guide <GuideLink to="section-3-clusters">§3</GuideLink>: segmented
-        controls “when used to switch views”.
-      </li>
-      <li>
-        The app holds the value (<code>value</code>, <code>onValueChange</code>)
-        and renders the content for it.
-      </li>
-      <li>
-        <strong>Library:</strong> the control (
-        <PartLink
-          component="segmented"
-          part="Segmented.Root"
-        />
-        ), the anchor at the screen’s edge (
-        <PartLink
-          component="viewport"
-          part="Viewport.Anchor"
-        />
-        ) and the toolbar giving it the bar’s look.
-      </li>
-      <li>
-        <strong>Demo:</strong> the value (the app’s state) and the rows it
-        shows.
-      </li>
-    </ul>
-    <CodeView code={contentCode} />
-    <ContentViews />
-
     <Heading
       id="in-a-navigation-bar"
       level={2}
@@ -376,10 +313,29 @@ export const SegmentedComposition: FunctionComponent = () => (
         Missed).
       </li>
       <li>
-        Inside the <a href="header">Header</a>’s bar, on its glass.
+        Inside the <a href="header">Header</a>’s bar, on its glass; the page’s
+        title a large title below it (
+        <PartLink
+          component="header"
+          part="Header.LargeTitle"
+        />
+        ), scrolling with the page.
       </li>
       <li>
-        <strong>Library:</strong> the control in the header’s bar, on its glass.
+        <PartLink
+          component="header"
+          part="Header.Root"
+        />{' '}
+        ties the bar to the large title. The control isn’t in the bar’s{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Title"
+        />
+        , so it stays as the large title scrolls under the bar.
+      </li>
+      <li>
+        <strong>Library:</strong> the control in the header’s bar, on its glass,
+        and the large title.
       </li>
       <li>
         <strong>Demo:</strong> the filter (the app’s state) and the rows it
@@ -420,6 +376,44 @@ export const SegmentedComposition: FunctionComponent = () => (
     <InToolbar />
 
     <Heading
+      id="more-than-fit"
+      level={2}
+    >
+      More than fit
+    </Heading>
+    <ul>
+      <li>
+        More items than its width holds (e.g. a news app’s sections): scrolled
+        sideways (<code>overflow</code> <code>scroll</code>), their labels
+        whole, instead of truncated.
+      </li>
+      <li>
+        Swiped (or by a wheel) to scroll; an item held shows the lens, dragged
+        over the items, scrolling them near an end (as an{' '}
+        <a href="edit-menu">Edit menu</a>’s actions).
+      </li>
+      <li>
+        Prefer fewer, shorter choices where they fit (a segmented control’s
+        choices are seen at once); scrolled, some are out of sight.
+      </li>
+      <li>
+        <strong>Library:</strong> the scrolling, the lens dragging over it (
+        <PartLink
+          component="segmented"
+          part="Segmented.Root"
+        >
+          overflow
+        </PartLink>
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the sections, and the stories shown by the one
+        chosen.
+      </li>
+    </ul>
+    <Overflowing />
+
+    <Heading
       id="in-forms"
       level={2}
     >
@@ -439,4 +433,4 @@ export const SegmentedComposition: FunctionComponent = () => (
 );
 
 /** Its live views, also on the component's page of demos (and `/all`). */
-export const segmentedCompositionDemos = [ContentViews, InHeader, InToolbar];
+export const segmentedCompositionDemos = [InHeader, InToolbar, Overflowing];

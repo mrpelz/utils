@@ -40,9 +40,14 @@ export const sheetRootRows: readonly PropRow[] = [
   ],
   [
     'swipeDirection',
-    union('down', 'up', 'left', 'right'),
+    union('down', 'up', 'left', 'right', 'none'),
     code(union('down')),
-    'The swipe direction used to dismiss the drawer (a sheet’s: down).',
+    <>
+      The direction it’s swiped away in (Base UI’s: one), its exit then
+      following the flick out through that edge; or <code>none</code> (this
+      library’s): not swiped away at all, closed by a press outside it, Escape
+      or its close button only.
+    </>,
   ],
   [
     'snapPoints',

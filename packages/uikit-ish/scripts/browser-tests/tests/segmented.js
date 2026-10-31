@@ -154,7 +154,7 @@ export const tests = [
       const geometry = await page.evaluate(`(() => {
         const root = ${page.section}.querySelector('[role=radiogroup]');
         const checked = root.querySelector('[role=radio][data-checked]').getBoundingClientRect();
-        const highlight = root.querySelector(':scope > div').getBoundingClientRect();
+        const highlight = root.querySelector('[data-segmented-part=highlight]').getBoundingClientRect();
         return {
           item: checked.height,
           outsetEnd: Math.round((highlight.right - checked.right) * 100) / 100,
@@ -219,7 +219,7 @@ export const tests = [
               await page.evaluate(`(() => {
                 const root = ${page.section}.querySelector('[role=radiogroup]');
                 return {
-                  highlight: getComputedStyle(root.querySelector(':scope > div')).opacity,
+                  highlight: getComputedStyle(root.querySelector('[data-segmented-part=highlight]')).opacity,
                   lens: getComputedStyle(root.lastElementChild).opacity,
                 };
               })()`),
@@ -257,7 +257,7 @@ export const tests = [
     },
   },
   {
-    name: 'segmented: on a viewport anchor at the screen’s top or bottom edge, clear of the safe area, over the scrolling list it filters',
+    name: 'segmented: in a bar at the screen’s top or bottom edge, clear of the safe area, over the list it filters',
     run: async (page) => {
       /** The control's box relative to its screen's, raw: the window's (top, bottom gap). */
       const placed = () =>
@@ -270,23 +270,26 @@ export const tests = [
           `${page.section}.querySelectorAll('[data-list-part=row]').length`,
         );
 
-      await page.open('segmented-composition-content');
+      // In the navigation bar (Recents: All, Missed).
+      await page.open('segmented-composition-header');
       const [top] = await placed();
       // At the window's top (raw: no safe area), 4px into its bar.
       assert.equal(top, 4);
       const all = await rows();
-      const favorites = await page.rect('[role=radio]', 1);
+      const missed = await page.rect('[role=radio]', 1);
       await page.click([
-        favorites.x + favorites.width / 2,
-        favorites.y + favorites.height / 2,
+        missed.x + missed.width / 2,
+        missed.y + missed.height / 2,
       ]);
       await sleep(300);
       assert.ok((await rows()) < all, 'filtered');
 
-      await page.setState(0, { edge: 'block-end' });
+      // In the bottom toolbar.
+      await page.open('segmented-composition-toolbar');
       const [, bottom] = await placed();
-      // At the window's bottom (raw: no safe area), 2px into its bar.
-      assert.equal(bottom, 2);
+      // At the window's bottom (raw: no safe area), centered on its bar's
+      // buttons (2px into it).
+      assert.equal(bottom, 8);
     },
   },
 ];

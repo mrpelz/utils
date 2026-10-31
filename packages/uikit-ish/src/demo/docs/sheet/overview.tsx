@@ -282,8 +282,8 @@ export const SheetOverview: FunctionComponent = () => (
     <ul>
       <li>
         Large: the whole screen but 10px at the top, opaque, its top corners
-        38px. Medium: a glass panel 6px from the sides and the bottom, as high
-        as its content.
+        38px. Medium: a glass panel 6px from the sides, on the bottom safe area
+        (the home indicator below it), as high as its content.
       </li>
       <li>
         Not compact (the window from 768px, or <code>compact={'{false}'}</code>

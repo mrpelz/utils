@@ -63,7 +63,7 @@ export const tests = [
         })()`);
       const gridBox = await popupBox();
       const spectrum = await page.evaluate(`(() => {
-        const item = [...document.querySelectorAll('[aria-label=Mode] > *')].find((element) => element.textContent.startsWith('Spectrum'));
+        const item = [...document.querySelectorAll('[aria-label=Mode] [role=radio]')].find((element) => element.textContent.startsWith('Spectrum'));
         const { height, width, x, y } = item.getBoundingClientRect();
         return [x + width / 2, y + height / 2];
       })()`);

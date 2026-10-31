@@ -4,6 +4,7 @@ import {
   elementRows,
   nativeButtonRow,
   PropRow,
+  union,
 } from '../../tooling/guide/props-table.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
@@ -78,6 +79,18 @@ export const segmentedRootRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     'Hides the separators between unselected items.',
+  ],
+  [
+    'overflow',
+    union('truncate', 'scroll'),
+    code(union('truncate')),
+    <>
+      Too narrow for its items: their labels truncated, or the items scrolled
+      sideways (<code>scroll</code>, their labels whole). Scrolled: swiped, or
+      by a wheel, snapping to an item; the lens (an item held, or a mouse’s
+      drag) drags over them, scrolling them near an end. The chosen item is
+      scrolled into view (at once, at first).
+    </>,
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];

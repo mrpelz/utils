@@ -47,6 +47,8 @@ export {
   type SheetHandle,
   type SheetPopupProps,
   useCreateSheetHandle,
+  type SheetRootProps,
+  type SheetSwipeDirection,
 } from './sheet/main.js';
 export {
   Tooltip,

@@ -3,13 +3,16 @@ import './style.css';
 
 import { Radio as BaseRadio } from '@base-ui/react/radio';
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
-import { ComponentProps, forwardRef } from 'react';
+import { ComponentProps, forwardRef, useEffect } from 'react';
 
 import {
   cn,
   type DelayedLens,
   delayLens,
+  edgeScrollDelta,
+  frameElapsed,
   isKeyboardFocus,
+  useForwardedRef,
   usePointerDrag,
   useSecondaryClick,
 } from '../utils/main.js';
@@ -51,6 +54,48 @@ export type { SegmentedItemProps, SegmentedRootProps } from './props.js';
 //   the track doesn't clip its content; the highlight clips itself (and its
 //   shadow) to the track. Sideways, it grows by at most twice as much as
 //   vertically (wide items).
+// - Scrolled (`overflow`), its items snap (by their start, a peek of the
+//   previous one beside it), and the checked one is scrolled into view (at
+//   once when mounted), a peek of the items beyond it beside it.
+
+const scrollerOf = (root: HTMLElement) =>
+  root.querySelector<HTMLElement>(':scope > .uikit-segmented-scroller');
+
+const trackOf = (root: HTMLElement) =>
+  scrollerOf(root)?.querySelector<HTMLElement>(
+    ':scope > .uikit-segmented-track',
+  );
+
+/** A press on the control: its lens, the item under it. */
+type DragState = {
+  /** Scrolling near its ends (scrolled), each frame. */
+  frame?: number;
+  isMouse: boolean;
+  /** A touch scrolling it (moved before its lens showed): no lens. */
+  isScrolling?: boolean;
+  item?: HTMLElement;
+  lens: DelayedLens;
+  start: { x: number; y: number };
+  x: number;
+};
+
+/** A touch moving this far (px) before the lens shows scrolls instead. */
+const scrollSlop = 8;
+
+// A touch moved past `scrollSlop` before its lens showed: scrolling, its
+// lens never shown.
+const yieldToScroll = (
+  state: DragState,
+  { clientX, clientY }: { clientX: number; clientY: number },
+) => {
+  if (
+    Math.hypot(clientX - state.start.x, clientY - state.start.y) <= scrollSlop
+  ) {
+    return;
+  }
+  state.lens.cancel();
+  state.isScrolling = true;
+};
 
 const isEnabled = (item: HTMLElement) =>
   !Object.hasOwn(item.dataset, 'disabled');
@@ -86,20 +131,35 @@ const press = (root: HTMLElement, clientX: number) => {
       ),
     ) || 0;
   const width = rect.width + outset * 2;
+  // Within the items, and what's shown of them (scrolled: its scroller's).
+  const shown = scrollerOf(root)?.getBoundingClientRect();
   const centerX = Math.max(
-    Math.min(...rects.map(({ left }) => left)) - outset + width / 2,
+    Math.max(
+      Math.min(...rects.map(({ left }) => left)),
+      shown?.left ?? -Infinity,
+    ) -
+      outset +
+      width / 2,
     Math.min(
       clientX,
-      Math.max(...rects.map(({ right }) => right)) + outset - width / 2,
+      Math.min(
+        Math.max(...rects.map(({ right }) => right)),
+        shown?.right ?? Infinity,
+      ) +
+        outset -
+        width / 2,
     ),
   );
 
+  // The highlight's start, in its track (scrolled along with the items);
+  // the lens', over the root.
   const rootRect = root.getBoundingClientRect();
   const paddingLeft = rootRect.left + root.clientLeft;
+  const track = trackOf(root)?.getBoundingClientRect() ?? rootRect;
   const start =
     getComputedStyle(root).direction === 'rtl'
-      ? paddingLeft + root.clientWidth - (centerX + width / 2)
-      : centerX - width / 2 - paddingLeft;
+      ? track.right - (centerX + width / 2)
+      : centerX - width / 2 - track.left;
 
   for (const other of items) other.toggleAttribute('data-lens', other === item);
 
@@ -130,6 +190,52 @@ const release = (root: HTMLElement, item?: HTMLElement) => {
   for (const other of getItems(root)) delete other.dataset.lens;
 };
 
+// Scrolls the checked item (if any) wholly into its scroller's view, its
+// track's padding and a peek of the items beyond it beside it (hinting at
+// them); only the scroller, not the page around it. To a snap position
+// (items snap by their start, see style.css): the nearest showing it so, so
+// snapping doesn't take it out of view again.
+const reveal = (root: HTMLElement, behavior: ScrollBehavior) => {
+  const scroller = scrollerOf(root);
+  const item = root.querySelector('[role="radio"][data-checked]');
+  if (!scroller || !item) return;
+
+  const style = getComputedStyle(root);
+  const margin = ['--uikit-segmented-padding-inline', '--uikit-segmented-peek']
+    .map((property) => Number.parseFloat(style.getPropertyValue(property)) || 0)
+    .reduce((sum, value) => sum + value, 0);
+  const shown = scroller.getBoundingClientRect();
+  const { left, right } = item.getBoundingClientRect();
+  const delta =
+    left - margin < shown.left
+      ? left - margin - shown.left
+      : Math.max(0, right + margin - shown.right);
+  if (Math.abs(delta) < 1) return;
+
+  // Each item's snap position (its start beside the padding and peek), as a
+  // `scrollLeft`; then the first past the target, in its direction.
+  const isRtl = style.direction === 'rtl';
+  const target = scroller.scrollLeft + delta;
+  const positions = getItems(root).map((other) => {
+    const rect = other.getBoundingClientRect();
+    return isRtl
+      ? scroller.scrollLeft + rect.right + margin - shown.right
+      : scroller.scrollLeft + rect.left - margin - shown.left;
+  });
+  const snapped =
+    delta > 0
+      ? Math.min(...positions.filter((position) => position >= target - 1))
+      : Math.max(...positions.filter((position) => position <= target + 1));
+
+  // (To a position, not by a distance: Chrome snaps a `scrollBy` by its
+  // direction.)
+  const isReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  scroller.scrollTo({
+    behavior: isReduced ? 'instant' : behavior,
+    left: Number.isFinite(snapped) ? snapped : target,
+  });
+};
+
 /**
  * The track, containing `Segmented.Item`s and a `Segmented.Highlight`.
  * Renders the glass lens shown while an item is pressed.
@@ -141,6 +247,7 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
       children,
       hideSeparators,
       onFocus,
+      overflow = 'truncate',
       onLostPointerCapture,
       onPointerCancel,
       onPointerDown,
@@ -149,16 +256,36 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
       onTouchMove,
       ...props
     },
-    ref,
+    forwardedRef,
   ) => {
-    const handlers = usePointerDrag<
-      HTMLDivElement,
-      { item?: HTMLElement; lens: DelayedLens }
-    >(
+    const ref = useForwardedRef(forwardedRef);
+    const isScrolled = overflow === 'scroll';
+
+    // Scrolled: its checked item in view, at once (mounted), then as it's
+    // checked (any way: pressed, by keys, or its `value`).
+    useEffect(() => {
+      const root = ref.current;
+      const track = root && trackOf(root);
+      if (!isScrolled || !root || !track) return undefined;
+
+      reveal(root, 'instant');
+      const observer = new MutationObserver(() => reveal(root, 'smooth'));
+      observer.observe(track, {
+        attributeFilter: ['data-checked'],
+        subtree: true,
+      });
+
+      return () => observer.disconnect();
+    }, [isScrolled, ref]);
+
+    const handlers = usePointerDrag<HTMLDivElement, DragState>(
       {
         end: (root, state, isCancelled) => {
-          const { item, lens } = state;
+          const { frame, item, lens } = state;
           lens.cancel();
+          if (frame !== undefined) cancelAnimationFrame(frame);
+          // (Snapping again, see `start`.)
+          delete root.dataset.edgeScrolling;
 
           if (!isCancelled && item) {
             if (!Object.hasOwn(item.dataset, 'checked')) item.click();
@@ -167,13 +294,26 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
 
           release(root, isCancelled ? undefined : item);
         },
-        // Held (its lens shown), the touch doesn't scroll.
-        isHolding: ({ lens }, position) => {
-          lens.move(position);
-          return lens.isShown();
+        // Held (its lens shown), the touch doesn't scroll. Scrolled, a touch
+        // moving first (before its lens shows) scrolls instead: no lens.
+        isHolding: (state, position) => {
+          if (isScrolled && !state.isMouse && !state.lens.isShown()) {
+            yieldToScroll(state, position);
+            return false;
+          }
+          state.lens.move(position);
+          return state.lens.isShown();
         },
         move: (root, state, event) => {
+          // (Also by its pointer's moves: Chrome holds a touch's moves back
+          // within its slop, past the lens' delay.)
+          if (isScrolled && !state.isMouse && !state.lens.isShown()) {
+            yieldToScroll(state, event);
+          }
+          if (state.isScrolling) return;
+          if (isScrolled && !state.isMouse && !state.lens.isShown()) return;
           state.lens.move(event);
+          state.x = event.clientX;
           state.item = press(root, event.clientX);
         },
         start: (root, event) => {
@@ -191,8 +331,38 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
           const lens = delayLens(event, () =>
             root.style.setProperty('--uikit-segmented-pressed', '1'),
           );
+          const state: DragState = {
+            isMouse: event.pointerType === 'mouse',
+            item,
+            lens,
+            start: { x: event.clientX, y: event.clientY },
+            x: event.clientX,
+          };
 
-          return { item, lens };
+          // Scrolled: held near an end, the lens scrolls its items (as
+          // menus' do), choosing what comes under it.
+          if (isScrolled) {
+            const elapsedOf = frameElapsed();
+            state.frame = requestAnimationFrame(function scroll(time) {
+              state.frame = requestAnimationFrame(scroll);
+              const elapsed = elapsedOf(time);
+              const scroller = scrollerOf(root);
+              if (!scroller || state.isScrolling) return;
+              if (!state.isMouse && !lens.isShown()) return;
+              const { left, right } = scroller.getBoundingClientRect();
+              const delta = edgeScrollDelta(state.x, left, right, elapsed);
+              if (delta === 0) return;
+              // (Not snapped back each frame: unsnapped until released.)
+              root.dataset.edgeScrolling = '';
+              const before = scroller.scrollLeft;
+              scroller.scrollLeft += delta;
+              if (scroller.scrollLeft !== before) {
+                state.item = press(root, state.x);
+              }
+            });
+          }
+
+          return state;
         },
       },
       {
@@ -210,6 +380,7 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
         ref={ref}
         data-glass-context="auto"
         data-hide-separators={hideSeparators ? '' : undefined}
+        data-overflow={overflow}
         // Focused by a pointer (its item pressed, see `end`), no ring.
         onFocus={(event) => {
           onFocus?.(event);
@@ -224,7 +395,19 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
         data-base-ui-swipe-ignore=""
         data-segmented-part="root"
       >
-        {children}
+        {/* Its items' viewport (scrolled, overflowing), and their track
+           (their columns; the highlight's box). */}
+        <div
+          className="uikit-segmented-scroller"
+          data-segmented-part="scroller"
+        >
+          <div
+            className="uikit-segmented-track"
+            data-segmented-part="track"
+          >
+            {children}
+          </div>
+        </div>
         {/* Positioned by its center, so it stays under the pointer. */}
         <span
           aria-hidden="true"
