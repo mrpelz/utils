@@ -1,4 +1,5 @@
 import type { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
+import type { useRender } from '@base-ui/react/use-render';
 import type { ComponentProps, ReactElement } from 'react';
 
 import type { ButtonRootProps } from '../button/main.js';
@@ -42,11 +43,23 @@ export type PanelState = {
 };
 
 export type ColorPickerRootProps = Omit<
-  ComponentProps<'div'>,
+  useRender.ComponentProps<'div'>,
   'defaultValue' | 'onChange'
 > & {
+  /**
+   * The initial mode (uncontrolled): its `Mode`'s and `View`'s `value`.
+   * @default the first `Mode`
+   */
+  defaultMode?: string;
   /** The initial color (uncontrolled; a hex string). */
   defaultValue?: string;
+  /** The mode (controlled): its `Mode`'s and `View`'s `value`. */
+  mode?: string;
+  /** Called with the mode chosen (its segmented control's details). */
+  onModeChange?: (
+    mode: string,
+    eventDetails: BaseRadioGroup.ChangeEventDetails,
+  ) => void;
   /** Called with the picked color (a hex string), and why. */
   onValueChange?: (
     value: string,
@@ -56,20 +69,7 @@ export type ColorPickerRootProps = Omit<
   value?: string;
 };
 
-export type ColorPickerPanelProps = ComponentProps<'div'> & {
-  /**
-   * The initial mode (uncontrolled): its `Mode`'s and `View`'s `value`.
-   * @default the first `Mode`
-   */
-  defaultMode?: string;
-  /** The mode (controlled): its `Mode`'s and `View`'s `value`. */
-  mode?: string;
-  /** Called with the mode chosen (its segmented control's details). */
-  onModeChange?: (
-    mode: string,
-    eventDetails: BaseRadioGroup.ChangeEventDetails,
-  ) => void;
-};
+export type ColorPickerPanelProps = ComponentProps<'div'>;
 
 export type ColorPickerModesProps = Omit<
   SegmentedRootProps,

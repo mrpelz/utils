@@ -31,7 +31,7 @@ import {
   colorPickerSlidersRows,
   colorPickerSwatchesRows,
 } from './docs.js';
-import { panelParts, shownModes } from './panel.js';
+import { modesControl, panelParts, shownModes } from './panel.js';
 import { propOptionsOverview, propOptionsOverviewContent } from './props.js';
 
 /**
@@ -43,19 +43,30 @@ const LiveView: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const sizeClass = useSizeClass();
   const [color, setColor] = useState('#AF52DE');
-  const [externalContent, externalPanel] = useProvidedState(id);
+  const [externalContent, externalRoot] = useProvidedState(id);
   const [controlContent, content, stateContent] = usePropControl(
     propOptionsOverviewContent,
     { external: externalContent, isOpen: true, title: '[content]' },
   );
-  const parts = panelParts({
-    modes: shownModes(content),
-    opacity: content.opacity,
-  });
-  const [controlPanel, propsPanel, statePanel, keyPanel] = usePropControl(
+  // (Its modes' control in its panel, or elsewhere: the sheet's header.)
+  const parts = (isModesElsewhere = false) =>
+    panelParts({
+      isModesElsewhere,
+      modes: shownModes(content),
+      opacity: content.opacity,
+    });
+  const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
     propOptionsOverview,
-    { external: externalPanel, title: 'ColorPicker.Panel' },
+    { external: externalRoot, title: 'ColorPicker.Root' },
   );
+  const rootProps = {
+    ...propsRoot,
+    value: color,
+    onValueChange: (next: string) => {
+      addLog(`color: ${next}`);
+      setColor(next);
+    },
+  };
   const isSheet =
     (content.presentation ??
       (sizeClass === 'compact' ? 'sheet' : 'popover')) === 'sheet';
@@ -65,12 +76,12 @@ const LiveView: FunctionComponent = () => {
       hasInputGuards
       isCentered
       isInline
-      controls={[controlContent, controlPanel]}
+      controls={[controlContent, controlRoot]}
       id={id}
       log={log}
       screen={isSheet ? 'centered' : undefined}
       stage={isSheet ? 'phone' : undefined}
-      state={[stateContent, statePanel]}
+      state={[stateContent, stateRoot]}
       title="Color picker"
     >
       {isSheet ? (
@@ -87,50 +98,48 @@ const LiveView: FunctionComponent = () => {
                   />
                 }
               />
-              <Sheet.Popup
-                compact
-                detent="medium"
+              {/* The picker the sheet's popup: its header and modes in the
+                 sheet's header (not scrolling), its panel in its content. */}
+              <ColorPicker.Root
+                key={keyRoot}
+                {...rootProps}
+                render={
+                  <Sheet.Popup
+                    compact
+                    detent="medium"
+                  />
+                }
               >
                 <Sheet.Header>
                   <Sheet.Grabber />
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Title>
-                      <span>Colors</span>
-                    </Toolbar.Title>
-                    <Toolbar.Trailing>
-                      <Sheet.Close
-                        render={
-                          <Toolbar.Button
-                            aria-label="Close"
-                            shape="circle"
-                          />
-                        }
-                      >
-                        <Button.Icon>
-                          <Symbol icon={sfXmark} />
-                        </Button.Icon>
-                      </Sheet.Close>
-                    </Toolbar.Trailing>
-                  </Toolbar.Root>
+                  <ColorPicker.Header>
+                    <Toolbar.Root placement="block-start">
+                      <Toolbar.Title>
+                        <span>Colors</span>
+                      </Toolbar.Title>
+                      <Toolbar.Trailing>
+                        <Sheet.Close
+                          render={
+                            <Toolbar.Button
+                              aria-label="Close"
+                              shape="circle"
+                            />
+                          }
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfXmark} />
+                          </Button.Icon>
+                        </Sheet.Close>
+                      </Toolbar.Trailing>
+                    </Toolbar.Root>
+                  </ColorPicker.Header>
+                  {modesControl(shownModes(content))}
                 </Sheet.Header>
                 <Sheet.Content>
-                  <ColorPicker.Root
-                    value={color}
-                    onValueChange={(next: string) => {
-                      addLog(`color: ${next}`);
-                      setColor(next);
-                    }}
-                  >
-                    <ColorPicker.Panel
-                      key={keyPanel}
-                      {...propsPanel}
-                    >
-                      {parts}
-                    </ColorPicker.Panel>
-                  </ColorPicker.Root>
+                  <ColorPicker.Panel>{parts(true)}</ColorPicker.Panel>
                   <Viewport.Padding edge="block-end" />
                 </Sheet.Content>
-              </Sheet.Popup>
+              </ColorPicker.Root>
             </Sheet.Root>
           </Viewport.Content>
         </Viewport.Provider>
@@ -149,11 +158,8 @@ const LiveView: FunctionComponent = () => {
               <Popover.Popup style={{ width: 'min(402px, 100vw)' }}>
                 <Popover.Arrow />
                 <ColorPicker.Root
-                  value={color}
-                  onValueChange={(next: string) => {
-                    addLog(`color: ${next}`);
-                    setColor(next);
-                  }}
+                  key={keyRoot}
+                  {...rootProps}
                 >
                   <ColorPicker.Header>
                     <Toolbar.Root placement="block-start">
@@ -185,12 +191,7 @@ const LiveView: FunctionComponent = () => {
                       </Toolbar.Trailing>
                     </Toolbar.Root>
                   </ColorPicker.Header>
-                  <ColorPicker.Panel
-                    key={keyPanel}
-                    {...propsPanel}
-                  >
-                    {parts}
-                  </ColorPicker.Panel>
+                  <ColorPicker.Panel>{parts()}</ColorPicker.Panel>
                 </ColorPicker.Root>
               </Popover.Popup>
             </Popover.Positioner>
@@ -274,12 +275,10 @@ export const ColorPickerOverview: FunctionComponent = () => (
             'value',
             'defaultValue',
             'onValueChange',
+            'defaultMode',
           ),
         ],
-        [
-          'ColorPicker.Panel',
-          pickRows(colorPickerPanelRows, 'defaultMode', 'children'),
-        ],
+        ['ColorPicker.Panel', pickRows(colorPickerPanelRows, 'children')],
         ['ColorPicker.Sliders', pickRows(colorPickerSlidersRows, 'model')],
         [
           'ColorPicker.Swatches',

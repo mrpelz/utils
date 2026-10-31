@@ -34,13 +34,13 @@ import {
 } from './docs.js';
 import { panelParts } from './panel.js';
 import {
-  getPropOptionsPanel,
   getPropOptionsRoot,
   getPropOptionsSwatches,
   propOptionsEyedropper,
   propOptionsGuideWell,
   propOptionsHeader,
   propOptionsMode,
+  propOptionsPanel,
   propOptionsPart,
   propOptionsSliders,
 } from './props.js';
@@ -81,7 +81,8 @@ const RootPart: FunctionComponent = () => {
         {...props}
         style={{ width: 'min(402px, 100%)', ...props.style }}
       >
-        <ColorPicker.Panel>{panelParts()}</ColorPicker.Panel>
+        {/* (All modes: its mode props' values.) */}
+        <ColorPicker.Panel>{panelParts({ modes: 'all' })}</ColorPicker.Panel>
       </ColorPicker.Root>
     </Component>
   );
@@ -129,17 +130,14 @@ const HeaderPart: FunctionComponent = () => {
 /** `ColorPicker.Panel`, outlined, with its props. */
 const PanelPart: FunctionComponent = () => {
   const id = 'color-picker-parts-panel';
-  const [log, addLog] = useLog();
+  const [log] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state, elementKey] = usePropControl(
-    useMemo(() => getPropOptionsPanel(addLog), [addLog]),
-    {
-      external,
-      isOpen: true,
-      emphasize: 'outline',
-      title: 'ColorPicker.Panel',
-    },
-  );
+  const [control, props, state, elementKey] = usePropControl(propOptionsPanel, {
+    external,
+    isOpen: true,
+    emphasize: 'outline',
+    title: 'ColorPicker.Panel',
+  });
 
   return (
     <Component
@@ -588,10 +586,27 @@ export const ColorPickerParts: FunctionComponent = () => (
       </li>
       <li>
         State: <code>value</code> or <code>defaultValue</code>,{' '}
-        <code>onValueChange</code> (with why).
+        <code>onValueChange</code> (with why); the mode shown, <code>mode</code>{' '}
+        or <code>defaultMode</code> (by default, the first),{' '}
+        <code>onModeChange</code>.
       </li>
       <li>
-        Renders a <code>div</code>.
+        Renders a <code>div</code>, or (<code>render</code>) the sheet’s{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Popup"
+        />
+        : its header and modes in the sheet’s{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Header"
+        />
+        , not scrolling, its panel in its{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Content"
+        />{' '}
+        (see <a href="color-picker/composition#in-a-sheet">In a sheet</a>).
       </li>
     </ul>
     <RootPart />
@@ -610,12 +625,13 @@ export const ColorPickerParts: FunctionComponent = () => (
         above the panel): e.g. a <a href="toolbar">Toolbar</a>.
       </li>
       <li>
-        In a sheet, its{' '}
+        In a sheet too, in its{' '}
         <PartLink
           component="sheet"
           part="Sheet.Header"
         />{' '}
-        instead.
+        after its grabber (the picker the sheet’s popup): its row 44px, not a
+        bar’s, the title as close to the modes as in a popover.
       </li>
       <li>
         Optional: without it (e.g. a popover from a list row,{' '}
@@ -658,11 +674,14 @@ export const ColorPickerParts: FunctionComponent = () => (
           component="color-picker"
           part="ColorPicker.Swatches"
         />
-        ; any of them left out, in any order.
-      </li>
-      <li>
-        State: the mode shown, <code>mode</code> or <code>defaultMode</code> (by
-        default, the first), <code>onModeChange</code>.
+        ; any of them left out, in any order. Its modes’ control may be
+        elsewhere in its picker (e.g. a sheet’s header), the mode the picker’s
+        (see{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Root"
+        />
+        ).
       </li>
       <li>
         Renders a <code>div</code>.
@@ -681,7 +700,9 @@ export const ColorPickerParts: FunctionComponent = () => (
     <ul>
       <li>
         Its modes’ control: a <a href="segmented">Segmented</a> control (its
-        highlight its own), choosing the panel’s mode; 24px above the view.
+        highlight its own), choosing the picker’s mode; 24px above the view, in
+        the panel or anywhere in its picker (e.g. a sheet’s header, inset as the
+        panel’s content).
       </li>
       <li>
         Its{' '}
@@ -820,7 +841,8 @@ export const ColorPickerParts: FunctionComponent = () => (
       <li>
         Each a row: its title (all caps), a slider mixing from the color (its
         track the color with the channel along its range), and its value, typed
-        too (committed on Enter, or as it’s left).
+        too: applied as it’s typed, within its range (e.g. 0–255, 0–360°,
+        0–100%; more shown as its most).
       </li>
       <li>
         Its values kept while they’re the color’s: a hue isn’t lost to a gray,

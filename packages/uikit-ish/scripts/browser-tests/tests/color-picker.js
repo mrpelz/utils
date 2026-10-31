@@ -38,21 +38,32 @@ export const tests = [
       }))()`);
       assert.deepEqual(state, { pressed: '#00A1D8', well: '#00A1D8' });
 
-      // Opacity: 50% (as an alpha channel).
+      // Opacity: 50% (as an alpha channel), applied as it's typed.
       await press(page, '[aria-label="Opacity percentage"]');
-      // (Typed: as an input event would set it.)
-      await page.evaluate(`(() => {
-        const input = document.querySelector(${JSON.stringify('[aria-label="Opacity percentage"]')});
-        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, '50');
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-      })()`);
-      await page.key('Enter');
+      /** Types into the opacity's field (as an input event would set it). */
+      const typeOpacity = (text) =>
+        page.evaluate(`(() => {
+          const input = document.querySelector(${JSON.stringify('[aria-label="Opacity percentage"]')});
+          Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, ${JSON.stringify(text)});
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        })()`);
+      await typeOpacity('50');
       await sleep(200);
       assert.match(await page.log(), /value change: #00A1D880/u);
 
       // Saved: the color added.
       await press(page, '[aria-label="Add color"]');
       assert.match(await page.log(), /saved colors \(add\): .*#00A1D880/u);
+
+      // Typed past its range: its most, shown so (not a digit's letters).
+      await typeOpacity('1x50');
+      await sleep(200);
+      assert.equal(
+        await page.evaluate(
+          `document.querySelector(${JSON.stringify('[aria-label="Opacity percentage"]')}).value`,
+        ),
+        '100',
+      );
 
       // The spectrum: by arrow keys; its popover not moving (its views as
       // high as each other).
@@ -99,7 +110,8 @@ export const tests = [
       });
       await sleep(700);
 
-      // The knob: shown, at the end (100%).
+      // The knob: shown, at the end (100%), as high as its track (flush
+      // with its end).
       const knob = await page.evaluate(`(() => {
         const thumb = document.querySelector('[aria-label=Opacity] input, input[aria-label=Opacity]')?.parentElement;
         const style = getComputedStyle(thumb);
@@ -107,7 +119,7 @@ export const tests = [
         const control = thumb.parentElement.parentElement.getBoundingClientRect();
         return [style.visibility, Math.round(control.right - thumb.getBoundingClientRect().right)];
       })()`);
-      assert.deepEqual(knob, ['visible', 2]);
+      assert.deepEqual(knob, ['visible', 0]);
 
       /** The shown page's saved colors. */
       const shown = () =>
@@ -202,7 +214,6 @@ export const tests = [
       await page.open('color-picker', 'light', {
         state: [
           { container: 'popover', defaultOpen: true },
-          null,
           { $rest: true, defaultMode: 'rgb' },
         ],
       });

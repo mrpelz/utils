@@ -38,6 +38,7 @@ const fourteenColors = [
 
 export const getPropOptionsRoot = (addLog: AddLog) => ({
   ...propOptionsElement,
+  render: [undefined, new MappedProp(<section />, '[<section />]')] as const,
   defaultValue: ['#AF52DE', '#007AFF', '#FF3B3080'] as const,
   value: [undefined, '#34C759'] as const,
   onValueChange: [
@@ -48,10 +49,6 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
     ),
     undefined,
   ] as const,
-});
-
-export const getPropOptionsPanel = (addLog: AddLog) => ({
-  ...propOptionsElement,
   // (Its modes' values, see panel.tsx: across its mode sets.)
   defaultMode: [undefined, 'grid', 'spectrum', 'rgb', 'hsl', 'cmyk'] as const,
   mode: [undefined, 'grid', 'spectrum', 'rgb', 'hsl', 'cmyk'] as const,
@@ -64,6 +61,9 @@ export const getPropOptionsPanel = (addLog: AddLog) => ({
     undefined,
   ] as const,
 });
+
+/** The panel's (its element's only). */
+export const propOptionsPanel = propOptionsElement;
 
 export const getPropOptionsSwatches = (addLog: AddLog) => ({
   ...propOptionsElement,
@@ -154,7 +154,7 @@ export const propOptionsOverviewContent = {
   opacity: [true, false] as const,
 };
 
-/** The overview's few: the panel's mode (its color the demo's). */
+/** The overview's few: the picker's mode (its color the demo's). */
 export const propOptionsOverview = {
   defaultMode: [undefined, 'spectrum', 'rgb', 'hsl', 'cmyk'] as const,
 };

@@ -2,6 +2,7 @@ import {
   code,
   elementRows,
   PropRow,
+  renderRows,
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
@@ -41,52 +42,6 @@ export const colorPickerRootRows: readonly PropRow[] = [
     </>,
   ],
   [
-    'children',
-    'ReactNode',
-    undefined,
-    <>
-      Its parts:{' '}
-      <PartLink
-        component="color-picker"
-        part="ColorPicker.Header"
-      />
-      ,{' '}
-      <PartLink
-        component="color-picker"
-        part="ColorPicker.Panel"
-      />{' '}
-      (the eyedropper in the header). With an{' '}
-      <PartLink
-        component="color-picker"
-        part="ColorPicker.Opacity"
-      />{' '}
-      in it, the color has an opacity; without one, it’s always opaque (
-      <code>#rrggbb</code>, a value’s alpha dropped as it changes).
-    </>,
-  ],
-  ...elementRows('div', 'HTMLDivElement'),
-];
-
-export const colorPickerHeaderRows: readonly PropRow[] = [
-  [
-    'children',
-    'ReactNode',
-    undefined,
-    <>
-      The app’s header: e.g. a <a href="toolbar">Toolbar</a> with the
-      eyedropper, “Colors” and a close button (in a sheet: its{' '}
-      <PartLink
-        component="sheet"
-        part="Sheet.Header"
-      />{' '}
-      instead).
-    </>,
-  ],
-  ...elementRows('div', 'HTMLDivElement'),
-];
-
-export const colorPickerPanelRows: readonly PropRow[] = [
-  [
     'mode',
     'string',
     undefined,
@@ -122,12 +77,63 @@ export const colorPickerPanelRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
+      Its parts:{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Header"
+      />
+      ,{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Panel"
+      />{' '}
+      (the eyedropper in the header; the modes’{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Modes"
+      />{' '}
+      in the panel, or anywhere in the picker, e.g. a sheet’s header). With an{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Opacity"
+      />{' '}
+      in it, the color has an opacity; without one, it’s always opaque (
+      <code>#rrggbb</code>, a value’s alpha dropped as it changes).
+    </>,
+  ],
+  ...renderRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerHeaderRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      The app’s header: e.g. a <a href="toolbar">Toolbar</a> with the
+      eyedropper, “Colors” and a close button (in a sheet too, its{' '}
+      <PartLink
+        component="sheet"
+        part="Sheet.Header"
+      />{' '}
+      only its grabber).
+    </>,
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerPanelRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
       Its parts, as composed: its modes (
       <PartLink
         component="color-picker"
         part="ColorPicker.Modes"
       />
-      , a{' '}
+      , unless elsewhere in its picker; a{' '}
       <PartLink
         component="color-picker"
         part="ColorPicker.View"

@@ -71,33 +71,46 @@ export const propOptionsComposition = {
   swatches: [true, false] as const,
 };
 
+const entriesOf = (modes: ModeEntry[] | ModeSet) =>
+  typeof modes === 'string' ? modeSets[modes] : modes;
+
+/** Its modes' control (by `modes`): in its panel, or a sheet's header. */
+export const modesControl = (
+  modes: ModeEntry[] | ModeSet = 'system',
+): ReactNode => (
+  <ColorPicker.Modes key="modes">
+    {entriesOf(modes).map(([value, label]) => (
+      <ColorPicker.Mode
+        key={value}
+        value={value}
+      >
+        {label}
+      </ColorPicker.Mode>
+    ))}
+  </ColorPicker.Modes>
+);
+
 /**
- * A panel's parts: its modes' control and views (by `modes`), its opacity
- * and swatches (unless left out).
+ * A panel's parts: its modes' control (unless elsewhere: `isModesElsewhere`,
+ * e.g. in a sheet's header) and views (by `modes`), its opacity and
+ * swatches (unless left out).
  */
 export const panelParts = ({
+  isModesElsewhere = false,
   modes = 'system',
   opacity = true,
   swatches = true,
   swatchesProps,
 }: {
+  isModesElsewhere?: boolean;
   modes?: ModeEntry[] | ModeSet;
   opacity?: boolean;
   swatches?: boolean;
   swatchesProps?: ColorPickerSwatchesProps;
 } = {}): ReactNode[] => {
-  const entries = typeof modes === 'string' ? modeSets[modes] : modes;
+  const entries = entriesOf(modes);
   return [
-    <ColorPicker.Modes key="modes">
-      {entries.map(([value, label]) => (
-        <ColorPicker.Mode
-          key={value}
-          value={value}
-        >
-          {label}
-        </ColorPicker.Mode>
-      ))}
-    </ColorPicker.Modes>,
+    isModesElsewhere ? null : modesControl(entries),
     ...entries.map(([value, , view]) => (
       <ColorPicker.View
         key={value}

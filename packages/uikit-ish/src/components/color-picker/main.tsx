@@ -6,12 +6,12 @@ import './style.css';
 
 import type { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import { Slider as BaseSlider } from '@base-ui/react/slider';
+import { useRender } from '@base-ui/react/use-render';
 import {
   cloneElement,
   ComponentProps,
   createContext,
   CSSProperties,
-  FocusEvent,
   forwardRef,
   FunctionComponent,
   KeyboardEvent,
@@ -193,15 +193,31 @@ const PickerContext = createContext<PickerState>({
 });
 
 /**
- * A color picker: its color, for its
- * parts (`Panel`, `Eyedropper`), in the app's popover or sheet.
+ * Its modes (see `Root`): the one shown, chosen by its `Modes`; the first
+ * `Mode` (or `View`) unless a default is given.
+ */
+const PanelContext = createContext<PanelState>({
+  mode: null,
+  registerMode: () => undefined,
+  setMode: () => undefined,
+});
+
+/**
+ * A color picker: its color and its mode, for its parts (`Header`,
+ * `Modes`, `Panel`, `Eyedropper`, anywhere in it), in the app's popover or
+ * sheet. Its element (`render`) may be the sheet's popup, so its modes'
+ * control can be in the sheet's header, not scrolling.
  */
 const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
   (
     {
       className,
+      defaultMode,
       defaultValue = '#000000',
+      mode: modeProp,
+      onModeChange,
       onValueChange,
+      render,
       style,
       value,
       ...props
@@ -235,59 +251,16 @@ const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
       [value ?? own, onValueChange, hasOpacity],
     );
 
-    return (
-      <PickerContext.Provider value={state}>
-        <div
-          ref={ref}
-          style={withStyle(
-            {
-              // (For its parts.)
-              '--uikit-color-picker-color': formatColor(color),
-              '--uikit-color-picker-color-opaque': formatColor({
-                ...color,
-                a: 1,
-              }),
-            },
-            style,
-          )}
-          {...props}
-          className={cn('uikit-color-picker-root', className)}
-          data-color-picker-part="root"
-        />
-      </PickerContext.Provider>
-    );
-  },
-);
-
-/**
- * Its panel's modes (see `Panel`): the one shown, chosen by its `Modes`;
- * the first `Mode` (or `View`) unless a default is given.
- */
-const PanelContext = createContext<PanelState>({
-  mode: null,
-  registerMode: () => undefined,
-  setMode: () => undefined,
-});
-
-/**
- * Its panel: its modes (`Modes`, a `Mode` each; a `View` each, paired by
- * their `value`s), the opacity, the color and the saved colors, as
- * composed (in its padding, its parts spaced).
- */
-const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
-  ({ className, defaultMode, mode: modeProp, onModeChange, ...props }, ref) => {
     const [ownMode, setOwnMode] = useState(defaultMode);
     // (Without a default: the first mode, as it's rendered.)
     const [firstMode, setFirstMode] = useState<string | undefined>();
     // (Controlled from the start: none yet, before its first mode is
     // known, not undefined, which would leave its control uncontrolled.)
     const mode = modeProp ?? ownMode ?? firstMode ?? null;
-
-    const panel = useMemo(
+    const modes = useMemo(
       () => ({
         mode,
-        registerMode: (value: string) =>
-          setFirstMode((first) => first ?? value),
+        registerMode: (next: string) => setFirstMode((first) => first ?? next),
         // Uncontrolled: its own state; controlled, only the app's `mode`.
         setMode: (next: string, details: BaseRadioGroup.ChangeEventDetails) => {
           if (modeProp === undefined) setOwnMode(next);
@@ -297,22 +270,57 @@ const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
       [mode, modeProp, onModeChange],
     );
 
+    const element = useRender({
+      defaultTagName: 'div',
+      props: {
+        style: withStyle(
+          {
+            // (For its parts.)
+            '--uikit-color-picker-color': formatColor(color),
+            '--uikit-color-picker-color-opaque': formatColor({
+              ...color,
+              a: 1,
+            }),
+          },
+          style,
+        ),
+        ...props,
+        className: cn('uikit-color-picker-root', className),
+        'data-color-picker-part': 'root',
+      },
+      ref,
+      render,
+    });
+
     return (
-      <PanelContext.Provider value={panel}>
-        <div
-          ref={ref}
-          {...props}
-          className={cn('uikit-color-picker-panel', className)}
-          data-color-picker-part="panel"
-        />
-      </PanelContext.Provider>
+      <PickerContext.Provider value={state}>
+        <PanelContext.Provider value={modes}>{element}</PanelContext.Provider>
+      </PickerContext.Provider>
     );
   },
 );
 
 /**
+ * Its panel: its modes' control (`Modes`, unless elsewhere, e.g. a sheet's
+ * header) and views (a `View` each, paired with its `Mode` by their
+ * `value`s), the opacity, the color and the saved colors, as composed (in
+ * its padding, its parts spaced).
+ */
+const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      {...props}
+      className={cn('uikit-color-picker-panel', className)}
+      data-color-picker-part="panel"
+    />
+  ),
+);
+
+/**
  * Its modes' control: a segmented control (its `Mode`s, its highlight),
- * choosing the `View` shown; 24px above it.
+ * choosing the `View` shown; 24px above it (in its panel, or at the end of
+ * a header).
  */
 const Modes = forwardRef<HTMLDivElement, ColorPickerModesProps>(
   ({ children, ...props }, ref) => {
@@ -325,6 +333,7 @@ const Modes = forwardRef<HTMLDivElement, ColorPickerModesProps>(
         // (Its modes, however many, scrolled when they don't fit.)
         overflow="scroll"
         {...props}
+        className={cn('uikit-color-picker-modes', props.className)}
         value={mode}
         onValueChange={(next, details) => setMode(String(next), details)}
       >
@@ -493,17 +502,17 @@ const trackStops = (colors: readonly string[]) =>
   colors
     .map(
       (stop, index) =>
-        `${stop} calc(20px + (100% - 40px) * ${String(index / Math.max(colors.length - 1, 1))})`,
+        `${stop} calc(var(--uikit-color-picker-channel-size) / 2 + (100% - var(--uikit-color-picker-channel-size)) * ${String(index / Math.max(colors.length - 1, 1))})`,
     )
     .join(', ');
 
 /**
  * A channel's row (the sliders', the opacity's): its title (all caps,
- * secondary), a slider (40px high, mixing from the color: its gradient
- * the color with the channel along its range; its knob 36px, in the color,
- * ringed white, 3px) and its value (a 75px by 40px field on the system
- * fill, 8px corners, Body emphasized: typed, committed on Enter or as it's
- * left).
+ * secondary), a slider (32px high, mixing from the color: its gradient
+ * the color with the channel along its range; its knob as high, in the
+ * color, ringed white, 3px) and its value (a 75px by 32px field on the system
+ * fill, 8px corners, Body emphasized: typed, applied as it's typed, within
+ * its range).
  */
 const ChannelRow: FunctionComponent<{
   /** Its field's name (e.g. “Opacity percentage”; default: “Red value”). */
@@ -532,16 +541,23 @@ const ChannelRow: FunctionComponent<{
   value,
 }) => {
   const [draft, setDraft] = useState<string | undefined>(undefined);
+  // Focused by a tap (until its click): Chrome's context menu for it kept
+  // closed (see the field).
+  const focusingRef = useRef(false);
   // Held, its touch doesn't scroll (see `useTouchHold`).
   const holdHandlers = useTouchHold<HTMLDivElement>('x');
 
-  const commit = (event: Event) => {
-    if (draft === undefined) return;
-    const next = Number.parseFloat(draft);
-    if (Number.isFinite(next)) {
-      onValueChange(clamp(Math.round(next), 0, max), event);
+  // Typed: its digits (a whole number), within its range, applied at once;
+  // shown as applied (e.g. 300 as 255), or empty while it's typed over.
+  const type = (text: string, event: Event) => {
+    const digits = text.replaceAll(/\D/gu, '');
+    if (digits === '') {
+      setDraft('');
+      return;
     }
-    setDraft(undefined);
+    const next = clamp(Number.parseInt(digits, 10), 0, max);
+    setDraft(String(next));
+    onValueChange(next, event);
   };
 
   return (
@@ -614,12 +630,31 @@ const ChannelRow: FunctionComponent<{
             aria-label={fieldLabel ?? `${label} value`}
             inputMode="numeric"
             value={draft ?? String(value)}
-            onBlur={(event: FocusEvent<HTMLInputElement>) => commit(event)}
-            onChange={(event) => setDraft(event.currentTarget.value)}
+            // Left (or Enter), its value again (e.g. emptied); its selection
+            // collapsed (kept, the next tap would be on selected text).
+            onChange={(event) => type(event.currentTarget.value, event)}
+            onBlur={(event) => {
+              setDraft(undefined);
+              focusingRef.current = false;
+              const { length } = event.currentTarget.value;
+              event.currentTarget.setSelectionRange(length, length);
+            }}
+            onClick={() => {
+              focusingRef.current = false;
+            }}
+            // The tap focusing it is on its text, selected: Chrome opens its
+            // context menu for that; not for this tap (a later press, held,
+            // opens it).
+            onContextMenu={(event) => {
+              if (focusingRef.current) event.preventDefault();
+            }}
             // Focused, all of it (to type over).
-            onFocus={(event) => event.currentTarget.select()}
+            onFocus={(event) => {
+              focusingRef.current = true;
+              event.currentTarget.select();
+            }}
             onKeyDown={(event) => {
-              if (event.key === 'Enter') commit(event);
+              if (event.key === 'Enter') setDraft(undefined);
             }}
           />
           {unit ? <span aria-hidden="true">{unit}</span> : null}

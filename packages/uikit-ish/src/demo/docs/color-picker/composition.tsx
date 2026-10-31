@@ -25,7 +25,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfEyedropper, sfXmark } from '../../tooling/icons.js';
-import { panelParts } from './panel.js';
+import { modesControl, panelParts } from './panel.js';
 import { propOptionsPresentation } from './props.js';
 
 /** The regular pattern: a well opening the picker in a popover. */
@@ -116,45 +116,53 @@ const InASheet: FunctionComponent = () => {
         <Viewport.Content>
           <Sheet.Root>
             <Sheet.Trigger render={<ColorPicker.Well color={color} />} />
-            <Sheet.Popup
-              compact
-              detent="medium"
+            {/* The picker the sheet's popup: its header and modes in the
+               sheet's header (not scrolling), its panel in its content. */}
+            <ColorPicker.Root
+              value={color}
+              render={
+                <Sheet.Popup
+                  compact
+                  detent="medium"
+                />
+              }
+              onValueChange={(next: string) => {
+                addLog(`color: ${next}`);
+                setColor(next);
+              }}
             >
               <Sheet.Header>
                 <Sheet.Grabber />
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
-                    <span>Colors</span>
-                  </Toolbar.Title>
-                  <Toolbar.Trailing>
-                    <Sheet.Close
-                      render={
-                        <Toolbar.Button
-                          aria-label="Close"
-                          shape="circle"
-                        />
-                      }
-                    >
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
-                      </Button.Icon>
-                    </Sheet.Close>
-                  </Toolbar.Trailing>
-                </Toolbar.Root>
+                <ColorPicker.Header>
+                  <Toolbar.Root placement="block-start">
+                    <Toolbar.Title>
+                      <span>Colors</span>
+                    </Toolbar.Title>
+                    <Toolbar.Trailing>
+                      <Sheet.Close
+                        render={
+                          <Toolbar.Button
+                            aria-label="Close"
+                            shape="circle"
+                          />
+                        }
+                      >
+                        <Button.Icon>
+                          <Symbol icon={sfXmark} />
+                        </Button.Icon>
+                      </Sheet.Close>
+                    </Toolbar.Trailing>
+                  </Toolbar.Root>
+                </ColorPicker.Header>
+                {modesControl()}
               </Sheet.Header>
               <Sheet.Content>
-                <ColorPicker.Root
-                  value={color}
-                  onValueChange={(next: string) => {
-                    addLog(`color: ${next}`);
-                    setColor(next);
-                  }}
-                >
-                  <ColorPicker.Panel>{panelParts()}</ColorPicker.Panel>
-                </ColorPicker.Root>
+                <ColorPicker.Panel>
+                  {panelParts({ isModesElsewhere: true })}
+                </ColorPicker.Panel>
                 <Viewport.Padding edge="block-end" />
               </Sheet.Content>
-            </Sheet.Popup>
+            </ColorPicker.Root>
           </Sheet.Root>
         </Viewport.Content>
       </Viewport.Provider>
@@ -216,33 +224,39 @@ const InAListRow: FunctionComponent = () => {
                             />
                           }
                         />
-                        <Sheet.Popup
-                          compact
-                          detent="medium"
+                        {/* The picker the sheet's popup: its header and modes in the
+                           sheet's header (not scrolling), its panel in its content. */}
+                        <ColorPicker.Root
+                          value={tint}
+                          render={
+                            <Sheet.Popup
+                              compact
+                              detent="medium"
+                            />
+                          }
+                          onValueChange={(next: string) => {
+                            addLog(`tint: ${next}`);
+                            setTint(next);
+                          }}
                         >
                           <Sheet.Header>
                             <Sheet.Grabber />
-                            <Toolbar.Root placement="block-start">
-                              <Toolbar.Title>
-                                <span>Tint</span>
-                              </Toolbar.Title>
-                            </Toolbar.Root>
+                            <ColorPicker.Header>
+                              <Toolbar.Root placement="block-start">
+                                <Toolbar.Title>
+                                  <span>Tint</span>
+                                </Toolbar.Title>
+                              </Toolbar.Root>
+                            </ColorPicker.Header>
+                            {modesControl()}
                           </Sheet.Header>
                           <Sheet.Content>
-                            <ColorPicker.Root
-                              value={tint}
-                              onValueChange={(next: string) => {
-                                addLog(`tint: ${next}`);
-                                setTint(next);
-                              }}
-                            >
-                              <ColorPicker.Panel>
-                                {panelParts()}
-                              </ColorPicker.Panel>
-                            </ColorPicker.Root>
+                            <ColorPicker.Panel>
+                              {panelParts({ isModesElsewhere: true })}
+                            </ColorPicker.Panel>
                             <Viewport.Padding edge="block-end" />
                           </Sheet.Content>
-                        </Sheet.Popup>
+                        </ColorPicker.Root>
                       </Sheet.Root>
                     </List.Trailing>
                   </List.Item>
@@ -374,11 +388,12 @@ const ComposedModes: FunctionComponent = () => {
       title="Color picker with its own modes"
     >
       <ColorPicker.Root
+        defaultMode="hsl"
         defaultValue="#AF52DE"
         style={{ width: 'min(402px, 100%)' }}
         onValueChange={(value: string) => addLog(`value change: ${value}`)}
       >
-        <ColorPicker.Panel defaultMode="hsl">
+        <ColorPicker.Panel>
           <ColorPicker.Modes>
             <ColorPicker.Mode value="spectrum">Spectrum</ColorPicker.Mode>
             <ColorPicker.Mode value="rgb">RGB</ColorPicker.Mode>
@@ -478,12 +493,17 @@ export const ColorPickerComposition: FunctionComponent = () => (
     <ul>
       <li>
         In a compact width: the well opens a <a href="sheet">Sheet</a> (its
-        medium detent), the toolbar in its{' '}
+        medium detent), the picker in its content, its toolbar in a{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Header"
+        />{' '}
+        as in a popover (the sheet’s{' '}
         <PartLink
           component="sheet"
           part="Sheet.Header"
-        />
-        , the picker in its content.
+        />{' '}
+        only its grabber).
       </li>
       <li>
         <strong>Library:</strong> the well opening a{' '}

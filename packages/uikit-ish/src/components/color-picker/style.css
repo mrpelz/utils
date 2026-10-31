@@ -80,6 +80,8 @@
      before: nothing around it moves; as wide: the card's sides where the
      panel's content's are). */
   .uikit-color-picker-channel {
+    /* Its slider's height, its knob's, its field's. */
+    --uikit-color-picker-channel-size: 32px;
     --uikit-viewport-keyboard-accessory-background: var(
       --color-ui-secondary-system-grouped-background
     );
@@ -123,11 +125,11 @@
   .uikit-color-picker-channel-control {
     position: relative;
     display: flex;
-    height: 40px;
+    height: var(--uikit-color-picker-channel-size);
     box-sizing: border-box;
     flex: 1 1 auto;
     align-items: center;
-    padding: 2px 20px;
+    padding: 0 calc(var(--uikit-color-picker-channel-size) / 2);
     border-radius: 100px;
     cursor: pointer;
     touch-action: pan-y;
@@ -157,9 +159,10 @@
       content: '';
       inset: 0;
       mask-image: radial-gradient(
-        circle 18px at
+        circle calc(var(--uikit-color-picker-channel-size) / 2) at
           calc(
-            20px + (100% - 40px) *
+            var(--uikit-color-picker-channel-size) / 2 +
+              (100% - var(--uikit-color-picker-channel-size)) *
               var(--uikit-color-picker-channel-position, 1)
           )
           50%,
@@ -176,13 +179,13 @@
     & > div {
       position: relative;
       width: 100%;
-      height: 36px;
+      height: var(--uikit-color-picker-channel-size);
     }
   }
 
   .uikit-color-picker-channel-thumb {
-    width: 36px;
-    height: 36px;
+    width: var(--uikit-color-picker-channel-size);
+    height: var(--uikit-color-picker-channel-size);
     box-sizing: border-box;
     border: 3px solid #fff;
     border-radius: 50%;
@@ -201,12 +204,12 @@
   .uikit-color-picker-channel-field {
     display: flex;
     width: 75px;
-    height: 40px;
+    height: var(--uikit-color-picker-channel-size);
     box-sizing: border-box;
     flex: none;
     align-items: center;
     justify-content: center;
-    padding: 9px 14px;
+    padding: 0 14px;
     border-radius: 8px;
     background-color: var(--color-ui-system-fill);
     cursor: text;
@@ -331,16 +334,28 @@
     flex-direction: column;
     padding: 0 16px 16px;
 
-    /* Without a header above it: as far from the top as the header's
-       content (16px). */
-    &:first-child {
+    /* Its picker without a header: as far from the top as the header's
+       content (16px). (Not by its place: in a sheet, its content's first,
+       the header the sheet's, see `Root`.) */
+    .uikit-color-picker-root:not(:has(.uikit-color-picker-header)) & {
       padding-block-start: 16px;
     }
+  }
 
-    & > [role='radiogroup'] {
-      margin-block-end: 24px;
+  /* Its modes' control: 24px above the views; outside the panel (e.g. a
+     sheet's header, after the picker's header), inset as the panel's
+     content, the sheet's header's 10px below it, too. */
+  .uikit-color-picker-modes {
+    flex: none;
+    margin-block-end: 24px;
+
+    /* (As wide as its container but the inset, not its content: too
+       narrow for its modes, they scroll within it.) */
+    :not(.uikit-color-picker-panel) > & {
+      width: auto;
+      align-self: stretch;
+      margin: 0 16px 14px;
     }
-
   }
 
   /* A mode's view: as high as the grid (a spacer of its aspect ratio, in

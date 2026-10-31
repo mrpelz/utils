@@ -5,6 +5,7 @@ import { FunctionComponent, ReactNode, useMemo, useState } from 'react';
 import {
   Button,
   ColorPicker,
+  type ColorPickerChangeEventDetails,
   Popover,
   Sheet,
   Symbol,
@@ -17,12 +18,12 @@ import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { sfEyedropper, sfXmark } from '../../tooling/icons.js';
-import { panelParts, propOptionsComposition } from './panel.js';
+import { modesControl, panelParts, propOptionsComposition } from './panel.js';
 import {
-  getPropOptionsPanel,
   getPropOptionsRoot,
   getPropOptionsSwatches,
   propOptionsContent,
+  propOptionsPanel,
   propOptionsWell,
 } from './props.js';
 
@@ -54,7 +55,7 @@ export const ColorPickerDemo: FunctionComponent = () => {
     { external: externalRoot, isOpen: true, title: 'root' },
   );
   const [controlPanel, propsPanel, statePanel, keyPanel] = usePropControl(
-    useMemo(() => getPropOptionsPanel(addLog), [addLog]),
+    propOptionsPanel,
     { external: externalPanel, title: 'panel' },
   );
   const [controlWell, propsWell, stateWell] = usePropControl(propOptionsWell, {
@@ -72,12 +73,17 @@ export const ColorPickerDemo: FunctionComponent = () => {
       { external: externalSwatches, title: 'swatches' },
     );
 
-  const panel = (
+  // (Its modes' control in it, or elsewhere: a sheet's header.)
+  const panel = (isModesElsewhere = false) => (
     <ColorPicker.Panel
       key={`${keyPanel}-${keySwatches}`}
       {...propsPanel}
     >
-      {panelParts({ ...composition, swatchesProps: propsSwatches })}
+      {panelParts({
+        ...composition,
+        isModesElsewhere,
+        swatchesProps: propsSwatches,
+      })}
     </ColorPicker.Panel>
   );
 
@@ -105,19 +111,13 @@ export const ColorPickerDemo: FunctionComponent = () => {
     </Button.Icon>
   );
 
-  const picker = (close: ReactNode) => (
-    <ColorPicker.Root
-      key={keyRoot}
-      {...propsRoot}
-      onValueChange={(value, details) => {
-        setColor(value);
-        propsRoot.onValueChange?.(value, details);
-      }}
-    >
-      <ColorPicker.Header>{header(close)}</ColorPicker.Header>
-      {panel}
-    </ColorPicker.Root>
-  );
+  const rootProps = {
+    ...propsRoot,
+    onValueChange: (value: string, details: ColorPickerChangeEventDetails) => {
+      setColor(value);
+      propsRoot.onValueChange?.(value, details);
+    },
+  };
 
   const well = (
     <ColorPicker.Well
@@ -170,39 +170,41 @@ export const ColorPickerDemo: FunctionComponent = () => {
           <Viewport.Content>
             <Sheet.Root defaultOpen={content.defaultOpen}>
               <Sheet.Trigger render={well} />
-              <Sheet.Popup
-                compact
-                detent="medium"
+              {/* The picker the sheet's popup: its header and modes in the
+                 sheet's header (not scrolling), its panel in its content. */}
+              <ColorPicker.Root
+                key={keyRoot}
+                {...rootProps}
+                render={
+                  <Sheet.Popup
+                    compact
+                    detent="medium"
+                  />
+                }
               >
                 <Sheet.Header>
                   <Sheet.Grabber />
-                  {header(
-                    <Sheet.Close
-                      render={
-                        <Toolbar.Button
-                          aria-label="Close"
-                          shape="circle"
-                        />
-                      }
-                    >
-                      {closeSymbol}
-                    </Sheet.Close>,
-                  )}
+                  <ColorPicker.Header>
+                    {header(
+                      <Sheet.Close
+                        render={
+                          <Toolbar.Button
+                            aria-label="Close"
+                            shape="circle"
+                          />
+                        }
+                      >
+                        {closeSymbol}
+                      </Sheet.Close>,
+                    )}
+                  </ColorPicker.Header>
+                  {modesControl(composition.modes)}
                 </Sheet.Header>
                 <Sheet.Content>
-                  <ColorPicker.Root
-                    key={keyRoot}
-                    {...propsRoot}
-                    onValueChange={(value, details) => {
-                      setColor(value);
-                      propsRoot.onValueChange?.(value, details);
-                    }}
-                  >
-                    {panel}
-                  </ColorPicker.Root>
+                  {panel(true)}
                   <Viewport.Padding edge="block-end" />
                 </Sheet.Content>
-              </Sheet.Popup>
+              </ColorPicker.Root>
             </Sheet.Root>
           </Viewport.Content>
         </Viewport.Provider>
@@ -213,18 +215,26 @@ export const ColorPickerDemo: FunctionComponent = () => {
             <Popover.Positioner>
               <Popover.Popup style={{ width: 402 }}>
                 <Popover.Arrow />
-                {picker(
-                  <Popover.Close
-                    render={
-                      <Toolbar.Button
-                        aria-label="Close"
-                        shape="circle"
-                      />
-                    }
-                  >
-                    {closeSymbol}
-                  </Popover.Close>,
-                )}
+                <ColorPicker.Root
+                  key={keyRoot}
+                  {...rootProps}
+                >
+                  <ColorPicker.Header>
+                    {header(
+                      <Popover.Close
+                        render={
+                          <Toolbar.Button
+                            aria-label="Close"
+                            shape="circle"
+                          />
+                        }
+                      >
+                        {closeSymbol}
+                      </Popover.Close>,
+                    )}
+                  </ColorPicker.Header>
+                  {panel()}
+                </ColorPicker.Root>
               </Popover.Popup>
             </Popover.Positioner>
           </Popover.Portal>
