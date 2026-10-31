@@ -203,6 +203,25 @@
     line-height: 1.4;
   }
 
+  /* `/`: its icon beside its title (an app icon's corners: its own). */
+  .demo-index-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-block: 0.5rem 1rem;
+
+    & .demo-page-title {
+      margin: 0;
+    }
+  }
+
+  .demo-index-icon {
+    width: 4rem;
+    height: 4rem;
+    flex: none;
+    filter: drop-shadow(0 4px 10px rgb(0 0 0 / 15%));
+  }
+
   /* A parts tree's levels around the component's (an app's: e.g. its
      viewport's content layer): greyed, the component's own parts within
      them in full. */

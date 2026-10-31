@@ -189,7 +189,7 @@ export const StepperParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>Root: the number field, its value and range.</li>
       <li>Group: the capsule, holding the input and the halves.</li>
-      <li>Input: the value, visually hidden (UIKit shows none).</li>
+      <li>Input: the value, visually hidden (none is shown).</li>
       <li>Decrement, Increment: the halves, “−” and “+”.</li>
       <li>All needed.</li>
     </ul>
@@ -360,8 +360,8 @@ export const StepperParts: FunctionComponent = () => (
       </li>
       <li>
         <code>Stepper.ScrubArea</code>, <code>Stepper.ScrubAreaCursor</code>:
-        dragging across a label to change the value, which UIKit’s stepper
-        doesn’t do.
+        dragging across a label to change the value, which this stepper doesn’t
+        do.
       </li>
     </ul>
   </>

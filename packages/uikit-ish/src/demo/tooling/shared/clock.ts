@@ -1,8 +1,8 @@
 /**
  * The devices' status bars' time (see style.css): the current time, as the
- * browser's locale writes it (without a day period, as iOS' status bar),
+ * browser's locale writes it (without a day period),
  * kept on the root element (`--demo-time`) from the next minute on; else
- * (server-side, prerendered) 9:41.
+ * (server-side, prerendered) 10:00.
  */
 export const startClock = (): void => {
   if (typeof document === 'undefined') return;

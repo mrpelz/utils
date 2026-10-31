@@ -1,7 +1,3 @@
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -34,6 +30,12 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfFolder,
+  sfListBullet,
+  sfMagnifyingglass,
+  sfTrash,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { rowTitles, sidebarSections } from './content.js';
 import { propOptionsAdaptiveContent } from './props.js';
@@ -293,7 +295,7 @@ const Selecting: FunctionComponent = () => {
       stage="tablet"
       title="Sidebar selecting content"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           <Layout.Column
             floating
@@ -405,7 +407,7 @@ const Hierarchy: FunctionComponent = () => {
       stage="tablet"
       title="Sidebar with folders in a hierarchy"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           <Layout.Column
             floating
@@ -608,7 +610,7 @@ const InADrawer: FunctionComponent = () => {
       stage="phone"
       title="Sidebar as a drawer"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           <Drawer.Root
             handle={sidebarDrawer}
@@ -964,7 +966,7 @@ const Adaptive: FunctionComponent = () => {
       state={[stateContent]}
       title="Sidebar, floating or a drawer"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           {isCompact ? (
             <Drawer.Root

@@ -21,13 +21,13 @@
     display: flex;
     height: 216px;
     justify-content: center;
-    color: var(--color-ios-label);
-    font-size: var(--font-ios-body-size);
+    color: var(--color-ui-label);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-body-weight);
-    font-weight: round(down, var(--font-ios-body-weight), 100);
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    font-variation-settings: 'wght' var(--font-ui-body-weight);
+    font-weight: round(down, var(--font-ui-body-weight), 100);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
     -webkit-user-select: none;
     user-select: none;
 
@@ -36,7 +36,7 @@
       top: 91px;
       height: 34px;
       border-radius: 8px;
-      background-color: var(--color-ios-tertiary-system-fill);
+      background-color: var(--color-ui-tertiary-system-fill);
       content: '';
       inset-inline: 8px;
       pointer-events: none;
@@ -59,7 +59,7 @@
     }
 
     &:focus-visible {
-      outline: 2px solid var(--color-ios-primary);
+      outline: 2px solid var(--color-ui-primary);
       outline-offset: -2px;
     }
 
@@ -108,7 +108,7 @@
     }
 
     &[aria-disabled='true'] {
-      color: var(--color-ios-tertiary-label);
+      color: var(--color-ui-tertiary-label);
     }
 
     &[data-editing] {
@@ -127,8 +127,8 @@
     margin: 0;
     appearance: none;
     background: none;
-    caret-color: var(--color-ios-primary);
-    color: var(--color-ios-primary);
+    caret-color: var(--color-ui-primary);
+    color: var(--color-ui-primary);
     font-family: inherit;
     font-size: 22px;
     font-variant-numeric: tabular-nums;

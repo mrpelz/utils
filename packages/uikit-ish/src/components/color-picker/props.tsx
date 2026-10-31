@@ -2,6 +2,10 @@ import type { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import type { ComponentProps, ReactElement } from 'react';
 
 import type { ButtonRootProps } from '../button/main.js';
+import type {
+  SegmentedItemProps,
+  SegmentedRootProps,
+} from '../segmented/main.js';
 
 export type Rgba = { a: number; b: number; g: number; r: number };
 
@@ -22,10 +26,20 @@ export type ColorPickerSavedColorsChangeEventDetails = {
 
 export type PickerState = {
   color: Rgba;
+  /** An `Opacity` rendered: the color keeping its alpha while it is. */
+  registerOpacity: () => () => void;
   setColor: (color: Rgba, eventDetails: ColorPickerChangeEventDetails) => void;
 };
 
-export type ColorPickerMode = 'grid' | 'sliders' | 'spectrum';
+/** A panel's modes (see `Panel`). */
+export type PanelState = {
+  mode: string | null;
+  registerMode: (value: string) => void;
+  setMode: (
+    mode: string,
+    eventDetails: BaseRadioGroup.ChangeEventDetails,
+  ) => void;
+};
 
 export type ColorPickerRootProps = Omit<
   ComponentProps<'div'>,
@@ -42,21 +56,57 @@ export type ColorPickerRootProps = Omit<
   value?: string;
 };
 
-export type ColorPickerPanelProps = Omit<ComponentProps<'div'>, 'children'> & {
-  /** The initial view (uncontrolled). */
-  defaultMode?: ColorPickerMode;
+export type ColorPickerPanelProps = ComponentProps<'div'> & {
   /**
-   * The initial saved colors (uncontrolled).
-   * @default Figma's
+   * The initial mode (uncontrolled): its `Mode`'s and `View`'s `value`.
+   * @default the first `Mode`
    */
-  defaultSavedColors?: string[];
-  /** The view (controlled). */
-  mode?: ColorPickerMode;
-  /** Called with the view chosen (its segmented control's details). */
+  defaultMode?: string;
+  /** The mode (controlled): its `Mode`'s and `View`'s `value`. */
+  mode?: string;
+  /** Called with the mode chosen (its segmented control's details). */
   onModeChange?: (
-    mode: ColorPickerMode,
+    mode: string,
     eventDetails: BaseRadioGroup.ChangeEventDetails,
   ) => void;
+};
+
+export type ColorPickerModesProps = Omit<
+  SegmentedRootProps,
+  'defaultValue' | 'onValueChange' | 'ref' | 'value'
+>;
+
+export type ColorPickerModeProps = Omit<SegmentedItemProps, 'ref' | 'value'> & {
+  /** Its mode: its `View`'s `value`. */
+  value: string;
+};
+
+export type ColorPickerViewProps = ComponentProps<'div'> & {
+  /** Its mode: its `Mode`'s `value`. */
+  value: string;
+};
+
+/**
+ * A color model, its channels as sliders: red, green and blue (0–255);
+ * hue (0–360°), saturation and lightness (0–100%); cyan, magenta, yellow
+ * and black (0–100%, naive: from sRGB, no ink's profile).
+ */
+export type ColorPickerSlidersModel = 'cmyk' | 'hsl' | 'rgb';
+
+export type ColorPickerSlidersProps = ComponentProps<'div'> & {
+  /**
+   * Its color model: its channels' sliders.
+   * @default 'rgb'
+   */
+  model?: ColorPickerSlidersModel;
+};
+
+export type ColorPickerSwatchesProps = ComponentProps<'div'> & {
+  /**
+   * The initial saved colors (uncontrolled).
+   * @default ten colors (see `defaultSavedColors`)
+   */
+  defaultSavedColors?: string[];
   /** Called with the saved colors, as one is added or deleted, and why. */
   onSavedColorsChange?: (
     colors: string[],
@@ -84,7 +134,7 @@ export type ColorWellProps = ComponentProps<'button'> & {
   /** Its color (a hex string; without one: the hues only). */
   color?: string;
   /**
-   * Figma “Size” (Small: 28px, Large: 36px).
+   * Its size (small: 28px, large: 36px).
    * @default 'small'
    */
   size?: 'large' | 'small';

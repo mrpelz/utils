@@ -87,13 +87,8 @@ export const ActivityViewInformationArchitecture: FunctionComponent = () => (
       What the guide doesn’t cover
     </Heading>
     <ul>
-      <li>
-        Its parts’ metrics (Figma “Activity Views”): rows of 78px items, 70px
-        action circles.
-      </li>
-      <li>
-        Apps (Figma’s app icon row) aren’t built: the system’s, not an app’s.
-      </li>
+      <li>Its parts’ metrics: rows of 78px items, 70px action circles.</li>
+      <li>Apps (an app icon row) aren’t built: the system’s, not an app’s.</li>
     </ul>
   </>
 );

@@ -18,12 +18,12 @@
     padding: 6px 12px;
     border-radius: 16px;
     color: var(--uikit-glass-content);
-    font-size: var(--font-ios-subheadline-size);
+    font-size: var(--font-ui-subheadline-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-subheadline-weight);
-    font-weight: round(down, var(--font-ios-subheadline-weight), 100);
-    letter-spacing: var(--font-ios-subheadline-tracking);
-    line-height: var(--font-ios-subheadline-line-height);
+    font-variation-settings: 'wght' var(--font-ui-subheadline-weight);
+    font-weight: round(down, var(--font-ui-subheadline-weight), 100);
+    letter-spacing: var(--font-ui-subheadline-tracking);
+    line-height: var(--font-ui-subheadline-line-height);
     pointer-events: none;
   }
 }

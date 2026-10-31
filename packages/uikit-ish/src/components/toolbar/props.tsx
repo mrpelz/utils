@@ -23,7 +23,13 @@ export type ToolbarRootProps = Omit<BaseToolbar.Root.Props, 'ref'> & {
 export type ToolbarSideProps = useRender.ComponentProps<'div'>;
 
 export type ToolbarGroupProps = Omit<BaseToolbar.Group.Props, 'ref'> & {
-  /** A tinted capsule (Figma “Text - Primary”, “Symbol Primary”). */
+  /**
+   * The space between its buttons (a length; a number: px), not at its
+   * ends (`--uikit-toolbar-group-gap`).
+   * @default 12
+   */
+  gap?: number | string;
+  /** A tinted capsule. */
   prominent?: boolean;
   /**
    * Its content's color (e.g. for a light `tint`; unblended).
@@ -52,13 +58,13 @@ export type ToolbarButtonProps = Omit<BaseToolbar.Button.Props, 'ref'> &
     | 'variant'
   > & {
     /**
-     * Of its own (not in a `Group`): tinted glass (Figma “Text - Primary”,
-     * “Symbol Primary”; `variant="glass-prominent"`).
+     * Of its own (not in a `Group`): tinted glass
+     * (`variant="glass-prominent"`).
      */
     prominent?: boolean;
   };
 
 export type ToolbarTitleProps = useRender.ComponentProps<'div'> & {
-  /** Aligned to the bar's start (Figma Style=Title 2 Line Left). */
+  /** Aligned to the bar's start. */
   alignStart?: boolean;
 };

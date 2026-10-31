@@ -1,4 +1,3 @@
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -18,6 +17,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfMagnifyingglass } from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { names } from '../viewport/content.js';
 
@@ -134,7 +134,7 @@ const formCode = `<List.Root>
   </Fieldset.Root>
 </List.Root>`;
 
-const suggestionsCode = `const contacts = ['Anna Haro', 'Daniel Higgins', 'David Taylor', 'Kate Bell'];
+const suggestionsCode = `const contacts = ['Anna Hall', 'Daniel Hughes', 'David Turner', 'Kate Brown'];
 // Its words starting with the text typed.
 const matches = (name, text) =>
   name
@@ -567,6 +567,74 @@ export const TextFieldComposition: FunctionComponent = () => (
         <a href="toolbar/composition#a-search-field">Toolbar</a>).
       </li>
       <li>
+        Its look follows where it sits (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />{' '}
+        <code>variant</code>; only its look, it stays a search field):
+        <ul>
+          <li>
+            <code>fill</code> (the default): the capsule on the tertiary fill,
+            on a page or in a sidebar (as here).
+          </li>
+          <li>
+            <code>row</code>: a list row’s background, height and corners,
+            beside an inset grouped list, e.g. in a{' '}
+            <PartLink
+              component="header"
+              part="Header.Accessory"
+            />{' '}
+            above it (<a href="header/composition#a-search-field">Header</a>).
+          </li>
+          <li>
+            <code>tab-bar</code>: a group’s glass capsule as high as its tabs,
+            in a{' '}
+            <PartLink
+              component="tab-bar"
+              part="TabBar.List"
+            />{' '}
+            beside a{' '}
+            <PartLink
+              component="tab-bar"
+              part="TabBar.Group"
+            />
+            , taking the free space (
+            <a href="tab-bar/composition#a-search-field-beside-the-tabs">
+              Tab bar
+            </a>
+            ).
+          </li>
+          <li>
+            <code>tab-bar-collapsed</code>: no capsule of its own, on the glass
+            of a{' '}
+            <PartLink
+              component="tab-bar"
+              part="TabBar.Accessory"
+            />{' '}
+            shown in the collapsed bar, filling it (
+            <a href="tab-bar/composition#search">Tab bar</a>).
+          </li>
+          <li>
+            <code>toolbar</code>: a glass capsule as high as the bar’s buttons,
+            in a{' '}
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Root"
+            />{' '}
+            between them, taking the free space (
+            <a href="toolbar/composition#a-search-field">Toolbar</a>).
+          </li>
+        </ul>
+        Its glass takes the bar’s colors (its glass context); in a bar at the
+        bottom, a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />{' '}
+        tracks the keyboard, pushing the bar up.
+      </li>
+      <li>
         <strong>Library:</strong> the search field (
         <PartLink
           component="text-field"
@@ -577,7 +645,7 @@ export const TextFieldComposition: FunctionComponent = () => (
           component="text-field"
           part="TextField.Clear"
         />
-        ).
+        ), and its looks (<code>variant</code>).
       </li>
       <li>
         <strong>Demo:</strong> the query (the app’s state), filtering the rows

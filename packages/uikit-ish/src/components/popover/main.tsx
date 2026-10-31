@@ -19,6 +19,7 @@ import {
   positionerSide,
   useCollision,
   useForwardedRef,
+  useGrowAvoidance,
   useInitialFocus,
   usePortalContainer,
   withStyle,
@@ -36,19 +37,19 @@ export type {
   PopoverPositionerProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Popovers (iPad Only)”): a panel with 13px
+// A panel with 13px
 // corners, its arrow a rounded wedge 56px wide, 13px deep, on any side, at
 // its start, center or end (Base UI's `Arrow`, pointing at its anchor's
 // center), its shadow 0 10px 100px at 30%. After the date picker's popover
 // (see `DatePicker`): 8px from its anchor (its arrow's tip, with an arrow)
-// and from the viewport's edges; centered (in a list row, iOS aligns it
-// with the row's end: the app's `align`); scaling in from its anchor (as
-// menus). Its bar (`Header`) as Figma's: 16px from its top.
+// and from the viewport's edges; centered (in a list row, aligned with
+// the row's end: the app's `align`); scaling in from its anchor (as
+// menus). Its bar (`Header`): 16px from its top.
 //
-// Deviations:
-// - The material is the menus' glass (`glassMedium`, see `Menu`; Figma: the
-//   “Thick” material, blended with what's behind, which a popup, positioned
-//   by a transform and animated, can't be).
+// Also:
+// - The material is the menus' glass (`glassMedium`, see `Menu`: not
+//   blended with what's behind, which a popup, positioned by a transform and
+//   animated, can't be).
 
 const PopoverContext = createContext<PopoverState | undefined>(undefined);
 
@@ -96,16 +97,20 @@ const Positioner = forwardRef<HTMLDivElement, PopoverPositionerProps>(
       sideOffset,
       ...props
     },
-    ref,
+    forwardedRef,
   ) => {
     const context = useContext(PopoverContext);
+    const ref = useForwardedRef(forwardedRef);
     const collision = useCollision({ collisionBoundary, collisionPadding });
+    // Growing rather than scrolling (unless its own is given).
+    const [grow, growRef] = useGrowAvoidance({}, ref);
 
     return (
       <BasePopover.Positioner
-        ref={ref}
+        ref={growRef}
         align={align}
         {...collision}
+        collisionAvoidance={grow}
         side={positionerSide(side)}
         sideOffset={sideOffset ?? 8 + (context?.hasArrow ? arrowDepth : 0)}
         {...props}
@@ -307,7 +312,7 @@ const placeNose = (arrow: HTMLElement, popup: HTMLElement) => {
 };
 
 /**
- * Figma's arrow, pointing at its anchor (moving its popup further out),
+ * Its arrow, pointing at its anchor (moving its popup further out),
  * drawn by its popup: where Base UI places it (its center along the
  * popup's edge, as `--uikit-popover-nose`).
  */
@@ -356,7 +361,7 @@ const Arrow = forwardRef<HTMLDivElement, Omit<BasePopover.Arrow.Props, 'ref'>>(
 
 /**
  * Its bar at its top (e.g. a `Toolbar`: its title, a close button), spaced
- * as Figma's popovers' (16px from the top, 10px above the content; the
+ * as popovers' are (16px from the top, 10px above the content; the
  * toolbar's row 44px). Optional.
  */
 const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
@@ -386,7 +391,7 @@ const Body = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
 );
 
 /**
- * A popover (UIKit `UIPopoverPresentationController`, Base UI's `Popover`):
+ * A popover (Base UI's `Popover`):
  * a panel of the menus' glass at its trigger (or `anchor`), optionally with
  * an arrow pointing at it.
  */

@@ -105,7 +105,12 @@ export const ListInformationArchitecture: FunctionComponent = () => (
           component="list"
           part="List.Grabber"
         />
-        , the group’s <code>onReorder</code>), deleting and inserting (
+        , by a reorder handle:{' '}
+        <PartLink
+          component="list"
+          part="List.createReorderHandle"
+        />
+        ), deleting and inserting (
         <PartLink
           component="list"
           part="List.EditButton"

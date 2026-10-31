@@ -2,12 +2,6 @@ import '../sheet/style.css';
 import '../toolbar/style.css';
 import './style.css';
 
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { sfChevronUpChevronDown } from '@bradleyhodges/sfsymbols/sfChevronUpChevronDown';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfPencil } from '@bradleyhodges/sfsymbols/sfPencil';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -18,17 +12,27 @@ import {
   Page,
   Symbol,
   Toolbar,
+  useTextActionsPrevention,
   Viewport,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { useLabelledRef } from '../../tooling/frame/render-code.js';
 import {
   Contents,
   Heading,
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfChevronBackward,
+  sfChevronUpChevronDown,
+  sfEllipsis,
+  sfPencil,
+  sfSquareAndArrowUp,
+  sfTrash,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -82,9 +86,14 @@ const [sort, setSort] = useState('date');
   </List.Trailing>
 </List.Item>`;
 
-const historyCode = `<Menu.Root>
+const historyCode = `const back = useRef<HTMLButtonElement>(null);
+// A held press selects no text (no browser text menu).
+useTextActionsPrevention(back);
+
+<Menu.Root>
   {/* A click goes back; a held press (or a right click) shows the pages. */}
   <Menu.Trigger
+    ref={back}
     aria-label="Back"
     openOn="secondaryClick"
     render={<Toolbar.Button shape="circle" />}
@@ -115,7 +124,7 @@ const FromAToolbarButton: FunctionComponent = () => {
       stage="phone"
       title="Menu from a toolbar button"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -257,6 +266,8 @@ const APopUpButton: FunctionComponent = () => {
 /** A back button: a click goes back, a held press shows the history. */
 const AHistory: FunctionComponent = () => {
   const [log, addLog] = useLog();
+  const back = useLabelledRef<HTMLButtonElement>('back', 'HTMLButtonElement');
+  useTextActionsPrevention(back);
 
   return (
     <Component
@@ -267,13 +278,14 @@ const AHistory: FunctionComponent = () => {
       stage="phone"
       title="Menu on a held press"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
               <Toolbar.Leading>
                 <Menu.Root>
                   <Menu.Trigger
+                    ref={back}
                     aria-label="Back"
                     openOn="secondaryClick"
                     render={<Toolbar.Button shape="circle" />}
@@ -309,7 +321,7 @@ const AHistory: FunctionComponent = () => {
                 <List.Group>
                   <List.Item>
                     <List.Content>
-                      <List.Title>Kate Bell</List.Title>
+                      <List.Title>Kate Brown</List.Title>
                       <List.Subtitle>Weekend photos</List.Subtitle>
                     </List.Content>
                   </List.Item>
@@ -461,8 +473,8 @@ export const MenuComposition: FunctionComponent = () => (
     <ul>
       <li>
         A choice shown on its button: the trigger’s label the chosen option,
-        chevrons after it (UIKit’s pop-up button), at a <a href="list">List</a>{' '}
-        row’s end.
+        chevrons after it (a pop-up button), at a <a href="list">List</a> row’s
+        end.
       </li>
       <li>
         A{' '}

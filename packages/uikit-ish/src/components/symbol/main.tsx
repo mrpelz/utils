@@ -7,10 +7,11 @@ import type { SymbolIcon, SymbolProps } from './props.js';
 
 export type { SymbolIcon, SymbolProps } from './props.js';
 
-// An SF Symbol, sized like the SF Pro glyph at the current font size, so it
-// can stand in for one (e.g. `􀋃` in Figma). Its outlines are filled as
-// given (SF Symbols': the Regular weight only, whatever its host's font
-// weight), its layers at their relative opacities.
+// An icon's outlines (e.g. an SF Symbol's; the library ships none), sized
+// like the SF Pro glyph at the current font size, so it can stand in for
+// one. Its outlines are filled as given (SF Symbols': the Regular weight
+// only, whatever its host's font weight), its layers at their relative
+// opacities.
 //
 // Emphasized (e.g. a selected tab's), it shows its `emphasizedIcon` (e.g.
 // the filled variant) instead: both glyphs stacked, faded by
@@ -78,7 +79,7 @@ const Glyph = ({
   );
 };
 
-/** An icon (e.g. an SF Symbol), with e.g. a `Badge`. */
+/** An icon's outlines (e.g. an SF Symbol's), with e.g. a `Badge`. */
 export const Symbol = forwardRef<HTMLSpanElement, SymbolProps>(
   (
     {

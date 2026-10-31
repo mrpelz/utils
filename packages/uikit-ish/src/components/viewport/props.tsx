@@ -4,14 +4,21 @@ import type { PortalContainer } from '../utils/main.js';
 import type { ViewportAnchorHandle } from './padding.js';
 
 /**
- * The window's horizontal size class (UIKit's): `regular` from 768px (an
- * iPad's window, full or split), `compact` below (a phone's).
+ * The window's horizontal size class: `regular` from 768px (a tablet's
+ * window, full or split), `compact` below (a phone's).
  */
 export type SizeClass = 'compact' | 'regular';
 
 /** The visual viewport, and the keyboard's height (0 without one). */
 export type VisualViewportState = {
   height: number;
+  /**
+   * The page hidden (the Page Visibility API: e.g. another tab, the app
+   * left, also a Home Screen app's). Meanwhile the rest is kept as it was
+   * (e.g. the keyboard's height: its field focused again as it's shown, see
+   * `preventFocusShift`); shown, read anew once the keyboard has settled.
+   */
+  isHidden: boolean;
   /** What the visual viewport doesn't show of the layout viewport's bottom. */
   keyboardInset: number;
   left: number;
@@ -68,7 +75,9 @@ export type ViewportProviderProps = {
   screen?: PortalContainer | null;
   /**
    * The scroll container tracked.
-   * @default the document's scrolling element
+   * @default the page filling its screen (the registered scroller there:
+   * a `Page.Root`, a sheet's content, the content layer), or the
+   * document's scrolling element
    */
   scroller?: RefObject<HTMLElement | null>;
 };
@@ -83,12 +92,38 @@ export type ViewportEdge =
  */
 export type ViewportSafeArea = 'all' | 'block' | 'inline' | 'none';
 
+/**
+ * The safe area insets a content layer keeps clear: as any layer's (see
+ * `ViewportSafeArea`), or `auto`, by what it holds (see
+ * `ViewportContentProps['safeArea']`).
+ */
+export type ViewportContentSafeArea = ViewportSafeArea | 'auto';
+
+/**
+ * A bar's scroll edge effect, as content scrolls under it:
+ * `soft`, a blur fading out away from the edge; `hard`, a solid backing
+ * with a dividing line; `none`.
+ */
+export type ViewportEdgeEffect = 'hard' | 'none' | 'soft';
+
 export type ViewportAnchorProps = ComponentProps<'div'> & {
   /**
    * The edge it floats at (e.g. `block-start`: a toolbar; `block-end`: a tab
    * bar).
    */
   edge: ViewportEdge;
+  /**
+   * At the block start or end: its scroll edge effect, as content scrolls
+   * under it (and under what's stuck to it, see `useViewportEdgeElement`).
+   * @default 'soft'
+   */
+  edgeEffect?: ViewportEdgeEffect;
+  /**
+   * At the block start or end: a color for its edge effect (e.g. to tell a
+   * state for a while), shown at rest too: `soft`, under its fade; `hard`,
+   * as its backing. Changes crossfade.
+   */
+  edgeTint?: string;
   /**
    * Its handle (see `Viewport.createAnchorHandle`), linking it to the
    * paddings given it (`anchor`, alone or among others): as high as it, or
@@ -122,12 +157,23 @@ export type ViewportOverscrollProps = ComponentProps<'div'> & {
    */
   edge?: 'block-end' | 'block-start';
   /**
-   * Kept shown at rest (UIKit's content inset), e.g. while refreshing: the
+   * Kept shown at rest, e.g. while refreshing: the
    * `Viewport.Padding` at its edge making room for it beyond the bars,
    * settling there (and back once closed).
    * @default false
    */
   open?: boolean;
+  /**
+   * The safe area insets it shows only clear of while pulled in (as
+   * `Content`'s: all, those of the block dimension, top and bottom, or the
+   * inline one, left and right, only, or none). Not kept clear, it shows in
+   * the inset too (e.g. behind the status bar), there even at rest, just
+   * past the content's end (e.g. faded by its progress, see
+   * `--uikit-viewport-overscroll-progress`); open, it rests clear of it all
+   * the same.
+   * @default 'all'
+   */
+  safeArea?: ViewportSafeArea;
 };
 
 export type ViewportPaddingProps = Omit<ComponentProps<'div'>, 'children'> & {
@@ -154,9 +200,17 @@ export type ViewportPaddingProps = Omit<ComponentProps<'div'>, 'children'> & {
   margin?: number | string;
 };
 
+export type ViewportKeyboardAccessoryProps = ComponentProps<'div'> & {
+  /**
+   * How far above the keyboard it's kept, lifted (px).
+   * @default 8
+   */
+  gap?: number;
+};
+
 export type ViewportContentProps = ComponentProps<'div'> & {
   /**
-   * Bouncing even when its content fits (UIKit's `alwaysBounceVertical`):
+   * Bouncing even when its content fits:
    * at least 1px to scroll, so a drag on it is its own (rubber-banding
    * here, the bars staying), not the document's (on iOS, moving the whole
    * app). Off: only content taller than it scrolls.
@@ -171,10 +225,20 @@ export type ViewportContentProps = ComponentProps<'div'> & {
    */
   keyboard?: 'overlay' | 'resize';
   /**
-   * The safe area insets kept clear.
-   * @default 'all'
+   * The safe area insets kept clear (as its padding), or `auto`, by what it
+   * holds (as `alwaysBounce`'s default):
+   * - Its content itself (e.g. a list after a `Viewport.Padding`): `all`.
+   *   Its content starts clear of them (the status bar, the home
+   *   indicator) and scrolls on under them, its paddings not counting
+   *   them again.
+   * - A child scrolling on its own (a `Page`, a `Header` around one, a
+   *   `Layout`, a `Navigation`, as its direct child, e.g. a tab bar's panel
+   *   rendered as one): `none`. That child fills the screen, under the
+   *   status bar too, its own bars and paddings keeping its content clear
+   *   (kept clear here, it would stop at their border).
+   * @default 'auto'
    */
-  safeArea?: ViewportSafeArea;
+  safeArea?: ViewportContentSafeArea;
 };
 
 export type ElementVisibilityOptions = {

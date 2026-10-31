@@ -49,7 +49,7 @@ const spinner = (page) =>
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'progress: a bar matches Figma (track, fill, a dot at 0%), light and dark',
+    name: 'progress: a bar matches the spec (track, fill, a dot at 0%), light and dark',
     run: async (page) => {
       for (const [scheme, track, fill] of /** @type {const} */ ([
         ['light', 'rgba(120, 120, 120, 0.2)', 'rgb(0, 136, 255)'],
@@ -85,7 +85,7 @@ export const tests = [
     },
   },
   {
-    name: 'progress: an activity indicator matches Figma (regular, small), spinning, indeterminate',
+    name: 'progress: an activity indicator matches the spec (regular, small), spinning, indeterminate',
     run: async (page) => {
       await page.open('progress');
       const regular = await spinner(page);

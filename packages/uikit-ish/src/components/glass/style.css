@@ -2,7 +2,7 @@
 @layer uikit-ish {
   /*
    * The layers of GlassBackground: each extends --uikit-glass-outset (4px
-   * for bars; Figma “BG”) beyond its element; as a lens
+   * for bars) beyond its element; as a lens
    * (--uikit-glass-scale), it scales up around the element's content
    * (unscaled layers have no `scale`, which would make them stacking
    * contexts, isolating their children's blend modes); each fades by itself
@@ -17,7 +17,7 @@
     opacity: calc(0.67 * var(--uikit-glass-fade, 1));
     pointer-events: none;
     scale: var(--uikit-glass-scale, none);
-    transition-duration: var(--glass-ios-lens-duration);
+    transition-duration: var(--glass-ui-lens-duration);
     transition-property: scale, opacity;
   }
 
@@ -29,7 +29,7 @@
     opacity: calc(0.67 * var(--uikit-glass-fade, 1));
     pointer-events: none;
     scale: var(--uikit-glass-scale, none);
-    transition-duration: var(--glass-ios-lens-duration);
+    transition-duration: var(--glass-ui-lens-duration);
     transition-property: scale, opacity;
   }
 
@@ -44,34 +44,34 @@
     );
     pointer-events: none;
     scale: var(--uikit-glass-scale, none);
-    transition-duration: var(--glass-ios-lens-duration);
+    transition-duration: var(--glass-ui-lens-duration);
     transition-property: scale, opacity;
   }
 
   .uikit-glass-tint-group {
     position: absolute;
     border-radius: 1000px;
-    box-shadow: var(--glass-ios-tint-shadow);
+    box-shadow: var(--glass-ui-tint-shadow);
     inset: calc(var(--uikit-glass-outset, 4px) * -1);
     isolation: isolate;
     opacity: var(--uikit-glass-fade, 1);
     pointer-events: none;
     scale: var(--uikit-glass-scale, none);
-    transition-duration: var(--glass-ios-lens-duration);
+    transition-duration: var(--glass-ui-lens-duration);
     transition-property: scale, opacity;
   }
 
   .uikit-glass-tint-base {
     position: absolute;
     border-radius: inherit;
-    background-color: var(--glass-ios-tint-base);
+    background-color: var(--glass-ui-tint-base);
     inset: 0;
   }
 
   .uikit-glass-tint-saturation {
     position: absolute;
     border-radius: inherit;
-    background-color: var(--glass-ios-tint-saturation);
+    background-color: var(--glass-ui-tint-saturation);
     inset: 0;
     mix-blend-mode: saturation;
   }
@@ -79,7 +79,7 @@
   .uikit-glass-tint-overlay {
     position: absolute;
     border-radius: inherit;
-    background-color: var(--glass-ios-tint-overlay);
+    background-color: var(--glass-ui-tint-overlay);
     inset: 0;
     mix-blend-mode: overlay;
   }
@@ -87,9 +87,9 @@
   .uikit-glass-tint {
     position: absolute;
     border-radius: inherit;
-    background-color: var(--uikit-glass-tint, var(--glass-ios-tint));
+    background-color: var(--uikit-glass-tint, var(--glass-ui-tint));
     inset: 0;
-    mix-blend-mode: var(--glass-ios-tint-blend);
+    mix-blend-mode: var(--glass-ui-tint-blend);
   }
 
   .uikit-glass-effect {
@@ -100,7 +100,7 @@
     opacity: var(--uikit-glass-fade, 1);
     pointer-events: none;
     scale: var(--uikit-glass-scale, none);
-    transition-duration: var(--glass-ios-lens-duration);
+    transition-duration: var(--glass-ui-lens-duration);
     transition-property: scale, opacity;
   }
 
@@ -112,7 +112,7 @@
     opacity: var(--uikit-glass-fade, 1);
     pointer-events: none;
     scale: var(--uikit-glass-scale, none);
-    transition-duration: var(--glass-ios-lens-duration);
+    transition-duration: var(--glass-ui-lens-duration);
     transition-property: scale, opacity;
   }
 
@@ -124,7 +124,7 @@
     opacity: calc(var(--uikit-glass-pressed, 0) * var(--uikit-glass-fade, 1));
     pointer-events: none;
     scale: var(--uikit-glass-scale, none);
-    transition-duration: var(--glass-ios-lens-duration);
+    transition-duration: var(--glass-ui-lens-duration);
     transition-property: scale, opacity;
   }
 
@@ -151,275 +151,275 @@
    */
 
   [data-glass-context='bright'] {
-    --uikit-glass-blur: var(--glass-ios-bright-blur);
-    --uikit-glass-fill: var(--glass-ios-bright-fill);
-    --uikit-glass-fill-filter: var(--glass-ios-bright-fill-filter);
-    --uikit-glass-content: var(--glass-ios-bright-content);
-    --uikit-glass-content-blend: var(--glass-ios-bright-content-blend);
-    --uikit-glass-content-disabled: var(--glass-ios-bright-content-disabled);
-    --uikit-glass-content-prominent: var(--glass-ios-bright-content-prominent);
+    --uikit-glass-blur: var(--glass-ui-bright-blur);
+    --uikit-glass-fill: var(--glass-ui-bright-fill);
+    --uikit-glass-fill-filter: var(--glass-ui-bright-fill-filter);
+    --uikit-glass-content: var(--glass-ui-bright-content);
+    --uikit-glass-content-blend: var(--glass-ui-bright-content-blend);
+    --uikit-glass-content-disabled: var(--glass-ui-bright-content-disabled);
+    --uikit-glass-content-prominent: var(--glass-ui-bright-content-prominent);
     --uikit-glass-content-prominent-blend: var(
-      --glass-ios-bright-content-prominent-blend
+      --glass-ui-bright-content-prominent-blend
     );
     --uikit-glass-content-prominent-disabled: var(
-      --glass-ios-bright-content-prominent-disabled
+      --glass-ui-bright-content-prominent-disabled
     );
-    --uikit-glass-selection: var(--glass-ios-bright-selection);
-    --uikit-glass-shadow: var(--glass-ios-bright-shadow);
+    --uikit-glass-selection: var(--glass-ui-bright-selection);
+    --uikit-glass-shadow: var(--glass-ui-bright-shadow);
     --uikit-glass-shadow-tinted:
       inset -3px -3px 0 -3.5px #fff, inset 3px 3px 0 -3.5px #fff,
       inset 0 0 0 0.5px rgb(255 255 255 / 50%),
-      inset 3px 3px 10px -2px var(--uikit-glass-tint, var(--glass-ios-tint)),
-      inset -3px -3px 10px -2px var(--uikit-glass-tint, var(--glass-ios-tint)),
+      inset 3px 3px 10px -2px var(--uikit-glass-tint, var(--glass-ui-tint)),
+      inset -3px -3px 10px -2px var(--uikit-glass-tint, var(--glass-ui-tint)),
       inset 0 0 5px 1px #fff, 0 0 15px 4px rgb(0 0 0 / 20%);
-    --uikit-glass-lens: var(--glass-ios-bright-lens);
-    --uikit-glass-lens-shadow: var(--glass-ios-bright-lens-shadow);
+    --uikit-glass-lens: var(--glass-ui-bright-lens);
+    --uikit-glass-lens-shadow: var(--glass-ui-bright-lens-shadow);
   }
 
   [data-glass-context='dim'] {
-    --uikit-glass-blur: var(--glass-ios-dim-blur);
-    --uikit-glass-fill: var(--glass-ios-dim-fill);
-    --uikit-glass-fill-filter: var(--glass-ios-dim-fill-filter);
-    --uikit-glass-content: var(--glass-ios-dim-content);
-    --uikit-glass-content-blend: var(--glass-ios-dim-content-blend);
-    --uikit-glass-content-disabled: var(--glass-ios-dim-content-disabled);
-    --uikit-glass-content-prominent: var(--glass-ios-dim-content-prominent);
+    --uikit-glass-blur: var(--glass-ui-dim-blur);
+    --uikit-glass-fill: var(--glass-ui-dim-fill);
+    --uikit-glass-fill-filter: var(--glass-ui-dim-fill-filter);
+    --uikit-glass-content: var(--glass-ui-dim-content);
+    --uikit-glass-content-blend: var(--glass-ui-dim-content-blend);
+    --uikit-glass-content-disabled: var(--glass-ui-dim-content-disabled);
+    --uikit-glass-content-prominent: var(--glass-ui-dim-content-prominent);
     --uikit-glass-content-prominent-blend: var(
-      --glass-ios-dim-content-prominent-blend
+      --glass-ui-dim-content-prominent-blend
     );
     --uikit-glass-content-prominent-disabled: var(
-      --glass-ios-dim-content-prominent-disabled
+      --glass-ui-dim-content-prominent-disabled
     );
-    --uikit-glass-selection: var(--glass-ios-dim-selection);
-    --uikit-glass-shadow: var(--glass-ios-dim-shadow);
+    --uikit-glass-selection: var(--glass-ui-dim-selection);
+    --uikit-glass-shadow: var(--glass-ui-dim-shadow);
     --uikit-glass-shadow-tinted:
-      inset 3px 3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ios-tint)),
-      inset -3px -3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ios-tint)),
+      inset 3px 3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ui-tint)),
+      inset -3px -3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ui-tint)),
       inset -0.5px -0.5px 0 rgb(255 255 255 / 50%),
       inset 0.5px 0.5px 0 rgb(255 255 255 / 10%),
       inset -3px 3px 0 -3.5px rgb(255 255 255 / 25%),
       inset 0 -5px 0 -3.5px
         color-mix(
           in oklab,
-          var(--uikit-glass-tint, var(--glass-ios-tint)) 50%,
+          var(--uikit-glass-tint, var(--glass-ui-tint)) 50%,
           transparent 10%
         ),
       inset 0 -5px 5px
         color-mix(
           in oklab,
-          var(--uikit-glass-tint, var(--glass-ios-tint)) 50%,
+          var(--uikit-glass-tint, var(--glass-ui-tint)) 50%,
           transparent 10%
         ),
       0 0 15px 4px rgb(0 0 0 / 20%);
-    --uikit-glass-lens: var(--glass-ios-dim-lens);
-    --uikit-glass-lens-shadow: var(--glass-ios-dim-lens-shadow);
+    --uikit-glass-lens: var(--glass-ui-dim-lens);
+    --uikit-glass-lens-shadow: var(--glass-ui-dim-lens-shadow);
   }
 
   [data-glass-context='background-bright'] {
-    --uikit-glass-blur: var(--glass-ios-background-bright-blur);
-    --uikit-glass-fill: var(--glass-ios-background-bright-fill);
-    --uikit-glass-fill-filter: var(--glass-ios-background-bright-fill-filter);
-    --uikit-glass-content: var(--glass-ios-background-bright-content);
+    --uikit-glass-blur: var(--glass-ui-background-bright-blur);
+    --uikit-glass-fill: var(--glass-ui-background-bright-fill);
+    --uikit-glass-fill-filter: var(--glass-ui-background-bright-fill-filter);
+    --uikit-glass-content: var(--glass-ui-background-bright-content);
     --uikit-glass-content-blend: var(
-      --glass-ios-background-bright-content-blend
+      --glass-ui-background-bright-content-blend
     );
     --uikit-glass-content-disabled: var(
-      --glass-ios-background-bright-content-disabled
+      --glass-ui-background-bright-content-disabled
     );
     --uikit-glass-content-prominent: var(
-      --glass-ios-background-bright-content-prominent
+      --glass-ui-background-bright-content-prominent
     );
     --uikit-glass-content-prominent-blend: var(
-      --glass-ios-background-bright-content-prominent-blend
+      --glass-ui-background-bright-content-prominent-blend
     );
     --uikit-glass-content-prominent-disabled: var(
-      --glass-ios-background-bright-content-prominent-disabled
+      --glass-ui-background-bright-content-prominent-disabled
     );
-    --uikit-glass-selection: var(--glass-ios-background-bright-selection);
-    --uikit-glass-shadow: var(--glass-ios-background-bright-shadow);
+    --uikit-glass-selection: var(--glass-ui-background-bright-selection);
+    --uikit-glass-shadow: var(--glass-ui-background-bright-shadow);
     --uikit-glass-shadow-tinted:
       inset -3px -3px 0 -3.5px #fff, inset 3px 3px 0 -3.5px #fff,
       inset 0 0 0 0.5px rgb(255 255 255 / 50%),
-      inset 3px 3px 10px -2px var(--uikit-glass-tint, var(--glass-ios-tint)),
-      inset -3px -3px 10px -2px var(--uikit-glass-tint, var(--glass-ios-tint)),
+      inset 3px 3px 10px -2px var(--uikit-glass-tint, var(--glass-ui-tint)),
+      inset -3px -3px 10px -2px var(--uikit-glass-tint, var(--glass-ui-tint)),
       inset 0 0 5px 1px #fff, 0 0 15px 4px rgb(0 0 0 / 20%);
-    --uikit-glass-lens: var(--glass-ios-background-bright-lens);
-    --uikit-glass-lens-shadow: var(--glass-ios-background-bright-lens-shadow);
+    --uikit-glass-lens: var(--glass-ui-background-bright-lens);
+    --uikit-glass-lens-shadow: var(--glass-ui-background-bright-lens-shadow);
   }
 
   [data-glass-context='background-dim'] {
-    --uikit-glass-blur: var(--glass-ios-background-dim-blur);
-    --uikit-glass-fill: var(--glass-ios-background-dim-fill);
-    --uikit-glass-fill-filter: var(--glass-ios-background-dim-fill-filter);
-    --uikit-glass-content: var(--glass-ios-background-dim-content);
-    --uikit-glass-content-blend: var(--glass-ios-background-dim-content-blend);
+    --uikit-glass-blur: var(--glass-ui-background-dim-blur);
+    --uikit-glass-fill: var(--glass-ui-background-dim-fill);
+    --uikit-glass-fill-filter: var(--glass-ui-background-dim-fill-filter);
+    --uikit-glass-content: var(--glass-ui-background-dim-content);
+    --uikit-glass-content-blend: var(--glass-ui-background-dim-content-blend);
     --uikit-glass-content-disabled: var(
-      --glass-ios-background-dim-content-disabled
+      --glass-ui-background-dim-content-disabled
     );
     --uikit-glass-content-prominent: var(
-      --glass-ios-background-dim-content-prominent
+      --glass-ui-background-dim-content-prominent
     );
     --uikit-glass-content-prominent-blend: var(
-      --glass-ios-background-dim-content-prominent-blend
+      --glass-ui-background-dim-content-prominent-blend
     );
     --uikit-glass-content-prominent-disabled: var(
-      --glass-ios-background-dim-content-prominent-disabled
+      --glass-ui-background-dim-content-prominent-disabled
     );
-    --uikit-glass-selection: var(--glass-ios-background-dim-selection);
-    --uikit-glass-shadow: var(--glass-ios-background-dim-shadow);
+    --uikit-glass-selection: var(--glass-ui-background-dim-selection);
+    --uikit-glass-shadow: var(--glass-ui-background-dim-shadow);
     --uikit-glass-shadow-tinted:
-      inset 3px 3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ios-tint)),
-      inset -3px -3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ios-tint)),
+      inset 3px 3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ui-tint)),
+      inset -3px -3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ui-tint)),
       inset -0.5px -0.5px 0 rgb(255 255 255 / 50%),
       inset 0.5px 0.5px 0 rgb(255 255 255 / 10%),
       inset -3px 3px 0 -3.5px rgb(255 255 255 / 25%),
       inset 0 -5px 0 -3.5px
         color-mix(
           in oklab,
-          var(--uikit-glass-tint, var(--glass-ios-tint)) 50%,
+          var(--uikit-glass-tint, var(--glass-ui-tint)) 50%,
           transparent 10%
         ),
       inset 0 -5px 5px
         color-mix(
           in oklab,
-          var(--uikit-glass-tint, var(--glass-ios-tint)) 50%,
+          var(--uikit-glass-tint, var(--glass-ui-tint)) 50%,
           transparent 10%
         ),
       0 0 15px 4px rgb(0 0 0 / 20%);
-    --uikit-glass-lens: var(--glass-ios-background-dim-lens);
-    --uikit-glass-lens-shadow: var(--glass-ios-background-dim-lens-shadow);
+    --uikit-glass-lens: var(--glass-ui-background-dim-lens);
+    --uikit-glass-lens-shadow: var(--glass-ui-background-dim-lens-shadow);
   }
 
   [data-glass-context='auto'],
   [data-glass-context='adaptive'] {
     --uikit-glass-blur: light-dark(
-      var(--glass-ios-bright-blur),
-      var(--glass-ios-dim-blur)
+      var(--glass-ui-bright-blur),
+      var(--glass-ui-dim-blur)
     );
     --uikit-glass-fill: light-dark(
-      var(--glass-ios-bright-fill),
-      var(--glass-ios-dim-fill)
+      var(--glass-ui-bright-fill),
+      var(--glass-ui-dim-fill)
     );
-    --uikit-glass-fill-filter: var(--glass-ios-bright-fill-filter);
+    --uikit-glass-fill-filter: var(--glass-ui-bright-fill-filter);
     --uikit-glass-content: light-dark(
-      var(--glass-ios-bright-content),
-      var(--glass-ios-dim-content)
+      var(--glass-ui-bright-content),
+      var(--glass-ui-dim-content)
     );
-    --uikit-glass-content-blend: var(--glass-ios-bright-content-blend);
+    --uikit-glass-content-blend: var(--glass-ui-bright-content-blend);
     --uikit-glass-content-disabled: light-dark(
-      var(--glass-ios-bright-content-disabled),
-      var(--glass-ios-dim-content-disabled)
+      var(--glass-ui-bright-content-disabled),
+      var(--glass-ui-dim-content-disabled)
     );
-    --uikit-glass-content-prominent: var(--glass-ios-bright-content-prominent);
+    --uikit-glass-content-prominent: var(--glass-ui-bright-content-prominent);
     --uikit-glass-content-prominent-blend: var(
-      --glass-ios-bright-content-prominent-blend
+      --glass-ui-bright-content-prominent-blend
     );
     --uikit-glass-content-prominent-disabled: var(
-      --glass-ios-bright-content-prominent-disabled
+      --glass-ui-bright-content-prominent-disabled
     );
     --uikit-glass-selection: light-dark(
-      var(--glass-ios-bright-selection),
-      var(--glass-ios-dim-selection)
+      var(--glass-ui-bright-selection),
+      var(--glass-ui-dim-selection)
     );
-    --uikit-glass-shadow: var(--glass-ios-bright-shadow);
+    --uikit-glass-shadow: var(--glass-ui-bright-shadow);
     --uikit-glass-shadow-tinted:
       inset -3px -3px 0 -3.5px #fff, inset 3px 3px 0 -3.5px #fff,
       inset 0 0 0 0.5px rgb(255 255 255 / 50%),
-      inset 3px 3px 10px -2px var(--uikit-glass-tint, var(--glass-ios-tint)),
-      inset -3px -3px 10px -2px var(--uikit-glass-tint, var(--glass-ios-tint)),
+      inset 3px 3px 10px -2px var(--uikit-glass-tint, var(--glass-ui-tint)),
+      inset -3px -3px 10px -2px var(--uikit-glass-tint, var(--glass-ui-tint)),
       inset 0 0 5px 1px #fff, 0 0 15px 4px rgb(0 0 0 / 20%);
     --uikit-glass-lens: light-dark(
-      var(--glass-ios-bright-lens),
-      var(--glass-ios-dim-lens)
+      var(--glass-ui-bright-lens),
+      var(--glass-ui-dim-lens)
     );
-    --uikit-glass-lens-shadow: var(--glass-ios-bright-lens-shadow);
+    --uikit-glass-lens-shadow: var(--glass-ui-bright-lens-shadow);
 
     @media (prefers-color-scheme: dark) {
-      --uikit-glass-fill-filter: var(--glass-ios-dim-fill-filter);
-      --uikit-glass-content-blend: var(--glass-ios-dim-content-blend);
-      --uikit-glass-content-prominent: var(--glass-ios-dim-content-prominent);
+      --uikit-glass-fill-filter: var(--glass-ui-dim-fill-filter);
+      --uikit-glass-content-blend: var(--glass-ui-dim-content-blend);
+      --uikit-glass-content-prominent: var(--glass-ui-dim-content-prominent);
       --uikit-glass-content-prominent-blend: var(
-        --glass-ios-dim-content-prominent-blend
+        --glass-ui-dim-content-prominent-blend
       );
       --uikit-glass-content-prominent-disabled: var(
-        --glass-ios-dim-content-prominent-disabled
+        --glass-ui-dim-content-prominent-disabled
       );
-      --uikit-glass-shadow: var(--glass-ios-dim-shadow);
+      --uikit-glass-shadow: var(--glass-ui-dim-shadow);
       --uikit-glass-shadow-tinted:
-        inset 3px 3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ios-tint)),
-        inset -3px -3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ios-tint)),
+        inset 3px 3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ui-tint)),
+        inset -3px -3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ui-tint)),
         inset -0.5px -0.5px 0 rgb(255 255 255 / 50%),
         inset 0.5px 0.5px 0 rgb(255 255 255 / 10%),
         inset -3px 3px 0 -3.5px rgb(255 255 255 / 25%),
         inset 0 -5px 0 -3.5px
           color-mix(
             in oklab,
-            var(--uikit-glass-tint, var(--glass-ios-tint)) 50%,
+            var(--uikit-glass-tint, var(--glass-ui-tint)) 50%,
             transparent 10%
           ),
         inset 0 -5px 5px
           color-mix(
             in oklab,
-            var(--uikit-glass-tint, var(--glass-ios-tint)) 50%,
+            var(--uikit-glass-tint, var(--glass-ui-tint)) 50%,
             transparent 10%
           ),
         0 0 15px 4px rgb(0 0 0 / 20%);
-      --uikit-glass-lens-shadow: var(--glass-ios-dim-lens-shadow);
+      --uikit-glass-lens-shadow: var(--glass-ui-dim-lens-shadow);
     }
 
     &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
-      --uikit-glass-fill-filter: var(--glass-ios-bright-fill-filter);
-      --uikit-glass-content-blend: var(--glass-ios-bright-content-blend);
+      --uikit-glass-fill-filter: var(--glass-ui-bright-fill-filter);
+      --uikit-glass-content-blend: var(--glass-ui-bright-content-blend);
       --uikit-glass-content-prominent: var(
-        --glass-ios-bright-content-prominent
+        --glass-ui-bright-content-prominent
       );
       --uikit-glass-content-prominent-blend: var(
-        --glass-ios-bright-content-prominent-blend
+        --glass-ui-bright-content-prominent-blend
       );
       --uikit-glass-content-prominent-disabled: var(
-        --glass-ios-bright-content-prominent-disabled
+        --glass-ui-bright-content-prominent-disabled
       );
-      --uikit-glass-shadow: var(--glass-ios-bright-shadow);
+      --uikit-glass-shadow: var(--glass-ui-bright-shadow);
       --uikit-glass-shadow-tinted:
         inset -3px -3px 0 -3.5px #fff, inset 3px 3px 0 -3.5px #fff,
         inset 0 0 0 0.5px rgb(255 255 255 / 50%),
-        inset 3px 3px 10px -2px var(--uikit-glass-tint, var(--glass-ios-tint)),
-        inset -3px -3px 10px -2px var(--uikit-glass-tint, var(--glass-ios-tint)),
+        inset 3px 3px 10px -2px var(--uikit-glass-tint, var(--glass-ui-tint)),
+        inset -3px -3px 10px -2px var(--uikit-glass-tint, var(--glass-ui-tint)),
         inset 0 0 5px 1px #fff, 0 0 15px 4px rgb(0 0 0 / 20%);
-      --uikit-glass-lens-shadow: var(--glass-ios-bright-lens-shadow);
+      --uikit-glass-lens-shadow: var(--glass-ui-bright-lens-shadow);
     }
 
     &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
-      --uikit-glass-fill-filter: var(--glass-ios-dim-fill-filter);
-      --uikit-glass-content-blend: var(--glass-ios-dim-content-blend);
-      --uikit-glass-content-prominent: var(--glass-ios-dim-content-prominent);
+      --uikit-glass-fill-filter: var(--glass-ui-dim-fill-filter);
+      --uikit-glass-content-blend: var(--glass-ui-dim-content-blend);
+      --uikit-glass-content-prominent: var(--glass-ui-dim-content-prominent);
       --uikit-glass-content-prominent-blend: var(
-        --glass-ios-dim-content-prominent-blend
+        --glass-ui-dim-content-prominent-blend
       );
       --uikit-glass-content-prominent-disabled: var(
-        --glass-ios-dim-content-prominent-disabled
+        --glass-ui-dim-content-prominent-disabled
       );
-      --uikit-glass-shadow: var(--glass-ios-dim-shadow);
+      --uikit-glass-shadow: var(--glass-ui-dim-shadow);
       --uikit-glass-shadow-tinted:
-        inset 3px 3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ios-tint)),
-        inset -3px -3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ios-tint)),
+        inset 3px 3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ui-tint)),
+        inset -3px -3px 0 -3.5px var(--uikit-glass-tint, var(--glass-ui-tint)),
         inset -0.5px -0.5px 0 rgb(255 255 255 / 50%),
         inset 0.5px 0.5px 0 rgb(255 255 255 / 10%),
         inset -3px 3px 0 -3.5px rgb(255 255 255 / 25%),
         inset 0 -5px 0 -3.5px
           color-mix(
             in oklab,
-            var(--uikit-glass-tint, var(--glass-ios-tint)) 50%,
+            var(--uikit-glass-tint, var(--glass-ui-tint)) 50%,
             transparent 10%
           ),
         inset 0 -5px 5px
           color-mix(
             in oklab,
-            var(--uikit-glass-tint, var(--glass-ios-tint)) 50%,
+            var(--uikit-glass-tint, var(--glass-ui-tint)) 50%,
             transparent 10%
           ),
         0 0 15px 4px rgb(0 0 0 / 20%);
-      --uikit-glass-lens-shadow: var(--glass-ios-dim-lens-shadow);
+      --uikit-glass-lens-shadow: var(--glass-ui-dim-lens-shadow);
     }
   }
 
@@ -431,36 +431,36 @@
    */
   .uikit-glass-medium {
     --uikit-glass-background: light-dark(
-      var(--glass-ios-medium-light-background),
-      var(--glass-ios-medium-dark-background)
+      var(--glass-ui-medium-light-background),
+      var(--glass-ui-medium-dark-background)
     );
     --uikit-glass-content: light-dark(
-      var(--glass-ios-medium-light-content),
-      var(--glass-ios-medium-dark-content)
+      var(--glass-ui-medium-light-content),
+      var(--glass-ui-medium-dark-content)
     );
-    --uikit-glass-content-blend: var(--glass-ios-medium-light-content-blend);
+    --uikit-glass-content-blend: var(--glass-ui-medium-light-content-blend);
     --uikit-glass-content-secondary: var(
-      --glass-ios-medium-light-content-secondary
+      --glass-ui-medium-light-content-secondary
     );
     --uikit-glass-content-disabled: var(
-      --glass-ios-medium-light-content-disabled
+      --glass-ui-medium-light-content-disabled
     );
     --uikit-glass-separator: light-dark(
-      var(--glass-ios-medium-light-separator),
-      var(--glass-ios-medium-dark-separator)
+      var(--glass-ui-medium-light-separator),
+      var(--glass-ui-medium-dark-separator)
     );
     --uikit-glass-divider: light-dark(
-      var(--glass-ios-medium-light-divider),
-      var(--glass-ios-medium-dark-divider)
+      var(--glass-ui-medium-light-divider),
+      var(--glass-ui-medium-dark-divider)
     );
     --uikit-glass-selection: light-dark(
-      var(--glass-ios-medium-light-selection),
-      var(--glass-ios-medium-dark-selection)
+      var(--glass-ui-medium-light-selection),
+      var(--glass-ui-medium-dark-selection)
     );
-    --uikit-glass-shadow: var(--glass-ios-bright-shadow);
+    --uikit-glass-shadow: var(--glass-ui-bright-shadow);
     --uikit-list-container-background: transparent;
     --uikit-list-container-group-background: var(
-      --color-ios-tertiary-system-fill
+      --color-ui-tertiary-system-fill
     );
 
     backdrop-filter: saturate(180%) blur(16px);
@@ -468,36 +468,36 @@
     box-shadow: var(--uikit-glass-shadow);
 
     @media (prefers-color-scheme: dark) {
-      --uikit-glass-content-blend: var(--glass-ios-medium-dark-content-blend);
+      --uikit-glass-content-blend: var(--glass-ui-medium-dark-content-blend);
       --uikit-glass-content-secondary: var(
-        --glass-ios-medium-dark-content-secondary
+        --glass-ui-medium-dark-content-secondary
       );
       --uikit-glass-content-disabled: var(
-        --glass-ios-medium-dark-content-disabled
+        --glass-ui-medium-dark-content-disabled
       );
-      --uikit-glass-shadow: var(--glass-ios-dim-shadow);
+      --uikit-glass-shadow: var(--glass-ui-dim-shadow);
     }
 
     &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
-      --uikit-glass-content-blend: var(--glass-ios-medium-light-content-blend);
+      --uikit-glass-content-blend: var(--glass-ui-medium-light-content-blend);
       --uikit-glass-content-secondary: var(
-        --glass-ios-medium-light-content-secondary
+        --glass-ui-medium-light-content-secondary
       );
       --uikit-glass-content-disabled: var(
-        --glass-ios-medium-light-content-disabled
+        --glass-ui-medium-light-content-disabled
       );
-      --uikit-glass-shadow: var(--glass-ios-bright-shadow);
+      --uikit-glass-shadow: var(--glass-ui-bright-shadow);
     }
 
     &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
-      --uikit-glass-content-blend: var(--glass-ios-medium-dark-content-blend);
+      --uikit-glass-content-blend: var(--glass-ui-medium-dark-content-blend);
       --uikit-glass-content-secondary: var(
-        --glass-ios-medium-dark-content-secondary
+        --glass-ui-medium-dark-content-secondary
       );
       --uikit-glass-content-disabled: var(
-        --glass-ios-medium-dark-content-disabled
+        --glass-ui-medium-dark-content-disabled
       );
-      --uikit-glass-shadow: var(--glass-ios-dim-shadow);
+      --uikit-glass-shadow: var(--glass-ui-dim-shadow);
     }
   }
 }

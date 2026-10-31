@@ -1,4 +1,3 @@
-import type { IconDefinition } from '@bradleyhodges/sfsymbols-types';
 import {
   FunctionComponent,
   UIEvent,
@@ -9,61 +8,109 @@ import {
 } from 'react';
 
 import { Symbol, type SymbolIcon } from '../../../components/index.js';
+import {
+  iconPackage,
+  type LoadedIcon,
+  loadIcon,
+  loadIconCategories,
+  loadIconNames,
+} from '../../tooling/icons.js';
 
-// Every SF Symbol of `@bradleyhodges/sfsymbols`, in a grid (no stage): the
-// package's index loaded on request (all of its symbols: a large download),
-// searchable by name, keyword and category; only the rows in view rendered.
-// A symbol clicked, its import is copied. Also its brand icons (FontAwesome's:
-// their paths explicitly filled), at their own units.
+// Every SF Symbol of `@bradleyhodges/sfsymbols` (not this library's, see
+// tooling/icons.ts), in a grid (no stage): on request, their names read off
+// the package's index and their categories loaded, searchable by both; only
+// the rows in view rendered, each cell's icon loaded once shown. A symbol
+// clicked, its import is copied. Also its brand icons (FontAwesome's: their
+// paths explicitly filled), at their own units.
 
 // A cell's size (px), and the rows rendered beyond the view (each way).
 const cellSize = 96;
 const overscan = 2;
 
-const isIcon = (value: unknown): value is IconDefinition =>
-  typeof value === 'object' && value !== null && 'svgPathData' in value;
-
-type CatalogIcon = IconDefinition & SymbolIcon;
-
 /** A brand icon's units: FontAwesome's, 512 to an em. */
-const withUnits = (icon: IconDefinition): CatalogIcon =>
+const withUnits = (icon: LoadedIcon): SymbolIcon =>
   icon.svgPathData.some((path) => 'fill' in path)
     ? { ...icon, unitsPerEm: 512 }
     : icon;
 
-/** What a symbol is found by: its names, keywords and categories. */
-const searchText = ({
-  categories,
-  iconName,
-  keywords,
-  sourceName,
-}: IconDefinition) =>
-  // (Its keywords: a list, typed as a record.)
-  [iconName, sourceName, ...Object.values(keywords ?? {}), ...categories]
-    .join(' ')
-    .toLowerCase();
-
 /** The import of a symbol, as copied. */
-const importOf = ({ iconName }: IconDefinition) =>
-  `import { ${iconName} } from '@bradleyhodges/sfsymbols/${iconName}';`;
+const importOf = (name: string) =>
+  `import { ${name} } from '${iconPackage}/${name}';`;
 
-/** The symbols, once loaded: searched, virtualized. */
+/** A symbol's cell: its icon once loaded (until then, its space empty). */
+const Cell: FunctionComponent<{
+  name: string;
+  onCopy: (name?: string) => void;
+}> = ({ name, onCopy }) => {
+  const [icon, setIcon] = useState<SymbolIcon>();
+
+  useEffect(() => {
+    let isCurrent = true;
+    loadIcon(name)
+      .then((loaded) => {
+        if (isCurrent) setIcon(withUnits(loaded));
+      })
+      .catch(() => undefined);
+    return () => {
+      isCurrent = false;
+    };
+  }, [name]);
+
+  return (
+    <button
+      className="symbol-catalog-cell"
+      title={importOf(name)}
+      type="button"
+      onClick={() =>
+        navigator.clipboard
+          .writeText(importOf(name))
+          .then(() => onCopy(name))
+          .catch(() => onCopy())
+      }
+    >
+      {icon ? <Symbol icon={icon} /> : <span />}
+      <span className="symbol-catalog-name">{icon?.sourceName}</span>
+    </button>
+  );
+};
+
+/** What a symbol is found by: its name and its categories' names. */
+const searchTexts = (
+  names: readonly string[],
+  categories: ReadonlyMap<string, readonly string[]>,
+) => {
+  const named = new Map<string, string[]>();
+  for (const [category, members] of categories) {
+    for (const member of members) {
+      named.set(member, [...(named.get(member) ?? []), category]);
+    }
+  }
+  return names.map((name) =>
+    [name.slice(2), ...(named.get(name) ?? [])].join(' ').toLowerCase(),
+  );
+};
+
+/** The symbols, once listed: searched, virtualized. */
 const Grid: FunctionComponent<{
-  icons: readonly CatalogIcon[];
-}> = ({ icons }) => {
+  categories: ReadonlyMap<string, readonly string[]>;
+  names: readonly string[];
+}> = ({ categories, names }) => {
   const [query, setQuery] = useState('');
   const [copied, setCopied] = useState<string>();
   const [scrollTop, setScrollTop] = useState(0);
   const [size, setSize] = useState({ height: 0, width: 0 });
   const box = useRef<HTMLDivElement>(null);
-  const texts = useMemo(() => icons.map((icon) => searchText(icon)), [icons]);
+  const texts = useMemo(
+    () => searchTexts(names, categories),
+    [categories, names],
+  );
 
   const found = useMemo(() => {
     const terms = query.toLowerCase().split(/\s+/u).filter(Boolean);
-    return icons.filter((_, index) =>
+    return names.filter((_, index) =>
       terms.every((term) => texts[index]?.includes(term)),
     );
-  }, [icons, query, texts]);
+  }, [names, query, texts]);
 
   useEffect(() => {
     const { current: element } = box;
@@ -90,7 +137,7 @@ const Grid: FunctionComponent<{
         <input
           aria-label="Search symbols"
           className="symbol-catalog-search"
-          placeholder={`Search ${String(icons.length)} symbols`}
+          placeholder={`Search ${String(names.length)} symbols`}
           type="search"
           value={query}
           onInput={({ currentTarget }) => {
@@ -124,22 +171,12 @@ const Grid: FunctionComponent<{
               top: `${String(first * cellSize)}px`,
             }}
           >
-            {shown.map((icon) => (
-              <button
-                key={icon.iconName}
-                className="symbol-catalog-cell"
-                title={importOf(icon)}
-                type="button"
-                onClick={() =>
-                  navigator.clipboard
-                    .writeText(importOf(icon))
-                    .then(() => setCopied(icon.iconName))
-                    .catch(() => setCopied(undefined))
-                }
-              >
-                <Symbol icon={icon} />
-                <span className="symbol-catalog-name">{icon.sourceName}</span>
-              </button>
+            {shown.map((name) => (
+              <Cell
+                key={name}
+                name={name}
+                onCopy={setCopied}
+              />
             ))}
           </div>
         </div>
@@ -149,14 +186,17 @@ const Grid: FunctionComponent<{
 };
 
 /**
- * Every SF Symbol, in a searchable grid: loaded on request (the package's
- * index, see above).
+ * Every SF Symbol, in a searchable grid: listed on request (the package's
+ * index and categories, see above).
  */
 export const Catalog: FunctionComponent = () => {
-  const [icons, setIcons] = useState<readonly CatalogIcon[]>();
+  const [listed, setListed] = useState<{
+    categories: ReadonlyMap<string, readonly string[]>;
+    names: readonly string[];
+  }>();
   const [state, setState] = useState<'error' | 'idle' | 'loading'>('idle');
 
-  if (icons) return <Grid icons={icons} />;
+  if (listed) return <Grid {...listed} />;
 
   return (
     <div className="symbol-catalog">
@@ -166,14 +206,8 @@ export const Catalog: FunctionComponent = () => {
         type="button"
         onClick={() => {
           setState('loading');
-          import('@bradleyhodges/sfsymbols')
-            .then((module) =>
-              setIcons(
-                Object.values(module)
-                  .filter(isIcon)
-                  .map((icon) => withUnits(icon)),
-              ),
-            )
+          Promise.all([loadIconNames(), loadIconCategories()])
+            .then(([names, categories]) => setListed({ categories, names }))
             .catch(() => setState('error'));
         }}
       >

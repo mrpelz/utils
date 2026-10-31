@@ -87,12 +87,10 @@ export const TypographyInformationArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The styles’ values: Figma “Typography” (“Text styles”, “Dynamic Type”,
-        “Dynamic Type – Accessibility Sizes”).
+        The styles’ values, at each text size (the accessibility sizes too).
       </li>
       <li>
-        Accessibility sizes without tracking (Figma gives none), and Figma’s odd
-        values kept (Title 2 at AX2 as Title 1).
+        Accessibility sizes without tracking, and Title 2 at AX2 as Title 1.
       </li>
     </ul>
   </>

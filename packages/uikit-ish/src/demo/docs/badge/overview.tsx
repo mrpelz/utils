@@ -1,6 +1,5 @@
 import './style.css';
 
-import { sfBell } from '@bradleyhodges/sfsymbols/sfBell';
 import { FunctionComponent } from 'react';
 
 import {
@@ -21,6 +20,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfBell } from '../../tooling/icons.js';
 import { badgeRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 
@@ -111,8 +111,8 @@ export const BadgeOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A count (or a word) in a red capsule, or a dot: something new to look at
-        (UIKit <code>badgeValue</code>, Figma “_Badge”).
+        A count (or a word) in a red capsule, or a dot: something new to look
+        at.
       </li>
       <li>
         On a symbol (a tab’s, a button’s), on an element’s corner (an avatar’s),

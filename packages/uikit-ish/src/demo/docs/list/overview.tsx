@@ -153,9 +153,7 @@ export const ListOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <ul className="demo-lead">
-      <li>
-        Rows of data in sections (UIKit <code>UITableView</code>).
-      </li>
+      <li>Rows of data in sections.</li>
       <li>A section: a group of rows, an optional header and footer.</li>
       <li>
         A row: a grid of parts (an edit control, an image, a title and subtitle,
@@ -200,7 +198,7 @@ export const ListOverview: FunctionComponent = () => (
         pop-up button, which can sit in a row).
       </li>
       <li>
-        An app’s top-level sections on iPhone: a <a href="tab-bar">Tab bar</a>.
+        An app’s top-level sections on a phone: a <a href="tab-bar">Tab bar</a>.
       </li>
       <li>
         Text between rows, without rows: a{' '}
@@ -228,7 +226,7 @@ export const ListOverview: FunctionComponent = () => (
       parts={[
         ['List.Root', pickRows(listRootRows, 'listStyle', 'editing')],
         ['List.Header', pickRows(listHeaderRows, 'prominence')],
-        ['List.Group', pickRows(listGroupRows, 'onReorder')],
+        ['List.Group', pickRows(listGroupRows, 'reorderHandle')],
         ['List.Item', pickRows(listItemRows, 'onClick', 'selected')],
         ['List.Title', pickRows(listTitleRows, 'render')],
         ['List.Image', pickRows(listImageRows, 'variant')],
@@ -353,7 +351,7 @@ export const ListOverview: FunctionComponent = () => (
           part="List.Button"
         />
         ) is a button or link: its hit area covers the row, beneath the trailing
-        controls; pressed, the row shows UIKit’s selection gray. A row with a
+        controls; pressed, the row shows the selection gray. A row with a
         control passes its clicks on to it (<code>forwardClick</code>).
       </li>
       <li>
@@ -373,9 +371,13 @@ export const ListOverview: FunctionComponent = () => (
         >
           Grabber
         </PartLink>{' '}
-        reorders it in its group (<code>onReorder</code>; the app reorders its
-        rows). Plain lists’ section titles stick to the top while their section
-        scrolls.
+        moves it where its reorder handle allows (
+        <PartLink
+          component="list"
+          part="List.createReorderHandle"
+        />
+        , across groups too; the app reorders its rows). Plain lists’ section
+        titles stick to the top while their section scrolls.
       </li>
       <li>
         Edit controls (

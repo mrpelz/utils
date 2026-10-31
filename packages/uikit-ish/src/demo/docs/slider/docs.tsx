@@ -121,7 +121,7 @@ export const sliderRootRows: readonly PropRow[] = [
       <code>center</code>, the thumb’s center at the control’s edge;{' '}
       <code>edge</code>, inset so its edge is at the control’s edge;{' '}
       <code>edge-client-only</code>, as <code>edge</code>, but rendered after
-      hydration. (Base UI’s default is <code>center</code>; iOS’s knob is
+      hydration. (Base UI’s default is <code>center</code>; the knob here is
       inset.)
     </>,
   ],
@@ -188,12 +188,9 @@ export const sliderRootRows: readonly PropRow[] = [
     'tint',
     'string (a CSS color)',
     <>
-      the app’s tint (<code>--color-ios-primary</code>)
+      the app’s tint (<code>--color-ui-primary</code>)
     </>,
-    <>
-      The fill’s color, and the pressed knob’s glow (UIKit{' '}
-      <code>minimumTrackTintColor</code>).
-    </>,
+    <>The fill’s color, and the pressed knob’s glow.</>,
   ],
   [
     'cursor',
@@ -398,8 +395,7 @@ export const sliderSymbolRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      The symbol (UIKit <code>minimumValueImage</code>,{' '}
-      <code>maximumValueImage</code>), e.g. a{' '}
+      The symbol, e.g. a{' '}
       <PartLink
         component="symbol"
         part="Symbol"

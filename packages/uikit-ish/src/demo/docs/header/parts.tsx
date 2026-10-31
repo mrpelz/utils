@@ -1,4 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
 import { FunctionComponent } from 'react';
 
 import {
@@ -15,6 +14,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfChevronBackward } from '../../tooling/icons.js';
 import { names } from '../viewport/content.js';
 import {
   headerAccessoryRows,
@@ -44,7 +44,7 @@ const RootPart: FunctionComponent = () => {
       state={state}
       title="Header.Root"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root
@@ -121,7 +121,7 @@ const LargeTitlePart: FunctionComponent = () => {
       state={state}
       title="Header.LargeTitle"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root
@@ -198,7 +198,7 @@ const AccessoryPart: FunctionComponent = () => {
       state={state}
       title="Header.Accessory"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root
@@ -356,8 +356,13 @@ export const HeaderParts: FunctionComponent = () => (
           part="Viewport.Padding"
         />{' '}
         at its start, as high as the bar), the bar’s title fades in as the large
-        title scrolls away, and what scrolls under the bar blurs beneath it
-        (scroll-driven, unique per header).
+        title scrolls away, and what scrolls under the bar blurs beneath it (the
+        bar’s anchor’s edge effect, see{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Anchor"
+        />
+        ).
       </li>
       <li>
         Around the page, or within it (e.g. a tab’s panel rendered as the page):
@@ -408,12 +413,16 @@ export const HeaderParts: FunctionComponent = () => (
     <ul>
       <li>
         What stays with the bar (a search field, a segmented control): after the
-        large title, scrolling with it, then sticking below the bar (UIKit: a
-        search bar with <code>hidesSearchBarWhenScrolling</code> false).
+        large title, scrolling with it, then sticking below the bar.
       </li>
       <li>
-        16px from the sides, 8px above the content; what scrolls under it
-        blurred, as under the bar.
+        16px from the sides, 8px above the content; stuck, the bar’s edge effect
+        reaches under it too (
+        <PartLink
+          component="viewport"
+          part="useViewportEdgeElement"
+        />
+        ), what scrolls under it blurred, as under the bar.
       </li>
       <li>
         It sticks below the bar, by its height (measured, also a taller one: a

@@ -3,6 +3,7 @@ import type { Properties } from 'csstype';
 import type { JSX, ReactNode } from 'react';
 
 import type { SecondaryClickProps } from '../utils/main.js';
+import type { ListReorderHandle } from './reorder.js';
 import type { ListSwipeActionsHandle } from './swipe-actions-handle.js';
 
 export type ListStyle = 'grouped' | 'insetGrouped' | 'plain' | 'sidebar';
@@ -21,7 +22,7 @@ export type PartProps<Tag extends IntrinsicTag> = Omit<
   (Tag extends 'button' | 'li' ? SecondaryClickProps : unknown);
 
 /**
- * An edit mode (UIKit `isEditing`), by side: `leading` (its rows' leading
+ * An edit mode, by side: `leading` (its rows' leading
  * edit controls, `Checkbox`, `Radio`, `EditButton`, slid in), `trailing`
  * (their trailing ones, `Grabber`), `both`, `none` (not editing: all slid
  * out, hidden), or `ignore` (not managed: shown as they are). Parts react
@@ -46,13 +47,21 @@ export type WhileEditingProps = {
 
 export type ListRootProps = PartProps<'div'> & {
   /**
+   * Its checkboxes pressed and dragged along the rows, selecting them (as
+   * the first one flips: on, or off), rows dragged back over returning;
+   * scrolling along near the scroll container's ends. Dragging from a
+   * checkbox, the page doesn't scroll (nor a sheet swipe away).
+   * @default true
+   */
+  dragToSelect?: boolean;
+  /**
    * Its sections' edit mode, unless their own (see `ListEditing`; Section,
    * Group, Item: each overriding the one around it).
    * @default 'ignore'
    */
   editing?: ListEditing;
   /**
-   * UIKit `UITableView.Style`.
+   * The list's style: inset grouped, grouped or plain.
    * @default 'insetGrouped'
    */
   listStyle?: ListStyle;
@@ -64,13 +73,30 @@ export type ListRootProps = PartProps<'div'> & {
 };
 
 export type ListGroupProps = PartProps<'ul'> & {
+  /** Its name, the target's, for its gaps (see `reorderHandle`). */
+  dropName?: string;
   /** Its rows' edit mode, unless their own (see `ListEditing`). */
   editing?: ListEditing;
   /**
-   * Called when a row is moved by its `Grabber` from one index to another
-   * (among the group's rows); the app reorders them.
+   * Handles whose rows can be dropped before, between and after its rows (as
+   * a `DropGroup` around them; see `List.createReorderHandle`).
    */
-  onReorder?: (from: number, to: number) => void;
+  reorderHandle?: ListReorderHandle | readonly ListReorderHandle[];
+};
+
+export type ListDropGroupProps = {
+  children?: ReactNode;
+  /** Its name, the target's, for its gaps. */
+  dropName?: string;
+  /** Handles whose rows can be dropped before, between and after its rows. */
+  reorderHandle: ListReorderHandle | readonly ListReorderHandle[];
+};
+
+export type ListDropTargetProps = PartProps<'li'> & {
+  /** Its name, the target's. */
+  dropName?: string;
+  /** Handles whose rows can be dropped where it's placed. */
+  reorderHandle: ListReorderHandle | readonly ListReorderHandle[];
 };
 
 export type ListSectionProps = PartProps<'section'> & {
@@ -88,9 +114,21 @@ export type ListItemProps = PartProps<'li'> & {
    * Its edit mode, overriding its group's (see `ListEditing`), e.g.
    * `none` or `ignore` exempting it.
    */
+  /**
+   * Its name in reordering: the moved rows' (`ListReorderItem`), and a gap's
+   * neighbours' (`ListReorderTarget` `after`, `before`).
+   */
+  dropName?: string;
   editing?: ListEditing;
   /** Its level in a hierarchy (indented 20px per level; e.g. a sidebar). */
   level?: number;
+  /**
+   * Handles it's reordered by (see `List.createReorderHandle`), by priority:
+   * dropped where several of them are targets, the first of those (grabbed
+   * with other rows, of the handles all of them have, by the first row's
+   * order).
+   */
+  reorderHandle?: ListReorderHandle | readonly ListReorderHandle[];
   /** Selected (e.g. a sidebar's current section): on a fill. */
   selected?: boolean;
 };
@@ -147,7 +185,6 @@ export type Drag = {
   base: number;
   isMoved: boolean;
   pointerId: number;
-  scroll: number;
   time: number;
   x: number;
   y: number;
@@ -271,14 +308,14 @@ export type ListTextProps = PartProps<'span'> & {
 
 export type ListImageProps = PartProps<'span'> & {
   /**
-   * Figma “_Images” Type.
+   * The image's frame: a symbol's, or a rounded, circular or filling one.
    * @default 'symbol'
    */
   variant?: 'circular' | 'fill' | 'rounded' | 'symbol';
 };
 
 export type ListButtonProps = PartProps<'button'> & {
-  /** Figma Value=Destructive. */
+  /** In the destructive color (`systemRed`). */
   destructive?: boolean;
 };
 
@@ -289,8 +326,7 @@ export type ListEditButtonProps = PartProps<'button'> & {
    */
   textColor?: string;
   /**
-   * Its circle's color (e.g. `systemRed` deleting, `systemGreen` inserting:
-   * UIKit's editing styles).
+   * Its circle's color (e.g. `systemRed` deleting, `systemGreen` inserting).
    * @default `systemGray`
    */
   tint?: string;
@@ -316,8 +352,7 @@ export type ListSwipeActionsProps = PartProps<'div'> & {
   /**
    * Swiping on past the actions stretches the outermost one up to the
    * others (following the row), and, past 304px, triggers it on
-   * release (Framework7 `.swipeout-overswipe`; UIKit
-   * `performsFirstActionWithFullSwipe`).
+   * release (Framework7 `.swipeout-overswipe`).
    */
   overswipe?: boolean;
   /**
@@ -351,7 +386,7 @@ export type ListSwipeActionProps = PartProps<'button'> & {
    */
   shape?: 'circle' | 'roundedRectangle';
   /**
-   * Shows the label below the shape (Figma “Label”). It needs room: for
+   * Shows the label below the shape. It needs room: for
    * multi-line rows (`Text`).
    * @default false
    */
@@ -376,8 +411,8 @@ export type ListHeaderProps = PartProps<'div'> & {
    */
   cursor?: Properties['cursor'];
   /**
-   * Figma “Header” Type; `nested` headers of plain lists are section titles
-   * (Figma “Section Title”).
+   * The header's prominence; `nested` headers of plain lists are section
+   * titles.
    * @default 'prominent'
    */
   prominence?: 'extraProminent' | 'nested' | 'prominent';
@@ -389,7 +424,7 @@ export type ListBlockProps = PartProps<'div'> & {
 };
 
 export type ListIndexProps = PartProps<'nav'> & {
-  /** UIKit size class: `compact` (iPhone, default) or `regular` (iPad). */
+  /** A size class: `compact` (a phone, default) or `regular` (a tablet). */
   size?: 'compact' | 'regular';
 };
 

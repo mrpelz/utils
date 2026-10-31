@@ -1,10 +1,5 @@
 import './style.css';
 
-import { sfChevronUpChevronDown } from '@bradleyhodges/sfsymbols/sfChevronUpChevronDown';
-import { sfLockFill } from '@bradleyhodges/sfsymbols/sfLockFill';
-import { sfPinFill } from '@bradleyhodges/sfsymbols/sfPinFill';
-import { sfSquare } from '@bradleyhodges/sfsymbols/sfSquare';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import { Button, Menu, Symbol } from '../../../components/index.js';
@@ -13,6 +8,13 @@ import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import {
+  sfChevronUpChevronDown,
+  sfLockFill,
+  sfPinFill,
+  sfSquare,
+  sfSquareAndArrowUp,
+} from '../../tooling/icons.js';
 import {
   getPropOptionsCheckboxItems,
   getPropOptionsItem,
@@ -32,7 +34,7 @@ import {
 } from './props.js';
 
 /**
- * A menu (Base UI Menu, Figma “Menu”): its trigger a `Button` (`render`),
+ * A menu (Base UI Menu): its trigger a `Button` (`render`),
  * quick actions, items (with symbols, shortcuts, a subtitle), sections and
  * a submenu.
  */
@@ -280,7 +282,7 @@ export const MenuDemo: FunctionComponent = () => {
   );
 };
 
-/** The menu in the regular size (iPad): submenus open beside it. */
+/** The menu in the regular size (regular): submenus open beside it. */
 export const MenuRegularDemo: FunctionComponent = () => {
   const id = 'menu-regular';
 
@@ -369,7 +371,7 @@ export const MenuRegularDemo: FunctionComponent = () => {
       baseUiId="menu"
       id={id}
       log={log}
-      title="Menu (iPad)"
+      title="Menu (regular)"
       controls={[
         controlRoot,
         controlTrigger,
@@ -659,7 +661,7 @@ export const MenuTogglesDemo: FunctionComponent = () => {
 };
 
 /**
- * A pop-up button (UIKit `UIButton` with a menu, e.g. in a list row): a
+ * A pop-up button (a button with a menu, e.g. in a list row): a
  * `Button` with the chosen option's label, then chevron.up.chevron.down,
  * opening a menu of options; choosing one closes it.
  */
@@ -696,7 +698,7 @@ export const MenuPopUpDemo: FunctionComponent = () => {
                     setValue(String(next));
                   }}
                 >
-                  {/* A pop-up closes on choosing (iOS). */}
+                  {/* A pop-up closes on choosing. */}
                   <Menu.RadioItem
                     closeOnClick
                     value="Daily"

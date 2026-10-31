@@ -62,7 +62,7 @@ export const SymbolParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its glyph: <code>icon</code> (an SF Symbol, or any icon’s outlines),
+        Its glyph: <code>icon</code> (any icon’s outlines, e.g. an SF Symbol’s),
         sized and colored by its text (font size, color), in its one weight.
       </li>
       <li>

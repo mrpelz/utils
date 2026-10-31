@@ -1,16 +1,15 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfBold } from '@bradleyhodges/sfsymbols/sfBold';
-import { sfItalic } from '@bradleyhodges/sfsymbols/sfItalic';
-import { sfPhoto } from '@bradleyhodges/sfsymbols/sfPhoto';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTextformat } from '@bradleyhodges/sfsymbols/sfTextformat';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
-import { sfUnderline } from '@bradleyhodges/sfsymbols/sfUnderline';
 import { FunctionComponent, useState } from 'react';
 
-import { EditMenu, Menu, Symbol, Viewport } from '../../../components/index.js';
+import {
+  EditMenu,
+  Menu,
+  Symbol,
+  useTextActionsPrevention,
+  Viewport,
+} from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
@@ -21,10 +20,21 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfBold,
+  sfItalic,
+  sfPhoto,
+  sfSquareAndArrowUp,
+  sfTextformat,
+  sfTrash,
+  sfUnderline,
+} from '../../tooling/icons.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 const elementCode = `const [isOpen, setIsOpen] = useState(false);
 const photo = useRef<HTMLButtonElement>(null);
+// A held press on it selects no text (no browser text menu over it).
+useTextActionsPrevention(photo);
 
 <EditMenu.Root open={isOpen} onOpenChange={setIsOpen}>
   <button ref={photo} type="button" onClick={() => setIsOpen(true)}>…</button>
@@ -40,6 +50,8 @@ const photo = useRef<HTMLButtonElement>(null);
 
 const richCode = `const [isOpen, setIsOpen] = useState(false);
 const word = useRef<HTMLButtonElement>(null);
+// A held press on it selects no text (no browser text menu over it).
+useTextActionsPrevention(word);
 
 {/* A phone's: its menus' submenus over their trigger. */}
 <EditMenu.Root open={isOpen} size="compact" onOpenChange={setIsOpen}>
@@ -99,6 +111,7 @@ const AtAnElement: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [isOpen, setIsOpen] = useState(false);
   const photo = useLabelledRef<HTMLButtonElement>('photo', 'HTMLButtonElement');
+  useTextActionsPrevention(photo);
 
   return (
     <Component
@@ -147,6 +160,7 @@ const ManyActions: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [isOpen, setIsOpen] = useState(false);
   const word = useLabelledRef<HTMLButtonElement>('word', 'HTMLButtonElement');
+  useTextActionsPrevention(word);
 
   return (
     <Component
@@ -215,6 +229,7 @@ const ARichMenuBehindMore: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [isOpen, setIsOpen] = useState(false);
   const word = useLabelledRef<HTMLButtonElement>('word', 'HTMLButtonElement');
+  useTextActionsPrevention(word);
 
   return (
     <Component
@@ -389,6 +404,15 @@ export const EditMenuComposition: FunctionComponent = () => (
       </li>
       <li>Closed by an action, a press outside, or Escape.</li>
       <li>
+        A held press on the button selects none of its text (no browser text
+        menu over the edit menu:{' '}
+        <PartLink
+          component="viewport"
+          part="useTextActionsPrevention"
+        />
+        ).
+      </li>
+      <li>
         <strong>Library:</strong> the capsule menu (
         <PartLink
           component="edit-menu"
@@ -426,6 +450,15 @@ export const EditMenuComposition: FunctionComponent = () => (
         <PartLink
           component="edit-menu"
           part="EditMenu.More"
+        />
+        ).
+      </li>
+      <li>
+        A held press on the button selects none of its text (no browser text
+        menu over the edit menu:{' '}
+        <PartLink
+          component="viewport"
+          part="useTextActionsPrevention"
         />
         ).
       </li>
@@ -470,9 +503,22 @@ export const EditMenuComposition: FunctionComponent = () => (
           component="edit-menu"
           part="EditMenu.Root"
         />
-        ’s <code>size</code>): Format’s submenu covers its trigger’s menu, as an
-        iPhone’s; regular (the default), beside it. Toggling keeps the menus
-        open, an action closes them all.
+        ’s <code>size</code>): Format’s submenu covers its trigger’s menu, as a
+        compact one’s; regular (the default), beside it. Toggling keeps the
+        menus open, an action closes them all.
+      </li>
+      <li>
+        Without room below their triggers, the menus grow rather than scroll:
+        shifted up over them as far as they need (Format’s, over its trigger).
+      </li>
+      <li>
+        A held press on the button selects none of its text (no browser text
+        menu over the edit menu:{' '}
+        <PartLink
+          component="viewport"
+          part="useTextActionsPrevention"
+        />
+        ).
       </li>
       <li>
         <strong>Library:</strong> the more button (

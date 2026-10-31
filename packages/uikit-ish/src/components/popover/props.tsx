@@ -18,8 +18,8 @@ export type PopoverPositionerProps = Omit<
   'align' | 'ref' | 'side'
 > & {
   /**
-   * Its alignment to its anchor (in a list row, iOS aligns it with the
-   * row's end: `end`).
+   * Its alignment to its anchor (in a list row, aligned with the row's
+   * end: `end`).
    * @default 'center'
    */
   align?: PopoverAlign;

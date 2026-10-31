@@ -1,10 +1,3 @@
-import { sfBell } from '@bradleyhodges/sfsymbols/sfBell';
-import { sfBellFill } from '@bradleyhodges/sfsymbols/sfBellFill';
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTray } from '@bradleyhodges/sfsymbols/sfTray';
-import { sfTrayFill } from '@bradleyhodges/sfsymbols/sfTrayFill';
 import type { CSSProperties } from 'react';
 
 import { Badge } from '../../../components/index.js';
@@ -12,6 +5,15 @@ import {
   commonPropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
+import {
+  sfBell,
+  sfBellFill,
+  sfHeartFill,
+  sfMagnifyingglass,
+  sfSquareAndArrowUp,
+  sfTray,
+  sfTrayFill,
+} from '../../tooling/icons.js';
 
 export const propOptionsSymbol = {
   // (Its own element: no `render`.)
@@ -50,8 +52,8 @@ export const propOptionsContent = {
   fontSize: ['17px', '28px', '48px', '11px'] as const,
   color: [
     undefined,
-    'var(--color-ios-primary)',
-    'var(--color-ios-secondary-label)',
+    'var(--color-ui-primary)',
+    'var(--color-ui-secondary-label)',
   ] as const,
 };
 

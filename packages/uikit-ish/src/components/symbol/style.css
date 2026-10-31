@@ -23,7 +23,7 @@
     display: inline-flex;
     mix-blend-mode: var(--uikit-symbol-blend, normal);
     scale: var(--uikit-symbol-scale, none);
-    transition: scale var(--glass-ios-lens-duration, 0s);
+    transition: scale var(--glass-ui-lens-duration, 0s);
 
     & > svg {
       overflow: visible;

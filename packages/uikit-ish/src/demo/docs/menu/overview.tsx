@@ -1,12 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfPencil } from '@bradleyhodges/sfsymbols/sfPencil';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent } from 'react';
 
 import {
@@ -28,6 +22,14 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import {
+  sfEllipsis,
+  sfFolder,
+  sfHeart,
+  sfPencil,
+  sfSquareAndArrowUp,
+  sfTrash,
+} from '../../tooling/icons.js';
+import {
   menuItemRows,
   menuPositionerRows,
   menuRootRows,
@@ -47,7 +49,7 @@ const LiveView: FunctionComponent = () => {
     title: 'Menu.Root',
   });
 
-  // Its device by the size: a phone (compact), an iPad (regular).
+  // Its device by the size: a phone (compact), a tablet (regular).
   const stage = (props.size ?? sizeClass) === 'regular' ? 'tablet' : 'phone';
 
   return (
@@ -157,12 +159,12 @@ export const MenuOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Actions and choices behind a control, in a glass popup at it (UIKit{' '}
-        <code>UIMenu</code>; Base UI’s <code>Menu</code>).
+        Actions and choices behind a control, in a glass popup at it (Base UI’s{' '}
+        <code>Menu</code>).
       </li>
       <li>
-        The iPhone’s menu or the iPad’s (<code>size</code>): its items’ size,
-        where its submenus open.
+        A phone’s menu or a tablet’s (<code>size</code>): its items’ size, where
+        its submenus open.
       </li>
     </ul>
     <LiveView />
@@ -272,7 +274,7 @@ export const MenuOverview: FunctionComponent = () => (
     <ul>
       <li>
         On touch, it opens as the finger goes down: dragging on to an item and
-        lifting chooses it (as iOS’).
+        lifting chooses it.
       </li>
       <li>
         Compact: 40px items, submenus over their trigger; regular: 36px items,
@@ -284,8 +286,11 @@ export const MenuOverview: FunctionComponent = () => (
         ).
       </li>
       <li>
-        With toggles, every item keeps a column for the checkmark; a popup
-        taller than the room for it scrolls.
+        With toggles, every item keeps a column for the checkmark. A popup
+        taller than the room beside its trigger grows over it (flipped if it
+        fits on the other side, else shifted); only taller than the screen, it
+        scrolls. A compact submenu without room below its trigger covers it; a
+        press outside it closes it alone.
       </li>
       <li>It closes once its trigger scrolls out of view.</li>
     </ul>

@@ -395,7 +395,7 @@ const className = (value: object) => {
     : (value.constructor as { name?: string } | undefined)?.name;
 };
 
-// An SF Symbol's definition (see `Symbol`): shown as its name.
+// An icon's definition (see `Symbol`): shown as its name.
 const isSymbol = (value: object): value is { iconName: string } =>
   'iconName' in value && 'svgPathData' in value;
 

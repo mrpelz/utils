@@ -574,7 +574,7 @@ export const RollComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Hours and minutes, as iOS’s time wheels: two columns,{' '}
+        Hours and minutes, as time wheels: two columns,{' '}
         <PartLink
           component="roll"
           part="Roll.Separator"
@@ -688,7 +688,7 @@ export const RollComposition: FunctionComponent = () => (
     <ul>
       <li>
         A column’s rows can depend on another’s value: a month’s days, the rest{' '}
-        <code>disabled</code> (shown, as iOS shows them, but not selectable).
+        <code>disabled</code> (shown, but not selectable).
       </li>
       <li>
         Settled on a disabled day (e.g. 31 after turning to April), the column
@@ -762,7 +762,7 @@ export const RollComposition: FunctionComponent = () => (
     <ul>
       <li>
         On demand: a button showing the value opens a{' '}
-        <a href="popover">Popover</a> with the roll (iOS’s compact pickers).
+        <a href="popover">Popover</a> with the roll (as compact pickers).
       </li>
       <li>Each change applies at once; tapping outside closes it.</li>
       <li>

@@ -44,7 +44,7 @@ const setup = async (page) => {
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'switch: on/off labels sit beside the knob, each on its side (Apple)',
+    name: 'switch: on/off labels sit beside the knob, each on its side',
     run: async (page) => {
       await page.open('switch', 'light', {
         state: [{ $rest: true, onOffLabels: true }],

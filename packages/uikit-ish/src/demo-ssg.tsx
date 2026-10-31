@@ -11,6 +11,7 @@ import { exit } from 'node:process';
 import prerender, { locationStub } from 'preact-iso/prerender';
 
 import { publicPath } from './demo/tooling/env.js';
+import { iconsLoaded } from './demo/tooling/icons.js';
 import { Demo } from './demo/tooling/main.js';
 
 const BODY = '<body></body>';
@@ -26,6 +27,9 @@ const template = await readFile(templatePath, { encoding: 'utf8' });
 if (!template.includes(BODY)) {
   exit(1);
 }
+
+// (Its icons first, see demo/tooling/icons.ts.)
+await iconsLoaded;
 
 const handled = new Set<string>();
 

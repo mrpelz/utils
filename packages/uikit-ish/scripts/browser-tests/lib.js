@@ -427,13 +427,10 @@ export class Page {
     await this.browser.send('Page.navigate', {
       url: `${this.url}all#${this.#fragment}`,
     });
-    // (The demos mount after the page (client only), each near the screen:
-    // with one selected, all of them, the others rendering nothing.)
-    const slot = JSON.stringify('.demo-virtual-slot');
-    const away = JSON.stringify('.demo-virtual-slot[data-away]');
-    await this.waitFor(
-      `Boolean(document.querySelector(${slot})) && !document.querySelector(${away})`,
-    );
+    // (The demos mount after the page (client only); raw, the one selected
+    // alone, marking the root as it's shown.)
+    const raw = JSON.stringify('data-demo-raw');
+    await this.waitFor(`document.documentElement.hasAttribute(${raw})`);
     await sleep(300);
   }
 

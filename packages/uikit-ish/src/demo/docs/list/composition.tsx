@@ -1,15 +1,3 @@
-import { sfArchiveboxFill } from '@bradleyhodges/sfsymbols/sfArchiveboxFill';
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { sfCircleFill } from '@bradleyhodges/sfsymbols/sfCircleFill';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfEnvelopeBadgeFill } from '@bradleyhodges/sfsymbols/sfEnvelopeBadgeFill';
-import { sfEnvelopeOpenFill } from '@bradleyhodges/sfsymbols/sfEnvelopeOpenFill';
-import { sfFlagFill } from '@bradleyhodges/sfsymbols/sfFlagFill';
-import { sfMinus } from '@bradleyhodges/sfsymbols/sfMinus';
-import { sfPlus } from '@bradleyhodges/sfsymbols/sfPlus';
-import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
-import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
-import { sfTrashFill } from '@bradleyhodges/sfsymbols/sfTrashFill';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -19,6 +7,7 @@ import {
   forwardClick,
   Header,
   List,
+  type ListReorderChange,
   Navigation,
   Page,
   Segmented,
@@ -28,6 +17,7 @@ import {
   Symbol,
   Toolbar,
   useCreateDatePickerHandle,
+  useCreateReorderHandle,
   Viewport,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
@@ -39,6 +29,20 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfArchiveboxFill,
+  sfChevronBackward,
+  sfCircleFill,
+  sfEllipsis,
+  sfEnvelopeBadgeFill,
+  sfEnvelopeOpenFill,
+  sfFlagFill,
+  sfMinus,
+  sfPlus,
+  sfSunMax,
+  sfSunMin,
+  sfTrashFill,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   contacts,
@@ -93,6 +97,11 @@ const settingsCode = `const [minutes, setMinutes] = useState(5);
       <List.Section>
         <List.Header prominence="nested"><List.Title render={<h3 />}>Display</List.Title></List.Header>
         <List.Group>
+          <List.Item>
+            <List.Span>
+              <Segmented.Root aria-label="Appearance" defaultValue="automatic">…</Segmented.Root>
+            </List.Span>
+          </List.Item>
           <List.Item>
             <List.Content>
               <List.Title>Text Size</List.Title>
@@ -191,11 +200,64 @@ const to = useCreateDatePickerHandle();
   </List.Section>
 </List.Root>`;
 
+const outlineCode = `// A body of the Solar System, and what orbits it.
+type Body = { name: string; orbiting?: Body[] };
+
+const sun: Body = {
+  name: 'Sun',
+  orbiting: [
+    { name: 'Mercury' },
+    { name: 'Venus' },
+    { name: 'Earth', orbiting: [{ name: 'Moon' }] },
+    { name: 'Mars', orbiting: [{ name: 'Phobos' }, { name: 'Deimos' }] },
+    {
+      name: 'Jupiter',
+      orbiting: [{ name: 'Io' }, { name: 'Europa' }, { name: 'Ganymede' }, { name: 'Callisto' }],
+    },
+  ],
+};
+
+// A row at its level; with what orbits it, a collapsible's trigger, its
+// orbiters' rows a level deeper in its panel.
+const Row = ({ body, level }: { body: Body; level: number }) =>
+  body.orbiting ? (
+    <List.CollapsibleRoot defaultOpen={level === 0}>
+      <List.Item level={level}>
+        <List.Content>
+          <List.Title render={<List.CollapsibleTrigger />}>{body.name}</List.Title>
+        </List.Content>
+        <List.Trailing>
+          <List.Detail>{body.orbiting.length}</List.Detail>
+          <List.Disclosure />
+        </List.Trailing>
+      </List.Item>
+      <List.CollapsiblePanel>
+        {body.orbiting.map((orbiter) => (
+          <Row key={orbiter.name} body={orbiter} level={level + 1} />
+        ))}
+      </List.CollapsiblePanel>
+    </List.CollapsibleRoot>
+  ) : (
+    <List.Item level={level}>
+      <List.Content>
+        <List.Title>{body.name}</List.Title>
+      </List.Content>
+    </List.Item>
+  );
+
+<List.Root>
+  <List.Section>
+    <List.Group>
+      <Row body={sun} level={0} />
+    </List.Group>
+  </List.Section>
+</List.Root>`;
+
 const drillInCode = `// Each page: its title, its rows (title, the page it pushes, detail).
 const pages = {
   settings: { title: 'Settings', rows: [['General', 'general']] },
   general: { title: 'General', rows: [['About', 'about'], ['Software Update']] },
-  about: { title: 'About', rows: [['Name', undefined, 'iPhone']] },
+  about: { title: 'About', rows: [['Name', undefined, 'My Phone']] },
 };
 const [keys, setKeys] = useState(['settings']);
 const push = (key) => setKeys((current) => [...current, key]);
@@ -203,21 +265,17 @@ const pop = () => setKeys((current) => current.slice(0, -1));
 
 <Navigation.Root onBack={pop}>
   <Navigation.SwipeArea />
-  {/* The back button: staying while the pages move. */}
-  <Viewport.BlockStart>
-    <Toolbar.Root placement="block-start">
-      <Toolbar.Leading>
-        {keys.length > 1 ? (
-          <Navigation.Back aria-label="Back" render={<Toolbar.Button shape="circle" />}>…</Navigation.Back>
-        ) : null}
-      </Toolbar.Leading>
-    </Toolbar.Root>
-  </Viewport.BlockStart>
   <Navigation.Stack>
-    {keys.map((key) => (
+    {keys.map((key, index) => (
       <Header.Root key={key}>
         <Viewport.BlockStart>
           <Toolbar.Root placement="block-start">
+            {/* Each pushed page's back button: staying put between them. */}
+            {index > 0 ? (
+              <Toolbar.Leading>
+                <Navigation.Back aria-label="Back" render={<Toolbar.Button shape="circle" />}>…</Navigation.Back>
+              </Toolbar.Leading>
+            ) : null}
             <Toolbar.Title><span>{pages[key].title}</span></Toolbar.Title>
           </Toolbar.Root>
         </Viewport.BlockStart>
@@ -255,12 +313,16 @@ const pop = () => setKeys((current) => current.slice(0, -1));
   </Navigation.Stack>
 </Navigation.Root>`;
 
-const editCode = `const rows = ['Mercury', 'Venus', 'Earth', 'Mars'];
+const editCode = `const [rows, setRows] = useState(['Mercury', 'Venus', 'Earth', 'Mars']);
 const [isEditing, setIsEditing] = useState(false);
+// Reordering: the app moves its rows (by their dropName).
+const reorderRows = useCreateReorderHandle({
+  onReorder: (change) => setRows((current) => List.reorder(current, change, (row) => row)),
+});
 // The list's selection (guide G7: the toolbar reads it).
 const [selected, setSelected] = useState([]);
 
-<Viewport.Content safeArea="none">
+<Viewport.Content>
   <Header.Root>
     <Viewport.BlockStart>
       <Toolbar.Root placement="block-start">
@@ -280,11 +342,13 @@ const [selected, setSelected] = useState([]);
           <CheckboxGroup
             value={selected}
             onValueChange={setSelected}
-            render={<List.Group onReorder={(from, to) => …} />}
+            render={<List.Group reorderHandle={reorderRows} />}
           >
             {rows.map((name) => (
               <List.Item
                 key={name}
+                dropName={name}
+                reorderHandle={reorderRows}
                 onClick={isEditing ? forwardClick('[role=checkbox]') : undefined}
               >
                 <List.Leading whileEditing="show">
@@ -332,7 +396,7 @@ const [added, setAdded] = useState(0);
             {/* Minus: opens the row's Delete (its trailing swipe actions). */}
             <List.SwipeActionsTrigger
               render={
-                <List.EditButton aria-label={\`Delete \${name}\`} tint="var(--color-ios-system-red)">
+                <List.EditButton aria-label={\`Delete \${name}\`} tint="var(--color-ui-system-red)">
                   <Symbol icon={sfMinus} />
                 </List.EditButton>
               }
@@ -345,7 +409,7 @@ const [added, setAdded] = useState(0);
           <List.SwipeActions overswipe allowSwipe="conceal">
             <List.SwipeAction
               label="Delete"
-              tint="var(--color-ios-system-red)"
+              tint="var(--color-ui-system-red)"
               onClick={() => setRows(rows.filter((row) => row !== name))}
             >
               <Symbol icon={sfTrashFill} />
@@ -356,7 +420,7 @@ const [added, setAdded] = useState(0);
       {/* The whole row inserts: its button; the plus its sign. */}
       <List.Item>
         <List.Leading>
-          <List.EditButton aria-hidden="true" render={<span />} tint="var(--color-ios-system-green)">
+          <List.EditButton aria-hidden="true" render={<span />} tint="var(--color-ui-system-green)">
             <Symbol icon={sfPlus} />
           </List.EditButton>
         </List.Leading>
@@ -379,6 +443,9 @@ const sectionsCode = `const [inner, setInner] = useState([
   ['Mercury', '0.39 AU'], ['Venus', '0.72 AU'], ['Earth', '1 AU'], ['Mars', '1.52 AU'],
 ]);
 const [outer, setOuter] = useState(['Jupiter', 'Saturn', 'Uranus', 'Neptune']);
+const reorderInner = useCreateReorderHandle({
+  onReorder: (change) => setInner((current) => List.reorder(current, change, ([name]) => name)),
+});
 const [isInnerEditing, setIsInnerEditing] = useState(false);
 const [isOuterEditing, setIsOuterEditing] = useState(false);
 
@@ -391,10 +458,15 @@ const [isOuterEditing, setIsOuterEditing] = useState(false);
         {isInnerEditing ? 'Done' : 'Edit'}
       </List.Action>
     </List.Header>
-    <List.Group onReorder={(from, to) => setInner(moved(inner, from, to))}>
+    <List.Group reorderHandle={reorderInner}>
       {inner.map(([name, distance]) => (
         // Home stays where it is: exempt from its section's edit mode.
-        <List.Item key={name} editing={name === 'Earth' ? 'none' : undefined}>
+        <List.Item
+          key={name}
+          dropName={name}
+          editing={name === 'Earth' ? 'none' : undefined}
+          reorderHandle={reorderInner}
+        >
           <List.Content>
             <List.Title>{name}</List.Title>
           </List.Content>
@@ -425,7 +497,7 @@ const [isOuterEditing, setIsOuterEditing] = useState(false);
           <List.Leading whileEditing="show">
             <List.EditButton
               aria-label={\`Delete \${name}\`}
-              tint="var(--color-ios-system-red)"
+              tint="var(--color-ui-system-red)"
               onClick={() => setOuter(outer.filter((row) => row !== name))}
             >
               <Symbol icon={sfMinus} />
@@ -440,35 +512,117 @@ const [isOuterEditing, setIsOuterEditing] = useState(false);
   </List.Section>
 </List.Root>`;
 
+const acrossCode = `const initial = {
+  inner: ['Mercury', 'Venus', 'Earth', 'Mars'],
+  outer: ['Jupiter', 'Saturn', 'Uranus', 'Neptune'],
+  dwarf: ['Ceres', 'Pluto'],
+};
+const [planets, setPlanets] = useState(initial);
+const [isEditing, setIsEditing] = useState(false);
+const [selected, setSelected] = useState([]);
+// One handle across the sections: the app moves its rows (by their dropName,
+// in lists named by their targets' dropName).
+const reorderPlanets = useCreateReorderHandle({
+  onReorder: (change) =>
+    setPlanets((current) => List.reorder(current, change, (name) => name)),
+});
+
+const row = (name) => (
+  <List.Item key={name} dropName={name} reorderHandle={reorderPlanets}>
+    <List.Leading whileEditing="show">
+      <List.Checkbox
+        aria-label={name}
+        checked={selected.includes(name)}
+        onCheckedChange={(isChecked) =>
+          setSelected((current) =>
+            isChecked ? [...current, name] : current.filter((other) => other !== name))}
+      />
+    </List.Leading>
+    <List.Content>
+      <List.Title>{name}</List.Title>
+    </List.Content>
+    <List.Trailing whileEditing="show">
+      <List.Grabber
+        aria-label={\`Reorder \${name}\`}
+        // A selected row's grabber drags all selected rows (it first).
+        onPointerDown={() => {
+          if (selected.length > 1 && selected.includes(name)) {
+            reorderPlanets.grab([name, ...selected.filter((other) => other !== name)]);
+          }
+        }}
+      />
+    </List.Trailing>
+  </List.Item>
+);
+
+<List.Root editing={isEditing ? 'both' : 'none'}>
+  <List.Section>
+    <List.Header><List.Title>Inner Planets</List.Title></List.Header>
+    <List.Group>
+      {/* The Sun stays first: its planets' gaps are after it. */}
+      <List.Item dropName="Sun" editing="none">
+        <List.Content><List.Title>(not a planet) Sun</List.Title></List.Content>
+      </List.Item>
+      <List.DropGroup dropName="inner" reorderHandle={reorderPlanets}>
+        {planets.inner.map(row)}
+      </List.DropGroup>
+    </List.Group>
+  </List.Section>
+  <List.Section>
+    <List.Header><List.Title>Outer Planets</List.Title></List.Header>
+    <List.Group dropName="outer" reorderHandle={reorderPlanets}>
+      {planets.outer.map(row)}
+    </List.Group>
+  </List.Section>
+  <List.Section>
+    <List.Header><List.Title>Dwarf Planets</List.Title></List.Header>
+    <List.Group>
+      {planets.dwarf.map(row)}
+      {/* Only added to at the end. */}
+      <List.DropTarget dropName="dwarf" reorderHandle={reorderPlanets} />
+    </List.Group>
+  </List.Section>
+</List.Root>`;
+
 const inboxCode = `const archive = () => {…};
 
 <List.Root listStyle="plain">
   <List.Section>
     <List.Group>
       <List.Item>
-        <List.Span>
+        <List.Leading>
           {/* Unread: a dot in the image's place. */}
           <List.Image
             aria-label="Unread"
             role="img"
-            style={{ color: 'var(--color-ios-primary)', fontSize: '10px' }}
+            style={{ color: 'var(--color-ui-primary)', fontSize: '10px' }}
           >
             <Symbol icon={sfCircleFill} />
           </List.Image>
-          <List.Title render={<button type="button" />} onClick={…}>Kate Bell</List.Title>
-          <List.Detail>09:41</List.Detail>
-          <List.DrillIn />
+        </List.Leading>
+        <List.Content>
+          <List.Title render={<button type="button" />} onClick={…}>Kate Brown</List.Title>
           <List.Subtitle>Weekend photos</List.Subtitle>
+        </List.Content>
+        <List.Trailing>
+          <List.Detail>10:00</List.Detail>
+        </List.Trailing>
+        <List.Trailing>
+          <List.DrillIn />
+        </List.Trailing>
+        {/* The preview, across the row (under the date too). */}
+        <List.Below>
           <List.Text>Hi! The photos from the weekend …</List.Text>
-          <List.SwipeActions side="inline-start" overswipe>
-            <List.SwipeAction showLabel label="Read" tint="var(--color-ios-system-blue)" onClick={…}>
+        </List.Below>
+        <List.SwipeActions side="inline-start" overswipe>
+            <List.SwipeAction showLabel label="Read" tint="var(--color-ui-system-blue)" onClick={…}>
               <Symbol icon={sfEnvelopeOpenFill} />
             </List.SwipeAction>
           </List.SwipeActions>
           <List.SwipeActions onOverswipe={archive}>
             <List.SwipeAction showLabel label="More" onClick={…}>…</List.SwipeAction>
-            <List.SwipeAction showLabel label="Flag" tint="var(--color-ios-system-orange)" onClick={…}>…</List.SwipeAction>
-            <List.SwipeAction showLabel label="Archive" tint="var(--color-ios-system-purple)" onClick={archive}>…</List.SwipeAction>
+            <List.SwipeAction showLabel label="Flag" tint="var(--color-ui-system-orange)" onClick={…}>…</List.SwipeAction>
+            <List.SwipeAction showLabel label="Archive" tint="var(--color-ui-system-purple)" onClick={archive}>…</List.SwipeAction>
           </List.SwipeActions>
         </List.Item>
       </List.Group>
@@ -537,15 +691,7 @@ const indexCode = `// The contacts, by their first letter.
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 /** A small dot in the tint, in the image's place (Mail's unread mark). */
-const unreadStyle = { color: 'var(--color-ios-primary)', fontSize: '10px' };
-
-/** Moves a row (the app's part of reordering, see `List.Group`). */
-const moved = <T,>(current: readonly T[], from: number, to: number) => {
-  const next = [...current];
-  const [row] = next.splice(from, 1);
-  if (row) next.splice(to, 0, row);
-  return next;
-};
+const unreadStyle = { color: 'var(--color-ui-primary)', fontSize: '10px' };
 
 /** A settings page: switches, drill-ins, and controls in rows. */
 const SettingsScreen: FunctionComponent = () => {
@@ -641,6 +787,24 @@ const SettingsScreen: FunctionComponent = () => {
                 <List.Title render={<h3 />}>Display</List.Title>
               </List.Header>
               <List.Group>
+                <List.Item>
+                  <List.Span>
+                    <Segmented.Root
+                      aria-label="Appearance"
+                      defaultValue="automatic"
+                      onValueChange={(value: unknown) =>
+                        addLog(`appearance: ${String(value)}`)
+                      }
+                    >
+                      <Segmented.Item value="light">Light</Segmented.Item>
+                      <Segmented.Item value="dark">Dark</Segmented.Item>
+                      <Segmented.Item value="automatic">
+                        Automatic
+                      </Segmented.Item>
+                      <Segmented.Highlight />
+                    </Segmented.Root>
+                  </List.Span>
+                </List.Item>
                 <List.Item>
                   <List.Content>
                     <List.Title>Text Size</List.Title>
@@ -838,6 +1002,105 @@ const Schedule: FunctionComponent = () => {
   );
 };
 
+/** A body of the Solar System, and what orbits it. */
+type Body = { readonly name: string; readonly orbiting?: readonly Body[] };
+
+const sun: Body = {
+  name: 'Sun',
+  orbiting: [
+    { name: 'Mercury' },
+    { name: 'Venus' },
+    { name: 'Earth', orbiting: [{ name: 'Moon' }] },
+    { name: 'Mars', orbiting: [{ name: 'Phobos' }, { name: 'Deimos' }] },
+    {
+      name: 'Jupiter',
+      orbiting: [
+        { name: 'Io' },
+        { name: 'Europa' },
+        { name: 'Ganymede' },
+        { name: 'Callisto' },
+      ],
+    },
+  ],
+};
+
+/**
+ * A body's row at its level; with what orbits it, a collapsible's trigger,
+ * its orbiters' rows a level deeper in its panel.
+ */
+const OutlineRow: FunctionComponent<{
+  readonly body: Body;
+  readonly level: number;
+  readonly onOpenChange: (name: string, isOpen: boolean) => void;
+}> = ({ body, level, onOpenChange }) =>
+  body.orbiting ? (
+    <List.CollapsibleRoot
+      defaultOpen={level === 0}
+      onOpenChange={(isOpen: boolean) => onOpenChange(body.name, isOpen)}
+    >
+      <List.Item level={level}>
+        <List.Content>
+          <List.Title render={<List.CollapsibleTrigger />}>
+            {body.name}
+          </List.Title>
+        </List.Content>
+        <List.Trailing>
+          <List.Detail>{body.orbiting.length}</List.Detail>
+          <List.Disclosure />
+        </List.Trailing>
+      </List.Item>
+      <List.CollapsiblePanel>
+        {body.orbiting.map((orbiter) => (
+          <OutlineRow
+            key={orbiter.name}
+            body={orbiter}
+            level={level + 1}
+            onOpenChange={onOpenChange}
+          />
+        ))}
+      </List.CollapsiblePanel>
+    </List.CollapsibleRoot>
+  ) : (
+    <List.Item level={level}>
+      <List.Content>
+        <List.Title>{body.name}</List.Title>
+      </List.Content>
+    </List.Item>
+  );
+
+/** The Solar System as an outline: bodies, what orbits them, indented. */
+const Outline: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+
+  return (
+    <Component
+      isInline
+      id="list-composition-outline"
+      log={log}
+      stage="phone"
+      title="List outline"
+    >
+      <Viewport.Content>
+        <Viewport.Padding edge="block-start" />
+        <List.Root>
+          <List.Section>
+            <List.Group>
+              <OutlineRow
+                body={sun}
+                level={0}
+                onOpenChange={(name: string, isOpen: boolean) =>
+                  addLog(`${name}: ${isOpen ? 'open' : 'closed'}`)
+                }
+              />
+            </List.Group>
+          </List.Section>
+        </List.Root>
+        <Viewport.Padding edge="block-end" />
+      </Viewport.Content>
+    </Component>
+  );
+};
+
 /** Settings' pages, drilled into by their rows, in a navigation. */
 const DrillIn: FunctionComponent = () => {
   const [log, addLog] = useLog();
@@ -859,27 +1122,11 @@ const DrillIn: FunctionComponent = () => {
       stage="phone"
       title="List drilling into pages"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root onBack={pop}>
           <Navigation.SwipeArea />
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
-                {keys.length > 1 ? (
-                  <Navigation.Back
-                    aria-label="Back"
-                    render={<Toolbar.Button shape="circle" />}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfChevronBackward} />
-                    </Button.Icon>
-                  </Navigation.Back>
-                ) : null}
-              </Toolbar.Leading>
-            </Toolbar.Root>
-          </Viewport.BlockStart>
           <Navigation.Stack>
-            {keys.map((key) => {
+            {keys.map((key, index) => {
               const page = settingsPages[key];
               if (!page) return null;
 
@@ -887,6 +1134,18 @@ const DrillIn: FunctionComponent = () => {
                 <Header.Root key={key}>
                   <Viewport.BlockStart>
                     <Toolbar.Root placement="block-start">
+                      {index > 0 ? (
+                        <Toolbar.Leading>
+                          <Navigation.Back
+                            aria-label="Back"
+                            render={<Toolbar.Button shape="circle" />}
+                          >
+                            <Button.Icon>
+                              <Symbol icon={sfChevronBackward} />
+                            </Button.Icon>
+                          </Navigation.Back>
+                        </Toolbar.Leading>
+                      ) : null}
                       <Toolbar.Title>
                         <span>{page.title}</span>
                       </Toolbar.Title>
@@ -942,6 +1201,14 @@ const EditMode: FunctionComponent = () => {
   const [rows, setRows] = useState<readonly string[]>(planets);
   const [isEditing, setIsEditing] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
+  const reorderRows = useCreateReorderHandle({
+    onReorder: (change: ListReorderChange) => {
+      addLog(
+        `reorder: ${String(change.items[0]?.name)} after ${change.target.after ?? '(start)'}`,
+      );
+      setRows((current) => List.reorder(current, change, (row: string) => row));
+    },
+  });
   const remove = (names: readonly string[]) => {
     addLog(`delete: ${names.join(', ')}`);
     setRows((current) => current.filter((row) => !names.includes(row)));
@@ -957,7 +1224,7 @@ const EditMode: FunctionComponent = () => {
       title="List in edit mode"
     >
       <>
-        <Viewport.Content safeArea="none">
+        <Viewport.Content>
           <Header.Root>
             <Viewport.BlockStart>
               <Toolbar.Root placement="block-start">
@@ -993,20 +1260,15 @@ const EditMode: FunctionComponent = () => {
               <List.Root editing={isEditing ? 'both' : 'none'}>
                 <List.Section>
                   <CheckboxGroup
+                    render={<List.Group reorderHandle={reorderRows} />}
                     value={selected}
-                    render={
-                      <List.Group
-                        onReorder={(from: number, to: number) => {
-                          addLog(`reorder: ${String(from)} → ${String(to)}`);
-                          setRows((current) => moved(current, from, to));
-                        }}
-                      />
-                    }
                     onValueChange={(value: string[]) => setSelected(value)}
                   >
                     {rows.map((name) => (
                       <List.Item
                         key={name}
+                        dropName={name}
+                        reorderHandle={reorderRows}
                         onClick={
                           isEditing
                             ? forwardClick('[role=checkbox]')
@@ -1028,7 +1290,7 @@ const EditMode: FunctionComponent = () => {
                         <List.SwipeActions overswipe>
                           <List.SwipeAction
                             label="Delete"
-                            tint="var(--color-ios-system-red)"
+                            tint="var(--color-ui-system-red)"
                             onClick={() => remove([name])}
                           >
                             <Symbol icon={sfTrashFill} />
@@ -1081,7 +1343,7 @@ const EditButtons: FunctionComponent = () => {
       stage="phone"
       title="List with edit buttons"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -1113,7 +1375,7 @@ const EditButtons: FunctionComponent = () => {
                           render={
                             <List.EditButton
                               aria-label={`Delete ${name}`}
-                              tint="var(--color-ios-system-red)"
+                              tint="var(--color-ui-system-red)"
                             >
                               <Symbol icon={sfMinus} />
                             </List.EditButton>
@@ -1129,7 +1391,7 @@ const EditButtons: FunctionComponent = () => {
                       >
                         <List.SwipeAction
                           label="Delete"
-                          tint="var(--color-ios-system-red)"
+                          tint="var(--color-ui-system-red)"
                           onClick={() => {
                             addLog(`delete: ${name}`);
                             setRows((current) =>
@@ -1148,7 +1410,7 @@ const EditButtons: FunctionComponent = () => {
                       <List.EditButton
                         aria-hidden="true"
                         render={<span />}
-                        tint="var(--color-ios-system-green)"
+                        tint="var(--color-ui-system-green)"
                       >
                         <Symbol icon={sfPlus} />
                       </List.EditButton>
@@ -1198,6 +1460,16 @@ const EditingSections: FunctionComponent = () => {
   const [outer, setOuter] = useState<readonly string[]>(outerPlanets);
   const [isInnerEditing, setIsInnerEditing] = useState(false);
   const [isOuterEditing, setIsOuterEditing] = useState(false);
+  const reorderInner = useCreateReorderHandle({
+    onReorder: (change: ListReorderChange) => {
+      addLog(
+        `reorder: ${String(change.items[0]?.name)} after ${change.target.after ?? '(start)'}`,
+      );
+      setInner((current) =>
+        List.reorder(current, change, ([name]: InnerPlanet) => name),
+      );
+    },
+  });
 
   return (
     <Component
@@ -1207,7 +1479,7 @@ const EditingSections: FunctionComponent = () => {
       stage="phone"
       title="List editing sections separately"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -1242,16 +1514,13 @@ const EditingSections: FunctionComponent = () => {
                     {isInnerEditing ? 'Done' : 'Edit'}
                   </List.Action>
                 </List.Header>
-                <List.Group
-                  onReorder={(from: number, to: number) => {
-                    addLog(`reorder: ${String(from)} → ${String(to)}`);
-                    setInner((current) => moved(current, from, to));
-                  }}
-                >
+                <List.Group reorderHandle={reorderInner}>
                   {inner.map(([name, distance]) => (
                     <List.Item
                       key={name}
+                      dropName={name}
                       editing={name === 'Earth' ? 'none' : undefined}
+                      reorderHandle={reorderInner}
                     >
                       <List.Content>
                         <List.Title>{name}</List.Title>
@@ -1287,7 +1556,7 @@ const EditingSections: FunctionComponent = () => {
                       <List.Leading whileEditing="show">
                         <List.EditButton
                           aria-label={`Delete ${name}`}
-                          tint="var(--color-ios-system-red)"
+                          tint="var(--color-ui-system-red)"
                           onClick={() => {
                             addLog(`delete: ${name}`);
                             setOuter((current) =>
@@ -1303,6 +1572,173 @@ const EditingSections: FunctionComponent = () => {
                       </List.Content>
                     </List.Item>
                   ))}
+                </List.Group>
+              </List.Section>
+            </List.Root>
+            <Viewport.Padding edge="block-end" />
+          </Page.Root>
+        </Header.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
+/** The Solar System's planets, by section. */
+const solarPlanets = {
+  inner: ['Mercury', 'Venus', 'Earth', 'Mars'],
+  outer: ['Jupiter', 'Saturn', 'Uranus', 'Neptune'],
+  dwarf: ['Ceres', 'Pluto'],
+} as const satisfies Record<string, readonly string[]>;
+
+type SolarPlanets = Readonly<
+  Record<keyof typeof solarPlanets, readonly string[]>
+>;
+
+/**
+ * Planets moved across sections by one reorder handle: the Sun pinned
+ * first (a drop group after it), a group, a drop target at a group's end;
+ * selected rows dragged together.
+ */
+const AcrossSections: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [bodies, setBodies] = useState<SolarPlanets>(solarPlanets);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selected, setSelected] = useState<readonly string[]>([]);
+  const reorderPlanets = useCreateReorderHandle({
+    onReorder: (change: ListReorderChange) => {
+      const { after = '–', before = '–', name, part } = change.target;
+      addLog(
+        `reorder: ${change.items.map((item) => String(item.name)).join(', ')} → ${part} ${String(name)}, after ${after}, before ${before}`,
+      );
+      setBodies((current) =>
+        List.reorder(current, change, (planet: string) => planet),
+      );
+    },
+  });
+
+  const row = (name: string) => (
+    <List.Item
+      key={name}
+      dropName={name}
+      reorderHandle={reorderPlanets}
+    >
+      <List.Leading whileEditing="show">
+        <List.Checkbox
+          aria-label={name}
+          checked={selected.includes(name)}
+          onCheckedChange={(isChecked: boolean) =>
+            setSelected((current) =>
+              isChecked
+                ? [...current, name]
+                : current.filter((other) => other !== name),
+            )
+          }
+        />
+      </List.Leading>
+      <List.Content>
+        <List.Title>{name}</List.Title>
+      </List.Content>
+      <List.Trailing whileEditing="show">
+        <List.Grabber
+          aria-label={`Reorder ${name}`}
+          onPointerDown={() => {
+            if (selected.length > 1 && selected.includes(name)) {
+              reorderPlanets.grab([
+                name,
+                ...selected.filter((other) => other !== name),
+              ]);
+            }
+          }}
+        />
+      </List.Trailing>
+    </List.Item>
+  );
+
+  return (
+    <Component
+      isInline
+      id="list-composition-across-sections"
+      log={log}
+      stage="phone"
+      title="List reordering across sections"
+    >
+      <Viewport.Content>
+        <Header.Root>
+          <Viewport.BlockStart>
+            <Toolbar.Root placement="block-start">
+              <Toolbar.Leading>
+                <Toolbar.Button
+                  onClick={() => {
+                    addLog('reset');
+                    setBodies(solarPlanets);
+                    setSelected([]);
+                  }}
+                >
+                  <Button.Label>Reset</Button.Label>
+                </Toolbar.Button>
+              </Toolbar.Leading>
+              <Toolbar.Title>
+                <span>Planets</span>
+              </Toolbar.Title>
+              <Toolbar.Trailing>
+                <Toolbar.Button
+                  prominent={isEditing}
+                  onClick={() => {
+                    addLog(isEditing ? 'done' : 'edit');
+                    setIsEditing(!isEditing);
+                    setSelected([]);
+                  }}
+                >
+                  <Button.Label>{isEditing ? 'Done' : 'Edit'}</Button.Label>
+                </Toolbar.Button>
+              </Toolbar.Trailing>
+            </Toolbar.Root>
+          </Viewport.BlockStart>
+          <Page.Root>
+            <Viewport.Padding edge="block-start" />
+            <List.Root editing={isEditing ? 'both' : 'none'}>
+              <List.Section>
+                <List.Header>
+                  <List.Title>Inner Planets</List.Title>
+                </List.Header>
+                <List.Group>
+                  <List.Item
+                    dropName="Sun"
+                    editing="none"
+                  >
+                    <List.Content>
+                      <List.Title>(not a planet) Sun</List.Title>
+                    </List.Content>
+                  </List.Item>
+                  <List.DropGroup
+                    dropName="inner"
+                    reorderHandle={reorderPlanets}
+                  >
+                    {bodies.inner.map((name) => row(name))}
+                  </List.DropGroup>
+                </List.Group>
+              </List.Section>
+              <List.Section>
+                <List.Header>
+                  <List.Title>Outer Planets</List.Title>
+                </List.Header>
+                <List.Group
+                  dropName="outer"
+                  reorderHandle={reorderPlanets}
+                >
+                  {bodies.outer.map((name) => row(name))}
+                </List.Group>
+              </List.Section>
+              <List.Section>
+                <List.Header>
+                  <List.Title>Dwarf Planets</List.Title>
+                </List.Header>
+                <List.Group>
+                  {bodies.dwarf.map((name) => row(name))}
+                  <List.DropTarget
+                    dropName="dwarf"
+                    reorderHandle={reorderPlanets}
+                  />
                 </List.Group>
               </List.Section>
             </List.Root>
@@ -1371,7 +1807,6 @@ const Inbox: FunctionComponent = () => {
                       {from}
                     </List.Title>
                     <List.Subtitle>{subject}</List.Subtitle>
-                    <List.Text>{preview}</List.Text>
                   </List.Content>
                   <List.Trailing>
                     <List.Detail>{date}</List.Detail>
@@ -1379,6 +1814,9 @@ const Inbox: FunctionComponent = () => {
                   <List.Trailing>
                     <List.DrillIn />
                   </List.Trailing>
+                  <List.Below>
+                    <List.Text>{preview}</List.Text>
+                  </List.Below>
                   <List.SwipeActions
                     overswipe
                     side="inline-start"
@@ -1386,7 +1824,7 @@ const Inbox: FunctionComponent = () => {
                     <List.SwipeAction
                       showLabel
                       label={read.includes(from) ? 'Unread' : 'Read'}
-                      tint="var(--color-ios-system-blue)"
+                      tint="var(--color-ui-system-blue)"
                       onClick={() => toggleRead(from)}
                     >
                       <Symbol
@@ -1409,7 +1847,7 @@ const Inbox: FunctionComponent = () => {
                     <List.SwipeAction
                       showLabel
                       label="Flag"
-                      tint="var(--color-ios-system-orange)"
+                      tint="var(--color-ui-system-orange)"
                       onClick={() => addLog(`flag: ${from}`)}
                     >
                       <Symbol icon={sfFlagFill} />
@@ -1417,7 +1855,7 @@ const Inbox: FunctionComponent = () => {
                     <List.SwipeAction
                       showLabel
                       label="Archive"
-                      tint="var(--color-ios-system-purple)"
+                      tint="var(--color-ui-system-purple)"
                       onClick={() => archive(from)}
                     >
                       <Symbol icon={sfArchiveboxFill} />
@@ -1510,10 +1948,12 @@ const Contacts: FunctionComponent = () => {
 const sections: readonly Section[] = [
   ['a-settings-page', 'A settings page'],
   ['rows-expanding-together', 'Rows expanding together'],
+  ['an-outline', 'An outline'],
   ['drilling-into-pages', 'Drilling into pages'],
   ['edit-mode-and-a-toolbar', 'Edit mode and a toolbar'],
   ['deleting-and-inserting-rows', 'Deleting and inserting rows'],
   ['editing-sections-separately', 'Editing sections separately'],
+  ['reordering-across-sections', 'Reordering across sections'],
   ['an-inbox', 'An inbox'],
   ['an-indexed-list', 'An indexed list'],
 ];
@@ -1530,14 +1970,19 @@ export const ListComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As iOS’s Settings: an inset grouped list in a <a href="page">Page</a>,
+        As a settings app: an inset grouped list in a <a href="page">Page</a>,
         under its <a href="header">Header</a>.
       </li>
       <li>
         Rows hold settings’ controls as trailing parts (a{' '}
         <a href="switch">Switch</a>, a <a href="segmented">Segmented</a>{' '}
-        control, a <a href="stepper">Stepper</a>), or as the whole row (a{' '}
-        <a href="slider">Slider</a> between its symbols).
+        control, a <a href="stepper">Stepper</a>), or across the whole row (
+        <PartLink
+          component="list"
+          part="List.Span"
+        />
+        : a <a href="segmented">Segmented</a> control’s options sharing its
+        width, a <a href="slider">Slider</a> between its symbols).
       </li>
       <li>Others drill in (a button title, a detail, a chevron).</li>
       <li>A row with a switch passes its clicks on to it.</li>
@@ -1561,8 +2006,12 @@ export const ListComposition: FunctionComponent = () => (
           component="list"
           part="List.DrillIn"
         />
-        ), the controls as trailing parts or whole rows, and{' '}
-        <code>forwardClick</code>.
+        ), the controls as trailing parts or across rows (
+        <PartLink
+          component="list"
+          part="List.Span"
+        />
+        ), and <code>forwardClick</code>.
       </li>
       <li>
         <strong>Demo:</strong> the settings, their values (e.g. the minutes) and
@@ -1600,7 +2049,7 @@ export const ListComposition: FunctionComponent = () => (
         the group’s first or last).
       </li>
       <li>
-        Their times open as in iOS’s Calendar: each picker’s button toggles its
+        Their times open as in a calendar app: each picker’s button toggles its
         time roll in a row below it (
         <PartLink
           component="date-picker"
@@ -1681,6 +2130,83 @@ export const ListComposition: FunctionComponent = () => (
     </ul>
     <CodeView code={scheduleCode} />
     <Schedule />
+
+    <Heading
+      id="an-outline"
+      level={2}
+    >
+      An outline
+    </Heading>
+    <ul>
+      <li>
+        A hierarchy (an outline, e.g. a file manager’s folders): each row’s{' '}
+        <code>level</code> (
+        <PartLink
+          component="list"
+          part="List.Item"
+        />
+        ) indents it 20px a level, its separator with it.
+      </li>
+      <li>
+        A row with rows below it in the hierarchy toggles them: its title is the
+        trigger (
+        <PartLink
+          component="list"
+          part="List.CollapsibleTrigger"
+        />
+        , the whole row pressable) of a{' '}
+        <PartLink
+          component="list"
+          part="List.CollapsibleRoot"
+        />
+        , its{' '}
+        <PartLink
+          component="list"
+          part="List.Disclosure"
+        />{' '}
+        turning; the rows a level deeper are in its{' '}
+        <PartLink
+          component="list"
+          part="List.CollapsiblePanel"
+        />
+        , closed with any panel around them.
+      </li>
+      <li>
+        All rows stay the group’s rows, however deep: one card, its corners on
+        the first and last rows shown.
+      </li>
+      <li>
+        <strong>Library:</strong> indenting by <code>level</code>, the
+        collapsible rows (
+        <PartLink
+          component="list"
+          part="List.CollapsibleRoot"
+        />
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.CollapsibleTrigger"
+        />
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.CollapsiblePanel"
+        />
+        ) nesting, and the turning{' '}
+        <PartLink
+          component="list"
+          part="List.Disclosure"
+        />
+        .
+      </li>
+      <li>
+        <strong>Demo:</strong> the bodies and what orbits them, rendering a row
+        per body (recursively, its level one deeper), the Sun open at first, and
+        logging toggles.
+      </li>
+    </ul>
+    <CodeView code={outlineCode} />
+    <Outline />
 
     <Heading
       id="drilling-into-pages"
@@ -1775,8 +2301,12 @@ export const ListComposition: FunctionComponent = () => (
           component="list"
           part="List.Grabber"
         />{' '}
-        sliding in), reordering (<code>onReorder</code>), the swipe actions and
-        the bottom bar (
+        sliding in), reordering (a reorder handle:{' '}
+        <PartLink
+          component="list"
+          part="List.createReorderHandle"
+        />
+        ), the swipe actions and the bottom bar (
         <PartLink
           component="viewport"
           part="Viewport.BlockEnd"
@@ -1803,8 +2333,8 @@ export const ListComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As UIKit’s editing styles: a red minus before each row, a green plus
-        before the last (
+        Editing styles: a red minus before each row, a green plus before the
+        last (
         <PartLink
           component="list"
           part="List.EditButton"
@@ -1825,7 +2355,7 @@ export const ListComposition: FunctionComponent = () => (
         , whose Delete removes the row.
       </li>
       <li>
-        As in UIKit’s edit mode, swiping doesn’t open it, but closes it again (
+        In edit mode, swiping doesn’t open it, but closes it again (
         <code>allowSwipe=&quot;conceal&quot;</code>), as a press outside the row
         does.
       </li>
@@ -1921,7 +2451,12 @@ export const ListComposition: FunctionComponent = () => (
           component="list"
           part="List.Grabber"
         />
-        , <code>onReorder</code>) and the edit buttons (
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.createReorderHandle"
+        />
+        ) and the edit buttons (
         <PartLink
           component="list"
           part="List.EditButton"
@@ -1937,6 +2472,125 @@ export const ListComposition: FunctionComponent = () => (
     <EditingSections />
 
     <Heading
+      id="reordering-across-sections"
+      level={2}
+    >
+      Reordering across sections
+    </Heading>
+    <ul>
+      <li>
+        One reorder handle (
+        <PartLink
+          component="list"
+          part="List.createReorderHandle"
+        />
+        , in a component <code>useCreateReorderHandle</code>) given to the
+        planets’ rows (
+        <PartLink
+          component="list"
+          part="List.Item"
+        />{' '}
+        <code>reorderHandle</code>, named by <code>dropName</code>) and to where
+        they can be dropped, in any section: a row’s{' '}
+        <PartLink
+          component="list"
+          part="List.Grabber"
+        />{' '}
+        drags it out of its group, the group closing up, a gap opening where it
+        would land (the groups and sections below making room).
+      </li>
+      <li>
+        Where they can be dropped is placed as JSX:
+        <ul>
+          <li>
+            Inner planets: a{' '}
+            <PartLink
+              component="list"
+              part="List.DropGroup"
+            />{' '}
+            around them (gaps before, between and after its rows, no element of
+            its own), so nothing lands above the Sun, a row outside it; emptied,
+            rows can be dropped back below the Sun.
+          </li>
+          <li>
+            Outer planets: the{' '}
+            <PartLink
+              component="list"
+              part="List.Group"
+            />{' '}
+            given the handle (as a drop group around all its rows).
+          </li>
+          <li>
+            Dwarf planets: only a{' '}
+            <PartLink
+              component="list"
+              part="List.DropTarget"
+            />{' '}
+            at the group’s end, so they’re only added to there; emptied, it’s
+            still a target.
+          </li>
+        </ul>
+      </li>
+      <li>
+        Dropped, the handle’s <code>onReorder</code> gets what moved and where
+        (the target’s part, its <code>dropName</code>, and the rows{' '}
+        <code>after</code> and <code>before</code> the gap); the app’s planets
+        are lists by section, reordered by{' '}
+        <PartLink
+          component="list"
+          part="List.reorder"
+        />{' '}
+        (the rows taken out, put after the row before the gap; into an empty
+        section by its name).
+      </li>
+      <li>
+        Several at once: in edit mode, pressing a selected row’s grabber grabs
+        all selected rows (the handle’s <code>grab</code>, by their names, the
+        pressed one first), dragged together, stacked.
+      </li>
+      <li>
+        By keyboard, a focused grabber’s arrow keys move its row to the previous
+        or next gap, across sections too, and announce it.
+      </li>
+      <li>
+        <strong>Library:</strong> the handle (
+        <PartLink
+          component="list"
+          part="List.createReorderHandle"
+        />
+        , its <code>grab</code>), the targets (
+        <PartLink
+          component="list"
+          part="List.DropGroup"
+        />
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.DropTarget"
+        />
+        ,{' '}
+        <PartLink
+          component="list"
+          part="List.Group"
+        />{' '}
+        <code>reorderHandle</code>), dragging and moving by keyboard, the
+        change’s description, and applying it (
+        <PartLink
+          component="list"
+          part="List.reorder"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the planets by section, which rows are selected,
+        grabbing the selected ones from a grabber, the Reset and Edit buttons,
+        and logging changes.
+      </li>
+    </ul>
+    <CodeView code={acrossCode} />
+    <AcrossSections />
+
+    <Heading
       id="an-inbox"
       level={2}
     >
@@ -1949,7 +2603,12 @@ export const ListComposition: FunctionComponent = () => (
           component="list"
           part="List.Text"
         />{' '}
-        preview below the subject.
+        preview below the subject, across the row (in a{' '}
+        <PartLink
+          component="list"
+          part="List.Below"
+        />
+        : from the sender’s name to the row’s end, under the date too).
       </li>
       <li>An unread dot in the image’s place.</li>
       <li>Swipe actions on both sides, labels shown.</li>
@@ -1967,9 +2626,14 @@ export const ListComposition: FunctionComponent = () => (
         <PartLink
           component="list"
           part="List.Text"
-        />
-        ), swipe actions on both sides and overswiping (<code>onOverswipe</code>
-        ).
+        />{' '}
+        in a{' '}
+        <PartLink
+          component="list"
+          part="List.Below"
+        />{' '}
+        aligned with the content), swipe actions on both sides and overswiping (
+        <code>onOverswipe</code>).
       </li>
       <li>
         <strong>Demo:</strong> the messages, their read and archived state, and
@@ -2029,10 +2693,12 @@ export const ListComposition: FunctionComponent = () => (
 export const listCompositionDemos = [
   SettingsScreen,
   Schedule,
+  Outline,
   DrillIn,
   EditMode,
   EditButtons,
   EditingSections,
+  AcrossSections,
   Inbox,
   Contacts,
 ];

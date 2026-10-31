@@ -22,8 +22,8 @@ const propOptionsRoot = {
   onOffLabels: [undefined, false, true] as const,
   tint: [
     undefined,
-    'var(--color-ios-system-blue)',
-    'var(--color-ios-system-orange)',
+    'var(--color-ui-system-blue)',
+    'var(--color-ui-system-orange)',
     '#000',
   ] as const,
 };
@@ -36,8 +36,8 @@ export const propOptionsOverview = {
   onOffLabels: [undefined, true] as const,
   tint: [
     undefined,
-    'var(--color-ios-system-blue)',
-    'var(--color-ios-system-orange)',
+    'var(--color-ui-system-blue)',
+    'var(--color-ui-system-orange)',
   ] as const,
 };
 

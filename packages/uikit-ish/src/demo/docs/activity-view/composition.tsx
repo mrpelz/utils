@@ -1,11 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfBook } from '@bradleyhodges/sfsymbols/sfBook';
-import { sfDocumentOnDocument } from '@bradleyhodges/sfsymbols/sfDocumentOnDocument';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfPrinter } from '@bradleyhodges/sfsymbols/sfPrinter';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
 import { FunctionComponent } from 'react';
 
 import {
@@ -29,6 +24,13 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfBook,
+  sfDocumentOnDocument,
+  sfHeart,
+  sfPrinter,
+  sfSquareAndArrowUp,
+} from '../../tooling/icons.js';
 import { photo } from '../avatar/props.js';
 import { GuideLink } from '../hig-guide/link.js';
 
@@ -134,7 +136,7 @@ const MoreActionsAsAList: FunctionComponent = () => {
   );
 };
 
-/** On iPad: in a popover at the Share button. */
+/** In a regular width: in a popover at the Share button. */
 const InAPopover: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
@@ -149,7 +151,7 @@ const InAPopover: FunctionComponent = () => {
       stage="tablet"
       title="Activity view in a popover"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -190,12 +192,12 @@ const InAPopover: FunctionComponent = () => {
                           <ActivityView.Separator />
                           <ActivityView.People aria-label="People">
                             <ActivityView.Person
-                              onClick={() => addLog('person: Kate Bell')}
+                              onClick={() => addLog('person: Kate Brown')}
                             >
                               <Avatar.Root>
                                 <Avatar.Fallback>KB</Avatar.Fallback>
                               </Avatar.Root>
-                              <ActivityView.Name>Kate Bell</ActivityView.Name>
+                              <ActivityView.Name>Kate Brown</ActivityView.Name>
                             </ActivityView.Person>
                           </ActivityView.People>
                           <ActivityView.Separator />
@@ -246,7 +248,7 @@ export const ActivityViewComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        On iPhone, in a <a href="sheet">Sheet</a> (its{' '}
+        In a compact width, in a <a href="sheet">Sheet</a> (its{' '}
         <code>background=&quot;grouped&quot;</code>): the actions row, then more
         actions as a <a href="list">List</a> (symbols as the rows’ images).
       </li>
@@ -291,8 +293,8 @@ export const ActivityViewComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        On iPad, in a <a href="popover">Popover</a> at the Share button (in the
-        page’s bar), in its{' '}
+        In a regular width, in a <a href="popover">Popover</a> at the Share
+        button (in the page’s bar), in its{' '}
         <PartLink
           component="popover"
           part="Popover.Body"

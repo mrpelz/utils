@@ -54,10 +54,7 @@ export const PageControlOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <ul className="demo-lead">
-      <li>
-        Dots for a row of pages, the current one highlighted (UIKit{' '}
-        <code>UIPageControl</code>).
-      </li>
+      <li>Dots for a row of pages, the current one highlighted.</li>
       <li>Moves to the previous or next page, or scrubs across them.</li>
     </ul>
     <LiveView />
@@ -139,9 +136,9 @@ export const PageControlOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        It has the <code>slider</code> role (as UIKit’s, an adjustable control):
-        its value the current page, from 1 to <code>count</code>, read as “3 of
-        8” (<code>format</code>).
+        It has the <code>slider</code> role (an adjustable control): its value
+        the current page, from 1 to <code>count</code>, read as “3 of 8” (
+        <code>format</code>).
       </li>
       <li>
         Named “Page” unless given an <code>aria-label</code>; name it by what
@@ -168,7 +165,7 @@ export const PageControlOverview: FunctionComponent = () => (
     <ul>
       <li>
         A press before or after the current dot goes to the previous or next
-        page (UIKit’s).
+        page.
       </li>
       <li>Dragged along it, it scrubs: a page per dot passed.</li>
       <li>

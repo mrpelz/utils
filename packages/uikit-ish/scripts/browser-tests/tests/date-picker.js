@@ -63,7 +63,7 @@ const isIncreasing = (values) =>
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'date picker: the inline calendar matches Figma',
+    name: 'date picker: the inline calendar matches the spec',
     run: async (page) => {
       await page.open('date-picker', 'light', {
         state: [{ $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
@@ -110,7 +110,7 @@ export const tests = [
         selected: '23',
         title: 'April 2025',
       });
-      assert.match(await page.log(), /value change: 4\/23\/2025, 9:41:00 AM/u);
+      assert.match(await page.log(), /value change: 4\/23\/2025, 10:00:00 AM/u);
 
       // Keyboard: a day on, a week on, a month on (into May).
       await page.evaluate(
@@ -319,8 +319,8 @@ export const tests = [
         `[...document.querySelectorAll(${JSON.stringify('[role=listbox]')})].map((column) => [column.getAttribute(${JSON.stringify('aria-label')}), column.querySelector(${JSON.stringify('[aria-selected=true]')}).textContent])`,
       );
       assert.deepEqual(columns, [
-        ['Hours', '9'],
-        ['Minutes', '41'],
+        ['Hours', '10'],
+        ['Minutes', '00'],
         ['AM/PM', 'AM'],
       ]);
 
@@ -333,9 +333,9 @@ export const tests = [
         await page.evaluate(
           `document.querySelector(${JSON.stringify('[aria-label=Time]')}).textContent`,
         ),
-        '9:41 PM',
+        '10:00 PM',
       );
-      assert.match(await page.log(), /value change: 4\/20\/2025, 9:41:00 PM/u);
+      assert.match(await page.log(), /value change: 4\/20\/2025, 10:00:00 PM/u);
 
       // Compact: the time's button opens the roll in a popover; 24 hours in
       // German, the buttons equally high.
@@ -352,8 +352,8 @@ export const tests = [
         `[...document.querySelectorAll(${JSON.stringify('[role=dialog] [role=listbox]')})].map((column) => [column.getAttribute(${JSON.stringify('aria-label')}), column.querySelector(${JSON.stringify('[aria-selected=true]')}).textContent])`,
       );
       assert.deepEqual(popover, [
-        ['Hours', '09'],
-        ['Minutes', '41'],
+        ['Hours', '10'],
+        ['Minutes', '00'],
       ]);
 
       // One popover: the calendar's, its days hidden behind the roll; the
@@ -452,7 +452,7 @@ export const tests = [
       assert.deepEqual(state, {
         dots: ['3', '14', '25'],
         first: 'Mon',
-        time: '09:41',
+        time: '10:00',
         weekend: [
           'Sun',
           'rgba(60, 60, 67, 0.6)',
@@ -977,7 +977,7 @@ export const tests = [
       assert.deepEqual(await state(), ['April 2025', '27']);
       await press('Next month');
       assert.deepEqual(await state(), ['May 2025', '1']);
-      assert.match(await page.log(), /value change: 5\/1\/2025, 9:41:00 AM/u);
+      assert.match(await page.log(), /value change: 5\/1\/2025, 10:00:00 AM/u);
 
       // “Now”: today, at the current time (the others keep the time).
       await press('Now');
@@ -1070,9 +1070,9 @@ export const tests = [
       const [tint, plain] = await page.evaluate(`(() => {
         const probe = document.createElement('span');
         document.body.append(probe);
-        probe.style.color = 'var(--color-ios-primary)';
+        probe.style.color = 'var(--color-ui-primary)';
         const tint = getComputedStyle(probe).color;
-        probe.style.color = 'var(--color-ios-label)';
+        probe.style.color = 'var(--color-ui-label)';
         const plain = getComputedStyle(probe).color;
         probe.remove();
         return [tint, plain];

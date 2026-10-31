@@ -8,7 +8,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { getPropOptionsRoot } from './props.js';
 
 /**
- * A page control (UIKit `UIPageControl`, Figma “_Page control”): pressed
+ * A page control: pressed
  * before or after the current dot, or by keys, it goes to the previous or
  * next page; of more than 7 pages, a window of 8 dots.
  */

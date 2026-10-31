@@ -36,7 +36,7 @@ const RootPart: FunctionComponent = () => {
       state={[state]}
       title="Page.Root"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">

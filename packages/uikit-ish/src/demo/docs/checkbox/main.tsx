@@ -14,7 +14,7 @@ import {
 } from './props.js';
 
 /**
- * A checkbox (Base UI's, as iOS selection circles): unchecked, checked, or
+ * A checkbox (Base UI's, as selection circles): unchecked, checked, or
  * mixed (indeterminate).
  */
 export const CheckboxDemo: FunctionComponent = () => {

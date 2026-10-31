@@ -48,8 +48,7 @@ export const progressRootRows: readonly PropRow[] = [
     undefined,
     <>
       The current value (required). The component is indeterminate when value is{' '}
-      <code>null</code>: its fill slides along the track (UIKit has none: prefer
-      an{' '}
+      <code>null</code>: its fill slides along the track (or prefer an{' '}
       <PartLink
         component="progress"
         part="ActivityIndicator"
@@ -61,6 +60,12 @@ export const progressRootRows: readonly PropRow[] = [
   ['max', 'number', code('100'), 'The maximum value.'],
   ...formatRows,
   ['tint', 'string (a CSS color)', 'system blue', 'The fill’s color.'],
+  [
+    'synchronized',
+    'boolean',
+    code('true'),
+    'Indeterminate, its fill sliding in sync with every other indeterminate bar’s on the page (wherever each is along, whenever it started), or on its own.',
+  ],
   [
     'children',
     'ReactNode',
@@ -160,42 +165,48 @@ export const activityIndicatorRows: readonly PropRow[] = [
     union('animate', 'freeze', 'reset', 'finish', 'finish-and-hide', 'none'),
     code('animate'),
     <>
-      How it shows: spinning (<code>animate</code>; UIKit{' '}
-      <code>startAnimating</code>); stopped (UIKit <code>stopAnimating</code>
-      ): at rest at once (<code>reset</code>, as UIKit’s), frozen where it is (
-      <code>freeze</code>), or finishing its turn first, then resting at the top
-      (no jump: <code>finish</code>), whatever its <code>movement</code>;
-      finishing, then hidden (<code>finish-and-hide</code>; UIKit{' '}
-      <code>hidesWhenStopped</code>), or hidden at once (<code>none</code>).
-      Hidden, it takes no room.
+      How it shows: spinning (<code>animate</code>); stopped: at rest at once (
+      <code>reset</code>), frozen where it is (<code>freeze</code>), or
+      finishing its turn first, then resting at the top (no jump:{' '}
+      <code>finish</code>), whatever its <code>movement</code>; finishing, then
+      hidden (<code>finish-and-hide</code>), or hidden at once (
+      <code>none</code>). Hidden, it takes no room.
     </>,
   ],
   [
     'size',
     union('regular', 'small'),
     code(union('regular')),
-    'Figma’s “Size”: 30px, or 22px.',
+    'Its size: 30px, or 22px.',
   ],
   [
     'movement',
     union('stepped', 'rotate', 'fade'),
     code(union('stepped')),
-    'How it spins: a spoke at a time (as UIKit), smoothly, or its spokes staying in place, fading in turn.',
+    'How it spins: a spoke at a time, smoothly, or its spokes staying in place, fading in turn.',
   ],
   ['duration', 'number', code('1'), 'Seconds a turn takes (its speed).'],
+  [
+    'synchronized',
+    'boolean',
+    code('true'),
+    <>
+      Spinning in sync with every other activity indicator on the page (alike at
+      once, whenever each started), or on its own; with its own{' '}
+      <code>progress</code> or <code>duration</code>, always on its own.
+    </>,
+  ],
   [
     'color',
     'string (a CSS color)',
     'the secondary label color',
-    <>
-      The spokes’ color (UIKit <code>color</code>).
-    </>,
+    <>The spokes’ color.</>,
   ],
   [
     'children',
     'ReactNode',
     undefined,
-    'A label after it (Figma “Label”), naming it (as Base UI’s Progress.Label).',
+    'A label after it, naming it (as Base UI’s Progress.Label).',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];

@@ -16,7 +16,7 @@ import {
 } from './props.js';
 
 /**
- * A roll (UIKit `UIPickerView`): hours and minutes (editable: press the
+ * A roll: hours and minutes (editable: press the
  * selected row, or type, to enter a number), and a column of text with a
  * disabled row (“Durian”: settling on it moves on).
  */

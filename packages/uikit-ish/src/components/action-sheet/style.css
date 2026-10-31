@@ -4,10 +4,19 @@
     /* An overlay: above the page's layers (e.g. Viewport's bars), overlays
        among themselves in the order they open (see Menu). */
     z-index: 100;
+
+    /* Pressed only on its popup: a press beside it (in the positioner's
+       box, but not the popup's) is outside it (Base UI's: inside the
+       positioner), closing it. */
+    pointer-events: none;
+
+    & > * {
+      pointer-events: auto;
+    }
   }
 
   /* Its panel: within the room for it (not its positioner's width), its
-     actions scrolling when they don't fit (as UIKit's). */
+     actions scrolling when they don't fit. */
   .uikit-action-sheet-popup.uikit-alert-panel {
     max-width: var(--available-width);
     max-height: var(--available-height);

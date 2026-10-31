@@ -139,11 +139,8 @@ export const ProgressInformationArchitecture: FunctionComponent = () => (
       What the guide doesn’t cover
     </Heading>
     <ul>
-      <li>
-        A bar’s label and value (Base UI’s; Figma has none), and the value in a
-        tooltip.
-      </li>
-      <li>An indeterminate bar (Base UI’s; UIKit has none).</li>
+      <li>A bar’s label and value (Base UI’s), and the value in a tooltip.</li>
+      <li>An indeterminate bar (Base UI’s).</li>
       <li>The spinner’s other movements (smooth, fading in place).</li>
     </ul>
   </>

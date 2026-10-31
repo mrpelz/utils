@@ -43,7 +43,7 @@ export type RollColumnProps = Omit<
    */
   editable?: boolean;
   /**
-   * Its rows repeat endlessly (as iOS's time wheels): scrolled past the
+   * Its rows repeat endlessly (e.g. a time's): scrolled past the
    * last row, the first follows, and so on.
    */
   loop?: boolean;

@@ -28,8 +28,8 @@ const editingType = union('both', 'leading', 'trailing', 'none', 'ignore');
 /** An edit mode's description (Root's, Section's, Item's). */
 const editingDescription = (scope: string, inherited: string | undefined) => (
   <>
-    {scope} edit mode (UIKit <code>isEditing</code>), by side:{' '}
-    <code>leading</code> slides in the rows’ leading edit controls (
+    {scope} edit mode, by side: <code>leading</code> slides in the rows’ leading
+    edit controls (
     <PartLink
       component="list"
       part="List.Checkbox"
@@ -100,8 +100,8 @@ export const listRootRows: readonly PropRow[] = [
     union('insetGrouped', 'grouped', 'plain', 'sidebar'),
     code(union('insetGrouped')),
     <>
-      UIKit <code>UITableView.Style</code>: groups inset 16px with 24px corners
-      (<code>insetGrouped</code>), full width (<code>grouped</code>), plain rows
+      The list’s style: groups inset 16px with 24px corners (
+      <code>insetGrouped</code>), full width (<code>grouped</code>), plain rows
       with sticky section titles (<code>plain</code>), or a sidebar’s capsule
       rows (<code>sidebar</code>).
     </>,
@@ -111,6 +111,22 @@ export const listRootRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     'Outlines its groups: hairlines above and below, or a border around inset ones.',
+  ],
+  [
+    'dragToSelect',
+    'boolean',
+    code('true'),
+    <>
+      Its checkboxes (
+      <PartLink
+        component="list"
+        part="List.Checkbox"
+      />
+      ) pressed and dragged along the rows, selecting them as the first one
+      flips (on, or off), rows dragged back over returning; scrolling along near
+      the scroll container’s ends. Dragging from a checkbox, the page doesn’t
+      scroll (nor a sheet swipe away).
+    </>,
   ],
   ...renderRows('div', 'HTMLElement'),
 ];
@@ -133,7 +149,7 @@ export const listHeaderRows: readonly PropRow[] = [
     'prominence',
     union('prominent', 'nested', 'extraProminent'),
     code(union('prominent')),
-    'The header’s type (Figma “Header”): nested headers of plain lists are section titles (sticky).',
+    'The header’s type: nested headers of plain lists are section titles (sticky).',
   ],
   cursorRow(
     <>
@@ -144,6 +160,27 @@ export const listHeaderRows: readonly PropRow[] = [
   ...renderRows('div', 'HTMLElement'),
 ];
 
+const reorderTargetHandleRow = (description: PropRow[3]): PropRow => [
+  'reorderHandle',
+  'ListReorderHandle | ListReorderHandle[]',
+  undefined,
+  <>
+    {description} See{' '}
+    <PartLink
+      component="list"
+      part="List.createReorderHandle"
+    />
+    .
+  </>,
+];
+
+const dropNameRow = (description: PropRow[3]): PropRow => [
+  'dropName',
+  'string',
+  undefined,
+  description,
+];
+
 export const listGroupRows: readonly PropRow[] = [
   [
     'editing',
@@ -151,22 +188,54 @@ export const listGroupRows: readonly PropRow[] = [
     'its section’s',
     editingDescription('Its rows’', 'Each row’s own overrides it.'),
   ],
-  [
-    'onReorder',
-    '(from: number, to: number) => void',
-    undefined,
+  reorderTargetHandleRow(
     <>
-      Called when a row is moved by its{' '}
+      Rows of these handles can be dropped before, between and after its rows
+      (as a{' '}
       <PartLink
         component="list"
-        part="List.Grabber"
-      >
-        Grabber
-      </PartLink>{' '}
-      from one index to another (among the group’s rows); the app reorders them.
+        part="List.DropGroup"
+      />{' '}
+      around them); emptied, into it.
     </>,
-  ],
+  ),
+  dropNameRow(
+    <>
+      Its name, its gaps’ (the change’s <code>target.name</code>, its{' '}
+      <code>part</code>: <code>Group</code>), e.g. the app’s list of its rows.
+    </>,
+  ),
   ...renderRows('ul', 'HTMLElement'),
+];
+
+export const listDropGroupRows: readonly PropRow[] = [
+  reorderTargetHandleRow(
+    'Rows of these handles can be dropped before, between and after its rows (required).',
+  ),
+  dropNameRow(
+    <>
+      Its name, its gaps’ (the change’s <code>target.name</code>, its{' '}
+      <code>part</code>: <code>DropGroup</code>), e.g. the app’s list of its
+      rows.
+    </>,
+  ),
+  childrenRow(
+    undefined,
+    'Its rows (no element of its own: they stay its group’s; only an empty, hidden one marks where it is, its gap once emptied).',
+  ),
+];
+
+export const listDropTargetRows: readonly PropRow[] = [
+  reorderTargetHandleRow(
+    'Rows of these handles can be dropped where it’s placed (required).',
+  ),
+  dropNameRow(
+    <>
+      Its name (the change’s <code>target.name</code>, its <code>part</code>:{' '}
+      <code>DropTarget</code>).
+    </>,
+  ),
+  ...renderRows('li', 'HTMLElement'),
 ];
 
 export const listItemRows: readonly PropRow[] = [
@@ -195,13 +264,42 @@ export const listItemRows: readonly PropRow[] = [
     'Its level in a hierarchy (indented 20px per level; e.g. a sidebar).',
   ],
   [
+    'reorderHandle',
+    'ListReorderHandle | ListReorderHandle[]',
+    undefined,
+    <>
+      The reorder handles it’s moved by (
+      <PartLink
+        component="list"
+        part="List.createReorderHandle"
+      />
+      ), by its{' '}
+      <PartLink
+        component="list"
+        part="List.Grabber"
+      />{' '}
+      or the handle’s <code>grab</code>. By priority: dropped where several are
+      targets, the first of them is called. Grabbed with other rows, only the
+      handles all of them have count, in the first row’s order.
+    </>,
+  ],
+  dropNameRow(
+    <>
+      Its name in reordering: the moved rows’ (the change’s{' '}
+      <code>items[].name</code>), and a gap’s neighbours’ (
+      <code>target.after</code>, <code>target.before</code>, even if it isn’t
+      reordered itself, e.g. a pinned row); the handle’s <code>grab</code> takes
+      rows by it.
+    </>,
+  ),
+  [
     'onClick',
     'MouseEventHandler<HTMLElement>',
     undefined,
     <>
       A click on the row: e.g.{' '}
       <PartLink part="forwardClick">forwardClick(selector)</PartLink>, passing
-      it on to a control in the row (a switch, a checkbox), as iOS rows do.
+      it on to a control in the row (a switch, a checkbox).
     </>,
   ],
   secondaryClickRow,
@@ -495,10 +593,9 @@ export const listImageRows: readonly PropRow[] = [
     union('symbol', 'rounded', 'circular', 'fill'),
     code(union('symbol')),
     <>
-      The image’s frame (Figma “_Images” Type): a symbol alone, a rounded or
-      circular frame (e.g. a symbol on a <code>backgroundColor</code>), or a
-      square filled by an <code>img</code>, <code>video</code> or{' '}
-      <code>canvas</code>.
+      The image’s frame: a symbol alone, a rounded or circular frame (e.g. a
+      symbol on a <code>backgroundColor</code>), or a square filled by an{' '}
+      <code>img</code>, <code>video</code> or <code>canvas</code>.
     </>,
   ],
   ...renderRows('span', 'HTMLElement'),
@@ -550,7 +647,11 @@ export const listGrabberRows: readonly PropRow[] = [
     'tabIndex',
     'number',
     code('0'),
-    'Focusable: arrow keys move its row by one.',
+    <>
+      Focusable: arrow keys move its row to the previous or next gap at once;
+      grabbed by the app (the handle’s <code>grab</code>), from gap to gap,
+      Enter or Space dropping it, Escape putting it back.
+    </>,
   ],
   childrenRow('three lines', 'What it shows: by default, three lines.'),
   ...renderRows('span', 'HTMLElement'),
@@ -578,8 +679,7 @@ export const listEditButtonRows: readonly PropRow[] = [
     code('systemGray'),
     <>
       Its circle’s color: e.g. <code>systemRed</code> deleting,{' '}
-      <code>systemGreen</code> inserting (UIKit’s{' '}
-      <code>UITableViewCell.EditingStyle</code>).
+      <code>systemGreen</code> inserting.
     </>,
   ],
   [
@@ -644,7 +744,7 @@ export const listSwipeActionsRows: readonly PropRow[] = [
     'overswipe',
     'boolean',
     code('false'),
-    'Swiping on past the actions stretches the outermost one up to the others (following the row), and, past 304px, triggers it on release (UIKit performsFirstActionWithFullSwipe).',
+    'Swiping on past the actions stretches the outermost one up to the others (following the row), and, past 304px, triggers it on release.',
   ],
   [
     'onOverswipe',
@@ -813,7 +913,7 @@ export const listIndexRows: readonly PropRow[] = [
     'size',
     union('compact', 'regular'),
     code(union('compact')),
-    'UIKit size class: compact (iPhone) or regular (iPad).',
+    'A size class: compact (a phone) or regular (a tablet).',
   ],
   [
     'aria-label',
@@ -855,6 +955,135 @@ export const forwardClickRows: readonly PropRow[] = [
     <>
       The row’s <code>onClick</code>: clicks the control as the click it is (a
       pointer’s or a keyboard’s), unless the click was the control’s own.
+    </>,
+  ],
+];
+
+/** `List.createReorderHandle(options)`, `useCreateReorderHandle(options)`. */
+export const listReorderHandleRows: readonly PropRow[] = [
+  [
+    'options.onReorder',
+    '(change: ListReorderChange, eventDetails) => void',
+    undefined,
+    <>
+      Called when rows are dropped (or moved by keyboard) somewhere new; the app
+      reorders them (e.g. by{' '}
+      <PartLink
+        component="list"
+        part="List.reorder"
+      />
+      ). <code>change.items</code>: the rows moved, in the order grabbed (
+      <code>name</code>, their <code>dropName</code>; <code>index</code>, among
+      the handle’s rows). <code>change.target</code>: where (<code>part</code>:{' '}
+      <code>Group</code>, <code>DropGroup</code> or <code>DropTarget</code>;{' '}
+      <code>name</code>, its <code>dropName</code>; <code>index</code>, the gap
+      within it; <code>flat</code>, among the handle’s targets;{' '}
+      <code>after</code>, <code>before</code>: the rows around the gap, not
+      moved ones). <code>eventDetails.reason</code>: <code>drag</code>,{' '}
+      <code>keyboard</code> or <code>imperative</code>. Not called when nothing
+      changes.
+    </>,
+  ],
+  [
+    '(return)',
+    'ListReorderHandle',
+    undefined,
+    <>
+      A handle: given to the rows moved by it (
+      <PartLink
+        component="list"
+        part="List.Item"
+      />
+      ’s <code>reorderHandle</code>) and to where they can be dropped (
+      <PartLink
+        component="list"
+        part="List.DropGroup"
+      />
+      ,{' '}
+      <PartLink
+        component="list"
+        part="List.DropTarget"
+      />
+      ,{' '}
+      <PartLink
+        component="list"
+        part="List.Group"
+      />
+      ’s); from the hook, the same for the component’s lifetime, its options the
+      latest.
+    </>,
+  ],
+  [
+    '.grab(names)',
+    '(names: string[]) => void',
+    undefined,
+    <>
+      Grabs rows by their <code>dropName</code> (in that order: the first leads
+      the stack), lifting them where the first is. Pressing one of their
+      grabbers then drags them all; or <code>move</code>, <code>drop</code>,{' '}
+      <code>cancel</code> (and a grabber’s keys) move them.
+    </>,
+  ],
+  [
+    '.move(direction)',
+    `(direction: ${union('next', 'previous')}) => void`,
+    undefined,
+    'Moves the grabbed rows to the next or previous gap (announced).',
+  ],
+  [
+    '.drop()',
+    '() => void',
+    undefined,
+    <>
+      Drops the grabbed rows at their gap (calling <code>onReorder</code>).
+    </>,
+  ],
+  ['.cancel()', '() => void', undefined, 'Puts the grabbed rows back.'],
+  [
+    '.isGrabbed',
+    'boolean',
+    undefined,
+    'Rows of it are grabbed (by the app, or dragged), not yet dropped.',
+  ],
+];
+
+/** `List.reorder(data, change, nameOf)`. */
+export const listReorderRows: readonly PropRow[] = [
+  [
+    'data',
+    'T[] | Record<string, T[]>',
+    undefined,
+    <>
+      The app’s rows: a list, or lists by name (their group’s or drop group’s{' '}
+      <code>dropName</code>).
+    </>,
+  ],
+  [
+    'change',
+    'ListReorderChange',
+    undefined,
+    <>
+      The handle’s <code>onReorder</code> argument.
+    </>,
+  ],
+  [
+    'nameOf',
+    '(row: T) => string',
+    undefined,
+    <>
+      A row’s name, as its <code>dropName</code>.
+    </>,
+  ],
+  [
+    '(return)',
+    'T[] | Record<string, T[]>',
+    undefined,
+    <>
+      The rows reordered: the moved ones taken out, put after the target’s{' '}
+      <code>after</code> row (or before its <code>before</code> row; rows not in
+      the data, e.g. a pinned one, taken as those before or after them); in an
+      empty list, by the target’s <code>name</code>. New arrays for the lists
+      that changed; the data itself if a row isn’t found.
     </>,
   ],
 ];

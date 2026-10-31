@@ -29,15 +29,15 @@ const geometry = (page) =>
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'toolbar: bottom capsules of 36px buttons, and glass buttons of their own, match Figma',
+    name: 'toolbar: bottom capsules of 36px buttons, and glass buttons of their own, match the spec',
     run: async (page) => {
       await page.open('toolbar-symbols', 'light', {
         state: [{ symbols: 6 }],
       });
       const { bar, buttons, groups } = await geometry(page);
 
-      // 4px 16px 2px (Figma's 36px below, but the home indicator's 34px: its
-      // anchor's); one capsule, 6 × 36px + 5 × 12px + 2 × 6px = 288px.
+      // 4px 16px 2px (the home indicator's 34px below: its anchor's); one
+      // capsule, 6 × 36px + 5 × 12px + 2 × 6px = 288px.
       assert.deepEqual(bar, [4, 16, 2, 16]);
       assert.deepEqual(
         groups.map(([, width, height]) => [width, height]),
@@ -53,7 +53,7 @@ export const tests = [
         [6, 54, 102, 150, 198, 246].map((left) => [left, 36, 36]),
       );
 
-      // Glass buttons at both sides, 12px apart (Figma Type=Buttons).
+      // Glass buttons at both sides, 12px apart.
       await page.open('toolbar');
       const sides = await geometry(page);
       assert.deepEqual(sides.groups, []);
@@ -88,7 +88,7 @@ export const tests = [
       await page.open('toolbar');
       // A glass button's lens (see Button).
       const lens = await page.evaluate(
-        `getComputedStyle(document.documentElement).getPropertyValue(${JSON.stringify('--glass-ios-lens-scale')}).trim()`,
+        `getComputedStyle(document.documentElement).getPropertyValue(${JSON.stringify('--glass-ui-lens-scale')}).trim()`,
       );
       assert.equal(await press('[data-toolbar-part=button]'), lens);
       assert.match(await page.log(), /button clicked/u);
@@ -131,7 +131,7 @@ export const tests = [
         })()`);
       const [plain] = await group();
       assert.equal(plain, false);
-      await page.setState(2, { tint: 'var(--color-ios-system-orange)' });
+      await page.setState(2, { tint: 'var(--color-ui-system-orange)' });
       await sleep(200);
       assert.deepEqual(await group(), [
         true,
@@ -158,7 +158,7 @@ export const tests = [
     },
   },
   {
-    name: 'page control: dots match Figma; a window of 8 dots, shrinking at the ends',
+    name: 'page control: dots match the spec; a window of 8 dots, shrinking at the ends',
     run: async (page) => {
       await page.open('page-control');
       /** @returns {Promise<{ current: number, dots: number[], height: number, padding: string }>} */
@@ -215,7 +215,7 @@ export const tests = [
     },
   },
   {
-    name: 'page control: plain, it matches Figma “Page Controls” (light and dark)',
+    name: 'page control: plain, it matches the spec “Page Controls” (light and dark)',
     run: async (page) => {
       for (const [scheme, label, other] of /** @type {const} */ ([
         ['light', 'rgb(0, 0, 0)', 'color(srgb 0 0 0 / 0.3)'],

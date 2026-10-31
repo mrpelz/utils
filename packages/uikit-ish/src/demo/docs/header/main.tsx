@@ -1,9 +1,5 @@
 import './style.css';
 
-import { sfCheckmark } from '@bradleyhodges/sfsymbols/sfCheckmark';
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
 import { FunctionComponent } from 'react';
 
 import {
@@ -23,14 +19,19 @@ import {
 } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import {
+  sfCheckmark,
+  sfChevronBackward,
+  sfEllipsis,
+  sfSquareAndArrowUp,
+} from '../../tooling/icons.js';
+import {
   propOptionsBar,
   propOptionsLargeTitle,
   propOptionsTitle,
 } from './props.js';
 
 /**
- * A page's header (UIKit `UINavigationBar`, Figma “Toobar - Top - iPhone”,
- * Style=Large Title): its top toolbar anchored above the page; the large
+ * A page's header: its top toolbar anchored above the page; the large
  * title sits below its buttons and scrolls away under it, the bar's title
  * fading in between them.
  */
@@ -63,7 +64,7 @@ export const HeaderDemo: FunctionComponent = () => {
       state={[stateBar, stateTitle, stateLargeTitle]}
       title="Header"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root
@@ -147,7 +148,7 @@ export const HeaderDemo: FunctionComponent = () => {
 
 /**
  * A page's header without a large title: the bar's title shows, with a
- * subtitle (Figma Style=Title 2 Line); centered, or at its start.
+ * subtitle; centered, or at its start.
  */
 export const HeaderTitleDemo: FunctionComponent = () => {
   const id = 'header-title';
@@ -178,7 +179,7 @@ export const HeaderTitleDemo: FunctionComponent = () => {
       state={[stateBar, stateTitle, stateSubtitle]}
       title="Header (Title)"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root

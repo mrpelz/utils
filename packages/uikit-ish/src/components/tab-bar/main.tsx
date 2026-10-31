@@ -19,6 +19,8 @@ import {
 import { GlassBackground } from '../glass/main.js';
 import {
   cn,
+  type DelayedLens,
+  delayLens,
   edgeScrollDelta,
   frameElapsed,
   useForwardedRef,
@@ -53,10 +55,10 @@ export type {
   TabBarTabProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Tab Bar - iPhone”, BG Context Dim/Bright), with
-// the selected content color mapped to the app tint (`--color-ios-primary`,
-// i.e. `systemBlue`); glass materials, vibrant content and selection colors are
-// tokens in `styles.css`, used via `glass/main.tsx`. The selection's transition
+// The tab bar in dim and bright contexts, with the selected content color
+// mapped to the app tint (`--color-ui-primary`, i.e. `systemBlue`); glass
+// materials, vibrant content and selection colors are tokens in
+// `styles.css`, used via `glass/main.tsx`. The selection's transition
 // duration comes from Framework7 `components/toolbar/toolbar-ios.less`
 // (`.tab-link-highlight`), disabled opacity from Framework7 `less/mixins.less`
 // (`.disabled()`).
@@ -65,49 +67,44 @@ export type {
 // (selected labels: 17px, bold); the compact size's (17/28px, 10/12px) are in
 // none.
 //
-// Deviations:
-// - The list's `size` (UIKit size class) switches between the iPhone and the
-//   iPad tab bar, for all its groups; tabs hold a symbol, a label or both in
-//   either: - `compact` (Figma “Tab Bar - iPhone”): content stacked, 54px high,
-//   with a preferred (shrinkable, not fixed) width of 102px, down to a minimum
-//   of 54px (Figma: 102px, or filling the bar with 4+ tabs); `width` is used as
-//   `flex-basis` is ignored for the group's intrinsic size. A single tab next
-//   to the search tab is 102px (Figma: 110px). Neighbors overlap. - `regular`
-//   (Figma “Tab Bar - iPad”): content in a row, 36px high, hugging it (Figma:
-//   stretching to the bar's width), with larger labels that grow when selected
-//   and smaller symbols; white selected content on dim glass (iPhone: the
-//   tint). The selection is the same token as the iPhone's (Figma: #EDEDED for
-//   symbol tabs, rgb(118 118 128 / 12%) for text tabs in the bright context,
-//   one or two levels apart). Symbol-only tabs are circles in the compact size
-//   (Figma: iPhone search) and capsules hugging the symbol in the regular size
-//   (Figma: iPad sidebar and search, 50×36), but circles alone in a group;
-//   others capsules; a tab's (or its group's) `shape` overrides this (`circle`:
-//   a circle in both sizes). Labels reserve their selected width, so selecting
-//   a tab doesn't shift the tabs.
-// - The bar's inline padding is always 32px (Figma: 28px with up to 3 tabs).
-// - No padding below the groups (Figma: 32px, within the home indicator's
-//   34px): the safe area is its anchor's (a `Viewport.BlockEnd`), so it sits
-//   right above it.
-// - In a bar wider than its groups, the space between them widens (Figma:
-//   groups centered), the first at the bar's start, as when collapsed.
-// - Nothing isolates blending (Figma: each group), as that would cut the glass
-//   blur off from the content behind the bar; glass, indicator and tabs stack
-//   by document order instead.
+// Also:
+// - The list's `size` (a size class) switches between the phone and the
+//   tablet tab bar, for all its groups; tabs hold a symbol, a label or both in
+//   either: - `compact`: content stacked, 54px high, with a preferred
+//   (shrinkable, not fixed) width of 102px, down to a minimum of 54px;
+//   `width` is used as `flex-basis` is ignored for the group's intrinsic
+//   size. A single tab next to the search tab is 102px. Neighbors overlap.
+//   - `regular`: content in a row, 36px high, hugging it, with larger labels
+//   that grow when selected and smaller symbols; white selected content on
+//   dim glass (compact: the tint). The selection is the same token as the
+//   compact size's. Symbol-only tabs are circles in the compact size and
+//   capsules hugging the symbol in the regular size (50×36), but circles
+//   alone in a group; others capsules; a tab's (or its group's) `shape`
+//   overrides this (`circle`: a circle in both sizes). Labels reserve their
+//   selected width, so selecting a tab doesn't shift the tabs.
+// - The bar's inline padding is always 32px.
+// - No padding below the groups: the safe area is its anchor's (a
+//   `Viewport.BlockEnd`), so it sits right above it.
+// - In a bar wider than its groups, the space between them widens, the first
+//   at the bar's start, as when collapsed.
+// - Nothing isolates blending, as that would cut the glass blur off from the
+//   content behind the bar; glass, indicator and tabs stack by document order
+//   instead.
 // - Each group positions its own selection (the indicator) on its active tab.
 //   When the active tab leaves a group, its selection fades out in place; a
 //   group gaining the active tab fades its selection in, so the selection never
 //   travels between groups.
-// - Figma's fill blend modes are applied as `mix-blend-mode` of separate layers
+// - The fills' blend modes are applied as `mix-blend-mode` of separate layers
 //   (blending with the blurred backdrop), each carrying the fill's opacity.
 // - The blur layer's own `filter: blur(10px)` and masking are omitted.
-// - Figma's glass effect (a layer effect, missing from the CSS export) is
-//   emulated as in Framework7 `less/mixins.less` (`.ios-glass()`: backdrop
+// - The glass effect (its rim and shading) is emulated as in Framework7 `less/mixins.less` (`.ios-glass()`: backdrop
 //   `saturate(180%)` and `--f7-glass-shadow`, see `styles.css`).
 // - Pressing a tab turns the selection into a glass lens that follows the
 //   pointer and activates the closest tab on release, as in Framework7
 //   `components/toolbar/tabbar-highlight.js` and `toolbar-ios.less`
 //   (`.tab-link-highlight-pressed`); unlike Framework7 for all pointer types,
-//   not only touch. The lens belongs to the list, so it moves (and can be
+//   not only touch, and only once held a moment or dragged (a quick tap
+//   only selects, see `delayLens`). The lens belongs to the list, so it moves (and can be
 //   dragged) between groups, and is drawn above the tabs, as it has to be above
 //   the groups' glass. While dragging, it follows the pointer without a
 //   transition (Framework7: 300ms ease-out).
@@ -274,7 +271,7 @@ const updateSelection = (group: HTMLElement, { instant = false } = {}) => {
   });
 };
 
-// Collapsed (measured on iOS 26, iPhone): the bar is 48pt high instead of
+// Collapsed: the bar is 48pt high instead of
 // 62pt around the same center line, 7pt further in from the edges. The
 // groups and tabs marked `visibleWhenCollapsed` remain (and only those: what
 // remains is the app's to decide, e.g. by `collapsedSelection`), the others
@@ -285,11 +282,11 @@ const updateSelection = (group: HTMLElement, { instant = false } = {}) => {
 // (with several remaining tabs, on the active one, if it's among them): a
 // symbol in a 40pt circle, or a label (and symbol, side by side, in the
 // regular size's metrics) in a capsule. The bar keeps its size (see `List`).
-// The regular size (iPad doesn't minimize its tab bar) keeps its height.
+// The regular size keeps its height (it's never minimized).
 
 /**
- * A choice of what remains while collapsed (for `visibleWhenCollapsed`), as
- * iOS's: the active tab (by its value, among the groups' tab values) and its
+ * A choice of what remains while collapsed (for `visibleWhenCollapsed`): the
+ * active tab (by its value, among the groups' tab values) and its
  * group; without one, the first group's first tab. Every group's `tab` is
  * its active tab, or its first (for groups the app keeps, too).
  */
@@ -634,8 +631,7 @@ const useMarks = () => {
   return [count, mark] as const;
 };
 
-// The accessory (UIKit `bottomAccessory`, e.g. Music's mini player), from
-// iOS 26: expanded, a capsule as wide as the bar's groups, its glass 48pt
+// The accessory (e.g. a music app's mini player): expanded, a capsule as wide as the bar's groups, its glass 48pt
 // high and 8pt above theirs; collapsed, it moves into their row, filling the
 // space after the remaining groups at the start (spaced as groups are), at
 // the height of their tabs. Sizes are of its box: the glass extends beyond
@@ -790,6 +786,10 @@ const morphAccessory = (list: HTMLElement, isCollapsed: boolean) => {
   if (morph?.isCollapsed === isCollapsed) return;
 
   const accessory = accessories.get(list);
+  // Its state at once (not at the next frame's placing, see
+  // `placeAccessory`): shown in it as the list renders, e.g. its field
+  // focused right away.
+  accessory?.toggleAttribute('data-collapsed', isCollapsed);
   accessoryMorphs.set(list, {
     isCollapsed,
     // From where it is (also mid-morph); placed right away the first time.
@@ -1032,6 +1032,7 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
       onPointerDown,
       onPointerMove,
       onPointerUp,
+      onTouchMove,
       size = 'compact',
       style,
       ...props
@@ -1047,6 +1048,16 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
       setList?.(listRef.current);
       return () => setList?.(null);
     }, [listRef, setList]);
+
+    // A single tab, in all its groups (see style.css: no selection), as
+    // rendered.
+    useLayoutEffect(() => {
+      const { current: list } = listRef;
+      list?.toggleAttribute(
+        'data-single-tab',
+        list.querySelectorAll('[role="tab"]').length === 1,
+      );
+    });
     const expandedWidthRef = useRef<number | undefined>(undefined);
     const resizingRef = useRef(collapsed);
     const wasCollapsedRef = useRef(collapsed);
@@ -1275,9 +1286,13 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
       [collapsed, collapsedPosition, markGroup, markedGroups],
     );
 
-    const handlers = usePointerDrag<HTMLDivElement, { tab?: HTMLElement }>(
+    const handlers = usePointerDrag<
+      HTMLDivElement,
+      { clientX: number; lens: DelayedLens; tab?: HTMLElement }
+    >(
       {
         end: (list, state, isCancelled) => {
+          state.lens.cancel();
           dragRef.current = undefined;
           stopScrollingRef.current?.();
 
@@ -1299,25 +1314,48 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
           reveal(state.tab);
         },
         move: (list, state, event) => {
+          state.clientX = event.clientX;
+          state.lens.move(event);
+          if (!state.lens.isShown()) return;
+
           state.tab = press(list, event.clientX);
           dragRef.current = { clientX: event.clientX, state };
         },
         start: (list, event) => {
           if (!(event.target instanceof Element)) return undefined;
-          if (!event.target.closest('[role="tab"]')) return undefined;
+          const tab = event.target.closest('[role="tab"]');
+          if (!(tab instanceof HTMLElement)) return undefined;
 
-          // Place (and size) the lens at the pointer without a transition,
-          // then let it follow without delay; only opacity and scale animate.
-          list.style.setProperty('--uikit-tab-bar-lens-move-duration', '0s');
-          list.style.setProperty('--uikit-tab-bar-lens-size-duration', '0s');
-          const tab = press(list, event.clientX);
-          list.getBoundingClientRect();
-          list.style.removeProperty('--uikit-tab-bar-lens-size-duration');
-          list.style.setProperty('--uikit-tab-bar-pressed', '1');
+          // The press (the lens, its group grown) a moment later: a quick
+          // tap only selects its tab (see `delayLens`).
+          const state: {
+            clientX: number;
+            lens: DelayedLens;
+            tab?: HTMLElement;
+          } = {
+            clientX: event.clientX,
+            lens: delayLens(event, () => {
+              // Place (and size) the lens at the pointer without a
+              // transition, then let it follow without delay; only opacity
+              // and scale animate.
+              list.style.setProperty(
+                '--uikit-tab-bar-lens-move-duration',
+                '0s',
+              );
+              list.style.setProperty(
+                '--uikit-tab-bar-lens-size-duration',
+                '0s',
+              );
+              state.tab = press(list, state.clientX);
+              list.getBoundingClientRect();
+              list.style.removeProperty('--uikit-tab-bar-lens-size-duration');
+              list.style.setProperty('--uikit-tab-bar-pressed', '1');
 
-          const state = { tab };
-          dragRef.current = { clientX: event.clientX, state };
-          stopScrollingRef.current = autoScroll(dragRef);
+              dragRef.current = { clientX: state.clientX, state };
+              stopScrollingRef.current = autoScroll(dragRef);
+            }),
+            tab,
+          };
           return state;
         },
       },
@@ -1327,6 +1365,7 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
         onPointerDown,
         onPointerMove,
         onPointerUp,
+        onTouchMove,
       },
     );
 
@@ -1345,6 +1384,8 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
           {...props}
           {...handlers}
           className={cn('uikit-tab-bar-list', className)}
+          // Its drags don't swipe a sheet (or drawer) away.
+          data-base-ui-swipe-ignore=""
           data-tab-bar-part="list"
           onClickCapture={(event: MouseEvent<HTMLDivElement>) => {
             (
@@ -1460,8 +1501,7 @@ const Group = forwardRef<HTMLDivElement, TabBarGroupProps>(
 
     return (
       <GroupContext.Provider value={context}>
-        {/* Neighboring tabs overlap in the compact size (Figma: negative
-           spacing of 10px, 7.333px with 4 and 5.5px with 5 tabs). Groups of
+        {/* Neighboring tabs overlap in the compact size. Groups of
            several tabs share the bar's width by their own (single tabs, e.g.
            search, keep theirs): too narrow, their tabs scroll within (see
            `StyledTabs`), they keep their shape. A grid track up to their width
@@ -1571,7 +1611,7 @@ const Tab = forwardRef<HTMLElement, Omit<TabBarTabProps, 'ref'>>(
 
 const Icon = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
   ({ className, ...props }, ref) => (
-    // Symbol of a tab (Figma “􀋃”, “􀰱”; e.g. a `Symbol`, with its badge),
+    // Symbol of a tab (e.g. a `Symbol`, with its badge),
     // sized by the list's size.
     <span
       ref={ref}
@@ -1615,8 +1655,8 @@ const Label = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
 );
 
 /**
- * A glass capsule of arbitrary content attached to the bar (UIKit
- * `bottomAccessory`, e.g. a mini player), to be rendered inside
+ * A glass capsule of arbitrary content attached to the bar (e.g. a mini
+ * player), to be rendered inside
  * `TabBar.Root`, after `TabBar.List`: above its groups, or, while the bar is
  * collapsed, between them. Positioned at the list, it doesn't take up space
  * in the layout.

@@ -14,13 +14,13 @@
     place-items: center;
   }
 
-  /* Figma State=Selected/Unselected (mixed: as selected). */
+  /* Selected and unselected (mixed: as selected). */
   .uikit-checkbox-select-circle {
     position: relative;
     flex: none;
     padding: 0;
     border: 1.5px solid
-      var(--uikit-checkbox-select-circle-border, var(--color-ios-system-gray3));
+      var(--uikit-checkbox-select-circle-border, var(--color-ui-system-gray3));
     margin: 0;
     appearance: none;
     background: none;
@@ -44,7 +44,7 @@
     &[data-checked],
     &[data-indeterminate] {
       border-color: transparent;
-      background-color: var(--color-ios-primary);
+      background-color: var(--color-ui-primary);
     }
 
     &[data-disabled] {

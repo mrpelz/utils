@@ -1,6 +1,6 @@
 /* Activity view demos (see main.tsx). */
 
-/* As an iPad's activity view popover. */
+/* As an activity view popover (regular). */
 .activity-view-demo-popup {
   width: 402px;
   max-height: 640px;
@@ -15,7 +15,7 @@
   width: 100%;
   box-sizing: border-box;
   border-radius: 38px 38px 0 0;
-  background-color: var(--color-ios-secondary-system-grouped-background);
+  background-color: var(--color-ui-secondary-system-grouped-background);
   margin-block-start: auto;
   padding-block: 16px 34px;
 }

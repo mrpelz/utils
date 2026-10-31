@@ -1,9 +1,9 @@
 import type { ComponentProps } from 'react';
 
 /**
- * An icon's outlines: filled paths in a view box, e.g. an SF Symbol from
- * `@bradleyhodges/sfsymbols` (`sfBell`; its icons have this shape, no
- * dependency needed; mind Apple's terms for SF Symbols).
+ * An icon's outlines: filled paths in a view box. The library ships no
+ * icons: e.g. an SF Symbol from `@bradleyhodges/sfsymbols` (`sfBell`) has
+ * this shape (Apple's, licensed for Apple platforms only; no dependency).
  */
 export type SymbolIcon = {
   /** Its name (e.g. `bell`), as its `data-symbol`. */

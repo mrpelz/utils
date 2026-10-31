@@ -2,10 +2,15 @@ import '../glass/style.css';
 import './style.css';
 
 import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
-import { ComponentProps, forwardRef, useState } from 'react';
+import { ComponentProps, forwardRef, ReactNode, useState } from 'react';
 
-import { cn, usePortalContainer } from '../utils/main.js';
-import { useSizeClass, ViewportScopeContext } from '../viewport/main.js';
+import { cn, useForwardedRef, usePortalContainer } from '../utils/main.js';
+import {
+  EdgeEffects,
+  useScrollerRegistration,
+  useSizeClass,
+  ViewportScopeContext,
+} from '../viewport/main.js';
 import type {
   SheetContentProps,
   SheetGrabberProps,
@@ -21,32 +26,31 @@ export type {
   SheetPopupProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Sheets”): over the page dimmed (black, 20%;
-// dark: 48%):
-// - large (Figma “Full Screen - iPhone”): opaque (elevated background:
+// Sheets, over the page dimmed (black, 20%; dark: 48%):
+// - large: opaque (elevated background:
 //   white; dark: #1c1c1e), from 10px below the top to the bottom, its top
 //   corners 38px, its shadow 0 15px 75px at 18%;
-// - medium (Figma “Inspector - iPhone”): glass, 6px from the sides and the
+// - medium: glass, 6px from the sides and the
 //   bottom, as high as its content, its corners 34px;
-// - in a regular width (iPad: the window from 768px, or not `compact`), a
-//   form sheet (Figma “iPad”): opaque, centered, up to 936px by 852px, its
+// - in a regular width (the window from 768px, or not `compact`), a form
+//   sheet: opaque, centered, up to 936px by 852px, its
 //   corners 38px.
-// Its header (Figma “Toolbar”): a grabber (`Grabber`, 36px by 5px, 5px from
-// the top, #cfcfcf; optional) above the app's content (e.g. a `Toolbar`: Figma's 44px title
-// and controls). Base UI's `Drawer` (a `Dialog` with gestures): modal,
+// Its header: a grabber (`Grabber`, 36px by 5px, 5px from
+// the top, #cfcfcf; optional) above the app's content (e.g. a `Toolbar`: a 44px title and
+// controls). Base UI's `Drawer` (a `Dialog` with gestures): modal,
 // dismissed by a press outside it (or Escape); swiped down (anywhere, its
 // content scrolled to its top), far enough or flung, too, otherwise
 // springing back.
 //
-// Deviations:
+// Also:
 // - The glass is the menus' (see `Menu`).
 // - Detents don't change by dragging (`detent` is the app's), and the page
-//   behind a large sheet doesn't shrink back (UIKit's stacked look).
+//   behind a large sheet doesn't shrink back (no stacked look).
 
 // Opaque, grouped (`background`, for grouped lists, as a page's): on the
 // grouped background, a list in it without its own (which would end with
 // it, the sheet's around it). In it,
-// UIKit's elevated backgrounds (dark mode: #1c1c1e, groups #2c2c2e), as
+// the elevated backgrounds (dark mode: #1c1c1e, groups #2c2c2e), as
 // tokens for all its content (e.g. a navigation's pages).
 
 /** The sheet, the page dimmed behind it. */
@@ -121,7 +125,7 @@ const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
 );
 
 /**
- * Its grabber (Figma: 36px by 5px, 5px from the top): showing the sheet
+ * Its grabber (36px by 5px, 5px from the top): showing the sheet
  * can be swiped (it can be anywhere); left out, a cleaner top.
  */
 const Grabber = forwardRef<HTMLDivElement, SheetGrabberProps>(
@@ -138,17 +142,27 @@ const Grabber = forwardRef<HTMLDivElement, SheetGrabberProps>(
 
 /**
  * Its content, scrolling (Base UI's `Drawer.Content`: its text selectable by
- * a mouse without swiping the sheet).
+ * a mouse without swiping the sheet); a scroller (registered), drawing its
+ * bars' edge effects (see `Viewport`).
  */
 const Content = forwardRef<HTMLDivElement, SheetContentProps>(
-  ({ className, ...props }, ref) => (
-    <BaseDrawer.Content
-      ref={ref}
-      className={cn('uikit-sheet-content', className)}
-      data-sheet-part="content"
-      {...props}
-    />
-  ),
+  ({ children, className, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    useScrollerRegistration(ref);
+
+    return (
+      <BaseDrawer.Content
+        ref={ref}
+        className={cn('uikit-sheet-content', className)}
+        data-sheet-part="content"
+        data-viewport-scroller=""
+        {...props}
+      >
+        {children as ReactNode}
+        <EdgeEffects scroller={ref} />
+      </BaseDrawer.Content>
+    );
+  },
 );
 
 /**
@@ -170,7 +184,7 @@ export const useCreateSheetHandle = <
 };
 
 /**
- * A sheet (UIKit `UISheetPresentationController`; Base UI's `Drawer`): a
+ * A sheet (Base UI's `Drawer`): a
  * modal panel for a scoped task, from the bottom (large or medium), or a
  * form sheet in a regular width.
  */

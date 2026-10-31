@@ -1,43 +1,43 @@
+import '../glass/style.css';
 import './style.css';
 
 import { Field as BaseField } from '@base-ui/react/field';
 import {
-  ComponentProps,
   forwardRef,
   MouseEvent,
   PointerEvent,
   ReactNode,
   useId,
-  useRef,
   useState,
 } from 'react';
 
-import { cn } from '../utils/main.js';
-import type { ClearProps } from './props.js';
+import { GlassBackground } from '../glass/main.js';
+import { cn, isKeyboardFocus } from '../utils/main.js';
+import type { ClearProps, SearchProps } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Text Field”, light and dark appearance), with
-// Figma colors mapped to UIKit semantic colors: 52px rows (padding 0 16px),
+// Text fields, light and dark, in the semantic colors: 52px rows (padding
+// 0 16px),
 // the value in 17px at 510 (20px line height, Body's tracking) in `label`,
 // the placeholder in `placeholderText`, a 2px caret in the tint, the clear
-// button (􀁑, 17px) in `tertiaryLabel` while focused and filled. What Figma
-// doesn't show follows Framework7 (`components/input/input.less`,
+// button (17px) in `tertiaryLabel` while focused and filled. Messages
+// follow Framework7 (`components/input/input.less`,
 // `input-ios.less`, `input-vars.less`): info (`Description`) and error
 // messages in 12px below, invalid text in `systemRed`, disabled at 55%.
 //
-// A Base UI field (UIKit `UITextField`): in a list row (`Root` rendering a
+// A Base UI field: in a list row (`Root` rendering a
 // `List.Item`), the label is the row's title and the control fills the rest
 // of the row, the description and error below (see `List`); elsewhere, the
 // parts stack. A textarea renders through `Control`'s `render`.
 //
-// Deviations:
+// Also:
 // - No outlined style (Framework7 `.input-outline`).
-// - Labels (Figma: none) are inline in rows, in Body, as UIKit's forms
-//   (Framework7 iOS: 12px labels above the input, `.item-label`); standalone,
+// - Labels are inline in rows, in Body (Framework7's iOS theme: 12px labels
+//   above the input, `.item-label`); standalone,
 //   they're above, in Subheadline.
 // - Info and errors are in Caption 1 (12/16px, Framework7: 12px, 1.4).
-// - The caret is the browser's (Figma: 2×22px, rounded).
-// - The clear button is UIKit's circled cross, cut out of the circle (Figma:
-//   the SF Symbols glyph), with a 44px hit area.
+// - The caret is the browser's.
+// - The clear button is a circled cross, cut out of the circle, with a 44px
+//   hit area.
 
 /** A field (Base UI); rendering a `List.Item`, a list row. */
 const Root = forwardRef<HTMLDivElement, Omit<BaseField.Root.Props, 'ref'>>(
@@ -66,7 +66,7 @@ const Label = forwardRef<HTMLElement, Omit<BaseField.Label.Props, 'ref'>>(
 const Control = forwardRef<HTMLElement, Omit<BaseField.Control.Props, 'ref'>>(
   ({ className, ...props }, ref) => (
     // Framework7 `.item-input-wrap input`: no box of its own.
-    // Figma “Value”: 17px, 510, 20px line height.
+    // The value: 17px, 510, 20px line height.
     <BaseField.Control
       ref={ref}
       data-text-field-part="control"
@@ -115,8 +115,8 @@ const setValue = (control: HTMLInputElement | HTMLTextAreaElement) => {
 
 /**
  * Empties the field's control (as typing would, so its change handlers run),
- * focusing it; shown while it's filled, and (`mode`, UIKit's
- * `clearButtonMode`) while it's focused, while it isn't, or always.
+ * focusing it; shown while it's filled, and (`mode`) while
+ * it's focused, while it isn't, or always.
  */
 const Clear = forwardRef<HTMLButtonElement, ClearProps>(
   (
@@ -206,25 +206,31 @@ const Clear = forwardRef<HTMLButtonElement, ClearProps>(
 );
 
 /**
- * A search field's capsule (Figma “Search Field”): its symbol, a
+ * A search field's capsule: its symbol, a
  * `TextField.Control` (e.g. `type="search"`), and its buttons.
  */
-const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
-  ({ className, onBlur, onFocus, onPointerDown, ...props }, ref) => {
-    // Focused by a pointer (pressed first), or else by keyboard.
-    const pressed = useRef(false);
-    const [isKeyboardFocus, setIsKeyboardFocus] = useState(false);
+const Search = forwardRef<HTMLLabelElement, SearchProps>(
+  (
+    { children, className, onBlur, onFocus, variant = 'fill', ...props },
+    ref,
+  ) => {
+    // Focused by keyboard, or by a pointer (pressed anywhere: also beside
+    // it, see `preventFocusShift`).
+    const [isKeyboard, setIsKeyboard] = useState(false);
 
     return (
-      // Figma “Search Field” (Sidebars, Toolbars): a capsule (36px high, on the
+      // A search field (sidebars, toolbars): a capsule (36px high, on the
       // tertiary fill, 10px in) of a magnifier symbol (the secondary label
       // color), the field (Body, regular), and e.g. a dictation button; pressed
       // anywhere, it focuses the field (a label). In a sidebar (see `Sidebar`):
       // 44px high, on the secondary fill, 11px in, its parts 8px apart.
+      // Otherwise looking like a list row, a tab bar's or a toolbar's
+      // (`variant`).
       <label
         ref={ref}
-        data-keyboard-focus={isKeyboardFocus ? '' : undefined}
+        data-keyboard-focus={isKeyboard ? '' : undefined}
         data-text-field-part="search"
+        data-variant={variant}
         onBlur={(event) => {
           onBlur?.(event);
           const { relatedTarget } = event;
@@ -232,21 +238,21 @@ const Search = forwardRef<HTMLLabelElement, ComponentProps<'label'>>(
             !(relatedTarget instanceof Node) ||
             !event.currentTarget.contains(relatedTarget)
           ) {
-            setIsKeyboardFocus(false);
+            setIsKeyboard(false);
           }
         }}
         onFocus={(event) => {
           onFocus?.(event);
-          setIsKeyboardFocus(!pressed.current);
-          pressed.current = false;
-        }}
-        onPointerDown={(event) => {
-          onPointerDown?.(event);
-          pressed.current = true;
+          setIsKeyboard(isKeyboardFocus());
         }}
         {...props}
         className={cn('uikit-text-field-search', className)}
-      />
+      >
+        {variant === 'tab-bar' || variant === 'toolbar' ? (
+          <GlassBackground kind={variant === 'toolbar' ? 'button' : 'bar'} />
+        ) : null}
+        {children}
+      </label>
     );
   },
 );

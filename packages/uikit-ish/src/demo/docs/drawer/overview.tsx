@@ -1,4 +1,3 @@
-import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
 import { FunctionComponent } from 'react';
 
 import {
@@ -22,6 +21,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfListBullet } from '../../tooling/icons.js';
 import { names } from '../viewport/content.js';
 import {
   drawerPopupRows,
@@ -69,7 +69,7 @@ const LiveView: FunctionComponent = () => {
       state={state}
       title="Drawer"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -204,8 +204,8 @@ export const DrawerOverview: FunctionComponent = () => (
         Room for it: a <a href="layout">Layout</a>’s column, side by side.
       </li>
       <li>
-        Drilling into a list: a <a href="navigation">Navigation</a> (iOS’
-        compact split view: one column at a time).
+        Drilling into a list: a <a href="navigation">Navigation</a> (one column
+        at a time).
       </li>
       <li>
         A scoped task over the page: a <a href="sheet">Sheet</a>.

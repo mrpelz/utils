@@ -1,9 +1,6 @@
 import '../toolbar/style.css';
 import './style.css';
 
-import { sfBellFill } from '@bradleyhodges/sfsymbols/sfBellFill';
-import { sfEnvelopeFill } from '@bradleyhodges/sfsymbols/sfEnvelopeFill';
-import { sfGearshapeFill } from '@bradleyhodges/sfsymbols/sfGearshapeFill';
 import { FunctionComponent } from 'react';
 
 import {
@@ -22,6 +19,11 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfBellFill,
+  sfEnvelopeFill,
+  sfGearshapeFill,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 /** Settings' rows: a pending update counted in its row. */
@@ -42,7 +44,7 @@ const InAListRow: FunctionComponent = () => {
             <List.Item>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-gray)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-gray)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfGearshapeFill} />
@@ -68,7 +70,7 @@ const InAListRow: FunctionComponent = () => {
             <List.Item>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-red)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-red)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfBellFill} />
@@ -102,13 +104,13 @@ const OnAnAvatar: FunctionComponent = () => (
     title="Badge on an avatar"
   >
     <div className="badge-demo-row">
-      <Avatar.Root aria-label="Jane Appleseed, 3 unread">
+      <Avatar.Root aria-label="Jane Doe, 3 unread">
         <Avatar.Fallback>JA</Avatar.Fallback>
         <Badge>3</Badge>
       </Avatar.Root>
-      <Avatar.Root aria-label="Kate Bell, unread">
+      <Avatar.Root aria-label="Kate Brown, unread">
         <Avatar.Fallback>KB</Avatar.Fallback>
-        <Badge tint="var(--color-ios-system-blue)" />
+        <Badge tint="var(--color-ui-system-blue)" />
       </Avatar.Root>
     </div>
   </Component>
@@ -212,7 +214,7 @@ export const BadgeComposition: FunctionComponent = () => (
         Without a count, a dot inside the corner; here tinted (<code>tint</code>
         ).
       </li>
-      <li>The avatar named with it (“Jane Appleseed, 3 unread”).</li>
+      <li>The avatar named with it (“Jane Doe, 3 unread”).</li>
       <li>
         <strong>Library:</strong> the badge on the avatar’s corner, its count or
         dot and its <code>tint</code>.

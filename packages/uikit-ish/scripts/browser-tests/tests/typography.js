@@ -20,7 +20,7 @@ const styles = [
 ];
 
 /**
- * Figma “Dynamic Type” (size/line height, tracking) for some sizes.
+ * The text sizes (size/line height, tracking) for some sizes.
  *
  * @type {Record<string, string[]>}
  */
@@ -81,7 +81,7 @@ const figma = {
 
 /**
  * Metrics (“size/line height tracking”) of the matrix demo's text in the
- * Dynamic Type size table's column for `size`.
+ * text size table's column for `size`.
  *
  * @param {Page} page
  * @param {string} size
@@ -101,7 +101,7 @@ const metrics = (page, size) =>
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'typography: text styles match Figma at Dynamic Type sizes',
+    name: 'typography: text styles match the spec at text sizes',
     run: async (page) => {
       await page.open('typography-sizes');
 
@@ -111,7 +111,7 @@ export const tests = [
     },
   },
   {
-    name: 'typography: emphasized weights and italics match Figma',
+    name: 'typography: emphasized weights and italics match the spec',
     run: async (page) => {
       await page.open('typography-matrix');
 
@@ -141,7 +141,7 @@ export const tests = [
     },
   },
   {
-    name: 'typography: all Dynamic Type sizes render',
+    name: 'typography: all text sizes render',
     run: async (page) => {
       await page.open('typography-sizes');
       await page.screenshot('typography-sizes');
@@ -198,7 +198,7 @@ export const tests = [
     },
   },
   {
-    name: 'typography: a Dynamic Type size around a list sizes its rows’ text',
+    name: 'typography: a text size around a list sizes its rows’ text',
     run: async (page) => {
       /** The list's first title's font size. */
       const size = () =>
@@ -208,9 +208,9 @@ export const tests = [
 
       await page.open('typography-composition-size');
       assert.equal(await size(), '17px');
-      await page.setState(0, { dynamicTypeSize: 'ax3' });
+      await page.setState(0, { textSize: 'ax3' });
       assert.notEqual(await size(), '17px');
-      await page.setState(0, { dynamicTypeSize: 'xSmall' });
+      await page.setState(0, { textSize: 'xSmall' });
       assert.equal(await size(), '14px');
     },
   },

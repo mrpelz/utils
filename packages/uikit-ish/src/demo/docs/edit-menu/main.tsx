@@ -24,7 +24,7 @@ import {
 } from './props.js';
 
 /**
- * An edit menu (UIKit `UIEditMenuInteraction`): opened above a text
+ * An edit menu: opened above a text
  * selection (`useSelectionAnchor`), its actions in a glass capsule, more
  * of them behind the chevron (`EditMenu.More`, a submenu).
  */

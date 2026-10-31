@@ -16,20 +16,20 @@ export type ButtonRootProps = BaseButtonProps &
      * @default 'pointer' (disabled, also without a click handler: 'not-allowed')
      */
     cursor?: Properties['cursor'];
-    /** Figma “Destructive”: tints the button red. */
+    /** Tints the button red. */
     destructive?: boolean;
     /**
      * Grows to fill the available width (a block, or a flex item sharing a
-     * row's free space), its content centered (Figma: hugging its content).
+     * row's free space), its content centered.
      */
     fill?: boolean;
     /**
      * `circle` is square with a round shape, for symbol-only buttons;
-     * `roundedRectangle` has 6px corners (large: 12px; Figma “Date and time -
-     * Collapsed”, large borderless buttons).
+     * `roundedRectangle` has 6px corners (large: 12px; e.g. a date
+     * picker's collapsed buttons, large borderless buttons).
      */
     shape?: 'capsule' | 'circle' | 'roundedRectangle';
-    /** Figma “Size” (not applicable to glass variants, which have one size). */
+    /** Its size (not applicable to glass variants, which have one size). */
     size?: 'large' | 'medium' | 'small';
     /**
      * Its text and symbols' color, over its variant's (e.g. for a light
@@ -37,12 +37,12 @@ export type ButtonRootProps = BaseButtonProps &
      */
     textColor?: string;
     /**
-     * The button's color (labels, fills, tinted glass; UIKit `tintColor`, e.g.
-     * Notes' yellow). `destructive` wins.
+     * The button's color (labels, fills, tinted glass; e.g. a notes
+     * app's yellow). `destructive` wins.
      * @default the primary color
      */
     tint?: string;
-    /** Figma “Style”, and “Button - Liquid Glass” with “Tinted”. */
+    /** Its style: classic ones, and glass (tinted or not). */
     variant?:
       | 'bordered'
       | 'bordered-prominent'

@@ -14,9 +14,8 @@ export type {
   ActivityViewPersonProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Activity Views”, UIKit
-// `UIActivityViewController`, a share sheet), in the app's sheet (iPhone)
-// or popover (iPad), as parts:
+// An activity view (a share sheet), in the app's sheet (compact) or popover
+// (a regular width), as parts:
 // - a header (16px in, its parts 16px apart): a thumbnail (64px, its
 //   corners 16px, a 0.5px border), its title (15px, medium) and subtitle
 //   (13px, the secondary label color) 1px apart, then (12px below) e.g. a
@@ -28,12 +27,11 @@ export type {
 // - separators between them (0.5px, 16px in);
 // - its actions as a list (a `List`).
 //
-// Deviations:
-// - A group's name (with a count) takes one line, truncated (iOS: scaled
-//   down to fit it).
-// - The actions' symbols are light (user: thinner; Figma: regular).
-// - Apps (Figma's app icon row, its people's app badges) aren't built: an
-//   avatar takes a `Badge` instead.
+// Also:
+// - A group's name (with a count) takes one line, truncated.
+// - The actions' symbols are light.
+// - Apps (an app icon row, people's app badges) aren't built: an avatar
+//   takes a `Badge` instead.
 
 /** Its header: a thumbnail, and its heading (title, subtitle, more). */
 const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
@@ -179,7 +177,7 @@ const Count = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
   ),
 );
 
-/** An action (Figma “Action”): its `Symbol` above its `Label`. */
+/** An action: its `Symbol` above its `Label`. */
 const Action = forwardRef<HTMLButtonElement, ActivityViewActionProps>(
   ({ className, ...props }, ref) => (
     <div
@@ -239,7 +237,7 @@ const Separator = forwardRef<HTMLHRElement, ComponentProps<'hr'>>(
 );
 
 /**
- * An activity view (UIKit `UIActivityViewController`, a share sheet): what's
+ * An activity view (a share sheet): what's
  * shared (`Header`), people and actions (`People`, `Actions`), and more
  * actions (a `List`), in the app's sheet or popover.
  */

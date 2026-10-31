@@ -11,9 +11,9 @@ export type EditMenuRootProps<Payload = unknown> = Omit<
   'size'
 > & {
   /**
-   * The UIKit size class of its menus (e.g. the “more” button's):
-   * `regular` (the iPad's: their submenus beside their trigger) or
-   * `compact` (the iPhone's: their submenus over it). The capsule is the
+   * The size class of its menus (e.g. the “more” button's): `regular`
+   * (their submenus beside their trigger) or `compact` (their submenus over
+   * it). The capsule is the
    * same either way.
    * @default 'regular'
    */
@@ -38,6 +38,6 @@ export type ItemProps = {
    * 'not-allowed'
    */
   cursor?: Properties['cursor'];
-  /** Red label (Figma State=Destructive). */
+  /** Red label (destructive). */
   destructive?: boolean;
 };

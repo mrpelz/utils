@@ -132,10 +132,7 @@ export const EditMenuInformationArchitecture: FunctionComponent = () => (
       What the guide doesn’t cover
     </Heading>
     <ul>
-      <li>
-        iOS 26’s own metrics (measured: 42px high, 14px labels), smaller than
-        Figma’s.
-      </li>
+      <li>Its metrics: 42px high, 14px labels.</li>
       <li>
         More actions in an iPad menu below the capsule (iOS pages the capsule).
       </li>

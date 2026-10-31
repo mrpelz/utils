@@ -12,24 +12,22 @@ import {
 import { cn } from '../utils/main.js';
 import type { FocusHandler, HalfProps } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Stepper”, “_Decrement”, “_Increment”:
-// Style=Default/Pressed/Disabled, light and dark appearance), with Figma
-// colors mapped to UIKit semantic colors: the halves `quaternarySystemFill`,
+// A stepper's halves (default, pressed, disabled), light and dark, in the
+// semantic colors: the halves `quaternarySystemFill`,
 // the separator and disabled symbols `tertiaryLabel`, symbols `label`.
 //
-// A Base UI number field (UIKit `UIStepper`): `Group` is the capsule, with
-// `Decrement` and `Increment` halves; the value isn't shown (as UIKit's), but
+// A Base UI number field: `Group` is the capsule, with `Decrement` and
+// `Increment` halves; the value isn't shown, but
 // held by the field's `Input`, visually hidden in the group, which keyboards
 // focus (arrow keys step) and assistive technology reads (a spin button).
 //
-// Deviations:
+// Also:
 // - The halves' size (46×32) is a minimum, not a fixed size.
-// - The symbols (Figma: “−” and “+” in Headline) are SVG strokes, 14px wide
-//   (as Figma's PNG, at 2px).
-// - Pressed in dark mode, the halves lighten by 8% white (Figma: 8% black,
-//   given in light mode only).
+// - The symbols (“−” and “+”) are SVG strokes, 14px wide, at 2px.
+// - Pressed, the halves darken by 8% black (light mode) or lighten by 8%
+//   white (dark mode).
 // - Focused by keyboard, the capsule has a 2px ring in the tint, 2px around
-//   it (Figma: none; as `Slider`'s knob).
+//   it (as `Slider`'s knob).
 
 /**
  * The stepper's capsule; it holds the field's `Input`. Pressed, it's marked
@@ -40,7 +38,7 @@ const Group = forwardRef<
   HTMLDivElement,
   Omit<BaseNumberField.Group.Props, 'ref'>
 >(({ className, onBlur, onKeyDown, onPointerDown, ...props }, ref) => (
-  // Figma “Stepper”: two halves side by side, a 1×24px separator between them
+  // Two halves side by side, a 1×24px separator between them
   // (4px from the top), its corners 8px.
   <BaseNumberField.Group
     ref={ref}
@@ -70,7 +68,7 @@ const Group = forwardRef<
 ));
 
 /**
- * The field's input, in the group: visually hidden (UIKit shows no value),
+ * The field's input, in the group: visually hidden (no value is shown),
  * the focus target and spin button; name it (`aria-label`).
  */
 const Input = forwardRef<
@@ -85,7 +83,7 @@ const Input = forwardRef<
   />
 ));
 
-// Figma PNG: 14px wide, 2px strokes (Headline at 590).
+// 14px wide, 2px strokes (Headline at 590).
 const Sign = ({ isPlus }: { isPlus: boolean }) => (
   <svg
     aria-hidden="true"
@@ -101,12 +99,12 @@ const Sign = ({ isPlus }: { isPlus: boolean }) => (
   </svg>
 );
 
-/** Figma “_Decrement”: the leading half, “−”. */
+/** The leading half, “−”. */
 const Decrement = forwardRef<
   HTMLButtonElement,
   Omit<BaseNumberField.Decrement.Props, 'ref'> & HalfProps
 >(({ className, children, ...props }, ref) => (
-  // Figma “_Decrement”, “_Increment” (see style.css).
+  // A half (see style.css).
   <BaseNumberField.Decrement
     ref={ref}
     {...props}
@@ -117,7 +115,7 @@ const Decrement = forwardRef<
   </BaseNumberField.Decrement>
 ));
 
-/** Figma “_Increment”: the trailing half, “+”. */
+/** The trailing half, “+”. */
 const Increment = forwardRef<
   HTMLButtonElement,
   Omit<BaseNumberField.Increment.Props, 'ref'> & HalfProps

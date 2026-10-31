@@ -1,4 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -23,6 +22,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfChevronBackward } from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { pages } from '../navigation/content.js';
 import { names } from '../viewport/content.js';
@@ -117,25 +117,27 @@ const pop = () => setKeys((current) => current.slice(0, -1));
   <Sheet.Content>
     <Navigation.Root onBack={pop}>
       <Navigation.SwipeArea />
-      {/* What stays while the pages move: the back button, Done. */}
-      <Viewport.BlockStart>
-        <Toolbar.Root placement="block-start">
-          <Toolbar.Leading>
-            {keys.length > 1 ? <Navigation.Back … /> : null}
-          </Toolbar.Leading>
-          <Toolbar.Trailing>
-            <Sheet.Close render={<Toolbar.Button prominent />}>
-              <Button.Label>Done</Button.Label>
-            </Sheet.Close>
-          </Toolbar.Trailing>
-        </Toolbar.Root>
-      </Viewport.BlockStart>
       <Navigation.Stack>
-        {keys.map((key) => (
+        {keys.map((key, index) => (
           <Header.Root key={key}>
             <Viewport.BlockStart>
               <Toolbar.Root placement="block-start">
+                {/* Each pushed page's back button, and every page's Done:
+                   staying put between pages having them. */}
+                {index > 0 ? (
+                  <Toolbar.Leading>
+                    <Navigation.Back … />
+                  </Toolbar.Leading>
+                ) : null}
                 <Toolbar.Title>…</Toolbar.Title>
+                <Toolbar.Trailing>
+                  <Navigation.Persistent
+                    persistentId="done"
+                    render={<Sheet.Close render={<Toolbar.Button prominent />} />}
+                  >
+                    <Button.Label>Done</Button.Label>
+                  </Navigation.Persistent>
+                </Toolbar.Trailing>
               </Toolbar.Root>
             </Viewport.BlockStart>
             <Page.Root>
@@ -509,32 +511,23 @@ const NavigationInside: FunctionComponent = () => {
             <Sheet.Content className="sheet-demo-stack">
               <Navigation.Root onBack={pop}>
                 <Navigation.SwipeArea />
-                <Viewport.BlockStart>
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Leading>
-                      {keys.length > 1 ? (
-                        <Navigation.Back
-                          aria-label={pages[keys.at(-2) ?? '']?.title}
-                          render={<Toolbar.Button shape="circle" />}
-                        >
-                          <Button.Icon>
-                            <Symbol icon={sfChevronBackward} />
-                          </Button.Icon>
-                        </Navigation.Back>
-                      ) : null}
-                    </Toolbar.Leading>
-                    <Toolbar.Trailing>
-                      <Sheet.Close render={<Toolbar.Button prominent />}>
-                        <Button.Label>Done</Button.Label>
-                      </Sheet.Close>
-                    </Toolbar.Trailing>
-                  </Toolbar.Root>
-                </Viewport.BlockStart>
                 <Navigation.Stack>
                   {keys.map((key, depth) => (
                     <Header.Root key={key}>
                       <Viewport.BlockStart>
                         <Toolbar.Root placement="block-start">
+                          {depth > 0 ? (
+                            <Toolbar.Leading>
+                              <Navigation.Back
+                                aria-label={pages[keys[depth - 1] ?? '']?.title}
+                                render={<Toolbar.Button shape="circle" />}
+                              >
+                                <Button.Icon>
+                                  <Symbol icon={sfChevronBackward} />
+                                </Button.Icon>
+                              </Navigation.Back>
+                            </Toolbar.Leading>
+                          ) : null}
                           <Toolbar.Title>
                             {depth === 0 ? (
                               <Sheet.Title render={<span />}>
@@ -544,6 +537,19 @@ const NavigationInside: FunctionComponent = () => {
                               <span>{pages[key]?.title}</span>
                             )}
                           </Toolbar.Title>
+                          {/* On every page, staying put (persistent). */}
+                          <Toolbar.Trailing>
+                            <Navigation.Persistent
+                              persistentId="done"
+                              render={
+                                <Sheet.Close
+                                  render={<Toolbar.Button prominent />}
+                                />
+                              }
+                            >
+                              <Button.Label>Done</Button.Label>
+                            </Navigation.Persistent>
+                          </Toolbar.Trailing>
                         </Toolbar.Root>
                       </Viewport.BlockStart>
                       <Page.Root>
@@ -812,18 +818,14 @@ export const SheetComposition: FunctionComponent = () => (
     <ul>
       <li>
         A task of several levels: a <a href="navigation">Navigation</a> as its
-        content, each page’s bar its title (moving with it); the back button and
-        Done in a bar that stays (in the{' '}
+        content, each page’s bar its title (moving with it), the back button
+        (from the first pushed page) and Done: persistent items (see{' '}
         <PartLink
           component="navigation"
-          part="Navigation.Root"
+          part="Navigation.Persistent"
         />
-        , outside its{' '}
-        <PartLink
-          component="navigation"
-          part="Navigation.Stack"
-        />
-        ).
+        ), staying put between pages having them, so Done never moves and the
+        back button slides in and out with the first pushed page.
       </li>
       <li>
         Its header the grabber alone (
@@ -861,7 +863,7 @@ export const SheetComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a regular width (an iPad’s), a form sheet: centered, up to 936px by
+        In a regular width (a tablet’s), a form sheet: centered, up to 936px by
         852px, the page dimmed around it.
       </li>
       <li>

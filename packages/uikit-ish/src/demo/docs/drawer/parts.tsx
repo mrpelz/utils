@@ -1,5 +1,3 @@
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
 import { FunctionComponent } from 'react';
 
 import {
@@ -18,6 +16,7 @@ import { useLog } from '../../tooling/frame/log.js';
 import { codeLabel } from '../../tooling/frame/render-code.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfHeart, sfListBullet } from '../../tooling/icons.js';
 import { names } from '../viewport/content.js';
 import {
   drawerCloseRows,
@@ -69,7 +68,7 @@ const RootPart: FunctionComponent = () => {
       state={state}
       title="Drawer.Root"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -179,7 +178,7 @@ const SwipeAreaPart: FunctionComponent = () => {
       state={state}
       title="Drawer.SwipeArea"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -289,7 +288,7 @@ const PopupPart: FunctionComponent = () => {
       state={state}
       title="Drawer.Popup"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -399,7 +398,7 @@ const TriggerPart: FunctionComponent = () => {
       state={state}
       title="Drawer.Trigger"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -509,7 +508,7 @@ const ClosePart: FunctionComponent = () => {
       state={state}
       title="Drawer.Close"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -619,7 +618,7 @@ const CreateHandlePart: FunctionComponent = () => {
       state={state}
       title="Drawer.createHandle"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -734,7 +733,7 @@ const UseCreateDrawerHandlePart: FunctionComponent = () => {
       state={state}
       title="useCreateDrawerHandle"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -938,6 +937,10 @@ export const DrawerParts: FunctionComponent = () => (
         The drawer follows the swipe; let go past half its width, or while still
         moving (a fling), it opens, otherwise it closes again (Base UI’s rule,
         not configurable).
+      </li>
+      <li>
+        A touch moving sideways first is the swipe: nothing scrolls until it
+        ends. Moving vertically first, it scrolls the page, as anywhere.
       </li>
       <li>
         Renders a <code>div</code> (Base UI’s <code>Drawer.SwipeArea</code>):

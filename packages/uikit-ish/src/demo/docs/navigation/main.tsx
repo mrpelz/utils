@@ -1,6 +1,5 @@
 import './style.css';
 
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
 import { FunctionComponent, useCallback, useState } from 'react';
 
 import {
@@ -17,13 +16,14 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { sfChevronBackward } from '../../tooling/icons.js';
 import { pages } from './content.js';
 import { useNavigationControls } from './props.js';
 
 type Stack = 'mail' | 'settings';
 
 /**
- * Navigation (UIKit `UINavigationController`): the app's stacks of pages
+ * Navigation: the app's stacks of pages
  * (its state, no router): drilling into a row pushes a page, the back button
  * (or swiping from the leading edge) pops it, each page's header moving
  * with it, the back button staying; switching between the stacks (e.g.
@@ -70,33 +70,29 @@ export const NavigationDemo: FunctionComponent = () => {
       state={state}
       title="Navigation"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
-                {keys.length > 1 ? (
-                  <Navigation.Back
-                    aria-label={pages[keys.at(-2) ?? '']?.title}
-                    {...propsBack}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfChevronBackward} />
-                    </Button.Icon>
-                  </Navigation.Back>
-                ) : null}
-              </Toolbar.Leading>
-            </Toolbar.Root>
-          </Viewport.BlockStart>
           <Navigation.Stack {...propsStack}>
-            {keys.map((key) => {
+            {keys.map((key, depth) => {
               const page = pages[key] ?? { children: [], title: key };
 
               return (
                 <Header.Root key={key}>
                   <Viewport.BlockStart>
                     <Toolbar.Root placement="block-start">
+                      {depth > 0 ? (
+                        <Toolbar.Leading>
+                          <Navigation.Back
+                            aria-label={pages[keys[depth - 1] ?? '']?.title}
+                            {...propsBack}
+                          >
+                            <Button.Icon>
+                              <Symbol icon={sfChevronBackward} />
+                            </Button.Icon>
+                          </Navigation.Back>
+                        </Toolbar.Leading>
+                      ) : null}
                       <Toolbar.Title>
                         <span>{page.title}</span>
                       </Toolbar.Title>

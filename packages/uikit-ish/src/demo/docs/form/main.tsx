@@ -30,7 +30,7 @@ import {
 } from './props.js';
 
 /**
- * A form (Base UI `Form`, `Fieldset`) as iOS lays it out: fieldsets are
+ * A form (Base UI `Form`, `Fieldset`) laid out as a list: fieldsets are
  * list sections, their legends the headers, fields rows (text fields of
  * each input type, a date, checkboxes in a group, radios); submitted by a
  * button.

@@ -83,9 +83,9 @@ export const tabBarListRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Minimized (UIKit <code>tabBarMinimizeBehavior</code>): only the groups and
-      tabs marked <code>visibleWhenCollapsed</code> remain, by default as
-      symbols in circles. The bar keeps its width.
+      Minimized: only the groups and tabs marked{' '}
+      <code>visibleWhenCollapsed</code> remain, by default as symbols in
+      circles. The bar keeps its width.
     </>,
   ],
   [
@@ -105,8 +105,8 @@ export const tabBarListRows: readonly PropRow[] = [
     union('compact', 'regular'),
     code('compact'),
     <>
-      UIKit size class: <code>compact</code> is the iPhone tab bar (content
-      stacked), <code>regular</code> the iPad tab bar (content in a row).
+      A size class: <code>compact</code> is the phone tab bar (content stacked),{' '}
+      <code>regular</code> the tablet tab bar (content in a row).
     </>,
   ],
   glassContext(''),
@@ -136,8 +136,8 @@ export const tabBarGroupRows: readonly PropRow[] = [
     code('false'),
     <>
       Remains while the bar is collapsed, with its tabs marked so; groups not
-      marked collapse away (<PartLink part="collapsedSelection" /> picks them as
-      iOS does: the active tab and its group).
+      marked collapse away (<PartLink part="collapsedSelection" /> picks them:
+      the active tab and its group).
     </>,
   ],
   [
@@ -211,7 +211,7 @@ export const tabBarTabRows: readonly PropRow[] = [
     <>
       A secondary click: a right click (or Control-click: the{' '}
       <code>contextmenu</code> event, whose menu it replaces), or a touch held
-      for 500ms (iOS: a long press), whose click then doesn’t follow. Not while
+      for 500ms (a long press), whose click then doesn’t follow. Not while
       disabled.
     </>,
   ],

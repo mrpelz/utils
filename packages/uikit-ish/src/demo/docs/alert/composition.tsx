@@ -288,7 +288,7 @@ export const AlertComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        More than two: stacked, as UIKit does (
+        More than two: stacked (
         <PartLink
           component="alert"
           part="Alert.Actions"
@@ -305,7 +305,7 @@ export const AlertComposition: FunctionComponent = () => (
           component="alert"
           part="Alert.Actions"
         />
-        ), as UIKit does.
+        ).
       </li>
       <li>
         <strong>Demo:</strong> the three choices and what each does (logged).

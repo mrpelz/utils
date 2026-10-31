@@ -56,9 +56,7 @@ export const SwitchOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <ul className="demo-lead">
-      <li>
-        Turns one setting on or off (UIKit <code>UISwitch</code>, HIG “toggle”).
-      </li>
+      <li>Turns one setting on or off.</li>
       <li>Takes effect at once: nothing to save or confirm.</li>
     </ul>
     <LiveView />
@@ -89,7 +87,7 @@ export const SwitchOverview: FunctionComponent = () => (
     <ul>
       <li>
         Selecting items (rows to delete, people to invite): a{' '}
-        <a href="checkbox">Checkbox</a>, iOS’s selection circle.
+        <a href="checkbox">Checkbox</a>, a selection circle.
       </li>
       <li>
         Two named options, or more than two: a <a href="segmented">Segmented</a>{' '}
@@ -153,8 +151,8 @@ export const SwitchOverview: FunctionComponent = () => (
       </li>
       <li>
         Its state isn’t told by color alone if you set <code>onOffLabels</code>{' '}
-        (“I” and “O” on the track, iOS’s “On/Off Labels” setting); the library
-        doesn’t read that setting itself.
+        (“I” and “O” on the track, as an accessibility setting would); the
+        library doesn’t read such a setting itself.
       </li>
       <li>
         Its animations (knob, lens) don’t follow{' '}

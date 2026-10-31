@@ -23,7 +23,7 @@
   }
 
   .uikit-toolbar-subtitle {
-    color: var(--color-ios-secondary-label);
+    color: var(--color-ui-secondary-label);
     font-size: 12px;
     font-variation-settings: 'wght' 510;
     font-weight: round(down, 510, 100);
@@ -50,8 +50,8 @@
       --uikit-toolbar-gap: 12px;
       --uikit-toolbar-text-padding: 6px;
 
-      /* (Figma: 36px below, the home indicator's 34px in it: the safe area,
-         kept clear by its anchor, see Viewport; 2px of its own.) */
+      /* (The safe area kept clear by its anchor, see Viewport; 2px of its
+         own.) */
       padding: 4px 16px 2px;
     }
 
@@ -100,7 +100,7 @@
     justify-content: center;
     padding: 0 var(--uikit-toolbar-group-padding);
     border-radius: 100px;
-    gap: 12px;
+    gap: var(--uikit-toolbar-group-gap, 12px);
 
     &[data-prominent] {
       --uikit-toolbar-content: var(--uikit-glass-content-prominent);
@@ -133,7 +133,7 @@
       letter-spacing: 0;
       line-height: 20px;
       scale: var(--uikit-toolbar-content-scale, none);
-      transition-duration: var(--glass-ios-lens-duration);
+      transition-duration: var(--glass-ui-lens-duration);
       transition-property: background-color, scale;
     }
 
@@ -181,13 +181,13 @@
     flex: 0 1 auto;
     flex-direction: column;
     align-items: center;
-    color: var(--color-ios-label);
-    font-size: var(--font-ios-body-size);
+    color: var(--color-ui-label);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-body-weight-emphasized);
-    font-weight: round(down, var(--font-ios-body-weight-emphasized), 100);
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    font-variation-settings: 'wght' var(--font-ui-body-weight-emphasized);
+    font-weight: round(down, var(--font-ui-body-weight-emphasized), 100);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
 
     /* Centered without sides, too (they take the free space otherwise). */
     margin-inline: auto;
@@ -200,8 +200,8 @@
       text-overflow: ellipsis;
     }
 
-    /* Title and Subtitle (Figma Style=Title 2 Line; its title in 17px, as
-       iOS 26's, never smaller than the rows' text). */
+    /* Title and subtitle (its title in 17px, never smaller than the rows'
+       text). */
     &:has(> [data-toolbar-part='subtitle']) {
       padding-top: 4px;
       line-height: 20px;

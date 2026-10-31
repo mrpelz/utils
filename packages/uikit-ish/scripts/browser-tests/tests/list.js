@@ -242,7 +242,7 @@ export const tests = [
     },
   },
   {
-    name: 'list: rows match Figma',
+    name: 'list: rows match the spec',
     run: async (page) => {
       await page.open('list');
 
@@ -293,7 +293,7 @@ export const tests = [
         },
       ]);
 
-      // Figma “Contents - Trailing”: Detail, Drill-in 16px apart.
+      // Trailing: Detail, Drill-in 16px apart.
       const gap = await page.evaluate(`(() => {
         const item = ${row(0, 1)};
         const detail = item.querySelector('[data-list-part=detail]').getBoundingClientRect();
@@ -304,21 +304,21 @@ export const tests = [
     },
   },
   {
-    name: 'list: titles center, glyphs match Figma, header button aligns',
+    name: 'list: titles center, glyphs match the spec, header button aligns',
     run: async (page) => {
       await page.open('list');
 
       const result = await page.evaluate(`(() => {
         const group = document.querySelector('[data-list-part=group]');
         const center = (element) => { const { bottom, top } = element.getBoundingClientRect(); return (top + bottom) / 2; };
-        // (SF Symbols: their paths' geometry, drawn through a mask.)
+        // (their paths' geometry, drawn through a mask.)
         const paths = (element) => [...element.querySelectorAll('path')].filter((path) => !path.closest('mask') || path.parentElement.tagName === 'mask').map((path) => { if (!path.closest('mask')) return path.getBoundingClientRect(); const { height, width, x, y } = path.getBBox(); const { a, d, e, f } = path.ownerSVGElement.getScreenCTM(); return new DOMRect(a * x + e, d * y + f, a * width, d * height); });
         const airplane = group.children[0];
         const check = paths(group.children[4].querySelector('[data-list-part=checkmark]'))[0];
         const button = paths(document.querySelector('[data-list-part=header] [data-list-part=accessory]'));
         const drillIn = paths(group.children[1].querySelector('[data-list-part=drill-in]'))[0];
         return {
-          // Path geometry plus the 2px stroke (Figma ink: 15.2 x 14.5).
+          // Path geometry plus the 2px stroke (ink: 15.2 x 14.5).
           check: [Math.round((check.width + 2) * 10) / 10, Math.round((check.height + 2) * 10) / 10],
           headerButton: Math.round(Math.max(...button.map((box) => box.right)) - drillIn.right),
           title: Math.round(center(airplane.querySelector('[data-list-part=title]')) - center(airplane)),
@@ -363,7 +363,7 @@ export const tests = [
     },
   },
   {
-    name: 'list: headers and footers match Figma',
+    name: 'list: headers and footers match the spec',
     run: async (page) => {
       await page.open('list-parts');
 
@@ -891,7 +891,7 @@ export const tests = [
     },
   },
   {
-    name: 'list: swipe actions open, match Figma and close',
+    name: 'list: swipe actions open, match the spec and close',
     run: async (page) => {
       await page.open('list-swipe');
 
@@ -982,7 +982,7 @@ export const tests = [
     },
   },
   {
-    name: 'list: edit controls match Figma; delete opens the swipe actions',
+    name: 'list: edit controls match the spec; delete opens the swipe actions',
     run: async (page) => {
       await page.open('list-edit-select');
       const checkbox = await page.evaluate(`(() => {

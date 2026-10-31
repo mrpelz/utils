@@ -1,5 +1,3 @@
-import { sfAirplane } from '@bradleyhodges/sfsymbols/sfAirplane';
-import { sfBellFill } from '@bradleyhodges/sfsymbols/sfBellFill';
 import { FunctionComponent, useEffect, useRef, useState } from 'react';
 
 import {
@@ -22,13 +20,14 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfAirplane, sfBellFill } from '../../tooling/icons.js';
 
 // A row's code (as Airplane Mode's in the list below).
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
 const listRowCode = `<List.Item onClick={forwardClick('[role=switch]')}>
   <List.Leading>
     <List.Image
-      style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
+      style={{ backgroundColor: 'var(--color-ui-system-orange)' }}
       variant="rounded"
     >
       <Symbol icon={sfAirplane} />
@@ -40,7 +39,7 @@ const listRowCode = `<List.Item onClick={forwardClick('[role=switch]')}>
   <List.Trailing>
     <Switch.Root
       aria-label="Airplane Mode"
-      tint="var(--color-ios-system-orange)"
+      tint="var(--color-ui-system-orange)"
     >
       <Switch.Thumb />
     </Switch.Root>
@@ -99,7 +98,7 @@ const isStalled = airDrop.stage === 'stalled';
         applied, finishing its turn, then fading out. */}
     <ActivityIndicator
       aria-label="Applying"
-      display={isSlow ? 'animate' : 'finish-and-hide'}
+      display={isSlow ? 'animate' : 'none'}
       movement="fade"
       size="small"
     />
@@ -189,7 +188,7 @@ const DelayedStates: FunctionComponent = () => {
       stage="phone"
       title="Switch with delayed states"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -221,7 +220,7 @@ const DelayedStates: FunctionComponent = () => {
                         <List.Trailing>
                           <ActivityIndicator
                             aria-label="Applying"
-                            display={isSlow ? 'animate' : 'finish-and-hide'}
+                            display={isSlow ? 'animate' : 'none'}
                             movement="fade"
                             size="small"
                           />
@@ -280,7 +279,7 @@ const InAList: FunctionComponent = () => {
             <List.Item onClick={forwardClick('[role=switch]')}>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-orange)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfAirplane} />
@@ -292,7 +291,7 @@ const InAList: FunctionComponent = () => {
               <List.Trailing>
                 <Switch.Root
                   aria-label="Airplane Mode"
-                  tint="var(--color-ios-system-orange)"
+                  tint="var(--color-ui-system-orange)"
                   onCheckedChange={(isChecked: boolean) =>
                     addLog(`airplane mode: ${String(isChecked)}`)
                   }
@@ -304,7 +303,7 @@ const InAList: FunctionComponent = () => {
             <List.Item onClick={forwardClick('[role=switch]')}>
               <List.Leading>
                 <List.Image
-                  style={{ backgroundColor: 'var(--color-ios-system-red)' }}
+                  style={{ backgroundColor: 'var(--color-ui-system-red)' }}
                   variant="rounded"
                 >
                   <Symbol icon={sfBellFill} />
@@ -351,7 +350,7 @@ export const SwitchComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        On iOS: in the trailing slot of <a href="list">List</a> rows.
+        Typically: in the trailing slot of <a href="list">List</a> rows.
       </li>
       <li>
         The row passes its clicks on to the switch (
@@ -404,8 +403,8 @@ export const SwitchComposition: FunctionComponent = () => (
         fades in beside the switch, at its start (not sliding in: its{' '}
         <code>display</code>, <code>animate</code>; <code>movement</code>,{' '}
         <code>fade</code>, its spokes fading in place); applied, it finishes its
-        turn, then fades out (<code>finish-and-hide</code>), taking no room:
-        Bluetooth (1.5s).
+        turn, then fades out (<code>none</code>), taking no room: Bluetooth
+        (1.5s).
       </li>
       <li>
         Past two seconds, not responding: the switch slides out at the row’s end

@@ -70,8 +70,8 @@ export const CheckboxOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        iOS has no checkboxes or radio buttons: it selects items with selection
-        circles, e.g. rows while editing a list (UIKit’s editing selection).
+        No classic checkboxes or radio buttons: items are selected with
+        selection circles, e.g. rows while editing a list.
       </li>
       <li>
         <PartLink
@@ -154,8 +154,7 @@ export const CheckboxOverview: FunctionComponent = () => (
         <a href="segmented">Segmented</a> control.
       </li>
       <li>
-        A checkmark after the chosen row (iOS’s settings lists, e.g. a
-        language):{' '}
+        A checkmark after the chosen row (settings lists, e.g. a language):{' '}
         <PartLink
           component="list"
           part="List.Checkmark"

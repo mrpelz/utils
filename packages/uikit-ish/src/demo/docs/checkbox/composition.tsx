@@ -26,10 +26,10 @@ import { GuideLink } from '../hig-guide/link.js';
 const rowsCode = `<List.Group>
   <List.Item onClick={forwardClick('[role=checkbox]')}>
     <List.Leading>
-      <List.Checkbox aria-label="Anna Haro" />
+      <List.Checkbox aria-label="Anna Hall" />
     </List.Leading>
     <List.Content>
-      <List.Title>Anna Haro</List.Title>
+      <List.Title>Anna Hall</List.Title>
     </List.Content>
   </List.Item>
   …
@@ -106,7 +106,7 @@ const formCode = `<Form onFormSubmit={(values) => …}>
   <Button.Root type="submit">…</Button.Root>
 </Form>`;
 
-const people = ['Anna Haro', 'Daniel Higgins', 'John Appleseed', 'Kate Bell'];
+const people = ['Anna Hall', 'Daniel Hughes', 'John Doe', 'Kate Brown'];
 
 const accounts = [
   ['icloud', 'iCloud'],
@@ -349,7 +349,7 @@ export const CheckboxComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Where iOS shows them: before a <a href="list">List</a>’s rows, as{' '}
+        Where they show: before a <a href="list">List</a>’s rows, as{' '}
         <PartLink
           component="list"
           part="List.Checkbox"
@@ -366,6 +366,15 @@ export const CheckboxComposition: FunctionComponent = () => (
         whole row selects.
       </li>
       <li>
+        Dragged from a checkbox along the rows, it selects them all (or
+        deselects, as the first one flips), scrolling along near the ends (
+        <PartLink
+          component="list"
+          part="List.Root"
+        />{' '}
+        <code>dragToSelect</code>).
+      </li>
+      <li>
         The list owns the selection; actions on it go elsewhere, e.g. a toolbar
         (guide <GuideLink to="rule-g7">G7</GuideLink>).
       </li>
@@ -376,7 +385,13 @@ export const CheckboxComposition: FunctionComponent = () => (
           component="list"
           part="List.Checkbox"
         />
-        ) and <code>forwardClick</code>, passing the row’s clicks on to it.
+        ) and <code>forwardClick</code>, passing the row’s clicks on to it;
+        dragging to select (
+        <PartLink
+          component="list"
+          part="List.Root"
+        />{' '}
+        <code>dragToSelect</code>).
       </li>
       <li>
         <strong>Demo:</strong> the rows and which are selected, and what

@@ -14,6 +14,7 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react';
+import { type WheelEventState, WheelGestures } from 'wheel-gestures';
 
 import {
   cn,
@@ -22,6 +23,13 @@ import {
   usePortalContainer,
   withStyle,
 } from '../utils/main.js';
+import {
+  registerScroller,
+  scrollerUnder,
+  subscribeScrollers,
+  useScrollerRegistration,
+} from './edge.js';
+import { EdgeEffects } from './edge-effect.js';
 import {
   createAnchorHandle,
   Padding,
@@ -37,6 +45,7 @@ import type {
   SizeClass,
   ViewportAnchorProps,
   ViewportContentProps,
+  ViewportKeyboardAccessoryProps,
   ViewportOverscrollProps,
   ViewportProviderProps,
   ViewportScrollEvent,
@@ -47,9 +56,13 @@ import type {
 export {
   preventFocusShift,
   preventInputZoom,
+  preventTextActions,
   useFocusShiftPrevention,
   useInputZoomPrevention,
+  useTextActionsPrevention,
 } from './input.js';
+export { useScrollerRegistration, useViewportEdgeElement } from './edge.js';
+export { EdgeEffects } from './edge-effect.js';
 export {
   useAnchorSize,
   useCreateViewportAnchorHandle,
@@ -62,7 +75,10 @@ export type {
   ElementVisibilityOptions,
   ViewportAnchorProps,
   ViewportContentProps,
+  ViewportKeyboardAccessoryProps,
+  ViewportContentSafeArea,
   ViewportEdge,
+  ViewportEdgeEffect,
   ViewportOverscrollProps,
   ViewportPaddingProps,
   ViewportProviderProps,
@@ -75,8 +91,9 @@ export type {
 
 // The viewport, for app logic (the Visual Viewport API):
 //
-// - The visual viewport (`Provider`, `useVisualViewport`): its size, offset
-//   and the keyboard's height (what it covers of the layout viewport), as
+// - The visual viewport (`Provider`, `useVisualViewport`): its size, offset,
+//   the keyboard's height (what it covers of the layout viewport) and
+//   whether the page is hidden (Page Visibility; meanwhile kept as it was), as
 //   custom properties on the root element (`--uikit-viewport-height`,
 //   `-width`, `-top`, `-left`, `-keyboard-inset`) and a hook.
 // - Scroll tracking (`Provider`, `useViewportScroll`, `useScrollDirection`):
@@ -103,6 +120,9 @@ type Scroll = Omit<ViewportScrollEvent, 'direction'>;
 
 type ScrollListener = (scroll: Scroll) => void;
 
+/** Nothing to tell (no provider tracking, see `createScrollStore`). */
+const noRefresh = () => undefined;
+
 /** The latest scroll, and its listeners. */
 const createScrollStore = () => {
   let latest: Scroll = {
@@ -116,15 +136,33 @@ const createScrollStore = () => {
   // Bouncing by itself (seen past an end, see `Provider`).
   let isNative = false;
   // Otherwise moved along as it's pulled (not the document's, see
-  // `Provider`).
+  // `Provider`), while an overscroll area holds it (see `Overscroll`):
+  // without one, nothing's moved (the browser's own scrolling untouched).
   let isMoved = false;
+  let holds = 0;
+  // The provider's, told as holds come and go (see `Provider`).
+  let refresh: () => void = noRefresh;
 
   return {
     current: () => latest,
-    isMoved: () => isMoved && !isNative,
+    hold: () => {
+      holds += 1;
+      refresh();
+      let isHeld = true;
+      return () => {
+        if (!isHeld) return;
+        isHeld = false;
+        holds -= 1;
+        refresh();
+      };
+    },
+    isMoved: () => isMoved && !isNative && holds > 0,
     isNative: () => isNative,
     setMoved: (value: boolean) => {
       isMoved = value;
+    },
+    setRefresh: (listener: () => void) => {
+      refresh = listener;
     },
     setNative: () => {
       isNative = true;
@@ -174,28 +212,33 @@ const trackDirection = (threshold: number, start: number) => {
   };
 };
 
+// A wheel pulling (see `Provider`): held until quiet for this long (its
+// gesture's own end, adapting to its events' pace, comes as soon as a
+// finger pauses).
+const wheelQuiet = 150;
+
+// A fling's start, told apart as inertia after a few deltas (see
+// `Provider`): its first delta at least this much of the largest (uneven,
+// e.g. interpolated, its largest isn't always its first).
+const flingStart = 0.75;
+
 /**
- * Rubber-banding (UIKit's): how far content moves pulled `distance` px past
+ * Rubber-banding: how far content moves pulled `distance` px past
  * an end, in a scroll container `size` px high (never as far as that).
  */
 const rubberBand = (distance: number, size: number) =>
   size > 0 ? (1 - 1 / ((distance * 0.55) / size + 1)) * size : 0;
 
-// A wheel overscrolling (see `Provider`): held until quiet for this long.
-const wheelQuiet = 150;
-
-// A wheel coasting (fingers lifted, the browser's inertia: e.g. Chrome's
-// fling): this many deltas in a row shrinking, each within this long (ms)
-// of the last.
-const wheelDecays = 4;
-const wheelInterval = 50;
+/**
+ * A wheel's rubber-banding (a trackpad's, a wheel's): stiffer, reaching half
+ * as far (wheel deltas aren't a finger's distance on the screen, and
+ * inertia is told apart only after a few of them, see `Provider`).
+ */
+const wheelRubberBand = (distance: number, size: number) =>
+  size > 0 ? (1 - 1 / ((distance * 0.4) / (size / 2) + 1)) * (size / 2) : 0;
 
 // Released, the pull bounces back this long (ms; see `Provider`).
 const bounceDuration = 350;
-
-// A wheel's delta, in pixels (by its `deltaMode`: pixels, lines, pages).
-const wheelPixels = (event: WheelEvent, page: number) =>
-  event.deltaY * ([1, 16, page][event.deltaMode] ?? 1);
 
 const clamp = (value: number, max: number) =>
   Math.round(Math.min(Math.max(value, 0), max));
@@ -208,9 +251,17 @@ const clamp = (value: number, max: number) =>
  */
 const readVisual = (screen?: HTMLElement | null): VisualViewportState => {
   if (typeof window === 'undefined') {
-    return { height: 0, keyboardInset: 0, left: 0, top: 0, width: 0 };
+    return {
+      height: 0,
+      isHidden: false,
+      keyboardInset: 0,
+      left: 0,
+      top: 0,
+      width: 0,
+    };
   }
   const { visualViewport: viewport } = window;
+  const isHidden = document.visibilityState === 'hidden';
   const height = viewport?.height ?? window.innerHeight;
   const top = viewport?.offsetTop ?? 0;
   const keyboardInset = Math.max(
@@ -220,6 +271,7 @@ const readVisual = (screen?: HTMLElement | null): VisualViewportState => {
   if (!screen) {
     return {
       height,
+      isHidden,
       keyboardInset,
       left: viewport?.offsetLeft ?? 0,
       top,
@@ -236,6 +288,7 @@ const readVisual = (screen?: HTMLElement | null): VisualViewportState => {
 
   return {
     height: Math.max(0, Math.round(rect.height) - screenTop - screenKeyboard),
+    isHidden,
     keyboardInset: screenKeyboard,
     left: 0,
     top: screenTop,
@@ -251,6 +304,44 @@ const elementOf = (
   return element instanceof HTMLElement ? element : null;
 };
 
+/**
+ * The root's markers (see style.css): the window an app's (its layers in
+ * it, or a provider tracking it), and an iOS Home Screen app's.
+ */
+const windowAttribute = 'data-uikit-viewport-window';
+const standaloneAttribute = 'data-uikit-viewport-standalone';
+
+/** Holds of the window's markers (see `useWindowHold`). */
+let windowHolds = 0;
+
+/**
+ * The window held as an app's while mounted, unless in a screen (its
+ * portal container, e.g. a device's frame): the root marked (its
+ * background beneath the layers, see style.css); in an iOS Home Screen app
+ * (`navigator.standalone`; its display mode `browser` without a web app
+ * manifest), its document as tall as the screen (WebKit's layout viewport
+ * short otherwise). Unmarked with the last hold.
+ */
+const useWindowHold = (screen: PortalContainer | null | undefined) => {
+  useLayoutEffect(() => {
+    if (elementOf(screen)) return undefined;
+    const root = document.documentElement;
+    if (windowHolds === 0) {
+      root.setAttribute(windowAttribute, '');
+      if ((navigator as { standalone?: boolean }).standalone === true) {
+        root.setAttribute(standaloneAttribute, '');
+      }
+    }
+    windowHolds += 1;
+    return () => {
+      windowHolds -= 1;
+      if (windowHolds > 0) return;
+      root.removeAttribute(windowAttribute);
+      root.removeAttribute(standaloneAttribute);
+    };
+  }, [screen]);
+};
+
 /** Provides the visual viewport and scroll tracking (see above). */
 const Provider: FunctionComponent<ViewportProviderProps> = ({
   children,
@@ -262,6 +353,35 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
   const screen = usePortalContainer(ownScreen);
   const [visual, setVisual] = useState(() => readVisual());
   const [scroll] = useState(createScrollStore);
+  // Tracked without a `scroller`: the page filling its screen (see
+  // edge.ts), or the document's.
+  const [filling, setFilling] = useState<Element | undefined>(undefined);
+
+  useLayoutEffect(() => {
+    if (scroller) return undefined;
+    const element = elementOf(screen);
+    const resolve = () => {
+      const rect = element
+        ? element.getBoundingClientRect()
+        : new DOMRect(0, 0, innerWidth, innerHeight);
+      setFilling(scrollerUnder(rect, element));
+    };
+    resolve();
+    const unsubscribe = subscribeScrollers(resolve);
+    // The document's, in the window: a scroller too (an app's own anchors'
+    // without pages).
+    const unregister =
+      element || !document.scrollingElement
+        ? undefined
+        : registerScroller(document.scrollingElement);
+    return () => {
+      unsubscribe();
+      unregister?.();
+    };
+  }, [screen, scroller]);
+
+  // Tracking the window: it's an app's.
+  useWindowHold(screen);
 
   // The visual viewport (once per frame), as custom properties, too: on
   // the root element, or its screen.
@@ -270,30 +390,49 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     const root = element ?? document.documentElement;
     let frame = 0;
 
+    const apply = () => {
+      const next = readVisual(element);
+      for (const [name, value] of [
+        ['height', next.height],
+        ['width', next.width],
+        ['top', next.top],
+        ['left', next.left],
+        ['keyboard-inset', next.keyboardInset],
+      ] as const) {
+        root.style.setProperty(`--uikit-viewport-${name}`, `${value}px`);
+      }
+      setVisual((current) =>
+        (Object.keys(next) as (keyof VisualViewportState)[]).every(
+          (key) => current[key] === next[key],
+        )
+          ? current
+          : next,
+      );
+    };
     const update = () => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const next = readVisual(element);
-        for (const [name, value] of [
-          ['height', next.height],
-          ['width', next.width],
-          ['top', next.top],
-          ['left', next.left],
-          ['keyboard-inset', next.keyboardInset],
-        ] as const) {
-          root.style.setProperty(`--uikit-viewport-${name}`, `${value}px`);
-        }
-        setVisual((current) =>
-          (Object.keys(next) as (keyof VisualViewportState)[]).every(
-            (key) => current[key] === next[key],
-          )
-            ? current
-            : next,
-        );
-      });
+      frame = requestAnimationFrame(apply);
+    };
+    // Hidden or shown (see `isHidden`): told at once (no frames while
+    // hidden), the rest kept as it was (e.g. the keyboard's push: its field
+    // focused again as it's shown, see `preventFocusShift`); shown, read
+    // anew once the keyboard has settled (not back after all: none).
+    let recheck: ReturnType<typeof setTimeout> | undefined;
+    const onVisibility = () => {
+      clearTimeout(recheck);
+      const isHidden = document.visibilityState === 'hidden';
+      setVisual((current) =>
+        current.isHidden === isHidden ? current : { ...current, isHidden },
+      );
+      if (isHidden) {
+        cancelAnimationFrame(frame);
+        return;
+      }
+      recheck = setTimeout(update, 500);
     };
 
     update();
+    document.addEventListener('visibilitychange', onVisibility);
     const { visualViewport: viewport } = window;
     viewport?.addEventListener('resize', update);
     viewport?.addEventListener('scroll', update);
@@ -304,6 +443,8 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     }
     return () => {
       cancelAnimationFrame(frame);
+      document.removeEventListener('visibilitychange', onVisibility);
+      clearTimeout(recheck);
       viewport?.removeEventListener('resize', update);
       viewport?.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
@@ -318,10 +459,11 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
   // Scroll tracking: the position (within the scroll range), and how far
   // it's overscrolled: Safari's own bounce (the position past an end), or,
   // where browsers keep it in range, touches and wheels pulling at an end
-  // (rubber-banded, as Safari's), moving it along (its
-  // `--uikit-viewport-bounce`, see style.css; not the document's).
+  // (rubber-banded, as Safari's), moving it along while an overscroll area
+  // holds it (its `--uikit-viewport-bounce`, see style.css; not the
+  // document's; without one, the browser's own scrolling untouched).
   useEffect(() => {
-    const element = scroller?.current ?? document.scrollingElement;
+    const element = scroller?.current ?? filling ?? document.scrollingElement;
     if (!element) return undefined;
     const isDocument = element === document.scrollingElement;
     const target: EventTarget = isDocument ? window : element;
@@ -331,7 +473,14 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     let pull = 0;
     let origin: number | undefined;
     let isTouching = false;
-    let wheel: ReturnType<typeof setTimeout> | undefined;
+    // A wheel gesture pulling (fingers on a trackpad, a wheel turning; not
+    // its inertia), until it ends (see `onGesture`).
+    let isWheeling = false;
+    let quiet: ReturnType<typeof setTimeout> | undefined;
+    // Pulled by a wheel (see `wheelRubberBand`), not a touch.
+    let isWheelPull = false;
+    // The held gesture's deltas, and the pull before each (see `onGesture`).
+    let history: { delta: number; pull: number }[] = [];
 
     const range = () =>
       Math.max(0, element.scrollHeight - element.clientHeight);
@@ -354,7 +503,11 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
       }
       const overscroll = scroll.isNative()
         ? raw - position
-        : Math.sign(pull) * rubberBand(Math.abs(pull), element.clientHeight);
+        : Math.sign(pull) *
+          (isWheelPull ? wheelRubberBand : rubberBand)(
+            Math.abs(pull),
+            element.clientHeight,
+          );
       const by = scroll.isMoved() ? -overscroll : 0;
       if (by !== shifted && element instanceof HTMLElement) {
         shifted = by;
@@ -369,7 +522,7 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
       scroll.emit({
         atBottom: position >= end - 1,
         atTop: position <= 0,
-        isHeld: isTouching || wheel !== undefined,
+        isHeld: isTouching || isWheeling,
         overscroll,
         position,
       });
@@ -395,6 +548,7 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     const onTouchStart = () => {
       cancelAnimationFrame(bounce);
       isTouching = true;
+      isWheelPull = false;
       origin = undefined;
     };
 
@@ -424,54 +578,69 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
       release();
     };
 
-    // A wheel's last delta and when, and how many shrank in a row; coasting
-    // (see `wheelDecays`) until it turns or goes quiet (not as a delta grows:
-    // an interpolated inertia's, e.g. Chrome's, uneven, would pull again,
-    // e.g. turning a second page).
-    let last = { delta: 0, time: 0 };
-    let decays = 0;
-    let isCoasting = false;
-
-    // Coasting: released at once (inertia doesn't pull on, as no finger
-    // does), none of it pulling again.
-    const coast = (event: WheelEvent, delta: number) => {
-      const isTurned = Math.sign(delta) !== Math.sign(last.delta);
-      const isQuiet = event.timeStamp - last.time > wheelQuiet;
-      const isShrinking = Math.abs(delta) < Math.abs(last.delta);
-      decays =
-        isShrinking && event.timeStamp - last.time < wheelInterval
-          ? decays + 1
-          : 0;
-      if (isTurned || isQuiet) isCoasting = false;
-      if (decays >= wheelDecays) isCoasting = true;
-      last = { delta, time: event.timeStamp };
-      if (!isCoasting) return false;
-      if (wheel !== undefined) {
-        clearTimeout(wheel);
-        wheel = undefined;
+    // Wheel gestures (`wheel-gestures`: where they start and end, and when
+    // they're inertia, the fingers lifted, e.g. Chrome's interpolated
+    // fling): pulling on past an end (or back) while held; inertia never
+    // pulls (as no finger does), releasing at once; quiet, released (see
+    // `wheelQuiet`).
+    // Inertia is told apart only after a few of its deltas: those pulled
+    // too, so once it is, the pull goes back to where it was before the
+    // fling started (the fingers lifting: see `flingStart`), told while
+    // still held (e.g. no longer armed), then released. (Where browsers
+    // tell inertia, `WheelEvent.momentum`, e.g. Chrome, from its first.)
+    // eslint-disable-next-line new-cap -- the library's factory
+    const gestures = WheelGestures({
+      preventWheelAction: false,
+      reverseSign: false,
+    });
+    const onGesture = ({
+      axisDelta,
+      event,
+      isEnding,
+      isMomentum,
+    }: WheelEventState) => {
+      if (isEnding) return;
+      if (isMomentum) {
+        if (!isWheeling) return;
+        clearTimeout(quiet);
+        // Told apart late (no `momentum`): back to before the fling.
+        if (typeof (event as { momentum?: unknown }).momentum !== 'boolean') {
+          const largest = Math.max(
+            ...history.map(({ delta }) => Math.abs(delta)),
+          );
+          const start = history.find(
+            ({ delta }) => Math.abs(delta) >= largest * flingStart,
+          );
+          pull = start?.pull ?? pull;
+          emit();
+        }
+        isWheeling = false;
+        history = [];
         release();
+        return;
       }
-      return true;
-    };
-
-    // Wheeled on past an end (or back), until quiet.
-    const onWheel = (event: Event) => {
-      const delta = wheelPixels(event as WheelEvent, element.clientHeight);
-      if (coast(event as WheelEvent, delta)) return;
       cancelAnimationFrame(bounce);
+      if (!isWheeling) history = [];
+      isWheeling = true;
+      clearTimeout(quiet);
+      quiet = setTimeout(() => {
+        isWheeling = false;
+        history = [];
+        release();
+      }, wheelQuiet);
+      isWheelPull = true;
+      const [, delta] = axisDelta;
+      history.push({ delta, pull });
       const raw = element.scrollTop;
       const isPast = (raw <= 0 && delta < 0) || (raw >= range() && delta > 0);
       if (isPast || pull !== 0) {
         const next = pull + delta;
         pull = pull !== 0 && Math.sign(next) !== Math.sign(pull) ? 0 : next;
       }
-      clearTimeout(wheel);
-      wheel = setTimeout(() => {
-        wheel = undefined;
-        release();
-      }, wheelQuiet);
       emit();
     };
+    const off = gestures.on('wheel', onGesture);
+    const onWheel = (event: Event) => gestures.feedWheel(event as WheelEvent);
 
     const listeners: [string, (event: Event) => void][] = [
       ['scroll', emit],
@@ -484,8 +653,15 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     for (const [type, listener] of listeners) {
       target.addEventListener(type, listener, { passive: true });
     }
+    // Its state at once (e.g. another page tracked, scrolled already),
+    // and again as overscroll areas come and go (moving it, or not).
+    emit();
+    scroll.setRefresh(emit);
     return () => {
-      clearTimeout(wheel);
+      scroll.setRefresh(noRefresh);
+      off();
+      gestures.disconnect();
+      clearTimeout(quiet);
       cancelAnimationFrame(bounce);
       for (const [type, listener] of listeners) {
         target.removeEventListener(type, listener);
@@ -494,7 +670,7 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
         element.style.removeProperty('--uikit-viewport-bounce');
       }
     };
-  }, [scroll, scroller]);
+  }, [filling, scroll, scroller]);
 
   const value = useMemo<ViewportContextValue>(
     () => ({ scroll, visual }),
@@ -520,7 +696,7 @@ const subscribeRegular = (onChange: () => void) => {
 
 /**
  * The window's horizontal size class (no `Provider` needed): e.g. a sheet
- * on `compact` (a phone), a popover on `regular` (an iPad); `compact` before
+ * on `compact` (a phone), a popover on `regular` (a tablet); `compact` before
  * hydration (server rendering).
  */
 export const useSizeClass = (): SizeClass =>
@@ -740,12 +916,28 @@ export const useElementGeometry = (
  */
 const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
   (
-    { className, edge, handle, keyboard = 'push', safeArea = 'all', ...props },
+    {
+      className,
+      edge,
+      edgeEffect = 'soft',
+      edgeTint,
+      handle,
+      keyboard = 'push',
+      safeArea = 'all',
+      style,
+      ...props
+    },
     forwardedRef,
   ) => {
     const ref = useForwardedRef(forwardedRef);
-    // Its size, for the paddings making room for it (see `Padding`).
-    useAnchorRegistration(ref, edge, handle);
+    // Its size, for the paddings making room for it (see `Padding`); its
+    // edge effect, for the scrollers drawing it (see `EdgeEffects`).
+    useAnchorRegistration(ref, edge, handle, {
+      effect: edgeEffect,
+      keyboard,
+      tint: edgeTint,
+    });
+    useWindowHold(usePortalContainer(undefined));
 
     return (
       <div
@@ -753,6 +945,7 @@ const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
         data-edge={edge}
         data-keyboard={keyboard}
         data-safe-area={safeArea}
+        style={style}
         {...props}
         className={cn('uikit-viewport-anchor', className)}
         data-viewport-part="anchor"
@@ -769,31 +962,43 @@ const bounceAttribute = (alwaysBounce: boolean | undefined) => {
 };
 
 /**
- * The content layer: filling the viewport, scrolling its content (track it
- * with `Provider`'s `scroller`), below the anchors; its safe area insets
- * kept clear (as padding).
+ * The content layer: filling the viewport, scrolling its content (a
+ * scroller, tracked by its `Provider` unless a page within it fills the
+ * screen, see edge.ts), below the anchors; its safe area insets kept clear
+ * (as padding), or not, by what it holds (`auto`, see style.css).
  */
 const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
   (
     {
       alwaysBounce,
+      children,
       className,
       keyboard = 'resize',
-      safeArea = 'all',
+      safeArea = 'auto',
       ...props
     },
-    ref,
-  ) => (
-    <div
-      ref={ref}
-      data-always-bounce={bounceAttribute(alwaysBounce)}
-      data-keyboard={keyboard}
-      data-safe-area={safeArea}
-      {...props}
-      className={cn('uikit-viewport-content', className)}
-      data-viewport-part="content"
-    />
-  ),
+    forwardedRef,
+  ) => {
+    const ref = useForwardedRef(forwardedRef);
+    useWindowHold(usePortalContainer(undefined));
+    useScrollerRegistration(ref);
+
+    return (
+      <div
+        ref={ref}
+        data-always-bounce={bounceAttribute(alwaysBounce)}
+        data-keyboard={keyboard}
+        data-safe-area={safeArea}
+        {...props}
+        className={cn('uikit-viewport-content', className)}
+        data-viewport-part="content"
+        data-viewport-scroller=""
+      >
+        {children}
+        <EdgeEffects scroller={ref} />
+      </div>
+    );
+  },
 );
 
 /**
@@ -801,7 +1006,8 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
  * there (needs a `Provider`): e.g. a refresh indicator. A layer beneath the
  * content layer (rendered before it), from its edge's bars (`anchor`), the
  * content's end moving it along as it bounces (Safari's own bounce; other
- * browsers', the scroll container moved along as it's pulled); where the
+ * browsers', the scroll container moved along as it's pulled, while an
+ * overscroll area is shown: it holds that); where the
  * content stays (the document's, there), sliding in over it. Its pull, as
  * custom properties: `--uikit-viewport-overscroll` (px), and
  * `--uikit-viewport-overscroll-progress` (0 to 1, of its own size; open, 1).
@@ -810,7 +1016,15 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
  */
 const Overscroll = forwardRef<HTMLDivElement, ViewportOverscrollProps>(
   (
-    { anchor, className, edge = 'block-start', open = false, style, ...props },
+    {
+      anchor,
+      className,
+      edge = 'block-start',
+      open = false,
+      safeArea = 'all',
+      style,
+      ...props
+    },
     forwardedRef,
   ) => {
     const context = useContext(ViewportContext);
@@ -821,6 +1035,10 @@ const Overscroll = forwardRef<HTMLDivElement, ViewportOverscrollProps>(
     const isOpen = useRef(open);
     const pull = useRef(0);
     useOverscrollRoom(edge, open ? size : 0);
+    useWindowHold(usePortalContainer(undefined));
+    // The content moved along as it's pulled, while it's shown (see
+    // `Provider`).
+    useLayoutEffect(() => context?.scroll.hold(), [context]);
 
     // Its pull, and how far along (of its size; open, all the way).
     const update = useCallback(() => {
@@ -873,6 +1091,7 @@ const Overscroll = forwardRef<HTMLDivElement, ViewportOverscrollProps>(
         ref={layer}
         className="uikit-viewport-overscroll"
         data-edge={edge}
+        data-safe-area={safeArea}
         data-viewport-part="overscroll"
         style={{ '--uikit-viewport-overscroll-inset': `${String(inset)}px` }}
       >
@@ -917,6 +1136,94 @@ const BlockEnd = forwardRef<HTMLDivElement, Omit<ViewportAnchorProps, 'edge'>>(
   ),
 );
 
+/**
+ * What's typed into, kept above the keyboard (e.g. a field's row, with its
+ * slider): while focus is within it and the keyboard covers it, lifted
+ * (its own box moved up, its place kept) until its end is `gap` above the
+ * keyboard; back as focus leaves, or the keyboard hides. Needs a
+ * `Provider` (the keyboard's height); without one, it stays.
+ */
+const KeyboardAccessory = forwardRef<
+  HTMLDivElement,
+  ViewportKeyboardAccessoryProps
+>(({ className, gap = 8, ...props }, forwardedRef) => {
+  const ref = useForwardedRef(forwardedRef);
+  const { keyboardInset } = useVisualViewport();
+  const [isFocused, setIsFocused] = useState(false);
+  // (Its lift now: its box measured without it.)
+  const liftRef = useRef(0);
+
+  // Lifted by what the keyboard covers of it (the visual viewport's bottom,
+  // the window's: where the keyboard's top is, whatever the screen).
+  const update = useCallback(() => {
+    const { current: element } = ref;
+    if (!element) return;
+    const { visualViewport: viewport } = window;
+    let lift = 0;
+    if (isFocused && keyboardInset > 0 && viewport) {
+      const bottom = element.getBoundingClientRect().bottom + liftRef.current;
+      const keyboardTop = viewport.offsetTop + viewport.height;
+      lift = Math.max(0, Math.round(bottom + gap - keyboardTop));
+    }
+    liftRef.current = lift;
+    element.style.setProperty(
+      '--uikit-viewport-keyboard-lift',
+      `${String(lift)}px`,
+    );
+    element.toggleAttribute('data-lifted', lift > 0);
+  }, [gap, isFocused, keyboardInset, ref]);
+
+  useLayoutEffect(update, [update]);
+
+  // Focus within it (`focusin`, `focusout`: they bubble, unlike a `focus`
+  // listener's events, e.g. Preact's `onFocus`).
+  useEffect(() => {
+    const { current: element } = ref;
+    if (!element) return undefined;
+    const onFocusIn = () => setIsFocused(true);
+    const onFocusOut = ({ relatedTarget }: FocusEvent) => {
+      // (Focus moving within it: still.)
+      if (relatedTarget instanceof Node && element.contains(relatedTarget)) {
+        return;
+      }
+      setIsFocused(false);
+    };
+    // (Focused already: e.g. a sheet's initial focus, before this.)
+
+    setIsFocused(element.contains(document.activeElement));
+    element.addEventListener('focusin', onFocusIn);
+    element.addEventListener('focusout', onFocusOut);
+    return () => {
+      element.removeEventListener('focusin', onFocusIn);
+      element.removeEventListener('focusout', onFocusOut);
+    };
+  }, [ref]);
+
+  // Moved meanwhile (scrolled, the visual viewport too): anew.
+  useEffect(() => {
+    if (!isFocused) return undefined;
+    const { visualViewport: viewport } = window;
+    const options = { capture: true, passive: true };
+    addEventListener('scroll', update, options);
+    viewport?.addEventListener('resize', update);
+    viewport?.addEventListener('scroll', update);
+    return () => {
+      removeEventListener('scroll', update, options);
+      viewport?.removeEventListener('resize', update);
+      viewport?.removeEventListener('scroll', update);
+    };
+  }, [isFocused, update]);
+
+  return (
+    <div
+      ref={ref}
+      {...props}
+      className={cn('uikit-viewport-keyboard-accessory', className)}
+      data-viewport-part="keyboard-accessory"
+    />
+  );
+});
+
 export const Viewport = {
   Provider,
   Anchor,
@@ -925,5 +1232,6 @@ export const Viewport = {
   BlockEnd,
   Overscroll,
   Padding,
+  KeyboardAccessory,
   createAnchorHandle,
 };

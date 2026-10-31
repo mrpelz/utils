@@ -18,18 +18,18 @@ export type { ButtonRootProps } from './props.js';
 const isGlass = (variant: ButtonRootProps['variant']) =>
   variant === 'glass' || variant === 'glass-prominent';
 
-// Source: Apple iOS 26 Figma (Button: Size, Style, Label Type, Enabled,
-// Destructive; Button - Liquid Glass: Tinted, BG Context).
+// Buttons (sizes, styles, labels and symbols, enabled and disabled,
+// destructive) and glass buttons (tinted or not, in dim and bright contexts).
 // Labels and symbols are in the Subheadline (small, medium) and Body
 // (large) text styles; glass buttons' labels (17/20px, no tracking) are in
 // none.
 //
-// The padding and line height give the Figma heights (small 28px, medium
-// 34px, large 50px), which are also the minimum sizes; glass buttons are
-// 48px high (Figma: 6px padding around a 36px “Text” frame).
+// The padding and line height give the heights (small 28px, medium 34px,
+// large 50px), which are also the minimum sizes; glass buttons are 48px high
+// (6px padding around 36px of content).
 //
-// HIG (Buttons): a hit region of at least 44×44pt, and always a press state.
-// Figma has no press state: classic buttons follow Framework7
+// A hit region of at least 44×44px, and always a press state: classic
+// buttons follow Framework7
 // (`button-ios.less`: the tint at 15% behind the label, a lighter fill for
 // filled buttons); glass buttons turn into a glass lens like the slider thumb
 // (scaled up, a tinted glow behind, the fill cleared, the lens' edge), and
@@ -83,10 +83,10 @@ const Root = forwardRef<HTMLElement, Omit<ButtonRootProps, 'ref'>>(
             // (`destructive` wins.)
             ...((destructive ?? tint) && {
               '--uikit-button-tint': destructive
-                ? 'var(--color-ios-system-red)'
+                ? 'var(--color-ui-system-red)'
                 : tint,
               '--uikit-glass-tint': destructive
-                ? 'var(--color-ios-system-red)'
+                ? 'var(--color-ui-system-red)'
                 : tint,
             }),
             // (Over the variants'.)
@@ -108,8 +108,7 @@ const Root = forwardRef<HTMLElement, Omit<ButtonRootProps, 'ref'>>(
               kind="button"
               tinted={variant === 'glass-prominent'}
             />
-            {/* Figma “Text” frame of glass buttons: the content, drawn above
-               the glass and blended with it (vibrant labels), and scaled up
+            {/* Glass buttons' content: drawn above the glass and blended with it (vibrant labels), and scaled up
                with the lens while pressed. */}
             <span
               className="uikit-button-content"
@@ -129,7 +128,7 @@ const Root = forwardRef<HTMLElement, Omit<ButtonRootProps, 'ref'>>(
 // (Marked, e.g. for fading a bar's content, see `Header`.)
 const Icon = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
   ({ className, ...props }, ref) => (
-    // Figma “Symbol”: its glyph (e.g. a `Symbol`, with its badge), in the
+    // A symbol: its glyph (e.g. a `Symbol`, with its badge), in the
     // label's typography (glass: its own).
     <span
       ref={ref}
@@ -142,7 +141,7 @@ const Icon = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
 
 const Label = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
   ({ className, ...props }, ref) => (
-    // Figma “Label”, truncated when the button is narrower than its content.
+    // A label, truncated when the button is narrower than its content.
     <span
       ref={ref}
       data-button-part="label"

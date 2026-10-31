@@ -54,7 +54,7 @@ const LiveView: FunctionComponent = () => {
       state={state}
       title="Layout"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root {...propsRoot}>
           <Layout.Column
             key={keyFirst}
@@ -160,9 +160,8 @@ export const LayoutOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Columns side by side (UIKit <code>UISplitViewController</code>, iPadOS’
-        columns): a sidebar, a list, a detail; each its own scroll container (a{' '}
-        <a href="page">Page</a> in it).
+        Columns side by side: a sidebar, a list, a detail; each its own scroll
+        container (a <a href="page">Page</a> in it).
       </li>
       <li>
         Sized, resizable, or sharing the free space; one may float over the
@@ -187,8 +186,7 @@ export const LayoutOverview: FunctionComponent = () => (
         detail (Mail, Notes, Files).
       </li>
       <li>
-        A list and its detail side by side, the list resizable (or fixed, as
-        iPadOS’).
+        A list and its detail side by side, the list resizable (or fixed).
       </li>
       <li>
         The same columns on a phone: the list (or an inspector) as a{' '}

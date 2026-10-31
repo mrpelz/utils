@@ -120,7 +120,7 @@ export const segmentedItemRows: readonly PropRow[] = [
     <>
       A secondary click: a right click (or Control-click: the{' '}
       <code>contextmenu</code> event, whose menu it replaces), or a touch held
-      for 500ms (iOS: a long press), whose click then doesn’t follow. Not while
+      for 500ms (a long press), whose click then doesn’t follow. Not while
       disabled.
     </>,
   ],

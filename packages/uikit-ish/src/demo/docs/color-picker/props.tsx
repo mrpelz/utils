@@ -4,7 +4,6 @@ import type { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 
 import {
   type ColorPickerChangeEventDetails,
-  type ColorPickerMode,
   type ColorPickerSavedColorsChangeEventDetails,
   Toolbar,
 } from '../../../components/index.js';
@@ -53,8 +52,21 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
 
 export const getPropOptionsPanel = (addLog: AddLog) => ({
   ...propOptionsElement,
-  defaultMode: [undefined, 'grid', 'spectrum', 'sliders'] as const,
-  mode: [undefined, 'grid', 'spectrum', 'sliders'] as const,
+  // (Its modes' values, see panel.tsx: across its mode sets.)
+  defaultMode: [undefined, 'grid', 'spectrum', 'rgb', 'hsl', 'cmyk'] as const,
+  mode: [undefined, 'grid', 'spectrum', 'rgb', 'hsl', 'cmyk'] as const,
+  onModeChange: [
+    new MappedProp(
+      (mode: string, { reason }: BaseRadioGroup.ChangeEventDetails) =>
+        addLog(`mode change: ${mode} (${reason})`),
+      '[log change]',
+    ),
+    undefined,
+  ] as const,
+});
+
+export const getPropOptionsSwatches = (addLog: AddLog) => ({
+  ...propOptionsElement,
   defaultSavedColors: [
     undefined,
     new MappedProp<string[]>(fourteenColors, '[14 colors: 2 pages]'),
@@ -62,14 +74,6 @@ export const getPropOptionsPanel = (addLog: AddLog) => ({
   savedColors: [
     undefined,
     new MappedProp<string[]>(['#FF3B30', '#34C759'], '[red, green]'),
-  ] as const,
-  onModeChange: [
-    new MappedProp(
-      (mode: ColorPickerMode, { reason }: BaseRadioGroup.ChangeEventDetails) =>
-        addLog(`mode change: ${mode} (${reason})`),
-      '[log change]',
-    ),
-    undefined,
   ] as const,
   onSavedColorsChange: [
     new MappedProp(
@@ -82,6 +86,21 @@ export const getPropOptionsPanel = (addLog: AddLog) => ({
     undefined,
   ] as const,
 });
+
+export const propOptionsSliders = {
+  ...propOptionsElement,
+  model: [undefined, 'rgb', 'hsl', 'cmyk'] as const,
+};
+
+/** A mode's (its label; its value, the view's it shows). */
+export const propOptionsMode = {
+  ...propOptionsElement,
+  children: ['Spectrum', 'Colors'] as const,
+  disabled: [undefined, false, true] as const,
+};
+
+/** Parts without props of their own (their element's). */
+export const propOptionsPart = propOptionsElement;
 
 export const propOptionsHeader = propOptionsElement;
 
@@ -110,7 +129,7 @@ export const propOptionsGuideWell = {
 };
 
 export const propOptionsContent = {
-  // In a popover (iPad), or a sheet (iPhone); by default, by the window's
+  // In a popover (regular), or a sheet (compact); by default, by the window's
   // size class (see Viewport's `useSizeClass`).
   container: [undefined, 'popover', 'sheet'] as const,
   defaultOpen: [false, true] as const,
@@ -121,7 +140,21 @@ export const propOptionsPresentation = {
   presentation: [undefined, 'popover', 'sheet'] as const,
 };
 
-/** The overview's few: the panel's view (its color the demo's). */
+/**
+ * The overview's: its presentation, which modes (and the opacity) its
+ * panel renders (see panel.tsx).
+ */
+export const propOptionsOverviewContent = {
+  ...propOptionsPresentation,
+  grid: [true, false] as const,
+  spectrum: [true, false] as const,
+  rgb: [true, false] as const,
+  hsl: [false, true] as const,
+  cmyk: [false, true] as const,
+  opacity: [true, false] as const,
+};
+
+/** The overview's few: the panel's mode (its color the demo's). */
 export const propOptionsOverview = {
-  defaultMode: [undefined, 'spectrum', 'sliders'] as const,
+  defaultMode: [undefined, 'spectrum', 'rgb', 'hsl', 'cmyk'] as const,
 };

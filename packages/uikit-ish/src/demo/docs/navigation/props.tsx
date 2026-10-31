@@ -45,7 +45,25 @@ export const getPropOptionsGuideBack = (addLog: AddLog) => ({
     undefined,
     new MappedProp(() => addLog('back clicked'), '[log click]'),
   ] as const,
+  persistentId: [undefined, false, 'back-button'] as const,
 });
+
+/** A persistent item's id per page: each page's own (never shared). */
+export const perPage = (key: string): string => key;
+
+/** A persistent item's options in the guide's views. */
+export const propOptionsGuidePersistent = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+  render: [
+    new MappedProp(<Toolbar.Button />, '[<Toolbar.Button />]'),
+    undefined,
+  ] as const,
+  persistentId: [
+    'select',
+    new MappedProp(perPage, '[each page’s own]'),
+  ] as const,
+};
 
 /**
  * The compact-or-regular view's content: a phone's or a tablet's layout, or
@@ -67,7 +85,8 @@ export const propOptionsGuideSwipeArea = {
 };
 
 /** A view's parts: the one it's about, open and emphasized. */
-export type NavigationPart = 'Back' | 'Root' | 'Stack' | 'SwipeArea';
+export type NavigationPart =
+  'Back' | 'Persistent' | 'Root' | 'Stack' | 'SwipeArea';
 
 /**
  * A view's prop controls, one per part (each with all its props), the
@@ -86,8 +105,13 @@ export const useNavigationControls = (
     offset = 0,
   }: { featured?: NavigationPart; isClosed?: boolean; offset?: number } = {},
 ) => {
-  const [externalRoot, externalStack, externalSwipeArea, externalBack] =
-    useProvidedState(id).slice(offset);
+  const [
+    externalRoot,
+    externalStack,
+    externalSwipeArea,
+    externalBack,
+    externalPersistent,
+  ] = useProvidedState(id).slice(offset);
   // (The swipe area, showing nothing of its own, overlaid.)
   const emphasis =
     featured === 'SwipeArea' ? ('overlay' as const) : ('outline' as const);
@@ -115,12 +139,32 @@ export const useNavigationControls = (
     { external: externalBack, ...options('Back') },
   );
 
+  // (Only in the persistent item's own view: the others have none.)
+  const isPersistent = featured === 'Persistent';
+  const [controlPersistent, propsPersistent, statePersistent] = usePropControl(
+    propOptionsGuidePersistent,
+    { external: externalPersistent, ...options('Persistent') },
+  );
+
   return {
-    controls: [controlRoot, controlStack, controlSwipeArea, controlBack],
+    controls: [
+      controlRoot,
+      controlStack,
+      controlSwipeArea,
+      controlBack,
+      ...(isPersistent ? [controlPersistent] : []),
+    ],
     propsBack,
+    propsPersistent,
     propsRoot,
     propsStack,
     propsSwipeArea,
-    state: [stateRoot, stateStack, stateSwipeArea, stateBack],
+    state: [
+      stateRoot,
+      stateStack,
+      stateSwipeArea,
+      stateBack,
+      ...(isPersistent ? [statePersistent] : []),
+    ],
   };
 };

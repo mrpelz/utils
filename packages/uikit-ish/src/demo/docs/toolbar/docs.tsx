@@ -109,10 +109,19 @@ export const toolbarSpacerRows: readonly PropRow[] = elementRows(
 
 export const toolbarGroupRows: readonly PropRow[] = [
   [
+    'gap',
+    'number | string',
+    code('12'),
+    <>
+      The space between its buttons (a length; a number: px), not at its ends
+      (also <code>--uikit-toolbar-group-gap</code>).
+    </>,
+  ],
+  [
     'prominent',
     'boolean',
     code('false'),
-    'A tinted capsule (Figma “Text - Primary”, “Symbol Primary”), its content white.',
+    'A tinted capsule, its content white.',
   ],
   [
     'tint',
@@ -223,7 +232,7 @@ export const toolbarTitleRows: readonly PropRow[] = [
     'alignStart',
     'boolean',
     code('false'),
-    'Aligned to the bar’s start, taking its free space (Figma Style=Title 2 Line Left); otherwise centered in the bar.',
+    'Aligned to the bar’s start, taking its free space; otherwise centered in the bar.',
   ],
   [
     'children',

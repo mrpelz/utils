@@ -1,8 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
 import { Fragment, FunctionComponent } from 'react';
 
 import {
@@ -23,6 +18,13 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfChevronBackward,
+  sfEllipsis,
+  sfFolder,
+  sfSquareAndArrowUp,
+  sfSquareAndPencil,
+} from '../../tooling/icons.js';
 import { names } from '../viewport/content.js';
 import {
   toolbarButtonRows,
@@ -195,8 +197,8 @@ export const ToolbarOverview: FunctionComponent = () => (
         start and end, a title (or a control) between them.
       </li>
       <li>
-        At the bottom of a screen (UIKit <code>UIToolbar</code>), or at its top
-        (a navigation bar: <code>placement=&quot;block-start&quot;</code>, as a{' '}
+        At the bottom of a screen, or at its top (a navigation bar:{' '}
+        <code>placement=&quot;block-start&quot;</code>, as a{' '}
         <a href="header">Header</a>’s bar).
       </li>
       <li>
@@ -324,8 +326,8 @@ export const ToolbarOverview: FunctionComponent = () => (
     <ul>
       <li>
         At the bottom (default): 48px capsules, their buttons 36px, 12px apart;
-        padded 4px 16px 36px (Figma’s, the home indicator’s 34px included, not
-        the safe area’s). At the top: 44px capsules, 10px apart, 54px high.
+        padded 4px 16px 2px, above the safe area (kept clear by its anchor). At
+        the top: 44px capsules, 10px apart, 54px high.
       </li>
       <li>
         <PartLink

@@ -21,44 +21,18 @@
   }
 
   /* Its bar (see Root): the app's toolbar in a `Viewport.BlockStart`, its
-     child. No box of its own; its large title's timeline, and its page's
-     scroll (`--uikit-page-scroll`, see Page) when the page is within it
-     (else the page's own, an ancestor's), for its bar. Its bar's height
+     child (its edge effect the anchor's, see Viewport). No box of its own;
+     its large title's timeline, for its bar. Its bar's height
      (`--uikit-header-bar`, measured, see Viewport.Padding) for its large
      title and accessory. */
   .uikit-header-root {
     display: contents;
     timeline-scope: var(--uikit-header-timeline);
-
-    &:has(.uikit-page-root) {
-      timeline-scope: var(--uikit-header-timeline), --uikit-page-scroll;
-    }
   }
 
   /* (In a navigation's transition, it moves with its page, see
      `Navigation`: its anchor, fixed, within its page's frame.) */
   .uikit-header-root > .uikit-viewport-anchor[data-edge='block-start'] {
-    /* The scroll edge effect, once content is scrolled under the bar (none
-       while its page can't scroll: its timeline inactive, the animation
-       doesn't apply, Safari leaving it at its own opacity): under the
-       whole anchor, the safe area above the bar too. */
-    &::before {
-      position: absolute;
-      z-index: -1;
-      animation: uikit-header-fade-in linear both;
-      animation-range: 0 16px;
-      animation-timeline: --uikit-page-scroll;
-      backdrop-filter: blur(8px);
-      content: '';
-      inset: 0 0 -16px;
-
-      /* (Under a floating column too, see Layout and Page.) */
-      inset-inline-start: calc(var(--uikit-layout-inset-start, 0px) * -1);
-      mask-image: linear-gradient(#000 50%, transparent);
-      opacity: 0;
-      pointer-events: none;
-    }
-
     /* With a large title: the bar's title fades in as the large title
        scrolls under the bar (see Root: the header's timeline). */
     .uikit-header-root[data-large-title] >
@@ -73,30 +47,17 @@
 
   /* What stays with the bar (see Accessory): sticking below it (the bar's
      height past the page's padding edge: its padding the safe area inset,
-     see Page), the content beneath it blurred as beneath the bar. */
+     see Page), the bar's edge effect reaching under it as it's stuck (see
+     Viewport); above the bar's layer (never under the bar itself), so the
+     effect blurs what's beneath it, not it. */
   .uikit-header-accessory {
     position: sticky;
-    z-index: 9;
+    z-index: 11;
     top: var(--uikit-header-bar, 0);
     padding: 0 16px 8px;
-
-    &::before {
-      position: absolute;
-      z-index: -1;
-      animation: uikit-header-fade-in linear both;
-      animation-range: 0 16px;
-      animation-timeline: scroll(nearest);
-      backdrop-filter: blur(8px);
-      content: '';
-      inset: 0 0 -16px;
-      inset-inline-start: calc(var(--uikit-layout-inset-start, 0px) * -1);
-      mask-image: linear-gradient(#000 50%, transparent);
-      opacity: 0;
-      pointer-events: none;
-    }
   }
 
-  /* Figma “Title and Subtitle”: 16px from the sides, 10px from the bar (its
+  /* A large title (and subtitle): 16px from the sides, 10px from the bar (its
      height measured); as it scrolls under the bar, it fades out. */
   .uikit-header-large-title {
     display: flex;
@@ -109,18 +70,18 @@
       block calc(var(--uikit-header-bar, 0px) + var(--uikit-page-safe-top, 0px))
         0
     );
-    color: var(--color-ios-label);
-    font-size: var(--font-ios-large-title-size);
+    color: var(--color-ui-label);
+    font-size: var(--font-ui-large-title-size);
     font-style: normal;
     font-variation-settings: 'wght'
-      var(--font-ios-large-title-weight-emphasized);
+      var(--font-ui-large-title-weight-emphasized);
     font-weight: round(
       down,
-      var(--font-ios-large-title-weight-emphasized),
+      var(--font-ui-large-title-weight-emphasized),
       100
     );
-    letter-spacing: var(--font-ios-large-title-tracking);
-    line-height: var(--font-ios-large-title-line-height);
+    letter-spacing: var(--font-ui-large-title-tracking);
+    line-height: var(--font-ui-large-title-line-height);
     view-timeline-axis: block;
     view-timeline-inset: calc(
         var(--uikit-header-bar, 0px) + var(--uikit-page-safe-top, 0px)

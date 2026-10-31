@@ -37,7 +37,7 @@ const SidebarSections: FunctionComponent = () => {
       stage="tablet"
       title="Collapsible sidebar sections"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           <Layout.Column
             floating

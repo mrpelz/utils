@@ -152,10 +152,8 @@ export const SheetOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A focused task over the page (UIKit{' '}
-        <code>UISheetPresentationController</code>; Base UI’s{' '}
-        <code>Drawer</code>): from the bottom on a phone, large or medium; a
-        form sheet, centered, on a tablet.
+        A focused task over the page (Base UI’s <code>Drawer</code>): from the
+        bottom on a phone, large or medium; a form sheet, centered, on a tablet.
       </li>
       <li>
         Modal, the page dimmed behind it; dismissed by its buttons, a press
@@ -304,8 +302,8 @@ export const SheetOverview: FunctionComponent = () => (
         the sheet doesn’t look inside for lists).
       </li>
       <li>
-        Its detent is the app’s: swiping doesn’t switch medium and large
-        (UIKit’s does); the page behind doesn’t shrink back.
+        Its detent is the app’s: swiping doesn’t switch medium and large; the
+        page behind doesn’t shrink back.
       </li>
     </ul>
   </>

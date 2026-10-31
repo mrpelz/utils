@@ -11,19 +11,17 @@ import type { CheckboxRootProps, RadioRootProps } from './props.js';
 
 export type { CheckboxRootProps, RadioRootProps } from './props.js';
 
-// Source: Apple iOS 26 Figma (“_Edit Buttons”, State=Selected/Unselected):
 // 22px circles, unselected with a 1.5px `systemGray3` border, selected in
-// the tint with a white checkmark. iOS has no checkboxes or radio buttons
-// of its own: lists select rows with these circles (UIKit editing), as
-// Framework7's iOS checkboxes are (`checkbox-ios.less`); mixed
+// the tint with a white checkmark, as lists select rows (editing), and as
+// Framework7's iOS theme's checkboxes are (`checkbox-ios.less`); mixed
 // (indeterminate), a dash (Framework7). Base UI checkboxes and radios (a
 // button, with a hidden input for forms), also used by `List` (`Checkbox`,
 // `Radio`).
 //
-// Deviations:
-// - Radios are circles too (Framework7 iOS: a checkmark only, as
+// Also:
+// - Radios are circles too (Framework7's iOS theme: a checkmark only, as
 //   `List.Checkmark`).
-// - The hit area is 44px (HIG), centered (Figma: the circle).
+// - The hit area is 44px, centered.
 
 export const Check = (): ReactNode => (
   <svg

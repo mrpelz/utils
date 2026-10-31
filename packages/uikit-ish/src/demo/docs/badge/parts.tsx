@@ -1,6 +1,5 @@
 import './style.css';
 
-import { sfBell } from '@bradleyhodges/sfsymbols/sfBell';
 import { FunctionComponent } from 'react';
 
 import { Badge, Symbol } from '../../../components/index.js';
@@ -9,6 +8,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfBell } from '../../tooling/icons.js';
 import { badgeRows } from './docs.js';
 import { propOptionsPart } from './props.js';
 

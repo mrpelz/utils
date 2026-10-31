@@ -8,14 +8,14 @@
     flex-wrap: wrap;
     align-items: center;
     anchor-scope: --uikit-progress-fill;
-    color: var(--color-ios-secondary-label);
-    font-size: var(--font-ios-subheadline-size);
+    color: var(--color-ui-secondary-label);
+    font-size: var(--font-ui-subheadline-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-subheadline-weight);
-    font-weight: round(down, var(--font-ios-subheadline-weight), 100);
+    font-variation-settings: 'wght' var(--font-ui-subheadline-weight);
+    font-weight: round(down, var(--font-ui-subheadline-weight), 100);
     gap: 6px 8px;
-    letter-spacing: var(--font-ios-subheadline-tracking);
-    line-height: var(--font-ios-subheadline-line-height);
+    letter-spacing: var(--font-ui-subheadline-tracking);
+    line-height: var(--font-ui-subheadline-line-height);
 
     /* Its label and value (see Label, Value): above the track (by default;
        on a line of their own, the label at its start, the value at its end),
@@ -73,7 +73,7 @@
 
       & > [data-progress-part='track'] {
         outline: 2px solid
-          var(--uikit-progress-tint, var(--color-ios-system-blue));
+          var(--uikit-progress-tint, var(--color-ui-system-blue));
         outline-offset: 2px;
       }
     }
@@ -95,7 +95,7 @@
     height: 6px;
     flex: 1 1 0;
     border-radius: 3px;
-    background-color: var(--color-ios-system-fill);
+    background-color: var(--color-ui-system-fill);
     container-type: inline-size;
   }
 
@@ -142,14 +142,14 @@
 
     display: inline-flex;
     align-items: center;
-    color: var(--color-ios-secondary-label);
-    font-size: var(--font-ios-body-size);
+    color: var(--color-ui-secondary-label);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-body-weight);
-    font-weight: round(down, var(--font-ios-body-weight), 100);
+    font-variation-settings: 'wght' var(--font-ui-body-weight);
+    font-weight: round(down, var(--font-ui-body-weight), 100);
     gap: 8px;
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
     vertical-align: middle;
 
     /* Hidden (see `display`): no room taken. Fading (`movement`), fading
@@ -219,7 +219,7 @@
     height: 100%;
     border-radius: 3px;
     anchor-name: --uikit-progress-fill;
-    background-color: var(--uikit-progress-tint, var(--color-ios-system-blue));
+    background-color: var(--uikit-progress-tint, var(--color-ui-system-blue));
     transition: width 200ms;
 
     [data-indeterminate] > & {

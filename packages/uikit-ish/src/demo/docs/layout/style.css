@@ -20,7 +20,7 @@
 /* A readout of the columns' sizes, below the screen. */
 .layout-demo-sizes {
   margin: 16px 0 0;
-  color: var(--color-ios-label);
+  color: var(--color-ui-label);
   font-size: 15px;
   font-variant-numeric: tabular-nums;
 }

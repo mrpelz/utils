@@ -19,13 +19,13 @@ export type {
   GlassContextValue,
 } from './props.js';
 
-// Liquid Glass building blocks shared by components: glass materials behind
+// Glass building blocks shared by components: glass materials behind
 // bars and capsules, and glass lenses (the pressed, magnified state of knobs
 // and selections), styled by style.css. Tokens and their sources are in
-// `styles.css` (`--glass-ios-*`).
+// `styles.css` (`--glass-ui-*`).
 
 // What's behind: its luminance below this, the glass turns dim; above the
-// other, bright; between, it stays (Puppertino's, after Apple's).
+// other, bright; between, it stays (Puppertino's).
 const toDim = 0.35;
 const toBright = 0.85;
 
@@ -180,7 +180,7 @@ export const InheritedGlassContext = createContext<GlassContext | undefined>(
  * positioned (or blended) to be drawn above.
  *
  * Tinted glass takes its color from `--uikit-glass-tint` (default:
- * `--glass-ios-tint`). `--uikit-glass-fade` (0 to 1, switched: the layers
+ * `--glass-ui-tint`). `--uikit-glass-fade` (0 to 1, switched: the layers
  * transition themselves) fades it out: opacity on the element instead would
  * make it a backdrop root (the blur and fill would see nothing behind) and
  * isolate its content's blend modes while fading (WebKit). As a lens (e.g.
@@ -199,7 +199,7 @@ export const GlassBackground: FunctionComponent<GlassBackgroundProps> = ({
         data-glass-part="blur"
       />
     ) : (
-      // Figma “Button - Liquid Glass” “Blur”: a blurred copy of the shape (2px
+      // A glass button's blur: a blurred copy of the shape (2px
       // down, blur(10px)), masked to outside the shape, which is what an outer
       // shadow draws. The masked backdrop blur only shows as a 2px sliver below
       // the shape and is left out.
@@ -211,7 +211,7 @@ export const GlassBackground: FunctionComponent<GlassBackgroundProps> = ({
     )}
     {tinted ? (
       // The tint layers are a group with a drop shadow, which isolates their
-      // blend modes from the backdrop (Figma export: a filtered group).
+      // blend modes from the backdrop.
       <span
         aria-hidden="true"
         className="uikit-glass-tint-group"
@@ -235,7 +235,7 @@ export const GlassBackground: FunctionComponent<GlassBackgroundProps> = ({
         />
       </span>
     ) : (
-      // The fills (Figma “Fill”) as a backdrop filter and a flat color, without
+      // The fills as a backdrop filter and a flat color, without
       // blend modes (see `styles.css`); they clear as a lens (as the slider
       // thumb's knob).
       <span
@@ -251,7 +251,7 @@ export const GlassBackground: FunctionComponent<GlassBackgroundProps> = ({
         data-glass-part="tinted-effect"
       />
     ) : (
-      // Glass effect (Figma “Glass Effect”, emulated as in Framework7).
+      // Glass effect (its rim and shading, emulated as in Framework7).
       <span
         aria-hidden="true"
         className="uikit-glass-effect"

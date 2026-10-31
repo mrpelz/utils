@@ -11,13 +11,13 @@ import type { FieldsetLegendProps } from './props.js';
 
 export type { FieldsetLegendProps } from './props.js';
 
-// Forms (Base UI `Form`, `Fieldset`), as iOS lays them out (Settings,
-// Contacts): in a `List`, a fieldset is a section, its legend the section's
+// Forms (Base UI `Form`, `Fieldset`), laid out as settings and contacts
+// apps do: in a `List`, a fieldset is a section, its legend the section's
 // header (`List.Header`), its fields rows (`TextField.Root` rendering a
 // `List.Item`; `Checkbox`, `Radio`, `Switch`, `Stepper`, `Slider`, … in
 // rows). A form submits with a `Button` of `type="submit"`.
 // Source: behavior after Framework7 (`form.js`, `list.less`: inputs in list
-// rows); Figma has no forms.
+// rows).
 
 /**
  * A fieldset (Base UI): a list section (`List.Section`), disabling its

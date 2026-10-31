@@ -1,4 +1,3 @@
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
 import { FunctionComponent, useMemo } from 'react';
 
 import { List, Symbol, TextField } from '../../../components/index.js';
@@ -8,6 +7,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfMagnifyingglass } from '../../tooling/icons.js';
 import {
   textFieldClearRows,
   textFieldControlRows,
@@ -151,9 +151,9 @@ const ControlPart: FunctionComponent = () => {
         </List.Section>
         {/* The suggestions of its `list` option. */}
         <datalist id={suggestionsId}>
-          <option value="Kate Bell" />
-          <option value="John Appleseed" />
-          <option value="Anna Haro" />
+          <option value="Kate Brown" />
+          <option value="John Doe" />
+          <option value="Anna Hall" />
         </datalist>
       </List.Root>
     </Component>
@@ -290,7 +290,7 @@ const ClearPart: FunctionComponent = () => {
                 <TextField.Label>Name</TextField.Label>
               </List.Content>
               <List.Trailing>
-                <TextField.Control defaultValue="Kate Bell" />
+                <TextField.Control defaultValue="Kate Brown" />
                 <TextField.Clear {...props} />
               </List.Trailing>
             </TextField.Root>
@@ -322,7 +322,11 @@ const SearchPart: FunctionComponent = () => {
       state={[state]}
       title="TextField.Search"
     >
-      <TextField.Root className="text-field-demo-standalone">
+      {/* (On glass's colors, as in a bar: its glass looks.) */}
+      <TextField.Root
+        className="text-field-demo-standalone"
+        data-glass-context="auto"
+      >
         <TextField.Search {...props}>
           <Symbol icon={sfMagnifyingglass} />
           <TextField.Control
@@ -556,12 +560,18 @@ export const TextFieldParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A search field’s capsule (Figma “Search Field”): 36px high, on the
-        tertiary fill; a magnifier, the control, a clear button.
+        A search field’s capsule: 36px high, on the tertiary fill; a magnifier,
+        the control, a clear button.
       </li>
       <li>
         Pressed anywhere, it focuses its control; focused by keyboard, an
         outline in the tint.
+      </li>
+      <li>
+        Its look (<code>variant</code>), by where it sits: the capsule; a list
+        row’s; a tab bar group’s glass capsule; on a collapsed tab bar’s glass;
+        a toolbar’s glass capsule (see{' '}
+        <a href="text-field/composition#a-search-field">Composition</a>).
       </li>
       <li>
         Renders a <code>label</code>.

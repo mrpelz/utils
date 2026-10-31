@@ -1,12 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfMap } from '@bradleyhodges/sfsymbols/sfMap';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -31,6 +22,17 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfChevronBackward,
+  sfEllipsis,
+  sfFolder,
+  sfListBullet,
+  sfMagnifyingglass,
+  sfMap,
+  sfSquareAndArrowUp,
+  sfSquareAndPencil,
+  sfTrash,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { messages } from '../list/content.js';
 import { names } from '../viewport/content.js';
@@ -52,7 +54,7 @@ const navigationCode = `<Header.Root>
         <Toolbar.Subtitle>3 unread</Toolbar.Subtitle>
       </Toolbar.Title>
       <Toolbar.Trailing>
-        <Toolbar.Group>
+        <Toolbar.Group gap={20}>
           <Toolbar.Button aria-label="Share" shape="circle">…</Toolbar.Button>
           <Toolbar.Button aria-label="More" shape="circle">…</Toolbar.Button>
         </Toolbar.Group>
@@ -117,31 +119,34 @@ const all = selected.length === messages.length;
 
 const searchCode = `const [query, setQuery] = useState('');
 
-<Viewport.Content>
-  <Viewport.Padding edge="block-start" />
-  <List.Root>…{/* the rows matching query */}</List.Root>
-  <Viewport.Padding edge="block-end" />
-</Viewport.Content>
-<Viewport.BlockEnd>
-  <Toolbar.Root>
-    <Toolbar.Button aria-label="Folders" shape="circle">…</Toolbar.Button>
-    {/* Taking the bar's free space. */}
-    <TextField.Root>
-      <TextField.Search>
-        <Symbol icon={sfMagnifyingglass} />
-        <TextField.Control
-          aria-label="Search"
-          placeholder="Search"
-          type="search"
-          value={query}
-          onValueChange={setQuery}
-        />
-        <TextField.Clear />
-      </TextField.Search>
-    </TextField.Root>
-    <Toolbar.Button aria-label="New contact" shape="circle">…</Toolbar.Button>
-  </Toolbar.Root>
-</Viewport.BlockEnd>`;
+{/* Tracking the keyboard over its screen. */}
+<Viewport.Provider>
+  <Viewport.Content>
+    <Viewport.Padding edge="block-start" />
+    <List.Root>…{/* the rows matching query */}</List.Root>
+    <Viewport.Padding edge="block-end" />
+  </Viewport.Content>
+  <Viewport.BlockEnd>
+    <Toolbar.Root>
+      <Toolbar.Button aria-label="Folders" shape="circle">…</Toolbar.Button>
+      {/* Taking the bar's free space, a glass capsule as its buttons. */}
+      <TextField.Root>
+        <TextField.Search variant="toolbar">
+          <Symbol icon={sfMagnifyingglass} />
+          <TextField.Control
+            aria-label="Search"
+            placeholder="Search"
+            type="search"
+            value={query}
+            onValueChange={setQuery}
+          />
+          <TextField.Clear />
+        </TextField.Search>
+      </TextField.Root>
+      <Toolbar.Button aria-label="New contact" shape="circle">…</Toolbar.Button>
+    </Toolbar.Root>
+  </Viewport.BlockEnd>
+</Viewport.Provider>`;
 
 const pagesCode = `const cities = ['Berlin', 'Lisbon', 'Tokyo'];
 const [page, setPage] = useState(0);
@@ -176,7 +181,7 @@ const NavigationBar: FunctionComponent = () => {
       stage="phone"
       title="Toolbar as a navigation bar"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -196,7 +201,7 @@ const NavigationBar: FunctionComponent = () => {
                 <Toolbar.Subtitle>{messages.length} unread</Toolbar.Subtitle>
               </Toolbar.Title>
               <Toolbar.Trailing>
-                <Toolbar.Group>
+                <Toolbar.Group gap={20}>
                   <Toolbar.Button
                     aria-label="Share"
                     shape="circle"
@@ -355,7 +360,8 @@ const Search: FunctionComponent = () => {
       stage="phone"
       title="Toolbar with a search field"
     >
-      <>
+      {/* Tracking the keyboard over its screen (see Viewport.Provider). */}
+      <Viewport.Provider>
         <Viewport.Content>
           <Viewport.Padding edge="block-start" />
           <List.Root>
@@ -385,7 +391,7 @@ const Search: FunctionComponent = () => {
               </Button.Icon>
             </Toolbar.Button>
             <TextField.Root>
-              <TextField.Search>
+              <TextField.Search variant="toolbar">
                 <Symbol icon={sfMagnifyingglass} />
                 <TextField.Control
                   aria-label="Search"
@@ -408,7 +414,7 @@ const Search: FunctionComponent = () => {
             </Toolbar.Button>
           </Toolbar.Root>
         </Viewport.BlockEnd>
-      </>
+      </Viewport.Provider>
     </Component>
   );
 };
@@ -528,7 +534,8 @@ export const ToolbarComposition: FunctionComponent = () => (
       </li>
       <li>
         Back at its start, the page’s title (a subtitle below it) centered, the
-        page’s actions in a capsule at its end.
+        page’s actions in a capsule at its end, set wider apart than the default
+        12px (<code>gap</code>), as the bar has room.
       </li>
       <li>
         With a large title, the bar’s title fades in as it scrolls away (see{' '}
@@ -545,7 +552,12 @@ export const ToolbarComposition: FunctionComponent = () => (
           component="viewport"
           part="Viewport.BlockStart"
         />
-        , its sides, title and subtitle, and the{' '}
+        , its sides, title and subtitle, the capsule’s spacing (
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Group"
+        />{' '}
+        <code>gap</code>), and the{' '}
         <PartLink
           component="header"
           part="Header.Root"
@@ -614,7 +626,7 @@ export const ToolbarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        iOS 26’s search at the bottom (Mail, Contacts): a{' '}
+        Search at the bottom (e.g. a mail app’s): a{' '}
         <a href="text-field">Text field</a>’s{' '}
         <PartLink
           component="text-field"
@@ -627,6 +639,14 @@ export const ToolbarComposition: FunctionComponent = () => (
         their size.
       </li>
       <li>
+        It looks like the bar’s capsules: glass, as high as its buttons (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />{' '}
+        <code>variant=&quot;toolbar&quot;</code>).
+      </li>
+      <li>
         Pushed up by the on-screen keyboard with its bar (
         <PartLink
           component="viewport"
@@ -636,13 +656,23 @@ export const ToolbarComposition: FunctionComponent = () => (
         ).
       </li>
       <li>
-        <strong>Library:</strong> the search field taking the bar’s free space,
-        and the bar pushed up by the keyboard (
+        <strong>Library:</strong> the search field taking the bar’s free space
+        in the bar’s look (
+        <PartLink
+          component="text-field"
+          part="TextField.Search"
+        />{' '}
+        <code>variant</code>), and the bar pushed up by the keyboard (
         <PartLink
           component="viewport"
           part="Viewport.BlockEnd"
         />{' '}
-        <code>keyboard=&quot;push&quot;</code>).
+        <code>keyboard=&quot;push&quot;</code>; the keyboard tracked by a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />
+        ).
       </li>
       <li>
         <strong>Demo:</strong> the query (the app’s state) and filtering the

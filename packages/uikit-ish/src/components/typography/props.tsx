@@ -1,6 +1,6 @@
 import type { useRender } from '@base-ui/react/use-render';
 
-/** UIKit `UIFont.TextStyle`. */
+/** A text style. */
 export type TextStyle =
   | 'body'
   | 'callout'
@@ -14,8 +14,8 @@ export type TextStyle =
   | 'title2'
   | 'title3';
 
-/** UIKit `UIContentSizeCategory` (Dynamic Type), `large` by default. */
-export type DynamicTypeSize =
+/** A text size (the accessibility sizes too), `large` by default. */
+export type TextSize =
   | 'ax1'
   | 'ax2'
   | 'ax3'
@@ -29,7 +29,7 @@ export type DynamicTypeSize =
   | 'xxLarge'
   | 'xxxLarge';
 
-/** Label colors of the text styles (Figma: the four label colors). */
+/** Label colors of the text styles (the four label colors). */
 export type TextColor = 'primary' | 'quaternary' | 'secondary' | 'tertiary';
 
 export type TypographyProps = useRender.ComponentProps<'span'> & {
@@ -38,14 +38,14 @@ export type TypographyProps = useRender.ComponentProps<'span'> & {
    * @default inherited
    */
   color?: TextColor;
-  /**
-   * Dynamic Type size of the text and its content.
-   * @default inherited
-   */
-  dynamicTypeSize?: DynamicTypeSize;
-  /** The style's bold weight (Figma “Emphasized”). */
+  /** The style's bold weight (emphasized). */
   emphasized?: boolean;
   italic?: boolean;
+  /**
+   * Text size of the text and its content.
+   * @default inherited
+   */
+  textSize?: TextSize;
   /**
    * The text style.
    * @default 'body'

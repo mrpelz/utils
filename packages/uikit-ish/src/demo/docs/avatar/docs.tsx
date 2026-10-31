@@ -16,7 +16,7 @@ export const avatarRootRows: readonly PropRow[] = [
     'number',
     code('70'),
     <>
-      Its diameter in pixels (Figma’s contact: 70). In a{' '}
+      Its diameter in pixels (a contact’s: 70). In a{' '}
       <PartLink
         component="avatar"
         part="Avatar.Group"

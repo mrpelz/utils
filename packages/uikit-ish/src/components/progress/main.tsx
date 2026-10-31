@@ -15,7 +15,7 @@ import {
   useState,
 } from 'react';
 
-import { cn, withStyle } from '../utils/main.js';
+import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import type {
   ActivityIndicatorDisplay,
   ActivityIndicatorMovement,
@@ -35,11 +35,10 @@ export type {
   ProgressValueProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Progress Indicators”):
-// - Progress bar (UIKit `UIProgressView`): a track 6px high, rounded, in
-//   the system fill, filled from its start in the tint (system blue); at 0%
-//   a 6px dot (Figma's fills between are hand-placed, near linear: linear).
-// - Progress indicator (UIKit `UIActivityIndicatorView`): 8 spokes around
+// Progress indicators:
+// - Progress bar: a track 6px high, rounded, in the system fill, filled from
+//   its start in the tint (system blue); at 0% a 6px dot, linear between.
+// - Activity indicator: 8 spokes around
 //   its center (Regular: 30px, spokes 4×10px; Small: 22px, 3×7px),
 //   rounded, in the secondary label color, at 100% at its top, then
 //   counterclockwise at 87%, 75%, 63%, 51%, 39%, 27% and 15%, spinning
@@ -47,19 +46,42 @@ export type {
 //   spokes in place, fading in turn: `movement`); optionally with a Body
 //   label in the secondary label color, 8px after it (Small: 4px).
 //
-// Deviations:
+// Also:
 // - The bar fills its container, at least 280px long (as a slider's
-//   control; Figma: 370px in a 402px frame).
-// - The bar's label and value (Base UI's; Figma has none), in Subheadline,
+//   control).
+// - The bar's label and value (Base UI's), in Subheadline,
 //   in the secondary label color: above its track (by default, at its start
 //   and end), below it, before or after it (`placement`); the value also in
 //   a tooltip (see `Tooltip`) centered on the fill's end: always, or while
 //   the bar is hovered or focused by keyboard (it's focusable then).
 // - Indeterminate (Base UI's `value` null), a bar's fill slides along its
-//   track (UIKit has none: use an `ActivityIndicator`).
-// - Stopping, an activity indicator rests at once (UIKit's), freezes where
-//   it is, or finishes its turn first; or hides, once finished (UIKit's
-//   `hidesWhenStopped`) or at once (`display`).
+//   track (or use an `ActivityIndicator`).
+// - Stopping, an activity indicator rests at once, freezes where it is, or
+//   finishes its turn first; or hides, once finished or at once
+//   (`display`).
+// - Spinning activity indicators (without their own progress or speed), and
+//   indeterminate bars' fills, all in sync: at once alike, whenever each
+//   started (`synchronized`).
+
+/**
+ * Synchronized (see `synchronized`): its animations (CSS's) on the page's
+ * clock (each started at its origin), not each on its own (started as
+ * applied), so all show alike at once; again as they restart (`restart`
+ * changing).
+ */
+const useSynchronized = (
+  element: RefObject<HTMLElement | null>,
+  isSynchronized: boolean,
+  restart: unknown,
+) => {
+  useLayoutEffect(() => {
+    if (!isSynchronized) return;
+    for (const animation of element.current?.getAnimations({ subtree: true }) ??
+      []) {
+      if (animation instanceof CSSAnimation) animation.startTime = 0;
+    }
+  }, [element, isSynchronized, restart]);
+};
 
 // Registers a momentary tooltip (see `Value`), which makes the bar
 // focusable.
@@ -67,10 +89,17 @@ const RootContext = createContext<((isMomentary: boolean) => void) | undefined>(
   undefined,
 );
 
-/** A progress bar (UIKit `UIProgressView`), its parts Base UI's. */
+/** A progress bar, its parts Base UI's. */
 const Root = forwardRef<HTMLDivElement, ProgressRootProps>(
-  ({ className, style, tabIndex, tint, ...props }, ref) => {
+  (
+    { className, style, synchronized = true, tabIndex, tint, value, ...props },
+    forwardedRef,
+  ) => {
     const [isMomentary, setIsMomentary] = useState(false);
+    const ref = useForwardedRef(forwardedRef);
+    // Indeterminate, its fill sliding (see `synchronized`).
+    const isIndeterminate = value === null;
+    useSynchronized(ref, synchronized && isIndeterminate, isIndeterminate);
 
     return (
       <RootContext.Provider value={setIsMomentary}>
@@ -78,6 +107,7 @@ const Root = forwardRef<HTMLDivElement, ProgressRootProps>(
           ref={ref}
           style={withStyle({ '--uikit-progress-tint': tint }, style)}
           tabIndex={tabIndex ?? (isMomentary ? 0 : undefined)}
+          value={value}
           {...props}
           className={cn('uikit-progress-root', className)}
           data-progress-part="root"
@@ -245,8 +275,7 @@ const useStopped = (
 };
 
 /**
- * An activity indicator (UIKit `UIActivityIndicatorView`, Figma “Progress
- * indicator”): spinning spokes, for progress of unknown length (an
+ * An activity indicator: spinning spokes, for progress of unknown length (an
  * indeterminate Base UI `Progress.Root`); optionally labeled.
  */
 export const ActivityIndicator = forwardRef<
@@ -261,13 +290,16 @@ export const ActivityIndicator = forwardRef<
       display = 'animate',
       duration,
       movement = 'stepped',
-      progress = 0,
+      progress: setProgress,
       size = 'regular',
       style,
+      synchronized = true,
       ...props
     },
-    ref,
+    forwardedRef,
   ) => {
+    const ref = useForwardedRef(forwardedRef);
+    const progress = setProgress ?? 0;
     const spinner = useRef<HTMLSpanElement>(null);
     const stopped = useStopped(spinner, display, movement);
     // Spinning, from where it was then (later progress not restarting it).
@@ -284,6 +316,12 @@ export const ActivityIndicator = forwardRef<
       (display === 'finish-and-hide' && stopped === 'reset');
     const shown = isHidden ? undefined : stopped;
     const isAtRest = shown === 'reset';
+    // (Not with its own progress or speed: see `synchronized`.)
+    useSynchronized(
+      ref,
+      synchronized && setProgress === undefined && duration === undefined,
+      `${display} ${movement} ${String(shown)}`,
+    );
 
     return (
       <BaseProgress.Root

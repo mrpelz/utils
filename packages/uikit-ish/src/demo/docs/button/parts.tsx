@@ -1,4 +1,3 @@
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { FunctionComponent, useMemo } from 'react';
 
 import { Button, Symbol } from '../../../components/index.js';
@@ -8,6 +7,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfHeartFill } from '../../tooling/icons.js';
 import { buttonIconRows, buttonLabelRows, buttonRootRows } from './docs.js';
 import { getPropOptionsRoot, propOptionsPart } from './props.js';
 

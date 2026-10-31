@@ -81,8 +81,8 @@ export const RollOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A wheel of columns, each scrolled to select a row (UIKit{' '}
-        <code>UIPickerView</code>): the selection in a band across its center.
+        A wheel of columns, each scrolled to select a row: the selection in a
+        band across its center.
       </li>
       <li>
         The parts of a value side by side: a time’s hours and minutes, a date’s
@@ -203,10 +203,10 @@ export const RollOverview: FunctionComponent = () => (
       </li>
       <li>
         <code>editable</code>: pressing the selected row shows a field for a
-        typed value (a numeric keyboard), as iOS’s time wheels.
+        typed value (a numeric keyboard), as time wheels do.
       </li>
       <li>
-        <code>loop</code>: rows repeat endlessly, as iOS’s time wheels.
+        <code>loop</code>: rows repeat endlessly, as time wheels do.
       </li>
     </ul>
   </>

@@ -93,7 +93,7 @@ export const rollColumnRows: readonly PropRow[] = [
     'loop',
     'boolean',
     code('false'),
-    'Its rows repeat endlessly (as iOS’s time wheels): scrolled past the last row, the first follows.',
+    'Its rows repeat endlessly (e.g. a time’s): scrolled past the last row, the first follows.',
   ],
   [
     'aria-label',

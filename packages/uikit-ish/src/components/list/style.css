@@ -22,18 +22,35 @@
     }
   }
 
+  /* Only marking a gap rows can be dropped into (see DropTarget). */
+  .uikit-list-drop-target {
+    display: block;
+    height: 0;
+    list-style: none;
+  }
+
+  /* Its rows' margins stay within it (reordered rows' room, see reorder.ts,
+     closing at its ends too). */
   .uikit-list-group {
+    display: flow-root;
     overflow: clip visible;
     padding: 0;
     border-radius: var(--uikit-list-radius, 24px);
     background-color: var(
       --uikit-list-group-background,
-      var(--color-ios-secondary-system-grouped-background)
+      var(--color-ui-secondary-system-grouped-background)
     );
     box-shadow: var(--uikit-list-outline-shadow, none);
     list-style: none;
     margin-block: 0;
     margin-inline: var(--uikit-list-inset, 16px);
+
+    /* Reordering (see reorder.ts): not clipping its lifted rows (no row is
+       swiped meanwhile; WebKit may clip them, composited, in a scrolled
+       container). */
+    &[data-reorder-active] {
+      overflow: visible;
+    }
   }
 
   /* A row (see Item): its parts in a line, in their order (a flexbox):
@@ -49,9 +66,9 @@
        content ending where the details do (their padding beyond), their label
        and symbol 16px apart (as a detail and its chevron, user), the symbol
        light (user: thinner than regular). */
-    --uikit-button-plain-size: var(--font-ios-body-size);
-    --uikit-button-plain-line-height: var(--font-ios-body-line-height);
-    --uikit-button-plain-tracking: var(--font-ios-body-tracking);
+    --uikit-button-plain-size: var(--font-ui-body-size);
+    --uikit-button-plain-line-height: var(--font-ui-body-line-height);
+    --uikit-button-plain-tracking: var(--font-ui-body-tracking);
     --uikit-button-plain-margin-end: -14px;
     --uikit-button-plain-gap: 16px;
     --uikit-button-plain-symbol-weight: 300;
@@ -63,7 +80,7 @@
     flex-wrap: wrap;
     align-content: center;
     align-items: center;
-    padding: var(--uikit-list-row-padding, 12px 16px);
+    padding: var(--uikit-list-row-padding-block, 12px) 16px;
 
     /* Indented by its level (see Item). */
     padding-inline-start: calc(
@@ -71,15 +88,19 @@
         20px
     );
 
-    /* Figma Height=Tall (images keep their regular size) */
+    /* Tall (images keep their regular size) */
     &:has(> [data-list-part='content'] > [data-list-part='subtitle']) {
       --uikit-list-min-height: 68px;
     }
 
     /* Framework7 media list (Mail): the image and the trailing parts at the
        top, the title emphasized (Framework7: 600), trailing details in
-       Subheadline. */
-    &:has(> [data-list-part='content'] > [data-list-part='text']) {
+       Subheadline; its text in the content, or below it (across the row,
+       under the trailing parts too, as Mail's preview). */
+    &:has(
+      > :is([data-list-part='content'], [data-list-part='below'])
+        > [data-list-part='text']
+    ) {
       --uikit-list-min-height: 0px;
 
       align-content: start;
@@ -101,16 +122,16 @@
       }
 
       & > [data-list-part='content'] > [data-list-part='subtitle'] {
-        color: var(--color-ios-label);
+        color: var(--color-ui-label);
       }
 
       & > [data-list-part='trailing'] > [data-list-part='detail'] {
-        font-size: var(--font-ios-subheadline-size);
+        font-size: var(--font-ui-subheadline-size);
         font-style: normal;
-        font-variation-settings: 'wght' var(--font-ios-subheadline-weight);
-        font-weight: round(down, var(--font-ios-subheadline-weight), 100);
-        letter-spacing: var(--font-ios-subheadline-tracking);
-        line-height: var(--font-ios-subheadline-line-height);
+        font-variation-settings: 'wght' var(--font-ui-subheadline-weight);
+        font-weight: round(down, var(--font-ui-subheadline-weight), 100);
+        letter-spacing: var(--font-ui-subheadline-tracking);
+        line-height: var(--font-ui-subheadline-line-height);
       }
     }
 
@@ -131,13 +152,13 @@
     }
 
     & [data-text-field-part='label'] {
-      color: var(--color-ios-label);
-      font-size: var(--font-ios-body-size);
+      color: var(--color-ui-label);
+      font-size: var(--font-ui-body-size);
       font-style: normal;
-      font-variation-settings: 'wght' var(--font-ios-body-weight);
-      font-weight: round(down, var(--font-ios-body-weight), 100);
-      letter-spacing: var(--font-ios-body-tracking);
-      line-height: var(--font-ios-body-line-height);
+      font-variation-settings: 'wght' var(--font-ui-body-weight);
+      font-weight: round(down, var(--font-ui-body-weight), 100);
+      letter-spacing: var(--font-ui-body-tracking);
+      line-height: var(--font-ui-body-line-height);
       margin-block: 0;
     }
 
@@ -152,8 +173,8 @@
       align-self: start;
     }
 
-    /* After an inline label, the value at the row's end (UIKit forms,
-       Settings). */
+    /* After an inline label, the value at the row's end (as forms and
+       settings do). */
     &:has(> [data-list-part='content'] > [data-text-field-part='label'])
       > [data-list-part='trailing']
       > input[data-text-field-part='control'] {
@@ -172,13 +193,13 @@
       margin: 4px 0 0;
     }
 
-    /* Figma “_Separator”, from the content (its text) to 16px before the
+    /* The separator, from the content (its text) to 16px before the
        edge: its start anchored to the content (moving with it, e.g. in edit
        mode); without anchor positioning, or content, the row's padding. */
     &::before {
       position: absolute;
       top: 0;
-      border-top: 1px solid var(--color-ios-list-separator);
+      border-top: 1px solid var(--color-ui-list-separator);
       content: '';
       inset-inline: var(--uikit-list-row-padding-start, 16px) 16px;
 
@@ -201,8 +222,7 @@
     }
 
     /* Slots before the content: what's in them in a line, above a
-       pressable title's hit area. Figma: an edit control 2px from the
-       start, 17px before what follows; the image 8px; other elements 12px
+       pressable title's hit area: an edit control 2px from the start, 17px before what follows; the image 8px; other elements 12px
        (8px apart). */
     & > [data-list-part='leading'] {
       position: relative;
@@ -258,12 +278,23 @@
     }
 
     /* A roll (e.g. DatePicker's TimeRoll, inline): across the row, its
-       columns centered (iOS). */
+       columns centered. */
     & > [data-list-part='span'] > [data-roll-part='root'] {
       flex: 1 1 auto;
     }
 
-    /* Under the row's line, across it (e.g. a field's messages). Hidden
+    /* With a line under it (a Below): its own line keeps the row's least
+       height, so the line under it only adds to it (the row's lines,
+       centered, would move up as it grows). */
+    &:has(> [data-list-part='below'])
+      > :is([data-list-part='content'], [data-list-part='span']) {
+      min-height: calc(
+        var(--uikit-list-min-height) - 2 * var(--uikit-list-row-padding-block, 12px)
+      );
+    }
+
+    /* Under the row's line, across it from where the content starts (see
+       Below; e.g. a field's messages, a message's preview). Hidden
        (`hidden`), collapsed: growing and shrinking (its content clipped
        meanwhile; its track's least none, its content's margins
        notwithstanding), fading. */
@@ -273,6 +304,7 @@
       min-width: 0;
       flex: 1 1 100%;
       grid-template-rows: minmax(0, 1fr);
+      margin-inline-start: var(--uikit-list-below-start, 0);
       transition:
         grid-template-rows 300ms ease,
         opacity 300ms ease,
@@ -289,7 +321,7 @@
       }
     }
 
-    /* Slots after the content (Figma “Contents - Trailing”): what's in them
+    /* Slots after the content: what's in them
        in a line, 16px apart (a grabber 12px), above a pressable title's hit
        area. */
     & > [data-list-part='trailing'] {
@@ -403,13 +435,13 @@
   .uikit-list-subtitle {
     min-width: 0;
     margin: 0;
-    color: var(--color-ios-secondary-label);
-    font-size: var(--font-ios-subheadline-size);
+    color: var(--color-ui-secondary-label);
+    font-size: var(--font-ui-subheadline-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-subheadline-weight);
-    font-weight: round(down, var(--font-ios-subheadline-weight), 100);
-    letter-spacing: var(--font-ios-subheadline-tracking);
-    line-height: var(--font-ios-subheadline-line-height);
+    font-variation-settings: 'wght' var(--font-ui-subheadline-weight);
+    font-weight: round(down, var(--font-ui-subheadline-weight), 100);
+    letter-spacing: var(--font-ui-subheadline-tracking);
+    line-height: var(--font-ui-subheadline-line-height);
     overflow-wrap: break-word;
     pointer-events: none;
   }
@@ -420,14 +452,14 @@
     min-width: 0;
     margin: 0;
     -webkit-box-orient: vertical;
-    color: var(--color-ios-secondary-label);
-    font-size: var(--font-ios-subheadline-size);
+    color: var(--color-ui-secondary-label);
+    font-size: var(--font-ui-subheadline-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-subheadline-weight);
-    font-weight: round(down, var(--font-ios-subheadline-weight), 100);
-    letter-spacing: var(--font-ios-subheadline-tracking);
+    font-variation-settings: 'wght' var(--font-ui-subheadline-weight);
+    font-weight: round(down, var(--font-ui-subheadline-weight), 100);
+    letter-spacing: var(--font-ui-subheadline-tracking);
     -webkit-line-clamp: attr(lines type(<integer>), 2);
-    line-height: var(--font-ios-subheadline-line-height);
+    line-height: var(--font-ui-subheadline-line-height);
     overflow-wrap: break-word;
     pointer-events: none;
   }
@@ -435,7 +467,7 @@
   .uikit-list-supertitle {
     min-width: 0;
     margin: 0;
-    color: var(--color-ios-secondary-label);
+    color: var(--color-ui-secondary-label);
     font-size: 15px;
     font-variation-settings: 'wght' 400;
     font-weight: round(down, 400, 100);
@@ -445,13 +477,13 @@
   }
 
   .uikit-list-detail {
-    color: var(--color-ios-secondary-label);
-    font-size: var(--font-ios-body-size);
+    color: var(--color-ui-secondary-label);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-body-weight);
-    font-weight: round(down, var(--font-ios-body-weight), 100);
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    font-variation-settings: 'wght' var(--font-ui-body-weight);
+    font-weight: round(down, var(--font-ui-body-weight), 100);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
     pointer-events: none;
     white-space: nowrap;
   }
@@ -460,8 +492,8 @@
     display: grid;
     min-width: 22px;
     min-height: 22px;
-    color: var(--color-ios-label);
-    font-size: var(--font-ios-body-size);
+    color: var(--color-ui-label);
+    font-size: var(--font-ui-body-size);
     font-variation-settings: 'wght' 590;
     font-weight: round(down, 590, 100);
     place-items: center;
@@ -472,8 +504,8 @@
     display: grid;
     min-width: 8px;
     min-height: 22px;
-    color: var(--color-ios-tertiary-label);
-    font-size: var(--font-ios-body-size);
+    color: var(--color-ui-tertiary-label);
+    font-size: var(--font-ui-body-size);
     font-variation-settings: 'wght' 590;
     font-weight: round(down, 590, 100);
     place-items: center;
@@ -490,8 +522,8 @@
     display: grid;
     min-width: 8px;
     min-height: 22px;
-    color: var(--color-ios-primary);
-    font-size: var(--font-ios-body-size);
+    color: var(--color-ui-primary);
+    font-size: var(--font-ui-body-size);
     font-variation-settings: 'wght' 590;
     font-weight: round(down, 590, 100);
     place-items: center;
@@ -516,7 +548,7 @@
   .uikit-list-footer {
     display: block;
     padding: 8px calc(16px + var(--uikit-list-inset, 16px)) 6px;
-    color: var(--color-ios-secondary-label);
+    color: var(--color-ui-secondary-label);
     font-size: 13px;
     font-variation-settings: 'wght' 400;
     font-weight: round(down, 400, 100);
@@ -559,11 +591,11 @@
     display: flow-root;
     min-width: 240px;
     background-color: var(--uikit-list-background);
-    color: var(--color-ios-label);
+    color: var(--color-ui-label);
 
     /* Its style (listStyle). */
 
-    /* Figma “Sidebars” (“Sidebar Row”, in a Sidebar's glass): groups
+    /* Sidebars (rows in a Sidebar's glass): groups
        without a shape of their own (nor a background), their rows capsules,
        44px high (selected: on a fill, its symbol and title emphasized, in the
        tint), without separators; 10px in at the first level, 20px more per
@@ -610,12 +642,12 @@
       --uikit-list-outline-shadow: none;
       --uikit-list-separator-opacity: 0;
       --uikit-list-row-min-height: 44px;
-      --uikit-list-row-padding: 0 16px;
+      --uikit-list-row-padding-block: 0px;
       --uikit-list-row-padding-start: 10px;
-      --uikit-list-selected-title: var(--color-ios-primary);
+      --uikit-list-selected-title: var(--color-ui-primary);
 
-      /* Pressed: on the selection's fill too (user: Figma's pressed rows are
-         wrong; selected and pressed differ in their text only; the
+      /* Pressed: on the selection's fill too (selected and pressed differ in
+         their text only; the
          sidebar's toolbar buttons pressed alike, see Sidebar). */
       --uikit-list-pressed-background: var(--uikit-list-selected-background);
 
@@ -626,7 +658,7 @@
         > [data-list-part='leading']
         > [data-list-part='image'][data-variant='symbol'] {
         width: 34px;
-        color: var(--color-ios-label);
+        color: var(--color-ui-label);
         margin-inline-end: 4px;
       }
 
@@ -634,7 +666,7 @@
         [data-list-part='row']
         > [data-list-part='content']
         > [data-list-part='title'] {
-        color: var(--color-ios-primary);
+        color: var(--color-ui-primary);
         font-variation-settings: 'wght' 590;
         font-weight: round(down, 590, 100);
       }
@@ -643,7 +675,7 @@
         [data-list-part='row']
         > [data-list-part='leading']
         > [data-list-part='image'] {
-        color: var(--color-ios-primary);
+        color: var(--color-ui-primary);
         font-variation-settings: 'wght' 590;
         font-weight: round(down, 590, 100);
 
@@ -657,29 +689,29 @@
       }
 
       & [data-list-part='header'] > [data-list-part='title'] {
-        color: var(--color-ios-secondary-label);
-        font-size: var(--font-ios-body-size);
+        color: var(--color-ui-secondary-label);
+        font-size: var(--font-ui-body-size);
         font-style: normal;
         font-variation-settings: 'wght' 400;
         font-weight: round(down, 400, 100);
-        letter-spacing: var(--font-ios-body-tracking);
-        line-height: var(--font-ios-body-line-height);
+        letter-spacing: var(--font-ui-body-tracking);
+        line-height: var(--font-ui-body-line-height);
       }
 
-      /* Its selection circles (Figma “Edit Button”): 8px before the symbol. */
+      /* Its selection circles (edit buttons): 8px before the symbol. */
       & [data-list-part='row'] > [data-list-part='leading'] > [data-list-part='edit'] {
         margin-inline: 0 8px;
       }
 
-      /* Chevrons (Figma “Disclosure”: #999, 590, an 18px box 12px from the
-         row's end): gray, not the tint; headers' and rows' alike, aligned. */
+      /* Chevrons (disclosures: #999, 590, an 18px box 12px from the row's
+         end): gray, not the tint; headers' and rows' alike, aligned. */
       & [data-list-part='disclosure'] {
-        color: var(--color-ios-secondary-label);
+        color: var(--color-ui-secondary-label);
       }
 
       & [data-list-part='header'] > [data-list-part='disclosure'] {
         min-width: 18px;
-        font-size: var(--font-ios-body-size);
+        font-size: var(--font-ui-body-size);
       }
 
       &
@@ -694,11 +726,11 @@
     &:where([data-list-style='grouped']) {
       --uikit-list-background: var(
         --uikit-list-container-background,
-        var(--color-ios-system-grouped-background)
+        var(--color-ui-system-grouped-background)
       );
       --uikit-list-group-background: var(
         --uikit-list-container-group-background,
-        var(--color-ios-secondary-system-grouped-background)
+        var(--color-ui-secondary-system-grouped-background)
       );
       --uikit-list-inset: 0px;
       --uikit-list-radius: 0px;
@@ -711,11 +743,11 @@
     &:where(:not([data-list-style]), [data-list-style='insetGrouped']) {
       --uikit-list-background: var(
         --uikit-list-container-background,
-        var(--color-ios-system-grouped-background)
+        var(--color-ui-system-grouped-background)
       );
       --uikit-list-group-background: var(
         --uikit-list-container-group-background,
-        var(--color-ios-secondary-system-grouped-background)
+        var(--color-ui-secondary-system-grouped-background)
       );
       --uikit-list-inset: 16px;
       --uikit-list-radius: 24px;
@@ -724,18 +756,18 @@
         var(--uikit-list-outline, transparent);
     }
 
-    /* Figma “Section Title”: nested headers stick to the top, 22px high on an
+    /* Section titles: nested headers stick to the top, 22px high on an
        opaque background (Framework7 contacts list), and sections are snap points, so
        scrolling ends with a section title fully in view. Rows are on the list
        background of Framework7's .list-strong. */
     &:where([data-list-style='plain']) {
       --uikit-list-background: var(
         --uikit-list-container-background,
-        var(--color-ios-system-background)
+        var(--color-ui-system-background)
       );
       --uikit-list-group-background: var(
         --uikit-list-container-group-background,
-        var(--color-ios-secondary-system-grouped-background)
+        var(--color-ui-secondary-system-grouped-background)
       );
       --uikit-list-section-snap: start;
       --uikit-list-inset: 0px;
@@ -746,20 +778,20 @@
         inset 0 -1px var(--uikit-list-outline, transparent);
       --uikit-list-header-position: sticky;
       --uikit-list-header-background: var(
-        --color-ios-list-section-title-background
+        --color-ui-list-section-title-background
       );
       --uikit-list-nested-padding-block: 0;
       --uikit-list-nested-min-height: 22px;
-      --uikit-list-nested-size: var(--font-ios-body-size);
-      --uikit-list-nested-line-height: var(--font-ios-body-line-height);
-      --uikit-list-nested-tracking: var(--font-ios-body-tracking);
+      --uikit-list-nested-size: var(--font-ui-body-size);
+      --uikit-list-nested-line-height: var(--font-ui-body-line-height);
+      --uikit-list-nested-tracking: var(--font-ui-body-tracking);
     }
 
     /* Outlined (Framework7 `.list-outline`): hairlines above and below
        groups that span the list, a border around inset ones; drawn as
        shadows, taking no space. */
     &:where([data-outline]) {
-      --uikit-list-outline: var(--color-ios-list-separator);
+      --uikit-list-outline: var(--color-ui-list-separator);
     }
   }
 
@@ -807,15 +839,15 @@
       }
     }
 
-    /* Lifted while reordered (see useReorder), opaque (Framework7: 80%, the
+    /* Lifted while reordered (see reorder.ts), opaque (Framework7: 80%, the
        rows beneath showing through), its separators hidden */
     &[data-reordering] {
       z-index: 2;
       background-color: var(
         --uikit-list-group-background,
-        var(--color-ios-secondary-system-grouped-background)
+        var(--color-ui-secondary-system-grouped-background)
       );
-      box-shadow: var(--shadow-ios-list-reorder);
+      box-shadow: var(--shadow-ui-list-reorder);
     }
 
     &[data-reordering],
@@ -824,9 +856,11 @@
     }
 
     /* The first and last rows shown (closed collapsible rows aside, see
-       CollapsiblePanel); while reordering, by their order on screen (see
-       useReorder). */
-    &:nth-child(1 of :not([data-closed])):not([data-reorder-edge]),
+       CollapsiblePanel; drop targets aside); while reordering, by their
+       order on screen (see reorder.ts). */
+    &:nth-child(
+        1 of :not([data-closed], [data-list-part='drop-target'])
+      ):not([data-reorder-edge]),
     &[data-reorder-edge~='first'] {
       border-start-end-radius: var(
         --uikit-list-item-radius,
@@ -840,7 +874,9 @@
       --uikit-list-separator-opacity: 0;
     }
 
-    &:nth-last-child(1 of :not([data-closed])):not([data-reorder-edge]),
+    &:nth-last-child(
+        1 of :not([data-closed], [data-list-part='drop-target'])
+      ):not([data-reorder-edge]),
     &[data-reorder-edge~='last'] {
       border-end-end-radius: var(
         --uikit-list-item-radius,
@@ -860,7 +896,7 @@
     &[data-pressed] {
       --uikit-list-row-background: var(
         --uikit-list-pressed-background,
-        var(--color-ios-system-gray4)
+        var(--color-ui-system-gray4)
       );
 
       transition-duration: 0ms;
@@ -874,7 +910,7 @@
     &:has(> * > * > * > a[href][data-list-part='title']:focus-visible),
     &:has(> * > * > * > button[data-list-part='title']:enabled:focus-visible),
     &:has(> * > * > * > button[data-list-part='button']:enabled:focus-visible) {
-      outline: 2px solid var(--color-ios-primary);
+      outline: 2px solid var(--color-ui-primary);
       outline-offset: -2px;
     }
 
@@ -883,12 +919,12 @@
       --uikit-list-separator-opacity: 0;
     }
 
-    /* Figma “Row with Swipe Actions”: the swiped row's content is a capsule
+    /* Swiped rows: the swiped row's content is a capsule
        (its end leaving the row rounded by its clip, see rowPath); its actions
        on the row's background. */
     &[data-swipe] > * > [data-list-part='row'] {
       border-radius: 34px;
-      background-color: var(--color-ios-system-gray5);
+      background-color: var(--color-ui-system-gray5);
     }
 
     /* Selected (see Item): on a fill (sidebars: its title in the tint), its
@@ -896,7 +932,7 @@
     &[data-selected] {
       --uikit-list-row-background: var(
         --uikit-list-selected-background,
-        var(--color-ios-system-gray5)
+        var(--color-ui-system-gray5)
       );
       --uikit-list-separator-opacity: 0;
     }
@@ -929,12 +965,12 @@
     background: none;
     color: inherit;
     font-family: inherit;
-    font-size: var(--font-ios-body-size);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-body-weight);
-    font-weight: round(down, var(--font-ios-body-weight), 100);
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    font-variation-settings: 'wght' var(--font-ui-body-weight);
+    font-weight: round(down, var(--font-ui-body-weight), 100);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
     overflow-wrap: break-word;
     text-align: inherit;
     text-decoration: none;
@@ -977,8 +1013,8 @@
       width: 42px;
       height: 42px;
       border-radius: 50%;
-      background-color: var(--color-ios-tertiary-system-fill);
-      color: var(--color-ios-secondary-label);
+      background-color: var(--color-ui-tertiary-system-fill);
+      color: var(--color-ui-secondary-label);
       font-size: 21px;
       margin-block: -12px;
     }
@@ -986,8 +1022,8 @@
     &:where([data-variant='fill']) {
       width: 52px;
       height: 52px;
-      background-color: var(--color-ios-tertiary-system-fill);
-      color: var(--color-ios-secondary-label);
+      background-color: var(--color-ui-tertiary-system-fill);
+      color: var(--color-ui-secondary-label);
       font-size: 21px;
       margin-block: -12px;
     }
@@ -996,7 +1032,7 @@
       width: 30px;
       height: 30px;
       border-radius: 7px;
-      background-color: var(--color-ios-primary);
+      background-color: var(--color-ui-primary);
       color: #fff;
       font-size: 17px;
       margin-block: -12px;
@@ -1005,8 +1041,8 @@
     &:where(:not([data-variant]), [data-variant='symbol']) {
       width: 28px;
       min-height: 20px;
-      color: var(--color-ios-primary);
-      font-size: var(--font-ios-body-size);
+      color: var(--color-ui-primary);
+      font-size: var(--font-ui-body-size);
       line-height: 20px;
     }
 
@@ -1025,12 +1061,12 @@
     border: 0;
     margin: 0;
     background: none;
-    color: var(--color-ios-primary);
+    color: var(--color-ui-primary);
     font-family: inherit;
-    font-size: var(--font-ios-body-size);
+    font-size: var(--font-ui-body-size);
     font-variation-settings: 'wght' 400;
     font-weight: round(down, 400, 100);
-    line-height: var(--font-ios-body-line-height);
+    line-height: var(--font-ui-body-line-height);
     place-items: center;
     text-align: inherit;
     text-decoration: none;
@@ -1063,8 +1099,8 @@
     display: grid;
     min-width: 22px;
     min-height: 25px;
-    color: var(--color-ios-tertiary-label);
-    font-size: var(--font-ios-body-size);
+    color: var(--color-ui-tertiary-label);
+    font-size: var(--font-ui-body-size);
     font-variation-settings: 'wght' 400;
     font-weight: round(down, 400, 100);
     place-items: center;
@@ -1090,14 +1126,14 @@
     border: 0;
     margin: 0;
     background: none;
-    color: var(--color-ios-primary);
+    color: var(--color-ui-primary);
     font-family: inherit;
-    font-size: var(--font-ios-body-size);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-body-weight);
-    font-weight: round(down, var(--font-ios-body-weight), 100);
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    font-variation-settings: 'wght' var(--font-ui-body-weight);
+    font-weight: round(down, var(--font-ui-body-weight), 100);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
     text-align: inherit;
     text-decoration: none;
     white-space: nowrap;
@@ -1111,7 +1147,7 @@
     &:disabled {
       --uikit-utils-cursor: attr(cursor type(<custom-ident>), not-allowed);
 
-      color: var(--color-ios-system-gray2);
+      color: var(--color-ui-system-gray2);
     }
   }
 
@@ -1121,14 +1157,14 @@
     border: 0;
     margin: 0;
     background: none;
-    color: var(--color-ios-primary);
+    color: var(--color-ui-primary);
     font-family: inherit;
-    font-size: var(--font-ios-body-size);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-body-weight);
-    font-weight: round(down, var(--font-ios-body-weight), 100);
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    font-variation-settings: 'wght' var(--font-ui-body-weight);
+    font-weight: round(down, var(--font-ui-body-weight), 100);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
     overflow-wrap: break-word;
     text-align: start;
     text-decoration: none;
@@ -1146,13 +1182,13 @@
     }
 
     &:where([data-destructive]) {
-      color: var(--color-ios-system-red);
+      color: var(--color-ui-system-red);
     }
 
     &:disabled {
       --uikit-utils-cursor: attr(cursor type(<custom-ident>), not-allowed);
 
-      color: var(--color-ios-system-gray2);
+      color: var(--color-ui-system-gray2);
     }
 
     &:focus-visible {
@@ -1174,7 +1210,7 @@
     background: none;
     background-color: var(
       --uikit-list-edit-tint,
-      var(--color-ios-system-gray)
+      var(--color-ui-system-gray)
     );
     color: var(--uikit-list-edit-text-color, #fff);
     font-family: inherit;
@@ -1327,7 +1363,7 @@
         animation-timeline: scroll(nearest inline);
         background-color: var(
           --uikit-list-action-tint,
-          var(--color-ios-system-gray)
+          var(--color-ui-system-gray)
         );
         content: '';
         filter: opacity(var(--uikit-list-action-arming, 1));
@@ -1366,7 +1402,7 @@
       white-space: nowrap;
 
       & > svg {
-        font-size: var(--font-ios-body-size);
+        font-size: var(--font-ui-body-size);
       }
     }
 
@@ -1395,7 +1431,7 @@
       animation-range: var(--uikit-list-action-reveal-from, 0)
         var(--uikit-list-action-reveal-to, 0);
       animation-timeline: scroll(nearest inline);
-      color: var(--color-ios-secondary-label);
+      color: var(--color-ui-secondary-label);
       filter: opacity(var(--uikit-list-action-arming, 1));
       font-size: 13px;
       font-variation-settings: 'wght' 510;
@@ -1423,7 +1459,7 @@
       padding-block: 8px 10px;
 
       & > [data-list-part='title'] {
-        color: var(--color-ios-label);
+        color: var(--color-ui-label);
         font-size: 22px;
         font-variation-settings: 'wght' 700;
         font-weight: round(down, 700, 100);
@@ -1437,7 +1473,7 @@
       padding-block: var(--uikit-list-nested-padding-block, 10px);
 
       & > [data-list-part='title'] {
-        color: var(--color-ios-secondary-label);
+        color: var(--color-ui-secondary-label);
         font-size: var(--uikit-list-nested-size, 17px);
         font-variation-settings: 'wght' 590;
         font-weight: round(down, 590, 100);
@@ -1450,13 +1486,13 @@
       padding-block: 5px 10px;
 
       & > [data-list-part='title'] {
-        color: var(--color-ios-label);
-        font-size: var(--font-ios-title3-size);
+        color: var(--color-ui-label);
+        font-size: var(--font-ui-title3-size);
         font-style: normal;
-        font-variation-settings: 'wght' var(--font-ios-title3-weight-emphasized);
-        font-weight: round(down, var(--font-ios-title3-weight-emphasized), 100);
-        letter-spacing: var(--font-ios-title3-tracking);
-        line-height: var(--font-ios-title3-line-height);
+        font-variation-settings: 'wght' var(--font-ui-title3-weight-emphasized);
+        font-weight: round(down, var(--font-ui-title3-weight-emphasized), 100);
+        letter-spacing: var(--font-ui-title3-tracking);
+        line-height: var(--font-ui-title3-line-height);
       }
     }
 
@@ -1498,7 +1534,7 @@
       margin-block-start: 2px;
     }
 
-    /* Figma “Trailing”, “_Header Trailing Accessories” */
+    /* Trailing accessories (rows' and headers') */
     &
       > :not(
         [data-list-part='supertitle'],
@@ -1515,13 +1551,13 @@
       line-height: 22px;
     }
 
-    /* Figma: 8.7px between the detail and the chevron; turned down (open),
+    /* 8.7px between the detail and the chevron; turned down (open),
        the chevron is wider: 7px apart, closed 11px */
     & > [data-list-part='detail'] + [data-list-part='disclosure'] {
       margin-inline-start: 8px;
     }
 
-    /* The box fits the glyph turned down, too (Figma: 12px) */
+    /* The box fits the glyph turned down, too */
     & > [data-list-part='disclosure'] {
       min-width: 13px;
       font-size: 19px;
@@ -1547,7 +1583,7 @@
       border-radius: 50%;
       background-color: color-mix(
         in srgb,
-        var(--color-ios-primary) 5%,
+        var(--color-ui-primary) 5%,
         transparent
       );
       margin-inline-end: -11px;
@@ -1556,13 +1592,13 @@
 
   .uikit-list-block {
     display: flow-root;
-    color: var(--color-ios-label);
-    font-size: var(--font-ios-body-size);
+    color: var(--color-ui-label);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-body-weight);
-    font-weight: round(down, var(--font-ios-body-weight), 100);
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    font-variation-settings: 'wght' var(--font-ui-body-weight);
+    font-weight: round(down, var(--font-ui-body-weight), 100);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
     margin-inline: var(--uikit-list-inset, 16px);
     padding-inline: 16px;
 
@@ -1570,7 +1606,7 @@
       border-radius: var(--uikit-list-radius, 24px);
       background-color: var(
         --uikit-list-group-background,
-        var(--color-ios-secondary-system-grouped-background)
+        var(--color-ui-secondary-system-grouped-background)
       );
       padding-block: 16px;
     }
@@ -1606,14 +1642,14 @@
     border: 0;
     margin: 0;
     background: none;
-    color: var(--color-ios-primary);
+    color: var(--color-ui-primary);
     font-family: inherit;
-    font-size: var(--font-ios-caption1-size);
+    font-size: var(--font-ui-caption1-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-caption1-weight-emphasized);
-    font-weight: round(down, var(--font-ios-caption1-weight-emphasized), 100);
-    letter-spacing: var(--font-ios-caption1-tracking);
-    line-height: var(--font-ios-caption1-line-height);
+    font-variation-settings: 'wght' var(--font-ui-caption1-weight-emphasized);
+    font-weight: round(down, var(--font-ui-caption1-weight-emphasized), 100);
+    letter-spacing: var(--font-ui-caption1-tracking);
+    line-height: var(--font-ui-caption1-line-height);
     text-align: center;
     text-decoration: none;
 
@@ -1622,5 +1658,17 @@
     @media (hover: hover) {
       cursor: var(--uikit-utils-cursor);
     }
+  }
+}
+
+@layer uikit-ish {
+  /* Dragging to select (see `select.ts`): from a checkbox, the page not
+     scrolling; while dragging, no text selected. */
+  .uikit-list-root [data-drag-to-select] {
+    touch-action: none;
+  }
+
+  .uikit-list-root[data-selecting] {
+    user-select: none;
   }
 }

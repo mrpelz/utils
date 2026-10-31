@@ -358,7 +358,7 @@ export const ProgressParts: FunctionComponent = () => (
         the line’s end (also alone), before or after the track; or in a tooltip
         at the fill’s end, always or momentary.
       </li>
-      <li>In a tooltip, iOS 26’s glass capsule (see Tooltip).</li>
+      <li>In a tooltip, a glass capsule (see Tooltip).</li>
     </ul>
     <ValuePart />
     <h3>Props</h3>

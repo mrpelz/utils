@@ -7,11 +7,11 @@ import { Component } from '../../tooling/frame/component.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import {
-  dynamicTypeSizes,
   propOptionsContent,
   propOptionsMatrix,
   propOptionsSizes,
   propOptionsTypography,
+  textSizes,
   textStyles,
 } from './props.js';
 
@@ -51,14 +51,14 @@ const variants = [
   { emphasized: true, italic: true, name: 'emphasized italic' },
 ] as const;
 
-// Figma “Text styles”: the variants (in a label color, at a Dynamic Type
-// size, both as controls).
+// The text styles' variants (in a label color, at a text size, both as
+// controls).
 export const TypographyMatrixDemo: FunctionComponent = () => {
   const id = 'typography-matrix';
 
   const [externalControl] = useProvidedState(id);
 
-  const [control, { color, dynamicTypeSize }, stateControl] = usePropControl(
+  const [control, { color, textSize }, stateControl] = usePropControl(
     propOptionsMatrix,
     { external: externalControl, isOpen: true, title: 'matrix' },
   );
@@ -87,9 +87,9 @@ export const TypographyMatrixDemo: FunctionComponent = () => {
               <Typography
                 key={variant.name}
                 color={color}
-                dynamicTypeSize={dynamicTypeSize}
                 emphasized={variant.emphasized}
                 italic={variant.italic}
+                textSize={textSize}
                 textStyle={textStyle}
               >
                 {name}
@@ -102,7 +102,7 @@ export const TypographyMatrixDemo: FunctionComponent = () => {
   );
 };
 
-// Figma “Dynamic Type”: the text styles at each size (in a label color, as
+// The text styles at each text size (in a label color, as
 // a control).
 export const TypographySizesDemo: FunctionComponent = () => {
   const id = 'typography-sizes';
@@ -120,11 +120,11 @@ export const TypographySizesDemo: FunctionComponent = () => {
       controls={control}
       id={id}
       state={[stateControl]}
-      title="Typography (Dynamic Type)"
+      title="Typography (text sizes)"
     >
       <div className="typography-demo-matrix typography-demo-sizes">
         <span />
-        {dynamicTypeSizes.map((size) => (
+        {textSizes.map((size) => (
           <span
             key={size}
             className="typography-demo-heading"
@@ -135,11 +135,11 @@ export const TypographySizesDemo: FunctionComponent = () => {
         {textStyles.map(([textStyle, name]) => (
           <Fragment key={textStyle}>
             <span className="typography-demo-heading">{textStyle}</span>
-            {dynamicTypeSizes.map((size) => (
+            {textSizes.map((size) => (
               <Typography
                 key={size}
                 color={color}
-                dynamicTypeSize={size}
+                textSize={size}
                 textStyle={textStyle}
               >
                 {name}

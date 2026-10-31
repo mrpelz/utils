@@ -50,7 +50,7 @@
     );
     mix-blend-mode: var(--uikit-symbol-blend);
     scale: var(--uikit-symbol-scale);
-    transition: scale var(--glass-ios-lens-duration);
+    transition: scale var(--glass-ui-lens-duration);
 
     &:has(> .uikit-symbol) {
       mix-blend-mode: normal;
@@ -64,7 +64,7 @@
       opacity: calc(
         var(--uikit-glass-fade, 1) * var(--uikit-tab-bar-tab-fade, 1)
       );
-      transition-duration: var(--glass-ios-lens-duration);
+      transition-duration: var(--glass-ui-lens-duration);
       transition-property: opacity, scale;
     }
 
@@ -90,14 +90,14 @@
     mix-blend-mode: var(--uikit-glass-content-blend);
     scale: var(--uikit-tab-bar-content-scale, none);
     text-align: center;
-    transition-duration: var(--glass-ios-lens-duration);
+    transition-duration: var(--glass-ui-lens-duration);
     transition-property: scale, width, height, opacity;
 
     & > * {
       opacity: calc(
         var(--uikit-glass-fade, 1) * var(--uikit-tab-bar-tab-fade, 1)
       );
-      transition: opacity var(--glass-ios-lens-duration);
+      transition: opacity var(--glass-ui-lens-duration);
     }
 
     [data-active] > & {
@@ -149,7 +149,7 @@
 
     & > * {
       opacity: var(--uikit-glass-fade, 1);
-      transition: opacity var(--glass-ios-lens-duration);
+      transition: opacity var(--glass-ui-lens-duration);
     }
   }
 
@@ -165,14 +165,14 @@
     opacity: var(--uikit-tab-bar-pressed, 0);
     pointer-events: none;
     scale: calc(
-      1 + (var(--glass-ios-lens-scale) - 1) * var(--uikit-tab-bar-pressed, 0)
+      1 + (var(--glass-ui-lens-scale) - 1) * var(--uikit-tab-bar-pressed, 0)
     );
     transition-duration:
-      var(--uikit-tab-bar-lens-move-duration, var(--glass-ios-lens-duration)),
-      var(--uikit-tab-bar-lens-move-duration, var(--glass-ios-lens-duration)),
-      var(--uikit-tab-bar-lens-size-duration, var(--glass-ios-lens-duration)),
-      var(--uikit-tab-bar-lens-size-duration, var(--glass-ios-lens-duration)),
-      var(--glass-ios-lens-duration), var(--glass-ios-lens-duration);
+      var(--uikit-tab-bar-lens-move-duration, var(--glass-ui-lens-duration)),
+      var(--uikit-tab-bar-lens-move-duration, var(--glass-ui-lens-duration)),
+      var(--uikit-tab-bar-lens-size-duration, var(--glass-ui-lens-duration)),
+      var(--uikit-tab-bar-lens-size-duration, var(--glass-ui-lens-duration)),
+      var(--glass-ui-lens-duration), var(--glass-ui-lens-duration);
     transition-property:
       --uikit-tab-bar-lens-x, --uikit-tab-bar-lens-y,
       --uikit-tab-bar-lens-width, --uikit-tab-bar-lens-height, opacity, scale;
@@ -217,11 +217,11 @@
       );
       transform: scale(
         calc(
-          1 + (var(--glass-ios-lens-scale) - 1) *
+          1 + (var(--glass-ui-lens-scale) - 1) *
             var(--uikit-tab-bar-pressed, 0)
         )
       );
-      transition-duration: var(--glass-ios-lens-duration);
+      transition-duration: var(--glass-ui-lens-duration);
     }
   }
 
@@ -251,7 +251,7 @@
     gap: var(--uikit-tab-bar-tab-gap);
     margin-inline-end: var(--uikit-tab-bar-tab-overlap);
     text-align: center;
-    transition-duration: var(--glass-ios-lens-duration);
+    transition-duration: var(--glass-ui-lens-duration);
     transition-property:
       width, min-width, min-height, padding, margin, gap, visibility;
     -webkit-user-select: none;
@@ -267,10 +267,10 @@
       opacity: calc(
         var(--uikit-glass-fade, 1) * var(--uikit-tab-bar-tab-fade, 1)
       );
-      transition: opacity var(--glass-ios-lens-duration);
+      transition: opacity var(--glass-ui-lens-duration);
     }
 
-    /* Symbol only: a circle (iPhone) or a capsule hugging it (iPad) */
+    /* Symbol only: a circle (compact) or a capsule hugging it (regular) */
     &:not(:has(> [data-tab-bar-part='label'])) {
       width: auto;
       flex-shrink: 0;
@@ -292,7 +292,7 @@
       margin-inline-end: 0;
     }
 
-    /* Symbol only (Figma iPad: sidebar and search, 50×36) */
+    /* Symbol only (regular: 50×36) */
     &&&:where([data-shape='capsule']):not(:has(> [data-tab-bar-part='label'])) {
       padding: var(--uikit-tab-bar-symbol-padding);
     }
@@ -318,7 +318,7 @@
     }
 
     &[data-active] {
-      color: var(--uikit-tab-bar-active-color, var(--color-ios-primary));
+      color: var(--uikit-tab-bar-active-color, var(--color-ui-primary));
     }
 
     &[data-disabled] {
@@ -390,12 +390,12 @@
       --uikit-tab-bar-collapsed-label-extent: auto;
       --uikit-tab-bar-collapsed-label-opacity: 1;
       --uikit-tab-bar-collapsed-symbol: flex;
-      --uikit-tab-bar-collapsed-icon-size: var(--font-ios-subheadline-size);
+      --uikit-tab-bar-collapsed-icon-size: var(--font-ui-subheadline-size);
       --uikit-tab-bar-collapsed-icon-line-height: var(
-        --font-ios-subheadline-line-height
+        --font-ui-subheadline-line-height
       );
       --uikit-tab-bar-collapsed-icon-letter-spacing: var(
-        --font-ios-subheadline-tracking
+        --font-ui-subheadline-tracking
       );
     }
 
@@ -438,18 +438,19 @@
     box-sizing: border-box;
     border-radius: 100px;
     color: var(--uikit-glass-content);
-    font-size: var(--font-ios-subheadline-size);
-    letter-spacing: var(--font-ios-subheadline-tracking);
-    line-height: var(--font-ios-subheadline-line-height);
-    transition-duration: var(--glass-ios-lens-duration);
-    transition-property: visibility;
+    font-size: var(--font-ui-subheadline-size);
+    letter-spacing: var(--font-ui-subheadline-tracking);
+    line-height: var(--font-ui-subheadline-line-height);
 
-    /* Hidden in the state it isn't shown in (see visibleIn), fading. */
+    /* Hidden in the state it isn't shown in (see visibleIn), fading (shown
+       at once: e.g. its field focused right away). */
     &[data-visible-in='expanded'][data-collapsed],
     &[data-visible-in='collapsed']:not([data-collapsed]) {
       --uikit-glass-fade: 0;
 
       pointer-events: none;
+      transition-duration: var(--glass-ui-lens-duration);
+      transition-property: visibility;
       visibility: hidden;
     }
 
@@ -467,14 +468,43 @@
     align-items: center;
     justify-content: flex-start;
 
-    /* (Figma: 32px below, within the home indicator's 34px: the safe area,
-       kept clear by its anchor, see Viewport; none of its own.) */
-    padding: 16px 32px 0;
+    /* Its sides clear of the screen's rounded corners (32px); pushed up by
+       the keyboard (see Viewport.BlockEnd's `keyboard`), away from them, its
+       groups' glass as wide as a toolbar's (16px from the sides, as the
+       keyboard's own bar: the glass extends 4px beyond), collapsed too. */
+    --uikit-tab-bar-side: 32px;
+
+    /* (None below: the safe area, kept clear by its anchor, see Viewport.) */
+    padding: 16px var(--uikit-tab-bar-side) 0;
     gap: var(--uikit-tab-bar-group-gap, 16px);
     interpolate-size: allow-keywords;
     touch-action: none;
-    transition-duration: var(--glass-ios-lens-duration);
+    transition-duration: var(--glass-ui-lens-duration);
     transition-property: padding, gap;
+
+    /* (Any keyboard height: 20px, collapsed without its inset; as the
+       padding transitions.) */
+    [data-keyboard='push'] > & {
+      --uikit-tab-bar-side: calc(
+        32px -
+          clamp(0px, var(--uikit-viewport-keyboard-inset, 0px) * 1000, 12px)
+      );
+      --uikit-tab-bar-collapsed-side-inset: calc(
+        var(--uikit-tab-bar-collapsed-inset) -
+          clamp(
+            0px,
+            var(--uikit-viewport-keyboard-inset, 0px) * 1000,
+            var(--uikit-tab-bar-collapsed-inset)
+          )
+      );
+    }
+
+    /* A single tab: nothing to choose, no selection (nor the active
+       tab's tint; pressed, its lens all the same). */
+    &[data-single-tab] {
+      --uikit-tab-bar-selection-shown: 0;
+      --uikit-tab-bar-active-color: currentcolor;
+    }
 
     /* Room for its accessory above the groups (see placeAccessory), in the
        bar's layout: its height and gap above the groups (at the padding),
@@ -496,14 +526,14 @@
         )
         1 0;
       content: '';
-      transition: margin var(--glass-ios-lens-duration);
+      transition: margin var(--glass-ui-lens-duration);
     }
 
     &[data-wide]::before,
     &[data-wide]::after {
       transition:
-        margin var(--glass-ios-lens-duration),
-        flex-grow var(--glass-ios-lens-duration);
+        margin var(--glass-ui-lens-duration),
+        flex-grow var(--glass-ui-lens-duration);
     }
 
     &::before {
@@ -571,30 +601,30 @@
       --uikit-tab-bar-pressed-group-scale: 1.065;
       --uikit-tab-bar-collapsed-tab-height: 36px;
       --uikit-tab-bar-collapsed-inset: 0px;
-      --uikit-tab-bar-icon-size: var(--font-ios-subheadline-size);
-      --uikit-tab-bar-icon-line-height: var(--font-ios-subheadline-line-height);
-      --uikit-tab-bar-icon-letter-spacing: var(--font-ios-subheadline-tracking);
+      --uikit-tab-bar-icon-size: var(--font-ui-subheadline-size);
+      --uikit-tab-bar-icon-line-height: var(--font-ui-subheadline-line-height);
+      --uikit-tab-bar-icon-letter-spacing: var(--font-ui-subheadline-tracking);
       --uikit-tab-bar-icon-weight: 510;
       --uikit-tab-bar-icon-active-weight: 700;
-      --uikit-tab-bar-label-size: var(--font-ios-subheadline-size);
+      --uikit-tab-bar-label-size: var(--font-ui-subheadline-size);
       --uikit-tab-bar-label-active-size: 17px;
       --uikit-tab-bar-label-line-height: var(
-        --font-ios-subheadline-line-height
+        --font-ui-subheadline-line-height
       );
       --uikit-tab-bar-label-letter-spacing: var(
-        --font-ios-subheadline-tracking
+        --font-ui-subheadline-tracking
       );
 
       /* Selected content in the regular size: the tint, or white on dim
          glass. */
-      --uikit-tab-bar-active-color: light-dark(var(--color-ios-primary), #fff);
+      --uikit-tab-bar-active-color: light-dark(var(--color-ui-primary), #fff);
     }
 
     &:where([data-size='regular']):where(
         [data-glass-context='bright'],
         [data-glass-context='background-bright']
       ) {
-      --uikit-tab-bar-active-color: var(--color-ios-primary);
+      --uikit-tab-bar-active-color: var(--color-ui-primary);
     }
 
     &:where([data-size='regular']):where(
@@ -616,17 +646,23 @@
       --uikit-tab-bar-label-min-width: 0;
 
       padding: calc(16px + var(--uikit-tab-bar-collapsed-inset))
-        calc(32px + var(--uikit-tab-bar-collapsed-inset))
+        calc(
+          var(--uikit-tab-bar-side) +
+            var(
+              --uikit-tab-bar-collapsed-side-inset,
+              var(--uikit-tab-bar-collapsed-inset)
+            )
+        )
         var(--uikit-tab-bar-collapsed-inset);
 
       && > div > [data-tab-bar-part='tabs'] > [role='tab'] {
-        --uikit-tab-bar-label-size: var(--font-ios-subheadline-size);
-        --uikit-tab-bar-label-active-size: var(--font-ios-subheadline-size);
+        --uikit-tab-bar-label-size: var(--font-ui-subheadline-size);
+        --uikit-tab-bar-label-active-size: var(--font-ui-subheadline-size);
         --uikit-tab-bar-label-line-height: var(
-          --font-ios-subheadline-line-height
+          --font-ui-subheadline-line-height
         );
         --uikit-tab-bar-label-letter-spacing: var(
-          --font-ios-subheadline-tracking
+          --font-ui-subheadline-tracking
         );
 
         width: var(--uikit-tab-bar-collapsed-width);
@@ -742,12 +778,12 @@
       --uikit-tab-bar-collapsed-label-extent: auto;
       --uikit-tab-bar-collapsed-label-opacity: 1;
       --uikit-tab-bar-collapsed-symbol: flex;
-      --uikit-tab-bar-collapsed-icon-size: var(--font-ios-subheadline-size);
+      --uikit-tab-bar-collapsed-icon-size: var(--font-ui-subheadline-size);
       --uikit-tab-bar-collapsed-icon-line-height: var(
-        --font-ios-subheadline-line-height
+        --font-ui-subheadline-line-height
       );
       --uikit-tab-bar-collapsed-icon-letter-spacing: var(
-        --font-ios-subheadline-tracking
+        --font-ui-subheadline-tracking
       );
     }
   }
@@ -768,7 +804,7 @@
     border: 0 solid transparent;
     grid-template-columns: minmax(0, max-content);
     margin-inline: 0;
-    transition-duration: var(--glass-ios-lens-duration);
+    transition-duration: var(--glass-ui-lens-duration);
     transition-property:
       min-width, min-height, margin, border-width, visibility;
 
@@ -780,7 +816,7 @@
     }
 
     /* Under the lens, the group grows: its glass and content scale up around
-       its center (measured on iOS 26: iPhone 1.05, iPad 1.065). Scaled layer
+       its center (compact 1.05, regular 1.065). Scaled layer
        by layer, so nothing isolates their blending (see pressGroup). */
     &[data-pressed] {
       --uikit-glass-scale: var(--uikit-tab-bar-pressed-group-scale);
@@ -890,12 +926,12 @@
       --uikit-tab-bar-collapsed-label-extent: auto;
       --uikit-tab-bar-collapsed-label-opacity: 1;
       --uikit-tab-bar-collapsed-symbol: flex;
-      --uikit-tab-bar-collapsed-icon-size: var(--font-ios-subheadline-size);
+      --uikit-tab-bar-collapsed-icon-size: var(--font-ui-subheadline-size);
       --uikit-tab-bar-collapsed-icon-line-height: var(
-        --font-ios-subheadline-line-height
+        --font-ui-subheadline-line-height
       );
       --uikit-tab-bar-collapsed-icon-letter-spacing: var(
-        --font-ios-subheadline-tracking
+        --font-ui-subheadline-tracking
       );
     }
 
@@ -908,7 +944,7 @@
     &&&&&&:where([data-selection-shown])
       > [data-tab-bar-part='tabs']
       > [role='tab'][data-active] {
-      color: var(--uikit-tab-bar-active-color, var(--color-ios-primary));
+      color: var(--uikit-tab-bar-active-color, var(--color-ui-primary));
     }
   }
 }

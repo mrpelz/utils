@@ -4,7 +4,7 @@
     display: flex;
     box-sizing: border-box;
     flex-direction: column;
-    color: var(--color-ios-label);
+    color: var(--color-ui-label);
   }
 
   .uikit-color-picker-grid {
@@ -66,24 +66,61 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    margin-block-end: 16px;
+
+    /* Four channels: closer, as high as the grid all the same. */
+    &[data-model='cmyk'] {
+      gap: 12px;
+    }
   }
 
-  .uikit-color-picker-opacity-title {
-    font-size: 15px;
+  /* A channel's row (see `ChannelRow`): its title above its slider and
+     value. Lifted above the keyboard (see `Viewport.KeyboardAccessory`),
+     only then: a list group's card around it (an inset grouped one's: its
+     background, 24px corners, outlined), its content 12px in (as high as
+     before: nothing around it moves; as wide: the card's sides where the
+     panel's content's are). */
+  .uikit-color-picker-channel {
+    --uikit-viewport-keyboard-accessory-background: var(
+      --color-ui-secondary-system-grouped-background
+    );
+
+    border-radius: 24px;
+    transition:
+      translate var(--uikit-viewport-keyboard-transition),
+      background-color var(--uikit-viewport-keyboard-transition),
+      box-shadow var(--uikit-viewport-keyboard-transition),
+      padding var(--uikit-viewport-keyboard-transition),
+      margin var(--uikit-viewport-keyboard-transition);
+
+    &[data-lifted] {
+      padding: 12px;
+      box-shadow: inset 0 0 0 1px var(--color-ui-list-separator);
+      margin-block: -12px;
+    }
+  }
+
+  .uikit-color-picker-channel-title {
+    color: var(--color-ui-secondary-label);
+    font-size: 13px;
     font-variation-settings: 'wght' 590;
     font-weight: round(down, 590, 100);
-    line-height: 20px;
+    line-height: 18px;
+    text-transform: uppercase;
   }
 
-  .uikit-color-picker-opacity-row {
+  .uikit-color-picker-channel-row {
     display: flex;
     align-items: center;
-    padding: 3px 0 22px;
     gap: 11px;
+    padding-block-start: 6px;
   }
 
-  .uikit-color-picker-opacity-control {
+  /* The opacity's, 22px above the color. */
+  .uikit-color-picker-opacity {
+    padding-block-end: 22px;
+  }
+
+  .uikit-color-picker-channel-control {
     position: relative;
     display: flex;
     height: 40px;
@@ -92,21 +129,48 @@
     align-items: center;
     padding: 2px 20px;
     border-radius: 100px;
-    background-image: conic-gradient(#ccc 25%, #fff 0 50%, #ccc 0 75%, #fff 0);
-    background-size: 12px 12px;
     cursor: pointer;
     touch-action: pan-y;
 
+    /* Translucent (the opacity's): a checkerboard under it. */
+    &[data-checkered] {
+      background-image: conic-gradient(
+        #ccc 25%,
+        #fff 0 50%,
+        #ccc 0 75%,
+        #fff 0
+      );
+      background-size: 12px 12px;
+    }
+
+    /* The gradient (its stops from where the knob's center is at its least
+       to where it is at its most, see `trackStops`), a hole in it at the knob (as large; centered on its
+       value, within the padding), so a translucent knob shows over the
+       checkerboard alone. */
     &::before {
       position: absolute;
       border-radius: inherit;
       background: linear-gradient(
         to right,
-        transparent 12%,
-        var(--uikit-color-picker-color-opaque) 88%
+        var(--uikit-color-picker-channel-stops)
       );
       content: '';
       inset: 0;
+      mask-image: radial-gradient(
+        circle 18px at
+          calc(
+            20px + (100% - 40px) *
+              var(--uikit-color-picker-channel-position, 1)
+          )
+          50%,
+        transparent 100%,
+        #000 100%
+      );
+    }
+
+    /* Opaque, no hole: its knob covers it. */
+    &:not([data-checkered])::before {
+      mask-image: none;
     }
 
     & > div {
@@ -116,22 +180,25 @@
     }
   }
 
-  .uikit-color-picker-opacity-thumb {
+  .uikit-color-picker-channel-thumb {
     width: 36px;
     height: 36px;
     box-sizing: border-box;
     border: 3px solid #fff;
     border-radius: 50%;
-    background-color: var(--uikit-color-picker-color-opaque);
+
+    /* The color (translucent: over the track's checkerboard, its gradient
+       cut out here, see above). */
+    background-color: var(--uikit-color-picker-channel-thumb);
     box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
     outline-offset: 2px;
 
     &:has(:focus-visible) {
-      outline: 2px solid var(--color-ios-primary);
+      outline: 2px solid var(--color-ui-primary);
     }
   }
 
-  .uikit-color-picker-percentage-field {
+  .uikit-color-picker-channel-field {
     display: flex;
     width: 75px;
     height: 40px;
@@ -141,18 +208,18 @@
     justify-content: center;
     padding: 9px 14px;
     border-radius: 8px;
-    background-color: var(--color-ios-system-fill);
+    background-color: var(--color-ui-system-fill);
     cursor: text;
-    font-size: var(--font-ios-body-size);
+    font-size: var(--font-ui-body-size);
     font-style: normal;
     font-variant-numeric: tabular-nums;
-    font-variation-settings: 'wght' var(--font-ios-body-weight-emphasized);
-    font-weight: round(down, var(--font-ios-body-weight-emphasized), 100);
-    letter-spacing: var(--font-ios-body-tracking);
-    line-height: var(--font-ios-body-line-height);
+    font-variation-settings: 'wght' var(--font-ui-body-weight-emphasized);
+    font-weight: round(down, var(--font-ui-body-weight-emphasized), 100);
+    letter-spacing: var(--font-ui-body-tracking);
+    line-height: var(--font-ui-body-line-height);
 
     &:has(:focus-visible) {
-      outline: 2px solid var(--color-ios-primary);
+      outline: 2px solid var(--color-ui-primary);
       outline-offset: 2px;
     }
 
@@ -183,8 +250,10 @@
     height: 82px;
     flex: none;
     border-radius: 18px;
-    background-image: conic-gradient(#ccc 25%, #fff 0 50%, #ccc 0 75%, #fff 0);
-    background-size: 12px 12px;
+
+    /* Translucent, over black (its upper left) and white (its lower
+       right). */
+    background-image: linear-gradient(to bottom right, #000 50%, #fff 50%);
     box-shadow: inset 0 0 0 100px var(--uikit-color-picker-color);
   }
 
@@ -195,6 +264,8 @@
     flex-direction: column;
     align-items: center;
     gap: 12px;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   .uikit-color-picker-saved-pages {
@@ -215,21 +286,23 @@
     width: 100%;
     min-height: 82px;
     flex: none;
-    gap: 22px 25px;
-    grid-template-columns: repeat(5, 30px);
+
+    /* Fitting its width: the gaps down to 6px, then the colors smaller. */
+    gap: 22px 6px;
+    grid-template-columns: repeat(5, minmax(0, 30px));
     place-content: start space-between;
     scroll-snap-align: start;
     scroll-snap-stop: always;
 
     & > button {
       position: relative;
-      width: 30px;
-      height: 30px;
+      width: 100%;
       padding: 0;
       border: 0;
       border-radius: 50%;
       margin: 0;
-      color: var(--color-ios-label);
+      aspect-ratio: 1;
+      color: var(--color-ui-label);
       cursor: pointer;
       outline-offset: 2px;
       -webkit-touch-callout: none;
@@ -245,7 +318,7 @@
 
     & > [data-add] {
       display: grid;
-      background-color: var(--color-ios-system-fill);
+      background-color: var(--color-ui-system-fill);
       font-size: 17px;
       font-variation-settings: 'wght' 510;
       font-weight: round(down, 510, 100);
@@ -268,19 +341,32 @@
       margin-block-end: 24px;
     }
 
-    & > [data-color-picker-view] {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+  }
+
+  /* A mode's view: as high as the grid (a spacer of its aspect ratio, in
+     the same cell), its content centered; higher only where its content
+     needs it (e.g. a narrow panel's sliders). */
+  .uikit-color-picker-view {
+    display: grid;
+    margin-block-end: 16px;
+
+    &::before {
+      align-self: start;
       aspect-ratio: 370 / 300;
-      margin-block-end: 16px;
+      content: '';
+      grid-area: 1 / 1;
+    }
+
+    & > * {
+      align-self: center;
+      grid-area: 1 / 1;
     }
   }
 
   .uikit-color-picker-header {
     padding: 16px 0 10px;
 
-    /* A toolbar in it: Figma's 44px row, its padding the header's (not a
+    /* A toolbar in it: a 44px row, its padding the header's (not a
        bar's). */
 
     /* (Over the bar's own: its placement's padding and height.) */
@@ -341,7 +427,7 @@
     /* The color (translucent: over a checkerboard, as the panel's). */
     &[data-color]::after {
       position: absolute;
-      border: 2px solid var(--color-ios-system-background);
+      border: 2px solid var(--color-ui-system-background);
       border-radius: 50%;
       background:
         linear-gradient(

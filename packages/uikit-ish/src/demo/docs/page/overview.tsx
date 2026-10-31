@@ -43,7 +43,7 @@ const LiveView: FunctionComponent = () => {
       state={[stateContent, stateRoot]}
       title="Page"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -96,14 +96,13 @@ export const PageOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        What a screen shows (UIKit: a view controller’s root view): its
-        content’s scroll container, filling its place, on the page background.
+        What a screen shows: its content’s scroll container, filling its place,
+        on the page background.
       </li>
       <li>
         Under a <a href="header">Header</a>’s bar (its large title at its
-        start), then lists or other content; <code>grouped</code> (UIKit’s
-        grouped background) for grouped lists, <code>plain</code> for plain
-        ones.
+        start), then lists or other content; <code>grouped</code> (the grouped
+        background) for grouped lists, <code>plain</code> for plain ones.
       </li>
       <li>After Framework7’s pages; no Base UI component.</li>
     </ul>
@@ -129,7 +128,12 @@ export const PageOverview: FunctionComponent = () => (
           part="Viewport.Padding"
         />{' '}
         at its start; one at its end, above a bottom bar or the screen’s edge),
-        its scroll the bar’s edge effect’s and its large title’s timeline.
+        its scroll followed by the bar’s edge effect (a scroller, see{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Anchor"
+        />
+        ).
       </li>
       <li>
         Its content’s ends spaced by those paddings (the library’s content

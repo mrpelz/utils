@@ -1,8 +1,6 @@
 import '../toolbar/style.css';
 
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfLocationFill } from '@bradleyhodges/sfsymbols/sfLocationFill';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -26,6 +24,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfEllipsis, sfLocationFill } from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { names } from '../viewport/content.js';
 import { propOptionsContentAnchor } from './props.js';
@@ -102,12 +101,12 @@ const favorites = names.filter((_, index) => index % 4 === 0);
 
 // Recent calls (as Phone's): name, kind, missed.
 const calls = [
-  ['Kate Bell', 'mobile', false],
-  ['Daniel Higgins', 'home', true],
-  ['Anna Haro', 'mobile', true],
-  ['John Appleseed', 'work', false],
-  ['Hank Zakroff', 'mobile', false],
-  ['David Taylor', 'mobile', true],
+  ['Kate Brown', 'mobile', false],
+  ['Daniel Hughes', 'home', true],
+  ['Anna Hall', 'mobile', true],
+  ['John Doe', 'work', false],
+  ['Hank Zimmer', 'mobile', false],
+  ['David Turner', 'mobile', true],
 ] as const;
 
 const logChange =
@@ -192,7 +191,7 @@ const InHeader: FunctionComponent = () => {
       stage="phone"
       title="Segmented in a navigation bar"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -220,7 +219,7 @@ const InHeader: FunctionComponent = () => {
                           <List.Title
                             style={
                               isMissed
-                                ? { color: 'var(--color-ios-system-red)' }
+                                ? { color: 'var(--color-ui-system-red)' }
                                 : undefined
                             }
                           >

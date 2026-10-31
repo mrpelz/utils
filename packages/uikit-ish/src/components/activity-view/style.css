@@ -38,7 +38,7 @@
   }
 
   .uikit-activity-view-title {
-    color: var(--color-ios-label);
+    color: var(--color-ui-label);
     font-size: 15px;
     font-variation-settings: 'wght' 510;
     font-weight: round(down, 510, 100);
@@ -51,23 +51,23 @@
   }
 
   .uikit-activity-view-subtitle {
-    color: var(--color-ios-secondary-label);
-    font-size: var(--font-ios-footnote-size);
+    color: var(--color-ui-secondary-label);
+    font-size: var(--font-ui-footnote-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-footnote-weight);
-    font-weight: round(down, var(--font-ios-footnote-weight), 100);
-    letter-spacing: var(--font-ios-footnote-tracking);
-    line-height: var(--font-ios-footnote-line-height);
+    font-variation-settings: 'wght' var(--font-ui-footnote-weight);
+    font-weight: round(down, var(--font-ui-footnote-weight), 100);
+    letter-spacing: var(--font-ui-footnote-tracking);
+    line-height: var(--font-ui-footnote-line-height);
   }
 
   .uikit-activity-view-message {
-    color: var(--color-ios-secondary-label);
-    font-size: var(--font-ios-footnote-size);
+    color: var(--color-ui-secondary-label);
+    font-size: var(--font-ui-footnote-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ios-footnote-weight);
-    font-weight: round(down, var(--font-ios-footnote-weight), 100);
-    letter-spacing: var(--font-ios-footnote-tracking);
-    line-height: var(--font-ios-footnote-line-height);
+    font-variation-settings: 'wght' var(--font-ui-footnote-weight);
+    font-weight: round(down, var(--font-ui-footnote-weight), 100);
+    letter-spacing: var(--font-ui-footnote-tracking);
+    line-height: var(--font-ui-footnote-line-height);
   }
 
   .uikit-activity-view-row {
@@ -98,7 +98,7 @@
   }
 
   .uikit-activity-view-count {
-    color: var(--color-ios-secondary-label);
+    color: var(--color-ui-secondary-label);
     font-size: 12px;
     letter-spacing: 0.06px;
     line-height: 15px;
@@ -109,7 +109,7 @@
     height: 0;
     border: 0;
     margin: 0 16px;
-    border-block-start: 0.5px solid var(--color-ios-separator);
+    border-block-start: 0.5px solid var(--color-ui-separator);
   }
 
   /* A list item: only its button laid out (in the row). */
@@ -128,7 +128,7 @@
     border: 0;
     margin: 0;
     background: none;
-    color: var(--color-ios-label);
+    color: var(--color-ui-label);
     cursor: pointer;
     font-family: inherit;
     gap: 5px;
@@ -144,7 +144,7 @@
       width: 70px;
       height: 70px;
       border-radius: 50%;
-      background-color: var(--color-ios-tertiary-system-fill);
+      background-color: var(--color-ui-tertiary-system-fill);
       font-size: 25px;
       font-variation-settings: 'wght' 300;
       font-weight: round(down, 300, 100);
@@ -159,11 +159,11 @@
       display: -webkit-box;
       overflow: hidden;
       -webkit-box-orient: vertical;
-      font-size: var(--font-ios-footnote-size);
+      font-size: var(--font-ui-footnote-size);
       font-style: normal;
-      font-variation-settings: 'wght' var(--font-ios-footnote-weight);
-      font-weight: round(down, var(--font-ios-footnote-weight), 100);
-      letter-spacing: var(--font-ios-footnote-tracking);
+      font-variation-settings: 'wght' var(--font-ui-footnote-weight);
+      font-weight: round(down, var(--font-ui-footnote-weight), 100);
+      letter-spacing: var(--font-ui-footnote-tracking);
       -webkit-line-clamp: 2;
       line-height: 15px;
     }

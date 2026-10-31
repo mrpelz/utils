@@ -1,7 +1,5 @@
 import './style.css';
 
-import { sfArrowUp } from '@bradleyhodges/sfsymbols/sfArrowUp';
-import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -16,11 +14,11 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { sfArrowUp, sfXmark } from '../../tooling/icons.js';
 import { getPropOptionsRoot, propOptionsPopup } from './props.js';
 
 /**
- * A sheet (UIKit `UISheetPresentationController`, Figma “Sheets”, Base UI's
- * `Drawer`): a scoped task from the bottom (large or medium), a form sheet
+ * A sheet (Base UI's `Drawer`): a scoped task from the bottom (large or medium), a form sheet
  * in a regular width; swiped down to dismiss it.
  */
 export const SheetDemo: FunctionComponent = () => {

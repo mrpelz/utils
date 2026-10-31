@@ -1,6 +1,5 @@
 import './style.css';
 
-import { sfFolderFill } from '@bradleyhodges/sfsymbols/sfFolderFill';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -14,10 +13,11 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { sfFolderFill } from '../../tooling/icons.js';
 import { useLayoutControls } from './props.js';
 
 /**
- * A layout (UIKit `UISplitViewController`), regular (e.g. an iPad):
+ * A layout, regular (e.g. a tablet):
  * columns side by side (a sidebar, a list, a detail), each a page of its
  * own; the sidebar and the list resizable by their dividers (or arrow keys
  * on them).
@@ -57,7 +57,7 @@ export const LayoutDemo: FunctionComponent = () => {
       state={state}
       title="Layout"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root {...propsRoot}>
           <Layout.Column
             key={keySidebar}

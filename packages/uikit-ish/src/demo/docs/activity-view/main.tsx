@@ -1,16 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfBook } from '@bradleyhodges/sfsymbols/sfBook';
-import { sfChevronRight } from '@bradleyhodges/sfsymbols/sfChevronRight';
-import { sfDocumentOnDocument } from '@bradleyhodges/sfsymbols/sfDocumentOnDocument';
-import { sfEyeglasses } from '@bradleyhodges/sfsymbols/sfEyeglasses';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfPencilTipCropCircle } from '@bradleyhodges/sfsymbols/sfPencilTipCropCircle';
-import { sfPerson2Fill } from '@bradleyhodges/sfsymbols/sfPerson2Fill';
-import { sfPlusSquare } from '@bradleyhodges/sfsymbols/sfPlusSquare';
-import { sfPrinter } from '@bradleyhodges/sfsymbols/sfPrinter';
-import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent } from 'react';
 
 import {
@@ -27,13 +17,24 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import {
+  sfBook,
+  sfChevronRight,
+  sfDocumentOnDocument,
+  sfEyeglasses,
+  sfHeart,
+  sfPencilTipCropCircle,
+  sfPerson2Fill,
+  sfPlusSquare,
+  sfPrinter,
+  sfXmark,
+} from '../../tooling/icons.js';
 import { photo } from '../avatar/props.js';
 import { propOptionsContent } from './props.js';
 
 /**
- * An activity view (UIKit `UIActivityViewController`, Figma “Activity
- * Views”): what's shared, people to share with, actions; in a sheet
- * (iPhone).
+ * An activity view: what's shared, people to share with, actions; in a
+ * sheet (compact).
  */
 export const ActivityViewDemo: FunctionComponent = () => {
   const id = 'activity-view';
@@ -324,7 +325,7 @@ export const ActivityViewDemo: FunctionComponent = () => {
   );
 };
 
-/** The activity view in a popover (iPad). */
+/** The activity view in a popover (regular). */
 export const ActivityViewPopoverDemo: FunctionComponent = () => {
   const id = 'activity-view-popover';
 

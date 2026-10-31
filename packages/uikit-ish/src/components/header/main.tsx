@@ -16,8 +16,8 @@ import {
   useState,
 } from 'react';
 
-import { cn } from '../utils/main.js';
-import { useAnchorSize } from '../viewport/main.js';
+import { cn, useForwardedRef } from '../utils/main.js';
+import { useAnchorSize, useViewportEdgeElement } from '../viewport/main.js';
 import type {
   HeaderAccessoryProps,
   HeaderContextValue,
@@ -31,12 +31,11 @@ export type {
   HeaderRootProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Toolbars”: “Toobar - Top - iPhone”,
-// Style=Large Title), with the titles' colors mapped to UIKit's label
-// colors. Behavior after Framework7's large navbar (`navbar.less`,
+// A top toolbar with a large title, the titles in the label colors.
+// Behavior after Framework7's large navbar (`navbar.less`,
 // `navbar.js`: `.navbar-large`, collapsing on scroll).
 //
-// A page's header (UIKit `UINavigationBar` with `prefersLargeTitles`): the
+// A page's header: the
 // app's top `Toolbar` (`placement="block-start"`) in a
 // `Viewport.BlockStart` (staying where it is, as the page scrolls or
 // bounces under it), and a large title in the page below it (`LargeTitle`,
@@ -49,21 +48,19 @@ export type {
 // large title scrolls under the bar, it fades out and the bar's own
 // `Toolbar.Title` fades in (scroll-driven animations, no scroll
 // listeners): without a large title, the bar's title just shows. Content
-// scrolled under the bar blurs beneath it (iOS 26's scroll edge effect, a
-// soft one: a backdrop blur, fading out downwards), whatever the page's
-// background.
+// scrolled under the bar blurs beneath it (the scroll edge effect: its
+// anchor's, see `Viewport`; its accessory, stuck, covered too).
 //
 // An accessory (`Accessory`: a search field, a segmented control) scrolls
-// with the large title, then sticks below the bar (UIKit: a search
-// controller's bar with `hidesSearchBarWhenScrolling` false), 16px from
+// with the large title, then sticks below the bar, 16px from
 // the sides, 8px above the content.
 //
-// Deviations:
-// - Pulled down, the large title doesn't grow (iOS: it scales up).
+// Also:
+// - Pulled down, the large title doesn't grow.
 // - The page's content makes room for the bar with a `Viewport.Padding`
 //   (the app's, at the page's start: as high as the bar, live); the large
 //   title and the accessory follow the bar's height too.
-// - The scroll edge effect is an approximation (Figma: none).
+// - The scroll edge effect (the anchor's) is an approximation.
 
 const HeaderContext = createContext<HeaderContextValue>({
   hasLargeTitle: false,
@@ -134,13 +131,16 @@ const LargeTitle = forwardRef<HTMLDivElement, HeaderLargeTitleProps>(
 );
 
 /**
- * What stays with the bar (a search field, a segmented control, UIKit's
- * `hidesSearchBarWhenScrolling` false): below the large title, scrolling
+ * What stays with the bar (a search field, a segmented control): below the large title, scrolling
  * with it, then sticking below the bar, the content beneath it blurred.
  */
 const Accessory = forwardRef<HTMLDivElement, HeaderAccessoryProps>(
-  ({ className, render, ...props }, ref) =>
-    useRender({
+  ({ className, render, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    // Stuck below the bar: the bar's edge effect reaching under it.
+    useViewportEdgeElement(ref, 'block-start');
+
+    return useRender({
       defaultTagName: 'div',
       props: {
         'data-header-part': 'accessory',
@@ -149,7 +149,8 @@ const Accessory = forwardRef<HTMLDivElement, HeaderAccessoryProps>(
       },
       ref,
       render,
-    }),
+    });
+  },
 );
 
 export const Header = {

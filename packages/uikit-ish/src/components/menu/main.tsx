@@ -10,6 +10,7 @@ import {
   MouseEvent as ReactMouseEvent,
   PointerEvent,
   ReactNode,
+  Ref,
   RefObject,
   useCallback,
   useContext,
@@ -28,6 +29,7 @@ import {
   positionerSide,
   useCollision,
   useForwardedRef,
+  useGrowAvoidance,
   usePortalContainer,
   useSecondaryClick,
 } from '../utils/main.js';
@@ -50,50 +52,46 @@ export type {
   TriggerProps as MenuTriggerProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Menus”: “Menu - iPhone”, “Menu - iPad -
-// Actions (and Submenus)”, “Items - iPhone/iPad”, “Section Title”,
-// “Separator”, “Quick Action”, “_Shortcuts”, Mode=Light and Dark), with the
-// destructive color mapped to `systemRed`; the “Medium” glass material and
-// the vibrant content colors are tokens in `styles.css`, used via
-// `glass/main.tsx` (`glassMedium`).
+// Menus (compact and regular): items, section titles, separators, quick
+// actions and shortcuts, light and dark, with the destructive color mapped
+// to `systemRed`; the “Medium” glass material and the vibrant content
+// colors are tokens in `styles.css`, used via `glass/main.tsx`
+// (`glassMedium`).
 //
-// Menus close when their anchor or popup leaves the viewport (UIKit: when
-// the source view scrolls away); popups taller than the space available
-// scroll (Framework7 `popover.less`: `.popover-inner`).
+// Menus close when their anchor or popup leaves the viewport; popups taller
+// than the space beside their trigger grow over it (see
+// `useGrowAvoidance`), scrolling only taller than the screen (Framework7
+// `popover.less`: `.popover-inner`).
 //
 // Symbols are in the Body (compact) and Subheadline (regular) text styles;
-// Figma's labels, subtitles, section titles, shortcuts and quick action labels
-// differ from the text styles in line height or tracking, and are kept.
+// labels, subtitles, section titles, shortcuts and quick action labels
+// differ from the text styles in line height or tracking.
 //
-// Deviations:
-// - The root's `size` (UIKit size class) switches between the iPhone
-//   (`compact`) and the iPad (`regular`) menu, for all its popups:
+// Also:
+// - The root's `size` (a size class) switches between the phone
+//   (`compact`) and the tablet (`regular`) menu, for all its popups:
 //   - `compact`: 40px items with 17px labels; submenus open over their
-//     trigger (which stays visible, its chevron turned down), covering the
-//     items below it (Figma “Submenu Open”: chevron.down). Items are inset
-//     8px from the popup's edge, as on iPad (Figma: 16px, but no highlighted
-//     items).
+//     trigger (which stays visible, its chevron turned down; without room
+//     below it, covered), covering the items below it; a press outside one
+//     closes it alone. Items are inset 8px from the popup's edge.
 //   - `regular`: 36px items with 15px labels; submenus open beside their
 //     trigger, which shows the selection while open.
-// - Popups are at least 238px wide (Figma: 238px).
+// - Popups are at least 238px wide.
 // - A checkmark column is reserved in all items of a popup containing
-//   checkbox or radio items (Figma “Menu has Toggles”).
+//   checkbox or radio items.
 // - Highlighted items and quick actions (pointer, keyboard) show the
-//   selection (Figma: one item or quick action, and the open submenu).
-// - The popup's corners are concentric with the item selections (pills,
-//   iOS 26 concentric shapes): the pill's radius plus the insets, 28px/30px
-//   (compact) and 26px/28px (regular) on the inline/block axes (Figma: 34px);
-//   quick actions 10px less (Figma: 20px).
+//   selection.
+// - The popup's corners are concentric with the item selections (pills):
+//   the pill's radius plus the insets, 28px/30px (compact) and 26px/28px
+//   (regular) on the inline/block axes; quick actions 10px less.
 // - While a compact submenu covers its parent, the parent's items but the
-//   trigger fade (as on iOS), and the submenu has no background of its own
-//   (it's on its parent's glass, whose background it would compound).
-// - Quick action symbols are 17px (compact) and 15px (regular), as rendered
-//   in the Figma PNG export (Figma CSS: 13px text in 22px and 19px boxes).
-// - The checkmark and chevrons are drawn as SVG strokes (Figma: SF Symbols
-//   glyphs 􀆅, 􀆊, 􀆈).
+//   trigger fade, and the submenu has no background of its own (it's on its
+//   parent's glass, whose background it would compound).
+// - Quick action symbols are 17px (compact) and 15px (regular).
+// - The checkmark and chevrons are drawn as SVG strokes.
 // - The popup is Framework7's popover glass (background, backdrop blur and
-//   glass effect, see `glassMedium`), not Figma's blended fills, and scales
-//   in and out as a Framework7 popover.
+//   glass effect, see `glassMedium`), and scales in and out as a Framework7
+//   popover.
 
 /** Shared by `Menu` and `EditMenu` (internal). */
 export const MenuContext = createContext<MenuContextValue>({
@@ -113,34 +111,185 @@ export const useRootActions = (
   return actionsRef ?? ownActionsRef;
 };
 
+/** Sets a (forwarded) ref, a callback or an object. */
+const assignRef = <T,>(ref: Ref<T> | undefined, value: T | null) => {
+  if (typeof ref === 'function') ref(value);
+  else if (ref) (ref as { current: T | null }).current = value;
+};
+
+/** An open submenu (see `OpenSubmenus`). */
+type OpenSubmenu = {
+  close: () => void;
+  /** Whether a press's target is in it (its popup, its trigger). */
+  contains: (target: Node) => boolean;
+};
+
+/**
+ * The open submenus a press outside closes one by one (innermost first),
+ * not the whole menu: compact ones (covering their parents), or, `all`,
+ * every one (an edit menu's; internal, see `useSubmenuOutsidePress`,
+ * `useKeepOpenInSubmenus`).
+ */
+export type OpenSubmenus = {
+  add: (submenu: OpenSubmenu) => void;
+  all: boolean;
+  /**
+   * The submenu a press outside closes (the innermost, the press outside
+   * it), decided once per press (Base UI tells each open menu of it, a
+   * mouse's press twice: its `pointerdown`, then its `mousedown`).
+   */
+  closing: (event: Event) => OpenSubmenu | undefined;
+  innermost: () => OpenSubmenu | undefined;
+  remove: (close: () => void) => void;
+};
+
+/** Whether `event` is `decided`'s press (itself, or its `mousedown`). */
+const isSamePress = (decided: Event, event: Event) =>
+  decided === event ||
+  (decided.type === 'pointerdown' &&
+    event.type === 'mousedown' &&
+    decided.target === event.target);
+
+export const createOpenSubmenus = (all = false): OpenSubmenus => {
+  let open: OpenSubmenu[] = [];
+  let decided: { event: Event; submenu?: OpenSubmenu } | undefined;
+  return {
+    add: (submenu) => {
+      open = [...open.filter(({ close }) => close !== submenu.close), submenu];
+    },
+    all,
+    closing: (event) => {
+      if (!decided || !isSamePress(decided.event, event)) {
+        const innermost = open.at(-1);
+        const { target } = event;
+        decided = {
+          event,
+          submenu:
+            innermost && target instanceof Node && !innermost.contains(target)
+              ? innermost
+              : undefined,
+        };
+      }
+      return decided.submenu;
+    },
+    innermost: () => open.at(-1),
+    remove: (close) => {
+      open = open.filter((submenu) => submenu.close !== close);
+    },
+  };
+};
+
+/** The root's open submenus (internal; Menu's, EditMenu's). */
+export const OpenSubmenusContext = createContext<OpenSubmenus | undefined>(
+  undefined,
+);
+
+/** How long after a stopped press its following events are too (ms). */
+const pressTail = 600;
+
+/**
+ * An open submenu (see `OpenSubmenus`), a press outside it (on the menus
+ * it covers, the page, or a modal menu's backdrop) closes it alone, as the
+ * pointer is released, doing nothing else: the whole press stopped and its
+ * defaults prevented (e.g. a mouse's keeping the page's selection), at the
+ * window, capturing: before Base UI's own listeners, which close menus by
+ * pointer type, iOS' taps on a backdrop differently (it sends them no
+ * mouse events), and before the page's (internal, see `Root`).
+ */
+export const useSubmenuOutsidePress = (submenus: OpenSubmenus): void => {
+  useEffect(() => {
+    // The press stopped (its pointer), and when it ended: its mouse events,
+    // touches and click follow (each browser in its order).
+    let pointerId: number | undefined;
+    let endedAt = Number.NEGATIVE_INFINITY;
+
+    const stop = (event: Event) => {
+      if (event.cancelable) event.preventDefault();
+      event.stopPropagation();
+    };
+
+    const onPointerDown = (event: globalThis.PointerEvent) => {
+      const open = submenus.innermost();
+      const { target } = event;
+      pointerId =
+        open && target instanceof Node && !open.contains(target)
+          ? event.pointerId
+          : undefined;
+      if (pointerId !== undefined) stop(event);
+    };
+
+    const onPointerUp = (event: globalThis.PointerEvent) => {
+      if (event.pointerId !== pointerId) return;
+      pointerId = undefined;
+      endedAt = event.timeStamp;
+      stop(event);
+      submenus.innermost()?.close();
+    };
+
+    const onPointerCancel = (event: globalThis.PointerEvent) => {
+      if (event.pointerId === pointerId) pointerId = undefined;
+    };
+
+    const onFollowing = (event: Event) => {
+      if (pointerId !== undefined || event.timeStamp - endedAt < pressTail) {
+        stop(event);
+      }
+    };
+
+    const listeners: [string, (event: Event) => void][] = [
+      ['pointerdown', onPointerDown as (event: Event) => void],
+      ['pointerup', onPointerUp as (event: Event) => void],
+      ['pointercancel', onPointerCancel as (event: Event) => void],
+      ...['mousedown', 'mouseup', 'click', 'touchstart', 'touchend'].map(
+        (type): [string, (event: Event) => void] => [type, onFollowing],
+      ),
+    ];
+    for (const [type, listener] of listeners) {
+      addEventListener(type, listener, { capture: true, passive: false });
+    }
+    return () => {
+      for (const [type, listener] of listeners) {
+        removeEventListener(type, listener, { capture: true });
+      }
+    };
+  }, [submenus]);
+};
+
 /**
  * A root menu's `onOpenChange`, not closing it for a press in one of its
  * submenus (in portals): Base UI tells those from presses outside by React's
  * event bubbling through portals, which Preact's portals lack, so it'd close
  * the whole menu, e.g. as a submenu's checkbox item is toggled (internal;
- * Menu's, EditMenu's).
+ * Menu's, EditMenu's). A compact submenu open, a press outside it (on its
+ * parent's items, or outside the menu) closes it alone (its trigger's own,
+ * see `useSubmenuToggle`).
  */
 export const useKeepOpenInSubmenus = (
   onOpenChange?: (
     isOpen: boolean,
     details: BaseMenu.Root.ChangeEventDetails,
   ) => void,
+  submenus?: OpenSubmenus,
 ): ((isOpen: boolean, details: BaseMenu.Root.ChangeEventDetails) => void) =>
   useCallback(
     (isOpen: boolean, details: BaseMenu.Root.ChangeEventDetails) => {
       const { event, reason } = details;
-      if (
-        !isOpen &&
-        reason === 'outside-press' &&
-        event.target instanceof Element &&
-        event.target.closest('[role="menu"]') !== null
-      ) {
-        details.cancel();
-        return;
+      const target = event.target instanceof Element ? event.target : null;
+      if (!isOpen && reason === 'outside-press' && target) {
+        const closing = submenus?.closing(event);
+        if (closing) {
+          details.cancel();
+          closing.close();
+          return;
+        }
+        if (target.closest('[role="menu"]') !== null) {
+          details.cancel();
+          return;
+        }
       }
       onOpenChange?.(isOpen, details);
     },
-    [onOpenChange],
+    [submenus, onOpenChange],
   );
 
 const Root = <Payload,>({
@@ -149,15 +298,19 @@ const Root = <Payload,>({
   ...props
 }: MenuRootProps<Payload>): ReactNode => {
   const actionsRef = useRootActions(props.actionsRef);
-  const onRootOpenChange = useKeepOpenInSubmenus(onOpenChange);
+  const [submenus] = useState(() => createOpenSubmenus());
+  useSubmenuOutsidePress(submenus);
+  const onRootOpenChange = useKeepOpenInSubmenus(onOpenChange, submenus);
 
   return (
     <MenuContext.Provider value={{ actionsRef, orientation: 'vertical', size }}>
-      <BaseMenu.Root
-        {...props}
-        actionsRef={actionsRef}
-        onOpenChange={onRootOpenChange}
-      />
+      <OpenSubmenusContext.Provider value={submenus}>
+        <BaseMenu.Root
+          {...props}
+          actionsRef={actionsRef}
+          onOpenChange={onRootOpenChange}
+        />
+      </OpenSubmenusContext.Provider>
     </MenuContext.Provider>
   );
 };
@@ -174,9 +327,14 @@ type SubmenuPress = { isOpen: boolean; pointerType: string };
  */
 type SubmenuToggle = {
   close: () => void;
+  /** Whether a press's target is in it (its popup, its trigger). */
+  contains: (target: Node) => boolean;
   /** Just opened by hovering (a click then confirms it, see below). */
   isJustHovered: () => boolean;
   press: (press: SubmenuPress) => void;
+  /** Its popup's and its trigger's elements (see `contains`). */
+  setPopup: (popup: HTMLElement | null) => void;
+  setTrigger: (trigger: HTMLElement | null) => void;
   /** The last press (once). */
   takePress: () => SubmenuPress | undefined;
 };
@@ -191,18 +349,30 @@ const SubmenuRoot = ({
   ...props
 }: BaseMenu.SubmenuRoot.Props): ReactNode => {
   const { actionsRef, orientation, size } = useContext(MenuContext);
+  const submenus = useContext(OpenSubmenusContext);
   const submenuActionsRef = useRootActions(actionsRefProp);
   // When hovering opened it (ms, the event's time base), if it did.
   const hoveredOpen = useRef<number | undefined>(undefined);
   const pressed = useRef<SubmenuPress | undefined>(undefined);
-  const toggle = useMemo(
+  const popupRef = useRef<HTMLElement | null>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const toggle = useMemo<SubmenuToggle>(
     () => ({
       close: () => submenuActionsRef.current?.close(),
+      contains: (target: Node) =>
+        (popupRef.current?.contains(target) ?? false) ||
+        (triggerRef.current?.contains(target) ?? false),
       isJustHovered: () =>
         hoveredOpen.current !== undefined &&
         performance.now() - hoveredOpen.current < hoverConfirm,
       press: (press: SubmenuPress) => {
         pressed.current = press;
+      },
+      setPopup: (popup: HTMLElement | null) => {
+        popupRef.current = popup;
+      },
+      setTrigger: (trigger: HTMLElement | null) => {
+        triggerRef.current = trigger;
       },
       takePress: () => {
         const press = pressed.current;
@@ -235,6 +405,30 @@ const SubmenuRoot = ({
               isOpen && details.reason === 'trigger-hover'
                 ? performance.now()
                 : undefined;
+            // Open, the innermost (see `OpenSubmenus`): compact ones
+            // (covering their parent), or all (an edit menu's); a press
+            // outside closes the innermost alone.
+            const isCompact = size === 'compact' && orientation === 'vertical';
+            const isTracked = submenus && (submenus.all || isCompact);
+            if (
+              isTracked &&
+              !isOpen &&
+              details.reason === 'outside-press' &&
+              submenus.closing(details.event)?.close !== toggle.close
+            ) {
+              details.cancel();
+              return;
+            }
+            if (isTracked) {
+              if (isOpen) {
+                submenus.add({
+                  close: toggle.close,
+                  contains: toggle.contains,
+                });
+              } else {
+                submenus.remove(toggle.close);
+              }
+            }
             onOpenChange?.(isOpen, details);
           }}
         />
@@ -310,6 +504,9 @@ const menuAt = (x: number, y: number) =>
 
 const pixels = (value: string) => Number.parseFloat(value) || 0;
 
+// How far (px) a finger moves before it's dragging (see `dragOverItems`).
+const dragSlop = 10;
+
 // Keeps a touch from scrolling (dragging over menus).
 const keepScroll = (event: TouchEvent) => {
   if (event.cancelable) event.preventDefault();
@@ -327,6 +524,28 @@ const keepTrustedMouse = (event: MouseEvent) => {
   event.stopPropagation();
 };
 
+/**
+ * How long (ms) a finger rests on a submenu's item before it opens (see
+ * `dragOverItems`): longer than Base UI's hover delay, so a submenu that
+ * opens on hover (regular) has by then.
+ */
+const submenuDwell = 300;
+
+/** A press's click (see `dragOverItems`). */
+const pressClick = (item: HTMLElement) => {
+  // (Not `click()`'s: Base UI takes a click without a click count for a
+  // screen reader's, highlighting a submenu's first item as it opens.)
+  item.dispatchEvent(
+    new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      detail: 1,
+      view: item.ownerDocument.defaultView,
+    }),
+  );
+};
+
 /** A menu's element scrolling its items (itself, unless it marks one). */
 const scrollerOf = (menu: HTMLElement) =>
   menu.querySelector<HTMLElement>('[data-menu-part=scroller]') ?? menu;
@@ -335,19 +554,27 @@ const scrollerOf = (menu: HTMLElement) =>
  * Drags a touch (`pointerId`) over menus' items, from `start` (if given, it
  * hovers the item there right away): the finger hovers the items as a mouse
  * would (see `hover`), so only the item under it is highlighted, and resting
- * on a submenu's item opens the submenu, to drag on into; released, the item
+ * on a submenu's item opens the submenu (by hover, or else pressed after
+ * `submenuDwell`), to drag on into; released, the item
  * there is clicked. Held near an end of a menu that scrolls (either way), the
  * finger scrolls it (as the tab bar's lens does). The touch's own clicks are
- * kept from the items (internal; Menu's trigger, EditMenu).
+ * kept from the items (internal; Menu's trigger, EditMenu). Released outside
+ * every menu after dragging (moved past `dragSlop`, or over a menu), it calls
+ * `onReleaseOutside` (e.g. closing the menu, as Base UI does for a mouse
+ * pressed on the trigger and released elsewhere).
  */
 export const dragOverItems = (
   document: Document,
   pointerId: number,
   start?: { x: number; y: number },
+  onReleaseOutside?: (x: number, y: number) => void,
 ): void => {
   let item: HTMLElement | undefined;
   // The open submenu's item the touch began on, if any (see below).
   let openAtStart: HTMLElement | undefined;
+  // Resting on a submenu's item that hover doesn't open (compact): opening
+  // it (see `submenuDwell`).
+  let dwell: ReturnType<typeof setTimeout> | undefined;
   let isFirst = true;
   const types = ['pointermove', 'pointerup', 'pointercancel'] as const;
   // The touch's boundary events, kept from Base UI as its moves are.
@@ -358,6 +585,9 @@ export const dragOverItems = (
     'pointerleave',
   ] as const;
   let finger: Finger | undefined;
+  // Where the finger first moved, and whether it has dragged since.
+  let origin: { x: number; y: number } | undefined;
+  let hasDragged = false;
   // The menu the finger was last over, which it scrolls beyond its ends.
   let menu: HTMLElement | undefined;
   document.documentElement.setAttribute(draggingAttribute, '');
@@ -371,6 +601,10 @@ export const dragOverItems = (
     if (!finger) return;
 
     menu = menuAt(finger.x, finger.y) ?? menu;
+    origin ??= { x: finger.x, y: finger.y };
+    hasDragged ||=
+      menu !== undefined ||
+      Math.hypot(finger.x - origin.x, finger.y - origin.y) > dragSlop;
     const next = menuItemAt(finger.x, finger.y);
     if (isFirst) {
       isFirst = false;
@@ -386,7 +620,15 @@ export const dragOverItems = (
       hover(item, false, finger);
     }
     item = next;
-    if (item) hover(item, true, finger);
+    clearTimeout(dwell);
+    if (!item) return;
+    hover(item, true, finger);
+    if (isSubmenuTrigger(item) && !isExpanded(item)) {
+      const rested = item;
+      dwell = setTimeout(() => {
+        if (rested === item && !isExpanded(rested)) pressClick(rested);
+      }, submenuDwell);
+    }
   };
 
   const elapsedOf = frameElapsed();
@@ -425,6 +667,22 @@ export const dragOverItems = (
     }
   });
 
+  // Released: the item there clicked; dragged out of the menus and released
+  // there, nothing chosen.
+  const release = ({ clientX: x, clientY: y }: globalThis.PointerEvent) => {
+    if (!item) {
+      if (hasDragged && !menuAt(x, y)) onReleaseOutside?.(x, y);
+      return;
+    }
+
+    // An open submenu stays open (clicking its item would close it), unless
+    // it was already open as the touch began on its item: pressed again, it
+    // closes (see `SubmenuTrigger`).
+    if (!isSubmenuTrigger(item) || !isExpanded(item) || item === openAtStart) {
+      pressClick(item);
+    }
+  };
+
   const listener = (pointerEvent: globalThis.PointerEvent) => {
     // Not the drag's own (synthetic) hovering.
     if (!pointerEvent.isTrusted) return;
@@ -452,6 +710,7 @@ export const dragOverItems = (
     }
 
     cancelAnimationFrame(frame);
+    clearTimeout(dwell);
     for (const type of [...types, ...boundaryTypes]) {
       document.removeEventListener(type, listener, { capture: true });
     }
@@ -472,15 +731,7 @@ export const dragOverItems = (
       }
     }, 500);
 
-    // An open submenu stays open (clicking its item would close it), unless
-    // it was already open as the touch began on its item: pressed again, it
-    // closes (see `SubmenuTrigger`).
-    if (
-      item &&
-      (!isSubmenuTrigger(item) || !isExpanded(item) || item === openAtStart)
-    ) {
-      item.click();
-    }
+    release(pointerEvent);
   };
 
   for (const type of [...types, ...boundaryTypes]) {
@@ -493,21 +744,30 @@ export const dragOverItems = (
 };
 
 /**
+ * Presses a menu's trigger as a mouse does (Base UI opens, or closes, its
+ * menu on a mouse down).
+ */
+const pressTrigger = (trigger: HTMLElement) => {
+  trigger.dispatchEvent(
+    new MouseEvent('mousedown', {
+      bubbles: true,
+      button: 0,
+      cancelable: true,
+      // (A press, not a screen reader's: Base UI takes a mouse down
+      // without a click count for one, highlighting the first item.)
+      detail: 1,
+      view: trigger.ownerDocument.defaultView,
+    }),
+  );
+};
+
+/**
  * Opens a menu by its trigger (`trigger`) as Base UI does on a mouse down;
  * a touch (`pointerId`) then drags over its items (see `dragOverItems`).
  */
 const openByTrigger = (trigger: HTMLElement, pointerId?: number) => {
   const document = trigger.ownerDocument;
-  if (trigger.getAttribute('aria-expanded') !== 'true') {
-    trigger.dispatchEvent(
-      new MouseEvent('mousedown', {
-        bubbles: true,
-        button: 0,
-        cancelable: true,
-        view: document.defaultView,
-      }),
-    );
-  }
+  if (trigger.getAttribute('aria-expanded') !== 'true') pressTrigger(trigger);
   if (pointerId === undefined) return;
 
   // Touch captures the pointer to the trigger; the menu's items are
@@ -515,7 +775,11 @@ const openByTrigger = (trigger: HTMLElement, pointerId?: number) => {
   if (trigger.hasPointerCapture(pointerId)) {
     trigger.releasePointerCapture(pointerId);
   }
-  dragOverItems(document, pointerId);
+  // Dragged out and released elsewhere (also back on the trigger): closed,
+  // as Base UI closes it for a mouse.
+  dragOverItems(document, pointerId, undefined, () => {
+    if (trigger.getAttribute('aria-expanded') === 'true') pressTrigger(trigger);
+  });
 };
 
 /** Opening by a secondary click: the trigger's own mouse down (internal). */
@@ -523,7 +787,7 @@ let isOpeningBySecondaryClick = false;
 
 /**
  * Opens the menu as Base UI's trigger does, but on touch already on touch
- * down, as on iOS; dragging on, the item under the finger is highlighted
+ * down; dragging on, the item under the finger is highlighted
  * and chosen where it's released, as Base UI does for the mouse (pressing
  * the trigger, releasing on an item): the finger hovers the items as a
  * mouse would, so only the item under it is highlighted, and resting on a
@@ -534,6 +798,10 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
   ({ onClick, onMouseDown, openOn, ...props }, ref) => {
     const isSecondary = openOn === 'secondaryClick';
     type Handler<E> = ((event: E) => void) | undefined;
+    // Pressed by a touch (opened or closed on its touch down, see below):
+    // its emulated mouse down and click aren't Base UI's (which would open
+    // the menu again; iOS emulates them after a tap, not after a drag).
+    const isTouchPress = useRef(false);
     // A secondary click (or a handler for it) opens the menu.
     const triggerProps = useSecondaryClick({
       ...props,
@@ -574,32 +842,49 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
         // a click by keys).
         onClick={(event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => {
           (onClick as Handler<typeof event>)?.(event);
-          if (isSecondary) event.preventBaseUIHandler();
+          if (isSecondary || isTouchPress.current) event.preventBaseUIHandler();
+          isTouchPress.current = false;
         }}
         onMouseDown={(event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => {
           (onMouseDown as Handler<typeof event>)?.(event);
-          if (isSecondary && !isOpeningBySecondaryClick) {
+          if (
+            (isSecondary && !isOpeningBySecondaryClick) ||
+            (isTouchPress.current && event.isTrusted)
+          ) {
             event.preventBaseUIHandler();
           }
         }}
-        onPointerDown={(event: PointerEvent<HTMLElement>) => {
+        onPointerDown={(event: BaseUIEvent<PointerEvent<HTMLElement>>) => {
           // Its own, and the secondary click's.
           (
             (triggerProps as { onPointerDown?: unknown })
               .onPointerDown as Handler<typeof event>
           )?.(event);
-          if (
-            isSecondary ||
-            event.pointerType !== 'touch' ||
-            event.defaultPrevented
-          ) {
-            return;
-          }
+          isTouchPress.current = false;
+          if (event.pointerType !== 'touch') return;
+          // (Not Base UI's own: iOS' touches have no size, which it takes
+          // for a screen reader's, highlighting the first item.)
+          event.preventBaseUIHandler();
+          if (isSecondary || event.defaultPrevented) return;
 
           // No emulated mouse events after the touch: Base UI opens and
-          // closes a menu on mouse down. Opens on touch down, as on iOS.
+          // closes a menu on mouse down. Opens on touch down; open, closes
+          // (as Base UI's mouse down does).
           event.preventDefault();
+          isTouchPress.current = true;
+          if (event.currentTarget.getAttribute('aria-expanded') === 'true') {
+            pressTrigger(event.currentTarget);
+            return;
+          }
           openByTrigger(event.currentTarget, event.pointerId);
+        }}
+        onPointerEnter={(event: BaseUIEvent<PointerEvent<HTMLElement>>) => {
+          (
+            (triggerProps as { onPointerEnter?: unknown })
+              .onPointerEnter as Handler<typeof event>
+          )?.(event);
+          // (Not Base UI's own on touch, see below.)
+          if (event.pointerType === 'touch') event.preventBaseUIHandler();
         }}
       />
     );
@@ -609,7 +894,7 @@ const Trigger = forwardRef<HTMLElement, TriggerProps>(
 /**
  * Closes the root menu when an open positioner's anchor (Base UI:
  * `data-anchor-hidden`) or the positioner itself leaves the viewport, as
- * UIKit menus close when their source view scrolls away (internal).
+ * Menus close when their source view scrolls away (internal).
  */
 export const useCloseOutOfView = (
   positionerRef: RefObject<HTMLDivElement | null>,
@@ -669,8 +954,8 @@ const Positioner = forwardRef<HTMLDivElement, MenuPositionerProps>(
           sideOffset: 12,
         };
       }
-      // (Over its parent's items, below its trigger, which stays in view to
-      // close it again: not flipped above it; without room, it scrolls.)
+      // (Over its parent's items, below its trigger: not flipped above it;
+      // without room, shifted up over it, see `useGrowAvoidance`.)
       if (submenu && size === 'compact') {
         return {
           align: 'start',
@@ -684,16 +969,24 @@ const Positioner = forwardRef<HTMLDivElement, MenuPositionerProps>(
           sideOffset: 0,
         };
       }
+      // (On its axis: flipped at most, else shifted, not beside its trigger
+      // instead, see `useGrowAvoidance`.)
       if (submenu) {
         return {
           align: 'start',
           alignOffset: -10,
+          collisionAvoidance: { fallbackAxisSide: 'none' },
           side: 'inline-end',
           sideOffset: 8,
         };
       }
-      return { sideOffset: 8 };
+      return {
+        collisionAvoidance: { fallbackAxisSide: 'none' },
+        sideOffset: 8,
+      };
     })();
+    // Growing rather than scrolling (unless its own is given).
+    const [grow, growRef] = useGrowAvoidance(defaults.collisionAvoidance, ref);
 
     return (
       // Compact submenus open below their trigger, over the parent's items,
@@ -702,18 +995,16 @@ const Positioner = forwardRef<HTMLDivElement, MenuPositionerProps>(
       // end. Above the page's own stacking (e.g. list rows' and segmented
       // items' z-indexes, bars at 10), which would otherwise show through it.
       <BaseMenu.Positioner
-        ref={ref}
+        ref={growRef}
         {...collision}
         {...props}
         align={props.align ?? defaults.align}
         alignOffset={props.alignOffset ?? defaults.alignOffset}
         className={cn('uikit-menu-positioner', className)}
+        collisionAvoidance={props.collisionAvoidance ?? grow}
         data-menu-part="positioner"
         side={positionerSide(side ?? defaults.side)}
         sideOffset={props.sideOffset ?? defaults.sideOffset}
-        collisionAvoidance={
-          props.collisionAvoidance ?? defaults.collisionAvoidance
-        }
       />
     );
   },
@@ -721,10 +1012,19 @@ const Positioner = forwardRef<HTMLDivElement, MenuPositionerProps>(
 
 const highlightSelectors = ['[data-highlighted]', '[data-popup-open]'];
 
-/** The menu's glass popup (Figma “Liquid Glass - Medium”). */
+/** The menu's glass popup (the medium glass). */
 const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
   ({ className, children, ...props }, ref) => {
     const { size, submenu } = useContext(MenuContext);
+    // A submenu's: its element, for presses outside it (see `OpenSubmenus`).
+    const toggle = useContext(SubmenuToggleContext);
+    const popupRef = useCallback(
+      (element: HTMLDivElement | null) => {
+        if (submenu) toggle?.setPopup(element);
+        assignRef(ref, element);
+      },
+      [ref, submenu, toggle],
+    );
     // Closed by keys, focus returns to its trigger; otherwise (a pointer:
     // an item, outside) it doesn't (Chrome would ring it: the popup took
     // focus by script, e.g. opened through a list row). Submenus: as Base
@@ -737,7 +1037,7 @@ const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
 
     return (
       <BaseMenu.Popup
-        ref={ref}
+        ref={popupRef}
         data-overlay={isOverlay ? '' : undefined}
         data-size={size}
         {...props}
@@ -764,7 +1064,7 @@ const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
   },
 );
 
-// Figma “Item”: [checkmark] [symbol] label/subtitle [shortcut | chevron]
+// An item: [checkmark] [symbol] label/subtitle [shortcut | chevron]
 // (see style.css).
 
 const Item = forwardRef<
@@ -876,14 +1176,30 @@ const RadioItemIndicator = forwardRef<
 export const useSubmenuToggle = ({
   onClick,
   onPointerDown,
-}: Pick<BaseMenu.SubmenuTrigger.Props, 'onClick' | 'onPointerDown'>): {
+  onPointerEnter,
+  ref,
+}: Pick<
+  BaseMenu.SubmenuTrigger.Props,
+  'onClick' | 'onPointerDown' | 'onPointerEnter'
+> & { ref?: Ref<HTMLElement> }): {
   onClick: (event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => void;
-  onPointerDown: (event: PointerEvent<HTMLElement>) => void;
+  onPointerDown: (event: BaseUIEvent<PointerEvent<HTMLElement>>) => void;
+  onPointerEnter: (event: BaseUIEvent<PointerEvent<HTMLElement>>) => void;
+  ref: (element: HTMLElement | null) => void;
 } => {
   const toggle = useContext(SubmenuToggleContext);
   type Handler<E> = ((event: E) => void) | undefined;
+  // Its element, for presses outside its submenu (see `OpenSubmenus`).
+  const triggerRef = useCallback(
+    (element: HTMLElement | null) => {
+      toggle?.setTrigger(element);
+      assignRef(ref, element);
+    },
+    [ref, toggle],
+  );
 
   return {
+    ref: triggerRef,
     onClick: (event: BaseUIEvent<ReactMouseEvent<HTMLElement>>) => {
       (onClick as Handler<typeof event>)?.(event);
       if (!toggle) return;
@@ -897,12 +1213,20 @@ export const useSubmenuToggle = ({
       event.preventBaseUIHandler();
       toggle.close();
     },
-    onPointerDown: (event: PointerEvent<HTMLElement>) => {
+    onPointerDown: (event: BaseUIEvent<PointerEvent<HTMLElement>>) => {
       (onPointerDown as Handler<typeof event>)?.(event);
+      // (Not Base UI's own on touch: iOS' touches have no size, which it
+      // takes for a screen reader's, highlighting the first item.)
+      if (event.pointerType === 'touch') event.preventBaseUIHandler();
       toggle?.press({
         isOpen: event.currentTarget.getAttribute('aria-expanded') === 'true',
         pointerType: event.pointerType,
       });
+    },
+    onPointerEnter: (event: BaseUIEvent<PointerEvent<HTMLElement>>) => {
+      (onPointerEnter as Handler<typeof event>)?.(event);
+      // (Not Base UI's own on touch, see above.)
+      if (event.pointerType === 'touch') event.preventBaseUIHandler();
     },
   };
 };
@@ -913,27 +1237,43 @@ const SubmenuTrigger = forwardRef<
   Omit<BaseMenu.SubmenuTrigger.Props, 'ref'> & ItemProps
 >(
   (
-    { className, children, destructive, onClick, onPointerDown, ...props },
+    {
+      className,
+      children,
+      destructive,
+      onClick,
+      onPointerDown,
+      onPointerEnter,
+      openOnHover,
+      ...props
+    },
     ref,
   ) => {
     const { orientation, size } = useContext(MenuContext);
-    const handlers = useSubmenuToggle({ onClick, onPointerDown });
+    const isOverlay = size === 'compact' && orientation === 'vertical';
+    const handlers = useSubmenuToggle({
+      onClick,
+      onPointerDown,
+      onPointerEnter,
+      ref,
+    });
 
     return (
       <BaseMenu.SubmenuTrigger
-        ref={ref}
         data-destructive={destructive ? '' : undefined}
         {...handlers}
         // Its submenu covers the parent's items (see `Popup`).
-        data-submenu-overlay={
-          size === 'compact' && orientation === 'vertical' ? '' : undefined
-        }
+        data-submenu-overlay={isOverlay ? '' : undefined}
+        // Covering, pressed, not hovered, by default (a compact menu: no
+        // hover; Base UI ignores clicks on a hover-opened one, so leaving it
+        // would close it); otherwise Base UI's.
+        openOnHover={openOnHover ?? (isOverlay ? false : undefined)}
         {...props}
         className={cn('uikit-menu-item uikit-menu-toggle-cursor', className)}
         data-menu-part="item"
       >
         {children as ReactNode}
-        {/* Figma “Submenu” (􀆊 or, compact and open, 􀆈: 15px, 700). */}
+        {/* A chevron (right or, compact and open, down: 15px, 700). */}
         <span
           aria-hidden="true"
           className="uikit-menu-chevron"
@@ -959,7 +1299,7 @@ const SubmenuTrigger = forwardRef<
 
 const Shortcut = forwardRef<HTMLElement, ComponentProps<'kbd'>>(
   ({ className, children, ...props }, ref) => (
-    // Figma “_Shortcuts”: modifier and key glyphs (e.g. “⌘A”), each centered in
+    // Shortcuts: modifier and key glyphs (e.g. “⌘A”), each centered in
     // a 14px cell, 1px apart.
     <kbd
       ref={ref}
@@ -982,8 +1322,8 @@ const Shortcut = forwardRef<HTMLElement, ComponentProps<'kbd'>>(
   ),
 );
 
-// Figma “Separator”: a hairline, inset 8px; on iPad 16px high, 17px before
-// a section, 21px after quick actions (iPhone: 21px).
+// A separator: a hairline, inset 8px; regular, 16px high, 17px before a
+// section, 21px after quick actions (compact: 21px).
 const StyledSeparator = forwardRef<
   HTMLDivElement,
   Omit<ComponentProps<typeof BaseMenu.Separator>, 'ref'>
@@ -998,7 +1338,7 @@ const StyledSeparator = forwardRef<
 
 const Separator = StyledSeparator;
 
-// Figma “Section Title”.
+// A section title.
 const GroupLabel = forwardRef<
   HTMLDivElement,
   Omit<ComponentProps<typeof BaseMenu.GroupLabel>, 'ref'>
@@ -1013,7 +1353,7 @@ const GroupLabel = forwardRef<
 
 const QuickActions = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
-    // Figma “Quick Actions”: a row of tiles, inset 10px from the popup's edge.
+    // Quick actions: a row of tiles, inset 10px from the popup's edge.
     <div
       ref={ref}
       data-menu-part="quick-actions"
@@ -1027,8 +1367,8 @@ const QuickAction = forwardRef<
   HTMLElement,
   Omit<BaseMenu.Item.Props, 'ref'> & ItemProps
 >(({ className, destructive, ...props }, ref) => (
-  // Figma “Quick Action”: a tile with a symbol above a label, and the
-  // selection (“BG”) while highlighted; concentric with the popup, 10px in.
+  // A quick action: a tile with a symbol above a label, and the
+  // selection while highlighted; concentric with the popup, 10px in.
   <BaseMenu.Item
     ref={ref}
     data-clickable={props.onClick ? '' : undefined}
@@ -1044,7 +1384,7 @@ const QuickAction = forwardRef<
 
 const Icon = forwardRef<HTMLSpanElement, SpanProps>(
   ({ className, ...props }, ref) => (
-    // Figma “Symbol”: 28px wide, hidden (with its gap) when absent.
+    // A symbol: 28px wide, hidden (with its gap) when absent.
     <span
       ref={ref}
       data-menu-part="icon"
@@ -1056,7 +1396,7 @@ const Icon = forwardRef<HTMLSpanElement, SpanProps>(
 
 const Label = forwardRef<HTMLSpanElement, SpanProps>(
   ({ className, ...props }, ref) => (
-    // Figma “Label and Subtitle”: the text is padded (10px or 9px), not the
+    // A label and subtitle: the text is padded (10px or 9px), not the
     // item, whose symbol is taller than the label.
     <span
       ref={ref}

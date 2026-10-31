@@ -34,13 +34,8 @@ const same = (a: Slots, b: Slots) =>
  * same frame, until the one shown fills the screen.
  */
 export const VirtualList: FunctionComponent<{
-  /**
-   * Its slots away from the screen are snap points, as the demos they stand
-   * for (none for raw demos, without a frame snapping).
-   */
-  isSnapPoint: boolean;
   items: readonly ReactNode[];
-}> = ({ items, isSnapPoint }) => {
+}> = ({ items }) => {
   const elements = useRef<(HTMLDivElement | null)[]>([]);
   const [slots, setSlots] = useState<Slots>({ heights: [], near: [] });
 
@@ -96,7 +91,7 @@ export const VirtualList: FunctionComponent<{
         }}
         className="demo-virtual-slot"
         data-away={isMounted ? undefined : ''}
-        data-snap={isSnapPoint && !isMounted && height !== 0 ? '' : undefined}
+        data-snap={!isMounted && height !== 0 ? '' : undefined}
         style={isMounted ? undefined : { height: height ?? '100svh' }}
       >
         {isMounted ? item : null}

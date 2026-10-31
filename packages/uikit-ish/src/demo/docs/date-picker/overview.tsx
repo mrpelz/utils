@@ -16,8 +16,8 @@ import { GuideLink } from '../hig-guide/link.js';
 import { datePickerRootRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 
-// Figma's example: April 20, 2025, 9:41.
-const example = new Date(2025, 3, 20, 9, 41);
+// An example date: April 20, 2025, 10:00.
+const example = new Date(2025, 3, 20, 10, 0);
 
 /** The picker, its value in its buttons (compact) or calendar (inline). */
 const LiveView: FunctionComponent = () => {
@@ -67,10 +67,7 @@ export const DatePickerOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <ul className="demo-lead">
-      <li>
-        Picks a date, a time, or both (UIKit <code>UIDatePicker</code>), or a
-        range of dates.
-      </li>
+      <li>Picks a date, a time, or both, or a range of dates.</li>
       <li>
         Compact: buttons showing the value, the calendar (or the time) in a
         popover; inline: the calendar in place.

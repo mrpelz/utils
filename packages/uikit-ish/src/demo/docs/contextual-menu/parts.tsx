@@ -1,9 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfPhoto } from '@bradleyhodges/sfsymbols/sfPhoto';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -11,15 +8,17 @@ import {
   ContextualMenu,
   Symbol,
   useCreateContextualMenuHandle,
+  useTextActionsPrevention,
   Viewport,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
-import { codeLabel } from '../../tooling/frame/render-code.js';
+import { codeLabel, useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfPhoto, sfSquareAndArrowUp, sfTrash } from '../../tooling/icons.js';
 import {
   getPropOptionsGuideRoot,
   getPropOptionsGuideTrigger,
@@ -134,6 +133,13 @@ const TriggerPart: FunctionComponent = () => {
       title: 'ContextualMenu.Trigger',
     },
   );
+  // Opened by a held press: selecting no text (no browser text menu).
+  const trigger = useLabelledRef<HTMLButtonElement>(
+    'trigger',
+    'HTMLButtonElement',
+  );
+  const isHeld = props.openOn === 'secondaryClick';
+  useTextActionsPrevention(trigger, isHeld);
 
   return (
     <Component
@@ -144,13 +150,17 @@ const TriggerPart: FunctionComponent = () => {
       id={id}
       log={log}
       screen="centered"
+      setup={isHeld ? 'useTextActionsPrevention(trigger);' : undefined}
       stage="phone"
       state={[state]}
       title="ContextualMenu.Trigger"
     >
       <Viewport.Content>
         <ContextualMenu.Root>
-          <ContextualMenu.Trigger {...props}>
+          <ContextualMenu.Trigger
+            ref={trigger}
+            {...props}
+          >
             <Button.Icon>
               <Symbol icon={sfPhoto} />
             </Button.Icon>
@@ -748,8 +758,8 @@ export const ContextualMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The menu’s state, and the lift: how far the trigger (or preview) rises
-        for the menu to fit below it in the viewport.
+        The menu’s state, and whether a preview is given (else the trigger lifts
+        itself).
       </li>
       <li>
         Its props are a <a href="menu">Menu</a>’s root’s (
@@ -761,7 +771,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
       </li>
       <li>
         Released off the trigger (it lifted away under the finger), the menu
-        stays open (as iOS’).
+        stays open.
       </li>
       <li>Renders no element.</li>
     </ul>
@@ -799,14 +809,20 @@ export const ContextualMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What the trigger turns into while the menu is open (the photo, larger),
-        in its place, lifted with it, aligned as the menu.
+        What the trigger turns into while the menu is open (the photo, larger):
+        above the menu in the same popup (the positioner’s stack), from the
+        trigger’s place, aligned as the menu.
       </li>
       <li>
-        Always in the viewport (at most as large); too tall with the menu, they
-        scroll together.
+        Rendered as itself, live (not a copy of the trigger). At most the room
+        the menu leaves (or, the menu taller, half of it), clipped.
       </li>
-      <li>Takes no pointer events (iOS: pressing it would commit).</li>
+      <li>
+        Without one, the trigger itself lifts into its place: in stacking
+        contexts of its ancestors (e.g. a <a href="viewport">Viewport</a>’s
+        layers), it can’t rise above the backdrop; give it a preview there.
+      </li>
+      <li>Takes no pointer events (pressing it would commit).</li>
       <li>
         Here: open the menu (a long press on its trigger, or its secondary
         click) to see it (one menu opens at a time).
@@ -827,9 +843,8 @@ export const ContextualMenuParts: FunctionComponent = () => (
         its <code>container</code>.
       </li>
       <li>
-        Its container is also the screen the trigger lifts within (as a
-        device’s: e.g. these views’ frames): the menu fits in it, the preview
-        stays in it. Without one, the viewport.
+        Its container is also the screen the menu fits in (as a device’s: e.g.
+        these views’ frames), clear of its safe area. Without one, the viewport.
       </li>
       <li>
         No box of its own (<code>display: contents</code>): rendered into a
@@ -853,7 +868,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
     <ul>
       <li>
         The page blurred and dimmed behind the lifted trigger and the menu
-        (iOS’); optional.
+        (optional).
       </li>
       <li>
         Here: open the menu (a long press on its trigger, or its secondary
@@ -871,12 +886,12 @@ export const ContextualMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Below the lifted trigger (or preview), 8px away; never above it (the
-        trigger lifts instead).
+        The preview’s slot and the menu below it, 8px apart, from the trigger’s
+        place: one stack, shifted as far as it needs to fit in its screen (never
+        flipped above the trigger).
       </li>
       <li>
-        Aligned with it (<code>align</code>, the preview aligning too), shifted
-        to stay in the viewport.
+        Aligned with the trigger (<code>align</code>, the preview aligning too).
       </li>
       <li>
         Here: open the menu (a long press on its trigger, or its secondary
@@ -899,7 +914,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
           component="menu"
           part="Menu.Popup"
         />
-        ), its height deciding how far the trigger lifts.
+        ), below the preview; taller than the room left, it scrolls.
       </li>
       <li>
         Here: open the menu (a long press on its trigger, or its secondary

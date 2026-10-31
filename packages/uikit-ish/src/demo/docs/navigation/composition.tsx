@@ -1,4 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -7,6 +6,7 @@ import {
   Layout,
   List,
   Navigation,
+  type NavigationBackEventDetails,
   Page,
   Sidebar,
   Symbol,
@@ -26,6 +26,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfChevronBackward } from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { pages, sections, type SectionValue } from './content.js';
 import { propOptionsAdaptiveContent } from './props.js';
@@ -56,7 +57,7 @@ const popToRoot = (value) =>
   }));
 
 <TabBar.Root value={tab} onValueChange={setTab}>
-  <Viewport.Content safeArea="none">
+  <Viewport.Content>
     {tabs.map(([value]) => (
       <TabBar.Panel
         key={value}
@@ -65,21 +66,24 @@ const popToRoot = (value) =>
         render={<Navigation.Root onBack={() => pop(value)} />}
       >
         <Navigation.SwipeArea />
-        {/* The tab's back button: staying while its pages move. */}
-        <Viewport.BlockStart>
-          <Toolbar.Root placement="block-start">
-            <Toolbar.Leading>
-              {stacks[value].length > 1 ? (
-                <Navigation.Back render={<Toolbar.Button shape="circle" />}>
-                  …
-                </Navigation.Back>
-              ) : null}
-            </Toolbar.Leading>
-          </Toolbar.Root>
-        </Viewport.BlockStart>
         <Navigation.Stack>
-          {stacks[value].map((key) => (
-            <Header.Root key={key}>…</Header.Root>
+          {stacks[value].map((key, index) => (
+            <Header.Root key={key}>
+              <Viewport.BlockStart>
+                <Toolbar.Root placement="block-start">
+                  {/* Each pushed page's: staying put between them. */}
+                  {index > 0 ? (
+                    <Toolbar.Leading>
+                      <Navigation.Back render={<Toolbar.Button shape="circle" />}>
+                        …
+                      </Navigation.Back>
+                    </Toolbar.Leading>
+                  ) : null}
+                  <Toolbar.Title>…</Toolbar.Title>
+                </Toolbar.Root>
+              </Viewport.BlockStart>
+              …
+            </Header.Root>
           ))}
         </Navigation.Stack>
       </TabBar.Panel>
@@ -153,19 +157,25 @@ const popToRoot = (value) =>
     </Sidebar.Root>
   </Layout.Column>
   <Layout.Column clearFloating>
-    {/* The selected section's stack; its back button spanning the column. */}
+    {/* The selected section's stack. */}
     <Navigation.Root onBack={pop}>
       <Navigation.SwipeArea />
-      <Viewport.BlockStart>
-        <Toolbar.Root placement="block-start">
-          <Toolbar.Leading>
-            {stacks[section].length > 1 ? <Navigation.Back … /> : null}
-          </Toolbar.Leading>
-        </Toolbar.Root>
-      </Viewport.BlockStart>
       <Navigation.Stack>
-        {stacks[section].map((key) => (
-          <Header.Root key={key}>…</Header.Root>
+        {stacks[section].map((key, index) => (
+          <Header.Root key={key}>
+            <Viewport.BlockStart>
+              <Toolbar.Root placement="block-start">
+                {/* Each pushed page's: staying put between them. */}
+                {index > 0 ? (
+                  <Toolbar.Leading>
+                    <Navigation.Back … />
+                  </Toolbar.Leading>
+                ) : null}
+                <Toolbar.Title>…</Toolbar.Title>
+              </Toolbar.Root>
+            </Viewport.BlockStart>
+            …
+          </Header.Root>
         ))}
       </Navigation.Stack>
     </Navigation.Root>
@@ -177,30 +187,75 @@ const pop = () => setKeys((current) => current.slice(0, -1));
 
 <Navigation.Root onBack={pop}>
   <Navigation.SwipeArea />
-  <Viewport.BlockStart>
-    <Toolbar.Root placement="block-start">
-      <Toolbar.Leading>
-        {keys.length > 1 ? <Navigation.Back … /> : null}
-      </Toolbar.Leading>
-      <Toolbar.Trailing>
-        {/* Cut back to the root: popped in one transition. */}
-        {keys.length > 1 ? (
-          <Toolbar.Button onClick={() => setKeys(keys.slice(0, 1))}>
-            <Button.Label>Done</Button.Label>
-          </Toolbar.Button>
-        ) : null}
-      </Toolbar.Trailing>
-    </Toolbar.Root>
-  </Viewport.BlockStart>
   <Navigation.Stack>
-    {keys.map((key) => (
+    {keys.map((key, index) => (
       <Header.Root key={key}>
         <Viewport.BlockStart>
           <Toolbar.Root placement="block-start">
+            {index > 0 ? (
+              <Toolbar.Leading>
+                <Navigation.Back … />
+              </Toolbar.Leading>
+            ) : null}
             <Toolbar.Title>…</Toolbar.Title>
+            {index > 0 ? (
+              <Toolbar.Trailing>
+                {/* Cut back to the root: popped in one transition. On every
+                   pushed page, staying put between them (as the back
+                   button). */}
+                <Navigation.Persistent
+                  persistentId="done"
+                  render={<Toolbar.Button />}
+                  onClick={() => setKeys(keys.slice(0, 1))}
+                >
+                  <Button.Label>Done</Button.Label>
+                </Navigation.Persistent>
+              </Toolbar.Trailing>
+            ) : null}
           </Toolbar.Root>
         </Viewport.BlockStart>
         <Page.Root>…</Page.Root>
+      </Header.Root>
+    ))}
+  </Navigation.Stack>
+</Navigation.Root>`;
+
+const deepCode = `// Levels 1 to 8 deep, each page its level.
+const [keys, setKeys] = useState(['1', '2', '3', '4', '5', '6', '7', '8']);
+const push = (count) =>
+  setKeys((current) => [
+    ...current,
+    ...Array.from({ length: count }, (_, index) =>
+      String(current.length + index + 1),
+    ),
+  ]);
+const pop = () => setKeys((current) => current.slice(0, -1));
+
+<Navigation.Root onBack={pop}>
+  <Navigation.SwipeArea />
+  <Navigation.Stack>
+    {keys.map((key, index) => (
+      <Header.Root key={key}>
+        <Viewport.BlockStart>
+          <Toolbar.Root placement="block-start">
+            {/* Pressed again while going back: further back, each press
+               its own transition (a cascade). */}
+            {index > 0 ? (
+              <Toolbar.Leading>
+                <Navigation.Back
+                  aria-label={\`Level \${keys[index - 1]}\`}
+                  render={<Toolbar.Button shape="circle" />}
+                >
+                  …
+                </Navigation.Back>
+              </Toolbar.Leading>
+            ) : null}
+            <Toolbar.Title>
+              <span>Level {key}</span>
+            </Toolbar.Title>
+          </Toolbar.Root>
+        </Viewport.BlockStart>
+        <Page.Root>…{/* rows pushing 1 and 5 levels */}</Page.Root>
       </Header.Root>
     ))}
   </Navigation.Stack>
@@ -218,13 +273,18 @@ const pop = () => setKeys((current) => current.slice(0, -1));
 
 <Navigation.Root onBack={pop}>
   <Navigation.SwipeArea />
-  <Viewport.BlockStart>…</Viewport.BlockStart>
   <Navigation.Stack>
     {keys.map((key, depth) => (
       <Header.Root key={key}>
-        {/* Each page's bar: its title, moving with it. */}
+        {/* Each page's bar: its title, moving with it; its back button,
+           staying put between pushed pages. */}
         <Viewport.BlockStart>
           <Toolbar.Root placement="block-start">
+            {depth > 0 ? (
+              <Toolbar.Leading>
+                <Navigation.Back … />
+              </Toolbar.Leading>
+            ) : null}
             <Toolbar.Title>
               <span>{pages[key].title}</span>
             </Toolbar.Title>
@@ -286,16 +346,23 @@ const keys = isOpened ? ['sections', ...stacks[section]] : ['sections'];
 isCompact ? (
   <Navigation.Root onBack={pop}>
     <Navigation.SwipeArea />
-    <Viewport.BlockStart>
-      <Toolbar.Root placement="block-start">
-        <Toolbar.Leading>
-          {keys.length > 1 ? <Navigation.Back … /> : null}
-        </Toolbar.Leading>
-      </Toolbar.Root>
-    </Viewport.BlockStart>
     <Navigation.Stack>
-      {keys.map((key) => (
-        <Header.Root key={key}>…</Header.Root>
+      {keys.map((key, index) => (
+        <Header.Root key={key}>
+          <Viewport.BlockStart>
+            <Toolbar.Root placement="block-start">
+              {/* Each page's own (not the root's): sliding in with the
+                 first, staying put on deeper pages (a persistent item). */}
+              {index > 0 ? (
+                <Toolbar.Leading>
+                  <Navigation.Back … />
+                </Toolbar.Leading>
+              ) : null}
+              <Toolbar.Title>…</Toolbar.Title>
+            </Toolbar.Root>
+          </Viewport.BlockStart>
+          …
+        </Header.Root>
       ))}
     </Navigation.Stack>
   </Navigation.Root>
@@ -386,7 +453,7 @@ const PerTab: FunctionComponent = () => {
           setTab(value);
         }}
       >
-        <Viewport.Content safeArea="none">
+        <Viewport.Content>
           {sections.map(([section]) => (
             <TabBar.Panel
               key={section}
@@ -395,27 +462,25 @@ const PerTab: FunctionComponent = () => {
               value={section}
             >
               <Navigation.SwipeArea />
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Leading>
-                    {stacks[section].length > 1 ? (
-                      <Navigation.Back
-                        aria-label={pages[stacks[section].at(-2) ?? '']?.title}
-                        render={<Toolbar.Button shape="circle" />}
-                      >
-                        <Button.Icon>
-                          <Symbol icon={sfChevronBackward} />
-                        </Button.Icon>
-                      </Navigation.Back>
-                    ) : null}
-                  </Toolbar.Leading>
-                </Toolbar.Root>
-              </Viewport.BlockStart>
               <Navigation.Stack>
-                {stacks[section].map((key) => (
+                {stacks[section].map((key, index) => (
                   <Header.Root key={key}>
                     <Viewport.BlockStart>
                       <Toolbar.Root placement="block-start">
+                        {index > 0 ? (
+                          <Toolbar.Leading>
+                            <Navigation.Back
+                              render={<Toolbar.Button shape="circle" />}
+                              aria-label={
+                                pages[stacks[section][index - 1] ?? '']?.title
+                              }
+                            >
+                              <Button.Icon>
+                                <Symbol icon={sfChevronBackward} />
+                              </Button.Icon>
+                            </Navigation.Back>
+                          </Toolbar.Leading>
+                        ) : null}
                         <Toolbar.Title>
                           <span>{pages[key]?.title}</span>
                         </Toolbar.Title>
@@ -522,7 +587,7 @@ const WithSidebar: FunctionComponent = () => {
       stage="tablet"
       title="Navigation beside a sidebar"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           <Layout.Column
             floating
@@ -561,27 +626,23 @@ const WithSidebar: FunctionComponent = () => {
           <Layout.Column clearFloating>
             <Navigation.Root onBack={pop}>
               <Navigation.SwipeArea />
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Leading>
-                    {keys.length > 1 ? (
-                      <Navigation.Back
-                        aria-label={pages[keys.at(-2) ?? '']?.title}
-                        render={<Toolbar.Button shape="circle" />}
-                      >
-                        <Button.Icon>
-                          <Symbol icon={sfChevronBackward} />
-                        </Button.Icon>
-                      </Navigation.Back>
-                    ) : null}
-                  </Toolbar.Leading>
-                </Toolbar.Root>
-              </Viewport.BlockStart>
               <Navigation.Stack>
-                {keys.map((key) => (
+                {keys.map((key, index) => (
                   <Header.Root key={key}>
                     <Viewport.BlockStart>
                       <Toolbar.Root placement="block-start">
+                        {index > 0 ? (
+                          <Toolbar.Leading>
+                            <Navigation.Back
+                              aria-label={pages[keys[index - 1] ?? '']?.title}
+                              render={<Toolbar.Button shape="circle" />}
+                            >
+                              <Button.Icon>
+                                <Symbol icon={sfChevronBackward} />
+                              </Button.Icon>
+                            </Navigation.Back>
+                          </Toolbar.Leading>
+                        ) : null}
                         <Toolbar.Title>
                           <span>{pages[key]?.title}</span>
                         </Toolbar.Title>
@@ -644,45 +705,45 @@ const PopToRoot: FunctionComponent = () => {
       stage="phone"
       title="Navigation popping to its root"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root onBack={pop}>
           <Navigation.SwipeArea />
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
-                {keys.length > 1 ? (
-                  <Navigation.Back
-                    aria-label={pages[keys.at(-2) ?? '']?.title}
-                    render={<Toolbar.Button shape="circle" />}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfChevronBackward} />
-                    </Button.Icon>
-                  </Navigation.Back>
-                ) : null}
-              </Toolbar.Leading>
-              <Toolbar.Trailing>
-                {keys.length > 1 ? (
-                  <Toolbar.Button
-                    onClick={() => {
-                      addLog('pop to root');
-                      setKeys((current) => current.slice(0, 1));
-                    }}
-                  >
-                    <Button.Label>Done</Button.Label>
-                  </Toolbar.Button>
-                ) : null}
-              </Toolbar.Trailing>
-            </Toolbar.Root>
-          </Viewport.BlockStart>
           <Navigation.Stack>
-            {keys.map((key) => (
+            {keys.map((key, index) => (
               <Header.Root key={key}>
                 <Viewport.BlockStart>
                   <Toolbar.Root placement="block-start">
+                    {index > 0 ? (
+                      <Toolbar.Leading>
+                        <Navigation.Back
+                          aria-label={pages[keys[index - 1] ?? '']?.title}
+                          render={<Toolbar.Button shape="circle" />}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Navigation.Back>
+                      </Toolbar.Leading>
+                    ) : null}
                     <Toolbar.Title>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
+                    {/* Done, as the back button: on every pushed page,
+                       staying put between them (a persistent item). */}
+                    {index > 0 ? (
+                      <Toolbar.Trailing>
+                        <Navigation.Persistent
+                          persistentId="done"
+                          render={<Toolbar.Button />}
+                          onClick={() => {
+                            addLog('pop to root');
+                            setKeys((current) => current.slice(0, 1));
+                          }}
+                        >
+                          <Button.Label>Done</Button.Label>
+                        </Navigation.Persistent>
+                      </Toolbar.Trailing>
+                    ) : null}
                   </Toolbar.Root>
                 </Viewport.BlockStart>
                 <Page.Root>
@@ -720,6 +781,95 @@ const PopToRoot: FunctionComponent = () => {
 };
 
 /** The root page with a large title, the pages pushed on it without. */
+/** Levels deep: going back quickly, pressing back again mid-transition. */
+const Deep: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [keys, setKeys] = useState(() =>
+    Array.from({ length: 8 }, (_, index) => String(index + 1)),
+  );
+  const push = (count: number) => {
+    addLog(`push: ${String(count)}`);
+    setKeys((current) => [
+      ...current,
+      ...Array.from({ length: count }, (_, index) =>
+        String(current.length + index + 1),
+      ),
+    ]);
+  };
+  const pop = ({ reason }: NavigationBackEventDetails) => {
+    addLog(`pop (${reason})`);
+    setKeys((current) => current.slice(0, -1));
+  };
+
+  return (
+    <Component
+      isInline
+      id="navigation-composition-deep"
+      log={log}
+      stage="phone"
+      title="Navigation, levels deep"
+    >
+      <Viewport.Content>
+        <Navigation.Root onBack={pop}>
+          <Navigation.SwipeArea />
+          <Navigation.Stack>
+            {keys.map((key, index) => (
+              <Header.Root key={key}>
+                <Viewport.BlockStart>
+                  <Toolbar.Root placement="block-start">
+                    {index > 0 ? (
+                      <Toolbar.Leading>
+                        <Navigation.Back
+                          aria-label={`Level ${keys[index - 1] ?? ''}`}
+                          render={<Toolbar.Button shape="circle" />}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Navigation.Back>
+                      </Toolbar.Leading>
+                    ) : null}
+                    <Toolbar.Title>
+                      <span>Level {key}</span>
+                    </Toolbar.Title>
+                  </Toolbar.Root>
+                </Viewport.BlockStart>
+                <Page.Root>
+                  <Viewport.Padding edge="block-start" />
+                  <List.Root>
+                    <List.Section>
+                      <List.Group>
+                        {[1, 5].map((count) => (
+                          <List.Item key={count}>
+                            <List.Content>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => push(count)}
+                              >
+                                {count === 1
+                                  ? `Level ${String(index + 2)}`
+                                  : `${String(count)} levels deeper`}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              <List.DrillIn />
+                            </List.Trailing>
+                          </List.Item>
+                        ))}
+                      </List.Group>
+                    </List.Section>
+                  </List.Root>
+                  <Viewport.Padding edge="block-end" />
+                </Page.Root>
+              </Header.Root>
+            ))}
+          </Navigation.Stack>
+        </Navigation.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
 const LargeTitles: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [keys, setKeys] = useState(['settings']);
@@ -740,30 +890,26 @@ const LargeTitles: FunctionComponent = () => {
       stage="phone"
       title="Navigation with large titles"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root onBack={pop}>
           <Navigation.SwipeArea />
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
-                {keys.length > 1 ? (
-                  <Navigation.Back
-                    aria-label={pages[keys.at(-2) ?? '']?.title}
-                    render={<Toolbar.Button shape="circle" />}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfChevronBackward} />
-                    </Button.Icon>
-                  </Navigation.Back>
-                ) : null}
-              </Toolbar.Leading>
-            </Toolbar.Root>
-          </Viewport.BlockStart>
           <Navigation.Stack>
             {keys.map((key, depth) => (
               <Header.Root key={key}>
                 <Viewport.BlockStart>
                   <Toolbar.Root placement="block-start">
+                    {depth > 0 ? (
+                      <Toolbar.Leading>
+                        <Navigation.Back
+                          aria-label={pages[keys[depth - 1] ?? '']?.title}
+                          render={<Toolbar.Button shape="circle" />}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Navigation.Back>
+                      </Toolbar.Leading>
+                    ) : null}
                     <Toolbar.Title>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
@@ -883,31 +1029,11 @@ const Adaptive: FunctionComponent = () => {
       title="Navigation, compact or beside a sidebar"
     >
       {isCompact ? (
-        <Viewport.Content safeArea="none">
+        <Viewport.Content>
           <Navigation.Root onBack={pop}>
             <Navigation.SwipeArea />
-            <Viewport.BlockStart>
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Leading>
-                  {keys.length > 1 ? (
-                    <Navigation.Back
-                      render={<Toolbar.Button shape="circle" />}
-                      aria-label={
-                        keys.length === 2
-                          ? 'Apps'
-                          : pages[keys.at(-2) ?? '']?.title
-                      }
-                    >
-                      <Button.Icon>
-                        <Symbol icon={sfChevronBackward} />
-                      </Button.Icon>
-                    </Navigation.Back>
-                  ) : null}
-                </Toolbar.Leading>
-              </Toolbar.Root>
-            </Viewport.BlockStart>
             <Navigation.Stack>
-              {keys.map((key) =>
+              {keys.map((key, index) =>
                 key === 'sections' ? (
                   <Header.Root key={key}>
                     <Viewport.BlockStart>
@@ -956,6 +1082,23 @@ const Adaptive: FunctionComponent = () => {
                   <Header.Root key={key}>
                     <Viewport.BlockStart>
                       <Toolbar.Root placement="block-start">
+                        {/* In each page's bar: sliding with the first page
+                           to have one, staying put on deeper ones (see
+                           Navigation.Persistent). */}
+                        <Toolbar.Leading>
+                          <Navigation.Back
+                            render={<Toolbar.Button shape="circle" />}
+                            aria-label={
+                              index === 1
+                                ? 'Apps'
+                                : pages[keys[index - 1] ?? '']?.title
+                            }
+                          >
+                            <Button.Icon>
+                              <Symbol icon={sfChevronBackward} />
+                            </Button.Icon>
+                          </Navigation.Back>
+                        </Toolbar.Leading>
                         <Toolbar.Title>
                           <span>{pages[key]?.title}</span>
                         </Toolbar.Title>
@@ -993,7 +1136,7 @@ const Adaptive: FunctionComponent = () => {
           </Navigation.Root>
         </Viewport.Content>
       ) : (
-        <Viewport.Content safeArea="none">
+        <Viewport.Content>
           <Layout.Root>
             <Layout.Column
               floating
@@ -1032,27 +1175,25 @@ const Adaptive: FunctionComponent = () => {
             <Layout.Column clearFloating>
               <Navigation.Root onBack={pop}>
                 <Navigation.SwipeArea />
-                <Viewport.BlockStart>
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Leading>
-                      {stack.length > 1 ? (
-                        <Navigation.Back
-                          aria-label={pages[stack.at(-2) ?? '']?.title}
-                          render={<Toolbar.Button shape="circle" />}
-                        >
-                          <Button.Icon>
-                            <Symbol icon={sfChevronBackward} />
-                          </Button.Icon>
-                        </Navigation.Back>
-                      ) : null}
-                    </Toolbar.Leading>
-                  </Toolbar.Root>
-                </Viewport.BlockStart>
                 <Navigation.Stack>
-                  {stack.map((key) => (
+                  {stack.map((key, index) => (
                     <Header.Root key={key}>
                       <Viewport.BlockStart>
                         <Toolbar.Root placement="block-start">
+                          {index > 0 ? (
+                            <Toolbar.Leading>
+                              <Navigation.Back
+                                render={<Toolbar.Button shape="circle" />}
+                                aria-label={
+                                  pages[stack[index - 1] ?? '']?.title
+                                }
+                              >
+                                <Button.Icon>
+                                  <Symbol icon={sfChevronBackward} />
+                                </Button.Icon>
+                              </Navigation.Back>
+                            </Toolbar.Leading>
+                          ) : null}
                           <Toolbar.Title>
                             <span>{pages[key]?.title}</span>
                           </Toolbar.Title>
@@ -1100,6 +1241,7 @@ const pageSections: readonly Section[] = [
   ['a-stack-per-tab', 'A stack per tab'],
   ['beside-a-sidebar', 'Beside a sidebar'],
   ['popping-to-the-root', 'Popping to the root'],
+  ['going-back-quickly', 'Going back quickly'],
   ['large-titles', 'Large titles'],
   ['compact-or-regular', 'Compact or regular'],
 ];
@@ -1130,27 +1272,18 @@ export const NavigationComposition: FunctionComponent = () => (
           component="navigation"
           part="Navigation.Stack"
         />
-        , each page’s bar (its title) moving with it; beside the stack, in the{' '}
-        <PartLink
-          component="navigation"
-          part="Navigation.Root"
-        />
-        , a bar that stays (a{' '}
-        <PartLink
-          component="viewport"
-          part="Viewport.BlockStart"
-        />{' '}
-        around a{' '}
-        <PartLink
-          component="toolbar"
-          part="Toolbar.Root"
-        />
-        ) with the{' '}
+        , each page’s bar (its title) moving with it; in each pushed page’s bar,
+        the{' '}
         <PartLink
           component="navigation"
           part="Navigation.Back"
-        />{' '}
-        while there’s a page to go back to, and a{' '}
+        />
+        , staying put between pushed pages (a persistent item, see{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Persistent"
+        />
+        ), and a{' '}
         <PartLink
           component="navigation"
           part="Navigation.SwipeArea"
@@ -1167,7 +1300,7 @@ export const NavigationComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Each tab its own stack (iOS’s tab bar apps, guide{' '}
+        Each tab its own stack (tab bar apps, guide{' '}
         <GuideLink to="shell-a">shell A</GuideLink>): a{' '}
         <PartLink
           component="tab-bar"
@@ -1186,12 +1319,12 @@ export const NavigationComposition: FunctionComponent = () => (
         positions.
       </li>
       <li>
-        Each panel its own bar that stays, its back button for its stack (shown
+        Each panel’s pages with their own back buttons, for its stack (shown
         with its panel).
       </li>
       <li>
         The selected tab pressed again: its stack back to its root page, in one
-        transition (iOS’s; the{' '}
+        transition (the{' '}
         <PartLink
           component="tab-bar"
           part="TabBar.Tab"
@@ -1241,12 +1374,12 @@ export const NavigationComposition: FunctionComponent = () => (
         <a href="navigation/composition#a-stack-per-tab">per tab</a>).
       </li>
       <li>
-        The bar that stays spans the content column (its containing block, see{' '}
+        The pages’ bars span the content column (its containing block, see{' '}
         <PartLink
           component="layout"
           part="Layout.Column"
         />
-        ), as the pages’ bars do.
+        ), the back button with them.
       </li>
       <li>
         <strong>Library:</strong> the navigation in a layout’s column beside a
@@ -1279,8 +1412,13 @@ export const NavigationComposition: FunctionComponent = () => (
         between are gone without moving.
       </li>
       <li>
-        Done stays beside the back button, in the bar that stays (both shown
-        while there’s a page to go back to); only the pages’ titles move.
+        Done, as the back button, in each pushed page’s bar: both persistent
+        items (Done a{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Persistent"
+        />
+        ), staying put between pushed pages; only the titles move.
       </li>
       <li>
         <strong>Library:</strong> one transition from the top page straight to
@@ -1295,6 +1433,56 @@ export const NavigationComposition: FunctionComponent = () => (
     <PopToRoot />
 
     <Heading
+      id="going-back-quickly"
+      level={2}
+    >
+      Going back quickly
+    </Heading>
+    <ul>
+      <li>
+        Levels deep (eight to start with; drill in one level, or five at once):
+        the back button pressed again while going back goes back further, each
+        press its own transition: the page it revealed starts leaving at once,
+        from where it is, while the earlier ones carry on (a cascade).
+      </li>
+      <li>
+        Swiped back again while going back (from the leading edge, the{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.SwipeArea"
+        />
+        ), the same: the page still leaving carries on, the swipe takes the one
+        it revealed from where it is; let go short, only that one settles back.
+      </li>
+      <li>
+        Pressed while a page is pushed: it goes back from where it is (no jump).
+      </li>
+      <li>
+        It stays pressable while it stays put (a persistent item, see{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Persistent"
+        />
+        ): between pushed pages, not as it slides out with the first.
+      </li>
+      <li>
+        <strong>Library:</strong> the back button pressable mid-transition, and
+        the stack running a transition per pop as its keys change again (
+        <PartLink
+          component="navigation"
+          part="Navigation.Stack"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the levels (the app’s keys), pushing one or five,
+        popping one per press.
+      </li>
+    </ul>
+    <CodeView code={deepCode} />
+    <Deep />
+
+    <Heading
       id="large-titles"
       level={2}
     >
@@ -1302,7 +1490,7 @@ export const NavigationComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        iOS’s: the stack’s root page with a large title (
+        The stack’s root page with a large title (
         <PartLink
           component="header"
           part="Header.LargeTitle"
@@ -1355,11 +1543,27 @@ export const NavigationComposition: FunctionComponent = () => (
         <a href="navigation/composition#a-stack-per-tab">per tab</a>).
       </li>
       <li>
+        Compact, the back button is in each page’s bar from the first opened
+        section on (
+        <PartLink
+          component="navigation"
+          part="Navigation.Back"
+        />
+        , a persistent item: see{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Persistent"
+        />
+        ): it slides in and out with the section’s root page, and stays put on
+        deeper pages, also while swiping back.
+      </li>
+      <li>
         Compact, a drawer instead: see <a href="sidebar/composition">Sidebar</a>
         .
       </li>
       <li>
-        <strong>Library:</strong> the navigation, the{' '}
+        <strong>Library:</strong> the navigation (its back button a persistent
+        item), the{' '}
         <PartLink
           component="sidebar"
           part="Sidebar.Root"
@@ -1382,6 +1586,7 @@ export const navigationCompositionDemos = [
   PerTab,
   WithSidebar,
   PopToRoot,
+  Deep,
   LargeTitles,
   Adaptive,
 ];

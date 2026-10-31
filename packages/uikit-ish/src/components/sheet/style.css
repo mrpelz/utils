@@ -43,27 +43,27 @@
   }
 
   .uikit-sheet-popup {
-    /* UIKit's elevated level (a modal presentation's): in dark mode, the
+    /* An elevated level (a modal presentation's): in dark mode, the
        backgrounds a step lighter, for everything in it (its lists, pages,
        a navigation's). */
-    --color-ios-system-background: light-dark(rgb(255 255 255), rgb(28 28 30));
-    --color-ios-secondary-system-background: light-dark(
+    --color-ui-system-background: light-dark(rgb(255 255 255), rgb(28 28 30));
+    --color-ui-secondary-system-background: light-dark(
       rgb(242 242 247),
       rgb(44 44 46)
     );
-    --color-ios-tertiary-system-background: light-dark(
+    --color-ui-tertiary-system-background: light-dark(
       rgb(255 255 255),
       rgb(58 58 60)
     );
-    --color-ios-system-grouped-background: light-dark(
+    --color-ui-system-grouped-background: light-dark(
       rgb(242 242 247),
       rgb(28 28 30)
     );
-    --color-ios-secondary-system-grouped-background: light-dark(
+    --color-ui-secondary-system-grouped-background: light-dark(
       rgb(255 255 255),
       rgb(44 44 46)
     );
-    --color-ios-tertiary-system-grouped-background: light-dark(
+    --color-ui-tertiary-system-grouped-background: light-dark(
       rgb(242 242 247),
       rgb(58 58 60)
     );
@@ -74,11 +74,11 @@
     overflow: hidden;
     box-sizing: border-box;
     flex-direction: column;
-    color: var(--color-ios-label);
+    color: var(--color-ui-label);
     outline: none;
     pointer-events: auto;
 
-    /* Close to UIKit's presentation (a critically damped spring); swiped,
+    /* A critically damped spring; swiped,
        following the finger (a transform: Base UI's own while it's swiped,
        overriding this one). */
     transform: translateY(
@@ -115,7 +115,7 @@
     /* The screen's bottom inset, for its content (see below). */
     --uikit-sheet-inset-bottom: var(--uikit-safe-area-inset-bottom, 0px);
 
-    /* Medium (6px from the bottom edge, over the home indicator as iOS's):
+    /* Medium (6px from the bottom edge, over the home indicator):
        what's left of it; a form sheet: none. */
     &[data-detent='medium'] > * {
       --uikit-safe-area-inset-bottom: max(
@@ -135,7 +135,7 @@
 
     &[data-detent='large'] {
       border-radius: 38px 38px 0 0;
-      background-color: var(--color-ios-system-background);
+      background-color: var(--color-ui-system-background);
       box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
       inset: calc(10px + var(--uikit-safe-area-inset-top, 0px)) 0 0;
     }
@@ -145,7 +145,7 @@
     &[data-detent='large'][data-background='grouped'] {
       --uikit-list-container-background: transparent;
 
-      background-color: var(--color-ios-system-grouped-background);
+      background-color: var(--color-ui-system-grouped-background);
     }
 
     &[data-detent='medium'] {
@@ -162,16 +162,16 @@
       width: min(936px, calc(100% - 64px));
       height: min(852px, calc(100% - 64px));
       border-radius: 38px;
-      background-color: var(--color-ios-system-background);
+      background-color: var(--color-ui-system-background);
       box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
-      color: var(--color-ios-label);
+      color: var(--color-ui-label);
       inset: 50% auto auto 50%;
       translate: -50% -50%;
 
       &[data-background='grouped'] {
         --uikit-list-container-background: transparent;
 
-        background-color: var(--color-ios-system-grouped-background);
+        background-color: var(--color-ui-system-grouped-background);
       }
 
       &[data-starting-style],
@@ -195,12 +195,18 @@
       padding-block-start: 16px;
     }
 
-    /* Only a grabber: over the content (its own bars below it). */
+    /* Only a grabber: over the content (its own bars below it). Composited
+       itself: the content scrolls (iOS composites it), and Safari otherwise
+       relies on its overlap testing to draw the header after it, which
+       misses it far down a scrolled document (e.g. an inline demo), leaving
+       the grabber hidden (until something recomposites, e.g. a button's
+       press). */
     &:has(> .uikit-sheet-grabber:only-child) {
       position: absolute;
       z-index: 1;
       inset: 0 0 auto;
       padding-block-end: 0;
+      will-change: transform;
     }
   }
 

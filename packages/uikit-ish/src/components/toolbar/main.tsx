@@ -30,41 +30,38 @@ export type {
   ToolbarTitleProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Toolbars”: “Toolbar - Bottom”, “Toobar - Top -
-// iPhone”, “_Buttons - Top”, “_Button - Bottom”, BG Context Dim/Bright), with
+// Toolbars (bottom and top, their buttons) in dim and bright contexts, with
 // the glass materials and vibrant content colors as tokens in `styles.css`,
-// used via `glass/main.tsx`, and the titles' colors mapped to UIKit's label
-// colors (`label`, `secondaryLabel`).
+// used via `glass/main.tsx`, and the titles in the label colors (`label`,
+// `secondaryLabel`).
 //
 // A toolbar holds glass capsules (`Group`) of buttons (`Button`): at the
 // bottom (default) 48px high, their buttons 36px, 6px from the capsule's
-// ends and 12px apart; at the top (`placement`, a navigation bar) 44px high,
+// ends and 12px apart (`gap`); at the top (`placement`, a navigation bar) 44px high,
 // 4px from the ends. Capsules sit at the bar's start (`Leading`) and end
 // (`Trailing`), 12px (top: 10px) apart, anything else (a `Title`, a page
 // control, a field) between them. A button of its own is a glass `Button`
 // (a circle for a symbol); several share a capsule (`Group`). Symbols and
 // labels are 17px (510, SF Pro's `ss16` alternates), in the glass' vibrant
-// content color; glass can be tinted (`prominent`, Figma “Text - Primary”,
-// “Symbol Primary”), its content white.
+// content color; glass can be tinted (`prominent`), its content white.
 //
-// Titles (Figma “Title”, “Title and Subtitle”): Body Emphasized, centered
+// Titles (with or without a subtitle): Body Emphasized, centered
 // in the bar; with a subtitle, over 12px (510) in the secondary label
 // color. Large titles sit below a top bar (see `Header`).
 //
-// Deviations:
-// - The bar's middle is centered in it while the sides fit (as iOS's
-//   titles; Figma: the title absolutely centered): the sides share the free
+// Also:
+// - The bar's middle is centered in it while the sides fit: the sides share the free
 //   space equally (a missing side is held by an empty one, so a title
 //   without `Leading` stays centered); a title aligned to the start (or
 //   anything taking the free space) takes all of it instead.
 // - Pressed, a capsule of several buttons turns into a glass lens as the tab
-//   bar's groups do (scaled up by 1.05, measured on iOS 26), the pressed
-//   button showing the selection (Figma: no pressed state).
-// - The bottom bar's padding is Figma's (4px 16px 36px) without the home
-//   indicator's 34px in it (2px below): the safe area is its anchor's (a
+//   bar's groups do (scaled up by 1.05), the pressed button showing the
+//   selection.
+// - The bottom bar's padding is 4px 16px 2px, without the home indicator's
+//   34px in it: the safe area is its anchor's (a
 //   `Viewport.BlockEnd`, a sheet's), so it sits right above it.
-// - With a subtitle, the title stays in 17px (Figma: 15px), as iOS 26's
-//   (user: not smaller than the rows' text).
+// - With a subtitle, the title stays in 17px (not smaller than the rows'
+//   text).
 
 /** The bar (its glass context also for glass inside it). */
 const Root = forwardRef<HTMLDivElement, ToolbarRootProps>(
@@ -136,12 +133,12 @@ const Spacer = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
 const GroupContext = createContext(false);
 
 /**
- * A glass capsule of several buttons (Figma “Button Group”); a single
+ * A glass capsule of several buttons; a single
  * button is a glass `Button` of its own (see `ToolbarButton`).
  */
 const Group = forwardRef<HTMLDivElement, ToolbarGroupProps>(
   (
-    { className, children, prominent, style, textColor, tint, ...props },
+    { className, children, gap, prominent, style, textColor, tint, ...props },
     ref,
   ) => {
     const isTinted = prominent ?? tint !== undefined;
@@ -159,6 +156,8 @@ const Group = forwardRef<HTMLDivElement, ToolbarGroupProps>(
         style={withStyle(
           {
             '--uikit-glass-tint': tint,
+            '--uikit-toolbar-group-gap':
+              typeof gap === 'number' ? `${String(gap)}px` : gap,
             '--uikit-toolbar-content': textColor,
             '--uikit-toolbar-content-blend':
               textColor === undefined ? undefined : 'normal',
@@ -220,7 +219,7 @@ const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
         render={
           render ??
           (isInGroup ? (
-            // Figma “Symbol”, “Text”: 36px (symbols: circles, as their 17px
+            // A symbol or text: 36px (symbols: circles, as their 17px
             // glyph and the padding are narrower), the content vibrant (blended
             // with the glass), scaled with the capsule's lens; pressed among
             // several, the selection. As `Button` as far as that goes in a
@@ -239,10 +238,9 @@ const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
               }
             />
           ) : (
-            // A button of its own: a `Button`, by default a glass one (Figma
-            // “_Button - Bottom”, “_Buttons - Top”), as high as the bar's
-            // capsules, its content as theirs; text 12px from its ends (Figma:
-            // 6px around a “Text” frame of 6px padding). Other variants are as
+            // A button of its own: a `Button`, by default a glass one, as high
+            // as the bar's capsules, its content as theirs; text 12px from its
+            // ends. Other variants are as
             // `Button`'s. (Over the button's own styles: tripled.)
             <Button.Root
               {...shared}
@@ -276,7 +274,7 @@ const Title = forwardRef<HTMLElement, ToolbarTitleProps>(
     }),
 );
 
-/** A title's subtitle (Figma “Subtitle”), inside `Title`. */
+/** A title's subtitle, inside `Title`. */
 const Subtitle = forwardRef<HTMLElement, useRender.ComponentProps<'span'>>(
   ({ className, render, ...props }, ref) =>
     useRender({

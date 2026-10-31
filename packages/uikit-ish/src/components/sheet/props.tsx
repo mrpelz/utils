@@ -27,7 +27,7 @@ export type SheetPopupProps = Omit<BaseDrawer.Popup.Props, 'ref'> & {
    */
   container?: BaseDrawer.Portal.Props['container'];
   /**
-   * Its height on an iPhone (compact width): the whole screen, or its
+   * Its height in a compact width (a phone's): the whole screen, or its
    * content's (a floating glass panel).
    * @default 'large'
    */

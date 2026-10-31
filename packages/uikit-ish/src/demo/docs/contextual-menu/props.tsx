@@ -40,7 +40,6 @@ export const propOptionsPreview = {
 export const propOptionsPositioner = {
   ...commonPropOptions,
   align: [undefined, 'start', 'center', 'end'] as const,
-  sideOffset: [undefined, 0, 8, 16] as const,
 };
 
 // The guide pages' views (see parts.tsx).

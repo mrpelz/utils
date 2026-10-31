@@ -6,17 +6,14 @@
     height: 100%;
     min-height: 0;
     box-sizing: border-box;
-    background-color: var(--color-ios-system-grouped-background);
-    color: var(--color-ios-label);
+    background-color: var(--color-ui-system-grouped-background);
+    color: var(--color-ui-label);
     overscroll-behavior: contain;
 
     /* Its ends: clear of the insets; the gap to its content is its
        `Viewport.Padding`s' (a list's ends are its container's, see List). */
     padding-block: var(--uikit-page-safe-top) var(--uikit-page-safe-bottom);
     padding-inline-start: var(--uikit-layout-inset-start, 0);
-
-    /* Its scrolling, for its header's bar (see Header). */
-    scroll-timeline: --uikit-page-scroll block;
 
     /* The safe area: its content below the top inset, its end scrolling
        clear of the bottom inset (the bars anchored over it: room made by
@@ -37,7 +34,7 @@
     }
 
     &[data-background='plain'] {
-      background-color: var(--color-ios-system-background);
+      background-color: var(--color-ui-system-background);
     }
 
     /* Bouncing even when its content fits (`alwaysBounce`): a box 1px

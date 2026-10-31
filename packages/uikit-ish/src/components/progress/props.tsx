@@ -3,6 +3,13 @@ import type { ReactNode } from 'react';
 
 export type ProgressRootProps = Omit<BaseProgress.Root.Props, 'ref'> & {
   /**
+   * Indeterminate (`value` null), its fill sliding in sync with every other
+   * indeterminate bar's on the page (wherever each is along, whenever it
+   * started), or on its own.
+   * @default true
+   */
+  synchronized?: boolean;
+  /**
    * The fill's color.
    * @default system blue
    */
@@ -42,19 +49,19 @@ export type ActivityIndicatorProps = Omit<
   BaseProgress.Root.Props,
   'children' | 'ref' | 'value'
 > & {
-  /** A label after it (Figma “Label”). */
+  /** A label after it. */
   children?: ReactNode;
   /**
-   * The spokes' color (UIKit `color`).
+   * The spokes' color.
    * @default the secondary label color
    */
   color?: string;
   /**
-   * How it shows: spinning (`animate`; UIKit `startAnimating`); stopped
-   * (UIKit `stopAnimating`), at rest at once (`reset`, as UIKit's), frozen
+   * How it shows: spinning (`animate`); stopped, at rest at once
+   * (`reset`), frozen
    * where it is (`freeze`), or finishing its turn first, then resting (no
-   * jump: `finish`); finishing, then hidden (`finish-and-hide`; UIKit
-   * `hidesWhenStopped`), or hidden at once (`none`). Hidden, it takes no
+   * jump: `finish`); finishing, then hidden (`finish-and-hide`), or
+   * hidden at once (`none`). Hidden, it takes no
    * room.
    * @default 'animate'
    */
@@ -65,7 +72,7 @@ export type ActivityIndicatorProps = Omit<
    */
   duration?: number;
   /**
-   * How it spins: a spoke at a time (as UIKit), smoothly, or its spokes
+   * How it spins: a spoke at a time, smoothly, or its spokes
    * staying in place, fading in turn.
    * @default 'stepped'
    */
@@ -80,8 +87,15 @@ export type ActivityIndicatorProps = Omit<
    */
   progress?: number;
   /**
-   * Figma “Size” (Regular: 30px, Small: 22px).
+   * Its size (regular: 30px, small: 22px).
    * @default 'regular'
    */
   size?: 'regular' | 'small';
+  /**
+   * Spinning in sync with every other activity indicator on the page
+   * (alike at once, whenever each started), or on its own; with its own
+   * `progress` or `duration`, always on its own.
+   * @default true
+   */
+  synchronized?: boolean;
 };

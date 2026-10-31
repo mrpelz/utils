@@ -1,12 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
-
 import { Slider as BaseSlider } from '@base-ui/react/slider';
-import { sfHareFill } from '@bradleyhodges/sfsymbols/sfHareFill';
-import { sfSpeakerFill } from '@bradleyhodges/sfsymbols/sfSpeakerFill';
-import { sfSpeakerWave3Fill } from '@bradleyhodges/sfsymbols/sfSpeakerWave3Fill';
-import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
-import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
-import { sfTortoiseFill } from '@bradleyhodges/sfsymbols/sfTortoiseFill';
 
 import { Symbol } from '../../../components/index.js';
 import { AddLog } from '../../tooling/frame/log.js';
@@ -14,6 +7,14 @@ import {
   commonPropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
+import {
+  sfHareFill,
+  sfSpeakerFill,
+  sfSpeakerWave3Fill,
+  sfSunMax,
+  sfSunMin,
+  sfTortoiseFill,
+} from '../../tooling/icons.js';
 
 export const propOptionsContent = {
   thumbs: [1, 2] as const,
@@ -78,8 +79,8 @@ export const propOptionsRoot = {
   cursor: [undefined, 'auto', 'pointer', 'copy'] as const,
   tint: [
     undefined,
-    'var(--color-ios-system-orange)',
-    'var(--color-ios-system-green)',
+    'var(--color-ui-system-orange)',
+    'var(--color-ui-system-green)',
   ] as const,
 };
 

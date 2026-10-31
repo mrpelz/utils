@@ -9,10 +9,12 @@ import {
   FocusEvent,
   forwardRef,
   FunctionComponent,
+  KeyboardEvent,
   MouseEvent,
   PointerEvent,
   ReactNode,
   RefObject,
+  TouchEvent as ReactTouchEvent,
   useCallback,
   useContext,
   useEffect,
@@ -33,8 +35,6 @@ import {
 } from '../checkbox/main.js';
 import {
   cn,
-  edgeScrollDelta,
-  frameElapsed,
   useForwardedRef,
   usePointerDrag,
   useSecondaryClick,
@@ -53,6 +53,8 @@ import type {
   ListButtonProps,
   ListCollapsiblePanelProps,
   ListCollapsibleRootProps,
+  ListDropGroupProps,
+  ListDropTargetProps,
   ListEditButtonProps,
   ListEditing,
   ListGroupProps,
@@ -87,6 +89,8 @@ export type {
   ListCollapsibleChangeEventDetails,
   ListCollapsiblePanelProps,
   ListCollapsibleRootProps,
+  ListDropGroupProps,
+  ListDropTargetProps,
   ListGroupProps,
   ListHeaderProps,
   ListImageProps,
@@ -101,29 +105,49 @@ export type {
   ListTextProps,
   ListWhileEditing,
 } from './props.js';
+import {
+  createReorderHandle,
+  ListReorderHandle,
+  reorder,
+  reorderByKey,
+  type ReorderItemEntry,
+  type ReorderTargetEntry,
+  setItemEntry,
+  startReorderDrag,
+} from './reorder.js';
+import { dragToSelect } from './select.js';
 import { createSwipeActionsHandle } from './swipe-actions-handle.js';
 
+export {
+  type ListReorderChange,
+  type ListReorderEventDetails,
+  ListReorderHandle,
+  type ListReorderItem,
+  type ListReorderOptions,
+  type ListReorderPart,
+  type ListReorderReason,
+  type ListReorderTarget,
+  useCreateReorderHandle,
+} from './reorder.js';
 export {
   ListSwipeActionsHandle,
   useCreateSwipeActionsHandle,
 } from './swipe-actions-handle.js';
 
-// Source: Apple iOS 26 Figma (“Lists and tables”: “Row” Height=Regular/Tall,
-// “_Images”, “_Trailing”, “_Edit Buttons”, “_Grabber”, “_Separator”, “Row -
-// Button”, “Row with Swipe Actions”, “_Swipe Actions”, “Header”, “_Header
-// Trailing Accessories”, “Section Title”, “Grouped Table Footer”, “Index Bar”),
-// with its colors mapped to UIKit semantic colors (the tint, the label colors,
-// `systemRed`, `systemGray2`/`3`/`5`); the separator is a token in
-// `styles.css`. What Figma doesn't define follows Framework7 (`list.less`,
-// `list-ios.less`, `list-vars.less`, `swipeout.less`, `swipeout-ios.less`,
-// `swipeout.js`, `list-index.less`, `block.less`):
-// - list styles (UIKit `UITableView.Style`): `insetGrouped` (the default: 16px
-//   inset, 24px corners), `grouped`, `plain` (Framework7 `.list`,
-//   `.list.inset`); 35px between sections (none at the list's ends: its
-//   neighbors' and container's spacing); optionally outlined
-//   (`.list-outline`)
-// - pressed rows (UIKit's cell selection, `systemGray4`), hiding the separators
-//   around pressed and swiped rows
+// Rows (regular and tall), images, trailing accessories, edit buttons,
+// grabbers, separators, button rows, swipe actions, headers (with trailing
+// accessories), section titles, grouped footers and an index bar, in the
+// semantic colors (the tint, the label colors, `systemRed`,
+// `systemGray2`/`3`/`5`); the separator is a token in `styles.css`. Behavior
+// after Framework7 (`list.less`, `list-ios.less`, `list-vars.less`,
+// `swipeout.less`, `swipeout-ios.less`, `swipeout.js`, `list-index.less`,
+// `block.less`):
+// - list styles: `insetGrouped` (the default: 16px inset, 24px corners),
+//   `grouped`, `plain` (Framework7 `.list`, `.list.inset`); 35px between
+//   sections (none at the list's ends: its neighbors' and container's
+//   spacing); optionally outlined (`.list-outline`)
+// - pressed rows (`systemGray4`), hiding the separators around pressed and
+//   swiped rows
 // - swiping: the row follows the pointer (rubber-banding past its actions) over
 //   its actions, pinned to the list's edge, which scale in one after another
 //   from the edge; it opens on releasing past half the actions, or on a quick
@@ -132,59 +156,54 @@ export {
 //   others, which follow the row, and arms overswiping (see `armDistance`;
 //   Framework7: past 1.2 times the actions), triggering it on release; armed,
 //   its symbol moves to the row's end, its label hides (150ms)
-// - reordering rows by their grabbers (`sortable.js`, see `useReorder`),
+// - reordering rows by their grabbers (`sortable.js`, see `reorder.ts`),
 //   independent of the leading edit controls (`Checkbox`, `Radio`,
-//   `EditButton`); entering and leaving edit mode (`Root` `editing`; UIKit
-//   `setEditing(_:animated:)`), they slide in and out from the rows' edges
-//   (300ms), the rows' content making room
-// - media rows, as in Mail (`.media-list`: a `Text` part)
+//   `EditButton`); entering and leaving edit mode (`Root` `editing`), they
+//   slide in and out from the rows' edges (300ms), the rows' content making
+//   room
+// - media rows, as in a mail app (`.media-list`: a `Text` part)
 // - the Content Block (`Block`)
 //
 // Titles, subtitles and details are in the Body and Subheadline text styles,
 // prominent headers in Title 3 Emphasized, index letters in Caption 1
-// Emphasized; Figma's nested and extra prominent headers, header subtitles and
+// Emphasized; nested and extra prominent headers, header subtitles and
 // details, footers and swipe action labels differ from the text styles in
-// tracking, and are kept.
+// tracking.
 //
 // Rows are grids: [edit control] [image] title/subtitle [trailing …], where
 // everything that is not a leading part, a title or a subtitle is trailing
-// (Figma “Contents - Trailing”: 16px apart), e.g. a `Switch` or a `Menu`
-// trigger; up to 36px high (e.g. a `Stepper` or `Segmented`), they fit regular
-// rows (8px from their edges). Rows with a subtitle are tall (Figma
-// Height=Tall: 68px); others are regular (52px). Both are minimum heights,
-// growing with wrapping text. A row is pressable when its `Title` (or `Button`)
-// is a link or button (`render`): its hit area covers the row, beneath the
-// trailing controls.
+// (16px apart), e.g. a `Switch` or a `Menu` trigger; up to 36px high (e.g. a
+// `Stepper` or `Segmented`), they fit regular rows (8px from their edges).
+// Rows with a subtitle are tall (68px); others are regular (52px). Both are
+// minimum heights, growing with wrapping text. A row is pressable when its
+// `Title` (or `Button`) is a link or button (`render`): its hit area covers
+// the row, beneath the trailing controls.
 //
-// Deviations:
+// Also:
 // - Focusing a swipe action opens the actions. A trigger opens them
 //   (`SwipeActionsTrigger`: in the row, or by a handle; e.g. rendering the
 //   delete edit button), not the edit button itself.
-// - Header and footer text is aligned with the rows' text (Figma: headers are
-//   laid out for the full width, footers for the rows').
-// - Sticky section titles (plain lists) are opaque (Framework7 contacts list;
-//   Figma: a blur only), and sections snap to the top of a scroll container
-//   with `scroll-snap-type` (Framework7: none).
-// - Images keep their regular size (one line's height) in tall rows (Figma
-//   Height=Tall: rounded 44px, circular 60px, fill 68px).
-// - Swiped rows taller than Figma's tall rows (e.g. Mail's) get 34px corners
-//   (Figma: a capsule, which would cut into their content).
+// - Header and footer text is aligned with the rows' text.
+// - Sticky section titles (plain lists) are opaque (Framework7 contacts
+//   list), and sections snap to the top of a scroll container with
+//   `scroll-snap-type` (Framework7: none).
+// - Images keep their regular size (one line's height) in tall rows.
+// - Swiped rows taller than tall rows (e.g. a mail app's) get 34px corners (a
+//   capsule would cut into their content).
 // - Swiped rows keep a round end at their place's edge, their content sliding
-//   away beneath it (iOS; Figma shows rows opened in place only).
-// - Swipe actions are 44px circles, 4px from a regular row's edges (Figma:
-//   52px, the row's height), or rounded rectangles as high as the row (as iOS
-//   notifications'), by action; labels are optional (for multi-line rows), 4px
-//   below the shapes, in 13px (Figma: 50px circles, 3px above 15px labels,
-//   which overflow a 68px row). Symbols can be text, in capitals (regular
-//   weight).
-// - Actions fade in as they scale in, and the others fade out while overswiping
-//   (iOS; Figma: none).
-// - Rounded and circular images size their symbol to the image (Figma: none
-//   given); header buttons are round (Figma PNG; CSS: 10px corners).
+//   away beneath it.
+// - Swipe actions are 44px circles, 4px from a regular row's edges, or
+//   rounded rectangles as high as the row (as notifications'), by action;
+//   labels are optional (for multi-line rows), 4px below the shapes, in 13px.
+//   Symbols can be text, in capitals (regular weight).
+// - Actions fade in as they scale in, and the others fade out while
+//   overswiping.
+// - Rounded and circular images size their symbol to the image; header
+//   buttons are round.
 // - Separators, chevrons and the checkmarks are drawn as CSS borders and SVG
-//   strokes (Figma: SF Symbols glyphs 􀆊, 􀆅, 􀅼, 􀅽, 􀌇, 􀆏).
+//   strokes.
 
-// Glyphs (SF Symbols, as SVG strokes at the current font size).
+// Glyphs (SVG strokes at the current font size).
 
 const Chevron = () => (
   <svg
@@ -202,7 +221,7 @@ const Chevron = () => (
   </svg>
 );
 
-// Figma PNG: 15.2 × 14.5px of ink at 17px (590).
+// 15.2 × 14.5px of ink at 17px (590).
 const Lines = () => (
   <svg
     aria-hidden="true"
@@ -248,15 +267,23 @@ const StyledRoot = forwardRef<HTMLElement, Omit<ListRootProps, 'editing'>>(
     }),
 );
 
-/** A list (UIKit `UITableView`): sections of rows, headers and footers. */
+// Dragging to select (see `select.ts`): the root's, for its checkboxes.
+const DragToSelectContext = createContext(true);
+
+/** A list: sections of rows, headers and footers. */
 const Root = forwardRef<HTMLElement, ListRootProps>(
-  ({ editing = 'ignore', ...props }, ref) => (
-    <EditingContext.Provider value={editing}>
-      <StyledRoot
-        ref={ref}
-        {...props}
-      />
-    </EditingContext.Provider>
+  (
+    { dragToSelect: isDragToSelect = true, editing = 'ignore', ...props },
+    ref,
+  ) => (
+    <DragToSelectContext.Provider value={isDragToSelect}>
+      <EditingContext.Provider value={editing}>
+        <StyledRoot
+          ref={ref}
+          {...props}
+        />
+      </EditingContext.Provider>
+    </DragToSelectContext.Provider>
   ),
 );
 
@@ -292,239 +319,72 @@ const Section = forwardRef<HTMLElement, ListSectionProps>(
   },
 );
 
-// Reordering (Framework7 `sortable.js`, `sortable.less`): dragging a row's
-// grabber lifts the row, which follows the pointer within its group, the
-// other rows making room (300ms); near an end of the scroll container, it
-// scrolls (as the tab bar's lens does). Released, the row settles into its
-// place, and the group's `onReorder` is called; the app reorders its rows.
-// Until their order changes (or, if it doesn't, the rows slide back), they
-// keep their offsets. Arrow keys on a focused grabber move its row by one.
-const reorderDuration = 300;
+// Reordering (see `reorder.ts`): the rows of a range (`DropGroup`, `Group`
+// given a `reorderHandle`) register with it, its gaps between them.
+type RangeContextValue = ReorderTargetEntry['members'];
+const RangeContext = createContext<RangeContextValue>(undefined);
 
-const isItem = (element: Element): element is HTMLElement =>
-  element instanceof HTMLElement && element.matches('[data-list-part=item]');
-
-// The nearest ancestor scrolling vertically, or the document's.
-const scrollContainerOf = (element: HTMLElement) => {
-  for (
-    let current = element.parentElement;
-    current;
-    current = current.parentElement
-  ) {
-    const { overflowY } = getComputedStyle(current);
-    if (
-      (overflowY === 'auto' || overflowY === 'scroll') &&
-      current.scrollHeight > current.clientHeight
-    ) {
-      return current;
-    }
-  }
-
-  return element.ownerDocument.scrollingElement ?? element.ownerDocument.body;
+const handlesOf = (
+  handle: ListReorderHandle | readonly ListReorderHandle[] | undefined,
+): readonly ListReorderHandle[] => {
+  if (handle === undefined) return [];
+  return handle instanceof ListReorderHandle ? [handle] : handle;
 };
 
-const setOffset = (item: HTMLElement, offset: number, isAnimated: boolean) => {
-  item.style.transition = isAnimated
-    ? `transform ${reorderDuration}ms`
-    : 'none';
-  item.style.transform = offset === 0 ? '' : `translateY(${offset}px)`;
-};
-
-/** Reorders a group's rows by their grabbers (see above). */
-const useReorder = (
-  groupRef: { current: HTMLElement | null },
-  onReorder: ((from: number, to: number) => void) | undefined,
+/**
+ * Keeps an entry in its handles' sets (`pick`: which), as they change, until
+ * unmounted.
+ */
+const useHandleEntry = <Entry,>(
+  entry: Entry,
+  handles: readonly ListReorderHandle[],
+  pick: (handle: ListReorderHandle) => Set<Entry>,
 ) => {
-  const onReorderRef = useRef(onReorder);
+  const registered = useRef<readonly ListReorderHandle[]>([]);
   useLayoutEffect(() => {
-    onReorderRef.current = onReorder;
+    for (const handle of registered.current) {
+      if (!handles.includes(handle)) pick(handle).delete(entry);
+    }
+    for (const handle of handles) pick(handle).add(entry);
+    registered.current = handles;
   });
+  useLayoutEffect(
+    () => () => {
+      for (const handle of registered.current) pick(handle).delete(entry);
+      registered.current = [];
+    },
+    [entry, pick],
+  );
+};
 
-  useEffect(() => {
-    const { current: group } = groupRef;
-    if (!group) return undefined;
+const targetsOf = (handle: ListReorderHandle) => handle.targets;
+const itemsOf = (handle: ListReorderHandle) => handle.items;
 
-    const grabberOf = (target: EventTarget | null) => {
-      const grabber =
-        target instanceof Element
-          ? target.closest<HTMLElement>('[data-list-part=grabber]')
-          : null;
-      const item = grabber?.closest<HTMLElement>('[data-list-part=item]');
-      return grabber && item && item.parentElement === group
-        ? { grabber, item }
-        : undefined;
-    };
+/**
+ * A range's gaps as targets of its handles (see `DropGroup`, `Group`): its
+ * rows' set, for them to register with.
+ */
+const useRange = (
+  part: 'DropGroup' | 'Group',
+  reorderHandle: ListReorderHandle | readonly ListReorderHandle[] | undefined,
+  dropName: string | undefined,
+  ref?: { readonly current: HTMLElement | null },
+): RangeContextValue => {
+  const latest = useRef({ dropName, reorderHandle });
+  useLayoutEffect(() => {
+    latest.current = { dropName, reorderHandle };
+  });
+  const [entry] = useState<ReorderTargetEntry>(() => ({
+    handles: () => handlesOf(latest.current.reorderHandle),
+    members: new Set(),
+    name: () => latest.current.dropName,
+    part,
+    ref,
+  }));
+  const handles = handlesOf(reorderHandle);
+  useHandleEntry(entry, handles, targetsOf);
 
-    // Clears the rows' offsets once their order changed, or slides them
-    // back if it doesn't.
-    const commit = (items: HTMLElement[], from: number, to: number) => {
-      const settle = { observer: undefined as MutationObserver | undefined };
-      let timeout: ReturnType<typeof setTimeout> | undefined;
-      const clearOffsets = (isAnimated: boolean) => {
-        settle.observer?.disconnect();
-        clearTimeout(timeout);
-        for (const element of items) {
-          setOffset(element, 0, isAnimated);
-          delete element.dataset.reordering;
-          delete element.dataset.reorderEdge;
-        }
-      };
-      settle.observer = new MutationObserver(() => clearOffsets(false));
-      settle.observer.observe(group, { childList: true });
-      timeout = setTimeout(() => clearOffsets(true), reorderDuration);
-
-      if (from === to) {
-        clearOffsets(true);
-        return;
-      }
-      onReorderRef.current?.(from, to);
-    };
-
-    const onPointerDown = (event: globalThis.PointerEvent) => {
-      if (event.button !== 0) return;
-      const target = grabberOf(event.target);
-      if (!target) return;
-
-      const { grabber, item } = target;
-      const items = [...group.children].filter(isItem);
-      const from = items.indexOf(item);
-      const origin = group.getBoundingClientRect().top;
-      // Relative to the group, which may scroll.
-      const tops = items.map(
-        (element) => element.getBoundingClientRect().top - origin,
-      );
-      const heights = items.map((element) => element.offsetHeight);
-      const height = heights[from] ?? 0;
-      const top = tops[from] ?? 0;
-      const bottomLimit =
-        (tops.at(-1) ?? 0) + (heights.at(-1) ?? 0) - top - height;
-      const startY = event.clientY - origin;
-      let clientY = event.clientY;
-      let to = from;
-
-      event.preventDefault();
-      grabber.setPointerCapture(event.pointerId);
-      item.dataset.reordering = '';
-      const scroller = scrollContainerOf(group);
-
-      // The rows' corners and separators follow their order on screen.
-      const markEdges = (place: number) => {
-        const order = items.filter((element) => element !== item);
-        order.splice(place, 0, item);
-        for (const [index, element] of order.entries()) {
-          element.dataset.reorderEdge = [
-            index === 0 ? 'first' : '',
-            index === order.length - 1 ? 'last' : '',
-            order[index - 1] === item ? 'after' : '',
-          ]
-            .filter(Boolean)
-            .join(' ');
-        }
-      };
-      markEdges(from);
-
-      const update = () => {
-        const groupTop = group.getBoundingClientRect().top;
-        const offset = Math.min(
-          Math.max(clientY - groupTop - startY, -top),
-          bottomLimit,
-        );
-        setOffset(item, offset, false);
-
-        // The row's place: its leading edge past the middle of the rows
-        // it's moved over (so it reaches the group's ends at any heights).
-        to = from;
-        for (const [index, rowTop] of tops.entries()) {
-          const middle = rowTop + (heights[index] ?? 0) / 2;
-          if (index < from && top + offset <= middle) to = Math.min(to, index);
-          if (index > from && top + height + offset >= middle) {
-            to = Math.max(to, index);
-          }
-        }
-        for (const [index, element] of items.entries()) {
-          if (index === from) continue;
-          const isBelow = index > from && index <= to;
-          const isAbove = index < from && index >= to;
-          setOffset(
-            element,
-            (isAbove ? height : 0) - (isBelow ? height : 0),
-            true,
-          );
-        }
-        markEdges(to);
-      };
-
-      const elapsedOf = frameElapsed();
-      let frame = requestAnimationFrame(function scroll(time) {
-        frame = requestAnimationFrame(scroll);
-        const elapsed = elapsedOf(time);
-        const { bottom, top: scrollerTop } =
-          scroller === scroller.ownerDocument.scrollingElement
-            ? { bottom: window.innerHeight, top: 0 }
-            : scroller.getBoundingClientRect();
-        const delta = edgeScrollDelta(clientY, scrollerTop, bottom, elapsed);
-        if (delta === 0) return;
-
-        const before = scroller.scrollTop;
-        scroller.scrollTop += delta;
-        if (scroller.scrollTop !== before) update();
-      });
-
-      const onMove = (moveEvent: globalThis.PointerEvent) => {
-        if (moveEvent.pointerId !== event.pointerId) return;
-        clientY = moveEvent.clientY;
-        update();
-      };
-
-      const onEnd = (endEvent: globalThis.PointerEvent) => {
-        if (endEvent.pointerId !== event.pointerId) return;
-        cancelAnimationFrame(frame);
-        grabber.removeEventListener('pointermove', onMove);
-        grabber.removeEventListener('pointerup', onEnd);
-        grabber.removeEventListener('pointercancel', onEnd);
-
-        // Settles into its place, then commits.
-        const place =
-          to > from
-            ? (tops[to] ?? 0) + (heights[to] ?? 0) - top - height
-            : (tops[to] ?? 0) - top;
-        const committed = endEvent.type === 'pointercancel' ? from : to;
-        if (committed === from) {
-          for (const element of items) setOffset(element, 0, true);
-        } else {
-          setOffset(item, place, true);
-        }
-        markEdges(committed);
-        setTimeout(() => commit(items, from, committed), reorderDuration);
-      };
-
-      grabber.addEventListener('pointermove', onMove);
-      grabber.addEventListener('pointerup', onEnd);
-      grabber.addEventListener('pointercancel', onEnd);
-    };
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
-      const target = grabberOf(event.target);
-      if (!target) return;
-
-      const items = [...group.children].filter(isItem);
-      const from = items.indexOf(target.item);
-      const to = from + (event.key === 'ArrowUp' ? -1 : 1);
-      if (to < 0 || to >= items.length) return;
-
-      event.preventDefault();
-      onReorderRef.current?.(from, to);
-    };
-
-    group.addEventListener('pointerdown', onPointerDown);
-    group.addEventListener('keydown', onKeyDown);
-
-    return () => {
-      group.removeEventListener('pointerdown', onPointerDown);
-      group.removeEventListener('keydown', onKeyDown);
-    };
-  }, [groupRef]);
+  return handles.length === 0 ? undefined : entry.members;
 };
 
 /** The rows of a section, on the list's background (inset: a card). */
@@ -544,26 +404,89 @@ const StyledGroup = forwardRef<HTMLElement, PartProps<'ul'>>(
 );
 
 const Group = forwardRef<HTMLElement, ListGroupProps>(
-  ({ editing, onReorder, ...props }, ref) => {
+  ({ dropName, editing, reorderHandle, ...props }, ref) => {
     const groupRef = useForwardedRef<HTMLElement>(ref);
     const inherited = useContext(EditingContext);
-    useReorder(groupRef, onReorder);
+    const range = useRange('Group', reorderHandle, dropName, groupRef);
 
     return (
       <EditingContext.Provider value={editing ?? inherited}>
-        <StyledGroup
-          ref={groupRef}
-          {...props}
-        />
+        <RangeContext.Provider value={range}>
+          <StyledGroup
+            ref={groupRef}
+            {...props}
+          />
+        </RangeContext.Provider>
       </EditingContext.Provider>
     );
+  },
+);
+
+/**
+ * A range of rows' gaps, targets of its handles (as a `Group` given a
+ * `reorderHandle`: before, between and after its rows), with no element of
+ * its own (only an empty, hidden one marking where it is, its gap once
+ * emptied): its rows stay its group's.
+ */
+const DropGroup: FunctionComponent<ListDropGroupProps> = ({
+  children,
+  dropName,
+  reorderHandle,
+}) => {
+  // Where it is, emptied: an empty, hidden element (as a `DropTarget`'s).
+  const markerRef = useRef<HTMLLIElement>(null);
+  const range = useRange('DropGroup', reorderHandle, dropName, markerRef);
+
+  return (
+    <RangeContext.Provider value={range}>
+      <li
+        ref={markerRef}
+        aria-hidden
+        className="uikit-list-drop-target"
+        data-list-part="drop-target"
+      />
+      {children}
+    </RangeContext.Provider>
+  );
+};
+
+/**
+ * A gap rows of its handles can be dropped into, where it's placed among a
+ * group's rows: an empty, hidden element (no height), only marking it.
+ */
+const DropTarget = forwardRef<HTMLElement, ListDropTargetProps>(
+  ({ className, dropName, render, reorderHandle, ...props }, ref) => {
+    const targetRef = useForwardedRef<HTMLElement>(ref);
+    const latest = useRef({ dropName, reorderHandle });
+    useLayoutEffect(() => {
+      latest.current = { dropName, reorderHandle };
+    });
+    const [entry] = useState<ReorderTargetEntry>(() => ({
+      handles: () => handlesOf(latest.current.reorderHandle),
+      name: () => latest.current.dropName,
+      part: 'DropTarget',
+      ref: targetRef,
+    }));
+    useHandleEntry(entry, handlesOf(reorderHandle), targetsOf);
+
+    return useRender({
+      defaultTagName: 'li',
+      props: {
+        'aria-hidden': true,
+        'data-list-part': 'drop-target',
+        className: cn('uikit-list-drop-target', className),
+        ...props,
+      },
+      ref: targetRef,
+      render,
+    });
   },
 );
 
 // Rows.
 
 /**
- * A swiped row's corners: a capsule up to Figma's tall rows (68px), taller
+ * A swiped row's corners: a capsule up to tall rows (68px), taller
  * rows (e.g. Mail's) get rounded corners.
  */
 const swipeRadius = 34;
@@ -708,7 +631,7 @@ const overswipeArm = 304;
 const armDuration = 150;
 /**
  * Actions fade in from this opacity as they scale in, and the others fade
- * to it while overswiping, until armed (iOS, measured: shapes, symbols and
+ * to it while overswiping, until armed (measured: shapes, symbols and
  * labels each at 36%).
  */
 const actionFade = 0.36;
@@ -719,7 +642,7 @@ const isRtl = (element: HTMLElement) =>
   getComputedStyle(element).direction === 'rtl';
 
 /**
- * Overswipe (Framework7 iOS): widens the outermost action's shape by
+ * Overswipe (Framework7's iOS theme): widens the outermost action's shape by
  * `extra` px towards the row (`towardsRow`, physical), from the edge (its
  * negative margin keeps the action's size), its symbol and label centered in
  * it, as the row moves (`transition`).
@@ -1122,7 +1045,7 @@ const PanelContext = createContext<PanelContextValue | undefined>(undefined);
  * Its collapsible's rows (Base UI `Collapsible.Panel`, `Accordion.Panel`),
  * shown or not, opening and closing in place, together (each its height),
  * e.g. an inline `Calendar` or `TimeRoll` below a row with a `DatePicker`
- * (see `DatePicker.Expandable`, as iOS's Calendar). Placed among a group's
+ * (see `DatePicker.Expandable`, as a calendar app's). Placed among a group's
  * rows (no element of its own: the group's rows stay its children), or
  * among another's (closed with it). Closed, they're inert.
  */
@@ -1338,7 +1261,43 @@ const useExpandedRow = (
 };
 
 /**
- * A row (UIKit `UITableViewCell`), with optional swipe actions. With a click
+ * A row in reordering (see `reorder.ts`): its name, its handles; in a
+ * range, one of its rows.
+ */
+const useReorderItem = (
+  itemRef: { readonly current: HTMLElement | null },
+  reorderHandle: ListReorderHandle | readonly ListReorderHandle[] | undefined,
+  dropName: string | undefined,
+) => {
+  const range = useContext(RangeContext);
+  useLayoutEffect(() => {
+    if (!range) return undefined;
+    range.add(itemRef);
+    return () => {
+      range.delete(itemRef);
+    };
+  }, [itemRef, range]);
+
+  const latest = useRef({ dropName, reorderHandle });
+  useLayoutEffect(() => {
+    latest.current = { dropName, reorderHandle };
+  });
+  const [entry] = useState<ReorderItemEntry>(() => ({
+    handles: () => handlesOf(latest.current.reorderHandle),
+    name: () => latest.current.dropName,
+    ref: itemRef,
+  }));
+  useHandleEntry(entry, handlesOf(reorderHandle), itemsOf);
+  useLayoutEffect(() => {
+    const { current: element } = itemRef;
+    if (!element) return undefined;
+    setItemEntry(element, entry);
+    return () => setItemEntry(element, undefined);
+  }, [entry, itemRef]);
+};
+
+/**
+ * A row, with optional swipe actions. With a click
  * handler, it's pressable itself (e.g. passing the click on to a control in
  * it), but where its own controls are pressed.
  *
@@ -1358,9 +1317,11 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     onPointerDown,
     onPointerMove,
     onPointerUp,
+    dropName,
     editing: itemEditing,
     id: idProp,
     level,
+    reorderHandle,
     selected,
     style,
     ...props
@@ -1368,6 +1329,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
   const inheritedEditing = useContext(EditingContext);
   const editing = itemEditing ?? inheritedEditing;
   const itemRef = useForwardedRef<HTMLElement>(ref);
+  useReorderItem(itemRef, reorderHandle, dropName);
   const id = useExpandedRow(itemRef, idProp);
   useEditingSizes(itemRef, editing !== 'ignore');
   useStrictSlots(itemRef);
@@ -1885,7 +1847,6 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       base: offsetOf(item),
       isMoved: false,
       pointerId: event.pointerId,
-      scroll: item.scrollLeft,
       time: performance.now(),
       x: event.clientX,
       y: event.clientY,
@@ -1917,8 +1878,9 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       showSnaps();
     }
 
-    // The content follows the pointer.
-    item.scrollLeft = drag.scroll - dx;
+    // The content follows the pointer (by its offset: the room before it
+    // grows as the swipe starts, see `showSnaps`).
+    scrollTo(drag.base + (isRtl(item) ? -dx : dx), false);
   };
 
   // A mouse drag released: overswiped (armed), opened (past half its
@@ -2172,13 +2134,59 @@ const Span = forwardRef<HTMLElement, PartProps<'span'>>(
 );
 
 /**
- * A line under a row's line, across it (e.g. a field's description and
- * error, a status); last in its row. Hidden (`hidden`), it collapses:
- * growing and shrinking as it's shown and hidden (kept rendered).
+ * A `Below`'s start: its row's content's (after the leading parts, e.g. an
+ * image, edit controls), as `--uikit-list-below-start`; measured, again as
+ * the row's parts resize (e.g. entering edit mode).
+ */
+const useBelowStart = (below: { current: HTMLElement | null }) => {
+  useLayoutEffect(() => {
+    const { current: element } = below;
+    const row = element?.parentElement;
+    const content = row?.querySelector<HTMLElement>(
+      ':scope > :is([data-list-part="content"], [data-list-part="span"])',
+    );
+    if (!element || !row || !content) return undefined;
+
+    const measure = () => {
+      const style = getComputedStyle(row);
+      const rowRect = row.getBoundingClientRect();
+      const contentRect = content.getBoundingClientRect();
+      const offset =
+        style.direction === 'rtl'
+          ? rowRect.right - contentRect.right
+          : contentRect.left - rowRect.left;
+      const start = Math.max(
+        offset - Number.parseFloat(style.paddingInlineStart),
+        0,
+      );
+      element.style.setProperty(
+        '--uikit-list-below-start',
+        `${String(start)}px`,
+      );
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(row);
+    observer.observe(content);
+    return () => {
+      observer.disconnect();
+    };
+  }, [below]);
+};
+
+/**
+ * A line under a row's line, across it from where its content starts (e.g.
+ * a field's description and error, a status, a message's preview); last in
+ * its row. Hidden (`hidden`), it collapses: growing and shrinking as it's
+ * shown and hidden (kept rendered).
  */
 const Below = forwardRef<HTMLElement, PartProps<'div'>>(
-  ({ className, render, ...props }, ref) =>
-    useRender({
+  ({ className, render, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    useBelowStart(ref);
+
+    return useRender({
       defaultTagName: 'div',
       props: {
         'data-list-part': 'below',
@@ -2187,10 +2195,11 @@ const Below = forwardRef<HTMLElement, PartProps<'div'>>(
       },
       ref,
       render,
-    }),
+    });
+  },
 );
 
-// Figma “Title”; as a link or button (`render`), it makes the row pressable.
+// A row's title; as a link or button (`render`), it makes the row pressable.
 const Title = forwardRef<HTMLElement, PartProps<'span'>>(
   ({ className, render, ...props }, ref) =>
     useRender({
@@ -2206,7 +2215,7 @@ const Title = forwardRef<HTMLElement, PartProps<'span'>>(
     }),
 );
 
-// Figma “Subtitle” (rows), “Supertitle” and “Subtitle” (headers).
+// A subtitle (rows), or a supertitle or subtitle (headers).
 const Subtitle = forwardRef<HTMLElement, PartProps<'span'>>(
   ({ className, render, ...props }, ref) =>
     useRender({
@@ -2253,7 +2262,7 @@ const Supertitle = forwardRef<HTMLElement, PartProps<'span'>>(
     }),
 );
 
-// Figma “Detail”.
+// A detail (trailing text).
 const Detail = forwardRef<HTMLElement, PartProps<'span'>>(
   ({ className, render, ...props }, ref) =>
     useRender({
@@ -2268,7 +2277,7 @@ const Detail = forwardRef<HTMLElement, PartProps<'span'>>(
     }),
 );
 
-// Figma “_Images”: a symbol, or an image (`img`, `video`, `canvas` filling
+// A symbol, or an image (`img`, `video`, `canvas` filling
 // it, or a symbol) in a rounded, circular or square frame.
 const Image = forwardRef<HTMLElement, ListImageProps>(
   ({ className, render, variant = 'symbol', ...props }, ref) =>
@@ -2285,7 +2294,7 @@ const Image = forwardRef<HTMLElement, ListImageProps>(
     }),
 );
 
-// Figma “Symbol” and “Info”: a symbol in the tint color, pressable as a
+// A symbol (e.g. info) in the tint color, pressable as a
 // link or button (`render`).
 const Accessory = forwardRef<
   HTMLElement,
@@ -2303,7 +2312,7 @@ const Accessory = forwardRef<
   }),
 );
 
-// Figma “Checkmark” (􀆅, 17px, 590).
+// A checkmark (17px, 590).
 const Checkmark = forwardRef<
   HTMLElement,
   PartProps<'span'> & WhileEditingProps
@@ -2321,7 +2330,7 @@ const Checkmark = forwardRef<
   }),
 );
 
-// Figma “Drill-in” (􀆊, 17px, 590).
+// A drill-in chevron (17px, 590).
 const DrillIn = forwardRef<HTMLElement, PartProps<'span'>>(
   ({ children, className, render, ...props }, ref) =>
     useRender({
@@ -2338,7 +2347,7 @@ const DrillIn = forwardRef<HTMLElement, PartProps<'span'>>(
     }),
 );
 
-// Figma “Disclosure” (rows: 17px, headers: 19px, 590, in the tint color),
+// A disclosure chevron (rows: 17px, headers: 19px, 590, in the tint color),
 // turned down while open (e.g. in a Base UI `Collapsible.Trigger`).
 const Disclosure = forwardRef<HTMLElement, PartProps<'span'>>(
   ({ children, className, render, ...props }, ref) => {
@@ -2362,13 +2371,25 @@ const Disclosure = forwardRef<HTMLElement, PartProps<'span'>>(
   },
 );
 
-// Figma “_Grabber” (􀌇, 17px, 400).
+// Three lines (17px, 400).
 /**
- * Figma “_Grabber”: drags its row to reorder its group (see `Group`
- * `onReorder`); focused, arrow keys move the row.
+ * A grabber: drags its row to reorder it (see `Item`
+ * `reorderHandle`); focused, arrow keys move the row (grabbed by the app:
+ * from target to target, Enter or Space dropping it).
  */
 const Grabber = forwardRef<HTMLElement, PartProps<'span'>>(
-  ({ children, className, onClick, render, ...props }, ref) =>
+  (
+    {
+      children,
+      className,
+      onClick,
+      onKeyDown,
+      onPointerDown,
+      render,
+      ...props
+    },
+    ref,
+  ) =>
     useRender({
       defaultTagName: 'span',
       props: {
@@ -2377,7 +2398,23 @@ const Grabber = forwardRef<HTMLElement, PartProps<'span'>>(
         tabIndex: 0,
         children: children ?? <Lines />,
         ...props,
-        // The click ending a drag (captured by the grabber, see `useReorder`)
+        onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
+          (onKeyDown as Handler<typeof event>)?.(event);
+          if (event.defaultPrevented) return;
+          reorderByKey(
+            event as unknown as globalThis.KeyboardEvent,
+            event.currentTarget,
+          );
+        },
+        onPointerDown: (event: PointerEvent<HTMLElement>) => {
+          (onPointerDown as Handler<typeof event>)?.(event);
+          if (event.defaultPrevented) return;
+          startReorderDrag(
+            event as unknown as globalThis.PointerEvent,
+            event.currentTarget,
+          );
+        },
+        // The click ending a drag (captured by the grabber, see `reorder.ts`)
         // stays with it: its row doesn't act on it (e.g. pass it on to its
         // checkbox, see `forwardClick`).
         onClick: (event: MouseEvent<HTMLElement>) => {
@@ -2390,7 +2427,7 @@ const Grabber = forwardRef<HTMLElement, PartProps<'span'>>(
     }),
 );
 
-// Figma Type=Button (rows) and Type=Action (headers): text in the tint
+// A button (rows) or an action (headers): text in the tint
 // color.
 const Action = forwardRef<HTMLElement, PartProps<'button'>>(
   ({ className, render, ...props }, ref) =>
@@ -2407,7 +2444,7 @@ const Action = forwardRef<HTMLElement, PartProps<'button'>>(
     }),
 );
 
-// Figma “Row - Button”: a pressable row's title in the tint color.
+// A button row: a pressable row's title in the tint color.
 const Button = forwardRef<HTMLElement, ListButtonProps>(
   ({ className, destructive, render, ...props }, ref) =>
     useRender({
@@ -2424,16 +2461,41 @@ const Button = forwardRef<HTMLElement, ListButtonProps>(
     }),
 );
 
-/** Figma State=Selected/Unselected: a checkbox (selecting rows). */
+/**
+ * A checkbox (selecting rows); pressed and dragged along the rows,
+ * selecting them (see `select.ts`, `Root`'s `dragToSelect`): neither
+ * scrolling nor swiping a sheet away then.
+ */
 const Checkbox = forwardRef<HTMLElement, CheckboxRootProps & WhileEditingProps>(
-  ({ whileEditing, ...props }, ref) => (
-    <CheckboxBase.Root
-      ref={ref}
-      data-list-part="edit"
-      {...whileEditingOf(whileEditing)}
-      {...props}
-    />
-  ),
+  ({ onPointerDown, onTouchMove, whileEditing, ...props }, ref) => {
+    const isDragToSelect = useContext(DragToSelectContext);
+
+    return (
+      <CheckboxBase.Root
+        ref={ref}
+        data-base-ui-swipe-ignore={isDragToSelect ? '' : undefined}
+        data-drag-to-select={isDragToSelect ? '' : undefined}
+        data-list-part="edit"
+        onPointerDown={(event: PointerEvent<HTMLElement>) => {
+          (onPointerDown as Handler<typeof event> | undefined)?.(event);
+          const { button, currentTarget, isPrimary } = event;
+          const root = currentTarget.closest<HTMLElement>(
+            '[data-list-part=root]',
+          );
+          if (!isDragToSelect || !isPrimary || button !== 0 || !root) return;
+          dragToSelect(currentTarget, root, event);
+        }}
+        // Not scrolling where `touch-action` isn't kept (seen on iOS): on
+        // the element itself, cancelable.
+        onTouchMove={(event: ReactTouchEvent<HTMLElement>) => {
+          (onTouchMove as Handler<typeof event> | undefined)?.(event);
+          if (isDragToSelect && event.cancelable) event.preventDefault();
+        }}
+        {...whileEditingOf(whileEditing)}
+        {...props}
+      />
+    );
+  },
 );
 
 /**
@@ -2469,7 +2531,7 @@ const StyledEditButton = forwardRef<
 );
 
 /**
- * Figma State=Remove/Add: a symbol (its child) in a circle of its `tint`,
+ * A remove or add button: a symbol (its child) in a circle of its `tint`,
  * doing what the app gives it (e.g. deleting the row; or, rendered by a
  * `SwipeActionsTrigger`, opening its trailing actions).
  */
@@ -2489,7 +2551,7 @@ const EditButton = forwardRef<HTMLElement, ListEditButtonProps>(
   ),
 );
 
-// Swipe actions (Figma “Row with Swipe Actions”, “_Swipe Actions”): shapes
+// Swipe actions: shapes
 // 10px apart, 10px from the row and 16px from the edge.
 
 // Circles centered in the row, rounded rectangles 4px from its edges.
@@ -2682,8 +2744,7 @@ const SwipeAction = forwardRef<HTMLElement, ListSwipeActionProps>(
   },
 );
 
-// Headers (Figma “Header” Type, “Section Title”) and footers (Figma
-// “Grouped Table Footer”).
+// Headers (and section titles) and footers.
 
 const Header = forwardRef<HTMLElement, ListHeaderProps>(
   ({ className, prominence, render, ...props }, ref) =>
@@ -2730,7 +2791,7 @@ const Block = forwardRef<HTMLElement, ListBlockProps>(
     }),
 );
 
-// Index (Figma “Index Bar”; Framework7 “List Index”): letters in the tint
+// Index (Framework7 “List Index”): letters in the tint
 // color, selected by pressing or scrubbing over them (clicking each item).
 // Placing it is up to the page (Framework7: at the page's edge), above the
 // sticky headers of plain lists (z-index 2).
@@ -2782,6 +2843,7 @@ const Index = forwardRef<HTMLElement, ListIndexProps>(
       onPointerDown,
       onPointerMove,
       onPointerUp,
+      onTouchMove,
       ...props
     },
     ref,
@@ -2805,6 +2867,7 @@ const Index = forwardRef<HTMLElement, ListIndexProps>(
         onPointerDown,
         onPointerMove,
         onPointerUp,
+        onTouchMove,
       },
     );
 
@@ -2835,7 +2898,7 @@ const IndexItem = forwardRef<HTMLElement, PartProps<'button'>>(
 
 /**
  * A row's click handler passing the click on to the control in it
- * (`selector`, e.g. `[role=switch]`), as iOS rows do, unless it was the
+ * (`selector`, e.g. `[role=switch]`), as native rows do, unless it was the
  * control's own: `<List.Item onClick={forwardClick('[role=switch]')}>`. As
  * the click it is: a pointer's (`detail` > 0) or a keyboard's (a control's
  * `click()` would be a keyboard's, so menus would open with their first
@@ -2857,6 +2920,8 @@ export const List = {
   Section,
   Header,
   Group,
+  DropGroup,
+  DropTarget,
   Item,
   Leading,
   Content,
@@ -2895,4 +2960,6 @@ export const List = {
   Index,
   IndexItem,
   createSwipeActionsHandle,
+  createReorderHandle,
+  reorder,
 };

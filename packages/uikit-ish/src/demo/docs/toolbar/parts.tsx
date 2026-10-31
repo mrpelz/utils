@@ -1,9 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfFlag } from '@bradleyhodges/sfsymbols/sfFlag';
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -18,6 +12,14 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import {
+  sfChevronBackward,
+  sfEllipsis,
+  sfFlag,
+  sfFolder,
+  sfSquareAndArrowUp,
+  sfTrash,
+} from '../../tooling/icons.js';
 import {
   toolbarButtonRows,
   toolbarGroupRows,
@@ -834,8 +836,8 @@ export const ToolbarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A glass capsule of several buttons (Figma “Button Group”), 6px in from
-        its ends (top: 4px), its buttons 12px apart.
+        A glass capsule of several buttons, 6px in from its ends (top: 4px), its
+        buttons 12px apart.
       </li>
       <li>
         Pressed, a glass lens (scaled by 1.05), the pressed button on the
@@ -953,7 +955,7 @@ export const ToolbarParts: FunctionComponent = () => (
         assistive technology), vertical in a horizontal bar.
       </li>
       <li>
-        No styles here (iOS’s bars separate by space): empty, as wide as styled.
+        No styles here (the bars separate by space): empty, as wide as styled.
       </li>
     </ul>
     <SeparatorPart />
@@ -996,7 +998,7 @@ export const ToolbarParts: FunctionComponent = () => (
         navigation (the arrow keys move within its text first).
       </li>
       <li>
-        No styles here: for iOS’s search field, a{' '}
+        No styles here: for a search field, a{' '}
         <a href="text-field">Text field</a>’s{' '}
         <PartLink
           component="text-field"

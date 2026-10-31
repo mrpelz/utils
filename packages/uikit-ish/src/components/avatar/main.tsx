@@ -18,19 +18,18 @@ export type {
   AvatarRootProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Activity Views”: “Contact”): a person's
-// photo in a circle (70px); several people (“Group”) in one circle on the
+// A person's photo in a circle (70px); several people (a group) in one
+// circle on the
 // system fill: the first 37px (of 70px) from 9px in, the second 22px, at
 // the opposite corner. Base UI's `Avatar`: its image once loaded, otherwise
 // its fallback.
 //
-// Deviations:
-// - The fallback (e.g. the person's initials, the app's) on iOS contacts'
-//   gray gradient (Figma: photos only), its text 40% of the avatar,
+// Also:
+// - The fallback (e.g. the person's initials, the app's) on a gray
+//   gradient, its text 40% of the avatar,
 //   semibold, white.
 // - A third person in a group: 26% of it, at the top end.
-// - Badges (`Badge`, a child) sit on its top end corner (Figma: an app's
-//   icon at its bottom end, which isn't built).
+// - Badges (`Badge`, a child) sit on its top end corner.
 
 /** A person's avatar (Base UI's `Avatar.Root`). */
 const Root = forwardRef<HTMLSpanElement, AvatarRootProps>(
@@ -74,7 +73,7 @@ const Fallback = forwardRef<HTMLSpanElement, AvatarFallbackProps>(
 );
 
 /**
- * Several people in one circle (Figma “Group”): their `Avatar.Root`s (up to
+ * Several people in one circle (a group): their `Avatar.Root`s (up to
  * three shown); badges (`Badge`) on its corner.
  */
 const Group = forwardRef<HTMLSpanElement, AvatarGroupProps>(

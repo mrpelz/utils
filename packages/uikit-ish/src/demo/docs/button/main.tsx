@@ -1,6 +1,5 @@
 import './style.css';
 
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { Fragment, FunctionComponent, ReactNode, useMemo } from 'react';
 
 import { Button, ButtonRootProps, Symbol } from '../../../components/index.js';
@@ -11,6 +10,7 @@ import {
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { sfHeartFill } from '../../tooling/icons.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -98,7 +98,7 @@ const matrixColumns = [false, true].flatMap((isDisabled) =>
   matrixLabelTypes.map((labelType) => ({ disabled: isDisabled, labelType })),
 );
 
-// All Figma permutations (Style, Size, Label Type, Enabled) at once, with
+// All permutations (style, size, label type, enabled) at once, with
 // Destructive and the glass context as controls.
 export const ButtonMatrixDemo: FunctionComponent = () => {
   const id = 'button-matrix';

@@ -8,6 +8,6 @@
 /* A readout of the stack, below the screen. */
 .navigation-demo-stack {
   margin: 16px 0 0;
-  color: var(--color-ios-label);
+  color: var(--color-ui-label);
   font-size: 15px;
 }

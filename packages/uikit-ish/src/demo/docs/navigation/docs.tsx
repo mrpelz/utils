@@ -59,8 +59,9 @@ export const navigationRootRows: readonly PropRow[] = [
         component="navigation"
         part="Navigation.Back"
       />{' '}
-      pressed (<code>back-press</code>): the app pops its stack. Without it (or
-      a{' '}
+      pressed (<code>back-press</code>): the app pops its stack. Swiped, as it’s
+      let go, the pop on from where the swipe left it (not popped, it settles
+      back). Without it (or a{' '}
       <PartLink
         component="navigation"
         part="Navigation.SwipeArea"
@@ -97,6 +98,21 @@ export const navigationSwipeAreaRows: readonly PropRow[] = [
 ];
 
 export const navigationBackRows: readonly PropRow[] = [
+  [
+    'persistentId',
+    'string | false',
+    code(union('back')),
+    <>
+      Its id as a persistent item (see{' '}
+      <PartLink
+        component="navigation"
+        part="Navigation.Persistent"
+      />
+      ): in each page’s bar, staying put between pages that both have one,
+      sliding with a page where only it has one; <code>false</code>, always
+      moving with its page.
+    </>,
+  ],
   [
     'disabled',
     'boolean',
@@ -135,9 +151,29 @@ export const navigationBackRows: readonly PropRow[] = [
             >
               {'<Toolbar.Button shape="circle" />'}
             </PartLink>{' '}
-            in a bar that stays.
+            in each pushed page’s bar.
           </>,
         ]
       : row,
   ),
+];
+
+export const navigationPersistentRows: readonly PropRow[] = [
+  [
+    'persistentId',
+    'string',
+    undefined,
+    <>
+      Its id (required): in a transition (pushed, popped, swiped back), while
+      both moving pages have an item of this id, it stays put (the upper page’s
+      shown); otherwise it moves with its page.
+    </>,
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'The item, or its content (rendering the item itself, by its render).',
+  ],
+  ...renderRows('div', 'HTMLDivElement'),
 ];

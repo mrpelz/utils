@@ -1,21 +1,5 @@
 import './style.css';
 
-import { sfCalendar } from '@bradleyhodges/sfsymbols/sfCalendar';
-import { sfClock } from '@bradleyhodges/sfsymbols/sfClock';
-import { sfDocument } from '@bradleyhodges/sfsymbols/sfDocument';
-import { sfEye } from '@bradleyhodges/sfsymbols/sfEye';
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfFolderBadgePlus } from '@bradleyhodges/sfsymbols/sfFolderBadgePlus';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
-import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfPerson2 } from '@bradleyhodges/sfsymbols/sfPerson2';
-import { sfPhoto } from '@bradleyhodges/sfsymbols/sfPhoto';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
-import { sfTextformat } from '@bradleyhodges/sfsymbols/sfTextformat';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
-import { sfTray } from '@bradleyhodges/sfsymbols/sfTray';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
@@ -38,6 +22,24 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import {
+  sfCalendar,
+  sfClock,
+  sfDocument,
+  sfEye,
+  sfFolder,
+  sfFolderBadgePlus,
+  sfHeart,
+  sfICircle,
+  sfListBullet,
+  sfMagnifyingglass,
+  sfPerson2,
+  sfPhoto,
+  sfSquareAndPencil,
+  sfTextformat,
+  sfTrash,
+  sfTray,
+} from '../../tooling/icons.js';
 import { propOptionsPopup } from '../drawer/props.js';
 import {
   getPropOptionsSidebarColumn,
@@ -49,9 +51,9 @@ import {
 } from './props.js';
 
 /**
- * A sidebar (Figma “Sidebars”, iPadOS 26): a floating glass panel (a
+ * A sidebar: a floating glass panel (a
  * `Sidebar`, its list of style `sidebar`) in a `Layout`'s first column,
- * regular (an iPad): the layout's `floating` column over the others, the
+ * regular (a tablet): the layout's `floating` column over the others, the
  * content's column clear of it (`clearFloating`: its page's content inset,
  * its background running underneath).
  */
@@ -120,7 +122,7 @@ export const SidebarDemo: FunctionComponent = () => {
         stateContentColumn,
       ]}
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root
           key={`${keyRoot}-${keyColumn}-${keySidebar}-${keyContentColumn}`}
           {...propsRoot}
@@ -572,7 +574,7 @@ export const SidebarDemo: FunctionComponent = () => {
 };
 
 /**
- * The sidebar, compact (an iPhone): a drawer, swiped in from its edge (the
+ * The sidebar, compact (a phone): a drawer, swiped in from its edge (the
  * layout's), or opened by the content's button.
  */
 export const SidebarCompactDemo: FunctionComponent = () => {
@@ -650,7 +652,7 @@ export const SidebarCompactDemo: FunctionComponent = () => {
         stateContentColumn,
       ]}
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root
           key={`${keyRoot}-${keyColumn}-${keyDrawer}-${keySidebar}-${keyContentColumn}`}
           {...propsRoot}
@@ -1145,7 +1147,7 @@ export const SidebarCompactDemo: FunctionComponent = () => {
 };
 
 /**
- * The sidebar while editing (Figma “Edit Button”): its rows selected by
+ * The sidebar while editing: its rows selected by
  * selection circles before their symbols.
  */
 export const SidebarEditingDemo: FunctionComponent = () => {
@@ -1165,7 +1167,7 @@ export const SidebarEditingDemo: FunctionComponent = () => {
       stage="tablet"
       title="Sidebar (Editing)"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           <Layout.Background>
             <div

@@ -1,7 +1,4 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
-import { sfArrowDown } from '@bradleyhodges/sfsymbols/sfArrowDown';
-import { sfArrowUp } from '@bradleyhodges/sfsymbols/sfArrowUp';
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { FunctionComponent, RefObject, useRef, useState } from 'react';
 
 import {
@@ -29,6 +26,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfArrowDown, sfArrowUp, sfHeartFill } from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { messages } from '../list/content.js';
 import { phoneTabs, phoneTabValues } from '../tab-bar/tabs.js';
@@ -163,6 +161,33 @@ const toolbarCode = `const [selected, setSelected] = useState<string[]>([]);
   </Toolbar.Root>
 </Viewport.BlockEnd>`;
 
+const tintCode = `const [isRecording, setIsRecording] = useState(false);
+
+<Viewport.Content>
+  <Viewport.Padding edge="block-start" />
+  <List.Root>…</List.Root>
+  <Viewport.Padding edge="block-end" />
+</Viewport.Content>
+{/* Recording: the bottom edge tinted red (at rest too). */}
+<Viewport.BlockEnd
+  edgeTint={isRecording ? 'rgb(255 59 48 / 35%)' : undefined}
+>
+  <Toolbar.Root>
+    <Toolbar.Leading />
+    <Toolbar.Title>
+      <span>{isRecording ? 'Recording…' : '12 Recordings'}</span>
+    </Toolbar.Title>
+    <Toolbar.Trailing>
+      <Toolbar.Button
+        destructive={isRecording}
+        onClick={() => setIsRecording((current) => !current)}
+      >
+        <Button.Label>{isRecording ? 'Stop' : 'Record'}</Button.Label>
+      </Toolbar.Button>
+    </Toolbar.Trailing>
+  </Toolbar.Root>
+</Viewport.BlockEnd>`;
+
 const refreshCode = `const contentRef = useRef<HTMLDivElement>(null);
 
 // Tracking the content layer's scrolling, not the document's.
@@ -201,6 +226,7 @@ useViewportScroll(({ isHeld, overscroll }) => {
 <Viewport.Overscroll
   className="pull"
   open={isRefreshing}
+  safeArea="inline"
 >
   {/* Pulled, turning along (a turn to the refresh distance);
       refreshing, spinning on from there. */}
@@ -267,6 +293,7 @@ useViewportScroll(({ isHeld: isHeldNow, overscroll: by }) => {
     className="pull"
     data-armed={overscroll <= -turnDistance ? '' : undefined}
     data-released={isHeld ? undefined : ''}
+    safeArea="inline"
   >
     <Symbol className="pull-arrow" icon={sfArrowDown} />
     {previous}
@@ -278,6 +305,7 @@ useViewportScroll(({ isHeld: isHeldNow, overscroll: by }) => {
     data-armed={overscroll >= turnDistance ? '' : undefined}
     data-released={isHeld ? undefined : ''}
     edge="block-end"
+    safeArea="inline"
   >
     <Symbol className="pull-arrow" icon={sfArrowUp} />
     {next}
@@ -506,7 +534,8 @@ const Message: FunctionComponent = () => {
  */
 const CollapseView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
-}> = ({ contentRef }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, contentRef }) => {
   const { atTop, direction } = useScrollDirection();
   const [value, setValue] = useState('contacts');
   // Collapsed, its selected tab remains.
@@ -516,6 +545,7 @@ const CollapseView: FunctionComponent<{
     <Component
       isInline
       id="viewport-composition-collapse"
+      screenRef={screenRef}
       stage="phone"
       title="Viewport collapsing a tab bar"
     >
@@ -573,10 +603,17 @@ const Collapse: FunctionComponent = () => {
     'contentRef',
     'HTMLDivElement',
   );
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
-      <CollapseView contentRef={contentRef} />
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
+      <CollapseView
+        contentRef={contentRef}
+        screenRef={screenRef}
+      />
     </Viewport.Provider>
   );
 };
@@ -591,7 +628,8 @@ const refreshDistance = 60;
  */
 const RefreshView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
-}> = ({ contentRef }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, contentRef }) => {
   const [log, addLog] = useLog();
   const [rows, setRows] = useState<readonly string[]>(names);
   const [scroll, setScroll] = useState({ isHeld: false, overscroll: 0 });
@@ -626,6 +664,7 @@ const RefreshView: FunctionComponent<{
       isInline
       id="viewport-composition-refresh"
       log={log}
+      screenRef={screenRef}
       stage="phone"
       title="Viewport pulled to refresh"
       diagnostics={
@@ -648,6 +687,7 @@ const RefreshView: FunctionComponent<{
         <Viewport.Overscroll
           className="viewport-demo-pull"
           open={isRefreshing}
+          safeArea="inline"
         >
           {/* Pulled, turning along (a turn to the refresh distance);
               refreshing, spinning on from there. */}
@@ -684,10 +724,17 @@ const Refresh: FunctionComponent = () => {
     'contentRef',
     'HTMLDivElement',
   );
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
-      <RefreshView contentRef={contentRef} />
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
+      <RefreshView
+        contentRef={contentRef}
+        screenRef={screenRef}
+      />
     </Viewport.Provider>
   );
 };
@@ -703,7 +750,8 @@ const turnDistance = 80;
  */
 const PagesView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
-}> = ({ contentRef }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, contentRef }) => {
   const [log, addLog] = useLog();
   const [index, setIndex] = useState(0);
   // The way it was turned: the page coming in from below (next) or above.
@@ -740,6 +788,7 @@ const PagesView: FunctionComponent<{
       isInline
       id="viewport-composition-pages"
       log={log}
+      screenRef={screenRef}
       stage="phone"
       title="Viewport pulled to turn pages"
       diagnostics={
@@ -761,6 +810,7 @@ const PagesView: FunctionComponent<{
             className="viewport-demo-pull"
             data-armed={overscroll <= -turnDistance ? '' : undefined}
             data-released={scroll.isHeld ? undefined : ''}
+            safeArea="inline"
           >
             <Symbol
               className="viewport-demo-pull-arrow"
@@ -775,6 +825,7 @@ const PagesView: FunctionComponent<{
             data-armed={overscroll >= turnDistance ? '' : undefined}
             data-released={scroll.isHeld ? undefined : ''}
             edge="block-end"
+            safeArea="inline"
           >
             <Symbol
               className="viewport-demo-pull-arrow"
@@ -824,10 +875,17 @@ const Pages: FunctionComponent = () => {
     'contentRef',
     'HTMLDivElement',
   );
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
-      <PagesView contentRef={contentRef} />
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
+      <PagesView
+        contentRef={contentRef}
+        screenRef={screenRef}
+      />
     </Viewport.Provider>
   );
 };
@@ -905,12 +963,74 @@ const Selection: FunctionComponent = () => {
   );
 };
 
+/** Recording: the bottom edge tinted while it goes on (see `edgeTint`). */
+const Tint: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [isRecording, setIsRecording] = useState(false);
+
+  return (
+    <Component
+      isInline
+      id="viewport-composition-tint"
+      log={log}
+      stage="phone"
+      title="Viewport with a tinted edge"
+    >
+      <>
+        <Viewport.Content>
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {names.map((name) => (
+                  <List.Item key={name}>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+          <Viewport.Padding edge="block-end" />
+        </Viewport.Content>
+        <Viewport.BlockEnd
+          edgeTint={isRecording ? 'rgb(255 59 48 / 35%)' : undefined}
+        >
+          <Toolbar.Root>
+            <Toolbar.Leading />
+            <Toolbar.Title>
+              <span>
+                {isRecording
+                  ? 'Recording…'
+                  : `${String(names.length)} Recordings`}
+              </span>
+            </Toolbar.Title>
+            <Toolbar.Trailing>
+              <Toolbar.Button
+                destructive={isRecording}
+                onClick={() => {
+                  addLog(isRecording ? 'stop' : 'record');
+                  setIsRecording((current) => !current);
+                }}
+              >
+                <Button.Label>{isRecording ? 'Stop' : 'Record'}</Button.Label>
+              </Toolbar.Button>
+            </Toolbar.Trailing>
+          </Toolbar.Root>
+        </Viewport.BlockEnd>
+      </>
+    </Component>
+  );
+};
+
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['an-app-shell-with-a-tab-bar', 'An app shell with a tab bar'],
   ['a-message-field-over-the-keyboard', 'A message field over the keyboard'],
   ['a-bar-collapsing-on-scroll', 'A bar collapsing on scroll'],
   ['a-bottom-toolbar-over-a-list', 'A bottom toolbar over a list'],
+  ['a-tinted-edge', 'A tinted edge'],
   ['pulling-to-refresh', 'Pulling to refresh'],
   ['pulling-to-turn-pages', 'Pulling to turn pages'],
 ];
@@ -944,7 +1064,7 @@ export const ViewportComposition: FunctionComponent = () => (
       </li>
       <li>
         The keyboard covers the tab bar (<code>keyboard=&quot;cover&quot;</code>
-        ), as iOS’s.
+        ).
       </li>
       <li>
         The panels as pages, with headers: see the{' '}
@@ -1106,6 +1226,46 @@ export const ViewportComposition: FunctionComponent = () => (
     <Selection />
 
     <Heading
+      id="a-tinted-edge"
+      level={2}
+    >
+      A tinted edge
+    </Heading>
+    <ul>
+      <li>
+        A state told at the screen’s edge for a while (here: recording): the
+        bottom bar’s edge effect tinted red, shown at rest too, crossfading as
+        it comes and goes.
+      </li>
+      <li>
+        Not the only sign of it (color alone isn’t seen by everyone): the bar’s
+        title says so, and its button changes.
+      </li>
+      <li>
+        Scrolled, the rows blur beneath the bar as at any edge (its{' '}
+        <code>edgeEffect</code>, <code>soft</code> by default).
+      </li>
+      <li>
+        <strong>Library:</strong> the bottom anchor’s <code>edgeTint</code> (
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />
+        ), drawn by the content layer beneath it (
+        <PartLink
+          component="viewport"
+          part="Viewport.Content"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the recording state, its tint, title and button.
+      </li>
+    </ul>
+    <CodeView code={tintCode} />
+    <Tint />
+
+    <Heading
       id="pulling-to-refresh"
       level={2}
     >
@@ -1127,8 +1287,9 @@ export const ViewportComposition: FunctionComponent = () => (
           part="useViewportScroll"
         />
         ’s <code>overscroll</code> (negative past the top) and{' '}
-        <code>isHeld</code> (still pulled: a touch, or a wheel until quiet);
-        released past the distance, it refreshes.
+        <code>isHeld</code> (still pulled: a touch, or a wheel’s fingers until
+        quiet or its inertia starts: inertia never pulls); released past the
+        distance, it refreshes.
       </li>
       <li>
         The indicator in a{' '}
@@ -1150,7 +1311,13 @@ export const ViewportComposition: FunctionComponent = () => (
       <li>
         Safari bounces past the top by itself; elsewhere, the pull is the
         touch’s (or the wheel’s), rubber-banded, the content moved along as
-        Safari’s.
+        Safari’s (only while an overscroll area is shown: without one, the
+        browser’s own scrolling is left as it is).
+      </li>
+      <li>
+        The indicator comes in from the screen’s edge, showing behind the status
+        bar (<code>safeArea=&quot;inline&quot;</code>: only the side insets kept
+        clear); refreshing, it rests clear of it.
       </li>
       <li>
         <strong>Library:</strong> the scroll hook’s <code>overscroll</code> and{' '}
@@ -1164,7 +1331,8 @@ export const ViewportComposition: FunctionComponent = () => (
           component="viewport"
           part="Viewport.Overscroll"
         />
-        , its <code>open</code> and custom properties) and the{' '}
+        , its <code>open</code>, <code>safeArea</code> and custom properties)
+        and the{' '}
         <PartLink
           component="progress"
           part="ActivityIndicator"
@@ -1218,6 +1386,10 @@ export const ViewportComposition: FunctionComponent = () => (
         ’s <code>alwaysBounce</code>).
       </li>
       <li>
+        The hints come in from the screen’s edges, showing behind the status bar
+        and the home indicator (<code>safeArea=&quot;inline&quot;</code>).
+      </li>
+      <li>
         <strong>Library:</strong> the scroll hook’s <code>overscroll</code> and{' '}
         <code>isHeld</code>, the overscroll areas at both edges (
         <PartLink
@@ -1243,6 +1415,7 @@ export const viewportCompositionDemos = [
   Message,
   Collapse,
   Selection,
+  Tint,
   Refresh,
   Pages,
 ];

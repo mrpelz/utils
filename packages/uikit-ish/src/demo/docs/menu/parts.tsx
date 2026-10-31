@@ -1,12 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfFolder } from '@bradleyhodges/sfsymbols/sfFolder';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
-import { sfLink } from '@bradleyhodges/sfsymbols/sfLink';
-import { sfPencil } from '@bradleyhodges/sfsymbols/sfPencil';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -14,15 +8,24 @@ import {
   Menu,
   Symbol,
   useCreateMenuHandle,
+  useTextActionsPrevention,
   Viewport,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
-import { codeLabel } from '../../tooling/frame/render-code.js';
+import { codeLabel, useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import {
+  sfFolder,
+  sfHeart,
+  sfLink,
+  sfPencil,
+  sfSquareAndArrowUp,
+  sfTrash,
+} from '../../tooling/icons.js';
 import {
   menuBackdropRows,
   menuCheckboxItemRows,
@@ -205,6 +208,13 @@ const TriggerPart: FunctionComponent = () => {
     useMemo(() => getPropOptionsGuideTrigger(addLog), [addLog]),
     { external, isOpen: true, emphasize: 'outline', title: 'Menu.Trigger' },
   );
+  // Opened by a held press: selecting no text (no browser text menu).
+  const trigger = useLabelledRef<HTMLButtonElement>(
+    'trigger',
+    'HTMLButtonElement',
+  );
+  const isHeld = props.openOn === 'secondaryClick';
+  useTextActionsPrevention(trigger, isHeld);
 
   return (
     <Component
@@ -215,13 +225,17 @@ const TriggerPart: FunctionComponent = () => {
       id={id}
       log={log}
       screen="centered"
+      setup={isHeld ? 'useTextActionsPrevention(trigger);' : undefined}
       stage="phone"
       state={[state]}
       title="Menu.Trigger"
     >
       <Viewport.Content>
         <Menu.Root>
-          <Menu.Trigger {...props}>
+          <Menu.Trigger
+            ref={trigger}
+            {...props}
+          >
             <Button.Label>Options</Button.Label>
           </Menu.Trigger>
           <Menu.Portal>
@@ -3269,9 +3283,9 @@ export const MenuParts: FunctionComponent = () => (
       </li>
       <li>
         Base UI’s other parts pass through unstyled: <code>Menu.Arrow</code> and{' '}
-        <code>Menu.Viewport</code> (iOS menus have neither), and filtering (
+        <code>Menu.Viewport</code> (these menus have neither), and filtering (
         <code>Menu.FilterRoot</code>, <code>Menu.Input</code>,{' '}
-        <code>Menu.List</code>, <code>Menu.Empty</code>, …: iOS menus have no
+        <code>Menu.List</code>, <code>Menu.Empty</code>, …: these menus have no
         search).
       </li>
     </ul>
@@ -3394,8 +3408,8 @@ export const MenuParts: FunctionComponent = () => (
         <code>onOpenChange</code> (with why).
       </li>
       <li>
-        Size: <code>size</code>, for all its popups: <code>compact</code> (the
-        iPhone’s menu) or <code>regular</code> (the iPad’s).
+        Size: <code>size</code>, for all its popups: <code>compact</code> (a
+        phone’s menu) or <code>regular</code> (a tablet’s).
       </li>
       <li>
         Modal by default: the page doesn’t scroll, outside presses only close
@@ -3464,7 +3478,7 @@ export const MenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        An element covering the page under the popup (optional; unstyled: iOS
+        An element covering the page under the popup (optional; unstyled: these
         menus don’t dim the page).
       </li>
       <li>Not rendered in a submenu.</li>
@@ -3491,9 +3505,7 @@ export const MenuParts: FunctionComponent = () => (
         A submenu’s: compact, below its trigger, over the parent’s items;
         regular, beside it, its first item at the trigger.
       </li>
-      <li>
-        Closes the menu once its trigger scrolls out of view (as UIKit’s).
-      </li>
+      <li>Closes the menu once its trigger scrolls out of view.</li>
       <li>
         Here: open the menu (its trigger) to see it (one menu opens at a time).
       </li>
@@ -3510,8 +3522,8 @@ export const MenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The menu itself: glass (Figma “Liquid Glass - Medium”), at least 238px
-        wide, scaling in from its trigger.
+        The menu itself: glass (the medium glass), at least 238px wide, scaling
+        in from its trigger.
       </li>
       <li>
         Its selection moves between the items (the pointer’s, the keys’), a pill
@@ -3539,8 +3551,8 @@ export const MenuParts: FunctionComponent = () => (
       </li>
       <li>
         Look: <code>destructive</code> (red), <code>disabled</code>; its
-        contents in Figma’s layout: [checkmark] [symbol] label/subtitle
-        [shortcut | chevron].
+        contents laid out: [checkmark] [symbol] label/subtitle [shortcut |
+        chevron].
       </li>
       <li>40px high (regular: 36px).</li>
       <li>
@@ -3585,8 +3597,7 @@ export const MenuParts: FunctionComponent = () => (
         <code>onCheckedChange</code>; the menu stays open.
       </li>
       <li>
-        With toggles in a popup, all its items keep a column for the checkmark
-        (Figma “Menu has Toggles”).
+        With toggles in a popup, all its items keep a column for the checkmark.
       </li>
       <li>
         Here: open the menu (its trigger) to see it (one menu opens at a time).
@@ -3604,8 +3615,7 @@ export const MenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The checkmark, while checked (Figma 􀆅, drawn as a stroke), at the item’s
-        start.
+        The checkmark, while checked (drawn as a stroke), at the item’s start.
       </li>
       <li>
         Here: open the menu (its trigger) to see it (one menu opens at a time).
@@ -3664,7 +3674,7 @@ export const MenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The checkmark of the chosen item (iOS’ radio items are checkmarks too).
+        The checkmark of the chosen item (radio items are checkmarks too).
       </li>
       <li>
         Here: open the menu (its trigger) to see it (one menu opens at a time).
@@ -3707,7 +3717,8 @@ export const MenuParts: FunctionComponent = () => (
     <ul>
       <li>
         An item opening its submenu, a chevron at its end; on hover too (
-        <code>openOnHover</code>).
+        <code>openOnHover</code>), by default only regular: compact, its submenu
+        covering the menu, it’s pressed (a phone’s menu has no hover).
       </li>
       <li>Regular: while its submenu is open, it keeps the selection.</li>
       <li>
@@ -3744,10 +3755,7 @@ export const MenuParts: FunctionComponent = () => (
       <code>Menu.GroupLabel</code>
     </Heading>
     <ul>
-      <li>
-        The section’s title (Figma “Section Title”), in the secondary label
-        color.
-      </li>
+      <li>The section’s title, in the secondary label color.</li>
       <li>
         Here: open the menu (its trigger) to see it (one menu opens at a time).
       </li>
@@ -3763,7 +3771,7 @@ export const MenuParts: FunctionComponent = () => (
       <code>Menu.Separator</code>
     </Heading>
     <ul>
-      <li>A hairline between sections, inset 8px (Figma “Separator”).</li>
+      <li>A hairline between sections, inset 8px.</li>
       <li>
         Here: open the menu (its trigger) to see it (one menu opens at a time).
       </li>
@@ -3780,8 +3788,8 @@ export const MenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A row of <PartLink part="Menu.QuickAction" />s at the popup’s top (Figma
-        “Quick Actions”), inset 10px.
+        A row of <PartLink part="Menu.QuickAction" />s at the popup’s top, inset
+        10px.
       </li>
       <li>
         Here: open the menu (its trigger) to see it (one menu opens at a time).
@@ -3875,8 +3883,8 @@ export const MenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A keyboard shortcut at the item’s end (iPad): its glyphs each in a cell
-        (⌘R).
+        A keyboard shortcut at the item’s end (regular): its glyphs each in a
+        cell (⌘R).
       </li>
       <li>
         Renders a <code>kbd</code>; shown only, the app handles the keys.

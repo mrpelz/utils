@@ -14,11 +14,11 @@ import {
   rangeMessages,
 } from './props.js';
 
-// Figma's example: April 20, 2025, 9:41 (a range: to April 24).
-const example = new Date(2025, 3, 20, 9, 41);
+// An example date: April 20, 2025, 10:00 (a range: to April 24).
+const example = new Date(2025, 3, 20, 10, 0);
 
 /**
- * A date picker (UIKit `UIDatePicker`, Figma “Date and time”): compact
+ * A date picker: compact
  * buttons opening the calendar in a popover, or the calendar inline.
  */
 export const DatePickerDemo: FunctionComponent = () => {

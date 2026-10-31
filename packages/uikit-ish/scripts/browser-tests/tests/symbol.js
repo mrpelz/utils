@@ -30,7 +30,7 @@ const symbol = (page) =>
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'symbol: an SF Symbol sized as the text’s glyph (its side bearings around it), in its color; a badge on it',
+    name: 'symbol: an icon sized as the text’s glyph (its side bearings around it), in its color; a badge on it',
     run: async (page) => {
       await page.open('symbol');
       const regular = await symbol(page);
@@ -48,7 +48,7 @@ export const tests = [
       );
 
       await page.setState(1, {
-        color: 'var(--color-ios-primary)',
+        color: 'var(--color-ui-primary)',
         fontSize: '17px',
       });
       await page.setState(0, { children: mapped('[badge: 3]') });

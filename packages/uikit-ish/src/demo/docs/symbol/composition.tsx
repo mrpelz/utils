@@ -1,8 +1,5 @@
 import './style.css';
 
-import { sfAirplane } from '@bradleyhodges/sfsymbols/sfAirplane';
-import { sfIcloudSlash } from '@bradleyhodges/sfsymbols/sfIcloudSlash';
-import { sfWifi } from '@bradleyhodges/sfsymbols/sfWifi';
 import { FunctionComponent } from 'react';
 
 import { List, Symbol } from '../../../components/index.js';
@@ -13,6 +10,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfAirplane, sfIcloudSlash, sfWifi } from '../../tooling/icons.js';
 
 /** Settings' rows: each a symbol, white on its color, as its image. */
 const RowImages: FunctionComponent = () => (
@@ -28,7 +26,7 @@ const RowImages: FunctionComponent = () => (
           <List.Item>
             <List.Leading>
               <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-orange)' }}
+                style={{ backgroundColor: 'var(--color-ui-system-orange)' }}
                 variant="rounded"
               >
                 <Symbol icon={sfAirplane} />
@@ -41,7 +39,7 @@ const RowImages: FunctionComponent = () => (
           <List.Item>
             <List.Leading>
               <List.Image
-                style={{ backgroundColor: 'var(--color-ios-system-blue)' }}
+                style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                 variant="rounded"
               >
                 <Symbol icon={sfWifi} />

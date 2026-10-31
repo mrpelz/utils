@@ -39,31 +39,27 @@ const entryInfo = (entry: CatalogEntry): EntryInfo => ({
 /**
  * Components' demos, one after another, each with its component's settings
  * and headers (see nav.tsx); client only (see `ClientOnly`: prerendered, an
- * empty shell), mounted while near the screen (see `VirtualList`).
+ * empty shell), mounted while near the screen (see `VirtualList`). Raw, as
+ * they are: the one shown alone (see frame/component.tsx).
  */
 const EntryDemos: FunctionComponent<{ entries: readonly CatalogEntry[] }> = ({
   entries,
 }) => {
   const { raw } = useOptions();
 
-  return (
-    <ClientOnly>
-      <VirtualList
-        isSnapPoint={!raw}
-        items={entries.flatMap((entry) => {
-          const info = entryInfo(entry);
-          return entry.demos.map((Demo, index) => (
-            <EntryContext.Provider
-              key={index}
-              value={info}
-            >
-              <Demo />
-            </EntryContext.Provider>
-          ));
-        })}
-      />
-    </ClientOnly>
-  );
+  const demos = entries.flatMap((entry) => {
+    const info = entryInfo(entry);
+    return entry.demos.map((Demo, index) => (
+      <EntryContext.Provider
+        key={`${entry.id}-${String(index)}`}
+        value={info}
+      >
+        <Demo />
+      </EntryContext.Provider>
+    ));
+  });
+
+  return <ClientOnly>{raw ? demos : <VirtualList items={demos} />}</ClientOnly>;
 };
 
 /** A component's page of prose (overview, parts). */
@@ -180,13 +176,27 @@ export const AllDemosPage: FunctionComponent = () => (
 /** `/`: the components by category, each with its summary. */
 export const IndexPage: FunctionComponent = () => (
   <div className="demo-page demo-prose">
-    <h1 className="demo-page-title">uikit-ish</h1>
+    <header className="demo-index-header">
+      {/* Its icon (see demo/assets/icon.svg): a switch, on, approximately. */}
+      <img
+        alt=""
+        className="demo-index-icon"
+        src="assets/icon-rounded.svg"
+      />
+      <h1 className="demo-page-title">uikit-ish</h1>
+    </header>
     <p className="demo-lead">
-      iOS 26 (UIKit) components for the web, built on Base UI: Apple&apos;s
-      Figma kit and Human Interface Guidelines, with Framework7&apos;s behavior
-      where they leave off.
+      App components for the web, touch first, built on Base UI, with
+      Framework7&apos;s behavior as a reference.
     </p>
     <nav className="demo-index-links">
+      <a href="kitchen-sink">
+        <strong>Kitchen sink</strong>
+        <span>
+          The components in an app, nested as an app nests them, as a raw demo:
+          no frame, no controls, no prose.
+        </span>
+      </a>
       <a href={guideHref()}>
         <strong>HIG composition guide</strong>
         <span>
@@ -202,6 +212,12 @@ export const IndexPage: FunctionComponent = () => (
         </span>
       </a>
     </nav>
+    <p>
+      No icons ship with the library. The demos show SF Symbols, which are
+      Apple’s and licensed for Apple platforms only: they are not part of the
+      library or its dependencies, and the demos load each from unpkg as they’re
+      shown. <a href="symbol#icons">Symbol</a> draws any icon’s outlines.
+    </p>
     <p>The components, grouped by what they&apos;re for:</p>
     <Contents
       sections={(Object.keys(categories) as Category[]).map((category) => [
@@ -223,8 +239,8 @@ export const IndexPage: FunctionComponent = () => (
         <p>{categories[category].description}</p>
         <ul className="demo-index-cards">
           {catalog
+            // (In the catalog's order: by how deep they typically nest.)
             .filter((entry) => entry.category === category)
-            .toSorted((a, b) => a.title.localeCompare(b.title))
             .map((entry) => (
               <li
                 key={entry.id}

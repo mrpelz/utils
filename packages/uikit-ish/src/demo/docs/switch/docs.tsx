@@ -73,16 +73,13 @@ export const switchRootRows: readonly PropRow[] = [
     'onOffLabels',
     'boolean',
     code('false'),
-    'Shows “I” and “O” on the track, beside the knob (UIKit’s accessibility setting “On/Off Labels”).',
+    'Shows “I” and “O” on the track, beside the knob (an accessibility setting).',
   ],
   [
     'tint',
     'string (a CSS color)',
     'system green',
-    <>
-      The track’s color while on, and the pressed knob’s glow (UIKit{' '}
-      <code>onTintColor</code>).
-    </>,
+    <>The track’s color while on, and the pressed knob’s glow.</>,
   ],
   [
     'cursor',

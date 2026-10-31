@@ -1,14 +1,6 @@
 import './style.css';
 
 import { Slider as BaseSlider } from '@base-ui/react/slider';
-import { sfBackwardFill } from '@bradleyhodges/sfsymbols/sfBackwardFill';
-import { sfForwardFill } from '@bradleyhodges/sfsymbols/sfForwardFill';
-import { sfPauseFill } from '@bradleyhodges/sfsymbols/sfPauseFill';
-import { sfPlayFill } from '@bradleyhodges/sfsymbols/sfPlayFill';
-import { sfSpeakerFill } from '@bradleyhodges/sfsymbols/sfSpeakerFill';
-import { sfSpeakerWave3Fill } from '@bradleyhodges/sfsymbols/sfSpeakerWave3Fill';
-import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
-import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
 import { FunctionComponent, useEffect, useState } from 'react';
 
 import {
@@ -30,6 +22,16 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfBackwardFill,
+  sfForwardFill,
+  sfPauseFill,
+  sfPlayFill,
+  sfSpeakerFill,
+  sfSpeakerWave3Fill,
+  sfSunMax,
+  sfSunMin,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { time } from './content.js';
 
@@ -493,9 +495,9 @@ export const SliderComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As iOS’s Display &amp; Brightness: a slider filling a{' '}
-        <a href="list">List</a> row of its own, between its ends’ symbols; the
-        section’s header names it.
+        As a display settings page: a slider filling a <a href="list">List</a>{' '}
+        row of its own, between its ends’ symbols; the section’s header names
+        it.
       </li>
       <li>
         Takes effect at once (guide,{' '}
@@ -659,8 +661,8 @@ export const SliderComposition: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        HIG: on iOS, audio volume uses the system’s volume view (with its output
-        device control), not a slider.
+        Audio volume: where the platform has its own volume control (with its
+        output device), prefer it to a slider.
       </li>
       <li>A web page has no such view; it sets its own media’s volume.</li>
     </ul>

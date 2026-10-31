@@ -1,4 +1,3 @@
-import { sfHeartFill } from '@bradleyhodges/sfsymbols/sfHeartFill';
 import { FunctionComponent } from 'react';
 
 import { Button, Symbol } from '../../../components/index.js';
@@ -12,6 +11,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfHeartFill } from '../../tooling/icons.js';
 import { buttonRootRows } from './docs.js';
 import {
   propOptionsOverviewContent,
@@ -74,12 +74,12 @@ export const ButtonOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Performs an action at once (UIKit <code>UIButton</code>; Base UI’s{' '}
-        <code>Button</code>): a label, a symbol, or both.
+        Performs an action at once (Base UI’s <code>Button</code>): a label, a
+        symbol, or both.
       </li>
       <li>
         Its prominence by its style: a label alone, on a fill, on the tint; or
-        Liquid Glass, floating over content.
+        Glass, floating over content.
       </li>
     </ul>
     <LiveView />

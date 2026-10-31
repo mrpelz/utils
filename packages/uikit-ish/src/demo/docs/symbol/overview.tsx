@@ -77,17 +77,15 @@ export const SymbolOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        An SF Symbol (or any icon’s outlines), sized as the glyph of the text
-        around it (it can stand in for one, as <code>􀋃</code> in Figma), in its
-        color.
+        Any icon’s outlines (the library ships no icons; the demos’ are SF
+        Symbols), sized as the glyph of the text around it (it can stand in for
+        one), in its color.
       </li>
       <li>
         Emphasized by its host (a selected tab), its filled variant instead: no
         state of the app’s picks it.
       </li>
-      <li>
-        The components’ symbols: a button’s, a tab’s, a row’s image (Figma “􀋃”).
-      </li>
+      <li>The components’ symbols: a button’s, a tab’s, a row’s image.</li>
     </ul>
     <LiveView />
 
@@ -212,14 +210,18 @@ export const SymbolOverview: FunctionComponent = () => (
           part="Symbol"
         />{' '}
         takes an object of filled paths in a view box (<code>SymbolIcon</code>
-        ). The library depends on no icon package.
+        ). The library ships no icons and depends on no icon package.
       </li>
       <li>
-        SF Symbols: <code>@bradleyhodges/sfsymbols</code>’ icons have that
-        shape. Import each by its own path (
-        <code>@bradleyhodges/sfsymbols/sfBell</code>), not the package’s index
-        (every symbol). Mind Apple’s terms: SF Symbols are licensed for Apple
-        platforms only.
+        The demos’ icons are SF Symbols: Apple’s, licensed for Apple platforms
+        only. They are not part of this library, nor bundled with its demos:
+        each is loaded from unpkg as it’s shown, a module of{' '}
+        <code>@bradleyhodges/sfsymbols</code> (its icons have that shape).
+      </li>
+      <li>
+        In an app that may use them, install the package and import each icon by
+        its own path (<code>@bradleyhodges/sfsymbols/sfBell</code>), not the
+        package’s index (every symbol).
       </li>
       <li>
         The package’s own renderer (<code>SFIcon</code>, from{' '}
@@ -248,13 +250,17 @@ export const SymbolOverview: FunctionComponent = () => (
           component="symbol"
           part="Symbol"
         />
-        : search by name, keyword or category; click one to copy its import.
+        : search by name or category; click one to copy its import (the
+        package’s path, see <a href="#icons">Icons</a>).
       </li>
       <li>
         Also the package’s brand icons (FontAwesome’s, 512 units to an em:{' '}
         <code>unitsPerEm</code>).
       </li>
-      <li>Loaded on request: all of them at once, a large download.</li>
+      <li>
+        Not part of the library: loaded from unpkg on request, their names first
+        (a large download), then each icon as it scrolls into view.
+      </li>
     </ul>
     <Catalog />
   </>

@@ -10,8 +10,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { getPropOptionsRoot } from './props.js';
 
 /**
- * An action sheet (UIKit `UIAlertController`, style `actionSheet`, Figma
- * “Action Sheets”): choices for an action, at the control that presented
+ * An action sheet: choices for an action, at the control that presented
  * it, in a phone's screen.
  */
 export const ActionSheetDemo: FunctionComponent = () => {

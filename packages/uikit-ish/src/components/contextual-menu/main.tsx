@@ -9,6 +9,7 @@ import {
   forwardRef,
   ReactNode,
   Ref,
+  useCallback,
   useContext,
   useLayoutEffect,
   useMemo,
@@ -18,10 +19,8 @@ import {
 import { createPortal } from 'react-dom';
 
 import { Menu, MenuTrigger } from '../menu/main.js';
-import { cn, useForwardedRef, usePortalContainer } from '../utils/main.js';
+import { cn, useForwardedRef } from '../utils/main.js';
 import type {
-  Align,
-  Box,
   ContextualMenuContextValue,
   ContextualMenuHandle,
   ContextualMenuPopupProps,
@@ -30,7 +29,6 @@ import type {
   ContextualMenuPreviewProps,
   ContextualMenuRootProps,
   ContextualMenuTriggerProps,
-  PortalContainer,
 } from './props.js';
 
 export type {
@@ -43,117 +41,36 @@ export type {
   ContextualMenuTriggerProps,
 } from './props.js';
 
-// A contextual menu (UIKit `UIContextMenuInteraction`): a trigger and its
-// `Menu`, below it. Opening, the trigger is lifted (above a blurred
-// `Backdrop`) as far as the menu needs to fit below it in the viewport, and
-// can turn into a `Preview` of what the menu acts on (e.g. a photo to
-// share), shown in its place, lifted with it; closing, it settles back.
-// Source: behavior after iOS (Figma: menus only, see `Menu`).
+// A contextual menu: a trigger and its
+// `Menu`, below it. Opening, what the menu is about is lifted with it, above
+// a blurred `Backdrop`: a `Preview` of it (e.g. a photo to share), or the
+// trigger itself.
 //
-// Deviations:
-// - The trigger lifts by a translation (and above the page by a
-//   `z-index`): in stacking contexts of its ancestors, it can't rise above
-//   the backdrop.
+// The preview and the menu are one popup (its `Positioner`): a stack, its
+// preview's slot first, placed from the trigger's place (its top, aligned
+// to it as the menu is), shifted as far as the stack needs to fit (as
+// menus grow, see `useGrowAvoidance`), within its portal's container (a
+// device's screen, e.g. the views' frames), clear of its safe area. Taller
+// than that, the menu scrolls; the preview takes at most what's left of
+// the room beside the menu (or, the menu taller, half of it).
+//
+// Also:
+// - Without a `Preview`, the live trigger is lifted onto the preview's slot
+//   (a translation, following it, and above the page by a `z-index`): in
+//   stacking contexts of its ancestors, it can't rise above the backdrop
+//   (there, give it a `Preview`).
 // - Opened as Base UI menus are (a press; on touch already on touch down,
 //   see `MenuTrigger`), not by a long press.
-// - The preview takes no pointer events (iOS: pressing it commits).
-// - Rendered into a container (its `Portal`'s), it lifts within that, as a
-//   device's screen (e.g. the views' frames), else within the viewport.
-// - Too tall for the viewport together (e.g. a large preview), the preview
-//   (or trigger) and the menu scroll together: a transparent scroll
-//   container over the whole viewport (behind the menu, wheel input over
-//   the menu scrolling it too) moves them, opened scrolled to its end (the
-//   menu in view, the preview partly out of it, above).
-
-/** The gap between the lifted trigger and the menu, and the viewport. */
-const gap = 8;
-const margin = 8;
+// - The preview takes no pointer events.
 
 const ContextualMenuContext = createContext<ContextualMenuContextValue>({
-  align: 'center',
-  lift: 0,
   isOpen: false,
-  isOverflowing: false,
   isPreview: false,
-  scrollerRef: { current: null },
-  setAlign: () => undefined,
-  setContainer: () => undefined,
-  setPopupHeight: () => undefined,
-  setPreviewSize: () => undefined,
+  setBackdrop: () => undefined,
+  setIsPreview: () => undefined,
+  setSlot: () => undefined,
   triggerRef: { current: null },
 });
-
-/** The screen it's on: its portal's container's box, or the viewport. */
-/** The trigger's box when it opened, and its direction. */
-type Origin = Box & { isRightToLeft: boolean };
-
-const screenOf = (container: PortalContainer | undefined): Box => {
-  const target =
-    container && 'current' in container ? container.current : container;
-  const element = target instanceof ShadowRoot ? target.host : target;
-  if (!element) {
-    return { height: innerHeight, left: 0, top: 0, width: innerWidth };
-  }
-  const { height, left, top, width } = element.getBoundingClientRect();
-  return { height, left, top, width };
-};
-
-/** Where a box (`height`) would be for a menu below it to fit. */
-const fittingTop = (screen: Box, height: number, menu: number) =>
-  screen.top + screen.height - margin - menu - gap - height;
-
-/**
- * How far a box (`top`, `height`) lifts for a menu below it to fit, never
- * leaving the screen (negative: moved down, e.g. scrolled partly above).
- */
-const liftFor = (screen: Box, top: number, height: number, menu: number) =>
-  top -
-  Math.max(
-    screen.top + margin,
-    Math.min(top, fittingTop(screen, height, menu)),
-  );
-
-/** How much a box (`height`) and the menu below it are too tall. */
-const overflowFor = (screen: Box, height: number, menu: number) =>
-  Math.max(0, screen.top + margin - fittingTop(screen, height, menu));
-
-/**
- * The lifted box for the trigger's (`trigger`): the preview's (from the
- * trigger's top, aligned to it as the menu is, within the screen), or the
- * trigger's.
- */
-const boxOf = (
-  screen: Box,
-  trigger: Box,
-  preview: { height: number; width: number } | undefined,
-  align: Align,
-  isRightToLeft: boolean,
-): Box => {
-  if (!preview) return trigger;
-  const start = isRightToLeft
-    ? trigger.left + trigger.width - preview.width
-    : trigger.left;
-  const end = isRightToLeft
-    ? trigger.left
-    : trigger.left + trigger.width - preview.width;
-  const left = {
-    center: trigger.left + trigger.width / 2 - preview.width / 2,
-    end,
-    start,
-  }[align];
-
-  return {
-    ...preview,
-    left: Math.max(
-      screen.left + margin,
-      Math.min(left, screen.left + screen.width - margin - preview.width),
-    ),
-    top: trigger.top,
-  };
-};
-
-const isRtl = (element: Element | null) =>
-  element ? getComputedStyle(element).direction === 'rtl' : false;
 
 /**
  * The contextual menu: its `Trigger` (and optional `Preview`), and its menu
@@ -168,121 +85,33 @@ const Root = <Payload,>({
   const [isOpenState, setIsOpenState] = useState(defaultOpen);
   const isOpen = openProp ?? isOpenState;
   const triggerRef = useRef<HTMLElement | null>(null);
-  // The trigger's box when it opened (unlifted).
-  const [origin, setOrigin] = useState<Origin | undefined>(undefined);
-  const [popupHeight, setPopupHeight] = useState(0);
-  const [previewSize, setPreviewSize] = useState<
-    { height: number; width: number } | undefined
-  >(undefined);
-  // The menu's alignment (see `Positioner`), also the preview's.
-  const [align, setAlign] = useState<Align>('center');
-
-  // Opening, the trigger's box, before it lifts.
-  const [isOpened, setIsOpened] = useState(isOpen);
-  if (isOpened !== isOpen) {
-    setIsOpened(isOpen);
-    if (!isOpen) setOrigin(undefined);
-  }
-  useLayoutEffect(() => {
-    const { current: trigger } = triggerRef;
-    if (!isOpen || origin || !trigger) return;
-    const { height, left, top, width } = trigger.getBoundingClientRect();
-    setOrigin({ height, left, isRightToLeft: isRtl(trigger), top, width });
-  }, [isOpen, origin]);
-
-  // Its screen (its portal's container, see `Portal`), as it opened.
-  const [container, setContainer] = useState<PortalContainer | undefined>(
-    undefined,
-  );
-  const screen = useMemo(
-    () => (origin ? screenOf(container) : undefined),
-    [container, origin],
-  );
-  const box =
-    origin &&
-    screen &&
-    boxOf(screen, origin, previewSize, align, origin.isRightToLeft);
-  // Too tall: scrolled (by `Scroller`, from 0 to the overflow), lifted
-  // further as it scrolls on; opened at its end (the menu in view).
-  const overflow =
-    isOpen && screen && box && popupHeight
-      ? overflowFor(screen, box.height, popupHeight)
-      : 0;
-  const scrollerRef = useRef<HTMLDivElement | null>(null);
-  const [scrolled, setScrolled] = useState<number | undefined>(undefined);
-  if (!isOpen && scrolled !== undefined) setScrolled(undefined);
-  const lift =
-    isOpen && screen && box
-      ? liftFor(screen, box.top, box.height, popupHeight) +
-        Math.min(scrolled ?? overflow, overflow)
-      : 0;
-  useLayoutEffect(() => {
-    const { current: scroller } = scrollerRef;
-    if (!scroller || overflow === 0 || scrolled !== undefined) return;
-    scroller.scrollTop = overflow;
-  }, [overflow, scrolled]);
+  const [isPreview, setIsPreview] = useState(false);
+  // The preview's slot in the positioned stack (see `Positioner`), shown.
+  const [slot, setSlot] = useState<HTMLElement | undefined>(undefined);
+  const [backdrop, setBackdrop] = useState<HTMLElement | undefined>(undefined);
 
   const value = useMemo<ContextualMenuContextValue>(
     () => ({
-      // Where the trigger is now (e.g. scrolled), lifted.
-      anchor: {
-        // Tracked (scroll containers, layout shifts) as the trigger.
-        get contextElement() {
-          return triggerRef.current ?? undefined;
-        },
-        getBoundingClientRect: () => {
-          const { current: trigger } = triggerRef;
-          const now = boxOf(
-            screenOf(container),
-            trigger?.getBoundingClientRect() ?? new DOMRect(),
-            previewSize,
-            align,
-            isRtl(trigger),
-          );
-          return new DOMRect(now.left, now.top - lift, now.width, now.height);
-        },
-      },
-      align,
-      box,
-      lift,
+      backdrop,
       isOpen,
-      origin,
-      isOverflowing: overflow > 0,
-      isPreview: previewSize !== undefined,
-      scrollerRef,
-      setAlign,
-      setContainer,
-      setPopupHeight,
-      setPreviewSize,
+      isPreview,
+      setBackdrop,
+      setIsPreview,
+      setSlot,
+      slot,
       triggerRef,
     }),
-    [align, box, container, lift, isOpen, origin, overflow, previewSize],
+    [backdrop, isOpen, isPreview, slot],
   );
 
   return (
     <ContextualMenuContext.Provider value={value}>
-      {overflow > 0
-        ? createPortal(
-            // Too tall: over the whole viewport (above the backdrop, below the
-            // menu, the preview taking no pointer events), transparent,
-            // scrolling them.
-            <div
-              ref={scrollerRef}
-              className="uikit-contextual-menu-scroller"
-              data-contextual-menu-part="scroller"
-              onScroll={(event) => setScrolled(event.currentTarget.scrollTop)}
-            >
-              <div style={{ height: window.innerHeight + overflow }} />
-            </div>,
-            document.body,
-          )
-        : null}
       <Menu.Root
         {...props}
         open={isOpen}
         onOpenChange={(isNextOpen, details) => {
           // Released off the trigger (it lifted away under the pointer):
-          // open all the same, as iOS's stays open as the finger lifts.
+          // open all the same, staying open as the finger lifts.
           if (!isNextOpen && details.reason === 'cancel-open') {
             details.cancel();
             return;
@@ -296,30 +125,114 @@ const Root = <Payload,>({
 };
 
 /**
+ * The backdrop with a hole where an element is (its box, its corners'
+ * radii), so it shows through: a mask (also its blur's, which a clip path
+ * leaves whole), an even-odd path of the backdrop's box, then the
+ * element's.
+ */
+const cutOut = (backdrop: HTMLElement, element: Element) => {
+  const outer = backdrop.getBoundingClientRect();
+  const { height, left, top, width } = element.getBoundingClientRect();
+  const x = left - outer.left;
+  const y = top - outer.top;
+  const radius = Math.min(
+    Number.parseFloat(getComputedStyle(element).borderTopLeftRadius) || 0,
+    width / 2,
+    height / 2,
+  );
+  const n = (value: number) => String(Math.round(value * 100) / 100);
+  const r = n(radius);
+  const path = [
+    `M0 0H${n(outer.width)}V${n(outer.height)}H0Z`,
+    `M${n(x + radius)} ${n(y)}H${n(x + width - radius)}`,
+    `A${r} ${r} 0 0 1 ${n(x + width)} ${n(y + radius)}`,
+    `V${n(y + height - radius)}`,
+    `A${r} ${r} 0 0 1 ${n(x + width - radius)} ${n(y + height)}`,
+    `H${n(x + radius)}`,
+    `A${r} ${r} 0 0 1 ${n(x)} ${n(y + height - radius)}`,
+    `V${n(y + radius)}`,
+    `A${r} ${r} 0 0 1 ${n(x + radius)} ${n(y)}Z`,
+  ].join('');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${n(outer.width)}" height="${n(outer.height)}"><path fill-rule="evenodd" d="${path}"/></svg>`;
+  const mask = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  const { style } = backdrop;
+  style.setProperty('mask', `${mask} 0 0 / 100% 100% no-repeat`);
+  style.setProperty('-webkit-mask', `${mask} 0 0 / 100% 100% no-repeat`);
+};
+
+/** The backdrop whole again (see `cutOut`). */
+const fillIn = (backdrop: HTMLElement) => {
+  backdrop.style.removeProperty('mask');
+  backdrop.style.removeProperty('-webkit-mask');
+};
+
+/**
  * What the menu is about (e.g. a `Button.Root`, rendered by `render`): it
- * opens the menu, lifting as far as the menu needs.
+ * opens the menu; without a `Preview`, it's lifted onto the preview's slot.
  */
 const Trigger = forwardRef<HTMLElement, ContextualMenuTriggerProps>(
   (props, forwardedRef) => {
-    const { lift, isOpen, isOverflowing, isPreview, triggerRef } = useContext(
+    const { backdrop, isOpen, isPreview, slot, triggerRef } = useContext(
       ContextualMenuContext,
     );
     const ref = useForwardedRef(forwardedRef);
+    const wrapperRef = useRef<HTMLSpanElement | null>(null);
+
+    // Lifted: onto the slot, following it (as it's placed, shifted, its
+    // trigger scrolled) while open; closed, back. Seen through the backdrop
+    // where it is (its cutout, in its shape: above the backdrop by its
+    // `z-index` only outside its ancestors' stacking contexts, e.g. a
+    // `Viewport`'s layers'), until the backdrop's gone.
+    useLayoutEffect(() => {
+      const { current: wrapper } = wrapperRef;
+      if (!wrapper) return undefined;
+      const { style } = wrapper;
+      const isLifted = isOpen && !isPreview && slot !== undefined;
+      if (!isLifted) {
+        style.removeProperty('--uikit-contextual-menu-lift-x');
+        style.removeProperty('--uikit-contextual-menu-lift-y');
+      }
+      if (isPreview || (!isLifted && !backdrop)) return undefined;
+      let frame = 0;
+      const follow = () => {
+        const from = wrapper.getBoundingClientRect();
+        // (Once placed: until then, Base UI's positioner is hidden at a
+        // provisional place.)
+        if (isLifted && slot.parentElement?.style.opacity !== '0') {
+          const to = slot.getBoundingClientRect();
+          style.setProperty(
+            '--uikit-contextual-menu-lift-x',
+            `${String(to.left - from.left)}px`,
+          );
+          style.setProperty(
+            '--uikit-contextual-menu-lift-y',
+            `${String(to.top - from.top)}px`,
+          );
+        }
+        const { current: trigger } = ref;
+        if (backdrop && trigger) cutOut(backdrop, trigger);
+        frame = requestAnimationFrame(follow);
+      };
+      follow();
+      return () => {
+        cancelAnimationFrame(frame);
+        if (backdrop) fillIn(backdrop);
+      };
+    }, [backdrop, isOpen, isPreview, ref, slot]);
 
     return (
-      // Lifted: above the page (and the backdrop), its trigger moved up as far
-      // as needed (the wrapper stays, for the menu's anchor); with a preview,
-      // hidden behind it.
+      // Lifted: above the page (and the backdrop), its trigger moved (the
+      // wrapper stays, for the menu's anchor); with a preview, hidden behind
+      // it.
       <span
-        ref={(element: HTMLElement | null) => {
+        ref={(element: HTMLSpanElement | null) => {
+          wrapperRef.current = element;
           triggerRef.current = element;
         }}
         className="uikit-contextual-menu-trigger"
         data-contextual-menu-part="trigger"
-        data-lifted={isOpen ? '' : undefined}
-        data-overflowing={isOpen && isOverflowing ? '' : undefined}
+        data-lifted={isOpen && !isPreview ? '' : undefined}
         data-previewed={isOpen && isPreview ? '' : undefined}
-        style={{ '--uikit-contextual-menu-lift': lift } as CSSProperties}
       >
         <MenuTrigger
           ref={ref as Ref<HTMLElement>}
@@ -332,160 +245,162 @@ const Trigger = forwardRef<HTMLElement, ContextualMenuTriggerProps>(
 
 /**
  * What the trigger turns into while the menu is open (e.g. the content the
- * menu acts on), in its place (aligned as the menu, see `Positioner`),
- * lifted with it, always in the viewport (at most as large).
+ * menu acts on): in the preview's slot, above the menu (aligned as it is),
+ * scaling in from the trigger's place.
  */
 const Preview = forwardRef<HTMLDivElement, ContextualMenuPreviewProps>(
-  ({ className, style, ...props }, forwardedRef) => {
-    const { align, box, lift, isOpen, origin, isOverflowing, setPreviewSize } =
-      useContext(ContextualMenuContext);
-    const ref = useForwardedRef(forwardedRef);
-    // Rendered once the trigger's box is known (see `Root`).
-    const isShown = isOpen && origin !== undefined;
+  ({ className, ...props }, ref) => {
+    const { isOpen, setIsPreview, slot } = useContext(ContextualMenuContext);
 
     useLayoutEffect(() => {
-      const { current: preview } = ref;
-      if (!isShown || !preview) return undefined;
-      const measure = () =>
-        setPreviewSize({
-          height: preview.offsetHeight,
-          width: preview.offsetWidth,
-        });
-      measure();
-      const observer = new ResizeObserver(measure);
-      observer.observe(preview);
-      return () => {
-        observer.disconnect();
-        setPreviewSize(undefined);
-      };
-    }, [ref, setPreviewSize, isShown]);
+      setIsPreview(true);
+      return () => setIsPreview(false);
+    }, [setIsPreview]);
 
-    if (!isShown) return null;
+    if (!isOpen || !slot) return null;
 
     return createPortal(
-      // Over the page and the backdrop, at the lifted place; scaling in from
-      // the trigger's top.
       <div
         ref={ref}
-        data-overflowing={isOverflowing ? '' : undefined}
         {...props}
         className={cn('uikit-contextual-menu-preview', className)}
         data-contextual-menu-part="preview"
-        style={
-          {
-            '--uikit-contextual-menu-lift': lift,
-            // Measured, at its place; not yet, at the trigger's.
-            left: `${String((box ?? origin).left)}px`,
-            top: `${String(origin.top)}px`,
-            transformOrigin: `top ${{ center: 'center', end: 'right', start: 'left' }[align]}`,
-            ...(typeof style === 'object' && style),
-          } as CSSProperties
-        }
       />,
-      document.body,
+      slot,
     );
   },
 );
 
-/**
- * The menu's portal (a `Menu`'s): into its `container`, also the screen the
- * trigger lifts within (as a device's: e.g. the views' frames), else the
- * viewport.
- */
+/** The menu's portal (a `Menu`'s): into its `container`, e.g. a screen. */
 const Portal = forwardRef<HTMLDivElement, ContextualMenuPortalProps>(
-  ({ container: containerProp, ...props }, ref) => {
-    const container = usePortalContainer(containerProp);
-    const { setContainer } = useContext(ContextualMenuContext);
-    useLayoutEffect(() => {
-      setContainer(container ?? undefined);
-      return () => setContainer(undefined);
-    }, [container, setContainer]);
-
-    return (
-      <Menu.Portal
-        ref={ref}
-        container={container}
-        {...props}
-      />
-    );
-  },
+  (props, ref) => (
+    <Menu.Portal
+      ref={ref}
+      {...props}
+    />
+  ),
 );
 
-// iOS: the page blurred and dimmed behind the lifted trigger and the menu.
+// The page blurred and dimmed behind the lifted trigger and the menu.
+// (Registered: cut out where the lifted trigger is, see `Trigger`.)
 const Backdrop = forwardRef<
   HTMLDivElement,
   Omit<ComponentProps<typeof BaseMenu.Backdrop>, 'ref'>
->(({ className, ...props }, ref) => (
-  <BaseMenu.Backdrop
-    ref={ref}
-    className={cn('uikit-contextual-menu-backdrop', className)}
-    data-contextual-menu-part="backdrop"
-    {...props}
-  />
-));
+>(({ className, ...props }, forwardedRef) => {
+  const { setBackdrop } = useContext(ContextualMenuContext);
+  const ref = useForwardedRef(forwardedRef);
+  const backdropRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      ref.current = element;
+      setBackdrop(element ?? undefined);
+    },
+    [ref, setBackdrop],
+  );
 
-/** The menu's place: below the lifted trigger (or preview). */
+  return (
+    <BaseMenu.Backdrop
+      ref={backdropRef}
+      className={cn('uikit-contextual-menu-backdrop', className)}
+      data-contextual-menu-part="backdrop"
+      {...props}
+    />
+  );
+});
+
+/** Its stack's sizes, as custom properties (see style.css). */
+const useStackSizes = (
+  positionerRef: { current: HTMLElement | null },
+  slot: HTMLElement | undefined,
+) => {
+  useLayoutEffect(() => {
+    const { current: positioner } = positionerRef;
+    if (!positioner || !slot) return undefined;
+    const measure = () => {
+      const popup = positioner.querySelector('.uikit-menu-popup');
+      positioner.style.setProperty(
+        '--uikit-contextual-menu-slot',
+        `${String(slot.offsetHeight)}px`,
+      );
+      positioner.style.setProperty(
+        '--uikit-contextual-menu-popup',
+        `${String(popup?.scrollHeight ?? 0)}px`,
+      );
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(slot);
+    const popup = positioner.querySelector('.uikit-menu-popup');
+    if (popup) observer.observe(popup);
+    return () => observer.disconnect();
+  }, [positionerRef, slot]);
+};
+
+/**
+ * The stack's place: from the trigger's top (aligned to it, `align`),
+ * shifted to fit; the preview's slot, then the menu.
+ */
 const Positioner = forwardRef<HTMLDivElement, ContextualMenuPositionerProps>(
-  (props, ref) => {
-    const { anchor, setAlign } = useContext(ContextualMenuContext);
-    const align = props.align ?? 'center';
-    useLayoutEffect(() => setAlign(align), [align, setAlign]);
+  ({ align = 'center', children, className, ...props }, forwardedRef) => {
+    const { isPreview, setSlot, slot, triggerRef } = useContext(
+      ContextualMenuContext,
+    );
+    const ref = useForwardedRef(forwardedRef);
+    // Without a preview, the slot is the trigger's size (it's lifted onto
+    // it, see `Trigger`).
+    const [size, setSize] = useState<
+      { height: number; width: number } | undefined
+    >(undefined);
+    useLayoutEffect(() => {
+      const { current: trigger } = triggerRef;
+      if (isPreview || !trigger) return;
+      const { height, width } = trigger.getBoundingClientRect();
+      setSize({ height, width });
+    }, [isPreview, triggerRef]);
+    const slotRef = useCallback(
+      (element: HTMLDivElement | null) => setSlot(element ?? undefined),
+      [setSlot],
+    );
+    useStackSizes(ref, slot);
 
     return (
       <Menu.Positioner
         ref={ref}
-        align="center"
-        anchor={anchor}
-        collisionAvoidance={{ align: 'shift', side: 'none' }}
+        align={align}
+        anchor={triggerRef}
+        // (Shifted: its stack covers the trigger's place by design.)
+        collisionAvoidance={{ align: 'shift', side: 'shift' }}
         side="block-end"
-        sideOffset={gap}
+        sideOffset={({ anchor }) => -anchor.height}
         {...props}
-      />
+        className={cn('uikit-contextual-menu-positioner', className)}
+      >
+        <div
+          ref={slotRef}
+          className="uikit-contextual-menu-slot"
+          data-contextual-menu-part="slot"
+          style={
+            isPreview || !size
+              ? undefined
+              : ({
+                  height: `${String(size.height)}px`,
+                  width: `${String(size.width)}px`,
+                } satisfies CSSProperties)
+          }
+        />
+        {children}
+      </Menu.Positioner>
     );
   },
 );
 
-/**
- * The menu (its height decides how far the trigger lifts; too tall for the
- * viewport, it scrolls with it, see `Root`).
- */
+/** The menu (below the preview's slot; taller than its room, it scrolls). */
 const Popup = forwardRef<HTMLDivElement, ContextualMenuPopupProps>(
-  ({ onWheel, style, ...props }, forwardedRef) => {
-    const { isOverflowing, scrollerRef, setPopupHeight } = useContext(
-      ContextualMenuContext,
-    );
-    const ref = useForwardedRef(forwardedRef);
-
-    useLayoutEffect(() => {
-      const { current: popup } = ref;
-      if (!popup) return undefined;
-      setPopupHeight(popup.scrollHeight);
-      return () => setPopupHeight(0);
-    }, [ref, setPopupHeight]);
-
-    return (
-      <Menu.Popup
-        ref={ref}
-        // Scrolled with the preview: its whole height (not the space below
-        // it), wheel input over it scrolling them.
-        style={
-          isOverflowing
-            ? (state) => ({
-                ...(typeof style === 'function' ? style(state) : style),
-                maxHeight: 'none',
-              })
-            : style
-        }
-        onWheel={(event) => {
-          onWheel?.(event);
-          if (isOverflowing) {
-            scrollerRef.current?.scrollBy({ top: event.deltaY });
-          }
-        }}
-        {...props}
-      />
-    );
-  },
+  (props, ref) => (
+    <Menu.Popup
+      ref={ref}
+      {...props}
+    />
+  ),
 );
 
 /**

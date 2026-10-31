@@ -1,7 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
-import { sfEllipsis } from '@bradleyhodges/sfsymbols/sfEllipsis';
-import { sfMagnifyingglass } from '@bradleyhodges/sfsymbols/sfMagnifyingglass';
-import { sfSquareAndPencil } from '@bradleyhodges/sfsymbols/sfSquareAndPencil';
 import { FunctionComponent, useState } from 'react';
 
 import {
@@ -24,6 +20,12 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfChevronBackward,
+  sfEllipsis,
+  sfMagnifyingglass,
+  sfSquareAndPencil,
+} from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { names } from '../viewport/content.js';
 
@@ -68,7 +70,8 @@ const searchCode = `const [query, setQuery] = useState('');
     {/* Scrolling with the large title, then staying below the bar. */}
     <Header.Accessory>
       <TextField.Root>
-        <TextField.Search>
+        {/* Looking like the list's rows below it. */}
+        <TextField.Search variant="row">
           <Symbol icon={sfMagnifyingglass} />
           <TextField.Control
             aria-label="Search"
@@ -152,7 +155,7 @@ const LargeTitle: FunctionComponent = () => {
       stage="phone"
       title="Header with a large title"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -217,7 +220,7 @@ const Search: FunctionComponent = () => {
       stage="phone"
       title="Header with a search field"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -235,7 +238,7 @@ const Search: FunctionComponent = () => {
             </Header.LargeTitle>
             <Header.Accessory>
               <TextField.Root>
-                <TextField.Search>
+                <TextField.Search variant="row">
                   <Symbol icon={sfMagnifyingglass} />
                   <TextField.Control
                     aria-label="Search"
@@ -282,7 +285,7 @@ const OverPicture: FunctionComponent = () => {
       stage="phone"
       title="Header over a picture"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root
@@ -358,7 +361,7 @@ const ControlBelow: FunctionComponent = () => {
       stage="phone"
       title="Header with a control"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -503,9 +506,13 @@ export const HeaderComposition: FunctionComponent = () => (
         staying below the bar.
       </li>
       <li>
+        It looks like the list’s rows below it: their background, height and
+        corners (<code>variant=&quot;row&quot;</code>), still a search field.
+      </li>
+      <li>
         Search sits with the page’s Region (guide{' '}
-        <GuideLink to="rule-a11">A11</GuideLink>); on iOS 26 also at the bottom
-        (see <a href="toolbar/composition#a-search-field">Toolbar</a>).
+        <GuideLink to="rule-a11">A11</GuideLink>); also at the bottom (see{' '}
+        <a href="toolbar/composition#a-search-field">Toolbar</a>).
       </li>
       <li>
         <strong>Library:</strong> the header’s accessory (
@@ -513,12 +520,13 @@ export const HeaderComposition: FunctionComponent = () => (
           component="header"
           part="Header.Accessory"
         />
-        ) scrolling, then staying below the bar, and the search field (
+        ) scrolling, then staying below the bar, and the search field in a row’s
+        look (
         <PartLink
           component="text-field"
           part="TextField.Search"
-        />
-        ,{' '}
+        />{' '}
+        <code>variant</code>,{' '}
         <PartLink
           component="text-field"
           part="TextField.Clear"

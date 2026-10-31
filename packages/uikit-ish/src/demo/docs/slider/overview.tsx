@@ -94,7 +94,7 @@ export const SliderOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         Sets a value between a minimum and a maximum by dragging a knob along a
-        track (UIKit <code>UISlider</code>).
+        track.
       </li>
       <li>The track fills with the tint up to the knob.</li>
       <li>
@@ -123,7 +123,7 @@ export const SliderOverview: FunctionComponent = () => (
       </li>
       <li>
         With the minimum at the leading end and the maximum at the trailing end
-        (vertically: at the bottom and top), as Apple’s HIG expects.
+        (vertically: at the bottom and top).
       </li>
     </ul>
 
@@ -136,8 +136,8 @@ export const SliderOverview: FunctionComponent = () => (
     <ul>
       <li>
         An exact number, changed a step at a time: a{' '}
-        <a href="stepper">Stepper</a> (Apple’s HIG suggests pairing a slider
-        with a text field and a stepper when the exact value matters).
+        <a href="stepper">Stepper</a> (or pair a slider with a text field and a
+        stepper when the exact value matters).
       </li>
       <li>
         One of a few named options: a <a href="segmented">Segmented</a> control.
@@ -149,8 +149,8 @@ export const SliderOverview: FunctionComponent = () => (
         editable indicator).
       </li>
       <li>
-        Audio volume on iOS: Apple’s HIG says to use the system’s volume view
-        instead (see <a href="slider/composition">Composition</a>).
+        Audio volume: prefer the platform’s own volume control where there is
+        one (see <a href="slider/composition">Composition</a>).
       </li>
     </ul>
 

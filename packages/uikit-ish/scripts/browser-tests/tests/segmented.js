@@ -144,7 +144,7 @@ export const tests = [
     },
   },
   {
-    name: 'segmented: geometry matches Figma',
+    name: 'segmented: geometry matches the spec',
     run: async (page) => {
       await page.open('segmented', 'light', {
         state: [{ $rest: true, count: 5 }],
@@ -259,12 +259,11 @@ export const tests = [
   {
     name: 'segmented: on a viewport anchor at the screen’s top or bottom edge, clear of the safe area, over the scrolling list it filters',
     run: async (page) => {
-      /** The control's box relative to its screen's (top, bottom gap). */
+      /** The control's box relative to its screen's, raw: the window's (top, bottom gap). */
       const placed = () =>
         page.evaluate(`(() => {
-          const screen = ${page.section}.querySelector('.demo-phone').getBoundingClientRect();
           const control = ${page.section}.querySelector('[role=radiogroup]').getBoundingClientRect();
-          return [Math.round(control.top - screen.top), Math.round(screen.bottom - control.bottom)];
+          return [Math.round(control.top), Math.round(innerHeight - control.bottom)];
         })()`);
       const rows = () =>
         page.evaluate(
@@ -273,8 +272,8 @@ export const tests = [
 
       await page.open('segmented-composition-content');
       const [top] = await placed();
-      // Below the status bar (62px), 8px into its bar.
-      assert.equal(top, 70);
+      // At the window's top (raw: no safe area), 4px into its bar.
+      assert.equal(top, 4);
       const all = await rows();
       const favorites = await page.rect('[role=radio]', 1);
       await page.click([
@@ -286,8 +285,8 @@ export const tests = [
 
       await page.setState(0, { edge: 'block-end' });
       const [, bottom] = await placed();
-      // Above the home indicator (34px), 8px into its bar.
-      assert.equal(bottom, 42);
+      // At the window's bottom (raw: no safe area), 2px into its bar.
+      assert.equal(bottom, 2);
     },
   },
 ];

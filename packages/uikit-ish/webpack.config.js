@@ -19,6 +19,8 @@ import {
 } from 'modify-source-webpack-plugin';
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 
+import { links, manifest, meta } from './scripts/demo-head.js';
+
 const { PUBLIC_PATH: publicPath = '/' } = process.env;
 
 export const dirDemo = path.resolve(dirBase, 'demo');
@@ -47,6 +49,15 @@ const configDownstream = {
   },
   output: {
     assetModuleFilename: 'assets/[name][ext]',
+    // The demo's icons and web app manifest (see scripts/demo-head.js).
+    copy: [
+      {
+        context: path.resolve(dirSrc, 'demo/assets'),
+        filename: '[base]',
+        from: ['icon-rounded.svg', 'manifest.webmanifest', 'icons/*.png'],
+        to: 'assets',
+      },
+    ],
     path: dirDemo,
     publicPath,
   },
@@ -120,12 +131,13 @@ config.plugins = [
   // @ts-ignore
   new HtmlWebpackPlugin({
     base: publicPath,
-    // The page under the device's safe areas (the notch, the home
-    // indicator): their insets in `env(safe-area-inset-*)`, kept clear by
-    // the library (see styles.css) and the guide's layout.
-    meta: {
-      viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
-    },
+    inject: false,
+    meta,
+    // Its page: its head's tags (its base first), then its manifest and
+    // links (relative to it, see scripts/demo-head.js); its body empty,
+    // filled by prerendering (see src/demo-ssg.tsx).
+    templateContent: ({ htmlWebpackPlugin }) =>
+      `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${htmlWebpackPlugin.options.title}</title>${htmlWebpackPlugin.tags.headTags}${manifest}${links}</head><body></body></html>`,
     title: '@mrpelz/uikit-ish',
   }),
   // @ts-ignore

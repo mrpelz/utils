@@ -128,7 +128,7 @@ const LoadingAPage: FunctionComponent = () => (
     stage="phone"
     title="Activity indicator loading a page"
   >
-    <Viewport.Content safeArea="none">
+    <Viewport.Content>
       <Header.Root>
         <Viewport.BlockStart>
           <Toolbar.Root placement="block-start">

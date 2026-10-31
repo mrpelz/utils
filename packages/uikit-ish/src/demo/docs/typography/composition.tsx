@@ -1,7 +1,5 @@
 import './style.css';
 
-import { sfCheckmarkCircleFill } from '@bradleyhodges/sfsymbols/sfCheckmarkCircleFill';
-import { sfCloudFill } from '@bradleyhodges/sfsymbols/sfCloudFill';
 import { FunctionComponent } from 'react';
 
 import { List, Symbol, Typography } from '../../../components/index.js';
@@ -14,6 +12,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfCheckmarkCircleFill, sfCloudFill } from '../../tooling/icons.js';
 import { propOptionsCompositionSize } from './props.js';
 
 /** An article's heading, paragraphs and caption, as their elements. */
@@ -54,7 +53,7 @@ const AnArticle: FunctionComponent = () => (
   </Component>
 );
 
-/** A list's rows at a Dynamic Type size, set around it. */
+/** A list's rows at a text size, set around it. */
 const ASizeForAList: FunctionComponent = () => {
   const id = 'typography-composition-size';
   const [external] = useProvidedState(id);
@@ -86,7 +85,7 @@ const ASizeForAList: FunctionComponent = () => {
                   <List.Title>Text Size</List.Title>
                 </List.Content>
                 <List.Trailing>
-                  <List.Detail>{props.dynamicTypeSize}</List.Detail>
+                  <List.Detail>{props.textSize}</List.Detail>
                 </List.Trailing>
               </List.Item>
               <List.Item>
@@ -180,18 +179,16 @@ export const TypographyComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A Dynamic Type size (<code>dynamicTypeSize</code>) for everything in it:
-        here a <a href="list">List</a>’s rows, their text growing and the rows
-        with it.
+        A text size (<code>textSize</code>) for everything in it: here a{' '}
+        <a href="list">List</a>’s rows, their text growing and the rows with it.
       </li>
       <li>
         The components use the text styles’ tokens, so they follow it (e.g. the
         app’s text size setting around its content).
       </li>
       <li>
-        <strong>Library:</strong> the Dynamic Type size (
-        <code>dynamicTypeSize</code>) for everything in it, and the components
-        following its tokens.
+        <strong>Library:</strong> the text size (<code>textSize</code>) for
+        everything in it, and the components following its tokens.
       </li>
       <li>
         <strong>Demo:</strong> the rows.

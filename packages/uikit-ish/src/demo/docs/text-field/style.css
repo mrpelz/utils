@@ -11,7 +11,7 @@
 /* A form on the list's background (the stage's: a phone's width), 16px
    below its end as on a page. */
 .text-field-demo-form {
-  background-color: var(--color-ios-system-grouped-background);
+  background-color: var(--color-ui-system-grouped-background);
   padding-block-end: 16px;
 }
 

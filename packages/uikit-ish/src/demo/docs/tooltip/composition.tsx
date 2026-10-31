@@ -1,10 +1,6 @@
 import '../toolbar/style.css';
 import './style.css';
 
-import { sfMappinAndEllipse } from '@bradleyhodges/sfsymbols/sfMappinAndEllipse';
-import { sfPlusSquareOnSquare } from '@bradleyhodges/sfsymbols/sfPlusSquareOnSquare';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useRef } from 'react';
 
 import { Button, Symbol, Toolbar, Tooltip } from '../../../components/index.js';
@@ -16,6 +12,12 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfMappinAndEllipse,
+  sfPlusSquareOnSquare,
+  sfSquareAndArrowUp,
+  sfTrash,
+} from '../../tooling/icons.js';
 
 /** A toolbar's symbol buttons, their tooltips sharing a provider. */
 const InAToolbar: FunctionComponent = () => {

@@ -864,8 +864,7 @@ export const ActionSheetParts: FunctionComponent = () => (
         destructive (red).
       </li>
       <li>
-        No Cancel: a press outside cancels (iOS 26’s anchored action sheets have
-        none).
+        No Cancel: a press outside cancels (anchored action sheets have none).
       </li>
       <li>
         Renders a <code>button</code>.

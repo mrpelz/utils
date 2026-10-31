@@ -29,24 +29,24 @@ export type {
   PageControlProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Toolbars”: “_Page control”, Dots 1 to 8+,
-// BG Context Dim/Bright): a glass capsule, 48px high, 24px from its ends,
+// A page control (1 to 8 dots, or more), in dim and bright contexts: a
+// glass capsule, 48px high, 24px from its ends,
 // of 8px dots 8px apart; the current page's in the glass' vibrant content
 // color, the others in its disabled content color. Of more than 7 pages, 8
 // dots show at a time: the dots before and after them (if any) are hinted
 // at by the outermost two shrinking (6px and 4px, in 8px and 6px slots).
-// Behavior after UIKit's `UIPageControl`: a press on either side of the
-// current dot goes to the previous or next page; dragged along (scrubbing,
-// UIKit's continuous interaction), a page per dot passed; an adjustable
+// A press on either side of the
+// current dot goes to the previous or next page; dragged along (scrubbing),
+// a page per dot passed; an adjustable
 // control (arrow keys, Home and End).
 //
-// Its plain variant: Figma “Page Controls” (UIKit's, over content): a
+// Its plain variant (over content): a
 // capsule 24px high, 12px from its ends, the current page's dot in the
 // label color, the others in it at 30%, without glass.
 //
-// Deviations:
+// Also:
 // - The window of 8 dots moves when the current page would reach a
-//   shrunken dot (Figma: the window's states only), the dots resizing
+//   shrunken dot, the dots resizing
 //   (200ms).
 // - Optionally, the current page (“3 of 8”) in a tooltip (see `Tooltip`)
 //   8px above it while it's hovered, pressed or focused by keyboard
@@ -91,7 +91,7 @@ const dotSize = (index: number, start: number, count: number) => {
 };
 
 /**
- * A page control (UIKit `UIPageControl`): dots of pages, the current one
+ * A page control: dots of pages, the current one
  * highlighted, on glass (e.g. in a `Toolbar`), or plain.
  */
 export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(

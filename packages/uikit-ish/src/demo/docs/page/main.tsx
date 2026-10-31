@@ -43,7 +43,7 @@ export const PageDemo: FunctionComponent = () => {
       state={[stateContent, stateRoot]}
       title="Page"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           {content.header ? (
             <Viewport.BlockStart>

@@ -9,8 +9,8 @@ export const propOptionsBar = {
   value: [40, 0, 10, 90, 100, null] as const,
   tint: [
     undefined,
-    'var(--color-ios-system-green)',
-    'var(--color-ios-system-orange)',
+    'var(--color-ui-system-green)',
+    'var(--color-ui-system-orange)',
   ] as const,
 };
 
@@ -58,10 +58,11 @@ export const propOptionsIndicator = {
   ] as const,
   progress: [undefined, 0.25, 0.5, -0.25, 1.5] as const,
   duration: [undefined, 0.5, 2] as const,
+  synchronized: [undefined, false, true] as const,
   color: [
     undefined,
-    'var(--color-ios-label)',
-    'var(--color-ios-primary)',
+    'var(--color-ui-label)',
+    'var(--color-ui-primary)',
   ] as const,
   children: [undefined, 'Loading'] as const,
 };
@@ -71,6 +72,7 @@ export const propOptionsGuideRoot = {
   ...propOptionsBar,
   min: [undefined, 0, 20] as const,
   max: [undefined, 100, 200] as const,
+  synchronized: [undefined, false, true] as const,
   format: [
     undefined,
     new MappedProp<Intl.NumberFormatOptions>(

@@ -54,7 +54,7 @@ const RootPart: FunctionComponent = () => {
       state={state}
       title="Layout.Root"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root {...propsRoot}>
           <Layout.Column
             key={keyFirst}
@@ -129,7 +129,7 @@ const BackgroundPart: FunctionComponent = () => {
       state={state}
       title="Layout.Background"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root {...propsRoot}>
           <Layout.Background {...propsBackground}>
             <div
@@ -193,7 +193,7 @@ const ColumnPart: FunctionComponent = () => {
       state={state}
       title="Layout.Column"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root {...propsRoot}>
           <Layout.Column
             key={keyFirst}

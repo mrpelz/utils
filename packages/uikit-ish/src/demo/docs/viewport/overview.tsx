@@ -1,4 +1,4 @@
-import { FunctionComponent, RefObject } from 'react';
+import { FunctionComponent, RefObject, useRef } from 'react';
 
 import {
   List,
@@ -36,7 +36,8 @@ import {
  */
 const LiveViewFrame: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
-}> = ({ contentRef }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, contentRef }) => {
   const id = 'viewport-overview';
   const [externalContent, externalStart, externalEnd] = useProvidedState(id);
   const [controlContent, propsContent, stateContent] = usePropControl(
@@ -62,6 +63,7 @@ const LiveViewFrame: FunctionComponent<{
       isInline
       controls={[controlContent, controlStart, controlEnd]}
       id={id}
+      screenRef={screenRef}
       stage="phone"
       state={[stateContent, stateStart, stateEnd]}
       title="Viewport"
@@ -130,10 +132,17 @@ const LiveView: FunctionComponent = () => {
     'contentRef',
     'HTMLDivElement',
   );
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
-      <LiveViewFrame contentRef={contentRef} />
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
+      <LiveViewFrame
+        contentRef={contentRef}
+        screenRef={screenRef}
+      />
     </Viewport.Provider>
   );
 };
@@ -171,10 +180,7 @@ export const ViewportOverview: FunctionComponent = () => (
         much of it shows); see{' '}
         <a href="viewport/parts#useelementvisibility">Parts</a>.
       </li>
-      <li>
-        This library’s own; no Base UI component, no UIKit counterpart (UIKit: a
-        window’s safe area and keyboard layout guides).
-      </li>
+      <li>This library’s own; no Base UI component.</li>
     </ul>
     <LiveView />
 
@@ -243,7 +249,7 @@ export const ViewportOverview: FunctionComponent = () => (
         title): a <a href="header">Header</a> in a <a href="page">Page</a>.
       </li>
       <li>
-        Columns side by side (a sidebar beside the content, on iPad): a{' '}
+        Columns side by side (a sidebar beside the content, on a tablet): a{' '}
         <a href="layout">Layout</a> (in{' '}
         <PartLink
           component="viewport"
@@ -378,6 +384,10 @@ export const ViewportOverview: FunctionComponent = () => (
         <code>body</code>. Otherwise, on iOS (as a web app, especially), a drag
         no scroll container takes (e.g. on a bar, or on content too short to
         scroll) rubber-bands the document, moving the whole app, its bars too.
+        Only on iOS (e.g. in{' '}
+        <code>@supports (-webkit-touch-callout: none)</code>): elsewhere, e.g.
+        Chrome on macOS, it also ends a trackpad’s inertia in the scroll
+        containers within.
       </li>
       <li>
         Anchors and the content layer are <code>position: fixed</code>: to the

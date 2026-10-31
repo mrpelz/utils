@@ -12,20 +12,18 @@ import {
   useRef,
 } from 'react';
 
-import { cn, usePointerDrag, withStyle } from '../utils/main.js';
+import { cn, delayLens, usePointerDrag, withStyle } from '../utils/main.js';
 import type { Drag, SwitchRootProps } from './props.js';
 
 export type { SwitchRootProps } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Toggle - Switch”, light and dark appearance),
-// with Figma colors mapped to UIKit semantic colors: on `systemGreen` (or
-// `tint`, UIKit `onTintColor`), off `systemFill`; the knob (`#fff`) has no
-// semantic equivalent.
-// The pressed glass effect and everything Figma does not specify come from
-// Framework7 `components/toggle/toggle.less`, `toggle-ios.less` (iOS values,
-// `.toggle-active-state`): transitions, pressed scales, glow, glass shadow.
+// The switch, light and dark, in the semantic colors: on `systemGreen` (or
+// `tint`), off `systemFill`; the knob (`#fff`) has no semantic equivalent.
+// The pressed glass effect comes from Framework7
+// `components/toggle/toggle.less`, `toggle-ios.less` (its iOS theme's
+// values, `.toggle-active-state`): transitions, pressed scales, glow, glass shadow.
 //
-// Deviations:
+// Also:
 // - The track's end cap (Framework7 `.toggle::after`) is omitted, as it shows
 //   as a separate circle while the pressed track shrinks.
 // - Track size (64×28) is a minimum, not a fixed size; the knob is positioned
@@ -40,13 +38,12 @@ export type { SwitchRootProps } from './props.js';
 //   not flip the state act as a tap (toggling), unless they flick towards the
 //   current side (Framework7: swipes within 300ms toggle).
 // - The browser's default focus ring is kept.
-// - Indeterminate (as a checkbox, which the platform's switches are; UIKit:
-//   none): the knob in the middle, on the off color; checked, the on color
+// - Indeterminate (as a checkbox, which the platform's switches are): the
+//   knob in the middle, on the off color; checked, the on color
 //   from the start up to the knob, fading out (so checked and unchecked
 //   differ), faded in and out as the state changes.
 //
-// On/off labels (UIKit's accessibility setting “On/Off Labels”, measured on
-// Apple's illustration): a 9px “I” bar (white) and a 9px “O” ring (tertiary
+// On/off labels (an accessibility setting): a 9px “I” bar (white) and a 9px “O” ring (tertiary
 // label), 1px strokes, each centered in the track beside the knob on its
 // side; the knob covers the other (both hidden while indeterminate, and
 // while pressed, as the knob is a lens).
@@ -63,8 +60,8 @@ const BaseRoot = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
   ),
 );
 
-// The pressed state is set here too, as `:active` is lost when the state
-// flips during a drag.
+// The pressed state is set here (not by `:active`: lost when the state flips
+// during a drag; and a quick tap shows no lens, see `delayLens`).
 const dragProperties = [
   '--uikit-switch-knob-move-duration',
   '--uikit-switch-knob-start',
@@ -83,6 +80,7 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
       onPointerDown,
       onPointerMove,
       onPointerUp,
+      onTouchMove,
       children,
       indeterminate = false,
       inputRef,
@@ -114,6 +112,7 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
     const handlers = usePointerDrag<HTMLSpanElement, Drag>(
       {
         end: (root, drag, isCancelled) => {
+          drag.lens.cancel();
           for (const property of dragProperties) {
             root.style.removeProperty(property);
           }
@@ -132,7 +131,13 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
             suppressClickRef.current = false;
           });
         },
+        // Held (its lens shown), the touch doesn't scroll.
+        isHolding: ({ lens }, position) => {
+          lens.move(position);
+          return lens.isShown();
+        },
         move: (root, drag, event) => {
+          drag.lens.move(event);
           drag.moved = (event.clientX - drag.startX) * drag.direction;
 
           const start = Math.max(
@@ -165,12 +170,16 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
           const direction = getComputedStyle(root).direction === 'rtl' ? -1 : 1;
           const min = Number.parseFloat(getComputedStyle(thumb).top);
 
-          root.style.setProperty('--uikit-switch-pressed', '1');
+          // (A quick tap only toggles: no lens, see `delayLens`.)
+          const lens = delayLens(event, () =>
+            root.style.setProperty('--uikit-switch-pressed', '1'),
+          );
 
           return {
             isChecked: isChecked(root),
             direction,
             isFlipped: false,
+            lens,
             max: rootRect.width - thumbRect.width - min,
             min,
             moved: 0,
@@ -189,6 +198,7 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
         onPointerDown,
         onPointerMove,
         onPointerUp,
+        onTouchMove,
       },
     );
 
@@ -215,6 +225,8 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
         {...props}
         {...handlers}
         className={cn('uikit-switch-root', className)}
+        // Its drags don't swipe a sheet (or drawer) away.
+        data-base-ui-swipe-ignore=""
         data-switch-part="root"
         onClickCapture={handleClickCapture}
       >

@@ -11,13 +11,13 @@ export const propOptionsRoot = {
     undefined,
     '#000',
     '#fff',
-    'var(--color-ios-system-yellow)',
+    'var(--color-ui-system-yellow)',
   ] as const,
   tint: [
     undefined,
-    'var(--color-ios-system-blue)',
-    'var(--color-ios-system-green)',
-    'var(--color-ios-system-gray)',
+    'var(--color-ui-system-blue)',
+    'var(--color-ui-system-green)',
+    'var(--color-ui-system-gray)',
   ] as const,
 };
 

@@ -1,4 +1,3 @@
-import { sfChevronBackward } from '@bradleyhodges/sfsymbols/sfChevronBackward';
 import { FunctionComponent, useCallback, useState } from 'react';
 
 import {
@@ -21,6 +20,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfChevronBackward } from '../../tooling/icons.js';
 import { pages } from './content.js';
 import { navigationRootRows, navigationStackRows } from './docs.js';
 import { useNavigationControls } from './props.js';
@@ -58,30 +58,26 @@ const LiveView: FunctionComponent = () => {
       state={state}
       title="Navigation"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
-                {keys.length > 1 ? (
-                  <Navigation.Back
-                    aria-label={pages[keys.at(-2) ?? '']?.title}
-                    {...propsBack}
-                  >
-                    <Button.Icon>
-                      <Symbol icon={sfChevronBackward} />
-                    </Button.Icon>
-                  </Navigation.Back>
-                ) : null}
-              </Toolbar.Leading>
-            </Toolbar.Root>
-          </Viewport.BlockStart>
           <Navigation.Stack {...propsStack}>
-            {keys.map((key) => (
+            {keys.map((key, index) => (
               <Header.Root key={key}>
                 <Viewport.BlockStart>
                   <Toolbar.Root placement="block-start">
+                    {index > 0 ? (
+                      <Toolbar.Leading>
+                        <Navigation.Back
+                          aria-label={pages[keys[index - 1] ?? '']?.title}
+                          {...propsBack}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Navigation.Back>
+                      </Toolbar.Leading>
+                    ) : null}
                     <Toolbar.Title>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
@@ -143,8 +139,8 @@ export const NavigationOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A stack of pages (UIKit <code>UINavigationController</code>): drilling
-        in pushes a page over the one before, going back pops it.
+        A stack of pages: drilling in pushes a page over the one before, going
+        back pops it.
       </li>
       <li>
         The app’s stack, rendered as its{' '}
@@ -156,8 +152,8 @@ export const NavigationOverview: FunctionComponent = () => (
         its own).
       </li>
       <li>
-        Swiping from the leading edge goes back, as on iOS; pages under the top
-        one stay mounted, their state and scroll positions kept.
+        Swiping from the leading edge goes back; pages under the top one stay
+        mounted, their state and scroll positions kept.
       </li>
       <li>
         This library’s own, after Framework7’s views; no Base UI component.
@@ -270,31 +266,24 @@ export const NavigationOverview: FunctionComponent = () => (
       </li>
       <li>
         A page’s <a href="header">Header</a> moves with its page, its bar and
-        title too; the back button stays (a <a href="toolbar">Toolbar</a> in a{' '}
-        <a href="viewport">Viewport</a>’s{' '}
-        <PartLink
-          component="viewport"
-          part="Viewport.BlockStart"
-        >
-          BlockStart
-        </PartLink>{' '}
-        in the{' '}
+        title too; the back button, in each pushed page’s bar, stays put between
+        pushed pages (a persistent item, see{' '}
         <PartLink
           component="navigation"
-          part="Navigation.Root"
+          part="Navigation.Persistent"
         />
-        , outside its{' '}
-        <PartLink
-          component="navigation"
-          part="Navigation.Stack"
-        />
-        ), over the pages’ bars.
+        ), sliding in and out with the first.
       </li>
       <li>
         Swiping back starts within 20px of the leading edge (touch or mouse):
         released past half the width, or flung (0.3px/ms), it pops (calling{' '}
-        <code>onBack</code>, the transition done by then); otherwise it settles
-        back.
+        <code>onBack</code> as it’s let go, the pop on from there); otherwise it
+        settles back.
+      </li>
+      <li>
+        Going back quickly, each pop runs its own transition: pressed or swiped
+        again while a page still leaves, that page leaves on its own and the
+        next one follows (a cascade). Not swiped while pushing.
       </li>
       <li>
         The leading edge mirrors right to left (pushed pages from the left).

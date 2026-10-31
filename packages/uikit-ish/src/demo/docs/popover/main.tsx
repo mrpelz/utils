@@ -1,7 +1,5 @@
 import './style.css';
 
-import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
-import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -15,6 +13,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { sfICircle, sfXmark } from '../../tooling/icons.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -22,8 +21,7 @@ import {
 } from './props.js';
 
 /**
- * A popover (UIKit `UIPopoverPresentationController`, Figma “Popovers”, Base
- * UI's `Popover`): a panel at its trigger, its arrow pointing at it; in a
+ * A popover (Base UI's `Popover`): a panel at its trigger, its arrow pointing at it; in a
  * list row, aligned with its end.
  */
 export const PopoverDemo: FunctionComponent = () => {

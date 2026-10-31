@@ -7,7 +7,7 @@ import type { BadgeProps } from './props.js';
 
 export type { BadgePlacement, BadgeProps } from './props.js';
 
-// Source: Apple iOS 26 Figma (app icons, “_Badge”): a capsule 24px high, at
+// A capsule 24px high, at
 // least 24px wide (a circle for a digit), 7px from its ends, in system red,
 // its text white, 16px/19px regular. Placed after Framework7's badge: on a
 // symbol (`placement` 'symbol', a child of a `Symbol`, e.g. in a
@@ -15,8 +15,8 @@ export type { BadgePlacement, BadgeProps } from './props.js';
 // text 10px semibold, 2px from its ends); on its element's top end corner
 // (e.g. an `Avatar`'s); or inline (e.g. a list row's detail); any tint.
 //
-// Deviations:
-// - Without content, a dot (10px; Figma, Framework7 have none; e.g. an
+// Also:
+// - Without content, a dot (10px; Framework7 has none; e.g. an
 //   unread indicator): on a symbol, centered on its top end corner; inline,
 //   centered with the text (by its cap height).
 // - On a symbol, it starts 5px before its end, 4px above it (Framework7:
@@ -28,7 +28,7 @@ export type { BadgePlacement, BadgeProps } from './props.js';
 // - On a tab collapsing away, it fades with its symbol: no special case.
 
 /**
- * A badge (UIKit `badgeValue`): a count (or short text) in a capsule, or,
+ * A badge: a count (or short text) in a capsule, or,
  * without content, a dot; on a `Symbol` (its child), an element's corner,
  * or inline (`placement`).
  */

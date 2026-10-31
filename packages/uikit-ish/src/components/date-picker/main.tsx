@@ -73,38 +73,33 @@ export type {
   TimeRollProps,
 } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Date and time - Collapsed”: State=Default/
-// Selected; “Date and time - Pickers”: Style=Inline/Compact; light and dark
-// appearance), with Figma colors mapped to UIKit semantic colors: the
-// collapsed buttons `tertiarySystemFill`, text `label` (selected: the tint),
-// weekdays `tertiaryLabel`, today and the arrows in the tint, the selected
-// day on the tint at 12%, the separator `separator`. Ranges follow
-// Framework7 (`calendar-ios.less`): their ends on the tint, the days between
-// on the tint at 12%.
+// Collapsed buttons (default and selected) and pickers (inline and
+// compact), light and dark, in the semantic colors: the collapsed buttons
+// `tertiarySystemFill`, text `label` (selected: the tint), weekdays
+// `tertiaryLabel`, today and the arrows in the tint, the selected day on the
+// tint at 12%, the separator `separator`. Ranges follow Framework7
+// (`calendar-ios.less`): their ends on the tint, the days between on the
+// tint at 12%.
 //
-// A date picker (UIKit `UIDatePicker`): `mode` picks a date, a time or both;
-// `pickerStyle` shows them `compact` (collapsed buttons, opening the
-// calendar or the time in a popover, a Base UI `Popover`) or `inline` (the
-// calendar in place). Names, numerals, the hour cycle and the week's first
-// day follow the locale (`Intl`). With `range`, two days are picked: a start
-// and an end (Framework7 `rangePicker`; UIKit: none), highlighted with the
-// days between.
+// A date picker: `mode` picks a date, a time or both; `pickerStyle` shows
+// them `compact` (collapsed buttons, opening the calendar or the time in a
+// popover, a Base UI `Popover`) or `inline` (the calendar in place). Names,
+// numerals, the hour cycle and the week's first day follow the locale
+// (`Intl`). With `range`, two days are picked: a start and an end
+// (Framework7 `rangePicker`), highlighted with the days between.
 //
 // The calendar is a group of day buttons (one tabbable): arrow keys move by
 // a day or week, Page Up/Down by a month, Home/End to the week's ends. Its
-// title opens a month and year roll (see `Roll`) over the days (as iOS's),
-// the time's button a roll of hours and minutes (both editable: pressing the
-// selected row, or typing, enters a number), as the compact time's popover.
+// title opens a month and year roll (see `Roll`) over the days, the time's
+// button a roll of hours and minutes (both editable: pressing the selected
+// row, or typing, enters a number), as the compact time's popover.
 //
-// Deviations:
-// - The rolls take the days' place (iOS: the month and year roll does; the
-//   time's opens in a popover).
-// - The popover is `Popover`'s (the menus' glass, see there; Figma: the
-//   “Regular” material, blur 50px), its corners 13px, as Figma's.
-// - The calendar's width (Figma: 370px) is a minimum: 7 × 44px days, 16px
-//   from the sides.
-// - The collapsed buttons are capsules (or, `buttonShape`, Figma's 6px
-//   corners).
+// Also:
+// - The rolls take the days' place (the time's too).
+// - The popover is `Popover`'s (the menus' glass, see there), its corners
+//   13px.
+// - The calendar's width is a minimum: 7 × 44px days, 16px from the sides.
+// - The collapsed buttons are capsules (or, `buttonShape`, 6px corners).
 
 // What swiping the days does (see `swipe`): a range dragged only picking
 // one.
@@ -230,6 +225,12 @@ const rangePlace = (day: Date, range: DateRange | null) => {
   return undefined;
 };
 
+/**
+ * How long (ms) after a month settled (a swipe's scroll ending) the
+ * calendar's height changes (see `CalendarPanel`).
+ */
+const resizeDelay = 200;
+
 /** Controlled or uncontrolled state (as Base UI's components). */
 const useControlled = <T,>(
   value: T | undefined,
@@ -245,7 +246,7 @@ const CollapsedButton = forwardRef<
     shape?: DatePickerProps['buttonShape'];
   }
 >(({ className, shape, ...props }, ref) => (
-  // Figma “Date and time - Collapsed”: a `Button` (bordered, secondary), 34px,
+  // A collapsed button: a `Button` (bordered, secondary), 34px,
   // padding 6px 11px, corners 6px (or a capsule), the text in Body; selected
   // (open), in the tint. (Doubled: over the button's own styles.)
   <Button.Root
@@ -259,7 +260,7 @@ const CollapsedButton = forwardRef<
   />
 ));
 
-// Figma “Time”: a 52px row, the title (Body) and the time.
+// A time row: a 52px row, the title (Body) and the time.
 const TimeRow = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     <div
@@ -377,8 +378,7 @@ const TimeRoll: FunctionComponent<TimeRollProps> = ({
   const twelveHour = hourCycle === 'h12' ? hours % 12 || 12 : hours % 12;
   const shownHour = twelve ? twelveHour : hours;
 
-  // Beyond the limits: the nearest within them (the roll moving back, as
-  // UIKit's).
+  // Beyond the limits: the nearest within them (the roll moving back).
   const set = (
     hour: number,
     minute: number,
@@ -677,7 +677,7 @@ const FormValue: FunctionComponent<{
     />
   );
 
-/** The calendar (Figma “Style=Inline”), with an optional time row. */
+/** The calendar (inline), with an optional time row. */
 const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   const {
     firstDayOfWeek: weekStartProp,
@@ -724,7 +724,10 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     monthRef.current = month;
   });
   const suppressClick = useRef(false);
-  const height = useRef<number | undefined>(undefined);
+  // The body's height, and its transition running (see below).
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const bodyHeight = useRef<number | undefined>(undefined);
+  const transition = useRef<Animation | undefined>(undefined);
   const titleId = useId();
   const rollId = useId();
 
@@ -782,20 +785,72 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
 
   // The strip as high as the shown month's days (its neighbours' clipped),
   // as they're laid out (not while hidden, e.g. in a closed row: none).
+  // Months of more or fewer weeks: the strip resized at once, the body
+  // around it transitioning (its content clipped meanwhile), a moment after
+  // the month settled (`resizeDelay`: resized as a swipe settled, it
+  // faltered). Under a roll, kept as it was (no shifts mid-roll):
+  // transitioning once the roll closes, at once.
+  const isRolled = rolled !== undefined;
+  const wasRolled = useRef(isRolled);
   useLayoutEffect(() => {
     const { current: days } = daysRef;
     const { current: pages } = pagesRef;
-    if (!days || !pages) return undefined;
+    const { current: body } = bodyRef;
+    const isClosing = wasRolled.current && !isRolled;
+    wasRolled.current = isRolled;
+    if (!days || !pages || !body || isRolled) return undefined;
+    let isPending = false;
+
     const fit = () => {
-      if (days.offsetHeight === 0) return;
-      height.current = days.offsetHeight;
+      if (days.offsetHeight === 0) return false;
       pages.style.height = `${String(days.offsetHeight)}px`;
+      return true;
     };
-    fit();
-    const observer = new ResizeObserver(fit);
+    const resize = () => {
+      isPending = false;
+      if (!fit()) return;
+      const next = body.offsetHeight;
+      const previous = bodyHeight.current;
+      bodyHeight.current = next;
+      if (previous === undefined || previous === next) return;
+      transition.current?.cancel();
+      body.style.overflow = 'clip';
+      const animation = body.animate(
+        [{ height: `${String(previous)}px` }, { height: `${String(next)}px` }],
+        { duration: 300, easing: 'ease' },
+      );
+      transition.current = animation;
+      const done = () => {
+        if (transition.current === animation) {
+          body.style.removeProperty('overflow');
+        }
+      };
+      animation.addEventListener('finish', done);
+      animation.addEventListener('cancel', done);
+    };
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    if (bodyHeight.current === undefined || isClosing) {
+      resize();
+    } else {
+      isPending = true;
+      timer = setTimeout(resize, resizeDelay);
+    }
+
+    // Resized otherwise (e.g. the text size): at once, the body's height
+    // as it is (not mid-transition: its own then).
+    const observer = new ResizeObserver(() => {
+      if (isPending) return;
+      fit();
+      if (transition.current?.playState === 'running') return;
+      bodyHeight.current = body.offsetHeight;
+    });
     observer.observe(days);
-    return () => observer.disconnect();
-  }, [month]);
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [isRolled, month, weekStart]);
 
   // The months side by side, scrolled sideways (see pager.ts): turned to,
   // by scrolling, its day focused.
@@ -824,25 +879,6 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     pagesRef,
   });
   const { goTo } = pager;
-
-  // Months of more or fewer weeks: once settled on one (not while
-  // scrolled: a native touch drag would falter), the strip's height
-  // transitioning (between heights laid out).
-  useLayoutEffect(() => {
-    const { current: days } = daysRef;
-    const { current: pages } = pagesRef;
-    if (!days || !pages) return;
-    const next = days.offsetHeight;
-    const previous = height.current;
-    if (next === 0) return;
-    height.current = next;
-    pages.style.height = `${String(next)}px`;
-    if (previous === undefined || previous === next) return;
-    pages.animate(
-      [{ height: `${String(previous)}px` }, { height: `${String(next)}px` }],
-      { duration: 300, easing: 'ease' },
-    );
-  }, [month, weekStart]);
 
   // Moved by keyboard: on past disabled days (in the direction moved), to
   // one that can be focused.
@@ -1064,7 +1100,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     );
 
     return (
-      // Figma “Day”: a 44px circle (behind it), its date in Title 3; today in
+      // A day: a 44px circle (behind it), its date in Title 3; today in
       // the tint; the selected day on the tint at 12%, its date 24px at 510, in
       // the tint. In a range (across its column, see Source), its ends on the
       // tint, the days between (and the halves towards them) on the tint at
@@ -1157,12 +1193,12 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   );
 
   return (
-    // Figma “Style=Inline”: the calendar, a separator, the time row.
+    // Inline: the calendar, a separator, the time row.
     <div
       className="uikit-date-picker-panel"
       data-date-picker-part="calendar"
     >
-      {/* Figma “Header”: 40px, the month and year (Body Emphasized) 16px from
+      {/* The header: 40px, the month and year (Body Emphasized) 16px from
          the start, the arrows (20px, 510, the tint) 16px from the end, 28px
          apart. */}
       <div
@@ -1175,8 +1211,8 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
           data-date-picker-part="month-title"
           id={titleId}
         >
-          {/* The title opens the month and year roll: its chevron (iOS: 􀆊, 590,
-             in the tint) turned down while open, the title in the tint. */}
+          {/* The title opens the month and year roll: its chevron (590, in the
+             tint) turned down while open, the title in the tint. */}
           <button
             aria-controls={rollId}
             aria-expanded={rolled === 'monthYear'}
@@ -1221,6 +1257,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
       {/* The weekdays and days, or a roll in their place (keeping their size).
        */}
       <div
+        ref={bodyRef}
         className="uikit-date-picker-body"
         data-date-picker-part="body"
         data-rolled={rolled === undefined ? undefined : ''}
@@ -1313,7 +1350,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
       </div>
       {footerContent === null || footerContent === undefined ? null : (
         <>
-          {/* Figma “Separator”: 0.5px, 16px from the sides, 11px down. */}
+          {/* A separator: 0.5px, 16px from the sides, 11px down. */}
           <div
             className="uikit-date-picker-separator"
             data-date-picker-part="separator"
@@ -1331,7 +1368,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
   );
 };
 
-/** A footer row (see `CalendarProps` `footer`): Figma “Time”'s, 52px. */
+/** A footer row (see `CalendarProps` `footer`): a time row's, 52px. */
 const CalendarRow = TimeRow;
 
 /** A footer button (see `CalendarProps` `footer`): a collapsed button. */
@@ -1345,7 +1382,7 @@ const CalendarButton = CollapsedButton;
 const CalendarMessage = forwardRef<HTMLParagraphElement, CalendarMessageProps>(
   ({ className, variant = 'info', ...props }, ref) => (
     // Footnote, 16px from the sides (as the rows' content), 12px from the
-    // rows (UIKit footers' metrics).
+    // rows (a list footer's metrics).
     <p
       ref={ref}
       aria-live="polite"
@@ -1359,7 +1396,7 @@ const CalendarMessage = forwardRef<HTMLParagraphElement, CalendarMessageProps>(
 );
 
 /**
- * The footer's Time row (Figma “Time”): the time's button, showing its
+ * The footer's time row: the time's button, showing its
  * roll; the picker's default footer, with a time.
  */
 const CalendarTimeRow: FunctionComponent<{
@@ -1386,7 +1423,7 @@ const CalendarTimeRow: FunctionComponent<{
     </CalendarRow>
   ) : null;
 
-/** The calendar (Figma “Style=Inline”, without the time). */
+/** The calendar (inline, without the time). */
 const Calendar: FunctionComponent<CalendarProps & { label?: string }> = (
   props,
 ) => <CalendarPanel {...props} />;
@@ -1505,7 +1542,7 @@ const TimePopover: FunctionComponent<
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner align={align}>
-          {/* Figma “Style=Compact”: the inline style in a popover, its content
+          {/* Compact: the inline style in a popover, its content
              clipped to its corners (not the popup: `overflow: hidden` would
              make it a scroll container, its material reaching beyond it,
              scrolled sideways as a day takes focus; and clip its glow). */}
@@ -1548,8 +1585,8 @@ const dateLabelOf = (
 
 /**
  * The compact style's calendar popover: from the date's button, or, with a
- * time, from the time's too, with the time's roll shown (as iOS's; one
- * popover for both).
+ * time, from the time's too, with the time's roll shown (one popover for
+ * both).
  */
 const CalendarPopover: FunctionComponent<{
   align?: PopoverAlign;
@@ -1756,7 +1793,7 @@ const useListSync = (
 };
 
 /**
- * A date picker (UIKit `UIDatePicker`): a date, a time or both (`mode`), or
+ * A date picker: a date, a time or both (`mode`), or
  * a range of dates (`range`); collapsed buttons opening the calendar or the
  * time in a popover (or toggling `open`, without `popover`), or the
  * calendar in place (`pickerStyle`).
@@ -1913,8 +1950,7 @@ const Root: FunctionComponent<DatePickerProps> = (props) => {
 /**
  * A date picker's pickers in place (see `Root` `handle`): its calendar and
  * time roll, each in collapsible list rows (`List.CollapsiblePanel`),
- * opened by its buttons; placed after the picker's row (as iOS's
- * Calendar). In an `List.AccordionItem` (with its row), one of its items.
+ * opened by its buttons; placed after the picker's row. In an `List.AccordionItem` (with its row), one of its items.
  */
 const Expandable: FunctionComponent<DatePickerExpandableProps> = ({
   handle,

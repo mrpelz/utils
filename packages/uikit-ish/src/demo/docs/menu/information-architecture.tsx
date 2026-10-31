@@ -171,10 +171,10 @@ export const MenuInformationArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The iPhone’s and the iPad’s menus (Figma’s two), switched by the size
-        class: where submenus open, the items’ size.
+        The compact and the regular menus, switched by the size class: where
+        submenus open, the items’ size.
       </li>
-      <li>Quick actions: a row of tiles at the top (Figma “Quick Actions”).</li>
+      <li>Quick actions: a row of tiles at the top.</li>
       <li>
         Opening on touch down and choosing by dragging on to an item (iOS’).
       </li>

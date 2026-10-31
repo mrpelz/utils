@@ -103,8 +103,8 @@ export const TextFieldOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Free text, a line (or several) of it (UIKit <code>UITextField</code>;
-        Base UI’s <code>Field</code>): a name, an address, a search.
+        Free text, a line (or several) of it (Base UI’s <code>Field</code>): a
+        name, an address, a search.
       </li>
       <li>
         As a <a href="list">List</a> row (a form’s, Settings’): its label the
@@ -223,8 +223,8 @@ export const TextFieldOverview: FunctionComponent = () => (
         ); invalid, it’s <code>aria-invalid</code>.
       </li>
       <li>
-        The clear button is out of the tab order (as UIKit’s), named “Clear
-        text”: the keyboard clears by selecting and deleting.
+        The clear button is out of the tab order, named “Clear text”: the
+        keyboard clears by selecting and deleting.
       </li>
       <li>
         Its <code>type</code>, <code>inputMode</code>, <code>autoComplete</code>{' '}
@@ -252,7 +252,7 @@ export const TextFieldOverview: FunctionComponent = () => (
       </li>
       <li>
         The clear button only while it’s filled: by default while it’s focused
-        too (UIKit’s <code>whileEditing</code>; its <code>mode</code>: also{' '}
+        too (<code>whileEditing</code>; its <code>mode</code>: also{' '}
         <code>unlessEditing</code>, <code>always</code>), clearing as typing
         would (its change handlers run), focusing the control.
       </li>

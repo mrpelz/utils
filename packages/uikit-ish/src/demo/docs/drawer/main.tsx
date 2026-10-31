@@ -1,5 +1,3 @@
-import { sfFolderFill } from '@bradleyhodges/sfsymbols/sfFolderFill';
-import { sfListBullet } from '@bradleyhodges/sfsymbols/sfListBullet';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
@@ -17,6 +15,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { sfFolderFill, sfListBullet } from '../../tooling/icons.js';
 import {
   getPropOptionsGuideColumn,
   propOptionsGuideRoot,
@@ -106,7 +105,7 @@ export const DrawerControlledDemo: FunctionComponent = () => {
         stateDetail,
       ]}
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root {...propsRoot}>
           <Drawer.Root
             key={keyDrawer}

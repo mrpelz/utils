@@ -14,19 +14,24 @@ import {
 } from 'react';
 
 import {
+  createOpenSubmenus,
   dragOverItems,
   Menu,
   MenuContext,
+  OpenSubmenusContext,
   useCloseOutOfView,
   useKeepOpenInSubmenus,
   useRootActions,
+  useSubmenuOutsidePress,
   useSubmenuToggle,
 } from '../menu/main.js';
 import {
   cn,
   MovingHighlight,
   positionerSide,
+  useCollision,
   useForwardedRef,
+  useGrowAvoidance,
 } from '../utils/main.js';
 import type {
   EditMenuPositionerProps,
@@ -36,13 +41,12 @@ import type {
 
 export type { EditMenuPositionerProps, EditMenuRootProps } from './props.js';
 
-// Source: Apple iOS 26 Figma (“Menus”: “Edit Menu”, “_Edit Menu Item”,
-// Mode=Light and Dark), with the destructive color mapped to `systemRed`; the
-// “Medium” glass material and vibrant content colors are tokens in
-// `styles.css`, used via `glass/style.css` (`uikit-glass-medium`). Its metrics
-// are iOS 26's own edit menu's, measured on an iPhone (see Deviations).
+// The edit menu and its items, light and dark, with the destructive color
+// mapped to `systemRed`; the “Medium” glass material and vibrant content
+// colors are tokens in `styles.css`, used via `glass/style.css`
+// (`uikit-glass-medium`).
 //
-// A Base UI menu in a horizontal glass capsule (UIKit `UIEditMenuInteraction`):
+// A Base UI menu in a horizontal glass capsule:
 // its actions are items, and `EditMenu.More` opens a submenu (a `Menu` popup)
 // with further actions. It's opened by the app (`open`) at an anchor (the
 // positioner's `anchor`, e.g. a selection), not by a trigger.
@@ -56,14 +60,13 @@ export type { EditMenuPositionerProps, EditMenuRootProps } from './props.js';
 // on release; held near an end, they scroll the actions (as the tab bar's lens
 // and menus do).
 //
-// Deviations:
-// - More actions open in a menu below the capsule, an iPad (`regular`) menu
-//   (UIKit: pages of the capsule).
+// Also:
+// - More actions open in a menu below the capsule, a `regular` menu (not
+//   pages of the capsule).
 // - Highlighted actions (pointer, keyboard) show the selection, as the “more”
-//   button does (Figma: no highlighted actions).
-// - The chevron is an SVG stroke (Figma: SF Symbols glyph 􀆊).
-// - Metrics of iOS 26's own edit menu (measured): 42px high, 14px labels, 16px
-//   dividers, a 34px “more” button (Figma: 44px, 15px, 18px, 36px).
+//   button does.
+// - The chevron is an SVG stroke.
+// - 42px high, 14px labels, 16px dividers, a 34px “more” button.
 // - The capsule is Framework7's popover glass, as the menu's popup (see
 //   `Menu`).
 
@@ -81,47 +84,68 @@ const Root = <Payload,>({
   ...props
 }: EditMenuRootProps<Payload>): ReactNode => {
   const actionsRef = useRootActions(props.actionsRef);
-  const onRootOpenChange = useKeepOpenInSubmenus(onOpenChange);
+  // A press outside its submenus closes them one by one (see Menu's
+  // `OpenSubmenus`), the innermost first.
+  const [submenus] = useState(() => createOpenSubmenus(true));
+  useSubmenuOutsidePress(submenus);
+  const onRootOpenChange = useKeepOpenInSubmenus(onOpenChange, submenus);
 
   return (
     // (Its menus' size, see `Menu.SubmenuRoot`.)
     <MenuContext.Provider value={{ actionsRef, orientation, size }}>
-      <BaseMenu.Root
-        modal={false}
-        orientation={orientation}
-        {...props}
-        actionsRef={actionsRef}
-        onOpenChange={onRootOpenChange}
-      >
-        <BaseMenu.Trigger
-          aria-hidden="true"
-          nativeButton={false}
-          tabIndex={-1}
-          render={
-            // Base UI positions a menu only for a trigger element; an edit menu
-            // opens at its anchor (e.g. a selection) instead, and pressing its
-            // content (e.g. to select text) must not open it. It's an inert,
-            // hidden element.
-            <span className="uikit-edit-menu-hidden-trigger" />
-          }
-        />
-        {children as ReactNode}
-      </BaseMenu.Root>
+      <OpenSubmenusContext.Provider value={submenus}>
+        <BaseMenu.Root
+          modal={false}
+          orientation={orientation}
+          {...props}
+          actionsRef={actionsRef}
+          onOpenChange={onRootOpenChange}
+        >
+          <BaseMenu.Trigger
+            aria-hidden="true"
+            nativeButton={false}
+            tabIndex={-1}
+            render={
+              // Base UI positions a menu only for a trigger element; an edit menu
+              // opens at its anchor (e.g. a selection) instead, and pressing its
+              // content (e.g. to select text) must not open it. It's an inert,
+              // hidden element.
+              <span className="uikit-edit-menu-hidden-trigger" />
+            }
+          />
+          {children as ReactNode}
+        </BaseMenu.Root>
+      </OpenSubmenusContext.Provider>
     </MenuContext.Provider>
   );
 };
 
 const Positioner = forwardRef<HTMLDivElement, EditMenuPositionerProps>(
-  ({ className, side = 'block-start', ...props }, forwardedRef) => {
+  (
+    {
+      className,
+      collisionBoundary,
+      collisionPadding,
+      side = 'block-start',
+      ...props
+    },
+    forwardedRef,
+  ) => {
     const ref = useForwardedRef(forwardedRef);
     useCloseOutOfView(ref);
+    // Within its container (e.g. the views' frames), clear of its safe area;
+    // growing rather than scrolling (unless its own is given).
+    const collision = useCollision({ collisionBoundary, collisionPadding });
+    const [grow, growRef] = useGrowAvoidance({}, ref);
 
     return (
       // Positions the capsule above its anchor (e.g. a text selection). */
       // Above the page's own stacking (e.g. list rows' and segmented items'
       // z-indexes, bars at 10), which would otherwise show through it.
       <BaseMenu.Positioner
-        ref={ref}
+        ref={growRef}
+        {...collision}
+        collisionAvoidance={grow}
         {...props}
         className={cn('uikit-edit-menu-positioner', className)}
         data-edit-menu-part="positioner"
@@ -303,7 +327,7 @@ const useTouchDrag = (popupRef: { current: HTMLDivElement | null }) => {
 
 const highlightSelectors = [':scope > [data-highlighted]:not([aria-haspopup])'];
 
-/** The edit menu's glass capsule (Figma “Liquid Glass”, Medium). */
+/** The edit menu's glass capsule (the medium glass). */
 const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
   ({ className, children, ...props }, forwardedRef) => {
     const ref = useForwardedRef(forwardedRef);
@@ -313,7 +337,7 @@ const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
     useTouchDrag(ref);
 
     return (
-      // iOS 26 (measured): 42px high, actions from 20px, the “more” button 4px
+      // 42px high, actions from 20px, the “more” button 4px
       // from the end; at most as wide as the space Base UI's positioner finds.
       <BaseMenu.Popup
         ref={ref}
@@ -355,7 +379,7 @@ const Item = forwardRef<
   HTMLElement,
   Omit<BaseMenu.Item.Props, 'ref'> & ItemProps
 >(({ className, children, destructive, ...props }, ref) => (
-  // Figma “_Edit Menu Item” (iOS 26's metrics): a label with a 16px high, 1px
+  // An action: a label with a 16px high, 1px
   // divider before it (except the first), 16px apart; the dividers next to the
   // highlighted action hide.
   <BaseMenu.Item
@@ -378,34 +402,49 @@ const Item = forwardRef<
 const More = forwardRef<
   HTMLElement,
   Omit<BaseMenu.SubmenuTrigger.Props, 'ref'>
->(({ className, children, onClick, onPointerDown, ...props }, ref) => (
-  // Figma “Menu” (iOS 26's metrics): a 34px circle with the selection and a
-  // chevron (􀆊, 14px, 590). Pressed again, it closes its menu.
-  <BaseMenu.SubmenuTrigger
-    ref={ref}
-    aria-label="More"
-    {...useSubmenuToggle({ onClick, onPointerDown })}
-    {...props}
-    className={cn('uikit-edit-menu-more uikit-menu-toggle-cursor', className)}
-    data-edit-menu-part="more"
-  >
-    {(children as ReactNode) ?? (
-      <svg
-        aria-hidden="true"
-        fill="none"
-        height="14"
-        stroke="currentcolor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2.2"
-        viewBox="0 0 10 16"
-        width="9"
-      >
-        <path d="M2.5 2.5L8 8l-5.5 5.5" />
-      </svg>
-    )}
-  </BaseMenu.SubmenuTrigger>
-));
+>(
+  (
+    {
+      className,
+      children,
+      onClick,
+      onPointerDown,
+      onPointerEnter,
+      openOnHover = false,
+      ...props
+    },
+    ref,
+  ) => (
+    // The “more” button: a 34px circle with the selection and a
+    // chevron (14px, 590). Pressed again, it closes its menu.
+    <BaseMenu.SubmenuTrigger
+      aria-label="More"
+      {...useSubmenuToggle({ onClick, onPointerDown, onPointerEnter, ref })}
+      {...props}
+      className={cn('uikit-edit-menu-more uikit-menu-toggle-cursor', className)}
+      data-edit-menu-part="more"
+      // Pressed, not hovered, by default (as a button: a pointer passing
+      // over the capsule doesn't open its menu).
+      openOnHover={openOnHover}
+    >
+      {(children as ReactNode) ?? (
+        <svg
+          aria-hidden="true"
+          fill="none"
+          height="14"
+          stroke="currentcolor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2.2"
+          viewBox="0 0 10 16"
+          width="9"
+        >
+          <path d="M2.5 2.5L8 8l-5.5 5.5" />
+        </svg>
+      )}
+    </BaseMenu.SubmenuTrigger>
+  ),
+);
 
 /** A text selection as a positioner's anchor (see `useSelectionAnchor`). */
 export type SelectionAnchor = { getBoundingClientRect: () => DOMRect };
@@ -527,7 +566,7 @@ const { createHandle: _createHandle, ...menuParts } = BaseMenu;
 export const EditMenu = {
   ...menuParts,
   Root,
-  // A menu's (its submenu's: an iPad menu, see `Menu`).
+  // A menu's (its submenu's: a `regular` menu, see `Menu`).
   Portal: Menu.Portal,
   SubmenuRoot: Menu.SubmenuRoot,
   Positioner,

@@ -2,9 +2,6 @@ import '../sheet/style.css';
 import '../toolbar/style.css';
 import './style.css';
 
-import { sfICircle } from '@bradleyhodges/sfsymbols/sfICircle';
-import { sfLine3HorizontalDecreaseCircle } from '@bradleyhodges/sfsymbols/sfLine3HorizontalDecreaseCircle';
-import { sfXmark } from '@bradleyhodges/sfsymbols/sfXmark';
 import { FunctionComponent } from 'react';
 
 import {
@@ -30,6 +27,11 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import {
+  sfICircle,
+  sfLine3HorizontalDecreaseCircle,
+  sfXmark,
+} from '../../tooling/icons.js';
 import { names } from '../viewport/content.js';
 import { propOptionsPresentation } from './props.js';
 
@@ -122,7 +124,7 @@ const InAListRow: FunctionComponent = () => {
   );
 };
 
-const adaptiveCode = `// A popover in a regular width (iPad), a sheet in a compact one (iPhone).
+const adaptiveCode = `// A popover in a regular width, a sheet in a compact one.
 const sheet = useSizeClass() === 'compact';
 
 sheet ? (
@@ -502,7 +504,7 @@ const ScrollingContent: FunctionComponent = () => {
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['in-a-list-row', 'In a list row'],
-  ['a-sheet-on-iphone', 'A sheet on iPhone'],
+  ['a-sheet-in-a-compact-width', 'A sheet in a compact width'],
   ['from-a-toolbar-button', 'From a toolbar button'],
   ['content-that-scrolls', 'Content that scrolls'],
 ];
@@ -524,7 +526,7 @@ export const PopoverComposition: FunctionComponent = () => (
         details of the row’s item.
       </li>
       <li>
-        Aligned with the row’s end, as iOS’s (
+        Aligned with the row’s end (
         <PartLink
           component="popover"
           part="Popover.Positioner"
@@ -551,14 +553,14 @@ export const PopoverComposition: FunctionComponent = () => (
     <InAListRow />
 
     <Heading
-      id="a-sheet-on-iphone"
+      id="a-sheet-in-a-compact-width"
       level={2}
     >
-      A sheet on iPhone
+      A sheet in a compact width
     </Heading>
     <ul>
       <li>
-        In a compact width, iOS shows a popover’s content as a sheet (guide{' '}
+        In a compact width, a popover’s content shows as a sheet (guide{' '}
         <a href="hig-guide#rule-a5">A5</a>): the app’s choice here, by{' '}
         <PartLink
           component="viewport"

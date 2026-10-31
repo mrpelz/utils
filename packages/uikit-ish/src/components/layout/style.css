@@ -100,7 +100,7 @@
       position: absolute;
       z-index: 20;
       width: 0.33px;
-      background-color: var(--color-ios-separator);
+      background-color: var(--color-ui-separator);
       content: '';
       inset-block: 0;
       inset-inline-start: 0;
@@ -121,7 +121,7 @@
     &::after {
       position: absolute;
       width: 2px;
-      background-color: var(--color-ios-primary);
+      background-color: var(--color-ui-primary);
       content: '';
       inset-block: 0;
       inset-inline-start: 4px;

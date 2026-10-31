@@ -1,9 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfPhoto } from '@bradleyhodges/sfsymbols/sfPhoto';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent } from 'react';
 
 import {
@@ -24,6 +21,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfPhoto, sfSquareAndArrowUp, sfTrash } from '../../tooling/icons.js';
 import { propOptionsOverviewRoot } from '../menu/props.js';
 import {
   contextualMenuPositionerRows,
@@ -120,8 +118,7 @@ export const ContextualMenuOverview: FunctionComponent = () => (
       <li>
         Actions on a piece of content, summoned from it: the content lifts above
         the blurred page (or turns into a preview of itself), a{' '}
-        <a href="menu">Menu</a> below it (UIKit{' '}
-        <code>UIContextMenuInteraction</code>).
+        <a href="menu">Menu</a> below it.
       </li>
     </ul>
     <LiveView />
@@ -228,12 +225,13 @@ export const ContextualMenuOverview: FunctionComponent = () => (
           component="contextual-menu"
           part="ContextualMenu.Preview"
         />
-        ) lifts as far as the menu needs to fit below it; closing, it settles
-        back.
+        ) and the menu are one popup, from the trigger’s place: shifted as far
+        as they need to fit in the screen (as menus grow); closing, the trigger
+        settles back.
       </li>
       <li>
-        Too tall for the viewport together, the preview and the menu scroll
-        together, opened with the menu in view.
+        Too tall for the screen together, the menu scrolls; the preview takes at
+        most the room the menu leaves (or half of it).
       </li>
     </ul>
   </>

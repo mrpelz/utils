@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   type ElementGeometry,
   List,
+  TextField,
   Toolbar,
   useAnchorSize,
   useElementGeometry,
@@ -20,6 +21,8 @@ import {
   useInputZoomPrevention,
   useScrollDirection,
   useSizeClass,
+  useTextActionsPrevention,
+  useViewportEdgeElement,
   useViewportScroll,
   useVisualViewport,
   Viewport,
@@ -43,6 +46,8 @@ import {
   preventFocusShiftReturnRows,
   preventFocusShiftRows,
   preventInputZoomRows,
+  preventTextActionsReturnRows,
+  preventTextActionsRows,
   useAnchorSizeReturnRows,
   useAnchorSizeRows,
   useElementGeometryRows,
@@ -53,12 +58,15 @@ import {
   useScrollDirectionArgumentRows,
   useScrollDirectionRows,
   useSizeClassReturnRows,
+  useTextActionsPreventionRows,
+  useViewportEdgeElementRows,
   useViewportScrollRows,
   useVisualViewportRows,
   viewportAnchorRows,
   viewportBlockEndRows,
   viewportBlockStartRows,
   viewportContentRows,
+  viewportKeyboardAccessoryRows,
   viewportOverscrollRows,
   viewportPaddingRows,
   viewportProviderRows,
@@ -75,12 +83,14 @@ import {
   propOptionsFocusShift,
   propOptionsHandlePadding,
   propOptionsInputZoom,
+  propOptionsKeyboardAccessory,
   propOptionsOverscroll,
   propOptionsPaddingContent,
   propOptionsPaddingEnd,
   propOptionsPaddingStart,
   propOptionsProvider,
   propOptionsScrollOptions,
+  propOptionsTextActions,
   toastAnchor,
 } from './props.js';
 
@@ -90,6 +100,9 @@ const release = preventInputZoom();`;
 const preventFocusShiftCode = `// The app's fields (in its root), until it's torn down.
 const remove = preventFocusShift(document.getElementById('app'));`;
 
+const preventTextActionsCode = `// A menu's trigger opened by a held press, until it's gone.
+const restore = preventTextActions(document.getElementById('back'));`;
+
 /**
  * `Viewport.Provider` (its props controlled around it, see `ProviderPart`):
  * a screen's content layer, what the hooks return below it.
@@ -97,8 +110,9 @@ const remove = preventFocusShift(document.getElementById('app'));`;
 const ProviderPartFrame: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
   control: ReactNode;
+  screenRef: RefObject<HTMLDivElement | null>;
   state: object;
-}> = ({ contentRef, control, state }) => {
+}> = ({ contentRef, control, screenRef, state }) => {
   const id = 'viewport-parts-provider';
   const visual = useVisualViewport();
   const { atBottom, atTop, direction = '–' } = useScrollDirection();
@@ -109,6 +123,7 @@ const ProviderPartFrame: FunctionComponent<{
       isInline
       controls={[control]}
       id={id}
+      screenRef={screenRef}
       stage="phone"
       state={[state]}
       title="Viewport.Provider"
@@ -169,12 +184,19 @@ const ProviderPart: FunctionComponent = () => {
     ),
     { external, title: 'Viewport.Provider' },
   );
+  // (Around the demo, outside its screen: unset, given the screen, as a
+  // provider within it would be, see `propOptionsProvider`.)
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider {...props}>
+    <Viewport.Provider
+      {...props}
+      screen={props.screen === null ? null : screenRef}
+    >
       <ProviderPartFrame
         contentRef={contentRef}
         control={control}
+        screenRef={screenRef}
         state={state}
       />
     </Viewport.Provider>
@@ -479,7 +501,8 @@ const PaddingPart: FunctionComponent = () => {
  */
 const OverscrollView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
-}> = ({ contentRef }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, contentRef }) => {
   const id = 'viewport-parts-overscroll';
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(propOptionsOverscroll, {
@@ -500,6 +523,7 @@ const OverscrollView: FunctionComponent<{
       isInline
       controls={[control]}
       id={id}
+      screenRef={screenRef}
       stage="phone"
       state={[state]}
       title="Viewport.Overscroll"
@@ -552,15 +576,90 @@ const OverscrollView: FunctionComponent<{
 };
 
 /** `OverscrollView`, in a provider tracking its screen's content. */
+/**
+ * `Viewport.KeyboardAccessory`, outlined: a note's field at the screen's
+ * bottom, lifted above the keyboard while it's typed into.
+ */
+const KeyboardAccessoryPart: FunctionComponent = () => {
+  const id = 'viewport-parts-keyboard-accessory';
+  const [external] = useProvidedState(id);
+  const [control, props, state] = usePropControl(propOptionsKeyboardAccessory, {
+    emphasize: 'outline',
+    external,
+    isOpen: true,
+    title: 'Viewport.KeyboardAccessory',
+  });
+
+  return (
+    <Component
+      hasInputGuards
+      isInline
+      controls={[control]}
+      id={id}
+      stage="phone"
+      state={[state]}
+      title="Viewport.KeyboardAccessory"
+    >
+      {/* Tracking the keyboard over its screen. */}
+      <Viewport.Provider>
+        <Viewport.BlockStart>
+          <Toolbar.Root placement="block-start">
+            <Toolbar.Title>
+              <span>Contacts</span>
+            </Toolbar.Title>
+          </Toolbar.Root>
+        </Viewport.BlockStart>
+        <Viewport.Content>
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {names.slice(0, 10).map((name) => (
+                  <List.Item key={name}>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+            {/* (Its section, as the accessory: spaced as sections are.) */}
+            <List.Section render={<Viewport.KeyboardAccessory {...props} />}>
+              <List.Group>
+                <TextField.Root render={<List.Item />}>
+                  <List.Content>
+                    <TextField.Label>Note</TextField.Label>
+                  </List.Content>
+                  <List.Trailing>
+                    <TextField.Control placeholder="Typed above the keyboard" />
+                  </List.Trailing>
+                </TextField.Root>
+              </List.Group>
+            </List.Section>
+          </List.Root>
+          <Viewport.Padding edge="block-end" />
+        </Viewport.Content>
+      </Viewport.Provider>
+    </Component>
+  );
+};
+
 const OverscrollPart: FunctionComponent = () => {
   const contentRef = useLabelledRef<HTMLDivElement>(
     'contentRef',
     'HTMLDivElement',
   );
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
-      <OverscrollView contentRef={contentRef} />
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
+      <OverscrollView
+        contentRef={contentRef}
+        screenRef={screenRef}
+      />
     </Viewport.Provider>
   );
 };
@@ -737,6 +836,67 @@ const bottom = useAnchorSize('block-end');`}
   </Component>
 );
 
+/**
+ * `useViewportEdgeElement`'s content (in the anchors' scope): a filter
+ * sticking below the bar, the bar's edge effect reaching under it.
+ */
+const EdgeElementContent: FunctionComponent = () => {
+  const filter = useLabelledRef<HTMLDivElement>('filter', 'HTMLDivElement');
+  const top = useAnchorSize('block-start');
+  useViewportEdgeElement(filter, 'block-start');
+
+  return (
+    <>
+      <Viewport.BlockStart>
+        <Toolbar.Root placement="block-start">
+          <Toolbar.Title>
+            <span>Contacts</span>
+          </Toolbar.Title>
+        </Toolbar.Root>
+      </Viewport.BlockStart>
+      <Viewport.Content>
+        <Viewport.Padding edge="block-start" />
+        <div
+          ref={filter}
+          className="viewport-demo-sticky"
+          style={{ top }}
+        >
+          <span className="viewport-demo-filter">Favorites only</span>
+        </div>
+        <List.Root>
+          <List.Section>
+            <List.Group>
+              {names.map((name) => (
+                <List.Item key={name}>
+                  <List.Content>
+                    <List.Title>{name}</List.Title>
+                  </List.Content>
+                </List.Item>
+              ))}
+            </List.Group>
+          </List.Section>
+        </List.Root>
+        <Viewport.Padding edge="block-end" />
+      </Viewport.Content>
+    </>
+  );
+};
+
+/** `useViewportEdgeElement`: a filter sticking below the bar. */
+const UseViewportEdgeElementPart: FunctionComponent = () => (
+  <Component
+    isInline
+    id="viewport-parts-use-viewport-edge-element"
+    stage="phone"
+    title="useViewportEdgeElement"
+    setup={`// Sticking below the bar (its height, in the anchors' scope):
+const top = useAnchorSize('block-start');
+useViewportEdgeElement(filter, 'block-start');`}
+  >
+    <EdgeElementContent />
+  </Component>
+);
+
 /** `useVisualViewport`'s readout (inside a provider, see below). */
 const UseVisualViewportView: FunctionComponent = () => {
   const visual = useVisualViewport();
@@ -759,6 +919,8 @@ const UseVisualViewportView: FunctionComponent = () => {
           </dd>
           <dt>keyboardInset</dt>
           <dd>{visual.keyboardInset}</dd>
+          <dt>isHidden</dt>
+          <dd>{String(visual.isHidden)}</dd>
         </dl>
       }
     ></Component>
@@ -780,7 +942,8 @@ const UseViewportScrollView: FunctionComponent<{
   addLog: AddLog;
   contentRef: RefObject<HTMLDivElement | null>;
   log: ReactNode;
-}> = ({ addLog, contentRef, log }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, addLog, contentRef, log }) => {
   const id = 'viewport-parts-use-viewport-scroll';
   const calls = useRef(0);
   const [external] = useProvidedState(id);
@@ -808,6 +971,7 @@ const UseViewportScrollView: FunctionComponent<{
       controls={[control]}
       id={id}
       log={log}
+      screenRef={screenRef}
       stage="phone"
       state={[state]}
       title="useViewportScroll"
@@ -856,13 +1020,18 @@ const UseViewportScrollPart: FunctionComponent = () => {
     'HTMLDivElement',
   );
   const [log, addLog] = useLog();
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
       <UseViewportScrollView
         addLog={addLog}
         contentRef={contentRef}
         log={log}
+        screenRef={screenRef}
       />
     </Viewport.Provider>
   );
@@ -871,7 +1040,8 @@ const UseViewportScrollPart: FunctionComponent = () => {
 /** `useScrollDirection`'s readout (inside a provider, see below). */
 const UseScrollDirectionView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
-}> = ({ contentRef }) => {
+  screenRef: RefObject<HTMLDivElement | null>;
+}> = ({ screenRef, contentRef }) => {
   const id = 'viewport-parts-use-scroll-direction';
   const [external] = useProvidedState(id);
   const [control, options, state] = usePropControl(propOptionsScrollOptions, {
@@ -890,6 +1060,7 @@ const UseScrollDirectionView: FunctionComponent<{
       isInline
       controls={[control]}
       id={id}
+      screenRef={screenRef}
       stage="phone"
       state={[state]}
       title="useScrollDirection"
@@ -931,10 +1102,17 @@ const UseScrollDirectionPart: FunctionComponent = () => {
     'contentRef',
     'HTMLDivElement',
   );
+  const screenRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Viewport.Provider scroller={contentRef}>
-      <UseScrollDirectionView contentRef={contentRef} />
+    <Viewport.Provider
+      screen={screenRef}
+      scroller={contentRef}
+    >
+      <UseScrollDirectionView
+        contentRef={contentRef}
+        screenRef={screenRef}
+      />
     </Viewport.Provider>
   );
 };
@@ -1097,7 +1275,7 @@ const GuardFields: FunctionComponent = () => (
       style={{ fontSize: 12 }}
     />
     <datalist id="viewport-demo-suggestions">
-      <option value="Cupertino" />
+      <option value="Portland" />
       <option value="San Francisco" />
       <option value="Zurich" />
     </datalist>
@@ -1197,6 +1375,42 @@ const UseFocusShiftPreventionPart: FunctionComponent = () => {
   );
 };
 
+/**
+ * `useTextActionsPrevention`: a message to hold (its text selected, the
+ * browser's text menu shown, unless prevented).
+ */
+const UseTextActionsPreventionPart: FunctionComponent = () => {
+  const id = 'viewport-parts-use-text-actions-prevention';
+  const message = useLabelledRef<HTMLParagraphElement>(
+    'message',
+    'HTMLParagraphElement',
+  );
+  const [external] = useProvidedState(id);
+  const [control, args, state] = usePropControl(propOptionsTextActions, {
+    external,
+    title: 'arguments',
+  });
+  useTextActionsPrevention(message, args.enabled);
+
+  return (
+    <Component
+      isCentered
+      isInline
+      controls={[control]}
+      id={id}
+      state={[state]}
+      title="useTextActionsPrevention"
+    >
+      <p
+        ref={message}
+        className="viewport-demo-message"
+      >
+        Hold this message: its text isn’t selected while prevented.
+      </p>
+    </Component>
+  );
+};
+
 /** `useSizeClass`: the window's size class, logged as it changes. */
 const UseSizeClassPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
@@ -1264,6 +1478,15 @@ export const ViewportParts: FunctionComponent = () => (
         a refresh indicator).
       </li>
       <li>
+        <PartLink
+          component="viewport"
+          part="Viewport.KeyboardAccessory"
+        >
+          KeyboardAccessory
+        </PartLink>
+        : what’s typed into, kept above the keyboard.
+      </li>
+      <li>
         Hooks: what the provider tracks, inside it; and an element’s visibility
         and geometry, anywhere.
       </li>
@@ -1292,6 +1515,13 @@ export const ViewportParts: FunctionComponent = () => (
                   part="Viewport.Padding"
                 />{' '}
                 (at its start and its end: in it, or in a page in it)
+              </li>
+              <li>
+                <PartLink
+                  component="viewport"
+                  part="Viewport.KeyboardAccessory"
+                />{' '}
+                (optional, anywhere in it: around what’s typed into)
               </li>
             </ul>
           </li>
@@ -1390,6 +1620,13 @@ export const ViewportParts: FunctionComponent = () => (
                 />{' '}
                 (anywhere inside)
               </li>
+              <li>
+                <PartLink
+                  component="viewport"
+                  part="useViewportEdgeElement"
+                />{' '}
+                (what sticks to their bars)
+              </li>
             </ul>
           </li>
         </ul>
@@ -1444,6 +1681,18 @@ export const ViewportParts: FunctionComponent = () => (
             />
             )
           </li>
+          <li>
+            <PartLink
+              component="viewport"
+              part="preventTextActions"
+            />{' '}
+            (and{' '}
+            <PartLink
+              component="viewport"
+              part="useTextActionsPrevention"
+            />
+            )
+          </li>
         </ul>
       </li>
     </ul>
@@ -1466,8 +1715,13 @@ export const ViewportParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Tracks a scroll container’s scrolling (the document’s, or{' '}
-        <code>scroller</code>), for{' '}
+        Tracks a scroll container’s scrolling (<code>scroller</code>; unset, the
+        one filling its screen: a <a href="page">Page</a>, a sheet’s content, a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Content"
+        />
+        , following as pages show and hide; or the document’s), for{' '}
         <PartLink
           component="viewport"
           part="useViewportScroll"
@@ -1478,6 +1732,15 @@ export const ViewportParts: FunctionComponent = () => (
           part="useScrollDirection"
         />
         : each takes its own <code>threshold</code>.
+      </li>
+      <li>
+        Tracking the window (as do the layers in it, outside a device’s screen):
+        marks the root as an app’s (<code>data-uikit-viewport-window</code>),
+        its background the app’s beneath the layers. In an iOS Home Screen app,
+        also makes the document as tall as the screen (
+        <code>data-uikit-viewport-standalone</code>): iOS 26 otherwise gives a
+        document no taller than its window a layout viewport short by the status
+        bar’s height, painting nothing below it (WebKit bug 301108).
       </li>
       <li>Here: tracking the screen’s content layer, the readout below it.</li>
     </ul>
@@ -1501,7 +1764,11 @@ export const ViewportParts: FunctionComponent = () => (
         <code>resize</code>), or overlaid.
       </li>
       <li>
-        Keeps the safe area insets clear (<code>safeArea</code>), as padding.
+        Keeps the safe area insets clear (<code>safeArea</code>), as padding; by
+        default (<code>auto</code>) not while its direct child scrolls on its
+        own (a <a href="page">Page</a>, a <a href="header">Header</a>, a{' '}
+        <a href="layout">Layout</a>, a <a href="navigation">Navigation</a>):
+        that child fills the screen, keeping its content clear itself.
       </li>
       <li>
         Renders a <code>div</code>; its ref is what a provider’s{' '}
@@ -1531,6 +1798,24 @@ export const ViewportParts: FunctionComponent = () => (
       <li>
         Keeps the safe area insets clear (<code>safeArea</code>), as padding;
         doesn’t inset the content.
+      </li>
+      <li>
+        At the top or bottom, its scroll edge effect (<code>edgeEffect</code>,{' '}
+        <code>soft</code> by default; <code>hard</code>; <code>none</code>):
+        drawn by the scroller beneath (a <a href="page">Page</a>, a sheet’s
+        content, the{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Content"
+        />
+        ) as content scrolls under it, one per edge however many anchors stack
+        there (as tall as the tallest), also under what’s stuck to them (
+        <PartLink
+          component="viewport"
+          part="useViewportEdgeElement"
+        />
+        ). Tinted (<code>edgeTint</code>), at rest too: see{' '}
+        <a href="viewport/composition#a-tinted-edge">a tinted edge</a>.
       </li>
       <li>
         The anchor is the surface: it has no background of its own, so a bar
@@ -1609,7 +1894,7 @@ export const ViewportParts: FunctionComponent = () => (
       </li>
       <li>
         The content margin: the library’s gap between content and its
-        container’s edge (UIKit’s layout margins), 16px by its tokens (
+        container’s edge, 16px by its tokens (
         <code>--uikit-content-margin-block-start</code>, <code>-end</code>);
         none before a{' '}
         <PartLink
@@ -1706,8 +1991,10 @@ export const ViewportParts: FunctionComponent = () => (
       </li>
       <li>
         Safari bounces the content past its ends itself: the layer shows through
-        the gap. Where the content stays (other browsers, detected as it’s
-        pulled), it slides in over it, by the pull (
+        the gap. Other browsers don’t: while it’s shown, the tracked scroll
+        container is moved along by the pull (as Safari’s; without one shown,
+        nothing is). Where the content stays (the document’s), it slides in over
+        it, by the pull (
         <PartLink
           component="viewport"
           part="useViewportScroll"
@@ -1742,6 +2029,51 @@ export const ViewportParts: FunctionComponent = () => (
     <OverscrollPart />
     <h3>Props</h3>
     <PropsTable rows={viewportOverscrollRows} />
+
+    <Heading
+      id="viewport-keyboardaccessory"
+      level={2}
+    >
+      <code>Viewport.KeyboardAccessory</code>
+    </Heading>
+    <ul>
+      <li>
+        What’s typed into, kept above the on-screen keyboard: while focus is
+        within it and the keyboard covers it, lifted (moved up, its place in the
+        layout kept) until its end is <code>gap</code> above the keyboard; back
+        as focus leaves, or the keyboard hides.
+      </li>
+      <li>
+        For fields the browser can’t scroll into view (an app’s don’t: the
+        document doesn’t scroll, and{' '}
+        <PartLink
+          component="viewport"
+          part="useFocusShiftPrevention"
+        />{' '}
+        keeps it from trying), e.g. a field below a sheet’s middle; with what
+        belongs to it (e.g. a color picker’s channel row: its slider too).
+      </li>
+      <li>
+        Lifted (<code>data-lifted</code>), above what’s around it, on{' '}
+        <code>--uikit-viewport-keyboard-accessory-background</code> (none by
+        default); by <code>--uikit-viewport-keyboard-lift</code> (px), following
+        the keyboard (250ms, none with reduced motion).
+      </li>
+      <li>
+        Needs a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />{' '}
+        (the keyboard’s height); without one, it stays.
+      </li>
+      <li>
+        Renders a <code>div</code>.
+      </li>
+    </ul>
+    <KeyboardAccessoryPart />
+    <h3>Props</h3>
+    <PropsTable rows={viewportKeyboardAccessoryRows} />
 
     <Heading
       id="viewport-createanchorhandle"
@@ -1827,6 +2159,37 @@ export const ViewportParts: FunctionComponent = () => (
     <PropsTable rows={useAnchorSizeRows} />
     <h3>Returns</h3>
     <PropsTable rows={useAnchorSizeReturnRows} />
+
+    <Heading
+      id="useviewportedgeelement"
+      level={2}
+    >
+      <code>useViewportEdgeElement</code>
+    </Heading>
+    <ul>
+      <li>
+        Something sticking to an edge’s bars (e.g. a{' '}
+        <PartLink
+          component="header"
+          part="Header.Accessory"
+        />
+        , which uses it): while it’s stuck, the edge effect (an anchor’s{' '}
+        <code>edgeEffect</code>, see{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Anchor"
+        />
+        ) reaches beyond the bars to cover it too.
+      </li>
+      <li>
+        Above the effect (a <code>z-index</code> over 9, the effect’s), so
+        what’s beneath it blurs, not it.
+      </li>
+      <li>Here: a filter sticking below the bar; scroll the list.</li>
+    </ul>
+    <UseViewportEdgeElementPart />
+    <h3>Arguments</h3>
+    <PropsTable rows={useViewportEdgeElementRows} />
 
     <Heading
       id="viewportscopecontext"
@@ -2009,12 +2372,12 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The window’s horizontal size class (UIKit’s): <code>regular</code> from
-        768px, <code>compact</code> below; re-rendering as it changes.
+        The window’s horizontal size class: <code>regular</code> from 768px,{' '}
+        <code>compact</code> below; re-rendering as it changes.
       </li>
       <li>
         For presentations by size: e.g. a sheet on <code>compact</code> (a
-        phone), a popover on <code>regular</code> (an iPad), as{' '}
+        phone), a popover on <code>regular</code> (a tablet), as{' '}
         <PartLink
           component="sheet"
           part="Sheet.Popup"
@@ -2089,11 +2452,28 @@ export const ViewportParts: FunctionComponent = () => (
         iOS scrolls the page (its layout viewport) to a text field it focuses,
         to keep it clear of the keyboard, shifting a fixed layout (e.g. a{' '}
         <a href="viewport">Viewport</a>’s bars). Guarded, a field touched in its
-        target is focused without scrolling (as the touch ends).
+        target is focused without scrolling (as the tap ends).
+      </li>
+      <li>
+        Also tapped just beside it (within about a finger’s width, touching no
+        other control) or on its label: iOS focuses it then, too (adjusting the
+        touch to the nearest control).
       </li>
       <li>
         The touch’s click doesn’t follow, and the caret goes where the field
         puts it (not where it was touched). Elsewhere, it does nothing.
+      </li>
+      <li>
+        The page hidden with a field focused in its target (another tab, a Home
+        Screen app left with the keyboard shown) and shown again: the field is
+        focused again without scrolling (its selection as it was), the page’s
+        scroll put back, so the keyboard returns with the bars where they were
+        (the{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />{' '}
+        keeps their push meanwhile).
       </li>
       <li>Until its returned function removes it.</li>
     </ul>
@@ -2127,6 +2507,62 @@ export const ViewportParts: FunctionComponent = () => (
     <UseFocusShiftPreventionPart />
     <h3>Arguments</h3>
     <PropsTable rows={useFocusShiftPreventionRows} />
+
+    <Heading
+      id="preventtextactions"
+      level={2}
+    >
+      <code>preventTextActions</code>
+    </Heading>
+    <ul>
+      <li>
+        A held press selects text (and shows the browser’s text menu, iOS’
+        callout): on a menu’s trigger opened by a held press (
+        <PartLink
+          component="menu"
+          part="Menu.Trigger"
+        />
+        ’s <code>openOn=&quot;secondaryClick&quot;</code>), or an edit menu’s
+        anchor (
+        <PartLink
+          component="edit-menu"
+          part="EditMenu.Positioner"
+        />
+        ), it shows over the menu. Guarded, its target selects none (its{' '}
+        <code>user-select</code> and <code>-webkit-touch-callout</code>,{' '}
+        <code>none</code>).
+      </li>
+      <li>
+        An app’s choice: text may well stay selectable. Until its returned
+        function restores the target’s own values.
+      </li>
+    </ul>
+    <CodeView code={preventTextActionsCode} />
+    <h3>Arguments</h3>
+    <PropsTable rows={preventTextActionsRows} />
+    <h3>Returns</h3>
+    <PropsTable rows={preventTextActionsReturnRows} />
+
+    <Heading
+      id="usetextactionsprevention"
+      level={2}
+    >
+      <code>useTextActionsPrevention</code>
+    </Heading>
+    <ul>
+      <li>
+        <PartLink
+          component="viewport"
+          part="preventTextActions"
+        />{' '}
+        on its <code>target</code>, while the component is mounted (and{' '}
+        <code>enabled</code>).
+      </li>
+      <li>Here: a message to hold (by touch).</li>
+    </ul>
+    <UseTextActionsPreventionPart />
+    <h3>Arguments</h3>
+    <PropsTable rows={useTextActionsPreventionRows} />
   </>
 );
 
@@ -2139,8 +2575,10 @@ export const viewportPartsDemos = [
   BlockEndPart,
   PaddingPart,
   OverscrollPart,
+  KeyboardAccessoryPart,
   CreateAnchorHandlePart,
   UseAnchorSizePart,
+  UseViewportEdgeElementPart,
   UseVisualViewportPart,
   UseViewportScrollPart,
   UseScrollDirectionPart,
@@ -2149,4 +2587,5 @@ export const viewportPartsDemos = [
   UseSizeClassPart,
   UseInputZoomPreventionPart,
   UseFocusShiftPreventionPart,
+  UseTextActionsPreventionPart,
 ];

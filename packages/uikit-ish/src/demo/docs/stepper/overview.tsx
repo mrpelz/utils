@@ -76,10 +76,7 @@ export const StepperOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <ul className="demo-lead">
-      <li>
-        Steps a number up or down (UIKit <code>UIStepper</code>): “−” and “+” in
-        a capsule.
-      </li>
+      <li>Steps a number up or down: “−” and “+” in a capsule.</li>
       <li>It shows no value: the app shows it, e.g. in its row.</li>
     </ul>
     <LiveView />

@@ -100,8 +100,8 @@ export const sheetRootRows: readonly PropRow[] = [
     code('false'),
     <>
       Whether to prevent the drawer from closing on outside presses (e.g. while
-      edited, iOS’s <code>isModalInPresentation</code>; swiping it down still
-      closes it, unless its <code>onOpenChange</code> cancels).
+      edited; swiping it down still closes it, unless its{' '}
+      <code>onOpenChange</code> cancels).
     </>,
   ],
   [

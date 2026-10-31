@@ -106,15 +106,14 @@ export const ActionSheetOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Choices about an action the person just started (UIKit{' '}
-        <code>UIAlertController</code>, style <code>actionSheet</code>): at the
-        control that started it.
+        Choices about an action the person just started: at the control that
+        started it.
       </li>
       <li>
-        Modal: the page dimmed; a press outside cancels. On iPad, the same
-        choices in a <a href="popover">Popover</a> (see{' '}
-        <a href="action-sheet/composition#a-popover-on-ipad">
-          A popover on iPad
+        Modal: the page dimmed; a press outside cancels. In a regular width, the
+        same choices in a <a href="popover">Popover</a> (see{' '}
+        <a href="action-sheet/composition#a-popover-in-a-regular-width">
+          A popover in a regular width
         </a>
         ).
       </li>

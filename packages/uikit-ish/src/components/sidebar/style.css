@@ -1,9 +1,9 @@
 /* Sidebar (see main.tsx). */
 @layer uikit-ish {
   .uikit-sidebar-toolbar {
-    --uikit-button-plain-size: var(--font-ios-body-size);
-    --uikit-button-plain-line-height: var(--font-ios-body-line-height);
-    --uikit-button-plain-tracking: var(--font-ios-body-tracking);
+    --uikit-button-plain-size: var(--font-ui-body-size);
+    --uikit-button-plain-line-height: var(--font-ui-body-line-height);
+    --uikit-button-plain-tracking: var(--font-ui-body-tracking);
     --uikit-button-plain-symbol-weight: 510;
     --uikit-button-plain-padding-inline: 8px;
     --uikit-button-plain-background-pressed: var(--uikit-sidebar-selection);
@@ -26,9 +26,9 @@
 
   .uikit-sidebar-root {
     /* Its selection's fill (selected and pressed rows, pressed toolbar
-       buttons; Figma: #ededed over its glass). Dark: floating (a light rim, a
+       buttons). Dark: floating (a light rim, a
        glow outside; the glass' dark inner bands would make the large panel
-       look inset, user). */
+       look inset). */
     --uikit-sidebar-selection: light-dark(
       rgb(0 0 0 / 7%),
       rgb(255 255 255 / 12%)
@@ -54,7 +54,7 @@
         0 0 25px rgb(0 0 0 / 30%);
     }
 
-    /* Its search field (see TextField.Search): Figma's fill blended with the
+    /* Its search field (see TextField.Search): a fill blended with the
        glass (plus-darker, plus-lighter in dark mode) as a flat color; its
        symbol and placeholder in the glass' secondary content color (#999). */
     --uikit-text-field-search-height: 44px;
@@ -70,9 +70,9 @@
     padding: 11px 16px 10px;
     border-radius: 20px;
     margin: var(--uikit-sidebar-margin, 8px);
-    color: var(--color-ios-label);
+    color: var(--color-ui-label);
 
-    /* Clear of the safe area insets (in a regular layout, e.g. an iPad's
+    /* Clear of the safe area insets (in a regular layout, e.g. a tablet's
        status bar). */
     margin-block: max(
         var(--uikit-sidebar-margin, 8px),

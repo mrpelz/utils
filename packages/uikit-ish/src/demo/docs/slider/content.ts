@@ -1,7 +1,9 @@
-import { sfHareFill } from '@bradleyhodges/sfsymbols/sfHareFill';
-import { sfSunMax } from '@bradleyhodges/sfsymbols/sfSunMax';
-import { sfSunMin } from '@bradleyhodges/sfsymbols/sfSunMin';
-import { sfTortoiseFill } from '@bradleyhodges/sfsymbols/sfTortoiseFill';
+import {
+  sfHareFill,
+  sfSunMax,
+  sfSunMin,
+  sfTortoiseFill,
+} from '../../tooling/icons.js';
 
 /** What a slider sets, with its ends' symbols: name, min, max. */
 export const symbolPairs = {

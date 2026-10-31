@@ -136,7 +136,7 @@ export const ContextualMenuInformationArchitecture: FunctionComponent = () => (
       What the guide doesn’t cover
     </Heading>
     <ul>
-      <li>The lift and the preview (iOS’; Figma has menus only).</li>
+      <li>The lift and the preview.</li>
       <li>
         Opening on a press as well as a held press (iOS: a held press only).
       </li>

@@ -110,7 +110,7 @@ const ThreeColumns: FunctionComponent = () => {
       state={state}
       title="Layout of three columns"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root {...propsRoot}>
           <Layout.Column
             key={keyFirst}
@@ -272,7 +272,7 @@ const Resizable: FunctionComponent = () => {
       state={state}
       title="Layout with a resizable column"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root {...propsRoot}>
           <Layout.Column
             {...propsFirst}
@@ -357,7 +357,7 @@ const BackgroundBehind: FunctionComponent = () => {
       state={state}
       title="Layout on a background"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root {...propsRoot}>
           <Layout.Background {...propsBackground}>
             <div

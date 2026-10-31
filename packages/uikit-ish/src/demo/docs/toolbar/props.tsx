@@ -34,18 +34,19 @@ export const propOptionsRoot = {
 
 export const propOptionsGroup = {
   ...commonPropOptions,
+  gap: [undefined, 0, 6, 24, '1em'] as const,
   prominent: [undefined, false, true] as const,
   // Over the tint: dark, light, or custom.
   textColor: [
     undefined,
     '#000',
     '#fff',
-    'var(--color-ios-system-yellow)',
+    'var(--color-ui-system-yellow)',
   ] as const,
   tint: [
     undefined,
-    'var(--color-ios-system-orange)',
-    'var(--color-ios-system-green)',
+    'var(--color-ui-system-orange)',
+    'var(--color-ui-system-green)',
   ] as const,
   disabled: [undefined, false, true] as const,
 };
@@ -161,7 +162,7 @@ export const propOptionsLink = {
 
 export const propOptionsInput = {
   ...commonPropOptions,
-  defaultValue: [undefined, 'Cupertino'] as const,
+  defaultValue: [undefined, 'Portland'] as const,
   disabled: [undefined, false, true] as const,
   focusableWhenDisabled: [undefined, false, true] as const,
 };

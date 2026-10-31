@@ -1,8 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfDocumentOnDocument } from '@bradleyhodges/sfsymbols/sfDocumentOnDocument';
-import { sfHeart } from '@bradleyhodges/sfsymbols/sfHeart';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -17,6 +15,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { sfDocumentOnDocument, sfHeart } from '../../tooling/icons.js';
 import { photo } from '../avatar/props.js';
 import {
   activityViewActionRows,
@@ -83,11 +82,11 @@ const HeaderPart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator />
           <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -169,11 +168,11 @@ const ThumbnailPart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator />
           <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -255,11 +254,11 @@ const HeadingPart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator />
           <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -341,11 +340,11 @@ const TitlePart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator />
           <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -429,11 +428,11 @@ const SubtitlePart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator />
           <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -515,11 +514,11 @@ const MessagePart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator />
           <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -601,11 +600,11 @@ const SeparatorPart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator {...props} />
           <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -687,11 +686,11 @@ const PeoplePart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator />
           <ActivityView.People {...props}>
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -780,7 +779,7 @@ const PersonPart: FunctionComponent = () => {
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -862,11 +861,11 @@ const NamePart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator />
           <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name {...props}>Kate Bell</ActivityView.Name>
+              <ActivityView.Name {...props}>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -948,11 +947,11 @@ const CountPart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator />
           <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -1034,11 +1033,11 @@ const ActionsPart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator />
           <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -1123,11 +1122,11 @@ const ActionPart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator />
           <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -1209,11 +1208,11 @@ const SymbolPart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator />
           <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -1295,11 +1294,11 @@ const LabelPart: FunctionComponent = () => {
           </ActivityView.Header>
           <ActivityView.Separator />
           <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Bell')}>
+            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
               <Avatar.Root>
                 <Avatar.Fallback>KB</Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Bell</ActivityView.Name>
+              <ActivityView.Name>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
               onClick={() => addLog('person: Gary and Fatima')}
@@ -1344,8 +1343,8 @@ export const ActivityViewParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        Parts placed in the app’s <a href="sheet">Sheet</a> (iPhone) or
-        <a href="popover">Popover</a> (iPad): no root of its own.
+        Parts placed in the app’s <a href="sheet">Sheet</a> (compact) or
+        <a href="popover">Popover</a> (regular): no root of its own.
       </li>
       <li>
         What’s shared (a header), people and actions (rows scrolling sideways),
@@ -1353,7 +1352,7 @@ export const ActivityViewParts: FunctionComponent = () => (
         below.
       </li>
       <li>
-        Apps (Figma’s app icon row, people’s app badges) aren’t built: a
+        Apps (an app icon row, people’s app badges) aren’t built: a
         <a href="badge">Badge</a> on an avatar instead.
       </li>
     </ul>

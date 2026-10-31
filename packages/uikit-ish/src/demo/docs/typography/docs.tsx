@@ -24,26 +24,18 @@ export const typographyRows: readonly PropRow[] = [
       'caption2',
     ),
     code(union('body')),
-    <>
-      The text style (UIKit <code>UIFont.TextStyle</code>): its size, line
-      height, weight and tracking.
-    </>,
+    <>The text style: its size, line height, weight and tracking.</>,
   ],
-  [
-    'emphasized',
-    'boolean',
-    code('false'),
-    'The style’s bold weight (Figma “Emphasized”).',
-  ],
+  ['emphasized', 'boolean', code('false'), 'The style’s bold weight.'],
   ['italic', 'boolean', code('false'), 'Italic.'],
   [
     'color',
     union('primary', 'secondary', 'tertiary', 'quaternary'),
     'inherited',
-    'A label color (UIKit’s label, secondary label, …).',
+    'A label color (label, secondary label, …).',
   ],
   [
-    'dynamicTypeSize',
+    'textSize',
     union(
       'xSmall',
       'small',
@@ -60,9 +52,8 @@ export const typographyRows: readonly PropRow[] = [
     ),
     'inherited (large)',
     <>
-      The Dynamic Type size (UIKit <code>UIContentSizeCategory</code>): of its
-      text and of everything in it (the text styles’ tokens, e.g. a list’s
-      rows).
+      The text size: of its text and of everything in it (the text styles’
+      tokens, e.g. a list’s rows).
     </>,
   ],
   [

@@ -13,9 +13,8 @@ import {
 } from './props.js';
 
 /**
- * Progress indicators (Figma “Progress Indicators”): a progress bar (UIKit
- * `UIProgressView`, Base UI's `Progress`), and an activity indicator (UIKit
- * `UIActivityIndicatorView`) for progress of unknown length.
+ * Progress indicators: a progress bar (Base UI's `Progress`), and an
+ * activity indicator for progress of unknown length.
  */
 export const ProgressDemo: FunctionComponent = () => {
   const id = 'progress';

@@ -1,9 +1,6 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { sfPhoto } from '@bradleyhodges/sfsymbols/sfPhoto';
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
-import { sfTrash } from '@bradleyhodges/sfsymbols/sfTrash';
 import { FunctionComponent, useMemo } from 'react';
 
 import {
@@ -16,6 +13,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { sfPhoto, sfSquareAndArrowUp, sfTrash } from '../../tooling/icons.js';
 import {
   getPropOptionsItem as getPropOptionsMenuItem,
   propOptionsItemDestructive as propOptionsMenuItemDestructive,
@@ -30,9 +28,9 @@ import {
 } from './props.js';
 
 /**
- * A contextual menu (UIKit `UIContextMenuInteraction`): opening, the
- * trigger lifts (as far as the menu needs to fit below it), turning into a
- * preview of the photo the menu acts on.
+ * A contextual menu: opening, the
+ * trigger turns into a preview of the photo the menu acts on, the menu
+ * below it (shifted as far as they need to fit).
  */
 export const ContextualMenuDemo: FunctionComponent = () => {
   const id = 'contextual-menu';

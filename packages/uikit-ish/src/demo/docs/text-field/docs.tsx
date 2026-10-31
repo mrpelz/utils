@@ -242,7 +242,7 @@ export const textFieldClearRows: readonly PropRow[] = [
     'mode',
     union('always', 'unlessEditing', 'whileEditing'),
     code(union('whileEditing')),
-    'When it’s shown (UIKit clearButtonMode), only ever while the field is filled: while the field is focused, while it isn’t, or either way.',
+    'When it’s shown, only ever while the field is filled: while the field is focused, while it isn’t, or either way.',
   ],
   [
     'children',
@@ -264,6 +264,37 @@ export const textFieldClearRows: readonly PropRow[] = [
 ];
 
 export const textFieldSearchRows: readonly PropRow[] = [
+  [
+    'variant',
+    union('fill', 'row', 'tab-bar', 'tab-bar-collapsed', 'toolbar'),
+    code(union('fill')),
+    <>
+      Its look, by where it sits: a capsule on the tertiary fill (
+      <code>fill</code>); a list row’s look, beside a list (<code>row</code>,
+      e.g. in a{' '}
+      <PartLink
+        component="header"
+        part="Header.Accessory"
+      />
+      ); a tab bar group’s glass capsule, beside a{' '}
+      <PartLink
+        component="tab-bar"
+        part="TabBar.Group"
+      />{' '}
+      (<code>tab-bar</code>); on a collapsed tab bar’s glass, filling a{' '}
+      <PartLink
+        component="tab-bar"
+        part="TabBar.Accessory"
+      />{' '}
+      (<code>tab-bar-collapsed</code>); or a toolbar’s glass capsule, between
+      its buttons (<code>toolbar</code>, in a{' '}
+      <PartLink
+        component="toolbar"
+        part="Toolbar.Root"
+      />
+      ). Only its look: it stays a search field.
+    </>,
+  ],
   [
     'children',
     'ReactNode',

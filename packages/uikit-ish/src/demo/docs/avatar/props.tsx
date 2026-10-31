@@ -39,7 +39,7 @@ export const propOptionsContent = {
 export const getPropOptionsGuideImage = (addLog: AddLog) => ({
   ...commonPropOptions,
   ...propOptionsImage,
-  alt: [undefined, 'Anna Haro', ''] as const,
+  alt: [undefined, 'Anna Hall', ''] as const,
   keepMounted: [undefined, false, true] as const,
   onLoadingStatusChange: [
     new MappedProp(

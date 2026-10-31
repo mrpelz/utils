@@ -19,7 +19,7 @@ import {
 } from './props.js';
 
 /**
- * A text field (Base UI Field, Framework7's iOS inputs) as a list row, its
+ * A text field (Base UI Field, Framework7's inputs) as a list row, its
  * label the row's title (see the form list for more).
  */
 export const TextFieldDemo: FunctionComponent = () => {
@@ -115,9 +115,9 @@ export const TextFieldDemo: FunctionComponent = () => {
         </List.Section>
         {/* The suggestions of the control's `list` option. */}
         <datalist id={suggestionsId}>
-          <option value="Kate Bell" />
-          <option value="John Appleseed" />
-          <option value="Anna Haro" />
+          <option value="Kate Brown" />
+          <option value="John Doe" />
+          <option value="Anna Hall" />
         </datalist>
       </List.Root>
     </Component>

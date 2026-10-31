@@ -1,27 +1,24 @@
+import { sfAirplane, sfBellFill, sfWifi } from '../../tooling/icons.js';
 // The List pages' content (data only), shared by its demos.
-
-import { sfAirplane } from '@bradleyhodges/sfsymbols/sfAirplane';
-import { sfBellFill } from '@bradleyhodges/sfsymbols/sfBellFill';
-import { sfWifi } from '@bradleyhodges/sfsymbols/sfWifi';
 
 /** Settings rows: title, symbol, the image's color, detail, subtitle. */
 export const settings = [
   {
-    color: 'var(--color-ios-system-orange)',
+    color: 'var(--color-ui-system-orange)',
     detail: 'Off',
     icon: sfAirplane,
     subtitle: 'Turns off radios',
     title: 'Airplane Mode',
   },
   {
-    color: 'var(--color-ios-system-blue)',
+    color: 'var(--color-ui-system-blue)',
     detail: 'Home',
     icon: sfWifi,
     subtitle: 'Connected',
     title: 'Wi-Fi',
   },
   {
-    color: 'var(--color-ios-system-red)',
+    color: 'var(--color-ui-system-red)',
     detail: 'Immediate',
     icon: sfBellFill,
     subtitle: 'Banners, Sounds',
@@ -64,22 +61,22 @@ export const contacts = {
 /** An inbox's messages. */
 export const messages = [
   {
-    date: '09:41',
-    from: 'Kate Bell',
+    date: '10:00',
+    from: 'Kate Brown',
     preview:
       'Hi! The photos from the weekend are finally in the shared album, have a look when you get a chance. Some of them turned out really well.',
     subject: 'Weekend photos',
   },
   {
     date: 'Yesterday',
-    from: 'John Appleseed',
+    from: 'John Doe',
     preview:
       'Attached is the agenda for Thursday. Let me know if anything is missing before I send it to everyone else.',
     subject: 'Agenda for Thursday',
   },
   {
     date: 'Monday',
-    from: 'Anna Haro',
+    from: 'Anna Hall',
     preview: 'Thanks, see you there!',
     subject: 'Re: Dinner',
   },
@@ -98,9 +95,9 @@ export const settingsPages: Record<
 > = {
   about: {
     rows: [
-      ['Name', undefined, 'iPhone'],
-      ['iOS Version', undefined, '26.0'],
-      ['Model Name', undefined, 'iPhone 17'],
+      ['Name', undefined, 'My Phone'],
+      ['Software Version', undefined, '26.0'],
+      ['Model Name', undefined, 'Phone Pro'],
     ],
     title: 'About',
   },

@@ -10,21 +10,26 @@ import {
   FunctionComponent,
   MouseEvent as ReactMouseEvent,
   PointerEvent as ReactPointerEvent,
+  PointerEventHandler,
   ReactNode,
   Ref,
   RefObject,
+  TouchEventHandler,
   useCallback,
   useContext,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
+  useState,
 } from 'react';
 
 import type {
+  DelayedLens,
   LogicalSide,
   PointerDrag,
   PointerDragHandlers,
   PointerHandler,
+  PointerPosition,
   PortalContainer,
   SecondaryClickHandlers,
   SecondaryClickProps,
@@ -32,6 +37,7 @@ import type {
 
 export type {
   ColorScheme,
+  DelayedLens,
   LogicalSide,
   PointerDrag,
   PointerDragHandlers,
@@ -194,6 +200,70 @@ export const useCollision = (
   };
 };
 
+type CollisionAvoidance = BasePopover.Positioner.Props['collisionAvoidance'];
+
+/**
+ * A positioner's growing (Menu's, Popover's, ActionSheet's, EditMenu's):
+ * rather than scroll in the room on its side, its popup grows. On its
+ * side if it fits there, else on the other (Base UI's flip, by `base`);
+ * fitting on neither (its popup held at its room's height,
+ * `--available-height`), shifted instead (`side: 'shift'`, while that
+ * positioner is shown): in its collision boundary (see `useCollision`),
+ * over its anchor as far as it needs, as tall as the boundary lets it be
+ * (taller, it scrolls after all). Returns its collision avoidance and its
+ * ref (also setting `ref`, if given: e.g. the component's own).
+ */
+export const useGrowAvoidance = (
+  base: CollisionAvoidance = {},
+  ref?: { current: HTMLElement | null },
+): [CollisionAvoidance, (element: HTMLElement | null) => void] => {
+  const [positioner, setPositioner] = useState<HTMLElement | null>(null);
+  // The positioner shifted (another one, e.g. reopened: not yet).
+  const [shifted, setShifted] = useState<HTMLElement | null>(null);
+  const isShifted = shifted !== null && shifted === positioner;
+
+  const setRef = useCallback(
+    (element: HTMLElement | null) => {
+      if (ref) ref.current = element;
+      setPositioner(element);
+    },
+    [ref],
+  );
+
+  useLayoutEffect(() => {
+    if (isShifted || !positioner) return undefined;
+    const check = () => {
+      // (Measured, in px: not yet, Base UI's seed, `100vh`.)
+      const value = positioner.style.getPropertyValue('--available-height');
+      const room = value.endsWith('px') ? Number.parseFloat(value) : 0;
+      // Its popup: its tallest child (beside focus guards).
+      const popup = Math.max(
+        0,
+        ...[...positioner.children].map((child) =>
+          child instanceof HTMLElement ? child.offsetHeight : 0,
+        ),
+      );
+      if (room > 0 && popup >= room - 1) setShifted(positioner);
+    };
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(positioner);
+    return () => observer.disconnect();
+  }, [isShifted, positioner]);
+
+  // (Shifting on its side, its alignment shifts too, or stays.)
+  return [
+    isShifted
+      ? {
+          align: base.align === 'none' ? 'none' : 'shift',
+          fallbackAxisSide: base.fallbackAxisSide,
+          side: 'shift',
+        }
+      : base,
+    setRef,
+  ];
+};
+
 /** A frame at 60 Hz, in ms: what `edgeScrollDelta`'s speed is per. */
 const frameDuration = 1000 / 60;
 
@@ -273,7 +343,7 @@ export const Reserve: FunctionComponent<{
   </>
 );
 
-/** How long a touch is held for a secondary click (iOS: a long press). */
+/** How long a touch is held for a secondary click (a long press). */
 const longPressDuration = 500;
 /** How far (px) a long press may move (farther, it's a drag or a scroll). */
 const longPressSlop = 10;
@@ -445,6 +515,34 @@ export const useInitialFocus = (
     [popup],
   );
 
+// The last input: a key pressed (Tab, arrows), or a pointer down (also a
+// touch, wherever it focuses: e.g. beside a field, see
+// `preventFocusShift`). Tracked from the module's load, in a browser.
+let isKeyboardLast = false;
+if (typeof window !== 'undefined') {
+  window.addEventListener(
+    'keydown',
+    () => {
+      isKeyboardLast = true;
+    },
+    { capture: true },
+  );
+  window.addEventListener(
+    'pointerdown',
+    () => {
+      isKeyboardLast = false;
+    },
+    { capture: true },
+  );
+}
+
+/**
+ * Whether a focus now is the keyboard's (a key pressed last, not a
+ * pointer): for a ring on keyboard focus only where `:focus-visible` can't
+ * tell (a text field matches it however it's focused).
+ */
+export const isKeyboardFocus = (): boolean => isKeyboardLast;
+
 /**
  * Returns an internal ref object for a `forwardRef` component's element that
  * is also exposed through the forwarded ref.
@@ -457,6 +555,101 @@ export const useForwardedRef = <T,>(
   useImperativeHandle(forwardedRef, () => ref.current as T, []);
 
   return ref;
+};
+
+// How long a press waits before its glass lens shows (ms), and how far (px)
+// its pointer moves to show it at once: a quick tap (also a click, e.g. a
+// trackpad pressed down) only selects; held or dragged, the lens shows.
+const lensDelay = 120;
+const lensSlop = 4;
+
+/**
+ * Calls `show` (showing a press's lens) after `lensDelay`, or once the
+ * pointer, down at `start`, moved past `lensSlop` along `axis` (mostly: not
+ * a swipe across it, e.g. scrolling); unless cancelled first.
+ */
+export const delayLens = (
+  start: PointerPosition,
+  show: () => void,
+  axis: 'x' | 'y' = 'x',
+): DelayedLens => {
+  let isShown = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const showNow = () => {
+    clearTimeout(timer);
+    if (isShown) return;
+    isShown = true;
+    show();
+  };
+  timer = setTimeout(showNow, lensDelay);
+
+  return {
+    cancel: () => clearTimeout(timer),
+    isShown: () => isShown,
+    move: ({ clientX, clientY }) => {
+      const along = Math.abs(
+        axis === 'x' ? clientX - start.clientX : clientY - start.clientY,
+      );
+      const across = Math.abs(
+        axis === 'x' ? clientY - start.clientY : clientX - start.clientX,
+      );
+      if (along > lensSlop && along >= across) showNow();
+    },
+  };
+};
+
+/** Handlers of a touch hold (see `useTouchHold`). */
+type TouchHoldHandlers<T extends HTMLElement> = {
+  onPointerCancel?: PointerEventHandler<T>;
+  onPointerDown?: PointerEventHandler<T>;
+  onPointerUp?: PointerEventHandler<T>;
+  onTouchMove?: TouchEventHandler<T>;
+};
+
+/**
+ * Handlers keeping a touch held on an element (a moment, or dragged along
+ * `axis`, see `delayLens`) from scrolling, for a drag whose `touch-action`
+ * lets a swipe across it scroll (e.g. a slider's). They call the given
+ * `handlers` (e.g. the component's own props) first.
+ */
+export const useTouchHold = <T extends HTMLElement>(
+  axis: 'x' | 'y',
+  {
+    onPointerCancel,
+    onPointerDown,
+    onPointerUp,
+    onTouchMove,
+  }: TouchHoldHandlers<T> = {},
+): Required<TouchHoldHandlers<T>> => {
+  const hold = useRef<DelayedLens>(undefined);
+  const release = () => {
+    hold.current?.cancel();
+    hold.current = undefined;
+  };
+
+  return {
+    onPointerCancel: (event) => {
+      onPointerCancel?.(event);
+      release();
+    },
+    onPointerDown: (event) => {
+      onPointerDown?.(event);
+      release();
+      if (event.pointerType === 'mouse') return;
+      hold.current = delayLens(event, () => undefined, axis);
+    },
+    onPointerUp: (event) => {
+      onPointerUp?.(event);
+      release();
+    },
+    onTouchMove: (event) => {
+      onTouchMove?.(event);
+      const [touch] = event.changedTouches;
+      if (!hold.current || !touch || !event.cancelable) return;
+      hold.current.move(touch);
+      if (hold.current.isShown()) event.preventDefault();
+    },
+  };
 };
 
 /**
@@ -485,10 +678,14 @@ export const usePointerDrag = <T extends HTMLElement, State>(
   } | null>(null);
 
   const call = useCallback(
-    (
-      name: keyof PointerDragHandlers<T>,
-      event: Parameters<PointerHandler<T>>[0],
-    ) => (handlersRef.current[name] as PointerHandler<T> | undefined)?.(event),
+    <Name extends keyof PointerDragHandlers<T>>(
+      name: Name,
+      event: Parameters<PointerDragHandlers<T>[Name]>[0],
+    ) =>
+      (
+        handlersRef.current[name] as
+          ((handledEvent: typeof event) => void) | undefined
+      )?.(event),
     [],
   );
 
@@ -576,18 +773,33 @@ export const usePointerDrag = <T extends HTMLElement, State>(
     [call, finish],
   );
 
+  const onTouchMove = useCallback<TouchEventHandler<T>>(
+    (event) => {
+      call('onTouchMove', event);
+
+      const { current: active } = activeRef;
+      const [touch] = event.changedTouches;
+      if (!active || !touch || !event.cancelable) return;
+      if (dragRef.current.isHolding?.(active.state, touch)) {
+        event.preventDefault();
+      }
+    },
+    [call],
+  );
+
   return {
     onLostPointerCapture,
     onPointerCancel,
     onPointerDown,
     onPointerMove,
     onPointerUp,
+    onTouchMove,
   };
 };
 
 /**
- * SF Symbols' `chevron.up.chevron.down` (􀆏), as SVG strokes at the current
- * font size (pop-up buttons).
+ * Up and down chevrons, as SVG strokes at the current font size (pop-up
+ * buttons).
  */
 export const UpDownChevrons: FunctionComponent = () => (
   <svg
@@ -618,7 +830,7 @@ export const draggingAttribute = 'data-dragging-items';
 /**
  * The selection of a popup's highlighted item (the first of `selectors`
  * found, in order, e.g. `[data-highlighted]`), as one pill moving from item
- * to item (iOS) instead of each item showing its own. Rendered last in the
+ * to item instead of each item showing its own. Rendered last in the
  * items' container (in a stacking context), it takes the item's place, size
  * and corners (those of its `::before`, where the items draw their selection
  * otherwise); it fades out in place when none is highlighted, and in where

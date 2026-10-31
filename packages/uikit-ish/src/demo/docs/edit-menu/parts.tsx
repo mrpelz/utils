@@ -790,8 +790,8 @@ export const EditMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The capsule: glass, 42px high (iOS 26’s, measured), its actions from
-        20px, the “more” button at its end.
+        The capsule: glass, 42px high, its actions from 20px, the “more” button
+        at its end.
       </li>
       <li>
         Too many actions: they scroll (touch drags highlight the one under the
@@ -836,8 +836,7 @@ export const EditMenuParts: FunctionComponent = () => (
           component="menu"
           part="Menu.SubmenuRoot"
         />
-        , its submenu an iPad menu below the capsule (iOS pages the capsule
-        instead).
+        , its submenu a regular menu below the capsule.
       </li>
     </ul>
     <SubmenuRootPart />

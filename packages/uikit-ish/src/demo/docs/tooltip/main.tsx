@@ -1,4 +1,3 @@
-import { sfSquareAndArrowUp } from '@bradleyhodges/sfsymbols/sfSquareAndArrowUp';
 import { FunctionComponent, useMemo } from 'react';
 
 import { Button, Symbol, Tooltip } from '../../../components/index.js';
@@ -6,6 +5,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { sfSquareAndArrowUp } from '../../tooling/icons.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -14,7 +14,7 @@ import {
 } from './props.js';
 
 /**
- * A tooltip (Base UI's `Tooltip`, no Figma): a short label at its trigger
+ * A tooltip (Base UI's `Tooltip`): a short label at its trigger
  * on hover and keyboard focus (not on touch), or held open.
  */
 export const TooltipDemo: FunctionComponent = () => {

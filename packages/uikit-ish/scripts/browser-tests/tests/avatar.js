@@ -69,7 +69,7 @@ export const tests = [
     },
   },
   {
-    name: 'avatar: several people in one circle (Figma “Group”: the first 37px, 9px in; the second 22px; a third)',
+    name: 'avatar: several people in one circle (the first 37px, 9px in; the second 22px; a third)',
     run: async (page) => {
       await page.open('avatar', 'light', {
         state: [{ $rest: true, people: 2 }],
@@ -101,7 +101,7 @@ export const tests = [
       })()`);
       // 53%, 31% and 26% of 70px.
       assert.deepEqual(group, {
-        images: ['Anna Haro', 'Kate Bell'],
+        images: ['Anna Hall', 'Kate Brown'],
         label: 'Weekend Trip',
         role: 'group',
         sizes: [37, 22, 18],
