@@ -296,6 +296,25 @@ export const viewportPaddingRows: readonly PropRow[] = [
   ...elementRows('div', 'HTMLDivElement'),
 ];
 
+export const viewportKeyboardAccessoryRows: readonly PropRow[] = [
+  [
+    'gap',
+    'number',
+    code('8'),
+    <>
+      How far above the keyboard it’s kept, lifted (px): e.g. more for a card
+      drawn past its box while lifted.
+    </>,
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'What’s typed into: e.g. a field’s row, with what belongs to it.',
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
 export const viewportOverscrollRows: readonly PropRow[] = [
   [
     'edge',

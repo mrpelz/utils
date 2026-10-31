@@ -2,9 +2,9 @@ import '../button/style.css';
 import '../menu/style.css';
 import '../page-control/style.css';
 import '../segmented/style.css';
-import '../slider/style.css';
 import './style.css';
 
+import type { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import { Slider as BaseSlider } from '@base-ui/react/slider';
 import {
   cloneElement,
@@ -17,7 +17,7 @@ import {
   KeyboardEvent,
   MouseEvent,
   PointerEvent,
-  ReactNode,
+  useCallback,
   useContext,
   useLayoutEffect,
   useMemo,
@@ -29,17 +29,23 @@ import { Button } from '../button/main.js';
 import { Menu } from '../menu/main.js';
 import { PageControl } from '../page-control/main.js';
 import { Segmented } from '../segmented/main.js';
-import { Slider } from '../slider/main.js';
 import { cn, useTouchHold, withStyle } from '../utils/main.js';
+import { Viewport } from '../viewport/main.js';
 import type {
   ColorPickerChangeEventDetails,
   ColorPickerEyedropperProps,
-  ColorPickerMode,
+  ColorPickerModeProps,
+  ColorPickerModesProps,
   ColorPickerPanelProps,
   ColorPickerRootProps,
   ColorPickerSavedColorsChangeEventDetails,
+  ColorPickerSlidersModel,
+  ColorPickerSlidersProps,
+  ColorPickerSwatchesProps,
+  ColorPickerViewProps,
   ColorWellProps,
   EyeDropperApi,
+  PanelState,
   PickerState,
   Rgba,
 } from './props.js';
@@ -47,11 +53,16 @@ import type {
 export type {
   ColorPickerChangeEventDetails,
   ColorPickerEyedropperProps,
-  ColorPickerMode,
+  ColorPickerModeProps,
+  ColorPickerModesProps,
   ColorPickerPanelProps,
   ColorPickerRootProps,
-  ColorWellProps,
   ColorPickerSavedColorsChangeEventDetails,
+  ColorPickerSlidersModel,
+  ColorPickerSlidersProps,
+  ColorPickerSwatchesProps,
+  ColorPickerViewProps,
+  ColorWellProps,
 } from './props.js';
 
 // A color picker and a color well, in the app's popover (a regular width)
@@ -62,11 +73,14 @@ export type {
 //   corners 18px, the selected one outlined white (3px);
 // - Spectrum: hues across, light to dark down (white at the top, pure hues
 //   halfway, black at the bottom), its corners 18px, the color ringed;
-// - Sliders: red, green and blue (`Slider`s, 0 to 255);
-// - Opacity (15px, semibold), a slider (40px high, a checkerboard under the
-//   color fading in, its knob 36px, in the color, ringed white, 3px) and its
-//   percentage (a 75px by 40px field on the system fill, 8px corners, Body
-//   emphasized);
+// - Sliders: red, green and blue (0 to 255), each a channel's row (see
+//   `ChannelRow`): its title (all caps), a slider mixing from the color
+//   (the channel at 0 to 255), and its value, typed;
+// - Each channel's row kept above the keyboard as its field's typed into
+//   (a `Viewport.KeyboardAccessory`; in a `Viewport.Provider`);
+// - Opacity (optional: its part, `Opacity`), a channel's row too: the
+//   color fading in over a checkerboard, its knob the color (translucent),
+//   its value a percentage;
 // - the color (82px, 18px corners) beside the saved colors (30px dots, 25px
 //   apart, rows 22px apart; the color's ringed white, 2px, 4px in) and an
 //   add button (on the system fill, its “+” the label's color).
@@ -74,7 +88,8 @@ export type {
 // white; with a color, the hues as a ring around it.
 //
 // Also:
-// - Colors are hex strings (`#rrggbb`, `#rrggbbaa` with opacity).
+// - Colors are hex strings (`#rrggbb`, `#rrggbbaa` with opacity; without
+//   opacity, always opaque).
 // - The eyedropper (`ColorPicker.Eyedropper`) is the browser's
 //   (`EyeDropper`; not where it has none, e.g. Safari).
 // - Saved colors are deleted by their menu (a secondary click: right click,
@@ -112,7 +127,7 @@ export const formatColor = ({ a, b, g, r }: Rgba): string =>
   `#${toHex(r)}${toHex(g)}${toHex(b)}${a < 1 ? toHex(a * 255) : ''}`.toUpperCase();
 
 // HSL (hue 0–360, saturation and lightness 0–1), for the spectrum.
-// eslint-disable-next-line unicorn/no-unnecessary-parameters
+
 const fromHsl = (h: number, s: number, l: number) => {
   const k = (n: number) => (n + h / 30) % 12;
   const amount = s * Math.min(l, 1 - l);
@@ -169,8 +184,11 @@ const sameColor = (a: Rgba, b: Rgba) =>
   Math.round(a.g) === Math.round(b.g) &&
   Math.round(a.b) === Math.round(b.b);
 
+const unregister = () => undefined;
+
 const PickerContext = createContext<PickerState>({
   color: { a: 1, b: 0, g: 0, r: 0 },
+  registerOpacity: () => unregister,
   setColor: () => undefined,
 });
 
@@ -180,30 +198,58 @@ const PickerContext = createContext<PickerState>({
  */
 const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
   (
-    { className, defaultValue = '#000000', onValueChange, value, ...props },
+    {
+      className,
+      defaultValue = '#000000',
+      onValueChange,
+      style,
+      value,
+      ...props
+    },
     ref,
   ) => {
     const [own, setOwn] = useState(defaultValue);
-    const color = parseColor(value ?? own);
+    // Its `Opacity`s rendered: without one, the color opaque (its alpha,
+    // if given one, dropped).
+    const [opacities, setOpacities] = useState(0);
+    const hasOpacity = opacities > 0;
+    const parsed = parseColor(value ?? own);
+    const color = hasOpacity ? parsed : { ...parsed, a: 1 };
+    const registerOpacity = useCallback(() => {
+      setOpacities((count) => count + 1);
+      return () => setOpacities((count) => count - 1);
+    }, []);
     const state = useMemo(
       () => ({
         color,
+        registerOpacity,
         // Uncontrolled: its own state; controlled, only the app's `value`.
         setColor: (next: Rgba, details: ColorPickerChangeEventDetails) => {
-          const hex = formatColor(next);
+          const hex = formatColor(hasOpacity ? next : { ...next, a: 1 });
           if (value === undefined) setOwn(hex);
           onValueChange?.(hex, details);
         },
       }),
       // (By its hex value.)
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [value ?? own, onValueChange],
+      [value ?? own, onValueChange, hasOpacity],
     );
 
     return (
       <PickerContext.Provider value={state}>
         <div
           ref={ref}
+          style={withStyle(
+            {
+              // (For its parts.)
+              '--uikit-color-picker-color': formatColor(color),
+              '--uikit-color-picker-color-opaque': formatColor({
+                ...color,
+                a: 1,
+              }),
+            },
+            style,
+          )}
           {...props}
           className={cn('uikit-color-picker-root', className)}
           data-color-picker-part="root"
@@ -213,155 +259,276 @@ const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
   },
 );
 
-const Grid: FunctionComponent = () => {
-  const { color, setColor } = useContext(PickerContext);
+/**
+ * Its panel's modes (see `Panel`): the one shown, chosen by its `Modes`;
+ * the first `Mode` (or `View`) unless a default is given.
+ */
+const PanelContext = createContext<PanelState>({
+  mode: null,
+  registerMode: () => undefined,
+  setMode: () => undefined,
+});
 
-  return (
-    // Grid: swatches in rows, its corners 18px.
-    <div
-      aria-label="Grid"
-      className="uikit-color-picker-grid"
-      data-color-picker-part="grid"
-      role="group"
-    >
-      {grid.flatMap((row) =>
-        row.map((hex) => {
-          const swatch = parseColor(hex);
-          return (
-            <button
-              key={hex}
-              aria-label={hex}
-              aria-pressed={sameColor(swatch, color)}
-              style={{ backgroundColor: hex }}
-              type="button"
-              onClick={(event: MouseEvent<HTMLButtonElement>) =>
-                setColor({ ...swatch, a: color.a }, { event, reason: 'grid' })
-              }
-            />
-          );
-        }),
-      )}
-    </div>
-  );
-};
+/**
+ * Its panel: its modes (`Modes`, a `Mode` each; a `View` each, paired by
+ * their `value`s), the opacity, the color and the saved colors, as
+ * composed (in its padding, its parts spaced).
+ */
+const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
+  ({ className, defaultMode, mode: modeProp, onModeChange, ...props }, ref) => {
+    const [ownMode, setOwnMode] = useState(defaultMode);
+    // (Without a default: the first mode, as it's rendered.)
+    const [firstMode, setFirstMode] = useState<string | undefined>();
+    // (Controlled from the start: none yet, before its first mode is
+    // known, not undefined, which would leave its control uncontrolled.)
+    const mode = modeProp ?? ownMode ?? firstMode ?? null;
 
-const Spectrum: FunctionComponent = () => {
-  const { color, setColor } = useContext(PickerContext);
-  const { h, l } = toHsl(color);
-
-  const pick = (event: PointerEvent<HTMLDivElement>) => {
-    const { height, left, top, width } =
-      event.currentTarget.getBoundingClientRect();
-    const hue = clamp((event.clientX - left) / width, 0, 1) * 360;
-    const lightness = 1 - clamp((event.clientY - top) / height, 0, 1);
-    setColor(
-      { ...fromHsl(hue % 360, 1, lightness), a: color.a },
-      { event, reason: 'spectrum' },
+    const panel = useMemo(
+      () => ({
+        mode,
+        registerMode: (value: string) =>
+          setFirstMode((first) => first ?? value),
+        // Uncontrolled: its own state; controlled, only the app's `mode`.
+        setMode: (next: string, details: BaseRadioGroup.ChangeEventDetails) => {
+          if (modeProp === undefined) setOwnMode(next);
+          onModeChange?.(next, details);
+        },
+      }),
+      [mode, modeProp, onModeChange],
     );
-  };
 
-  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    event.currentTarget.setPointerCapture(event.pointerId);
-    pick(event);
-  };
-
-  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
-    pick(event);
-  };
-
-  // Arrow keys: hue across (5°), lightness down (5%).
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const moves: Record<string, [number, number]> = {
-      ArrowDown: [0, -0.05],
-      ArrowLeft: [-5, 0],
-      ArrowRight: [5, 0],
-      ArrowUp: [0, 0.05],
-    };
-    const move = moves[event.key];
-    if (!move) return;
-    event.preventDefault();
-    setColor(
-      {
-        ...fromHsl((h + move[0] + 360) % 360, 1, clamp(l + move[1], 0, 1)),
-        a: color.a,
-      },
-      { event, reason: 'spectrum' },
+    return (
+      <PanelContext.Provider value={panel}>
+        <div
+          ref={ref}
+          {...props}
+          className={cn('uikit-color-picker-panel', className)}
+          data-color-picker-part="panel"
+        />
+      </PanelContext.Provider>
     );
-  };
+  },
+);
 
-  return (
-    // Spectrum: hues across, white to black down; the color ringed.
-    <div
-      aria-label="Spectrum"
-      aria-valuetext={formatColor({ ...color, a: 1 })}
-      className="uikit-color-picker-spectrum"
-      // Its drags don't swipe a sheet (or drawer) away.
-      data-base-ui-swipe-ignore=""
-      data-color-picker-part="spectrum"
-      role="slider"
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-    >
-      <span
-        style={{
-          backgroundColor: formatColor({ ...color, a: 1 }),
-          left: `${String((h / 360) * 100)}%`,
-          top: `${String((1 - l) * 100)}%`,
-        }}
+/**
+ * Its modes' control: a segmented control (its `Mode`s, its highlight),
+ * choosing the `View` shown; 24px above it.
+ */
+const Modes = forwardRef<HTMLDivElement, ColorPickerModesProps>(
+  ({ children, ...props }, ref) => {
+    const { mode, setMode } = useContext(PanelContext);
+
+    return (
+      <Segmented.Root
+        ref={ref}
+        aria-label="Mode"
+        {...props}
+        value={mode}
+        onValueChange={(next, details) => setMode(String(next), details)}
+      >
+        {children}
+        <Segmented.Highlight />
+      </Segmented.Root>
+    );
+  },
+);
+
+/** A mode, in its `Modes`: its label, choosing its `View` (by `value`). */
+const Mode = forwardRef<HTMLElement, ColorPickerModeProps>(
+  ({ value, ...props }, ref) => {
+    const { registerMode } = useContext(PanelContext);
+    useLayoutEffect(() => registerMode(value), [registerMode, value]);
+
+    return (
+      <Segmented.Item
+        ref={ref}
+        value={value}
+        {...props}
       />
-    </div>
-  );
-};
+    );
+  },
+);
 
-// Each in its color.
-const channels = [
-  ['r', 'Red', 'var(--color-ui-system-red)'],
-  ['g', 'Green', 'var(--color-ui-system-green)'],
-  ['b', 'Blue', 'var(--color-ui-system-blue)'],
-] as const;
+/**
+ * A mode's view (by `value`, its `Mode`'s): shown while it's chosen; all
+ * as high as the grid (so a popover doesn't move as they're switched).
+ */
+const View = forwardRef<HTMLDivElement, ColorPickerViewProps>(
+  ({ className, value, ...props }, ref) => {
+    const { mode, registerMode } = useContext(PanelContext);
+    // (A mode, too: without `Modes`, its only view shown.)
+    useLayoutEffect(() => registerMode(value), [registerMode, value]);
+    if (mode !== value) return null;
 
-const Sliders: FunctionComponent = () => {
-  const { color, setColor } = useContext(PickerContext);
+    return (
+      <div
+        ref={ref}
+        data-color-picker-view={value}
+        {...props}
+        className={cn('uikit-color-picker-view', className)}
+        data-color-picker-part="view"
+      />
+    );
+  },
+);
 
-  return (
-    <div
-      className="uikit-color-picker-sliders"
-      data-color-picker-part="sliders"
-    >
-      {channels.map(([channel, label, tint]) => (
-        <Slider.Root
-          key={channel}
-          max={255}
-          min={0}
-          tint={tint}
-          value={Math.round(color[channel])}
-          onValueChange={(next, { event }) =>
-            setColor(
-              { ...color, [channel]: next as number },
-              { event, reason: 'sliders' },
-            )
-          }
-        >
-          <Slider.Label placement="block-start">{label}</Slider.Label>
-          <Slider.Value placement="block-start" />
-          <Slider.Control>
-            <Slider.Track>
-              <Slider.Indicator />
-              <Slider.Thumb />
-            </Slider.Track>
-          </Slider.Control>
-        </Slider.Root>
-      ))}
-    </div>
-  );
-};
+/** Swatches in rows (a gray row, then hues by lightness), its corners 18px. */
+const Grid = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
+  ({ className, ...props }, ref) => {
+    const { color, setColor } = useContext(PickerContext);
 
-const Opacity: FunctionComponent = () => {
-  const { color, setColor } = useContext(PickerContext);
-  const percent = Math.round(color.a * 100);
+    return (
+      <div
+        ref={ref}
+        aria-label="Grid"
+        role="group"
+        {...props}
+        className={cn('uikit-color-picker-grid', className)}
+        data-color-picker-part="grid"
+      >
+        {grid.flatMap((row) =>
+          row.map((hex) => {
+            const swatch = parseColor(hex);
+            return (
+              <button
+                key={hex}
+                aria-label={hex}
+                aria-pressed={sameColor(swatch, color)}
+                style={{ backgroundColor: hex }}
+                type="button"
+                onClick={(event: MouseEvent<HTMLButtonElement>) =>
+                  setColor({ ...swatch, a: color.a }, { event, reason: 'grid' })
+                }
+              />
+            );
+          }),
+        )}
+      </div>
+    );
+  },
+);
+
+/** Hues across, white to black down, the color ringed; its corners 18px. */
+const Spectrum = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
+  ({ className, ...props }, ref) => {
+    const { color, setColor } = useContext(PickerContext);
+    const { h, l } = toHsl(color);
+
+    const pick = (event: PointerEvent<HTMLDivElement>) => {
+      const { height, left, top, width } =
+        event.currentTarget.getBoundingClientRect();
+      const hue = clamp((event.clientX - left) / width, 0, 1) * 360;
+      const lightness = 1 - clamp((event.clientY - top) / height, 0, 1);
+      setColor(
+        { ...fromHsl(hue % 360, 1, lightness), a: color.a },
+        { event, reason: 'spectrum' },
+      );
+    };
+
+    const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+      event.currentTarget.setPointerCapture(event.pointerId);
+      pick(event);
+    };
+
+    const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+      if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+      pick(event);
+    };
+
+    // Arrow keys: hue across (5°), lightness down (5%).
+    const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+      const moves: Record<string, [number, number]> = {
+        ArrowDown: [0, -0.05],
+        ArrowLeft: [-5, 0],
+        ArrowRight: [5, 0],
+        ArrowUp: [0, 0.05],
+      };
+      const move = moves[event.key];
+      if (!move) return;
+      event.preventDefault();
+      setColor(
+        {
+          ...fromHsl((h + move[0] + 360) % 360, 1, clamp(l + move[1], 0, 1)),
+          a: color.a,
+        },
+        { event, reason: 'spectrum' },
+      );
+    };
+
+    return (
+      <div
+        ref={ref}
+        aria-label="Spectrum"
+        aria-valuetext={formatColor({ ...color, a: 1 })}
+        role="slider"
+        tabIndex={0}
+        {...props}
+        className={cn('uikit-color-picker-spectrum', className)}
+        // Its drags don't swipe a sheet (or drawer) away.
+        data-base-ui-swipe-ignore=""
+        data-color-picker-part="spectrum"
+        onKeyDown={handleKeyDown}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+      >
+        <span
+          style={{
+            backgroundColor: formatColor({ ...color, a: 1 }),
+            left: `${String((h / 360) * 100)}%`,
+            top: `${String((1 - l) * 100)}%`,
+          }}
+        />
+      </div>
+    );
+  },
+);
+
+/**
+ * A gradient's stops, across a channel's track (from where its knob's
+ * center is at its least to where it is at its most), evenly.
+ */
+const trackStops = (colors: readonly string[]) =>
+  colors
+    .map(
+      (stop, index) =>
+        `${stop} calc(20px + (100% - 40px) * ${String(index / Math.max(colors.length - 1, 1))})`,
+    )
+    .join(', ');
+
+/**
+ * A channel's row (the sliders', the opacity's): its title (all caps,
+ * secondary), a slider (40px high, mixing from the color: its gradient
+ * the color with the channel along its range; its knob 36px, in the color,
+ * ringed white, 3px) and its value (a 75px by 40px field on the system
+ * fill, 8px corners, Body emphasized: typed, committed on Enter or as it's
+ * left).
+ */
+const ChannelRow: FunctionComponent<{
+  /** Its field's name (e.g. “Opacity percentage”; default: “Red value”). */
+  fieldLabel?: string;
+  /** Its track's background under its gradient (the opacity's checkerboard). */
+  isCheckered?: boolean;
+  label: string;
+  max: number;
+  onValueChange: (value: number, event: Event) => void;
+  /** Its gradient: the color with the channel along its range, evenly. */
+  stops: readonly string[];
+  /** Its knob's color (translucent, over the checkerboard). */
+  thumbColor: string;
+  /** After its value, not typed (e.g. “%”). */
+  unit?: string;
+  value: number;
+}> = ({
+  fieldLabel,
+  isCheckered = false,
+  label,
+  max,
+  onValueChange,
+  stops,
+  thumbColor,
+  unit,
+  value,
+}) => {
   const [draft, setDraft] = useState<string | undefined>(undefined);
   // Held, its touch doesn't scroll (see `useTouchHold`).
   const holdHandlers = useTouchHold<HTMLDivElement>('x');
@@ -370,73 +537,81 @@ const Opacity: FunctionComponent = () => {
     if (draft === undefined) return;
     const next = Number.parseFloat(draft);
     if (Number.isFinite(next)) {
-      setColor(
-        { ...color, a: clamp(next, 0, 100) / 100 },
-        { event, reason: 'opacity' },
-      );
+      onValueChange(clamp(Math.round(next), 0, max), event);
     }
     setDraft(undefined);
   };
 
   return (
-    <>
+    // Its field typed into: kept above the keyboard, all of the row.
+    // (8px above it, as any; and its card's 12px past its end, lifted: see
+    // style.css.)
+    <Viewport.KeyboardAccessory
+      className="uikit-color-picker-channel"
+      data-color-picker-part="channel"
+      gap={20}
+    >
       <div
-        className="uikit-color-picker-opacity-title"
-        data-color-picker-part="opacity-title"
+        aria-hidden="true"
+        className="uikit-color-picker-channel-title"
+        data-color-picker-part="channel-title"
       >
-        Opacity
+        {label}
       </div>
       <div
-        className="uikit-color-picker-opacity-row"
-        data-color-picker-part="opacity-row"
+        className="uikit-color-picker-channel-row"
+        data-color-picker-part="channel-row"
       >
         <BaseSlider.Root
-          aria-label="Opacity"
-          max={100}
+          aria-label={label}
+          max={max}
           min={0}
           style={{ display: 'contents' }}
           thumbAlignment="center"
-          value={percent}
+          value={value}
           onValueChange={(next, { event }) =>
-            setColor(
-              { ...color, a: (next as number) / 100 },
-              { event, reason: 'opacity' },
-            )
+            onValueChange(next as number, event)
           }
         >
-          {/* The opacity slider: the color fading in over a checkerboard; its
-             knob the color, ringed white. Centered on its value (no measuring,
-             as Base UI's edge alignment does, which a popover scaling in would
-             throw off), over a track inset by half a knob. */}
+          {/* The slider: its gradient over the track (a checkerboard,
+             translucent), a hole in it at the knob; its knob the color,
+             ringed white. Centered on its value (no measuring, as Base UI's
+             edge alignment does, which a popover scaling in would throw
+             off), over a track inset by half a knob. */}
           <BaseSlider.Control
-            className="uikit-color-picker-opacity-control"
+            className="uikit-color-picker-channel-control"
             // Its drags don't swipe a sheet (or drawer) away.
             data-base-ui-swipe-ignore=""
-            data-color-picker-part="opacity"
-            // (Its thumb's place, for the hole in its gradient: the slider's
-            // value, not the color's alpha, which is rounded otherwise.)
+            data-checkered={isCheckered ? '' : undefined}
+            data-color-picker-part="channel-control"
+            // (Its knob's place, for the hole in its gradient: the slider's
+            // value, not the color's, which is rounded otherwise.)
             style={
-              { '--uikit-color-picker-alpha': percent / 100 } as CSSProperties
+              {
+                '--uikit-color-picker-channel-position': value / max,
+                '--uikit-color-picker-channel-stops': trackStops(stops),
+                '--uikit-color-picker-channel-thumb': thumbColor,
+              } as CSSProperties
             }
             {...holdHandlers}
           >
             <BaseSlider.Track>
               <BaseSlider.Thumb
-                className="uikit-color-picker-opacity-thumb"
-                data-color-picker-part="opacity-thumb"
+                className="uikit-color-picker-channel-thumb"
+                data-color-picker-part="channel-thumb"
               />
             </BaseSlider.Track>
           </BaseSlider.Control>
         </BaseSlider.Root>
-        {/* Its percentage: the number typed, the “%” after it (not typed). */}
+        {/* Its value: the number typed, its unit after it (not typed). */}
         <label
-          className="uikit-color-picker-percentage-field"
-          data-color-picker-part="percentage-field"
+          className="uikit-color-picker-channel-field"
+          data-color-picker-part="channel-field"
         >
           <input
-            aria-label="Opacity percentage"
+            aria-label={fieldLabel ?? `${label} value`}
             inputMode="numeric"
-            value={draft ?? String(percent)}
+            value={draft ?? String(value)}
             onBlur={(event: FocusEvent<HTMLInputElement>) => commit(event)}
             onChange={(event) => setDraft(event.currentTarget.value)}
             // Focused, all of it (to type over).
@@ -445,12 +620,180 @@ const Opacity: FunctionComponent = () => {
               if (event.key === 'Enter') commit(event);
             }}
           />
-          <span aria-hidden="true">%</span>
+          {unit ? <span aria-hidden="true">{unit}</span> : null}
         </label>
       </div>
-    </>
+    </Viewport.KeyboardAccessory>
   );
 };
+
+/** A model's channels: their values (rounded, as shown) and back. */
+type Model = {
+  channels: readonly {
+    label: string;
+    max: number;
+    unit?: string;
+  }[];
+  /** The color's channels (rounded). */
+  from: (color: Rgba) => number[];
+  /** Channels as a color (its red, green and blue). */
+  to: (values: readonly number[]) => Omit<Rgba, 'a'>;
+};
+
+/** Hue (0–360°), saturation and lightness (0–100%). */
+const hsl: Model = {
+  channels: [
+    { label: 'Hue', max: 360, unit: '°' },
+    { label: 'Saturation', max: 100, unit: '%' },
+    { label: 'Lightness', max: 100, unit: '%' },
+  ],
+  from: (color) => {
+    const { h, l, s } = toHsl(color);
+    return [Math.round(h) % 360, Math.round(s * 100), Math.round(l * 100)];
+  },
+  to: ([h = 0, s = 0, l = 0]) => fromHsl(h % 360, s / 100, l / 100),
+};
+
+/**
+ * Cyan, magenta, yellow and black (0–100%): naive (from sRGB, no ink's
+ * profile), as on screen.
+ */
+const cmyk: Model = {
+  channels: [
+    { label: 'Cyan', max: 100, unit: '%' },
+    { label: 'Magenta', max: 100, unit: '%' },
+    { label: 'Yellow', max: 100, unit: '%' },
+    { label: 'Black', max: 100, unit: '%' },
+  ],
+  from: ({ b, g, r }) => {
+    const k = 1 - Math.max(r, g, b) / 255;
+    const ink = (channel: number) =>
+      k >= 1 ? 0 : Math.round(((1 - channel / 255 - k) / (1 - k)) * 100);
+    return [ink(r), ink(g), ink(b), Math.round(k * 100)];
+  },
+  to: ([c = 0, m = 0, y = 0, k = 0]) => {
+    const channel = (ink: number) => 255 * (1 - ink / 100) * (1 - k / 100);
+    return { b: channel(y), g: channel(m), r: channel(c) };
+  },
+};
+
+/** Red, green and blue (0–255). */
+const rgb: Model = {
+  channels: [
+    { label: 'Red', max: 255 },
+    { label: 'Green', max: 255 },
+    { label: 'Blue', max: 255 },
+  ],
+  from: ({ b, g, r }) => [r, g, b].map((channel) => Math.round(channel)),
+  to: ([r = 0, g = 0, b = 0]) => ({ b, g, r }),
+};
+
+const models: Record<ColorPickerSlidersModel, Model> = { cmyk, hsl, rgb };
+
+/**
+ * A channel's track's colors: the color with the channel along its range,
+ * enough of them to be exact (linear between them): a hue around (every
+ * 60°), a lightness through the pure hue (halfway), the others its ends.
+ */
+const trackColors = (
+  model: Model,
+  values: readonly number[],
+  index: number,
+) => {
+  const { max } = model.channels[index] ?? { max: 1 };
+  const steps = model === hsl ? ([6, 1, 2][index] ?? 1) : 1;
+  return Array.from({ length: steps + 1 }, (_, step) => {
+    const next = values.with(index, (max * step) / steps);
+    return formatColor({ ...model.to(next), a: 1 });
+  });
+};
+
+/**
+ * Sliders: a color model's channels (`model`: red, green and blue; hue,
+ * saturation and lightness; cyan, magenta, yellow and black), each mixing
+ * from the color, its value typed too.
+ */
+const Sliders = forwardRef<HTMLDivElement, ColorPickerSlidersProps>(
+  ({ className, model: modelName = 'rgb', ...props }, ref) => {
+    const { color, setColor } = useContext(PickerContext);
+    const model = models[modelName];
+    const opaque = formatColor({ ...color, a: 1 });
+
+    // Its values as last set, while they're the color's: so a hue isn't
+    // lost to a gray (no saturation), nor inks to black (all of it).
+    const [last, setLast] = useState<{ color: string; values: number[] }>();
+    const values = last?.color === opaque ? last.values : model.from(color);
+
+    return (
+      <div
+        ref={ref}
+        {...props}
+        className={cn('uikit-color-picker-sliders', className)}
+        data-color-picker-part="sliders"
+        data-model={modelName}
+      >
+        {model.channels.map(({ label, max, unit }, index) => (
+          <ChannelRow
+            key={label}
+            label={label}
+            max={max}
+            stops={trackColors(model, values, index)}
+            thumbColor={opaque}
+            unit={unit}
+            value={values[index] ?? 0}
+            onValueChange={(next, event) => {
+              const nextValues = values.with(index, next);
+              const nextColor = { ...model.to(nextValues), a: color.a };
+              setLast({
+                color: formatColor({ ...nextColor, a: 1 }),
+                values: nextValues,
+              });
+              setColor(nextColor, { event, reason: 'sliders' });
+            }}
+          />
+        ))}
+      </div>
+    );
+  },
+);
+
+/**
+ * The opacity: the color fading in over a checkerboard, in percent; 22px
+ * above what follows. Rendered, the color has it (see `Root`): without
+ * it, it's opaque.
+ */
+const Opacity = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
+  ({ className, ...props }, ref) => {
+    const { color, registerOpacity, setColor } = useContext(PickerContext);
+    useLayoutEffect(registerOpacity, [registerOpacity]);
+
+    return (
+      <div
+        ref={ref}
+        {...props}
+        className={cn('uikit-color-picker-opacity', className)}
+        data-color-picker-part="opacity"
+      >
+        <ChannelRow
+          isCheckered
+          fieldLabel="Opacity percentage"
+          label="Opacity"
+          max={100}
+          thumbColor={formatColor(color)}
+          unit="%"
+          value={Math.round(color.a * 100)}
+          stops={[
+            formatColor({ ...color, a: 0 }),
+            formatColor({ ...color, a: 1 }),
+          ]}
+          onValueChange={(next, event) =>
+            setColor({ ...color, a: next / 100 }, { event, reason: 'opacity' })
+          }
+        />
+      </div>
+    );
+  },
+);
 
 // A page of saved colors: 2 rows of 5, always as high (so its
 // popover doesn't move).
@@ -508,37 +851,25 @@ const SavedSwatch: FunctionComponent<{
   );
 };
 
-const modes: [ColorPickerMode, string][] = [
-  ['grid', 'Grid'],
-  ['spectrum', 'Spectrum'],
-  ['sliders', 'Sliders'],
-];
-
 /**
- * Its views (Grid, Spectrum, Sliders), the opacity, the color and the saved
- * colors (in pages; adding the color to them, deleting one by its menu).
+ * The color (82px, 18px corners; translucent, over black and white) beside
+ * the saved colors (in pages, with a page control; adding the color to
+ * them, deleting one by its menu).
  */
-const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
+const Swatches = forwardRef<HTMLDivElement, ColorPickerSwatchesProps>(
   (
     {
       className,
-      defaultMode = 'grid',
       defaultSavedColors: initialSaved = defaultSavedColors,
-      mode: modeProp,
-      onModeChange,
       onSavedColorsChange,
       savedColors: savedProp,
-      style,
       ...props
     },
     ref,
   ) => {
     const { color } = useContext(PickerContext);
-    const [ownMode, setOwnMode] = useState(defaultMode);
-    const mode = modeProp ?? ownMode;
     const [ownSaved, setOwnSaved] = useState(initialSaved);
     const saved = savedProp ?? ownSaved;
-    const opaque = formatColor({ ...color, a: 1 });
 
     // Uncontrolled: their own state; controlled, only the app's.
     const changeSaved = (
@@ -591,126 +922,87 @@ const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
       setScrollTarget(next);
     };
 
-    const views: Record<ColorPickerMode, ReactNode> = {
-      grid: <Grid />,
-      sliders: <Sliders />,
-      spectrum: <Spectrum />,
-    };
-
     return (
-      // Its views all as high as the grid (so its popover doesn't move).
       <div
         ref={ref}
-        style={withStyle(
-          {
-            // (For its parts.)
-            '--uikit-color-picker-color': formatColor(color),
-            '--uikit-color-picker-color-opaque': opaque,
-          },
-          style,
-        )}
         {...props}
-        className={cn('uikit-color-picker-panel', className)}
-        data-color-picker-part="panel"
+        className={cn('uikit-color-picker-swatches', className)}
+        data-color-picker-part="swatches"
       >
-        <Segmented.Root
-          aria-label="View"
-          value={mode}
-          onValueChange={(next, details) => {
-            if (modeProp === undefined) setOwnMode(next as ColorPickerMode);
-            onModeChange?.(next as ColorPickerMode, details);
-          }}
-        >
-          {modes.map(([value, label]) => (
-            <Segmented.Item
-              key={value}
-              value={value}
-            >
-              {label}
-            </Segmented.Item>
-          ))}
-          <Segmented.Highlight />
-        </Segmented.Root>
-        <div data-color-picker-view={mode}>{views[mode]}</div>
-        <Opacity />
+        {/* The color, over black and white (translucent). */}
         <div
-          className="uikit-color-picker-swatches"
-          data-color-picker-part="swatches"
+          aria-hidden="true"
+          className="uikit-color-picker-current"
+          data-color-picker-part="current"
+        />
+        <div
+          className="uikit-color-picker-saved-column"
+          data-color-picker-part="saved-column"
         >
-          {/* The color, over a checkerboard (translucent). */}
+          {/* Its pages of saved colors, side by side, swiped (snapping to
+             each); room for their focus rings (4px) all around, the pages 8px
+             apart (so a page's rings don't show beside another). */}
           <div
-            aria-hidden="true"
-            className="uikit-color-picker-current"
-            data-color-picker-part="current"
-          />
-          <div
-            className="uikit-color-picker-saved-column"
-            data-color-picker-part="saved-column"
+            ref={pagesRef}
+            aria-label="Saved colors"
+            className="uikit-color-picker-saved-pages"
+            data-color-picker-part="saved-pages"
+            role="group"
+            onScroll={handleScroll}
           >
-            {/* Its pages of saved colors, side by side, swiped (snapping to
-               each); room for their focus rings (4px) all around, the pages 8px
-               apart (so a page's rings don't show beside another). */}
-            <div
-              ref={pagesRef}
-              aria-label="Saved colors"
-              className="uikit-color-picker-saved-pages"
-              data-color-picker-part="saved-pages"
-              role="group"
-              onScroll={handleScroll}
-            >
-              {Array.from({ length: pages }, (_, index) => (
-                <Saved
-                  key={index}
-                  // (Only the page shown can be reached.)
-                  inert={index !== shownPage}
-                >
-                  {items
-                    .slice(index * pageSize, (index + 1) * pageSize)
-                    .map((hex) =>
-                      hex === undefined ? (
-                        <button
-                          key="add"
-                          aria-label="Add color"
-                          data-add=""
-                          type="button"
-                          onClick={(event: MouseEvent<HTMLButtonElement>) => {
-                            const next = formatColor(color);
-                            if (saved.includes(next)) return;
-                            changeSaved([...saved, next], {
-                              event,
-                              reason: 'add',
-                            });
-                            // On the page it lands on.
-                            goTo(Math.floor(saved.length / pageSize));
-                          }}
-                        >
-                          +
-                        </button>
-                      ) : (
-                        <SavedSwatch
-                          key={hex}
-                          hex={hex}
-                          onDelete={(event: Event) =>
-                            changeSaved(
-                              saved.filter((other) => other !== hex),
-                              { event, reason: 'delete' },
-                            )
-                          }
-                        />
-                      ),
-                    )}
-                </Saved>
-              ))}
-            </div>
-            {/* (Its room kept with one page: so its popover doesn't move.) */}
+            {Array.from({ length: pages }, (_, index) => (
+              <Saved
+                key={index}
+                // (Only the page shown can be reached.)
+                inert={index !== shownPage}
+              >
+                {items
+                  .slice(index * pageSize, (index + 1) * pageSize)
+                  .map((hex) =>
+                    hex === undefined ? (
+                      <button
+                        key="add"
+                        aria-label="Add color"
+                        data-add=""
+                        type="button"
+                        onClick={(event: MouseEvent<HTMLButtonElement>) => {
+                          const next = formatColor(color);
+                          if (saved.includes(next)) return;
+                          changeSaved([...saved, next], {
+                            event,
+                            reason: 'add',
+                          });
+                          // On the page it lands on.
+                          goTo(Math.floor(saved.length / pageSize));
+                        }}
+                      >
+                        +
+                      </button>
+                    ) : (
+                      <SavedSwatch
+                        key={hex}
+                        hex={hex}
+                        onDelete={(event: Event) =>
+                          changeSaved(
+                            saved.filter((other) => other !== hex),
+                            { event, reason: 'delete' },
+                          )
+                        }
+                      />
+                    ),
+                  )}
+              </Saved>
+            ))}
+          </div>
+          {/* (Only with pages: one page, no room below the colors.) */}
+          {pages > 1 ? (
             <PageControl
-              count={Math.max(pages, 2)}
-              style={pages > 1 ? undefined : { visibility: 'hidden' }}
+              count={pages}
               value={shownPage}
               variant="plain"
               onValueChange={goTo}
             />
-          </div>
+          ) : null}
         </div>
       </div>
     );
@@ -796,6 +1088,14 @@ export const ColorPicker = {
   Root,
   Header,
   Panel,
+  Modes,
+  Mode,
+  View,
+  Grid,
+  Spectrum,
+  Sliders,
+  Opacity,
+  Swatches,
   Eyedropper,
   Well,
 };

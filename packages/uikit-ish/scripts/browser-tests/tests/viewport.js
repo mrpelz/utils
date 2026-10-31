@@ -121,7 +121,8 @@ export const tests = [
       await page.evaluate(
         `document.documentElement.style.setProperty(${JSON.stringify('--uikit-viewport-keyboard-inset')}, '300px')`,
       );
-      await sleep(100);
+      // (Once they've followed it: 250ms.)
+      await sleep(400);
       const keyboard = await boxes();
       assert.equal(keyboard.bottom[3], 300, 'pushed');
       assert.equal(keyboard.leading[3], 300, 'sides');
@@ -129,7 +130,7 @@ export const tests = [
 
       await page.setState(1, { keyboard: 'cover' });
       await page.setState(4, { keyboard: 'overlay' });
-      await sleep(100);
+      await sleep(400);
       const covered = await boxes();
       assert.equal(covered.bottom[3], 0, 'covered');
       assert.equal(covered.layer[3], 0, 'overlaid');

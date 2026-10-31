@@ -55,7 +55,13 @@ export const colorPickerRootRows: readonly PropRow[] = [
         component="color-picker"
         part="ColorPicker.Panel"
       />{' '}
-      (the eyedropper in the header).
+      (the eyedropper in the header). With an{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Opacity"
+      />{' '}
+      in it, the color has an opacity; without one, it’s always opaque (
+      <code>#rrggbb</code>, a value’s alpha dropped as it changes).
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -82,25 +88,194 @@ export const colorPickerHeaderRows: readonly PropRow[] = [
 export const colorPickerPanelRows: readonly PropRow[] = [
   [
     'mode',
-    union('grid', 'spectrum', 'sliders'),
+    'string',
     undefined,
     <>
-      The view (controlled). To render it uncontrolled, use the{' '}
+      The mode shown (controlled): its{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Mode"
+      />
+      ’s and{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.View"
+      />
+      ’s <code>value</code>. To render it uncontrolled, use the{' '}
       <code>defaultMode</code> prop instead.
     </>,
   ],
   [
     'defaultMode',
-    union('grid', 'spectrum', 'sliders'),
-    code('grid'),
-    'The initial view (uncontrolled).',
+    'string',
+    'the first mode',
+    'The initial mode (uncontrolled).',
   ],
   [
     'onModeChange',
-    '(mode, eventDetails) => void',
+    '(mode: string, eventDetails) => void',
     undefined,
-    'Called with the view chosen (its segmented control’s details).',
+    'Called with the mode chosen (its segmented control’s details).',
   ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its parts, as composed: its modes (
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Modes"
+      />
+      , a{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.View"
+      />{' '}
+      each), the{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Opacity"
+      />
+      , the{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Swatches"
+      />
+      ; any of them left out.
+    </>,
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerModesRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its modes:{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Mode"
+      />
+      s, in their order (its highlight after them, its own).
+    </>,
+  ],
+  [
+    '…',
+    'SegmentedRootProps',
+    undefined,
+    <>
+      A{' '}
+      <PartLink
+        component="segmented"
+        part="Segmented.Root"
+      />
+      ’s props, but its value (the panel’s <code>mode</code>); named “Mode” by
+      default (<code>aria-label</code>).
+    </>,
+  ],
+];
+
+export const colorPickerModeRows: readonly PropRow[] = [
+  [
+    'value',
+    'string',
+    undefined,
+    <>
+      Its mode (required): its{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.View"
+      />
+      ’s <code>value</code>, and the panel’s <code>mode</code> while it’s
+      chosen.
+    </>,
+  ],
+  ['children', 'ReactNode', undefined, 'Its label: e.g. “Grid”, “RGB”.'],
+  [
+    '…',
+    'SegmentedItemProps',
+    undefined,
+    <>
+      A{' '}
+      <PartLink
+        component="segmented"
+        part="Segmented.Item"
+      />
+      ’s props (e.g. <code>disabled</code>).
+    </>,
+  ],
+];
+
+export const colorPickerViewRows: readonly PropRow[] = [
+  [
+    'value',
+    'string',
+    undefined,
+    <>
+      Its mode (required): its{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Mode"
+      />
+      ’s <code>value</code>; shown while it’s chosen.
+    </>,
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      What it shows: a{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Grid"
+      />
+      , a{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Spectrum"
+      />
+      , a{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Sliders"
+      />
+      .
+    </>,
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerGridRows: readonly PropRow[] = [
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerSpectrumRows: readonly PropRow[] = [
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerSlidersRows: readonly PropRow[] = [
+  [
+    'model',
+    union('rgb', 'hsl', 'cmyk'),
+    code('rgb'),
+    <>
+      Its color model, its channels’ sliders: red, green and blue (0–255); hue
+      (0–360°), saturation and lightness (0–100%); cyan, magenta, yellow and
+      black (0–100%; naive, from sRGB, no ink’s profile).
+    </>,
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerOpacityRows: readonly PropRow[] = [
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerSwatchesRows: readonly PropRow[] = [
   [
     'savedColors',
     'string[]',
@@ -213,7 +388,7 @@ export const defaultSavedColorsRows: readonly PropRow[] = [
     'string[]',
     undefined,
     <>
-      The default saved colors (hex strings), the panel’s{' '}
+      The default saved colors (hex strings), the swatches’{' '}
       <code>defaultSavedColors</code> by default.
     </>,
   ],

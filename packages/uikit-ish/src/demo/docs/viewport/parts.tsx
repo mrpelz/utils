@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   type ElementGeometry,
   List,
+  TextField,
   Toolbar,
   useAnchorSize,
   useElementGeometry,
@@ -65,6 +66,7 @@ import {
   viewportBlockEndRows,
   viewportBlockStartRows,
   viewportContentRows,
+  viewportKeyboardAccessoryRows,
   viewportOverscrollRows,
   viewportPaddingRows,
   viewportProviderRows,
@@ -81,6 +83,7 @@ import {
   propOptionsFocusShift,
   propOptionsHandlePadding,
   propOptionsInputZoom,
+  propOptionsKeyboardAccessory,
   propOptionsOverscroll,
   propOptionsPaddingContent,
   propOptionsPaddingEnd,
@@ -573,6 +576,74 @@ const OverscrollView: FunctionComponent<{
 };
 
 /** `OverscrollView`, in a provider tracking its screen's content. */
+/**
+ * `Viewport.KeyboardAccessory`, outlined: a note's field at the screen's
+ * bottom, lifted above the keyboard while it's typed into.
+ */
+const KeyboardAccessoryPart: FunctionComponent = () => {
+  const id = 'viewport-parts-keyboard-accessory';
+  const [external] = useProvidedState(id);
+  const [control, props, state] = usePropControl(propOptionsKeyboardAccessory, {
+    emphasize: 'outline',
+    external,
+    isOpen: true,
+    title: 'Viewport.KeyboardAccessory',
+  });
+
+  return (
+    <Component
+      hasInputGuards
+      isInline
+      controls={[control]}
+      id={id}
+      stage="phone"
+      state={[state]}
+      title="Viewport.KeyboardAccessory"
+    >
+      {/* Tracking the keyboard over its screen. */}
+      <Viewport.Provider>
+        <Viewport.BlockStart>
+          <Toolbar.Root placement="block-start">
+            <Toolbar.Title>
+              <span>Contacts</span>
+            </Toolbar.Title>
+          </Toolbar.Root>
+        </Viewport.BlockStart>
+        <Viewport.Content>
+          <Viewport.Padding edge="block-start" />
+          <List.Root>
+            <List.Section>
+              <List.Group>
+                {names.slice(0, 10).map((name) => (
+                  <List.Item key={name}>
+                    <List.Content>
+                      <List.Title>{name}</List.Title>
+                    </List.Content>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+            {/* (Its section, as the accessory: spaced as sections are.) */}
+            <List.Section render={<Viewport.KeyboardAccessory {...props} />}>
+              <List.Group>
+                <TextField.Root render={<List.Item />}>
+                  <List.Content>
+                    <TextField.Label>Note</TextField.Label>
+                  </List.Content>
+                  <List.Trailing>
+                    <TextField.Control placeholder="Typed above the keyboard" />
+                  </List.Trailing>
+                </TextField.Root>
+              </List.Group>
+            </List.Section>
+          </List.Root>
+          <Viewport.Padding edge="block-end" />
+        </Viewport.Content>
+      </Viewport.Provider>
+    </Component>
+  );
+};
+
 const OverscrollPart: FunctionComponent = () => {
   const contentRef = useLabelledRef<HTMLDivElement>(
     'contentRef',
@@ -1407,6 +1478,15 @@ export const ViewportParts: FunctionComponent = () => (
         a refresh indicator).
       </li>
       <li>
+        <PartLink
+          component="viewport"
+          part="Viewport.KeyboardAccessory"
+        >
+          KeyboardAccessory
+        </PartLink>
+        : what’s typed into, kept above the keyboard.
+      </li>
+      <li>
         Hooks: what the provider tracks, inside it; and an element’s visibility
         and geometry, anywhere.
       </li>
@@ -1435,6 +1515,13 @@ export const ViewportParts: FunctionComponent = () => (
                   part="Viewport.Padding"
                 />{' '}
                 (at its start and its end: in it, or in a page in it)
+              </li>
+              <li>
+                <PartLink
+                  component="viewport"
+                  part="Viewport.KeyboardAccessory"
+                />{' '}
+                (optional, anywhere in it: around what’s typed into)
               </li>
             </ul>
           </li>
@@ -1944,6 +2031,51 @@ export const ViewportParts: FunctionComponent = () => (
     <PropsTable rows={viewportOverscrollRows} />
 
     <Heading
+      id="viewport-keyboardaccessory"
+      level={2}
+    >
+      <code>Viewport.KeyboardAccessory</code>
+    </Heading>
+    <ul>
+      <li>
+        What’s typed into, kept above the on-screen keyboard: while focus is
+        within it and the keyboard covers it, lifted (moved up, its place in the
+        layout kept) until its end is <code>gap</code> above the keyboard; back
+        as focus leaves, or the keyboard hides.
+      </li>
+      <li>
+        For fields the browser can’t scroll into view (an app’s don’t: the
+        document doesn’t scroll, and{' '}
+        <PartLink
+          component="viewport"
+          part="useFocusShiftPrevention"
+        />{' '}
+        keeps it from trying), e.g. a field below a sheet’s middle; with what
+        belongs to it (e.g. a color picker’s channel row: its slider too).
+      </li>
+      <li>
+        Lifted (<code>data-lifted</code>), above what’s around it, on{' '}
+        <code>--uikit-viewport-keyboard-accessory-background</code> (none by
+        default); by <code>--uikit-viewport-keyboard-lift</code> (px), following
+        the keyboard (250ms, none with reduced motion).
+      </li>
+      <li>
+        Needs a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />{' '}
+        (the keyboard’s height); without one, it stays.
+      </li>
+      <li>
+        Renders a <code>div</code>.
+      </li>
+    </ul>
+    <KeyboardAccessoryPart />
+    <h3>Props</h3>
+    <PropsTable rows={viewportKeyboardAccessoryRows} />
+
+    <Heading
       id="viewport-createanchorhandle"
       level={2}
     >
@@ -2443,6 +2575,7 @@ export const viewportPartsDemos = [
   BlockEndPart,
   PaddingPart,
   OverscrollPart,
+  KeyboardAccessoryPart,
   CreateAnchorHandlePart,
   UseAnchorSizePart,
   UseViewportEdgeElementPart,

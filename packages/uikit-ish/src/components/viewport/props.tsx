@@ -200,6 +200,14 @@ export type ViewportPaddingProps = Omit<ComponentProps<'div'>, 'children'> & {
   margin?: number | string;
 };
 
+export type ViewportKeyboardAccessoryProps = ComponentProps<'div'> & {
+  /**
+   * How far above the keyboard it's kept, lifted (px).
+   * @default 8
+   */
+  gap?: number;
+};
+
 export type ViewportContentProps = ComponentProps<'div'> & {
   /**
    * Bouncing even when its content fits:

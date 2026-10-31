@@ -77,6 +77,11 @@ export const propOptionsScrollOptions = {
   threshold: [undefined, 0, 8, 50, 200] as const,
 };
 
+export const propOptionsKeyboardAccessory = {
+  ...elementOptions,
+  gap: [undefined, 0, 24] as const,
+};
+
 export const propOptionsContent = {
   ...elementOptions,
   keyboard: [undefined, 'resize', 'overlay'] as const,

@@ -451,9 +451,32 @@
     }
   }
 
+  /* What's typed into, kept above the keyboard (see `KeyboardAccessory`):
+     lifted by `--uikit-viewport-keyboard-lift` (its place kept), as the
+     keyboard moves; above what's around it, its background the app's
+     (`--uikit-viewport-keyboard-accessory-background`, none by default). */
+  .uikit-viewport-keyboard-accessory {
+    --uikit-viewport-keyboard-transition: 250ms cubic-bezier(0.2, 0.9, 0.3, 1);
+
+    position: relative;
+    transition:
+      translate var(--uikit-viewport-keyboard-transition),
+      background-color var(--uikit-viewport-keyboard-transition);
+    translate: 0 calc(var(--uikit-viewport-keyboard-lift, 0px) * -1);
+
+    &[data-lifted] {
+      z-index: 1;
+      background-color: var(
+        --uikit-viewport-keyboard-accessory-background,
+        transparent
+      );
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .uikit-viewport-anchor,
-    .uikit-viewport-content {
+    .uikit-viewport-content,
+    .uikit-viewport-keyboard-accessory {
       --uikit-viewport-keyboard-transition: 0s;
     }
   }

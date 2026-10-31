@@ -63,7 +63,7 @@ export const tests = [
         })()`);
       const gridBox = await popupBox();
       const spectrum = await page.evaluate(`(() => {
-        const item = [...document.querySelectorAll('[aria-label=View] > *')].find((element) => element.textContent.startsWith('Spectrum'));
+        const item = [...document.querySelectorAll('[aria-label=Mode] > *')].find((element) => element.textContent.startsWith('Spectrum'));
         const { height, width, x, y } = item.getBoundingClientRect();
         return [x + width / 2, y + height / 2];
       })()`);
@@ -90,6 +90,9 @@ export const tests = [
       await page.open('color-picker', 'light', {
         state: [
           { container: 'popover', defaultOpen: true },
+          null,
+          null,
+          null,
           null,
           { $rest: true, defaultSavedColors: '$[14 colors: 2 pages]' },
         ],
@@ -160,6 +163,9 @@ export const tests = [
         state: [
           { container: 'popover', defaultOpen: true },
           null,
+          null,
+          null,
+          null,
           { $rest: true, defaultSavedColors: '$[14 colors: 2 pages]' },
         ],
       });
@@ -191,23 +197,24 @@ export const tests = [
     },
   },
   {
-    name: 'color picker: its sliders in their colors; the add button only for a color not saved yet',
+    name: 'color picker: its sliders mixing from the color; the add button only for a color not saved yet',
     run: async (page) => {
       await page.open('color-picker', 'light', {
         state: [
           { container: 'popover', defaultOpen: true },
           null,
-          { $rest: true, defaultMode: 'sliders' },
+          { $rest: true, defaultMode: 'rgb' },
         ],
       });
       await sleep(700);
-      const fills = await page.evaluate(
-        `[...document.querySelectorAll(${JSON.stringify('[data-color-picker-view] input[type=range]')})].map((input) => getComputedStyle(input.parentElement.parentElement.firstElementChild).backgroundColor)`,
+      // Each from the color (#AF52DE) with its channel at 0 to it at 255.
+      const ends = await page.evaluate(
+        `[...document.querySelectorAll(${JSON.stringify('[data-color-picker-view] [data-color-picker-part=channel-control]')})].map((control) => getComputedStyle(control, '::before').backgroundImage.match(/rgb[(][^)]*[)]/gu))`,
       );
-      assert.deepEqual(fills, [
-        'rgb(255, 56, 60)',
-        'rgb(52, 199, 89)',
-        'rgb(0, 136, 255)',
+      assert.deepEqual(ends, [
+        ['rgb(0, 82, 222)', 'rgb(255, 82, 222)'],
+        ['rgb(175, 0, 222)', 'rgb(175, 255, 222)'],
+        ['rgb(175, 82, 0)', 'rgb(175, 82, 255)'],
       ]);
 
       // A saved color: no add button; another: one.
