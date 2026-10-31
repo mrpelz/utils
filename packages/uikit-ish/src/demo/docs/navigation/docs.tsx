@@ -59,8 +59,9 @@ export const navigationRootRows: readonly PropRow[] = [
         component="navigation"
         part="Navigation.Back"
       />{' '}
-      pressed (<code>back-press</code>): the app pops its stack. Without it (or
-      a{' '}
+      pressed (<code>back-press</code>): the app pops its stack. Swiped, as it’s
+      let go, the pop on from where the swipe left it (not popped, it settles
+      back). Without it (or a{' '}
       <PartLink
         component="navigation"
         part="Navigation.SwipeArea"

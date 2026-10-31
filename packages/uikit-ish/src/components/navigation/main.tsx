@@ -12,7 +12,6 @@ import {
   MouseEvent,
   PointerEvent,
   ReactElement,
-  RefObject,
   useContext,
   useLayoutEffect,
   useRef,
@@ -55,14 +54,15 @@ export type {
 //
 // Swiping from the top page's leading edge (its `SwipeArea`: touch, or a
 // mouse) pops it interactively: released past half the width (or flung),
-// `onBack` is called for the app to pop its stack (the transition is done
-// by then); otherwise it settles back. A `Back` (e.g. a bar's back button)
-// calls `onBack` too, the app's pop transitioning as any.
+// `onBack` is called for the app to pop its stack, its pop on from where
+// the swipe left it; otherwise it settles back. A `Back` (e.g. a bar's back
+// button) calls `onBack` too, the app's pop transitioning as any.
 //
-// Popped again while popping (e.g. a back button pressed again), each pop
-// runs its own transition: the page on top leaves on its own, on from where
-// it is, and the page it revealed starts leaving too (a cascade); pushed
-// back mid-transition, the push reverses from where it is.
+// Popped again while popping (e.g. a back button pressed again, or swiped
+// again), each pop runs its own transition: the page on top leaves on its
+// own, on from where it is, and the page it revealed starts leaving too (a
+// cascade; swiped, by the swipe); pushed back mid-transition, the push
+// reverses from where it is. (Not swiped while pushing.)
 //
 // Pages under the top one stay mounted (their state and scroll positions
 // kept), hidden. A page's `Header` moves with its page, its bar too; its
@@ -107,7 +107,7 @@ type SwipeHandlers = Pick<
 
 /**
  * Its stack's transitions (see `Stack`): its keys reported, a transition
- * set, animated, and done (at rest); the page a swipe popped.
+ * set, animated, and done (at rest).
  */
 type StackContext = {
   animate: (from: number, to: number, done: () => void) => void;
@@ -116,7 +116,6 @@ type StackContext = {
   rest: () => void;
   setKeys: (keys: string[]) => void;
   setTransition: (transition: Transition) => void;
-  swipedRef: RefObject<string | undefined>;
   transition: Transition | null;
 };
 
@@ -140,11 +139,13 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
     // Its stack's keys (reported by its `Stack`).
     const [keys, setKeys] = useState<string[]>([]);
     const [transition, setTransition] = useState<Transition | null>(null);
-    // The page a completed swipe popped (the app pops it: no transition).
-    const swipedRef = useRef<string | undefined>(undefined);
+    // (The latest, for a swipe's pop not taken up by the app.)
+    const keysRef = useRef(keys);
+    keysRef.current = keys;
     const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
       undefined,
     );
+    const frameRef = useRef<number | undefined>(undefined);
     const swipeRef = useRef<
       | {
           /** The latest moves (time, progress), for the release's speed. */
@@ -173,18 +174,29 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
       );
     };
 
+    // An animation's next steps (see `animate`) dropped: another taking
+    // over, or a swipe.
+    const stop = () => {
+      clearTimeout(timerRef.current);
+      if (frameRef.current !== undefined) {
+        cancelAnimationFrame(frameRef.current);
+      }
+      frameRef.current = undefined;
+    };
+
     // Animates the progress, then calls `done` (once it's there).
     const animate = (from: number, to: number, done: () => void) => {
-      clearTimeout(timerRef.current);
+      stop();
       setProgress(from, false);
       ref.current?.getBoundingClientRect();
-      requestAnimationFrame(() => {
+      frameRef.current = requestAnimationFrame(() => {
+        frameRef.current = undefined;
         setProgress(to, true);
         timerRef.current = setTimeout(done, duration + 50);
       });
     };
 
-    const progress = () => {
+    const currentProgress = () => {
       const { current: root } = ref;
       if (!root) return 0;
       return (
@@ -204,9 +216,42 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
       setTransition(null);
     };
 
-    useLayoutEffect(() => () => clearTimeout(timerRef.current), []);
+    useLayoutEffect(() => stop, []);
 
-    const canSwipe = Boolean(onBack) && keys.length > 1 && !transition;
+    // At rest, or popping (the page on top leaving: swiped back further, a
+    // cascade, see `startSwipe`); not while pushing, nor swiping.
+    const canSwipe =
+      Boolean(onBack) &&
+      keys.length > 1 &&
+      (!transition || !keys.includes(transition.top));
+
+    // A swipe's transition (see `canSwipe`): the top page over the one under
+    // it; while popping, the page leaving on its own (on from where it is,
+    // as `Departing`), the top page from where it was revealed to (`from`).
+    const startSwipe = (top: string, under: string): Transition => {
+      const { current: root } = ref;
+      if (!transition?.leaving || !root) return { top, under };
+      const progress = currentProgress();
+      const direction = getComputedStyle(root).direction === 'rtl' ? -1 : 1;
+      return {
+        departing: [
+          ...(transition.departing ?? []),
+          { key: transition.top, page: transition.leaving, progress },
+        ],
+        from: (1 - progress) * -0.3 * root.clientWidth * direction,
+        top,
+        under,
+      };
+    };
+
+    // Where it's back where it started (0; started elsewhere, `from`: where
+    // the top page is shown again).
+    const shownAt = (from: number | undefined) => {
+      const { current: root } = ref;
+      if (!from || !root) return 0;
+      const direction = getComputedStyle(root).direction === 'rtl' ? -1 : 1;
+      return from / (from - root.clientWidth * direction);
+    };
 
     const endSwipe = (event: PointerEvent<HTMLDivElement>) => {
       const { current: swipe } = swipeRef;
@@ -222,23 +267,21 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
           Math.max(now - first[0], 1)
         : 0;
       const top = keys.at(-1);
+      const from = transition?.from;
       if (
         event.type !== 'pointercancel' &&
         (swipe.progress > 0.5 || velocity > flingVelocity)
       ) {
+        // Popped: on, the app's pop taking over (see `changeKeys`, from
+        // where it is); not popped by the app after all, back.
         animate(swipe.progress, 1, () => {
-          swipedRef.current = top;
-          onBack?.({ event, reason: 'swipe' });
-          // Not popped by the app after all: back.
-          timerRef.current = setTimeout(() => {
-            if (swipedRef.current !== top) return;
-            swipedRef.current = undefined;
-            animate(1, 0, rest);
-          }, 1000);
+          if (top === undefined || !keysRef.current.includes(top)) return;
+          animate(1, shownAt(from), rest);
         });
+        onBack?.({ event, reason: 'swipe' });
         return;
       }
-      animate(swipe.progress, 0, rest);
+      animate(swipe.progress, shownAt(from), rest);
     };
 
     const back =
@@ -260,6 +303,9 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
               if (!root || !top || !under || event.button !== 0) return;
               event.preventDefault();
               event.currentTarget.setPointerCapture(event.pointerId);
+              const next = startSwipe(top, under);
+              // (The pop it interrupts: its pages on as `next` has them.)
+              stop();
               swipeRef.current = {
                 pointerId: event.pointerId,
                 moves: [[performance.now(), 0]],
@@ -268,7 +314,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
                 x: event.clientX,
               };
               setProgress(0, false);
-              setTransition({ top, under });
+              setTransition(next);
             },
             onPointerMove: (event: PointerEvent<HTMLDivElement>) => {
               const { current: swipe } = swipeRef;
@@ -293,11 +339,10 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
           back,
           stack: {
             animate,
-            progress,
+            progress: currentProgress,
             rest,
             setKeys,
             setTransition,
-            swipedRef,
             transition,
           },
           swipe: swipeHandlers,
@@ -333,16 +378,11 @@ const changeKeys = (
   const running = stack.transition;
 
   if (isPrefix(keys, previous.keys)) {
-    // Swiped back: popped already.
-    if (stack.swipedRef.current === oldTop) {
-      stack.swipedRef.current = undefined;
-      stack.rest();
-      return;
-    }
     if (running?.top === oldTop) {
-      // Its push reversed, from where it is.
+      // Its push reversed (or its swipe popped), from where it is.
       stack.setTransition({
         departing: running.departing,
+        from: running.from,
         leaving: previous.pages.at(-1),
         top: oldTop,
         under: newTop,

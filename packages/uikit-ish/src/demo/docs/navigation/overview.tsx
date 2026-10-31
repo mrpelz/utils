@@ -277,8 +277,13 @@ export const NavigationOverview: FunctionComponent = () => (
       <li>
         Swiping back starts within 20px of the leading edge (touch or mouse):
         released past half the width, or flung (0.3px/ms), it pops (calling{' '}
-        <code>onBack</code>, the transition done by then); otherwise it settles
-        back.
+        <code>onBack</code> as it’s let go, the pop on from there); otherwise it
+        settles back.
+      </li>
+      <li>
+        Going back quickly, each pop runs its own transition: pressed or swiped
+        again while a page still leaves, that page leaves on its own and the
+        next one follows (a cascade). Not swiped while pushing.
       </li>
       <li>
         The leading edge mirrors right to left (pushed pages from the left).

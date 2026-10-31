@@ -672,12 +672,19 @@ export const NavigationParts: FunctionComponent = () => (
       </li>
       <li>
         Rendered while a page can be popped (the root’s <code>onBack</code>,
-        more than one page) or a swipe goes on; nothing otherwise.
+        more than one page; at rest, or while popping) or a swipe goes on;
+        nothing otherwise.
       </li>
       <li>
         Swiped, the top page follows the finger; let go past half the width (or
-        flung), <code>onBack</code> is called (reason <code>swipe</code>, the
-        transition done); otherwise it settles back.
+        flung), <code>onBack</code> is called (reason <code>swipe</code>, as
+        it’s let go: the pop on from there); otherwise it settles back.
+      </li>
+      <li>
+        Also while a page is popped (still leaving: a swipe again, the cascade
+        of going back quickly, see{' '}
+        <a href="navigation/composition#going-back-quickly">Composition</a>);
+        not while one is pushed.
       </li>
       <li>
         Its swipes are its own: nothing scrolls meanwhile, and a{' '}

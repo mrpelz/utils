@@ -1446,6 +1446,15 @@ export const NavigationComposition: FunctionComponent = () => (
         from where it is, while the earlier ones carry on (a cascade).
       </li>
       <li>
+        Swiped back again while going back (from the leading edge, the{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.SwipeArea"
+        />
+        ), the same: the page still leaving carries on, the swipe takes the one
+        it revealed from where it is; let go short, only that one settles back.
+      </li>
+      <li>
         Pressed while a page is pushed: it goes back from where it is (no jump).
       </li>
       <li>

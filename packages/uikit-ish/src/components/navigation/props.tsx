@@ -35,9 +35,10 @@ export type NavigationBackEventDetails = {
 
 export type NavigationRootProps = ComponentProps<'div'> & {
   /**
-   * Called when the top page goes back (swiped back, its transition done;
-   * or a `Navigation.Back` pressed): the app pops its stack. Without it
-   * (or a `SwipeArea`), pages can't be swiped back.
+   * Called when the top page goes back (swiped back, as it's let go: its
+   * pop on from where the swipe left it; or a `Navigation.Back` pressed):
+   * the app pops its stack. Not popped, it settles back. Without it (or a
+   * `SwipeArea`), pages can't be swiped back.
    */
   onBack?: (eventDetails: NavigationBackEventDetails) => void;
 };
