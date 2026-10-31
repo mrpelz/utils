@@ -93,6 +93,13 @@ export type ViewportEdge =
 export type ViewportSafeArea = 'all' | 'block' | 'inline' | 'none';
 
 /**
+ * The safe area insets a content layer keeps clear: as any layer's (see
+ * `ViewportSafeArea`), or `auto`, by what it holds (see
+ * `ViewportContentProps['safeArea']`).
+ */
+export type ViewportContentSafeArea = ViewportSafeArea | 'auto';
+
+/**
  * A bar's scroll edge effect, as content scrolls under it:
  * `soft`, a blur fading out away from the edge; `hard`, a solid backing
  * with a dividing line; `none`.
@@ -210,10 +217,20 @@ export type ViewportContentProps = ComponentProps<'div'> & {
    */
   keyboard?: 'overlay' | 'resize';
   /**
-   * The safe area insets kept clear.
-   * @default 'all'
+   * The safe area insets kept clear (as its padding), or `auto`, by what it
+   * holds (as `alwaysBounce`'s default):
+   * - Its content itself (e.g. a list after a `Viewport.Padding`): `all`.
+   *   Its content starts clear of them (the status bar, the home
+   *   indicator) and scrolls on under them, its paddings not counting
+   *   them again.
+   * - A child scrolling on its own (a `Page`, a `Header` around one, a
+   *   `Layout`, a `Navigation`, as its direct child, e.g. a tab bar's panel
+   *   rendered as one): `none`. That child fills the screen, under the
+   *   status bar too, its own bars and paddings keeping its content clear
+   *   (kept clear here, it would stop at their border).
+   * @default 'auto'
    */
-  safeArea?: ViewportSafeArea;
+  safeArea?: ViewportContentSafeArea;
 };
 
 export type ElementVisibilityOptions = {

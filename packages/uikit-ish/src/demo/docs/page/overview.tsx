@@ -43,7 +43,7 @@ const LiveView: FunctionComponent = () => {
       state={[stateContent, stateRoot]}
       title="Page"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">

@@ -70,7 +70,7 @@ export const NavigationDemo: FunctionComponent = () => {
       state={state}
       title="Navigation"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>

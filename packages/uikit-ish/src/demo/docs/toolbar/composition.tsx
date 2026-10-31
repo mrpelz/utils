@@ -181,7 +181,7 @@ const NavigationBar: FunctionComponent = () => {
       stage="phone"
       title="Toolbar as a navigation bar"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">

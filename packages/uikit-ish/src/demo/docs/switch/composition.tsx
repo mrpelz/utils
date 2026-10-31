@@ -188,7 +188,7 @@ const DelayedStates: FunctionComponent = () => {
       stage="phone"
       title="Switch with delayed states"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">

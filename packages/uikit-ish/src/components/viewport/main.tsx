@@ -74,6 +74,7 @@ export type {
   ElementVisibilityOptions,
   ViewportAnchorProps,
   ViewportContentProps,
+  ViewportContentSafeArea,
   ViewportEdge,
   ViewportEdgeEffect,
   ViewportOverscrollProps,
@@ -962,7 +963,7 @@ const bounceAttribute = (alwaysBounce: boolean | undefined) => {
  * The content layer: filling the viewport, scrolling its content (a
  * scroller, tracked by its `Provider` unless a page within it fills the
  * screen, see edge.ts), below the anchors; its safe area insets kept clear
- * (as padding).
+ * (as padding), or not, by what it holds (`auto`, see style.css).
  */
 const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
   (
@@ -971,7 +972,7 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
       children,
       className,
       keyboard = 'resize',
-      safeArea = 'all',
+      safeArea = 'auto',
       ...props
     },
     forwardedRef,

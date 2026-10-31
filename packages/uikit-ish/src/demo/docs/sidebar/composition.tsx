@@ -295,7 +295,7 @@ const Selecting: FunctionComponent = () => {
       stage="tablet"
       title="Sidebar selecting content"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           <Layout.Column
             floating
@@ -407,7 +407,7 @@ const Hierarchy: FunctionComponent = () => {
       stage="tablet"
       title="Sidebar with folders in a hierarchy"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           <Layout.Column
             floating
@@ -610,7 +610,7 @@ const InADrawer: FunctionComponent = () => {
       stage="phone"
       title="Sidebar as a drawer"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           <Drawer.Root
             handle={sidebarDrawer}
@@ -966,7 +966,7 @@ const Adaptive: FunctionComponent = () => {
       state={[stateContent]}
       title="Sidebar, floating or a drawer"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           {isCompact ? (
             <Drawer.Root

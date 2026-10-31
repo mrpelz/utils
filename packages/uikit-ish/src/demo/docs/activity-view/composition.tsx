@@ -151,7 +151,7 @@ const InAPopover: FunctionComponent = () => {
       stage="tablet"
       title="Activity view in a popover"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">

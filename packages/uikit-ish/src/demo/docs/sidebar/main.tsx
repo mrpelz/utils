@@ -122,7 +122,7 @@ export const SidebarDemo: FunctionComponent = () => {
         stateContentColumn,
       ]}
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root
           key={`${keyRoot}-${keyColumn}-${keySidebar}-${keyContentColumn}`}
           {...propsRoot}
@@ -652,7 +652,7 @@ export const SidebarCompactDemo: FunctionComponent = () => {
         stateContentColumn,
       ]}
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root
           key={`${keyRoot}-${keyColumn}-${keyDrawer}-${keySidebar}-${keyContentColumn}`}
           {...propsRoot}
@@ -1167,7 +1167,7 @@ export const SidebarEditingDemo: FunctionComponent = () => {
       stage="tablet"
       title="Sidebar (Editing)"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           <Layout.Background>
             <div

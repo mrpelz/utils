@@ -20,6 +20,7 @@ import {
 import { ColorScheme } from '../../../components/utils/main.js';
 import { Breadcrumb, Tabs, useEntry } from '../guide/nav.js';
 import { PagePathContext } from '../guide/sections.js';
+import { useRawDocument } from '../shared/raw-document.js';
 import { CodeView } from './code-view.js';
 import { usePortalColorScheme } from './portal-scheme.js';
 import { renderCode } from './render-code.js';
@@ -220,27 +221,9 @@ const useIsRaw = () => {
   return raw && pagePath === '';
 };
 
-/**
- * Raw, the demo is the app (its screen the window's): the document marked,
- * so it doesn't bounce (see shared/style.css); titled as the demo. (Added
- * to the Home Screen as itself, see scripts/demo-head.js: decided as the
- * page loads.)
- */
-const useRawDocument = (isRaw: boolean, isHidden: boolean, title: string) => {
-  const isRawShown = isRaw && !isHidden;
-  useLayoutEffect(() => {
-    if (!isRawShown) return undefined;
-    const { documentElement: root } = document;
-    root.dataset.demoRaw = '';
-    const { title: documentTitle } = document;
-    document.title = title;
-
-    return () => {
-      delete root.dataset.demoRaw;
-      document.title = documentTitle;
-    };
-  }, [isRawShown, title]);
-};
+/** Raw and shown, the demo is the app (see `useRawDocument`). */
+const useRawDemoDocument = (isRaw: boolean, isHidden: boolean, title: string) =>
+  useRawDocument(isRaw && !isHidden, title);
 
 /**
  * A device's screen (a stage's, see `Stage`): its frame (see
@@ -658,7 +641,7 @@ export const Component: FunctionComponent<{
 
   const config = useGuards(isHidden, hasInputGuards, isRaw);
 
-  useRawDocument(isRaw, isHidden, title);
+  useRawDemoDocument(isRaw, isHidden, title);
 
   if (isHidden) return null;
   if (isRaw) return children;

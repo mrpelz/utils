@@ -322,7 +322,7 @@ const reorderRows = useCreateReorderHandle({
 // The list's selection (guide G7: the toolbar reads it).
 const [selected, setSelected] = useState([]);
 
-<Viewport.Content safeArea="none">
+<Viewport.Content>
   <Header.Root>
     <Viewport.BlockStart>
       <Toolbar.Root placement="block-start">
@@ -1122,7 +1122,7 @@ const DrillIn: FunctionComponent = () => {
       stage="phone"
       title="List drilling into pages"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root onBack={pop}>
           <Navigation.SwipeArea />
           <Navigation.Stack>
@@ -1224,7 +1224,7 @@ const EditMode: FunctionComponent = () => {
       title="List in edit mode"
     >
       <>
-        <Viewport.Content safeArea="none">
+        <Viewport.Content>
           <Header.Root>
             <Viewport.BlockStart>
               <Toolbar.Root placement="block-start">
@@ -1343,7 +1343,7 @@ const EditButtons: FunctionComponent = () => {
       stage="phone"
       title="List with edit buttons"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -1479,7 +1479,7 @@ const EditingSections: FunctionComponent = () => {
       stage="phone"
       title="List editing sections separately"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -1662,7 +1662,7 @@ const AcrossSections: FunctionComponent = () => {
       stage="phone"
       title="List reordering across sections"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">

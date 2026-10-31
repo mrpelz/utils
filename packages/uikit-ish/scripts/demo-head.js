@@ -29,10 +29,13 @@ export const meta = {
 };
 
 /**
- * Its web app manifest, unless it shows a demo raw (`#id=…&raw=true` on a
- * demos' page, see src/demo/tooling/frame/component.tsx): added to the
+ * Its web app manifest, unless it shows an app of its own: a demo raw
+ * (`#id=…&raw=true` on a demos' page, see
+ * src/demo/tooling/frame/component.tsx), or the kitchen sink
+ * (`/kitchen-sink`, see src/demo/kitchen-sink/main.tsx). Added to the
  * Home Screen, that's its own app (no manifest: its start the current URL,
- * not the demo's start page; its name the demo's id), as Safari reads the
+ * not the demo's start page; its name the demo's id, or the kitchen
+ * sink's title), as Safari reads the
  * head once, as the page loads. (A script, run as the head's parsed: before
  * Safari reads it.)
  */
@@ -45,16 +48,20 @@ export const manifest = `<script>(() => {
       return null;
     }
   };
+  const isAt = (path) =>
+    [path, path + '/'].some((end) => location.pathname.endsWith(end));
   const id = option('id');
-  if (
-    option('raw') === true &&
-    typeof id === 'string' &&
-    ['/all', '/all/'].some((end) => location.pathname.endsWith(end))
-  ) {
-    document.title = id;
+  const name =
+    option('raw') === true && typeof id === 'string' && isAt('/all')
+      ? id
+      : isAt('/kitchen-sink')
+        ? 'Kitchen sink'
+        : undefined;
+  if (name !== undefined) {
+    document.title = name;
     document
       .querySelector('meta[name=apple-mobile-web-app-title]')
-      ?.setAttribute('content', id);
+      ?.setAttribute('content', name);
     return;
   }
   const link = document.createElement('link');

@@ -6,6 +6,7 @@ import {
   Layout,
   List,
   Navigation,
+  type NavigationBackEventDetails,
   Page,
   Sidebar,
   Symbol,
@@ -56,7 +57,7 @@ const popToRoot = (value) =>
   }));
 
 <TabBar.Root value={tab} onValueChange={setTab}>
-  <Viewport.Content safeArea="none">
+  <Viewport.Content>
     {tabs.map(([value]) => (
       <TabBar.Panel
         key={value}
@@ -214,6 +215,47 @@ const pop = () => setKeys((current) => current.slice(0, -1));
           </Toolbar.Root>
         </Viewport.BlockStart>
         <Page.Root>…</Page.Root>
+      </Header.Root>
+    ))}
+  </Navigation.Stack>
+</Navigation.Root>`;
+
+const deepCode = `// Levels 1 to 8 deep, each page its level.
+const [keys, setKeys] = useState(['1', '2', '3', '4', '5', '6', '7', '8']);
+const push = (count) =>
+  setKeys((current) => [
+    ...current,
+    ...Array.from({ length: count }, (_, index) =>
+      String(current.length + index + 1),
+    ),
+  ]);
+const pop = () => setKeys((current) => current.slice(0, -1));
+
+<Navigation.Root onBack={pop}>
+  <Navigation.SwipeArea />
+  <Navigation.Stack>
+    {keys.map((key, index) => (
+      <Header.Root key={key}>
+        <Viewport.BlockStart>
+          <Toolbar.Root placement="block-start">
+            {/* Pressed again while going back: further back, each press
+               its own transition (a cascade). */}
+            {index > 0 ? (
+              <Toolbar.Leading>
+                <Navigation.Back
+                  aria-label={\`Level \${keys[index - 1]}\`}
+                  render={<Toolbar.Button shape="circle" />}
+                >
+                  …
+                </Navigation.Back>
+              </Toolbar.Leading>
+            ) : null}
+            <Toolbar.Title>
+              <span>Level {key}</span>
+            </Toolbar.Title>
+          </Toolbar.Root>
+        </Viewport.BlockStart>
+        <Page.Root>…{/* rows pushing 1 and 5 levels */}</Page.Root>
       </Header.Root>
     ))}
   </Navigation.Stack>
@@ -411,7 +453,7 @@ const PerTab: FunctionComponent = () => {
           setTab(value);
         }}
       >
-        <Viewport.Content safeArea="none">
+        <Viewport.Content>
           {sections.map(([section]) => (
             <TabBar.Panel
               key={section}
@@ -545,7 +587,7 @@ const WithSidebar: FunctionComponent = () => {
       stage="tablet"
       title="Navigation beside a sidebar"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           <Layout.Column
             floating
@@ -663,7 +705,7 @@ const PopToRoot: FunctionComponent = () => {
       stage="phone"
       title="Navigation popping to its root"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root onBack={pop}>
           <Navigation.SwipeArea />
           <Navigation.Stack>
@@ -739,6 +781,95 @@ const PopToRoot: FunctionComponent = () => {
 };
 
 /** The root page with a large title, the pages pushed on it without. */
+/** Levels deep: going back quickly, pressing back again mid-transition. */
+const Deep: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+  const [keys, setKeys] = useState(() =>
+    Array.from({ length: 8 }, (_, index) => String(index + 1)),
+  );
+  const push = (count: number) => {
+    addLog(`push: ${String(count)}`);
+    setKeys((current) => [
+      ...current,
+      ...Array.from({ length: count }, (_, index) =>
+        String(current.length + index + 1),
+      ),
+    ]);
+  };
+  const pop = ({ reason }: NavigationBackEventDetails) => {
+    addLog(`pop (${reason})`);
+    setKeys((current) => current.slice(0, -1));
+  };
+
+  return (
+    <Component
+      isInline
+      id="navigation-composition-deep"
+      log={log}
+      stage="phone"
+      title="Navigation, levels deep"
+    >
+      <Viewport.Content>
+        <Navigation.Root onBack={pop}>
+          <Navigation.SwipeArea />
+          <Navigation.Stack>
+            {keys.map((key, index) => (
+              <Header.Root key={key}>
+                <Viewport.BlockStart>
+                  <Toolbar.Root placement="block-start">
+                    {index > 0 ? (
+                      <Toolbar.Leading>
+                        <Navigation.Back
+                          aria-label={`Level ${keys[index - 1] ?? ''}`}
+                          render={<Toolbar.Button shape="circle" />}
+                        >
+                          <Button.Icon>
+                            <Symbol icon={sfChevronBackward} />
+                          </Button.Icon>
+                        </Navigation.Back>
+                      </Toolbar.Leading>
+                    ) : null}
+                    <Toolbar.Title>
+                      <span>Level {key}</span>
+                    </Toolbar.Title>
+                  </Toolbar.Root>
+                </Viewport.BlockStart>
+                <Page.Root>
+                  <Viewport.Padding edge="block-start" />
+                  <List.Root>
+                    <List.Section>
+                      <List.Group>
+                        {[1, 5].map((count) => (
+                          <List.Item key={count}>
+                            <List.Content>
+                              <List.Title
+                                render={<button type="button" />}
+                                onClick={() => push(count)}
+                              >
+                                {count === 1
+                                  ? `Level ${String(index + 2)}`
+                                  : `${String(count)} levels deeper`}
+                              </List.Title>
+                            </List.Content>
+                            <List.Trailing>
+                              <List.DrillIn />
+                            </List.Trailing>
+                          </List.Item>
+                        ))}
+                      </List.Group>
+                    </List.Section>
+                  </List.Root>
+                  <Viewport.Padding edge="block-end" />
+                </Page.Root>
+              </Header.Root>
+            ))}
+          </Navigation.Stack>
+        </Navigation.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
 const LargeTitles: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [keys, setKeys] = useState(['settings']);
@@ -759,7 +890,7 @@ const LargeTitles: FunctionComponent = () => {
       stage="phone"
       title="Navigation with large titles"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root onBack={pop}>
           <Navigation.SwipeArea />
           <Navigation.Stack>
@@ -898,7 +1029,7 @@ const Adaptive: FunctionComponent = () => {
       title="Navigation, compact or beside a sidebar"
     >
       {isCompact ? (
-        <Viewport.Content safeArea="none">
+        <Viewport.Content>
           <Navigation.Root onBack={pop}>
             <Navigation.SwipeArea />
             <Navigation.Stack>
@@ -1005,7 +1136,7 @@ const Adaptive: FunctionComponent = () => {
           </Navigation.Root>
         </Viewport.Content>
       ) : (
-        <Viewport.Content safeArea="none">
+        <Viewport.Content>
           <Layout.Root>
             <Layout.Column
               floating
@@ -1110,6 +1241,7 @@ const pageSections: readonly Section[] = [
   ['a-stack-per-tab', 'A stack per tab'],
   ['beside-a-sidebar', 'Beside a sidebar'],
   ['popping-to-the-root', 'Popping to the root'],
+  ['going-back-quickly', 'Going back quickly'],
   ['large-titles', 'Large titles'],
   ['compact-or-regular', 'Compact or regular'],
 ];
@@ -1301,6 +1433,47 @@ export const NavigationComposition: FunctionComponent = () => (
     <PopToRoot />
 
     <Heading
+      id="going-back-quickly"
+      level={2}
+    >
+      Going back quickly
+    </Heading>
+    <ul>
+      <li>
+        Levels deep (eight to start with; drill in one level, or five at once):
+        the back button pressed again while going back goes back further, each
+        press its own transition: the page it revealed starts leaving at once,
+        from where it is, while the earlier ones carry on (a cascade).
+      </li>
+      <li>
+        Pressed while a page is pushed: it goes back from where it is (no jump).
+      </li>
+      <li>
+        It stays pressable while it stays put (a persistent item, see{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Persistent"
+        />
+        ): between pushed pages, not as it slides out with the first.
+      </li>
+      <li>
+        <strong>Library:</strong> the back button pressable mid-transition, and
+        the stack running a transition per pop as its keys change again (
+        <PartLink
+          component="navigation"
+          part="Navigation.Stack"
+        />
+        ).
+      </li>
+      <li>
+        <strong>Demo:</strong> the levels (the app’s keys), pushing one or five,
+        popping one per press.
+      </li>
+    </ul>
+    <CodeView code={deepCode} />
+    <Deep />
+
+    <Heading
       id="large-titles"
       level={2}
     >
@@ -1404,6 +1577,7 @@ export const navigationCompositionDemos = [
   PerTab,
   WithSidebar,
   PopToRoot,
+  Deep,
   LargeTitles,
   Adaptive,
 ];

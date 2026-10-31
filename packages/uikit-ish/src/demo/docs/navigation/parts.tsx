@@ -71,7 +71,7 @@ const RootPart: FunctionComponent = () => {
       state={state}
       title="Navigation.Root"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>
@@ -160,7 +160,7 @@ const StackPart: FunctionComponent = () => {
       state={state}
       title="Navigation.Stack"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>
@@ -252,7 +252,7 @@ const SwipeAreaPart: FunctionComponent = () => {
       state={state}
       title="Navigation.SwipeArea"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>
@@ -341,7 +341,7 @@ const BackPart: FunctionComponent = () => {
       state={state}
       title="Navigation.Back"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>
@@ -442,7 +442,7 @@ const PersistentPart: FunctionComponent = () => {
       state={state}
       title="Navigation.Persistent"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>

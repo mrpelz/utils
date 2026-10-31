@@ -191,7 +191,7 @@ const InHeader: FunctionComponent = () => {
       stage="phone"
       title="Segmented in a navigation bar"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">

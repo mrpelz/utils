@@ -239,7 +239,7 @@ const Adaptive: FunctionComponent = () => {
         ...drawer.controls,
       ]}
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root {...propsRoot}>
           {isCompact ? (
             <Drawer.Root
@@ -468,7 +468,7 @@ const Inspector: FunctionComponent = () => {
         controlColumn,
       ]}
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root {...propsRoot}>
           <Drawer.Root
             key={mailboxes.keyRoot}

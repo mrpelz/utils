@@ -416,6 +416,31 @@
       visibility: hidden;
     }
 
+    /* Its safe area insets (`safeArea`) unset (`auto`): kept clear (as
+       `all`), but not while its child scrolls on its own (as `none`: it
+       fills the screen, its bars and paddings keeping its content clear,
+       the insets left for them). */
+    &[data-safe-area='auto']:has(
+        > :is(
+            .uikit-page-root,
+            .uikit-header-root,
+            .uikit-layout-root,
+            .uikit-navigation-root
+          )
+      ) {
+      --uikit-viewport-safe-top: 0px;
+      --uikit-viewport-safe-right: 0px;
+      --uikit-viewport-safe-bottom: 0px;
+      --uikit-viewport-safe-left: 0px;
+
+      & > * {
+        --uikit-safe-area-inset-top: inherit;
+        --uikit-safe-area-inset-right: inherit;
+        --uikit-safe-area-inset-bottom: inherit;
+        --uikit-safe-area-inset-left: inherit;
+      }
+    }
+
     &[data-keyboard='resize'] {
       top: var(--uikit-viewport-top, 0);
       bottom: var(--uikit-viewport-keyboard-inset, 0);

@@ -1677,7 +1677,11 @@ export const ViewportParts: FunctionComponent = () => (
         <code>resize</code>), or overlaid.
       </li>
       <li>
-        Keeps the safe area insets clear (<code>safeArea</code>), as padding.
+        Keeps the safe area insets clear (<code>safeArea</code>), as padding; by
+        default (<code>auto</code>) not while its direct child scrolls on its
+        own (a <a href="page">Page</a>, a <a href="header">Header</a>, a{' '}
+        <a href="layout">Layout</a>, a <a href="navigation">Navigation</a>):
+        that child fills the screen, keeping its content clear itself.
       </li>
       <li>
         Renders a <code>div</code>; its ref is what a provider’s{' '}

@@ -38,9 +38,13 @@
       visibility: hidden;
     }
 
+    /* (From where it was: see Transition's `from`, at progress 0.) */
     &[data-navigation-role='top'] {
       --uikit-navigation-x: calc(
-        var(--uikit-navigation-progress) * var(--uikit-navigation-width, 100%) *
+        var(--uikit-navigation-from, 0px) *
+          (1 - var(--uikit-navigation-progress)) +
+          var(--uikit-navigation-progress) *
+          var(--uikit-navigation-width, 100%) *
           var(--uikit-navigation-direction)
       );
       --uikit-navigation-shown: calc(1 - var(--uikit-navigation-progress));
@@ -70,6 +74,17 @@
       }
     }
 
+    /* (The uppermost page's shared items shown and still pressable: e.g.
+       its back button pressed again, further back; the others' hidden.) */
+    & [data-navigation-shared] {
+      pointer-events: auto;
+    }
+
+    & [data-navigation-shared-hidden] {
+      pointer-events: none;
+      visibility: hidden;
+    }
+
     &[data-navigation-role='top'],
     &[data-navigation-role='under'] {
       pointer-events: none;
@@ -83,9 +98,6 @@
       }
     }
 
-    &[data-navigation-role='under'] [data-navigation-shared] {
-      visibility: hidden;
-    }
   }
 
   /* A persistent item's own box, unless it renders the item itself. */

@@ -6,6 +6,15 @@ import {
 import { codeLabel } from '../../tooling/frame/render-code.js';
 
 const safeAreas = [undefined, 'all', 'block', 'inline', 'none'] as const;
+// (The content layer's: also `auto`, its default, by what it holds.)
+const contentSafeAreas = [
+  undefined,
+  'auto',
+  'all',
+  'block',
+  'inline',
+  'none',
+] as const;
 
 // Each anchor (and the content layer) is off by default: they float over
 // the whole page.
@@ -29,7 +38,7 @@ export const propOptionsLayer = {
   shown: [false, true] as const,
   keyboard: [undefined, 'resize', 'overlay'] as const,
   alwaysBounce: [undefined, true, false] as const,
-  safeArea: safeAreas,
+  safeArea: contentSafeAreas,
 };
 
 // The guide pages' views (see overview.tsx, parts.tsx): each part's props,
@@ -43,7 +52,7 @@ const elementOptions = {
 export const propOptionsOverviewContent = {
   keyboard: [undefined, 'resize', 'overlay'] as const,
   alwaysBounce: [undefined, true, false] as const,
-  safeArea: safeAreas,
+  safeArea: contentSafeAreas,
 };
 
 export const propOptionsOverviewBlockStart = {
@@ -72,7 +81,7 @@ export const propOptionsContent = {
   ...elementOptions,
   keyboard: [undefined, 'resize', 'overlay'] as const,
   alwaysBounce: [undefined, true, false] as const,
-  safeArea: safeAreas,
+  safeArea: contentSafeAreas,
 };
 
 /**

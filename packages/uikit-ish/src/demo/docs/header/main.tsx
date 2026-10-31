@@ -64,7 +64,7 @@ export const HeaderDemo: FunctionComponent = () => {
       state={[stateBar, stateTitle, stateLargeTitle]}
       title="Header"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root
@@ -179,7 +179,7 @@ export const HeaderTitleDemo: FunctionComponent = () => {
       state={[stateBar, stateTitle, stateSubtitle]}
       title="Header (Title)"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root

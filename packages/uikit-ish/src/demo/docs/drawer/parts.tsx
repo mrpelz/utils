@@ -68,7 +68,7 @@ const RootPart: FunctionComponent = () => {
       state={state}
       title="Drawer.Root"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -178,7 +178,7 @@ const SwipeAreaPart: FunctionComponent = () => {
       state={state}
       title="Drawer.SwipeArea"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -288,7 +288,7 @@ const PopupPart: FunctionComponent = () => {
       state={state}
       title="Drawer.Popup"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -398,7 +398,7 @@ const TriggerPart: FunctionComponent = () => {
       state={state}
       title="Drawer.Trigger"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -508,7 +508,7 @@ const ClosePart: FunctionComponent = () => {
       state={state}
       title="Drawer.Close"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -618,7 +618,7 @@ const CreateHandlePart: FunctionComponent = () => {
       state={state}
       title="Drawer.createHandle"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -733,7 +733,7 @@ const UseCreateDrawerHandlePart: FunctionComponent = () => {
       state={state}
       title="useCreateDrawerHandle"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">

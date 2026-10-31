@@ -105,7 +105,7 @@ export const DrawerControlledDemo: FunctionComponent = () => {
         stateDetail,
       ]}
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root {...propsRoot}>
           <Drawer.Root
             key={keyDrawer}

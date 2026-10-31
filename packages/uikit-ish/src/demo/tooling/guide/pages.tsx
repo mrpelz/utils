@@ -190,6 +190,13 @@ export const IndexPage: FunctionComponent = () => (
       Framework7&apos;s behavior as a reference.
     </p>
     <nav className="demo-index-links">
+      <a href="kitchen-sink">
+        <strong>Kitchen sink</strong>
+        <span>
+          The components in an app, nested as an app nests them, as a raw demo:
+          no frame, no controls, no prose.
+        </span>
+      </a>
       <a href={guideHref()}>
         <strong>HIG composition guide</strong>
         <span>
@@ -232,8 +239,8 @@ export const IndexPage: FunctionComponent = () => (
         <p>{categories[category].description}</p>
         <ul className="demo-index-cards">
           {catalog
+            // (In the catalog's order: by how deep they typically nest.)
             .filter((entry) => entry.category === category)
-            .toSorted((a, b) => a.title.localeCompare(b.title))
             .map((entry) => (
               <li
                 key={entry.id}

@@ -3,7 +3,24 @@ import type { ComponentProps, ReactElement } from 'react';
 
 export type Role = 'current' | 'hidden' | 'top' | 'under';
 
+/**
+ * A page still leaving on its own (popped further while it left, see
+ * `Stack`): its key, the page, and its progress as it was handed over.
+ */
+export type Departing = {
+  key: string;
+  page: ReactElement;
+  progress: number;
+};
+
 export type Transition = {
+  /** Pages still leaving on their own, the earliest first (above). */
+  departing?: Departing[];
+  /**
+   * Where the upper page starts from (px, signed; e.g. revealed partly, as
+   * it starts leaving too), at progress 0; otherwise where it's shown.
+   */
+  from?: number;
   /** A popped page, shown while it leaves. */
   leaving?: ReactElement;
   top: string;

@@ -44,7 +44,7 @@ const RootPart: FunctionComponent = () => {
       state={state}
       title="Header.Root"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root
@@ -121,7 +121,7 @@ const LargeTitlePart: FunctionComponent = () => {
       state={state}
       title="Header.LargeTitle"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root
@@ -198,7 +198,7 @@ const AccessoryPart: FunctionComponent = () => {
       state={state}
       title="Header.Accessory"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root

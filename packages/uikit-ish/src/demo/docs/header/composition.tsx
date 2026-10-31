@@ -155,7 +155,7 @@ const LargeTitle: FunctionComponent = () => {
       stage="phone"
       title="Header with a large title"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -220,7 +220,7 @@ const Search: FunctionComponent = () => {
       stage="phone"
       title="Header with a search field"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -285,7 +285,7 @@ const OverPicture: FunctionComponent = () => {
       stage="phone"
       title="Header over a picture"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root
@@ -361,7 +361,7 @@ const ControlBelow: FunctionComponent = () => {
       stage="phone"
       title="Header with a control"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">

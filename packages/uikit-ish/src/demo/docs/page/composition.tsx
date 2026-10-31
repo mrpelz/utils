@@ -101,7 +101,7 @@ const columnCode = `<Layout.Root>
   </Layout.Column>
 </Layout.Root>`;
 
-const viewportCode = `<Viewport.Content safeArea="none">
+const viewportCode = `<Viewport.Content>
   <Header.Root>
     <Viewport.BlockStart>
       <Toolbar.Root placement="block-start">…</Toolbar.Root>
@@ -128,7 +128,7 @@ const BackgroundGrouped: FunctionComponent = () => (
     stage="phone"
     title="Page, grouped"
   >
-    <Viewport.Content safeArea="none">
+    <Viewport.Content>
       <Header.Root>
         <Viewport.BlockStart>
           <Toolbar.Root placement="block-start">
@@ -175,7 +175,7 @@ const BackgroundPlain: FunctionComponent = () => (
     stage="phone"
     title="Page, plain"
   >
-    <Viewport.Content safeArea="none">
+    <Viewport.Content>
       <Header.Root>
         <Viewport.BlockStart>
           <Toolbar.Root placement="block-start">
@@ -233,7 +233,7 @@ const InAStack: FunctionComponent = () => {
       stage="phone"
       title="Pages in a stack"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Navigation.Root onBack={pop}>
           <Navigation.SwipeArea />
           <Navigation.Stack>
@@ -317,7 +317,7 @@ const InAColumn: FunctionComponent = () => {
       stage="tablet"
       title="Page beside a sidebar"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root>
           <Layout.Column
             floating
@@ -414,7 +414,7 @@ const OverAViewport: FunctionComponent = () => {
       title="Page beneath a bottom bar"
     >
       <>
-        <Viewport.Content safeArea="none">
+        <Viewport.Content>
           <Header.Root>
             <Viewport.BlockStart>
               <Toolbar.Root placement="block-start">

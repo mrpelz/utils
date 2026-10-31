@@ -75,7 +75,7 @@ const LiveView: FunctionComponent = () => {
       state={[stateContent, stateColumn, stateContentColumn]}
       title="Sidebar"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root key={`${keyColumn}-${keyContentColumn}`}>
           {content.background === 'picture' ? (
             <Layout.Background>

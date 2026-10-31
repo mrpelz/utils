@@ -69,7 +69,7 @@ const LiveView: FunctionComponent = () => {
       state={state}
       title="Drawer"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">

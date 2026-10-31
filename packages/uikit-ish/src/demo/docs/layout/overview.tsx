@@ -54,7 +54,7 @@ const LiveView: FunctionComponent = () => {
       state={state}
       title="Layout"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Layout.Root {...propsRoot}>
           <Layout.Column
             key={keyFirst}

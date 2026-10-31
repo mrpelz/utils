@@ -124,7 +124,7 @@ const FromAToolbarButton: FunctionComponent = () => {
       stage="phone"
       title="Menu from a toolbar button"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
@@ -278,7 +278,7 @@ const AHistory: FunctionComponent = () => {
       stage="phone"
       title="Menu on a held press"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content>
         <Header.Root>
           <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">

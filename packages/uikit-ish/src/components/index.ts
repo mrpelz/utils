@@ -305,6 +305,7 @@ export {
   ViewportScopeContext,
   type ViewportAnchorProps,
   type ViewportContentProps,
+  type ViewportContentSafeArea,
   type ViewportEdge,
   type ViewportEdgeEffect,
   type ViewportOverscrollProps,

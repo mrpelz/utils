@@ -39,7 +39,7 @@ import { phoneTabs, phoneTabValues } from './tabs.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 const panelsCode = `<TabBar.Root defaultValue="favorites">
-  <Viewport.Content safeArea="none">
+  <Viewport.Content>
     {/* Kept mounted while hidden: its page keeps its scroll position. */}
     <TabBar.Panel
       keepMounted
@@ -306,7 +306,7 @@ const Panels: FunctionComponent = () => {
         value={value}
         onValueChange={onValueChange}
       >
-        <Viewport.Content safeArea="none">
+        <Viewport.Content>
           {phoneTabs.map(([tab, label]) => (
             <TabBar.Panel
               key={tab}

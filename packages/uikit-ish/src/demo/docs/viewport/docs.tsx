@@ -23,6 +23,41 @@ const safeAreaRow: PropRow = [
   </>,
 ];
 
+// The content layer's: also `auto` (its default), by what it holds.
+const contentSafeAreaRow: PropRow = [
+  'safeArea',
+  union('auto', 'all', 'block', 'inline', 'none'),
+  code(union('auto')),
+  <>
+    The safe area insets kept clear (as padding), as an anchor’s (all, the block
+    dimension’s, the inline one’s, or none), or <code>auto</code>, by what it
+    holds:
+    <ul>
+      <li>
+        Its content itself (e.g. a list after a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />
+        ): all. Its content starts clear of them (the status bar, the home
+        indicator) and scrolls on under them; its paddings don’t count them
+        again.
+      </li>
+      <li>
+        A child scrolling on its own, as its direct child (a{' '}
+        <a href="page">Page</a>, a <a href="header">Header</a> around one, a{' '}
+        <a href="layout">Layout</a>, a <a href="navigation">Navigation</a>, e.g.
+        a <a href="tab-bar">Tab bar</a>’s panel rendered as one): none. That
+        child fills the screen, under the status bar too, its own bars and
+        paddings keeping its content clear; kept clear here, it would stop at
+        their border instead.
+      </li>
+    </ul>
+    Set it to keep the insets clear (or not) whatever it holds, e.g.{' '}
+    <code>none</code> for content behind the status bar.
+  </>,
+];
+
 const anchorHandleRow: PropRow = [
   'handle',
   'ViewportAnchorHandle',
@@ -157,7 +192,7 @@ export const viewportContentRows: readonly PropRow[] = [
       into view), or overlaid by it (filling the layout viewport, from its top).
     </>,
   ],
-  safeAreaRow,
+  contentSafeAreaRow,
   [
     'alwaysBounce',
     'boolean',
