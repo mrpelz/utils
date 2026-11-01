@@ -220,29 +220,28 @@ export const ColorPickerDemo: FunctionComponent = () => {
           <Popover.Trigger render={well} />
           <Popover.Portal>
             <Popover.Positioner>
-              <Popover.Popup style={{ width: 402 }}>
+              <ColorPicker.Root
+                key={keyRoot}
+                {...rootProps}
+                render={<Popover.Popup style={{ width: 402 }} />}
+              >
                 <Popover.Arrow />
-                <ColorPicker.Root
-                  key={keyRoot}
-                  {...rootProps}
-                >
-                  <ColorPicker.Header>
-                    {header(
-                      <Popover.Close
-                        render={
-                          <Toolbar.Button
-                            aria-label="Close"
-                            shape="circle"
-                          />
-                        }
-                      >
-                        {closeSymbol}
-                      </Popover.Close>,
-                    )}
-                  </ColorPicker.Header>
-                  {panel()}
-                </ColorPicker.Root>
-              </Popover.Popup>
+                <ColorPicker.Header>
+                  {header(
+                    <Popover.Close
+                      render={
+                        <Toolbar.Button
+                          aria-label="Close"
+                          shape="circle"
+                        />
+                      }
+                    >
+                      {closeSymbol}
+                    </Popover.Close>,
+                  )}
+                </ColorPicker.Header>
+                <Popover.Body>{panel()}</Popover.Body>
+              </ColorPicker.Root>
             </Popover.Positioner>
           </Popover.Portal>
         </Popover.Root>

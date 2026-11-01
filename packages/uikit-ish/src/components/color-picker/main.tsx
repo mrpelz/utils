@@ -1,4 +1,5 @@
 import '../button/style.css';
+import '../list/style.css';
 import '../menu/style.css';
 import '../page-control/style.css';
 import '../segmented/style.css';
@@ -31,12 +32,20 @@ import {
 } from 'react';
 
 import { Button } from '../button/main.js';
+import { List } from '../list/main.js';
 import { Menu } from '../menu/main.js';
 import { PageControl } from '../page-control/main.js';
 import { Segmented } from '../segmented/main.js';
-import { Checkmark, cn, useTouchHold, withStyle } from '../utils/main.js';
+import {
+  Checkmark,
+  cn,
+  useForwardedRef,
+  useTouchHold,
+  withStyle,
+} from '../utils/main.js';
 import { Viewport } from '../viewport/main.js';
 import { codeGroups, type ColorCode, parseCssColor } from './color.js';
+import { cssNamedColors } from './named-colors.js';
 import type {
   ColorPickerChangeEventDetails,
   ColorPickerCodeCopyProps,
@@ -44,6 +53,8 @@ import type {
   ColorPickerEyedropperProps,
   ColorPickerModeProps,
   ColorPickerModesProps,
+  ColorPickerNamedColorProps,
+  ColorPickerNamedProps,
   ColorPickerPanelProps,
   ColorPickerRootProps,
   ColorPickerSavedColorsChangeEventDetails,
@@ -54,6 +65,7 @@ import type {
   ColorPickerViewProps,
   ColorWellProps,
   EyeDropperApi,
+  NamedIndexEntry,
   PanelState,
   PickerState,
   Rgba,
@@ -66,6 +78,8 @@ export type {
   ColorPickerEyedropperProps,
   ColorPickerModeProps,
   ColorPickerModesProps,
+  ColorPickerNamedColorProps,
+  ColorPickerNamedProps,
   ColorPickerPanelProps,
   ColorPickerRootProps,
   ColorPickerSavedColorsChangeEventDetails,
@@ -1387,6 +1401,23 @@ const Code = forwardRef<HTMLDivElement, ColorPickerCodeProps>(
   },
 );
 
+/** A color well: its color, opening the picker. */
+const Well = forwardRef<HTMLButtonElement, ColorWellProps>(
+  ({ className, color, size = 'small', style, ...props }, ref) => (
+    <button
+      ref={ref}
+      aria-label="Color"
+      data-color={color === undefined ? undefined : ''}
+      data-size={size}
+      style={withStyle({ '--uikit-color-picker-well-color': color }, style)}
+      type="button"
+      {...props}
+      className={cn('uikit-color-picker-well', className)}
+      data-color-picker-part="well"
+    />
+  ),
+);
+
 // How long a copy shows as done (its checkmark).
 const copiedFor = 1500;
 
@@ -1423,13 +1454,23 @@ const CodeCopy: FunctionComponent<ColorPickerCodeCopyProps> = ({
       .catch(() => undefined);
   };
 
-  const item = ({ code, label, subtitle }: ColorCode) => (
+  // (Hex's: its color in a well at its end, inert.)
+  const item = ({ code, label, subtitle, well }: ColorCode) => (
     <Menu.Item
       key={code}
       onClick={(event: MouseEvent<HTMLElement>) => copy(code, event)}
     >
       <Menu.Label>{label}</Menu.Label>
       <Menu.Subtitle>{subtitle}</Menu.Subtitle>
+      {well === undefined ? null : (
+        <Well
+          inert
+          aria-hidden="true"
+          className="uikit-color-picker-code-copy-well"
+          color={well}
+          tabIndex={-1}
+        />
+      )}
     </Menu.Item>
   );
 
@@ -1494,21 +1535,213 @@ const CodeCopy: FunctionComponent<ColorPickerCodeCopyProps> = ({
   );
 };
 
-/** A color well: its color, opening the picker. */
-const Well = forwardRef<HTMLButtonElement, ColorWellProps>(
-  ({ className, color, size = 'small', style, ...props }, ref) => (
-    <button
-      ref={ref}
-      aria-label="Color"
-      data-color={color === undefined ? undefined : ''}
-      data-size={size}
-      style={withStyle({ '--uikit-color-picker-well-color': color }, style)}
-      type="button"
-      {...props}
-      className={cn('uikit-color-picker-well', className)}
-      data-color-picker-part="well"
-    />
-  ),
+/**
+ * Its named colors' rows (see `Named`): one registered (its label's first
+ * letter, for the index), while mounted.
+ */
+const NamedContext = createContext<(entry: NamedIndexEntry) => () => void>(
+  () => unregister,
+);
+
+/** The scroll container `element` is in (its block axis), or the page. */
+const scrollerOf = (element: HTMLElement): Element => {
+  for (
+    let parent = element.parentElement;
+    parent && parent !== document.body;
+    parent = parent.parentElement
+  ) {
+    const { overflowY } = getComputedStyle(parent);
+    if (overflowY === 'auto' || overflowY === 'scroll') return parent;
+  }
+  return document.scrollingElement ?? document.documentElement;
+};
+
+/** A row at the top of its scroll container (below its scroll padding). */
+const jumpTo = (element: HTMLElement) => {
+  const scroller = scrollerOf(element);
+  const padding =
+    Number.parseFloat(getComputedStyle(scroller).scrollPaddingBlockStart) || 0;
+  const top =
+    scroller === document.scrollingElement
+      ? 0
+      : scroller.getBoundingClientRect().top;
+  scroller.scrollTo({
+    top:
+      scroller.scrollTop + element.getBoundingClientRect().top - top - padding,
+  });
+};
+
+/**
+ * A row in view (between its scroll container's scroll paddings: e.g. a
+ * sheet's header), at once: already, it stays; else, centered there.
+ */
+const revealCentered = (element: HTMLElement) => {
+  const scroller = scrollerOf(element);
+  const style = getComputedStyle(scroller);
+  const paddingStart = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
+  const paddingEnd = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
+  const scrollerTop =
+    scroller === document.scrollingElement
+      ? 0
+      : scroller.getBoundingClientRect().top;
+  const { bottom, height, top } = element.getBoundingClientRect();
+  const viewStart = scrollerTop + paddingStart;
+  const viewHeight = scroller.clientHeight - paddingStart - paddingEnd;
+  if (top >= viewStart && bottom <= viewStart + viewHeight) return;
+  scroller.scrollTo({
+    behavior: 'instant',
+    top: scroller.scrollTop + top - viewStart - (viewHeight - height) / 2,
+  });
+};
+
+/**
+ * Its named colors (a mode's content, e.g. “Named”): one list of their rows
+ * (`NamedColor`s: e.g. the app's, `CssNamedColors`'), as high as they are
+ * (scrolled by its container: e.g. a sheet's content, a popover's body). At
+ * its end (in its panel's inset), an index of their labels' first letters,
+ * kept centered in view as it's scrolled; one picked, the first row with it
+ * at the top (below the container's scroll padding: e.g. a sheet's header).
+ * Shown, the color's row in view at once (see `revealCentered`).
+ */
+const Named = forwardRef<HTMLDivElement, ColorPickerNamedProps>(
+  ({ children, className, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    // Shown (e.g. its mode chosen): the color's row in view, at once.
+    useLayoutEffect(() => {
+      const picked = ref.current?.querySelector<HTMLElement>(
+        '[data-color-picker-part="named-color"][data-picked]',
+      );
+      if (picked) revealCentered(picked);
+    }, [ref]);
+    const [entries, setEntries] = useState<readonly NamedIndexEntry[]>([]);
+    const register = useCallback((entry: NamedIndexEntry) => {
+      // (In the document's order; rows apart, neither in the other: only
+      // following, or not.)
+      setEntries((current) =>
+        [...current, entry].toSorted((a, b) =>
+          a.element.compareDocumentPosition(b.element) ===
+          Node.DOCUMENT_POSITION_FOLLOWING
+            ? -1
+            : 1,
+        ),
+      );
+      return () =>
+        setEntries((current) => current.filter((other) => other !== entry));
+    }, []);
+    // Each letter's first row.
+    const letters = useMemo(() => {
+      const first = new Map<string, HTMLElement>();
+      for (const { element, label } of entries) {
+        if (!first.has(label)) first.set(label, element);
+      }
+      return [...first];
+    }, [entries]);
+
+    return (
+      <NamedContext.Provider value={register}>
+        <div
+          ref={ref}
+          {...props}
+          className={cn('uikit-color-picker-named', className)}
+          data-color-picker-part="named"
+        >
+          <List.Root listStyle="insetGrouped">
+            <List.Section>
+              <List.Group>{children}</List.Group>
+            </List.Section>
+          </List.Root>
+          {letters.length > 0 ? (
+            <div
+              className="uikit-color-picker-named-index"
+              data-color-picker-part="named-index"
+            >
+              <List.Index aria-label="Index">
+                {letters.map(([letter, element]) => (
+                  <List.IndexItem
+                    key={letter}
+                    onClick={() => jumpTo(element)}
+                  >
+                    {letter}
+                  </List.IndexItem>
+                ))}
+              </List.Index>
+            </div>
+          ) : null}
+        </div>
+      </NamedContext.Provider>
+    );
+  },
+);
+
+/**
+ * A named color's row (in a `Named`): its color in a well (inert), its label
+ * (or its color), a checkmark while it's the color (its opacity aside); its
+ * label's first letter in the index. Pressed, the color (its opacity kept,
+ * as a grid swatch's).
+ */
+const NamedColor = forwardRef<HTMLElement, ColorPickerNamedColorProps>(
+  ({ children, color: cssColor, ...props }, forwardedRef) => {
+    const { color, setColor } = useContext(PickerContext);
+    const register = useContext(NamedContext);
+    const ref = useForwardedRef(forwardedRef);
+    const named = useMemo(() => parseCssColor(cssColor), [cssColor]);
+    const isPicked = named !== undefined && sameColor(named, color);
+    const letter = (typeof children === 'string' ? children : cssColor)
+      .charAt(0)
+      .toUpperCase();
+
+    useLayoutEffect(() => {
+      const { current: element } = ref;
+      return element ? register({ element, label: letter }) : undefined;
+    }, [letter, ref, register]);
+
+    return (
+      <List.Item
+        ref={ref}
+        {...props}
+        data-color-picker-part="named-color"
+        data-picked={isPicked ? '' : undefined}
+      >
+        <List.Leading>
+          <Well
+            inert
+            aria-hidden="true"
+            color={cssColor}
+            tabIndex={-1}
+          />
+        </List.Leading>
+        <List.Content>
+          <List.Title
+            aria-pressed={isPicked}
+            render={<button type="button" />}
+            onClick={(event: MouseEvent<HTMLElement>) => {
+              if (!named) return;
+              setColor({ ...named, a: color.a }, { event, reason: 'named' });
+            }}
+          >
+            {children ?? cssColor}
+          </List.Title>
+        </List.Content>
+        <List.Trailing>{isPicked ? <List.Checkmark /> : null}</List.Trailing>
+      </List.Item>
+    );
+  },
+);
+
+/**
+ * The CSS named colors (148, synonyms too: e.g. gray and grey; not
+ * `transparent`; see named-colors.ts), as a `Named`'s rows, labeled by their
+ * names.
+ */
+const CssNamedColors: FunctionComponent = () => (
+  <>
+    {cssNamedColors.map((name) => (
+      <NamedColor
+        key={name}
+        color={name}
+      />
+    ))}
+  </>
 );
 
 export const ColorPicker = {
@@ -1527,5 +1760,8 @@ export const ColorPicker = {
   SystemColors,
   Code,
   CodeCopy,
+  Named,
+  NamedColor,
+  CssNamedColors,
   Well,
 };

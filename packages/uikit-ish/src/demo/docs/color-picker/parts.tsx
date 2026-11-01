@@ -3,6 +3,8 @@ import { FunctionComponent, ReactNode, useMemo } from 'react';
 import {
   Button,
   ColorPicker,
+  type ColorPickerNamedColorProps,
+  type ColorPickerNamedProps,
   Symbol,
   Toolbar,
 } from '../../../components/index.js';
@@ -27,6 +29,8 @@ import {
   colorPickerHeaderRows,
   colorPickerModeRows,
   colorPickerModesRows,
+  colorPickerNamedColorRows,
+  colorPickerNamedRows,
   colorPickerOpacityRows,
   colorPickerPanelRows,
   colorPickerRootRows,
@@ -50,6 +54,8 @@ import {
   propOptionsGuideWell,
   propOptionsHeader,
   propOptionsMode,
+  propOptionsNamed,
+  propOptionsNamedColor,
   propOptionsPanel,
   propOptionsPart,
   propOptionsSliders,
@@ -392,6 +398,59 @@ const CodeCopyPart = panelPartDemo(
   ),
 );
 
+/**
+ * The named colors' parts (see the `Named…` demos), scrolling in a box: the
+ * app's rows (two), then the CSS named colors; each part's props given.
+ */
+const namedColors = ({
+  color = {},
+  named = {},
+}: {
+  color?: Partial<ColorPickerNamedColorProps>;
+  named?: ColorPickerNamedProps;
+}) => (
+  <div style={{ maxHeight: 480, overflowY: 'auto' }}>
+    <ColorPicker.Panel>
+      <ColorPicker.View value="named">
+        <ColorPicker.Named {...named}>
+          <ColorPicker.NamedColor
+            color="#AF52DE"
+            {...{ children: 'Brand purple', ...color }}
+          />
+          <ColorPicker.NamedColor color="oklch(62% 0.19 260)">
+            Brand blue
+          </ColorPicker.NamedColor>
+          <ColorPicker.CssNamedColors />
+        </ColorPicker.Named>
+      </ColorPicker.View>
+    </ColorPicker.Panel>
+  </div>
+);
+
+/** `ColorPicker.Named`: the app's rows, then the CSS named colors. */
+const NamedPart = panelPartDemo(
+  'color-picker-parts-named',
+  'ColorPicker.Named',
+  () => propOptionsNamed,
+  (props) => namedColors({ named: props }),
+);
+
+/** `ColorPicker.NamedColor`: the app's first row. */
+const NamedColorPart = panelPartDemo(
+  'color-picker-parts-named-color',
+  'ColorPicker.NamedColor',
+  () => propOptionsNamedColor,
+  (props) => namedColors({ color: props }),
+);
+
+/** `ColorPicker.CssNamedColors`: after the app's rows. */
+const CssNamedColorsPart = panelPartDemo(
+  'color-picker-parts-css-named-colors',
+  'ColorPicker.CssNamedColors',
+  () => ({}),
+  () => namedColors({}),
+);
+
 /** `ColorPicker.Opacity`: under the spectrum, the color translucent. */
 const OpacityPart = panelPartDemo(
   'color-picker-parts-opacity',
@@ -574,6 +633,10 @@ export const ColorPickerParts: FunctionComponent = () => (
         Code: the color’s hex code, typed; copied (in other formats too) by its
         menu.
       </li>
+      <li>
+        Named: a mode’s list of named colors (the app’s, the CSS named colors),
+        with an index.
+      </li>
       <li>Well: shows a color, opening the picker (outside it).</li>
     </ul>
     <ul>
@@ -666,6 +729,29 @@ export const ColorPickerParts: FunctionComponent = () => (
                             (optional)
                           </li>
                         </ul>
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    or{' '}
+                    <PartLink
+                      component="color-picker"
+                      part="ColorPicker.Named"
+                    />
+                    <ul>
+                      <li>
+                        <PartLink
+                          component="color-picker"
+                          part="ColorPicker.NamedColor"
+                        />{' '}
+                        (one per color)
+                      </li>
+                      <li>
+                        <PartLink
+                          component="color-picker"
+                          part="ColorPicker.CssNamedColors"
+                        />{' '}
+                        (optional; the CSS named colors’ rows)
                       </li>
                     </ul>
                   </li>
@@ -1130,6 +1216,109 @@ export const ColorPickerParts: FunctionComponent = () => (
     <PropsTable rows={colorPickerCodeCopyRows} />
 
     <Heading
+      id="colorpicker-named"
+      level={2}
+    >
+      <code>ColorPicker.Named</code>
+    </Heading>
+    <ul>
+      <li>
+        A mode’s named colors (in its{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.View"
+        />
+        , e.g. “Named”): one list of their rows (
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.NamedColor"
+        />
+        s: the app’s, and{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.CssNamedColors"
+        />
+        ’).
+      </li>
+      <li>
+        As high as its rows: its container scrolls it (e.g. a sheet’s content, a
+        popover’s body; here, a box). Its view as high as the grid’s, at least,
+        among a grid’s or a spectrum’s.
+      </li>
+      <li>
+        At its end, in the panel’s inset: an index of its rows’ first letters,
+        kept centered in view as it’s scrolled (below a sheet’s header). One
+        pressed (or scrubbed over), the first row with it at the top.
+      </li>
+      <li>
+        Renders a <code>div</code>.
+      </li>
+    </ul>
+    <NamedPart />
+    <h3>Props</h3>
+    <PropsTable rows={colorPickerNamedRows} />
+
+    <Heading
+      id="colorpicker-namedcolor"
+      level={2}
+    >
+      <code>ColorPicker.NamedColor</code>
+    </Heading>
+    <ul>
+      <li>
+        A named color’s row: its color (any CSS color) in a{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Well"
+        />{' '}
+        (inert), its label (or its color), a checkmark while it’s the color (its
+        opacity aside). Its label’s first letter is in the index.
+      </li>
+      <li>
+        Pressed, it’s the color (<code>named</code>), its opacity kept, as a
+        grid swatch’s.
+      </li>
+      <li>
+        Renders a{' '}
+        <PartLink
+          component="list"
+          part="List.Item"
+        />
+        .
+      </li>
+    </ul>
+    <NamedColorPart />
+    <h3>Props</h3>
+    <PropsTable rows={colorPickerNamedColorRows} />
+
+    <Heading
+      id="colorpicker-cssnamedcolors"
+      level={2}
+    >
+      <code>ColorPicker.CssNamedColors</code>
+    </Heading>
+    <ul>
+      <li>
+        The CSS named colors (148: synonyms too, e.g. <code>gray</code> and{' '}
+        <code>grey</code>; not <code>transparent</code>), as{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.NamedColor"
+        />
+        s labeled by their names.
+      </li>
+      <li>
+        Renders a fragment (no props), in a{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Named"
+        />{' '}
+        (e.g. after the app’s rows).
+      </li>
+    </ul>
+    <CssNamedColorsPart />
+
+    <Heading
       id="colorpicker-opacity"
       level={2}
     >
@@ -1332,6 +1521,9 @@ export const colorPickerPartsDemos = [
   SlidersPart,
   CodePart,
   CodeCopyPart,
+  NamedPart,
+  NamedColorPart,
+  CssNamedColorsPart,
   OpacityPart,
   SwatchesPart,
   EyedropperPart,

@@ -1,8 +1,9 @@
 import type { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import type { useRender } from '@base-ui/react/use-render';
-import type { ComponentProps, ReactElement } from 'react';
+import type { ComponentProps, ReactElement, ReactNode } from 'react';
 
 import type { ButtonRootProps } from '../button/main.js';
+import type { ListItemProps } from '../list/main.js';
 import type {
   SegmentedItemProps,
   SegmentedRootProps,
@@ -13,7 +14,7 @@ export type Rgba = { a: number; b: number; g: number; r: number };
 /**
  * Why the color changed, and the event: its grid, spectrum or sliders, the
  * opacity (slider or percentage), a saved color pressed, the eyedropper,
- * the system's color picker, or its code typed.
+ * the system's color picker, its code typed, or a named color picked.
  */
 export type ColorPickerChangeEventDetails = {
   event: Event;
@@ -21,6 +22,7 @@ export type ColorPickerChangeEventDetails = {
     | 'code'
     | 'eyedropper'
     | 'grid'
+    | 'named'
     | 'opacity'
     | 'saved'
     | 'sliders'
@@ -169,6 +171,18 @@ export type ColorPickerSystemColorsProps = Omit<
 };
 
 export type ColorPickerCodeProps = ComponentProps<'div'>;
+
+export type ColorPickerNamedProps = ComponentProps<'div'>;
+
+export type ColorPickerNamedColorProps = Omit<ListItemProps, 'color'> & {
+  /** Its label (e.g. its name). @default its `color` */
+  children?: ReactNode;
+  /** Its color: any CSS color (e.g. a name, a hex code, `oklch()`). */
+  color: string;
+};
+
+/** A row's index entry (see `Named`): its first letter, its element. */
+export type NamedIndexEntry = { element: HTMLElement; label: string };
 
 export type ColorPickerCodeCopyProps = Omit<
   ButtonRootProps,

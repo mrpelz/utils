@@ -40,7 +40,8 @@ export const colorPickerRootRows: readonly PropRow[] = [
       ): <code>grid</code>, <code>spectrum</code>, <code>sliders</code>,{' '}
       <code>opacity</code>, <code>saved</code> (a saved color pressed),{' '}
       <code>eyedropper</code>, <code>system-colors</code> (the system’s color
-      picker), or <code>code</code> (its hex code typed).
+      picker), <code>code</code> (its hex code typed), or <code>named</code> (a
+      named color picked).
     </>,
   ],
   [
@@ -250,6 +251,11 @@ export const colorPickerViewRows: readonly PropRow[] = [
       <PartLink
         component="color-picker"
         part="ColorPicker.Sliders"
+      />
+      , a{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Named"
       />
       .
     </>,
@@ -504,4 +510,47 @@ export const defaultSavedColorsRows: readonly PropRow[] = [
       <code>defaultSavedColors</code> by default.
     </>,
   ],
+];
+
+export const colorPickerNamedRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its rows:{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.NamedColor"
+      />
+      s (e.g. the app’s), and{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.CssNamedColors"
+      />
+      ’.
+    </>,
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerNamedColorRows: readonly PropRow[] = [
+  [
+    'color',
+    'string',
+    undefined,
+    <>
+      Its color (required): any CSS color (e.g. a name, a hex code,{' '}
+      <code>oklch()</code>).
+    </>,
+  ],
+  [
+    'children',
+    'ReactNode',
+    <>
+      its <code>color</code>
+    </>,
+    'Its label (e.g. its name).',
+  ],
+  ...elementRows('li', 'HTMLLIElement'),
 ];

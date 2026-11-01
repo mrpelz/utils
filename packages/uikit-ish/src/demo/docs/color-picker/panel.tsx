@@ -58,10 +58,17 @@ const spectrum: ModeEntry = [
 const rgb: ModeEntry = ['rgb', 'RGB', sliders('rgb')];
 const hsl: ModeEntry = ['hsl', 'HSL', sliders('hsl')];
 const cmyk: ModeEntry = ['cmyk', 'CMYK', sliders('cmyk')];
+const named: ModeEntry = [
+  'named',
+  'Named',
+  <ColorPicker.Named key="named">
+    <ColorPicker.CssNamedColors />
+  </ColorPicker.Named>,
+];
 
-/** Mode sets: the system's (one sliders view, “Sliders”), and others (their values the same: `grid`, `spectrum`, `rgb`, `hsl`, `cmyk`). */
+/** Mode sets: the system's (one sliders view, “Sliders”), and others (their values the same: `grid`, `spectrum`, `rgb`, `hsl`, `cmyk`, `named`). */
 export const modeSets = {
-  all: [grid, spectrum, rgb, hsl, cmyk],
+  all: [grid, spectrum, rgb, hsl, cmyk, named],
   sliders: [rgb, hsl, cmyk],
   system: [grid, spectrum, ['rgb', 'Sliders', sliders()]],
 } satisfies Record<string, ModeEntry[]>;
@@ -78,6 +85,7 @@ export type ModesShown = {
   codeCopy?: boolean;
   grid?: boolean;
   hsl?: boolean;
+  named?: boolean;
   rgb?: ColorPickerSlidersRange | false;
   spectrum?: boolean;
 };
@@ -92,6 +100,7 @@ export const shownModes = ({
   codeCopy: isCodeCopy = true,
   grid: isGrid = true,
   hsl: isHsl = false,
+  named: isNamed = false,
   rgb: rgbRange = 'byte',
   spectrum: isSpectrum = true,
 }: ModesShown): ModeEntry[] => {
@@ -107,13 +116,15 @@ export const shownModes = ({
     'CMYK',
     sliders('cmyk', undefined, code),
   ];
-  return [
-    isGrid ? grid : undefined,
-    isSpectrum ? spectrum : undefined,
-    rgbRange ? rgbEntry : undefined,
-    isHsl ? hslEntry : undefined,
-    isCmyk ? cmykEntry : undefined,
-  ].filter((entry) => entry !== undefined);
+  const entries: [isShown: boolean, entry: ModeEntry][] = [
+    [isGrid, grid],
+    [isSpectrum, spectrum],
+    [rgbRange !== false, rgbEntry],
+    [isHsl, hslEntry],
+    [isCmyk, cmykEntry],
+    [isNamed, named],
+  ];
+  return entries.filter(([isShown]) => isShown).map(([, entry]) => entry);
 };
 
 /** Its composition's options (see `panelParts`), as a prop control's. */

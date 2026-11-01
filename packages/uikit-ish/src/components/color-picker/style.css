@@ -277,6 +277,19 @@
     }
   }
 
+  /* A hex code's well (see `CodeCopy`), at its menu item's end (where a
+     shortcut is), centered; its item not blended with the glass (as a
+     destructive one's), so the well shows the color as it is. */
+  .uikit-color-picker-code-copy-well {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    margin-inline-start: 8px;
+  }
+
+  .uikit-menu-item:has(> .uikit-color-picker-code-copy-well) {
+    mix-blend-mode: normal;
+  }
+
   /* Its field (a channel's value's, as wide as its digits): `#`, then up to
      8 digits. */
   .uikit-color-picker-code-field {
@@ -443,6 +456,12 @@
     flex-direction: column;
     padding: 0 16px 16px;
 
+    /* In a popover's body (scrolling it, e.g. the named colors): its end
+       the body's (16px). */
+    .uikit-popover-body > & {
+      padding-block-end: 0;
+    }
+
     /* Its picker without a header: as far from the top as the header's
        content (16px). (Not by its place: in a sheet, its content's first,
        the header the sheet's, see `Root`.) */
@@ -487,6 +506,41 @@
       align-self: center;
       grid-area: 1 / 1;
     }
+  }
+
+  /* Its named colors (see `Named`): its list's cards as wide as the panel's
+     content, on its background; its index at its end, in the panel's
+     inset (16px), kept centered in its container's view (between its
+     scroll paddings, see Viewport.Padding: e.g. a sheet's header) as it's
+     scrolled (a percentage of a sticky offset: of the scrollport). */
+  .uikit-color-picker-named {
+    display: grid;
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr) 0;
+
+    /* Its end as far from what follows (e.g. the opacity) as a list's
+       sections are apart: the view's 16px, and the rest. */
+    & > .uikit-list-root {
+      --uikit-list-container-background: transparent;
+      --uikit-list-inset: 0px;
+
+      margin-block-end: calc(var(--uikit-list-section-spacing) - 16px);
+    }
+  }
+
+  .uikit-color-picker-named-index {
+    position: sticky;
+    z-index: 3;
+    top: calc(
+      50% +
+        (
+          var(--uikit-viewport-padding-block-start, 0px) -
+            var(--uikit-viewport-padding-block-end, 0px)
+        ) /
+        2
+    );
+    width: 16px;
+    translate: 0 -50%;
   }
 
   .uikit-color-picker-header {

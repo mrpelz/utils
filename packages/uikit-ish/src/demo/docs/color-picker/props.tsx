@@ -123,6 +123,16 @@ export const propOptionsSystemColors = propOptionsEyedropper;
 /** The code's (its element's; its children: the copy button). */
 export const propOptionsCode = propOptionsElement;
 
+/** The named colors' (its element's; its children: its sections). */
+export const propOptionsNamed = propOptionsElement;
+
+/** A named color's row: its color (any CSS color's syntax), its label. */
+export const propOptionsNamedColor = {
+  ...propOptionsElement,
+  color: ['#AF52DE', 'oklch(70% 0.2 150)', 'rebeccapurple'] as const,
+  children: [undefined, 'Brand purple'] as const,
+};
+
 /** The code's copy button: what it renders, disabled, its copies logged. */
 export const getPropOptionsCodeCopy = (addLog: AddLog) => ({
   ...propOptionsElement,
@@ -169,9 +179,10 @@ export const propOptionsPresentation = {
 };
 
 /**
- * The overview's: its presentation, which modes (and the opacity) its
- * panel renders (see panel.tsx); RGB's, in which range; the sliders' code
- * row and its copy button, or none; the system colors' button, or none.
+ * The overview's: its presentation, which modes (the named colors' too)
+ * and the opacity its panel renders (see panel.tsx); RGB's, in which range;
+ * the sliders' code row and its copy button, or none; the system colors'
+ * button, or none.
  */
 export const propOptionsOverviewContent = {
   ...propOptionsPresentation,
@@ -180,6 +191,7 @@ export const propOptionsOverviewContent = {
   rgb: ['byte', 'percentage', false] as const,
   hsl: [false, true] as const,
   cmyk: [false, true] as const,
+  named: [false, true] as const,
   opacity: [true, false] as const,
   code: [true, false] as const,
   codeCopy: [true, false] as const,

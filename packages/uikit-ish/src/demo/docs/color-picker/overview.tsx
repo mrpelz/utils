@@ -185,47 +185,50 @@ const LiveView: FunctionComponent = () => {
           />
           <Popover.Portal>
             <Popover.Positioner>
-              <Popover.Popup style={{ width: 'min(402px, 100vw)' }}>
+              <ColorPicker.Root
+                key={keyRoot}
+                {...rootProps}
+                render={
+                  <Popover.Popup style={{ width: 'min(402px, 100vw)' }} />
+                }
+              >
                 <Popover.Arrow />
-                <ColorPicker.Root
-                  key={keyRoot}
-                  {...rootProps}
-                >
-                  <ColorPicker.Header>
-                    <Toolbar.Root placement="block-start">
-                      <Toolbar.Leading>
-                        <ColorPicker.Eyedropper
-                          render={<Toolbar.Button shape="circle" />}
-                        >
-                          <Button.Icon>
-                            <Symbol icon={sfEyedropper} />
-                          </Button.Icon>
-                        </ColorPicker.Eyedropper>
-                        {systemColors}
-                      </Toolbar.Leading>
-                      <Toolbar.Title>
-                        <span>Colors</span>
-                      </Toolbar.Title>
-                      <Toolbar.Trailing>
-                        {codeCopy}
-                        <Popover.Close
-                          render={
-                            <Toolbar.Button
-                              aria-label="Close"
-                              shape="circle"
-                            />
-                          }
-                        >
-                          <Button.Icon>
-                            <Symbol icon={sfXmark} />
-                          </Button.Icon>
-                        </Popover.Close>
-                      </Toolbar.Trailing>
-                    </Toolbar.Root>
-                  </ColorPicker.Header>
+                <ColorPicker.Header>
+                  <Toolbar.Root placement="block-start">
+                    <Toolbar.Leading>
+                      <ColorPicker.Eyedropper
+                        render={<Toolbar.Button shape="circle" />}
+                      >
+                        <Button.Icon>
+                          <Symbol icon={sfEyedropper} />
+                        </Button.Icon>
+                      </ColorPicker.Eyedropper>
+                      {systemColors}
+                    </Toolbar.Leading>
+                    <Toolbar.Title>
+                      <span>Colors</span>
+                    </Toolbar.Title>
+                    <Toolbar.Trailing>
+                      {codeCopy}
+                      <Popover.Close
+                        render={
+                          <Toolbar.Button
+                            aria-label="Close"
+                            shape="circle"
+                          />
+                        }
+                      >
+                        <Button.Icon>
+                          <Symbol icon={sfXmark} />
+                        </Button.Icon>
+                      </Popover.Close>
+                    </Toolbar.Trailing>
+                  </Toolbar.Root>
+                </ColorPicker.Header>
+                <Popover.Body>
                   <ColorPicker.Panel>{parts()}</ColorPicker.Panel>
-                </ColorPicker.Root>
-              </Popover.Popup>
+                </Popover.Body>
+              </ColorPicker.Root>
             </Popover.Positioner>
           </Popover.Portal>
         </Popover.Root>
@@ -398,6 +401,20 @@ export const ColorPickerOverview: FunctionComponent = () => (
         ) copies it, or another format (e.g. <code>oklch()</code>), from its
         menu. Without the code’s row, the copy button is in the header’s
         toolbar, before its close button.
+      </li>
+      <li>
+        Named (with <code>named</code>): the CSS named colors (
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.CssNamedColors"
+        />
+        ) in a list (
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Named"
+        />
+        ), an index of their first letters at its end. The sheet’s content (or
+        the popover’s body) scrolls it.
       </li>
     </ul>
   </>

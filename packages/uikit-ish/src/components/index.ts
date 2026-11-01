@@ -76,6 +76,8 @@ export {
   type ColorPickerEyedropperProps,
   type ColorPickerModeProps,
   type ColorPickerModesProps,
+  type ColorPickerNamedColorProps,
+  type ColorPickerNamedProps,
   type ColorPickerPanelProps,
   type ColorPickerRootProps,
   type ColorPickerSavedColorsChangeEventDetails,

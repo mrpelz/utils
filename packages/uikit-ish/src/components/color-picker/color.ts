@@ -62,6 +62,8 @@ export type ColorCode = {
   code: string;
   label: string;
   subtitle: string;
+  /** Its color shown (hex's: opaque, or with its alpha). */
+  well?: string;
 };
 
 /** A group of codes: its title, its codes. */
@@ -176,8 +178,13 @@ export const codeGroups = (color: Rgba, hex: string): readonly CodeGroup[] => {
     [
       'Hex',
       [
-        { code: hex, label: 'Hex', subtitle: hex },
-        { code: withAlpha, label: 'Hex with alpha', subtitle: withAlpha },
+        { code: hex, label: 'Hex', subtitle: hex, well: hex },
+        {
+          code: withAlpha,
+          label: 'Hex with alpha',
+          subtitle: withAlpha,
+          well: withAlpha,
+        },
       ],
     ],
     [
