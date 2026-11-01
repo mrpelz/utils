@@ -10,6 +10,7 @@ import {
 } from 'react';
 
 import { ColorScheme } from '../../../components/utils/main.js';
+import { publicUrl } from '../public-url.js';
 
 /**
  * A demo's stage: a device's screen (its frame drawn by the stage, see
@@ -143,8 +144,8 @@ export const useProvidedSettings = (
 
 /**
  * A demo's URL with its state (its prop controls') and its settings
- * changed: on the current page, or on `path`'s (e.g. `viewport/all`,
- * relative to the document's base), then with `back`.
+ * changed: on the current page, or on `path`'s (e.g. `viewport/all`, under
+ * the site's public path), then with `back`.
  */
 export const useCreateStateUrl = (
   id: string,
@@ -162,7 +163,7 @@ export const useCreateStateUrl = (
 ): string | undefined =>
   useMemo(() => {
     if (path !== undefined) {
-      return `${path}#${createFragment({ back, id, settings, state }, '') ?? ''}`;
+      return `${publicUrl(path)}#${createFragment({ back, id, settings, state }, '') ?? ''}`;
     }
 
     // (Server-side, none: preact-iso's prerendering stubs `location` as

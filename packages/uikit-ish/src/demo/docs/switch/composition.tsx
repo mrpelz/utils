@@ -21,6 +21,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfAirplane, sfBellFill } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // A row's code (as Airplane Mode's in the list below).
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
@@ -350,7 +351,8 @@ export const SwitchComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Typically: in the trailing slot of <a href="list">List</a> rows.
+        Typically: in the trailing slot of <a href={publicUrl('list')}>List</a>{' '}
+        rows.
       </li>
       <li>
         The row passes its clicks on to the switch (
@@ -463,8 +465,9 @@ export const SwitchComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Renders a hidden checkbox input: in a <a href="form">Form</a>, submitted
-        by its <code>name</code>, as a native checkbox.
+        Renders a hidden checkbox input: in a{' '}
+        <a href={publicUrl('form')}>Form</a>, submitted by its <code>name</code>
+        , as a native checkbox.
       </li>
       <li>
         Value: <code>value</code> while on, <code>uncheckedValue</code> while

@@ -10,6 +10,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { accordionItemRows, accordionRootRows } from './docs.js';
 
 /** Mail's accounts, one open at a time (uncontrolled). */
@@ -106,8 +107,8 @@ export const AccordionOverview: FunctionComponent = () => (
       </li>
       <li>
         Its parts render what they collapse and toggle: here the{' '}
-        <a href="list">List</a>, its sections (items), their headers (triggers),
-        their groups (panels).
+        <a href={publicUrl('list')}>List</a>, its sections (items), their
+        headers (triggers), their groups (panels).
       </li>
     </ul>
     <LiveView />
@@ -133,8 +134,8 @@ export const AccordionOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Sections collapsing on their own: <a href="collapsible">Collapsible</a>{' '}
-        (a sidebar’s).
+        Sections collapsing on their own:{' '}
+        <a href={publicUrl('collapsible')}>Collapsible</a> (a sidebar’s).
       </li>
       <li>
         Rows among a list group’s rows (e.g. pickers below their rows, one open
@@ -147,7 +148,7 @@ export const AccordionOverview: FunctionComponent = () => (
       </li>
       <li>
         One of a few views of the same content:{' '}
-        <a href="segmented">Segmented</a>.
+        <a href={publicUrl('segmented')}>Segmented</a>.
       </li>
     </ul>
 
@@ -159,7 +160,7 @@ export const AccordionOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        All its props: <a href="accordion/parts">Parts</a>.
+        All its props: <a href={publicUrl('accordion/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

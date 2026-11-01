@@ -7,6 +7,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -163,7 +164,7 @@ export const actionSheetTriggerRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <a href="button">Button</a>’s{' '}
+            {row[3]} E.g. a <a href={publicUrl('button')}>Button</a>’s{' '}
             <PartLink
               component="button"
               part="Button.Root"

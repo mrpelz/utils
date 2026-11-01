@@ -18,6 +18,7 @@ import {
   sfMagnifyingglass,
   sfSquareAndPencil,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { sidebarSections } from './content.js';
 import {
   sidebarRootRows,
@@ -275,8 +276,9 @@ export const SidebarParts: FunctionComponent = () => (
       <li>The panel, and a toolbar at its top with buttons at its ends.</li>
       <li>
         Its search field and list are other components’ (
-        <a href="text-field">Text field</a>, <a href="list">List</a>); its place
-        and size, its <a href="layout">Layout</a> column’s.
+        <a href={publicUrl('text-field')}>Text field</a>,{' '}
+        <a href={publicUrl('list')}>List</a>); its place and size, its{' '}
+        <a href={publicUrl('layout')}>Layout</a> column’s.
       </li>
       <li>The views show the panel on a picture, as behind its glass.</li>
     </ul>

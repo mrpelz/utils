@@ -11,6 +11,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 /** A list's folder renamed: its name in the alert's field, saved by Save. */
 const WithATextField: FunctionComponent = () => {
@@ -222,7 +223,7 @@ export const AlertComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="list">List</a> row’s button opens it; its{' '}
+        A <a href={publicUrl('list')}>List</a> row’s button opens it; its{' '}
         <PartLink
           component="alert"
           part="Alert.Field"
@@ -297,7 +298,7 @@ export const AlertComposition: FunctionComponent = () => (
       </li>
       <li>
         A choice of what to do with something the person started: often an{' '}
-        <a href="action-sheet">Action sheet</a> instead.
+        <a href={publicUrl('action-sheet')}>Action sheet</a> instead.
       </li>
       <li>
         <strong>Library:</strong> stacking more than two actions (

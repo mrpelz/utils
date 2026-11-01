@@ -12,6 +12,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   textFieldControlRows,
   textFieldErrorRows,
@@ -107,9 +108,9 @@ export const TextFieldOverview: FunctionComponent = () => (
         name, an address, a search.
       </li>
       <li>
-        As a <a href="list">List</a> row (a form’s, Settings’): its label the
-        row’s title, its value at the row’s end; or stacked on its own; or a
-        search field’s capsule.
+        As a <a href={publicUrl('list')}>List</a> row (a form’s, Settings’): its
+        label the row’s title, its value at the row’s end; or stacked on its
+        own; or a search field’s capsule.
       </li>
       <li>
         Validated as the browser’s inputs are (and by a function of the app’s),
@@ -127,7 +128,10 @@ export const TextFieldOverview: FunctionComponent = () => (
     <ul>
       <li>
         Something only people know: a name, an email address, a note (see{' '}
-        <a href="text-field/composition#in-a-form-list">Composition</a>).
+        <a href={publicUrl('text-field/composition#in-a-form-list')}>
+          Composition
+        </a>
+        ).
       </li>
       <li>
         Searching: a search field (
@@ -148,17 +152,19 @@ export const TextFieldOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A pick from a known set: a <a href="segmented">Segmented</a> control, a{' '}
-        <a href="list">List</a> with checkmarks, a <a href="menu">Menu</a>.
+        A pick from a known set: a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> control, a{' '}
+        <a href={publicUrl('list')}>List</a> with checkmarks, a{' '}
+        <a href={publicUrl('menu')}>Menu</a>.
       </li>
       <li>
-        A number in a range: a <a href="slider">Slider</a> or a{' '}
-        <a href="stepper">Stepper</a>; a date: a{' '}
-        <a href="date-picker">Date picker</a>.
+        A number in a range: a <a href={publicUrl('slider')}>Slider</a> or a{' '}
+        <a href={publicUrl('stepper')}>Stepper</a>; a date: a{' '}
+        <a href={publicUrl('date-picker')}>Date picker</a>.
       </li>
       <li>
         A text asked for at a moment (a name for a new folder): an{' '}
-        <a href="alert">Alert</a>’s field.
+        <a href={publicUrl('alert')}>Alert</a>’s field.
       </li>
     </ul>
 
@@ -171,7 +177,7 @@ export const TextFieldOverview: FunctionComponent = () => (
     <ul>
       <li>The props most fields set, across their parts.</li>
       <li>
-        All parts’ props: <a href="text-field/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('text-field/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -258,8 +264,8 @@ export const TextFieldOverview: FunctionComponent = () => (
       </li>
       <li>
         Validated when its <code>validationMode</code> says: on submitting its{' '}
-        <a href="form">Form</a> (then on each change), on leaving it, or on each
-        change; invalid, its value in red, its error shown.
+        <a href={publicUrl('form')}>Form</a> (then on each change), on leaving
+        it, or on each change; invalid, its value in red, its error shown.
       </li>
       <li>
         Its description and error in Caption 1 (12px), below it; disabled,

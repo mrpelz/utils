@@ -1,5 +1,6 @@
 import { createContext, FunctionComponent, ReactNode, useContext } from 'react';
 
+import { publicUrl } from '../public-url.js';
 import { EntryContext } from './nav.js';
 
 // Anchors on the guide pages: their sections (headings with ids) listed at
@@ -19,12 +20,11 @@ export type Section = readonly [id: string, title: ReactNode];
 export const PagePathContext = createContext('');
 
 /**
- * A link to a section of the page at `path` (the index's: empty), never
- * just `#…`: the router leaves those to the browser, without a smooth scroll
- * (see main.tsx).
+ * A link to a section of this page: its anchor alone, the browser's (the
+ * router leaves those to it: scrolled to, in its history, restored on
+ * reload).
  */
-const sectionHref = (path: string, id: string): string =>
-  `${path || './'}#${id}`;
+const sectionHref = (id: string): string => `#${id}`;
 
 /** A section's heading, anchored (`id`), with a link to itself. */
 export const Heading: FunctionComponent<{
@@ -32,7 +32,6 @@ export const Heading: FunctionComponent<{
   id: string;
   level: 2 | 3 | 4;
 }> = ({ children, id, level }) => {
-  const path = useContext(PagePathContext);
   const Tag = `h${String(level)}` as 'h2';
 
   return (
@@ -41,7 +40,7 @@ export const Heading: FunctionComponent<{
       <a
         aria-label="Link to this section"
         className="demo-anchor"
-        href={sectionHref(path, id)}
+        href={sectionHref(id)}
       >
         #
       </a>
@@ -52,24 +51,20 @@ export const Heading: FunctionComponent<{
 /** A page's sections, listed at its top, linking to their headings. */
 export const Contents: FunctionComponent<{
   sections: readonly Section[];
-}> = ({ sections }) => {
-  const path = useContext(PagePathContext);
-
-  return (
-    <nav
-      aria-label="Sections"
-      className="demo-contents"
-    >
-      <ul>
-        {sections.map(([id, title]) => (
-          <li key={id}>
-            <a href={sectionHref(path, id)}>{title}</a>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
-};
+}> = ({ sections }) => (
+  <nav
+    aria-label="Sections"
+    className="demo-contents"
+  >
+    <ul>
+      {sections.map(([id, title]) => (
+        <li key={id}>
+          <a href={sectionHref(id)}>{title}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+);
 
 /**
  * A part's name in a parts page's tree (`<code>`), linking to its section
@@ -86,7 +81,11 @@ export const PartLink: FunctionComponent<{
   const entry = useContext(EntryContext);
 
   return (
-    <a href={`${component ?? entry?.id ?? ''}/parts#${sectionId(part)}`}>
+    <a
+      href={publicUrl(
+        `${component ?? entry?.id ?? ''}/parts#${sectionId(part)}`,
+      )}
+    >
       <code>{children ?? part}</code>
     </a>
   );

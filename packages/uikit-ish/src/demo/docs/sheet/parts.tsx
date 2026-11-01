@@ -15,6 +15,7 @@ import { codeLabel } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { names } from '../viewport/content.js';
 import {
   sheetCloseRows,
@@ -1160,7 +1161,7 @@ export const SheetParts: FunctionComponent = () => (
     <ul>
       <li>
         Opens the sheet; focus returns to it as it closes. Usually a{' '}
-        <a href="button">Button</a> (its <code>render</code>).
+        <a href={publicUrl('button')}>Button</a> (its <code>render</code>).
       </li>
       <li>
         Renders a <code>button</code>.

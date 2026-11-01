@@ -6,6 +6,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -36,7 +37,7 @@ export const FormInformationArchitecture: FunctionComponent = () => (
           Entering data
         </a>{' '}
         (a pattern); no form component: iOS lays forms out as lists (
-        <a href="list">List</a>), their rows inputs.
+        <a href={publicUrl('list')}>List</a>), their rows inputs.
       </li>
       <li>
         As the guide sees it (<GuideLink to="section-8-2">§8.2</GuideLink>):
@@ -60,8 +61,8 @@ export const FormInformationArchitecture: FunctionComponent = () => (
         <GuideLink to="section-6-containment">§6</GuideLink>).
       </li>
       <li>
-        Here: a <a href="list">List</a> (the Collection), fieldsets its sections
-        (Groups), fields its rows (Items).
+        Here: a <a href={publicUrl('list')}>List</a> (the Collection), fieldsets
+        its sections (Groups), fields its rows (Items).
       </li>
     </ul>
 
@@ -107,7 +108,7 @@ export const FormInformationArchitecture: FunctionComponent = () => (
       </li>
       <li>
         <strong>Surface:</strong> a page, or a modal one for a task (a{' '}
-        <a href="sheet">Sheet</a>: Cancel and Done in its bar).
+        <a href={publicUrl('sheet')}>Sheet</a>: Cancel and Done in its bar).
       </li>
     </ul>
   </>

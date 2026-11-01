@@ -10,6 +10,7 @@ import {
 } from '../../docs/catalog.js';
 import { guideHref } from '../../docs/hig-guide/link.js';
 import { useOptions } from '../frame/state.js';
+import { publicUrl } from '../public-url.js';
 import { ClientOnly } from '../shared/client-only.js';
 import { VirtualList } from '../shared/virtual-list.js';
 import {
@@ -21,7 +22,7 @@ import {
 } from './nav.js';
 import { Contents, Heading, PagePathContext } from './sections.js';
 
-// (Links are relative to the document's base: the demo's public path.)
+// (Links under the site's public path: see `publicUrl`, env.ts.)
 
 const entryInfo = (entry: CatalogEntry): EntryInfo => ({
   baseUiId: entry.baseUiId,
@@ -92,7 +93,7 @@ export const NotFound: FunctionComponent = () => (
   <div className="demo-page demo-prose">
     <h1 className="demo-page-title">Not found</h1>
     <p>
-      No such page. See <a href="./">the index</a> of components.
+      No such page. See <a href={publicUrl('./')}>the index</a> of components.
     </p>
   </div>
 );
@@ -119,7 +120,8 @@ const GuidePage: FunctionComponent<{
         <Content />
       ) : (
         <p>
-          No {label} yet: see <a href={`${entry.id}/all`}>all demos</a>.
+          No {label} yet: see{' '}
+          <a href={publicUrl(`${entry.id}/all`)}>all demos</a>.
         </p>
       )}
     </ComponentShell>
@@ -181,7 +183,7 @@ export const IndexPage: FunctionComponent = () => (
       <img
         alt=""
         className="demo-index-icon"
-        src="assets/icon-rounded.svg"
+        src={publicUrl('assets/icon-rounded.svg')}
       />
       <h1 className="demo-page-title">uikit-ish</h1>
     </header>
@@ -190,7 +192,7 @@ export const IndexPage: FunctionComponent = () => (
       Framework7&apos;s behavior as a reference.
     </p>
     <nav className="demo-index-links">
-      <a href="kitchen-sink">
+      <a href={publicUrl('kitchen-sink')}>
         <strong>Kitchen sink</strong>
         <span>
           The components in an app, nested as an app nests them, as a raw demo:
@@ -205,7 +207,7 @@ export const IndexPage: FunctionComponent = () => (
           components’ information architecture pages are after.
         </span>
       </a>
-      <a href="all">
+      <a href={publicUrl('all')}>
         <strong>All demos</strong>
         <span>
           Every component’s comprehensive demos, one after another on one page.
@@ -216,7 +218,8 @@ export const IndexPage: FunctionComponent = () => (
       No icons ship with the library. The demos show SF Symbols, which are
       Apple’s and licensed for Apple platforms only: they are not part of the
       library or its dependencies, and the demos load each from unpkg as they’re
-      shown. <a href="symbol#icons">Symbol</a> draws any icon’s outlines.
+      shown. <a href={publicUrl('symbol#icons')}>Symbol</a> draws any icon’s
+      outlines.
     </p>
     <p>The components, grouped by what they&apos;re for:</p>
     <Contents
@@ -247,21 +250,27 @@ export const IndexPage: FunctionComponent = () => (
                 className="demo-index-card"
               >
                 <h3>
-                  <a href={entry.id}>{entry.title}</a>
+                  <a href={publicUrl(entry.id)}>{entry.title}</a>
                 </h3>
                 <p>{entry.summary ?? ''}</p>
                 <span className="demo-index-card-links">
-                  {entry.Overview ? <a href={entry.id}>overview</a> : null}
-                  {entry.Parts ? <a href={`${entry.id}/parts`}>parts</a> : null}
+                  {entry.Overview ? (
+                    <a href={publicUrl(entry.id)}>overview</a>
+                  ) : null}
+                  {entry.Parts ? (
+                    <a href={publicUrl(`${entry.id}/parts`)}>parts</a>
+                  ) : null}
                   {entry.Composition ? (
-                    <a href={`${entry.id}/composition`}>composition</a>
+                    <a href={publicUrl(`${entry.id}/composition`)}>
+                      composition
+                    </a>
                   ) : null}
                   {entry.InformationArchitecture ? (
-                    <a href={`${entry.id}/information-architecture`}>
+                    <a href={publicUrl(`${entry.id}/information-architecture`)}>
                       information architecture
                     </a>
                   ) : null}
-                  <a href={`${entry.id}/all`}>
+                  <a href={publicUrl(`${entry.id}/all`)}>
                     {entry.demos.length === 1
                       ? 'demo'
                       : `${String(entry.demos.length)} demos`}

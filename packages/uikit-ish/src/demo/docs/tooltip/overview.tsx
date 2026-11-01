@@ -15,6 +15,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfSquareAndArrowUp } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   tooltipPositionerRows,
   tooltipProviderRows,
@@ -123,8 +124,8 @@ export const TooltipOverview: FunctionComponent = () => (
       </li>
       <li>
         Held open, labeling something for good, on touch too (a value at a
-        slider’s thumb: see <a href="slider">Slider</a>,{' '}
-        <a href="progress">Progress</a>).
+        slider’s thumb: see <a href={publicUrl('slider')}>Slider</a>,{' '}
+        <a href={publicUrl('progress')}>Progress</a>).
       </li>
     </ul>
 
@@ -137,11 +138,13 @@ export const TooltipOverview: FunctionComponent = () => (
     <ul>
       <li>
         Anything needed on touch (no hover there): a label on the control, or a{' '}
-        <a href="popover">Popover</a> it opens.
+        <a href={publicUrl('popover')}>Popover</a> it opens.
       </li>
       <li>
-        Anything to press or select: a <a href="popover">Popover</a> or a{' '}
-        <a href="menu">Menu</a> (a tooltip can’t be hovered or pressed).
+        Anything to press or select: a{' '}
+        <a href={publicUrl('popover')}>Popover</a> or a{' '}
+        <a href={publicUrl('menu')}>Menu</a> (a tooltip can’t be hovered or
+        pressed).
       </li>
     </ul>
 
@@ -154,7 +157,7 @@ export const TooltipOverview: FunctionComponent = () => (
     <ul>
       <li>The props most tooltips set.</li>
       <li>
-        All parts’ props: <a href="tooltip/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('tooltip/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

@@ -26,6 +26,7 @@ import {
   sfMagnifyingglass,
   sfSquareAndPencil,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { names } from '../viewport/content.js';
 
@@ -427,8 +428,8 @@ export const HeaderComposition: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A header sits at the start of a <a href="page">Page</a>; its bar holds a{' '}
-        <a href="toolbar">Toolbar</a>’s parts.
+        A header sits at the start of a <a href={publicUrl('page')}>Page</a>;
+        its bar holds a <a href={publicUrl('toolbar')}>Toolbar</a>’s parts.
       </li>
       <li>
         What stays with the bar follows the large title, in an accessory: a
@@ -436,7 +437,10 @@ export const HeaderComposition: FunctionComponent = () => (
       </li>
       <li>
         In a stack: see{' '}
-        <a href="navigation/composition#large-titles">Navigation</a>.
+        <a href={publicUrl('navigation/composition#large-titles')}>
+          Navigation
+        </a>
+        .
       </li>
     </ul>
 
@@ -492,7 +496,8 @@ export const HeaderComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Mail’s and Contacts’: a <a href="text-field">Text field</a>’s{' '}
+        Mail’s and Contacts’: a <a href={publicUrl('text-field')}>Text field</a>
+        ’s{' '}
         <PartLink
           component="text-field"
           part="TextField.Search"
@@ -512,7 +517,7 @@ export const HeaderComposition: FunctionComponent = () => (
       <li>
         Search sits with the page’s Region (guide{' '}
         <GuideLink to="rule-a11">A11</GuideLink>); also at the bottom (see{' '}
-        <a href="toolbar/composition#a-search-field">Toolbar</a>).
+        <a href={publicUrl('toolbar/composition#a-search-field')}>Toolbar</a>).
       </li>
       <li>
         <strong>Library:</strong> the header’s accessory (
@@ -581,7 +586,7 @@ export const HeaderComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="segmented">Segmented</a> control in the header’s{' '}
+        A <a href={publicUrl('segmented')}>Segmented</a> control in the header’s{' '}
         <PartLink
           component="header"
           part="Header.Accessory"
@@ -591,7 +596,10 @@ export const HeaderComposition: FunctionComponent = () => (
       </li>
       <li>
         In the bar instead, in place of its title: see{' '}
-        <a href="segmented/composition#in-a-navigation-bar">Segmented</a>.
+        <a href={publicUrl('segmented/composition#in-a-navigation-bar')}>
+          Segmented
+        </a>
+        .
       </li>
       <li>
         <strong>Library:</strong> the header’s accessory and the{' '}

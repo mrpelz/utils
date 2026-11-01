@@ -8,6 +8,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { symbolRows } from './docs.js';
 import { propOptionsSymbol } from './props.js';
 
@@ -76,7 +77,7 @@ export const SymbolParts: FunctionComponent = () => (
       </li>
       <li>
         Its children sit on it (positioned on the glyph’s box), e.g. a{' '}
-        <a href="badge">Badge</a>.
+        <a href={publicUrl('badge')}>Badge</a>.
       </li>
       <li>
         Renders a <code>span</code>, its glyph an SVG hidden from assistive

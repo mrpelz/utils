@@ -19,6 +19,7 @@ import {
   sfTrash,
   sfXmark,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -410,14 +411,14 @@ export const ButtonComposition: FunctionComponent = () => (
         not OK).
       </li>
       <li>
-        Confirmed by an <a href="alert">Alert</a> (the button its trigger’s{' '}
-        <code>render</code>), its own destructive action repeated; Cancel to
-        keep it.
+        Confirmed by an <a href={publicUrl('alert')}>Alert</a> (the button its
+        trigger’s <code>render</code>), its own destructive action repeated;
+        Cancel to keep it.
       </li>
       <li>
         An alert is a last resort (guide <GuideLink to="rule-g5">G5</GuideLink>
         ): for what can be undone, undo instead; for several choices, an{' '}
-        <a href="action-sheet">Action sheet</a>.
+        <a href={publicUrl('action-sheet')}>Action sheet</a>.
       </li>
       <li>
         <strong>Library:</strong> the destructive button and the{' '}

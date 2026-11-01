@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -87,12 +88,12 @@ export const PageInformationArchitecture: FunctionComponent = () => (
       <li>
         <strong>A stack:</strong> one per level of the Drill move (guide{' '}
         <GuideLink to="move-drill">§7.2</GuideLink>), in a{' '}
-        <a href="navigation">Navigation</a>.
+        <a href={publicUrl('navigation')}>Navigation</a>.
       </li>
       <li>
         <strong>A split:</strong> one per column (guide{' '}
         <GuideLink to="shell-b">§7.4, shell B</GuideLink>), in a{' '}
-        <a href="layout">Layout</a>.
+        <a href={publicUrl('layout')}>Layout</a>.
       </li>
       <li>
         <strong>A tab:</strong> each tab’s root (guide{' '}

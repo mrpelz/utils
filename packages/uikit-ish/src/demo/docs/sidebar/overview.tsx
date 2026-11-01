@@ -27,6 +27,7 @@ import {
   sfMagnifyingglass,
   sfSquareAndPencil,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { rowTitles, sidebarSections } from './content.js';
 import { sidebarRootRows, sidebarToolbarRows } from './docs.js';
 import {
@@ -247,14 +248,14 @@ export const SidebarOverview: FunctionComponent = () => (
         toolbar, a search field and a list, scrolling inside it.
       </li>
       <li>
-        Placed by a <a href="layout">Layout</a>: its floating first column
-        (regular), or a drawer swiped in (compact).
+        Placed by a <a href={publicUrl('layout')}>Layout</a>: its floating first
+        column (regular), or a drawer swiped in (compact).
       </li>
       <li>
-        The panel only: its content is a <a href="list">List</a> of style{' '}
-        <code>sidebar</code> (capsule rows, the selection) and a{' '}
-        <a href="text-field">Text field</a>’s search field. This library’s own;
-        no Base UI component.
+        The panel only: its content is a <a href={publicUrl('list')}>List</a> of
+        style <code>sidebar</code> (capsule rows, the selection) and a{' '}
+        <a href={publicUrl('text-field')}>Text field</a>’s search field. This
+        library’s own; no Base UI component.
       </li>
     </ul>
     <LiveView />
@@ -276,7 +277,8 @@ export const SidebarOverview: FunctionComponent = () => (
       </li>
       <li>
         On a phone, the same sidebar as a drawer, or its sections as a stack’s
-        root page (see <a href="sidebar/composition">Composition</a>).
+        root page (see{' '}
+        <a href={publicUrl('sidebar/composition')}>Composition</a>).
       </li>
     </ul>
 
@@ -288,15 +290,17 @@ export const SidebarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A few stable sections, on a phone: a <a href="tab-bar">Tab bar</a>.
+        A few stable sections, on a phone: a{' '}
+        <a href={publicUrl('tab-bar')}>Tab bar</a>.
       </li>
       <li>
         Drilling into a hierarchy, one level at a time: a{' '}
-        <a href="navigation">Navigation</a> (its pages’ lists).
+        <a href={publicUrl('navigation')}>Navigation</a> (its pages’ lists).
       </li>
       <li>
-        Commands rather than places: a <a href="toolbar">Toolbar</a>, a{' '}
-        <a href="menu">Menu</a>.
+        Commands rather than places: a{' '}
+        <a href={publicUrl('toolbar')}>Toolbar</a>, a{' '}
+        <a href={publicUrl('menu')}>Menu</a>.
       </li>
     </ul>
 
@@ -309,12 +313,12 @@ export const SidebarOverview: FunctionComponent = () => (
     <ul>
       <li>
         Its parts are plain elements: its props are their attributes (all parts’
-        props: <a href="sidebar/parts">Parts</a>).
+        props: <a href={publicUrl('sidebar/parts')}>Parts</a>).
       </li>
       <li>
-        Where it is and how wide: the <a href="layout">Layout</a> column’s (
-        <code>floating</code>, <code>defaultSize</code>, <code>resizable</code>,{' '}
-        <code>drawer</code>).
+        Where it is and how wide: the <a href={publicUrl('layout')}>Layout</a>{' '}
+        column’s (<code>floating</code>, <code>defaultSize</code>,{' '}
+        <code>resizable</code>, <code>drawer</code>).
       </li>
     </ul>
     <KeyPropsTable

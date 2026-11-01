@@ -10,6 +10,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { collapsibleRootRows } from './docs.js';
 
 /** A list section collapsing by its header (uncontrolled). */
@@ -129,7 +130,8 @@ export const CollapsibleOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Several, one open at a time: an <a href="accordion">Accordion</a>.
+        Several, one open at a time: an{' '}
+        <a href={publicUrl('accordion')}>Accordion</a>.
       </li>
       <li>
         Rows among a list group’s rows (e.g. a picker below its row): the list’s
@@ -142,7 +144,7 @@ export const CollapsibleOverview: FunctionComponent = () => (
       </li>
       <li>
         A level deeper, with its own title: a page drilled into (
-        <a href="navigation">Navigation</a>).
+        <a href={publicUrl('navigation')}>Navigation</a>).
       </li>
     </ul>
 
@@ -154,7 +156,7 @@ export const CollapsibleOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        All its props: <a href="collapsible/parts">Parts</a>.
+        All its props: <a href={publicUrl('collapsible/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

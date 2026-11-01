@@ -28,6 +28,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 /** A sign-up: required fields, validated; a server's error, shown. */
@@ -514,7 +515,8 @@ export const FormComposition: FunctionComponent = () => (
       <li>
         Creating something defers to Done (the guide’s{' '}
         <GuideLink to="commit-model">commit model</GuideLink>, §8.2): Cancel
-        closes the <a href="sheet">Sheet</a>, Done submits the form.
+        closes the <a href={publicUrl('sheet')}>Sheet</a>, Done submits the
+        form.
       </li>
       <li>
         Done is in the sheet’s toolbar, outside the form: a{' '}
@@ -567,7 +569,7 @@ export const FormComposition: FunctionComponent = () => (
       <li>
         Progressive disclosure, as the guide’s form example (a reminder’s date,{' '}
         <GuideLink to="section-8-2">§8.2</GuideLink>): a{' '}
-        <a href="switch">Switch</a> enables the fieldset below it (
+        <a href={publicUrl('switch')}>Switch</a> enables the fieldset below it (
         <PartLink
           component="form"
           part="Fieldset.Root"
@@ -614,10 +616,11 @@ export const FormComposition: FunctionComponent = () => (
         ’s, rendered as their rows.
       </li>
       <li>
-        Submitted as: a string (text), a number (<a href="stepper">Stepper</a>,{' '}
-        <a href="slider">Slider</a>), an ISO date (
-        <a href="date-picker">Date picker</a>), a boolean (
-        <a href="switch">Switch</a>).
+        Submitted as: a string (text), a number (
+        <a href={publicUrl('stepper')}>Stepper</a>,{' '}
+        <a href={publicUrl('slider')}>Slider</a>), an ISO date (
+        <a href={publicUrl('date-picker')}>Date picker</a>), a boolean (
+        <a href={publicUrl('switch')}>Switch</a>).
       </li>
       <li>
         <strong>Library:</strong> each control’s value in the form (text, a

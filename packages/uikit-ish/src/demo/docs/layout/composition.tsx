@@ -19,6 +19,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { rowTitles, sidebarSections } from '../sidebar/content.js';
 import { names } from '../viewport/content.js';
@@ -467,9 +468,11 @@ export const LayoutComposition: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A layout holds columns, each holding a <a href="page">Page</a> (or a{' '}
-        <a href="navigation">Navigation</a>, a <a href="sidebar">Sidebar</a>);
-        it fills a screen (a <a href="viewport">Viewport</a>’s content layer).
+        A layout holds columns, each holding a{' '}
+        <a href={publicUrl('page')}>Page</a> (or a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a>, a{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a>); it fills a screen (a{' '}
+        <a href={publicUrl('viewport')}>Viewport</a>’s content layer).
       </li>
       <li>
         Sidebar and split (guide{' '}
@@ -547,7 +550,8 @@ export const LayoutComposition: FunctionComponent = () => (
     <ul>
       <li>
         Columns that don’t fit as drawers, the app’s choice (by the size class):
-        see <a href="drawer/composition">Drawer</a>, e.g. an inspector.
+        see <a href={publicUrl('drawer/composition')}>Drawer</a>, e.g. an
+        inspector.
       </li>
     </ul>
 

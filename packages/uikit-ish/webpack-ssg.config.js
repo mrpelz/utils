@@ -15,7 +15,8 @@ import {
 } from 'modify-source-webpack-plugin';
 import webpack from 'webpack';
 
-const { PUBLIC_PATH: publicPath = '/' } = process.env;
+// The site's public path, ending in a slash (as webpack.config.js's).
+const publicPath = (process.env.PUBLIC_PATH ?? '/').replace(/\/?$/u, '/');
 
 export const dirDemo = path.resolve(dirBase, 'demo/__ssg__');
 

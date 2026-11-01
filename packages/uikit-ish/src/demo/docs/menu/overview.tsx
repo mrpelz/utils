@@ -29,6 +29,7 @@ import {
   sfSquareAndArrowUp,
   sfTrash,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   menuItemRows,
   menuPositionerRows,
@@ -199,20 +200,23 @@ export const MenuOverview: FunctionComponent = () => (
     <ul>
       <li>
         Actions on a piece of content, summoned from it: a{' '}
-        <a href="contextual-menu">Contextual menu</a>.
+        <a href={publicUrl('contextual-menu')}>Contextual menu</a>.
       </li>
       <li>
-        Actions on selected text: an <a href="edit-menu">Edit menu</a>.
+        Actions on selected text: an{' '}
+        <a href={publicUrl('edit-menu')}>Edit menu</a>.
       </li>
       <li>
         Choices about an action the person just started (Delete, or not): an{' '}
-        <a href="action-sheet">Action sheet</a>.
+        <a href={publicUrl('action-sheet')}>Action sheet</a>.
       </li>
       <li>
-        A few settings, or a small task: a <a href="popover">Popover</a>.
+        A few settings, or a small task: a{' '}
+        <a href={publicUrl('popover')}>Popover</a>.
       </li>
       <li>
-        A choice always visible: a <a href="segmented">Segmented</a> control.
+        A choice always visible: a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
     </ul>
 
@@ -225,7 +229,7 @@ export const MenuOverview: FunctionComponent = () => (
     <ul>
       <li>The props most menus set.</li>
       <li>
-        All parts’ props: <a href="menu/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('menu/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

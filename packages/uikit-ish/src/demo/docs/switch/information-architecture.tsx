@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -79,7 +80,8 @@ export const SwitchInformationArchitecture: FunctionComponent = () => (
         <tr>
           <th>N ≤ ~5</th>
           <td>
-            Segmented control (<a href="segmented">Segmented</a>) / radios
+            Segmented control (<a href={publicUrl('segmented')}>Segmented</a>) /
+            radios
           </td>
           <td>Pop-up button</td>
         </tr>
@@ -97,7 +99,8 @@ export const SwitchInformationArchitecture: FunctionComponent = () => (
       </li>
       <li>
         This library’s checkbox is iOS’s selection circle (
-        <a href="checkbox">Checkbox</a>): for selecting items, not settings.
+        <a href={publicUrl('checkbox')}>Checkbox</a>): for selecting items, not
+        settings.
       </li>
     </ul>
 
@@ -168,7 +171,8 @@ export const SwitchInformationArchitecture: FunctionComponent = () => (
         <strong>Containment:</strong> an Item holds inline controls, a Choice
         among them; Items are in Groups, Groups in a Collection (
         <GuideLink to="section-6-containment">§6</GuideLink>). Here: a switch in
-        a <a href="list">List</a> row’s trailing slot, rows in a section.
+        a <a href={publicUrl('list')}>List</a> row’s trailing slot, rows in a
+        section.
       </li>
       <li>
         <strong>Commit model:</strong> a form either applies each field at once

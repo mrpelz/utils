@@ -21,6 +21,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfMagnifyingglass } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   tabBarAccessoryRows,
@@ -163,17 +164,17 @@ export const TabBarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Actions (Add, Compose, Share): a <a href="toolbar">Toolbar</a>, as a tab
-        bar navigates and never acts (guide{' '}
-        <GuideLink to="rule-g1">G1</GuideLink>).
+        Actions (Add, Compose, Share): a{' '}
+        <a href={publicUrl('toolbar')}>Toolbar</a>, as a tab bar navigates and
+        never acts (guide <GuideLink to="rule-g1">G1</GuideLink>).
       </li>
       <li>
         Switching between views of the same content: a{' '}
-        <a href="segmented">Segmented</a> control, in the content.
+        <a href={publicUrl('segmented')}>Segmented</a> control, in the content.
       </li>
       <li>
         Many or user-defined sections (folders, playlists): a{' '}
-        <a href="sidebar">Sidebar</a> (guide{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a> (guide{' '}
         <GuideLink to="section-7-3">§7.3</GuideLink>).
       </li>
     </ul>
@@ -187,7 +188,7 @@ export const TabBarOverview: FunctionComponent = () => (
     <ul>
       <li>The props most tab bars set, across their parts.</li>
       <li>
-        All parts’ props: <a href="tab-bar/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('tab-bar/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -276,7 +277,8 @@ export const TabBarOverview: FunctionComponent = () => (
           component="viewport"
           part="useViewportScroll"
         />
-        ), or on search (see <a href="tab-bar/composition">Composition</a>).
+        ), or on search (see{' '}
+        <a href={publicUrl('tab-bar/composition')}>Composition</a>).
       </li>
     </ul>
   </>

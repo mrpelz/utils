@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -89,7 +90,7 @@ export const SidebarInformationArchitecture: FunctionComponent = () => (
         <strong>Sidebar and split</strong> (guide{' '}
         <GuideLink to="shell-b">§7.4, shell B</GuideLink>): the sidebar, its
         section’s content beside it (a list, a detail; a{' '}
-        <a href="navigation">Navigation</a>).
+        <a href={publicUrl('navigation')}>Navigation</a>).
       </li>
     </ul>
 
@@ -108,7 +109,10 @@ export const SidebarInformationArchitecture: FunctionComponent = () => (
       <li>
         Here, also a drawer (Framework7’s panels; iOS has none): the sidebar
         kept, swiped in (see{' '}
-        <a href="sidebar/composition#floating-or-a-drawer">Composition</a>).
+        <a href={publicUrl('sidebar/composition#floating-or-a-drawer')}>
+          Composition
+        </a>
+        ).
       </li>
     </ul>
 

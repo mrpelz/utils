@@ -1,13 +1,12 @@
 import { Collapsible } from '@base-ui/react/collapsible';
 import { RadioGroup } from '@base-ui/react/radio-group';
 import { ErrorBoundary, LocationProvider, Route, Router } from 'preact-iso';
-import { FunctionComponent, useMemo } from 'react';
+import { FunctionComponent, useEffect } from 'react';
 
 import * as components from '../../components/index.js';
 import { useTouchActive } from '../../styles.js';
 import { HigGuidePage } from '../docs/hig-guide/main.js';
 import { KitchenSinkPage } from '../kitchen-sink/main.js';
-import { publicPath } from './env.js';
 import { nameComponents } from './frame/render-code.js';
 import { OptionsProvider } from './frame/state.js';
 import {
@@ -20,6 +19,7 @@ import {
   OverviewPage,
   PartsPage,
 } from './guide/pages.js';
+import { publicUrl } from './public-url.js';
 import { startClock } from './shared/clock.js';
 import { startStatusBarTaps } from './shared/status-bar.js';
 
@@ -38,84 +38,69 @@ const TouchActive: FunctionComponent = () => {
   return null;
 };
 
-const usePath = (input: string) =>
-  useMemo(
-    () =>
-      publicPath === '/'
-        ? input
-        : `/${[publicPath.split('/'), input.split('/')]
-            .flat()
-            .filter((segment) => segment.length)
-            .join('/')}`,
-    [input],
-  );
-
-// Anchor links (`list/parts#list-root`, `hig-guide#rule-g7`): the router
-// takes them over (not starting with `#`, because of the document's base) and
-// scrolls to the top on another page, not to their anchor; so the anchor's
-// element is scrolled to after it: on another page once it's rendered (the
-// router's `onRouteChange`), on the same page once the router pushed it.
-// Back and forward are left to the browser's scroll restoration.
-
-// Content above the anchor may still grow as it's scrolled to (e.g. the
-// guide's diagrams, rendered on the client): the scroll is aimed at it again
-// on every resize, until the person scrolls themselves (or for a while).
-
-const settling = 3000;
-const userScroll = ['keydown', 'pointerdown', 'touchstart', 'wheel'] as const;
-
-let stopFollowing: (() => void) | undefined;
+// Anchors. On this page (`#…`, or a link to this page with one): the
+// browser's (scrolled to, in its history, restored on reload), passed over
+// by the router (it'd take over any link with a path: its click listener,
+// added after this one, stopped). To another page (`list/parts#…`): the
+// router's, which scrolls to the top; the anchor scrolled to once the page
+// is rendered (its `onRouteChange`). On load (a reload too): the browser's
+// own jump, as the page is parsed, finds the anchor only if prerendered (a
+// build; not the watch server's page, rendered on the client), so it's
+// scrolled to once the app first rendered (its routes not lazy: the page's
+// content rendered then), unless the browser scrolled already (to it, or
+// back to where it was, restoring). Content growing above it after (e.g.
+// the guide's diagrams): kept in place by the browser's scroll anchoring.
+// Back and forward: the browser's scroll restoration.
 
 const scrollToAnchor = () => {
-  stopFollowing?.();
-
   const id = decodeURIComponent(location.hash.slice(1));
   if (!id) return;
 
-  const target = document.querySelector(`#${CSS.escape(id)}`);
-  if (!target) return;
-
-  const scroll = () => target.scrollIntoView({ behavior: 'smooth' });
-  scroll();
-
-  const observer = new ResizeObserver(scroll);
-  observer.observe(document.documentElement);
-
-  let timeout: ReturnType<typeof setTimeout> | undefined;
-  const stop = () => {
-    observer.disconnect();
-    clearTimeout(timeout);
-    for (const type of userScroll) removeEventListener(type, stop);
-    stopFollowing = undefined;
-  };
-  timeout = setTimeout(stop, settling);
-  for (const type of userScroll) {
-    addEventListener(type, stop, { passive: true });
-  }
-
-  stopFollowing = stop;
+  document.querySelector(`#${CSS.escape(id)}`)?.scrollIntoView();
 };
 
-// An anchor link to another page was followed (until it's rendered).
+// A link's target opening it here (none, or `_self`).
+const ownTarget = /^(?:_?self)?$/iu;
+
+// A link to another page with an anchor was followed (until it's rendered).
 let isAnchorFollowed = false;
 
 if (typeof addEventListener === 'function') {
   addEventListener('click', (event) => {
+    // (Clicks the browser handles itself, as the router leaves them.)
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey
+    ) {
+      return;
+    }
+
     const link = event
       .composedPath()
       .find((target) => target instanceof HTMLAnchorElement);
+    if (
+      !link?.hash ||
+      link.origin !== location.origin ||
+      !ownTarget.test(link.target) ||
+      link.hasAttribute('download')
+    ) {
+      return;
+    }
 
-    if (!link?.hash || link.origin !== location.origin) return;
+    // (This page's: the browser's.)
+    if (
+      link.pathname === location.pathname &&
+      link.search === location.search
+    ) {
+      event.stopImmediatePropagation();
+      return;
+    }
 
-    const { pathname } = location;
-    isAnchorFollowed = link.pathname !== pathname;
-
-    // (After the router's own handler, whether it took the link over.)
-    setTimeout(() => {
-      if (event.defaultPrevented && link.pathname === pathname) {
-        scrollToAnchor();
-      }
-    });
+    isAnchorFollowed = true;
   });
 }
 
@@ -126,47 +111,58 @@ const onRouteChange = () => {
   scrollToAnchor();
 };
 
+// On load: the URL's anchor, unless the browser scrolled already (see
+// above).
+const AnchorOnLoad: FunctionComponent = () => {
+  useEffect(() => {
+    if (scrollY === 0) scrollToAnchor();
+  }, []);
+
+  return null;
+};
+
 export const Demo: FunctionComponent = () => (
   <LocationProvider>
     <OptionsProvider>
       <ErrorBoundary>
         <TouchActive />
+        <AnchorOnLoad />
         <Router onRouteChange={onRouteChange}>
           <Route
             component={IndexPage}
-            path={usePath('/')}
+            path={publicUrl('/')}
           />
           <Route
             component={AllDemosPage}
-            path={usePath('/all')}
+            path={publicUrl('/all')}
           />
           <Route
             component={KitchenSinkPage}
-            path={usePath('/kitchen-sink')}
+            path={publicUrl('/kitchen-sink')}
           />
           <Route
             component={HigGuidePage}
-            path={usePath('/hig-guide')}
+            path={publicUrl('/hig-guide')}
           />
           <Route
             component={OverviewPage}
-            path={usePath('/:id')}
+            path={publicUrl('/:id')}
           />
           <Route
             component={PartsPage}
-            path={usePath('/:id/parts')}
+            path={publicUrl('/:id/parts')}
           />
           <Route
             component={CompositionPage}
-            path={usePath('/:id/composition')}
+            path={publicUrl('/:id/composition')}
           />
           <Route
             component={InformationArchitecturePage}
-            path={usePath('/:id/information-architecture')}
+            path={publicUrl('/:id/information-architecture')}
           />
           <Route
             component={ComponentDemosPage}
-            path={usePath('/:id/all')}
+            path={publicUrl('/:id/all')}
           />
           <Route
             default

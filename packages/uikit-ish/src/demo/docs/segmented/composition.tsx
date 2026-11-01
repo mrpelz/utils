@@ -23,6 +23,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfEllipsis, sfLocationFill } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 /** A news app's sections: more than a phone's width holds. */
@@ -313,8 +314,8 @@ export const SegmentedComposition: FunctionComponent = () => (
         Missed).
       </li>
       <li>
-        Inside the <a href="header">Header</a>’s bar, on its glass; the page’s
-        title a large title below it (
+        Inside the <a href={publicUrl('header')}>Header</a>’s bar, on its glass;
+        the page’s title a large title below it (
         <PartLink
           component="header"
           part="Header.LargeTitle"
@@ -353,8 +354,8 @@ export const SegmentedComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Between a bottom <a href="toolbar">Toolbar</a>’s buttons: choosing how
-        the content is shown (Maps’ modes).
+        Between a bottom <a href={publicUrl('toolbar')}>Toolbar</a>’s buttons:
+        choosing how the content is shown (Maps’ modes).
       </li>
       <li>
         The buttons act on the content (guide{' '}
@@ -390,7 +391,7 @@ export const SegmentedComposition: FunctionComponent = () => (
       <li>
         Swiped (or by a wheel) to scroll; an item held shows the lens, dragged
         over the items, scrolling them near an end (as an{' '}
-        <a href="edit-menu">Edit menu</a>’s actions).
+        <a href={publicUrl('edit-menu')}>Edit menu</a>’s actions).
       </li>
       <li>
         Prefer fewer, shorter choices where they fit (a segmented control’s
@@ -421,9 +422,10 @@ export const SegmentedComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A radio group with hidden radio inputs: in a <a href="form">Form</a>,
-        submitted by the root’s <code>name</code> (the chosen item’s{' '}
-        <code>value</code>), as native radio buttons.
+        A radio group with hidden radio inputs: in a{' '}
+        <a href={publicUrl('form')}>Form</a>, submitted by the root’s{' '}
+        <code>name</code> (the chosen item’s <code>value</code>), as native
+        radio buttons.
       </li>
       <li>
         Can be <code>required</code>.

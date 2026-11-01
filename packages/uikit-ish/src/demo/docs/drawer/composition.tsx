@@ -26,6 +26,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfICircle, sfListBullet } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   getPropOptionsGuideColumn,
   propOptionsGuideRoot,
@@ -649,13 +650,14 @@ export const DrawerComposition: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A drawer holds a page (or a <a href="sidebar">Sidebar</a>); it sits in a
-        screen (a <a href="viewport">Viewport</a>’s content layer), its popup
-        over it.
+        A drawer holds a page (or a <a href={publicUrl('sidebar')}>Sidebar</a>);
+        it sits in a screen (a <a href={publicUrl('viewport')}>Viewport</a>’s
+        content layer), its popup over it.
       </li>
       <li>
-        On a phone, a <a href="layout">Layout</a>’s columns that don’t fit: the
-        app renders a column or a drawer (its choice, e.g. by the size class).
+        On a phone, a <a href={publicUrl('layout')}>Layout</a>’s columns that
+        don’t fit: the app renders a column or a drawer (its choice, e.g. by the
+        size class).
       </li>
     </ul>
 

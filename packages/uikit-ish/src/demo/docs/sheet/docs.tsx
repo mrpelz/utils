@@ -7,6 +7,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -217,7 +218,7 @@ export const sheetTriggerRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <a href="button">Button</a>’s{' '}
+            {row[3]} E.g. a <a href={publicUrl('button')}>Button</a>’s{' '}
             <PartLink
               component="button"
               part="Button.Root"
@@ -320,7 +321,7 @@ export const sheetHeaderRows: readonly PropRow[] = [
         component="sheet"
         part="Sheet.Grabber"
       />
-      , optional), then e.g. a <a href="toolbar">Toolbar</a> (its{' '}
+      , optional), then e.g. a <a href={publicUrl('toolbar')}>Toolbar</a> (its{' '}
       <code>placement=&quot;block-start&quot;</code>), with its title and
       buttons. Over the content, which scrolls under it (its content making room
       with a{' '}
@@ -385,9 +386,9 @@ export const sheetContentRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      What scrolls: e.g. a <a href="list">List</a>, a form, a{' '}
-      <a href="navigation">Navigation</a>. Under a header with more than a
-      grabber, first a{' '}
+      What scrolls: e.g. a <a href={publicUrl('list')}>List</a>, a form, a{' '}
+      <a href={publicUrl('navigation')}>Navigation</a>. Under a header with more
+      than a grabber, first a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Padding"

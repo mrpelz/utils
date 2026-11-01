@@ -32,6 +32,7 @@ import {
   sfLine3HorizontalDecreaseCircle,
   sfXmark,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { names } from '../viewport/content.js';
 import { propOptionsPresentation } from './props.js';
 
@@ -526,8 +527,8 @@ export const PopoverComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A row’s info button (a <a href="button">Button</a>, its symbol) shows
-        details of the row’s item.
+        A row’s info button (a <a href={publicUrl('button')}>Button</a>, its
+        symbol) shows details of the row’s item.
       </li>
       <li>
         Aligned with the row’s end (
@@ -565,12 +566,14 @@ export const PopoverComposition: FunctionComponent = () => (
     <ul>
       <li>
         In a compact width, a popover’s content shows as a sheet (guide{' '}
-        <a href="hig-guide#rule-a5">A5</a>): the app’s choice here, by{' '}
+        <a href={publicUrl('hig-guide#rule-a5')}>A5</a>): the app’s choice here,
+        by{' '}
         <PartLink
           component="viewport"
           part="useSizeClass"
         />
-        ; a <a href="sheet">Sheet</a> with the same bar and content (its{' '}
+        ; a <a href={publicUrl('sheet')}>Sheet</a> with the same bar and content
+        (its{' '}
         <PartLink
           component="sheet"
           part="Sheet.Header"
@@ -616,13 +619,13 @@ export const PopoverComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="toolbar">Toolbar</a>’s button (
+        A <a href={publicUrl('toolbar')}>Toolbar</a>’s button (
         <code>{'render={<Toolbar.Button />}'}</code>) shows options about the
         page: below it, its arrow pointing at it.
       </li>
       <li>
-        For commands, or one choice among several, a <a href="menu">Menu</a>{' '}
-        instead.
+        For commands, or one choice among several, a{' '}
+        <a href={publicUrl('menu')}>Menu</a> instead.
       </li>
       <li>
         <strong>Library:</strong> the popover’s trigger rendering the toolbar’s

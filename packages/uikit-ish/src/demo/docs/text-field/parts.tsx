@@ -8,6 +8,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfMagnifyingglass } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   textFieldClearRows,
   textFieldControlRows,
@@ -571,7 +572,10 @@ export const TextFieldParts: FunctionComponent = () => (
         Its look (<code>variant</code>), by where it sits: the capsule; a list
         row’s; a tab bar group’s glass capsule; on a collapsed tab bar’s glass;
         a toolbar’s glass capsule (see{' '}
-        <a href="text-field/composition#a-search-field">Composition</a>).
+        <a href={publicUrl('text-field/composition#a-search-field')}>
+          Composition
+        </a>
+        ).
       </li>
       <li>
         Renders a <code>label</code>.

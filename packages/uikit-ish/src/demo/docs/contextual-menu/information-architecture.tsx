@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -57,8 +58,9 @@ export const ContextualMenuInformationArchitecture: FunctionComponent = () => (
         ); here the anchor a content element (or the pointer).
       </li>
       <li>
-        A <a href="menu">Menu</a>’s sibling (anchored to a control), rendered
-        the same; the content lifts, or is previewed, as it’s summoned.
+        A <a href={publicUrl('menu')}>Menu</a>’s sibling (anchored to a
+        control), rendered the same; the content lifts, or is previewed, as it’s
+        summoned.
       </li>
     </ul>
 

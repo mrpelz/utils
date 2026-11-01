@@ -7,6 +7,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   avatarFallbackRows,
   avatarGroupRows,
@@ -206,7 +207,8 @@ export const AvatarParts: FunctionComponent = () => (
         A person, in a circle: <code>size</code> (70px by default).
       </li>
       <li>
-        Not clipping: a <a href="badge">Badge</a> in it overhangs its corner.
+        Not clipping: a <a href={publicUrl('badge')}>Badge</a> in it overhangs
+        its corner.
       </li>
       <li>
         Renders a <code>span</code>.

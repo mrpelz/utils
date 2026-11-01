@@ -23,6 +23,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfChevronBackward } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { pages } from '../navigation/content.js';
 import { names } from '../viewport/content.js';
@@ -752,8 +753,8 @@ export const SheetComposition: FunctionComponent = () => (
       </li>
       <li>
         Edited, closing it (Cancel, Escape, swiped down) asks first: an{' '}
-        <a href="action-sheet">Action sheet</a>, Discard Changes or Keep
-        Editing; a press outside it does nothing (
+        <a href={publicUrl('action-sheet')}>Action sheet</a>, Discard Changes or
+        Keep Editing; a press outside it does nothing (
         <code>disablePointerDismissal</code>).
       </li>
       <li>
@@ -825,9 +826,10 @@ export const SheetComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A task of several levels: a <a href="navigation">Navigation</a> as its
-        content, each page’s bar its title (moving with it), the back button
-        (from the first pushed page) and Done: persistent items (see{' '}
+        A task of several levels: a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a> as its content, each
+        page’s bar its title (moving with it), the back button (from the first
+        pushed page) and Done: persistent items (see{' '}
         <PartLink
           component="navigation"
           part="Navigation.Persistent"

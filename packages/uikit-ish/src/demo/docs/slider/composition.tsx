@@ -32,6 +32,7 @@ import {
   sfSunMax,
   sfSunMin,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { time } from './content.js';
 
@@ -495,15 +496,15 @@ export const SliderComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As a display settings page: a slider filling a <a href="list">List</a>{' '}
-        row of its own, between its ends’ symbols; the section’s header names
-        it.
+        As a display settings page: a slider filling a{' '}
+        <a href={publicUrl('list')}>List</a> row of its own, between its ends’
+        symbols; the section’s header names it.
       </li>
       <li>
         Takes effect at once (guide,{' '}
         <GuideLink to="commit-model">§8.2, commit model</GuideLink>: immediate
         per field): the app follows <code>onValueChange</code>, as for other
-        settings (e.g. a <a href="switch">Switch</a>).
+        settings (e.g. a <a href={publicUrl('switch')}>Switch</a>).
       </li>
       <li>The header doesn’t label the input: name the thumb itself.</li>
       <li>
@@ -594,7 +595,7 @@ export const SliderComposition: FunctionComponent = () => (
         value at its end), or beside it.
       </li>
       <li>
-        In a <a href="form">Form</a>: Base UI’s{' '}
+        In a <a href={publicUrl('form')}>Form</a>: Base UI’s{' '}
         <PartLink
           component="form"
           part="Field"
@@ -647,7 +648,8 @@ export const SliderComposition: FunctionComponent = () => (
         <code>aria-valuetext</code> says both (<code>getAriaValueText</code>).
       </li>
       <li>
-        Below the playback <a href="button">Buttons</a>: the volume.
+        Below the playback <a href={publicUrl('button')}>Buttons</a>: the
+        volume.
       </li>
       <li>
         <strong>Library:</strong> the controlled value,{' '}

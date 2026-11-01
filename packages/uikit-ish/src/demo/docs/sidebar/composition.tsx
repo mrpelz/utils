@@ -36,6 +36,7 @@ import {
   sfMagnifyingglass,
   sfTrash,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { rowTitles, sidebarSections } from './content.js';
 import { propOptionsAdaptiveContent } from './props.js';
@@ -1146,13 +1147,17 @@ export const SidebarComposition: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         A sidebar holds a toolbar, a search field (
-        <a href="text-field">Text field</a>) and a list (<a href="list">List</a>{' '}
-        of style <code>sidebar</code>); it’s held by a{' '}
-        <a href="layout">Layout</a> column, beside the content it selects.
+        <a href={publicUrl('text-field')}>Text field</a>) and a list (
+        <a href={publicUrl('list')}>List</a> of style <code>sidebar</code>);
+        it’s held by a <a href={publicUrl('layout')}>Layout</a> column, beside
+        the content it selects.
       </li>
       <li>
         A section’s content may be a stack of its own: see{' '}
-        <a href="navigation/composition#beside-a-sidebar">Navigation</a>.
+        <a href={publicUrl('navigation/composition#beside-a-sidebar')}>
+          Navigation
+        </a>
+        .
       </li>
     </ul>
 
@@ -1241,7 +1246,7 @@ export const SidebarComposition: FunctionComponent = () => (
       </li>
       <li>
         The section collapses by its title (a{' '}
-        <a href="collapsible">Collapsible</a>: its{' '}
+        <a href={publicUrl('collapsible')}>Collapsible</a>: its{' '}
         <PartLink
           component="list"
           part="List.Header"
@@ -1470,7 +1475,10 @@ export const SidebarComposition: FunctionComponent = () => (
       </li>
       <li>
         Compact, the sections as a stack’s root page instead: see{' '}
-        <a href="navigation/composition#compact-or-regular">Navigation</a>.
+        <a href={publicUrl('navigation/composition#compact-or-regular')}>
+          Navigation
+        </a>
+        .
       </li>
       <li>
         <strong>Library:</strong> the{' '}

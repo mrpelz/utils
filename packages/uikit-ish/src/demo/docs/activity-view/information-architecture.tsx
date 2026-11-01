@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -70,8 +71,9 @@ export const ActivityViewInformationArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>Its surface:</strong> the app’s <a href="sheet">Sheet</a>{' '}
-        (iPhone) or <a href="popover">Popover</a> (iPad): window-modal, or
+        <strong>Its surface:</strong> the app’s{' '}
+        <a href={publicUrl('sheet')}>Sheet</a> (iPhone) or{' '}
+        <a href={publicUrl('popover')}>Popover</a> (iPad): window-modal, or
         transient at the Share button (guide{' '}
         <GuideLink to="modality-ladder">ladder</GuideLink>).
       </li>

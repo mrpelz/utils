@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -74,7 +75,7 @@ export const SegmentedInformationArchitecture: FunctionComponent = () => (
         <tr>
           <th>N = 2</th>
           <td>
-            Toggle (<a href="switch">Switch</a>) / checkbox
+            Toggle (<a href={publicUrl('switch')}>Switch</a>) / checkbox
           </td>
           <td>—</td>
         </tr>
@@ -99,8 +100,8 @@ export const SegmentedInformationArchitecture: FunctionComponent = () => (
       </li>
       <li>
         Past about five options, or long ones: the same Choice, collapsed, a
-        pop-up button (<a href="menu">Menu</a>) or a picker (
-        <a href="roll">Roll</a>).
+        pop-up button (<a href={publicUrl('menu')}>Menu</a>) or a picker (
+        <a href={publicUrl('roll')}>Roll</a>).
       </li>
     </ul>
 
@@ -185,7 +186,8 @@ export const SegmentedInformationArchitecture: FunctionComponent = () => (
         segmented switch can take a tab bar’s place (
         <GuideLink to="section-7-3">§7.3</GuideLink>,{' '}
         <GuideLink to="rule-g4">G4</GuideLink>: the same Choice, rendered per
-        host). On iPhone, top-level sections are a <a href="tab-bar">Tab bar</a>
+        host). On iPhone, top-level sections are a{' '}
+        <a href={publicUrl('tab-bar')}>Tab bar</a>
         ’s.
       </li>
       <li>

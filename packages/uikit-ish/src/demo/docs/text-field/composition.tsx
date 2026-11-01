@@ -18,6 +18,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfMagnifyingglass } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { names } from '../viewport/content.js';
 
@@ -512,8 +513,8 @@ export const TextFieldComposition: FunctionComponent = () => (
       <li>
         Checked on leaving a field (
         <code>validationMode=&quot;onBlur&quot;</code>
-        ), and all on submitting the <a href="form">Form</a>: invalid, it isn’t
-        submitted, its first invalid field focused; valid,{' '}
+        ), and all on submitting the <a href={publicUrl('form')}>Form</a>:
+        invalid, it isn’t submitted, its first invalid field focused; valid,{' '}
         <code>onFormSubmit</code> gets the values (by <code>name</code>).
       </li>
       <li>
@@ -563,8 +564,8 @@ export const TextFieldComposition: FunctionComponent = () => (
       </li>
       <li>
         In a page’s header, a toolbar, a sidebar (see{' '}
-        <a href="header/composition#a-search-field">Header</a>,{' '}
-        <a href="toolbar/composition#a-search-field">Toolbar</a>).
+        <a href={publicUrl('header/composition#a-search-field')}>Header</a>,{' '}
+        <a href={publicUrl('toolbar/composition#a-search-field')}>Toolbar</a>).
       </li>
       <li>
         Its look follows where it sits (
@@ -585,7 +586,9 @@ export const TextFieldComposition: FunctionComponent = () => (
               component="header"
               part="Header.Accessory"
             />{' '}
-            above it (<a href="header/composition#a-search-field">Header</a>).
+            above it (
+            <a href={publicUrl('header/composition#a-search-field')}>Header</a>
+            ).
           </li>
           <li>
             <code>tab-bar</code>: a group’s glass capsule as high as its tabs,
@@ -600,7 +603,11 @@ export const TextFieldComposition: FunctionComponent = () => (
               part="TabBar.Group"
             />
             , taking the free space (
-            <a href="tab-bar/composition#a-search-field-beside-the-tabs">
+            <a
+              href={publicUrl(
+                'tab-bar/composition#a-search-field-beside-the-tabs',
+              )}
+            >
               Tab bar
             </a>
             ).
@@ -613,7 +620,7 @@ export const TextFieldComposition: FunctionComponent = () => (
               part="TabBar.Accessory"
             />{' '}
             shown in the collapsed bar, filling it (
-            <a href="tab-bar/composition#search">Tab bar</a>).
+            <a href={publicUrl('tab-bar/composition#search')}>Tab bar</a>).
           </li>
           <li>
             <code>toolbar</code>: a glass capsule as high as the bar’s buttons,
@@ -623,7 +630,10 @@ export const TextFieldComposition: FunctionComponent = () => (
               part="Toolbar.Root"
             />{' '}
             between them, taking the free space (
-            <a href="toolbar/composition#a-search-field">Toolbar</a>).
+            <a href={publicUrl('toolbar/composition#a-search-field')}>
+              Toolbar
+            </a>
+            ).
           </li>
         </ul>
         Its glass takes the bar’s colors (its glass context); in a bar at the
@@ -670,8 +680,8 @@ export const TextFieldComposition: FunctionComponent = () => (
         >
           {'render={<List.Item />}'}
         </PartLink>
-        ) of a grouped <a href="list">List</a>, in sections: a{' '}
-        <a href="form">Form</a>’s{' '}
+        ) of a grouped <a href={publicUrl('list')}>List</a>, in sections: a{' '}
+        <a href={publicUrl('form')}>Form</a>’s{' '}
         <PartLink
           component="form"
           part="Fieldset.Root"
@@ -718,7 +728,9 @@ export const TextFieldComposition: FunctionComponent = () => (
       <li>
         Or the browser’s: a <code>{'<datalist>'}</code> by the control’s{' '}
         <code>list</code> (see the{' '}
-        <a href="text-field/parts#textfield-control">control’s view</a>
+        <a href={publicUrl('text-field/parts#textfield-control')}>
+          control’s view
+        </a>
         ).
       </li>
       <li>

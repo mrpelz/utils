@@ -15,6 +15,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   datePickerCalendarButtonRows,
   datePickerCalendarMessageRows,
@@ -608,7 +609,7 @@ export const DatePickerParts: FunctionComponent = () => (
       </li>
       <li>
         Here: see{' '}
-        <a href="date-picker/composition#expanded-below-a-row">
+        <a href={publicUrl('date-picker/composition#expanded-below-a-row')}>
           Expanded below a row
         </a>
         .
@@ -655,8 +656,8 @@ export const DatePickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A time as a <a href="roll">Roll</a>: hours, minutes and (12 hours) the
-        day period; the numbers editable.
+        A time as a <a href={publicUrl('roll')}>Roll</a>: hours, minutes and (12
+        hours) the day period; the numbers editable.
       </li>
       <li>
         Controlled only (<code>value</code>, <code>onValueChange</code>): the
@@ -694,8 +695,8 @@ export const DatePickerParts: FunctionComponent = () => (
     <ul>
       <li>
         A footer button, as the compact style’s (a bordered, secondary{' '}
-        <a href="button">Button</a>): e.g. jumping to a date (the footer’s{' '}
-        <code>select</code>).
+        <a href={publicUrl('button')}>Button</a>): e.g. jumping to a date (the
+        footer’s <code>select</code>).
       </li>
       <li>
         Renders a <code>button</code>.

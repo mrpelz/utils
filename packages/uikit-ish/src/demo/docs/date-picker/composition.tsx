@@ -21,6 +21,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // An example date: April 20, 2025, 10:00.
 const example = new Date(2025, 3, 20, 10, 0);
@@ -257,9 +258,9 @@ export const DatePickerComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The compact style at a <a href="list">List</a> row’s end, as in
-        Settings: its buttons show the value, opening the calendar (or the time)
-        in a popover.
+        The compact style at a <a href={publicUrl('list')}>List</a> row’s end,
+        as in Settings: its buttons show the value, opening the calendar (or the
+        time) in a popover.
       </li>
       <li>In a row, the popover aligns to the buttons’ end.</li>
       <li>
@@ -346,7 +347,7 @@ export const DatePickerComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a <a href="form">Form</a>, in Base UI’s{' '}
+        In a <a href={publicUrl('form')}>Form</a>, in Base UI’s{' '}
         <PartLink
           component="form"
           part="Field"

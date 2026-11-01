@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -36,7 +37,8 @@ export const NavigationInformationArchitecture: FunctionComponent = () => (
           Navigation and search
         </a>{' '}
         pattern (hierarchical navigation), rendered by navigation bars (
-        <a href="toolbar">Toolbar</a>, <a href="header">Header</a>).
+        <a href={publicUrl('toolbar')}>Toolbar</a>,{' '}
+        <a href={publicUrl('header')}>Header</a>).
       </li>
       <li>
         As the guide’s moves (
@@ -64,7 +66,7 @@ export const NavigationInformationArchitecture: FunctionComponent = () => (
       <li>
         Not for detours (a self-contained task returning where it started, guide{' '}
         <GuideLink to="move-detour">Detour</GuideLink>): those are modal (a{' '}
-        <a href="sheet">Sheet</a>).
+        <a href={publicUrl('sheet')}>Sheet</a>).
       </li>
     </ul>
 
@@ -79,7 +81,10 @@ export const NavigationInformationArchitecture: FunctionComponent = () => (
         <strong>A tabbed stack</strong> (guide{' '}
         <GuideLink to="shell-a">§7.4, shell A</GuideLink>): each tab holds its
         own Drill stack (see{' '}
-        <a href="navigation/composition#a-stack-per-tab">Composition</a>).
+        <a href={publicUrl('navigation/composition#a-stack-per-tab')}>
+          Composition
+        </a>
+        ).
       </li>
       <li>
         <strong>Sidebar and split</strong> (guide{' '}
@@ -108,8 +113,10 @@ export const NavigationInformationArchitecture: FunctionComponent = () => (
       </li>
       <li>
         Here, the app decides by the width (see{' '}
-        <a href="navigation/composition#compact-or-regular">Composition</a>),
-        the state (the section, its stack) kept across.
+        <a href={publicUrl('navigation/composition#compact-or-regular')}>
+          Composition
+        </a>
+        ), the state (the section, its stack) kept across.
       </li>
     </ul>
 

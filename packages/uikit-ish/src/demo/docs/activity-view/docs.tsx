@@ -1,5 +1,6 @@
 import { elementRows, PropRow } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -49,7 +50,8 @@ export const activityViewHeadingRows = rows(
       component="activity-view"
       part="ActivityView.Subtitle"
     />
-    , then (12px below) e.g. a menu (a <a href="button">Button</a>) and a{' '}
+    , then (12px below) e.g. a menu (a <a href={publicUrl('button')}>Button</a>)
+    and a{' '}
     <PartLink
       component="activity-view"
       part="ActivityView.Message"
@@ -105,7 +107,7 @@ export const activityViewPersonRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      An <a href="avatar">Avatar</a> (a group’s:{' '}
+      An <a href={publicUrl('avatar')}>Avatar</a> (a group’s:{' '}
       <PartLink
         component="avatar"
         part="Avatar.Group"
@@ -191,8 +193,9 @@ export const activityViewActionRows: readonly PropRow[] = [
 
 export const activityViewSymbolRows = rows(
   <>
-    The action’s symbol (a <a href="symbol">Symbol</a>, 25px, light) in a 70px
-    circle on a fill; hidden from assistive technology (the label names it).
+    The action’s symbol (a <a href={publicUrl('symbol')}>Symbol</a>, 25px,
+    light) in a 70px circle on a fill; hidden from assistive technology (the
+    label names it).
   </>,
   'span',
   'HTMLSpanElement',

@@ -154,6 +154,10 @@ export const usePortalContainer = (
   return container === undefined ? provided : container;
 };
 
+/** A shadow root (server-side, none: no `ShadowRoot`, e.g. prerendering). */
+const isShadowRoot = (node: unknown): node is ShadowRoot =>
+  typeof ShadowRoot !== 'undefined' && node instanceof ShadowRoot;
+
 type CollisionProps = Pick<
   BasePopover.Positioner.Props,
   'collisionBoundary' | 'collisionPadding'
@@ -174,7 +178,7 @@ export const useCollision = (
   const container = usePortalContainer(undefined);
   const resolved =
     container && 'current' in container ? container.current : container;
-  const element = resolved instanceof ShadowRoot ? resolved.host : resolved;
+  const element = isShadowRoot(resolved) ? resolved.host : resolved;
 
   if (collisionPadding !== undefined || typeof document === 'undefined') {
     return {

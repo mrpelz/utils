@@ -12,6 +12,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { datePickerRootRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
@@ -100,14 +101,15 @@ export const DatePickerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Other values in columns (sizes, measures): a <a href="roll">Roll</a>.
+        Other values in columns (sizes, measures): a{' '}
+        <a href={publicUrl('roll')}>Roll</a>.
       </li>
       <li>
-        A number a step at a time: a <a href="stepper">Stepper</a>.
+        A number a step at a time: a <a href={publicUrl('stepper')}>Stepper</a>.
       </li>
       <li>
         Typed dates (e.g. known from a document): a{' '}
-        <a href="text-field">Text field</a>.
+        <a href={publicUrl('text-field')}>Text field</a>.
       </li>
     </ul>
 
@@ -120,7 +122,7 @@ export const DatePickerOverview: FunctionComponent = () => (
     <ul>
       <li>The props most date pickers set.</li>
       <li>
-        All parts’ props: <a href="date-picker/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('date-picker/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -161,7 +163,7 @@ export const DatePickerOverview: FunctionComponent = () => (
       </li>
       <li>
         The rolls (month and year, the time) are listboxes (see{' '}
-        <a href="roll">Roll</a>).
+        <a href={publicUrl('roll')}>Roll</a>).
       </li>
       <li>
         A range’s footer message (

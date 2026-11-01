@@ -17,6 +17,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { settings } from './content.js';
 import {
@@ -173,7 +174,7 @@ export const ListOverview: FunctionComponent = () => (
       <li>
         Settings and forms: rows holding a switch, a detail, a control, or
         drilling into a page (inset grouped; see{' '}
-        <a href="list/composition">Composition</a>).
+        <a href={publicUrl('list/composition')}>Composition</a>).
       </li>
       <li>
         A collection of items to browse and act on: messages, contacts, files
@@ -181,7 +182,7 @@ export const ListOverview: FunctionComponent = () => (
       </li>
       <li>
         An app’s sections in a sidebar (<code>listStyle</code>{' '}
-        <code>sidebar</code>, in a <a href="sidebar">Sidebar</a>).
+        <code>sidebar</code>, in a <a href={publicUrl('sidebar')}>Sidebar</a>).
       </li>
     </ul>
 
@@ -193,12 +194,14 @@ export const ListOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A few options shown side by side: a <a href="segmented">Segmented</a>{' '}
-        control; an option out of many, collapsed: a <a href="menu">Menu</a> (a
-        pop-up button, which can sit in a row).
+        A few options shown side by side: a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> control; an option out of
+        many, collapsed: a <a href={publicUrl('menu')}>Menu</a> (a pop-up
+        button, which can sit in a row).
       </li>
       <li>
-        An app’s top-level sections on a phone: a <a href="tab-bar">Tab bar</a>.
+        An app’s top-level sections on a phone: a{' '}
+        <a href={publicUrl('tab-bar')}>Tab bar</a>.
       </li>
       <li>
         Text between rows, without rows: a{' '}
@@ -206,7 +209,7 @@ export const ListOverview: FunctionComponent = () => (
           component="list"
           part="List.Block"
         />{' '}
-        in a section (see <a href="list/parts">Parts</a>).
+        in a section (see <a href={publicUrl('list/parts')}>Parts</a>).
       </li>
     </ul>
 
@@ -219,7 +222,7 @@ export const ListOverview: FunctionComponent = () => (
     <ul>
       <li>The props most lists set, across their parts.</li>
       <li>
-        All parts’ props: <a href="list/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('list/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

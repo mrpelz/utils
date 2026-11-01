@@ -14,6 +14,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { morePeriods, periods } from './content.js';
 import { segmentedItemRows, segmentedRootRows } from './docs.js';
@@ -111,7 +112,7 @@ export const SegmentedOverview: FunctionComponent = () => (
       <li>
         To switch between views of the same content (e.g. All and Missed calls),
         in a navigation bar or a toolbar (see{' '}
-        <a href="segmented/composition">Composition</a>).
+        <a href={publicUrl('segmented/composition')}>Composition</a>).
       </li>
     </ul>
 
@@ -123,19 +124,21 @@ export const SegmentedOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A setting that’s on or off: a <a href="switch">Switch</a>.
+        A setting that’s on or off: a <a href={publicUrl('switch')}>Switch</a>.
       </li>
       <li>
-        More options, or long ones: a <a href="menu">Menu</a> (a pop-up button)
-        or a <a href="roll">Roll</a> picker, collapsed until needed (guide{' '}
+        More options, or long ones: a <a href={publicUrl('menu')}>Menu</a> (a
+        pop-up button) or a <a href={publicUrl('roll')}>Roll</a> picker,
+        collapsed until needed (guide{' '}
         <GuideLink to="choice-family">§5</GuideLink>).
       </li>
       <li>
-        Switching an app’s top-level sections: a <a href="tab-bar">Tab bar</a>.
+        Switching an app’s top-level sections: a{' '}
+        <a href={publicUrl('tab-bar')}>Tab bar</a>.
       </li>
       <li>
-        Starting something: a <a href="button">Button</a>, as choosing an option
-        doesn’t perform an action.
+        Starting something: a <a href={publicUrl('button')}>Button</a>, as
+        choosing an option doesn’t perform an action.
       </li>
     </ul>
 
@@ -148,7 +151,7 @@ export const SegmentedOverview: FunctionComponent = () => (
     <ul>
       <li>The props most segmented controls set, across their parts.</li>
       <li>
-        All parts’ props: <a href="segmented/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('segmented/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

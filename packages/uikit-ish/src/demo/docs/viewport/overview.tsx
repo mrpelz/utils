@@ -18,6 +18,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { names } from './content.js';
 import {
   viewportAnchorRows,
@@ -178,7 +179,7 @@ export const ViewportOverview: FunctionComponent = () => (
         Hooks for an element in the visible area (the viewport, or a scroll
         container): whether it’s visible, and where (its edges’ distances, how
         much of it shows); see{' '}
-        <a href="viewport/parts#useelementvisibility">Parts</a>.
+        <a href={publicUrl('viewport/parts#useelementvisibility')}>Parts</a>.
       </li>
       <li>This library’s own; no Base UI component.</li>
     </ul>
@@ -207,7 +208,7 @@ export const ViewportOverview: FunctionComponent = () => (
           component="viewport"
           part="Viewport.BlockStart"
         />{' '}
-        (see <a href="viewport/composition">Composition</a>).
+        (see <a href={publicUrl('viewport/composition')}>Composition</a>).
       </li>
       <li>
         A field that stays above the on-screen keyboard (a message field):{' '}
@@ -246,11 +247,12 @@ export const ViewportOverview: FunctionComponent = () => (
     <ul>
       <li>
         A page’s own bars, scrolling with it (a navigation bar with a large
-        title): a <a href="header">Header</a> in a <a href="page">Page</a>.
+        title): a <a href={publicUrl('header')}>Header</a> in a{' '}
+        <a href={publicUrl('page')}>Page</a>.
       </li>
       <li>
         Columns side by side (a sidebar beside the content, on a tablet): a{' '}
-        <a href="layout">Layout</a> (in{' '}
+        <a href={publicUrl('layout')}>Layout</a> (in{' '}
         <PartLink
           component="viewport"
           part="Viewport.Content"
@@ -259,8 +261,9 @@ export const ViewportOverview: FunctionComponent = () => (
       </li>
       <li>
         Something over the content, for a moment (a sheet, a menu): an overlay (
-        <a href="sheet">Sheet</a>, <a href="popover">Popover</a>,{' '}
-        <a href="menu">Menu</a>), not an anchor.
+        <a href={publicUrl('sheet')}>Sheet</a>,{' '}
+        <a href={publicUrl('popover')}>Popover</a>,{' '}
+        <a href={publicUrl('menu')}>Menu</a>), not an anchor.
       </li>
     </ul>
 
@@ -273,7 +276,8 @@ export const ViewportOverview: FunctionComponent = () => (
     <ul>
       <li>The props most viewports set, across their parts.</li>
       <li>
-        All parts’ props, and the hooks: <a href="viewport/parts">Parts</a>.
+        All parts’ props, and the hooks:{' '}
+        <a href={publicUrl('viewport/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -299,9 +303,10 @@ export const ViewportOverview: FunctionComponent = () => (
     <ul>
       <li>
         Its parts are <code>div</code>s without roles: what’s in them brings its
-        own (a <a href="toolbar">Toolbar</a> is a <code>toolbar</code>, a tab
-        bar’s list a <code>tablist</code>). A landmark, if wanted, by the
-        anchor’s attributes (e.g. <code>role=&quot;navigation&quot;</code>).
+        own (a <a href={publicUrl('toolbar')}>Toolbar</a> is a{' '}
+        <code>toolbar</code>, a tab bar’s list a <code>tablist</code>). A
+        landmark, if wanted, by the anchor’s attributes (e.g.{' '}
+        <code>role=&quot;navigation&quot;</code>).
       </li>
       <li>
         The content layer is a scroll container: in Chrome, keyboard focusable

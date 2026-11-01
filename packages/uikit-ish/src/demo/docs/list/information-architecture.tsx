@@ -6,6 +6,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -267,14 +268,15 @@ export const ListInformationArchitecture: FunctionComponent = () => (
         holds Groups of Items; an Item holds a viewer (a thumbnail), an
         indicator, a Command, a Choice or a Value input (guide,{' '}
         <GuideLink to="section-6-containment">§6</GuideLink>): here, a{' '}
-        <a href="page">Page</a> holds the list, rows hold switches, segmented
-        controls, steppers, sliders.
+        <a href={publicUrl('page')}>Page</a> holds the list, rows hold switches,
+        segmented controls, steppers, sliders.
       </li>
       <li>
         <strong>Layer:</strong> the content layer, scrolling beneath the glass
         bars (guide <GuideLink to="layers">§2</GuideLink>,{' '}
         <GuideLink to="rule-g9">G9</GuideLink>). A sidebar’s list is the
-        exception that sits on a glass panel (see <a href="sidebar">Sidebar</a>
+        exception that sits on a glass panel (see{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a>
         ).
       </li>
       <li>
@@ -285,13 +287,13 @@ export const ListInformationArchitecture: FunctionComponent = () => (
           component="list"
           part="List.DrillIn"
         />{' '}
-        pushing a page in a <a href="navigation">Navigation</a>.
+        pushing a page in a <a href={publicUrl('navigation')}>Navigation</a>.
       </li>
       <li>
         <strong>Selection and actions:</strong> the list owns the selection;
         toolbars and command sets read it (
         <GuideLink to="rule-g7">G7</GuideLink>), as the edit mode’s toolbar does
-        (see <a href="list/composition">Composition</a>).
+        (see <a href={publicUrl('list/composition')}>Composition</a>).
       </li>
       <li>
         <strong>Forms:</strong> a form is Groups of Items whose trailing slot

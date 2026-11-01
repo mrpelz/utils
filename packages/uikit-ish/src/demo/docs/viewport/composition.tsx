@@ -27,6 +27,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfArrowDown, sfArrowUp, sfHeartFill } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { messages } from '../list/content.js';
 import { phoneTabs, phoneTabValues } from '../tab-bar/tabs.js';
@@ -1068,7 +1069,7 @@ export const ViewportComposition: FunctionComponent = () => (
       </li>
       <li>
         The panels as pages, with headers: see the{' '}
-        <a href="tab-bar/composition">Tab bar’s composition</a>.
+        <a href={publicUrl('tab-bar/composition')}>Tab bar’s composition</a>.
       </li>
       <li>
         <strong>Library:</strong> the content layer (
@@ -1153,7 +1154,7 @@ export const ViewportComposition: FunctionComponent = () => (
       </li>
       <li>
         Tracking the document’s scrolling instead: see the{' '}
-        <a href="tab-bar/composition">Tab bar’s composition</a>.
+        <a href={publicUrl('tab-bar/composition')}>Tab bar’s composition</a>.
       </li>
       <li>
         <strong>Library:</strong> the provider tracking the content layer (
@@ -1198,7 +1199,7 @@ export const ViewportComposition: FunctionComponent = () => (
       </li>
       <li>
         Entering and leaving edit mode: see the{' '}
-        <a href="list/composition">List’s composition</a>.
+        <a href={publicUrl('list/composition')}>List’s composition</a>.
       </li>
       <li>
         <strong>Library:</strong> the bottom anchor (

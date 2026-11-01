@@ -8,6 +8,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -190,7 +191,7 @@ export const popoverTriggerRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <a href="button">Button</a>’s{' '}
+            {row[3]} E.g. a <a href={publicUrl('button')}>Button</a>’s{' '}
             <PartLink
               component="button"
               part="Button.Root"
@@ -289,7 +290,7 @@ export const popoverPopupRows: readonly PropRow[] = [
         part="Popover.Arrow"
       />
       , optional) and its content: a header (e.g. a{' '}
-      <a href="toolbar">Toolbar</a>), a{' '}
+      <a href={publicUrl('toolbar')}>Toolbar</a>), a{' '}
       <PartLink
         component="popover"
         part="Popover.Body"
@@ -311,7 +312,7 @@ export const popoverHeaderRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Its bar: a <a href="toolbar">Toolbar</a> (
+      Its bar: a <a href={publicUrl('toolbar')}>Toolbar</a> (
       <code>placement=&quot;block-start&quot;</code>, a 44px row here), its
       title (
       <PartLink

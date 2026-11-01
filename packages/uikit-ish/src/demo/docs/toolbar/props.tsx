@@ -6,6 +6,7 @@ import {
   commonPropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { propOptionsRoot as propOptionsButtonRoot } from '../button/props.js';
 
 export const cursorOptions = [undefined, 'auto', 'pointer', 'copy'] as const;
@@ -157,7 +158,7 @@ export const propOptionsSeparator = {
 
 export const propOptionsLink = {
   ...commonPropOptions,
-  href: ['toolbar/parts#toolbar-link', undefined] as const,
+  href: [publicUrl('toolbar/parts#toolbar-link'), undefined] as const,
 };
 
 export const propOptionsInput = {

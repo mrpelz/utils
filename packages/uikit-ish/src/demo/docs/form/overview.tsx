@@ -20,6 +20,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { fieldsetLegendRows, fieldsetRootRows, formRows } from './docs.js';
 
@@ -130,12 +131,12 @@ export const FormOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         Fields to fill in and submit together, laid out as settings and contacts
-        apps do: a <a href="list">List</a>, fieldsets its sections, fields its
-        rows.
+        apps do: a <a href={publicUrl('list')}>List</a>, fieldsets its sections,
+        fields its rows.
       </li>
       <li>
         Base UI’s form: values by their fields’ names, validated, submitted with
-        a <a href="button">Button</a>.
+        a <a href={publicUrl('button')}>Button</a>.
       </li>
     </ul>
     <LiveView />
@@ -167,8 +168,8 @@ export const FormOverview: FunctionComponent = () => (
     <ul>
       <li>
         Settings that apply at once (each its own change): a{' '}
-        <a href="list">List</a> of controls, no form or submit (the commit
-        model’s other kind).
+        <a href={publicUrl('list')}>List</a> of controls, no form or submit (the
+        commit model’s other kind).
       </li>
     </ul>
 
@@ -181,7 +182,7 @@ export const FormOverview: FunctionComponent = () => (
     <ul>
       <li>The props most forms set.</li>
       <li>
-        All parts’ props: <a href="form/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('form/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

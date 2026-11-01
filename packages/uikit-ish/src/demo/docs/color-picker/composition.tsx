@@ -25,6 +25,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfEyedropper, sfPaintpalette, sfXmark } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { modesControl, panelParts } from './panel.js';
 import { propOptionsPresentation } from './props.js';
 
@@ -454,11 +455,12 @@ export const ColorPickerComposition: FunctionComponent = () => (
           component="color-picker"
           part="ColorPicker.Well"
         />
-        ) is the trigger of a <a href="popover">Popover</a> with the picker.
+        ) is the trigger of a <a href={publicUrl('popover')}>Popover</a> with
+        the picker.
       </li>
       <li>
-        Its header the app’s: a <a href="toolbar">Toolbar</a> with the
-        eyedropper (
+        Its header the app’s: a <a href={publicUrl('toolbar')}>Toolbar</a> with
+        the eyedropper (
         <PartLink
           component="color-picker"
           part="ColorPicker.Eyedropper"
@@ -501,8 +503,9 @@ export const ColorPickerComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a compact width: the well opens a <a href="sheet">Sheet</a> (its
-        medium detent), the picker in its content, its toolbar in a{' '}
+        In a compact width: the well opens a{' '}
+        <a href={publicUrl('sheet')}>Sheet</a> (its medium detent), the picker
+        in its content, its toolbar in a{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Header"
@@ -537,8 +540,8 @@ export const ColorPickerComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A well at a <a href="list">List</a> row’s end (named by what it colors,
-        here “Tint”).
+        A well at a <a href={publicUrl('list')}>List</a> row’s end (named by
+        what it colors, here “Tint”).
       </li>
       <li>
         By the window’s size class (

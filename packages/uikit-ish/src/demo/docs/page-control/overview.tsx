@@ -10,6 +10,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { pageControlRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
@@ -86,17 +87,19 @@ export const PageControlOverview: FunctionComponent = () => (
     <ul>
       <li>
         Sections of an app, each with its own content: a{' '}
-        <a href="tab-bar">Tab bar</a>.
+        <a href={publicUrl('tab-bar')}>Tab bar</a>.
       </li>
       <li>
-        Views of the same content, named: a <a href="segmented">Segmented</a>{' '}
-        control.
+        Views of the same content, named: a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
       <li>
-        Many items, or items to pick by name: a <a href="list">List</a>.
+        Many items, or items to pick by name: a{' '}
+        <a href={publicUrl('list')}>List</a>.
       </li>
       <li>
-        Going deeper into an item: <a href="navigation">Navigation</a>.
+        Going deeper into an item:{' '}
+        <a href={publicUrl('navigation')}>Navigation</a>.
       </li>
     </ul>
 
@@ -109,7 +112,7 @@ export const PageControlOverview: FunctionComponent = () => (
     <ul>
       <li>The props most page controls set.</li>
       <li>
-        All its props: <a href="page-control/parts">Parts</a>.
+        All its props: <a href={publicUrl('page-control/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -151,7 +154,8 @@ export const PageControlOverview: FunctionComponent = () => (
       </li>
       <li>
         Its dots are small: it’s an indicator first, the pages themselves should
-        also swipe (see <a href="page-control/composition">Composition</a>
+        also swipe (see{' '}
+        <a href={publicUrl('page-control/composition')}>Composition</a>
         ).
       </li>
     </ul>

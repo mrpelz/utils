@@ -21,7 +21,10 @@ import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 
 import { links, manifest, meta } from './scripts/demo-head.js';
 
-const { PUBLIC_PATH: publicPath = '/' } = process.env;
+// The site's public path (its prefix, e.g. GitLab Pages' `/<project>/`),
+// ending in a slash, given or not (webpack's runtime appends chunks' names
+// to it as is).
+const publicPath = (process.env.PUBLIC_PATH ?? '/').replace(/\/?$/u, '/');
 
 export const dirDemo = path.resolve(dirBase, 'demo');
 
@@ -130,14 +133,14 @@ config.plugins = [
   }),
   // @ts-ignore
   new HtmlWebpackPlugin({
-    base: publicPath,
     inject: false,
     meta,
-    // Its page: its head's tags (its base first), then its manifest and
-    // links (relative to it, see scripts/demo-head.js); its body empty,
+    // Its page: its head's tags (no base: links under the public path, see
+    // src/demo/tooling/public-url.ts), then its manifest and links (see
+    // scripts/demo-head.js); its body empty,
     // filled by prerendering (see src/demo-ssg.tsx).
     templateContent: ({ htmlWebpackPlugin }) =>
-      `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${htmlWebpackPlugin.options.title}</title>${htmlWebpackPlugin.tags.headTags}${manifest}${links}</head><body></body></html>`,
+      `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${htmlWebpackPlugin.options.title}</title>${htmlWebpackPlugin.tags.headTags}${manifest(publicPath)}${links(publicPath)}</head><body></body></html>`,
     title: '@mrpelz/uikit-ish',
   }),
   // @ts-ignore

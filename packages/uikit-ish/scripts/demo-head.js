@@ -1,8 +1,18 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types -- JavaScript, typed via JSDoc */
+
 // The demo's page head (see webpack.config.js): its icons and web app
 // manifest (src/demo/assets: icon.svg, its variants made by scripts/icons.js,
 // copied by `output.copy`), as a Home Screen app too.
 
 import { splashes } from './icons-devices.js';
+
+/**
+ * Its assets' URL (under the site's public path, ending in a slash, as the
+ * page has no base: see src/demo/tooling/public-url.ts).
+ *
+ * @param {string} publicPath
+ */
+const assetsUrl = (publicPath) => `${publicPath}assets/`;
 
 /**
  * Its meta tags (HtmlWebpackPlugin's `meta`): the page under the device's
@@ -38,8 +48,11 @@ export const meta = {
  * sink's title), as Safari reads the
  * head once, as the page loads. (A script, run as the head's parsed: before
  * Safari reads it.)
+ *
+ * @param {string} publicPath
+ * @returns {string}
  */
-export const manifest = `<script>(() => {
+export const manifest = (publicPath) => `<script>(() => {
   const fragment = new URLSearchParams(location.hash.slice(1));
   const option = (key) => {
     try {
@@ -66,17 +79,26 @@ export const manifest = `<script>(() => {
   }
   const link = document.createElement('link');
   link.rel = 'manifest';
-  link.href = 'assets/manifest.webmanifest';
+  link.href = '${assetsUrl(publicPath)}manifest.webmanifest';
   document.head.append(link);
 })();</script>`;
 
-/** Its links: the icons, the splash screens. */
-export const links = [
-  '<link rel="icon" type="image/svg+xml" href="assets/icon-rounded.svg">',
-  '<link rel="icon" type="image/png" sizes="196x196" href="assets/favicon-196.png">',
-  '<link rel="apple-touch-icon" href="assets/apple-icon-180.png">',
-  ...splashes().map(
-    ({ file, media }) =>
-      `<link rel="apple-touch-startup-image" href="assets/${file}" media="${media}">`,
-  ),
-].join('');
+/**
+ * Its links: the icons, the splash screens.
+ *
+ * @param {string} publicPath
+ * @returns {string}
+ */
+export const links = (publicPath) => {
+  const assets = assetsUrl(publicPath);
+
+  return [
+    `<link rel="icon" type="image/svg+xml" href="${assets}icon-rounded.svg">`,
+    `<link rel="icon" type="image/png" sizes="196x196" href="${assets}favicon-196.png">`,
+    `<link rel="apple-touch-icon" href="${assets}apple-icon-180.png">`,
+    ...splashes().map(
+      ({ file, media }) =>
+        `<link rel="apple-touch-startup-image" href="${assets}${file}" media="${media}">`,
+    ),
+  ].join('');
+};

@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -77,10 +78,11 @@ export const MenuInformationArchitecture: FunctionComponent = () => (
         “Menu / Pull-down / Context / Edit / Dock menus”), nested by submenus.
       </li>
       <li>
-        Its siblings: the <a href="contextual-menu">Contextual menu</a>{' '}
-        (anchored to content), the <a href="edit-menu">Edit menu</a> (to a text
-        selection), the <a href="action-sheet">Action sheet</a> (rendered as a
-        sheet).
+        Its siblings: the{' '}
+        <a href={publicUrl('contextual-menu')}>Contextual menu</a> (anchored to
+        content), the <a href={publicUrl('edit-menu')}>Edit menu</a> (to a text
+        selection), the <a href={publicUrl('action-sheet')}>Action sheet</a>{' '}
+        (rendered as a sheet).
       </li>
       <li>
         A pop-up button’s menu is a Choice instead (one selected), collapsed

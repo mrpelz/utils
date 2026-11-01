@@ -15,6 +15,7 @@ import { useLog } from '../../tooling/frame/log.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfChevronBackward } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { names } from '../viewport/content.js';
 import {
   headerAccessoryRows,
@@ -265,9 +266,9 @@ export const HeaderParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         A root (no box of its own) around the app’s bar (a top{' '}
-        <a href="toolbar">Toolbar</a>, anchored) and its <a href="page">Page</a>
-        : an optional large title, and an optional accessory staying below the
-        bar.
+        <a href={publicUrl('toolbar')}>Toolbar</a>, anchored) and its{' '}
+        <a href={publicUrl('page')}>Page</a>: an optional large title, and an
+        optional accessory staying below the bar.
       </li>
       <li>
         The views’ pages scroll under the bar: scroll them to see the titles

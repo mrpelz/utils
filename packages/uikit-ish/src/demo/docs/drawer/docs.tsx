@@ -6,6 +6,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -139,8 +140,9 @@ export const drawerPopupRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Its content, filling it: e.g. a <a href="page">Page</a> (its own scroll
-      container, its safe areas its own), a <a href="sidebar">Sidebar</a>.
+      Its content, filling it: e.g. a <a href={publicUrl('page')}>Page</a> (its
+      own scroll container, its safe areas its own), a{' '}
+      <a href={publicUrl('sidebar')}>Sidebar</a>.
     </>,
   ],
   [
@@ -155,7 +157,7 @@ export const drawerPopupRows: readonly PropRow[] = [
     code('false'),
     <>
       Without a background or shadow of its own: its content floats itself (e.g.
-      a floating <a href="sidebar">Sidebar</a>).
+      a floating <a href={publicUrl('sidebar')}>Sidebar</a>).
     </>,
   ],
   [

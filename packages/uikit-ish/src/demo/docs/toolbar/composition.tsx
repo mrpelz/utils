@@ -33,6 +33,7 @@ import {
   sfSquareAndPencil,
   sfTrash,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { messages } from '../list/content.js';
 import { names } from '../viewport/content.js';
@@ -506,8 +507,9 @@ export const ToolbarComposition: FunctionComponent = () => (
         what it’s in, its commands for the content beside it.
       </li>
       <li>
-        At the top of a page, its <a href="header">Header</a>’s bar; at the
-        bottom of a screen, a <a href="viewport">Viewport</a>’s anchor.
+        At the top of a page, its <a href={publicUrl('header')}>Header</a>’s
+        bar; at the bottom of a screen, a{' '}
+        <a href={publicUrl('viewport')}>Viewport</a>’s anchor.
       </li>
     </ul>
 
@@ -539,7 +541,7 @@ export const ToolbarComposition: FunctionComponent = () => (
       </li>
       <li>
         With a large title, the bar’s title fades in as it scrolls away (see{' '}
-        <a href="header">Header</a>).
+        <a href={publicUrl('header')}>Header</a>).
       </li>
       <li>
         <strong>Library:</strong> the bar (
@@ -594,8 +596,9 @@ export const ToolbarComposition: FunctionComponent = () => (
         focusable.
       </li>
       <li>
-        A list’s edit mode: see <a href="list/composition">List</a>; a
-        viewport’s bottom bar: see <a href="viewport/composition">Viewport</a>.
+        A list’s edit mode: see <a href={publicUrl('list/composition')}>List</a>
+        ; a viewport’s bottom bar: see{' '}
+        <a href={publicUrl('viewport/composition')}>Viewport</a>.
       </li>
       <li>
         <strong>Library:</strong> the bottom bar’s sides, its title, and a
@@ -627,7 +630,7 @@ export const ToolbarComposition: FunctionComponent = () => (
     <ul>
       <li>
         Search at the bottom (e.g. a mail app’s): a{' '}
-        <a href="text-field">Text field</a>’s{' '}
+        <a href={publicUrl('text-field')}>Text field</a>’s{' '}
         <PartLink
           component="text-field"
           part="TextField.Search"
@@ -691,12 +694,13 @@ export const ToolbarComposition: FunctionComponent = () => (
     <ul>
       <li>
         Between the sides, in a title’s place: a control for the view, e.g.
-        Weather’s page dots (a <a href="page-control">Page control</a>),
-        centered in the bar.
+        Weather’s page dots (a{' '}
+        <a href={publicUrl('page-control')}>Page control</a>), centered in the
+        bar.
       </li>
       <li>
         A segmented control in a toolbar: see{' '}
-        <a href="segmented/composition#in-a-toolbar">Segmented</a>.
+        <a href={publicUrl('segmented/composition#in-a-toolbar')}>Segmented</a>.
       </li>
       <li>
         <strong>Library:</strong> the{' '}

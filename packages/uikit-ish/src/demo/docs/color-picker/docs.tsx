@@ -6,6 +6,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -111,8 +112,8 @@ export const colorPickerHeaderRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      The app’s header: e.g. a <a href="toolbar">Toolbar</a> with the
-      eyedropper, “Colors” and a close button (in a sheet too, its{' '}
+      The app’s header: e.g. a <a href={publicUrl('toolbar')}>Toolbar</a> with
+      the eyedropper, “Colors” and a close button (in a sheet too, its{' '}
       <PartLink
         component="sheet"
         part="Sheet.Header"

@@ -40,6 +40,7 @@ import { useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { names } from './content.js';
 import {
   elementGeometryRows,
@@ -1716,7 +1717,8 @@ export const ViewportParts: FunctionComponent = () => (
       </li>
       <li>
         Tracks a scroll container’s scrolling (<code>scroller</code>; unset, the
-        one filling its screen: a <a href="page">Page</a>, a sheet’s content, a{' '}
+        one filling its screen: a <a href={publicUrl('page')}>Page</a>, a
+        sheet’s content, a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Content"
@@ -1766,9 +1768,11 @@ export const ViewportParts: FunctionComponent = () => (
       <li>
         Keeps the safe area insets clear (<code>safeArea</code>), as padding; by
         default (<code>auto</code>) not while its direct child scrolls on its
-        own (a <a href="page">Page</a>, a <a href="header">Header</a>, a{' '}
-        <a href="layout">Layout</a>, a <a href="navigation">Navigation</a>):
-        that child fills the screen, keeping its content clear itself.
+        own (a <a href={publicUrl('page')}>Page</a>, a{' '}
+        <a href={publicUrl('header')}>Header</a>, a{' '}
+        <a href={publicUrl('layout')}>Layout</a>, a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a>): that child fills the
+        screen, keeping its content clear itself.
       </li>
       <li>
         Renders a <code>div</code>; its ref is what a provider’s{' '}
@@ -1802,8 +1806,8 @@ export const ViewportParts: FunctionComponent = () => (
       <li>
         At the top or bottom, its scroll edge effect (<code>edgeEffect</code>,{' '}
         <code>soft</code> by default; <code>hard</code>; <code>none</code>):
-        drawn by the scroller beneath (a <a href="page">Page</a>, a sheet’s
-        content, the{' '}
+        drawn by the scroller beneath (a <a href={publicUrl('page')}>Page</a>, a
+        sheet’s content, the{' '}
         <PartLink
           component="viewport"
           part="Viewport.Content"
@@ -1815,7 +1819,10 @@ export const ViewportParts: FunctionComponent = () => (
           part="useViewportEdgeElement"
         />
         ). Tinted (<code>edgeTint</code>), at rest too: see{' '}
-        <a href="viewport/composition#a-tinted-edge">a tinted edge</a>.
+        <a href={publicUrl('viewport/composition#a-tinted-edge')}>
+          a tinted edge
+        </a>
+        .
       </li>
       <li>
         The anchor is the surface: it has no background of its own, so a bar
@@ -1977,7 +1984,10 @@ export const ViewportParts: FunctionComponent = () => (
         What shows past the tracked scroll container’s start (<code>edge</code>{' '}
         <code>block-start</code>) or end (<code>block-end</code>) as it’s pulled
         there: e.g. a refresh indicator, a hint to the next page (see the{' '}
-        <a href="viewport/composition#pulling-to-refresh">composition</a>).
+        <a href={publicUrl('viewport/composition#pulling-to-refresh')}>
+          composition
+        </a>
+        ).
       </li>
       <li>
         A layer beneath the content layer (render it before it), from the bars
@@ -2251,7 +2261,10 @@ export const ViewportParts: FunctionComponent = () => (
         The direction changes past <code>threshold</code> (its own);{' '}
         <code>overscroll</code>, how far it’s pulled past an end, and{' '}
         <code>isHeld</code>: e.g. pulling to refresh, or to turn pages (see the{' '}
-        <a href="viewport/composition#pulling-to-refresh">composition</a>).
+        <a href={publicUrl('viewport/composition#pulling-to-refresh')}>
+          composition
+        </a>
+        ).
       </li>
       <li>
         Inside a provider (outside one: never called). Here: each call logged
@@ -2451,8 +2464,8 @@ export const ViewportParts: FunctionComponent = () => (
       <li>
         iOS scrolls the page (its layout viewport) to a text field it focuses,
         to keep it clear of the keyboard, shifting a fixed layout (e.g. a{' '}
-        <a href="viewport">Viewport</a>’s bars). Guarded, a field touched in its
-        target is focused without scrolling (as the tap ends).
+        <a href={publicUrl('viewport')}>Viewport</a>’s bars). Guarded, a field
+        touched in its target is focused without scrolling (as the tap ends).
       </li>
       <li>
         Also tapped just beside it (within about a finger’s width, touching no

@@ -1,6 +1,7 @@
 import { useLocation } from 'preact-iso';
 import { FunctionComponent, useEffect } from 'react';
 
+import { publicUrl } from '../../tooling/public-url.js';
 import { guideHref } from './link.js';
 import { Hig } from './parts.js';
 import { Section1, Section2, Section3 } from './sections-1-3.js';
@@ -93,7 +94,7 @@ export const HigGuidePage: FunctionComponent = () => {
   return (
     <div className="demo-page demo-prose">
       <nav className="demo-page-nav">
-        <a href="./">uikit-ish</a> › Guide
+        <a href={publicUrl('./')}>uikit-ish</a> › Guide
       </nav>
       <h1 className="demo-page-title">
         Apple HIG Components — Composition, Shared Traits &amp; a Re-Slicing

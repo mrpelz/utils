@@ -22,6 +22,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfPhoto, sfSquareAndArrowUp, sfTrash } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { propOptionsOverviewRoot } from '../menu/props.js';
 import {
   contextualMenuPositionerRows,
@@ -118,7 +119,7 @@ export const ContextualMenuOverview: FunctionComponent = () => (
       <li>
         Actions on a piece of content, summoned from it: the content lifts above
         the blurred page (or turns into a preview of itself), a{' '}
-        <a href="menu">Menu</a> below it.
+        <a href={publicUrl('menu')}>Menu</a> below it.
       </li>
     </ul>
     <LiveView />
@@ -145,10 +146,12 @@ export const ContextualMenuOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Actions behind a control (a “More” button): a <a href="menu">Menu</a>.
+        Actions behind a control (a “More” button): a{' '}
+        <a href={publicUrl('menu')}>Menu</a>.
       </li>
       <li>
-        Actions on selected text: an <a href="edit-menu">Edit menu</a>.
+        Actions on selected text: an{' '}
+        <a href={publicUrl('edit-menu')}>Edit menu</a>.
       </li>
       <li>
         The only way to an action: put it in view too (a contextual menu is
@@ -165,8 +168,8 @@ export const ContextualMenuOverview: FunctionComponent = () => (
     <ul>
       <li>The props most contextual menus set.</li>
       <li>
-        All parts’ props: <a href="contextual-menu/parts">Parts</a>; the items’:
-        a <a href="menu/parts">Menu</a>’s.
+        All parts’ props: <a href={publicUrl('contextual-menu/parts')}>Parts</a>
+        ; the items’: a <a href={publicUrl('menu/parts')}>Menu</a>’s.
       </li>
     </ul>
     <KeyPropsTable
@@ -195,7 +198,7 @@ export const ContextualMenuOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="menu">Menu</a>’s: the trigger a button opening a{' '}
+        A <a href={publicUrl('menu')}>Menu</a>’s: the trigger a button opening a{' '}
         <code>menu</code>, its items menu items, keys as a menu’s.
       </li>
       <li>

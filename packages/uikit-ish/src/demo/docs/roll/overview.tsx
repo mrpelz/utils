@@ -14,6 +14,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { rollColumnRows } from './docs.js';
 import { fruits, propOptionsOverview } from './props.js';
@@ -117,15 +118,17 @@ export const RollOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Dates and times as such: a <a href="date-picker">Date picker</a> (built
-        on rolls, with a calendar).
+        Dates and times as such: a{' '}
+        <a href={publicUrl('date-picker')}>Date picker</a> (built on rolls, with
+        a calendar).
       </li>
       <li>
-        A few options, all visible: a <a href="segmented">Segmented</a> control;
-        options with details: a <a href="list">List</a>.
+        A few options, all visible: a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> control; options with
+        details: a <a href={publicUrl('list')}>List</a>.
       </li>
       <li>
-        A number a step at a time: a <a href="stepper">Stepper</a>.
+        A number a step at a time: a <a href={publicUrl('stepper')}>Stepper</a>.
       </li>
     </ul>
 
@@ -138,7 +141,7 @@ export const RollOverview: FunctionComponent = () => (
     <ul>
       <li>The props most rolls’ columns set.</li>
       <li>
-        All parts’ props: <a href="roll/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('roll/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

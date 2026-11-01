@@ -6,6 +6,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -39,7 +40,8 @@ export const avatarRootRows: readonly PropRow[] = [
         component="avatar"
         part="Avatar.Fallback"
       />{' '}
-      (one shows at a time), and e.g. a <a href="badge">Badge</a> on its corner.
+      (one shows at a time), and e.g. a <a href={publicUrl('badge')}>Badge</a>{' '}
+      on its corner.
     </>,
   ],
   ...baseUiRows('span', 'HTMLSpanElement'),
@@ -100,7 +102,7 @@ export const avatarGroupRows: readonly PropRow[] = [
         part="Avatar.Root"
       />
       s (the first three shown, sized and placed by the group), and e.g. a{' '}
-      <a href="badge">Badge</a> on its corner.
+      <a href={publicUrl('badge')}>Badge</a> on its corner.
     </>,
   ],
   [

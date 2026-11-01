@@ -16,6 +16,7 @@ import { codeLabel } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   actionSheetActionRows,
   actionSheetActionsRows,
@@ -736,7 +737,8 @@ export const ActionSheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The control its choices are about (e.g. a <a href="button">Button</a>:{' '}
+        The control its choices are about (e.g. a{' '}
+        <a href={publicUrl('button')}>Button</a>:{' '}
         <code>{'render={<Button.Root />}'}</code>): the sheet shows at it.
       </li>
       <li>
@@ -759,9 +761,9 @@ export const ActionSheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The panel (an <a href="alert">Alert</a>’s: the menus’ glass, 300px wide,
-        34px corners): below its trigger, 8px from it (above it, if there’s no
-        room), scaling in from it; without a trigger, at its{' '}
+        The panel (an <a href={publicUrl('alert')}>Alert</a>’s: the menus’
+        glass, 300px wide, 34px corners): below its trigger, 8px from it (above
+        it, if there’s no room), scaling in from it; without a trigger, at its{' '}
         <code>container</code>’s bottom, above its safe area.
       </li>
       <li>

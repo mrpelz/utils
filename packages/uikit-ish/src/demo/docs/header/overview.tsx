@@ -21,6 +21,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfChevronBackward, sfSquareAndPencil } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { names } from '../viewport/content.js';
 import {
   headerAccessoryRows,
@@ -148,8 +149,8 @@ export const HeaderOverview: FunctionComponent = () => (
         title fades in; content scrolled under the bar blurs beneath it.
       </li>
       <li>
-        Its bar is the app’s <a href="toolbar">Toolbar</a>, anchored at the top
-        (a{' '}
+        Its bar is the app’s <a href={publicUrl('toolbar')}>Toolbar</a>,
+        anchored at the top (a{' '}
         <PartLink
           component="viewport"
           part="Viewport.BlockStart"
@@ -167,9 +168,10 @@ export const HeaderOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Every <a href="page">Page</a> of an app’s navigation: its title, its way
-        back, its actions (in a <a href="navigation">Navigation</a>, each page
-        its own header, moving with it in transitions).
+        Every <a href={publicUrl('page')}>Page</a> of an app’s navigation: its
+        title, its way back, its actions (in a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a>, each page its own
+        header, moving with it in transitions).
       </li>
       <li>
         A large title on a stack’s root page (and top-level pages), the bar’s
@@ -177,7 +179,7 @@ export const HeaderOverview: FunctionComponent = () => (
       </li>
       <li>
         What scrolls with the title: a search field, a control (see{' '}
-        <a href="header/composition">Composition</a>).
+        <a href={publicUrl('header/composition')}>Composition</a>).
       </li>
     </ul>
 
@@ -190,7 +192,7 @@ export const HeaderOverview: FunctionComponent = () => (
     <ul>
       <li>
         A bar that doesn’t belong to a page (over several pages, no large
-        title): a <a href="toolbar">Toolbar</a> in a{' '}
+        title): a <a href={publicUrl('toolbar')}>Toolbar</a> in a{' '}
         <PartLink
           component="viewport"
           part="Viewport.BlockStart"
@@ -198,7 +200,8 @@ export const HeaderOverview: FunctionComponent = () => (
         alone, outside a header.
       </li>
       <li>
-        Commands at the bottom: a bottom <a href="toolbar">Toolbar</a>.
+        Commands at the bottom: a bottom{' '}
+        <a href={publicUrl('toolbar')}>Toolbar</a>.
       </li>
     </ul>
 
@@ -211,7 +214,7 @@ export const HeaderOverview: FunctionComponent = () => (
     <ul>
       <li>The props most headers set, across their parts.</li>
       <li>
-        All parts’ props: <a href="header/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('header/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -234,8 +237,9 @@ export const HeaderOverview: FunctionComponent = () => (
         <code>aria-level</code> to change it).
       </li>
       <li>
-        The bar is a <code>toolbar</code> (see <a href="toolbar">Toolbar</a>):
-        one tab stop, the arrow keys between its buttons.
+        The bar is a <code>toolbar</code> (see{' '}
+        <a href={publicUrl('toolbar')}>Toolbar</a>): one tab stop, the arrow
+        keys between its buttons.
       </li>
       <li>
         With a large title, the bar’s title is only faded out (its opacity), so
@@ -283,9 +287,10 @@ export const HeaderOverview: FunctionComponent = () => (
       </li>
       <li>Pulled down, the large title doesn’t grow.</li>
       <li>
-        In a <a href="navigation">Navigation</a>’s transition: moving with its
-        page, its bar too (its anchor within the page’s frame); in a{' '}
-        <a href="layout">Layout</a>’s column, its bar spans the column.
+        In a <a href={publicUrl('navigation')}>Navigation</a>’s transition:
+        moving with its page, its bar too (its anchor within the page’s frame);
+        in a <a href={publicUrl('layout')}>Layout</a>’s column, its bar spans
+        the column.
       </li>
     </ul>
   </>

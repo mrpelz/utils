@@ -22,6 +22,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -211,7 +212,8 @@ export const ProgressComposition: FunctionComponent = () => (
       </li>
       <li>
         A small activity indicator (<code>size</code>) in the{' '}
-        <a href="list">List</a> row’s detail, named (<code>aria-label</code>).
+        <a href={publicUrl('list')}>List</a> row’s detail, named (
+        <code>aria-label</code>).
       </li>
       <li>
         <strong>Library:</strong> the small{' '}

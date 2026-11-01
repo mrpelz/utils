@@ -5,6 +5,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, and the hooks' arguments and return values, for the
 // parts page (all) and the overview (its key ones).
@@ -45,12 +46,14 @@ const contentSafeAreaRow: PropRow = [
       </li>
       <li>
         A child scrolling on its own, as its direct child (a{' '}
-        <a href="page">Page</a>, a <a href="header">Header</a> around one, a{' '}
-        <a href="layout">Layout</a>, a <a href="navigation">Navigation</a>, e.g.
-        a <a href="tab-bar">Tab bar</a>’s panel rendered as one): none. That
-        child fills the screen, under the status bar too, its own bars and
-        paddings keeping its content clear; kept clear here, it would stop at
-        their border instead.
+        <a href={publicUrl('page')}>Page</a>, a{' '}
+        <a href={publicUrl('header')}>Header</a> around one, a{' '}
+        <a href={publicUrl('layout')}>Layout</a>, a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a>, e.g. a{' '}
+        <a href={publicUrl('tab-bar')}>Tab bar</a>’s panel rendered as one):
+        none. That child fills the screen, under the status bar too, its own
+        bars and paddings keeping its content clear; kept clear here, it would
+        stop at their border instead.
       </li>
     </ul>
     Set it to keep the insets clear (or not) whatever it holds, e.g.{' '}
@@ -102,7 +105,8 @@ const edgeEffectRow: PropRow = [
     At the block start or end: its scroll edge effect, as content scrolls under
     it: <code>soft</code>, a blur fading out away from the edge;{' '}
     <code>hard</code>, a solid backing with a dividing line. Drawn by the
-    scroller beneath (a <a href="page">Page</a>, a sheet’s content, the{' '}
+    scroller beneath (a <a href={publicUrl('page')}>Page</a>, a sheet’s content,
+    the{' '}
     <PartLink
       component="viewport"
       part="Viewport.Content"
@@ -140,7 +144,7 @@ export const viewportProviderRows: readonly PropRow[] = [
     'the page filling its screen, or the document’s scrolling element',
     <>
       The scroll container tracked. Unset: the scroller filling its screen (a{' '}
-      <a href="page">Page</a>, a sheet’s content, a{' '}
+      <a href={publicUrl('page')}>Page</a>, a sheet’s content, a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Content"
@@ -206,9 +210,11 @@ export const viewportContentRows: readonly PropRow[] = [
       drag on it is its own (rubber-banding the content layer, the bars
       staying), not the document’s (on iOS, moving the whole app).{' '}
       <code>false</code>: only content taller than it scrolls. Unset: not while
-      its child scrolls on its own (a <a href="page">Page</a>, a{' '}
-      <a href="header">Header</a> around one, a <a href="layout">Layout</a>, a{' '}
-      <a href="navigation">Navigation</a>), which bouncing it would move whole.
+      its child scrolls on its own (a <a href={publicUrl('page')}>Page</a>, a{' '}
+      <a href={publicUrl('header')}>Header</a> around one, a{' '}
+      <a href={publicUrl('layout')}>Layout</a>, a{' '}
+      <a href={publicUrl('navigation')}>Navigation</a>), which bouncing it would
+      move whole.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),

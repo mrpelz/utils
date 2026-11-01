@@ -15,6 +15,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   editMenuItemRows,
   editMenuMoreRows,
@@ -643,8 +644,8 @@ export const EditMenuParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        A <a href="menu">Menu</a> in a horizontal glass capsule, opened by the
-        app at an anchor (a selection): no trigger.
+        A <a href={publicUrl('menu')}>Menu</a> in a horizontal glass capsule,
+        opened by the app at an anchor (a selection): no trigger.
       </li>
       <li>
         Its own parts: the root, the positioner, the capsule, its actions and
@@ -747,7 +748,7 @@ export const EditMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="menu">Menu</a>’s portal (
+        A <a href={publicUrl('menu')}>Menu</a>’s portal (
         <PartLink
           component="menu"
           part="Menu.Portal"

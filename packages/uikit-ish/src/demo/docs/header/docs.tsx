@@ -1,5 +1,6 @@
 import { code, PropRow, renderRows } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -72,9 +73,10 @@ export const headerAccessoryRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      What stays with the bar: a <a href="text-field">Text field</a>’s search
-      field, a <a href="segmented">Segmented</a> control (16px from the sides,
-      8px above the content).
+      What stays with the bar: a{' '}
+      <a href={publicUrl('text-field')}>Text field</a>’s search field, a{' '}
+      <a href={publicUrl('segmented')}>Segmented</a> control (16px from the
+      sides, 8px above the content).
     </>,
   ],
   ...renderRows('div', 'HTMLElement'),

@@ -26,6 +26,7 @@ import {
   sfHeart,
   sfXmark,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { photo } from '../avatar/props.js';
 import {
   activityViewActionRows,
@@ -169,8 +170,8 @@ export const ActivityViewOverview: FunctionComponent = () => (
         share sheet).
       </li>
       <li>
-        Parts in the app’s <a href="sheet">Sheet</a> (compact) or{' '}
-        <a href="popover">Popover</a> (regular).
+        Parts in the app’s <a href={publicUrl('sheet')}>Sheet</a> (compact) or{' '}
+        <a href={publicUrl('popover')}>Popover</a> (regular).
       </li>
     </ul>
     <LiveView />
@@ -196,12 +197,13 @@ export const ActivityViewOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A few actions on something, without sharing: a <a href="menu">Menu</a>{' '}
-        or a <a href="contextual-menu">Contextual menu</a>.
+        A few actions on something, without sharing: a{' '}
+        <a href={publicUrl('menu')}>Menu</a> or a{' '}
+        <a href={publicUrl('contextual-menu')}>Contextual menu</a>.
       </li>
       <li>
         Choices about an action just started: an{' '}
-        <a href="action-sheet">Action sheet</a>.
+        <a href={publicUrl('action-sheet')}>Action sheet</a>.
       </li>
     </ul>
 
@@ -214,7 +216,7 @@ export const ActivityViewOverview: FunctionComponent = () => (
     <ul>
       <li>The props most activity views set.</li>
       <li>
-        All parts’ props: <a href="activity-view/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('activity-view/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

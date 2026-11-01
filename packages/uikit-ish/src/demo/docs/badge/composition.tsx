@@ -24,6 +24,7 @@ import {
   sfEnvelopeFill,
   sfGearshapeFill,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 /** Settings' rows: a pending update counted in its row. */
@@ -174,8 +175,8 @@ export const BadgeComposition: FunctionComponent = () => (
     <ul>
       <li>
         Inline (<code>placement=&quot;inline&quot;</code>), in a{' '}
-        <a href="list">List</a> row’s detail, before its chevron: Settings’
-        pending update.
+        <a href={publicUrl('list')}>List</a> row’s detail, before its chevron:
+        Settings’ pending update.
       </li>
       <li>Read with the row: “General, 1”.</li>
       <li>
@@ -208,7 +209,8 @@ export const BadgeComposition: FunctionComponent = () => (
     <ul>
       <li>
         On its corner (the default, <code>corner</code>): an{' '}
-        <a href="avatar">Avatar</a> is positioned, and doesn’t clip it.
+        <a href={publicUrl('avatar')}>Avatar</a> is positioned, and doesn’t clip
+        it.
       </li>
       <li>
         Without a count, a dot inside the corner; here tinted (<code>tint</code>
@@ -234,7 +236,7 @@ export const BadgeComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        On the button’s <a href="symbol">Symbol</a> (
+        On the button’s <a href={publicUrl('symbol')}>Symbol</a> (
         <code>placement=&quot;symbol&quot;</code>, its child): smaller, and not
         blended with the glass as the symbol is.
       </li>
@@ -263,8 +265,8 @@ export const BadgeComposition: FunctionComponent = () => (
     <ul>
       <li>
         On a tab’s symbol, as on a button’s: see{' '}
-        <a href="tab-bar/composition#badges-on-tabs">Tab bar</a> (collapsed, a
-        tab’s badge goes with it).
+        <a href={publicUrl('tab-bar/composition#badges-on-tabs')}>Tab bar</a>{' '}
+        (collapsed, a tab’s badge goes with it).
       </li>
       <li>
         Guide <GuideLink to="section-7-5">§7.5</GuideLink>: an activity badge on

@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -58,9 +59,9 @@ export const EditMenuInformationArchitecture: FunctionComponent = () => (
         ); here a text selection (or an element), rendered as a horizontal bar.
       </li>
       <li>
-        The <a href="menu">Menu</a>’s and the{' '}
-        <a href="contextual-menu">Contextual menu</a>’s sibling; its overflow a
-        submenu (the “more” button) rather than nesting.
+        The <a href={publicUrl('menu')}>Menu</a>’s and the{' '}
+        <a href={publicUrl('contextual-menu')}>Contextual menu</a>’s sibling;
+        its overflow a submenu (the “more” button) rather than nesting.
       </li>
     </ul>
 

@@ -19,6 +19,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfPhoto, sfSquareAndArrowUp, sfTrash } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   getPropOptionsGuideRoot,
   getPropOptionsGuideTrigger,
@@ -692,8 +693,8 @@ export const ContextualMenuParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        A <a href="menu">Menu</a> whose trigger lifts above the page as it opens
-        (or turns into a preview), the menu below it.
+        A <a href={publicUrl('menu')}>Menu</a> whose trigger lifts above the
+        page as it opens (or turns into a preview), the menu below it.
       </li>
       <li>
         Its own parts: the root, the trigger, the preview, the backdrop, the
@@ -724,8 +725,8 @@ export const ContextualMenuParts: FunctionComponent = () => (
                     <PartLink part="ContextualMenu.Popup" />
                     <ul>
                       <li>
-                        a <a href="menu/parts">Menu</a>’s items, groups,
-                        separators, quick actions (e.g.
+                        a <a href={publicUrl('menu/parts')}>Menu</a>’s items,
+                        groups, separators, quick actions (e.g.
                         <PartLink
                           component="menu"
                           part="Menu.Item"
@@ -762,7 +763,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
         itself).
       </li>
       <li>
-        Its props are a <a href="menu">Menu</a>’s root’s (
+        Its props are a <a href={publicUrl('menu')}>Menu</a>’s root’s (
         <PartLink
           component="menu"
           part="Menu.Root"
@@ -795,7 +796,8 @@ export const ContextualMenuParts: FunctionComponent = () => (
       </li>
       <li>
         Renders a <code>button</code> (in a wrapper that keeps its place while
-        it lifts); usually a <a href="button">Button</a> (<code>render</code>).
+        it lifts); usually a <a href={publicUrl('button')}>Button</a> (
+        <code>render</code>).
       </li>
     </ul>
     <TriggerPart />
@@ -819,8 +821,9 @@ export const ContextualMenuParts: FunctionComponent = () => (
       </li>
       <li>
         Without one, the trigger itself lifts into its place: in stacking
-        contexts of its ancestors (e.g. a <a href="viewport">Viewport</a>’s
-        layers), it can’t rise above the backdrop; give it a preview there.
+        contexts of its ancestors (e.g. a{' '}
+        <a href={publicUrl('viewport')}>Viewport</a>’s layers), it can’t rise
+        above the backdrop; give it a preview there.
       </li>
       <li>Takes no pointer events (pressing it would commit).</li>
       <li>
@@ -909,7 +912,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="menu">Menu</a>’s popup (
+        A <a href={publicUrl('menu')}>Menu</a>’s popup (
         <PartLink
           component="menu"
           part="Menu.Popup"

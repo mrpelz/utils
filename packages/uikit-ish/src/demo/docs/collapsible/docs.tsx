@@ -4,6 +4,7 @@ import {
   PropRow,
   union,
 } from '../../tooling/guide/props-table.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Its parts' props (Base UI's), for the parts page (all) and the overview
 // (its key ones).
@@ -42,7 +43,8 @@ export const collapsibleTriggerRows: readonly PropRow[] = [
     code('true'),
     <>
       Renders a <code>button</code>; <code>false</code> when it renders another
-      element (e.g. a <a href="list/parts#list-header">List.Header</a>
+      element (e.g. a{' '}
+      <a href={publicUrl('list/parts#list-header')}>List.Header</a>
       ).
     </>,
   ],

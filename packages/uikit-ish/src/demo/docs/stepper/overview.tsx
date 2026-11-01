@@ -14,6 +14,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { stepperRootRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
@@ -107,18 +108,21 @@ export const StepperOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A value along a range, roughly: a <a href="slider">Slider</a>.
+        A value along a range, roughly: a{' '}
+        <a href={publicUrl('slider')}>Slider</a>.
       </li>
       <li>
-        Large or exact numbers, typed: a <a href="text-field">Text field</a>{' '}
-        (numeric input mode).
+        Large or exact numbers, typed: a{' '}
+        <a href={publicUrl('text-field')}>Text field</a> (numeric input mode).
       </li>
       <li>
-        One of a few named options: a <a href="segmented">Segmented</a> control.
+        One of a few named options: a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
       <li>
         A value from a long ordered set (a time, a date): a{' '}
-        <a href="roll">Roll</a>, or a <a href="date-picker">Date picker</a>.
+        <a href={publicUrl('roll')}>Roll</a>, or a{' '}
+        <a href={publicUrl('date-picker')}>Date picker</a>.
       </li>
     </ul>
 
@@ -131,7 +135,7 @@ export const StepperOverview: FunctionComponent = () => (
     <ul>
       <li>The props most steppers set.</li>
       <li>
-        All parts’ props: <a href="stepper/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('stepper/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

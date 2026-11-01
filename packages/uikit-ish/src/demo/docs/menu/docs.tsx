@@ -7,6 +7,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -252,7 +253,8 @@ export const menuSubmenuRootRows: readonly PropRow[] = [
         part="Menu.SubmenuTrigger"
       />{' '}
       and its portal (its own positioner and popup). Its size: its root menu’s;
-      in an <a href="edit-menu">Edit menu</a>, <code>regular</code>.
+      in an <a href={publicUrl('edit-menu')}>Edit menu</a>, <code>regular</code>
+      .
     </>,
   ],
 ];
@@ -340,7 +342,7 @@ export const menuTriggerRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <a href="button">Button</a>’s{' '}
+            {row[3]} E.g. a <a href={publicUrl('button')}>Button</a>’s{' '}
             <PartLink
               component="button"
               part="Button.Root"
@@ -748,7 +750,8 @@ export const menuIconRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      A <a href="symbol">Symbol</a> (Body; regular: Subheadline), 28px wide.
+      A <a href={publicUrl('symbol')}>Symbol</a> (Body; regular: Subheadline),
+      28px wide.
     </>,
   ],
   ...elementRows('span', 'HTMLSpanElement'),

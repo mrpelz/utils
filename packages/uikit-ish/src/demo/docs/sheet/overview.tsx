@@ -19,6 +19,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { names } from '../viewport/content.js';
 import { sheetPopupRows, sheetRootRows } from './docs.js';
 import {
@@ -179,8 +180,9 @@ export const SheetOverview: FunctionComponent = () => (
         e.g. a share sheet, filters.
       </li>
       <li>
-        A task of several steps: a <a href="navigation">Navigation</a> inside it
-        (see <a href="sheet/composition">Composition</a>).
+        A task of several steps: a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a> inside it (see{' '}
+        <a href={publicUrl('sheet/composition')}>Composition</a>).
       </li>
     </ul>
 
@@ -192,16 +194,18 @@ export const SheetOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A choice of a few actions: an <a href="action-sheet">Action sheet</a>; a
-        question that must be answered: an <a href="alert">Alert</a>.
+        A choice of a few actions: an{' '}
+        <a href={publicUrl('action-sheet')}>Action sheet</a>; a question that
+        must be answered: an <a href={publicUrl('alert')}>Alert</a>.
       </li>
       <li>
         Something tied to a control (a tablet’s): a{' '}
-        <a href="popover">Popover</a>, a <a href="menu">Menu</a>.
+        <a href={publicUrl('popover')}>Popover</a>, a{' '}
+        <a href={publicUrl('menu')}>Menu</a>.
       </li>
       <li>
         Going deeper in the app’s content: a push in a{' '}
-        <a href="navigation">Navigation</a>, not a sheet.
+        <a href={publicUrl('navigation')}>Navigation</a>, not a sheet.
       </li>
     </ul>
 
@@ -214,7 +218,7 @@ export const SheetOverview: FunctionComponent = () => (
     <ul>
       <li>The props most sheets set, across their parts.</li>
       <li>
-        All parts’ props: <a href="sheet/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('sheet/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

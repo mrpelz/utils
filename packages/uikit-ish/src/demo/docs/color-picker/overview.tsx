@@ -24,6 +24,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfEyedropper, sfPaintpalette, sfXmark } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   colorPickerPanelRows,
@@ -263,8 +264,9 @@ export const ColorPickerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A few named colors (e.g. a label’s): a <a href="list">List</a> of
-        checkmarked rows, or a <a href="segmented">Segmented</a> control.
+        A few named colors (e.g. a label’s): a{' '}
+        <a href={publicUrl('list')}>List</a> of checkmarked rows, or a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
     </ul>
 
@@ -277,7 +279,7 @@ export const ColorPickerOverview: FunctionComponent = () => (
     <ul>
       <li>The props most color pickers set.</li>
       <li>
-        All parts’ props: <a href="color-picker/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('color-picker/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -344,7 +346,8 @@ export const ColorPickerOverview: FunctionComponent = () => (
       </li>
       <li>
         The add button saves the color (not if saved); more than ten, the saved
-        colors page, swiped or by their <a href="page-control">Page control</a>.
+        colors page, swiped or by their{' '}
+        <a href={publicUrl('page-control')}>Page control</a>.
       </li>
       <li>
         The eyedropper (

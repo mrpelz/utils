@@ -33,6 +33,7 @@ import {
   sfMagnifyingglass,
   sfPlayFill,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { names } from '../viewport/content.js';
 import { phoneTabs, phoneTabValues } from './tabs.js';
@@ -775,8 +776,9 @@ export const TabBarComposition: FunctionComponent = () => (
       <li>
         As an app’s shell (guide{' '}
         <GuideLink to="shell-a">§7.4, shell A</GuideLink>): each panel a{' '}
-        <a href="page">Page</a> (<code>render</code>), scrolling on its own, in
-        the <a href="viewport">Viewport</a>’s content layer.
+        <a href={publicUrl('page')}>Page</a> (<code>render</code>), scrolling on
+        its own, in the <a href={publicUrl('viewport')}>Viewport</a>’s content
+        layer.
       </li>
       <li>
         The bar floats over it, anchored at the bottom (
@@ -833,8 +835,8 @@ export const TabBarComposition: FunctionComponent = () => (
       <li>
         The search field appears beside it: an accessory shown only while
         collapsed (<code>visibleIn</code>), holding a{' '}
-        <a href="text-field">TextField</a>’s search field, on the accessory’s
-        glass as the collapsed bar’s (
+        <a href={publicUrl('text-field')}>TextField</a>’s search field, on the
+        accessory’s glass as the collapsed bar’s (
         <PartLink
           component="text-field"
           part="TextField.Search"
@@ -941,7 +943,8 @@ export const TabBarComposition: FunctionComponent = () => (
     <ul>
       <li>
         A section’s news (missed calls, new voicemail): a{' '}
-        <a href="badge">Badge</a> inside the tab’s <a href="symbol">Symbol</a>.
+        <a href={publicUrl('badge')}>Badge</a> inside the tab’s{' '}
+        <a href={publicUrl('symbol')}>Symbol</a>.
       </li>
       <li>
         Placed on the glyph, solid while the symbol blends with the glass.
@@ -979,7 +982,7 @@ export const TabBarComposition: FunctionComponent = () => (
     <ul>
       <li>The tab bar minimizes while the content scrolls down.</li>
       <li>
-        Inside a <a href="viewport">Viewport</a>’s provider,{' '}
+        Inside a <a href={publicUrl('viewport')}>Viewport</a>’s provider,{' '}
         <PartLink
           component="viewport"
           part="useViewportScroll"

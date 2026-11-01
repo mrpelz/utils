@@ -12,6 +12,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { names } from '../viewport/content.js';
 import {
   layoutBackgroundRows,
@@ -246,13 +247,15 @@ export const LayoutParts: FunctionComponent = () => (
         A root of columns side by side, and optionally a background behind them.
       </li>
       <li>
-        Each column filled by its content: a <a href="page">Page</a>, a{' '}
-        <a href="navigation">Navigation</a>, a <a href="sidebar">Sidebar</a>.
+        Each column filled by its content: a{' '}
+        <a href={publicUrl('page')}>Page</a>, a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a>, a{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a>.
       </li>
       <li>
         In a resizable column’s view, drag its divider (or focus it, the arrow
-        keys). On a phone, a column can be a <a href="drawer">Drawer</a>{' '}
-        instead.
+        keys). On a phone, a column can be a{' '}
+        <a href={publicUrl('drawer')}>Drawer</a> instead.
       </li>
     </ul>
     <ul>

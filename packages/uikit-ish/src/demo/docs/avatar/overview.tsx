@@ -13,6 +13,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   avatarFallbackRows,
   avatarGroupRows,
@@ -125,8 +126,8 @@ export const AvatarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A thing, not a person (an app, a setting): a <a href="symbol">Symbol</a>{' '}
-        in a row’s image.
+        A thing, not a person (an app, a setting): a{' '}
+        <a href={publicUrl('symbol')}>Symbol</a> in a row’s image.
       </li>
       <li>A picture of the content: an image.</li>
     </ul>
@@ -140,7 +141,7 @@ export const AvatarOverview: FunctionComponent = () => (
     <ul>
       <li>The props most avatars set.</li>
       <li>
-        All parts’ props: <a href="avatar/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('avatar/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

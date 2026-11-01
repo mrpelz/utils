@@ -14,6 +14,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfEyedropper, sfPaintpalette } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   colorPickerEyedropperRows,
   colorPickerGridRows,
@@ -675,7 +676,11 @@ export const ColorPickerParts: FunctionComponent = () => (
           component="sheet"
           part="Sheet.Content"
         />{' '}
-        (see <a href="color-picker/composition#in-a-sheet">In a sheet</a>).
+        (see{' '}
+        <a href={publicUrl('color-picker/composition#in-a-sheet')}>
+          In a sheet
+        </a>
+        ).
       </li>
     </ul>
     <RootPart />
@@ -691,7 +696,7 @@ export const ColorPickerParts: FunctionComponent = () => (
     <ul>
       <li>
         The app’s header above the panel (16px from the popover’s top, 10px
-        above the panel): e.g. a <a href="toolbar">Toolbar</a>.
+        above the panel): e.g. a <a href={publicUrl('toolbar')}>Toolbar</a>.
       </li>
       <li>
         In a sheet too, in its{' '}
@@ -704,8 +709,10 @@ export const ColorPickerParts: FunctionComponent = () => (
       </li>
       <li>
         Optional: without it (e.g. a popover from a list row,{' '}
-        <a href="color-picker/composition#in-a-list-row">In a list row</a>), the
-        panel starts 16px from the top.
+        <a href={publicUrl('color-picker/composition#in-a-list-row')}>
+          In a list row
+        </a>
+        ), the panel starts 16px from the top.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -768,10 +775,10 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its modes’ control: a <a href="segmented">Segmented</a> control (its
-        highlight its own), choosing the picker’s mode; 24px above the view, in
-        the panel or anywhere in its picker (e.g. a sheet’s header, inset as the
-        panel’s content).
+        Its modes’ control: a <a href={publicUrl('segmented')}>Segmented</a>{' '}
+        control (its highlight its own), choosing the picker’s mode; 24px above
+        the view, in the panel or anywhere in its picker (e.g. a sheet’s header,
+        inset as the panel’s content).
       </li>
       <li>
         Its{' '}
@@ -980,7 +987,8 @@ export const ColorPickerParts: FunctionComponent = () => (
     <ul>
       <li>
         The color (over black and white, translucent) beside the saved colors,
-        in pages of ten (with a <a href="page-control">Page control</a>).
+        in pages of ten (with a{' '}
+        <a href={publicUrl('page-control')}>Page control</a>).
       </li>
       <li>
         State: <code>savedColors</code> or <code>defaultSavedColors</code>,{' '}

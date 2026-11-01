@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -165,8 +166,8 @@ export const TabBarInformationArchitecture: FunctionComponent = () => (
         <GuideLink to="rule-a3">A3</GuideLink>). The concept stays, only its
         rendering changes (<GuideLink to="rule-g4">G4</GuideLink>): here, the
         list’s <code>size</code> renders the iPad’s tab bar (
-        <code>regular</code>), and the <a href="sidebar">Sidebar</a> is a
-        component of its own.
+        <code>regular</code>), and the{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a> is a component of its own.
       </li>
       <li>
         <strong>Search:</strong> beside the tab bar, as iOS 26’s (
@@ -186,7 +187,7 @@ export const TabBarInformationArchitecture: FunctionComponent = () => (
         <strong>It navigates, never acts</strong> (
         <GuideLink to="rule-a1">A1</GuideLink>,{' '}
         <GuideLink to="rule-g1">G1</GuideLink>): no Add or Compose tab; actions
-        go to a <a href="toolbar">Toolbar</a> (
+        go to a <a href={publicUrl('toolbar')}>Toolbar</a> (
         <GuideLink to="section-7-7">§7.7</GuideLink>).
       </li>
       <li>

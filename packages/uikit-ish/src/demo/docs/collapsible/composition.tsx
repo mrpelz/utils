@@ -18,6 +18,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 /** A sidebar's sections (Music's), each collapsing by its title. */
 const SidebarSections: FunctionComponent = () => {
@@ -267,7 +268,7 @@ export const CollapsibleComposition: FunctionComponent = () => (
           part="List.CollapsiblePanel"
         />
         ), the same props; see{' '}
-        <a href="list/composition#rows-expanding-together">
+        <a href={publicUrl('list/composition#rows-expanding-together')}>
           List: Rows expanding together
         </a>
         .
