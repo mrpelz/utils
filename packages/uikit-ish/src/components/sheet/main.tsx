@@ -12,6 +12,7 @@ import {
   useState,
 } from 'react';
 
+import { useSettingsPortalProps } from '../settings/main.js';
 import { cn, useForwardedRef, usePortalContainer } from '../utils/main.js';
 import {
   EdgeEffects,
@@ -113,6 +114,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
       <ViewportScopeContext.Provider value={scope}>
         <BaseDrawer.Portal
           className="uikit-sheet-portal"
+          {...useSettingsPortalProps()}
           container={usePortalContainer(container)}
         >
           <BaseDrawer.Backdrop

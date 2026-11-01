@@ -1,0 +1,8 @@
+/* Settings (see main.tsx). */
+@layer uikit-ish {
+  /* A provider's element: no box of its own, its overrides inherited by
+     what's within it. */
+  .uikit-settings {
+    display: contents;
+  }
+}

@@ -231,11 +231,17 @@
 
   /* The index's links to the guide and the page of all demos: boxes as
      wide as two cards. */
+
+  /* Its links: two by two (one column on a phone). */
   .demo-index-links {
     display: grid;
     gap: 1rem;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    grid-template-columns: minmax(0, 1fr);
     margin-block: 2rem;
+
+    @media (width >= 40rem) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 
     & a {
       display: grid;

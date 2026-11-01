@@ -1,0 +1,32 @@
+/* Settings' demos (see overview.tsx, parts.tsx). */
+@layer demo {
+  /* A provider's panel: in its color scheme, its label, its content. */
+  .settings-demo-panel {
+    display: grid;
+    min-width: 14rem;
+    padding: 1rem;
+    border-radius: 16px;
+    background-color: var(--color-ui-secondary-system-background);
+    color: var(--color-ui-label);
+    gap: 0.75rem;
+    justify-items: start;
+  }
+
+  .settings-demo-label {
+    color: var(--color-ui-secondary-label);
+    font-size: var(--font-ui-footnote-size);
+  }
+
+  /* Settings side by side (its diagnostics). */
+  .settings-demo-table {
+    border-collapse: collapse;
+    font-family: monospace;
+    font-size: 0.75rem;
+
+    & th,
+    & td {
+      padding: 0.125rem 0.5rem;
+      text-align: start;
+    }
+  }
+}

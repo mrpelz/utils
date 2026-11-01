@@ -20,6 +20,7 @@ import {
   useState,
 } from 'react';
 
+import { useSettingsPortalProps } from '../settings/main.js';
 import {
   Checkmark,
   cn,
@@ -1654,6 +1655,7 @@ const Portal = forwardRef<HTMLDivElement, Omit<BaseMenu.Portal.Props, 'ref'>>(
   ({ className, container, ...props }, ref) => (
     <BaseMenu.Portal
       ref={ref}
+      {...useSettingsPortalProps()}
       container={usePortalContainer(container)}
       {...props}
       className={cn('uikit-menu-portal', className)}

@@ -278,6 +278,11 @@ import {
 } from './segmented/overview.js';
 import { SegmentedParts, segmentedPartsDemos } from './segmented/parts.js';
 import {
+  SettingsOverview,
+  settingsOverviewDemos,
+} from './settings/overview.js';
+import { SettingsParts, settingsPartsDemos } from './settings/parts.js';
+import {
   SheetComposition,
   sheetCompositionDemos,
 } from './sheet/composition.js';
@@ -415,6 +420,11 @@ import { ViewportParts, viewportPartsDemos } from './viewport/parts.js';
  * and values, indicators, overlay surfaces), not by Apple's own categories.
  */
 export const categories = {
+  foundations: {
+    description:
+      'What the components follow: the settings for color, contrast, motion and text.',
+    title: 'Foundations',
+  },
   structure: {
     description:
       'The frame of an app: its columns, pages and bars, and moving between them.',
@@ -476,6 +486,16 @@ export type CatalogEntry = {
 
 /** Every component's demos, in the order of the page of all demos. */
 export const catalog: readonly CatalogEntry[] = [
+  {
+    category: 'foundations',
+    demos: [...settingsOverviewDemos, ...settingsPartsDemos],
+    id: 'settings',
+    Overview: SettingsOverview,
+    Parts: SettingsParts,
+    summary:
+      'The settings the components follow (color scheme, contrast, motion, transparency, text size): the system’s, overridden by providers for what’s within them.',
+    title: 'Settings',
+  },
   {
     category: 'structure',
     demos: [

@@ -18,6 +18,28 @@
     --uikit-safe-area-inset-left: env(safe-area-inset-left, 0px);
 
     /*
+     * Settings (see components/settings/main.tsx): each the system's (its
+     * media query's, see below; without one, the default), unless a
+     * provider overrides it (on its element, inherited: the nearest
+     * provider's wins; a portal's, where it was opened). 0 or 1; text size
+     * a keyword (Typography's).
+     */
+    --uikit-settings-contrast-system: 0;
+    --uikit-settings-differentiate-without-color-system: 0;
+    --uikit-settings-reduced-motion-system: 0;
+    --uikit-settings-reduced-transparency-system: 0;
+    --uikit-settings-text-size-system: large;
+    --uikit-settings-contrast: var(--uikit-settings-contrast-system);
+    --uikit-settings-differentiate-without-color: var(
+      --uikit-settings-differentiate-without-color-system
+    );
+    --uikit-settings-reduced-motion: var(--uikit-settings-reduced-motion-system);
+    --uikit-settings-reduced-transparency: var(
+      --uikit-settings-reduced-transparency-system
+    );
+    --uikit-settings-text-size: var(--uikit-settings-text-size-system);
+
+    /*
      * Grayscale antialiasing (Framework7 components/app/app.less)
      */
     -webkit-font-smoothing: antialiased;
@@ -469,6 +491,25 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-color-scheme='light']) {
       --glass-ui-lens-shadow: var(--glass-ui-dim-lens-shadow);
+    }
+  }
+
+  /* Settings: the system's (see above). */
+  @media (prefers-contrast: more), (forced-colors: active) {
+    :root {
+      --uikit-settings-contrast-system: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --uikit-settings-reduced-motion-system: 1;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    :root {
+      --uikit-settings-reduced-transparency-system: 1;
     }
   }
 

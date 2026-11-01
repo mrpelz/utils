@@ -15,6 +15,7 @@ import {
   useState,
 } from 'react';
 
+import { useSettingsPortalProps } from '../settings/main.js';
 import {
   cn,
   positionerSide,
@@ -439,6 +440,7 @@ const Portal = forwardRef<
 >(({ className, container, ...props }, ref) => (
   <BasePopover.Portal
     ref={ref}
+    {...useSettingsPortalProps()}
     container={usePortalContainer(container)}
     {...props}
     className={cn('uikit-popover-portal', className)}

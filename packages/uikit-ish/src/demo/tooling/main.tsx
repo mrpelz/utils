@@ -6,6 +6,7 @@ import { FunctionComponent, useEffect } from 'react';
 import * as components from '../../components/index.js';
 import { useTouchActive } from '../../styles.js';
 import { HigGuidePage } from '../docs/hig-guide/main.js';
+import { TokensPage } from '../docs/tokens/main.js';
 import { KitchenSinkPage } from '../kitchen-sink/main.js';
 import { nameComponents } from './frame/render-code.js';
 import { OptionsProvider } from './frame/state.js';
@@ -143,6 +144,10 @@ export const Demo: FunctionComponent = () => (
           <Route
             component={HigGuidePage}
             path={publicUrl('/hig-guide')}
+          />
+          <Route
+            component={TokensPage}
+            path={publicUrl('/tokens')}
           />
           <Route
             component={OverviewPage}

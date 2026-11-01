@@ -10,6 +10,7 @@ import {
   useState,
 } from 'react';
 
+import { useSettingsPortalProps } from '../settings/main.js';
 import {
   cn,
   useForwardedRef,
@@ -99,6 +100,7 @@ const Popup = forwardRef<HTMLDivElement, DrawerPopupProps>(
         <BaseDrawer.Portal
           keepMounted
           className="uikit-drawer-portal"
+          {...useSettingsPortalProps()}
           container={usePortalContainer(container)}
         >
           <BaseDrawer.Backdrop

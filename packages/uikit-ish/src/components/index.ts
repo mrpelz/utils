@@ -52,6 +52,15 @@ export {
   type SheetSwipeDirection,
 } from './sheet/main.js';
 export {
+  Settings,
+  type SettingsContrast,
+  type SettingsPortalProps,
+  type SettingsProviderProps,
+  type SettingsValues,
+  useSettings,
+  useSettingsPortalProps,
+} from './settings/main.js';
+export {
   Tooltip,
   type TooltipHandle,
   type TooltipPositionerProps,

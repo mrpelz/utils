@@ -207,6 +207,13 @@ export const IndexPage: FunctionComponent = () => (
           components’ information architecture pages are after.
         </span>
       </a>
+      <a href={publicUrl('tokens')}>
+        <strong>Design tokens</strong>
+        <span>
+          The library’s colors, text styles, materials and shadows, live, as its
+          stylesheet sets them.
+        </span>
+      </a>
       <a href={publicUrl('all')}>
         <strong>All demos</strong>
         <span>
