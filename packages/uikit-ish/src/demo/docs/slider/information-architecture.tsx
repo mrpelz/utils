@@ -6,6 +6,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -103,8 +104,8 @@ export const SliderInformationArchitecture: FunctionComponent = () => (
         absorbs sliders “conceptually”.
       </li>
       <li>
-        Read-only neighbor: <a href="progress">Progress</a>, the same track and
-        fill, no knob.
+        Read-only neighbor: <a href={publicUrl('progress')}>Progress</a>, the
+        same track and fill, no knob.
       </li>
     </ul>
 

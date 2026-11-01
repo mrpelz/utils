@@ -4,6 +4,7 @@ import {
   PropRow,
   union,
 } from '../../tooling/guide/props-table.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Its props, for the parts page (all) and the overview (its key ones).
 
@@ -20,9 +21,9 @@ export const badgeRows: readonly PropRow[] = [
     code(union('corner')),
     <>
       On its element’s top end corner (24px; its element positioned, e.g. an{' '}
-      <a href="avatar">Avatar</a>), inline (e.g. a list row’s detail), or on a
-      symbol (a child of a <a href="symbol">Symbol</a>, 16px, its text 10px
-      semibold).
+      <a href={publicUrl('avatar')}>Avatar</a>), inline (e.g. a list row’s
+      detail), or on a symbol (a child of a{' '}
+      <a href={publicUrl('symbol')}>Symbol</a>, 16px, its text 10px semibold).
     </>,
   ],
   ['tint', 'string (a CSS color)', 'system red', 'Its color.'],

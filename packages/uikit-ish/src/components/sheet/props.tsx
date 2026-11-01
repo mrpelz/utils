@@ -2,7 +2,28 @@ import type { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import type { Properties } from 'csstype';
 import type { ComponentProps } from 'react';
 
+import type { ViewportEdgeEffect } from '../viewport/main.js';
+
 export type SheetDetent = 'large' | 'medium';
+
+/**
+ * The direction a sheet is swiped away in (Base UI's `Drawer`'s), or
+ * `none`: not swiped away at all.
+ */
+export type SheetSwipeDirection = 'down' | 'left' | 'none' | 'right' | 'up';
+
+export type SheetRootProps<Payload = unknown> = Omit<
+  BaseDrawer.Root.Props<Payload>,
+  'swipeDirection'
+> & {
+  /**
+   * The direction it's swiped away in (also its exit then: following the
+   * flick, out through that edge), or `none`: not swiped away (closed by
+   * a press outside it, Escape, or its close button only).
+   * @default 'down'
+   */
+  swipeDirection?: SheetSwipeDirection;
+};
 
 export type SheetPopupProps = Omit<BaseDrawer.Popup.Props, 'ref'> & {
   /**
@@ -32,6 +53,20 @@ export type SheetPopupProps = Omit<BaseDrawer.Popup.Props, 'ref'> & {
    * @default 'large'
    */
   detent?: SheetDetent;
+};
+
+export type SheetHeaderProps = ComponentProps<'div'> & {
+  /**
+   * Its scroll edge effect, as the content scrolls under it (see
+   * `Viewport.Anchor`): `soft`, a blur fading out away from it; `hard`, a
+   * solid backing with a dividing line; `none`. Only a grabber: none.
+   * @default 'soft'
+   */
+  edgeEffect?: ViewportEdgeEffect;
+  /**
+   * A color for its edge effect, shown at rest too (see `Viewport.Anchor`).
+   */
+  edgeTint?: string;
 };
 
 export type SheetContentProps = Omit<BaseDrawer.Content.Props, 'ref'>;

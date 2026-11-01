@@ -4,6 +4,7 @@ import {
   PropRow,
   union,
 } from '../../tooling/guide/props-table.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Its props, for the parts page (all) and the overview (its key ones).
 
@@ -50,8 +51,8 @@ export const pageControlRows: readonly PropRow[] = [
     code('glass'),
     <>
       <code>glass</code>: a glass capsule (e.g. in a{' '}
-      <a href="toolbar">Toolbar</a>); <code>plain</code>: dots only, over
-      content.
+      <a href={publicUrl('toolbar')}>Toolbar</a>); <code>plain</code>: dots
+      only, over content.
     </>,
   ],
   [

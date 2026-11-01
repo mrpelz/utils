@@ -29,6 +29,7 @@ import {
   sfTrash,
   sfUnderline,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 const elementCode = `const [isOpen, setIsOpen] = useState(false);
@@ -382,7 +383,8 @@ export const EditMenuComposition: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        At a text selection: see the <a href="edit-menu">overview</a> (
+        At a text selection: see the{' '}
+        <a href={publicUrl('edit-menu')}>overview</a> (
         <PartLink
           component="edit-menu"
           part="useSelectionAnchor"
@@ -443,7 +445,8 @@ export const EditMenuComposition: FunctionComponent = () => (
     <ul>
       <li>
         More actions than the screen is wide: they scroll in the capsule, faded
-        at the ends with more beyond (drag them by touch, or scroll).
+        at the ends with more beyond, a peek of them showing (swipe them, drag
+        over them held, or scroll).
       </li>
       <li>
         Or fewer, the rest behind the “more” button (

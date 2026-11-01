@@ -22,6 +22,7 @@ const propOptionsRoot = (values: readonly [string, string, string]) => ({
   required: [undefined, false, true] as const,
   name: [undefined, 'period'] as const,
   hideSeparators: [undefined, false, true] as const,
+  overflow: [undefined, 'truncate', 'scroll'] as const,
 });
 
 /** The overview's few: its look and states, not its plumbing. */
@@ -29,11 +30,12 @@ export const propOptionsOverviewRoot = {
   defaultValue: ['day', 'week', undefined] as const,
   disabled: [undefined, true] as const,
   hideSeparators: [undefined, true] as const,
+  overflow: [undefined, 'truncate', 'scroll'] as const,
 };
 
-/** The guide pages' content: how many periods (see content.ts). */
+/** The guide pages' content: how many periods (see content.ts; 10, more). */
 export const propOptionsPeriodsContent = {
-  count: [3, 2, 4, 5] as const,
+  count: [3, 2, 4, 5, 10] as const,
 };
 
 export const propOptionsHighlight = {
@@ -97,8 +99,3 @@ export const getPropOptionsRoot = (
     ),
   ] as const,
 });
-
-/** The composition's anchor: the control at the screen's top or bottom. */
-export const propOptionsContentAnchor = {
-  edge: ['block-start', 'block-end'] as const,
-};

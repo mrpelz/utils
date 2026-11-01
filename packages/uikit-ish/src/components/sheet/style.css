@@ -81,7 +81,8 @@
     /* A critically damped spring; swiped,
        following the finger (a transform: Base UI's own while it's swiped,
        overriding this one). */
-    transform: translateY(
+    transform: translate(
+      var(--drawer-swipe-movement-x, 0),
       calc(
         var(--drawer-snap-point-offset, 0px) +
           var(--drawer-swipe-movement-y, 0px)
@@ -92,6 +93,22 @@
     &[data-starting-style],
     &[data-ending-style] {
       transform: translateY(100%);
+    }
+
+    /* Swiped away another way (`swipeDirection`): on from the flick, out
+       through that edge (a screen's length past it, wherever it is). */
+    &[data-ending-style][data-swipe-dismiss] {
+      &[data-swipe-direction='up'] {
+        transform: translateY(-100lvh);
+      }
+
+      &[data-swipe-direction='left'] {
+        transform: translateX(-100lvw);
+      }
+
+      &[data-swipe-direction='right'] {
+        transform: translateX(100lvw);
+      }
     }
 
     /* Let go (swiped): as fast as it was flung. */
@@ -115,13 +132,10 @@
     /* The screen's bottom inset, for its content (see below). */
     --uikit-sheet-inset-bottom: var(--uikit-safe-area-inset-bottom, 0px);
 
-    /* Medium (6px from the bottom edge, over the home indicator):
-       what's left of it; a form sheet: none. */
+    /* Medium (on the bottom inset, see below): none left; a form sheet:
+       none. */
     &[data-detent='medium'] > * {
-      --uikit-safe-area-inset-bottom: max(
-        0px,
-        var(--uikit-sheet-inset-bottom) - 6px
-      );
+      --uikit-safe-area-inset-bottom: 0px;
     }
 
     &:not([data-compact]) > * {
@@ -132,6 +146,14 @@
     & .uikit-sheet-content > * {
       --uikit-safe-area-inset-bottom: 0px;
     }
+
+    /* (Its background, for its header's edge effect: see Viewport.) */
+    --uikit-viewport-edge-background: var(--color-ui-system-background);
+
+    /* A heavier veil than a page's (a secondary scroller): its content
+       hidden under more of its bars, the header's (see the content) and
+       those in it (e.g. a navigation's). */
+    --uikit-viewport-edge-veil: 0.75;
 
     &[data-detent='large'] {
       border-radius: 38px 38px 0 0;
@@ -144,17 +166,40 @@
        without its own (which would end with it, the sheet's around it). */
     &[data-detent='large'][data-background='grouped'] {
       --uikit-list-container-background: transparent;
+      --uikit-viewport-edge-background: var(
+        --color-ui-system-grouped-background
+      );
 
       background-color: var(--color-ui-system-grouped-background);
     }
 
+    /* On the bottom inset (the home indicator below it, not under it);
+       without one, 6px from the edge. */
     &[data-detent='medium'] {
       right: 6px;
-      bottom: 6px;
+      bottom: max(6px, var(--uikit-sheet-inset-bottom));
       left: 6px;
-      max-height: calc(100% - 64px);
+
+      /* Up to the screen but 64px, nor into the top inset (below it as a
+         large one, at most). */
+      max-height: min(
+        100% - 64px,
+        100% - max(6px, var(--uikit-sheet-inset-bottom)) -
+          var(--uikit-safe-area-inset-top, 0px) - 10px
+      );
       border-radius: 34px;
       color: var(--uikit-glass-content);
+
+      /* (None: its glass translucent, painted over itself again it'd
+         lighten; its content fading out under its header instead, see the
+         content.) */
+      --uikit-viewport-edge-background: transparent;
+
+      /* Nor a blur (its backdrop the glass's tint, blurred over it: the
+         tint twice). */
+      & > .uikit-viewport-edge-effect[data-edge-effect='soft']::before {
+        backdrop-filter: none;
+      }
     }
 
     /* A form sheet (not compact: a regular width, see main.tsx). */
@@ -168,8 +213,13 @@
       inset: 50% auto auto 50%;
       translate: -50% -50%;
 
+      --uikit-viewport-edge-background: var(--color-ui-system-background);
+
       &[data-background='grouped'] {
         --uikit-list-container-background: transparent;
+        --uikit-viewport-edge-background: var(
+          --color-ui-system-grouped-background
+        );
 
         background-color: var(--color-ui-system-grouped-background);
       }
@@ -181,32 +231,42 @@
     }
   }
 
+  /* Over the content, which scrolls under it (a bar of the sheet's, its
+     edge effect the content's, beneath it: see main.tsx), its content
+     making room for it (its `Viewport.Padding`). Composited itself: the
+     content scrolls (iOS composites it), and Safari otherwise relies on its
+     overlap testing to draw the header after it, which misses it far down a
+     scrolled document (e.g. an inline demo), leaving it hidden (until
+     something recomposites, e.g. a button's press). Its spacing in its
+     content box (as its size, measured: see `Viewport.Anchor`). */
   .uikit-sheet-header {
+    position: absolute;
+    z-index: 10;
     display: flex;
-    flex: none;
     flex-direction: column;
     align-items: stretch;
-    padding-block-end: 10px;
+    inset: 0 0 auto;
     -webkit-user-select: none;
     user-select: none;
+    will-change: transform;
 
-    /* Without a grabber: its content where it'd be with one (16px down). */
-    &:not(:has(> .uikit-sheet-grabber)) {
-      padding-block-start: 16px;
+    /* 10px below its content. */
+    &::after {
+      height: 10px;
+      flex: none;
+      content: '';
     }
 
-    /* Only a grabber: over the content (its own bars below it). Composited
-       itself: the content scrolls (iOS composites it), and Safari otherwise
-       relies on its overlap testing to draw the header after it, which
-       misses it far down a scrolled document (e.g. an inline demo), leaving
-       the grabber hidden (until something recomposites, e.g. a button's
-       press). */
-    &:has(> .uikit-sheet-grabber:only-child) {
-      position: absolute;
-      z-index: 1;
-      inset: 0 0 auto;
-      padding-block-end: 0;
-      will-change: transform;
+    /* Without a grabber: its content where it'd be with one (16px down). */
+    &:not(:has(> .uikit-sheet-grabber))::before {
+      height: 16px;
+      flex: none;
+      content: '';
+    }
+
+    /* Only a grabber: no bar (the content's own bars below it). */
+    &:has(> .uikit-sheet-grabber:only-child)::after {
+      display: none;
     }
   }
 
@@ -238,6 +298,27 @@
     }
   }
 
+  /* Its content's edge effects (see Sheet.Content: beside it, the popup's
+     children), within its corners: rounded as the popup's at their edge,
+     as browsers don't all clip a backdrop filter to its rounded overflow
+     (WebKit). */
+  .uikit-sheet-popup > .uikit-viewport-edge-effect {
+    &[data-edge='block-start'] {
+      border-start-end-radius: inherit;
+      border-start-start-radius: inherit;
+    }
+
+    &[data-edge='block-end'] {
+      border-end-end-radius: inherit;
+      border-end-start-radius: inherit;
+    }
+
+    &::before,
+    &::after {
+      border-radius: inherit;
+    }
+  }
+
   .uikit-sheet-content {
     overflow: auto;
     min-height: 0;
@@ -249,6 +330,24 @@
        is its `Viewport.Padding`'s (a list's ends are its container's, see
        List). */
     padding-block-end: var(--uikit-safe-area-inset-bottom, 0);
+
+    /* Under its header (a bar, not only a grabber), fading out: hidden
+       under the share of it the veil is (`--uikit-viewport-edge-veil`),
+       showing past it and its soft effect's reach (16px), whatever the
+       sheet's background (its glass too, not lightened by a veil's). */
+    .uikit-sheet-popup:has(
+        > .uikit-sheet-header > :not(.uikit-sheet-grabber)
+      )
+      > & {
+      mask-image: linear-gradient(
+        transparent
+          calc(
+            var(--uikit-viewport-padding-block-start, 0px) *
+              var(--uikit-viewport-edge-veil, 0.75)
+          ),
+        #000 calc(var(--uikit-viewport-padding-block-start, 0px) + 16px)
+      );
+    }
 
     /* Its header only a grabber (its content's own bars, e.g. a
        navigation's): over the content, which starts at the sheet's top

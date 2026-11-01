@@ -8,6 +8,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfHeartFill } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { buttonIconRows, buttonLabelRows, buttonRootRows } from './docs.js';
 import { getPropOptionsRoot, propOptionsPart } from './props.js';
 
@@ -179,8 +180,8 @@ export const ButtonParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A symbol (a <a href="symbol">Symbol</a>), in the label’s text style
-        (glass: 19px, Semibold).
+        A symbol (a <a href={publicUrl('symbol')}>Symbol</a>), in the label’s
+        text style (glass: 19px, Semibold).
       </li>
       <li>
         Renders a <code>span</code>.

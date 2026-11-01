@@ -11,6 +11,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { Catalog } from './catalog.js';
 import { symbolRows } from './docs.js';
 import {
@@ -97,9 +98,10 @@ export const SymbolOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A control’s symbol: a symbol-only button (<a href="button">Button</a>’s
-        icon), a tab (<a href="tab-bar">Tab bar</a>), a row’s image (
-        <a href="list">List</a>).
+        A control’s symbol: a symbol-only button (
+        <a href={publicUrl('button')}>Button</a>’s icon), a tab (
+        <a href={publicUrl('tab-bar')}>Tab bar</a>), a row’s image (
+        <a href={publicUrl('list')}>List</a>).
       </li>
       <li>A symbol in text: a label’s, a status’.</li>
     </ul>
@@ -112,7 +114,7 @@ export const SymbolOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A person’s picture: an <a href="avatar">Avatar</a>.
+        A person’s picture: an <a href={publicUrl('avatar')}>Avatar</a>.
       </li>
       <li>A picture of the content (a photo, an illustration): an image.</li>
     </ul>
@@ -126,7 +128,7 @@ export const SymbolOverview: FunctionComponent = () => (
     <ul>
       <li>The props most symbols set.</li>
       <li>
-        All its props: <a href="symbol/parts">Parts</a>.
+        All its props: <a href={publicUrl('symbol/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -185,10 +187,11 @@ export const SymbolOverview: FunctionComponent = () => (
         Emphasized, its <code>emphasizedIcon</code> (e.g. the filled variant)
         fades in over its icon, as far as its host’s{' '}
         <code>--uikit-symbol-emphasis</code> (0 to 1, inherited): a selected{' '}
-        <a href="tab-bar">Tab bar</a> tab, a checked{' '}
-        <a href="segmented">Segmented</a> item, a selected{' '}
-        <a href="sidebar">Sidebar</a> row. Both icons are given; the host’s
-        state picks one, so an uncontrolled tab bar’s symbols follow it.
+        <a href={publicUrl('tab-bar')}>Tab bar</a> tab, a checked{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> item, a selected{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a> row. Both icons are given;
+        the host’s state picks one, so an uncontrolled tab bar’s symbols follow
+        it.
       </li>
       <li>
         In a glass control, its glyph is blended and scaled with the control’s

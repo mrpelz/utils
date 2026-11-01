@@ -21,6 +21,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfChevronBackward } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { pages } from './content.js';
 import { navigationRootRows, navigationStackRows } from './docs.js';
 import { useNavigationControls } from './props.js';
@@ -179,9 +180,10 @@ export const NavigationOverview: FunctionComponent = () => (
       </li>
       <li>
         One stack per section of an app: per tab (a{' '}
-        <a href="tab-bar">Tab bar</a>
-        ), or per sidebar row in a <a href="layout">Layout</a>’s content column
-        (see <a href="navigation/composition">Composition</a>).
+        <a href={publicUrl('tab-bar')}>Tab bar</a>
+        ), or per sidebar row in a <a href={publicUrl('layout')}>Layout</a>’s
+        content column (see{' '}
+        <a href={publicUrl('navigation/composition')}>Composition</a>).
       </li>
     </ul>
 
@@ -194,15 +196,16 @@ export const NavigationOverview: FunctionComponent = () => (
     <ul>
       <li>
         Switching between an app’s sections (flat, not deeper): a{' '}
-        <a href="tab-bar">Tab bar</a>, or a <a href="sidebar">Sidebar</a>.
+        <a href={publicUrl('tab-bar')}>Tab bar</a>, or a{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a>.
       </li>
       <li>
         A self-contained task (compose, edit, add): a modal{' '}
-        <a href="sheet">Sheet</a>, not a pushed page.
+        <a href={publicUrl('sheet')}>Sheet</a>, not a pushed page.
       </li>
       <li>
         Switching a view’s content in place (Day, Week, Month): a{' '}
-        <a href="segmented">Segmented</a> control.
+        <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
     </ul>
 
@@ -215,7 +218,7 @@ export const NavigationOverview: FunctionComponent = () => (
     <ul>
       <li>
         Its root’s and its stack’s props (all of them, every part’s:{' '}
-        <a href="navigation/parts">Parts</a>).
+        <a href={publicUrl('navigation/parts')}>Parts</a>).
       </li>
     </ul>
     <KeyPropsTable
@@ -265,9 +268,9 @@ export const NavigationOverview: FunctionComponent = () => (
         (another stack), shown at once.
       </li>
       <li>
-        A page’s <a href="header">Header</a> moves with its page, its bar and
-        title too; the back button, in each pushed page’s bar, stays put between
-        pushed pages (a persistent item, see{' '}
+        A page’s <a href={publicUrl('header')}>Header</a> moves with its page,
+        its bar and title too; the back button, in each pushed page’s bar, stays
+        put between pushed pages (a persistent item, see{' '}
         <PartLink
           component="navigation"
           part="Navigation.Persistent"
@@ -290,8 +293,8 @@ export const NavigationOverview: FunctionComponent = () => (
       </li>
       <li>
         It fills its container (its pages each as high as it): put it in a
-        screen, a <a href="viewport">Viewport</a>’s content layer, or a{' '}
-        <a href="layout">Layout</a> column.
+        screen, a <a href={publicUrl('viewport')}>Viewport</a>’s content layer,
+        or a <a href={publicUrl('layout')}>Layout</a> column.
       </li>
     </ul>
   </>

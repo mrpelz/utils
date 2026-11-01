@@ -27,6 +27,7 @@
       "js-yaml": "5.4.3"
     },
     "eslint": "10.12.0",
+    "postcss-calc": "11.2.3",
     "react": "npm:@preact/compat",
     "react-dom": "npm:@preact/compat",
     "serialize-javascript": "7.1.2",

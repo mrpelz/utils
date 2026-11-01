@@ -4,6 +4,7 @@ import {
   PropRow,
   union,
 } from '../../tooling/guide/props-table.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -36,8 +37,8 @@ export const pageRootRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      What it scrolls: e.g. a <a href="header">Header</a>’s large title at its
-      start (below the header’s bar), then lists.
+      What it scrolls: e.g. a <a href={publicUrl('header')}>Header</a>’s large
+      title at its start (below the header’s bar), then lists.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),

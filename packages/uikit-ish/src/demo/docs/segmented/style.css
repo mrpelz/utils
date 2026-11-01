@@ -1,0 +1,8 @@
+/* Segmented demo (see overview.tsx). */
+
+/* A phone's content: the control inset from its edges, as a page's. */
+.segmented-demo-content {
+  width: 100%;
+  box-sizing: border-box;
+  padding-inline: 16px;
+}

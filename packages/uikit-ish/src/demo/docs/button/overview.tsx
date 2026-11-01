@@ -12,6 +12,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfHeartFill } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { buttonRootRows } from './docs.js';
 import {
   propOptionsOverviewContent,
@@ -97,13 +98,13 @@ export const ButtonOverview: FunctionComponent = () => (
       </li>
       <li>
         A control of its own over content (glass): a player’s, a map’s (see{' '}
-        <a href="button/composition">Composition</a>).
+        <a href={publicUrl('button/composition')}>Composition</a>).
       </li>
       <li>
-        In other components: a <a href="toolbar">Toolbar</a>’s buttons, a{' '}
-        <a href="list">List</a> row’s trailing one, a trigger’s{' '}
-        <code>render</code> (a <a href="sheet">Sheet</a>’s, an{' '}
-        <a href="alert">Alert</a>’s).
+        In other components: a <a href={publicUrl('toolbar')}>Toolbar</a>’s
+        buttons, a <a href={publicUrl('list')}>List</a> row’s trailing one, a
+        trigger’s <code>render</code> (a <a href={publicUrl('sheet')}>Sheet</a>
+        ’s, an <a href={publicUrl('alert')}>Alert</a>’s).
       </li>
     </ul>
 
@@ -115,20 +116,20 @@ export const ButtonOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Going somewhere (a page of the app’s): a <a href="list">List</a> row
-        drilling in, or a link.
+        Going somewhere (a page of the app’s): a{' '}
+        <a href={publicUrl('list')}>List</a> row drilling in, or a link.
       </li>
       <li>
-        A setting on or off: a <a href="switch">Switch</a>; one of a few
-        options: a <a href="segmented">Segmented</a> control.
+        A setting on or off: a <a href={publicUrl('switch')}>Switch</a>; one of
+        a few options: a <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
       <li>
-        Several actions behind one: a <a href="menu">Menu</a> (its trigger a
-        button).
+        Several actions behind one: a <a href={publicUrl('menu')}>Menu</a> (its
+        trigger a button).
       </li>
       <li>
-        A bar’s actions: a <a href="toolbar">Toolbar</a>’s buttons (its
-        capsules, its keyboard).
+        A bar’s actions: a <a href={publicUrl('toolbar')}>Toolbar</a>’s buttons
+        (its capsules, its keyboard).
       </li>
     </ul>
 
@@ -141,7 +142,7 @@ export const ButtonOverview: FunctionComponent = () => (
     <ul>
       <li>The props most buttons set.</li>
       <li>
-        All parts’ props: <a href="button/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('button/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

@@ -4,6 +4,7 @@ import {
   PropRow,
   union,
 } from '../../tooling/guide/props-table.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Its props, for the parts page (all) and the overview (its key ones).
 
@@ -31,10 +32,10 @@ export const symbolRows: readonly PropRow[] = [
       The icon shown when its host emphasizes it, e.g. <code>sfBellFill</code>{' '}
       on a selected tab: both stacked, faded by the inherited{' '}
       <code>--uikit-symbol-emphasis</code> (0 to 1). Set by a selected{' '}
-      <a href="tab-bar">Tab bar</a> tab, a checked{' '}
-      <a href="segmented">Segmented</a> item and a selected{' '}
-      <a href="sidebar">Sidebar</a> row; set it in your own CSS for others. No
-      state of the app’s picks the icon.
+      <a href={publicUrl('tab-bar')}>Tab bar</a> tab, a checked{' '}
+      <a href={publicUrl('segmented')}>Segmented</a> item and a selected{' '}
+      <a href={publicUrl('sidebar')}>Sidebar</a> row; set it in your own CSS for
+      others. No state of the app’s picks the icon.
     </>,
   ],
   [
@@ -53,7 +54,7 @@ export const symbolRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      What sits on it, e.g. a <a href="badge">Badge</a> (
+      What sits on it, e.g. a <a href={publicUrl('badge')}>Badge</a> (
       <code>placement=&quot;symbol&quot;</code>): neither blended nor scaled
       with the glyph.
     </>,

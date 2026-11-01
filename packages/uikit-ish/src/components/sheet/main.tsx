@@ -2,11 +2,20 @@ import '../glass/style.css';
 import './style.css';
 
 import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
-import { ComponentProps, forwardRef, ReactNode, useState } from 'react';
+import {
+  Children,
+  createContext,
+  forwardRef,
+  isValidElement,
+  ReactNode,
+  useContext,
+  useState,
+} from 'react';
 
 import { cn, useForwardedRef, usePortalContainer } from '../utils/main.js';
 import {
   EdgeEffects,
+  useAnchorRegistration,
   useScrollerRegistration,
   useSizeClass,
   ViewportScopeContext,
@@ -15,7 +24,9 @@ import type {
   SheetContentProps,
   SheetGrabberProps,
   SheetHandle,
+  SheetHeaderProps,
   SheetPopupProps,
+  SheetRootProps,
 } from './props.js';
 
 export type {
@@ -23,15 +34,19 @@ export type {
   SheetDetent,
   SheetGrabberProps,
   SheetHandle,
+  SheetHeaderProps,
   SheetPopupProps,
+  SheetRootProps,
+  SheetSwipeDirection,
 } from './props.js';
 
 // Sheets, over the page dimmed (black, 20%; dark: 48%):
 // - large: opaque (elevated background:
 //   white; dark: #1c1c1e), from 10px below the top to the bottom, its top
 //   corners 38px, its shadow 0 15px 75px at 18%;
-// - medium: glass, 6px from the sides and the
-//   bottom, as high as its content, its corners 34px;
+// - medium: glass, 6px from the sides, on the bottom safe area (the home
+//   indicator below it; without one, 6px from the bottom), as high as its
+//   content, its corners 34px;
 // - in a regular width (the window from 768px, or not `compact`), a form
 //   sheet: opaque, centered, up to 936px by 852px, its
 //   corners 38px.
@@ -53,6 +68,25 @@ export type {
 // the elevated backgrounds (dark mode: #1c1c1e, groups #2c2c2e), as
 // tokens for all its content (e.g. a navigation's pages).
 
+/** Its root's `swipeDirection`: `none`, not swiped away at all. */
+const NoSwipeContext = createContext(false);
+
+/**
+ * Base UI's `Drawer.Root`, its `swipeDirection` also `none`: its popup
+ * then ignored by its swipes (Base UI's swipe ignore, see `Popup`).
+ */
+const Root = <Payload,>({
+  swipeDirection,
+  ...props
+}: SheetRootProps<Payload>): ReactNode => (
+  <NoSwipeContext.Provider value={swipeDirection === 'none'}>
+    <BaseDrawer.Root
+      swipeDirection={swipeDirection === 'none' ? undefined : swipeDirection}
+      {...props}
+    />
+  </NoSwipeContext.Provider>
+);
+
 /** The sheet, the page dimmed behind it. */
 const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
   (
@@ -68,6 +102,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
   ) => {
     // (By the window's size class, see Viewport.)
     const sizeClass = useSizeClass();
+    const isNotSwiped = useContext(NoSwipeContext);
     const isCompact = compactProp ?? sizeClass === 'compact';
     // Its anchors' scope: fixed to it (see Viewport.Padding).
     const [scope] = useState(() => ({}));
@@ -91,6 +126,8 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
             <BaseDrawer.Popup
               ref={ref}
               data-background={background}
+              // (Not swiped away: none of its swipes start, see `Root`.)
+              data-base-ui-swipe-ignore={isNotSwiped ? '' : undefined}
               data-compact={isCompact ? '' : undefined}
               data-detent={detent}
               data-sheet-part="popup"
@@ -110,21 +147,6 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
 );
 
 /**
- * Its header: its grabber (`Grabber`), above the app's content (e.g. a
- * `Toolbar`); with only a grabber, over the content (see style.css).
- */
-const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      data-sheet-part="header"
-      {...props}
-      className={cn('uikit-sheet-header', className)}
-    />
-  ),
-);
-
-/**
  * Its grabber (36px by 5px, 5px from the top): showing the sheet
  * can be swiped (it can be anywhere); left out, a cleaner top.
  */
@@ -140,10 +162,51 @@ const Grabber = forwardRef<HTMLDivElement, SheetGrabberProps>(
   ),
 );
 
+/** Not registered (see `Header`). */
+const noElement = { current: null };
+
+/**
+ * Its header: its grabber (`Grabber`), above the app's content (e.g. a
+ * `Toolbar`). Over the content, which scrolls under it (its edge effect,
+ * see `EdgeEffects`): a bar of the sheet's (a block-start anchor in its
+ * scope), its content making room with a `Viewport.Padding` (as a page
+ * under its toolbar). Only a grabber: over the content too, no bar (the
+ * content's own bars below it, see style.css).
+ */
+const Header = forwardRef<HTMLDivElement, SheetHeaderProps>(
+  (
+    { children, className, edgeEffect = 'soft', edgeTint, ...props },
+    forwardedRef,
+  ) => {
+    const ref = useForwardedRef(forwardedRef);
+    const isGrabberOnly = Children.toArray(children).every(
+      (child) => isValidElement(child) && child.type === Grabber,
+    );
+    useAnchorRegistration(
+      isGrabberOnly ? noElement : ref,
+      'block-start',
+      undefined,
+      { effect: edgeEffect, tint: edgeTint },
+    );
+
+    return (
+      <div
+        ref={ref}
+        data-sheet-part="header"
+        {...props}
+        className={cn('uikit-sheet-header', className)}
+      >
+        {children}
+      </div>
+    );
+  },
+);
+
 /**
  * Its content, scrolling (Base UI's `Drawer.Content`: its text selectable by
  * a mouse without swiping the sheet); a scroller (registered), drawing its
- * bars' edge effects (see `Viewport`).
+ * bars' edge effects (see `Viewport`): beside it, not in it, so its mask
+ * (fading it out under the header, see style.css) leaves them be.
  */
 const Content = forwardRef<HTMLDivElement, SheetContentProps>(
   ({ children, className, ...props }, forwardedRef) => {
@@ -151,16 +214,18 @@ const Content = forwardRef<HTMLDivElement, SheetContentProps>(
     useScrollerRegistration(ref);
 
     return (
-      <BaseDrawer.Content
-        ref={ref}
-        className={cn('uikit-sheet-content', className)}
-        data-sheet-part="content"
-        data-viewport-scroller=""
-        {...props}
-      >
-        {children as ReactNode}
+      <>
+        <BaseDrawer.Content
+          ref={ref}
+          className={cn('uikit-sheet-content', className)}
+          data-sheet-part="content"
+          data-viewport-scroller=""
+          {...props}
+        >
+          {children as ReactNode}
+        </BaseDrawer.Content>
         <EdgeEffects scroller={ref} />
-      </BaseDrawer.Content>
+      </>
     );
   },
 );
@@ -190,6 +255,7 @@ export const useCreateSheetHandle = <
  */
 export const Sheet = {
   ...BaseDrawer,
+  Root,
   Popup,
   Header,
   Grabber,

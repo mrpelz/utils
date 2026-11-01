@@ -12,6 +12,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { typographyRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 
@@ -85,15 +86,16 @@ export const TypographyOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A list row’s texts: its own parts (<a href="list">List</a>’s title,
-        subtitle, detail).
+        A list row’s texts: its own parts (<a href={publicUrl('list')}>List</a>
+        ’s title, subtitle, detail).
       </li>
       <li>
-        A page’s title: a <a href="header">Header</a>’s large title.
+        A page’s title: a <a href={publicUrl('header')}>Header</a>’s large
+        title.
       </li>
       <li>
-        A symbol in text: a <a href="symbol">Symbol</a>, inside it (sized and
-        weighted with it).
+        A symbol in text: a <a href={publicUrl('symbol')}>Symbol</a>, inside it
+        (sized and weighted with it).
       </li>
     </ul>
 
@@ -106,7 +108,7 @@ export const TypographyOverview: FunctionComponent = () => (
     <ul>
       <li>The props most text sets.</li>
       <li>
-        All its props: <a href="typography/parts">Parts</a>.
+        All its props: <a href={publicUrl('typography/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -158,7 +160,7 @@ export const TypographyOverview: FunctionComponent = () => (
       </li>
       <li>
         Weights are variable (the system font’s): a symbol in it follows the
-        weight (see <a href="symbol">Symbol</a>).
+        weight (see <a href={publicUrl('symbol')}>Symbol</a>).
       </li>
       <li>
         Its color inherited unless set; its text size, for its text and

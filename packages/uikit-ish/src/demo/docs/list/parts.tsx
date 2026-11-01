@@ -38,6 +38,7 @@ import {
   sfSquareAndPencil,
   sfTrashFill,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { contacts, messages, planets, settings } from './content.js';
 import {
   forwardClickRows,
@@ -2915,7 +2916,7 @@ export const ListParts: FunctionComponent = () => (
         trailing grabbers, both, none, or not managed), the default its
         sections, groups and rows override; their parts follow by their{' '}
         <code>whileEditing</code>. Sections editing separately:{' '}
-        <a href="list/composition#editing-sections-separately">
+        <a href={publicUrl('list/composition#editing-sections-separately')}>
           Editing sections separately
         </a>
         .
@@ -3262,7 +3263,7 @@ export const ListParts: FunctionComponent = () => (
           part="DatePicker.Expandable"
         />
         ’s rows: see{' '}
-        <a href="list/composition#rows-expanding-together">
+        <a href={publicUrl('list/composition#rows-expanding-together')}>
           Rows expanding together
         </a>
         ).
@@ -3354,9 +3355,9 @@ export const ListParts: FunctionComponent = () => (
       <li>
         Or its actions: buttons alone in it, 16px below the group, stacked and
         centered, as wide as the group at most (a <code>fill</code>{' '}
-        <a href="button">Button</a> spanning it). A section can have both: a
-        footer of text, then one of actions. The gap is the list’s, not the
-        buttons’ (see{' '}
+        <a href={publicUrl('button')}>Button</a> spanning it). A section can
+        have both: a footer of text, then one of actions. The gap is the list’s,
+        not the buttons’ (see{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
@@ -3461,7 +3462,7 @@ export const ListParts: FunctionComponent = () => (
       <li>
         A slot after a row’s content: what’s in it in a line, 16px apart
         (details, chevrons, a grabber, any element, e.g. a
-        <a href="switch">Switch</a>); several per row.
+        <a href={publicUrl('switch')}>Switch</a>); several per row.
       </li>
       <li>
         In edit mode, sliding in (<code>whileEditing=&quot;show&quot;</code>,
@@ -3482,7 +3483,8 @@ export const ListParts: FunctionComponent = () => (
     <ul>
       <li>
         Content across a row’s whole line, in place of the others (e.g. a
-        <a href="slider">Slider</a>, a <a href="segmented">Segmented</a>
+        <a href={publicUrl('slider')}>Slider</a>, a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a>
         control, an inline calendar).
       </li>
     </ul>
@@ -3833,8 +3835,8 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="checkbox">Checkbox</a> as a row’s leading edit control:
-        selecting several rows.
+        A <a href={publicUrl('checkbox')}>Checkbox</a> as a row’s leading edit
+        control: selecting several rows.
       </li>
       <li>
         Rows pass their clicks on to it (<PartLink part="forwardClick" />
@@ -3853,8 +3855,8 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="checkbox">Radio</a> as a row’s leading edit control: choosing
-        one row.
+        A <a href={publicUrl('checkbox')}>Radio</a> as a row’s leading edit
+        control: choosing one row.
       </li>
       <li>
         Its group: a Base UI{' '}
@@ -3899,7 +3901,7 @@ export const ListParts: FunctionComponent = () => (
       <li>
         Here: a minus on each row, a plus on an insert row; clicks logged.
         Deleting and inserting for real:{' '}
-        <a href="list/composition#deleting-and-inserting-rows">
+        <a href={publicUrl('list/composition#deleting-and-inserting-rows')}>
           Deleting and inserting rows
         </a>
         .

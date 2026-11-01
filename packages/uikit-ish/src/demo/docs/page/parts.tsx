@@ -12,6 +12,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { names } from '../viewport/content.js';
 import { pageRootRows } from './docs.js';
 import { propOptionsGuideRoot } from './props.js';
@@ -139,7 +140,8 @@ export const PageParts: FunctionComponent = () => (
       </li>
       <li>
         Inset at its start beside a floating column (
-        <code>--uikit-layout-inset-start</code>, see <a href="layout">Layout</a>
+        <code>--uikit-layout-inset-start</code>, see{' '}
+        <a href={publicUrl('layout')}>Layout</a>
         ).
       </li>
       <li>

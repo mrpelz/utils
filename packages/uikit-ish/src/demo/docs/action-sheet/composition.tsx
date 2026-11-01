@@ -21,6 +21,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { propOptionsPresentation } from './props.js';
 
 const adaptiveCode = `// An action sheet in a compact width, a popover in a regular one.
@@ -226,12 +227,13 @@ export const ActionSheetComposition: FunctionComponent = () => (
     <ul>
       <li>
         In a regular width, an action sheet shows as a popover (guide{' '}
-        <a href="hig-guide#rule-a6">A6</a>): the app’s choice here, by{' '}
+        <a href={publicUrl('hig-guide#rule-a6')}>A6</a>): the app’s choice here,
+        by{' '}
         <PartLink
           component="viewport"
           part="useSizeClass"
         />
-        ; a <a href="popover">Popover</a> with an arrow, the same{' '}
+        ; a <a href={publicUrl('popover')}>Popover</a> with an arrow, the same{' '}
         <PartLink
           component="action-sheet"
           part="ActionSheet.Actions"

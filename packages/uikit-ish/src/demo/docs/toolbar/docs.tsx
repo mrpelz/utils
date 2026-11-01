@@ -9,6 +9,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -47,7 +48,7 @@ export const toolbarRootRows: readonly PropRow[] = [
     <>
       Where the bar is: at the bottom (48px capsules, the home indicator’s space
       below), or at the top (a navigation bar: 44px capsules; see{' '}
-      <a href="header">Header</a>).
+      <a href={publicUrl('header')}>Header</a>).
     </>,
   ],
   [
@@ -171,8 +172,8 @@ export const toolbarButtonRows: readonly PropRow[] = [
       <code>glass</code> (in a group: the capsule’s)
     </>,
     <>
-      A <a href="button">Button</a>’s variant. Of its own, any; in a group, the
-      classic ones only (the glass is the capsule’s).
+      A <a href={publicUrl('button')}>Button</a>’s variant. Of its own, any; in
+      a group, the classic ones only (the glass is the capsule’s).
     </>,
   ],
   [

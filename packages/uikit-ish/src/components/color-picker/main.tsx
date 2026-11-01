@@ -1,4 +1,5 @@
 import '../button/style.css';
+import '../list/style.css';
 import '../menu/style.css';
 import '../page-control/style.css';
 import '../segmented/style.css';
@@ -6,19 +7,24 @@ import './style.css';
 
 import type { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import { Slider as BaseSlider } from '@base-ui/react/slider';
+import { useRender } from '@base-ui/react/use-render';
 import {
+  Children,
   cloneElement,
   ComponentProps,
   createContext,
   CSSProperties,
   FocusEvent,
   forwardRef,
+  Fragment,
   FunctionComponent,
+  isValidElement,
   KeyboardEvent,
   MouseEvent,
   PointerEvent,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -26,25 +32,40 @@ import {
 } from 'react';
 
 import { Button } from '../button/main.js';
+import { List } from '../list/main.js';
 import { Menu } from '../menu/main.js';
 import { PageControl } from '../page-control/main.js';
 import { Segmented } from '../segmented/main.js';
-import { cn, useTouchHold, withStyle } from '../utils/main.js';
+import {
+  Checkmark,
+  cn,
+  useForwardedRef,
+  useTouchHold,
+  withStyle,
+} from '../utils/main.js';
 import { Viewport } from '../viewport/main.js';
+import { codeGroups, type ColorCode, parseCssColor } from './color.js';
+import { cssNamedColors } from './named-colors.js';
 import type {
   ColorPickerChangeEventDetails,
+  ColorPickerCodeCopyProps,
+  ColorPickerCodeProps,
   ColorPickerEyedropperProps,
   ColorPickerModeProps,
   ColorPickerModesProps,
+  ColorPickerNamedColorProps,
+  ColorPickerNamedProps,
   ColorPickerPanelProps,
   ColorPickerRootProps,
   ColorPickerSavedColorsChangeEventDetails,
   ColorPickerSlidersModel,
   ColorPickerSlidersProps,
   ColorPickerSwatchesProps,
+  ColorPickerSystemColorsProps,
   ColorPickerViewProps,
   ColorWellProps,
   EyeDropperApi,
+  NamedIndexEntry,
   PanelState,
   PickerState,
   Rgba,
@@ -52,15 +73,21 @@ import type {
 
 export type {
   ColorPickerChangeEventDetails,
+  ColorPickerCodeCopyProps,
+  ColorPickerCodeProps,
   ColorPickerEyedropperProps,
   ColorPickerModeProps,
   ColorPickerModesProps,
+  ColorPickerNamedColorProps,
+  ColorPickerNamedProps,
   ColorPickerPanelProps,
   ColorPickerRootProps,
   ColorPickerSavedColorsChangeEventDetails,
   ColorPickerSlidersModel,
   ColorPickerSlidersProps,
+  ColorPickerSlidersRange,
   ColorPickerSwatchesProps,
+  ColorPickerSystemColorsProps,
   ColorPickerViewProps,
   ColorWellProps,
 } from './props.js';
@@ -73,9 +100,10 @@ export type {
 //   corners 18px, the selected one outlined white (3px);
 // - Spectrum: hues across, light to dark down (white at the top, pure hues
 //   halfway, black at the bottom), its corners 18px, the color ringed;
-// - Sliders: red, green and blue (0 to 255), each a channel's row (see
-//   `ChannelRow`): its title (all caps), a slider mixing from the color
-//   (the channel at 0 to 255), and its value, typed;
+// - Sliders: red, green and blue (0 to 255; or 0 to 100%, see `Sliders`),
+//   each a channel's row (see `ChannelRow`): its title (all caps), a slider
+//   mixing from the color (the channel along its range), and its value,
+//   typed;
 // - Each channel's row kept above the keyboard as its field's typed into
 //   (a `Viewport.KeyboardAccessory`; in a `Viewport.Provider`);
 // - Opacity (optional: its part, `Opacity`), a channel's row too: the
@@ -92,6 +120,10 @@ export type {
 //   opacity, always opaque).
 // - The eyedropper (`ColorPicker.Eyedropper`) is the browser's
 //   (`EyeDropper`; not where it has none, e.g. Safari).
+// - The system's color picker (`ColorPicker.SystemColors`) is a color
+//   input's (over its button, pressed itself: on iOS, nothing else opens
+//   it; with the opacity rendered, its alpha too where the input has one,
+//   e.g. Safari; else its colors opaque, the opacity kept).
 // - Saved colors are deleted by their menu (a secondary click: right click,
 //   long press).
 
@@ -188,20 +220,39 @@ const unregister = () => undefined;
 
 const PickerContext = createContext<PickerState>({
   color: { a: 1, b: 0, g: 0, r: 0 },
+  hasOpacity: false,
   registerOpacity: () => unregister,
   setColor: () => undefined,
 });
 
 /**
- * A color picker: its color, for its
- * parts (`Panel`, `Eyedropper`), in the app's popover or sheet.
+ * Its modes (see `Root`): the one shown, chosen by its `Modes`; the first
+ * `Mode` (or `View`) unless a default is given.
+ */
+const PanelContext = createContext<PanelState>({
+  isGridHeight: false,
+  mode: null,
+  registerGridHeight: () => unregister,
+  registerMode: () => undefined,
+  setMode: () => undefined,
+});
+
+/**
+ * A color picker: its color and its mode, for its parts (`Header`,
+ * `Modes`, `Panel`, `Eyedropper`, anywhere in it), in the app's popover or
+ * sheet. Its element (`render`) may be the sheet's popup, so its modes'
+ * control can be in the sheet's header, not scrolling.
  */
 const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
   (
     {
       className,
+      defaultMode,
       defaultValue = '#000000',
+      mode: modeProp,
+      onModeChange,
       onValueChange,
+      render,
       style,
       value,
       ...props
@@ -222,6 +273,7 @@ const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
     const state = useMemo(
       () => ({
         color,
+        hasOpacity,
         registerOpacity,
         // Uncontrolled: its own state; controlled, only the app's `value`.
         setColor: (next: Rgba, details: ColorPickerChangeEventDetails) => {
@@ -235,84 +287,85 @@ const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
       [value ?? own, onValueChange, hasOpacity],
     );
 
-    return (
-      <PickerContext.Provider value={state}>
-        <div
-          ref={ref}
-          style={withStyle(
-            {
-              // (For its parts.)
-              '--uikit-color-picker-color': formatColor(color),
-              '--uikit-color-picker-color-opaque': formatColor({
-                ...color,
-                a: 1,
-              }),
-            },
-            style,
-          )}
-          {...props}
-          className={cn('uikit-color-picker-root', className)}
-          data-color-picker-part="root"
-        />
-      </PickerContext.Provider>
-    );
-  },
-);
-
-/**
- * Its panel's modes (see `Panel`): the one shown, chosen by its `Modes`;
- * the first `Mode` (or `View`) unless a default is given.
- */
-const PanelContext = createContext<PanelState>({
-  mode: null,
-  registerMode: () => undefined,
-  setMode: () => undefined,
-});
-
-/**
- * Its panel: its modes (`Modes`, a `Mode` each; a `View` each, paired by
- * their `value`s), the opacity, the color and the saved colors, as
- * composed (in its padding, its parts spaced).
- */
-const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
-  ({ className, defaultMode, mode: modeProp, onModeChange, ...props }, ref) => {
     const [ownMode, setOwnMode] = useState(defaultMode);
     // (Without a default: the first mode, as it's rendered.)
     const [firstMode, setFirstMode] = useState<string | undefined>();
     // (Controlled from the start: none yet, before its first mode is
     // known, not undefined, which would leave its control uncontrolled.)
     const mode = modeProp ?? ownMode ?? firstMode ?? null;
-
-    const panel = useMemo(
+    // Its views of the grid's height (a `Grid`, a `Spectrum`): with one,
+    // all as high (see `View`).
+    const [gridHeights, setGridHeights] = useState(0);
+    const registerGridHeight = useCallback(() => {
+      setGridHeights((count) => count + 1);
+      return () => setGridHeights((count) => count - 1);
+    }, []);
+    const modes = useMemo(
       () => ({
+        isGridHeight: gridHeights > 0,
         mode,
-        registerMode: (value: string) =>
-          setFirstMode((first) => first ?? value),
+        registerGridHeight,
+        registerMode: (next: string) => setFirstMode((first) => first ?? next),
         // Uncontrolled: its own state; controlled, only the app's `mode`.
         setMode: (next: string, details: BaseRadioGroup.ChangeEventDetails) => {
           if (modeProp === undefined) setOwnMode(next);
           onModeChange?.(next, details);
         },
       }),
-      [mode, modeProp, onModeChange],
+      [gridHeights, mode, modeProp, onModeChange, registerGridHeight],
     );
 
+    const element = useRender({
+      defaultTagName: 'div',
+      props: {
+        style: withStyle(
+          {
+            // (For its parts.)
+            '--uikit-color-picker-color': formatColor(color),
+            '--uikit-color-picker-color-opaque': formatColor({
+              ...color,
+              a: 1,
+            }),
+          },
+          style,
+        ),
+        ...props,
+        className: cn('uikit-color-picker-root', className),
+        'data-color-picker-part': 'root',
+      },
+      ref,
+      render,
+    });
+
     return (
-      <PanelContext.Provider value={panel}>
-        <div
-          ref={ref}
-          {...props}
-          className={cn('uikit-color-picker-panel', className)}
-          data-color-picker-part="panel"
-        />
-      </PanelContext.Provider>
+      <PickerContext.Provider value={state}>
+        <PanelContext.Provider value={modes}>{element}</PanelContext.Provider>
+      </PickerContext.Provider>
     );
   },
 );
 
 /**
+ * Its panel: its modes' control (`Modes`, unless elsewhere, e.g. a sheet's
+ * header) and views (a `View` each, paired with its `Mode` by their
+ * `value`s), the opacity, the color and the saved colors, as composed (in
+ * its padding, its parts spaced).
+ */
+const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      {...props}
+      className={cn('uikit-color-picker-panel', className)}
+      data-color-picker-part="panel"
+    />
+  ),
+);
+
+/**
  * Its modes' control: a segmented control (its `Mode`s, its highlight),
- * choosing the `View` shown; 24px above it.
+ * choosing the `View` shown; 24px above it (in its panel, or at the end of
+ * a header).
  */
 const Modes = forwardRef<HTMLDivElement, ColorPickerModesProps>(
   ({ children, ...props }, ref) => {
@@ -322,7 +375,10 @@ const Modes = forwardRef<HTMLDivElement, ColorPickerModesProps>(
       <Segmented.Root
         ref={ref}
         aria-label="Mode"
+        // (Its modes, however many, scrolled when they don't fit.)
+        overflow="scroll"
         {...props}
+        className={cn('uikit-color-picker-modes', props.className)}
         value={mode}
         onValueChange={(next, details) => setMode(String(next), details)}
       >
@@ -344,29 +400,6 @@ const Mode = forwardRef<HTMLElement, ColorPickerModeProps>(
         ref={ref}
         value={value}
         {...props}
-      />
-    );
-  },
-);
-
-/**
- * A mode's view (by `value`, its `Mode`'s): shown while it's chosen; all
- * as high as the grid (so a popover doesn't move as they're switched).
- */
-const View = forwardRef<HTMLDivElement, ColorPickerViewProps>(
-  ({ className, value, ...props }, ref) => {
-    const { mode, registerMode } = useContext(PanelContext);
-    // (A mode, too: without `Modes`, its only view shown.)
-    useLayoutEffect(() => registerMode(value), [registerMode, value]);
-    if (mode !== value) return null;
-
-    return (
-      <div
-        ref={ref}
-        data-color-picker-view={value}
-        {...props}
-        className={cn('uikit-color-picker-view', className)}
-        data-color-picker-part="view"
       />
     );
   },
@@ -484,6 +517,45 @@ const Spectrum = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
 );
 
 /**
+ * A mode's view (by `value`, its `Mode`'s): shown while it's chosen. With a
+ * view of the grid's height (a `Grid` or `Spectrum` in it) among them, all
+ * as high (so a popover doesn't move as they're switched); without, each as
+ * high as its content (e.g. sliders alone).
+ */
+const View = forwardRef<HTMLDivElement, ColorPickerViewProps>(
+  ({ children, className, value, ...props }, ref) => {
+    const { isGridHeight, mode, registerGridHeight, registerMode } =
+      useContext(PanelContext);
+    // (A mode, too: without `Modes`, its only view shown.)
+    useLayoutEffect(() => registerMode(value), [registerMode, value]);
+    // (Rendered or not: its own height known by its children's types.)
+    const isOwnGridHeight = Children.toArray(children).some(
+      (child) =>
+        isValidElement(child) &&
+        (child.type === Grid || child.type === Spectrum),
+    );
+    useLayoutEffect(
+      () => (isOwnGridHeight ? registerGridHeight() : undefined),
+      [isOwnGridHeight, registerGridHeight],
+    );
+    if (mode !== value) return null;
+
+    return (
+      <div
+        ref={ref}
+        data-color-picker-view={value}
+        {...props}
+        className={cn('uikit-color-picker-view', className)}
+        data-color-picker-part="view"
+        data-grid-height={isGridHeight ? '' : undefined}
+      >
+        {children}
+      </div>
+    );
+  },
+);
+
+/**
  * A gradient's stops, across a channel's track (from where its knob's
  * center is at its least to where it is at its most), evenly.
  */
@@ -491,18 +563,53 @@ const trackStops = (colors: readonly string[]) =>
   colors
     .map(
       (stop, index) =>
-        `${stop} calc(20px + (100% - 40px) * ${String(index / Math.max(colors.length - 1, 1))})`,
+        `${stop} calc(var(--uikit-color-picker-channel-size) / 2 + (100% - var(--uikit-color-picker-channel-size)) * ${String(index / Math.max(colors.length - 1, 1))})`,
     )
     .join(', ');
 
 /**
  * A channel's row (the sliders', the opacity's): its title (all caps,
- * secondary), a slider (40px high, mixing from the color: its gradient
- * the color with the channel along its range; its knob 36px, in the color,
- * ringed white, 3px) and its value (a 75px by 40px field on the system
- * fill, 8px corners, Body emphasized: typed, committed on Enter or as it's
- * left).
+ * secondary), a slider (32px high, mixing from the color: its gradient
+ * the color with the channel along its range; its knob as high, in the
+ * color, ringed white, 3px) and its value (a 75px by 32px field on the system
+ * fill, 8px corners, Body emphasized: typed, applied as it's typed, within
+ * its range).
  */
+/**
+ * A typed field's handlers (a channel's value, the code): focused, all of
+ * it selected (to type over); left (or Enter), `onLeave` (its value again,
+ * e.g. emptied) and its selection collapsed (kept, the next tap would be on
+ * selected text). The tap focusing it is on its text, selected: Chrome opens
+ * its context menu for that; not for this tap (a later press, held, opens
+ * it).
+ */
+const useFieldSelection = (onLeave: () => void) => {
+  // Focused by a tap (until its click).
+  const focusingRef = useRef(false);
+
+  return {
+    onBlur: (event: FocusEvent<HTMLInputElement>) => {
+      onLeave();
+      focusingRef.current = false;
+      const { length } = event.currentTarget.value;
+      event.currentTarget.setSelectionRange(length, length);
+    },
+    onClick: () => {
+      focusingRef.current = false;
+    },
+    onContextMenu: (event: MouseEvent<HTMLInputElement>) => {
+      if (focusingRef.current) event.preventDefault();
+    },
+    onFocus: (event: FocusEvent<HTMLInputElement>) => {
+      focusingRef.current = true;
+      event.currentTarget.select();
+    },
+    onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter') onLeave();
+    },
+  };
+};
+
 const ChannelRow: FunctionComponent<{
   /** Its field's name (e.g. “Opacity percentage”; default: “Red value”). */
   fieldLabel?: string;
@@ -530,16 +637,21 @@ const ChannelRow: FunctionComponent<{
   value,
 }) => {
   const [draft, setDraft] = useState<string | undefined>(undefined);
+  const selection = useFieldSelection(() => setDraft(undefined));
   // Held, its touch doesn't scroll (see `useTouchHold`).
   const holdHandlers = useTouchHold<HTMLDivElement>('x');
 
-  const commit = (event: Event) => {
-    if (draft === undefined) return;
-    const next = Number.parseFloat(draft);
-    if (Number.isFinite(next)) {
-      onValueChange(clamp(Math.round(next), 0, max), event);
+  // Typed: its digits (a whole number), within its range, applied at once;
+  // shown as applied (e.g. 300 as 255), or empty while it's typed over.
+  const type = (text: string, event: Event) => {
+    const digits = text.replaceAll(/\D/gu, '');
+    if (digits === '') {
+      setDraft('');
+      return;
     }
-    setDraft(undefined);
+    const next = clamp(Number.parseInt(digits, 10), 0, max);
+    setDraft(String(next));
+    onValueChange(next, event);
   };
 
   return (
@@ -612,13 +724,10 @@ const ChannelRow: FunctionComponent<{
             aria-label={fieldLabel ?? `${label} value`}
             inputMode="numeric"
             value={draft ?? String(value)}
-            onBlur={(event: FocusEvent<HTMLInputElement>) => commit(event)}
-            onChange={(event) => setDraft(event.currentTarget.value)}
-            // Focused, all of it (to type over).
-            onFocus={(event) => event.currentTarget.select()}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') commit(event);
-            }}
+            // (Left, or Enter: its value again, e.g. emptied; see
+            // `useFieldSelection`.)
+            onChange={(event) => type(event.currentTarget.value, event)}
+            {...selection}
           />
           {unit ? <span aria-hidden="true">{unit}</span> : null}
         </label>
@@ -636,6 +745,11 @@ type Model = {
   }[];
   /** The color's channels (rounded). */
   from: (color: Rgba) => number[];
+  /**
+   * The color, one channel set (only it: the others as they are, not as
+   * rounded; by default, from all of them, see `to`).
+   */
+  set?: (color: Rgba, index: number, value: number) => Omit<Rgba, 'a'>;
   /** Channels as a color (its red, green and blue). */
   to: (values: readonly number[]) => Omit<Rgba, 'a'>;
 };
@@ -688,7 +802,46 @@ const rgb: Model = {
   to: ([r = 0, g = 0, b = 0]) => ({ b, g, r }),
 };
 
+const rgbKeys = ['r', 'g', 'b'] as const;
+
+/**
+ * Red, green and blue in percent (0–100%): coarser than bytes, so a channel
+ * set leaves the others as they are (not as rounded, see `set`).
+ */
+const rgbPercentage: Model = {
+  channels: [
+    { label: 'Red', max: 100, unit: '%' },
+    { label: 'Green', max: 100, unit: '%' },
+    { label: 'Blue', max: 100, unit: '%' },
+  ],
+  from: ({ b, g, r }) =>
+    [r, g, b].map((channel) => Math.round((channel / 255) * 100)),
+  set: ({ b, g, r }, index, value) => ({
+    b,
+    g,
+    r,
+    [rgbKeys[index] ?? 'r']: (value * 255) / 100,
+  }),
+  to: ([r = 0, g = 0, b = 0]) => ({
+    b: (b * 255) / 100,
+    g: (g * 255) / 100,
+    r: (r * 255) / 100,
+  }),
+};
+
 const models: Record<ColorPickerSlidersModel, Model> = { cmyk, hsl, rgb };
+
+/** A model's color, one channel set (see `Model`'s `set`). */
+const withChannel = (
+  model: Model,
+  color: Rgba,
+  values: readonly number[],
+  index: number,
+  value: number,
+) =>
+  model.set
+    ? model.set(color, index, value)
+    : model.to(values.with(index, value));
 
 /**
  * A channel's track's colors: the color with the channel along its range,
@@ -697,32 +850,50 @@ const models: Record<ColorPickerSlidersModel, Model> = { cmyk, hsl, rgb };
  */
 const trackColors = (
   model: Model,
+  color: Rgba,
   values: readonly number[],
   index: number,
 ) => {
   const { max } = model.channels[index] ?? { max: 1 };
   const steps = model === hsl ? ([6, 1, 2][index] ?? 1) : 1;
-  return Array.from({ length: steps + 1 }, (_, step) => {
-    const next = values.with(index, (max * step) / steps);
-    return formatColor({ ...model.to(next), a: 1 });
-  });
+  return Array.from({ length: steps + 1 }, (_, step) =>
+    formatColor({
+      ...withChannel(model, color, values, index, (max * step) / steps),
+      a: 1,
+    }),
+  );
 };
 
 /**
- * Sliders: a color model's channels (`model`: red, green and blue; hue,
- * saturation and lightness; cyan, magenta, yellow and black), each mixing
- * from the color, its value typed too.
+ * Sliders: a color model's channels (`model`: red, green and blue, in bytes
+ * or percent, its `range`; hue, saturation and lightness; cyan, magenta,
+ * yellow and black), each mixing from the color, its value typed too; then
+ * its children (e.g. the `Code`), spaced as the channels.
  */
 const Sliders = forwardRef<HTMLDivElement, ColorPickerSlidersProps>(
-  ({ className, model: modelName = 'rgb', ...props }, ref) => {
+  (
+    { children, className, model: modelName = 'rgb', range = 'byte', ...props },
+    ref,
+  ) => {
     const { color, setColor } = useContext(PickerContext);
-    const model = models[modelName];
+    const model =
+      modelName === 'rgb' && range === 'percentage'
+        ? rgbPercentage
+        : models[modelName];
     const opaque = formatColor({ ...color, a: 1 });
 
-    // Its values as last set, while they're the color's: so a hue isn't
-    // lost to a gray (no saturation), nor inks to black (all of it).
-    const [last, setLast] = useState<{ color: string; values: number[] }>();
-    const values = last?.color === opaque ? last.values : model.from(color);
+    // Its values as last set, while they're the color's (and its model's):
+    // so a hue isn't lost to a gray (no saturation), nor inks to black (all
+    // of it).
+    const [last, setLast] = useState<{
+      color: string;
+      model: Model;
+      values: number[];
+    }>();
+    const values =
+      last?.color === opaque && last.model === model
+        ? last.values
+        : model.from(color);
 
     return (
       <div
@@ -731,27 +902,33 @@ const Sliders = forwardRef<HTMLDivElement, ColorPickerSlidersProps>(
         className={cn('uikit-color-picker-sliders', className)}
         data-color-picker-part="sliders"
         data-model={modelName}
+        data-range={modelName === 'rgb' ? range : undefined}
       >
         {model.channels.map(({ label, max, unit }, index) => (
           <ChannelRow
             key={label}
             label={label}
             max={max}
-            stops={trackColors(model, values, index)}
+            stops={trackColors(model, color, values, index)}
             thumbColor={opaque}
             unit={unit}
             value={values[index] ?? 0}
             onValueChange={(next, event) => {
               const nextValues = values.with(index, next);
-              const nextColor = { ...model.to(nextValues), a: color.a };
+              const nextColor = {
+                ...withChannel(model, color, values, index, next),
+                a: color.a,
+              };
               setLast({
                 color: formatColor({ ...nextColor, a: 1 }),
+                model,
                 values: nextValues,
               });
               setColor(nextColor, { event, reason: 'sliders' });
             }}
           />
         ))}
+        {children}
       </div>
     );
   },
@@ -827,7 +1004,7 @@ const SavedSwatch: FunctionComponent<{
           <button
             aria-label={hex}
             aria-pressed={sameColor(swatch, color) && swatch.a === color.a}
-            style={{ backgroundColor: hex }}
+            style={{ '--uikit-color-picker-color': hex }}
             type="button"
             onClick={(event: MouseEvent<HTMLButtonElement>) =>
               setColor(swatch, { event, reason: 'saved' })
@@ -1067,6 +1244,163 @@ const Eyedropper: FunctionComponent<ColorPickerEyedropperProps> = ({
   );
 };
 
+/** Whether the browser has a color input (its picker the system's). */
+const hasColorInput = () => {
+  if (typeof document === 'undefined') return false;
+  const input = document.createElement('input');
+  input.type = 'color';
+  return input.type === 'color';
+};
+
+/**
+ * Whether its color input has an alpha (its `alpha` attribute: e.g.
+ * Safari's; without, a value with one is invalid, black).
+ */
+const hasColorInputAlpha = () =>
+  typeof HTMLInputElement !== 'undefined' &&
+  'alpha' in HTMLInputElement.prototype;
+
+/**
+ * Its system colors (a leading button, after the eyedropper): a `Button`
+ * (or what it renders), opening the system's color picker: a color input's
+ * (none without one), over the button, transparent: pressed itself (on iOS,
+ * nothing else opens it: neither `showPicker` nor a click, see WebKit's bug
+ * 261703), the button showing the press; the button clicking it from the
+ * keyboard. With the opacity rendered, its alpha too, where the input has
+ * one (its `alpha`: e.g. Safari); else its colors opaque, the opacity kept.
+ */
+const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
+  render,
+  ...props
+}) => {
+  const { color, hasOpacity, setColor } = useContext(PickerContext);
+  // (Its input, as rendered: for its button's press.)
+  const [input, setInput] = useState<HTMLInputElement | null>(null);
+  if (!hasColorInput()) return null;
+  // (With the opacity, the input's alpha too, where it has one.)
+  const hasAlpha = hasOpacity && hasColorInputAlpha();
+
+  const open = () => input?.click();
+
+  return (
+    <span
+      className="uikit-color-picker-system-colors"
+      data-color-picker-part="system-colors"
+    >
+      {render ? (
+        cloneElement(render, {
+          'aria-label': 'System colors',
+          ...props,
+          onClick: open,
+        })
+      ) : (
+        <Button.Root
+          aria-label="System colors"
+          {...props}
+          onClick={open}
+        />
+      )}
+      <input
+        ref={setInput}
+        // (`alpha`: too new for the JSX types; a boolean property, as set.)
+        {...(hasAlpha ? { alpha: true } : {})}
+        aria-hidden="true"
+        className="uikit-color-picker-system-colors-input"
+        disabled={props.disabled}
+        tabIndex={-1}
+        type="color"
+        // (The color, as it is: its picker opened from it.)
+        value={formatColor(hasAlpha ? color : { ...color, a: 1 }).toLowerCase()}
+        // (As it's picked, live; without its alpha, the opacity kept.)
+        onChange={(event) => {
+          // (Any CSS color, with an alpha: see color.ts.)
+          const picked = parseCssColor(event.currentTarget.value);
+          if (!picked) return;
+          setColor(hasAlpha ? picked : { ...picked, a: color.a }, {
+            event,
+            reason: 'system-colors',
+          });
+        }}
+      />
+    </span>
+  );
+};
+
+/**
+ * Its code (a row; its place the app's: e.g. under the sliders), as high as a
+ * channel's, its field where a channel's value is: “Hex” (a channel's title,
+ * beside them, centered), then its children (e.g. a `CodeCopy`), the color's
+ * hex code typed (`#` before it, not typed: its digits, applied as they make
+ * a code, 3, 4, 6 or 8 of them; with an alpha, 4 or 8), at its end. Kept above the keyboard as it's typed into (as a
+ * channel's row).
+ */
+const Code = forwardRef<HTMLDivElement, ColorPickerCodeProps>(
+  ({ children, className, ...props }, ref) => {
+    const { color, setColor } = useContext(PickerContext);
+    const [draft, setDraft] = useState<string | undefined>(undefined);
+    const selection = useFieldSelection(() => setDraft(undefined));
+
+    const type = (text: string, event: Event) => {
+      const digits = text
+        .replaceAll(/[^\da-f]/giu, '')
+        .slice(0, 8)
+        .toUpperCase();
+      setDraft(digits);
+      if (![3, 4, 6, 8].includes(digits.length)) return;
+      const typed = parseColor(`#${digits}`);
+      // (Without an alpha typed, the color's kept.)
+      setColor(digits.length % 4 === 0 ? typed : { ...typed, a: color.a }, {
+        event,
+        reason: 'code',
+      });
+    };
+
+    return (
+      <Viewport.KeyboardAccessory
+        ref={ref}
+        gap={20}
+        {...props}
+        className={cn('uikit-color-picker-code', className)}
+        data-color-picker-part="code"
+      >
+        <div
+          className="uikit-color-picker-channel-row uikit-color-picker-code-row"
+          data-color-picker-part="code-row"
+        >
+          <div
+            aria-hidden="true"
+            className="uikit-color-picker-channel-title"
+            data-color-picker-part="code-title"
+          >
+            Hex
+          </div>
+          {children}
+          {/* Its code: `#` (not typed), its digits typed, in a field as a
+             channel's value is. */}
+          <label
+            className="uikit-color-picker-channel-field uikit-color-picker-code-field"
+            data-color-picker-part="code-field"
+          >
+            <span aria-hidden="true">#</span>
+            <input
+              // (`spellcheck`: Preact's spelling, which the React lint rule
+              // would rename.)
+              {...{ spellcheck: false }}
+              aria-label="Hex color"
+              autoCapitalize="characters"
+              autoComplete="off"
+              autoCorrect="off"
+              value={draft ?? formatColor(color).slice(1)}
+              onChange={(event) => type(event.currentTarget.value, event)}
+              {...selection}
+            />
+          </label>
+        </div>
+      </Viewport.KeyboardAccessory>
+    );
+  },
+);
+
 /** A color well: its color, opening the picker. */
 const Well = forwardRef<HTMLButtonElement, ColorWellProps>(
   ({ className, color, size = 'small', style, ...props }, ref) => (
@@ -1084,6 +1418,332 @@ const Well = forwardRef<HTMLButtonElement, ColorWellProps>(
   ),
 );
 
+// How long a copy shows as done (its checkmark).
+const copiedFor = 1500;
+
+/**
+ * Its code's copy button: a `Button` (or what it renders, its content the
+ * app's: e.g. a symbol), opening a menu of the color's codes (see color.ts):
+ * hex's, then a submenu each of the others' groups, each code its format and
+ * its values (`Menu.Label`, `Menu.Subtitle`). One picked, copied to the
+ * clipboard (`onCodeCopy`); for a moment, a checkmark instead of its content
+ * (`data-copied`). Its place the app's (in a `Code`, or not).
+ */
+const CodeCopy: FunctionComponent<ColorPickerCodeCopyProps> = ({
+  children,
+  onCodeCopy,
+  render,
+  ...props
+}) => {
+  const { color } = useContext(PickerContext);
+  const [isCopied, setIsCopied] = useState(false);
+
+  useEffect(() => {
+    if (!isCopied) return undefined;
+    const timeout = setTimeout(() => setIsCopied(false), copiedFor);
+    return () => clearTimeout(timeout);
+  }, [isCopied]);
+
+  const copy = (code: string, event: Event) => {
+    navigator.clipboard
+      .writeText(code)
+      .then(() => {
+        setIsCopied(true);
+        onCodeCopy?.(code, event);
+      })
+      .catch(() => undefined);
+  };
+
+  // (Hex's: its color in a well at its end, inert.)
+  const item = ({ code, label, subtitle, well }: ColorCode) => (
+    <Menu.Item
+      key={code}
+      onClick={(event: MouseEvent<HTMLElement>) => copy(code, event)}
+    >
+      <Menu.Label>{label}</Menu.Label>
+      <Menu.Subtitle>{subtitle}</Menu.Subtitle>
+      {well === undefined ? null : (
+        <Well
+          inert
+          aria-hidden="true"
+          className="uikit-color-picker-code-copy-well"
+          color={well}
+          tabIndex={-1}
+        />
+      )}
+    </Menu.Item>
+  );
+
+  const content = isCopied ? (
+    <Button.Icon>
+      <Checkmark />
+    </Button.Icon>
+  ) : (
+    children
+  );
+  const trigger = render ? (
+    cloneElement(
+      render,
+      {
+        'aria-label': 'Copy color code',
+        ...props,
+        'data-copied': isCopied ? '' : undefined,
+      },
+      content,
+    )
+  ) : (
+    <Button.Root
+      aria-label="Copy color code"
+      {...props}
+      data-copied={isCopied ? '' : undefined}
+    >
+      {content}
+    </Button.Root>
+  );
+
+  return (
+    <Menu.Root>
+      <Menu.Trigger render={trigger} />
+      <Menu.Portal>
+        <Menu.Positioner>
+          <Menu.Popup>
+            {codeGroups(color, formatColor({ ...color, a: 1 })).map(
+              ([title, codes], index) =>
+                index === 0 ? (
+                  <Fragment key={title}>
+                    {codes.map((entry) => item(entry))}
+                  </Fragment>
+                ) : (
+                  <Menu.SubmenuRoot key={title}>
+                    <Menu.SubmenuTrigger>
+                      <Menu.Label>{title}</Menu.Label>
+                    </Menu.SubmenuTrigger>
+                    <Menu.Portal>
+                      <Menu.Positioner>
+                        <Menu.Popup>
+                          {codes.map((entry) => item(entry))}
+                        </Menu.Popup>
+                      </Menu.Positioner>
+                    </Menu.Portal>
+                  </Menu.SubmenuRoot>
+                ),
+            )}
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
+  );
+};
+
+/**
+ * Its named colors' rows (see `Named`): one registered (its label's first
+ * letter, for the index), while mounted.
+ */
+const NamedContext = createContext<(entry: NamedIndexEntry) => () => void>(
+  () => unregister,
+);
+
+/** The scroll container `element` is in (its block axis), or the page. */
+const scrollerOf = (element: HTMLElement): Element => {
+  for (
+    let parent = element.parentElement;
+    parent && parent !== document.body;
+    parent = parent.parentElement
+  ) {
+    const { overflowY } = getComputedStyle(parent);
+    if (overflowY === 'auto' || overflowY === 'scroll') return parent;
+  }
+  return document.scrollingElement ?? document.documentElement;
+};
+
+/** A row at the top of its scroll container (below its scroll padding). */
+const jumpTo = (element: HTMLElement) => {
+  const scroller = scrollerOf(element);
+  const padding =
+    Number.parseFloat(getComputedStyle(scroller).scrollPaddingBlockStart) || 0;
+  const top =
+    scroller === document.scrollingElement
+      ? 0
+      : scroller.getBoundingClientRect().top;
+  scroller.scrollTo({
+    top:
+      scroller.scrollTop + element.getBoundingClientRect().top - top - padding,
+  });
+};
+
+/**
+ * A row in view (between its scroll container's scroll paddings: e.g. a
+ * sheet's header), at once: already, it stays; else, centered there.
+ */
+const revealCentered = (element: HTMLElement) => {
+  const scroller = scrollerOf(element);
+  const style = getComputedStyle(scroller);
+  const paddingStart = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
+  const paddingEnd = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
+  const scrollerTop =
+    scroller === document.scrollingElement
+      ? 0
+      : scroller.getBoundingClientRect().top;
+  const { bottom, height, top } = element.getBoundingClientRect();
+  const viewStart = scrollerTop + paddingStart;
+  const viewHeight = scroller.clientHeight - paddingStart - paddingEnd;
+  if (top >= viewStart && bottom <= viewStart + viewHeight) return;
+  scroller.scrollTo({
+    behavior: 'instant',
+    top: scroller.scrollTop + top - viewStart - (viewHeight - height) / 2,
+  });
+};
+
+/**
+ * Its named colors (a mode's content, e.g. “Named”): one list of their rows
+ * (`NamedColor`s: e.g. the app's, `CssNamedColors`'), as high as they are
+ * (scrolled by its container: e.g. a sheet's content, a popover's body). At
+ * its end (in its panel's inset), an index of their labels' first letters,
+ * kept centered in view as it's scrolled; one picked, the first row with it
+ * at the top (below the container's scroll padding: e.g. a sheet's header).
+ * Shown, the color's row in view at once (see `revealCentered`).
+ */
+const Named = forwardRef<HTMLDivElement, ColorPickerNamedProps>(
+  ({ children, className, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    // Shown (e.g. its mode chosen): the color's row in view, at once.
+    useLayoutEffect(() => {
+      const picked = ref.current?.querySelector<HTMLElement>(
+        '[data-color-picker-part="named-color"][data-picked]',
+      );
+      if (picked) revealCentered(picked);
+    }, [ref]);
+    const [entries, setEntries] = useState<readonly NamedIndexEntry[]>([]);
+    const register = useCallback((entry: NamedIndexEntry) => {
+      // (In the document's order; rows apart, neither in the other: only
+      // following, or not.)
+      setEntries((current) =>
+        [...current, entry].toSorted((a, b) =>
+          a.element.compareDocumentPosition(b.element) ===
+          Node.DOCUMENT_POSITION_FOLLOWING
+            ? -1
+            : 1,
+        ),
+      );
+      return () =>
+        setEntries((current) => current.filter((other) => other !== entry));
+    }, []);
+    // Each letter's first row.
+    const letters = useMemo(() => {
+      const first = new Map<string, HTMLElement>();
+      for (const { element, label } of entries) {
+        if (!first.has(label)) first.set(label, element);
+      }
+      return [...first];
+    }, [entries]);
+
+    return (
+      <NamedContext.Provider value={register}>
+        <div
+          ref={ref}
+          {...props}
+          className={cn('uikit-color-picker-named', className)}
+          data-color-picker-part="named"
+        >
+          <List.Root listStyle="insetGrouped">
+            <List.Section>
+              <List.Group>{children}</List.Group>
+            </List.Section>
+          </List.Root>
+          {letters.length > 0 ? (
+            <div
+              className="uikit-color-picker-named-index"
+              data-color-picker-part="named-index"
+            >
+              <List.Index aria-label="Index">
+                {letters.map(([letter, element]) => (
+                  <List.IndexItem
+                    key={letter}
+                    onClick={() => jumpTo(element)}
+                  >
+                    {letter}
+                  </List.IndexItem>
+                ))}
+              </List.Index>
+            </div>
+          ) : null}
+        </div>
+      </NamedContext.Provider>
+    );
+  },
+);
+
+/**
+ * A named color's row (in a `Named`): its color in a well (inert), its label
+ * (or its color), a checkmark while it's the color (its opacity aside); its
+ * label's first letter in the index. Pressed, the color (its opacity kept,
+ * as a grid swatch's).
+ */
+const NamedColor = forwardRef<HTMLElement, ColorPickerNamedColorProps>(
+  ({ children, color: cssColor, ...props }, forwardedRef) => {
+    const { color, setColor } = useContext(PickerContext);
+    const register = useContext(NamedContext);
+    const ref = useForwardedRef(forwardedRef);
+    const named = useMemo(() => parseCssColor(cssColor), [cssColor]);
+    const isPicked = named !== undefined && sameColor(named, color);
+    const letter = (typeof children === 'string' ? children : cssColor)
+      .charAt(0)
+      .toUpperCase();
+
+    useLayoutEffect(() => {
+      const { current: element } = ref;
+      return element ? register({ element, label: letter }) : undefined;
+    }, [letter, ref, register]);
+
+    return (
+      <List.Item
+        ref={ref}
+        {...props}
+        data-color-picker-part="named-color"
+        data-picked={isPicked ? '' : undefined}
+      >
+        <List.Leading>
+          <Well
+            inert
+            aria-hidden="true"
+            color={cssColor}
+            tabIndex={-1}
+          />
+        </List.Leading>
+        <List.Content>
+          <List.Title
+            aria-pressed={isPicked}
+            render={<button type="button" />}
+            onClick={(event: MouseEvent<HTMLElement>) => {
+              if (!named) return;
+              setColor({ ...named, a: color.a }, { event, reason: 'named' });
+            }}
+          >
+            {children ?? cssColor}
+          </List.Title>
+        </List.Content>
+        <List.Trailing>{isPicked ? <List.Checkmark /> : null}</List.Trailing>
+      </List.Item>
+    );
+  },
+);
+
+/**
+ * The CSS named colors (148, synonyms too: e.g. gray and grey; not
+ * `transparent`; see named-colors.ts), as a `Named`'s rows, labeled by their
+ * names.
+ */
+const CssNamedColors: FunctionComponent = () => (
+  <>
+    {cssNamedColors.map((name) => (
+      <NamedColor
+        key={name}
+        color={name}
+      />
+    ))}
+  </>
+);
+
 export const ColorPicker = {
   Root,
   Header,
@@ -1097,5 +1757,11 @@ export const ColorPicker = {
   Opacity,
   Swatches,
   Eyedropper,
+  SystemColors,
+  Code,
+  CodeCopy,
+  Named,
+  NamedColor,
+  CssNamedColors,
   Well,
 };

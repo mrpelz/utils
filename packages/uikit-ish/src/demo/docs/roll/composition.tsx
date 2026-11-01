@@ -19,6 +19,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { hours, minutes } from './props.js';
 
 const months = [
@@ -714,7 +715,8 @@ export const RollComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Below a <a href="list">List</a> row, in place: its title opens it (
+        Below a <a href={publicUrl('list')}>List</a> row, in place: its title
+        opens it (
         <PartLink
           component="list"
           part="List.CollapsibleTrigger"
@@ -730,8 +732,8 @@ export const RollComposition: FunctionComponent = () => (
       </li>
       <li>The row’s detail shows the value, as Settings does.</li>
       <li>
-        A date or a time: the <a href="date-picker">Date picker</a> does this
-        itself, with a calendar.
+        A date or a time: the <a href={publicUrl('date-picker')}>Date picker</a>{' '}
+        does this itself, with a calendar.
       </li>
       <li>
         <strong>Library:</strong> the expandable row (
@@ -762,7 +764,8 @@ export const RollComposition: FunctionComponent = () => (
     <ul>
       <li>
         On demand: a button showing the value opens a{' '}
-        <a href="popover">Popover</a> with the roll (as compact pickers).
+        <a href={publicUrl('popover')}>Popover</a> with the roll (as compact
+        pickers).
       </li>
       <li>Each change applies at once; tapping outside closes it.</li>
       <li>

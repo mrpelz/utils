@@ -1,10 +1,12 @@
 import { createContext, FunctionComponent, useContext } from 'react';
 
+import { publicUrl } from '../public-url.js';
+
 const BASE_UI_DOCS = 'https://base-ui.com/react/components';
 const FRAMEWORK7_DOCS = 'https://framework7.io/react';
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
 
-// (Links are relative to the document's base: the demo's public path.)
+// (Links under the site's public path: see `publicUrl`, env.ts.)
 
 /** The component a page or demo is about (see the catalog). */
 export type EntryInfo = {
@@ -42,12 +44,12 @@ export const Breadcrumb: FunctionComponent<{
   hasComponent?: boolean;
 }> = ({ entry, hasComponent = false }) => (
   <nav className="demo-page-nav">
-    <a href="./">uikit-ish</a> ›{' '}
-    <a href={`./#${entry.category}`}>{entry.categoryTitle}</a>
+    <a href={publicUrl('./')}>uikit-ish</a> ›{' '}
+    <a href={publicUrl(`#${entry.category}`)}>{entry.categoryTitle}</a>
     {hasComponent ? (
       <>
         {' › '}
-        <a href={entry.id}>{entry.title}</a>
+        <a href={publicUrl(entry.id)}>{entry.title}</a>
       </>
     ) : null}
   </nav>
@@ -82,7 +84,7 @@ export const Tabs: FunctionComponent<{
         <a
           key={id}
           aria-current={id === tab ? 'page' : undefined}
-          href={href}
+          href={publicUrl(href)}
         >
           {label}
         </a>

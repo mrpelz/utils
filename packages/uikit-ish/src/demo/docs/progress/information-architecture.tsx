@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -62,7 +63,8 @@ export const ProgressInformationArchitecture: FunctionComponent = () => (
       </li>
       <li>
         On the guide’s <GuideLink to="indicator-continuum">continuum</GuideLink>
-        , read-only; made editable, it’s a <a href="slider">Slider</a>.
+        , read-only; made editable, it’s a{' '}
+        <a href={publicUrl('slider')}>Slider</a>.
       </li>
     </ul>
 

@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -94,9 +95,10 @@ export const ColorPickerInformationArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         <strong>Layer:</strong> the well in the content layer (e.g. a{' '}
-        <a href="list">List</a> row); the picker in the overlay, a{' '}
-        <a href="popover">Popover</a> (iPad) or a <a href="sheet">Sheet</a>{' '}
-        (iPhone) (guide <GuideLink to="layers">§2</GuideLink>).
+        <a href={publicUrl('list')}>List</a> row); the picker in the overlay, a{' '}
+        <a href={publicUrl('popover')}>Popover</a> (iPad) or a{' '}
+        <a href={publicUrl('sheet')}>Sheet</a> (iPhone) (guide{' '}
+        <GuideLink to="layers">§2</GuideLink>).
       </li>
       <li>
         <strong>Containment:</strong> an Item holds a Value input inline (the

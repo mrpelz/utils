@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -65,7 +66,7 @@ export const RollInformationArchitecture: FunctionComponent = () => (
         The <GuideLink to="section-5-mapping">mapping table</GuideLink>: a
         picker is “Choice or Value input, collapsed/wheel · single”. A roll is
         the wheel; collapsed, it’s in a popover (see{' '}
-        <a href="roll/composition#in-a-popover">Composition</a>).
+        <a href={publicUrl('roll/composition#in-a-popover')}>Composition</a>).
       </li>
     </ul>
     <table>
@@ -80,14 +81,15 @@ export const RollInformationArchitecture: FunctionComponent = () => (
         <tr>
           <th>N = 2</th>
           <td>
-            Toggle (<a href="switch">Switch</a>) / checkbox
+            Toggle (<a href={publicUrl('switch')}>Switch</a>) / checkbox
           </td>
           <td>—</td>
         </tr>
         <tr>
           <th>N ≤ ~5</th>
           <td>
-            Segmented control (<a href="segmented">Segmented</a>) / radios
+            Segmented control (<a href={publicUrl('segmented')}>Segmented</a>) /
+            radios
           </td>
           <td>Pop-up button</td>
         </tr>
@@ -101,10 +103,11 @@ export const RollInformationArchitecture: FunctionComponent = () => (
         <tr>
           <th>ordered</th>
           <td>
-            Stepper (<a href="stepper">Stepper</a>)
+            Stepper (<a href={publicUrl('stepper')}>Stepper</a>)
           </td>
           <td>
-            Picker (date/number: <a href="date-picker">Date picker</a>)
+            Picker (date/number:{' '}
+            <a href={publicUrl('date-picker')}>Date picker</a>)
           </td>
         </tr>
       </tbody>
@@ -177,8 +180,8 @@ export const RollInformationArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         <strong>Layer:</strong> inline, the content layer (e.g. expanded below a{' '}
-        <a href="list">List</a> row); on demand, the overlay, in a{' '}
-        <a href="popover">Popover</a> (guide{' '}
+        <a href={publicUrl('list')}>List</a> row); on demand, the overlay, in a{' '}
+        <a href={publicUrl('popover')}>Popover</a> (guide{' '}
         <GuideLink to="layers">§2</GuideLink>).
       </li>
       <li>

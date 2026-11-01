@@ -159,11 +159,15 @@
     margin-inline: calc(10px - var(--uikit-menu-inset));
   }
 
-  /* An item (all but quick actions), its selection a pill. */
+  /* An item (all but quick actions), its selection a pill: its corners the
+     popup's, inset (concentric, as a quick action's), half a single line's
+     height; taller (e.g. with a subtitle), still concentric, not a stadium.
+     (Elsewhere, e.g. an edit menu's, without the popup's metrics: a
+     pill.) */
   .uikit-menu-item {
     &::before {
       position: absolute;
-      border-radius: 100px;
+      border-radius: var(--uikit-menu-pill, 100px);
       background-color: var(--uikit-glass-selection);
       content: '';
       inset: 0;

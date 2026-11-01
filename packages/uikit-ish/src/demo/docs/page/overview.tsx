@@ -17,6 +17,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { names } from '../viewport/content.js';
 import { pageRootRows } from './docs.js';
 import { propOptionsGuideRoot, propOptionsOverviewContent } from './props.js';
@@ -100,9 +101,10 @@ export const PageOverview: FunctionComponent = () => (
         on the page background.
       </li>
       <li>
-        Under a <a href="header">Header</a>’s bar (its large title at its
-        start), then lists or other content; <code>grouped</code> (the grouped
-        background) for grouped lists, <code>plain</code> for plain ones.
+        Under a <a href={publicUrl('header')}>Header</a>’s bar (its large title
+        at its start), then lists or other content; <code>grouped</code> (the
+        grouped background) for grouped lists, <code>plain</code> for plain
+        ones.
       </li>
       <li>After Framework7’s pages; no Base UI component.</li>
     </ul>
@@ -116,13 +118,14 @@ export const PageOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Every screen’s content: in a <a href="navigation">Navigation</a> (one
-        per pushed page), a <a href="layout">Layout</a> column, a tab bar’s
-        panel, a <a href="viewport">Viewport</a>’s content layer.
+        Every screen’s content: in a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a> (one per pushed page),
+        a <a href={publicUrl('layout')}>Layout</a> column, a tab bar’s panel, a{' '}
+        <a href={publicUrl('viewport')}>Viewport</a>’s content layer.
       </li>
       <li>
-        Under a <a href="header">Header</a>’s bar: the page’s content starts
-        below it (a{' '}
+        Under a <a href={publicUrl('header')}>Header</a>’s bar: the page’s
+        content starts below it (a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
@@ -149,12 +152,13 @@ export const PageOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Content over a page, for a moment: a <a href="sheet">Sheet</a>, a{' '}
-        <a href="popover">Popover</a>.
+        Content over a page, for a moment: a{' '}
+        <a href={publicUrl('sheet')}>Sheet</a>, a{' '}
+        <a href={publicUrl('popover')}>Popover</a>.
       </li>
       <li>
-        Columns side by side, each a page: a <a href="layout">Layout</a> around
-        them.
+        Columns side by side, each a page: a{' '}
+        <a href={publicUrl('layout')}>Layout</a> around them.
       </li>
     </ul>
 
@@ -166,7 +170,8 @@ export const PageOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its one part’s props (all of them: <a href="page/parts">Parts</a>).
+        Its one part’s props (all of them:{' '}
+        <a href={publicUrl('page/parts')}>Parts</a>).
       </li>
     </ul>
     <KeyPropsTable
@@ -206,8 +211,8 @@ export const PageOverview: FunctionComponent = () => (
       </li>
       <li>
         In a column clear of a floating one (<code>clearFloating</code>, see{' '}
-        <a href="layout">Layout</a>): its content inset by that column’s size,
-        its background running beneath it.
+        <a href={publicUrl('layout')}>Layout</a>): its content inset by that
+        column’s size, its background running beneath it.
       </li>
       <li>
         Its scrolling, tracked: a{' '}
@@ -215,7 +220,8 @@ export const PageOverview: FunctionComponent = () => (
           component="viewport"
           part="Viewport.Provider"
         />
-        ’s <code>scroller</code> (its ref; see <a href="viewport">Viewport</a>).
+        ’s <code>scroller</code> (its ref; see{' '}
+        <a href={publicUrl('viewport')}>Viewport</a>).
       </li>
     </ul>
   </>

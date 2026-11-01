@@ -26,6 +26,7 @@ import {
   sfSquareAndArrowUp,
   sfTrash,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   menuBackdropRows,
   menuCheckboxItemRows,
@@ -3438,8 +3439,8 @@ export const MenuParts: FunctionComponent = () => (
         history).
       </li>
       <li>
-        Renders a <code>button</code>; usually a <a href="button">Button</a> (
-        <code>render</code>).
+        Renders a <code>button</code>; usually a{' '}
+        <a href={publicUrl('button')}>Button</a> (<code>render</code>).
       </li>
     </ul>
     <TriggerPart />
@@ -3830,8 +3831,9 @@ export const MenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        An item’s symbol (a <a href="symbol">Symbol</a>), 28px wide, before its
-        label (its gap with it gone without one); above a quick action’s label.
+        An item’s symbol (a <a href={publicUrl('symbol')}>Symbol</a>), 28px
+        wide, before its label (its gap with it gone without one); above a quick
+        action’s label.
       </li>
       <li>
         Here: open the menu (its trigger) to see it (one menu opens at a time).

@@ -43,6 +43,7 @@ import {
   sfSunMin,
   sfTrashFill,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   contacts,
@@ -1970,19 +1971,22 @@ export const ListComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As a settings app: an inset grouped list in a <a href="page">Page</a>,
-        under its <a href="header">Header</a>.
+        As a settings app: an inset grouped list in a{' '}
+        <a href={publicUrl('page')}>Page</a>, under its{' '}
+        <a href={publicUrl('header')}>Header</a>.
       </li>
       <li>
         Rows hold settings’ controls as trailing parts (a{' '}
-        <a href="switch">Switch</a>, a <a href="segmented">Segmented</a>{' '}
-        control, a <a href="stepper">Stepper</a>), or across the whole row (
+        <a href={publicUrl('switch')}>Switch</a>, a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> control, a{' '}
+        <a href={publicUrl('stepper')}>Stepper</a>), or across the whole row (
         <PartLink
           component="list"
           part="List.Span"
         />
-        : a <a href="segmented">Segmented</a> control’s options sharing its
-        width, a <a href="slider">Slider</a> between its symbols).
+        : a <a href={publicUrl('segmented')}>Segmented</a> control’s options
+        sharing its width, a <a href={publicUrl('slider')}>Slider</a> between
+        its symbols).
       </li>
       <li>Others drill in (a button title, a detail, a chevron).</li>
       <li>A row with a switch passes its clicks on to it.</li>
@@ -2221,7 +2225,7 @@ export const ListComposition: FunctionComponent = () => (
           component="list"
           part="List.DrillIn"
         />{' '}
-        push a page in a <a href="navigation">Navigation</a>.
+        push a page in a <a href={publicUrl('navigation')}>Navigation</a>.
       </li>
       <li>
         The app keeps the stack (keyed pages, in a{' '}
@@ -2281,12 +2285,13 @@ export const ListComposition: FunctionComponent = () => (
         from its trailing edge; the content makes room. Done slides them out.
       </li>
       <li>
-        The list owns the selection: a <a href="checkbox">CheckboxGroup</a>{' '}
-        rendering the group holds it.
+        The list owns the selection: a{' '}
+        <a href={publicUrl('checkbox')}>CheckboxGroup</a> rendering the group
+        holds it.
       </li>
       <li>
-        The bottom toolbar (in the <a href="viewport">Viewport</a>’s block end)
-        reads it, to delete the selected rows (guide{' '}
+        The bottom toolbar (in the <a href={publicUrl('viewport')}>Viewport</a>
+        ’s block end) reads it, to delete the selected rows (guide{' '}
         <GuideLink to="rule-g7">G7</GuideLink>).
       </li>
       <li>Rows still swipe to delete one.</li>

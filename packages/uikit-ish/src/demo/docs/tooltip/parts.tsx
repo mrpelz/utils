@@ -20,6 +20,7 @@ import {
   sfSquareAndArrowUp,
   sfTrash,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   tooltipHandleRows,
   tooltipHandleTypeRows,
@@ -611,7 +612,8 @@ export const TooltipParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The control it labels (e.g. a symbol <a href="button">Button</a>:{' '}
+        The control it labels (e.g. a symbol{' '}
+        <a href={publicUrl('button')}>Button</a>:{' '}
         <code>{'render={<Button.Root />}'}</code>): hovered for its{' '}
         <code>delay</code> (300ms, or its provider’s), or focused by keyboard.
       </li>

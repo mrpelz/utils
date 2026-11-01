@@ -154,6 +154,10 @@ export const usePortalContainer = (
   return container === undefined ? provided : container;
 };
 
+/** A shadow root (server-side, none: no `ShadowRoot`, e.g. prerendering). */
+const isShadowRoot = (node: unknown): node is ShadowRoot =>
+  typeof ShadowRoot !== 'undefined' && node instanceof ShadowRoot;
+
 type CollisionProps = Pick<
   BasePopover.Positioner.Props,
   'collisionBoundary' | 'collisionPadding'
@@ -174,7 +178,7 @@ export const useCollision = (
   const container = usePortalContainer(undefined);
   const resolved =
     container && 'current' in container ? container.current : container;
-  const element = resolved instanceof ShadowRoot ? resolved.host : resolved;
+  const element = isShadowRoot(resolved) ? resolved.host : resolved;
 
   if (collisionPadding !== undefined || typeof document === 'undefined') {
     return {
@@ -814,6 +818,26 @@ export const UpDownChevrons: FunctionComponent = () => (
     width="0.59em"
   >
     <path d="M2 6l3-3.5L8 6M2 10l3 3.5L8 10" />
+  </svg>
+);
+
+/**
+ * A checkmark, as an SVG stroke at the current font size (menus' checked
+ * items, a copy button's copied).
+ */
+export const Checkmark: FunctionComponent = () => (
+  <svg
+    aria-hidden="true"
+    fill="none"
+    height="0.8em"
+    stroke="currentcolor"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="2.2"
+    viewBox="0 0 16 16"
+    width="0.8em"
+  >
+    <path d="M2.5 8.5l3.8 3.8L13.5 3.5" />
   </svg>
 );
 

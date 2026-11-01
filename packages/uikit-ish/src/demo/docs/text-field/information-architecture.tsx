@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -122,7 +123,7 @@ export const TextFieldInformationArchitecture: FunctionComponent = () => (
       </li>
       <li>
         <strong>Surfaces:</strong> an alert’s fields, a sheet’s form (see{' '}
-        <a href="sheet/composition">Sheet</a>).
+        <a href={publicUrl('sheet/composition')}>Sheet</a>).
       </li>
     </ul>
 

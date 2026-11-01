@@ -2,9 +2,11 @@ import {
   code,
   elementRows,
   PropRow,
+  renderRows,
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -36,56 +38,12 @@ export const colorPickerRootRows: readonly PropRow[] = [
     <>
       Called with the picked color (uppercase hex), and why (<code>reason</code>
       ): <code>grid</code>, <code>spectrum</code>, <code>sliders</code>,{' '}
-      <code>opacity</code>, <code>saved</code> (a saved color pressed), or{' '}
-      <code>eyedropper</code>.
+      <code>opacity</code>, <code>saved</code> (a saved color pressed),{' '}
+      <code>eyedropper</code>, <code>system-colors</code> (the system’s color
+      picker), <code>code</code> (its hex code typed), or <code>named</code> (a
+      named color picked).
     </>,
   ],
-  [
-    'children',
-    'ReactNode',
-    undefined,
-    <>
-      Its parts:{' '}
-      <PartLink
-        component="color-picker"
-        part="ColorPicker.Header"
-      />
-      ,{' '}
-      <PartLink
-        component="color-picker"
-        part="ColorPicker.Panel"
-      />{' '}
-      (the eyedropper in the header). With an{' '}
-      <PartLink
-        component="color-picker"
-        part="ColorPicker.Opacity"
-      />{' '}
-      in it, the color has an opacity; without one, it’s always opaque (
-      <code>#rrggbb</code>, a value’s alpha dropped as it changes).
-    </>,
-  ],
-  ...elementRows('div', 'HTMLDivElement'),
-];
-
-export const colorPickerHeaderRows: readonly PropRow[] = [
-  [
-    'children',
-    'ReactNode',
-    undefined,
-    <>
-      The app’s header: e.g. a <a href="toolbar">Toolbar</a> with the
-      eyedropper, “Colors” and a close button (in a sheet: its{' '}
-      <PartLink
-        component="sheet"
-        part="Sheet.Header"
-      />{' '}
-      instead).
-    </>,
-  ],
-  ...elementRows('div', 'HTMLDivElement'),
-];
-
-export const colorPickerPanelRows: readonly PropRow[] = [
   [
     'mode',
     'string',
@@ -122,12 +80,63 @@ export const colorPickerPanelRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
+      Its parts:{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Header"
+      />
+      ,{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Panel"
+      />{' '}
+      (the eyedropper in the header; the modes’{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Modes"
+      />{' '}
+      in the panel, or anywhere in the picker, e.g. a sheet’s header). With an{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Opacity"
+      />{' '}
+      in it, the color has an opacity; without one, it’s always opaque (
+      <code>#rrggbb</code>, a value’s alpha dropped as it changes).
+    </>,
+  ],
+  ...renderRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerHeaderRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      The app’s header: e.g. a <a href={publicUrl('toolbar')}>Toolbar</a> with
+      the eyedropper, “Colors” and a close button (in a sheet too, its{' '}
+      <PartLink
+        component="sheet"
+        part="Sheet.Header"
+      />{' '}
+      only its grabber).
+    </>,
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerPanelRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
       Its parts, as composed: its modes (
       <PartLink
         component="color-picker"
         part="ColorPicker.Modes"
       />
-      , a{' '}
+      , unless elsewhere in its picker; a{' '}
       <PartLink
         component="color-picker"
         part="ColorPicker.View"
@@ -243,6 +252,11 @@ export const colorPickerViewRows: readonly PropRow[] = [
         component="color-picker"
         part="ColorPicker.Sliders"
       />
+      , a{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Named"
+      />
       .
     </>,
   ],
@@ -263,9 +277,34 @@ export const colorPickerSlidersRows: readonly PropRow[] = [
     union('rgb', 'hsl', 'cmyk'),
     code('rgb'),
     <>
-      Its color model, its channels’ sliders: red, green and blue (0–255); hue
-      (0–360°), saturation and lightness (0–100%); cyan, magenta, yellow and
-      black (0–100%; naive, from sRGB, no ink’s profile).
+      Its color model, its channels’ sliders: red, green and blue (0–255, or
+      0–100%: its <code>range</code>); hue (0–360°), saturation and lightness
+      (0–100%); cyan, magenta, yellow and black (0–100%; naive, from sRGB, no
+      ink’s profile).
+    </>,
+  ],
+  [
+    'range',
+    union('byte', 'percentage'),
+    code('byte'),
+    <>
+      Red, green and blue’s range (<code>model</code> <code>rgb</code>; the
+      others’ are fixed): in bytes (0–255), or in percent (0–100%). Percent is
+      coarser: a channel set is rounded to it, the others (and a color picked
+      elsewhere, e.g. a swatch) kept exact.
+    </>,
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      After its channels, spaced as they are: e.g. the code (
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Code"
+      />
+      ).
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -337,6 +376,85 @@ export const colorPickerEyedropperRows: readonly PropRow[] = [
   ],
 ];
 
+export const colorPickerCodeRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Before its field: e.g. its copy button (
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.CodeCopy"
+      />
+      ).
+    </>,
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerCodeCopyRows: readonly PropRow[] = [
+  [
+    'render',
+    'ReactElement',
+    <>
+      a{' '}
+      <PartLink
+        component="button"
+        part="Button.Root"
+      />
+    </>,
+    'What it renders: e.g. a button sized as the code’s field.',
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'Its content: e.g. a copy symbol (copied, a checkmark for a moment).',
+  ],
+  [
+    'onCodeCopy',
+    '(code: string, event: Event) => void',
+    undefined,
+    'Called with a code copied (to the clipboard), and the event.',
+  ],
+  [
+    '…',
+    'ButtonRootProps',
+    undefined,
+    'A button’s props (not onClick: it opens the menu of codes).',
+  ],
+];
+
+export const colorPickerSystemColorsRows: readonly PropRow[] = [
+  [
+    'render',
+    'ReactElement',
+    <>
+      a{' '}
+      <PartLink
+        component="button"
+        part="Button.Root"
+      />
+    </>,
+    <>
+      What it renders: e.g. a{' '}
+      <PartLink
+        component="toolbar"
+        part="Toolbar.Button"
+      />{' '}
+      in a toolbar, sized as its other buttons.
+    </>,
+  ],
+  ['children', 'ReactNode', undefined, 'Its content: e.g. a palette symbol.'],
+  [
+    '…',
+    'ButtonRootProps',
+    undefined,
+    'A button’s props (not onClick: it opens the system’s color picker).',
+  ],
+];
+
 export const colorPickerWellRows: readonly PropRow[] = [
   [
     'color',
@@ -392,4 +510,47 @@ export const defaultSavedColorsRows: readonly PropRow[] = [
       <code>defaultSavedColors</code> by default.
     </>,
   ],
+];
+
+export const colorPickerNamedRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its rows:{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.NamedColor"
+      />
+      s (e.g. the app’s), and{' '}
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.CssNamedColors"
+      />
+      ’.
+    </>,
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerNamedColorRows: readonly PropRow[] = [
+  [
+    'color',
+    'string',
+    undefined,
+    <>
+      Its color (required): any CSS color (e.g. a name, a hex code,{' '}
+      <code>oklch()</code>).
+    </>,
+  ],
+  [
+    'children',
+    'ReactNode',
+    <>
+      its <code>color</code>
+    </>,
+    'Its label (e.g. its name).',
+  ],
+  ...elementRows('li', 'HTMLLIElement'),
 ];

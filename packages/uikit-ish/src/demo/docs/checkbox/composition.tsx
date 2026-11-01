@@ -21,6 +21,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const rowsCode = `<List.Group>
@@ -349,7 +350,8 @@ export const CheckboxComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Where they show: before a <a href="list">List</a>’s rows, as{' '}
+        Where they show: before a <a href={publicUrl('list')}>List</a>’s rows,
+        as{' '}
         <PartLink
           component="list"
           part="List.Checkbox"
@@ -491,7 +493,7 @@ export const CheckboxComposition: FunctionComponent = () => (
         the text ticks it and names it.
       </li>
       <li>
-        In a <a href="form">Form</a>: Base UI’s{' '}
+        In a <a href={publicUrl('form')}>Form</a>: Base UI’s{' '}
         <PartLink
           component="form"
           part="Field"

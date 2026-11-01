@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -77,11 +78,15 @@ export const LayoutInformationArchitecture: FunctionComponent = () => (
         The guide: in compact width, shell B collapses to shell A, columns
         becoming stack levels; the same structure, re-rendered (guide{' '}
         <GuideLink to="rule-g4">G4</GuideLink>; see{' '}
-        <a href="navigation/composition#compact-or-regular">Navigation</a>).
+        <a href={publicUrl('navigation/composition#compact-or-regular')}>
+          Navigation
+        </a>
+        ).
       </li>
       <li>
-        Here, also a <a href="drawer">Drawer</a> (Framework7’s panels; iOS has
-        none): the app’s choice, a column kept, swiped in from its edge.
+        Here, also a <a href={publicUrl('drawer')}>Drawer</a> (Framework7’s
+        panels; iOS has none): the app’s choice, a column kept, swiped in from
+        its edge.
       </li>
     </ul>
 

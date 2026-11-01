@@ -10,6 +10,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { switchRootRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 
@@ -87,15 +88,16 @@ export const SwitchOverview: FunctionComponent = () => (
     <ul>
       <li>
         Selecting items (rows to delete, people to invite): a{' '}
-        <a href="checkbox">Checkbox</a>, a selection circle.
+        <a href={publicUrl('checkbox')}>Checkbox</a>, a selection circle.
       </li>
       <li>
-        Two named options, or more than two: a <a href="segmented">Segmented</a>{' '}
-        control.
+        Two named options, or more than two: a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
       <li>
-        Starting something (Connect, Sign Out): a <a href="button">Button</a>,
-        as a switch states a setting, it doesn’t perform an action.
+        Starting something (Connect, Sign Out): a{' '}
+        <a href={publicUrl('button')}>Button</a>, as a switch states a setting,
+        it doesn’t perform an action.
       </li>
     </ul>
 
@@ -108,7 +110,7 @@ export const SwitchOverview: FunctionComponent = () => (
     <ul>
       <li>The props most switches set.</li>
       <li>
-        All parts’ props: <a href="switch/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('switch/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

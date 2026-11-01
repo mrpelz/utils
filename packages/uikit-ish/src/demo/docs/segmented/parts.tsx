@@ -274,6 +274,10 @@ export const SegmentedParts: FunctionComponent = () => (
       <li>
         Separators: <code>hideSeparators</code>.
       </li>
+      <li>
+        Too narrow for its items: their labels truncated, or the items scrolled
+        sideways, snapping, the chosen one in view (<code>overflow</code>).
+      </li>
       <li>Renders the lens shown while an item is pressed.</li>
     </ul>
     <RootPart />

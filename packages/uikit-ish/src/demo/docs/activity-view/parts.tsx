@@ -16,6 +16,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfDocumentOnDocument, sfHeart } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { photo } from '../avatar/props.js';
 import {
   activityViewActionRows,
@@ -1343,17 +1344,20 @@ export const ActivityViewParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        Parts placed in the app’s <a href="sheet">Sheet</a> (compact) or
-        <a href="popover">Popover</a> (regular): no root of its own.
+        Parts placed in the app’s <a href={publicUrl('sheet')}>Sheet</a>{' '}
+        (compact) or
+        <a href={publicUrl('popover')}>Popover</a> (regular): no root of its
+        own.
       </li>
       <li>
         What’s shared (a header), people and actions (rows scrolling sideways),
-        separators between them; more actions as a <a href="list">List</a>
+        separators between them; more actions as a{' '}
+        <a href={publicUrl('list')}>List</a>
         below.
       </li>
       <li>
         Apps (an app icon row, people’s app badges) aren’t built: a
-        <a href="badge">Badge</a> on an avatar instead.
+        <a href={publicUrl('badge')}>Badge</a> on an avatar instead.
       </li>
     </ul>
     <ul>
@@ -1545,8 +1549,8 @@ export const ActivityViewParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A person (or a group): an <a href="avatar">Avatar</a> above its{' '}
-        <PartLink part="ActivityView.Name" />, 78px wide.
+        A person (or a group): an <a href={publicUrl('avatar')}>Avatar</a> above
+        its <PartLink part="ActivityView.Name" />, 78px wide.
       </li>
       <li>
         Renders a <code>button</code> in a list item.

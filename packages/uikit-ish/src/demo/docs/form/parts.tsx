@@ -17,6 +17,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { textFieldRootRows } from '../text-field/docs.js';
 import { fieldsetLegendRows, fieldsetRootRows, formRows } from './docs.js';
 import {
@@ -327,7 +328,7 @@ export const FormParts: FunctionComponent = () => (
       </li>
       <li>
         Field: Base UI’s, a value by its name (text fields are{' '}
-        <a href="text-field">Text field</a>s).
+        <a href={publicUrl('text-field')}>Text field</a>s).
       </li>
     </ul>
     <ul>
@@ -376,8 +377,8 @@ export const FormParts: FunctionComponent = () => (
         external <code>errors</code> shown on them.
       </li>
       <li>
-        Laid out as a <a href="list">List</a>: fieldsets its sections, fields
-        its rows; a <a href="button">Button</a> of{' '}
+        Laid out as a <a href={publicUrl('list')}>List</a>: fieldsets its
+        sections, fields its rows; a <a href={publicUrl('button')}>Button</a> of{' '}
         <code>type=&quot;submit&quot;</code> submits it.
       </li>
       <li>
@@ -469,8 +470,10 @@ export const FormParts: FunctionComponent = () => (
       </li>
       <li>
         Around a control that isn’t a text field (a{' '}
-        <a href="stepper">Stepper</a>, a <a href="slider">Slider</a>, a{' '}
-        <a href="date-picker">Date picker</a>), rendered as its row (
+        <a href={publicUrl('stepper')}>Stepper</a>, a{' '}
+        <a href={publicUrl('slider')}>Slider</a>, a{' '}
+        <a href={publicUrl('date-picker')}>Date picker</a>), rendered as its row
+        (
         <PartLink
           component="list"
           part="List.Item"
@@ -506,7 +509,7 @@ export const FormParts: FunctionComponent = () => (
         >
           Field.Error
         </PartLink>
-        , …) as <a href="text-field/parts">Text field’s</a>.
+        , …) as <a href={publicUrl('text-field/parts')}>Text field’s</a>.
       </li>
     </ul>
     <FieldPart />

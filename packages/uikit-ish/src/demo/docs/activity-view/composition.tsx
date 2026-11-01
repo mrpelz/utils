@@ -31,6 +31,7 @@ import {
   sfPrinter,
   sfSquareAndArrowUp,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { photo } from '../avatar/props.js';
 import { GuideLink } from '../hig-guide/link.js';
 
@@ -248,9 +249,10 @@ export const ActivityViewComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a compact width, in a <a href="sheet">Sheet</a> (its{' '}
+        In a compact width, in a <a href={publicUrl('sheet')}>Sheet</a> (its{' '}
         <code>background=&quot;grouped&quot;</code>): the actions row, then more
-        actions as a <a href="list">List</a> (symbols as the rows’ images).
+        actions as a <a href={publicUrl('list')}>List</a> (symbols as the rows’
+        images).
       </li>
       <li>
         Without a thumbnail or people: the parts are optional (see{' '}
@@ -293,8 +295,8 @@ export const ActivityViewComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a regular width, in a <a href="popover">Popover</a> at the Share
-        button (in the page’s bar), in its{' '}
+        In a regular width, in a <a href={publicUrl('popover')}>Popover</a> at
+        the Share button (in the page’s bar), in its{' '}
         <PartLink
           component="popover"
           part="Popover.Body"

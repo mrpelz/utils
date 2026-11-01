@@ -25,6 +25,7 @@ import {
   sfSquareAndArrowUp,
   sfSquareAndPencil,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { names } from '../viewport/content.js';
 import {
   toolbarButtonRows,
@@ -199,7 +200,7 @@ export const ToolbarOverview: FunctionComponent = () => (
       <li>
         At the bottom of a screen, or at its top (a navigation bar:{' '}
         <code>placement=&quot;block-start&quot;</code>, as a{' '}
-        <a href="header">Header</a>’s bar).
+        <a href={publicUrl('header')}>Header</a>’s bar).
       </li>
       <li>
         Built on Base UI’s Toolbar: one stop in the tab order, arrow keys
@@ -222,7 +223,7 @@ export const ToolbarOverview: FunctionComponent = () => (
           component="viewport"
           part="Viewport.BlockEnd"
         />{' '}
-        (see <a href="viewport">Viewport</a>).
+        (see <a href={publicUrl('viewport')}>Viewport</a>).
       </li>
       <li>
         A navigation bar at the top: back, the title, a page’s actions (in a{' '}
@@ -230,13 +231,14 @@ export const ToolbarOverview: FunctionComponent = () => (
           component="viewport"
           part="Viewport.BlockStart"
         />
-        , tied to its page by a <a href="header">Header</a>: staying where it is
-        while the page scrolls).
+        , tied to its page by a <a href={publicUrl('header')}>Header</a>:
+        staying where it is while the page scrolls).
       </li>
       <li>
         Acting on a selection in edit mode (Select All, Move, Delete), or
         hosting a control between the capsules (a search field, page dots, a
-        segmented control; see <a href="toolbar/composition">Composition</a>).
+        segmented control; see{' '}
+        <a href={publicUrl('toolbar/composition')}>Composition</a>).
       </li>
     </ul>
 
@@ -248,17 +250,19 @@ export const ToolbarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Moving between an app’s sections: a <a href="tab-bar">Tab bar</a> (a
-        toolbar’s buttons act on the current view; tabs switch views).
+        Moving between an app’s sections: a{' '}
+        <a href={publicUrl('tab-bar')}>Tab bar</a> (a toolbar’s buttons act on
+        the current view; tabs switch views).
       </li>
       <li>
-        Many commands, or rarely used ones: a <a href="menu">Menu</a> behind one
-        button (e.g. More, <code>ellipsis</code>).
+        Many commands, or rarely used ones: a{' '}
+        <a href={publicUrl('menu')}>Menu</a> behind one button (e.g. More,{' '}
+        <code>ellipsis</code>).
       </li>
       <li>
         Commands on one item (a row): its swipe actions or a{' '}
-        <a href="contextual-menu">Contextual menu</a>; a single action in the
-        content: a <a href="button">Button</a>.
+        <a href={publicUrl('contextual-menu')}>Contextual menu</a>; a single
+        action in the content: a <a href={publicUrl('button')}>Button</a>.
       </li>
     </ul>
 
@@ -271,7 +275,7 @@ export const ToolbarOverview: FunctionComponent = () => (
     <ul>
       <li>The props most toolbars set, across their parts.</li>
       <li>
-        All parts’ props: <a href="toolbar/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('toolbar/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -308,7 +312,7 @@ export const ToolbarOverview: FunctionComponent = () => (
       </li>
       <li>
         The title is text, not a heading: a page’s heading is its large title
-        (see <a href="header">Header</a>), or render one (
+        (see <a href={publicUrl('header')}>Header</a>), or render one (
         <code>render=&#123;&lt;h1 /&gt;&#125;</code>).
       </li>
       <li>
@@ -348,8 +352,8 @@ export const ToolbarOverview: FunctionComponent = () => (
         the free space instead.
       </li>
       <li>
-        A button of its own is a glass <a href="button">Button</a> (a circle for
-        a symbol); several share a capsule (
+        A button of its own is a glass <a href={publicUrl('button')}>Button</a>{' '}
+        (a circle for a symbol); several share a capsule (
         <PartLink
           component="toolbar"
           part="Toolbar.Group"

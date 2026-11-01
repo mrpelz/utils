@@ -19,6 +19,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // A row's code (as Guests' in the list below).
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
@@ -264,8 +265,8 @@ export const StepperComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Typically: in the trailing slot of <a href="list">List</a> rows, the
-        value in the row’s detail (the app’s: the stepper shows none).
+        Typically: in the trailing slot of <a href={publicUrl('list')}>List</a>{' '}
+        rows, the value in the row’s detail (the app’s: the stepper shows none).
       </li>
       <li>
         Controlled (<code>value</code>, <code>onValueChange</code>): the row
@@ -277,7 +278,9 @@ export const StepperComposition: FunctionComponent = () => (
       </li>
       <li>
         Also in a settings page: the list’s{' '}
-        <a href="list/composition#a-settings-page">settings page</a>{' '}
+        <a href={publicUrl('list/composition#a-settings-page')}>
+          settings page
+        </a>{' '}
         (Auto-Lock).
       </li>
       <li>
@@ -334,7 +337,7 @@ export const StepperComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a <a href="form">Form</a>, in Base UI’s{' '}
+        In a <a href={publicUrl('form')}>Form</a>, in Base UI’s{' '}
         <PartLink
           component="form"
           part="Field"

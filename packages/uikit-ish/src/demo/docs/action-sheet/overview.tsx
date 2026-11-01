@@ -14,6 +14,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   actionSheetActionRows,
@@ -111,8 +112,12 @@ export const ActionSheetOverview: FunctionComponent = () => (
       </li>
       <li>
         Modal: the page dimmed; a press outside cancels. In a regular width, the
-        same choices in a <a href="popover">Popover</a> (see{' '}
-        <a href="action-sheet/composition#a-popover-in-a-regular-width">
+        same choices in a <a href={publicUrl('popover')}>Popover</a> (see{' '}
+        <a
+          href={publicUrl(
+            'action-sheet/composition#a-popover-in-a-regular-width',
+          )}
+        >
           A popover in a regular width
         </a>
         ).
@@ -147,11 +152,11 @@ export const ActionSheetOverview: FunctionComponent = () => (
     <ul>
       <li>
         Commands that aren’t about confirming (Share, Duplicate, Rename): a{' '}
-        <a href="menu">Menu</a>.
+        <a href={publicUrl('menu')}>Menu</a>.
       </li>
       <li>
         Information the app must tell, or a question not tied to a control: an{' '}
-        <a href="alert">Alert</a>.
+        <a href={publicUrl('alert')}>Alert</a>.
       </li>
       <li>Undoable actions: just do them, offer undo.</li>
     </ul>
@@ -165,7 +170,7 @@ export const ActionSheetOverview: FunctionComponent = () => (
     <ul>
       <li>The props most action sheets set.</li>
       <li>
-        All parts’ props: <a href="action-sheet/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('action-sheet/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

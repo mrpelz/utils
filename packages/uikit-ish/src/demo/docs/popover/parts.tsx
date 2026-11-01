@@ -20,6 +20,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfXmark } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   popoverArrowRows,
   popoverBackdropRows,
@@ -1761,8 +1762,8 @@ export const PopoverParts: FunctionComponent = () => (
     <ul>
       <li>
         The control it’s shown from, and anchored to: e.g. a{' '}
-        <a href="button">Button</a> (<code>{'render={<Button.Root />}'}</code>),
-        a{' '}
+        <a href={publicUrl('button')}>Button</a> (
+        <code>{'render={<Button.Root />}'}</code>), a{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Well"
@@ -1842,8 +1843,8 @@ export const PopoverParts: FunctionComponent = () => (
       <li>
         Places the popup at its trigger (or <code>anchor</code>): its{' '}
         <code>side</code> (below by default; logical), its <code>align</code>{' '}
-        (centered by default; in a <a href="list">List</a> row, aligned with the
-        row’s end: <code>end</code>).
+        (centered by default; in a <a href={publicUrl('list')}>List</a> row,
+        aligned with the row’s end: <code>end</code>).
       </li>
       <li>
         8px from it (with an arrow, the arrow’s tip) and from the screen’s
@@ -1915,7 +1916,7 @@ export const PopoverParts: FunctionComponent = () => (
     <ul>
       <li>
         Optional: its bar (16px from the top, 10px above the content): a{' '}
-        <a href="toolbar">Toolbar</a> (
+        <a href={publicUrl('toolbar')}>Toolbar</a> (
         <code>placement=&quot;block-start&quot;</code>), its title (
         <PartLink
           component="popover"
@@ -1929,8 +1930,8 @@ export const PopoverParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Popovers without a bar (a <a href="roll">Roll</a>, a calendar) leave it
-        out.
+        Popovers without a bar (a <a href={publicUrl('roll')}>Roll</a>, a
+        calendar) leave it out.
       </li>
       <li>
         Renders a <code>div</code>.

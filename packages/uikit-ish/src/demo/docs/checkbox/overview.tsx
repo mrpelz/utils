@@ -13,6 +13,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   checkboxGroupRows,
@@ -147,11 +148,12 @@ export const CheckboxOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A setting that takes effect at once: a <a href="switch">Switch</a>.
+        A setting that takes effect at once: a{' '}
+        <a href={publicUrl('switch')}>Switch</a>.
       </li>
       <li>
         Choosing one of a few short options shown side by side: a{' '}
-        <a href="segmented">Segmented</a> control.
+        <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
       <li>
         A checkmark after the chosen row (settings lists, e.g. a language):{' '}
@@ -159,7 +161,7 @@ export const CheckboxOverview: FunctionComponent = () => (
           component="list"
           part="List.Checkmark"
         />{' '}
-        (see <a href="list">List</a>).
+        (see <a href={publicUrl('list')}>List</a>).
       </li>
     </ul>
 
@@ -172,7 +174,7 @@ export const CheckboxOverview: FunctionComponent = () => (
     <ul>
       <li>The props most selection circles set, across the parts.</li>
       <li>
-        All parts’ props: <a href="checkbox/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('checkbox/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -264,7 +266,7 @@ export const CheckboxOverview: FunctionComponent = () => (
       <li>
         In a list, a row passes its clicks on to its circle (
         <code>forwardClick</code>), so the whole row selects (see{' '}
-        <a href="checkbox/composition">Composition</a>; guide{' '}
+        <a href={publicUrl('checkbox/composition')}>Composition</a>; guide{' '}
         <GuideLink to="rule-g7">G7</GuideLink>: the list owns the selection).
       </li>
     </ul>

@@ -3,6 +3,7 @@
 import type { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 
 import {
+  Button,
   type ColorPickerChangeEventDetails,
   type ColorPickerSavedColorsChangeEventDetails,
   Toolbar,
@@ -38,6 +39,7 @@ const fourteenColors = [
 
 export const getPropOptionsRoot = (addLog: AddLog) => ({
   ...propOptionsElement,
+  render: [undefined, new MappedProp(<section />, '[<section />]')] as const,
   defaultValue: ['#AF52DE', '#007AFF', '#FF3B3080'] as const,
   value: [undefined, '#34C759'] as const,
   onValueChange: [
@@ -48,10 +50,6 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
     ),
     undefined,
   ] as const,
-});
-
-export const getPropOptionsPanel = (addLog: AddLog) => ({
-  ...propOptionsElement,
   // (Its modes' values, see panel.tsx: across its mode sets.)
   defaultMode: [undefined, 'grid', 'spectrum', 'rgb', 'hsl', 'cmyk'] as const,
   mode: [undefined, 'grid', 'spectrum', 'rgb', 'hsl', 'cmyk'] as const,
@@ -64,6 +62,9 @@ export const getPropOptionsPanel = (addLog: AddLog) => ({
     undefined,
   ] as const,
 });
+
+/** The panel's (its element's only). */
+export const propOptionsPanel = propOptionsElement;
 
 export const getPropOptionsSwatches = (addLog: AddLog) => ({
   ...propOptionsElement,
@@ -90,6 +91,7 @@ export const getPropOptionsSwatches = (addLog: AddLog) => ({
 export const propOptionsSliders = {
   ...propOptionsElement,
   model: [undefined, 'rgb', 'hsl', 'cmyk'] as const,
+  range: [undefined, 'byte', 'percentage'] as const,
 };
 
 /** A mode's (its label; its value, the view's it shows). */
@@ -116,6 +118,42 @@ export const propOptionsEyedropper = {
   disabled: [undefined, false, true] as const,
 };
 
+export const propOptionsSystemColors = propOptionsEyedropper;
+
+/** The code's (its element's; its children: the copy button). */
+export const propOptionsCode = propOptionsElement;
+
+/** The named colors' (its element's; its children: its sections). */
+export const propOptionsNamed = propOptionsElement;
+
+/** A named color's row: its color (any CSS color's syntax), its label. */
+export const propOptionsNamedColor = {
+  ...propOptionsElement,
+  color: ['#AF52DE', 'oklch(70% 0.2 150)', 'rebeccapurple'] as const,
+  children: [undefined, 'Brand purple'] as const,
+};
+
+/** The code's copy button: what it renders, disabled, its copies logged. */
+export const getPropOptionsCodeCopy = (addLog: AddLog) => ({
+  ...propOptionsElement,
+  render: [
+    undefined,
+    new MappedProp(
+      <Button.Root
+        shape="circle"
+        size="small"
+        variant="bordered"
+      />,
+      '[<Button.Root shape="circle" size="small" variant="bordered" />]',
+    ),
+  ] as const,
+  disabled: [undefined, false, true] as const,
+  onCodeCopy: [
+    new MappedProp((code: string) => addLog(`copy: ${code}`), '[log copy]'),
+    undefined,
+  ] as const,
+});
+
 /** The main demo's well (its color the picked one). */
 export const propOptionsWell = {
   size: [undefined, 'small', 'large'] as const,
@@ -141,20 +179,26 @@ export const propOptionsPresentation = {
 };
 
 /**
- * The overview's: its presentation, which modes (and the opacity) its
- * panel renders (see panel.tsx).
+ * The overview's: its presentation, which modes (the named colors' too)
+ * and the opacity its panel renders (see panel.tsx); RGB's, in which range;
+ * the sliders' code row and its copy button, or none; the system colors'
+ * button, or none.
  */
 export const propOptionsOverviewContent = {
   ...propOptionsPresentation,
   grid: [true, false] as const,
   spectrum: [true, false] as const,
-  rgb: [true, false] as const,
+  rgb: ['byte', 'percentage', false] as const,
   hsl: [false, true] as const,
   cmyk: [false, true] as const,
+  named: [false, true] as const,
   opacity: [true, false] as const,
+  code: [true, false] as const,
+  codeCopy: [true, false] as const,
+  systemColors: [true, false] as const,
 };
 
-/** The overview's few: the panel's mode (its color the demo's). */
+/** The overview's few: the picker's mode (its color the demo's). */
 export const propOptionsOverview = {
   defaultMode: [undefined, 'spectrum', 'rgb', 'hsl', 'cmyk'] as const,
 };

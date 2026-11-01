@@ -18,6 +18,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { rowTitles, sidebarSections } from '../sidebar/content.js';
 import { names } from '../viewport/content.js';
 import { layoutColumnRows, layoutRootRows } from './docs.js';
@@ -161,15 +162,16 @@ export const LayoutOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         Columns side by side: a sidebar, a list, a detail; each its own scroll
-        container (a <a href="page">Page</a> in it).
+        container (a <a href={publicUrl('page')}>Page</a> in it).
       </li>
       <li>
         Sized, resizable, or sharing the free space; one may float over the
-        others (a <a href="sidebar">Sidebar</a>).
+        others (a <a href={publicUrl('sidebar')}>Sidebar</a>).
       </li>
       <li>
-        On a phone, the app’s choice: a column as a <a href="drawer">Drawer</a>{' '}
-        instead, swiped in from its edge.
+        On a phone, the app’s choice: a column as a{' '}
+        <a href={publicUrl('drawer')}>Drawer</a> instead, swiped in from its
+        edge.
       </li>
     </ul>
     <LiveView />
@@ -190,8 +192,8 @@ export const LayoutOverview: FunctionComponent = () => (
       </li>
       <li>
         The same columns on a phone: the list (or an inspector) as a{' '}
-        <a href="drawer">Drawer</a> (see{' '}
-        <a href="drawer/composition">its Composition</a>).
+        <a href={publicUrl('drawer')}>Drawer</a> (see{' '}
+        <a href={publicUrl('drawer/composition')}>its Composition</a>).
       </li>
     </ul>
 
@@ -203,12 +205,14 @@ export const LayoutOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        One page at a time, drilled into: a <a href="navigation">Navigation</a>{' '}
-        (on a phone, a split’s columns as stack levels).
+        One page at a time, drilled into: a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a> (on a phone, a split’s
+        columns as stack levels).
       </li>
       <li>
-        Something over the page for a moment: a <a href="sheet">Sheet</a>, a{' '}
-        <a href="popover">Popover</a>.
+        Something over the page for a moment: a{' '}
+        <a href={publicUrl('sheet')}>Sheet</a>, a{' '}
+        <a href={publicUrl('popover')}>Popover</a>.
       </li>
     </ul>
 
@@ -221,7 +225,7 @@ export const LayoutOverview: FunctionComponent = () => (
     <ul>
       <li>The props most layouts set, across their parts.</li>
       <li>
-        All parts’ props: <a href="layout/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('layout/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -249,8 +253,8 @@ export const LayoutOverview: FunctionComponent = () => (
     <ul>
       <li>
         Its parts are <code>div</code>s without roles: a column’s landmark, if
-        wanted, by its content (a <a href="sidebar">Sidebar</a> is a{' '}
-        <code>navigation</code>) or its attributes.
+        wanted, by its content (a <a href={publicUrl('sidebar')}>Sidebar</a> is
+        a <code>navigation</code>) or its attributes.
       </li>
       <li>
         A resizable column’s divider is a focusable <code>separator</code>{' '}

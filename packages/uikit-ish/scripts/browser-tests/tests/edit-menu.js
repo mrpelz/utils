@@ -54,9 +54,9 @@ export const tests = [
         assert.equal(before.overflowing, true);
         assert.equal(before.moreEnd, 4);
 
-        // Touching an action highlights it; dragging to the end (short of
-        // the “more” button) scrolls the actions under the finger, the
-        // “more” button staying in place.
+        // Touching an action highlights it; held, then dragged to the end
+        // (short of the “more” button), it scrolls the actions under the
+        // finger, the “more” button staying in place.
         /** @type {[number, number]} */
         const first = await page.evaluate(`(() => {
           const { height, width, x, y } = ${popup}.querySelector('[role=menuitem]').getBoundingClientRect();
@@ -69,7 +69,8 @@ export const tests = [
 
         await withTouch(page, async (touch) => {
           await touch('touchStart', ...first);
-          await sleep(100);
+          // (Held past the swipe's moment: moved at once, it'd pan.)
+          await sleep(250);
           assert.equal(await page.evaluate(highlighted), 'Cut');
 
           for (let step = 1; step <= 8; step += 1) {
@@ -107,6 +108,84 @@ export const tests = [
         // Released on the last action, it's chosen (closing the menu,
         // reported as an item press).
         assert.match(await page.log(), /open change: false\/item-press/);
+      } finally {
+        await page.browser.send('Emulation.clearDeviceMetricsOverride');
+      }
+    },
+  },
+  {
+    name: 'edit menu: a sideways swipe on its overflowing actions pans them, resting with a peek beyond each end, choosing nothing',
+    run: async (page) => {
+      await page.browser.send('Emulation.setDeviceMetricsOverride', {
+        deviceScaleFactor: 1,
+        height: 800,
+        mobile: false,
+        width: 320,
+      });
+      try {
+        await page.open('edit-menu', 'light', {
+          state: [{ $rest: true, open: true }],
+        });
+        await sleep(500);
+        const { overflowing } = await capsule(page);
+        assert.equal(overflowing, true);
+
+        /** Where it rests: its scroll, and how much of the actions beyond its ends shows. */
+        const resting = () =>
+          page.evaluate(`(() => {
+            const scroller = ${popup}.querySelector('[data-menu-part=scroller]');
+            const shown = scroller.getBoundingClientRect();
+            const items = [...scroller.querySelectorAll('[role=menuitem]:not([aria-haspopup])')].map((item) => item.getBoundingClientRect());
+            const before = items.find(({ left, right }) => left < shown.left - 0.5 && right > shown.left + 0.5);
+            const after = items.find(({ left, right }) => left < shown.right - 0.5 && right > shown.right + 0.5);
+            return {
+              after: after ? Math.round(shown.right - after.left) : 0,
+              before: before ? Math.round(before.right - shown.left) : 0,
+              range: Math.round(scroller.scrollWidth - scroller.clientWidth),
+              scrolled: Math.round(scroller.scrollLeft),
+              unsnapped: scroller.hasAttribute('data-unsnapped'),
+            };
+          })()`);
+        /** @type {[number, number]} */
+        const [x, y] = await page.evaluate(`(() => {
+          const { height, width, x, y } = ${popup}.querySelector('[data-menu-part=scroller]').getBoundingClientRect();
+          return [x + width / 2, y + height / 2];
+        })()`);
+        const highlighted = `${popup}.querySelector('[role=menuitem][data-highlighted]')?.textContent ?? null`;
+
+        await withTouch(page, async (touch) => {
+          // Moved at once, slowly: it pans (nothing highlighted), resting
+          // apart from an end with a peek beyond both.
+          await touch('touchStart', x, y);
+          for (let step = 1; step <= 18; step += 1) {
+            await touch('touchMove', x - step * 5, y);
+          }
+          assert.equal(await page.evaluate(highlighted), null);
+          await sleep(100);
+          await touch('touchEnd');
+          await sleep(1000);
+
+          const panned = await resting();
+          assert.ok(panned.scrolled > 0, `scrolled ${panned.scrolled}`);
+          assert.equal(panned.unsnapped, false, 'snapping again');
+          if (panned.scrolled < panned.range) {
+            assert.ok(panned.before >= 30, `peek before ${panned.before}`);
+            assert.ok(panned.after >= 30, `peek after ${panned.after}`);
+          }
+
+          // Flung back: to its start.
+          await touch('touchStart', x - 60, y);
+          for (let step = 1; step <= 4; step += 1) {
+            await touch('touchMove', x - 60 + step * 30, y);
+          }
+          await touch('touchEnd');
+          await sleep(1200);
+          const { scrolled } = await resting();
+          assert.equal(scrolled, 0);
+        });
+
+        // Nothing chosen: the menu stayed open.
+        assert.doesNotMatch(await page.log(), /item-press/);
       } finally {
         await page.browser.send('Emulation.clearDeviceMetricsOverride');
       }

@@ -18,6 +18,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   editMenuItemRows,
   editMenuPositionerRows,
@@ -144,10 +145,10 @@ export const EditMenuOverview: FunctionComponent = () => (
     <ul>
       <li>
         Actions on an item of content, with a preview: a{' '}
-        <a href="contextual-menu">Contextual menu</a>.
+        <a href={publicUrl('contextual-menu')}>Contextual menu</a>.
       </li>
       <li>
-        Actions behind a control: a <a href="menu">Menu</a>.
+        Actions behind a control: a <a href={publicUrl('menu')}>Menu</a>.
       </li>
     </ul>
 
@@ -160,7 +161,7 @@ export const EditMenuOverview: FunctionComponent = () => (
     <ul>
       <li>The props most edit menus set.</li>
       <li>
-        All parts’ props: <a href="edit-menu/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('edit-menu/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -208,8 +209,10 @@ export const EditMenuOverview: FunctionComponent = () => (
         closes the menu.
       </li>
       <li>
-        Too many actions for its width: they scroll, faded at the ends; touch
-        drags highlight the action under the finger, lifting chooses it.
+        Too many actions for its width: they scroll, faded at the ends, resting
+        on an action with a peek of those beyond. A swipe pans them; a touch
+        held, then dragged, highlights the action under the finger, lifting
+        chooses it.
       </li>
       <li>
         It keeps the selection while it has focus, and closes once its anchor

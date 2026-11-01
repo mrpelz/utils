@@ -33,6 +33,7 @@ import {
   sfSquareAndArrowUp,
   sfTrash,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -473,8 +474,8 @@ export const MenuComposition: FunctionComponent = () => (
     <ul>
       <li>
         A choice shown on its button: the trigger’s label the chosen option,
-        chevrons after it (a pop-up button), at a <a href="list">List</a> row’s
-        end.
+        chevrons after it (a pop-up button), at a{' '}
+        <a href={publicUrl('list')}>List</a> row’s end.
       </li>
       <li>
         A{' '}

@@ -11,6 +11,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfAirplane, sfIcloudSlash, sfWifi } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 /** Settings' rows: each a symbol, white on its color, as its image. */
 const RowImages: FunctionComponent = () => (
@@ -110,13 +111,14 @@ export const SymbolComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a <a href="button">Button</a>’s icon (
+        In a <a href={publicUrl('button')}>Button</a>’s icon (
         <PartLink
           component="button"
           part="Button.Icon"
         />
         ): before a label, after it (a pop-up’s chevrons), or alone (a circle,
-        named): see <a href="button/composition#symbols-and-labels">Button</a>.
+        named): see{' '}
+        <a href={publicUrl('button/composition#symbols-and-labels')}>Button</a>.
       </li>
       <li>
         On glass, its glyph blended with the button’s content (vibrant), as the
@@ -132,7 +134,7 @@ export const SymbolComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Settings’ rows: a <a href="list">List</a> row’s{' '}
+        Settings’ rows: a <a href={publicUrl('list')}>List</a> row’s{' '}
         <PartLink
           component="list"
           part="List.Image"
@@ -194,10 +196,10 @@ export const SymbolComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="badge">Badge</a> as its child (
+        A <a href={publicUrl('badge')}>Badge</a> as its child (
         <code>placement=&quot;symbol&quot;</code>), on its top end corner, not
         blended with it: see{' '}
-        <a href="badge/composition#on-a-toolbar-button">Badge</a>.
+        <a href={publicUrl('badge/composition#on-a-toolbar-button')}>Badge</a>.
       </li>
     </ul>
   </>

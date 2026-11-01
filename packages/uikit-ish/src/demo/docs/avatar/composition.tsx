@@ -11,6 +11,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { photo } from './props.js';
 
 /** Contacts' rows: each person's avatar as the row's image. */
@@ -137,7 +138,7 @@ export const AvatarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="list">List</a> row’s image (
+        A <a href={publicUrl('list')}>List</a> row’s image (
         <PartLink
           component="list"
           part="List.Image"
@@ -208,9 +209,9 @@ export const AvatarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="badge">Badge</a> in the avatar, on its top end corner (its
-        default placement): see{' '}
-        <a href="badge/composition#on-an-avatar">Badge</a>.
+        A <a href={publicUrl('badge')}>Badge</a> in the avatar, on its top end
+        corner (its default placement): see{' '}
+        <a href={publicUrl('badge/composition#on-an-avatar')}>Badge</a>.
       </li>
     </ul>
   </>

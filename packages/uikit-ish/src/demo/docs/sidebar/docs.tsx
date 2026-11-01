@@ -1,5 +1,6 @@
 import { elementRows, PropRow } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -48,8 +49,9 @@ export const sidebarToolbarRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Buttons at its two ends (borderless <a href="button">Button</a>s, in the
-      glass’ content color): one at each end, or a{' '}
+      Buttons at its two ends (borderless{' '}
+      <a href={publicUrl('button')}>Button</a>s, in the glass’ content color):
+      one at each end, or a{' '}
       <PartLink
         component="sidebar"
         part="Sidebar.ToolbarGroup"

@@ -9,6 +9,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfBell } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { badgeRows } from './docs.js';
 import { propOptionsPart } from './props.js';
 
@@ -69,17 +70,18 @@ export const BadgeParts: FunctionComponent = () => (
       </li>
       <li>
         Where: <code>placement</code>, never from its parent. On a symbol (
-        <code>symbol</code>: a child of a <a href="symbol">Symbol</a>, its
-        smaller size), on its parent’s top end corner (<code>corner</code>: the
-        parent positioned, as an <a href="avatar">Avatar</a> is), or in the text
-        (<code>inline</code>).
+        <code>symbol</code>: a child of a{' '}
+        <a href={publicUrl('symbol')}>Symbol</a>, its smaller size), on its
+        parent’s top end corner (<code>corner</code>: the parent positioned, as
+        an <a href={publicUrl('avatar')}>Avatar</a> is), or in the text (
+        <code>inline</code>).
       </li>
       <li>
         Look: <code>tint</code>, <code>textColor</code>.
       </li>
       <li>
         Renders a <code>span</code>, without a role: its text read where it is
-        (see <a href="badge#accessibility">Accessibility</a>).
+        (see <a href={publicUrl('badge#accessibility')}>Accessibility</a>).
       </li>
     </ul>
     <BadgePart />

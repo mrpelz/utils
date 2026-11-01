@@ -375,7 +375,8 @@ const scrollerOf = (element: HTMLElement, edge: ViewportEdge): HTMLElement => {
  * Its scroll container's scroll padding at its edge: its own padding there
  * (the safe area it keeps clear) and the padding's height, so focus moving
  * and `scrollIntoView` stop clear of the anchors, not behind them; while
- * mounted.
+ * mounted. The same as `--uikit-viewport-padding-<edge>` (e.g. for a mask
+ * fading the content under them, see Sheet).
  */
 const useScrollPadding = (
   ref: RefObject<HTMLElement | null>,
@@ -386,6 +387,7 @@ const useScrollPadding = (
     if (!element) return undefined;
     const scroller = scrollerOf(element, edge);
     const property = `scroll-padding-${edge}`;
+    const variable = `--uikit-viewport-padding-${edge}`;
     const paddingProperty = `padding-${edge}`;
     let value = '';
 
@@ -396,6 +398,7 @@ const useScrollPadding = (
         ) || 0;
       value = `${String(Math.round(inset + element.offsetHeight))}px`;
       scroller.style.setProperty(property, value);
+      scroller.style.setProperty(variable, value);
     };
     // (Its height changing, or the scroller's padding: e.g. the keyboard.)
     const observer = new ResizeObserver(update);
@@ -406,6 +409,7 @@ const useScrollPadding = (
       observer.disconnect();
       if (scroller.style.getPropertyValue(property) === value) {
         scroller.style.removeProperty(property);
+        scroller.style.removeProperty(variable);
       }
     };
   }, [edge, ref]);

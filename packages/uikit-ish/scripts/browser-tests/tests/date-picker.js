@@ -15,7 +15,7 @@ import { mapped, sleep } from '../lib.js';
  */
 const calendar = (page) =>
   page.evaluate(`(() => {
-    const days = [...document.querySelectorAll('[aria-pressed]')];
+    const days = [...document.querySelectorAll('[aria-pressed]:not([inert] *)')];
     return {
       focusable: days.find((day) => day.tabIndex === 0)?.textContent,
       selected: days.find((day) => day.getAttribute('aria-pressed') === 'true')?.textContent,
@@ -31,7 +31,8 @@ const calendar = (page) =>
  */
 const clickDay = async (page, day) => {
   const point = await page.evaluate(`(() => {
-    const day = [...document.querySelectorAll('[aria-pressed]')].find((element) => element.textContent === ${JSON.stringify(day)});
+    // (The shown month's: its pager holds others, inert.)
+    const day = [...document.querySelectorAll('[aria-pressed]:not([inert] *)')].find((element) => element.textContent === ${JSON.stringify(day)});
     const { height, width, x, y } = day.getBoundingClientRect();
     return [x + width / 2, y + height / 2];
   })()`);
@@ -73,7 +74,7 @@ export const tests = [
         const title = document.querySelector('[data-date-picker-part=calendar] h2');
         const header = title.parentElement.getBoundingClientRect();
         const weekdays = document.querySelector('abbr').parentElement;
-        const days = [...document.querySelectorAll('[aria-pressed]')];
+        const days = [...document.querySelectorAll('[aria-pressed]:not([inert] *)')];
         const [first] = days;
         const below = days.find((day) => day.textContent === String(Number(first.textContent) + 7));
         const selected = days.find((day) => day.getAttribute('aria-pressed') === 'true');
@@ -180,7 +181,7 @@ export const tests = [
 
       await page.setState(0, { min: mapped('[April 10, 2025]') });
       const limits = await page.evaluate(`(() => {
-        const days = [...document.querySelectorAll('[aria-pressed]')];
+        const days = [...document.querySelectorAll('[aria-pressed]:not([inert] *)')];
         return [days.find((day) => day.textContent === '9').disabled, days.find((day) => day.textContent === '10').disabled, document.querySelector('[aria-label="Previous month"]').disabled];
       })()`);
       assert.deepEqual(limits, [true, false, true]);
@@ -393,7 +394,7 @@ export const tests = [
       /** @returns {Promise<string[]>} */
       const places = () =>
         page.evaluate(
-          `[...document.querySelectorAll(${JSON.stringify('[data-range]')})].map((day) => day.textContent + ${JSON.stringify(':')} + day.dataset.range)`,
+          `[...document.querySelectorAll(${JSON.stringify('[data-range]:not([inert] *)')})].map((day) => day.textContent + ${JSON.stringify(':')} + day.dataset.range)`,
         );
       assert.deepEqual(await places(), [
         '20:start',
@@ -439,7 +440,7 @@ export const tests = [
       });
 
       const state = await page.evaluate(`(() => {
-        const days = [...document.querySelectorAll('[aria-pressed]')];
+        const days = [...document.querySelectorAll('[aria-pressed]:not([inert] *)')];
         const day = (text) => days.find((element) => element.textContent === text);
         const abbrs = [...document.querySelectorAll('abbr')];
         return {
@@ -472,7 +473,7 @@ export const tests = [
       /** @param {string} text */
       const center = (text) =>
         page.evaluate(`(() => {
-          const day = [...document.querySelectorAll('[aria-pressed]')].find((element) => element.textContent === ${JSON.stringify(text)});
+          const day = [...document.querySelectorAll('[aria-pressed]:not([inert] *)')].find((element) => element.textContent === ${JSON.stringify(text)});
           const { height, width, x, y } = day.getBoundingClientRect();
           return [x + width / 2, y + height / 2];
         })()`);
@@ -481,7 +482,7 @@ export const tests = [
       await page.drag(from, to, { duration: 400 });
       await sleep(300);
       const places = await page.evaluate(
-        `[...document.querySelectorAll(${JSON.stringify('[data-range]')})].map((day) => day.textContent + ${JSON.stringify(':')} + day.dataset.range)`,
+        `[...document.querySelectorAll(${JSON.stringify('[data-range]:not([inert] *)')})].map((day) => day.textContent + ${JSON.stringify(':')} + day.dataset.range)`,
       );
       assert.deepEqual(places, [
         '8:start',
@@ -548,7 +549,7 @@ export const tests = [
 
       /** @type {[number, number]} */
       const from = await page.evaluate(`(() => {
-        const day = [...document.querySelectorAll('[aria-pressed]')].find((element) => element.textContent === '20');
+        const day = [...document.querySelectorAll('[aria-pressed]:not([inert] *)')].find((element) => element.textContent === '20');
         const { height, width, x, y } = day.getBoundingClientRect();
         return [x + width / 2, y + height / 2];
       })()`);
@@ -573,7 +574,7 @@ export const tests = [
 
       /** @type {[number, number]} */
       const to = await page.evaluate(`(() => {
-        const day = [...document.querySelectorAll('[aria-pressed]')].find((element) => element.textContent === '5');
+        const day = [...document.querySelectorAll('[aria-pressed]:not([inert] *)')].find((element) => element.textContent === '5');
         const { height, width, x, y } = day.getBoundingClientRect();
         return [x + width / 2, y + height / 2];
       })()`);
@@ -770,9 +771,9 @@ export const tests = [
         ),
       });
       const styles = await page.evaluate(`(() => {
-        const day = (text) => [...document.querySelectorAll('[aria-pressed]')].find((element) => element.textContent === text);
+        const day = (text) => [...document.querySelectorAll('[aria-pressed]:not([inert] *)')].find((element) => element.textContent === text);
         return [
-          getComputedStyle(day('3').querySelector(${JSON.stringify('[data-date-picker-part=dots] > *')})).backgroundColor,
+          getComputedStyle(day('3').querySelector(${JSON.stringify('[data-date-picker-part=dots]:not([inert] *) > *')})).backgroundColor,
           getComputedStyle(day('14')).color,
           getComputedStyle(day('25'), '::before').backgroundColor,
         ];
@@ -877,9 +878,9 @@ export const tests = [
       });
       const state = await page.evaluate(`(() => {
         const day = (text) => [...document.querySelectorAll(${JSON.stringify('[role=group] [aria-pressed]:not([data-outside])')})].find((element) => element.textContent === text);
-        const dots = (element) => [...element.querySelectorAll(${JSON.stringify('[data-date-picker-part=dots] > *')})].map((dot) => getComputedStyle(dot).backgroundColor);
+        const dots = (element) => [...element.querySelectorAll(${JSON.stringify('[data-date-picker-part=dots]:not([inert] *) > *')})].map((dot) => getComputedStyle(dot).backgroundColor);
         return {
-          adjacent: document.querySelectorAll(${JSON.stringify('[data-outside] [data-date-picker-part=dots], [data-outside][data-highlight-text], [data-outside][data-highlight-circle], [data-outside][data-weekday-highlighted]')}).length,
+          adjacent: document.querySelectorAll(${JSON.stringify('[data-outside]:not([inert] *) [data-date-picker-part=dots], [data-outside][data-highlight-text]:not([inert] *), [data-outside][data-highlight-circle]:not([inert] *), [data-outside][data-weekday-highlighted]:not([inert] *)')}).length,
           fourteenth: dots(day('14')),
           twentySecond: [dots(day('22')).length, getComputedStyle(day('22')).color, getComputedStyle(day('22'), '::before').backgroundColor],
         };
@@ -1017,7 +1018,7 @@ export const tests = [
       await clickDay(page, '13');
       assert.deepEqual(
         await page.evaluate(
-          `[...document.querySelectorAll(${JSON.stringify('[data-range]')})].map((day) => day.textContent + ${JSON.stringify(':')} + day.dataset.range)`,
+          `[...document.querySelectorAll(${JSON.stringify('[data-range]:not([inert] *)')})].map((day) => day.textContent + ${JSON.stringify(':')} + day.dataset.range)`,
         ),
         ['12:start', '13:end'],
       );

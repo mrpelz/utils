@@ -6,6 +6,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -77,14 +78,15 @@ export const CheckboxInformationArchitecture: FunctionComponent = () => (
         <tr>
           <th>N = 2</th>
           <td>
-            Toggle (<a href="switch">Switch</a>) / <strong>checkbox</strong>
+            Toggle (<a href={publicUrl('switch')}>Switch</a>) /{' '}
+            <strong>checkbox</strong>
           </td>
           <td>—</td>
         </tr>
         <tr>
           <th>N ≤ ~5</th>
           <td>
-            Segmented control (<a href="segmented">Segmented</a>) /{' '}
+            Segmented control (<a href={publicUrl('segmented')}>Segmented</a>) /{' '}
             <strong>radios</strong>
           </td>
           <td>Pop-up button</td>

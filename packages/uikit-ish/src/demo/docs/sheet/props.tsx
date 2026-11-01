@@ -57,7 +57,7 @@ export const getPropOptionsGuideRoot = (addLog: AddLog) => ({
   open: [undefined, false, true] as const,
   modal: [undefined, false, 'trap-focus'] as const,
   disablePointerDismissal: [undefined, false, true] as const,
-  swipeDirection: [undefined, 'down', 'up', 'left', 'right'] as const,
+  swipeDirection: [undefined, 'down', 'up', 'left', 'right', 'none'] as const,
   snapPoints: [undefined, [0.5, 1] as number[]] as const,
   defaultSnapPoint: [undefined, 0.5, 1] as const,
   snapPoint: [undefined, 0.5, 1] as const,
@@ -101,10 +101,12 @@ export const propOptionsPart = {
   ...commonPropOptions,
 };
 
-/** `Sheet.Header`: its own element (no `render`). */
+/** `Sheet.Header`: its own element (no `render`), its edge effect. */
 export const propOptionsHeader = {
   className: commonPropOptions.className,
   style: commonPropOptions.style,
+  edgeEffect: [undefined, 'soft', 'hard', 'none'] as const,
+  edgeTint: [undefined, 'rgb(255 59 48 / 30%)'] as const,
 };
 
 /** `Sheet.Grabber`: its own element (no `render`), its cursor. */

@@ -13,6 +13,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { symbolPairs } from './content.js';
 import {
@@ -119,7 +120,7 @@ export const SliderOverview: FunctionComponent = () => (
       </li>
       <li>
         For a range within bounds (e.g. a price from–to): two thumbs (see{' '}
-        <a href="slider/composition">Composition</a>).
+        <a href={publicUrl('slider/composition')}>Composition</a>).
       </li>
       <li>
         With the minimum at the leading end and the maximum at the trailing end
@@ -136,21 +137,22 @@ export const SliderOverview: FunctionComponent = () => (
     <ul>
       <li>
         An exact number, changed a step at a time: a{' '}
-        <a href="stepper">Stepper</a> (or pair a slider with a text field and a
-        stepper when the exact value matters).
+        <a href={publicUrl('stepper')}>Stepper</a> (or pair a slider with a text
+        field and a stepper when the exact value matters).
       </li>
       <li>
-        One of a few named options: a <a href="segmented">Segmented</a> control.
+        One of a few named options: a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
       <li>
         A value that only shows progress, not one to set: a{' '}
-        <a href="progress">Progress</a> bar (guide{' '}
+        <a href={publicUrl('progress')}>Progress</a> bar (guide{' '}
         <GuideLink to="indicator-continuum">§5</GuideLink>: a slider is an
         editable indicator).
       </li>
       <li>
         Audio volume: prefer the platform’s own volume control where there is
-        one (see <a href="slider/composition">Composition</a>).
+        one (see <a href={publicUrl('slider/composition')}>Composition</a>).
       </li>
     </ul>
 
@@ -163,7 +165,7 @@ export const SliderOverview: FunctionComponent = () => (
     <ul>
       <li>The props most sliders set, across their parts.</li>
       <li>
-        All parts’ props: <a href="slider/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('slider/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

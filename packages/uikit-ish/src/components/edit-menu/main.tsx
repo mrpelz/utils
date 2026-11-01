@@ -58,7 +58,9 @@ export type { EditMenuPositionerProps, EditMenuRootProps } from './props.js';
 // capsule, the “more” button staying at its end. Touches drag over the actions
 // (no native scrolling), highlighting the one under the finger and choosing it
 // on release; held near an end, they scroll the actions (as the tab bar's lens
-// and menus do).
+// and menus do). A sideways swipe begun on them (moving at once, before the
+// highlight's drag) pans them instead, flung on release (see `dragOverItems`'
+// `pan`), choosing nothing.
 //
 // Also:
 // - More actions open in a menu below the capsule, a `regular` menu (not
@@ -276,7 +278,10 @@ const useOverflow = (scrollerRef: { current: HTMLDivElement | null }) => {
  * selection (iOS), so even the “more” button opens by the drag (hovered,
  * or clicked on release).
  */
-const useTouchDrag = (popupRef: { current: HTMLDivElement | null }) => {
+const useTouchDrag = (
+  popupRef: { current: HTMLDivElement | null },
+  scrollerRef: { current: HTMLDivElement | null },
+) => {
   useLayoutEffect(() => {
     const { current: popup } = popupRef;
     if (!popup) return undefined;
@@ -299,10 +304,17 @@ const useTouchDrag = (popupRef: { current: HTMLDivElement | null }) => {
           target.releasePointerCapture(event.pointerId);
         }
       }
-      dragOverItems(document, event.pointerId, {
-        x: event.clientX,
-        y: event.clientY,
-      });
+      // Begun on its actions (overflowing), a sideways swipe pans them.
+      const { current: scroller } = scrollerRef;
+      const isOnActions =
+        event.target instanceof Node && scroller?.contains(event.target);
+      dragOverItems(
+        document,
+        event.pointerId,
+        { x: event.clientX, y: event.clientY },
+        undefined,
+        (isOnActions && scroller) || undefined,
+      );
     };
 
     const onTouchStart = (event: TouchEvent) => {
@@ -322,7 +334,7 @@ const useTouchDrag = (popupRef: { current: HTMLDivElement | null }) => {
         capture: true,
       });
     };
-  }, [popupRef]);
+  }, [popupRef, scrollerRef]);
 };
 
 const highlightSelectors = [':scope > [data-highlighted]:not([aria-haspopup])'];
@@ -334,7 +346,7 @@ const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
     const scrollerRef = useRef<HTMLDivElement>(null);
     useKeepSelection(ref);
     useOverflow(scrollerRef);
-    useTouchDrag(ref);
+    useTouchDrag(ref, scrollerRef);
 
     return (
       // 42px high, actions from 20px, the “more” button 4px

@@ -6,6 +6,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
@@ -46,7 +47,7 @@ export const AccordionComposition: FunctionComponent = () => (
           part="DatePicker.Root"
         />{' '}
         with a handle in an item opening and closing with it. See{' '}
-        <a href="list/composition#rows-expanding-together">
+        <a href={publicUrl('list/composition#rows-expanding-together')}>
           List: Rows expanding together
         </a>
         .

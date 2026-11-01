@@ -6,6 +6,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -70,7 +71,7 @@ export const ToolbarInformationArchitecture: FunctionComponent = () => (
       <li>
         Toolbars hold actions; tab bars navigate (guide{' '}
         <GuideLink to="rule-a1">A1</GuideLink>): switching sections is a{' '}
-        <a href="tab-bar">Tab bar</a>’s.
+        <a href={publicUrl('tab-bar')}>Tab bar</a>’s.
       </li>
     </ul>
 
@@ -105,7 +106,7 @@ export const ToolbarInformationArchitecture: FunctionComponent = () => (
         Regions act on the selection, Collections own it (guide{' '}
         <GuideLink to="rule-g7">G7</GuideLink>): an edit-mode bar reads the
         list’s selection, holding none of its own (see{' '}
-        <a href="toolbar/composition#edit-mode">Composition</a>).
+        <a href={publicUrl('toolbar/composition#edit-mode')}>Composition</a>).
       </li>
     </ul>
 
@@ -119,12 +120,15 @@ export const ToolbarInformationArchitecture: FunctionComponent = () => (
       <li>
         <strong>Shells:</strong> a navigation stack’s top bar (guide{' '}
         <GuideLink to="shell-a">§7.4, shell A</GuideLink>): back, the title, a
-        command set (see <a href="header">Header</a>).
+        command set (see <a href={publicUrl('header')}>Header</a>).
       </li>
       <li>
         <strong>Search:</strong> in a toolbar, a sidebar, or beside the tab bar
         (guide <GuideLink to="rule-a11">A11</GuideLink>; see{' '}
-        <a href="toolbar/composition#a-search-field">Composition</a>).
+        <a href={publicUrl('toolbar/composition#a-search-field')}>
+          Composition
+        </a>
+        ).
       </li>
       <li>
         <strong>Controls:</strong> a Choice between the capsules (a segmented

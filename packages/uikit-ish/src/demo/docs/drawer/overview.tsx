@@ -22,6 +22,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfListBullet } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { names } from '../viewport/content.js';
 import {
   drawerPopupRows,
@@ -171,7 +172,8 @@ export const DrawerOverview: FunctionComponent = () => (
       </li>
       <li>
         E.g. a compact layout’s sidebar or inspector: on a phone, a{' '}
-        <a href="layout">Layout</a>’s column as a drawer (the app’s choice).
+        <a href={publicUrl('layout')}>Layout</a>’s column as a drawer (the app’s
+        choice).
       </li>
     </ul>
     <LiveView />
@@ -189,7 +191,7 @@ export const DrawerOverview: FunctionComponent = () => (
       </li>
       <li>
         A tablet’s columns on a phone: the columns that don’t fit as drawers
-        (see <a href="drawer/composition">Composition</a>).
+        (see <a href={publicUrl('drawer/composition')}>Composition</a>).
       </li>
     </ul>
 
@@ -201,14 +203,15 @@ export const DrawerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Room for it: a <a href="layout">Layout</a>’s column, side by side.
+        Room for it: a <a href={publicUrl('layout')}>Layout</a>’s column, side
+        by side.
       </li>
       <li>
-        Drilling into a list: a <a href="navigation">Navigation</a> (one column
-        at a time).
+        Drilling into a list: a <a href={publicUrl('navigation')}>Navigation</a>{' '}
+        (one column at a time).
       </li>
       <li>
-        A scoped task over the page: a <a href="sheet">Sheet</a>.
+        A scoped task over the page: a <a href={publicUrl('sheet')}>Sheet</a>.
       </li>
     </ul>
 
@@ -221,7 +224,7 @@ export const DrawerOverview: FunctionComponent = () => (
     <ul>
       <li>The props most drawers set, across their parts.</li>
       <li>
-        All parts’ props: <a href="drawer/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('drawer/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

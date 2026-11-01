@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 /** The page's sections (its headings' ids), listed at its top. */
@@ -28,8 +29,8 @@ export const DrawerInformationArchitecture: FunctionComponent = () => (
       </li>
       <li>
         As primitives: a split’s Region or Viewer (see{' '}
-        <a href="layout/information-architecture">Layout</a>), kept at an edge
-        of a compact screen.
+        <a href={publicUrl('layout/information-architecture')}>Layout</a>), kept
+        at an edge of a compact screen.
       </li>
     </ul>
 
@@ -44,12 +45,15 @@ export const DrawerInformationArchitecture: FunctionComponent = () => (
         The guide: in compact width, shell B (sidebar and split) collapses to
         shell A, columns becoming stack levels (guide{' '}
         <GuideLink to="rule-g4">G4</GuideLink>; see{' '}
-        <a href="navigation/composition#compact-or-regular">Navigation</a>).
+        <a href={publicUrl('navigation/composition#compact-or-regular')}>
+          Navigation
+        </a>
+        ).
       </li>
       <li>
         A drawer keeps a column instead, over the content from its edge: the
         same structure, re-rendered otherwise (the app’s choice, see{' '}
-        <a href="drawer/composition">Composition</a>).
+        <a href={publicUrl('drawer/composition')}>Composition</a>).
       </li>
     </ul>
 

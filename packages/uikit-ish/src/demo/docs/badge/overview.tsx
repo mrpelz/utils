@@ -21,6 +21,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfBell } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { badgeRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 
@@ -154,10 +155,11 @@ export const BadgeOverview: FunctionComponent = () => (
         text, as Mail’s mailboxes.
       </li>
       <li>
-        Work going on: <a href="progress">Progress</a>.
+        Work going on: <a href={publicUrl('progress')}>Progress</a>.
       </li>
       <li>
-        Something the person must answer now: an <a href="alert">Alert</a>.
+        Something the person must answer now: an{' '}
+        <a href={publicUrl('alert')}>Alert</a>.
       </li>
     </ul>
 
@@ -170,7 +172,7 @@ export const BadgeOverview: FunctionComponent = () => (
     <ul>
       <li>The props most badges set.</li>
       <li>
-        All its props: <a href="badge/parts">Parts</a>.
+        All its props: <a href={publicUrl('badge/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -216,11 +218,12 @@ export const BadgeOverview: FunctionComponent = () => (
       </li>
       <li>
         On a symbol, it’s neither blended nor scaled with it (see{' '}
-        <a href="symbol">Symbol</a>): in a glass button, it stays red.
+        <a href={publicUrl('symbol')}>Symbol</a>): in a glass button, it stays
+        red.
       </li>
       <li>
         On a tab collapsing away, it fades with its tab (see{' '}
-        <a href="tab-bar/composition#badges-on-tabs">Tab bar</a>).
+        <a href={publicUrl('tab-bar/composition#badges-on-tabs')}>Tab bar</a>).
       </li>
     </ul>
   </>

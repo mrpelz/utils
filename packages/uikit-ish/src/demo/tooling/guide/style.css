@@ -69,7 +69,7 @@
     }
   }
 
-  /* Text people read. */
+  /* Text people read (not the demos' stages in it: the components'). */
   .demo-prose {
     font-size: 1rem;
     line-height: 1.5;
@@ -77,47 +77,47 @@
     /* (Long names, e.g. a part's deep in a parts tree, break on a phone.) */
     overflow-wrap: break-word;
 
-    & h2 {
+    & h2:where(:not(.demo-stage *)) {
       margin: 2.5rem 0 0.75rem;
       font-size: 1.375rem;
     }
 
-    & h3 {
+    & h3:where(:not(.demo-stage *)) {
       margin: 1.5rem 0 0.5rem;
       font-size: 1.125rem;
     }
 
-    & p,
-    & ul {
+    & p:where(:not(.demo-stage *)),
+    & ul:where(:not(.demo-stage *)) {
       max-width: 42rem;
     }
 
-    & code {
+    & code:where(:not(.demo-stage *)) {
       padding: 0.1em 0.3em;
       border-radius: 4px;
       background-color: light-dark(#f0f0f0, #262626);
       font-size: 0.875em;
     }
 
-    & a {
+    & a:where(:not(.demo-stage *)) {
       color: inherit;
     }
 
     /* (Its tables' cells bordered as the demos' frames.) */
-    & table {
+    & table:where(:not(.demo-stage *)) {
       border-collapse: collapse;
       margin-block: 1rem;
     }
 
-    & th,
-    & td {
+    & th:where(:not(.demo-stage *)),
+    & td:where(:not(.demo-stage *)) {
       padding: 0.5rem 0.75rem;
       border: 1px dashed #404040;
       text-align: start;
       vertical-align: top;
     }
 
-    & thead th {
+    & thead th:where(:not(.demo-stage *)) {
       font-family: monospace;
       font-size: 0.875rem;
     }

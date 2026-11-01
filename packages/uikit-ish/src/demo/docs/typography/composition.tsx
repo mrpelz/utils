@@ -13,6 +13,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfCheckmarkCircleFill, sfCloudFill } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { propOptionsCompositionSize } from './props.js';
 
 /** An article's heading, paragraphs and caption, as their elements. */
@@ -180,7 +181,8 @@ export const TypographyComposition: FunctionComponent = () => (
     <ul>
       <li>
         A text size (<code>textSize</code>) for everything in it: here a{' '}
-        <a href="list">List</a>’s rows, their text growing and the rows with it.
+        <a href={publicUrl('list')}>List</a>’s rows, their text growing and the
+        rows with it.
       </li>
       <li>
         The components use the text styles’ tokens, so they follow it (e.g. the
@@ -204,8 +206,8 @@ export const TypographyComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="symbol">Symbol</a> in the text, sized as its glyphs and
-        weighted as it (emphasized: heavier), in its color.
+        A <a href={publicUrl('symbol')}>Symbol</a> in the text, sized as its
+        glyphs and weighted as it (emphasized: heavier), in its color.
       </li>
       <li>
         <strong>Library:</strong> the{' '}

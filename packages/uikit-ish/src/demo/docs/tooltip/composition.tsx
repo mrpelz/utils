@@ -18,6 +18,7 @@ import {
   sfSquareAndArrowUp,
   sfTrash,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 /** A toolbar's symbol buttons, their tooltips sharing a provider. */
 const InAToolbar: FunctionComponent = () => {
@@ -161,7 +162,7 @@ export const TooltipComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="toolbar">Toolbar</a>’s symbol buttons (
+        A <a href={publicUrl('toolbar')}>Toolbar</a>’s symbol buttons (
         <code>{'render={<Toolbar.Button />}'}</code>), each named (
         <code>aria-label</code>), each with its tooltip.
       </li>
@@ -209,8 +210,9 @@ export const TooltipComposition: FunctionComponent = () => (
         ’s <code>anchor</code>): a label for good, on touch too.
       </li>
       <li>
-        As <a href="slider">Slider</a>’s and <a href="progress">Progress</a>’
-        value labels, and a <a href="page-control">Page control</a>’s.
+        As <a href={publicUrl('slider')}>Slider</a>’s and{' '}
+        <a href={publicUrl('progress')}>Progress</a>’ value labels, and a{' '}
+        <a href={publicUrl('page-control')}>Page control</a>’s.
       </li>
       <li>
         <strong>Library:</strong> holding it open (<code>open</code>) at an

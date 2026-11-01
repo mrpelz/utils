@@ -1,7 +1,9 @@
+import './style.css';
+
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import { FunctionComponent } from 'react';
 
-import { Segmented } from '../../../components/index.js';
+import { Segmented, Viewport } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
@@ -12,12 +14,13 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
-import { periods } from './content.js';
+import { morePeriods, periods } from './content.js';
 import { segmentedItemRows, segmentedRootRows } from './docs.js';
 import { propOptionsOverviewRoot, propOptionsPeriodsContent } from './props.js';
 
-/** Periods, with a few of the root's props. */
+/** Periods on a phone's screen (its width), with a few of the root's props. */
 const LiveView: FunctionComponent = () => {
   const id = 'segmented-overview';
   const [log, addLog] = useLog();
@@ -31,35 +34,45 @@ const LiveView: FunctionComponent = () => {
     { external: externalRoot, isOpen: true, title: 'Segmented.Root' },
   );
 
+  const shown =
+    content.count > periods.length
+      ? morePeriods
+      : periods.slice(0, content.count);
+
   return (
     <Component
-      isCentered
       isInline
       controls={[controlContent, controlRoot]}
       id={id}
       log={log}
+      screen="centered"
+      stage="phone"
       state={[stateContent, stateRoot]}
       title="Segmented"
     >
-      <Segmented.Root
-        key={elementKey}
-        aria-label="Period"
-        {...propsRoot}
-        onValueChange={(
-          value: unknown,
-          { reason }: BaseRadioGroup.ChangeEventDetails,
-        ) => addLog(`value change: ${String(value)}/${reason}`)}
-      >
-        {periods.slice(0, content.count).map(([value, label]) => (
-          <Segmented.Item
-            key={value}
-            value={value}
+      <Viewport.Content>
+        <div className="segmented-demo-content">
+          <Segmented.Root
+            key={elementKey}
+            aria-label="Period"
+            {...propsRoot}
+            onValueChange={(
+              value: unknown,
+              { reason }: BaseRadioGroup.ChangeEventDetails,
+            ) => addLog(`value change: ${String(value)}/${reason}`)}
           >
-            {label}
-          </Segmented.Item>
-        ))}
-        <Segmented.Highlight />
-      </Segmented.Root>
+            {shown.map(([value, label]) => (
+              <Segmented.Item
+                key={value}
+                value={value}
+              >
+                {label}
+              </Segmented.Item>
+            ))}
+            <Segmented.Highlight />
+          </Segmented.Root>
+        </div>
+      </Viewport.Content>
     </Component>
   );
 };
@@ -98,8 +111,8 @@ export const SegmentedOverview: FunctionComponent = () => (
       </li>
       <li>
         To switch between views of the same content (e.g. All and Missed calls),
-        in the content, a navigation bar or a toolbar (see{' '}
-        <a href="segmented/composition">Composition</a>).
+        in a navigation bar or a toolbar (see{' '}
+        <a href={publicUrl('segmented/composition')}>Composition</a>).
       </li>
     </ul>
 
@@ -111,19 +124,21 @@ export const SegmentedOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A setting that’s on or off: a <a href="switch">Switch</a>.
+        A setting that’s on or off: a <a href={publicUrl('switch')}>Switch</a>.
       </li>
       <li>
-        More options, or long ones: a <a href="menu">Menu</a> (a pop-up button)
-        or a <a href="roll">Roll</a> picker, collapsed until needed (guide{' '}
+        More options, or long ones: a <a href={publicUrl('menu')}>Menu</a> (a
+        pop-up button) or a <a href={publicUrl('roll')}>Roll</a> picker,
+        collapsed until needed (guide{' '}
         <GuideLink to="choice-family">§5</GuideLink>).
       </li>
       <li>
-        Switching an app’s top-level sections: a <a href="tab-bar">Tab bar</a>.
+        Switching an app’s top-level sections: a{' '}
+        <a href={publicUrl('tab-bar')}>Tab bar</a>.
       </li>
       <li>
-        Starting something: a <a href="button">Button</a>, as choosing an option
-        doesn’t perform an action.
+        Starting something: a <a href={publicUrl('button')}>Button</a>, as
+        choosing an option doesn’t perform an action.
       </li>
     </ul>
 
@@ -136,7 +151,7 @@ export const SegmentedOverview: FunctionComponent = () => (
     <ul>
       <li>The props most segmented controls set, across their parts.</li>
       <li>
-        All parts’ props: <a href="segmented/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('segmented/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -151,6 +166,7 @@ export const SegmentedOverview: FunctionComponent = () => (
             'disabled',
             'name',
             'hideSeparators',
+            'overflow',
           ),
         ],
         ['Segmented.Item', pickRows(segmentedItemRows, 'value', 'disabled')],
@@ -208,6 +224,11 @@ export const SegmentedOverview: FunctionComponent = () => (
       <li>
         Separators show between unchosen items only (or none:{' '}
         <code>hideSeparators</code>).
+      </li>
+      <li>
+        Too narrow for its items: their labels truncated, or (
+        <code>overflow=&quot;scroll&quot;</code>) the items scrolled sideways,
+        snapping to an item; the chosen item scrolled into view.
       </li>
     </ul>
   </>

@@ -14,6 +14,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   alertActionRows,
@@ -157,15 +158,16 @@ export const AlertOverview: FunctionComponent = () => (
       <li>
         Choices about an action the person just started (Delete Photo, Save
         Draft, Cancel), from its control: an{' '}
-        <a href="action-sheet">Action sheet</a>.
+        <a href={publicUrl('action-sheet')}>Action sheet</a>.
       </li>
       <li>
         A task with more than a field or two (a form): a{' '}
-        <a href="sheet">Sheet</a>.
+        <a href={publicUrl('sheet')}>Sheet</a>.
       </li>
       <li>
         Options at a control, dismissed by a press outside: a{' '}
-        <a href="popover">Popover</a> or a <a href="menu">Menu</a>.
+        <a href={publicUrl('popover')}>Popover</a> or a{' '}
+        <a href={publicUrl('menu')}>Menu</a>.
       </li>
     </ul>
 
@@ -178,7 +180,7 @@ export const AlertOverview: FunctionComponent = () => (
     <ul>
       <li>The props most alerts set.</li>
       <li>
-        All parts’ props: <a href="alert/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('alert/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

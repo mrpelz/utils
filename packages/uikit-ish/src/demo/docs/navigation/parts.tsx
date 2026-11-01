@@ -16,6 +16,7 @@ import { useLog } from '../../tooling/frame/log.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfChevronBackward } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { pages } from './content.js';
 import {
   navigationBackRows,
@@ -647,7 +648,8 @@ export const NavigationParts: FunctionComponent = () => (
       <li>
         Each page in a frame filling it (absolutely placed): the top one shown,
         those under it hidden and inert, kept mounted; each page’s{' '}
-        <a href="header">Header</a> moving with it, its bar and title too.
+        <a href={publicUrl('header')}>Header</a> moving with it, its bar and
+        title too.
       </li>
       <li>
         Renders a <code>div</code>, filling its root, clipping the pages as they
@@ -683,8 +685,10 @@ export const NavigationParts: FunctionComponent = () => (
       <li>
         Also while a page is popped (still leaving: a swipe again, the cascade
         of going back quickly, see{' '}
-        <a href="navigation/composition#going-back-quickly">Composition</a>);
-        not while one is pushed.
+        <a href={publicUrl('navigation/composition#going-back-quickly')}>
+          Composition
+        </a>
+        ); not while one is pushed.
       </li>
       <li>
         Its swipes are its own: nothing scrolls meanwhile, and a{' '}

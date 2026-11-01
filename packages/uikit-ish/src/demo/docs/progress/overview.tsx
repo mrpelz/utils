@@ -13,6 +13,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   activityIndicatorRows,
@@ -112,11 +113,13 @@ export const ProgressOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A value to set: a <a href="slider">Slider</a> (an editable bar, the
-        guide’s <GuideLink to="indicator-continuum">continuum</GuideLink>).
+        A value to set: a <a href={publicUrl('slider')}>Slider</a> (an editable
+        bar, the guide’s{' '}
+        <GuideLink to="indicator-continuum">continuum</GuideLink>).
       </li>
       <li>
-        Something new waiting, counted: a <a href="badge">Badge</a>.
+        Something new waiting, counted: a <a href={publicUrl('badge')}>Badge</a>
+        .
       </li>
       <li>
         A bar of unknown length (Base UI’s indeterminate): prefer an activity
@@ -133,7 +136,7 @@ export const ProgressOverview: FunctionComponent = () => (
     <ul>
       <li>The props most progress indicators set.</li>
       <li>
-        All parts’ props: <a href="progress/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('progress/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable

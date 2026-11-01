@@ -7,6 +7,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { menuPopupRows, menuRootRows, menuTriggerRows } from '../menu/docs.js';
 
 // Every part's props (Base UI's, through Menu's, with its descriptions),
@@ -151,7 +152,7 @@ export const contextualMenuPopupRows: readonly PropRow[] = menuPopupRows.map(
           row[1],
           row[2],
           <>
-            A <a href="menu">Menu</a>’s contents (
+            A <a href={publicUrl('menu')}>Menu</a>’s contents (
             <PartLink
               component="menu"
               part="Menu.Item"

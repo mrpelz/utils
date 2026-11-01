@@ -20,6 +20,7 @@ import {
   sfSquareAndArrowUp,
   sfTrash,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   toolbarButtonRows,
   toolbarGroupRows,
@@ -868,7 +869,8 @@ export const ToolbarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href="button">Button</a> in the toolbar’s keyboard navigation, with{' '}
+        A <a href={publicUrl('button')}>Button</a> in the toolbar’s keyboard
+        navigation, with{' '}
         <PartLink
           component="button"
           part="Button.Icon"
@@ -999,12 +1001,13 @@ export const ToolbarParts: FunctionComponent = () => (
       </li>
       <li>
         No styles here: for a search field, a{' '}
-        <a href="text-field">Text field</a>’s{' '}
+        <a href={publicUrl('text-field')}>Text field</a>’s{' '}
         <PartLink
           component="text-field"
           part="TextField.Search"
         />{' '}
-        between the sides (see <a href="toolbar/composition">Composition</a>).
+        between the sides (see{' '}
+        <a href={publicUrl('toolbar/composition')}>Composition</a>).
       </li>
     </ul>
     <InputPart />

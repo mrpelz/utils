@@ -23,6 +23,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfXmark } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   popoverPositionerRows,
@@ -176,8 +177,8 @@ export const PopoverOverview: FunctionComponent = () => (
       </li>
       <li>
         In a regular width; in a compact one, the same content usually in a{' '}
-        <a href="sheet">Sheet</a> (see{' '}
-        <a href="popover/composition#a-sheet-in-a-compact-width">
+        <a href={publicUrl('sheet')}>Sheet</a> (see{' '}
+        <a href={publicUrl('popover/composition#a-sheet-in-a-compact-width')}>
           A sheet in a compact width
         </a>
         ).
@@ -197,9 +198,10 @@ export const PopoverOverview: FunctionComponent = () => (
         options, a color, a date), done without leaving the page.
       </li>
       <li>
-        Its content can be anything: a <a href="list">List</a>, a{' '}
-        <a href="roll">Roll</a>, a <a href="date-picker">Date picker</a>’s
-        calendar, a <a href="color-picker">Color picker</a>.
+        Its content can be anything: a <a href={publicUrl('list')}>List</a>, a{' '}
+        <a href={publicUrl('roll')}>Roll</a>, a{' '}
+        <a href={publicUrl('date-picker')}>Date picker</a>’s calendar, a{' '}
+        <a href={publicUrl('color-picker')}>Color picker</a>.
       </li>
       <li>
         A Container of the guide’s <em>Surface</em> family (
@@ -216,19 +218,20 @@ export const PopoverOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A list of commands or of choices: a <a href="menu">Menu</a> (menus, not
-        popovers, for those).
+        A list of commands or of choices: a <a href={publicUrl('menu')}>Menu</a>{' '}
+        (menus, not popovers, for those).
       </li>
       <li>
         A focused task that must be finished or canceled (a new item, a form): a{' '}
-        <a href="sheet">Sheet</a>.
+        <a href={publicUrl('sheet')}>Sheet</a>.
       </li>
       <li>
-        A decision the app needs now: an <a href="alert">Alert</a> or an{' '}
-        <a href="action-sheet">Action sheet</a>.
+        A decision the app needs now: an <a href={publicUrl('alert')}>Alert</a>{' '}
+        or an <a href={publicUrl('action-sheet')}>Action sheet</a>.
       </li>
       <li>
-        A short hint about a control: a <a href="tooltip">Tooltip</a>.
+        A short hint about a control: a{' '}
+        <a href={publicUrl('tooltip')}>Tooltip</a>.
       </li>
     </ul>
 
@@ -241,7 +244,7 @@ export const PopoverOverview: FunctionComponent = () => (
     <ul>
       <li>The props most popovers set.</li>
       <li>
-        All parts’ props: <a href="popover/parts">Parts</a>.
+        All parts’ props: <a href={publicUrl('popover/parts')}>Parts</a>.
       </li>
     </ul>
     <KeyPropsTable
@@ -314,9 +317,9 @@ export const PopoverOverview: FunctionComponent = () => (
     <ul>
       <li>
         Below its trigger by default (<code>side</code>), centered on it (
-        <code>align</code>; in a <a href="list">List</a> row, aligned with the
-        row’s end: <code>align=&quot;end&quot;</code>); on the other side if
-        there’s no room, 8px from the screen’s edges.
+        <code>align</code>; in a <a href={publicUrl('list')}>List</a> row,
+        aligned with the row’s end: <code>align=&quot;end&quot;</code>); on the
+        other side if there’s no room, 8px from the screen’s edges.
       </li>
       <li>
         Its arrow points at its trigger, on whichever side it ends up; the popup

@@ -13,6 +13,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // The toolbar's code (as Weather's, see the toolbar's composition).
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
@@ -140,8 +141,9 @@ export const PageControlComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its glass variant, between a <a href="toolbar">Toolbar</a>’s capsules
-        (Weather’s cities): it takes the bar’s glass <code>context</code>.
+        Its glass variant, between a <a href={publicUrl('toolbar')}>Toolbar</a>
+        ’s capsules (Weather’s cities): it takes the bar’s glass{' '}
+        <code>context</code>.
       </li>
       <li>
         Controlled by the app’s page (<code>value</code>,{' '}
@@ -149,7 +151,9 @@ export const PageControlComposition: FunctionComponent = () => (
       </li>
       <li>
         Live: the toolbar’s{' '}
-        <a href="toolbar/composition#controls-between-the-capsules">
+        <a
+          href={publicUrl('toolbar/composition#controls-between-the-capsules')}
+        >
           controls between the capsules
         </a>
         .

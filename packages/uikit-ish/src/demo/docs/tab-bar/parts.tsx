@@ -18,6 +18,7 @@ import {
   sfMagnifyingglass,
   sfPlayFill,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   collapsedSelectionRows,
   tabBarAccessoryRows,
@@ -928,7 +929,8 @@ export const TabBarParts: FunctionComponent = () => (
         Hidden ones unmount, unless <code>keepMounted</code>.
       </li>
       <li>
-        Panels as an app’s pages: <a href="tab-bar/composition">Composition</a>.
+        Panels as an app’s pages:{' '}
+        <a href={publicUrl('tab-bar/composition')}>Composition</a>.
       </li>
     </ul>
     <PanelPart />

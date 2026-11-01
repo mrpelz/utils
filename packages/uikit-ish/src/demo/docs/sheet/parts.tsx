@@ -15,6 +15,7 @@ import { codeLabel } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { names } from '../viewport/content.js';
 import {
   sheetCloseRows,
@@ -99,6 +100,7 @@ const RootPart: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -187,6 +189,7 @@ const TriggerPart: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -273,6 +276,7 @@ const PopupPart: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -361,10 +365,12 @@ const HeaderPart: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
-                    {names.slice(0, 3).map((name) => (
+                    {/* (Enough to scroll under it.) */}
+                    {names.slice(0, 20).map((name) => (
                       <List.Item key={name}>
                         <List.Content>
                           <List.Title>{name}</List.Title>
@@ -449,6 +455,7 @@ const GrabberPart: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -537,6 +544,7 @@ const ContentPart: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content {...props}>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -630,6 +638,7 @@ const TitlePart: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -718,6 +727,7 @@ const DescriptionPart: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -809,6 +819,7 @@ const ClosePart: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -900,6 +911,7 @@ const CreateHandlePart: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -995,6 +1007,7 @@ const UseCreateSheetHandlePart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Sheet.Header>
               <Sheet.Content>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -1127,6 +1140,12 @@ export const SheetParts: FunctionComponent = () => (
         Its state: open (<code>open</code> or <code>defaultOpen</code>,{' '}
         <code>onOpenChange</code>), modal, dismissed by outside presses or not.
       </li>
+      <li>
+        Base UI’s <code>Drawer.Root</code>, its <code>swipeDirection</code> also{' '}
+        <code>none</code>: not swiped away at all (its popup ignored by its
+        swipes). Swiped away in another direction than down, it leaves through
+        that edge.
+      </li>
       <li>Renders no element.</li>
     </ul>
     <RootPart />
@@ -1142,7 +1161,7 @@ export const SheetParts: FunctionComponent = () => (
     <ul>
       <li>
         Opens the sheet; focus returns to it as it closes. Usually a{' '}
-        <a href="button">Button</a> (its <code>render</code>).
+        <a href={publicUrl('button')}>Button</a> (its <code>render</code>).
       </li>
       <li>
         Renders a <code>button</code>.
@@ -1203,7 +1222,20 @@ export const SheetParts: FunctionComponent = () => (
         ), above a toolbar of the app’s. (The sheet is swiped down by any of it,
         its content scrolled to its top.)
       </li>
-      <li>With only a grabber, over the content (its own bars below it).</li>
+      <li>
+        Over the content, which scrolls under it, blurred and faded (its{' '}
+        <code>edgeEffect</code>, as a bar’s: soft, hard or none;{' '}
+        <code>edgeTint</code>), whatever it holds; the content makes room with a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />{' '}
+        first, as a page under its toolbar.
+      </li>
+      <li>
+        With only a grabber, over the content too, no bar (its own bars below
+        it).
+      </li>
       <li>
         Renders a <code>div</code>.
       </li>
@@ -1244,13 +1276,19 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What scrolls below the header, filling the sheet (medium: as high as it,
-        up to the screen but 64px).
+        What scrolls, under the header, filling the sheet (medium: as high as
+        it, up to the screen but 64px); first, a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />{' '}
+        (<code>edge=&quot;block-start&quot;</code>) making room for a header
+        with more than a grabber.
       </li>
       <li>
         Its end scrolls clear of the home indicator (padded by the bottom safe
-        area inset; medium, 6px from the screen’s edge, what’s left of it), the
-        sheet’s background reaching the edge.
+        area inset; medium, on it, none), the sheet’s background reaching the
+        edge.
       </li>
       <li>
         Renders a <code>div</code>.

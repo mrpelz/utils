@@ -140,28 +140,124 @@
     white-space: nowrap;
   }
 
+  /* The control: its track's background and shape; its lens over it (see
+     main.tsx), outside its scroller, unclipped. */
   .uikit-segmented-root {
     --uikit-segmented-padding-block: 4px;
     --uikit-segmented-padding-inline: 8px;
     --uikit-segmented-highlight-outset: 4px;
 
+    /* Scrolled (`overflow`): how much of the items beyond its ends shows,
+       hinting at them (see main.tsx). */
+    --uikit-segmented-peek: 20px;
+
     position: relative;
-    display: grid;
+    display: flex;
     width: 100%;
-    min-height: 36px;
+    min-width: 0;
     box-sizing: border-box;
-    align-items: center;
     align-self: center;
-    padding: var(--uikit-segmented-padding-block)
-      var(--uikit-segmented-padding-inline);
     border-radius: 100px;
     background-color: var(--color-ui-tertiary-system-fill);
-    grid-auto-columns: 1fr;
-    grid-auto-flow: column;
     touch-action: pan-y;
 
     &[data-hide-separators] [role='radio']::before {
       display: none;
+    }
+
+    /* Overflowing (`overflow`), scrolled sideways too (natively: a quick
+       swipe; the lens, held, drags over it instead, see main.tsx). */
+    &[data-overflow='scroll'] {
+      touch-action: auto;
+    }
+  }
+
+  /* Its items' viewport: clipping them to its shape; overflowing, scrolled
+     (no scrollbar). */
+  .uikit-segmented-scroller {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    border-radius: inherit;
+
+    [data-overflow='scroll'] > & {
+      --uikit-segmented-fade: to right;
+
+      overflow: auto hidden;
+
+      /* Faded at the ends with more items beyond (as EditMenu's actions),
+         by its own scroll: the start's fade in over its first 16px, the
+         end's out over its last. Not scrolled (or without scroll
+         timelines), none. */
+      animation:
+        uikit-segmented-fade-start linear both,
+        uikit-segmented-fade-end linear both;
+      animation-range:
+        0 16px,
+        calc(100% - 16px) 100%;
+      animation-timeline: scroll(self inline);
+      mask-image: linear-gradient(
+        var(--uikit-segmented-fade),
+        transparent,
+        #000 var(--uikit-segmented-fade-start),
+        #000 calc(100% - var(--uikit-segmented-fade-end)),
+        transparent
+      );
+      overscroll-behavior-inline: contain;
+
+      /* (Snapped by their start, past the previous item's peek; scrolled to
+         its start, the first item whole.) */
+      scroll-padding-inline: calc(
+          var(--uikit-segmented-padding-inline) + var(--uikit-segmented-peek)
+        )
+        var(--uikit-segmented-padding-inline);
+      scroll-snap-type: x proximity;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      &:dir(rtl) {
+        --uikit-segmented-fade: to left;
+      }
+    }
+
+    /* (Its lens scrolling it near an end: unsnapped, see main.tsx.) */
+    [data-overflow='scroll'][data-edge-scrolling] > & {
+      scroll-snap-type: none;
+    }
+  }
+
+  /* Its items (equal columns) and highlight (positioned in it: scrolled
+     along); as wide as the control, or, overflowing, as its items need. */
+  .uikit-segmented-track {
+    position: relative;
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    min-height: 36px;
+    box-sizing: border-box;
+    flex: none;
+    align-items: center;
+    padding: var(--uikit-segmented-padding-block)
+      var(--uikit-segmented-padding-inline);
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
+
+    [data-overflow='scroll'] & {
+      width: max-content;
+      min-width: 100%;
+
+      & > [role='radio'] {
+        scroll-snap-align: start;
+      }
+
+      /* (Labels whole: not truncated.) */
+      & .uikit-segmented-label-text,
+      & .uikit-segmented-label-reserve {
+        overflow: visible;
+      }
     }
   }
 
@@ -418,4 +514,37 @@
       --uikit-segmented-active: 9;
     }
   }
+
+  @keyframes uikit-segmented-fade-start {
+    from {
+      --uikit-segmented-fade-start: 0px;
+    }
+
+    to {
+      --uikit-segmented-fade-start: 16px;
+    }
+  }
+
+  @keyframes uikit-segmented-fade-end {
+    from {
+      --uikit-segmented-fade-end: 16px;
+    }
+
+    to {
+      --uikit-segmented-fade-end: 0px;
+    }
+  }
+}
+
+/* (Lengths, so its fades animate; see the scroller.) */
+@property --uikit-segmented-fade-start {
+  inherits: false;
+  initial-value: 0;
+  syntax: '<length>';
+}
+
+@property --uikit-segmented-fade-end {
+  inherits: false;
+  initial-value: 0;
+  syntax: '<length>';
 }

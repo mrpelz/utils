@@ -6,6 +6,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -79,9 +80,10 @@ export const navigationStackRows: readonly PropRow[] = [
     undefined,
     <>
       The stack’s pages, bottom to top, each with a <code>key</code> (e.g. a{' '}
-      <a href="page">Page</a>, or a <a href="header">Header</a> around one):
-      keys extended, the new top page is pushed; cut back (by one or more), the
-      top page is popped; otherwise, the new top page is shown at once.
+      <a href={publicUrl('page')}>Page</a>, or a{' '}
+      <a href={publicUrl('header')}>Header</a> around one): keys extended, the
+      new top page is pushed; cut back (by one or more), the top page is popped;
+      otherwise, the new top page is shown at once.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),

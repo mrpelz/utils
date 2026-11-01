@@ -7,6 +7,7 @@ import {
 } from 'react';
 
 import { useDark } from '../../tooling/shared/use-dark.js';
+import { guideHref } from './link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
 
@@ -152,7 +153,7 @@ export const Heading: FunctionComponent<{
       <a
         aria-label="Link to this section"
         className="demo-anchor"
-        href={`hig-guide#${id}`}
+        href={guideHref(id)}
       >
         #
       </a>

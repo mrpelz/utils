@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -60,12 +61,12 @@ export const DatePickerInformationArchitecture: FunctionComponent = () => (
         The <GuideLink to="section-5-mapping">mapping table</GuideLink>: a
         picker is “Choice or Value input, collapsed/wheel · single”: compact,
         the date picker is collapsed; its time, a wheel (a{' '}
-        <a href="roll">Roll</a>).
+        <a href={publicUrl('roll')}>Roll</a>).
       </li>
       <li>
         The guide’s <GuideLink to="choice-family">choice family</GuideLink>{' '}
         (§5): an ordered value, collapsed, is a picker (date/number); inline, a{' '}
-        <a href="stepper">Stepper</a>.
+        <a href={publicUrl('stepper')}>Stepper</a>.
       </li>
     </ul>
 
@@ -136,7 +137,7 @@ export const DatePickerInformationArchitecture: FunctionComponent = () => (
         <strong>Containment:</strong> an Item holds inline controls, a Value
         input among them (the grammar,{' '}
         <GuideLink to="section-6-containment">§6</GuideLink>): the compact style
-        at a <a href="list">List</a> row’s end; expanded below it.
+        at a <a href={publicUrl('list')}>List</a> row’s end; expanded below it.
       </li>
       <li>
         <strong>Commit model:</strong> a form either applies each field at once

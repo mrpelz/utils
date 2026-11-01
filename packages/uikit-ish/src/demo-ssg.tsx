@@ -13,6 +13,7 @@ import prerender, { locationStub } from 'preact-iso/prerender';
 import { publicPath } from './demo/tooling/env.js';
 import { iconsLoaded } from './demo/tooling/icons.js';
 import { Demo } from './demo/tooling/main.js';
+import { publicUrl } from './demo/tooling/public-url.js';
 
 const BODY = '<body></body>';
 
@@ -34,8 +35,10 @@ await iconsLoaded;
 const handled = new Set<string>();
 
 const render = async (location: string) => {
+  // Its path on the site (its output directory's, the output served at the
+  // public path), and its URL (under the public path, as its links are).
   const suffixedLocation = path.join(location, './');
-  const prefixedLocation = path.join(publicPath, suffixedLocation);
+  const prefixedLocation = publicUrl(suffixedLocation);
 
   const outputDir = path.join(demoDir, '.', suffixedLocation);
   if (handled.has(outputDir)) return undefined;
@@ -64,26 +67,46 @@ const render = async (location: string) => {
   return links;
 };
 
-const stripFragments = (links: Set<string>) => {
+// The site's own pages: its links under its public path (not another
+// site's, nor this page's anchors, `#…`), without it and their fragments.
+const ownPages = (links: Set<string>) => {
   const result = new Set<string>();
 
   for (const link of links) {
-    const stripped = link.replace(/#.*/, '');
-    result.add(stripped);
+    if (!link.startsWith(publicPath)) continue;
+    result.add(link.slice(publicPath.length).replace(/#.*/u, '') || '.');
   }
 
   return result;
 };
 
-const walk = async (location: string) => {
-  const links = await render(location);
+// Pages failing to render (by location): reported, not lost, the build
+// failing after the others are written.
+const failures = new Map<string, unknown>();
+
+const walk = async (location: string): Promise<void> => {
+  let links: Set<string> | undefined;
+  try {
+    links = await render(location);
+  } catch (error) {
+    failures.set(location, error);
+    console.error(`❌ failed to prerender "${location}"`, error);
+    return;
+  }
   if (!links) return;
 
-  const strippedLinks = stripFragments(links);
-
-  await Promise.allSettled(Array.from(strippedLinks).map((link) => walk(link)));
+  await Promise.all(Array.from(ownPages(links)).map((link) => walk(link)));
 };
 
 await walk('.');
 
-console.log(`✅ finished; prerendered ${handled.size} links`);
+console.log(
+  `✅ finished; prerendered ${handled.size - failures.size} of ${handled.size} links`,
+);
+
+if (failures.size > 0) {
+  console.error(
+    `❌ ${failures.size} failed: ${Array.from(failures.keys()).join(', ')}`,
+  );
+  exit(1);
+}

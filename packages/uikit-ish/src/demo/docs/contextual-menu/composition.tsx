@@ -33,6 +33,7 @@ import {
   sfTextBadgePlus,
   sfTrash,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 const thumbnailsCode = `const photo = '/photos/beach.jpg';
@@ -483,9 +484,9 @@ export const ContextualMenuComposition: FunctionComponent = () => (
         would).
       </li>
       <li>
-        Inside a <a href="viewport">Viewport</a>’s content layer (its own
-        stacking context), it shows through the blurred page all the same (the
-        backdrop cut out where it is).
+        Inside a <a href={publicUrl('viewport')}>Viewport</a>’s content layer
+        (its own stacking context), it shows through the blurred page all the
+        same (the backdrop cut out where it is).
       </li>
       <li>
         <strong>Library:</strong> lifting the live trigger (

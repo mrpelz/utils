@@ -26,6 +26,7 @@ import {
   sfFolder,
   sfSquareAndPencil,
 } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { pages } from '../navigation/content.js';
 import { rowTitles, sidebarSections } from '../sidebar/content.js';
@@ -496,8 +497,8 @@ export const PageComposition: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A page holds a <a href="header">Header</a> and its content (lists); it’s
-        held by a stack, a column, a viewport’s content layer.
+        A page holds a <a href={publicUrl('header')}>Header</a> and its content
+        (lists); it’s held by a stack, a column, a viewport’s content layer.
       </li>
       <li>
         A Surface holding Regions and a Collection (guide,{' '}
@@ -575,9 +576,9 @@ export const PageComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a <a href="layout">Layout</a> column clear of a floating one (
-        <code>clearFloating</code>): its content inset by the sidebar’s size,
-        its background (and its bar’s edge) running underneath it.
+        In a <a href={publicUrl('layout')}>Layout</a> column clear of a floating
+        one (<code>clearFloating</code>): its content inset by the sidebar’s
+        size, its background (and its bar’s edge) running underneath it.
       </li>
       <li>
         Resize the sidebar (its <code>defaultSize</code>, or resizable): the
@@ -602,8 +603,9 @@ export const PageComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a <a href="viewport">Viewport</a>’s content layer, a bottom{' '}
-        <a href="toolbar">Toolbar</a> floating over the page’s end.
+        In a <a href={publicUrl('viewport')}>Viewport</a>’s content layer, a
+        bottom <a href={publicUrl('toolbar')}>Toolbar</a> floating over the
+        page’s end.
       </li>
       <li>
         Its end scrolls out from under the bar: a{' '}

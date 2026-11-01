@@ -1,6 +1,10 @@
 /* Color-picker (see main.tsx). */
 @layer uikit-ish {
   .uikit-color-picker-root {
+    /* Its content's start below a header over it (e.g. a sheet's: its
+       Viewport.Padding's margin), its modes' 24px to the views. */
+    --uikit-content-margin-block-start: 14px;
+
     display: flex;
     box-sizing: border-box;
     flex-direction: column;
@@ -78,8 +82,11 @@
      only then: a list group's card around it (an inset grouped one's: its
      background, 24px corners, outlined), its content 12px in (as high as
      before: nothing around it moves; as wide: the card's sides where the
-     panel's content's are). */
-  .uikit-color-picker-channel {
+     panel's content's are). The code's row too (see `Code`). */
+  .uikit-color-picker-channel,
+  .uikit-color-picker-code {
+    /* Its slider's height, its knob's, its field's. */
+    --uikit-color-picker-channel-size: 32px;
     --uikit-viewport-keyboard-accessory-background: var(
       --color-ui-secondary-system-grouped-background
     );
@@ -123,11 +130,11 @@
   .uikit-color-picker-channel-control {
     position: relative;
     display: flex;
-    height: 40px;
+    height: var(--uikit-color-picker-channel-size);
     box-sizing: border-box;
     flex: 1 1 auto;
     align-items: center;
-    padding: 2px 20px;
+    padding: 0 calc(var(--uikit-color-picker-channel-size) / 2);
     border-radius: 100px;
     cursor: pointer;
     touch-action: pan-y;
@@ -157,9 +164,10 @@
       content: '';
       inset: 0;
       mask-image: radial-gradient(
-        circle 18px at
+        circle calc(var(--uikit-color-picker-channel-size) / 2) at
           calc(
-            20px + (100% - 40px) *
+            var(--uikit-color-picker-channel-size) / 2 +
+              (100% - var(--uikit-color-picker-channel-size)) *
               var(--uikit-color-picker-channel-position, 1)
           )
           50%,
@@ -176,13 +184,13 @@
     & > div {
       position: relative;
       width: 100%;
-      height: 36px;
+      height: var(--uikit-color-picker-channel-size);
     }
   }
 
   .uikit-color-picker-channel-thumb {
-    width: 36px;
-    height: 36px;
+    width: var(--uikit-color-picker-channel-size);
+    height: var(--uikit-color-picker-channel-size);
     box-sizing: border-box;
     border: 3px solid #fff;
     border-radius: 50%;
@@ -201,12 +209,12 @@
   .uikit-color-picker-channel-field {
     display: flex;
     width: 75px;
-    height: 40px;
+    height: var(--uikit-color-picker-channel-size);
     box-sizing: border-box;
     flex: none;
     align-items: center;
     justify-content: center;
-    padding: 9px 14px;
+    padding: 0 14px;
     border-radius: 8px;
     background-color: var(--color-ui-system-fill);
     cursor: text;
@@ -238,11 +246,117 @@
     }
   }
 
+  /* The code's row (see `Code`), as high as a channel's (its title's line,
+     above the card, lifted: as before, nothing around it moves), its field
+     where a channel's value is: its title beside them, centered, then its
+     children (e.g. the copy button), its field. */
+  .uikit-color-picker-code {
+    margin-block-start: 24px;
+
+    &[data-lifted] {
+      margin-block: 12px -12px;
+    }
+
+    /* First in its container (nothing above it to space it from, e.g.
+       alone): none. */
+    &:first-child {
+      margin-block-start: 0;
+
+      &[data-lifted] {
+        margin-block: -12px;
+      }
+    }
+  }
+
+  .uikit-color-picker-code-row {
+    padding-block-start: 0;
+
+    & > .uikit-color-picker-channel-title {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+  }
+
+  /* A hex code's well (see `CodeCopy`), at its menu item's end (where a
+     shortcut is), centered; its item not blended with the glass (as a
+     destructive one's), so the well shows the color as it is. */
+  .uikit-color-picker-code-copy-well {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    margin-inline-start: 8px;
+  }
+
+  .uikit-menu-item:has(> .uikit-color-picker-code-copy-well) {
+    mix-blend-mode: normal;
+  }
+
+  /* Its field (a channel's value's, as wide as its digits): `#`, then up to
+     8 digits. */
+  .uikit-color-picker-code-field {
+    width: auto;
+    gap: 2px;
+
+    & > span {
+      color: var(--color-ui-secondary-label);
+    }
+
+    & > input {
+      width: 8ch;
+      font-variant-numeric: tabular-nums;
+      text-align: start;
+      text-transform: uppercase;
+    }
+  }
+
   .uikit-color-picker-swatches {
     display: flex;
     align-items: flex-start;
     gap: 30px;
     padding-block-start: 26px;
+
+    /* First in its panel (nothing above it to space it from, e.g. alone):
+       none. */
+    &:first-child {
+      padding-block-start: 0;
+    }
+  }
+
+  /* The system colors (see `SystemColors`): its button and, over it, its
+     input, transparent (pressed itself). */
+  .uikit-color-picker-system-colors {
+    display: inline-grid;
+    flex: none;
+
+    & > * {
+      grid-area: 1 / 1;
+    }
+
+    /* The input pressed: the button shows it (as its own `:active`, see
+       Button). */
+    &:has(> .uikit-color-picker-system-colors-input:active:enabled)
+      > .uikit-button-root {
+      --uikit-glass-pressed: 1;
+      --uikit-glass-scale: var(--glass-ui-lens-scale);
+      --uikit-button-content-scale: var(--glass-ui-lens-content-scale);
+
+      background-color: var(--uikit-button-background-pressed);
+    }
+  }
+
+  .uikit-color-picker-system-colors-input {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    border: 0;
+    margin: 0;
+    appearance: none;
+    cursor: pointer;
+    opacity: 0;
+
+    &:disabled {
+      cursor: default;
+    }
   }
 
   .uikit-color-picker-current {
@@ -308,6 +422,17 @@
       -webkit-touch-callout: none;
     }
 
+    /* A saved color (translucent: over black, its upper left, and white,
+       its lower right, as the current one). */
+    & > :not([data-add]) {
+      background:
+        linear-gradient(
+          var(--uikit-color-picker-color),
+          var(--uikit-color-picker-color)
+        ),
+        linear-gradient(to bottom right, #000 50%, #fff 50%);
+    }
+
     & > [aria-pressed='true']::after {
       position: absolute;
       border: 2px solid #fff;
@@ -331,26 +456,46 @@
     flex-direction: column;
     padding: 0 16px 16px;
 
-    /* Without a header above it: as far from the top as the header's
-       content (16px). */
-    &:first-child {
+    /* In a popover's body (scrolling it, e.g. the named colors): its end
+       the body's (16px). */
+    .uikit-popover-body > & {
+      padding-block-end: 0;
+    }
+
+    /* Its picker without a header: as far from the top as the header's
+       content (16px). (Not by its place: in a sheet, its content's first,
+       the header the sheet's, see `Root`.) */
+    .uikit-color-picker-root:not(:has(.uikit-color-picker-header)) & {
       padding-block-start: 16px;
     }
-
-    & > [role='radiogroup'] {
-      margin-block-end: 24px;
-    }
-
   }
 
-  /* A mode's view: as high as the grid (a spacer of its aspect ratio, in
-     the same cell), its content centered; higher only where its content
-     needs it (e.g. a narrow panel's sliders). */
+  /* Its modes' control: 24px above the views; outside the panel (e.g. a
+     sheet's header, after the picker's header), inset as the panel's
+     content, those 24px the header's 10px below it and its content's
+     margin (see the root). */
+  .uikit-color-picker-modes {
+    flex: none;
+    margin-block-end: 24px;
+
+    /* (As wide as its container but the inset, not its content: too
+       narrow for its modes, they scroll within it.) */
+    :not(.uikit-color-picker-panel) > & {
+      width: auto;
+      align-self: stretch;
+      margin: 0 16px;
+    }
+  }
+
+  /* A mode's view: with a grid or a spectrum among them, as high as the
+     grid (a spacer of its aspect ratio, in the same cell), its content
+     centered; higher only where its content needs it (e.g. a narrow
+     panel's sliders). Without, as high as its content. */
   .uikit-color-picker-view {
     display: grid;
     margin-block-end: 16px;
 
-    &::before {
+    &[data-grid-height]::before {
       align-self: start;
       aspect-ratio: 370 / 300;
       content: '';
@@ -361,6 +506,41 @@
       align-self: center;
       grid-area: 1 / 1;
     }
+  }
+
+  /* Its named colors (see `Named`): its list's cards as wide as the panel's
+     content, on its background; its index at its end, in the panel's
+     inset (16px), kept centered in its container's view (between its
+     scroll paddings, see Viewport.Padding: e.g. a sheet's header) as it's
+     scrolled (a percentage of a sticky offset: of the scrollport). */
+  .uikit-color-picker-named {
+    display: grid;
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr) 0;
+
+    /* Its end as far from what follows (e.g. the opacity) as a list's
+       sections are apart: the view's 16px, and the rest. */
+    & > .uikit-list-root {
+      --uikit-list-container-background: transparent;
+      --uikit-list-inset: 0px;
+
+      margin-block-end: calc(var(--uikit-list-section-spacing) - 16px);
+    }
+  }
+
+  .uikit-color-picker-named-index {
+    position: sticky;
+    z-index: 3;
+    top: calc(
+      50% +
+        (
+          var(--uikit-viewport-padding-block-start, 0px) -
+            var(--uikit-viewport-padding-block-end, 0px)
+        ) /
+        2
+    );
+    width: 16px;
+    translate: 0 -50%;
   }
 
   .uikit-color-picker-header {

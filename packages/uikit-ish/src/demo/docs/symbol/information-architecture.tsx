@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -75,7 +76,7 @@ export const SymbolInformationArchitecture: FunctionComponent = () => (
       </li>
       <li>
         <strong>Size and weight:</strong> its text’s: a text style around it
-        (see <a href="typography">Typography</a>).
+        (see <a href={publicUrl('typography')}>Typography</a>).
       </li>
     </ul>
 

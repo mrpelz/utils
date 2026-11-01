@@ -5,6 +5,7 @@ import {
   Heading,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -78,21 +79,22 @@ export const StepperInformationArchitecture: FunctionComponent = () => (
         <tr>
           <th>N = 2</th>
           <td>
-            Toggle (<a href="switch">Switch</a>) / checkbox
+            Toggle (<a href={publicUrl('switch')}>Switch</a>) / checkbox
           </td>
           <td>—</td>
         </tr>
         <tr>
           <th>N ≤ ~5</th>
           <td>
-            Segmented control (<a href="segmented">Segmented</a>) / radios
+            Segmented control (<a href={publicUrl('segmented')}>Segmented</a>) /
+            radios
           </td>
           <td>Pop-up button</td>
         </tr>
         <tr>
           <th>N large</th>
           <td>
-            Wheel picker (<a href="roll">Roll</a>) / list
+            Wheel picker (<a href={publicUrl('roll')}>Roll</a>) / list
           </td>
           <td>Pop-up / menu picker</td>
         </tr>
@@ -102,7 +104,8 @@ export const StepperInformationArchitecture: FunctionComponent = () => (
             <strong>Stepper</strong>
           </td>
           <td>
-            Picker (date/number: <a href="date-picker">Date picker</a>)
+            Picker (date/number:{' '}
+            <a href={publicUrl('date-picker')}>Date picker</a>)
           </td>
         </tr>
       </tbody>
@@ -182,8 +185,8 @@ export const StepperInformationArchitecture: FunctionComponent = () => (
         <strong>Containment:</strong> an Item holds inline controls, a Choice or
         a Value input among them (the grammar,{' '}
         <GuideLink to="section-6-containment">§6</GuideLink>). Here: a stepper
-        in a <a href="list">List</a> row’s trailing slot, its value in the row’s
-        detail.
+        in a <a href={publicUrl('list')}>List</a> row’s trailing slot, its value
+        in the row’s detail.
       </li>
       <li>
         <strong>Commit model:</strong> a form either applies each field at once

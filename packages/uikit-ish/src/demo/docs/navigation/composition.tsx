@@ -27,6 +27,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfChevronBackward } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import { pages, sections, type SectionValue } from './content.js';
 import { propOptionsAdaptiveContent } from './props.js';
@@ -1252,10 +1253,10 @@ export const NavigationComposition: FunctionComponent = () => (
     <Contents sections={pageSections} />
     <ul className="demo-lead">
       <li>
-        A navigation holds pages (a <a href="page">Page</a> with a{' '}
-        <a href="header">Header</a> each); it’s held by what switches between
-        sections (a <a href="tab-bar">Tab bar</a>, a{' '}
-        <a href="sidebar">Sidebar</a>
+        A navigation holds pages (a <a href={publicUrl('page')}>Page</a> with a{' '}
+        <a href={publicUrl('header')}>Header</a> each); it’s held by what
+        switches between sections (a <a href={publicUrl('tab-bar')}>Tab bar</a>,
+        a <a href={publicUrl('sidebar')}>Sidebar</a>
         ).
       </li>
       <li>
@@ -1264,7 +1265,8 @@ export const NavigationComposition: FunctionComponent = () => (
           component="list"
           part="List.DrillIn"
         />{' '}
-        chevron (see <a href="list/composition#drilling-into-pages">List</a>).
+        chevron (see{' '}
+        <a href={publicUrl('list/composition#drilling-into-pages')}>List</a>).
       </li>
       <li>
         In each: the pages in its{' '}
@@ -1360,9 +1362,10 @@ export const NavigationComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A tablet’s: the sidebar picks a section (a <a href="layout">Layout</a>’s
-        floating column), its stack in the content column (
-        <code>clearFloating</code>: the pages’ content clear of the sidebar).
+        A tablet’s: the sidebar picks a section (a{' '}
+        <a href={publicUrl('layout')}>Layout</a>’s floating column), its stack
+        in the content column (<code>clearFloating</code>: the pages’ content
+        clear of the sidebar).
       </li>
       <li>
         Switching sections switches stacks (shown at once, not pushed); each
@@ -1371,7 +1374,10 @@ export const NavigationComposition: FunctionComponent = () => (
       <li>
         The selected section’s row pressed again: its stack back to its root
         page, in one transition (as a tab pressed again,{' '}
-        <a href="navigation/composition#a-stack-per-tab">per tab</a>).
+        <a href={publicUrl('navigation/composition#a-stack-per-tab')}>
+          per tab
+        </a>
+        ).
       </li>
       <li>
         The pages’ bars span the content column (its containing block, see{' '}
@@ -1407,8 +1413,11 @@ export const NavigationComposition: FunctionComponent = () => (
     <ul>
       <li>
         The keys cut back by several (e.g. Done, or the selected tab pressed
-        again: <a href="navigation/composition#a-stack-per-tab">per tab</a>):
-        one transition, from the top page straight to the root; the pages
+        again:{' '}
+        <a href={publicUrl('navigation/composition#a-stack-per-tab')}>
+          per tab
+        </a>
+        ): one transition, from the top page straight to the root; the pages
         between are gone without moving.
       </li>
       <li>
@@ -1540,7 +1549,10 @@ export const NavigationComposition: FunctionComponent = () => (
       <li>
         Regular, the selected section’s sidebar row pressed again: its stack
         back to its root page, in one transition (as a tab pressed again,{' '}
-        <a href="navigation/composition#a-stack-per-tab">per tab</a>).
+        <a href={publicUrl('navigation/composition#a-stack-per-tab')}>
+          per tab
+        </a>
+        ).
       </li>
       <li>
         Compact, the back button is in each page’s bar from the first opened
@@ -1558,8 +1570,8 @@ export const NavigationComposition: FunctionComponent = () => (
         deeper pages, also while swiping back.
       </li>
       <li>
-        Compact, a drawer instead: see <a href="sidebar/composition">Sidebar</a>
-        .
+        Compact, a drawer instead: see{' '}
+        <a href={publicUrl('sidebar/composition')}>Sidebar</a>.
       </li>
       <li>
         <strong>Library:</strong> the navigation (its back button a persistent

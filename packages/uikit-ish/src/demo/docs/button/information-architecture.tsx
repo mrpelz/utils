@@ -6,6 +6,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 
 const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
@@ -87,14 +88,15 @@ export const ButtonInformationArchitecture: FunctionComponent = () => (
       <li>
         A command is defined once and projected into any number of hosts (guide{' '}
         <GuideLink to="rule-g6">G6</GuideLink>): a button in the page, a{' '}
-        <a href="toolbar">Toolbar</a>’s, a <a href="menu">Menu</a>’s item, a{' '}
-        <a href="contextual-menu">Contextual menu</a>’s.
+        <a href={publicUrl('toolbar')}>Toolbar</a>’s, a{' '}
+        <a href={publicUrl('menu')}>Menu</a>’s item, a{' '}
+        <a href={publicUrl('contextual-menu')}>Contextual menu</a>’s.
       </li>
       <li>
         Several commands together are a Command set (guide,{' '}
         <GuideLink to="primitive-command-set">§5</GuideLink>): a toolbar’s
-        capsule, a menu, an <a href="action-sheet">Action sheet</a>; a button is
-        often its anchor.
+        capsule, a menu, an <a href={publicUrl('action-sheet')}>Action sheet</a>
+        ; a button is often its anchor.
       </li>
       <li>
         A destructive command confirmed: the lowest modality that works (guide{' '}

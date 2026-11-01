@@ -1,5 +1,6 @@
 import { code, elementRows, PropRow } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -42,10 +43,10 @@ export const layoutColumnRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Its content, filling it: e.g. a <a href="page">Page</a> (its own scroll
-      container), a <a href="navigation">Navigation</a>, a{' '}
-      <a href="sidebar">Sidebar</a>. Its fixed layers (e.g. a header’s bar) span
-      it, not the screen.
+      Its content, filling it: e.g. a <a href={publicUrl('page')}>Page</a> (its
+      own scroll container), a <a href={publicUrl('navigation')}>Navigation</a>,
+      a <a href={publicUrl('sidebar')}>Sidebar</a>. Its fixed layers (e.g. a
+      header’s bar) span it, not the screen.
     </>,
   ],
   [
@@ -75,7 +76,8 @@ export const layoutColumnRows: readonly PropRow[] = [
     code('false'),
     <>
       Floating over the others at the layout’s start (e.g. a{' '}
-      <a href="sidebar">Sidebar</a>), which span the layout underneath it.
+      <a href={publicUrl('sidebar')}>Sidebar</a>), which span the layout
+      underneath it.
     </>,
   ],
   [

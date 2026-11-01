@@ -7,6 +7,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   accordionHeaderRows,
   accordionItemRows,
@@ -317,7 +318,7 @@ export const AccordionParts: FunctionComponent = () => (
       </li>
       <li>
         Renders a <code>div</code>, or what it’s given: here the{' '}
-        <a href="list">List</a> (
+        <a href={publicUrl('list')}>List</a> (
         <PartLink
           component="list"
           part="List.Root"

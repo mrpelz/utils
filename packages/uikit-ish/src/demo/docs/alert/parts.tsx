@@ -15,6 +15,7 @@ import { codeLabel } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import {
   alertActionRows,
   alertActionsRows,
@@ -863,7 +864,7 @@ export const AlertParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What opens it: e.g. a <a href="button">Button</a> (
+        What opens it: e.g. a <a href={publicUrl('button')}>Button</a> (
         <code>{'render={<Button.Root />}'}</code>). Optional: an alert the app
         opens (e.g. after a failed save) has none, opened by a handle (see{' '}
         <PartLink
