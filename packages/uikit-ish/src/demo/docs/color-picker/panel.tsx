@@ -1,25 +1,52 @@
 import type { ReactNode } from 'react';
 
 import {
+  Button,
   ColorPicker,
   type ColorPickerSlidersModel,
   type ColorPickerSlidersRange,
   type ColorPickerSwatchesProps,
+  Symbol,
 } from '../../../components/index.js';
+import { sfDocumentOnDocument } from '../../tooling/icons.js';
 
 // The demos' panels, as composed (see `panelParts`): their modes (in
 // order), whether they have the opacity and the swatches.
 
 type ModeEntry = [value: string, label: string, view: ReactNode];
 
+/** The code's copy button (a menu of its codes). */
+const codeCopy = (
+  <ColorPicker.CodeCopy
+    shape="circle"
+    size="small"
+    variant="bordered-secondary"
+  >
+    <Button.Icon>
+      <Symbol icon={sfDocumentOnDocument} />
+    </Button.Icon>
+  </ColorPicker.CodeCopy>
+);
+
+/**
+ * The code's row (under the sliders, as the system's), its copy button
+ * before its field (or none: `hasCopy`).
+ */
+export const codeRow = (hasCopy = true): ReactNode => (
+  <ColorPicker.Code>{hasCopy ? codeCopy : null}</ColorPicker.Code>
+);
+
 const sliders = (
   model?: ColorPickerSlidersModel,
   range?: ColorPickerSlidersRange,
+  code: ReactNode = codeRow(),
 ) => (
   <ColorPicker.Sliders
     model={model}
     range={range}
-  />
+  >
+    {code}
+  </ColorPicker.Sliders>
 );
 
 const grid: ModeEntry = ['grid', 'Grid', <ColorPicker.Grid key="grid" />];
@@ -43,10 +70,12 @@ export type ModeSet = keyof typeof modeSets;
 
 /**
  * Each mode rendered or not (as a prop control's, see the overview); RGB,
- * in its range.
+ * in its range; the sliders' code row, its copy button.
  */
 export type ModesShown = {
   cmyk?: boolean;
+  code?: boolean;
+  codeCopy?: boolean;
   grid?: boolean;
   hsl?: boolean;
   rgb?: ColorPickerSlidersRange | false;
@@ -59,22 +88,31 @@ export type ModesShown = {
  */
 export const shownModes = ({
   cmyk: isCmyk = false,
+  code: isCode = true,
+  codeCopy: isCodeCopy = true,
   grid: isGrid = true,
   hsl: isHsl = false,
   rgb: rgbRange = 'byte',
   spectrum: isSpectrum = true,
 }: ModesShown): ModeEntry[] => {
+  const code = isCode ? codeRow(isCodeCopy) : null;
   const rgbEntry: ModeEntry = [
     'rgb',
     isHsl || isCmyk ? 'RGB' : 'Sliders',
-    sliders(isHsl || isCmyk ? 'rgb' : undefined, rgbRange || undefined),
+    sliders(isHsl || isCmyk ? 'rgb' : undefined, rgbRange || undefined, code),
+  ];
+  const hslEntry: ModeEntry = ['hsl', 'HSL', sliders('hsl', undefined, code)];
+  const cmykEntry: ModeEntry = [
+    'cmyk',
+    'CMYK',
+    sliders('cmyk', undefined, code),
   ];
   return [
     isGrid ? grid : undefined,
     isSpectrum ? spectrum : undefined,
     rgbRange ? rgbEntry : undefined,
-    isHsl ? hsl : undefined,
-    isCmyk ? cmyk : undefined,
+    isHsl ? hslEntry : undefined,
+    isCmyk ? cmykEntry : undefined,
   ].filter((entry) => entry !== undefined);
 };
 

@@ -12,12 +12,13 @@ export type Rgba = { a: number; b: number; g: number; r: number };
 
 /**
  * Why the color changed, and the event: its grid, spectrum or sliders, the
- * opacity (slider or percentage), a saved color pressed, the eyedropper, or
- * the system's color picker.
+ * opacity (slider or percentage), a saved color pressed, the eyedropper,
+ * the system's color picker, or its code typed.
  */
 export type ColorPickerChangeEventDetails = {
   event: Event;
   reason:
+    | 'code'
     | 'eyedropper'
     | 'grid'
     | 'opacity'
@@ -162,6 +163,21 @@ export type ColorPickerSystemColorsProps = Omit<
   /**
    * What it renders (e.g. a `Toolbar.Button` in a toolbar, sized as its
    * other buttons).
+   * @default a `Button.Root`
+   */
+  render?: ReactElement<Record<string, unknown>>;
+};
+
+export type ColorPickerCodeProps = ComponentProps<'div'>;
+
+export type ColorPickerCodeCopyProps = Omit<
+  ButtonRootProps,
+  'onClick' | 'ref' | 'render'
+> & {
+  /** Called with a code copied (to the clipboard), and the event. */
+  onCodeCopy?: (code: string, event: Event) => void;
+  /**
+   * What it renders (e.g. a `Button.Root`, sized as the code's field).
    * @default a `Button.Root`
    */
   render?: ReactElement<Record<string, unknown>>;

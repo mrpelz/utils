@@ -821,6 +821,26 @@ export const UpDownChevrons: FunctionComponent = () => (
   </svg>
 );
 
+/**
+ * A checkmark, as an SVG stroke at the current font size (menus' checked
+ * items, a copy button's copied).
+ */
+export const Checkmark: FunctionComponent = () => (
+  <svg
+    aria-hidden="true"
+    fill="none"
+    height="0.8em"
+    stroke="currentcolor"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="2.2"
+    viewBox="0 0 16 16"
+    width="0.8em"
+  >
+    <path d="M2.5 8.5l3.8 3.8L13.5 3.5" />
+  </svg>
+);
+
 // How long the moving highlight stays between items (see `MovingHighlight`).
 const hideDelay = 100;
 

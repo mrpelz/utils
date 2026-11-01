@@ -13,9 +13,15 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
-import { sfEyedropper, sfPaintpalette } from '../../tooling/icons.js';
+import {
+  sfDocumentOnDocument,
+  sfEyedropper,
+  sfPaintpalette,
+} from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import {
+  colorPickerCodeCopyRows,
+  colorPickerCodeRows,
   colorPickerEyedropperRows,
   colorPickerGridRows,
   colorPickerHeaderRows,
@@ -36,8 +42,10 @@ import {
 } from './docs.js';
 import { panelParts } from './panel.js';
 import {
+  getPropOptionsCodeCopy,
   getPropOptionsRoot,
   getPropOptionsSwatches,
+  propOptionsCode,
   propOptionsEyedropper,
   propOptionsGuideWell,
   propOptionsHeader,
@@ -328,6 +336,62 @@ const SlidersPart = panelPartDemo(
   ),
 );
 
+// The code's copy button's content (its symbol).
+const copySymbol = (
+  <Button.Icon>
+    <Symbol icon={sfDocumentOnDocument} />
+  </Button.Icon>
+);
+
+/** `ColorPicker.Code`: under the sliders (their child), its copy button in it. */
+const CodePart = panelPartDemo(
+  'color-picker-parts-code',
+  'ColorPicker.Code',
+  () => propOptionsCode,
+  (props) => (
+    <ColorPicker.Panel>
+      <ColorPicker.View value="sliders">
+        <ColorPicker.Sliders>
+          <ColorPicker.Code {...props}>
+            <ColorPicker.CodeCopy
+              shape="circle"
+              size="small"
+              variant="bordered-secondary"
+            >
+              {copySymbol}
+            </ColorPicker.CodeCopy>
+          </ColorPicker.Code>
+        </ColorPicker.Sliders>
+      </ColorPicker.View>
+    </ColorPicker.Panel>
+  ),
+);
+
+/** `ColorPicker.CodeCopy`: in the code, under the sliders. */
+const CodeCopyPart = panelPartDemo(
+  'color-picker-parts-code-copy',
+  'ColorPicker.CodeCopy',
+  getPropOptionsCodeCopy,
+  (props) => (
+    <ColorPicker.Panel>
+      <ColorPicker.View value="sliders">
+        <ColorPicker.Sliders>
+          <ColorPicker.Code>
+            <ColorPicker.CodeCopy
+              shape="circle"
+              size="small"
+              variant="bordered-secondary"
+              {...props}
+            >
+              {copySymbol}
+            </ColorPicker.CodeCopy>
+          </ColorPicker.Code>
+        </ColorPicker.Sliders>
+      </ColorPicker.View>
+    </ColorPicker.Panel>
+  ),
+);
+
 /** `ColorPicker.Opacity`: under the spectrum, the color translucent. */
 const OpacityPart = panelPartDemo(
   'color-picker-parts-opacity',
@@ -506,6 +570,10 @@ export const ColorPickerParts: FunctionComponent = () => (
       </li>
       <li>Eyedropper: picks a color off the screen.</li>
       <li>System colors: opens the system’s color picker.</li>
+      <li>
+        Code: the color’s hex code, typed; copied (in other formats too) by its
+        menu.
+      </li>
       <li>Well: shows a color, opening the picker (outside it).</li>
     </ul>
     <ul>
@@ -582,6 +650,24 @@ export const ColorPickerParts: FunctionComponent = () => (
                       component="color-picker"
                       part="ColorPicker.Sliders"
                     />
+                    <ul>
+                      <li>
+                        <PartLink
+                          component="color-picker"
+                          part="ColorPicker.Code"
+                        />{' '}
+                        (optional; anywhere in the picker, e.g. here)
+                        <ul>
+                          <li>
+                            <PartLink
+                              component="color-picker"
+                              part="ColorPicker.CodeCopy"
+                            />{' '}
+                            (optional)
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
                   </li>
                 </ul>
               </li>
@@ -955,6 +1041,95 @@ export const ColorPickerParts: FunctionComponent = () => (
     <PropsTable rows={colorPickerSlidersRows} />
 
     <Heading
+      id="colorpicker-code"
+      level={2}
+    >
+      <code>ColorPicker.Code</code>
+    </Heading>
+    <ul>
+      <li>
+        The color’s hex code: “Hex” above (as a channel’s title), then its field
+        (<code>#</code> before it, not typed) at the row’s end, where a
+        channel’s value is. Its digits apply as soon as they make a code: 3 or
+        6, or with an alpha, 4 or 8 (without one, the color’s opacity kept).
+        Left, its code again (e.g. emptied).
+      </li>
+      <li>
+        Its place the app’s: anywhere in the picker, e.g. under the channels of{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Sliders"
+        />{' '}
+        (its child), as the demos have it. Kept above the keyboard as it’s typed
+        into, as a channel’s row.
+      </li>
+      <li>
+        Before its field, its children: e.g. its copy button (
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.CodeCopy"
+        />
+        ).
+      </li>
+      <li>
+        Renders a <code>div</code>.
+      </li>
+    </ul>
+    <CodePart />
+    <h3>Props</h3>
+    <PropsTable rows={colorPickerCodeRows} />
+
+    <Heading
+      id="colorpicker-codecopy"
+      level={2}
+    >
+      <code>ColorPicker.CodeCopy</code>
+    </Heading>
+    <ul>
+      <li>
+        A button opening a{' '}
+        <PartLink
+          component="menu"
+          part="Menu.Root"
+        />{' '}
+        of the color’s codes: hex (without and with its alpha), then a submenu
+        each: sRGB’s <code>rgb()</code>, <code>hsl()</code>, <code>hwb()</code>;
+        the perceptual <code>oklch()</code>, <code>oklab()</code>,{' '}
+        <code>lab()</code>, <code>lch()</code>; the wide gamut’s{' '}
+        <code>color(display-p3)</code>. Each code shows its format, its values
+        below (e.g. “r: 175 / g: 82 / b: 222”).
+      </li>
+      <li>
+        One picked, it’s copied to the clipboard (<code>onCodeCopy</code>); for
+        a moment, a checkmark instead of its content (<code>data-copied</code>).
+      </li>
+      <li>
+        Its place the app’s: in{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Code"
+        />{' '}
+        (before its field), or anywhere in the picker, e.g. in{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Header"
+        />
+        ’s toolbar.
+      </li>
+      <li>
+        Renders a{' '}
+        <PartLink
+          component="button"
+          part="Button.Root"
+        />
+        , or its <code>render</code>.
+      </li>
+    </ul>
+    <CodeCopyPart />
+    <h3>Props</h3>
+    <PropsTable rows={colorPickerCodeCopyRows} />
+
+    <Heading
       id="colorpicker-opacity"
       level={2}
     >
@@ -1155,6 +1330,8 @@ export const colorPickerPartsDemos = [
   GridPart,
   SpectrumPart,
   SlidersPart,
+  CodePart,
+  CodeCopyPart,
   OpacityPart,
   SwatchesPart,
   EyedropperPart,

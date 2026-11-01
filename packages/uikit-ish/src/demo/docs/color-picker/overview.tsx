@@ -23,7 +23,12 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
-import { sfEyedropper, sfPaintpalette, sfXmark } from '../../tooling/icons.js';
+import {
+  sfDocumentOnDocument,
+  sfEyedropper,
+  sfPaintpalette,
+  sfXmark,
+} from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
@@ -58,6 +63,16 @@ const LiveView: FunctionComponent = () => {
       </Button.Icon>
     </ColorPicker.SystemColors>
   ) : null;
+  // The code's copy button without its row (left out): on its own, in the
+  // header's toolbar (before its close button).
+  const codeCopy =
+    !content.code && content.codeCopy ? (
+      <ColorPicker.CodeCopy render={<Toolbar.Button shape="circle" />}>
+        <Button.Icon>
+          <Symbol icon={sfDocumentOnDocument} />
+        </Button.Icon>
+      </ColorPicker.CodeCopy>
+    ) : null;
   // Its modes; one alone, no control for them (its view shown).
   const modes = shownModes(content);
   const hasModesControl = modes.length > 1;
@@ -131,6 +146,7 @@ const LiveView: FunctionComponent = () => {
                         <span>Colors</span>
                       </Toolbar.Title>
                       <Toolbar.Trailing>
+                        {codeCopy}
                         <Sheet.Close
                           render={
                             <Toolbar.Button
@@ -191,6 +207,7 @@ const LiveView: FunctionComponent = () => {
                         <span>Colors</span>
                       </Toolbar.Title>
                       <Toolbar.Trailing>
+                        {codeCopy}
                         <Popover.Close
                           render={
                             <Toolbar.Button
@@ -366,6 +383,21 @@ export const ColorPickerOverview: FunctionComponent = () => (
         ) open the system’s color picker; with the opacity, its alpha too where
         the browser’s has one (e.g. Safari), else its colors opaque, the opacity
         kept.
+      </li>
+      <li>
+        Under the sliders, the color’s hex code (
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Code"
+        />
+        ), typed; before it, its copy button (
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.CodeCopy"
+        />
+        ) copies it, or another format (e.g. <code>oklch()</code>), from its
+        menu. Without the code’s row, the copy button is in the header’s
+        toolbar, before its close button.
       </li>
     </ul>
   </>

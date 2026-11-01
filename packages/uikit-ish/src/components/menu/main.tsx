@@ -21,6 +21,7 @@ import {
 } from 'react';
 
 import {
+  Checkmark,
   cn,
   draggingAttribute,
   edgeScrollDelta,
@@ -1344,22 +1345,6 @@ const RadioItem = forwardRef<
     data-menu-part="item"
   />
 ));
-
-const Checkmark = () => (
-  <svg
-    aria-hidden="true"
-    fill="none"
-    height="0.8em"
-    stroke="currentcolor"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="2.2"
-    viewBox="0 0 16 16"
-    width="0.8em"
-  >
-    <path d="M2.5 8.5l3.8 3.8L13.5 3.5" />
-  </svg>
-);
 
 const CheckboxItemIndicator = forwardRef<
   HTMLSpanElement,

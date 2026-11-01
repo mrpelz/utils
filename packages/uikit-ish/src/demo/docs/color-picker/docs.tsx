@@ -39,8 +39,8 @@ export const colorPickerRootRows: readonly PropRow[] = [
       Called with the picked color (uppercase hex), and why (<code>reason</code>
       ): <code>grid</code>, <code>spectrum</code>, <code>sliders</code>,{' '}
       <code>opacity</code>, <code>saved</code> (a saved color pressed),{' '}
-      <code>eyedropper</code>, or <code>system-colors</code> (the system’s color
-      picker).
+      <code>eyedropper</code>, <code>system-colors</code> (the system’s color
+      picker), or <code>code</code> (its hex code typed).
     </>,
   ],
   [
@@ -288,6 +288,19 @@ export const colorPickerSlidersRows: readonly PropRow[] = [
       elsewhere, e.g. a swatch) kept exact.
     </>,
   ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      After its channels, spaced as they are: e.g. the code (
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.Code"
+      />
+      ).
+    </>,
+  ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
 
@@ -354,6 +367,56 @@ export const colorPickerEyedropperRows: readonly PropRow[] = [
     'ButtonRootProps',
     undefined,
     'A button’s props (not onClick: it picks a color off the screen).',
+  ],
+];
+
+export const colorPickerCodeRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Before its field: e.g. its copy button (
+      <PartLink
+        component="color-picker"
+        part="ColorPicker.CodeCopy"
+      />
+      ).
+    </>,
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const colorPickerCodeCopyRows: readonly PropRow[] = [
+  [
+    'render',
+    'ReactElement',
+    <>
+      a{' '}
+      <PartLink
+        component="button"
+        part="Button.Root"
+      />
+    </>,
+    'What it renders: e.g. a button sized as the code’s field.',
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'Its content: e.g. a copy symbol (copied, a checkmark for a moment).',
+  ],
+  [
+    'onCodeCopy',
+    '(code: string, event: Event) => void',
+    undefined,
+    'Called with a code copied (to the clipboard), and the event.',
+  ],
+  [
+    '…',
+    'ButtonRootProps',
+    undefined,
+    'A button’s props (not onClick: it opens the menu of codes).',
   ],
 ];
 

@@ -13,7 +13,9 @@ import {
   ComponentProps,
   createContext,
   CSSProperties,
+  FocusEvent,
   forwardRef,
+  Fragment,
   FunctionComponent,
   isValidElement,
   KeyboardEvent,
@@ -21,6 +23,7 @@ import {
   PointerEvent,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -31,10 +34,13 @@ import { Button } from '../button/main.js';
 import { Menu } from '../menu/main.js';
 import { PageControl } from '../page-control/main.js';
 import { Segmented } from '../segmented/main.js';
-import { cn, useTouchHold, withStyle } from '../utils/main.js';
+import { Checkmark, cn, useTouchHold, withStyle } from '../utils/main.js';
 import { Viewport } from '../viewport/main.js';
+import { codeGroups, type ColorCode, parseCssColor } from './color.js';
 import type {
   ColorPickerChangeEventDetails,
+  ColorPickerCodeCopyProps,
+  ColorPickerCodeProps,
   ColorPickerEyedropperProps,
   ColorPickerModeProps,
   ColorPickerModesProps,
@@ -55,6 +61,8 @@ import type {
 
 export type {
   ColorPickerChangeEventDetails,
+  ColorPickerCodeCopyProps,
+  ColorPickerCodeProps,
   ColorPickerEyedropperProps,
   ColorPickerModeProps,
   ColorPickerModesProps,
@@ -553,6 +561,41 @@ const trackStops = (colors: readonly string[]) =>
  * fill, 8px corners, Body emphasized: typed, applied as it's typed, within
  * its range).
  */
+/**
+ * A typed field's handlers (a channel's value, the code): focused, all of
+ * it selected (to type over); left (or Enter), `onLeave` (its value again,
+ * e.g. emptied) and its selection collapsed (kept, the next tap would be on
+ * selected text). The tap focusing it is on its text, selected: Chrome opens
+ * its context menu for that; not for this tap (a later press, held, opens
+ * it).
+ */
+const useFieldSelection = (onLeave: () => void) => {
+  // Focused by a tap (until its click).
+  const focusingRef = useRef(false);
+
+  return {
+    onBlur: (event: FocusEvent<HTMLInputElement>) => {
+      onLeave();
+      focusingRef.current = false;
+      const { length } = event.currentTarget.value;
+      event.currentTarget.setSelectionRange(length, length);
+    },
+    onClick: () => {
+      focusingRef.current = false;
+    },
+    onContextMenu: (event: MouseEvent<HTMLInputElement>) => {
+      if (focusingRef.current) event.preventDefault();
+    },
+    onFocus: (event: FocusEvent<HTMLInputElement>) => {
+      focusingRef.current = true;
+      event.currentTarget.select();
+    },
+    onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter') onLeave();
+    },
+  };
+};
+
 const ChannelRow: FunctionComponent<{
   /** Its field's name (e.g. “Opacity percentage”; default: “Red value”). */
   fieldLabel?: string;
@@ -580,9 +623,7 @@ const ChannelRow: FunctionComponent<{
   value,
 }) => {
   const [draft, setDraft] = useState<string | undefined>(undefined);
-  // Focused by a tap (until its click): Chrome's context menu for it kept
-  // closed (see the field).
-  const focusingRef = useRef(false);
+  const selection = useFieldSelection(() => setDraft(undefined));
   // Held, its touch doesn't scroll (see `useTouchHold`).
   const holdHandlers = useTouchHold<HTMLDivElement>('x');
 
@@ -669,32 +710,10 @@ const ChannelRow: FunctionComponent<{
             aria-label={fieldLabel ?? `${label} value`}
             inputMode="numeric"
             value={draft ?? String(value)}
-            // Left (or Enter), its value again (e.g. emptied); its selection
-            // collapsed (kept, the next tap would be on selected text).
+            // (Left, or Enter: its value again, e.g. emptied; see
+            // `useFieldSelection`.)
             onChange={(event) => type(event.currentTarget.value, event)}
-            onBlur={(event) => {
-              setDraft(undefined);
-              focusingRef.current = false;
-              const { length } = event.currentTarget.value;
-              event.currentTarget.setSelectionRange(length, length);
-            }}
-            onClick={() => {
-              focusingRef.current = false;
-            }}
-            // The tap focusing it is on its text, selected: Chrome opens its
-            // context menu for that; not for this tap (a later press, held,
-            // opens it).
-            onContextMenu={(event) => {
-              if (focusingRef.current) event.preventDefault();
-            }}
-            // Focused, all of it (to type over).
-            onFocus={(event) => {
-              focusingRef.current = true;
-              event.currentTarget.select();
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') setDraft(undefined);
-            }}
+            {...selection}
           />
           {unit ? <span aria-hidden="true">{unit}</span> : null}
         </label>
@@ -834,10 +853,14 @@ const trackColors = (
 /**
  * Sliders: a color model's channels (`model`: red, green and blue, in bytes
  * or percent, its `range`; hue, saturation and lightness; cyan, magenta,
- * yellow and black), each mixing from the color, its value typed too.
+ * yellow and black), each mixing from the color, its value typed too; then
+ * its children (e.g. the `Code`), spaced as the channels.
  */
 const Sliders = forwardRef<HTMLDivElement, ColorPickerSlidersProps>(
-  ({ className, model: modelName = 'rgb', range = 'byte', ...props }, ref) => {
+  (
+    { children, className, model: modelName = 'rgb', range = 'byte', ...props },
+    ref,
+  ) => {
     const { color, setColor } = useContext(PickerContext);
     const model =
       modelName === 'rgb' && range === 'percentage'
@@ -891,6 +914,7 @@ const Sliders = forwardRef<HTMLDivElement, ColorPickerSlidersProps>(
             }}
           />
         ))}
+        {children}
       </div>
     );
   },
@@ -1222,50 +1246,6 @@ const hasColorInputAlpha = () =>
   typeof HTMLInputElement !== 'undefined' &&
   'alpha' in HTMLInputElement.prototype;
 
-/** A CSS number or percentage (of `scale`), as a number (of `scale`). */
-const cssNumber = (text: string, scale: number) =>
-  text.endsWith('%')
-    ? (Number.parseFloat(text) / 100) * scale
-    : Number.parseFloat(text);
-
-/** A functional CSS color (its name, its arguments). */
-const functionalColor = /^(?<name>rgba?|color)\((?<args>[^)]*)\)$/u;
-
-/**
- * A color input's value as a color: hex, `rgb()` or `color(srgb …)` (with
- * an alpha, its value may be any CSS color: as drawn, anything else).
- */
-const parseInputColor = (value: string): Rgba => {
-  const text = value.trim().toLowerCase();
-  if (text.startsWith('#')) return parseColor(text);
-  const functional = functionalColor.exec(text);
-  if (functional?.groups) {
-    const { args = '', name } = functional.groups;
-    const parts = args.split(/[\s,/]+/u).filter(Boolean);
-    const isSrgb = name === 'color' && parts[0] === 'srgb';
-    if (name !== 'color' || isSrgb) {
-      const [r = '0', g = '0', b = '0', a = '1'] = isSrgb
-        ? parts.slice(1)
-        : parts;
-      const channel = (part: string) =>
-        isSrgb ? cssNumber(part, 1) * 255 : cssNumber(part, 255);
-      return {
-        a: clamp(cssNumber(a, 1), 0, 1),
-        b: clamp(channel(b), 0, 255),
-        g: clamp(channel(g), 0, 255),
-        r: clamp(channel(r), 0, 255),
-      };
-    }
-  }
-  // (Anything else: drawn, a pixel read back, as sRGB.)
-  const context = document.createElement('canvas').getContext('2d');
-  if (!context) return { a: 1, b: 0, g: 0, r: 0 };
-  context.fillStyle = value;
-  context.fillRect(0, 0, 1, 1);
-  const [r = 0, g = 0, b = 0, a = 255] = context.getImageData(0, 0, 1, 1).data;
-  return { a: a / 255, b, g, r };
-};
-
 /**
  * Its system colors (a leading button, after the eyedropper): a `Button`
  * (or what it renders), opening the system's color picker: a color input's
@@ -1319,7 +1299,9 @@ const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
         value={formatColor(hasAlpha ? color : { ...color, a: 1 }).toLowerCase()}
         // (As it's picked, live; without its alpha, the opacity kept.)
         onChange={(event) => {
-          const picked = parseInputColor(event.currentTarget.value);
+          // (Any CSS color, with an alpha: see color.ts.)
+          const picked = parseCssColor(event.currentTarget.value);
+          if (!picked) return;
           setColor(hasAlpha ? picked : { ...picked, a: color.a }, {
             event,
             reason: 'system-colors',
@@ -1327,6 +1309,188 @@ const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
         }}
       />
     </span>
+  );
+};
+
+/**
+ * Its code (a row; its place the app's: e.g. under the sliders), as high as a
+ * channel's, its field where a channel's value is: “Hex” (a channel's title,
+ * beside them, centered), then its children (e.g. a `CodeCopy`), the color's
+ * hex code typed (`#` before it, not typed: its digits, applied as they make
+ * a code, 3, 4, 6 or 8 of them; with an alpha, 4 or 8), at its end. Kept above the keyboard as it's typed into (as a
+ * channel's row).
+ */
+const Code = forwardRef<HTMLDivElement, ColorPickerCodeProps>(
+  ({ children, className, ...props }, ref) => {
+    const { color, setColor } = useContext(PickerContext);
+    const [draft, setDraft] = useState<string | undefined>(undefined);
+    const selection = useFieldSelection(() => setDraft(undefined));
+
+    const type = (text: string, event: Event) => {
+      const digits = text
+        .replaceAll(/[^\da-f]/giu, '')
+        .slice(0, 8)
+        .toUpperCase();
+      setDraft(digits);
+      if (![3, 4, 6, 8].includes(digits.length)) return;
+      const typed = parseColor(`#${digits}`);
+      // (Without an alpha typed, the color's kept.)
+      setColor(digits.length % 4 === 0 ? typed : { ...typed, a: color.a }, {
+        event,
+        reason: 'code',
+      });
+    };
+
+    return (
+      <Viewport.KeyboardAccessory
+        ref={ref}
+        gap={20}
+        {...props}
+        className={cn('uikit-color-picker-code', className)}
+        data-color-picker-part="code"
+      >
+        <div
+          className="uikit-color-picker-channel-row uikit-color-picker-code-row"
+          data-color-picker-part="code-row"
+        >
+          <div
+            aria-hidden="true"
+            className="uikit-color-picker-channel-title"
+            data-color-picker-part="code-title"
+          >
+            Hex
+          </div>
+          {children}
+          {/* Its code: `#` (not typed), its digits typed, in a field as a
+             channel's value is. */}
+          <label
+            className="uikit-color-picker-channel-field uikit-color-picker-code-field"
+            data-color-picker-part="code-field"
+          >
+            <span aria-hidden="true">#</span>
+            <input
+              // (`spellcheck`: Preact's spelling, which the React lint rule
+              // would rename.)
+              {...{ spellcheck: false }}
+              aria-label="Hex color"
+              autoCapitalize="characters"
+              autoComplete="off"
+              autoCorrect="off"
+              value={draft ?? formatColor(color).slice(1)}
+              onChange={(event) => type(event.currentTarget.value, event)}
+              {...selection}
+            />
+          </label>
+        </div>
+      </Viewport.KeyboardAccessory>
+    );
+  },
+);
+
+// How long a copy shows as done (its checkmark).
+const copiedFor = 1500;
+
+/**
+ * Its code's copy button: a `Button` (or what it renders, its content the
+ * app's: e.g. a symbol), opening a menu of the color's codes (see color.ts):
+ * hex's, then a submenu each of the others' groups, each code its format and
+ * its values (`Menu.Label`, `Menu.Subtitle`). One picked, copied to the
+ * clipboard (`onCodeCopy`); for a moment, a checkmark instead of its content
+ * (`data-copied`). Its place the app's (in a `Code`, or not).
+ */
+const CodeCopy: FunctionComponent<ColorPickerCodeCopyProps> = ({
+  children,
+  onCodeCopy,
+  render,
+  ...props
+}) => {
+  const { color } = useContext(PickerContext);
+  const [isCopied, setIsCopied] = useState(false);
+
+  useEffect(() => {
+    if (!isCopied) return undefined;
+    const timeout = setTimeout(() => setIsCopied(false), copiedFor);
+    return () => clearTimeout(timeout);
+  }, [isCopied]);
+
+  const copy = (code: string, event: Event) => {
+    navigator.clipboard
+      .writeText(code)
+      .then(() => {
+        setIsCopied(true);
+        onCodeCopy?.(code, event);
+      })
+      .catch(() => undefined);
+  };
+
+  const item = ({ code, label, subtitle }: ColorCode) => (
+    <Menu.Item
+      key={code}
+      onClick={(event: MouseEvent<HTMLElement>) => copy(code, event)}
+    >
+      <Menu.Label>{label}</Menu.Label>
+      <Menu.Subtitle>{subtitle}</Menu.Subtitle>
+    </Menu.Item>
+  );
+
+  const content = isCopied ? (
+    <Button.Icon>
+      <Checkmark />
+    </Button.Icon>
+  ) : (
+    children
+  );
+  const trigger = render ? (
+    cloneElement(
+      render,
+      {
+        'aria-label': 'Copy color code',
+        ...props,
+        'data-copied': isCopied ? '' : undefined,
+      },
+      content,
+    )
+  ) : (
+    <Button.Root
+      aria-label="Copy color code"
+      {...props}
+      data-copied={isCopied ? '' : undefined}
+    >
+      {content}
+    </Button.Root>
+  );
+
+  return (
+    <Menu.Root>
+      <Menu.Trigger render={trigger} />
+      <Menu.Portal>
+        <Menu.Positioner>
+          <Menu.Popup>
+            {codeGroups(color, formatColor({ ...color, a: 1 })).map(
+              ([title, codes], index) =>
+                index === 0 ? (
+                  <Fragment key={title}>
+                    {codes.map((entry) => item(entry))}
+                  </Fragment>
+                ) : (
+                  <Menu.SubmenuRoot key={title}>
+                    <Menu.SubmenuTrigger>
+                      <Menu.Label>{title}</Menu.Label>
+                    </Menu.SubmenuTrigger>
+                    <Menu.Portal>
+                      <Menu.Positioner>
+                        <Menu.Popup>
+                          {codes.map((entry) => item(entry))}
+                        </Menu.Popup>
+                      </Menu.Positioner>
+                    </Menu.Portal>
+                  </Menu.SubmenuRoot>
+                ),
+            )}
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
   );
 };
 
@@ -1361,5 +1525,7 @@ export const ColorPicker = {
   Swatches,
   Eyedropper,
   SystemColors,
+  Code,
+  CodeCopy,
   Well,
 };

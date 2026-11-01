@@ -71,6 +71,8 @@ export { Badge, type BadgePlacement, type BadgeProps } from './badge/main.js';
 export {
   ColorPicker,
   type ColorPickerChangeEventDetails,
+  type ColorPickerCodeCopyProps,
+  type ColorPickerCodeProps,
   type ColorPickerEyedropperProps,
   type ColorPickerModeProps,
   type ColorPickerModesProps,

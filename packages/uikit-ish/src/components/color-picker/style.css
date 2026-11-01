@@ -82,8 +82,9 @@
      only then: a list group's card around it (an inset grouped one's: its
      background, 24px corners, outlined), its content 12px in (as high as
      before: nothing around it moves; as wide: the card's sides where the
-     panel's content's are). */
-  .uikit-color-picker-channel {
+     panel's content's are). The code's row too (see `Code`). */
+  .uikit-color-picker-channel,
+  .uikit-color-picker-code {
     /* Its slider's height, its knob's, its field's. */
     --uikit-color-picker-channel-size: 32px;
     --uikit-viewport-keyboard-accessory-background: var(
@@ -242,6 +243,55 @@
       letter-spacing: inherit;
       outline: none;
       text-align: end;
+    }
+  }
+
+  /* The code's row (see `Code`), as high as a channel's (its title's line,
+     above the card, lifted: as before, nothing around it moves), its field
+     where a channel's value is: its title beside them, centered, then its
+     children (e.g. the copy button), its field. */
+  .uikit-color-picker-code {
+    margin-block-start: 24px;
+
+    &[data-lifted] {
+      margin-block: 12px -12px;
+    }
+
+    /* First in its container (nothing above it to space it from, e.g.
+       alone): none. */
+    &:first-child {
+      margin-block-start: 0;
+
+      &[data-lifted] {
+        margin-block: -12px;
+      }
+    }
+  }
+
+  .uikit-color-picker-code-row {
+    padding-block-start: 0;
+
+    & > .uikit-color-picker-channel-title {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+  }
+
+  /* Its field (a channel's value's, as wide as its digits): `#`, then up to
+     8 digits. */
+  .uikit-color-picker-code-field {
+    width: auto;
+    gap: 2px;
+
+    & > span {
+      color: var(--color-ui-secondary-label);
+    }
+
+    & > input {
+      width: 8ch;
+      font-variant-numeric: tabular-nums;
+      text-align: start;
+      text-transform: uppercase;
     }
   }
 

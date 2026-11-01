@@ -298,6 +298,27 @@
     }
   }
 
+  /* Its content's edge effects (see Sheet.Content: beside it, the popup's
+     children), within its corners: rounded as the popup's at their edge,
+     as browsers don't all clip a backdrop filter to its rounded overflow
+     (WebKit). */
+  .uikit-sheet-popup > .uikit-viewport-edge-effect {
+    &[data-edge='block-start'] {
+      border-start-end-radius: inherit;
+      border-start-start-radius: inherit;
+    }
+
+    &[data-edge='block-end'] {
+      border-end-end-radius: inherit;
+      border-end-start-radius: inherit;
+    }
+
+    &::before,
+    &::after {
+      border-radius: inherit;
+    }
+  }
+
   .uikit-sheet-content {
     overflow: auto;
     min-height: 0;

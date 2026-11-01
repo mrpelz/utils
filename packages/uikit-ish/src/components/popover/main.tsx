@@ -8,6 +8,7 @@ import {
   createContext,
   forwardRef,
   ReactElement,
+  useCallback,
   useContext,
   useLayoutEffect,
   useMemo,
@@ -53,15 +54,47 @@ export type {
 
 const PopoverContext = createContext<PopoverState | undefined>(undefined);
 
-const Root = <Payload,>(
-  props: BasePopover.Root.Props<Payload>,
-): ReactElement => {
+/**
+ * Not closed by a press or focus in a menu (in a portal) opened from it, e.g.
+ * a submenu: Base UI tells those from outside ones by its menus' floating
+ * tree, a root menu's joining the popover's, its submenus' their own, and by
+ * React's event bubbling through portals, which Preact's portals lack (as
+ * Menu's, see `useKeepOpenInSubmenus`).
+ */
+const Root = <Payload,>({
+  onOpenChange,
+  ...props
+}: BasePopover.Root.Props<Payload>): ReactElement => {
   const [hasArrow, setHasArrow] = useState(false);
   const state = useMemo(() => ({ hasArrow, setHasArrow }), [hasArrow]);
 
+  const onRootOpenChange = useCallback(
+    (isOpen: boolean, details: BasePopover.Root.ChangeEventDetails) => {
+      const { event, reason } = details;
+      const target =
+        reason === 'focus-out' && event instanceof FocusEvent
+          ? event.relatedTarget
+          : event.target;
+      if (
+        !isOpen &&
+        (reason === 'outside-press' || reason === 'focus-out') &&
+        target instanceof Element &&
+        target.closest('[role="menu"]') !== null
+      ) {
+        details.cancel();
+        return;
+      }
+      onOpenChange?.(isOpen, details);
+    },
+    [onOpenChange],
+  );
+
   return (
     <PopoverContext.Provider value={state}>
-      <BasePopover.Root {...props} />
+      <BasePopover.Root
+        {...props}
+        onOpenChange={onRootOpenChange}
+      />
     </PopoverContext.Provider>
   );
 };

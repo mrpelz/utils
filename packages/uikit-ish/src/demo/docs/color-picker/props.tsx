@@ -3,6 +3,7 @@
 import type { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 
 import {
+  Button,
   type ColorPickerChangeEventDetails,
   type ColorPickerSavedColorsChangeEventDetails,
   Toolbar,
@@ -119,6 +120,30 @@ export const propOptionsEyedropper = {
 
 export const propOptionsSystemColors = propOptionsEyedropper;
 
+/** The code's (its element's; its children: the copy button). */
+export const propOptionsCode = propOptionsElement;
+
+/** The code's copy button: what it renders, disabled, its copies logged. */
+export const getPropOptionsCodeCopy = (addLog: AddLog) => ({
+  ...propOptionsElement,
+  render: [
+    undefined,
+    new MappedProp(
+      <Button.Root
+        shape="circle"
+        size="small"
+        variant="bordered"
+      />,
+      '[<Button.Root shape="circle" size="small" variant="bordered" />]',
+    ),
+  ] as const,
+  disabled: [undefined, false, true] as const,
+  onCodeCopy: [
+    new MappedProp((code: string) => addLog(`copy: ${code}`), '[log copy]'),
+    undefined,
+  ] as const,
+});
+
 /** The main demo's well (its color the picked one). */
 export const propOptionsWell = {
   size: [undefined, 'small', 'large'] as const,
@@ -145,8 +170,8 @@ export const propOptionsPresentation = {
 
 /**
  * The overview's: its presentation, which modes (and the opacity) its
- * panel renders (see panel.tsx); RGB's, in which range; the system colors'
- * button, or none.
+ * panel renders (see panel.tsx); RGB's, in which range; the sliders' code
+ * row and its copy button, or none; the system colors' button, or none.
  */
 export const propOptionsOverviewContent = {
   ...propOptionsPresentation,
@@ -156,6 +181,8 @@ export const propOptionsOverviewContent = {
   hsl: [false, true] as const,
   cmyk: [false, true] as const,
   opacity: [true, false] as const,
+  code: [true, false] as const,
+  codeCopy: [true, false] as const,
   systemColors: [true, false] as const,
 };
 
