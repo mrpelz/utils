@@ -315,6 +315,17 @@
       -webkit-touch-callout: none;
     }
 
+    /* A saved color (translucent: over black, its upper left, and white,
+       its lower right, as the current one). */
+    & > :not([data-add]) {
+      background:
+        linear-gradient(
+          var(--uikit-color-picker-color),
+          var(--uikit-color-picker-color)
+        ),
+        linear-gradient(to bottom right, #000 50%, #fff 50%);
+    }
+
     & > [aria-pressed='true']::after {
       position: absolute;
       border: 2px solid #fff;

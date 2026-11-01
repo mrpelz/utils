@@ -864,7 +864,7 @@ const SavedSwatch: FunctionComponent<{
           <button
             aria-label={hex}
             aria-pressed={sameColor(swatch, color) && swatch.a === color.a}
-            style={{ backgroundColor: hex }}
+            style={{ '--uikit-color-picker-color': hex }}
             type="button"
             onClick={(event: MouseEvent<HTMLButtonElement>) =>
               setColor(swatch, { event, reason: 'saved' })
