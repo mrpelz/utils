@@ -37,8 +37,9 @@ export const colorPickerRootRows: readonly PropRow[] = [
     <>
       Called with the picked color (uppercase hex), and why (<code>reason</code>
       ): <code>grid</code>, <code>spectrum</code>, <code>sliders</code>,{' '}
-      <code>opacity</code>, <code>saved</code> (a saved color pressed), or{' '}
-      <code>eyedropper</code>.
+      <code>opacity</code>, <code>saved</code> (a saved color pressed),{' '}
+      <code>eyedropper</code>, or <code>system-colors</code> (the system’s color
+      picker).
     </>,
   ],
   [
@@ -352,6 +353,35 @@ export const colorPickerEyedropperRows: readonly PropRow[] = [
     'ButtonRootProps',
     undefined,
     'A button’s props (not onClick: it picks a color off the screen).',
+  ],
+];
+
+export const colorPickerSystemColorsRows: readonly PropRow[] = [
+  [
+    'render',
+    'ReactElement',
+    <>
+      a{' '}
+      <PartLink
+        component="button"
+        part="Button.Root"
+      />
+    </>,
+    <>
+      What it renders: e.g. a{' '}
+      <PartLink
+        component="toolbar"
+        part="Toolbar.Button"
+      />{' '}
+      in a toolbar, sized as its other buttons.
+    </>,
+  ],
+  ['children', 'ReactNode', undefined, 'Its content: e.g. a palette symbol.'],
+  [
+    '…',
+    'ButtonRootProps',
+    undefined,
+    'A button’s props (not onClick: it opens the system’s color picker).',
   ],
 ];
 

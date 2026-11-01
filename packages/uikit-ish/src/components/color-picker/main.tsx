@@ -44,6 +44,7 @@ import type {
   ColorPickerSlidersModel,
   ColorPickerSlidersProps,
   ColorPickerSwatchesProps,
+  ColorPickerSystemColorsProps,
   ColorPickerViewProps,
   ColorWellProps,
   EyeDropperApi,
@@ -64,6 +65,7 @@ export type {
   ColorPickerSlidersProps,
   ColorPickerSlidersRange,
   ColorPickerSwatchesProps,
+  ColorPickerSystemColorsProps,
   ColorPickerViewProps,
   ColorWellProps,
 } from './props.js';
@@ -96,6 +98,10 @@ export type {
 //   opacity, always opaque).
 // - The eyedropper (`ColorPicker.Eyedropper`) is the browser's
 //   (`EyeDropper`; not where it has none, e.g. Safari).
+// - The system's color picker (`ColorPicker.SystemColors`) is a color
+//   input's (over its button, pressed itself: on iOS, nothing else opens
+//   it; with the opacity rendered, its alpha too where the input has one,
+//   e.g. Safari; else its colors opaque, the opacity kept).
 // - Saved colors are deleted by their menu (a secondary click: right click,
 //   long press).
 
@@ -192,6 +198,7 @@ const unregister = () => undefined;
 
 const PickerContext = createContext<PickerState>({
   color: { a: 1, b: 0, g: 0, r: 0 },
+  hasOpacity: false,
   registerOpacity: () => unregister,
   setColor: () => undefined,
 });
@@ -244,6 +251,7 @@ const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
     const state = useMemo(
       () => ({
         color,
+        hasOpacity,
         registerOpacity,
         // Uncontrolled: its own state; controlled, only the app's `value`.
         setColor: (next: Rgba, details: ColorPickerChangeEventDetails) => {
@@ -1198,6 +1206,130 @@ const Eyedropper: FunctionComponent<ColorPickerEyedropperProps> = ({
   );
 };
 
+/** Whether the browser has a color input (its picker the system's). */
+const hasColorInput = () => {
+  if (typeof document === 'undefined') return false;
+  const input = document.createElement('input');
+  input.type = 'color';
+  return input.type === 'color';
+};
+
+/**
+ * Whether its color input has an alpha (its `alpha` attribute: e.g.
+ * Safari's; without, a value with one is invalid, black).
+ */
+const hasColorInputAlpha = () =>
+  typeof HTMLInputElement !== 'undefined' &&
+  'alpha' in HTMLInputElement.prototype;
+
+/** A CSS number or percentage (of `scale`), as a number (of `scale`). */
+const cssNumber = (text: string, scale: number) =>
+  text.endsWith('%')
+    ? (Number.parseFloat(text) / 100) * scale
+    : Number.parseFloat(text);
+
+/** A functional CSS color (its name, its arguments). */
+const functionalColor = /^(?<name>rgba?|color)\((?<args>[^)]*)\)$/u;
+
+/**
+ * A color input's value as a color: hex, `rgb()` or `color(srgb …)` (with
+ * an alpha, its value may be any CSS color: as drawn, anything else).
+ */
+const parseInputColor = (value: string): Rgba => {
+  const text = value.trim().toLowerCase();
+  if (text.startsWith('#')) return parseColor(text);
+  const functional = functionalColor.exec(text);
+  if (functional?.groups) {
+    const { args = '', name } = functional.groups;
+    const parts = args.split(/[\s,/]+/u).filter(Boolean);
+    const isSrgb = name === 'color' && parts[0] === 'srgb';
+    if (name !== 'color' || isSrgb) {
+      const [r = '0', g = '0', b = '0', a = '1'] = isSrgb
+        ? parts.slice(1)
+        : parts;
+      const channel = (part: string) =>
+        isSrgb ? cssNumber(part, 1) * 255 : cssNumber(part, 255);
+      return {
+        a: clamp(cssNumber(a, 1), 0, 1),
+        b: clamp(channel(b), 0, 255),
+        g: clamp(channel(g), 0, 255),
+        r: clamp(channel(r), 0, 255),
+      };
+    }
+  }
+  // (Anything else: drawn, a pixel read back, as sRGB.)
+  const context = document.createElement('canvas').getContext('2d');
+  if (!context) return { a: 1, b: 0, g: 0, r: 0 };
+  context.fillStyle = value;
+  context.fillRect(0, 0, 1, 1);
+  const [r = 0, g = 0, b = 0, a = 255] = context.getImageData(0, 0, 1, 1).data;
+  return { a: a / 255, b, g, r };
+};
+
+/**
+ * Its system colors (a leading button, after the eyedropper): a `Button`
+ * (or what it renders), opening the system's color picker: a color input's
+ * (none without one), over the button, transparent: pressed itself (on iOS,
+ * nothing else opens it: neither `showPicker` nor a click, see WebKit's bug
+ * 261703), the button showing the press; the button clicking it from the
+ * keyboard. With the opacity rendered, its alpha too, where the input has
+ * one (its `alpha`: e.g. Safari); else its colors opaque, the opacity kept.
+ */
+const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
+  render,
+  ...props
+}) => {
+  const { color, hasOpacity, setColor } = useContext(PickerContext);
+  // (Its input, as rendered: for its button's press.)
+  const [input, setInput] = useState<HTMLInputElement | null>(null);
+  if (!hasColorInput()) return null;
+  // (With the opacity, the input's alpha too, where it has one.)
+  const hasAlpha = hasOpacity && hasColorInputAlpha();
+
+  const open = () => input?.click();
+
+  return (
+    <span
+      className="uikit-color-picker-system-colors"
+      data-color-picker-part="system-colors"
+    >
+      {render ? (
+        cloneElement(render, {
+          'aria-label': 'System colors',
+          ...props,
+          onClick: open,
+        })
+      ) : (
+        <Button.Root
+          aria-label="System colors"
+          {...props}
+          onClick={open}
+        />
+      )}
+      <input
+        ref={setInput}
+        // (`alpha`: too new for the JSX types; a boolean property, as set.)
+        {...(hasAlpha ? { alpha: true } : {})}
+        aria-hidden="true"
+        className="uikit-color-picker-system-colors-input"
+        disabled={props.disabled}
+        tabIndex={-1}
+        type="color"
+        // (The color, as it is: its picker opened from it.)
+        value={formatColor(hasAlpha ? color : { ...color, a: 1 }).toLowerCase()}
+        // (As it's picked, live; without its alpha, the opacity kept.)
+        onChange={(event) => {
+          const picked = parseInputColor(event.currentTarget.value);
+          setColor(hasAlpha ? picked : { ...picked, a: color.a }, {
+            event,
+            reason: 'system-colors',
+          });
+        }}
+      />
+    </span>
+  );
+};
+
 /** A color well: its color, opening the picker. */
 const Well = forwardRef<HTMLButtonElement, ColorWellProps>(
   ({ className, color, size = 'small', style, ...props }, ref) => (
@@ -1228,5 +1360,6 @@ export const ColorPicker = {
   Opacity,
   Swatches,
   Eyedropper,
+  SystemColors,
   Well,
 };

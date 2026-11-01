@@ -23,7 +23,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
-import { sfEyedropper, sfXmark } from '../../tooling/icons.js';
+import { sfEyedropper, sfPaintpalette, sfXmark } from '../../tooling/icons.js';
 import { GuideLink } from '../hig-guide/link.js';
 import {
   colorPickerPanelRows,
@@ -49,6 +49,14 @@ const LiveView: FunctionComponent = () => {
     { external: externalContent, isOpen: true, title: '[content]' },
   );
   // (Its modes' control in its panel, or elsewhere: the sheet's header.)
+  // The system's color picker's button (left out, none).
+  const systemColors = content.systemColors ? (
+    <ColorPicker.SystemColors render={<Toolbar.Button shape="circle" />}>
+      <Button.Icon>
+        <Symbol icon={sfPaintpalette} />
+      </Button.Icon>
+    </ColorPicker.SystemColors>
+  ) : null;
   // Its modes; one alone, no control for them (its view shown).
   const modes = shownModes(content);
   const hasModesControl = modes.length > 1;
@@ -117,6 +125,7 @@ const LiveView: FunctionComponent = () => {
                   <Sheet.Grabber />
                   <ColorPicker.Header>
                     <Toolbar.Root placement="block-start">
+                      <Toolbar.Leading>{systemColors}</Toolbar.Leading>
                       <Toolbar.Title>
                         <span>Colors</span>
                       </Toolbar.Title>
@@ -175,6 +184,7 @@ const LiveView: FunctionComponent = () => {
                             <Symbol icon={sfEyedropper} />
                           </Button.Icon>
                         </ColorPicker.Eyedropper>
+                        {systemColors}
                       </Toolbar.Leading>
                       <Toolbar.Title>
                         <span>Colors</span>
@@ -343,6 +353,16 @@ export const ColorPickerOverview: FunctionComponent = () => (
           part="ColorPicker.Eyedropper"
         />
         ) is the browser’s: where there’s none (Safari), it doesn’t show.
+      </li>
+      <li>
+        The system colors (
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.SystemColors"
+        />
+        ) open the system’s color picker; with the opacity, its alpha too where
+        the browser’s has one (e.g. Safari), else its colors opaque, the opacity
+        kept.
       </li>
     </ul>
   </>

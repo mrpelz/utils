@@ -17,7 +17,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
-import { sfEyedropper, sfXmark } from '../../tooling/icons.js';
+import { sfEyedropper, sfPaintpalette, sfXmark } from '../../tooling/icons.js';
 import { modesControl, panelParts, propOptionsComposition } from './panel.js';
 import {
   getPropOptionsRoot,
@@ -29,7 +29,8 @@ import {
 
 /**
  * A color picker: from a color well, in a popover (regular) or a sheet
- * (compact), its header the app's (eyedropper, title, close).
+ * (compact), its header the app's (eyedropper, system colors, title,
+ * close).
  */
 export const ColorPickerDemo: FunctionComponent = () => {
   const id = 'color-picker';
@@ -98,6 +99,11 @@ export const ColorPickerDemo: FunctionComponent = () => {
             <Symbol icon={sfEyedropper} />
           </Button.Icon>
         </ColorPicker.Eyedropper>
+        <ColorPicker.SystemColors render={<Toolbar.Button shape="circle" />}>
+          <Button.Icon>
+            <Symbol icon={sfPaintpalette} />
+          </Button.Icon>
+        </ColorPicker.SystemColors>
       </Toolbar.Leading>
       <Toolbar.Title>
         <span>Colors</span>

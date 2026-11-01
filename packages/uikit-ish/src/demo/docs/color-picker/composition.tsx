@@ -24,7 +24,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
-import { sfEyedropper, sfXmark } from '../../tooling/icons.js';
+import { sfEyedropper, sfPaintpalette, sfXmark } from '../../tooling/icons.js';
 import { modesControl, panelParts } from './panel.js';
 import { propOptionsPresentation } from './props.js';
 
@@ -65,6 +65,13 @@ const InAPopover: FunctionComponent = () => {
                           <Symbol icon={sfEyedropper} />
                         </Button.Icon>
                       </ColorPicker.Eyedropper>
+                      <ColorPicker.SystemColors
+                        render={<Toolbar.Button shape="circle" />}
+                      >
+                        <Button.Icon>
+                          <Symbol icon={sfPaintpalette} />
+                        </Button.Icon>
+                      </ColorPicker.SystemColors>
                     </Toolbar.Leading>
                     <Toolbar.Title>
                       <span>Colors</span>

@@ -81,6 +81,7 @@ export {
   type ColorPickerSlidersProps,
   type ColorPickerSlidersRange,
   type ColorPickerSwatchesProps,
+  type ColorPickerSystemColorsProps,
   type ColorPickerViewProps,
   type ColorWellProps,
   defaultSavedColors,

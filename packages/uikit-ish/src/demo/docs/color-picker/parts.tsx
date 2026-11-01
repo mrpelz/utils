@@ -13,7 +13,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
-import { sfEyedropper } from '../../tooling/icons.js';
+import { sfEyedropper, sfPaintpalette } from '../../tooling/icons.js';
 import {
   colorPickerEyedropperRows,
   colorPickerGridRows,
@@ -26,6 +26,7 @@ import {
   colorPickerSlidersRows,
   colorPickerSpectrumRows,
   colorPickerSwatchesRows,
+  colorPickerSystemColorsRows,
   colorPickerViewRows,
   colorPickerWellRows,
   defaultSavedColorsRows,
@@ -43,6 +44,7 @@ import {
   propOptionsPanel,
   propOptionsPart,
   propOptionsSliders,
+  propOptionsSystemColors,
 } from './props.js';
 
 const parseColorCode = `parseColor('#007AFF'); // { r: 0, g: 122, b: 255, a: 1 }
@@ -401,6 +403,62 @@ const EyedropperPart: FunctionComponent = () => {
   );
 };
 
+/**
+ * `ColorPicker.SystemColors`, outlined, in the header's toolbar (after the
+ * eyedropper).
+ */
+const SystemColorsPart: FunctionComponent = () => {
+  const id = 'color-picker-parts-system-colors';
+  const [external] = useProvidedState(id);
+  const [control, props, state] = usePropControl(propOptionsSystemColors, {
+    external,
+    isOpen: true,
+    emphasize: 'outline',
+    title: 'ColorPicker.SystemColors',
+  });
+
+  return (
+    <Component
+      hasInputGuards
+      isCentered
+      isInline
+      isStretched
+      controls={[control]}
+      id={id}
+      state={[state]}
+      title="ColorPicker.SystemColors"
+    >
+      <ColorPicker.Root
+        defaultValue="#AF52DE"
+        style={{ width: 'min(402px, 100%)' }}
+      >
+        <ColorPicker.Header>
+          <Toolbar.Root placement="block-start">
+            <Toolbar.Leading>
+              <ColorPicker.Eyedropper
+                render={<Toolbar.Button shape="circle" />}
+              >
+                <Button.Icon>
+                  <Symbol icon={sfEyedropper} />
+                </Button.Icon>
+              </ColorPicker.Eyedropper>
+              <ColorPicker.SystemColors {...props}>
+                <Button.Icon>
+                  <Symbol icon={sfPaintpalette} />
+                </Button.Icon>
+              </ColorPicker.SystemColors>
+            </Toolbar.Leading>
+            <Toolbar.Title>
+              <span>Colors</span>
+            </Toolbar.Title>
+          </Toolbar.Root>
+        </ColorPicker.Header>
+        <ColorPicker.Panel>{panelParts()}</ColorPicker.Panel>
+      </ColorPicker.Root>
+    </Component>
+  );
+};
+
 /** `ColorPicker.Well`, outlined, with its props. */
 const WellPart: FunctionComponent = () => {
   const id = 'color-picker-parts-well';
@@ -436,13 +494,17 @@ export const ColorPickerParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>Root: the color, for its parts.</li>
-      <li>Header: the app’s (a toolbar: the eyedropper, a title, close).</li>
+      <li>
+        Header: the app’s (a toolbar: the eyedropper, the system colors, a
+        title, close).
+      </li>
       <li>
         Panel: its parts as composed: its modes (a segmented control, a view
         each: the grid, the spectrum, sliders), the opacity, the swatches (the
         color, the saved colors).
       </li>
       <li>Eyedropper: picks a color off the screen.</li>
+      <li>System colors: opens the system’s color picker.</li>
       <li>Well: shows a color, opening the picker (outside it).</li>
     </ul>
     <ul>
@@ -463,6 +525,13 @@ export const ColorPickerParts: FunctionComponent = () => (
                 <PartLink
                   component="color-picker"
                   part="ColorPicker.Eyedropper"
+                />{' '}
+                (optional)
+              </li>
+              <li>
+                <PartLink
+                  component="color-picker"
+                  part="ColorPicker.SystemColors"
                 />{' '}
                 (optional)
               </li>
@@ -955,6 +1024,47 @@ export const ColorPickerParts: FunctionComponent = () => (
     <PropsTable rows={colorPickerEyedropperRows} />
 
     <Heading
+      id="colorpicker-systemcolors"
+      level={2}
+    >
+      <code>ColorPicker.SystemColors</code>
+    </Heading>
+    <ul>
+      <li>
+        A button opening the system’s color picker: a color input’s, over the
+        button, transparent, pressed itself (on iOS, nothing else opens it); on
+        a desktop, its panel; on iOS, a sheet. From the keyboard, the button
+        opens it. Its colors apply as they’re picked. With the{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Opacity"
+        />{' '}
+        rendered, its alpha too, where the browser’s picker has one (the input’s{' '}
+        <code>alpha</code>: e.g. Safari); otherwise its colors are opaque, the
+        color’s opacity kept. Where a browser can’t open it, it renders nothing.
+      </li>
+      <li>
+        In the header’s toolbar, leading, after the{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Eyedropper"
+        />
+        .
+      </li>
+      <li>
+        Renders a{' '}
+        <PartLink
+          component="button"
+          part="Button.Root"
+        />
+        , or its <code>render</code> (e.g. a toolbar’s button).
+      </li>
+    </ul>
+    <SystemColorsPart />
+    <h3>Props</h3>
+    <PropsTable rows={colorPickerSystemColorsRows} />
+
+    <Heading
       id="colorpicker-well"
       level={2}
     >
@@ -1040,5 +1150,6 @@ export const colorPickerPartsDemos = [
   OpacityPart,
   SwatchesPart,
   EyedropperPart,
+  SystemColorsPart,
   WellPart,
 ];

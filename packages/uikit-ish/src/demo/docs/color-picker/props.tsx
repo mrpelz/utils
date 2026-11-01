@@ -117,6 +117,8 @@ export const propOptionsEyedropper = {
   disabled: [undefined, false, true] as const,
 };
 
+export const propOptionsSystemColors = propOptionsEyedropper;
+
 /** The main demo's well (its color the picked one). */
 export const propOptionsWell = {
   size: [undefined, 'small', 'large'] as const,
@@ -143,7 +145,8 @@ export const propOptionsPresentation = {
 
 /**
  * The overview's: its presentation, which modes (and the opacity) its
- * panel renders (see panel.tsx); RGB's, in which range.
+ * panel renders (see panel.tsx); RGB's, in which range; the system colors'
+ * button, or none.
  */
 export const propOptionsOverviewContent = {
   ...propOptionsPresentation,
@@ -153,6 +156,7 @@ export const propOptionsOverviewContent = {
   hsl: [false, true] as const,
   cmyk: [false, true] as const,
   opacity: [true, false] as const,
+  systemColors: [true, false] as const,
 };
 
 /** The overview's few: the picker's mode (its color the demo's). */

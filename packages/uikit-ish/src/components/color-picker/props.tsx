@@ -12,11 +12,19 @@ export type Rgba = { a: number; b: number; g: number; r: number };
 
 /**
  * Why the color changed, and the event: its grid, spectrum or sliders, the
- * opacity (slider or percentage), a saved color pressed, or the eyedropper.
+ * opacity (slider or percentage), a saved color pressed, the eyedropper, or
+ * the system's color picker.
  */
 export type ColorPickerChangeEventDetails = {
   event: Event;
-  reason: 'eyedropper' | 'grid' | 'opacity' | 'saved' | 'sliders' | 'spectrum';
+  reason:
+    | 'eyedropper'
+    | 'grid'
+    | 'opacity'
+    | 'saved'
+    | 'sliders'
+    | 'spectrum'
+    | 'system-colors';
 };
 
 /** Why the saved colors changed (one added, or deleted), and the event. */
@@ -27,6 +35,8 @@ export type ColorPickerSavedColorsChangeEventDetails = {
 
 export type PickerState = {
   color: Rgba;
+  /** An `Opacity` rendered: the color's alpha its own (else opaque). */
+  hasOpacity: boolean;
   /** An `Opacity` rendered: the color keeping its alpha while it is. */
   registerOpacity: () => () => void;
   setColor: (color: Rgba, eventDetails: ColorPickerChangeEventDetails) => void;
@@ -134,6 +144,18 @@ export type ColorPickerSwatchesProps = ComponentProps<'div'> & {
 export type EyeDropperApi = { open: () => Promise<{ sRGBHex: string }> };
 
 export type ColorPickerEyedropperProps = Omit<
+  ButtonRootProps,
+  'onClick' | 'ref' | 'render'
+> & {
+  /**
+   * What it renders (e.g. a `Toolbar.Button` in a toolbar, sized as its
+   * other buttons).
+   * @default a `Button.Root`
+   */
+  render?: ReactElement<Record<string, unknown>>;
+};
+
+export type ColorPickerSystemColorsProps = Omit<
   ButtonRootProps,
   'onClick' | 'ref' | 'render'
 > & {
