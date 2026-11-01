@@ -322,8 +322,46 @@ export const sheetHeaderRows: readonly PropRow[] = [
       />
       , optional), then e.g. a <a href="toolbar">Toolbar</a> (its{' '}
       <code>placement=&quot;block-start&quot;</code>), with its title and
-      buttons. Only a grabber: over the content (its own bars, e.g. a
+      buttons. Over the content, which scrolls under it (its content making room
+      with a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Padding"
+      />
+      ). Only a grabber: over the content too, no bar (its own bars, e.g. a
       navigation’s, below it, as the content’s top safe area inset).
+    </>,
+  ],
+  [
+    'edgeEffect',
+    union('soft', 'hard', 'none'),
+    code(union('soft')),
+    <>
+      Its scroll edge effect, as the content scrolls under it (as a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Anchor"
+      />
+      ’s): <code>soft</code>, a blur fading out away from it; <code>hard</code>,
+      a solid backing with a dividing line; <code>none</code>. Only a grabber:
+      none. The content fades out under it, whatever the sheet’s background:
+      fully hidden under a share of it (<code>--uikit-viewport-edge-veil</code>,
+      0 to 1, a sheet’s <code>0.75</code>, heavier than a page’s; set on the
+      popup or above), showing past it. On a medium sheet’s glass, no blur: the
+      fade alone.
+    </>,
+  ],
+  [
+    'edgeTint',
+    'string',
+    undefined,
+    <>
+      A color for its edge effect, shown at rest too (as a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Anchor"
+      />
+      ’s).
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -348,7 +386,13 @@ export const sheetContentRows: readonly PropRow[] = [
     undefined,
     <>
       What scrolls: e.g. a <a href="list">List</a>, a form, a{' '}
-      <a href="navigation">Navigation</a>.
+      <a href="navigation">Navigation</a>. Under a header with more than a
+      grabber, first a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Padding"
+      />{' '}
+      (<code>edge=&quot;block-start&quot;</code>), making room for it.
     </>,
   ],
   ...baseUiRows('div', 'HTMLDivElement'),

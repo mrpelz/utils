@@ -8,7 +8,8 @@ import { sleep } from '../lib.js';
 
 /**
  * The open sheet (its panel, its actions' boxes), its trigger's box (if
- * any), and its screen's (its container).
+ * any), and its screen's (its container: the demo's phone, or raw, the
+ * window).
  *
  * @param {Page} page
  */
@@ -21,7 +22,7 @@ const sheet = (page) =>
       actions: [...popup.querySelectorAll('[data-action-sheet-part=action]')].map(box),
       backdrop: box(document.querySelector('[data-action-sheet-part=backdrop]')),
       panel: [box(popup), getComputedStyle(popup).borderRadius],
-      screen: box(document.querySelector('.demo-phone')),
+      screen: box(document.querySelector('.demo-phone')) ?? [0, 0, innerWidth, innerHeight],
       trigger: box(document.querySelector('[aria-haspopup]')),
     };
   })()`);
@@ -56,10 +57,14 @@ export const tests = [
       const [triggerLeft, triggerTop, triggerWidth, triggerHeight] =
         open.trigger;
       assert.equal(top - (triggerTop + triggerHeight), 8, 'below it');
-      assert.ok(
-        Math.abs(left + width / 2 - (triggerLeft + triggerWidth / 2)) <= 1,
-        'centered on it',
+      // Centered on it, within 8px of the screen's edges (raw, the window's:
+      // the trigger in its corner).
+      const [screenLeft, , screenWidth] = open.screen;
+      const centered = Math.min(
+        Math.max(triggerLeft + triggerWidth / 2 - width / 2, screenLeft + 8),
+        screenLeft + screenWidth - 8 - width,
       );
+      assert.ok(Math.abs(left - centered) <= 1, 'centered on it');
       assert.deepEqual(open.backdrop, open.screen, 'its backdrop fills it');
       // Stacked, 10px apart, 48px high, the panel's width (14px in).
       const [first, second] = open.actions;
@@ -92,7 +97,7 @@ export const tests = [
       const [screenLeft, , screenWidth] = open.screen;
       const screenBottom = open.screen[1] + open.screen[3];
       const inset = await page.evaluate(
-        `parseFloat(getComputedStyle(document.querySelector(${JSON.stringify('.demo-phone')})).getPropertyValue(${JSON.stringify('--uikit-safe-area-inset-bottom')}))`,
+        `parseFloat(getComputedStyle(document.querySelector(${JSON.stringify('.demo-phone')}) ?? document.documentElement).getPropertyValue(${JSON.stringify('--uikit-safe-area-inset-bottom')})) || 0`,
       );
       assert.equal(screenBottom - (top + height), inset + 8);
       assert.ok(

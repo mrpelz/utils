@@ -157,6 +157,7 @@ const InASheet: FunctionComponent = () => {
                 {modesControl()}
               </Sheet.Header>
               <Sheet.Content>
+                <Viewport.Padding edge="block-start" />
                 <ColorPicker.Panel>
                   {panelParts({ isModesElsewhere: true })}
                 </ColorPicker.Panel>
@@ -251,6 +252,7 @@ const InAListRow: FunctionComponent = () => {
                             {modesControl()}
                           </Sheet.Header>
                           <Sheet.Content>
+                            <Viewport.Padding edge="block-start" />
                             <ColorPicker.Panel>
                               {panelParts({ isModesElsewhere: true })}
                             </ColorPicker.Panel>

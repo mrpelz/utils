@@ -64,6 +64,7 @@ export {
 export { useScrollerRegistration, useViewportEdgeElement } from './edge.js';
 export { EdgeEffects } from './edge-effect.js';
 export {
+  useAnchorRegistration,
   useAnchorSize,
   useCreateViewportAnchorHandle,
   ViewportAnchorHandle,

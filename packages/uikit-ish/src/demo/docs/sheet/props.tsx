@@ -101,10 +101,12 @@ export const propOptionsPart = {
   ...commonPropOptions,
 };
 
-/** `Sheet.Header`: its own element (no `render`). */
+/** `Sheet.Header`: its own element (no `render`), its edge effect. */
 export const propOptionsHeader = {
   className: commonPropOptions.className,
   style: commonPropOptions.style,
+  edgeEffect: [undefined, 'soft', 'hard', 'none'] as const,
+  edgeTint: [undefined, 'rgb(255 59 48 / 30%)'] as const,
 };
 
 /** `Sheet.Grabber`: its own element (no `render`), its cursor. */

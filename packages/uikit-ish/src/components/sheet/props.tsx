@@ -2,6 +2,8 @@ import type { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import type { Properties } from 'csstype';
 import type { ComponentProps } from 'react';
 
+import type { ViewportEdgeEffect } from '../viewport/main.js';
+
 export type SheetDetent = 'large' | 'medium';
 
 /**
@@ -51,6 +53,20 @@ export type SheetPopupProps = Omit<BaseDrawer.Popup.Props, 'ref'> & {
    * @default 'large'
    */
   detent?: SheetDetent;
+};
+
+export type SheetHeaderProps = ComponentProps<'div'> & {
+  /**
+   * Its scroll edge effect, as the content scrolls under it (see
+   * `Viewport.Anchor`): `soft`, a blur fading out away from it; `hard`, a
+   * solid backing with a dividing line; `none`. Only a grabber: none.
+   * @default 'soft'
+   */
+  edgeEffect?: ViewportEdgeEffect;
+  /**
+   * A color for its edge effect, shown at rest too (see `Viewport.Anchor`).
+   */
+  edgeTint?: string;
 };
 
 export type SheetContentProps = Omit<BaseDrawer.Content.Props, 'ref'>;

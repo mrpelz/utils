@@ -136,6 +136,7 @@ const LiveView: FunctionComponent = () => {
                   {modesControl(shownModes(content))}
                 </Sheet.Header>
                 <Sheet.Content>
+                  <Viewport.Padding edge="block-start" />
                   <ColorPicker.Panel>{parts(true)}</ColorPicker.Panel>
                   <Viewport.Padding edge="block-end" />
                 </Sheet.Content>

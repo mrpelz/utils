@@ -201,6 +201,7 @@ export const ColorPickerDemo: FunctionComponent = () => {
                   {modesControl(composition.modes)}
                 </Sheet.Header>
                 <Sheet.Content>
+                  <Viewport.Padding edge="block-start" />
                   {panel(true)}
                   <Viewport.Padding edge="block-end" />
                 </Sheet.Content>

@@ -115,6 +115,7 @@ const LiveView: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>

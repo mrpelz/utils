@@ -180,6 +180,7 @@ const InASheetWithCancelDone: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <Form
                 id={formId}
                 onFormSubmit={(values: Record<string, unknown>) => {

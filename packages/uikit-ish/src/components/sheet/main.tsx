@@ -3,9 +3,10 @@ import './style.css';
 
 import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import {
-  ComponentProps,
+  Children,
   createContext,
   forwardRef,
+  isValidElement,
   ReactNode,
   useContext,
   useState,
@@ -14,6 +15,7 @@ import {
 import { cn, useForwardedRef, usePortalContainer } from '../utils/main.js';
 import {
   EdgeEffects,
+  useAnchorRegistration,
   useScrollerRegistration,
   useSizeClass,
   ViewportScopeContext,
@@ -22,6 +24,7 @@ import type {
   SheetContentProps,
   SheetGrabberProps,
   SheetHandle,
+  SheetHeaderProps,
   SheetPopupProps,
   SheetRootProps,
 } from './props.js';
@@ -31,6 +34,7 @@ export type {
   SheetDetent,
   SheetGrabberProps,
   SheetHandle,
+  SheetHeaderProps,
   SheetPopupProps,
   SheetRootProps,
   SheetSwipeDirection,
@@ -143,21 +147,6 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
 );
 
 /**
- * Its header: its grabber (`Grabber`), above the app's content (e.g. a
- * `Toolbar`); with only a grabber, over the content (see style.css).
- */
-const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      data-sheet-part="header"
-      {...props}
-      className={cn('uikit-sheet-header', className)}
-    />
-  ),
-);
-
-/**
  * Its grabber (36px by 5px, 5px from the top): showing the sheet
  * can be swiped (it can be anywhere); left out, a cleaner top.
  */
@@ -173,10 +162,51 @@ const Grabber = forwardRef<HTMLDivElement, SheetGrabberProps>(
   ),
 );
 
+/** Not registered (see `Header`). */
+const noElement = { current: null };
+
+/**
+ * Its header: its grabber (`Grabber`), above the app's content (e.g. a
+ * `Toolbar`). Over the content, which scrolls under it (its edge effect,
+ * see `EdgeEffects`): a bar of the sheet's (a block-start anchor in its
+ * scope), its content making room with a `Viewport.Padding` (as a page
+ * under its toolbar). Only a grabber: over the content too, no bar (the
+ * content's own bars below it, see style.css).
+ */
+const Header = forwardRef<HTMLDivElement, SheetHeaderProps>(
+  (
+    { children, className, edgeEffect = 'soft', edgeTint, ...props },
+    forwardedRef,
+  ) => {
+    const ref = useForwardedRef(forwardedRef);
+    const isGrabberOnly = Children.toArray(children).every(
+      (child) => isValidElement(child) && child.type === Grabber,
+    );
+    useAnchorRegistration(
+      isGrabberOnly ? noElement : ref,
+      'block-start',
+      undefined,
+      { effect: edgeEffect, tint: edgeTint },
+    );
+
+    return (
+      <div
+        ref={ref}
+        data-sheet-part="header"
+        {...props}
+        className={cn('uikit-sheet-header', className)}
+      >
+        {children}
+      </div>
+    );
+  },
+);
+
 /**
  * Its content, scrolling (Base UI's `Drawer.Content`: its text selectable by
  * a mouse without swiping the sheet); a scroller (registered), drawing its
- * bars' edge effects (see `Viewport`).
+ * bars' edge effects (see `Viewport`): beside it, not in it, so its mask
+ * (fading it out under the header, see style.css) leaves them be.
  */
 const Content = forwardRef<HTMLDivElement, SheetContentProps>(
   ({ children, className, ...props }, forwardedRef) => {
@@ -184,16 +214,18 @@ const Content = forwardRef<HTMLDivElement, SheetContentProps>(
     useScrollerRegistration(ref);
 
     return (
-      <BaseDrawer.Content
-        ref={ref}
-        className={cn('uikit-sheet-content', className)}
-        data-sheet-part="content"
-        data-viewport-scroller=""
-        {...props}
-      >
-        {children as ReactNode}
+      <>
+        <BaseDrawer.Content
+          ref={ref}
+          className={cn('uikit-sheet-content', className)}
+          data-sheet-part="content"
+          data-viewport-scroller=""
+          {...props}
+        >
+          {children as ReactNode}
+        </BaseDrawer.Content>
         <EdgeEffects scroller={ref} />
-      </BaseDrawer.Content>
+      </>
     );
   },
 );

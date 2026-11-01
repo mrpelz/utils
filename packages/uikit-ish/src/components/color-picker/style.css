@@ -1,6 +1,10 @@
 /* Color-picker (see main.tsx). */
 @layer uikit-ish {
   .uikit-color-picker-root {
+    /* Its content's start below a header over it (e.g. a sheet's: its
+       Viewport.Padding's margin), its modes' 24px to the views. */
+    --uikit-content-margin-block-start: 14px;
+
     display: flex;
     box-sizing: border-box;
     flex-direction: column;
@@ -344,7 +348,8 @@
 
   /* Its modes' control: 24px above the views; outside the panel (e.g. a
      sheet's header, after the picker's header), inset as the panel's
-     content, the sheet's header's 10px below it, too. */
+     content, those 24px the header's 10px below it and its content's
+     margin (see the root). */
   .uikit-color-picker-modes {
     flex: none;
     margin-block-end: 24px;
@@ -354,7 +359,7 @@
     :not(.uikit-color-picker-panel) > & {
       width: auto;
       align-self: stretch;
-      margin: 0 16px 14px;
+      margin: 0 16px;
     }
   }
 

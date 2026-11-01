@@ -41,6 +41,9 @@ export const tests = [
       // Opacity: 50% (as an alpha channel), applied as it's typed.
       await press(page, '[aria-label="Opacity percentage"]');
       /** Types into the opacity's field (as an input event would set it). */
+      /**
+       * @param {string} text
+       */
       const typeOpacity = (text) =>
         page.evaluate(`(() => {
           const input = document.querySelector(${JSON.stringify('[aria-label="Opacity percentage"]')});

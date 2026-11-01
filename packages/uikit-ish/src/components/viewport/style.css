@@ -217,12 +217,21 @@
     }
 
     /* Soft: a blur fading out away from the edge (16px further), the tint
-       under the same fade. */
+       under the same fade; over the blur, the background behind the content
+       in a secondary scroller (--uikit-viewport-edge-background: a
+       sheet's, a page's in it too), so the content fades into it at the
+       edge, not lightening (or darkening) the bars with its own colors; a
+       page's (primary) bars, the blur alone. Solid under half of it,
+       fading out past it; with a veil (`--uikit-viewport-edge-veil`, 0 to
+       1, e.g. a sheet's: the heavier, the less of the content shows
+       through), solid under that share of the bars. (Unset, the veiled
+       length is invalid, its fallback the half.) */
     &[data-edge-effect='soft'] {
       height: calc(var(--uikit-viewport-edge-reach) + 16px);
 
       &::before {
         backdrop-filter: blur(8px);
+        background-color: var(--uikit-viewport-edge-background, transparent);
       }
 
       &::after {
@@ -232,14 +241,24 @@
 
       /* (Masked each, not the layer: masked, it would be the blur's
          backdrop root, the blur seeing nothing behind it.) */
+      --uikit-viewport-edge-veiled: calc(
+        var(--uikit-viewport-edge-size) * var(--uikit-viewport-edge-veil)
+      );
+
       &[data-edge='block-start']::before,
       &[data-edge='block-start']::after {
-        mask-image: linear-gradient(#000 50%, transparent);
+        mask-image: linear-gradient(
+          #000 var(--uikit-viewport-edge-veiled, 50%),
+          transparent
+        );
       }
 
       &[data-edge='block-end']::before,
       &[data-edge='block-end']::after {
-        mask-image: linear-gradient(transparent, #000 50%);
+        mask-image: linear-gradient(
+          transparent,
+          #000 calc(100% - var(--uikit-viewport-edge-veiled, 50%))
+        );
       }
     }
 

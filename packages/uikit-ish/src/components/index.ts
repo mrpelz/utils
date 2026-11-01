@@ -43,6 +43,7 @@ export {
   Sheet,
   type SheetContentProps,
   type SheetGrabberProps,
+  type SheetHeaderProps,
   type SheetDetent,
   type SheetHandle,
   type SheetPopupProps,

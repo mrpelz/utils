@@ -113,7 +113,11 @@ const edgeEffectRow: PropRow = [
       component="viewport"
       part="useViewportEdgeElement"
     />
-    ).
+    ). How much of the content shows through it: <code>soft</code>, solid under
+    half of the effect, fading out past it; with a veil (
+    <code>--uikit-viewport-edge-veil</code>, 0 to 1: the heavier, the less; set
+    on the scroller or above), solid under that share of the anchor. A sheet’s
+    is <code>0.75</code>.
   </>,
 ];
 

@@ -9,7 +9,8 @@ import { sleep } from '../lib.js';
 
 /**
  * The open sheet's box (left, top, right, bottom from its screen's edges:
- * the demo's phone or tablet, or the viewport's) and corners, or null.
+ * the demo's phone or tablet, or the viewport's), corners and width, its
+ * screen's width and top safe area inset (raw: none), or null.
  *
  * @param {Page} page
  */
@@ -20,7 +21,8 @@ const sheet = (page) =>
     const screen = popup.closest('.demo-phone, .demo-tablet');
     const frame = screen ? screen.getBoundingClientRect() : { bottom: innerHeight, left: 0, right: innerWidth, top: 0 };
     const { bottom, left, right, top } = popup.getBoundingClientRect();
-    return { box: [left - frame.left, top - frame.top, frame.right - right, frame.bottom - bottom].map(Math.round), radius: getComputedStyle(popup).borderRadius, width: Math.round(right - left) };
+    const safeTop = parseFloat(getComputedStyle(screen ?? document.documentElement).getPropertyValue('--uikit-safe-area-inset-top')) || 0;
+    return { box: [left - frame.left, top - frame.top, frame.right - right, frame.bottom - bottom].map(Math.round), radius: getComputedStyle(popup).borderRadius, safeTop: Math.round(safeTop), screenWidth: Math.round(frame.right - frame.left), width: Math.round(right - left) };
   })()`);
 
 /** @type {import('../lib.js').Test[]} */
@@ -33,11 +35,13 @@ export const tests = [
         state: [{ $rest: true, defaultOpen: true }],
       });
       await sleep(600);
-      assert.deepEqual(await sheet(page), {
-        box: [0, 72, 0, 0],
-        radius: '38px 38px 0px 0px',
-        width: 402,
-      });
+      const large = await sheet(page);
+      if (!large) throw new Error('not open');
+      assert.deepEqual(
+        [large.box, large.radius, large.width],
+        [[0, 10 + large.safeTop, 0, 0], '38px 38px 0px 0px', large.screenWidth],
+        '10px below the top safe area, the screen’s width',
+      );
 
       await page.open('sheet', 'light', {
         state: [{ defaultOpen: true }, { detent: 'medium' }],

@@ -135,7 +135,10 @@ sheet ? (
         <Sheet.Grabber />
         <Toolbar.Root placement="block-start">…</Toolbar.Root>
       </Sheet.Header>
-      <Sheet.Content>{/* the same content */}</Sheet.Content>
+      <Sheet.Content>
+        <Viewport.Padding edge="block-start" />
+        {/* the same content */}
+      </Sheet.Content>
     </Sheet.Popup>
   </Sheet.Root>
 ) : (
@@ -230,6 +233,7 @@ const ASheetOnIPhone: FunctionComponent = () => {
                 </Toolbar.Root>
               </Sheet.Header>
               <Sheet.Content>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>

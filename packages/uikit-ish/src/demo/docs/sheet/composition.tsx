@@ -92,7 +92,10 @@ const discard = () => {
         </Toolbar.Trailing>
       </Toolbar.Root>
     </Sheet.Header>
-    <Sheet.Content>…{/* its fields */}</Sheet.Content>
+    <Sheet.Content>
+      <Viewport.Padding edge="block-start" />
+      …{/* its fields */}
+    </Sheet.Content>
     <ActionSheet.Root open={isConfirming} onOpenChange={setIsConfirming}>
       <ActionSheet.Popup>
         <ActionSheet.Actions>
@@ -204,6 +207,7 @@ const Detents: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -256,6 +260,7 @@ const Detents: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -346,6 +351,7 @@ const CancelDone: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -441,6 +447,7 @@ const WithoutAGrabber: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
@@ -646,6 +653,7 @@ const FormSheet: FunctionComponent = () => {
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <List.Root>
                 <List.Section>
                   <List.Group>
