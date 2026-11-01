@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import {
   ColorPicker,
   type ColorPickerSlidersModel,
+  type ColorPickerSlidersRange,
   type ColorPickerSwatchesProps,
 } from '../../../components/index.js';
 
@@ -11,8 +12,14 @@ import {
 
 type ModeEntry = [value: string, label: string, view: ReactNode];
 
-const sliders = (model?: ColorPickerSlidersModel) => (
-  <ColorPicker.Sliders model={model} />
+const sliders = (
+  model?: ColorPickerSlidersModel,
+  range?: ColorPickerSlidersRange,
+) => (
+  <ColorPicker.Sliders
+    model={model}
+    range={range}
+  />
 );
 
 const grid: ModeEntry = ['grid', 'Grid', <ColorPicker.Grid key="grid" />];
@@ -34,12 +41,15 @@ export const modeSets = {
 
 export type ModeSet = keyof typeof modeSets;
 
-/** Each mode rendered or not (as a prop control's, see the overview). */
+/**
+ * Each mode rendered or not (as a prop control's, see the overview); RGB,
+ * in its range.
+ */
 export type ModesShown = {
   cmyk?: boolean;
   grid?: boolean;
   hsl?: boolean;
-  rgb?: boolean;
+  rgb?: ColorPickerSlidersRange | false;
   spectrum?: boolean;
 };
 
@@ -51,14 +61,18 @@ export const shownModes = ({
   cmyk: isCmyk = false,
   grid: isGrid = true,
   hsl: isHsl = false,
-  rgb: isRgb = true,
+  rgb: rgbRange = 'byte',
   spectrum: isSpectrum = true,
 }: ModesShown): ModeEntry[] => {
-  const rgbEntry = isHsl || isCmyk ? rgb : modeSets.system[2];
+  const rgbEntry: ModeEntry = [
+    'rgb',
+    isHsl || isCmyk ? 'RGB' : 'Sliders',
+    sliders(isHsl || isCmyk ? 'rgb' : undefined, rgbRange || undefined),
+  ];
   return [
     isGrid ? grid : undefined,
     isSpectrum ? spectrum : undefined,
-    isRgb ? rgbEntry : undefined,
+    rgbRange ? rgbEntry : undefined,
     isHsl ? hsl : undefined,
     isCmyk ? cmyk : undefined,
   ].filter((entry) => entry !== undefined);

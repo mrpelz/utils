@@ -90,6 +90,7 @@ export const getPropOptionsSwatches = (addLog: AddLog) => ({
 export const propOptionsSliders = {
   ...propOptionsElement,
   model: [undefined, 'rgb', 'hsl', 'cmyk'] as const,
+  range: [undefined, 'byte', 'percentage'] as const,
 };
 
 /** A mode's (its label; its value, the view's it shows). */
@@ -142,13 +143,13 @@ export const propOptionsPresentation = {
 
 /**
  * The overview's: its presentation, which modes (and the opacity) its
- * panel renders (see panel.tsx).
+ * panel renders (see panel.tsx); RGB's, in which range.
  */
 export const propOptionsOverviewContent = {
   ...propOptionsPresentation,
   grid: [true, false] as const,
   spectrum: [true, false] as const,
-  rgb: [true, false] as const,
+  rgb: ['byte', 'percentage', false] as const,
   hsl: [false, true] as const,
   cmyk: [false, true] as const,
   opacity: [true, false] as const,

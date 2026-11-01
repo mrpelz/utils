@@ -8,12 +8,14 @@ import type { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import { Slider as BaseSlider } from '@base-ui/react/slider';
 import { useRender } from '@base-ui/react/use-render';
 import {
+  Children,
   cloneElement,
   ComponentProps,
   createContext,
   CSSProperties,
   forwardRef,
   FunctionComponent,
+  isValidElement,
   KeyboardEvent,
   MouseEvent,
   PointerEvent,
@@ -60,6 +62,7 @@ export type {
   ColorPickerSavedColorsChangeEventDetails,
   ColorPickerSlidersModel,
   ColorPickerSlidersProps,
+  ColorPickerSlidersRange,
   ColorPickerSwatchesProps,
   ColorPickerViewProps,
   ColorWellProps,
@@ -73,9 +76,10 @@ export type {
 //   corners 18px, the selected one outlined white (3px);
 // - Spectrum: hues across, light to dark down (white at the top, pure hues
 //   halfway, black at the bottom), its corners 18px, the color ringed;
-// - Sliders: red, green and blue (0 to 255), each a channel's row (see
-//   `ChannelRow`): its title (all caps), a slider mixing from the color
-//   (the channel at 0 to 255), and its value, typed;
+// - Sliders: red, green and blue (0 to 255; or 0 to 100%, see `Sliders`),
+//   each a channel's row (see `ChannelRow`): its title (all caps), a slider
+//   mixing from the color (the channel along its range), and its value,
+//   typed;
 // - Each channel's row kept above the keyboard as its field's typed into
 //   (a `Viewport.KeyboardAccessory`; in a `Viewport.Provider`);
 // - Opacity (optional: its part, `Opacity`), a channel's row too: the
@@ -197,7 +201,9 @@ const PickerContext = createContext<PickerState>({
  * `Mode` (or `View`) unless a default is given.
  */
 const PanelContext = createContext<PanelState>({
+  isGridHeight: false,
   mode: null,
+  registerGridHeight: () => unregister,
   registerMode: () => undefined,
   setMode: () => undefined,
 });
@@ -257,9 +263,18 @@ const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
     // (Controlled from the start: none yet, before its first mode is
     // known, not undefined, which would leave its control uncontrolled.)
     const mode = modeProp ?? ownMode ?? firstMode ?? null;
+    // Its views of the grid's height (a `Grid`, a `Spectrum`): with one,
+    // all as high (see `View`).
+    const [gridHeights, setGridHeights] = useState(0);
+    const registerGridHeight = useCallback(() => {
+      setGridHeights((count) => count + 1);
+      return () => setGridHeights((count) => count - 1);
+    }, []);
     const modes = useMemo(
       () => ({
+        isGridHeight: gridHeights > 0,
         mode,
+        registerGridHeight,
         registerMode: (next: string) => setFirstMode((first) => first ?? next),
         // Uncontrolled: its own state; controlled, only the app's `mode`.
         setMode: (next: string, details: BaseRadioGroup.ChangeEventDetails) => {
@@ -267,7 +282,7 @@ const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
           onModeChange?.(next, details);
         },
       }),
-      [mode, modeProp, onModeChange],
+      [gridHeights, mode, modeProp, onModeChange, registerGridHeight],
     );
 
     const element = useRender({
@@ -355,29 +370,6 @@ const Mode = forwardRef<HTMLElement, ColorPickerModeProps>(
         ref={ref}
         value={value}
         {...props}
-      />
-    );
-  },
-);
-
-/**
- * A mode's view (by `value`, its `Mode`'s): shown while it's chosen; all
- * as high as the grid (so a popover doesn't move as they're switched).
- */
-const View = forwardRef<HTMLDivElement, ColorPickerViewProps>(
-  ({ className, value, ...props }, ref) => {
-    const { mode, registerMode } = useContext(PanelContext);
-    // (A mode, too: without `Modes`, its only view shown.)
-    useLayoutEffect(() => registerMode(value), [registerMode, value]);
-    if (mode !== value) return null;
-
-    return (
-      <div
-        ref={ref}
-        data-color-picker-view={value}
-        {...props}
-        className={cn('uikit-color-picker-view', className)}
-        data-color-picker-part="view"
       />
     );
   },
@@ -489,6 +481,45 @@ const Spectrum = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
             top: `${String((1 - l) * 100)}%`,
           }}
         />
+      </div>
+    );
+  },
+);
+
+/**
+ * A mode's view (by `value`, its `Mode`'s): shown while it's chosen. With a
+ * view of the grid's height (a `Grid` or `Spectrum` in it) among them, all
+ * as high (so a popover doesn't move as they're switched); without, each as
+ * high as its content (e.g. sliders alone).
+ */
+const View = forwardRef<HTMLDivElement, ColorPickerViewProps>(
+  ({ children, className, value, ...props }, ref) => {
+    const { isGridHeight, mode, registerGridHeight, registerMode } =
+      useContext(PanelContext);
+    // (A mode, too: without `Modes`, its only view shown.)
+    useLayoutEffect(() => registerMode(value), [registerMode, value]);
+    // (Rendered or not: its own height known by its children's types.)
+    const isOwnGridHeight = Children.toArray(children).some(
+      (child) =>
+        isValidElement(child) &&
+        (child.type === Grid || child.type === Spectrum),
+    );
+    useLayoutEffect(
+      () => (isOwnGridHeight ? registerGridHeight() : undefined),
+      [isOwnGridHeight, registerGridHeight],
+    );
+    if (mode !== value) return null;
+
+    return (
+      <div
+        ref={ref}
+        data-color-picker-view={value}
+        {...props}
+        className={cn('uikit-color-picker-view', className)}
+        data-color-picker-part="view"
+        data-grid-height={isGridHeight ? '' : undefined}
+      >
+        {children}
       </div>
     );
   },
@@ -673,6 +704,11 @@ type Model = {
   }[];
   /** The color's channels (rounded). */
   from: (color: Rgba) => number[];
+  /**
+   * The color, one channel set (only it: the others as they are, not as
+   * rounded; by default, from all of them, see `to`).
+   */
+  set?: (color: Rgba, index: number, value: number) => Omit<Rgba, 'a'>;
   /** Channels as a color (its red, green and blue). */
   to: (values: readonly number[]) => Omit<Rgba, 'a'>;
 };
@@ -725,7 +761,46 @@ const rgb: Model = {
   to: ([r = 0, g = 0, b = 0]) => ({ b, g, r }),
 };
 
+const rgbKeys = ['r', 'g', 'b'] as const;
+
+/**
+ * Red, green and blue in percent (0–100%): coarser than bytes, so a channel
+ * set leaves the others as they are (not as rounded, see `set`).
+ */
+const rgbPercentage: Model = {
+  channels: [
+    { label: 'Red', max: 100, unit: '%' },
+    { label: 'Green', max: 100, unit: '%' },
+    { label: 'Blue', max: 100, unit: '%' },
+  ],
+  from: ({ b, g, r }) =>
+    [r, g, b].map((channel) => Math.round((channel / 255) * 100)),
+  set: ({ b, g, r }, index, value) => ({
+    b,
+    g,
+    r,
+    [rgbKeys[index] ?? 'r']: (value * 255) / 100,
+  }),
+  to: ([r = 0, g = 0, b = 0]) => ({
+    b: (b * 255) / 100,
+    g: (g * 255) / 100,
+    r: (r * 255) / 100,
+  }),
+};
+
 const models: Record<ColorPickerSlidersModel, Model> = { cmyk, hsl, rgb };
+
+/** A model's color, one channel set (see `Model`'s `set`). */
+const withChannel = (
+  model: Model,
+  color: Rgba,
+  values: readonly number[],
+  index: number,
+  value: number,
+) =>
+  model.set
+    ? model.set(color, index, value)
+    : model.to(values.with(index, value));
 
 /**
  * A channel's track's colors: the color with the channel along its range,
@@ -734,32 +809,46 @@ const models: Record<ColorPickerSlidersModel, Model> = { cmyk, hsl, rgb };
  */
 const trackColors = (
   model: Model,
+  color: Rgba,
   values: readonly number[],
   index: number,
 ) => {
   const { max } = model.channels[index] ?? { max: 1 };
   const steps = model === hsl ? ([6, 1, 2][index] ?? 1) : 1;
-  return Array.from({ length: steps + 1 }, (_, step) => {
-    const next = values.with(index, (max * step) / steps);
-    return formatColor({ ...model.to(next), a: 1 });
-  });
+  return Array.from({ length: steps + 1 }, (_, step) =>
+    formatColor({
+      ...withChannel(model, color, values, index, (max * step) / steps),
+      a: 1,
+    }),
+  );
 };
 
 /**
- * Sliders: a color model's channels (`model`: red, green and blue; hue,
- * saturation and lightness; cyan, magenta, yellow and black), each mixing
- * from the color, its value typed too.
+ * Sliders: a color model's channels (`model`: red, green and blue, in bytes
+ * or percent, its `range`; hue, saturation and lightness; cyan, magenta,
+ * yellow and black), each mixing from the color, its value typed too.
  */
 const Sliders = forwardRef<HTMLDivElement, ColorPickerSlidersProps>(
-  ({ className, model: modelName = 'rgb', ...props }, ref) => {
+  ({ className, model: modelName = 'rgb', range = 'byte', ...props }, ref) => {
     const { color, setColor } = useContext(PickerContext);
-    const model = models[modelName];
+    const model =
+      modelName === 'rgb' && range === 'percentage'
+        ? rgbPercentage
+        : models[modelName];
     const opaque = formatColor({ ...color, a: 1 });
 
-    // Its values as last set, while they're the color's: so a hue isn't
-    // lost to a gray (no saturation), nor inks to black (all of it).
-    const [last, setLast] = useState<{ color: string; values: number[] }>();
-    const values = last?.color === opaque ? last.values : model.from(color);
+    // Its values as last set, while they're the color's (and its model's):
+    // so a hue isn't lost to a gray (no saturation), nor inks to black (all
+    // of it).
+    const [last, setLast] = useState<{
+      color: string;
+      model: Model;
+      values: number[];
+    }>();
+    const values =
+      last?.color === opaque && last.model === model
+        ? last.values
+        : model.from(color);
 
     return (
       <div
@@ -768,21 +857,26 @@ const Sliders = forwardRef<HTMLDivElement, ColorPickerSlidersProps>(
         className={cn('uikit-color-picker-sliders', className)}
         data-color-picker-part="sliders"
         data-model={modelName}
+        data-range={modelName === 'rgb' ? range : undefined}
       >
         {model.channels.map(({ label, max, unit }, index) => (
           <ChannelRow
             key={label}
             label={label}
             max={max}
-            stops={trackColors(model, values, index)}
+            stops={trackColors(model, color, values, index)}
             thumbColor={opaque}
             unit={unit}
             value={values[index] ?? 0}
             onValueChange={(next, event) => {
               const nextValues = values.with(index, next);
-              const nextColor = { ...model.to(nextValues), a: color.a };
+              const nextColor = {
+                ...withChannel(model, color, values, index, next),
+                a: color.a,
+              };
               setLast({
                 color: formatColor({ ...nextColor, a: 1 }),
+                model,
                 values: nextValues,
               });
               setColor(nextColor, { event, reason: 'sliders' });

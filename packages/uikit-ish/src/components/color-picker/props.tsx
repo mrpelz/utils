@@ -34,7 +34,11 @@ export type PickerState = {
 
 /** A panel's modes (see `Panel`). */
 export type PanelState = {
+  /** Its views all as high as the grid (one of them a grid, a spectrum). */
+  isGridHeight: boolean;
   mode: string | null;
+  /** A view of the grid's height, while mounted (its cleanup). */
+  registerGridHeight: () => () => void;
   registerMode: (value: string) => void;
   setMode: (
     mode: string,
@@ -93,12 +97,23 @@ export type ColorPickerViewProps = ComponentProps<'div'> & {
  */
 export type ColorPickerSlidersModel = 'cmyk' | 'hsl' | 'rgb';
 
+/**
+ * Red, green and blue's range: in bytes (0–255), or in percent (0–100%,
+ * coarser: a channel set, the others kept exact).
+ */
+export type ColorPickerSlidersRange = 'byte' | 'percentage';
+
 export type ColorPickerSlidersProps = ComponentProps<'div'> & {
   /**
    * Its color model: its channels' sliders.
    * @default 'rgb'
    */
   model?: ColorPickerSlidersModel;
+  /**
+   * Red, green and blue's range (`model` `rgb`; the others' are fixed).
+   * @default 'byte'
+   */
+  range?: ColorPickerSlidersRange;
 };
 
 export type ColorPickerSwatchesProps = ComponentProps<'div'> & {

@@ -79,6 +79,7 @@ export {
   type ColorPickerSavedColorsChangeEventDetails,
   type ColorPickerSlidersModel,
   type ColorPickerSlidersProps,
+  type ColorPickerSlidersRange,
   type ColorPickerSwatchesProps,
   type ColorPickerViewProps,
   type ColorWellProps,

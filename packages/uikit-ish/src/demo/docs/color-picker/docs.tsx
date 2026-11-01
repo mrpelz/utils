@@ -269,9 +269,21 @@ export const colorPickerSlidersRows: readonly PropRow[] = [
     union('rgb', 'hsl', 'cmyk'),
     code('rgb'),
     <>
-      Its color model, its channels’ sliders: red, green and blue (0–255); hue
-      (0–360°), saturation and lightness (0–100%); cyan, magenta, yellow and
-      black (0–100%; naive, from sRGB, no ink’s profile).
+      Its color model, its channels’ sliders: red, green and blue (0–255, or
+      0–100%: its <code>range</code>); hue (0–360°), saturation and lightness
+      (0–100%); cyan, magenta, yellow and black (0–100%; naive, from sRGB, no
+      ink’s profile).
+    </>,
+  ],
+  [
+    'range',
+    union('byte', 'percentage'),
+    code('byte'),
+    <>
+      Red, green and blue’s range (<code>model</code> <code>rgb</code>; the
+      others’ are fixed): in bytes (0–255), or in percent (0–100%). Percent is
+      coarser: a channel set is rounded to it, the others (and a color picked
+      elsewhere, e.g. a swatch) kept exact.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),

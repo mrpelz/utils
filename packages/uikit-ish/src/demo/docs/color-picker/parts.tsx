@@ -713,7 +713,14 @@ export const ColorPickerParts: FunctionComponent = () => (
         s, in their order: which modes, and how they’re labeled (e.g. “Sliders”
         for one sliders view, “RGB”, “HSL” for several).
       </li>
-      <li>Optional: a panel with one view needs none.</li>
+      <li>
+        Optional: with one mode, leave it out (the panel’s only{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.View"
+        />{' '}
+        shown, no control to choose).
+      </li>
       <li>
         Renders a{' '}
         <PartLink
@@ -776,8 +783,23 @@ export const ColorPickerParts: FunctionComponent = () => (
         , the panel’s only one.
       </li>
       <li>
-        As high as the grid, its content centered: switching doesn’t move a
-        popover.
+        With a{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Grid"
+        />{' '}
+        or a{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Spectrum"
+        />{' '}
+        among the views, all as high as the grid, their content centered:
+        switching doesn’t move a popover. Without (e.g.{' '}
+        <PartLink
+          component="color-picker"
+          part="ColorPicker.Sliders"
+        />{' '}
+        alone), as high as its content.
       </li>
       <li>
         Renders a <code>div</code>.

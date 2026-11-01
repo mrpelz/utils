@@ -49,10 +49,13 @@ const LiveView: FunctionComponent = () => {
     { external: externalContent, isOpen: true, title: '[content]' },
   );
   // (Its modes' control in its panel, or elsewhere: the sheet's header.)
+  // Its modes; one alone, no control for them (its view shown).
+  const modes = shownModes(content);
+  const hasModesControl = modes.length > 1;
   const parts = (isModesElsewhere = false) =>
     panelParts({
-      isModesElsewhere,
-      modes: shownModes(content),
+      isModesElsewhere: isModesElsewhere || !hasModesControl,
+      modes,
       opacity: content.opacity,
     });
   const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
@@ -133,7 +136,7 @@ const LiveView: FunctionComponent = () => {
                       </Toolbar.Trailing>
                     </Toolbar.Root>
                   </ColorPicker.Header>
-                  {modesControl(shownModes(content))}
+                  {hasModesControl ? modesControl(modes) : null}
                 </Sheet.Header>
                 <Sheet.Content>
                   <Viewport.Padding edge="block-start" />
@@ -280,7 +283,10 @@ export const ColorPickerOverview: FunctionComponent = () => (
           ),
         ],
         ['ColorPicker.Panel', pickRows(colorPickerPanelRows, 'children')],
-        ['ColorPicker.Sliders', pickRows(colorPickerSlidersRows, 'model')],
+        [
+          'ColorPicker.Sliders',
+          pickRows(colorPickerSlidersRows, 'model', 'range'),
+        ],
         [
           'ColorPicker.Swatches',
           pickRows(colorPickerSwatchesRows, 'savedColors'),

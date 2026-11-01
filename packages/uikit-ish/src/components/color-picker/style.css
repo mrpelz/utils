@@ -250,6 +250,12 @@
     align-items: flex-start;
     gap: 30px;
     padding-block-start: 26px;
+
+    /* First in its panel (nothing above it to space it from, e.g. alone):
+       none. */
+    &:first-child {
+      padding-block-start: 0;
+    }
   }
 
   .uikit-color-picker-current {
@@ -374,14 +380,15 @@
     }
   }
 
-  /* A mode's view: as high as the grid (a spacer of its aspect ratio, in
-     the same cell), its content centered; higher only where its content
-     needs it (e.g. a narrow panel's sliders). */
+  /* A mode's view: with a grid or a spectrum among them, as high as the
+     grid (a spacer of its aspect ratio, in the same cell), its content
+     centered; higher only where its content needs it (e.g. a narrow
+     panel's sliders). Without, as high as its content. */
   .uikit-color-picker-view {
     display: grid;
     margin-block-end: 16px;
 
-    &::before {
+    &[data-grid-height]::before {
       align-self: start;
       aspect-ratio: 370 / 300;
       content: '';
