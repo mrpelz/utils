@@ -17,13 +17,19 @@ import { RefObject, useEffect, useLayoutEffect, useRef } from 'react';
 // of its own) drags it by its handle (`handle`: its grabber, its bar but its
 // buttons), its snapping off as it's dragged; let go, to the nearest stop
 // (flung, the next one its way); pressed, not dragged, to the next stop up
-// (from its top, its lowest).
+// (from its top, its lowest). At its top stop, its content (`content`)
+// pulled down past its start (Safari's bounce: its position negative; iOS
+// hands no gesture on from it midway) and let go: a stop down (from its
+// lowest, closed, if it closes); its content kept scrolling until it's
+// bounced back (`data-pulled`, see style.css: hidden at once, it'd jump).
 
 export type SnapOptions = {
   /** Its stop now (an index of `stops`). */
   active: number;
   /** Closed by scrolling it away (below its lowest stop), or not. */
   canClose: boolean;
+  /** Its content's scroller (a selector), pulled down a stop at its start. */
+  content?: string;
   /** What a mouse drags it by (a selector: e.g. its header). */
   handle?: string;
   onClose: (event: Event) => void;
@@ -43,6 +49,12 @@ const dragSlop = 4;
 
 /** How fast (px/ms) a mouse lets go for a fling (to the next stop). */
 const flingSpeed = 0.4;
+
+/** How far (px) its content is pulled past its start to step down. */
+const pullDistance = 50;
+
+/** How long (ms) its content may bounce back, at most (see above). */
+const pullHold = 1000;
 
 /** What a press on a handle is for itself, not a drag (its buttons…). */
 const interactive =
@@ -196,6 +208,45 @@ export const useSnap = (
       if (index !== current.active) current.onSelect(index, event);
     };
 
+    // Its content, held scrolling until it's bounced back (see above).
+    let held:
+      | {
+          content: HTMLElement;
+          onBack: () => void;
+          timer: ReturnType<typeof setTimeout>;
+        }
+      | undefined;
+
+    const release = () => {
+      if (!held) return;
+      clearTimeout(held.timer);
+      held.content.removeEventListener('scroll', held.onBack);
+      delete held.content.dataset.pulled;
+      held = undefined;
+    };
+
+    const onPull = (event: TouchEvent) => {
+      const { current } = optionsRef;
+      if (
+        !current?.content ||
+        current.active !== current.stops.length - 1 ||
+        (current.active === 0 && !current.canClose)
+      ) {
+        return;
+      }
+      const content = element.querySelector<HTMLElement>(current.content);
+      if (!content || content.scrollTop > -pullDistance) return;
+      release();
+      content.dataset.pulled = '';
+      const onBack = () => {
+        if (content.scrollTop >= 0) release();
+      };
+      held = { content, onBack, timer: setTimeout(release, pullHold) };
+      content.addEventListener('scroll', onBack, { passive: true });
+      if (current.active === 0) current.onClose(event);
+      else current.onSelect(current.active - 1, event);
+    };
+
     const onScroll = (event: Event) => {
       if (isTouching || performance.now() - input < inputDelay) {
         isScrolling.current = true;
@@ -300,6 +351,7 @@ export const useSnap = (
 
     element.addEventListener('scroll', onScroll, { passive: true });
     if (hasScrollEnd) element.addEventListener('scrollend', settle);
+    element.addEventListener('touchend', onPull, { passive: true });
     element.addEventListener('pointerdown', onDragStart);
     element.addEventListener('pointermove', onDragMove);
     element.addEventListener('pointerup', onDragEnd);
@@ -317,6 +369,8 @@ export const useSnap = (
       clearTimeout(rest);
       element.removeEventListener('scroll', onScroll);
       element.removeEventListener('scrollend', settle);
+      element.removeEventListener('touchend', onPull);
+      release();
       element.removeEventListener('pointerdown', onDragStart);
       element.removeEventListener('pointermove', onDragMove);
       element.removeEventListener('pointerup', onDragEnd);

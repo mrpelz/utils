@@ -356,6 +356,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
         ? {
             active: snap.active,
             canClose: !isNotSwiped,
+            content: '[data-sheet-part=content]',
             handle: dragHandle,
             onClose: snap.close,
             onSelect: snap.select,

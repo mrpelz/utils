@@ -439,11 +439,11 @@
       overscroll-behavior: auto;
     }
 
+    /* (Pulled down a stop: until it's bounced back, see snap.ts.) */
     :where(.uikit-sheet-popup[data-snap]:not([data-snap-top]) > .uikit-sheet-panel)
-      > & {
+      > &:not([data-pulled]) {
       overflow: hidden;
     }
-
 
     /* Its end clear of the home indicator (its background to the edge;
        none left for what's in it, see the popup); the gap to its content

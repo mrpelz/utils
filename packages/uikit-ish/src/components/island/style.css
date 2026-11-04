@@ -27,9 +27,33 @@
       margin-inline: 10px auto;
     }
 
+    /* Snapping: its scroller (as tall as it may be) clipped to its box, its
+       box reaching above it (`--uikit-island-reach`; its place as tall as
+       it shows): touched on it alone and its reach, the content beneath
+       above it (its shadow kept, beside it, below it); a sliver's further
+       (a grabber's alone: small, by the home indicator). Moved (see
+       main.tsx), reaching up all of its scroller (its clip kept: iOS, its
+       clip lifted as it's touched, drops the touch's pan). */
     &[data-snap] {
-      height: var(--uikit-island-shown);
+      --uikit-island-reach: 24px;
+
+      overflow: visible clip;
+      height: calc(var(--uikit-island-shown) + var(--uikit-island-reach));
+      padding-top: var(--uikit-island-reach);
+      margin-top: calc(-1 * var(--uikit-island-reach));
+      overflow-clip-margin: 16px;
       pointer-events: none;
+    }
+
+    &[data-snap][data-sliver] {
+      --uikit-island-reach: 44px;
+    }
+
+    &[data-snap][data-moving] {
+      --uikit-island-reach: max(
+        0px,
+        var(--uikit-island-max-height) - var(--uikit-island-shown)
+      );
     }
   }
 
@@ -219,8 +243,9 @@
       overscroll-behavior: auto;
     }
 
+    /* (Pulled down a stop: until it's bounced back, see sheet/snap.ts.) */
     :where(.uikit-island[data-snap] > .uikit-island-scroller:not([data-snap-top]) > .uikit-island-panel)
-      > & {
+      > &:not([data-pulled]) {
       overflow: hidden;
     }
 

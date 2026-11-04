@@ -9,6 +9,7 @@ import {
   RefObject,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -51,8 +52,8 @@ export type {
 // `--uikit-viewport-anchor-block-end`) follows it as it settles there.
 // Snapping natively, as a medium sheet's (see sheet/snap.ts): within its
 // box, pinned to its bottom, a scroller as tall as it may be (overflowing
-// it upward, touches through it but on its capsule: to the content
-// beneath), a spacer as tall, its panel (the capsule) as tall, a marker per
+// it upward, touched on all of it: iOS scrolls no scroller touches pass
+// through), a spacer as tall, its panel (the capsule) as tall, a marker per
 // stop. Never closed, nor scrolled below its lowest stop (its spacer short
 // of it: its scroll from there): its lowest stop its least (e.g. a sliver, its
 // grabber alone: then its capsule's glass a pill around its grabber alone,
@@ -116,6 +117,106 @@ const useSliverProgress = (
       element.style.removeProperty('--uikit-island-sliver');
     };
   }, [ref, sliverTo]);
+};
+
+/** How long (ms) after a wheel or key it may rest again (see below). */
+const idleDelay = 300;
+
+/**
+ * Its hit area (see style.css): at rest, its box (its scroller clipped to
+ * it, the content beneath touched above it); moved (pressed, wheeled,
+ * keyed, scrolled away from its stop `top`), all of its scroller's (it may
+ * grow), till it rests at its stop again (`data-moving`, on `ref`). Its
+ * layout untouched: its clip's reach alone (its clip kept).
+ */
+const useHitArea = (
+  ref: RefObject<HTMLElement | null>,
+  scroller: RefObject<HTMLElement | null>,
+  top: number | undefined,
+) => {
+  const topRef = useRef(top);
+  // (Its checks: its stop's changes, and its scroller's events.)
+  const check = useRef<(() => void) | undefined>(undefined);
+  const hasTop = top !== undefined;
+
+  useEffect(() => {
+    const { current: root } = ref;
+    const { current: element } = scroller;
+    if (!root || !element || !hasTop) return undefined;
+    let isPressed = false;
+    let frame = 0;
+    let idle: ReturnType<typeof setTimeout> | undefined;
+
+    const move = () => {
+      root.dataset.moving = '';
+    };
+    const rest = () => {
+      if (isPressed) return;
+      const { current: stop } = topRef;
+      const end = element.scrollHeight - element.clientHeight;
+      if (
+        stop !== undefined &&
+        Math.abs(element.scrollTop - Math.min(stop, end)) < 1
+      ) {
+        delete root.dataset.moving;
+      } else {
+        move();
+      }
+    };
+    check.current = rest;
+    // (Scrolled: read once a frame.)
+    const onScroll = () => {
+      if (frame !== 0) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        rest();
+      });
+    };
+
+    // Wheeled, keyed: rested again a while after (scrolling its content,
+    // or past its range's end, its scroller unscrolled).
+    const onInput = () => {
+      move();
+      clearTimeout(idle);
+      idle = setTimeout(rest, idleDelay);
+    };
+    const onPress = () => {
+      isPressed = true;
+      move();
+    };
+    const onRelease = () => {
+      if (!isPressed) return;
+      isPressed = false;
+      rest();
+    };
+    const listening = { capture: true, passive: true };
+    element.addEventListener('pointerdown', onPress, listening);
+    element.addEventListener('wheel', onInput, listening);
+    element.addEventListener('keydown', onInput, listening);
+    element.addEventListener('scroll', onScroll, { passive: true });
+    element.addEventListener('scrollend', rest);
+    globalThis.addEventListener('pointerup', onRelease, listening);
+    globalThis.addEventListener('pointercancel', onRelease, listening);
+    return () => {
+      check.current = undefined;
+      cancelAnimationFrame(frame);
+      clearTimeout(idle);
+      element.removeEventListener('pointerdown', onPress, listening);
+      element.removeEventListener('wheel', onInput, listening);
+      element.removeEventListener('keydown', onInput, listening);
+      element.removeEventListener('scroll', onScroll);
+      element.removeEventListener('scrollend', rest);
+      globalThis.removeEventListener('pointerup', onRelease, listening);
+      globalThis.removeEventListener('pointercancel', onRelease, listening);
+      delete root.dataset.moving;
+    };
+  }, [hasTop, ref, scroller]);
+
+  // (Its stop moved: away from it, till it's there; before it's scrolled.)
+  useLayoutEffect(() => {
+    topRef.current = top;
+    check.current?.();
+  }, [top]);
 };
 
 /** A stop chosen by the user, cancelable (see `onSnapPointChange`). */
@@ -239,28 +340,33 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
       isSnapping && sliver !== undefined && stops[0]?.[0] === sliver;
     const sliverTo = positions[1];
 
+    // A stop chosen by the user (by its index).
+    const select = (next: number, event: Event) => {
+      const name = stops[next]?.[0];
+      if (name === undefined) return;
+      const details = snapDetails(event);
+      onSnapPointChange?.(name, details);
+      if (snapPoint === undefined && !details.isCanceled) {
+        setOwn(name);
+      }
+    };
+
     useSnap(
       scroller,
       isSnapping
         ? {
             active: index,
             canClose: false,
+            content: '[data-island-part=content]',
             handle,
             onClose: noop,
-            onSelect: (next, event) => {
-              const name = stops[next]?.[0];
-              if (name === undefined) return;
-              const details = snapDetails(event);
-              onSnapPointChange?.(name, details);
-              if (snapPoint === undefined && !details.isCanceled) {
-                setOwn(name);
-              }
-            },
+            onSelect: select,
             stops: positions,
           }
         : undefined,
     );
     useSliverProgress(scroller, isSliver ? sliverTo : undefined);
+    useHitArea(ref, scroller, isSnapping ? positions[index] : undefined);
 
     // (Its box: its stop's, at most as tall as it may be.)
     const shown = isSnapping
