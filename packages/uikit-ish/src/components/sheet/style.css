@@ -371,9 +371,10 @@
     }
   }
 
-  /* Its stops (snapping): where it snaps, scrolled by as much. */
+  /* Its stops (snapping): where it snaps, scrolled by as much (by their
+     start; 1px high: iOS snaps to no area without a height). */
   .uikit-sheet-stop {
-    height: 0;
+    height: 1px;
     align-self: start;
     grid-area: 1 / 1;
     pointer-events: none;

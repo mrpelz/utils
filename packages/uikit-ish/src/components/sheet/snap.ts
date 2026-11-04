@@ -3,15 +3,16 @@ import { RefObject, useEffect, useLayoutEffect, useRef } from 'react';
 // Snapping by its snap groups' stops (see `SnapGroup`), natively: the
 // popup a scroller (`scroll-snap-type: y mandatory`), a spacer as high as
 // it, then its panel (the sheet's look: glass, or opaque), as high too, and
-// a zero-height marker per stop (and at 0: closed) its snap positions
-// (see style.css). Scrolled by `h`, `h` of the panel shows, from its top to
-// the popup's bottom (a capsule's: above the bottom inset, its corners
-// clipped round). Its content scrolls at its top stop only (handing back to
-// the popup at its start, natively). Nothing moves its scroll while it's
-// scrolled: its stop read as it comes to rest, a stop set by the app
-// scrolled to (smoothly; as it opens, or its stops re-measured, at once).
-// Only the user's scrolls (touched, wheeled, keyed) choose a stop: any
-// other (the browser's, re-snapping as its stops move) is brought back.
+// a 1px marker per stop (and at 0: closed; iOS snaps to none at 0px) its
+// snap positions (see style.css). Scrolled by `h`, `h` of the panel shows,
+// from its top to the popup's bottom (a capsule's: above the bottom inset,
+// its corners clipped round). Its content scrolls at its top stop only
+// (handing back to the popup at its start, natively). Nothing moves its
+// scroll while it's scrolled: its stop read as it comes to rest, a stop
+// set by the app scrolled to (smoothly; as it opens, or its stops
+// re-measured, at once). Only the user's scrolls (touched, wheeled, keyed)
+// choose a stop: any other (the browser's, re-snapping as its stops move)
+// is brought back.
 // Its stops within its scroll's range (Safari, a marker past its end,
 // snaps to that and holds it), see style.css. A mouse (no native scroll
 // of its own) drags it by its handle (`handle`: its grabber, its bar but its
