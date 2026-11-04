@@ -639,7 +639,7 @@ export const ColorPickerParts: FunctionComponent = () => (
       </li>
       <li>Well: shows a color, opening the picker (outside it).</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="color-picker"
@@ -1470,7 +1470,7 @@ export const ColorPickerParts: FunctionComponent = () => (
       </li>
     </ul>
     <CodeView code={parseColorCode} />
-    <h3>Arguments and return</h3>
+    <h3>Arguments and Return</h3>
     <PropsTable rows={parseColorRows} />
 
     <Heading
@@ -1487,7 +1487,7 @@ export const ColorPickerParts: FunctionComponent = () => (
       </li>
     </ul>
     <CodeView code={formatColorCode} />
-    <h3>Arguments and return</h3>
+    <h3>Arguments and Return</h3>
     <PropsTable rows={formatColorRows} />
 
     <Heading

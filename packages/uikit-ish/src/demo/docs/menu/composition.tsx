@@ -34,7 +34,6 @@ import {
   sfTrash,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 const toolbarCode = `<Toolbar.Trailing>
@@ -486,10 +485,7 @@ export const MenuComposition: FunctionComponent = () => (
         holding the app’s value; aligned with the row’s end (
         <code>align=&quot;end&quot;</code>).
       </li>
-      <li>
-        Guide <GuideLink to="choice-family">choice family</GuideLink>: a
-        collapsed choice of a few options.
-      </li>
+      <li>A collapsed choice of a few options.</li>
       <li>
         <strong>Library:</strong> the radio items (
         <PartLink

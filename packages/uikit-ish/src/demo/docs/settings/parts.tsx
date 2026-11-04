@@ -62,7 +62,7 @@ export const SettingsParts: FunctionComponent = () => (
       <li>Provider: settings for what’s within it.</li>
       <li>Hooks: the settings resolved (for logic), a portal’s props.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="settings"
@@ -110,7 +110,8 @@ export const SettingsParts: FunctionComponent = () => (
       </li>
       <li>
         Renders a <code>div</code> without a box (<code>display: contents</code>
-        ), or its <code>render</code>.
+        ), or its <code>render</code>, laid out as that element is (e.g. an
+        app’s root, or a demo’s stage).
       </li>
     </ul>
     <ProviderPart />

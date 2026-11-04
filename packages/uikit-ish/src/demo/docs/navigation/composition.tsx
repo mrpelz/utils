@@ -28,7 +28,6 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfChevronBackward } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { pages, sections, type SectionValue } from './content.js';
 import { propOptionsAdaptiveContent } from './props.js';
 
@@ -1302,8 +1301,7 @@ export const NavigationComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Each tab its own stack (tab bar apps, guide{' '}
-        <GuideLink to="shell-a">shell A</GuideLink>): a{' '}
+        Each tab its own stack (an app built around a tab bar): a{' '}
         <PartLink
           component="tab-bar"
           part="TabBar.Panel"

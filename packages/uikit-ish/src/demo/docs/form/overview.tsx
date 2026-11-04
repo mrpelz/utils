@@ -21,7 +21,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { fieldsetLegendRows, fieldsetRootRows, formRows } from './docs.js';
 
 /** A short form: a fieldset of two fields, submitted. */
@@ -150,8 +149,7 @@ export const FormOverview: FunctionComponent = () => (
     <ul>
       <li>
         For values taken together, once: creating or editing something (an
-        account, an event), deferring to a submit or a Done (the guide’s{' '}
-        <GuideLink to="commit-model">commit model</GuideLink>, §8.2).
+        account, an event), deferring to a submit or a Done.
       </li>
       <li>
         For its validation, too: required fields, types, a server’s errors shown

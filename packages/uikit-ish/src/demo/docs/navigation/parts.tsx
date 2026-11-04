@@ -529,7 +529,7 @@ export const NavigationParts: FunctionComponent = () => (
         leading edge, the swipe area, where a swipe back starts.
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li className="demo-tree-context">
         <span>The app’s root, e.g. </span>
         <PartLink

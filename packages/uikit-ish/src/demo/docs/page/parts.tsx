@@ -77,7 +77,7 @@ export const PageParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>One part: the page, its content’s scroll container.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li className="demo-tree-context">
         <PartLink
           component="header"

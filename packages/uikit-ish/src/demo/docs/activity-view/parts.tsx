@@ -1360,7 +1360,7 @@ export const ActivityViewParts: FunctionComponent = () => (
         <a href={publicUrl('badge')}>Badge</a> on an avatar instead.
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink part="ActivityView.Header" /> (optional)
         <ul>

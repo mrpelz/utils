@@ -29,7 +29,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 
 /** A sign-up: required fields, validated; a server's error, shown. */
 const ValidationAndServerErrors: FunctionComponent = () => {
@@ -513,10 +512,8 @@ export const FormComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Creating something defers to Done (the guide’s{' '}
-        <GuideLink to="commit-model">commit model</GuideLink>, §8.2): Cancel
-        closes the <a href={publicUrl('sheet')}>Sheet</a>, Done submits the
-        form.
+        Creating something defers to Done: Cancel closes the{' '}
+        <a href={publicUrl('sheet')}>Sheet</a>, Done submits the form.
       </li>
       <li>
         Done is in the sheet’s toolbar, outside the form: a{' '}
@@ -567,8 +564,7 @@ export const FormComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Progressive disclosure, as the guide’s form example (a reminder’s date,{' '}
-        <GuideLink to="section-8-2">§8.2</GuideLink>): a{' '}
+        Progressive disclosure (e.g. a reminder’s date): a{' '}
         <a href={publicUrl('switch')}>Switch</a> enables the fieldset below it (
         <PartLink
           component="form"

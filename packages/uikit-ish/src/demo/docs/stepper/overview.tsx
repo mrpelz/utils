@@ -15,7 +15,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { stepperRootRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 
@@ -94,9 +93,8 @@ export const StepperOverview: FunctionComponent = () => (
         copies, a font size.
       </li>
       <li>
-        Ordered, step-wise (the guide’s{' '}
-        <GuideLink to="choice-family">choice family</GuideLink>): each press one
-        step, where the value’s near what it should be.
+        Ordered, step-wise: each press one step, where the value’s near what it
+        should be.
       </li>
     </ul>
 

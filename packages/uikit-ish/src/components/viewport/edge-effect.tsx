@@ -29,6 +29,12 @@ import { useEdgeEffectOf } from './padding.js';
 
 type BlockEdge = 'block-start' | 'block-end';
 
+/**
+ * On a scroller: its start's progress (see `progressOf`), for its own
+ * styles (its edge effect's on the effect).
+ */
+const startProgress = '--uikit-viewport-edge-start-progress';
+
 /** How far content scrolls under the bars for the effect to show (px). */
 const ramp = 16;
 
@@ -62,6 +68,12 @@ const useMeasure = (
 
     const measure = () => {
       frame = 0;
+      const progress = String(progressOf(element, edge));
+      // (Also the scroller's, at its start: e.g. a sheet's content masked
+      // under its header as far, see Sheet.)
+      if (edge === 'block-start') {
+        element.style.setProperty(startProgress, progress);
+      }
       const { current: target } = layer;
       const lineRect = line.current?.getBoundingClientRect();
       if (!target || !lineRect) return;
@@ -75,7 +87,6 @@ const useMeasure = (
           extent = Math.max(extent, lineRect.top - box.top);
         }
       }
-      const progress = String(progressOf(element, edge));
       const value = `${String(Math.round(extent))}px`;
       if (`${progress} ${value}` === written) return;
       written = `${progress} ${value}`;
@@ -96,6 +107,7 @@ const useMeasure = (
       element.removeEventListener('scroll', schedule);
       observer.disconnect();
       unsubscribe();
+      if (edge === 'block-start') element.style.removeProperty(startProgress);
     };
   }, [edge, layer, line, scroller]);
 };

@@ -22,7 +22,6 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfMagnifyingglass } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import {
   tabBarAccessoryRows,
   tabBarGroupRows,
@@ -151,8 +150,8 @@ export const TabBarOverview: FunctionComponent = () => (
       </li>
       <li>Search can take a group of its own, beside the tabs.</li>
       <li>
-        Tabs stay put: don’t add, remove or hide them as the app’s state changes
-        (guide <GuideLink to="rule-g2">G2</GuideLink>).
+        Tabs stay put: don’t add, remove or hide them as the app’s state
+        changes.
       </li>
     </ul>
 
@@ -166,7 +165,7 @@ export const TabBarOverview: FunctionComponent = () => (
       <li>
         Actions (Add, Compose, Share): a{' '}
         <a href={publicUrl('toolbar')}>Toolbar</a>, as a tab bar navigates and
-        never acts (guide <GuideLink to="rule-g1">G1</GuideLink>).
+        never acts.
       </li>
       <li>
         Switching between views of the same content: a{' '}
@@ -174,8 +173,7 @@ export const TabBarOverview: FunctionComponent = () => (
       </li>
       <li>
         Many or user-defined sections (folders, playlists): a{' '}
-        <a href={publicUrl('sidebar')}>Sidebar</a> (guide{' '}
-        <GuideLink to="section-7-3">§7.3</GuideLink>).
+        <a href={publicUrl('sidebar')}>Sidebar</a>.
       </li>
     </ul>
 

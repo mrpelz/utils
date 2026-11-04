@@ -156,8 +156,10 @@
     --uikit-viewport-edge-veil: 0.75;
 
     &[data-detent='large'] {
+      --uikit-sheet-background: var(--color-ui-system-background);
+
       border-radius: 38px 38px 0 0;
-      background-color: var(--color-ui-system-background);
+      background-color: var(--uikit-sheet-background);
       box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
       inset: calc(10px + var(--uikit-safe-area-inset-top, 0px)) 0 0;
     }
@@ -169,8 +171,9 @@
       --uikit-viewport-edge-background: var(
         --color-ui-system-grouped-background
       );
+      --uikit-sheet-background: var(--color-ui-system-grouped-background);
 
-      background-color: var(--color-ui-system-grouped-background);
+      background-color: var(--uikit-sheet-background);
     }
 
     /* On the bottom inset (the home indicator below it, not under it);
@@ -197,9 +200,35 @@
 
       /* Nor a blur (its backdrop the glass's tint, blurred over it: the
          tint twice). */
-      & > .uikit-viewport-edge-effect[data-edge-effect='soft']::before {
+      & .uikit-sheet-panel > .uikit-viewport-edge-effect[data-edge-effect='soft']::before {
         backdrop-filter: none;
       }
+    }
+
+    /* Snapping by its groups (see snap.ts): a scroller (its bars hidden)
+       snapping to its stops' markers, from the bottom: a medium one's up to
+       the screen but 64px (as high as it may be), its look its panel's
+       (scrolled up out of its spacer), not its own. */
+    &&[data-snap] {
+      display: block;
+      overflow: hidden auto;
+      max-height: none;
+      background-color: transparent;
+      box-shadow: none;
+      overscroll-behavior: contain;
+      scroll-snap-type: y mandatory;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    &&[data-snap][data-detent='medium'] {
+      top: max(
+        64px - max(6px, var(--uikit-sheet-inset-bottom)),
+        var(--uikit-safe-area-inset-top, 0px) + 10px
+      );
     }
 
     /* A form sheet (not compact: a regular width, see main.tsx). */
@@ -268,6 +297,7 @@
     &:has(> .uikit-sheet-grabber:only-child)::after {
       display: none;
     }
+
   }
 
   /* The grabber, its cursor's area around it (12px wide, 5px and 6px
@@ -298,11 +328,66 @@
     }
   }
 
-  /* Its content's edge effects (see Sheet.Content: beside it, the popup's
+  /* Its panel (see Popup): no box of its own, its children the popup's;
+     snapping (see snap.ts), the sheet's look and box, as high as the popup
+     (scrolled up into it), its corners the sheet's (a capsule's at its top,
+     its bottom ones the popup's clip), its content's edge effects fixed to
+     it. */
+  .uikit-sheet-panel {
+    display: contents;
+    border-radius: inherit;
+
+    .uikit-sheet-popup[data-snap] > & {
+      position: relative;
+      display: flex;
+      height: 100%;
+      box-sizing: border-box;
+      flex-direction: column;
+      contain: layout;
+      scroll-snap-align: none;
+    }
+
+    /* A capsule's glass (by class), its content in the glass's color. */
+    .uikit-sheet-popup[data-snap='capsule'] > & {
+      color: var(--uikit-glass-content);
+    }
+
+    /* (A large one's opaque background.) */
+    .uikit-sheet-popup[data-snap='sheet'] > & {
+      background-color: var(--uikit-sheet-background);
+      box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
+    }
+  }
+
+  /* The room it's scrolled up out of (snapping), else none. */
+  .uikit-sheet-spacer {
+    display: none;
+
+    /* Its stops in one cell, each down by its own (within it: `cqh`). */
+    .uikit-sheet-popup[data-snap] > & {
+      display: grid;
+      height: 100%;
+      container-type: size;
+    }
+  }
+
+  /* Its stops (snapping): where it snaps, scrolled by as much. */
+  .uikit-sheet-stop {
+    height: 0;
+    align-self: start;
+    grid-area: 1 / 1;
+    pointer-events: none;
+    scroll-snap-align: start;
+
+    /* Flung, one at a time (not past it). */
+    scroll-snap-stop: always;
+  }
+
+  /* Its content's edge effects (see Sheet.Content: beside it, the panel's
      children), within its corners: rounded as the popup's at their edge,
      as browsers don't all clip a backdrop filter to its rounded overflow
      (WebKit). */
-  .uikit-sheet-popup > .uikit-viewport-edge-effect {
+  .uikit-sheet-panel > .uikit-viewport-edge-effect {
     &[data-edge='block-start'] {
       border-start-end-radius: inherit;
       border-start-start-radius: inherit;
@@ -317,6 +402,14 @@
     &::after {
       border-radius: inherit;
     }
+
+  }
+
+  /* Its snap groups (see SnapGroup) spaced as list sections are: the gap
+     the next one's (its start), so a stop ends with its group's content;
+     after an empty one (its header alone), none. */
+  .uikit-sheet-snap-group:not(:empty) + .uikit-sheet-snap-group {
+    padding-block-start: var(--uikit-list-section-spacing, 35px);
   }
 
   .uikit-sheet-content {
@@ -324,6 +417,18 @@
     min-height: 0;
     flex: 1 1 auto;
     overscroll-behavior: contain;
+
+    /* Snapping (see the popup): at its start, handing a pull down back to
+       the popup; below its top stop, not scrolling. */
+    :where(.uikit-sheet-popup[data-snap] > .uikit-sheet-panel) > & {
+      overscroll-behavior: auto;
+    }
+
+    :where(.uikit-sheet-popup[data-snap]:not([data-snap-top]) > .uikit-sheet-panel)
+      > & {
+      overflow: hidden;
+    }
+
 
     /* Its end clear of the home indicator (its background to the edge;
        none left for what's in it, see the popup); the gap to its content
@@ -334,13 +439,15 @@
     /* Under its header (a bar, not only a grabber), fading out: hidden
        under the share of it the veil is (`--uikit-viewport-edge-veil`),
        showing past it and its soft effect's reach (16px), whatever the
-       sheet's background (its glass too, not lightened by a veil's). */
-    .uikit-sheet-popup:has(
+       sheet's background (its glass too, not lightened by a veil's). As
+       its edge effect, only as content scrolls under it (its progress,
+       `--uikit-viewport-edge-start-progress`): at the top, all shown. */
+    .uikit-sheet-panel:has(
         > .uikit-sheet-header > :not(.uikit-sheet-grabber)
       )
       > & {
       mask-image: linear-gradient(
-        transparent
+        rgb(0 0 0 / calc(1 - var(--uikit-viewport-edge-start-progress, 1)))
           calc(
             var(--uikit-viewport-padding-block-start, 0px) *
               var(--uikit-viewport-edge-veil, 0.75)
@@ -352,7 +459,7 @@
     /* Its header only a grabber (its content's own bars, e.g. a
        navigation's): over the content, which starts at the sheet's top
        (nothing of those bars clipped), its bars below the grabber. */
-    .uikit-sheet-popup:has(
+    .uikit-sheet-panel:has(
         > .uikit-sheet-header > .uikit-sheet-grabber:only-child
       )
       > & {

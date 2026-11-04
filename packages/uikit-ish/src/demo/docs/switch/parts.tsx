@@ -83,7 +83,7 @@ export const SwitchParts: FunctionComponent = () => (
       <li>Thumb: the knob.</li>
       <li>Both always needed.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="switch"

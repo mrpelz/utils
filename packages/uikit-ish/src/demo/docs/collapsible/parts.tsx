@@ -179,7 +179,7 @@ export const CollapsibleParts: FunctionComponent = () => (
         collapses (<code>render</code>).
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="collapsible"

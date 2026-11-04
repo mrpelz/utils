@@ -1,3 +1,4 @@
+import type { SettingsProviderProps } from '../../../components/index.js';
 import {
   commonPropOptions,
   MappedProp,
@@ -35,9 +36,7 @@ export const propOptionsProviderPart = {
 };
 
 /** A provider's props as given (those inherited left out, not reset). */
-export const given = <T extends Record<string, unknown>>(
-  props: T,
-): Partial<T> =>
+export const given = (props: Record<string, unknown>): SettingsProviderProps =>
   Object.fromEntries(
     Object.entries(props).filter(([, value]) => value !== inherit),
-  ) as Partial<T>;
+  ) as SettingsProviderProps;

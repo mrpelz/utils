@@ -14,7 +14,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import {
   activityIndicatorRows,
   progressLabelRows,
@@ -114,8 +113,7 @@ export const ProgressOverview: FunctionComponent = () => (
     <ul>
       <li>
         A value to set: a <a href={publicUrl('slider')}>Slider</a> (an editable
-        bar, the guide’s{' '}
-        <GuideLink to="indicator-continuum">continuum</GuideLink>).
+        bar).
       </li>
       <li>
         Something new waiting, counted: a <a href={publicUrl('badge')}>Badge</a>

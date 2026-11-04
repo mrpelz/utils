@@ -20,7 +20,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { rowTitles, sidebarSections } from '../sidebar/content.js';
 import { names } from '../viewport/content.js';
 import { useLayoutControls } from './props.js';
@@ -474,11 +473,7 @@ export const LayoutComposition: FunctionComponent = () => (
         <a href={publicUrl('sidebar')}>Sidebar</a>); it fills a screen (a{' '}
         <a href={publicUrl('viewport')}>Viewport</a>’s content layer).
       </li>
-      <li>
-        Sidebar and split (guide{' '}
-        <GuideLink to="shell-b">§7.4, shell B</GuideLink>): sections, a list,
-        the selected item.
-      </li>
+      <li>A sidebar and a split view: sections, a list, the selected item.</li>
     </ul>
 
     <Heading

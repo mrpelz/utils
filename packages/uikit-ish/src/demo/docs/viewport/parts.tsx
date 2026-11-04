@@ -1496,7 +1496,7 @@ export const ViewportParts: FunctionComponent = () => (
         <code>transform</code>); in an app, they’re the window’s.
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="viewport"
@@ -1773,6 +1773,22 @@ export const ViewportParts: FunctionComponent = () => (
         <a href={publicUrl('layout')}>Layout</a>, a{' '}
         <a href={publicUrl('navigation')}>Navigation</a>): that child fills the
         screen, keeping its content clear itself.
+      </li>
+      <li>
+        For what’s in it that isn’t padded (e.g. a map’s controls, kept clear of
+        a bar or an island): the anchors’ sizes at its top and bottom, as a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />{' '}
+        makes room for them (beyond the safe area), as{' '}
+        <code>--uikit-viewport-anchor-block-start</code> and{' '}
+        <code>--uikit-viewport-anchor-block-end</code>; in a script,{' '}
+        <PartLink
+          component="viewport"
+          part="useAnchorSize"
+        />
+        .
       </li>
       <li>
         Renders a <code>div</code>; its ref is what a provider’s{' '}
@@ -2275,7 +2291,7 @@ export const ViewportParts: FunctionComponent = () => (
     <UseViewportScrollPart />
     <h3>Arguments</h3>
     <PropsTable rows={useViewportScrollRows} />
-    <h3>The listener’s event</h3>
+    <h3>The Listener’s Event</h3>
     <PropsTable rows={viewportScrollEventRows} />
 
     <Heading
@@ -2374,7 +2390,7 @@ export const ViewportParts: FunctionComponent = () => (
     <UseElementGeometryPart />
     <h3>Arguments</h3>
     <PropsTable rows={useElementGeometryRows} />
-    <h3>Its listener’s geometry</h3>
+    <h3>Its Listener’s Geometry</h3>
     <PropsTable rows={elementGeometryRows} />
 
     <Heading

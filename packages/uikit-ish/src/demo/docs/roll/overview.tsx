@@ -15,7 +15,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { rollColumnRows } from './docs.js';
 import { fruits, propOptionsOverview } from './props.js';
 
@@ -104,9 +103,8 @@ export const RollOverview: FunctionComponent = () => (
         measures.
       </li>
       <li>
-        Inline (in a row, expanded) or on demand (in a popover): the guide’s
-        wheel picker, a <em>Choice</em> of one from a large set (
-        <GuideLink to="choice-family">choice family</GuideLink>).
+        Inline (in a row, expanded) or on demand (in a popover): a wheel picker,
+        a choice of one from a large set.
       </li>
     </ul>
 

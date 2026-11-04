@@ -628,7 +628,7 @@ export const ActionSheetParts: FunctionComponent = () => (
         view’s button to open its sheet.
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="action-sheet"
@@ -902,7 +902,7 @@ export const ActionSheetParts: FunctionComponent = () => (
       </li>
     </ul>
     <CreateHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={actionSheetHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={actionSheetHandleRows} />
@@ -928,7 +928,7 @@ export const ActionSheetParts: FunctionComponent = () => (
       </li>
     </ul>
     <UseCreateActionSheetHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={actionSheetHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={actionSheetHandleRows} />

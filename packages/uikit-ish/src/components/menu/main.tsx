@@ -999,6 +999,33 @@ const openByTrigger = (trigger: HTMLElement, pointerId?: number) => {
   if (trigger.hasPointerCapture(pointerId)) {
     trigger.releasePointerCapture(pointerId);
   }
+  // Opened by a mouse down, Base UI lets the mouse's release over an item
+  // choose it, until a mouse up anywhere: the touch's own (emulated) is
+  // kept from it (see `dragOverItems`), so the next tap on an item would
+  // choose it twice (by its mouse up, and its click: a checkbox item
+  // toggled back). Ended with the touch, by a mouse up on the trigger
+  // (which doesn't close the menu).
+  const end = (event: globalThis.PointerEvent) => {
+    if (event.pointerId !== pointerId) return;
+    for (const type of ['pointerup', 'pointercancel']) {
+      document.removeEventListener(type, end as (event: Event) => void, {
+        capture: true,
+      });
+    }
+    trigger.dispatchEvent(
+      new MouseEvent('mouseup', {
+        bubbles: true,
+        button: 0,
+        cancelable: true,
+        view: document.defaultView,
+      }),
+    );
+  };
+  for (const type of ['pointerup', 'pointercancel']) {
+    document.addEventListener(type, end as (event: Event) => void, {
+      capture: true,
+    });
+  }
   // Dragged out and released elsewhere (also back on the trigger): closed,
   // as Base UI closes it for a mouse.
   dragOverItems(document, pointerId, undefined, () => {

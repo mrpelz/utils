@@ -258,7 +258,7 @@ export const LayoutParts: FunctionComponent = () => (
         <a href={publicUrl('drawer')}>Drawer</a> instead.
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li className="demo-tree-context">
         <span>The app’s root, e.g. </span>
         <PartLink

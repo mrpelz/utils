@@ -154,27 +154,6 @@
     min-width: 14rem;
   }
 
-  /* Diagrams drawn in text (see docs/hig-guide/parts.tsx), as written. */
-  .demo-diagram {
-    max-width: 100%;
-    padding: 0.75rem;
-    border: 1px dashed #404040;
-    font-size: 0.75rem;
-    line-height: 1.25;
-    overflow-x: auto;
-    white-space: pre;
-  }
-
-  .demo-mermaid {
-    margin: 1rem 0;
-    overflow-x: auto;
-
-    & svg {
-      max-width: 100%;
-      height: auto;
-    }
-  }
-
   /* A heading's link to itself, shown as it's hovered. */
   .demo-anchor {
     color: #a1a1a1;
@@ -222,6 +201,18 @@
     filter: drop-shadow(0 4px 10px rgb(0 0 0 / 15%));
   }
 
+  /* A parts tree (a parts page's, an app's structure): scrolling sideways
+     on its own where its levels' indents leave too little room, each level
+     at least as wide as a short line (not wrapped word by word). */
+  .demo-tree {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+
+    & li {
+      min-width: 14rem;
+    }
+  }
+
   /* A parts tree's levels around the component's (an app's: e.g. its
      viewport's content layer): greyed, the component's own parts within
      them in full. */
@@ -229,12 +220,11 @@
     opacity: 0.5;
   }
 
-  /* The index's links to the guide and the page of all demos: boxes as
-     wide as two cards. */
-
-  /* Its links: two by two (one column on a phone). */
+  /* The index's links (its top-level pages): two by two (one column on a
+     phone), as wide as the page's text and cards. */
   .demo-index-links {
     display: grid;
+    max-width: 42rem;
     gap: 1rem;
     grid-template-columns: minmax(0, 1fr);
     margin-block: 2rem;

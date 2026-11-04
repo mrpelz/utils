@@ -556,7 +556,7 @@ const InAPopover: FunctionComponent = () => {
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['a-time', 'A time'],
-  ['carrying-over-to-the-hour', 'Carrying over to the hour'],
+  ['carrying-over-to-the-hour', 'Carrying Over to the hour'],
   ['resetting-the-minutes', 'Resetting the minutes'],
   ['dependent-columns', 'Dependent columns'],
   ['inline-in-a-list-row', 'Inline in a list row'],
@@ -617,7 +617,7 @@ export const RollComposition: FunctionComponent = () => (
       id="carrying-over-to-the-hour"
       level={2}
     >
-      Carrying over to the hour
+      Carrying Over to the hour
     </Heading>
     <ul>
       <li>

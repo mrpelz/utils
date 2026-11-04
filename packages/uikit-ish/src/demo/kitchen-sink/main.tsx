@@ -209,7 +209,7 @@ const App: FunctionComponent = () => {
 
 /** `/kitchen-sink`: the app, the page's own (see `useRawDocument`). */
 export const KitchenSinkPage: FunctionComponent = () => {
-  useRawDocument(true, 'Kitchen sink');
+  useRawDocument(true, 'Kitchen Sink');
 
   return (
     <ClientOnly>

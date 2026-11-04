@@ -3291,7 +3291,7 @@ export const MenuParts: FunctionComponent = () => (
       </li>
     </ul>
 
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink part="Menu.Root" />
         <ul>
@@ -3917,7 +3917,7 @@ export const MenuParts: FunctionComponent = () => (
       </li>
     </ul>
     <CreateHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={menuHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={menuHandleRows} />
@@ -3939,7 +3939,7 @@ export const MenuParts: FunctionComponent = () => (
       </li>
     </ul>
     <UseCreateMenuHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={menuHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={menuHandleRows} />

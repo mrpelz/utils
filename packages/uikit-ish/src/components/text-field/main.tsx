@@ -13,7 +13,7 @@ import {
 
 import { GlassBackground } from '../glass/main.js';
 import { cn, isKeyboardFocus } from '../utils/main.js';
-import type { ClearProps, SearchProps } from './props.js';
+import type { ClearProps, FrameProps } from './props.js';
 
 // Text fields, light and dark, in the semantic colors: 52px rows (padding
 // 0 16px),
@@ -206,10 +206,13 @@ const Clear = forwardRef<HTMLButtonElement, ClearProps>(
 );
 
 /**
- * A search field's capsule: its symbol, a
- * `TextField.Control` (e.g. `type="search"`), and its buttons.
+ * A text field's frame: around its symbol, a `TextField.Control` (e.g.
+ * `type="search"`), and its buttons, in one of its looks (`variant`),
+ * morphing from one to another as it changes: its box (height, insets,
+ * corners, fill) transitions, its glass (the glass looks') fading in and
+ * out, always there.
  */
-const Search = forwardRef<HTMLLabelElement, SearchProps>(
+const Frame = forwardRef<HTMLLabelElement, FrameProps>(
   (
     { children, className, onBlur, onFocus, variant = 'fill', ...props },
     ref,
@@ -219,7 +222,7 @@ const Search = forwardRef<HTMLLabelElement, SearchProps>(
     const [isKeyboard, setIsKeyboard] = useState(false);
 
     return (
-      // A search field (sidebars, toolbars): a capsule (36px high, on the
+      // E.g. a search field (sidebars, toolbars): a capsule (36px high, on the
       // tertiary fill, 10px in) of a magnifier symbol (the secondary label
       // color), the field (Body, regular), and e.g. a dictation button; pressed
       // anywhere, it focuses the field (a label). In a sidebar (see `Sidebar`):
@@ -229,7 +232,7 @@ const Search = forwardRef<HTMLLabelElement, SearchProps>(
       <label
         ref={ref}
         data-keyboard-focus={isKeyboard ? '' : undefined}
-        data-text-field-part="search"
+        data-text-field-part="frame"
         data-variant={variant}
         onBlur={(event) => {
           onBlur?.(event);
@@ -246,11 +249,16 @@ const Search = forwardRef<HTMLLabelElement, SearchProps>(
           setIsKeyboard(isKeyboardFocus());
         }}
         {...props}
-        className={cn('uikit-text-field-search', className)}
+        className={cn('uikit-text-field-frame', className)}
       >
-        {variant === 'tab-bar' || variant === 'toolbar' ? (
+        {/* (Shown in the glass looks, see style.css.) */}
+        <span
+          aria-hidden="true"
+          className="uikit-text-field-frame-glass"
+          data-text-field-part="frame-glass"
+        >
           <GlassBackground kind={variant === 'toolbar' ? 'button' : 'bar'} />
-        ) : null}
+        </span>
         {children}
       </label>
     );
@@ -259,7 +267,7 @@ const Search = forwardRef<HTMLLabelElement, SearchProps>(
 
 export const TextField = {
   ...BaseField,
-  Search,
+  Frame,
   Root,
   Label,
   Control,

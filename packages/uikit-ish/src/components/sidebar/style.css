@@ -33,7 +33,7 @@
       rgb(0 0 0 / 7%),
       rgb(255 255 255 / 12%)
     );
-    --uikit-text-field-search-fill: light-dark(
+    --uikit-text-field-frame-fill: light-dark(
       rgb(0 0 0 / 7%),
       rgb(255 255 255 / 12%)
     );
@@ -54,12 +54,12 @@
         0 0 25px rgb(0 0 0 / 30%);
     }
 
-    /* Its search field (see TextField.Search): a fill blended with the
+    /* Its search field (see TextField.Frame): a fill blended with the
        glass (plus-darker, plus-lighter in dark mode) as a flat color; its
        symbol and placeholder in the glass' secondary content color (#999). */
-    --uikit-text-field-search-height: 44px;
-    --uikit-text-field-search-padding: 11px;
-    --uikit-text-field-search-gap: 8px;
+    --uikit-text-field-frame-height: 44px;
+    --uikit-text-field-frame-padding: 11px;
+    --uikit-text-field-frame-gap: 8px;
 
     display: flex;
     overflow: auto;
@@ -84,11 +84,11 @@
       );
     overscroll-behavior: contain;
 
-    & [data-text-field-part='search'] {
+    & [data-text-field-part='frame'] {
       color: var(--uikit-glass-content-secondary);
     }
 
-    & [data-text-field-part='search'] input::placeholder {
+    & [data-text-field-part='frame'] input::placeholder {
       color: var(--uikit-glass-content-secondary);
     }
 

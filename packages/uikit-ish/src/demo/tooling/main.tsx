@@ -5,7 +5,8 @@ import { FunctionComponent, useEffect } from 'react';
 
 import * as components from '../../components/index.js';
 import { useTouchActive } from '../../styles.js';
-import { HigGuidePage } from '../docs/hig-guide/main.js';
+import { BackstoryAndFaqPage } from '../docs/pages/backstory-and-faq.js';
+import { GettingStartedPage } from '../docs/pages/getting-started.js';
 import { TokensPage } from '../docs/tokens/main.js';
 import { KitchenSinkPage } from '../kitchen-sink/main.js';
 import { nameComponents } from './frame/render-code.js';
@@ -15,7 +16,6 @@ import {
   ComponentDemosPage,
   CompositionPage,
   IndexPage,
-  InformationArchitecturePage,
   NotFound,
   OverviewPage,
   PartsPage,
@@ -142,12 +142,16 @@ export const Demo: FunctionComponent = () => (
             path={publicUrl('/kitchen-sink')}
           />
           <Route
-            component={HigGuidePage}
-            path={publicUrl('/hig-guide')}
-          />
-          <Route
             component={TokensPage}
             path={publicUrl('/tokens')}
+          />
+          <Route
+            component={GettingStartedPage}
+            path={publicUrl('/getting-started')}
+          />
+          <Route
+            component={BackstoryAndFaqPage}
+            path={publicUrl('/backstory-and-faq')}
           />
           <Route
             component={OverviewPage}
@@ -160,10 +164,6 @@ export const Demo: FunctionComponent = () => (
           <Route
             component={CompositionPage}
             path={publicUrl('/:id/composition')}
-          />
-          <Route
-            component={InformationArchitecturePage}
-            path={publicUrl('/:id/information-architecture')}
           />
           <Route
             component={ComponentDemosPage}

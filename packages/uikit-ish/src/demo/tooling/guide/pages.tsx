@@ -8,7 +8,6 @@ import {
   categories,
   type Category,
 } from '../../docs/catalog.js';
-import { guideHref } from '../../docs/hig-guide/link.js';
 import { useOptions } from '../frame/state.js';
 import { publicUrl } from '../public-url.js';
 import { ClientOnly } from '../shared/client-only.js';
@@ -30,9 +29,7 @@ const entryInfo = (entry: CatalogEntry): EntryInfo => ({
   categoryTitle: categories[entry.category].title,
   framework7Id: entry.framework7Id,
   hasComposition: entry.Composition !== undefined,
-  hasInformationArchitecture: entry.InformationArchitecture !== undefined,
   hasParts: entry.Parts !== undefined,
-  higId: entry.higId,
   id: entry.id,
   title: entry.title,
 });
@@ -91,7 +88,7 @@ const ComponentShell: FunctionComponent<{
 
 export const NotFound: FunctionComponent = () => (
   <div className="demo-page demo-prose">
-    <h1 className="demo-page-title">Not found</h1>
+    <h1 className="demo-page-title">Not Found</h1>
     <p>
       No such page. See <a href={publicUrl('./')}>the index</a> of components.
     </p>
@@ -102,7 +99,7 @@ const useCatalogEntry = () => catalogEntry(useRoute().params.id ?? '');
 
 /** A component's page of prose: its catalog entry's, or a pointer to its demos. */
 const GuidePage: FunctionComponent<{
-  content: 'Composition' | 'InformationArchitecture' | 'Overview' | 'Parts';
+  content: 'Composition' | 'Overview' | 'Parts';
   /** What the page is (“No … yet”). */
   label: string;
   tab: Exclude<Tab, 'all'>;
@@ -155,15 +152,6 @@ export const CompositionPage: FunctionComponent = () => (
   />
 );
 
-/** `/:id/information-architecture`: where it sits in Apple's information architecture. */
-export const InformationArchitecturePage: FunctionComponent = () => (
-  <GuidePage
-    content="InformationArchitecture"
-    label="information architecture page"
-    tab="information-architecture"
-  />
-);
-
 /** `/:id/all`: the component's comprehensive demos (headed each). */
 export const ComponentDemosPage: FunctionComponent = () => {
   const entry = useCatalogEntry();
@@ -192,30 +180,26 @@ export const IndexPage: FunctionComponent = () => (
       Framework7&apos;s behavior as a reference.
     </p>
     <nav className="demo-index-links">
+      <a href={publicUrl('getting-started')}>
+        <strong>Getting Started</strong>
+        <span>
+          Installing the library, React or Preact, the globals an app needs, how
+          its components nest, and running it as a PWA.
+        </span>
+      </a>
+      <a href={publicUrl('backstory-and-faq')}>
+        <strong>Backstory &amp; FAQ</strong>
+        <span>Why this exists, and questions people ask.</span>
+      </a>
       <a href={publicUrl('kitchen-sink')}>
-        <strong>Kitchen sink</strong>
+        <strong>Kitchen Sink</strong>
         <span>
           The components in an app, nested as an app nests them, as a raw demo:
           no frame, no controls, no prose.
         </span>
       </a>
-      <a href={guideHref()}>
-        <strong>HIG composition guide</strong>
-        <span>
-          How Apple’s components fit together, their shared traits, and a
-          re-slicing into primitives: what this index’s groups and the
-          components’ information architecture pages are after.
-        </span>
-      </a>
-      <a href={publicUrl('tokens')}>
-        <strong>Design tokens</strong>
-        <span>
-          The library’s colors, text styles, materials and shadows, live, as its
-          stylesheet sets them.
-        </span>
-      </a>
       <a href={publicUrl('all')}>
-        <strong>All demos</strong>
+        <strong>All Demos</strong>
         <span>
           Every component’s comprehensive demos, one after another on one page.
         </span>
@@ -248,6 +232,17 @@ export const IndexPage: FunctionComponent = () => (
         </Heading>
         <p>{categories[category].description}</p>
         <ul className="demo-index-cards">
+          {category === 'foundations' ? (
+            <li className="demo-index-card">
+              <h3>
+                <a href={publicUrl('tokens')}>Design Tokens</a>
+              </h3>
+              <p>
+                The library’s colors, text styles and materials, live, as its
+                stylesheet sets them.
+              </p>
+            </li>
+          ) : null}
           {catalog
             // (In the catalog's order: by how deep they typically nest.)
             .filter((entry) => entry.category === category)
@@ -262,25 +257,20 @@ export const IndexPage: FunctionComponent = () => (
                 <p>{entry.summary ?? ''}</p>
                 <span className="demo-index-card-links">
                   {entry.Overview ? (
-                    <a href={publicUrl(entry.id)}>overview</a>
+                    <a href={publicUrl(entry.id)}>Overview</a>
                   ) : null}
                   {entry.Parts ? (
-                    <a href={publicUrl(`${entry.id}/parts`)}>parts</a>
+                    <a href={publicUrl(`${entry.id}/parts`)}>Parts</a>
                   ) : null}
                   {entry.Composition ? (
                     <a href={publicUrl(`${entry.id}/composition`)}>
-                      composition
-                    </a>
-                  ) : null}
-                  {entry.InformationArchitecture ? (
-                    <a href={publicUrl(`${entry.id}/information-architecture`)}>
-                      information architecture
+                      Composition
                     </a>
                   ) : null}
                   <a href={publicUrl(`${entry.id}/all`)}>
                     {entry.demos.length === 1
-                      ? 'demo'
-                      : `${String(entry.demos.length)} demos`}
+                      ? 'Demo'
+                      : `${String(entry.demos.length)} Demos`}
                   </a>
                 </span>
               </li>

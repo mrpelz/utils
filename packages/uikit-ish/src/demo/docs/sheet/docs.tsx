@@ -57,29 +57,42 @@ export const sheetRootRows: readonly PropRow[] = [
     <>
       Snap points used to position the drawer: fractions of the viewport’s
       height (0–1), pixels (above 1), or <code>px</code>/<code>rem</code>{' '}
-      strings. (A sheet’s heights are its <code>detent</code>s.)
+      strings. (A sheet’s heights are its <code>detent</code>s.) Left out with{' '}
+      <PartLink
+        component="sheet"
+        part="Sheet.SnapGroup"
+      />
+      s in it (this library’s): their ends, measured live, named by their{' '}
+      <code>value</code>s here and below.
     </>,
   ],
   [
     'defaultSnapPoint',
     'number | string | null',
     undefined,
-    'The initial snap point value when uncontrolled.',
+    <>
+      The initial snap point value when uncontrolled (again as it opens): with
+      snap groups, a group’s <code>value</code>, by default the lowest.
+    </>,
   ],
   [
     'snapPoint',
     'number | string | null',
     undefined,
     <>
-      The currently active snap point. Use with <code>onSnapPointChange</code>{' '}
-      to control the snap point.
+      The currently active snap point (with snap groups, a group’s{' '}
+      <code>value</code>). Use with <code>onSnapPointChange</code> to control
+      the snap point.
     </>,
   ],
   [
     'onSnapPointChange',
     '(snapPoint: number | string | null, eventDetails) => void',
     undefined,
-    'Callback fired when the snap point changes.',
+    <>
+      Callback fired when the snap point changes (with snap groups, called with
+      a group’s <code>value</code>).
+    </>,
   ],
   [
     'snapToSequentialPoints',
@@ -200,6 +213,21 @@ export const sheetTriggerRows: readonly PropRow[] = [
     'Payload',
     undefined,
     'A payload to pass to the drawer when it is opened.',
+  ],
+  [
+    'snapPoint',
+    'string',
+    undefined,
+    <>
+      The stop it opens the sheet at (this library’s): a{' '}
+      <PartLink
+        component="sheet"
+        part="Sheet.SnapGroup"
+      />
+      ’s <code>value</code>, a deep link into it (controlled, told to the root’s{' '}
+      <code>onSnapPointChange</code>); left out, the root’s{' '}
+      <code>defaultSnapPoint</code>.
+    </>,
   ],
   [
     'id',
@@ -376,6 +404,27 @@ export const sheetGrabberRows: readonly PropRow[] = [
       <code>grab</code> (swiped: <code>grabbing</code>)
     </>,
     'The cursor (where the pointer hovers).',
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const sheetSnapGroupRows: readonly PropRow[] = [
+  [
+    'value',
+    'string',
+    undefined,
+    <>
+      Its snap point’s name: the sheet snaps to show everything up to its end
+      (its header too), named so in the root’s <code>snapPoint</code>,{' '}
+      <code>defaultSnapPoint</code> and <code>onSnapPointChange</code>.
+      Required.
+    </>,
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'What it reveals: content up to its end, after the group before it.',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];

@@ -702,7 +702,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
         same parts, under <code>ContextualMenu</code>).
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink part="ContextualMenu.Root" />
         <ul>
@@ -948,7 +948,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
       </li>
     </ul>
     <CreateHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={contextualMenuHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={contextualMenuHandleRows} />
@@ -965,7 +965,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
       </li>
     </ul>
     <UseCreateContextualMenuHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={contextualMenuHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={contextualMenuHandleRows} />

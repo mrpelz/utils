@@ -34,7 +34,6 @@ import {
   sfTrash,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { messages } from '../list/content.js';
 import { names } from '../viewport/content.js';
 
@@ -132,7 +131,7 @@ const searchCode = `const [query, setQuery] = useState('');
       <Toolbar.Button aria-label="Folders" shape="circle">…</Toolbar.Button>
       {/* Taking the bar's free space, a glass capsule as its buttons. */}
       <TextField.Root>
-        <TextField.Search variant="toolbar">
+        <TextField.Frame variant="toolbar">
           <Symbol icon={sfMagnifyingglass} />
           <TextField.Control
             aria-label="Search"
@@ -142,7 +141,7 @@ const searchCode = `const [query, setQuery] = useState('');
             onValueChange={setQuery}
           />
           <TextField.Clear />
-        </TextField.Search>
+        </TextField.Frame>
       </TextField.Root>
       <Toolbar.Button aria-label="New contact" shape="circle">…</Toolbar.Button>
     </Toolbar.Root>
@@ -392,7 +391,7 @@ const Search: FunctionComponent = () => {
               </Button.Icon>
             </Toolbar.Button>
             <TextField.Root>
-              <TextField.Search variant="toolbar">
+              <TextField.Frame variant="toolbar">
                 <Symbol icon={sfMagnifyingglass} />
                 <TextField.Control
                   aria-label="Search"
@@ -402,7 +401,7 @@ const Search: FunctionComponent = () => {
                   onValueChange={(value: string) => setQuery(value)}
                 />
                 <TextField.Clear />
-              </TextField.Search>
+              </TextField.Frame>
             </TextField.Root>
             <Toolbar.Button
               aria-label="New contact"
@@ -502,9 +501,8 @@ export const ToolbarComposition: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A toolbar is a Region (guide,{' '}
-        <GuideLink to="primitive-region">§5</GuideLink>): placed at an edge by
-        what it’s in, its commands for the content beside it.
+        A toolbar is a bar: placed at an edge by what it’s in, its commands for
+        the content beside it.
       </li>
       <li>
         At the top of a page, its <a href={publicUrl('header')}>Header</a>’s
@@ -633,7 +631,7 @@ export const ToolbarComposition: FunctionComponent = () => (
         <a href={publicUrl('text-field')}>Text field</a>’s{' '}
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />{' '}
         between a button at each end, taking the bar’s free space.
       </li>
@@ -645,7 +643,7 @@ export const ToolbarComposition: FunctionComponent = () => (
         It looks like the bar’s capsules: glass, as high as its buttons (
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />{' '}
         <code>variant=&quot;toolbar&quot;</code>).
       </li>
@@ -663,7 +661,7 @@ export const ToolbarComposition: FunctionComponent = () => (
         in the bar’s look (
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />{' '}
         <code>variant</code>), and the bar pushed up by the keyboard (
         <PartLink

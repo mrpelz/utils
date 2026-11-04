@@ -625,7 +625,7 @@ export const ToolbarParts: FunctionComponent = () => (
       </li>
       <li>The views show each bar on a page’s background, as behind glass.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="toolbar"
@@ -1004,7 +1004,7 @@ export const ToolbarParts: FunctionComponent = () => (
         <a href={publicUrl('text-field')}>Text field</a>’s{' '}
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />{' '}
         between the sides (see{' '}
         <a href={publicUrl('toolbar/composition')}>Composition</a>).

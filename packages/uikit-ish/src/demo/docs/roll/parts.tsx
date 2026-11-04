@@ -204,7 +204,7 @@ export const RollParts: FunctionComponent = () => (
       <li>Item: a row.</li>
       <li>Separator: text between columns (optional).</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="roll"

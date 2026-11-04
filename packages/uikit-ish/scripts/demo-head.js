@@ -68,7 +68,7 @@ export const manifest = (publicPath) => `<script>(() => {
     option('raw') === true && typeof id === 'string' && isAt('/all')
       ? id
       : isAt('/kitchen-sink')
-        ? 'Kitchen sink'
+        ? 'Kitchen Sink'
         : undefined;
   if (name !== undefined) {
     document.title = name;

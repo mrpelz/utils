@@ -8,6 +8,7 @@ import {
   createContext,
   forwardRef,
   ReactElement,
+  ReactNode,
   useCallback,
   useContext,
   useLayoutEffect,
@@ -26,9 +27,16 @@ import {
   usePortalContainer,
   withStyle,
 } from '../utils/main.js';
+import {
+  EdgeEffects,
+  useAnchorRegistration,
+  useScrollerRegistration,
+  ViewportScopeContext,
+} from '../viewport/main.js';
 import type {
   Nose,
   PopoverHandle,
+  PopoverHeaderProps,
   PopoverPositionerProps,
   PopoverState,
 } from './props.js';
@@ -36,6 +44,7 @@ import type {
 export type {
   PopoverAlign,
   PopoverHandle,
+  PopoverHeaderProps,
   PopoverPositionerProps,
 } from './props.js';
 
@@ -266,6 +275,8 @@ const Popup = forwardRef<HTMLDivElement, Omit<BasePopover.Popup.Props, 'ref'>>(
   ({ className, children, initialFocus, style, ...props }, ref) => {
     const popupRef = useForwardedRef(ref);
     const focus = useInitialFocus(popupRef);
+    // Its anchors' scope (its header's): fixed to it (see Viewport.Padding).
+    const [scope] = useState(() => ({}));
 
     return (
       <BasePopover.Popup
@@ -288,7 +299,9 @@ const Popup = forwardRef<HTMLDivElement, Omit<BasePopover.Popup.Props, 'ref'>>(
           <span data-layer="rim" />
           <span data-layer="highlight" />
         </span>
-        {children}
+        <ViewportScopeContext.Provider value={scope}>
+          {children as ReactNode}
+        </ViewportScopeContext.Provider>
       </BasePopover.Popup>
     );
   },
@@ -396,32 +409,54 @@ const Arrow = forwardRef<HTMLDivElement, Omit<BasePopover.Arrow.Props, 'ref'>>(
 /**
  * Its bar at its top (e.g. a `Toolbar`: its title, a close button), spaced
  * as popovers' are (16px from the top, 10px above the content; the
- * toolbar's row 44px). Optional.
+ * toolbar's row 44px). Optional. Over the body, which scrolls under it (a
+ * block-start anchor in the popup's scope, its soft edge effect): the body
+ * makes room with a `Viewport.Padding`, as a sheet's content does.
  */
-const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('uikit-popover-header', className)}
-      data-popover-part="header"
-      {...props}
-    />
-  ),
+const Header = forwardRef<HTMLDivElement, PopoverHeaderProps>(
+  ({ className, edgeEffect = 'soft', edgeTint, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    useAnchorRegistration(ref, 'block-start', undefined, {
+      effect: edgeEffect,
+      tint: edgeTint,
+    });
+
+    return (
+      <div
+        ref={ref}
+        className={cn('uikit-popover-header', className)}
+        data-popover-part="header"
+        {...props}
+      />
+    );
+  },
 );
 
 /**
  * Its content, scrolling inside the popup, as high as the popup may be (the
- * popup itself can't scroll: its material and arrow are drawn around it).
+ * popup itself can't scroll: its material and arrow are drawn around it);
+ * a scroller (registered), drawing its header's edge effect (see
+ * `Viewport`): beside it, not in it, so its mask (fading it out under the
+ * header, see style.css) leaves it be.
  */
 const Body = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('uikit-popover-body', className)}
-      data-popover-part="body"
-      {...props}
-    />
-  ),
+  ({ className, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    useScrollerRegistration(ref);
+
+    return (
+      <>
+        <div
+          ref={ref}
+          className={cn('uikit-popover-body', className)}
+          data-popover-part="body"
+          data-viewport-scroller=""
+          {...props}
+        />
+        <EdgeEffects scroller={ref} />
+      </>
+    );
+  },
 );
 
 /**

@@ -14,19 +14,19 @@ import {
   textFieldControlRows,
   textFieldDescriptionRows,
   textFieldErrorRows,
+  textFieldFrameRows,
   textFieldItemRows,
   textFieldLabelRows,
   textFieldRootRows,
-  textFieldSearchRows,
   textFieldValidityRows,
 } from './docs.js';
 import {
   getPropOptionsClear,
   getPropOptionsControl,
   propOptionsError,
+  propOptionsGuideFrame,
   propOptionsGuideLabel,
   propOptionsGuideRoot,
-  propOptionsGuideSearch,
   propOptionsPart,
   suggestionsId,
 } from './props.js';
@@ -302,15 +302,15 @@ const ClearPart: FunctionComponent = () => {
   );
 };
 
-/** `TextField.Search`, outlined: a search field's capsule. */
-const SearchPart: FunctionComponent = () => {
-  const id = 'text-field-parts-search';
+/** `TextField.Frame`, outlined: a search field's capsule. */
+const FramePart: FunctionComponent = () => {
+  const id = 'text-field-parts-frame';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(propOptionsGuideSearch, {
+  const [control, props, state] = usePropControl(propOptionsGuideFrame, {
     external,
     isOpen: true,
     emphasize: 'outline',
-    title: 'TextField.Search',
+    title: 'TextField.Frame',
   });
 
   return (
@@ -321,14 +321,14 @@ const SearchPart: FunctionComponent = () => {
       controls={[control]}
       id={id}
       state={[state]}
-      title="TextField.Search"
+      title="TextField.Frame"
     >
       {/* (On glass's colors, as in a bar: its glass looks.) */}
       <TextField.Root
         className="text-field-demo-standalone"
         data-glass-context="auto"
       >
-        <TextField.Search {...props}>
+        <TextField.Frame {...props}>
           <Symbol icon={sfMagnifyingglass} />
           <TextField.Control
             aria-label="Search"
@@ -336,7 +336,7 @@ const SearchPart: FunctionComponent = () => {
             type="search"
           />
           <TextField.Clear />
-        </TextField.Search>
+        </TextField.Frame>
       </TextField.Root>
     </Component>
   );
@@ -359,7 +359,7 @@ export const TextFieldParts: FunctionComponent = () => (
         <code>Validity</code> and <code>Item</code>, unstyled).
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="text-field"
@@ -381,7 +381,7 @@ export const TextFieldParts: FunctionComponent = () => (
             , or{' '}
             <PartLink
               component="text-field"
-              part="TextField.Search"
+              part="TextField.Frame"
             />{' '}
             around it
           </li>
@@ -554,15 +554,15 @@ export const TextFieldParts: FunctionComponent = () => (
     <PropsTable rows={textFieldClearRows} />
 
     <Heading
-      id="textfield-search"
+      id="textfield-frame"
       level={2}
     >
-      <code>TextField.Search</code>
+      <code>TextField.Frame</code>
     </Heading>
     <ul>
       <li>
-        A search field’s capsule: 36px high, on the tertiary fill; a magnifier,
-        the control, a clear button.
+        A frame around a field’s control: 36px high, on the tertiary fill; here
+        a search field’s, a magnifier, the control, a clear button.
       </li>
       <li>
         Pressed anywhere, it focuses its control; focused by keyboard, an
@@ -575,15 +575,15 @@ export const TextFieldParts: FunctionComponent = () => (
         <a href={publicUrl('text-field/composition#a-search-field')}>
           Composition
         </a>
-        ).
+        ). Changed, it morphs from one look to the other.
       </li>
       <li>
         Renders a <code>label</code>.
       </li>
     </ul>
-    <SearchPart />
+    <FramePart />
     <h3>Props</h3>
-    <PropsTable rows={textFieldSearchRows} />
+    <PropsTable rows={textFieldFrameRows} />
 
     <Heading
       id="textfield-validity"
@@ -625,5 +625,5 @@ export const textFieldPartsDemos = [
   DescriptionPart,
   ErrorPart,
   ClearPart,
-  SearchPart,
+  FramePart,
 ];

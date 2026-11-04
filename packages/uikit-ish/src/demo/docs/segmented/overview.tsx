@@ -15,7 +15,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { morePeriods, periods } from './content.js';
 import { segmentedItemRows, segmentedRootRows } from './docs.js';
 import { propOptionsOverviewRoot, propOptionsPeriodsContent } from './props.js';
@@ -129,8 +128,7 @@ export const SegmentedOverview: FunctionComponent = () => (
       <li>
         More options, or long ones: a <a href={publicUrl('menu')}>Menu</a> (a
         pop-up button) or a <a href={publicUrl('roll')}>Roll</a> picker,
-        collapsed until needed (guide{' '}
-        <GuideLink to="choice-family">§5</GuideLink>).
+        collapsed until needed.
       </li>
       <li>
         Switching an app’s top-level sections: a{' '}

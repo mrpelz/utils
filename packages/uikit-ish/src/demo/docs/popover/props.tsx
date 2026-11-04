@@ -144,6 +144,13 @@ export const propOptionsElement = {
   style: commonPropOptions.style,
 };
 
+/** `Popover.Header`: its own element, its edge effect. */
+export const propOptionsHeader = {
+  ...propOptionsElement,
+  edgeEffect: [undefined, 'soft', 'hard', 'none'] as const,
+  edgeTint: [undefined, 'rgb(255 59 48 / 30%)'] as const,
+};
+
 /** `Popover.Title`: in a toolbar's title, a `span`. */
 export const propOptionsTitle = {
   className: commonPropOptions.className,

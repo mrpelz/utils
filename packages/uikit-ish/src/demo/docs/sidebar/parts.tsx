@@ -62,7 +62,7 @@ const RootPart: FunctionComponent = () => {
             </Button.Root>
           </Sidebar.Toolbar>
           <TextField.Root>
-            <TextField.Search>
+            <TextField.Frame>
               <Symbol icon={sfMagnifyingglass} />
               <TextField.Control
                 aria-label="Search"
@@ -70,7 +70,7 @@ const RootPart: FunctionComponent = () => {
                 type="search"
               />
               <TextField.Clear />
-            </TextField.Search>
+            </TextField.Frame>
           </TextField.Root>
           <List.Root listStyle="sidebar">
             {sidebarSections.map(([title, rows]) => (
@@ -282,7 +282,7 @@ export const SidebarParts: FunctionComponent = () => (
       </li>
       <li>The views show the panel on a picture, as behind its glass.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="layout"
@@ -331,7 +331,7 @@ export const SidebarParts: FunctionComponent = () => (
                 →{' '}
                 <PartLink
                   component="text-field"
-                  part="TextField.Search"
+                  part="TextField.Frame"
                 />
               </li>
               <li>

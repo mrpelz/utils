@@ -89,6 +89,7 @@ const InAListRow: FunctionComponent = () => {
                           </Toolbar.Root>
                         </Popover.Header>
                         <Popover.Body>
+                          <Viewport.Padding edge="block-start" />
                           <List.Root>
                             <List.Section>
                               <List.Group>
@@ -152,7 +153,8 @@ sheet ? (
           <Popover.Header>
             <Toolbar.Root placement="block-start">…</Toolbar.Root>
           </Popover.Header>
-          <Popover.Body>{/* the same content */}</Popover.Body>
+          <Popover.Body>
+            <Viewport.Padding edge="block-start" />{/* the same content */}</Popover.Body>
         </Popover.Popup>
       </Popover.Positioner>
     </Popover.Portal>
@@ -311,6 +313,7 @@ const ASheetOnIPhone: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Popover.Header>
                 <Popover.Body>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     <List.Section>
                       <List.Group>
@@ -392,6 +395,7 @@ const FromAToolbarButton: FunctionComponent = () => {
                       </Toolbar.Root>
                     </Popover.Header>
                     <Popover.Body>
+                      <Viewport.Padding edge="block-start" />
                       <List.Root>
                         <List.Section>
                           <List.Group>
@@ -479,6 +483,7 @@ const ScrollingContent: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -565,9 +570,8 @@ export const PopoverComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a compact width, a popover’s content shows as a sheet (guide{' '}
-        <a href={publicUrl('hig-guide#rule-a5')}>A5</a>): the app’s choice here,
-        by{' '}
+        In a compact width, a popover’s content shows as a sheet: the app’s
+        choice here, by{' '}
         <PartLink
           component="viewport"
           part="useSizeClass"
@@ -651,7 +655,8 @@ export const PopoverComposition: FunctionComponent = () => (
           part="Popover.Body"
         />{' '}
         scrolls when the popup reaches its maximum height: the room for it, or
-        less (here: 360px, the app’s); its bar stays.
+        less (here: 360px, the app’s); its bar stays, the rows scrolling under
+        it, fading out beneath it (clear at the top).
       </li>
       <li>
         <strong>Library:</strong> the body (
@@ -659,10 +664,17 @@ export const PopoverComposition: FunctionComponent = () => (
           component="popover"
           part="Popover.Body"
         />
-        ) scrolling once the popup reaches its maximum height, the bar staying.
+        ) scrolling once the popup reaches its maximum height, under the bar
+        (its edge effect).
       </li>
       <li>
-        <strong>Demo:</strong> the maximum height (360px) and the rows.
+        <strong>Demo:</strong> the maximum height (360px), the rows, and the
+        body’s room for the bar (a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />
+        ).
       </li>
     </ul>
     <ScrollingContent />

@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   ActionSheet,
@@ -16,17 +16,24 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePropControl } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
-import { sfChevronBackward } from '../../tooling/icons.js';
+import {
+  sfChevronBackward,
+  sfEllipsis,
+  sfSquareAndArrowUp,
+  sfXmark,
+} from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { pages } from '../navigation/content.js';
 import { names } from '../viewport/content.js';
+import { getPropOptionsOpeningAtAStop } from './props.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 
@@ -688,6 +695,188 @@ const FormSheet: FunctionComponent = () => {
   );
 };
 
+/**
+ * A place's sheet (medium: glass, snapping by its groups): its header a
+ * stop of its own (`header`: an empty group, the capsule its bar alone),
+ * then a summary, its actions, its reviews.
+ */
+const placePopup = (addLog: (entry: string) => void) => (
+  <Sheet.Popup
+    compact
+    detent="medium"
+  >
+    <Sheet.Header>
+      <Sheet.Grabber />
+      <Toolbar.Root placement="block-start">
+        <Toolbar.Leading>
+          <Toolbar.Button
+            aria-label="Share"
+            shape="circle"
+            onClick={() => addLog('Share clicked')}
+          >
+            <Button.Icon>
+              <Symbol icon={sfSquareAndArrowUp} />
+            </Button.Icon>
+          </Toolbar.Button>
+        </Toolbar.Leading>
+        <Toolbar.Title>
+          <Sheet.Title render={<span />}>Harbor Café</Sheet.Title>
+        </Toolbar.Title>
+        <Toolbar.Trailing>
+          <Toolbar.Button
+            aria-label="More"
+            shape="circle"
+            onClick={() => addLog('More clicked')}
+          >
+            <Button.Icon>
+              <Symbol icon={sfEllipsis} />
+            </Button.Icon>
+          </Toolbar.Button>
+          <Sheet.Close
+            render={
+              <Toolbar.Button
+                aria-label="Close"
+                shape="circle"
+              />
+            }
+          >
+            <Button.Icon>
+              <Symbol icon={sfXmark} />
+            </Button.Icon>
+          </Sheet.Close>
+        </Toolbar.Trailing>
+      </Toolbar.Root>
+    </Sheet.Header>
+    <Sheet.Content>
+      <Viewport.Padding edge="block-start" />
+      <Sheet.SnapGroup value="header" />
+      <Sheet.SnapGroup value="peek">
+        <List.Root>
+          <List.Section>
+            <List.Group>
+              <List.Item>
+                <List.Content>
+                  <List.Title>Open until 6 PM</List.Title>
+                  <List.Subtitle>Café · 300 m</List.Subtitle>
+                </List.Content>
+              </List.Item>
+            </List.Group>
+          </List.Section>
+        </List.Root>
+      </Sheet.SnapGroup>
+      <Sheet.SnapGroup value="details">
+        <List.Root>
+          <List.Section>
+            <List.Group>
+              {['Call', 'Website', 'Directions'].map((action) => (
+                <List.Item key={action}>
+                  <List.Content>
+                    <List.Title
+                      render={<button type="button" />}
+                      onClick={() => addLog(`${action} clicked`)}
+                    >
+                      {action}
+                    </List.Title>
+                  </List.Content>
+                </List.Item>
+              ))}
+            </List.Group>
+          </List.Section>
+        </List.Root>
+      </Sheet.SnapGroup>
+      <Sheet.SnapGroup value="all">
+        <List.Root>
+          <List.Section>
+            <List.Group>
+              {names.map((name) => (
+                <List.Item key={name}>
+                  <List.Content>
+                    <List.Title>{name}</List.Title>
+                    <List.Subtitle>Review</List.Subtitle>
+                  </List.Content>
+                </List.Item>
+              ))}
+            </List.Group>
+          </List.Section>
+        </List.Root>
+        <Viewport.Padding edge="block-end" />
+      </Sheet.SnapGroup>
+    </Sheet.Content>
+  </Sheet.Popup>
+);
+
+/** Deep links into the place's sheet: a stop, a trigger's label. */
+const links: readonly [string, string][] = [
+  ['peek', 'Opening Hours'],
+  ['details', 'Contact'],
+  ['all', 'Reviews'],
+];
+
+/**
+ * Opening at a stop: where (`defaultSnapPoint`) apart from whether it's
+ * open at first (`defaultOpen`), and triggers linking into stops of their
+ * own (`snapPoint`); its own (uncontrolled).
+ */
+const OpeningAtAStop: FunctionComponent = () => {
+  const id = 'sheet-composition-opening-at-a-stop';
+  const [log, addLog] = useLog();
+  const [external] = useProvidedState(id);
+  const [control, props, state, elementKey] = usePropControl(
+    useMemo(() => getPropOptionsOpeningAtAStop(addLog), [addLog]),
+    { external, isOpen: true, title: 'Sheet.Root' },
+  );
+
+  return (
+    <Component
+      hasWallpaper
+      isInline
+      controls={[control]}
+      id={id}
+      log={log}
+      screen="centered"
+      stage="phone"
+      state={[state]}
+      title="Opening at a stop"
+    >
+      <Viewport.Content>
+        <Sheet.Root
+          key={`${elementKey}`}
+          {...props}
+        >
+          <div className="sheet-demo-links">
+            <Sheet.Trigger
+              render={
+                <Button.Root
+                  size="large"
+                  variant="bordered-prominent"
+                />
+              }
+            >
+              <Button.Label>Show Place</Button.Label>
+            </Sheet.Trigger>
+            {/* Deep links: each opening it at a stop of its own. */}
+            {links.map(([stop, label]) => (
+              <Sheet.Trigger
+                key={stop}
+                snapPoint={stop}
+                render={
+                  <Button.Root
+                    size="large"
+                    variant="bordered"
+                  />
+                }
+              >
+                <Button.Label>{label}</Button.Label>
+              </Sheet.Trigger>
+            ))}
+          </div>
+          {placePopup(addLog)}
+        </Sheet.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['medium-and-large', 'Medium and large'],
@@ -695,6 +884,7 @@ const sections: readonly Section[] = [
   ['without-a-grabber', 'Without a grabber'],
   ['a-navigation-inside', 'A navigation inside'],
   ['a-form-sheet-on-a-tablet', 'A form sheet on a tablet'],
+  ['opening-at-a-stop', 'Opening at a stop'],
 ];
 
 /** `/sheet/composition`: sheets' detents, tasks, stacks and widths. */
@@ -762,10 +952,8 @@ export const SheetComposition: FunctionComponent = () => (
         instead of closing; swiped down, kept open, the sheet springs back.
       </li>
       <li>
-        A sheet is for a scoped task that keeps its parent in view (guide{' '}
-        <GuideLink to="rule-a8">A8</GuideLink>); the confirmation is its own
-        (guide <GuideLink to="rule-g3">G3</GuideLink>: one transient surface at
-        a time).
+        A sheet is for a scoped task that keeps its parent in view; the
+        confirmation is its own (one transient surface at a time).
       </li>
       <li>
         <strong>Library:</strong> the sheet’s controlled <code>open</code> and{' '}
@@ -880,10 +1068,7 @@ export const SheetComposition: FunctionComponent = () => (
         By the window (from 768px), or set: <code>compact={'{false}'}</code>, as
         here.
       </li>
-      <li>
-        The same sheet adapts, its task the same (guide{' '}
-        <GuideLink to="rule-g4">G4</GuideLink>).
-      </li>
+      <li>The same sheet adapts, its task the same.</li>
       <li>
         <strong>Library:</strong> the form sheet (
         <code>
@@ -897,6 +1082,54 @@ export const SheetComposition: FunctionComponent = () => (
     </ul>
     <CodeView code={formSheetCode} />
     <FormSheet />
+
+    <Heading
+      id="opening-at-a-stop"
+      level={2}
+    >
+      Opening at a stop
+    </Heading>
+    <ul>
+      <li>
+        A place’s sheet, revealed group by group (
+        <PartLink
+          component="sheet"
+          part="Sheet.SnapGroup"
+        />
+        ): its header alone (<code>header</code>, an empty group first: the
+        capsule its bar, its buttons in reach), a summary (<code>peek</code>),
+        its actions (<code>details</code>), its reviews (<code>all</code>).
+      </li>
+      <li>
+        Where it opens (<code>defaultSnapPoint</code>) is apart from whether
+        it’s open at first (<code>defaultOpen</code>): opened again, it’s at
+        that stop again.
+      </li>
+      <li>
+        Deep links: its other triggers open it at a stop of their own (
+        <PartLink
+          component="sheet"
+          part="Sheet.Trigger"
+        >
+          Sheet.Trigger snapPoint
+        </PartLink>
+        ): its hours (Opening Hours), its actions (Contact), its reviews
+        (Reviews); Show Place, at its default.
+      </li>
+      <li>
+        Swiped, a stop at a time, down from its lowest closed; at{' '}
+        <code>all</code>, its reviews scroll.
+      </li>
+      <li>
+        <strong>Library:</strong> the stops by its groups, opening at one (its
+        default, or a trigger’s), snapping within its glass capsule.
+      </li>
+      <li>
+        <strong>Demo:</strong> the place, its groups’ names, its triggers’
+        stops, and logging its stops and buttons.
+      </li>
+    </ul>
+    <OpeningAtAStop />
   </>
 );
 
@@ -907,4 +1140,5 @@ export const sheetCompositionDemos = [
   WithoutAGrabber,
   NavigationInside,
   FormSheet,
+  OpeningAtAStop,
 ];

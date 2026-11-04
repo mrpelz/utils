@@ -966,7 +966,11 @@ const bounceAttribute = (alwaysBounce: boolean | undefined) => {
  * The content layer: filling the viewport, scrolling its content (a
  * scroller, tracked by its `Provider` unless a page within it fills the
  * screen, see edge.ts), below the anchors; its safe area insets kept clear
- * (as padding), or not, by what it holds (`auto`, see style.css).
+ * (as padding), or not, by what it holds (`auto`, see style.css). For
+ * what's in it (e.g. a map's controls, kept clear of a bar or an island),
+ * its scope's anchors' sizes at its block edges, as a padding there makes
+ * room for them (beyond the safe area): `--uikit-viewport-anchor-block-start`
+ * and `-end` (px).
  */
 const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
   (
@@ -976,6 +980,7 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
       className,
       keyboard = 'resize',
       safeArea = 'auto',
+      style,
       ...props
     },
     forwardedRef,
@@ -983,6 +988,8 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
     const ref = useForwardedRef(forwardedRef);
     useWindowHold(usePortalContainer(undefined));
     useScrollerRegistration(ref);
+    const start = useAnchorSize('block-start');
+    const end = useAnchorSize('block-end');
 
     return (
       <div
@@ -990,6 +997,13 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
         data-always-bounce={bounceAttribute(alwaysBounce)}
         data-keyboard={keyboard}
         data-safe-area={safeArea}
+        style={withStyle(
+          {
+            '--uikit-viewport-anchor-block-end': `${String(end)}px`,
+            '--uikit-viewport-anchor-block-start': `${String(start)}px`,
+          },
+          style,
+        )}
         {...props}
         className={cn('uikit-viewport-content', className)}
         data-viewport-part="content"

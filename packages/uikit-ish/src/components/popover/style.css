@@ -23,7 +23,28 @@
   /* Its bar (16px from the popover's top, 10px above its content),
      a toolbar in it a 44px row, its padding the header's (not a bar's). */
   .uikit-popover-header {
-    padding: 16px 0 10px;
+    position: absolute;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    inset: 0 0 auto;
+
+    /* Its spacing in its content box (measured as its height, see
+       Viewport.Padding): 16px above its bar, 10px below. */
+    &::before,
+    &::after {
+      flex: none;
+      content: '';
+    }
+
+    &::before {
+      height: 16px;
+    }
+
+    &::after {
+      height: 10px;
+    }
 
     /* (Over the bar's own: its placement's padding and height.) */
     & > [data-toolbar-part='root'][data-placement] {
@@ -45,6 +66,27 @@
     /* Its end 16px after its content, as a list's inset from its sides (a
        list's ends are its container's, see List). */
     padding-block-end: 16px;
+
+    /* Its start the header's room alone (its spacing the header's own, see
+       above): no content margin beyond it. */
+    & > .uikit-viewport-padding[data-edge='block-start'] {
+      --uikit-viewport-padding-margin: 0px;
+    }
+
+    /* Under its header, fading out (as a sheet's content, see Sheet): hidden
+       under the share of it the veil is, showing past it and its edge
+       effect's reach (16px); only as content scrolls under it, at the top
+       all shown. */
+    .uikit-popover-popup:has(.uikit-popover-header) & {
+      mask-image: linear-gradient(
+        rgb(0 0 0 / calc(1 - var(--uikit-viewport-edge-start-progress, 1)))
+          calc(
+            var(--uikit-viewport-padding-block-start, 0px) *
+              var(--uikit-viewport-edge-veil, 0.75)
+          ),
+        #000 calc(var(--uikit-viewport-padding-block-start, 0px) + 16px)
+      );
+    }
   }
 
   /* Its material (see main.tsx): its outlines' clip paths by its arrow's
@@ -56,7 +98,7 @@
 
     position: relative;
 
-    /* Its header and body stacked, within the viewport (Base UI's room for
+    /* Its header over its body, within the viewport (Base UI's room for
        it): taller content scrolls in its body (see `Body`). */
     display: flex;
     max-height: var(--available-height);
@@ -65,8 +107,22 @@
     background-color: transparent;
     box-shadow: none;
     color: var(--uikit-glass-content);
+
+    /* Its body's edge effects fixed to it (see Viewport): their containing
+       block. */
+    contain: layout;
     isolation: isolate;
     outline: none;
+
+    /* Its glass behind its header: none drawn over it (translucent, painted
+       over itself again it'd lighten, its blur the tint twice), its body
+       fading out under the header instead (see the body). */
+    --uikit-viewport-edge-background: transparent;
+    --uikit-viewport-edge-veil: 0.75;
+
+    & .uikit-viewport-edge-effect[data-edge-effect='soft']::before {
+      backdrop-filter: none;
+    }
 
     /* Its backdrop blur: without an arrow, its own, rounded (WebKit draws
        none through a clip path); with one, as one with its wedge (by its

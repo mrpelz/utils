@@ -20,7 +20,6 @@ import {
   sfXmark,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 
@@ -416,9 +415,9 @@ export const ButtonComposition: FunctionComponent = () => (
         Cancel to keep it.
       </li>
       <li>
-        An alert is a last resort (guide <GuideLink to="rule-g5">G5</GuideLink>
-        ): for what can be undone, undo instead; for several choices, an{' '}
-        <a href={publicUrl('action-sheet')}>Action sheet</a>.
+        An alert is a last resort: for what can be undone, undo instead; for
+        several choices, an <a href={publicUrl('action-sheet')}>Action sheet</a>
+        .
       </li>
       <li>
         <strong>Library:</strong> the destructive button and the{' '}

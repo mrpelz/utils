@@ -44,7 +44,6 @@ import {
   sfTrashFill,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import {
   contacts,
   messages,
@@ -1990,10 +1989,7 @@ export const ListComposition: FunctionComponent = () => (
       </li>
       <li>Others drill in (a button title, a detail, a chevron).</li>
       <li>A row with a switch passes its clicks on to it.</li>
-      <li>
-        Settings take effect at once (guide{' '}
-        <GuideLink to="commit-model">§8.2, commit model</GuideLink>).
-      </li>
+      <li>Settings take effect at once.</li>
       <li>
         <strong>Library:</strong> the inset grouped list (
         <PartLink
@@ -2291,8 +2287,7 @@ export const ListComposition: FunctionComponent = () => (
       </li>
       <li>
         The bottom toolbar (in the <a href={publicUrl('viewport')}>Viewport</a>
-        ’s block end) reads it, to delete the selected rows (guide{' '}
-        <GuideLink to="rule-g7">G7</GuideLink>).
+        ’s block end) reads it, to delete the selected rows.
       </li>
       <li>Rows still swipe to delete one.</li>
       <li>

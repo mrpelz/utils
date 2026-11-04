@@ -210,7 +210,8 @@ const useOverrides = (outer: Overrides, ownKey: string): Overrides =>
 
 /**
  * Settings for what's within it (see `SettingsProviderProps`): a
- * `display: contents` element (or `render`'s), its overrides on it as
+ * `display: contents` element (or `render`'s, as it's laid out), its
+ * overrides on it as
  * custom properties, for CSS, and in context, for `useSettings`. Nested,
  * an inner provider overrides an outer one's, setting by setting.
  */
@@ -232,7 +233,10 @@ const Provider = forwardRef<HTMLDivElement, SettingsProviderProps>(
       defaultTagName: 'div',
       props: {
         ...elementProps,
-        className: cn('uikit-settings', className),
+        // (`render`'s element a box of its own: e.g. an app's root, laid
+        // out as it is.)
+        className:
+          render === undefined ? cn('uikit-settings', className) : className,
         'data-color-scheme': own.includes('colorScheme')
           ? props.colorScheme
           : undefined,

@@ -1,17 +1,7 @@
 /* The design tokens page (see main.tsx), as the docs' pages: the page's
    colors, dashed frames, monospace details. Its specimens (text styles,
-   materials, shadows) on surfaces in the scheme chosen. */
+   materials) in both schemes, side by side. */
 @layer demo {
-  .demo-tokens-scheme {
-    margin-block: 1.5rem 0;
-  }
-
-  .demo-tokens-pending {
-    padding: 1rem;
-    border: 1px dashed #404040;
-    color: light-dark(#404040, #a1a1a1);
-  }
-
   /* Cards in a grid, as many as fit. */
   .demo-token-grid {
     display: grid;
@@ -103,18 +93,31 @@
     }
   }
 
-  /* A surface in the scheme chosen (its own background and label). */
-  .demo-token-specimens,
-  .demo-token-shadows {
-    border: 1px dashed #404040;
-    background-color: var(--color-ui-system-background);
-    color: var(--color-ui-label);
+  /* Light and dark, side by side; narrow, one above the other. */
+  .demo-token-schemes {
+    display: grid;
+    gap: 1.5rem 1rem;
+    grid-template-columns: minmax(0, 1fr);
+
+    @media (width >= 48rem) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
-  /* Text styles: a specimen, its metrics beside it. */
+  .demo-token-scheme-label {
+    color: light-dark(#404040, #a1a1a1);
+    font-size: 0.875rem;
+    margin-block: 0 0.5rem;
+  }
+
+  /* Text styles, on a surface in its scheme (its own background and
+     label): a specimen, its metrics beside it. */
   .demo-token-specimens {
     display: grid;
     padding: 0;
+    border: 1px dashed #404040;
+    background-color: var(--color-ui-system-background);
+    color: var(--color-ui-label);
     list-style: none;
 
     & > li {
@@ -250,92 +253,5 @@
     & > span {
       padding: 0.375rem 1rem;
     }
-  }
-
-  /* A glass group's tokens, folded. */
-  .demo-token-group {
-    padding: 0.5rem 1rem;
-    border: 1px dashed #404040;
-    margin-block: 0.5rem;
-
-    & > summary {
-      display: flex;
-      justify-content: space-between;
-      cursor: pointer;
-      gap: 1rem;
-    }
-  }
-
-  .demo-token-group-count {
-    color: light-dark(#404040, #a1a1a1);
-    font-family: monospace;
-  }
-
-  .demo-token-description {
-    color: light-dark(#404040, #a1a1a1);
-    white-space: pre-line;
-  }
-
-  .demo-token-table {
-    display: grid;
-    margin: 0.5rem 0 0;
-    font-size: 0.875rem;
-    gap: 0.75rem;
-
-    & > div {
-      display: grid;
-      gap: 0.125rem;
-    }
-
-    & dd {
-      display: grid;
-      margin: 0;
-      color: light-dark(#404040, #a1a1a1);
-      gap: 0.125rem;
-
-      & code {
-        overflow-wrap: anywhere;
-      }
-    }
-  }
-
-  /* Shadows, each on a card on the surface. */
-  .demo-token-shadows {
-    padding: 1rem;
-  }
-
-  .demo-token-shadow-stage {
-    display: grid;
-    height: 3.5rem;
-    place-items: center;
-  }
-
-  .demo-token-shadow {
-    width: 60%;
-    height: 1.75rem;
-    border-radius: 8px;
-    background-color: var(--color-ui-secondary-system-background);
-  }
-
-  /* Safe areas: each edge's inset, drawn to scale (0px: a hairline). */
-  .demo-token-safe-areas {
-    display: grid;
-    gap: 0.75rem;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr));
-  }
-
-  .demo-token-safe-area {
-    display: grid;
-    padding: 0.75rem;
-    border: 1px dashed #404040;
-    font-family: monospace;
-    font-size: 0.875rem;
-    gap: 0.5rem;
-  }
-
-  .demo-token-safe-area-value {
-    width: max(1px, var(--demo-token-inset));
-    height: 0.75rem;
-    background: var(--demo-hatch), rgb(255 59 48 / 50%);
   }
 }

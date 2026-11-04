@@ -2,7 +2,6 @@
 import './style.css';
 
 import type { Popover as BasePopover } from '@base-ui/react/popover';
-import type { Signalish } from 'preact';
 import {
   createContext,
   CSSProperties,
@@ -75,7 +74,10 @@ export const mergeClassNames = (
  * @example <span className={cn('uikit-menu-icon', className)} />
  */
 export const cn: {
-  (name: string, className?: Signalish<string | undefined>): string;
+  (
+    name: string,
+    className?: string | { readonly value: string | undefined },
+  ): string;
   <State>(
     name: string,
     className?: string | ((state: State) => string | undefined),
@@ -89,7 +91,7 @@ export const cn: {
       ) ?? name) as never;
   }
 
-  // (Preact's class names can be signals.)
+  // (Preact's class names can be signals: anything with a `value`.)
   const value =
     typeof className === 'object' && className !== null
       ? (className as { value: string | undefined }).value

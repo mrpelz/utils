@@ -1,6 +1,8 @@
 import type { Popover as BasePopover } from '@base-ui/react/popover';
+import type { ComponentProps } from 'react';
 
 import type { LogicalSide } from '../utils/main.js';
+import type { ViewportEdgeEffect } from '../viewport/main.js';
 
 export type PopoverAlign = 'center' | 'end' | 'start';
 
@@ -28,6 +30,21 @@ export type PopoverPositionerProps = Omit<
    * @default 'block-end'
    */
   side?: LogicalSide;
+};
+
+export type PopoverHeaderProps = ComponentProps<'div'> & {
+  /**
+   * Its scroll edge effect, as the body scrolls under it (see
+   * `Viewport.Anchor`): `soft`, the body fading out under it (on the
+   * popover's glass, no blur); `hard`, a solid backing with a dividing line;
+   * `none`.
+   * @default 'soft'
+   */
+  edgeEffect?: ViewportEdgeEffect;
+  /**
+   * A color for its edge effect, shown at rest too (see `Viewport.Anchor`).
+   */
+  edgeTint?: string;
 };
 
 export type Nose = 'bottom' | 'left' | 'right' | 'top';

@@ -42,7 +42,7 @@ export const TypographyParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>One element: its text in a style.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="typography"

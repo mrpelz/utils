@@ -485,7 +485,7 @@ export const SliderParts: FunctionComponent = () => (
         track: ticks.
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="slider"

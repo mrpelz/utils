@@ -33,7 +33,6 @@ import {
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import { photo } from '../avatar/props.js';
-import { GuideLink } from '../hig-guide/link.js';
 
 /** The share sheet's actions row, then more actions as a list. */
 const MoreActionsAsAList: FunctionComponent = () => {
@@ -304,9 +303,8 @@ export const ActivityViewComposition: FunctionComponent = () => (
         .
       </li>
       <li>
-        Guide <GuideLink to="primitive-command-set">§5</GuideLink>: the same
-        Command set, rendered as a sheet list (compact) or a popover list
-        (regular).
+        The same set of commands, shown as a sheet’s list (compact) or a
+        popover’s (regular).
       </li>
       <li>
         <strong>Library:</strong> the activity view with its thumbnail and

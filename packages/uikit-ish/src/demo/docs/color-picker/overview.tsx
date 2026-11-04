@@ -30,7 +30,6 @@ import {
   sfXmark,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import {
   colorPickerPanelRows,
   colorPickerRootRows,
@@ -270,9 +269,7 @@ export const ColorPickerOverview: FunctionComponent = () => (
         For any color: a drawing’s, a text’s, an app’s tint, a calendar’s.
       </li>
       <li>
-        A value, not a pick from the app’s few: the guide’s{' '}
-        <GuideLink to="primitive-value-input">Value input</GuideLink> (its value
-        type: a color).
+        For entering a value (a color), not for picking one of the app’s few.
       </li>
     </ul>
 

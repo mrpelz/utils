@@ -27,7 +27,6 @@ import {
   sfSquareAndPencil,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { names } from '../viewport/content.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -72,7 +71,7 @@ const searchCode = `const [query, setQuery] = useState('');
     <Header.Accessory>
       <TextField.Root>
         {/* Looking like the list's rows below it. */}
-        <TextField.Search variant="row">
+        <TextField.Frame variant="row">
           <Symbol icon={sfMagnifyingglass} />
           <TextField.Control
             aria-label="Search"
@@ -82,7 +81,7 @@ const searchCode = `const [query, setQuery] = useState('');
             onValueChange={setQuery}
           />
           <TextField.Clear />
-        </TextField.Search>
+        </TextField.Frame>
       </TextField.Root>
     </Header.Accessory>
     <List.Root>…{/* the rows matching query */}</List.Root>
@@ -239,7 +238,7 @@ const Search: FunctionComponent = () => {
             </Header.LargeTitle>
             <Header.Accessory>
               <TextField.Root>
-                <TextField.Search variant="row">
+                <TextField.Frame variant="row">
                   <Symbol icon={sfMagnifyingglass} />
                   <TextField.Control
                     aria-label="Search"
@@ -249,7 +248,7 @@ const Search: FunctionComponent = () => {
                     onValueChange={(value: string) => setQuery(value)}
                   />
                   <TextField.Clear />
-                </TextField.Search>
+                </TextField.Frame>
               </TextField.Root>
             </Header.Accessory>
 
@@ -500,7 +499,7 @@ export const HeaderComposition: FunctionComponent = () => (
         ’s{' '}
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />{' '}
         in the header’s{' '}
         <PartLink
@@ -515,8 +514,7 @@ export const HeaderComposition: FunctionComponent = () => (
         corners (<code>variant=&quot;row&quot;</code>), still a search field.
       </li>
       <li>
-        Search sits with the page’s Region (guide{' '}
-        <GuideLink to="rule-a11">A11</GuideLink>); also at the bottom (see{' '}
+        Search sits with the page’s bar; also at the bottom (see{' '}
         <a href={publicUrl('toolbar/composition#a-search-field')}>Toolbar</a>).
       </li>
       <li>
@@ -529,7 +527,7 @@ export const HeaderComposition: FunctionComponent = () => (
         look (
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />{' '}
         <code>variant</code>,{' '}
         <PartLink

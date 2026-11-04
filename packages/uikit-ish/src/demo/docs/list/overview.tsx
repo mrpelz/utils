@@ -18,7 +18,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { settings } from './content.js';
 import {
   listGroupRows,
@@ -416,8 +415,7 @@ export const ListOverview: FunctionComponent = () => (
         >
           SwipeActionsTrigger
         </PartLink>{' '}
-        opens the row’s trailing swipe actions (guide{' '}
-        <GuideLink to="rule-g7">G7</GuideLink>: the list owns the selection).
+        opens the row’s trailing swipe actions (the list owns the selection).
       </li>
     </ul>
   </>

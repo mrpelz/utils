@@ -34,7 +34,6 @@ import {
   sfPlayFill,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { names } from '../viewport/content.js';
 import { phoneTabs, phoneTabValues } from './tabs.js';
 
@@ -124,7 +123,7 @@ const field = useRef(null);
   <TabBar.Accessory visibleIn="collapsed">
     <TextField.Root>
       {/* On the accessory's glass, as the collapsed bar's. */}
-      <TextField.Search variant="tab-bar-collapsed">
+      <TextField.Frame variant="tab-bar-collapsed">
         <Symbol icon={sfMagnifyingglass} />
         <TextField.Control
           ref={field}
@@ -133,7 +132,7 @@ const field = useRef(null);
           type="search"
         />
         <TextField.Clear />
-      </TextField.Search>
+      </TextField.Frame>
     </TextField.Root>
   </TabBar.Accessory>
 </TabBar.Root>
@@ -160,7 +159,7 @@ const searchBesideCode = `const [query, setQuery] = useState('');
         </TabBar.Group>
         {/* Beside the group, as a group's glass capsule. */}
         <TextField.Root>
-          <TextField.Search variant="tab-bar">
+          <TextField.Frame variant="tab-bar">
             <Symbol icon={sfMagnifyingglass} />
             <TextField.Control
               aria-label="Search"
@@ -170,7 +169,7 @@ const searchBesideCode = `const [query, setQuery] = useState('');
               onValueChange={setQuery}
             />
             <TextField.Clear />
-          </TextField.Search>
+          </TextField.Frame>
         </TextField.Root>
       </TabBar.List>
     </Viewport.BlockEnd>
@@ -439,7 +438,7 @@ const Search: FunctionComponent = () => {
             </TabBar.List>
             <TabBar.Accessory visibleIn="collapsed">
               <TextField.Root>
-                <TextField.Search variant="tab-bar-collapsed">
+                <TextField.Frame variant="tab-bar-collapsed">
                   <Symbol icon={sfMagnifyingglass} />
                   <TextField.Control
                     ref={field}
@@ -448,7 +447,7 @@ const Search: FunctionComponent = () => {
                     type="search"
                   />
                   <TextField.Clear />
-                </TextField.Search>
+                </TextField.Frame>
               </TextField.Root>
             </TabBar.Accessory>
           </Viewport.BlockEnd>
@@ -516,7 +515,7 @@ const SearchBeside: FunctionComponent = () => {
                 </TabBar.Tab>
               </TabBar.Group>
               <TextField.Root>
-                <TextField.Search variant="tab-bar">
+                <TextField.Frame variant="tab-bar">
                   <Symbol icon={sfMagnifyingglass} />
                   <TextField.Control
                     aria-label="Search"
@@ -526,7 +525,7 @@ const SearchBeside: FunctionComponent = () => {
                     onValueChange={(value: string) => setQuery(value)}
                   />
                   <TextField.Clear />
-                </TextField.Search>
+                </TextField.Frame>
               </TextField.Root>
             </TabBar.List>
           </Viewport.BlockEnd>
@@ -774,11 +773,9 @@ export const TabBarComposition: FunctionComponent = () => (
         showing the active tab’s.
       </li>
       <li>
-        As an app’s shell (guide{' '}
-        <GuideLink to="shell-a">§7.4, shell A</GuideLink>): each panel a{' '}
-        <a href={publicUrl('page')}>Page</a> (<code>render</code>), scrolling on
-        its own, in the <a href={publicUrl('viewport')}>Viewport</a>’s content
-        layer.
+        As an app’s shell: each panel a <a href={publicUrl('page')}>Page</a> (
+        <code>render</code>), scrolling on its own, in the{' '}
+        <a href={publicUrl('viewport')}>Viewport</a>’s content layer.
       </li>
       <li>
         The bar floats over it, anchored at the bottom (
@@ -826,11 +823,7 @@ export const TabBarComposition: FunctionComponent = () => (
       Search
     </Heading>
     <ul>
-      <li>
-        Search: a group of its own after the sections’ (guide{' '}
-        <GuideLink to="rule-a11">A11</GuideLink>,{' '}
-        <GuideLink to="section-7-6">§7.6</GuideLink>).
-      </li>
+      <li>Search: a group of its own after the sections’.</li>
       <li>Choosing it collapses the bar to the section last chosen.</li>
       <li>
         The search field appears beside it: an accessory shown only while
@@ -839,7 +832,7 @@ export const TabBarComposition: FunctionComponent = () => (
         accessory’s glass as the collapsed bar’s (
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />{' '}
         <code>variant=&quot;tab-bar-collapsed&quot;</code>).
       </li>
@@ -861,7 +854,7 @@ export const TabBarComposition: FunctionComponent = () => (
         look (
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />{' '}
         <code>variant</code>).
       </li>
@@ -892,7 +885,7 @@ export const TabBarComposition: FunctionComponent = () => (
         It looks like a group: a glass capsule as high as the tabs (
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />{' '}
         <code>variant=&quot;tab-bar&quot;</code>).
       </li>
@@ -913,7 +906,7 @@ export const TabBarComposition: FunctionComponent = () => (
         <strong>Library:</strong> the search field’s tab bar look (
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />{' '}
         <code>variant</code>) beside a{' '}
         <PartLink
@@ -949,10 +942,7 @@ export const TabBarComposition: FunctionComponent = () => (
       <li>
         Placed on the glyph, solid while the symbol blends with the glass.
       </li>
-      <li>
-        Guide <GuideLink to="section-7-5">§7.5</GuideLink>: an activity badge on
-        a tab item.
-      </li>
+      <li>It shows activity on the tab.</li>
       <li>
         <strong>Library:</strong> the{' '}
         <PartLink

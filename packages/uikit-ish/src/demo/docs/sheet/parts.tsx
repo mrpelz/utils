@@ -27,15 +27,18 @@ import {
   sheetHeaderRows,
   sheetPopupRows,
   sheetRootRows,
+  sheetSnapGroupRows,
   sheetTitleRows,
   sheetTriggerRows,
 } from './docs.js';
 import {
   getPropOptionsGuideRoot,
+  getPropOptionsSnapGroupRoot,
   propOptionsGrabber,
   propOptionsGuidePopup,
   propOptionsHeader,
   propOptionsPart,
+  propOptionsSnapGroup,
 } from './props.js';
 
 // Each view: a phone's screen, its button presenting the sheet (opened, the
@@ -475,6 +478,125 @@ const GrabberPart: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
               <Viewport.Padding edge="block-end" />
+            </Sheet.Content>
+          </Sheet.Popup>
+        </Sheet.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
+/**
+ * `Sheet.SnapGroup`: a place's sheet, revealed group by group (its first
+ * group outlined).
+ */
+const SnapGroupPart: FunctionComponent = () => {
+  const id = 'sheet-parts-snap-group';
+  const [log, addLog] = useLog();
+  const [externalRoot, external] = useProvidedState(id);
+  const [controlRoot, propsRoot, stateRoot, keyRoot] = usePropControl(
+    useMemo(() => getPropOptionsSnapGroupRoot(addLog), [addLog]),
+    { external: externalRoot, isOpen: true, title: 'Sheet.Root' },
+  );
+  const [control, props, state] = usePropControl(propOptionsSnapGroup, {
+    external,
+    isOpen: true,
+    emphasize: 'outline',
+    title: 'Sheet.SnapGroup',
+  });
+
+  return (
+    <Component
+      isInline
+      controls={[controlRoot, control]}
+      id={id}
+      log={log}
+      screen="centered"
+      stage="phone"
+      state={[stateRoot, state]}
+      title="Sheet.SnapGroup"
+    >
+      <Viewport.Content>
+        <Sheet.Root
+          key={`${keyRoot}`}
+          defaultOpen
+          {...propsRoot}
+        >
+          <Sheet.Trigger
+            render={
+              <Button.Root
+                size="large"
+                variant="bordered"
+              />
+            }
+          >
+            <Button.Label>Show Place</Button.Label>
+          </Sheet.Trigger>
+          <Sheet.Popup
+            compact
+            detent="medium"
+          >
+            <Sheet.Header>
+              <Sheet.Grabber />
+              <Toolbar.Root placement="block-start">
+                <Toolbar.Title>
+                  <Sheet.Title render={<span />}>Harbor Café</Sheet.Title>
+                </Toolbar.Title>
+                <Toolbar.Trailing>
+                  <Sheet.Close render={<Toolbar.Button />}>
+                    <Button.Label>Done</Button.Label>
+                  </Sheet.Close>
+                </Toolbar.Trailing>
+              </Toolbar.Root>
+            </Sheet.Header>
+            <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
+              <Sheet.SnapGroup {...props}>
+                <List.Root>
+                  <List.Section>
+                    <List.Group>
+                      <List.Item>
+                        <List.Content>
+                          <List.Title>Open until 6 PM</List.Title>
+                          <List.Subtitle>Café · 300 m</List.Subtitle>
+                        </List.Content>
+                      </List.Item>
+                    </List.Group>
+                  </List.Section>
+                </List.Root>
+              </Sheet.SnapGroup>
+              <Sheet.SnapGroup value="details">
+                <List.Root>
+                  <List.Section>
+                    <List.Group>
+                      {['Call', 'Website', 'Directions'].map((name) => (
+                        <List.Item key={name}>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                          </List.Content>
+                        </List.Item>
+                      ))}
+                    </List.Group>
+                  </List.Section>
+                </List.Root>
+              </Sheet.SnapGroup>
+              <Sheet.SnapGroup value="all">
+                <List.Root>
+                  <List.Section>
+                    <List.Group>
+                      {names.map((name) => (
+                        <List.Item key={name}>
+                          <List.Content>
+                            <List.Title>{name}</List.Title>
+                            <List.Subtitle>Review</List.Subtitle>
+                          </List.Content>
+                        </List.Item>
+                      ))}
+                    </List.Group>
+                  </List.Section>
+                </List.Root>
+                <Viewport.Padding edge="block-end" />
+              </Sheet.SnapGroup>
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -1051,7 +1173,7 @@ export const SheetParts: FunctionComponent = () => (
       </li>
       <li>Press each view’s button to open its sheet.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="sheet"
@@ -1104,6 +1226,15 @@ export const SheetParts: FunctionComponent = () => (
                   part="Sheet.Description"
                 />
                 , optional)
+                <ul>
+                  <li>
+                    <PartLink
+                      component="sheet"
+                      part="Sheet.SnapGroup"
+                    />{' '}
+                    (optional; one per stop, in order)
+                  </li>
+                </ul>
               </li>
             </ul>
           </li>
@@ -1269,6 +1400,55 @@ export const SheetParts: FunctionComponent = () => (
     <PropsTable rows={sheetGrabberRows} />
 
     <Heading
+      id="sheet-snapgroup"
+      level={2}
+    >
+      <code>Sheet.SnapGroup</code>
+    </Heading>
+    <ul>
+      <li>
+        A stop of the sheet’s: swiped up, it reveals its content group by group,
+        snapping to show everything up to a group’s end (its header too, clear
+        of the home indicator), measured live as the content changes.
+      </li>
+      <li>
+        Named (<code>value</code>): the root’s <code>snapPoint</code>,{' '}
+        <code>defaultSnapPoint</code> (by default the lowest) and{' '}
+        <code>onSnapPointChange</code> take and give the names, not heights.
+      </li>
+      <li>
+        Groups follow one another in its{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Content"
+        />
+        ; the last holds the rest: reaching past the sheet’s height, its stop is
+        the whole sheet.
+      </li>
+      <li>
+        Snapping (this library’s own, not Base UI’s): a medium sheet within its
+        glass capsule, as high as its stop, its content clipped and always above
+        the home indicator; a large one moved down. Below its top stop its
+        content doesn’t scroll (dragging it drags the sheet); at its top stop it
+        does, until pulled down from its start.
+      </li>
+      <li>
+        Swiped: flung, a stop at a time (down from its lowest: closed);
+        otherwise to the nearest stop, let go.
+      </li>
+      <li>
+        Optional: without groups, the root’s <code>snapPoints</code> (Base UI’s)
+        position it, or none.
+      </li>
+      <li>
+        Renders a <code>div</code>.
+      </li>
+    </ul>
+    <SnapGroupPart />
+    <h3>Props</h3>
+    <PropsTable rows={sheetSnapGroupRows} />
+
+    <Heading
       id="sheet-content"
       level={2}
     >
@@ -1378,7 +1558,7 @@ export const SheetParts: FunctionComponent = () => (
       </li>
     </ul>
     <CreateHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={sheetHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={sheetHandleRows} />
@@ -1403,7 +1583,7 @@ export const SheetParts: FunctionComponent = () => (
       </li>
     </ul>
     <UseCreateSheetHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={sheetHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={sheetHandleRows} />
@@ -1459,6 +1639,7 @@ export const sheetPartsDemos = [
   PopupPart,
   HeaderPart,
   GrabberPart,
+  SnapGroupPart,
   ContentPart,
   TitlePart,
   DescriptionPart,

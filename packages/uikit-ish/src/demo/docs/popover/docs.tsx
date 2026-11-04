@@ -324,7 +324,42 @@ export const popoverHeaderRows: readonly PropRow[] = [
         component="popover"
         part="Popover.Close"
       />
+      ). Over the body, which scrolls under it (making room with a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Padding"
+      />
       ).
+    </>,
+  ],
+  [
+    'edgeEffect',
+    union('soft', 'hard', 'none'),
+    code(union('soft')),
+    <>
+      Its scroll edge effect, as the body scrolls under it (as a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Anchor"
+      />
+      ’s): <code>soft</code>, the body fading out under it (fully hidden under a
+      share of it, <code>--uikit-viewport-edge-veil</code>, 0 to 1, a popover’s{' '}
+      <code>0.75</code>; showing past it), with no blur on the popover’s glass;{' '}
+      <code>hard</code>, a solid backing with a dividing line; <code>none</code>
+      .
+    </>,
+  ],
+  [
+    'edgeTint',
+    'string',
+    undefined,
+    <>
+      A color for its edge effect, shown at rest too (as a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Anchor"
+      />
+      ’s).
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),

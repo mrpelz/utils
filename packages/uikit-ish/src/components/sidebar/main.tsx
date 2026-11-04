@@ -20,7 +20,7 @@ export type {
 // its top, 16px from its sides, 10px from its bottom; its content e.g. a
 // toolbar (borderless buttons, Body, symbols 510, the
 // trailing ones 24px apart; 20px above what follows), a search field
-// (`TextField.Search`: 44px high, on the secondary fill) and a list
+// (`TextField.Frame`: 44px high, on the secondary fill) and a list
 // (`List.Root` of style `sidebar`: capsule rows, sections without a shape of
 // their own), scrolling inside it. Put it in a `Layout` column (`floating`:
 // over the other columns; compact: a drawer, swiped in), which places and sizes
@@ -33,7 +33,7 @@ export type {
 
 /**
  * A sidebar: a floating glass panel, its
- * content (e.g. a `TextField.Search`, a `List.Root` of style `sidebar`)
+ * content (e.g. a `TextField.Frame`, a `List.Root` of style `sidebar`)
  * scrolling inside it; in a `Layout` column (see there).
  */
 const Root = forwardRef<HTMLElement, SidebarRootProps>(

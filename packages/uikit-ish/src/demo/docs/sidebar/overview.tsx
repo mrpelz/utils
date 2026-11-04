@@ -125,7 +125,7 @@ const LiveView: FunctionComponent = () => {
                 </Sidebar.ToolbarGroup>
               </Sidebar.Toolbar>
               <TextField.Root>
-                <TextField.Search>
+                <TextField.Frame>
                   <Symbol icon={sfMagnifyingglass} />
                   <TextField.Control
                     aria-label="Search"
@@ -133,7 +133,7 @@ const LiveView: FunctionComponent = () => {
                     type="search"
                   />
                   <TextField.Clear />
-                </TextField.Search>
+                </TextField.Frame>
               </TextField.Root>
               <List.Root listStyle="sidebar">
                 {sidebarSections.map(([title, rows]) => (

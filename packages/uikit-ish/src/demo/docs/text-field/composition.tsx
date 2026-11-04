@@ -19,7 +19,6 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfMagnifyingglass } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { names } from '../viewport/content.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -76,7 +75,7 @@ const validationCode = `const taken = ['admin', 'root'];
 const searchCode = `const [query, setQuery] = useState('');
 
 <TextField.Root>
-  <TextField.Search>
+  <TextField.Frame>
     <Symbol icon={sfMagnifyingglass} />
     <TextField.Control
       aria-label="Search"
@@ -86,7 +85,7 @@ const searchCode = `const [query, setQuery] = useState('');
       onValueChange={setQuery}
     />
     <TextField.Clear />
-  </TextField.Search>
+  </TextField.Frame>
 </TextField.Root>
 <List.Root>…{/* the rows matching query */}</List.Root>`;
 
@@ -289,7 +288,7 @@ const SearchWithClear: FunctionComponent = () => {
     >
       <div className="text-field-demo-search">
         <TextField.Root>
-          <TextField.Search>
+          <TextField.Frame>
             <Symbol icon={sfMagnifyingglass} />
             <TextField.Control
               aria-label="Search"
@@ -299,7 +298,7 @@ const SearchWithClear: FunctionComponent = () => {
               onValueChange={setQuery}
             />
             <TextField.Clear />
-          </TextField.Search>
+          </TextField.Frame>
         </TextField.Root>
         <List.Root>
           <List.Section>
@@ -518,8 +517,8 @@ export const TextFieldComposition: FunctionComponent = () => (
         <code>onFormSubmit</code> gets the values (by <code>name</code>).
       </li>
       <li>
-        Inline, below the field: the lowest modality that works (guide{' '}
-        <GuideLink to="rule-g5">G5</GuideLink>), no alert.
+        Inline, below the field: the least interrupting way that works, no
+        alert.
       </li>
       <li>
         <strong>Library:</strong> the field’s constraints and{' '}
@@ -552,7 +551,7 @@ export const TextFieldComposition: FunctionComponent = () => (
       <li>
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />
         : the capsule, a magnifier, the control (
         <code>type=&quot;search&quot;</code>: iOS’s Search key), its clear
@@ -571,7 +570,7 @@ export const TextFieldComposition: FunctionComponent = () => (
         Its look follows where it sits (
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />{' '}
         <code>variant</code>; only its look, it stays a search field):
         <ul>
@@ -648,7 +647,7 @@ export const TextFieldComposition: FunctionComponent = () => (
         <strong>Library:</strong> the search field (
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />
         ): the capsule, magnifier and clear button (
         <PartLink

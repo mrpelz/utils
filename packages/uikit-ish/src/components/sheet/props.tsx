@@ -25,6 +25,27 @@ export type SheetRootProps<Payload = unknown> = Omit<
   swipeDirection?: SheetSwipeDirection;
 };
 
+export type SheetTriggerProps<Payload = unknown> = Omit<
+  BaseDrawer.Trigger.Props<Payload>,
+  'ref'
+> & {
+  /**
+   * The stop it opens the sheet at (a snap group's `value`, see
+   * `Sheet.SnapGroup`): a deep link into it; left out, the root's
+   * `defaultSnapPoint`.
+   */
+  snapPoint?: string;
+};
+
+export type SheetSnapGroupProps = ComponentProps<'div'> & {
+  /**
+   * Its snap point's name: the sheet snaps to show everything up to its
+   * end (its header too), named so in the root's `snapPoint`,
+   * `defaultSnapPoint` and `onSnapPointChange`.
+   */
+  value: string;
+};
+
 export type SheetPopupProps = Omit<BaseDrawer.Popup.Props, 'ref'> & {
   /**
    * Its background (as a page's, see `Page.Root`): `grouped` for grouped

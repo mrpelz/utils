@@ -235,7 +235,7 @@ export const ProgressParts: FunctionComponent = () => (
       <li>Its label and value: optional, placed by their own prop.</li>
       <li>An activity indicator: one element of its own.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink part="Progress.Root" />
         <ul>

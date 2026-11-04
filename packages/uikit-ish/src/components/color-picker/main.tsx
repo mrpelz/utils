@@ -1261,6 +1261,14 @@ const hasColorInputAlpha = () =>
   'alpha' in HTMLInputElement.prototype;
 
 /**
+ * A color input's `alpha` (its picker's opacity), as a property: too new for
+ * the JSX types, and React renders no attribute it doesn't know as `true`.
+ */
+const setAlpha = (input: HTMLInputElement | null, hasAlpha: boolean) => {
+  if (input) (input as HTMLInputElement & { alpha: boolean }).alpha = hasAlpha;
+};
+
+/**
  * Its system colors (a leading button, after the eyedropper): a `Button`
  * (or what it renders), opening the system's color picker: a color input's
  * (none without one), over the button, transparent: pressed itself (on iOS,
@@ -1276,9 +1284,10 @@ const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
   const { color, hasOpacity, setColor } = useContext(PickerContext);
   // (Its input, as rendered: for its button's press.)
   const [input, setInput] = useState<HTMLInputElement | null>(null);
-  if (!hasColorInput()) return null;
   // (With the opacity, the input's alpha too, where it has one.)
   const hasAlpha = hasOpacity && hasColorInputAlpha();
+  useLayoutEffect(() => setAlpha(input, hasAlpha), [hasAlpha, input]);
+  if (!hasColorInput()) return null;
 
   const open = () => input?.click();
 
@@ -1302,8 +1311,6 @@ const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
       )}
       <input
         ref={setInput}
-        // (`alpha`: too new for the JSX types; a boolean property, as set.)
-        {...(hasAlpha ? { alpha: true } : {})}
         aria-hidden="true"
         className="uikit-color-picker-system-colors-input"
         disabled={props.disabled}
@@ -1324,6 +1331,11 @@ const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
       />
     </span>
   );
+};
+
+/** A field without spell checking (its `spellcheck` property). */
+const noSpellcheck = (input: HTMLInputElement | null) => {
+  if (input) input.spellcheck = false;
 };
 
 /**
@@ -1383,13 +1395,9 @@ const Code = forwardRef<HTMLDivElement, ColorPickerCodeProps>(
           >
             <span aria-hidden="true">#</span>
             <input
-              // (`spellcheck`: Preact's spelling, which the React lint rule
-              // would rename.)
-              {...{ spellcheck: false }}
-              aria-label="Hex color"
-              autoCapitalize="characters"
-              autoComplete="off"
-              autoCorrect="off"
+              // (As a property: spelled differently in React's and Preact's
+              // JSX.)
+              ref={noSpellcheck}
               value={draft ?? formatColor(color).slice(1)}
               onChange={(event) => type(event.currentTarget.value, event)}
               {...selection}

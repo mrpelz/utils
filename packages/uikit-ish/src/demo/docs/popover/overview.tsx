@@ -10,6 +10,7 @@ import {
   Switch,
   Symbol,
   Toolbar,
+  Viewport,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
@@ -24,7 +25,6 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfXmark } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import {
   popoverPositionerRows,
   popoverRootRows,
@@ -106,6 +106,7 @@ const LiveView: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -203,11 +204,7 @@ export const PopoverOverview: FunctionComponent = () => (
         <a href={publicUrl('date-picker')}>Date picker</a>’s calendar, a{' '}
         <a href={publicUrl('color-picker')}>Color picker</a>.
       </li>
-      <li>
-        A Container of the guide’s <em>Surface</em> family (
-        <GuideLink to="primitive-surface">§5</GuideLink>): a popover is anchored
-        to its control, dismissed by a press outside it.
-      </li>
+      <li>Anchored to its control, dismissed by a press outside it.</li>
     </ul>
 
     <Heading

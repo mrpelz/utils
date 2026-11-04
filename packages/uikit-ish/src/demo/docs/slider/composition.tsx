@@ -33,7 +33,6 @@ import {
   sfSunMin,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { time } from './content.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -501,10 +500,9 @@ export const SliderComposition: FunctionComponent = () => (
         symbols; the section’s header names it.
       </li>
       <li>
-        Takes effect at once (guide,{' '}
-        <GuideLink to="commit-model">§8.2, commit model</GuideLink>: immediate
-        per field): the app follows <code>onValueChange</code>, as for other
-        settings (e.g. a <a href={publicUrl('switch')}>Switch</a>).
+        Takes effect at once, field by field: the app follows{' '}
+        <code>onValueChange</code>, as for other settings (e.g. a{' '}
+        <a href={publicUrl('switch')}>Switch</a>).
       </li>
       <li>The header doesn’t label the input: name the thumb itself.</li>
       <li>

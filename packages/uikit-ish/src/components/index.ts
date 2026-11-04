@@ -25,6 +25,7 @@ export {
   Popover,
   type PopoverAlign,
   type PopoverHandle,
+  type PopoverHeaderProps,
   type PopoverPositionerProps,
   useCreatePopoverHandle,
 } from './popover/main.js';
@@ -44,6 +45,8 @@ export {
   type SheetContentProps,
   type SheetGrabberProps,
   type SheetHeaderProps,
+  type SheetSnapGroupProps,
+  type SheetTriggerProps,
   type SheetDetent,
   type SheetHandle,
   type SheetPopupProps,

@@ -22,6 +22,7 @@ import { ColorScheme } from '../../../components/utils/main.js';
 import { Breadcrumb, Tabs, useEntry } from '../guide/nav.js';
 import { PagePathContext } from '../guide/sections.js';
 import { useRawDocument } from '../shared/raw-document.js';
+import { titleCase } from '../shared/title-case.js';
 import { CodeView } from './code-view.js';
 import { renderCode } from './render-code.js';
 import {
@@ -61,7 +62,7 @@ const DemoHeader: FunctionComponent<{
         />
       ) : null}
       <h2 className="demo-heading">
-        {title}
+        {titleCase(title)}
         {stateUrl ? (
           <a
             className="demo-id"
@@ -223,7 +224,7 @@ const useIsRaw = () => {
 
 /** Raw and shown, the demo is the app (see `useRawDocument`). */
 const useRawDemoDocument = (isRaw: boolean, isHidden: boolean, title: string) =>
-  useRawDocument(isRaw && !isHidden, title);
+  useRawDocument(isRaw && !isHidden, titleCase(title));
 
 /**
  * A device's screen (a stage's, see `Stage`): its frame (see
