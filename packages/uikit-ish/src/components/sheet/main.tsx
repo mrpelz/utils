@@ -8,8 +8,10 @@ import {
   forwardRef,
   isValidElement,
   ReactNode,
+  RefObject,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -226,6 +228,103 @@ const Root = <Payload,>({
   );
 };
 
+/** What a mouse drags it by: its header (its grabber, its bar but its buttons). */
+const dragHandle = '[data-sheet-part=header], [data-sheet-part=grabber]';
+
+/** What a press there is for itself (its buttons…), not a drag. */
+const interactive =
+  'a, button, input, label, select, textarea, [contenteditable], [role=button], [role=link]';
+
+/** How fast (px/ms) a mouse lets go for a fling (closing it). */
+const flingSpeed = 0.4;
+
+/**
+ * Not snapping (compact, swiped down): dragged down by a mouse by its
+ * header (Base UI's swipes a touch's), following it; let go past a third of
+ * its height, or flung, closed (`close`), else back.
+ */
+const useMouseSwipe = (
+  ref: RefObject<HTMLElement | null>,
+  isCompact: boolean,
+  isSnapping: boolean,
+) => {
+  const close = useContext(SnapContext)?.close;
+  const isNotSwiped = useContext(NoSwipeContext);
+  const isEnabled = isCompact && !isSnapping && !isNotSwiped;
+  const closeRef = useRef(close);
+  useLayoutEffect(() => {
+    closeRef.current = close;
+  });
+
+  useEffect(() => {
+    const { current: element } = ref;
+    if (!element || !isEnabled) return undefined;
+    let drag:
+      | { id: number; moves: [time: number, y: number][]; startY: number }
+      | undefined;
+    const release = () => {
+      element.style.removeProperty('transform');
+      element.style.removeProperty('transition');
+    };
+
+    const onDown = (event: PointerEvent) => {
+      if (
+        event.pointerType !== 'mouse' ||
+        event.button !== 0 ||
+        !(event.target instanceof Element) ||
+        !event.target.closest(dragHandle) ||
+        event.target.closest(interactive)
+      ) {
+        return;
+      }
+      drag = {
+        id: event.pointerId,
+        moves: [[event.timeStamp, event.clientY]],
+        startY: event.clientY,
+      };
+      element.setPointerCapture(event.pointerId);
+    };
+    const onMove = (event: PointerEvent) => {
+      if (drag?.id !== event.pointerId) return;
+      const distance = Math.max(0, event.clientY - drag.startY);
+      drag.moves = [
+        ...drag.moves.filter(([time]) => event.timeStamp - time < 100),
+        [event.timeStamp, event.clientY],
+      ];
+      element.style.transition = 'none';
+      element.style.transform = `translateY(${String(distance)}px)`;
+    };
+    const onUp = (event: PointerEvent) => {
+      if (drag?.id !== event.pointerId) return;
+      const { moves, startY } = drag;
+      drag = undefined;
+      const distance = event.clientY - startY;
+      const [first] = moves;
+      const speed =
+        first && event.timeStamp > first[0]
+          ? (event.clientY - first[1]) / (event.timeStamp - first[0])
+          : 0;
+      // (Its transition back: from where it was let go, closed or not.)
+      release();
+      if (distance > element.offsetHeight / 3 || speed > flingSpeed) {
+        closeRef.current?.(event);
+      }
+    };
+
+    element.addEventListener('pointerdown', onDown);
+    element.addEventListener('pointermove', onMove);
+    element.addEventListener('pointerup', onUp);
+    element.addEventListener('pointercancel', onUp);
+    return () => {
+      element.removeEventListener('pointerdown', onDown);
+      element.removeEventListener('pointermove', onMove);
+      element.removeEventListener('pointerup', onUp);
+      element.removeEventListener('pointercancel', onUp);
+      release();
+    };
+  }, [isEnabled, ref]);
+};
+
 /** The sheet, the page dimmed behind it. */
 const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
   (
@@ -257,12 +356,14 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
         ? {
             active: snap.active,
             canClose: !isNotSwiped,
+            handle: dragHandle,
             onClose: snap.close,
             onSelect: snap.select,
             stops: snap.stops,
           }
         : undefined,
     );
+    useMouseSwipe(ref, isCompact, isSnapping);
     let snapKind: string | undefined;
     if (isSnapping) {
       snapKind = isCompact && detent === 'medium' ? 'capsule' : 'sheet';

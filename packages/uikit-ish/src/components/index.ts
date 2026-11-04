@@ -55,6 +55,15 @@ export {
   type SheetSwipeDirection,
 } from './sheet/main.js';
 export {
+  Island,
+  type IslandContentProps,
+  type IslandGrabberProps,
+  type IslandHeaderProps,
+  type IslandRootProps,
+  type IslandSnapGroupProps,
+  type IslandSnapPointChangeDetails,
+} from './island/main.js';
+export {
   Settings,
   type SettingsContrast,
   type SettingsPortalProps,

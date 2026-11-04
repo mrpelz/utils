@@ -418,6 +418,21 @@
     flex: 1 1 auto;
     overscroll-behavior: contain;
 
+    /* Clipped round itself, as its sheet's corners (WebKit draws a
+       composited scroller past its parent's rounded clip): a medium one's
+       all round, a large one's at its top, a form sheet's all round. */
+    :where(.uikit-sheet-popup[data-compact][data-detent='medium']) & {
+      clip-path: inset(0 round 34px);
+    }
+
+    :where(.uikit-sheet-popup[data-compact][data-detent='large']) & {
+      clip-path: inset(0 round 38px 38px 0 0);
+    }
+
+    :where(.uikit-sheet-popup:not([data-compact])) & {
+      clip-path: inset(0 round 38px);
+    }
+
     /* Snapping (see the popup): at its start, handing a pull down back to
        the popup; below its top stop, not scrolling. */
     :where(.uikit-sheet-popup[data-snap] > .uikit-sheet-panel) > & {

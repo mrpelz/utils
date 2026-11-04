@@ -107,6 +107,14 @@ if (config.module) {
       use: [MiniCssExtractPlugin.loader, 'css-loader'],
     },
     {
+      // MapLibre's (the island's map demo): its worker's URL set by the demo
+      // (see src/demo/docs/island/map.tsx), its own `new URL()` of a
+      // variable, for a worker elsewhere, left to the browser (not an
+      // asset to bundle; otherwise a "critical dependency" warning).
+      parser: { url: false },
+      test: /maplibre-gl\/dist\/maplibre-gl\.mjs$/u,
+    },
+    {
       // (Also Monaco's icon font, see MonacoWebpackPlugin.)
       test: /\.(?:png|jpe?g|gif|ttf)$/i,
       type: 'asset/resource',

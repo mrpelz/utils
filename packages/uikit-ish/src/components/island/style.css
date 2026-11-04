@@ -1,0 +1,271 @@
+/* Island (see main.tsx). */
+@layer uikit-ish {
+  /* Its anchor (a bottom `Viewport.Anchor`, holding it): touches through
+     it, but on the island (to the content beneath, e.g. a map, beside it;
+     above it, snapping, its scroller's). */
+  :where(.uikit-viewport-anchor):has(> .uikit-island) {
+    pointer-events: none;
+  }
+
+  /* Its box: as tall as it shows (its content's, or its stop's), 6px from
+     the screen's edges (above the bottom inset, on it); regular, a
+     floating panel at the inline start. Its content's edge effects as a
+     medium sheet's (its glass not lightened by a backing, nor blurred
+     twice: its content fading out under its header instead). */
+  .uikit-island {
+    --uikit-viewport-edge-background: transparent;
+    --uikit-viewport-edge-veil: 0.75;
+
+    position: relative;
+    box-sizing: border-box;
+    border-radius: 34px;
+    margin: 0 6px max(0px, 6px - var(--uikit-safe-area-inset-bottom, 0px));
+    color: var(--uikit-glass-content);
+
+    &[data-regular] {
+      width: min(375px, 100% - 20px);
+      margin-inline: 10px auto;
+    }
+
+    &[data-snap] {
+      height: var(--uikit-island-shown);
+      pointer-events: none;
+    }
+  }
+
+  /* Snapping (see main.tsx, sheet/snap.ts): a scroller pinned to its
+     bottom, as tall as it may be (overflowing it upward), its bars hidden,
+     its corners the capsule's (its panel's clipped round below); touched
+     on all of it (above its capsule too: iOS scrolls no scroller touches
+     pass through), not bounced (iOS: below its lowest stop, it'd be dragged
+     down; its content's handing back to it its own). Not snapping: no box
+     of its own (its corners passed on). */
+  .uikit-island-scroller {
+    display: contents;
+    border-radius: inherit;
+
+    .uikit-island[data-snap] > & {
+      position: absolute;
+      bottom: 0;
+      display: block;
+      overflow: hidden auto;
+      height: var(--uikit-island-max-height);
+      inset-inline: 0;
+      overscroll-behavior: none;
+      pointer-events: auto;
+      scroll-snap-type: y mandatory;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  }
+
+  /* The room it's scrolled up out of (snapping), short of its lowest stop
+     (never scrolled below it), its stops in one cell, each down by its own
+     (within it: `cqh`); else none. */
+  .uikit-island-spacer {
+    display: none;
+
+    .uikit-island[data-snap] > .uikit-island-scroller > & {
+      display: grid;
+      height: calc(100% - var(--uikit-island-lowest, 0px));
+      container-type: size;
+    }
+  }
+
+  /* Its stops: where it snaps, scrolled by as much; flung, one at a time. */
+  .uikit-island-stop {
+    height: 0;
+    align-self: start;
+    grid-area: 1 / 1;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  /* Its capsule (its glass's colors by class, drawn by its glass layer):
+     its header over its content; as tall as its content (up to as tall as
+     it may be), or (snapping) as the scroller, scrolled up into it; its
+     content's edge effects fixed to it. None left of the screen's insets
+     for what's in it (kept clear by its anchor). */
+  .uikit-island-panel {
+    --uikit-safe-area-inset-top: 0px;
+    --uikit-safe-area-inset-right: 0px;
+    --uikit-safe-area-inset-bottom: 0px;
+    --uikit-safe-area-inset-left: 0px;
+
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    max-height: var(--uikit-island-max-height, none);
+    box-sizing: border-box;
+    flex-direction: column;
+    border-radius: inherit;
+    backdrop-filter: none;
+    background-color: transparent;
+    box-shadow: none;
+    contain: layout;
+    isolation: isolate;
+    pointer-events: auto;
+
+    .uikit-island[data-snap] > .uikit-island-scroller > & {
+      height: 100%;
+      max-height: none;
+    }
+  }
+
+  /* Its glass (a medium material's), behind its content; a sliver's
+     fading in as it's swiped up past it (`--uikit-island-sliver`). */
+  .uikit-island-glass {
+    position: absolute;
+    z-index: -1;
+    border-radius: inherit;
+    backdrop-filter: saturate(180%) blur(16px);
+    background-color: var(--uikit-glass-background);
+    box-shadow: var(--uikit-glass-shadow);
+    inset: 0;
+    opacity: var(--uikit-island-sliver, 1);
+    pointer-events: none;
+  }
+
+  /* Its header, over its content (as a sheet's: its grabber, 10px below
+     its bar; without a grabber, its bar 16px down). */
+  .uikit-island-header {
+    position: absolute;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    inset: 0 0 auto;
+    -webkit-user-select: none;
+    user-select: none;
+
+    &::after {
+      height: 10px;
+      flex: none;
+      content: '';
+    }
+
+    &:not(:has(> .uikit-island-grabber))::before {
+      height: 16px;
+      flex: none;
+      content: '';
+    }
+
+    /* Only a grabber (and a sliver's stop): no bar. */
+    &:not(:has(> :not(.uikit-island-grabber, .uikit-island-snap-group)))::after {
+      display: none;
+    }
+  }
+
+  /* The grabber, its cursor's area around it (as a sheet's); a sliver's,
+     its glass a pill of its own around it (fading out as the capsule's
+     fades in). */
+  .uikit-island-grabber {
+    --uikit-utils-cursor: attr(cursor type(<custom-ident>), grab);
+
+    position: relative;
+    display: flex;
+    flex: none;
+    align-self: center;
+    padding: 5px 12px 6px;
+    border-radius: 100px;
+    isolation: isolate;
+
+    &::before {
+      width: 36px;
+      height: 5px;
+      border-radius: 100px;
+      background-color: #cfcfcf;
+      content: '';
+    }
+
+    &::after {
+      position: absolute;
+      z-index: -1;
+      display: none;
+      border-radius: inherit;
+      backdrop-filter: saturate(180%) blur(16px);
+      background-color: var(--uikit-glass-background);
+      box-shadow: var(--uikit-glass-shadow);
+      content: '';
+      inset: 0;
+      opacity: calc(1 - var(--uikit-island-sliver, 1));
+      pointer-events: none;
+    }
+
+    .uikit-island[data-sliver] &::after {
+      display: block;
+    }
+
+    @media (hover: hover) {
+      cursor: var(--uikit-utils-cursor);
+    }
+  }
+
+  /* Its content, scrolling under its header; snapping, at its top stop
+     only (else the scroller's: at its start, a pull down handed back).
+     Clipped round itself (WebKit draws a composited scroller past its
+     parent's rounded clip). */
+  .uikit-island-content {
+    overflow: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+    clip-path: inset(0 round 34px);
+    overscroll-behavior: contain;
+
+    :where(.uikit-island[data-snap] > .uikit-island-scroller > .uikit-island-panel) > & {
+      overscroll-behavior: auto;
+    }
+
+    :where(.uikit-island[data-snap] > .uikit-island-scroller:not([data-snap-top]) > .uikit-island-panel)
+      > & {
+      overflow: hidden;
+    }
+
+    /* Under its header (a bar, not only a grabber), fading out (as a
+       sheet's): hidden under the share of it the veil is, showing past it
+       and its soft effect's reach; only as content scrolls under it. */
+    .uikit-island-panel:has(
+        > .uikit-island-header > :not(.uikit-island-grabber, .uikit-island-snap-group)
+      )
+      > & {
+      mask-image: linear-gradient(
+        rgb(0 0 0 / calc(1 - var(--uikit-viewport-edge-start-progress, 1)))
+          calc(
+            var(--uikit-viewport-padding-block-start, 0px) *
+              var(--uikit-viewport-edge-veil, 0.75)
+          ),
+        #000 calc(var(--uikit-viewport-padding-block-start, 0px) + 16px)
+      );
+    }
+  }
+
+  /* Its content's edge effects: within its corners, no blur (see above). */
+  .uikit-island-panel > .uikit-viewport-edge-effect {
+    &[data-edge='block-start'] {
+      border-start-end-radius: inherit;
+      border-start-start-radius: inherit;
+    }
+
+    &[data-edge='block-end'] {
+      border-end-end-radius: inherit;
+      border-end-start-radius: inherit;
+    }
+
+    &::before,
+    &::after {
+      border-radius: inherit;
+    }
+
+    &[data-edge-effect='soft']::before {
+      backdrop-filter: none;
+    }
+  }
+
+  /* Its snap groups spaced as list sections are (see a sheet's). */
+  .uikit-island-snap-group:not(:empty) + .uikit-island-snap-group {
+    padding-block-start: var(--uikit-list-section-spacing, 35px);
+  }
+}

@@ -161,6 +161,13 @@ import { HeaderDemo, HeaderTitleDemo } from './header/main.js';
 import { HeaderOverview, headerOverviewDemos } from './header/overview.js';
 import { HeaderParts, headerPartsDemos } from './header/parts.js';
 import {
+  IslandComposition,
+  islandCompositionDemos,
+} from './island/composition.js';
+import { IslandDemo } from './island/main.js';
+import { IslandOverview, islandOverviewDemos } from './island/overview.js';
+import { IslandParts, islandPartsDemos } from './island/parts.js';
+import {
   LayoutComposition,
   layoutCompositionDemos,
 } from './layout/composition.js';
@@ -688,6 +695,22 @@ export const catalog: readonly CatalogEntry[] = [
     summary:
       'A focused task over the page: from the bottom on a phone, large or medium, a form sheet on a tablet; dismissed by its buttons or dragged down.',
     title: 'Sheet',
+  },
+  {
+    category: 'presentation',
+    demos: [
+      IslandDemo,
+      ...islandOverviewDemos,
+      ...islandPartsDemos,
+      ...islandCompositionDemos,
+    ],
+    id: 'island',
+    Composition: IslandComposition,
+    Overview: IslandOverview,
+    Parts: IslandParts,
+    summary:
+      'A sheet’s glass capsule that’s always there, over a page’s content such as a map: swiped up, it reveals more, stop by stop.',
+    title: 'Island',
   },
   {
     baseUiId: 'popover',

@@ -13,13 +13,19 @@ import { RefObject, useEffect, useLayoutEffect, useRef } from 'react';
 // Only the user's scrolls (touched, wheeled, keyed) choose a stop: any
 // other (the browser's, re-snapping as its stops move) is brought back.
 // Its stops within its scroll's range (Safari, a marker past its end,
-// snaps to that and holds it), see style.css.
+// snaps to that and holds it), see style.css. A mouse (no native scroll
+// of its own) drags it by its handle (`handle`: its grabber, its bar but its
+// buttons), its snapping off as it's dragged; let go, to the nearest stop
+// (flung, the next one its way); pressed, not dragged, to the next stop up
+// (from its top, its lowest).
 
 export type SnapOptions = {
   /** Its stop now (an index of `stops`). */
   active: number;
   /** Closed by scrolling it away (below its lowest stop), or not. */
   canClose: boolean;
+  /** What a mouse drags it by (a selector: e.g. its header). */
+  handle?: string;
   onClose: (event: Event) => void;
   onSelect: (index: number, event: Event) => void;
   /** Its stops' heights (px from its panel's top, ascending). */
@@ -32,12 +38,53 @@ const restDelay = 150;
 /** How long (ms) after a wheel or key a scroll is still the user's. */
 const inputDelay = 300;
 
-/** The stop nearest `position`, or `-1`: nearer closed (0). */
+/** How far (px) a mouse moves before it drags (else it presses). */
+const dragSlop = 4;
+
+/** How fast (px/ms) a mouse lets go for a fling (to the next stop). */
+const flingSpeed = 0.4;
+
+/** What a press on a handle is for itself, not a drag (its buttons…). */
+const interactive =
+  'a, button, input, label, select, textarea, [contenteditable], [role=button], [role=link]';
+
+/**
+ * Where a mouse's drag lets go to (see above): flung (`speed`, px/ms, down
+ * positive), the next of `positions` its way; else the nearest.
+ */
+const dragTarget = (
+  positions: readonly number[],
+  position: number,
+  speed: number,
+) => {
+  if (speed > flingSpeed) {
+    return (
+      positions.findLast((stop) => stop < position - 1) ?? positions[0] ?? 0
+    );
+  }
+  if (speed < -flingSpeed) {
+    return (
+      positions.find((stop) => stop > position + 1) ?? positions.at(-1) ?? 0
+    );
+  }
+  let nearest = positions[0] ?? 0;
+  for (const stop of positions) {
+    if (Math.abs(stop - position) < Math.abs(nearest - position)) {
+      nearest = stop;
+    }
+  }
+  return nearest;
+};
+
+/**
+ * The stop nearest `position`, or `-1`: nearer closed (0); as near, the
+ * stop (e.g. one at 0: an island's lowest, see Island).
+ */
 const nearestStop = (stops: readonly number[], position: number) => {
   let nearest = -1;
   let distance = position;
   for (const [index, stop] of stops.entries()) {
-    if (!(Math.abs(stop - position) < distance)) {
+    if (!(Math.abs(stop - position) <= distance)) {
       continue;
     }
 
@@ -108,10 +155,25 @@ export const useSnap = (
     let isTouching = false;
     let input = Number.NEGATIVE_INFINITY;
 
+    // A mouse's drag (see above): where it started, its last moves (for
+    // its speed as it lets go), dragged yet.
+    let drag:
+      | {
+          id: number;
+          isDragged: boolean;
+          moves: [time: number, y: number][];
+          startTop: number;
+          startY: number;
+        }
+      | undefined;
+
     // At rest: its stop, or (scrolled away) closed; not the user's scroll:
     // back at its stop.
     const settle = (event: Event) => {
       clearTimeout(rest);
+      // (Dragged by a mouse: at rest once let go; its snapping back.)
+      if (drag?.isDragged) return;
+      element.style.removeProperty('scroll-snap-type');
       const isUsers = isScrolling.current;
       isScrolling.current = false;
       const { current } = optionsRef;
@@ -163,8 +225,85 @@ export const useSnap = (
     const inputEvents = ['keydown', 'wheel'] as const;
     const listening = { capture: true, passive: true };
 
+    const onDragStart = (event: PointerEvent) => {
+      const { current } = optionsRef;
+      if (
+        event.pointerType !== 'mouse' ||
+        event.button !== 0 ||
+        !current?.handle ||
+        !(event.target instanceof Element) ||
+        !event.target.closest(current.handle) ||
+        event.target.closest(interactive)
+      ) {
+        return;
+      }
+      drag = {
+        id: event.pointerId,
+        isDragged: false,
+        moves: [[event.timeStamp, event.clientY]],
+        startTop: element.scrollTop,
+        startY: event.clientY,
+      };
+      element.setPointerCapture(event.pointerId);
+    };
+
+    const onDragMove = (event: PointerEvent) => {
+      if (drag?.id !== event.pointerId) return;
+      const distance = event.clientY - drag.startY;
+      if (!drag.isDragged && Math.abs(distance) < dragSlop) return;
+      if (!drag.isDragged) {
+        drag.isDragged = true;
+        isScrolling.current = true;
+        element.style.scrollSnapType = 'none';
+      }
+      drag.moves = [
+        ...drag.moves.filter(([time]) => event.timeStamp - time < 100),
+        [event.timeStamp, event.clientY],
+      ];
+      element.scrollTop = drag.startTop - distance;
+    };
+
+    const onDragEnd = (event: PointerEvent) => {
+      if (drag?.id !== event.pointerId) return;
+      const { isDragged, moves } = drag;
+      drag = undefined;
+      const { current } = optionsRef;
+      if (!current) return;
+      const stops = current.stops.map((stop) => Math.min(stop, range(element)));
+      // Pressed: the next stop up (from its top, its lowest).
+      if (!isDragged) {
+        if (event.type !== 'pointerup' || stops.length < 2) return;
+        current.onSelect(
+          current.active >= stops.length - 1 ? 0 : current.active + 1,
+          event,
+        );
+        return;
+      }
+      // Let go: flung, the next stop its way; else the nearest.
+      const [first] = moves;
+      const speed =
+        first && event.timeStamp > first[0]
+          ? (event.clientY - first[1]) / (event.timeStamp - first[0])
+          : 0;
+      const position = element.scrollTop;
+      const positions = [current.canClose ? 0 : undefined, ...stops].filter(
+        (stop) => stop !== undefined,
+      );
+      const top = dragTarget(positions, position, speed);
+      if (Math.abs(top - position) < 1) {
+        element.style.removeProperty('scroll-snap-type');
+        settle(event);
+        return;
+      }
+      element.scrollTo({ behavior: 'smooth', top });
+    };
+
     element.addEventListener('scroll', onScroll, { passive: true });
     if (hasScrollEnd) element.addEventListener('scrollend', settle);
+    element.addEventListener('pointerdown', onDragStart);
+    element.addEventListener('pointermove', onDragMove);
+    element.addEventListener('pointerup', onDragEnd);
+    element.addEventListener('pointercancel', onDragEnd);
     for (const type of pressEvents) {
       element.addEventListener(type, onPress, listening);
     }
@@ -178,6 +317,11 @@ export const useSnap = (
       clearTimeout(rest);
       element.removeEventListener('scroll', onScroll);
       element.removeEventListener('scrollend', settle);
+      element.removeEventListener('pointerdown', onDragStart);
+      element.removeEventListener('pointermove', onDragMove);
+      element.removeEventListener('pointerup', onDragEnd);
+      element.removeEventListener('pointercancel', onDragEnd);
+      element.style.removeProperty('scroll-snap-type');
       for (const type of pressEvents) {
         element.removeEventListener(type, onPress, listening);
       }
