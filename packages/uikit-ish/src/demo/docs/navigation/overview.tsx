@@ -268,6 +268,15 @@ export const NavigationOverview: FunctionComponent = () => (
         (another stack), shown at once.
       </li>
       <li>
+        An instant page (in a{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Page"
+        />{' '}
+        of <code>instant</code>), pushed or popped, is shown at once, and isn’t
+        swiped back while it’s on top.
+      </li>
+      <li>
         A page’s <a href={publicUrl('header')}>Header</a> moves with its page,
         its bar and title too; the back button, in each pushed page’s bar, stays
         put between pushed pages (a persistent item, see{' '}

@@ -1441,10 +1441,12 @@
     }
   }
 
+  /* Sticky (a plain list's): below its page's bar (as a header's accessory,
+     see header/style.css), not under it. */
   .uikit-list-header {
     position: var(--uikit-list-header-position, static);
     z-index: 2;
-    top: 0;
+    top: var(--uikit-header-bar, 0);
     display: grid;
     box-sizing: border-box;
     align-content: end;
@@ -1602,12 +1604,15 @@
     margin-inline: var(--uikit-list-inset, 16px);
     padding-inline: 16px;
 
+    /* Strong: on the rows' background, inset and outlined as the list's
+       groups are (see `Root` `outline`). */
     &:where([data-strong]) {
       border-radius: var(--uikit-list-radius, 24px);
       background-color: var(
         --uikit-list-group-background,
         var(--color-ui-secondary-system-grouped-background)
       );
+      box-shadow: var(--uikit-list-outline-shadow, none);
       padding-block: 16px;
     }
 

@@ -316,10 +316,14 @@ export const ActivityIndicator = forwardRef<
       (display === 'finish-and-hide' && stopped === 'reset');
     const shown = isHidden ? undefined : stopped;
     const isAtRest = shown === 'reset';
-    // (Not with its own progress or speed: see `synchronized`.)
+    // (Not with its own progress or speed: see `synchronized`. Nor frozen: a
+    // start time set plays a paused animation again.)
     useSynchronized(
       ref,
-      synchronized && setProgress === undefined && duration === undefined,
+      synchronized &&
+        setProgress === undefined &&
+        duration === undefined &&
+        shown !== 'freeze',
       `${display} ${movement} ${String(shown)}`,
     );
 

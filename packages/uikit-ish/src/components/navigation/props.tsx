@@ -1,5 +1,5 @@
 import type { useRender } from '@base-ui/react/use-render';
-import type { ComponentProps, ReactElement } from 'react';
+import type { ComponentProps, ReactElement, ReactNode } from 'react';
 
 export type Role = 'current' | 'hidden' | 'top' | 'under';
 
@@ -45,6 +45,18 @@ export type NavigationRootProps = ComponentProps<'div'> & {
 
 /** Its children: the app's stack of pages, bottom to top, each keyed. */
 export type NavigationStackProps = ComponentProps<'div'>;
+
+export type NavigationPageProps = {
+  /** The page (e.g. a `Header.Root` around its `Page.Root`). */
+  children?: ReactNode;
+  /**
+   * Shown at once, pushed or popped (no slide in or out), and not swiped
+   * back while it's on top (its `Back` still going back): e.g. a page whose
+   * own scrolling (an overscroll's pull) a slide would disturb.
+   * @default false
+   */
+  instant?: boolean;
+};
 
 export type NavigationSwipeAreaProps = ComponentProps<'div'> & {
   /**

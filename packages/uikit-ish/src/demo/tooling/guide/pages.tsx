@@ -191,11 +191,17 @@ export const IndexPage: FunctionComponent = () => (
         <strong>Backstory &amp; FAQ</strong>
         <span>Why this exists, and questions people ask.</span>
       </a>
-      <a href={publicUrl('kitchen-sink')}>
+      {/* Loaded, not routed (a target of its own: the router passes it
+          over): its head decided as it loads, so it's added to the Home
+          Screen as itself (see scripts/demo-head.js). */}
+      <a
+        href={publicUrl('kitchen-sink')}
+        target="_top"
+      >
         <strong>Kitchen Sink</strong>
         <span>
-          The components in an app, nested as an app nests them, as a raw demo:
-          no frame, no controls, no prose.
+          Every component on a page of its own, in all its looks and states, as
+          a raw demo: no frame, no controls, no prose.
         </span>
       </a>
       <a href={publicUrl('all')}>

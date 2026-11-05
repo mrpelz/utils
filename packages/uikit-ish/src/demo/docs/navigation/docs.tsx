@@ -81,12 +81,50 @@ export const navigationStackRows: readonly PropRow[] = [
     <>
       The stack’s pages, bottom to top, each with a <code>key</code> (e.g. a{' '}
       <a href={publicUrl('page')}>Page</a>, or a{' '}
-      <a href={publicUrl('header')}>Header</a> around one): keys extended, the
-      new top page is pushed; cut back (by one or more), the top page is popped;
-      otherwise, the new top page is shown at once.
+      <a href={publicUrl('header')}>Header</a> around one; optionally in a{' '}
+      <PartLink
+        component="navigation"
+        part="Navigation.Page"
+      />
+      , keyed instead): keys extended, the new top page is pushed; cut back (by
+      one or more), the top page is popped; otherwise, the new top page is shown
+      at once.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const navigationPageRows: readonly PropRow[] = [
+  [
+    'instant',
+    'boolean',
+    code('false'),
+    <>
+      Shown at once: pushed or popped without sliding in or out, and not swiped
+      back while it’s on top (its{' '}
+      <PartLink
+        component="navigation"
+        part="Navigation.Back"
+      />{' '}
+      still going back, at once). E.g. a page whose own scrolling a slide would
+      disturb (pulled past its ends, see{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Overscroll"
+      />
+      ).
+    </>,
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      The page (e.g. a <a href={publicUrl('header')}>Header</a> around a{' '}
+      <a href={publicUrl('page')}>Page</a>), rendered as it is: no element of
+      its own.
+    </>,
+  ],
 ];
 
 export const navigationSwipeAreaRows: readonly PropRow[] = [

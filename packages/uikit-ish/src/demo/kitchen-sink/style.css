@@ -1,0 +1,158 @@
+/* The kitchen sink (see main.tsx, shared.tsx). */
+@layer demo {
+  /* Things side by side, wrapping. */
+  .kitchen-sink-showcase {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+  }
+
+  /* A bar spanning a row: room below it. */
+  .kitchen-sink-row-bar {
+    padding-block-end: 12px;
+
+    & > * {
+      flex: 1 1 auto;
+    }
+  }
+
+  /* A list's index, in its anchor (see list.tsx): centered on it. */
+  .kitchen-sink-index {
+    display: flex;
+    align-items: center;
+  }
+
+  /* A field around a group of rows, without a box of its own. */
+  .kitchen-sink-contents {
+    display: contents;
+  }
+
+  /* A value beside its control: digits as wide as each other (no shift). */
+  .kitchen-sink-value {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* A form's submitted values, as sent. */
+  .kitchen-sink-submitted {
+    margin: 0;
+    font-family: ui-monospace, monospace;
+    white-space: pre-wrap;
+  }
+
+  /* A picture behind glass buttons (their `context`: on it). */
+  .kitchen-sink-picture {
+    padding: 24px 16px;
+    border-radius: var(--uikit-list-radius, 24px);
+    background: linear-gradient(
+      135deg,
+      #ffd60a 0%,
+      #ff9f0a 30%,
+      #1c1c1e 60%,
+      #0a84ff 100%
+    );
+    margin-inline: var(--uikit-list-inset, 16px);
+  }
+
+  /* A photo's tile (its image a background), and a button around one. */
+  .kitchen-sink-photo {
+    display: block;
+    width: 96px;
+    height: 96px;
+    border-radius: 12px;
+    background-position: center;
+    background-size: cover;
+  }
+
+  .kitchen-sink-photo-trigger {
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: none;
+  }
+
+  /* A photo's preview (a contextual menu's): larger. */
+  .kitchen-sink-photo-preview > .kitchen-sink-photo {
+    width: min(280px, 70vw);
+    height: min(280px, 70vw);
+  }
+
+  /* Text to select (an edit menu's). */
+  .kitchen-sink-selectable {
+    margin: 0;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* An activity view's popover (regular): as wide as a phone's. */
+  .kitchen-sink-activity-popup {
+    width: 402px;
+    max-height: 640px;
+  }
+
+  /* A page's content filling the screen (see `isFullBleed`). */
+  .kitchen-sink-full-bleed {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* A popover's width (as a phone's, at most). */
+  .kitchen-sink-popover {
+    width: min(320px, calc(100vw - 16px));
+  }
+
+  /* A box holding a layout (its columns): as high as a tablet's screen,
+     at most; its corners and frame a stage's. */
+  .kitchen-sink-layout-box {
+    position: relative;
+    display: grid;
+    overflow: clip;
+    height: min(480px, 70vh);
+    border: 1px solid var(--color-ui-separator);
+    border-radius: var(--uikit-list-radius, 24px);
+    margin-inline: var(--uikit-list-inset, 16px);
+  }
+
+  /* Filling its box (e.g. a layout's background picture). */
+  .kitchen-sink-fill {
+    position: absolute;
+    padding: 0;
+    border-radius: 0;
+    inset: 0;
+    margin-inline: 0;
+  }
+
+  /* A tab bar accessory's title, taking its room. */
+  .kitchen-sink-accessory-title {
+    flex: 1 1 auto;
+  }
+
+  /* A settings provider's element: its own page background (its color
+     scheme's, its contrast's), so what's within it shows them. */
+  .kitchen-sink-settings {
+    background-color: var(--color-ui-system-grouped-background);
+    color: var(--color-ui-label);
+    padding-block: 1px;
+  }
+
+  /* A screen of its own (a bare page's, see viewport.tsx): filling the
+     stack's frame, its provider's (as a docs stage's screen). */
+  .kitchen-sink-screen {
+    position: relative;
+    display: grid;
+    overflow: clip;
+    height: 100%;
+  }
+
+  /* A row of a bar's (its anchor's): a search, a filter. */
+  .kitchen-sink-bar-row {
+    display: grid;
+    padding: 0 16px 8px;
+  }
+
+  /* Things one below another (e.g. bars). */
+  .kitchen-sink-stacked {
+    display: grid;
+    gap: 20px;
+  }
+}

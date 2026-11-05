@@ -516,7 +516,12 @@ export const listFooterRows: readonly PropRow[] = renderRows(
 );
 
 export const listBlockRows: readonly PropRow[] = [
-  ['strong', 'boolean', code('false'), 'On the rows’ background (as a group).'],
+  [
+    'strong',
+    'boolean',
+    code('false'),
+    'On the rows’ background, inset and outlined as the list’s groups are (its style, its root’s outline).',
+  ],
   ...renderRows('div', 'HTMLElement'),
 ];
 

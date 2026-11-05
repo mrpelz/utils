@@ -419,7 +419,10 @@ export type ListHeaderProps = PartProps<'div'> & {
 };
 
 export type ListBlockProps = PartProps<'div'> & {
-  /** On the rows' background (Framework7 `.block-strong`). */
+  /**
+   * On the rows' background (Framework7 `.block-strong`): inset and outlined
+   * as the list's groups are (its style's, `Root` `outline`).
+   */
   strong?: boolean;
 };
 

@@ -20,6 +20,7 @@ import { publicUrl } from '../../tooling/public-url.js';
 import { pages } from './content.js';
 import {
   navigationBackRows,
+  navigationPageRows,
   navigationPersistentRows,
   navigationRootRows,
   navigationStackRows,
@@ -515,6 +516,110 @@ const PersistentPart: FunctionComponent = () => {
   );
 };
 
+/**
+ * `Navigation.Page`, around each of Settings' pages: instant (by default
+ * here), pushed and popped at once, not swiped back; or sliding as any.
+ */
+const PagePart: FunctionComponent = () => {
+  const id = 'navigation-parts-page';
+  const [log, addLog] = useLog();
+  const [keys, setKeys] = useState(['settings']);
+  const push = (key: string) => {
+    addLog(`push: ${key}`);
+    setKeys((current) => [...current, key]);
+  };
+  const pop = useCallback(
+    ({ reason }: NavigationBackEventDetails) => {
+      addLog(`pop (${reason})`);
+      setKeys((current) => current.slice(0, -1));
+    },
+    [addLog],
+  );
+  const {
+    controls,
+    propsBack,
+    propsPage,
+    propsRoot,
+    propsStack,
+    propsSwipeArea,
+    state,
+  } = useNavigationControls(id, addLog, pop, { featured: 'Page' });
+
+  return (
+    <Component
+      isInline
+      controls={controls}
+      id={id}
+      log={log}
+      setup={setup}
+      stage="phone"
+      state={state}
+      title="Navigation.Page"
+    >
+      <Viewport.Content>
+        <Navigation.Root {...propsRoot}>
+          <Navigation.SwipeArea {...propsSwipeArea} />
+          <Navigation.Stack {...propsStack}>
+            {keys.map((key, index) => (
+              <Navigation.Page
+                key={key}
+                {...propsPage}
+              >
+                <Header.Root>
+                  <Viewport.BlockStart>
+                    <Toolbar.Root placement="block-start">
+                      {index > 0 ? (
+                        <Toolbar.Leading>
+                          <Navigation.Back
+                            aria-label={pages[keys[index - 1] ?? '']?.title}
+                            {...propsBack}
+                          >
+                            <Button.Icon>
+                              <Symbol icon={sfChevronBackward} />
+                            </Button.Icon>
+                          </Navigation.Back>
+                        </Toolbar.Leading>
+                      ) : null}
+                      <Toolbar.Title>
+                        <span>{pages[key]?.title}</span>
+                      </Toolbar.Title>
+                    </Toolbar.Root>
+                  </Viewport.BlockStart>
+                  <Page.Root>
+                    <Viewport.Padding edge="block-start" />
+                    <List.Root>
+                      <List.Section>
+                        <List.Group>
+                          {pages[key]?.children.map((child) => (
+                            <List.Item key={child}>
+                              <List.Content>
+                                <List.Title
+                                  render={<button type="button" />}
+                                  onClick={() => push(child)}
+                                >
+                                  {pages[child]?.title}
+                                </List.Title>
+                              </List.Content>
+                              <List.Trailing>
+                                <List.DrillIn />
+                              </List.Trailing>
+                            </List.Item>
+                          ))}
+                        </List.Group>
+                      </List.Section>
+                    </List.Root>
+                    <Viewport.Padding edge="block-end" />
+                  </Page.Root>
+                </Header.Root>
+              </Navigation.Page>
+            ))}
+          </Navigation.Stack>
+        </Navigation.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
 /** `/navigation/parts`: its root, stack, swipe area and back button. */
 export const NavigationParts: FunctionComponent = () => (
   <>
@@ -581,7 +686,11 @@ export const NavigationParts: FunctionComponent = () => (
                       component="page"
                       part="Page.Root"
                     />
-                    <span>s, their bars moving with them</span>
+                    <span>
+                      s, their bars moving with them; each optionally in a{' '}
+                    </span>
+                    <PartLink part="Navigation.Page" />
+                    <span> (keyed instead: instant, or not)</span>
                     <ul>
                       <li>
                         <PartLink part="Navigation.Back" />,{' '}
@@ -659,6 +768,46 @@ export const NavigationParts: FunctionComponent = () => (
     <StackPart />
     <h3>Props</h3>
     <PropsTable rows={navigationStackRows} />
+
+    <Heading
+      id="navigation-page"
+      level={2}
+    >
+      <code>Navigation.Page</code>
+    </Heading>
+    <ul>
+      <li>
+        Around a page of the stack (optional; keyed, as the stack’s child, in
+        place of the page): how it comes and goes.
+      </li>
+      <li>
+        Instant (<code>instant</code>): pushed or popped, shown at once, no
+        slide in or out; on top, not swiped back (its{' '}
+        <PartLink part="Navigation.Back" /> still going back, at once). The page
+        coming or going decides: pushed onto an instant page, or popped off one
+        to it, the other page slides as any.
+      </li>
+      <li>
+        E.g. a page whose own scrolling a slide would disturb: pulled past its
+        ends (a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Overscroll"
+        />
+        ’s refresh, or turning pages).
+      </li>
+      <li>
+        Here, every page instant (its control): drilling in and going back show
+        the pages at once; not instant, they slide.
+      </li>
+      <li>
+        Renders no element: its page as it is (in the stack’s frame, as without
+        it).
+      </li>
+    </ul>
+    <PagePart />
+    <h3>Props</h3>
+    <PropsTable rows={navigationPageRows} />
 
     <Heading
       id="navigation-swipearea"
@@ -789,6 +938,7 @@ export const NavigationParts: FunctionComponent = () => (
 export const navigationPartsDemos = [
   RootPart,
   StackPart,
+  PagePart,
   SwipeAreaPart,
   BackPart,
   PersistentPart,

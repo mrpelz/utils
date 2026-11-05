@@ -8,6 +8,7 @@ import {
   createContext,
   CSSProperties,
   forwardRef,
+  FunctionComponent,
   isValidElement,
   MouseEvent,
   PointerEvent,
@@ -22,6 +23,7 @@ import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import type {
   NavigationBackEventDetails,
   NavigationBackProps,
+  NavigationPageProps,
   NavigationPersistentProps,
   NavigationRootProps,
   NavigationStackProps,
@@ -33,6 +35,7 @@ import type {
 export type {
   NavigationBackEventDetails,
   NavigationBackProps,
+  NavigationPageProps,
   NavigationPersistentProps,
   NavigationRootProps,
   NavigationStackProps,
@@ -115,6 +118,8 @@ type StackContext = {
   progress: () => number;
   rest: () => void;
   setKeys: (keys: string[]) => void;
+  /** Whether its top page is instant (see `Page`): not swiped back. */
+  setTopInstant: (isInstant: boolean) => void;
   setTransition: (transition: Transition) => void;
   transition: Transition | null;
 };
@@ -136,12 +141,15 @@ const NavigationContext = createContext<{
 const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
   ({ className, onBack, ...props }, forwardedRef) => {
     const ref = useForwardedRef(forwardedRef);
-    // Its stack's keys (reported by its `Stack`).
+    // Its stack's keys (reported by its `Stack`), its top page instant.
     const [keys, setKeys] = useState<string[]>([]);
+    const [isTopInstant, setTopInstant] = useState(false);
     const [transition, setTransition] = useState<Transition | null>(null);
     // (The latest, for a swipe's pop not taken up by the app.)
     const keysRef = useRef(keys);
-    keysRef.current = keys;
+    useLayoutEffect(() => {
+      keysRef.current = keys;
+    });
     const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
       undefined,
     );
@@ -157,6 +165,8 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
         }
       | undefined
     >(undefined);
+    // A swipe going on (its handlers kept, see `swipeHandlers`).
+    const [isSwiping, setIsSwiping] = useState(false);
 
     // The progress (and its transition), on the root.
     const setProgress = (progress: number, isAnimated: boolean) => {
@@ -223,6 +233,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
     const canSwipe =
       Boolean(onBack) &&
       keys.length > 1 &&
+      !isTopInstant &&
       (!transition || !keys.includes(transition.top));
 
     // A swipe's transition (see `canSwipe`): the top page over the one under
@@ -257,6 +268,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
       const { current: swipe } = swipeRef;
       if (swipe?.pointerId !== event.pointerId) return;
       swipeRef.current = undefined;
+      setIsSwiping(false);
 
       // Its speed as released: over the last moves (held still: none).
       const now = performance.now();
@@ -291,7 +303,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
 
     // Where a swipe back starts (see `SwipeArea`): while one can, or goes on.
     const swipeHandlers: SwipeHandlers | undefined =
-      canSwipe || swipeRef.current
+      canSwipe || isSwiping
         ? {
             onLostPointerCapture: endSwipe,
             onPointerCancel: endSwipe,
@@ -313,6 +325,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
                 width: root.clientWidth,
                 x: event.clientX,
               };
+              setIsSwiping(true);
               setProgress(0, false);
               setTransition(next);
             },
@@ -342,6 +355,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
             progress: currentProgress,
             rest,
             setKeys,
+            setTopInstant,
             setTransition,
             transition,
           },
@@ -437,6 +451,19 @@ const changeKeys = (
 };
 
 /**
+ * A page of a `Stack` (its keyed child; optional, around a page): how it
+ * comes and goes. Instant (`instant`), pushed and popped at once, not
+ * swiped back while on top. Renders its page alone.
+ */
+const Page: FunctionComponent<NavigationPageProps> = ({ children }) => (
+  <>{children}</>
+);
+
+/** Whether a stack's child is an instant page (see `Page`). */
+const isInstant = (page: ReactElement | undefined) =>
+  page?.type === Page && (page.props as NavigationPageProps).instant === true;
+
+/**
  * Its stack of pages (keyed children, see above), filling its root: pushed,
  * popped, or replaced as the app's keys change.
  */
@@ -451,9 +478,11 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
     const previousRef = useRef({ keys, pages });
     const transition = stack?.transition ?? null;
 
-    // Pushed, popped, or replaced (see above).
+    // Pushed, popped, or replaced (see above); an instant page (see
+    // `Page`) pushed or popped: shown at once.
     useLayoutEffect(() => {
       stack?.setKeys(keys);
+      stack?.setTopInstant(isInstant(pages.at(-1)));
       const { current: previous } = previousRef;
       previousRef.current = { keys, pages };
       if (!stack || sameKeys(previous.keys, keys)) return;
@@ -461,6 +490,15 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
       const oldTop = previous.keys.at(-1);
       const newTop = keys.at(-1);
       if (oldTop === undefined || newTop === undefined || oldTop === newTop) {
+        stack.rest();
+        return;
+      }
+      const isPushed = isPrefix(previous.keys, keys);
+      const isPopped = isPrefix(keys, previous.keys);
+      if (
+        (isPushed && isInstant(pages.at(-1))) ||
+        (isPopped && isInstant(previous.pages.at(-1)))
+      ) {
         stack.rest();
         return;
       }
@@ -716,6 +754,7 @@ const Persistent = forwardRef<HTMLDivElement, NavigationPersistentProps>(
 export const Navigation = {
   Root,
   Stack,
+  Page,
   SwipeArea,
   Back,
   Persistent,

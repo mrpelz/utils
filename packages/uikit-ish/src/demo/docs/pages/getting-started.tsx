@@ -191,8 +191,7 @@ export const GettingStartedPage: FunctionComponent = () => (
     </Heading>
     <p>
       From your render root (the body, or any element below it) down to a switch
-      at the end of a list row, in a tab with a large title. This is how the{' '}
-      <a href={publicUrl('kitchen-sink')}>kitchen sink</a> is built:
+      at the end of a list row, in a tab with a large title:
     </p>
     <ul className="demo-tree">
       <li className="demo-tree-context">

@@ -298,6 +298,7 @@ export {
   type NavigationBackProps,
   type NavigationPersistentProps,
   type NavigationRootProps,
+  type NavigationPageProps,
   type NavigationStackProps,
   type NavigationSwipeAreaProps,
 } from './navigation/main.js';

@@ -161,6 +161,7 @@ const names = [
   'sfSquare',
   'sfSquareAndArrowUp',
   'sfSquareAndPencil',
+  'sfStar',
   'sfSunMax',
   'sfSunMin',
   'sfTagFill',
@@ -184,6 +185,9 @@ const icons = Object.fromEntries(
     { svgPathData: [], viewBox: '0 0 20 20' },
   ]),
 ) as Record<(typeof names)[number], SymbolIcon>;
+
+/** The demos' icons, by name (e.g. the kitchen sink's grid of them all). */
+export const demoIcons: Readonly<Record<string, SymbolIcon>> = icons;
 
 /** The demos' icons loaded: awaited before the demo renders (see demo.tsx). */
 export const iconsLoaded = Promise.all(
@@ -273,6 +277,7 @@ export const {
   sfSquare,
   sfSquareAndArrowUp,
   sfSquareAndPencil,
+  sfStar,
   sfSunMax,
   sfSunMin,
   sfTagFill,

@@ -92,3 +92,29 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Its app look (`look="app"`, e.g. the kitchen sink's: in a strong list
+   block, see catalog.tsx): the grid's box without its frame (the block's),
+   as high as most of the screen; its cells pressed and hovered on the
+   rows' fills. */
+.symbol-catalog[data-look='app'] {
+  justify-items: stretch;
+
+  & .symbol-catalog-box {
+    height: min(60vh, 480px);
+    border: 0;
+    border-radius: 0;
+  }
+
+  & .symbol-catalog-cell {
+    color: var(--color-ui-label);
+
+    &:hover {
+      background: var(--color-ui-system-fill);
+    }
+
+    &:active {
+      background: var(--color-ui-secondary-system-fill);
+    }
+  }
+}

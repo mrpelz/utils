@@ -147,6 +147,24 @@ const createStore = () => {
       };
     },
     notify,
+    /**
+     * The tallest bottom anchor pushed up by the keyboard (`keyboard`
+     * `push`, e.g. a message field's bar): its size (its content box's,
+     * its safe area aside), sitting on the keyboard while it shows.
+     */
+    pushed: (): number => {
+      let size = 0;
+      for (const entry of entries) {
+        if (
+          entry.kind === 'anchor' &&
+          entry.edge === 'block-end' &&
+          (entry.keyboard ?? 'push') === 'push'
+        ) {
+          size = Math.max(size, entry.size);
+        }
+      }
+      return size;
+    },
     /** The open overscroll areas' sizes at an edge, added up. */
     room: (edge: ViewportEdge): number => {
       let room = 0;
@@ -324,6 +342,16 @@ export const useAnchorSize = (
     () => store.size(edge, handles),
     () => 0,
   );
+};
+
+/**
+ * The tallest bottom anchor of its scope the keyboard pushes up (see the
+ * store's `pushed`): what sits on the keyboard while it shows.
+ */
+export const usePushedAnchorSize = (): number => {
+  const store = useStore();
+
+  return useSyncExternalStore(store.subscribe, store.pushed, () => 0);
 };
 
 /**

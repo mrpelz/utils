@@ -36,6 +36,7 @@ import {
   useAnchorRegistration,
   useAnchorSize,
   useOverscrollRoom,
+  usePushedAnchorSize,
 } from './padding.js';
 import type {
   ElementGeometry,
@@ -1155,8 +1156,10 @@ const BlockEnd = forwardRef<HTMLDivElement, Omit<ViewportAnchorProps, 'edge'>>(
  * What's typed into, kept above the keyboard (e.g. a field's row, with its
  * slider): while focus is within it and the keyboard covers it, lifted
  * (its own box moved up, its place kept) until its end is `gap` above the
- * keyboard; back as focus leaves, or the keyboard hides. Needs a
- * `Provider` (the keyboard's height); without one, it stays.
+ * keyboard, and above the bar the keyboard pushes up (a bottom anchor of
+ * `keyboard` `push`, e.g. a message field's: on the keyboard, covering it
+ * too); back as focus leaves, or the keyboard hides. Needs a `Provider`
+ * (the keyboard's height); without one, it stays.
  */
 const KeyboardAccessory = forwardRef<
   HTMLDivElement,
@@ -1164,6 +1167,8 @@ const KeyboardAccessory = forwardRef<
 >(({ className, gap = 8, ...props }, forwardedRef) => {
   const ref = useForwardedRef(forwardedRef);
   const { keyboardInset } = useVisualViewport();
+  // (The bar on the keyboard, while it shows: covering it too.)
+  const pushed = usePushedAnchorSize();
   const [isFocused, setIsFocused] = useState(false);
   // (Its lift now: its box measured without it.)
   const liftRef = useRef(0);
@@ -1177,7 +1182,7 @@ const KeyboardAccessory = forwardRef<
     let lift = 0;
     if (isFocused && keyboardInset > 0 && viewport) {
       const bottom = element.getBoundingClientRect().bottom + liftRef.current;
-      const keyboardTop = viewport.offsetTop + viewport.height;
+      const keyboardTop = viewport.offsetTop + viewport.height - pushed;
       lift = Math.max(0, Math.round(bottom + gap - keyboardTop));
     }
     liftRef.current = lift;
@@ -1186,7 +1191,7 @@ const KeyboardAccessory = forwardRef<
       `${String(lift)}px`,
     );
     element.toggleAttribute('data-lifted', lift > 0);
-  }, [gap, isFocused, keyboardInset, ref]);
+  }, [gap, isFocused, keyboardInset, pushed, ref]);
 
   useLayoutEffect(update, [update]);
 
