@@ -1,6 +1,6 @@
 {
   "name": "@mrpelz/modifiable-date",
-  "version": "7.11.0",
+  "version": "7.11.1-feat-uikit-ish-kitchen-sink.0",
   "repository": {
     "type": "git",
     "url": "https://git.i.wurstsalat.cloud/mrpelz/utils.git",
