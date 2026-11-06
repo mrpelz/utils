@@ -368,6 +368,33 @@ const useWindowHold = (screen: PortalContainer | null | undefined) => {
   }, [screen]);
 };
 
+/** A screen's marker: an app's (its background, see style.css). */
+const screenAttribute = 'data-uikit-viewport-screen';
+
+/** Holds of each screen's marker (its providers', see `useScreenHold`). */
+const screenHolds = new WeakMap<HTMLElement, number>();
+
+/**
+ * A screen (not the window) held as an app's while mounted, as the window
+ * is (see `useWindowHold`): marked (its background beneath the layers, see
+ * style.css; e.g. a page of its own in a navigation stack, not the page
+ * below showing through as it slides in). Unmarked with the last hold.
+ */
+const useScreenHold = (screen: PortalContainer | null | undefined) => {
+  useLayoutEffect(() => {
+    const element = elementOf(screen);
+    if (!element) return undefined;
+    const holds = screenHolds.get(element) ?? 0;
+    if (holds === 0) element.setAttribute(screenAttribute, '');
+    screenHolds.set(element, holds + 1);
+    return () => {
+      const rest = (screenHolds.get(element) ?? 1) - 1;
+      screenHolds.set(element, rest);
+      if (rest === 0) element.removeAttribute(screenAttribute);
+    };
+  }, [screen]);
+};
+
 /** A screen's marker: its layers following its box (see `Provider`). */
 const boxDrivenAttribute = 'data-uikit-viewport-box-driven';
 
@@ -409,8 +436,9 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     };
   }, [screen, scroller]);
 
-  // Tracking the window: it's an app's.
+  // Tracking the window (or a screen): it's an app's.
   useWindowHold(screen);
+  useScreenHold(screen);
 
   // The visual viewport (once per frame), as custom properties, too: on
   // the root element, or its screen.

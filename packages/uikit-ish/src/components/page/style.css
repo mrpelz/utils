@@ -37,6 +37,23 @@
       background-color: var(--color-ui-system-background);
     }
 
+    /* Filled by its content (`fill`), not scrolling: no padding (its
+       content under the bars and the safe areas, their insets its own),
+       its content filling it. */
+    &[data-fill] {
+      display: grid;
+      overflow: clip;
+      padding: 0;
+
+      & > * {
+        --uikit-safe-area-inset-top: var(--uikit-page-safe-top);
+        --uikit-safe-area-inset-bottom: var(--uikit-page-safe-bottom);
+
+        min-width: 0;
+        min-height: 0;
+      }
+    }
+
     /* Bouncing even when its content fits (`alwaysBounce`): a box 1px
        taller than it (its padding box: absolutely placed, it counts toward
        its scrollable overflow), unseen. */

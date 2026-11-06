@@ -71,7 +71,9 @@ export type ViewportProviderProps = {
    * layers' bottom: measured against their containing block, the window
    * unless the screen or an ancestor contains them, read anew as it
    * resizes, e.g. within an app's content layer resized above the
-   * keyboard), its custom properties on it.
+   * keyboard), its custom properties on it; an app's background beneath
+   * its layers, as the window's (e.g. a page of its own in a navigation
+   * stack; its own background kept).
    * @default the provided portal container (`PortalContainerContext`), or
    * none: the window
    */

@@ -75,7 +75,10 @@ const RootPart: FunctionComponent = () => {
 export const PageParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>One part: the page, its content’s scroll container.</li>
+      <li>
+        One part: the page, its content’s scroll container (or, filled by it,
+        not scrolling).
+      </li>
     </ul>
     <ul className="demo-tree">
       <li className="demo-tree-context">
@@ -143,6 +146,13 @@ export const PageParts: FunctionComponent = () => (
         <code>--uikit-layout-inset-start</code>, see{' '}
         <a href={publicUrl('layout')}>Layout</a>
         ).
+      </li>
+      <li>
+        <code>fill</code>: filled by its content, not scrolled (e.g. a map under
+        its bars, as Framework7’s <code>.page</code> without its{' '}
+        <code>.page-content</code>): not a scroller, its content running under
+        the bars, the safe areas and a floating column, on the page background
+        (not the page below showing through as it slides in).
       </li>
       <li>
         Renders a <code>div</code>.

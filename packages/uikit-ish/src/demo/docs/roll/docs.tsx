@@ -77,7 +77,7 @@ export const rollColumnRows: readonly PropRow[] = [
     'disabled',
     'boolean',
     code('false'),
-    'Disables the column: it can’t be scrolled or focused.',
+    'Disables the column: dimmed, it can’t be scrolled or focused.',
   ],
   [
     'editable',

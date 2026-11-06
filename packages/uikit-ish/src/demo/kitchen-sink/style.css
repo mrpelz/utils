@@ -111,31 +111,6 @@
     max-height: 640px;
   }
 
-  /* A page's content filling the screen (see `isFullBleed`), and a bare
-     page's (see `isBare`): on a page background of their own (not the
-     page below showing through, as they slide in). */
-  .kitchen-sink-full-bleed {
-    position: absolute;
-    inset: 0;
-  }
-
-  .kitchen-sink-full-bleed,
-  .kitchen-sink-bare {
-    background-color: var(--color-ui-system-grouped-background);
-    color: var(--color-ui-label);
-  }
-
-  .kitchen-sink-bare {
-    display: grid;
-    height: 100%;
-    min-height: 0;
-
-    & > * {
-      min-width: 0;
-      min-height: 0;
-    }
-  }
-
   /* A popover's width (as a phone's, at most). */
   .kitchen-sink-popover {
     width: min(320px, calc(100vw - 16px));

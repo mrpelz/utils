@@ -185,9 +185,13 @@ export const viewportProviderRows: readonly PropRow[] = [
         part="Layout.Column"
       />
       ), read anew as that resizes (e.g. within an app’s content layer, resized
-      above the keyboard: then, nothing covered). By default, the portal
-      container provided by <code>PortalContainerContext</code> (the app’s
-      screen for its popups, too); <code>null</code>: the window.
+      above the keyboard: then, nothing covered). An app’s background beneath
+      its layers, as the window’s (e.g. a page of its own in a{' '}
+      <a href={publicUrl('navigation')}>Navigation</a> stack, not the page below
+      showing through as it slides in; a background of its own kept). By
+      default, the portal container provided by{' '}
+      <code>PortalContainerContext</code> (the app’s screen for its popups,
+      too); <code>null</code>: the window.
     </>,
   ],
   [

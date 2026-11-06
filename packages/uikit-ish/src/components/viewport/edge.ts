@@ -109,11 +109,12 @@ export const registerScroller = (element: Element): (() => void) => {
 /** A scroller (see above), registered while mounted. */
 export const useScrollerRegistration = (
   ref: RefObject<Element | null>,
+  isEnabled = true,
 ): void => {
   useLayoutEffect(() => {
     const { current: element } = ref;
-    return element ? registerScroller(element) : undefined;
-  }, [ref]);
+    return element && isEnabled ? registerScroller(element) : undefined;
+  }, [isEnabled, ref]);
 };
 
 /**

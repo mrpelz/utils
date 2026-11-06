@@ -156,14 +156,8 @@ const StackPage: FunctionComponent<{
   const Trailing = page?.Trailing;
   const Anchors = page?.Anchors;
 
-  // (Bare: its content its own app, see `isBare`; on a page background.)
-  if (page?.isBare) {
-    return (
-      <div className="kitchen-sink-bare">
-        <page.Content />
-      </div>
-    );
-  }
+  // (Bare: its content its own app, see `isBare`.)
+  if (page?.isBare) return <page.Content />;
 
   return (
     <Header.Root>
@@ -193,9 +187,12 @@ const StackPage: FunctionComponent<{
       {Anchors ? <Anchors /> : null}
       {/* (Full bleed: its content filling the screen, under its bar.) */}
       {page?.isFullBleed ? (
-        <div className="kitchen-sink-full-bleed">
+        <Page.Root
+          fill
+          background={page.background}
+        >
           <page.Content />
-        </div>
+        </Page.Root>
       ) : (
         <Page.Root background={page?.background}>
           <Viewport.Padding

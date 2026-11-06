@@ -21,6 +21,14 @@
     background-color: var(--color-ui-system-grouped-background);
   }
 
+  /* A provider's screen (not the window, see main.tsx): the same, beneath
+     its layers (e.g. a page of its own in a navigation stack, not the page
+     below showing through as it slides in). Unspecific: a screen's own
+     background (e.g. a device frame's wallpaper) kept. */
+  :where([data-uikit-viewport-screen]) {
+    background-color: var(--color-ui-system-grouped-background);
+  }
+
   /* A screen's layers' box (see main.tsx's `Provider`): fixed, filling
      their containing block (the window, or an ancestor containing them),
      unseen. */

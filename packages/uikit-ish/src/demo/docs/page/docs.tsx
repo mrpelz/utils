@@ -33,12 +33,24 @@ export const pageRootRows: readonly PropRow[] = [
     </>,
   ],
   [
+    'fill',
+    'boolean',
+    code('false'),
+    <>
+      Its content filling it, not scrolled (e.g. a map under its bars): not a
+      scroller (its provider tracks none here; no edge effects), its content
+      running under the bars and the safe areas (their insets its own, to keep
+      clear of where it needs to), on the page background all the same.
+    </>,
+  ],
+  [
     'children',
     'ReactNode',
     undefined,
     <>
-      What it scrolls: e.g. a <a href={publicUrl('header')}>Header</a>’s large
-      title at its start (below the header’s bar), then lists.
+      What it scrolls (or, <code>fill</code>, what fills it): e.g. a{' '}
+      <a href={publicUrl('header')}>Header</a>’s large title at its start (below
+      the header’s bar), then lists.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
