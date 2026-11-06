@@ -93,14 +93,20 @@ export type EdgeEffect = {
 /**
  * A scope's anchors, and who's told of their changes. Their sizes measured
  * by one observer, all at once (told once): one anchor shown as another's
- * hidden (e.g. a tab's panel's bar), never none in between.
+ * hidden (e.g. a tab's panel's bar), never none in between. Within another
+ * (`parent`, see `useChildViewportScope`): its anchors too (e.g. a
+ * navigation's page's: its own, and a tab bar's around the navigation),
+ * told of their changes.
  */
-const createStore = () => {
-  const entries = new Set<Entry>();
+const createStore = (parent?: Store): Store => {
+  const ownEntries = new Set<Entry>();
   const listeners = new Set<() => void>();
   const notify = () => {
     for (const listener of listeners) listener();
   };
+  // Its own entries, and its parent's (theirs, on up).
+  const allEntries = (): Entry[] =>
+    parent ? [...ownEntries, ...parent.entries()] : [...ownEntries];
 
   const measured = new Map<Element, Entry>();
   let observer: ResizeObserver | undefined;
@@ -129,13 +135,15 @@ const createStore = () => {
 
   return {
     add: (entry: Entry) => {
-      entries.add(entry);
+      ownEntries.add(entry);
       notify();
       return () => {
-        entries.delete(entry);
+        ownEntries.delete(entry);
         notify();
       };
     },
+    /** Its entries, its parent's too (see above). */
+    entries: allEntries,
     /** An anchor's element, its size measured into its entry (see above). */
     measure: (element: Element, entry: Entry) => {
       observer ??= new ResizeObserver(onResize);
@@ -154,7 +162,7 @@ const createStore = () => {
      */
     pushed: (): number => {
       let size = 0;
-      for (const entry of entries) {
+      for (const entry of allEntries()) {
         if (
           entry.kind === 'anchor' &&
           entry.edge === 'block-end' &&
@@ -168,7 +176,7 @@ const createStore = () => {
     /** The open overscroll areas' sizes at an edge, added up. */
     room: (edge: ViewportEdge): number => {
       let room = 0;
-      for (const entry of entries) {
+      for (const entry of allEntries()) {
         if (entry.kind === 'overscroll' && entry.edge === edge) {
           room += entry.size;
         }
@@ -181,7 +189,7 @@ const createStore = () => {
       handles: readonly ViewportAnchorHandle[] | undefined,
     ): number => {
       let size = 0;
-      for (const entry of entries) {
+      for (const entry of allEntries()) {
         if (entry.kind !== 'anchor') continue;
         const isMatch = handles
           ? entry.handle !== undefined && handles.includes(entry.handle)
@@ -200,7 +208,7 @@ const createStore = () => {
       let effect: ViewportEdgeEffect = 'none';
       let tint: string | undefined;
       let keyboard: ViewportAnchorProps['keyboard'];
-      for (const entry of entries) {
+      for (const entry of allEntries()) {
         const { effect: entryEffect = 'none' } = entry;
         const hasEffect =
           entry.kind === 'anchor' &&
@@ -223,29 +231,70 @@ const createStore = () => {
     },
     subscribe: (listener: () => void) => {
       listeners.add(listener);
+      const unsubscribe = parent?.subscribe(listener);
       return () => {
         listeners.delete(listener);
+        unsubscribe?.();
       };
     },
   };
 };
 
-type Store = ReturnType<typeof createStore>;
+type Store = {
+  add: (entry: Entry) => () => void;
+  effect: (edge: ViewportEdge) => string;
+  entries: () => Entry[];
+  measure: (element: Element, entry: Entry) => () => void;
+  notify: () => void;
+  pushed: () => number;
+  room: (edge: ViewportEdge) => number;
+  size: (
+    edge: ViewportEdge,
+    handles: readonly ViewportAnchorHandle[] | undefined,
+  ) => number;
+  subscribe: (listener: () => void) => () => void;
+};
 
 const stores = new WeakMap<object, Store>();
 const windowScope = {};
+// A scope within another (see `useChildViewportScope`): its parent's key.
+const parents = new WeakMap<object, object>();
 
-/** The store of the scope it's in (see `ViewportScopeContext`). */
-const useStore = (): Store => {
-  const scope = useContext(ViewportScopeContext);
-  const portalContainer = useContext(PortalContainerContext);
-  const key = scope ?? portalContainer ?? windowScope;
+/** A scope's store (by its key), made as it's first needed. */
+const storeOf = (key: object): Store => {
   let store = stores.get(key);
   if (!store) {
-    store = createStore();
+    const parent = parents.get(key);
+    store = createStore(parent ? storeOf(parent) : undefined);
     stores.set(key, store);
   }
   return store;
+};
+
+/** The key of the scope it's in (see `ViewportScopeContext`). */
+const useScopeKey = (): object => {
+  const scope = useContext(ViewportScopeContext);
+  const portalContainer = useContext(PortalContainerContext);
+  return scope ?? portalContainer ?? windowScope;
+};
+
+/** The store of the scope it's in (see `ViewportScopeContext`). */
+const useStore = (): Store => storeOf(useScopeKey());
+
+/**
+ * A scope within the one it's in (for `ViewportScopeContext`), made once:
+ * its anchors its own (e.g. a navigation's page's, not its other pages'
+ * while they're hidden), the outer scope's counting too (e.g. a tab bar's
+ * around the navigation). Internal (see `Navigation.Stack`).
+ */
+export const useChildViewportScope = (): object => {
+  const parent = useScopeKey();
+  const [scope] = useState(() => {
+    const key = {};
+    parents.set(key, parent);
+    return key;
+  });
+  return scope;
 };
 
 /**

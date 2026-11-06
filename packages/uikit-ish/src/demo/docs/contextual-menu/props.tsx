@@ -31,6 +31,7 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
 export const propOptionsTrigger = {
   ...commonPropOptions,
   disabled: [undefined, false, true] as const,
+  openOn: [undefined, 'click', 'secondaryClick'] as const,
 };
 
 export const propOptionsPreview = {

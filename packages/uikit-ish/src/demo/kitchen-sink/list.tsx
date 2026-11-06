@@ -125,7 +125,9 @@ const StyledList: FunctionComponent<{
               </List.Image>
             </List.Leading>
             <List.Content>
-              <List.Title render={<button type="button" />}>{name}</List.Title>
+              <List.Title render={<button type="button" />}>
+                {index === 1 ? `${name} (selected)` : name}
+              </List.Title>
             </List.Content>
             <List.Trailing>
               <List.Detail>{index + 1}</List.Detail>

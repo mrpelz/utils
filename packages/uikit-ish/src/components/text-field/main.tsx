@@ -8,6 +8,7 @@ import {
   PointerEvent,
   ReactNode,
   useId,
+  useRef,
   useState,
 } from 'react';
 
@@ -115,7 +116,7 @@ const setValue = (control: HTMLInputElement | HTMLTextAreaElement) => {
 
 /**
  * Empties the field's control (as typing would, so its change handlers run),
- * focusing it; shown while it's filled, and (`mode`) while
+ * its focus as it was (kept, not taken); shown while it's filled, and (`mode`) while
  * it's focused, while it isn't, or always.
  */
 const Clear = forwardRef<HTMLButtonElement, ClearProps>(
@@ -125,12 +126,15 @@ const Clear = forwardRef<HTMLButtonElement, ClearProps>(
       children,
       mode = 'whileEditing',
       onClick,
+      onMouseDown,
       onPointerDown,
       ...props
     },
     ref,
   ) => {
     const mask = useId();
+    // The control focused as it was pressed (its focus kept, see below).
+    const wasFocused = useRef(false);
 
     return (
       // Shown while the field is filled, and (`mode`) focused or not
@@ -160,8 +164,21 @@ const Clear = forwardRef<HTMLButtonElement, ClearProps>(
           ) {
             return;
           }
+          // (Focus as it was: the field's kept, see below, or given back if
+          // lost all the same; not focused, no keyboard shown for it.)
           setValue(control);
-          control.focus();
+          if (wasFocused.current && document.activeElement !== control) {
+            control.focus({ preventScroll: true });
+          }
+          wasFocused.current = false;
+        }}
+        onMouseDown={(event: MouseEvent<HTMLButtonElement>) => {
+          (onMouseDown as ((mouseEvent: typeof event) => void) | undefined)?.(
+            event,
+          );
+          // The control keeps focus (iOS: moved by the mouse down it
+          // emulates after a tap, not by the pointer down).
+          event.preventDefault();
         }}
         onPointerDown={(event: PointerEvent<HTMLButtonElement>) => {
           (
@@ -169,6 +186,11 @@ const Clear = forwardRef<HTMLButtonElement, ClearProps>(
           )?.(event);
           // The control keeps focus.
           event.preventDefault();
+          wasFocused.current =
+            document.activeElement ===
+            event.currentTarget
+              .closest('[data-text-field-part=root]')
+              ?.querySelector('[data-text-field-part=control]');
         }}
       >
         {(children as ReactNode) ?? (

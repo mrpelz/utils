@@ -2,9 +2,10 @@ import type { ComponentProps } from 'react';
 
 export type LayoutColumnProps = ComponentProps<'div'> & {
   /**
-   * Next to a floating column (see `floating`): its pages' content inset by
-   * the floating column's size (`--uikit-layout-inset-start`), their
-   * backgrounds running underneath it.
+   * Next to a floating column (see `floating`): its pages' content (and a
+   * `Viewport.Content`'s, its bars') inset by the floating column's size
+   * (`--uikit-layout-inset-start`), their backgrounds running underneath
+   * it.
    */
   clearFloating?: boolean;
   /** Its initial size (px, uncontrolled); without a size, it's flexible. */

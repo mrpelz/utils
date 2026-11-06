@@ -1,5 +1,21 @@
 /* The kitchen sink (see main.tsx, shared.tsx). */
 @layer demo {
+  /* A showcase's stage (see `Showcase`): a background of its own (dots on
+     the page's own background, framed), not a list's, so what's on it
+     reads as shown, not as placed in a list. */
+  .kitchen-sink-stage {
+    padding: 20px 16px;
+    border: 1px dashed var(--color-ui-separator);
+    border-radius: var(--uikit-list-radius, 24px);
+    background-color: var(--color-ui-system-background);
+    background-image: radial-gradient(
+      var(--color-ui-separator) 1px,
+      transparent 1.5px
+    );
+    background-size: 12px 12px;
+    margin-inline: var(--uikit-list-inset, 16px);
+  }
+
   /* Things side by side, wrapping. */
   .kitchen-sink-showcase {
     display: flex;
@@ -69,6 +85,11 @@
     border: 0;
     border-radius: 12px;
     background: none;
+
+    /* Held to open its menu: no text selection, no callout. */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   /* A photo's preview (a contextual menu's): larger. */
@@ -90,10 +111,29 @@
     max-height: 640px;
   }
 
-  /* A page's content filling the screen (see `isFullBleed`). */
+  /* A page's content filling the screen (see `isFullBleed`), and a bare
+     page's (see `isBare`): on a page background of their own (not the
+     page below showing through, as they slide in). */
   .kitchen-sink-full-bleed {
     position: absolute;
     inset: 0;
+  }
+
+  .kitchen-sink-full-bleed,
+  .kitchen-sink-bare {
+    background-color: var(--color-ui-system-grouped-background);
+    color: var(--color-ui-label);
+  }
+
+  .kitchen-sink-bare {
+    display: grid;
+    height: 100%;
+    min-height: 0;
+
+    & > * {
+      min-width: 0;
+      min-height: 0;
+    }
   }
 
   /* A popover's width (as a phone's, at most). */

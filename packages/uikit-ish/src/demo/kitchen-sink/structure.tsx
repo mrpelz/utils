@@ -56,6 +56,7 @@ import {
 const iconButton = (label: string, icon: typeof sfFolder) => (
   <Toolbar.Button
     aria-label={label}
+    disabled={false}
     shape="circle"
   >
     <Button.Icon>
@@ -88,25 +89,32 @@ const ToolbarContent: FunctionComponent = () => (
     >
       <Toolbar.Root>
         <Toolbar.Leading>
-          <Toolbar.Button>
+          <Toolbar.Button disabled={false}>
             <Button.Label>Edit</Button.Label>
           </Toolbar.Button>
         </Toolbar.Leading>
         <Toolbar.Trailing>
-          <Toolbar.Button prominent>
+          <Toolbar.Button
+            prominent
+            disabled={false}
+          >
             <Button.Label>Done</Button.Label>
           </Toolbar.Button>
         </Toolbar.Trailing>
       </Toolbar.Root>
       <Toolbar.Root>
         <Toolbar.Leading>
-          <Toolbar.Button destructive>
+          <Toolbar.Button
+            destructive
+            disabled={false}
+          >
             <Button.Label>Delete</Button.Label>
           </Toolbar.Button>
         </Toolbar.Leading>
         <Toolbar.Trailing>
           <Toolbar.Button
             prominent
+            disabled={false}
             tint="var(--color-ui-system-green)"
           >
             <Button.Label>Save</Button.Label>
@@ -799,7 +807,7 @@ const LayoutContent: FunctionComponent = () => (
                       >
                         <List.Content>
                           <List.Title render={<button type="button" />}>
-                            {name}
+                            {index === 0 ? `${name} (selected)` : name}
                           </List.Title>
                         </List.Content>
                       </List.Item>
@@ -843,6 +851,7 @@ const SidebarContent: FunctionComponent = () => (
             <Sidebar.Root>
               <Sidebar.Toolbar>
                 <Button.Root
+                  disabled={false}
                   tint="var(--uikit-glass-content)"
                   variant="borderless"
                 >
@@ -851,6 +860,7 @@ const SidebarContent: FunctionComponent = () => (
                 <Sidebar.ToolbarGroup>
                   <Button.Root
                     aria-label="Compose"
+                    disabled={false}
                     shape="circle"
                     tint="var(--uikit-glass-content)"
                     variant="borderless"
@@ -897,7 +907,7 @@ const SidebarContent: FunctionComponent = () => (
                         </List.Leading>
                         <List.Content>
                           <List.Title render={<button type="button" />}>
-                            {name}
+                            {index === 0 ? `${name} (selected)` : name}
                           </List.Title>
                         </List.Content>
                         <List.Trailing>

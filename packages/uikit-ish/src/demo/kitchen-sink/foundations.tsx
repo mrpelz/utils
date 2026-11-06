@@ -177,14 +177,21 @@ const SettingsContent: FunctionComponent = () => {
                   Body text in the secondary label color.
                 </Typography>
                 <div className="kitchen-sink-showcase">
-                  <Button.Root variant="bordered-prominent">
+                  <Button.Root
+                    disabled={false}
+                    variant="bordered-prominent"
+                  >
                     <Button.Label>Prominent</Button.Label>
                   </Button.Root>
-                  <Button.Root variant="bordered">
+                  <Button.Root
+                    disabled={false}
+                    variant="bordered"
+                  >
                     <Button.Label>Bordered</Button.Label>
                   </Button.Root>
                   <Button.Root
                     aria-label="Share"
+                    disabled={false}
                     shape="circle"
                     variant="glass"
                   >

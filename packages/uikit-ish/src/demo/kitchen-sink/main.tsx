@@ -156,8 +156,14 @@ const StackPage: FunctionComponent<{
   const Trailing = page?.Trailing;
   const Anchors = page?.Anchors;
 
-  // (Bare: its content its own app, see `isBare`.)
-  if (page?.isBare) return <page.Content />;
+  // (Bare: its content its own app, see `isBare`; on a page background.)
+  if (page?.isBare) {
+    return (
+      <div className="kitchen-sink-bare">
+        <page.Content />
+      </div>
+    );
+  }
 
   return (
     <Header.Root>

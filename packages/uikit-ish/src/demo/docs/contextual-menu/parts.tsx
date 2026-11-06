@@ -43,10 +43,24 @@ import {
   propOptionsGuidePreview,
 } from './props.js';
 
+/** Its trigger, held to open: selecting no text (no browser text menu). */
+const useHeldTrigger = (isHeld = true) => {
+  const trigger = useLabelledRef<HTMLButtonElement>(
+    'trigger',
+    'HTMLButtonElement',
+  );
+  useTextActionsPrevention(trigger, isHeld);
+  return trigger;
+};
+
+// (Shown in the demos' code.)
+const heldSetup = 'useTextActionsPrevention(trigger);';
+
 /** `ContextualMenu.Root`, outlined, with its props. */
 const RootPart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-root';
   const [log, addLog] = useLog();
+  const trigger = useHeldTrigger();
   const [external] = useProvidedState(id);
   const [control, props, state, elementKey] = usePropControl(
     useMemo(() => getPropOptionsGuideRoot(addLog), [addLog]),
@@ -67,6 +81,7 @@ const RootPart: FunctionComponent = () => {
       id={id}
       log={log}
       screen="centered"
+      setup={heldSetup}
       stage="phone"
       state={[state]}
       title="ContextualMenu.Root"
@@ -76,7 +91,10 @@ const RootPart: FunctionComponent = () => {
           key={elementKey}
           {...props}
         >
-          <ContextualMenu.Trigger render={<Button.Root variant="bordered" />}>
+          <ContextualMenu.Trigger
+            ref={trigger}
+            render={<Button.Root variant="bordered" />}
+          >
             <Button.Icon>
               <Symbol icon={sfPhoto} />
             </Button.Icon>
@@ -134,13 +152,8 @@ const TriggerPart: FunctionComponent = () => {
       title: 'ContextualMenu.Trigger',
     },
   );
-  // Opened by a held press: selecting no text (no browser text menu).
-  const trigger = useLabelledRef<HTMLButtonElement>(
-    'trigger',
-    'HTMLButtonElement',
-  );
-  const isHeld = props.openOn === 'secondaryClick';
-  useTextActionsPrevention(trigger, isHeld);
+  const isHeld = props.openOn !== 'click';
+  const trigger = useHeldTrigger(isHeld);
 
   return (
     <Component
@@ -151,7 +164,7 @@ const TriggerPart: FunctionComponent = () => {
       id={id}
       log={log}
       screen="centered"
-      setup={isHeld ? 'useTextActionsPrevention(trigger);' : undefined}
+      setup={isHeld ? heldSetup : undefined}
       stage="phone"
       state={[state]}
       title="ContextualMenu.Trigger"
@@ -209,6 +222,7 @@ const TriggerPart: FunctionComponent = () => {
 const PreviewPart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-preview';
   const [log, addLog] = useLog();
+  const trigger = useHeldTrigger();
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(propOptionsGuidePreview, {
     external,
@@ -226,13 +240,17 @@ const PreviewPart: FunctionComponent = () => {
       id={id}
       log={log}
       screen="centered"
+      setup={heldSetup}
       stage="phone"
       state={[state]}
       title="ContextualMenu.Preview"
     >
       <Viewport.Content>
         <ContextualMenu.Root>
-          <ContextualMenu.Trigger render={<Button.Root variant="bordered" />}>
+          <ContextualMenu.Trigger
+            ref={trigger}
+            render={<Button.Root variant="bordered" />}
+          >
             <Button.Icon>
               <Symbol icon={sfPhoto} />
             </Button.Icon>
@@ -280,6 +298,7 @@ const PreviewPart: FunctionComponent = () => {
 const PortalPart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-portal';
   const [log, addLog] = useLog();
+  const trigger = useHeldTrigger();
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(propOptionsGuidePortal, {
     external,
@@ -297,13 +316,17 @@ const PortalPart: FunctionComponent = () => {
       id={id}
       log={log}
       screen="centered"
+      setup={heldSetup}
       stage="phone"
       state={[state]}
       title="ContextualMenu.Portal"
     >
       <Viewport.Content>
         <ContextualMenu.Root>
-          <ContextualMenu.Trigger render={<Button.Root variant="bordered" />}>
+          <ContextualMenu.Trigger
+            ref={trigger}
+            render={<Button.Root variant="bordered" />}
+          >
             <Button.Icon>
               <Symbol icon={sfPhoto} />
             </Button.Icon>
@@ -351,6 +374,7 @@ const PortalPart: FunctionComponent = () => {
 const BackdropPart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-backdrop';
   const [log, addLog] = useLog();
+  const trigger = useHeldTrigger();
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(propOptionsGuideBackdrop, {
     external,
@@ -368,13 +392,17 @@ const BackdropPart: FunctionComponent = () => {
       id={id}
       log={log}
       screen="centered"
+      setup={heldSetup}
       stage="phone"
       state={[state]}
       title="ContextualMenu.Backdrop"
     >
       <Viewport.Content>
         <ContextualMenu.Root>
-          <ContextualMenu.Trigger render={<Button.Root variant="bordered" />}>
+          <ContextualMenu.Trigger
+            ref={trigger}
+            render={<Button.Root variant="bordered" />}
+          >
             <Button.Icon>
               <Symbol icon={sfPhoto} />
             </Button.Icon>
@@ -422,6 +450,7 @@ const BackdropPart: FunctionComponent = () => {
 const PositionerPart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-positioner';
   const [log, addLog] = useLog();
+  const trigger = useHeldTrigger();
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(propOptionsGuidePositioner, {
     external,
@@ -439,13 +468,17 @@ const PositionerPart: FunctionComponent = () => {
       id={id}
       log={log}
       screen="centered"
+      setup={heldSetup}
       stage="phone"
       state={[state]}
       title="ContextualMenu.Positioner"
     >
       <Viewport.Content>
         <ContextualMenu.Root>
-          <ContextualMenu.Trigger render={<Button.Root variant="bordered" />}>
+          <ContextualMenu.Trigger
+            ref={trigger}
+            render={<Button.Root variant="bordered" />}
+          >
             <Button.Icon>
               <Symbol icon={sfPhoto} />
             </Button.Icon>
@@ -493,6 +526,7 @@ const PositionerPart: FunctionComponent = () => {
 const PopupPart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-popup';
   const [log, addLog] = useLog();
+  const trigger = useHeldTrigger();
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(propOptionsPopup, {
     external,
@@ -510,13 +544,17 @@ const PopupPart: FunctionComponent = () => {
       id={id}
       log={log}
       screen="centered"
+      setup={heldSetup}
       stage="phone"
       state={[state]}
       title="ContextualMenu.Popup"
     >
       <Viewport.Content>
         <ContextualMenu.Root>
-          <ContextualMenu.Trigger render={<Button.Root variant="bordered" />}>
+          <ContextualMenu.Trigger
+            ref={trigger}
+            render={<Button.Root variant="bordered" />}
+          >
             <Button.Icon>
               <Symbol icon={sfPhoto} />
             </Button.Icon>
@@ -571,6 +609,7 @@ const photoMenu = codeLabel(
 const CreateHandlePart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-create-handle';
   const [log, addLog] = useLog();
+  const trigger = useHeldTrigger();
 
   return (
     <Component
@@ -580,6 +619,7 @@ const CreateHandlePart: FunctionComponent = () => {
       id={id}
       log={log}
       screen="centered"
+      setup={heldSetup}
       stage="phone"
       title="ContextualMenu.createHandle"
     >
@@ -587,6 +627,7 @@ const CreateHandlePart: FunctionComponent = () => {
         <div className="contextual-menu-demo-triggers">
           <ContextualMenu.Root handle={photoMenu}>
             <ContextualMenu.Trigger
+              ref={trigger}
               handle={photoMenu}
               id="contextual-menu-parts-create-handle-trigger"
               render={<Button.Root variant="bordered" />}
@@ -628,6 +669,7 @@ const CreateHandlePart: FunctionComponent = () => {
 const UseCreateContextualMenuHandlePart: FunctionComponent = () => {
   const id = 'contextual-menu-parts-use-create-contextual-menu-handle';
   const [log, addLog] = useLog();
+  const trigger = useHeldTrigger();
   const imageMenu = codeLabel(
     useCreateContextualMenuHandle(),
     'imageMenu',
@@ -642,6 +684,7 @@ const UseCreateContextualMenuHandlePart: FunctionComponent = () => {
       id={id}
       log={log}
       screen="centered"
+      setup={heldSetup}
       stage="phone"
       title="useCreateContextualMenuHandle"
     >
@@ -649,6 +692,7 @@ const UseCreateContextualMenuHandlePart: FunctionComponent = () => {
         <div className="contextual-menu-demo-triggers">
           <ContextualMenu.Root handle={imageMenu}>
             <ContextualMenu.Trigger
+              ref={trigger}
               handle={imageMenu}
               id="contextual-menu-parts-use-create-contextual-menu-handle-trigger"
               render={<Button.Root variant="bordered" />}
@@ -787,12 +831,13 @@ export const ContextualMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What the menu is about (a photo’s thumbnail, a message): a press opens
-        it (on touch, at touch down), lifting it above the blurred page.
+        What the menu is about (a photo’s thumbnail, a message): a right click
+        or a held press opens it, lifting it above the blurred page; a press is
+        the trigger’s own (opening the photo).
       </li>
       <li>
-        <code>openOn=&quot;secondaryClick&quot;</code>: a held press or a right
-        click opens it; a press is the trigger’s own (opening the photo).
+        <code>openOn=&quot;click&quot;</code>: a press opens it too (on touch,
+        at touch down).
       </li>
       <li>
         Renders a <code>button</code> (in a wrapper that keeps its place while

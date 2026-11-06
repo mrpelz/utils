@@ -68,7 +68,10 @@ export type ViewportProviderProps = {
   /**
    * The app's screen, when it isn't the window (e.g. a device's frame in a
    * page): the visual viewport within it (the keyboard's inset over its
-   * bottom), its custom properties on it.
+   * layers' bottom: measured against their containing block, the window
+   * unless the screen or an ancestor contains them, read anew as it
+   * resizes, e.g. within an app's content layer resized above the
+   * keyboard), its custom properties on it.
    * @default the provided portal container (`PortalContainerContext`), or
    * none: the window
    */

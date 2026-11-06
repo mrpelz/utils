@@ -198,6 +198,7 @@ const placeBar = (close?: ReactNode) => (
     <Toolbar.Leading>
       <Toolbar.Button
         aria-label="Share"
+        disabled={false}
         shape="circle"
       >
         <Button.Icon>
@@ -211,6 +212,7 @@ const placeBar = (close?: ReactNode) => (
     <Toolbar.Trailing>
       <Toolbar.Button
         aria-label="More"
+        disabled={false}
         shape="circle"
       >
         <Button.Icon>

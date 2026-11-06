@@ -14,12 +14,18 @@ import {
   PointerEvent,
   ReactElement,
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from 'react';
 
 import { cn, useForwardedRef, withStyle } from '../utils/main.js';
+import {
+  useAnchorSize,
+  useChildViewportScope,
+  ViewportScopeContext,
+} from '../viewport/main.js';
 import type {
   NavigationBackEventDetails,
   NavigationBackProps,
@@ -459,6 +465,44 @@ const Page: FunctionComponent<NavigationPageProps> = ({ children }) => (
   <>{children}</>
 );
 
+/**
+ * A frame's element: its scope's anchors' sizes at its block edges (as the
+ * content layer's, see `Viewport.Content`), for what's in it (e.g. a map's
+ * controls, kept clear of its island).
+ */
+const FrameElement: FunctionComponent<ComponentProps<'div'>> = ({
+  style,
+  ...props
+}) => {
+  const start = useAnchorSize('block-start');
+  const end = useAnchorSize('block-end');
+
+  return (
+    <div
+      {...props}
+      style={withStyle(
+        {
+          '--uikit-viewport-anchor-block-end': `${String(end)}px`,
+          '--uikit-viewport-anchor-block-start': `${String(start)}px`,
+        },
+        style,
+      )}
+    />
+  );
+};
+
+/**
+ * A page's frame (its element, see `Stack`), its page in a scope of its
+ * own (its anchors, e.g. its bar: its edge effect and its paddings' room
+ * its own, not its stack's other pages' while they're hidden; the outer
+ * scope's anchors counting too).
+ */
+const Frame: FunctionComponent<ComponentProps<'div'>> = (props) => (
+  <ViewportScopeContext.Provider value={useChildViewportScope()}>
+    <FrameElement {...props} />
+  </ViewportScopeContext.Provider>
+);
+
 /** Whether a stack's child is an instant page (see `Page`). */
 const isInstant = (page: ReactElement | undefined) =>
   page?.type === Page && (page.props as NavigationPageProps).instant === true;
@@ -619,6 +663,58 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
         .map(({ page }) => page),
     ];
 
+    // Gone (popped, or replaced): lingering, hidden and inert, until the
+    // browser is idle and the stack at rest, unmounted then (a large page's
+    // unmounting costly: not as the stack comes to rest, nor mid-slide).
+    // Pushed again meanwhile, a page anew (its frame's key's generation
+    // the next: mounted afresh, not shown as it was left).
+    const shownKeys = shown.map((page) => String(page.key));
+    const [lastShown, setLastShown] = useState(shown);
+    const [lingering, setLingering] = useState<readonly ReactElement[]>([]);
+    const [generations, setGenerations] = useState<ReadonlyMap<string, number>>(
+      () => new Map(),
+    );
+    if (
+      !sameKeys(
+        lastShown.map((page) => String(page.key)),
+        shownKeys,
+      )
+    ) {
+      const isShown = (page: ReactElement) =>
+        shownKeys.includes(String(page.key));
+      const returning = lingering.filter((page) => isShown(page));
+      const kept = lingering.filter((page) => !isShown(page));
+      const dropped = lastShown.filter(
+        (page) =>
+          !isShown(page) && kept.every((other) => other.key !== page.key),
+      );
+      setLastShown(shown);
+      setLingering([...kept, ...dropped]);
+      if (returning.length > 0) {
+        const next = new Map(generations);
+        for (const page of returning) {
+          const key = String(page.key);
+          next.set(key, (next.get(key) ?? 0) + 1);
+        }
+        setGenerations(next);
+      }
+    }
+
+    useEffect(() => {
+      if (lingering.length === 0 || transition) return undefined;
+      const unmount = () => setLingering([]);
+      if (typeof requestIdleCallback === 'function') {
+        const id = requestIdleCallback(unmount, { timeout: 2000 });
+        return () => cancelIdleCallback(id);
+      }
+      // (Safari: no idle callbacks; shortly after.)
+      const id = setTimeout(unmount, 500);
+      return () => clearTimeout(id);
+    }, [lingering, transition]);
+
+    const frameKey = (key: string) =>
+      `${key}\0${String(generations.get(key) ?? 0)}`;
+
     return (
       <div
         ref={ref}
@@ -626,10 +722,14 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
         {...props}
         className={cn('uikit-navigation-stack', className)}
       >
-        {shown.map((page, index) => {
+        {[...shown, ...lingering].map((page, index) => {
           const key = String(page.key);
-          const role = roleOf(key, index, shown.length);
-          const isInert = role !== 'current' && key !== pressable;
+          const isLingering = index >= shown.length;
+          const role = isLingering
+            ? 'hidden'
+            : roleOf(key, index, shown.length);
+          const isInert =
+            isLingering || (role !== 'current' && key !== pressable);
           const departingIndex = departing.findIndex(
             (entry) => entry.key === key,
           );
@@ -638,8 +738,8 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
             // (`top`) and the one under it (`under`) move by the progress (0:
             // the upper shown), their headers with them. At rest, none of it
             // applies (no transforms, which would isolate glass' blending).
-            <div
-              key={key}
+            <Frame
+              key={frameKey(key)}
               aria-hidden={isInert ? true : undefined}
               className="uikit-navigation-frame"
               data-navigation-departing={departingIndex === -1 ? undefined : ''}
@@ -663,7 +763,7 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
               }
             >
               {page}
-            </div>
+            </Frame>
           );
         })}
       </div>

@@ -78,7 +78,8 @@ export type {
 //     closes it alone. Items are inset 8px from the popup's edge.
 //   - `regular`: 36px items with 15px labels; submenus open beside their
 //     trigger, which shows the selection while open.
-// - Popups are at least 238px wide.
+// - Popups are at least 238px wide, and at most 280px (compact) or 320px
+//   (regular): longer labels wrap.
 // - A checkmark column is reserved in all items of a popup containing
 //   checkbox or radio items.
 // - Highlighted items and quick actions (pointer, keyboard) show the
@@ -989,7 +990,7 @@ const pressTrigger = (trigger: HTMLElement) => {
  * Opens a menu by its trigger (`trigger`) as Base UI does on a mouse down;
  * a touch (`pointerId`) then drags over its items (see `dragOverItems`).
  */
-const openByTrigger = (trigger: HTMLElement, pointerId?: number) => {
+const openByTrigger = (trigger: HTMLElement, pointerId?: number): void => {
   const document = trigger.ownerDocument;
   if (trigger.getAttribute('aria-expanded') !== 'true') pressTrigger(trigger);
   if (pointerId === undefined) return;
@@ -1672,6 +1673,9 @@ export const useCreateMenuHandle = <
 
 /** The menu's trigger (also of `ContextualMenu`). */
 export { Trigger as MenuTrigger };
+
+/** Opens a menu by its trigger, as a mouse down does (`ContextualMenu`'s). */
+export { openByTrigger as openMenuByTrigger };
 
 /**
  * Its portal (Base UI's): no box of its own (\`display: contents\`), so

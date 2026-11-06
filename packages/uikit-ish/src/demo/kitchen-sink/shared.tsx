@@ -70,8 +70,9 @@ export const PushContext = createContext<(key: string) => void>(
 export const usePush = (): ((key: string) => void) => useContext(PushContext);
 
 /**
- * A section of things side by side (wrapping), on the rows' background,
- * titled; `stacked`, one below another (e.g. bars).
+ * A section of things side by side (wrapping), on a stage (a background of
+ * its own: shown, not placed in a list), titled; `stacked`, one below
+ * another (e.g. bars).
  */
 export const Showcase: FunctionComponent<{
   children: ReactNode;
@@ -84,13 +85,11 @@ export const Showcase: FunctionComponent<{
         <List.Title>{title}</List.Title>
       </List.Header>
     )}
-    <List.Block strong>
-      <div
-        className={isStacked ? 'kitchen-sink-stacked' : 'kitchen-sink-showcase'}
-      >
-        {children}
-      </div>
-    </List.Block>
+    <div
+      className={`kitchen-sink-stage ${isStacked ? 'kitchen-sink-stacked' : 'kitchen-sink-showcase'}`}
+    >
+      {children}
+    </div>
   </List.Section>
 );
 

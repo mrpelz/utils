@@ -21,6 +21,28 @@
     background-color: var(--color-ui-system-grouped-background);
   }
 
+  /* A screen's layers' box (see main.tsx's `Provider`): fixed, filling
+     their containing block (the window, or an ancestor containing them),
+     unseen. */
+  .uikit-viewport-box {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  /* Its keyboard's inset changed by that box resizing (see main.tsx): its
+     layers following it at once (the box moving as the keyboard does). */
+  [data-uikit-viewport-box-driven]
+    :is(
+      .uikit-viewport-anchor,
+      .uikit-viewport-content,
+      .uikit-viewport-overscroll,
+      .uikit-viewport-keyboard-accessory
+    ) {
+    --uikit-viewport-keyboard-transition: 0s;
+  }
+
   /* The content's edge (see padding.tsx): room for the anchors, as high
      as they are, and the content margin (the library's gap between content and its container's edge, by token; a
      `margin` prop, inline, overrides it). None before a large title (it

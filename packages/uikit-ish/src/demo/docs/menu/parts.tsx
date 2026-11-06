@@ -3523,7 +3523,8 @@ export const MenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The menu itself: glass (the medium glass), at least 238px wide, scaling
+        The menu itself: glass (the medium glass), at least 238px wide and at
+        most 280px (compact) or 320px (regular), longer labels wrapping; scaling
         in from its trigger.
       </li>
       <li>

@@ -141,9 +141,13 @@
     }
   }
 
+  /* (Its color, as a disabled item's: translucent, as the medium glass'
+     disabled gray blended (#BFBFBF multiplied light, #404040 added dark)
+     would be, blended or not: WebKit drew it blended only where a moving
+     highlight was, see the separator.) */
   .uikit-menu-group-label {
     padding: var(--uikit-menu-title-padding);
-    color: var(--uikit-glass-content-disabled);
+    color: light-dark(rgb(0 0 0 / 25%), rgb(255 255 255 / 25%));
     font-size: var(--uikit-menu-title-size);
     font-variation-settings: 'wght' 510;
     font-weight: round(down, 510, 100);
@@ -193,9 +197,10 @@
       }
     }
 
+    /* (Translucent: see the group label.) */
     &[data-disabled] {
-      --uikit-glass-content: var(--uikit-glass-content-disabled);
-      --uikit-glass-content-secondary: var(--uikit-glass-content-disabled);
+      --uikit-glass-content: light-dark(rgb(0 0 0 / 25%), rgb(255 255 255 / 25%));
+      --uikit-glass-content-secondary: light-dark(rgb(0 0 0 / 25%), rgb(255 255 255 / 25%));
     }
 
     &[data-destructive]:not([data-disabled]) {
@@ -260,6 +265,9 @@
     position: relative;
     display: flex;
     min-width: 238px;
+
+    /* At most its size's width (see Size): longer labels wrapping. */
+    max-width: min(var(--uikit-menu-max-width), var(--available-width, 100vw));
     max-height: var(--available-height);
     box-sizing: border-box;
     flex-direction: column;
@@ -277,6 +285,7 @@
     /* Its size's metrics (see Size); compact submenus' chevrons turn down
        while open. */
     &[data-size='compact'] {
+      --uikit-menu-max-width: 280px;
       --uikit-menu-inset: 8px;
       --uikit-menu-item-padding-block: 10px;
       --uikit-menu-icon-size: var(--font-ui-body-size);
@@ -298,6 +307,7 @@
     }
 
     &[data-size='regular'] {
+      --uikit-menu-max-width: 320px;
       --uikit-menu-inset: 8px;
       --uikit-menu-item-padding-block: 9px;
       --uikit-menu-icon-size: var(--font-ui-subheadline-size);
@@ -408,8 +418,9 @@
       }
     }
 
+    /* (Translucent: see the group label.) */
     &[data-disabled] {
-      --uikit-glass-content: var(--uikit-glass-content-disabled);
+      --uikit-glass-content: light-dark(rgb(0 0 0 / 25%), rgb(255 255 255 / 25%));
     }
 
     &[data-destructive]:not([data-disabled]) {

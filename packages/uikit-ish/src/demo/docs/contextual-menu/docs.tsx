@@ -71,14 +71,13 @@ export const contextualMenuTriggerRows: readonly PropRow[] = [
   [
     'openOn',
     union('click', 'secondaryClick'),
-    code(union('click')),
+    code(union('secondaryClick')),
     <>
-      What opens the menu: a press (on touch, as the finger goes down; drag on
-      to an item to choose it), or a secondary click (a right click, a touch
-      held), a click then being the trigger’s own (e.g. opening the photo). On
-      touch, a held press also selects the trigger’s text (and shows the
-      browser’s text menu): unless it should stay selectable, turn that off on
-      the trigger (
+      What opens the menu: a secondary click (a right click, a touch held; drag
+      on to an item to choose it), a click being the trigger’s own (e.g. opening
+      the photo), or a press too (on touch, as the finger goes down). On touch,
+      a held press also selects the trigger’s text (and shows the browser’s text
+      menu): unless it should stay selectable, turn that off on the trigger (
       <PartLink
         component="viewport"
         part="useTextActionsPrevention"

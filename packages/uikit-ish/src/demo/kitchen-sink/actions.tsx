@@ -60,13 +60,17 @@ const ButtonContent: FunctionComponent = () => (
         {sizes.map((size) => (
           <Button.Root
             key={size}
+            disabled={false}
             size={size}
             variant={variant}
           >
             <Button.Label>{size}</Button.Label>
           </Button.Root>
         ))}
-        <Button.Root variant={variant}>
+        <Button.Root
+          disabled={false}
+          variant={variant}
+        >
           <Button.Icon>
             <Symbol icon={sfPlus} />
           </Button.Icon>
@@ -74,6 +78,7 @@ const ButtonContent: FunctionComponent = () => (
         </Button.Root>
         <Button.Root
           aria-label="Add"
+          disabled={false}
           shape="circle"
           variant={variant}
         >
@@ -82,6 +87,7 @@ const ButtonContent: FunctionComponent = () => (
           </Button.Icon>
         </Button.Root>
         <Button.Root
+          disabled={false}
           shape="roundedRectangle"
           variant={variant}
         >
@@ -89,6 +95,7 @@ const ButtonContent: FunctionComponent = () => (
         </Button.Root>
         <Button.Root
           destructive
+          disabled={false}
           variant={variant}
         >
           <Button.Label>Delete</Button.Label>
@@ -109,6 +116,7 @@ const ButtonContent: FunctionComponent = () => (
       ].map((tint) => (
         <Button.Root
           key={tint}
+          disabled={false}
           tint={tint}
           variant="bordered-prominent"
         >
@@ -116,6 +124,7 @@ const ButtonContent: FunctionComponent = () => (
         </Button.Root>
       ))}
       <Button.Root
+        disabled={false}
         textColor="#000"
         tint="var(--color-ui-system-yellow)"
         variant="bordered-prominent"
@@ -123,6 +132,7 @@ const ButtonContent: FunctionComponent = () => (
         <Button.Label>Dark Text</Button.Label>
       </Button.Root>
       <Button.Root
+        disabled={false}
         tint="var(--color-ui-system-teal)"
         variant="glass-prominent"
       >
@@ -135,6 +145,7 @@ const ButtonContent: FunctionComponent = () => (
     >
       <Button.Root
         fill
+        disabled={false}
         size="large"
         variant="bordered-prominent"
       >
@@ -142,6 +153,7 @@ const ButtonContent: FunctionComponent = () => (
       </Button.Root>
       <Button.Root
         fill
+        disabled={false}
         size="large"
         variant="bordered"
       >
@@ -149,7 +161,10 @@ const ButtonContent: FunctionComponent = () => (
       </Button.Root>
     </Showcase>
     <Showcase title="Icons and Labels">
-      <Button.Root variant="bordered-secondary">
+      <Button.Root
+        disabled={false}
+        variant="bordered-secondary"
+      >
         <Button.Icon>
           <Symbol icon={sfPerson2Fill} />
         </Button.Icon>
@@ -158,7 +173,10 @@ const ButtonContent: FunctionComponent = () => (
           <Symbol icon={sfChevronRight} />
         </Button.Icon>
       </Button.Root>
-      <Button.Root variant="bordered">
+      <Button.Root
+        disabled={false}
+        variant="bordered"
+      >
         <Button.Label>Sort</Button.Label>
         <Button.Icon>
           <Symbol icon={sfChevronUpChevronDown} />
@@ -174,6 +192,7 @@ const ButtonContent: FunctionComponent = () => (
           <Button.Root
             key={context}
             context={context}
+            disabled={false}
             variant="glass"
           >
             <Button.Label>{context}</Button.Label>
@@ -182,6 +201,7 @@ const ButtonContent: FunctionComponent = () => (
         <Button.Root
           aria-label="Share"
           context="adaptive"
+          disabled={false}
           shape="circle"
           variant="glass"
         >
@@ -191,6 +211,7 @@ const ButtonContent: FunctionComponent = () => (
         </Button.Root>
         <Button.Root
           context="adaptive"
+          disabled={false}
           variant="glass-prominent"
         >
           <Button.Label>Prominent</Button.Label>
@@ -407,7 +428,12 @@ const MenuTrailing: FunctionComponent = () => (
 const MenuContent: FunctionComponent = () => (
   <List.Root>
     <Showcase title="Everything in a Menu">
-      <MenuButton label="Regular">{fullMenu}</MenuButton>
+      <MenuButton
+        label="Regular"
+        size="regular"
+      >
+        {fullMenu}
+      </MenuButton>
       <MenuButton
         label="Compact"
         size="compact"
@@ -521,9 +547,12 @@ const ContextualMenuContent: FunctionComponent = () => (
         label="Photo, without a preview"
       />
     </Showcase>
-    <Showcase title="A Button">
+    <Showcase title="A Button (Pressed, Held, or Right-Clicked)">
       <ContextualMenu.Root>
-        <ContextualMenu.Trigger render={<Button.Root variant="bordered" />}>
+        <ContextualMenu.Trigger
+          openOn="click"
+          render={<Button.Root variant="bordered" />}
+        >
           <Button.Icon>
             <Symbol icon={sfPhoto} />
           </Button.Icon>
@@ -633,10 +662,41 @@ const ElementMenu: FunctionComponent<{ size?: 'compact' | 'regular' }> = ({
           <EditMenu.Popup>
             <EditMenu.Item>Copy</EditMenu.Item>
             <EditMenu.Item>Share…</EditMenu.Item>
-            <EditMenu.Item>Look Up</EditMenu.Item>
-            <EditMenu.Item>Translate</EditMenu.Item>
-            <EditMenu.Item>Add to Album</EditMenu.Item>
             <EditMenu.Item destructive>Delete</EditMenu.Item>
+            {/* (Its menu of the size given: compact, its submenu over
+                its trigger; regular, beside it.) */}
+            <EditMenu.SubmenuRoot>
+              <EditMenu.More />
+              <EditMenu.Portal>
+                <Menu.Positioner>
+                  <Menu.Popup>
+                    <Menu.Item>
+                      <Menu.Label>Look Up</Menu.Label>
+                    </Menu.Item>
+                    <Menu.Item>
+                      <Menu.Label>Translate</Menu.Label>
+                    </Menu.Item>
+                    <Menu.SubmenuRoot>
+                      <Menu.SubmenuTrigger>
+                        <Menu.Label>Add to Album</Menu.Label>
+                      </Menu.SubmenuTrigger>
+                      <Menu.Portal>
+                        <Menu.Positioner>
+                          <Menu.Popup>
+                            <Menu.Item>
+                              <Menu.Label>Holidays</Menu.Label>
+                            </Menu.Item>
+                            <Menu.Item>
+                              <Menu.Label>Family</Menu.Label>
+                            </Menu.Item>
+                          </Menu.Popup>
+                        </Menu.Positioner>
+                      </Menu.Portal>
+                    </Menu.SubmenuRoot>
+                  </Menu.Popup>
+                </Menu.Positioner>
+              </EditMenu.Portal>
+            </EditMenu.SubmenuRoot>
           </EditMenu.Popup>
         </EditMenu.Positioner>
       </EditMenu.Portal>
@@ -652,7 +712,7 @@ const EditMenuContent: FunctionComponent = () => (
     >
       <SelectionMenu />
     </Showcase>
-    <Showcase title="At an Element (Pressed): Regular, Compact">
+    <Showcase title="At an Element (Pressed): Its More Menu Regular, Compact">
       <ElementMenu />
       <ElementMenu size="compact" />
     </Showcase>
@@ -687,6 +747,7 @@ const activityContent = (close: ReactNode) => (
         <ActivityView.Title>Harbor Walk</ActivityView.Title>
         <ActivityView.Subtitle>Photo · 2.4 MB</ActivityView.Subtitle>
         <Button.Root
+          disabled={false}
           size="small"
           variant="bordered-secondary"
         >

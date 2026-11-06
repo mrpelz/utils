@@ -313,6 +313,7 @@ const BadgeTrailing: FunctionComponent = () => (
   <Toolbar.Trailing>
     <Toolbar.Button
       aria-label="Mail, 12 unread"
+      disabled={false}
       shape="circle"
     >
       <Button.Icon>
@@ -367,6 +368,7 @@ const BadgeContent: FunctionComponent = () => (
         <Button.Root
           key={icon.sourceName ?? index}
           aria-label={`${counts[index] ?? ''} new`}
+          disabled={false}
           shape="circle"
           variant={index === 0 ? 'borderless' : 'bordered'}
         >
@@ -379,6 +381,7 @@ const BadgeContent: FunctionComponent = () => (
       ))}
       <Button.Root
         aria-label="New"
+        disabled={false}
         shape="circle"
         variant="glass"
       >

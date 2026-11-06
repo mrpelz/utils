@@ -177,9 +177,17 @@ export const viewportProviderRows: readonly PropRow[] = [
       The app’s screen, when it isn’t the window (e.g. a device’s frame in a
       page, as here): the visual viewport within it (what the keyboard covers of
       its bottom, how far its top is scrolled away while the keyboard shows),
-      its custom properties set on it, not the root element. By default, the
-      portal container provided by <code>PortalContainerContext</code> (the
-      app’s screen for its popups, too); <code>null</code>: the window.
+      its custom properties set on it, not the root element. Measured against
+      its layers’ containing block (the window, unless the screen or an ancestor
+      contains them, e.g. a{' '}
+      <PartLink
+        component="layout"
+        part="Layout.Column"
+      />
+      ), read anew as that resizes (e.g. within an app’s content layer, resized
+      above the keyboard: then, nothing covered). By default, the portal
+      container provided by <code>PortalContainerContext</code> (the app’s
+      screen for its popups, too); <code>null</code>: the window.
     </>,
   ],
   [
@@ -721,7 +729,12 @@ export const useSizeClassReturnRows: readonly PropRow[] = [
     <>
       The window’s horizontal size class: <code>regular</code> from 768px (a
       tablet’s window), <code>compact</code> below (a phone’s); before hydration
-      (server rendering), <code>compact</code>.
+      (server rendering), <code>compact</code>. Held while iPadOS resizes the
+      window for its app switcher’s snapshots (still shown, each resize
+      announced by an orientation change that contradicts the window’s shape;
+      its layout switching would remount it), until the orientation matches the
+      window again or the page is shown anew. A real rotation or resize (e.g.
+      Split View) changes it.
     </>,
   ],
 ];

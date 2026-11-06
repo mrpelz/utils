@@ -277,6 +277,12 @@ export const NavigationOverview: FunctionComponent = () => (
         swiped back while it’s on top.
       </li>
       <li>
+        A page gone (popped, or replaced) stays mounted, hidden and inert, until
+        the browser is idle and the stack at rest (Safari: shortly after): a
+        large page’s unmounting doesn’t stall the stack as it comes to rest.
+        Pushed again meanwhile, it’s mounted afresh.
+      </li>
+      <li>
         A page’s <a href={publicUrl('header')}>Header</a> moves with its page,
         its bar and title too; the back button, in each pushed page’s bar, stays
         put between pushed pages (a persistent item, see{' '}

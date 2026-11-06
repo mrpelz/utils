@@ -184,6 +184,7 @@ const edgeScreen = (
               <Toolbar.Leading>
                 <Toolbar.Button
                   aria-label="Folders"
+                  disabled={false}
                   shape="circle"
                 >
                   <Button.Icon>
@@ -194,6 +195,7 @@ const edgeScreen = (
               <Toolbar.Trailing>
                 <Toolbar.Button
                   aria-label="Compose"
+                  disabled={false}
                   shape="circle"
                 >
                   <Button.Icon>
@@ -332,6 +334,7 @@ const AnchorsScreen: FunctionComponent = () => {
               <Toolbar.Trailing>
                 <Toolbar.Button
                   aria-label="Compose"
+                  disabled={false}
                   shape="circle"
                 >
                   <Button.Icon>
@@ -840,9 +843,6 @@ const screens = [
   ['Edges', [['viewport/tint', 'A Tinted Edge (Recording)', RecordingScreen]]],
 ] as const;
 
-/** Its pages shown at once (see `isInstant`): their overscroll's. */
-const instantKeys = new Set<string>(['viewport/pages', 'viewport/refresh']);
-
 const edges = [
   ['viewport/soft', 'Soft', 'soft', undefined],
   ['viewport/hard', 'Hard', 'hard', undefined],
@@ -888,14 +888,7 @@ export const viewportPages: SinkPages = {
   viewport: { Content: ViewportContent, title: 'Viewport' },
   ...Object.fromEntries(
     screens.flatMap(([, entries]) =>
-      entries.map(([key, title, Content]) => [
-        key,
-        {
-          ...screenPage(title, Content),
-          // (Pulled past their ends: not slid in or out, nor swiped back.)
-          isInstant: instantKeys.has(key),
-        },
-      ]),
+      entries.map(([key, title, Content]) => [key, screenPage(title, Content)]),
     ),
   ),
   ...Object.fromEntries(

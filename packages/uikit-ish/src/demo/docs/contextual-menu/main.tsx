@@ -7,11 +7,13 @@ import {
   Button,
   ContextualMenu,
   Symbol,
+  useTextActionsPrevention,
   Viewport,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
+import { useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { sfPhoto, sfSquareAndArrowUp, sfTrash } from '../../tooling/icons.js';
 import {
@@ -80,6 +82,13 @@ export const ContextualMenuDemo: FunctionComponent = () => {
       external: externalDestructiveItem,
       title: 'item (delete)',
     });
+  // Opened by a held press: selecting no text (no browser text menu).
+  const trigger = useLabelledRef<HTMLButtonElement>(
+    'trigger',
+    'HTMLButtonElement',
+  );
+  const isHeld = propsTrigger.openOn !== 'click';
+  useTextActionsPrevention(trigger, isHeld);
 
   return (
     <Component
@@ -88,6 +97,7 @@ export const ContextualMenuDemo: FunctionComponent = () => {
       id={id}
       log={log}
       screen="centered"
+      setup={isHeld ? 'useTextActionsPrevention(trigger);' : undefined}
       stage="phone"
       title="Contextual Menu"
       controls={[
@@ -117,6 +127,7 @@ export const ContextualMenuDemo: FunctionComponent = () => {
           {...propsRoot}
         >
           <ContextualMenu.Trigger
+            ref={trigger}
             {...propsTrigger}
             render={<Button.Root variant="bordered" />}
           >

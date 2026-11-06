@@ -93,6 +93,25 @@
         ) {
         padding-inline-start: var(--uikit-layout-inset-start);
       }
+
+      /* A content layer in it (e.g. a screen's own provider's): its
+         content clear of it too, unless its child scrolls on its own (a
+         page: clearing it itself). */
+      & .uikit-viewport-content:not(
+          :has(
+              > :is(
+                  .uikit-page-root,
+                  .uikit-header-root,
+                  .uikit-layout-root,
+                  .uikit-navigation-root
+                )
+            )
+        ) {
+        padding-inline-start: max(
+          var(--uikit-viewport-safe-left),
+          var(--uikit-layout-inset-start)
+        );
+      }
     }
 
     /* The hairline between columns. */

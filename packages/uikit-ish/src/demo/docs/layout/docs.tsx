@@ -84,7 +84,7 @@ export const layoutColumnRows: readonly PropRow[] = [
     'clearFloating',
     'boolean',
     code('false'),
-    'Next to a floating column: its pages’ content inset by the floating column’s size, their backgrounds (and bars’ edges) running underneath it.',
+    'Next to a floating column: its pages’ content (and a Viewport.Content’s) inset by the floating column’s size, their backgrounds (and bars’ edges) running underneath it.',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
