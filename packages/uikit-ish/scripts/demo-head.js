@@ -42,8 +42,10 @@ export const meta = {
  * Its web app manifest, unless it shows an app of its own: a demo raw
  * (`#id=…&raw=true` on a demos' page, see
  * src/demo/tooling/frame/component.tsx), the kitchen sink
- * (`/kitchen-sink`, see src/demo/kitchen-sink/main.tsx), or the iOS 27
- * blur test page's guide (`/ios27-blur`, see src/demo/ios27-blur/main.tsx;
+ * (`/kitchen-sink`, see src/demo/kitchen-sink/main.tsx), the iOS 27
+ * status bar demo (`/ios27-status-bar`, see
+ * src/demo/ios27-status-bar/main.tsx), or the iOS 27 blur test page's guide
+ * (`/ios27-blur`, see src/demo/ios27-blur/main.tsx;
  * each of its rounds, `/ios27-blur/<style>/…`, has a manifest of its own,
  * `assets/ios27-blur-<style>.webmanifest`: its scope its pages, so its
  * pages loaded stay in its app, with its status bar style). Added
@@ -78,12 +80,32 @@ export const manifest = (publicPath) => `<script>(() => {
       .querySelector('meta[name=apple-mobile-web-app-status-bar-style]')
       ?.setAttribute('content', blurStatus);
   }
+  // (The iOS 27 status bar demo, see src/demo/ios27-status-bar/detect.ts:
+  // on iOS 27 or later, by Safari's version, the OS's frozen since iOS 26,
+  // an iPad's as a Mac's with touch, below the status bar, \`default\`,
+  // the document marked.)
+  const isStatusBarDemo = isAt('/ios27-status-bar');
+  if (isStatusBarDemo) {
+    const agent = navigator.userAgent;
+    const isIos =
+      ['iPhone', 'iPad', 'iPod'].some((device) => agent.includes(device)) ||
+      (agent.includes('Macintosh') && navigator.maxTouchPoints > 1);
+    const version = Number(agent.split('Version/')[1]?.split('.')[0]);
+    if (isIos && version >= 27) {
+      document.documentElement.setAttribute('data-ios27', '');
+      document
+        .querySelector('meta[name=apple-mobile-web-app-status-bar-style]')
+        ?.setAttribute('content', 'default');
+    }
+  }
   const name =
     option('raw') === true && typeof id === 'string' && isAt('/all')
       ? id
       : isAt('/kitchen-sink')
         ? 'Kitchen Sink'
-        : blurAt !== -1
+        : isStatusBarDemo
+          ? 'iOS 27 Status Bar'
+          : blurAt !== -1
           ? blurStatus === undefined
             ? 'iOS 27 Blur'
             : 'Blur Test'

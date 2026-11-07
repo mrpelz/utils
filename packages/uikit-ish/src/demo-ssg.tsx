@@ -105,6 +105,7 @@ await walk(KITCHEN_SINK_PATH);
 // (The iOS 27 blur test page: its own, and each variant's, see
 // demo/ios27-blur/main.tsx.)
 await walk('ios27-blur');
+await walk('ios27-status-bar');
 await Promise.all(ios27BlurPaths.map((location) => walk(location)));
 
 console.log(

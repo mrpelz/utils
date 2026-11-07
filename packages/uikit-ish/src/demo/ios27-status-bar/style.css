@@ -1,0 +1,18 @@
+/* The iOS 27 status bar demo (see main.tsx). */
+@layer demo {
+  /* A row's label and value, apart. */
+  .ios27-status-bar-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .ios27-status-bar-value {
+    color: var(--color-ui-secondary-label);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ios27-status-bar-text {
+    margin: 0 0 8px;
+  }
+}
