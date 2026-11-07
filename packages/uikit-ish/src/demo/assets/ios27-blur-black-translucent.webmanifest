@@ -1,7 +1,7 @@
 {
-  "name": "Blur black-translucent",
-  "short_name": "Blur black-translucent",
-  "description": "iOS 27 blur test, round with the “black-translucent” status bar style.",
+  "name": "Blur Test",
+  "short_name": "Blur Test",
+  "description": "iOS 27 blur test.",
   "icons": [
     {
       "src": "manifest-icon-192.maskable.png",

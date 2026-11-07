@@ -34,7 +34,6 @@ import {
   isVariant,
   siteStatus,
   type Status,
-  statuses,
   type Strip,
   titleOf,
   type Variant,
@@ -296,12 +295,6 @@ const App: FunctionComponent<{
                     (key) => [key, variants[key].label] as const,
                   )}
                   onChange={(next) => go(status ?? siteStatus, next)}
-                />
-                <Choice
-                  label="Status bar (add anew)"
-                  options={statuses.map((key) => [key, key] as const)}
-                  value={status ?? siteStatus}
-                  onChange={(next) => go(next, variant)}
                 />
                 <Choice
                   label="Edge effect"

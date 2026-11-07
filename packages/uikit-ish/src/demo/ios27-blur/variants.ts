@@ -4,7 +4,10 @@ import { publicUrl } from '../tooling/public-url.js';
 // main.tsx): `/ios27-blur/<style>/<variant>`, and a round's own pages
 // (`start`, `done`, see run.tsx).
 
-export const statuses = ['black-translucent', 'default', 'black'] as const;
+// (Its status bar style: `black-translucent` alone, the page under the
+// status bar, its color the page's to match; `default` and `black` put an
+// opaque bar of the system's above the page, its color never the app's.)
+export const statuses = ['black-translucent'] as const;
 
 export type Status = (typeof statuses)[number];
 
@@ -103,4 +106,4 @@ export const go = (status: Status, page: Step | Variant): void => {
 
 /** Its title (the Home Screen app's name, see scripts/demo-head.js). */
 export const titleOf = (status: Status | undefined): string =>
-  status === undefined ? 'iOS 27 Blur' : `Blur ${status}`;
+  status === undefined ? 'iOS 27 Blur' : 'Blur Test';

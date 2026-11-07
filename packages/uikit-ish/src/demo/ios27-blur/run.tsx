@@ -1,10 +1,10 @@
-// The test page's guided rounds (see main.tsx), for a tester who isn't a
-// developer: the guide (`/ios27-blur`, in Safari), each round's setup
-// (`/ios27-blur/<style>/start`: adding it to the Home Screen as its own
-// app, as iOS reads its status bar style then), the round in the app (its
-// variants' pages loaded one after another, two questions on each), its
-// end (`/ios27-blur/<style>/done`: its results copied). Its progress kept
-// in local storage (each Home Screen app's own).
+// The test page's guided round (see main.tsx), for a tester who isn't a
+// developer: the guide (`/ios27-blur`, in Safari), its setup
+// (`/ios27-blur/<style>/start`: adding it to the Home Screen as an app of
+// its own, its manifest's), the round in the app (its variants' pages
+// loaded one after another, two questions on each), its end
+// (`/ios27-blur/<style>/done`: its results copied). Its progress kept in
+// local storage (the Home Screen app's own).
 
 import { FunctionComponent, ReactNode, useEffect, useState } from 'react';
 
@@ -20,10 +20,8 @@ import {
   variantKeys,
 } from './variants.js';
 
-/** The rounds, in order: the most promising style first. */
-const rounds: readonly Status[] = ['default', 'black-translucent', 'black'];
-
-const roundOf = (status: Status) => rounds.indexOf(status) + 1;
+/** The round's status bar style (see variants.ts). */
+const round: Status = 'black-translucent';
 
 const runKey = 'ios27-blur-run';
 
@@ -164,7 +162,7 @@ export const RunQuestions: FunctionComponent<{
             )
           }
         >
-          {index + 1 === total ? 'Finish the round' : 'Next screen'}
+          {index + 1 === total ? 'Finish the test' : 'Next screen'}
         </button>
         <button
           type="button"
@@ -213,7 +211,7 @@ const PageLink: FunctionComponent<{ children: ReactNode; path: string }> = ({
   </a>
 );
 
-/** `/ios27-blur`: what it's for, and the rounds (in Safari). */
+/** `/ios27-blur`: what it's for, and how (in Safari). */
 export const Guide: FunctionComponent = () => (
   <TextPage>
     <h1>Testing the blur at the top of the screen</h1>
@@ -221,11 +219,11 @@ export const Guide: FunctionComponent = () => (
       Thank you for helping! On iOS 27, web apps added to the Home Screen show a
       blurry band at the top of the screen, below the clock. This test tries a
       few ways to get rid of it, and needs your eyes to tell which ones work. It
-      takes about 15 minutes.
+      takes about 5 minutes.
     </p>
     <p>
       You need an iPhone with iOS 27, and Safari. Keep the phone upright
-      (portrait), and don’t switch between Light and Dark Mode during a round.
+      (portrait), and don’t switch between Light and Dark Mode during the test.
     </p>
 
     <h2>Before you start</h2>
@@ -237,56 +235,37 @@ export const Guide: FunctionComponent = () => (
 
     <h2>How it works</h2>
     <p>
-      There are three rounds. Each round is its own little app on your Home
-      Screen, because iOS only reads one of the settings we’re testing at the
-      moment an app is added. So for each round you’ll add an app, open it, and
-      go through its screens.
+      The test runs as a little app on your Home Screen, because the blur only
+      shows up there. You’ll add the app, open it, and go through its screens.
     </p>
     <p>
-      In each round, the app shows you {variantKeys.length} screens, one after
-      another. Each one has a title bar and colorful stripes underneath. On each
-      screen you look at the top of the screen and answer two simple questions.
-      You don’t need to understand what the screens test: just describe what you
-      see. “Not sure” is a fine answer too.
+      The app shows you {variantKeys.length} screens, one after another. Each
+      one has a title bar and colorful stripes underneath. On each screen you
+      look at the top of the screen and answer two simple questions. You don’t
+      need to understand what the screens test: just describe what you see. “Not
+      sure” is a fine answer too.
     </p>
-
-    <h2>The rounds</h2>
-    <p>Do them in this order. Each link opens that round’s setup page.</p>
-    <ol>
-      {rounds.map((status) => (
-        <li key={status}>
-          <PageLink path={pathOf(status, 'start')}>
-            Round {roundOf(status)}: the “{titleOf(status)}” app
-          </PageLink>
-        </li>
-      ))}
-    </ol>
     <p>
-      After each round, come back to this page in Safari (it stays open in its
-      tab) and go on with the next round.
+      <PageLink path={pathOf(round, 'start')}>Start: add the test app</PageLink>
     </p>
 
     <h2>Sending the results</h2>
     <p>
-      At the end of each round, the app shows a “Copy results” button. Tap it,
-      then paste the results into a message (Messages, Mail, or whatever you
-      use) to the person who asked you to test. Do this after every round: each
-      app keeps its own results.
+      At the end, the app shows a “Copy results” button. Tap it, then paste the
+      results into a message (Messages, Mail, or whatever you use) to the person
+      who asked you to test.
     </p>
 
     <h2>For developers</h2>
     <p>
       Every screen can also be explored freely, with its settings, a log and
-      snapshots (outside a round), e.g.{' '}
-      <PageLink path={pathOf('default', 'none')}>
-        the “default” style without a strip
-      </PageLink>
-      .
+      snapshots (outside the round), e.g.{' '}
+      <PageLink path={pathOf(round, 'none')}>the one without a strip</PageLink>.
     </p>
   </TextPage>
 );
 
-/** A round's setup (in Safari), or its start (in its Home Screen app). */
+/** The round's setup (in Safari), or its start (in its Home Screen app). */
 export const Start: FunctionComponent<{ status: Status }> = ({ status }) => {
   const [installed, setInstalled] = useState<boolean | undefined>();
   useEffect(() => {
@@ -300,9 +279,7 @@ export const Start: FunctionComponent<{ status: Status }> = ({ status }) => {
   if (!installed) {
     return (
       <TextPage>
-        <h1>
-          Round {roundOf(status)}: add the {name} app
-        </h1>
+        <h1>Add the {name} app</h1>
         <ol>
           <li>
             Tap the Share button: the square with an arrow pointing up. If you
@@ -315,7 +292,7 @@ export const Start: FunctionComponent<{ status: Status }> = ({ status }) => {
           </li>
           <li>
             Go to your Home Screen and open the new {name} app. It shows this
-            page again, with a button to start the round.
+            page again, with a button to start the test.
           </li>
         </ol>
         <p>
@@ -327,9 +304,7 @@ export const Start: FunctionComponent<{ status: Status }> = ({ status }) => {
 
   return (
     <TextPage>
-      <h1>
-        Round {roundOf(status)}: {name} is ready
-      </h1>
+      <h1>{name} is ready</h1>
       <p>
         You’ll see {variantKeys.length} screens. Each shows a title bar with
         colorful stripes, already scrolled so the stripes are under the clock.
@@ -355,7 +330,7 @@ export const Start: FunctionComponent<{ status: Status }> = ({ status }) => {
           type="button"
           onClick={() => startRun(status)}
         >
-          Start round {roundOf(status)}
+          Start the test
         </button>
       </div>
       <p className="ios27-blur-note">
@@ -365,16 +340,15 @@ export const Start: FunctionComponent<{ status: Status }> = ({ status }) => {
   );
 };
 
-/** A round's end: its results to copy, what's next. */
+/** The round's end: its results to copy, what's next. */
 export const Done: FunctionComponent<{ status: Status }> = ({ status }) => {
   const [lines] = useState(readLog);
   const [copied, setCopied] = useState<boolean | undefined>();
   const text = lines.join('\n');
-  const isLast = roundOf(status) === rounds.length;
 
   return (
     <TextPage>
-      <h1>Round {roundOf(status)} is done. Thank you!</h1>
+      <h1>Done. Thank you!</h1>
       <ol>
         <li>Tap “Copy results”.</li>
         <li>
@@ -382,9 +356,8 @@ export const Done: FunctionComponent<{ status: Status }> = ({ status }) => {
           person who asked you to test.
         </li>
         <li>
-          {isLast
-            ? 'That was the last round. You can delete the three “Blur” apps from your Home Screen now.'
-            : 'Switch back to Safari, where the guide is still open, and go on with the next round.'}
+          That’s all. You can delete the {`“${titleOf(status)}”`} app from your
+          Home Screen now.
         </li>
       </ol>
       <div className="ios27-blur-buttons">
@@ -404,7 +377,7 @@ export const Done: FunctionComponent<{ status: Status }> = ({ status }) => {
           type="button"
           onClick={() => go(status, 'start')}
         >
-          Do this round again
+          Do the test again
         </button>
       </div>
       {copied === true ? (

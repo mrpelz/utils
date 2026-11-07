@@ -69,7 +69,7 @@ export const manifest = (publicPath) => `<script>(() => {
     [path, path + '/'].some((end) => location.pathname.endsWith(end));
   const id = option('id');
   // (The iOS 27 blur test page: its status bar style its path's, at
-  // \`/ios27-blur/<style>/<variant>\`, each style its own app.)
+  // \`/ios27-blur/<style>/<variant>\`, its app the style's.)
   const parts = location.pathname.split('/').filter(Boolean);
   const blurAt = parts.lastIndexOf('ios27-blur');
   const blurStatus = blurAt === -1 ? undefined : parts[blurAt + 1];
@@ -86,7 +86,7 @@ export const manifest = (publicPath) => `<script>(() => {
         : blurAt !== -1
           ? blurStatus === undefined
             ? 'iOS 27 Blur'
-            : 'Blur ' + blurStatus
+            : 'Blur Test'
           : undefined;
   if (name !== undefined) {
     document.title = name;
