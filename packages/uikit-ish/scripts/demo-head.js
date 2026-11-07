@@ -43,8 +43,10 @@ export const meta = {
  * (`#id=…&raw=true` on a demos' page, see
  * src/demo/tooling/frame/component.tsx), the kitchen sink
  * (`/kitchen-sink`, see src/demo/kitchen-sink/main.tsx), or the iOS 27
- * blur test page (`/ios27-blur`, and each of its variants', with a status
- * bar style of its own, see src/demo/ios27-blur/main.tsx). Added
+ * blur test page's guide (`/ios27-blur`, see src/demo/ios27-blur/main.tsx;
+ * each of its rounds, `/ios27-blur/<style>/…`, has a manifest of its own,
+ * `assets/ios27-blur-<style>.webmanifest`: its scope its pages, so its
+ * pages loaded stay in its app, with its status bar style). Added
  * to the Home Screen, that's its own app (no manifest: its start the
  * current URL, not the demo's start page; its name the demo's id, or the
  * page's title), as Safari reads the
@@ -91,11 +93,20 @@ export const manifest = (publicPath) => `<script>(() => {
     document
       .querySelector('meta[name=apple-mobile-web-app-title]')
       ?.setAttribute('content', name);
-    return;
   }
+  // (A round of the iOS 27 blur test: its own manifest, its scope the
+  // round's pages, so loading another stays in its app; else, an app of its
+  // own, none.)
+  const manifestName =
+    blurStatus !== undefined
+      ? 'ios27-blur-' + blurStatus
+      : name === undefined
+        ? 'manifest'
+        : undefined;
+  if (manifestName === undefined) return;
   const link = document.createElement('link');
   link.rel = 'manifest';
-  link.href = '${assetsUrl(publicPath)}manifest.webmanifest';
+  link.href = '${assetsUrl(publicPath)}' + manifestName + '.webmanifest';
   document.head.append(link);
 })();</script>`;
 
