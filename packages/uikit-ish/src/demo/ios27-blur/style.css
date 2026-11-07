@@ -1,5 +1,11 @@
 /* The iOS 27 blur test page (see main.tsx). */
 @layer demo {
+  /* A round's page tint (see main.tsx: the page's, set inline): its own
+     color, told from black or white (the system's bars'), the strip's too. */
+  :root[data-ios27-blur-tinted] {
+    --ios27-blur-tint: light-dark(#c4dcf2, #10304a);
+  }
+
   /* The strip at the top (a variant's, prerendered, see main.tsx): fixed,
      as wide as the screen, as tall as the top safe area (6px at least), the
      page's background (the document's, as the app sets it: its bars'
@@ -27,6 +33,10 @@
 
     :root[data-ios27-blur-background='plain'] & {
       --ios27-blur-page: var(--color-ui-system-background);
+    }
+
+    :root[data-ios27-blur-tinted] & {
+      --ios27-blur-page: var(--ios27-blur-tint);
     }
 
     /* Painting nothing (its background clipped to its text: none), its
@@ -76,8 +86,12 @@
   /* The controls, in the bottom bar: one below another. */
   .ios27-blur-controls {
     display: grid;
-    padding: 8px 16px;
+    padding: 12px 16px;
+    border-radius: 20px;
+    background-color: var(--color-ui-system-background);
+    box-shadow: 0 2px 12px rgb(0 0 0 / 25%);
     gap: 6px;
+    margin-inline: 8px;
   }
 
   .ios27-blur-choice {
@@ -192,11 +206,17 @@
   }
 
   /* A round's screen's questions (in its bottom bar). */
+
+  /* (Both on a card of their own, opaque: read over the stripes.) */
   .ios27-blur-run {
     display: grid;
-    padding: 8px 16px;
+    padding: 12px 16px;
+    border-radius: 20px;
+    background-color: var(--color-ui-system-background);
+    box-shadow: 0 2px 12px rgb(0 0 0 / 25%);
     color: var(--color-ui-label);
     gap: 8px;
+    margin-inline: 8px;
   }
 
   .ios27-blur-run-step {
@@ -205,34 +225,151 @@
     font-weight: 600;
   }
 
+  /* The pictures to pick from (see run.tsx), two a row. */
+  .ios27-blur-looks {
+    display: grid;
+    gap: 6px;
+    grid-template-columns: 1fr 1fr;
+
+    & > button {
+      display: grid;
+      align-content: start;
+      padding: 6px;
+      border: 2px solid var(--color-ui-separator);
+      border-radius: 10px;
+      background-color: var(--color-ui-secondary-system-background);
+      color: var(--color-ui-label);
+      font-size: 12px;
+      gap: 4px;
+      line-height: 1.25;
+      text-align: start;
+    }
+
+    & > button[aria-pressed='true'] {
+      border-color: #007aff;
+      background-color: color-mix(in srgb, #007aff 18%, transparent);
+    }
+  }
+
+  /* A picture of the top of a phone: stripes under its clock and its title
+     bar's buttons; its look an effect over the stripes up at the clock (a
+     blur; a bar, in no color of the test's: a neutral pattern). */
+  .ios27-blur-picture {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    height: 48px;
+    border-radius: 8px;
+    background-color: #e5e5ea;
+  }
+
+  .ios27-blur-picture-stripes {
+    position: absolute;
+    background-image: repeating-linear-gradient(
+      100deg,
+      #ff3b30 0 10px,
+      #fc0 10px 20px,
+      #34c759 20px 30px,
+      #007aff 30px 40px,
+      #af52de 40px 50px
+    );
+    inset: 0 6px;
+  }
+
+  .ios27-blur-picture-effect {
+    position: absolute;
+    top: 0;
+    height: 14px;
+    inset-inline: 0;
+
+    [data-look='blur'] > & {
+      backdrop-filter: blur(3px);
+    }
+
+    /* (Any color: a neutral pattern, not matched by color.) */
+    [data-look='bar'] > & {
+      background-color: #8e8e93;
+      background-image: repeating-linear-gradient(
+        45deg,
+        rgb(255 255 255 / 35%) 0 3px,
+        transparent 3px 6px
+      );
+    }
+
+    [data-look='other'] > & {
+      height: 100%;
+      background-color: var(--color-ui-secondary-system-background);
+      opacity: 0.85;
+    }
+  }
+
+  .ios27-blur-picture-clock {
+    position: absolute;
+    top: 1px;
+    left: 10px;
+    color: #000;
+    font-size: 9px;
+    font-weight: 600;
+  }
+
+  .ios27-blur-picture-bar {
+    position: absolute;
+    top: 18px;
+    display: flex;
+    justify-content: space-between;
+    inset-inline: 10px;
+
+    & > span {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: rgb(255 255 255 / 70%);
+    }
+  }
+
+  /* The note (see run.tsx). */
+  .ios27-blur-note-field {
+    display: grid;
+    font-size: 13px;
+    gap: 4px;
+
+    & textarea {
+      font-size: 16px;
+    }
+  }
+
+  /* A question (see run.tsx): its text, then its answers, two a row. */
+  .ios27-blur-ask {
+    margin: 0;
+    font-size: 14px;
+  }
+
   .ios27-blur-question {
     display: grid;
     padding: 0;
     border: 0;
     margin: 0;
-    gap: 4px;
-    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    grid-template-columns: 1fr 1fr 1fr;
 
     & legend {
       padding: 0;
-      margin-bottom: 4px;
-      font-size: 15px;
+      margin-bottom: 6px;
+      font-size: 14px;
     }
 
     & button {
-      padding: 6px 8px;
-      border: 1px solid var(--color-ui-separator);
-      border-radius: 8px;
+      padding: 8px;
+      border: 2px solid var(--color-ui-separator);
+      border-radius: 10px;
       background-color: var(--color-ui-secondary-system-background);
       color: var(--color-ui-label);
       font-size: 13px;
-      text-align: start;
     }
 
     & button[aria-pressed='true'] {
       border-color: #007aff;
-      background-color: #007aff;
-      color: #fff;
+      background-color: color-mix(in srgb, #007aff 18%, transparent);
     }
   }
 }

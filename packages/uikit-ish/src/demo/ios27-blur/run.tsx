@@ -86,79 +86,149 @@ const advance = (status: Status, index: number, answer: string) => {
   go(status, variantKeys[next] ?? 'none');
 };
 
-const blurAnswers = [
-  ['none', 'No blur at all'],
-  ['clock', 'Blurred only right behind the clock'],
-  ['far', 'Blurred further down, over the title bar or more'],
+// What's up at the clock (the status bar, above the title bar's buttons),
+// as pictures (see `Picture`): the tester picks the nearest, a note for
+// what it misses.
+const looks = [
+  ['clear', 'The stripes, sharp'],
+  ['blur', 'The stripes, blurred'],
+  ['bar', 'A bar of one color, covering the stripes'],
+  ['other', 'None of these (please describe below)'],
+] as const;
+
+// A bar's color (asked apart, the pictures showing none: not matched by
+// color): blending into the page around the stripes, or not.
+const blendAnswers = [
+  ['blends', 'Yes, it blends in'],
+  ['stands-out', 'No, it stands out'],
   ['unsure', 'Not sure'],
 ] as const;
 
-const behindAnswers = [
-  ['page', 'A solid bar in the page’s color (white or black)'],
-  ['red', 'A solid red bar'],
-  ['stripes', 'The colorful stripes, sharp'],
+// The title bar's own buttons and title (not the stripes behind it, soft by
+// design: its edge effect): iOS 27's blur over them, or not.
+const barAnswers = [
+  ['sharp', 'Sharp, as usual'],
+  ['blurry', 'Blurry'],
   ['unsure', 'Not sure'],
 ] as const;
 
-/** A question, its answers as buttons (one picked). */
-const Question: FunctionComponent<{
-  answers: readonly (readonly [string, string])[];
-  onPick: (value: string) => void;
-  picked: string | undefined;
-  title: string;
-}> = ({ answers, onPick, picked, title }) => (
-  <fieldset className="ios27-blur-question">
-    <legend>{title}</legend>
-    {answers.map(([value, label]) => (
-      <button
-        key={value}
-        aria-pressed={picked === value}
-        type="button"
-        onClick={() => onPick(value)}
-      >
-        {label}
-      </button>
-    ))}
-  </fieldset>
+type Look = (typeof looks)[number][0];
+
+/**
+ * A picture of the top of a phone (see style.css): its clock, its title
+ * bar's buttons, stripes beneath; as `look` (none of them: veiled).
+ */
+const Picture: FunctionComponent<{ look: Look }> = ({ look }) => (
+  <span
+    aria-hidden="true"
+    className="ios27-blur-picture"
+    data-look={look}
+  >
+    <span className="ios27-blur-picture-stripes" />
+    <span className="ios27-blur-picture-effect" />
+    <span className="ios27-blur-picture-clock">9:41</span>
+    <span className="ios27-blur-picture-bar">
+      <span />
+      <span />
+      <span />
+    </span>
+  </span>
 );
 
-/** A round's screen's questions (in its bottom bar, see main.tsx). */
+/** A round's screen's question (in its bottom bar, see main.tsx). */
 export const RunQuestions: FunctionComponent<{
   index: number;
   status: Status;
   total: number;
 }> = ({ index, status, total }) => {
-  const [blur, setBlur] = useState<string | undefined>();
-  const [behind, setBehind] = useState<string | undefined>();
+  const [look, setLook] = useState<Look | undefined>();
+  const [bar, setBar] = useState<string | undefined>();
+  const [blend, setBlend] = useState<string | undefined>();
+  const [note, setNote] = useState('');
+  const isAnswered =
+    look !== undefined &&
+    (look !== 'bar' || blend !== undefined) &&
+    bar !== undefined &&
+    (look !== 'other' || note.trim() !== '');
 
   return (
     <div className="ios27-blur-run">
       <p className="ios27-blur-run-step">
-        Screen {index + 1} of {total}: look at the very top of the screen,
-        around the clock and just below it.
+        Screen {index + 1} of {total}
       </p>
-      <Question
-        answers={blurAnswers}
-        picked={blur}
-        title="Is anything blurred there?"
-        onPick={setBlur}
-      />
-      <Question
-        answers={behindAnswers}
-        picked={behind}
-        title="What do you see directly behind the clock?"
-        onPick={setBehind}
-      />
+      <p className="ios27-blur-ask">
+        1. Up at the clock and the battery (above the title bar’s buttons):
+        which picture fits best?
+      </p>
+      <div className="ios27-blur-looks">
+        {looks.map(([value, label]) => (
+          <button
+            key={value}
+            aria-pressed={look === value}
+            type="button"
+            onClick={() => setLook(value)}
+          >
+            <Picture look={value} />
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+      {look === 'bar' ? (
+        <fieldset className="ios27-blur-question">
+          <legend>
+            Does that bar have the same color as the page’s background (the
+            color beside and between the stripes), so it blends in?
+          </legend>
+          {blendAnswers.map(([value, label]) => (
+            <button
+              key={value}
+              aria-pressed={blend === value}
+              type="button"
+              onClick={() => setBlend(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </fieldset>
+      ) : null}
+      <fieldset className="ios27-blur-question">
+        <legend>
+          2. The title bar’s own buttons (the round ones) and its title text:
+          are they sharp, or blurry? (The stripes behind the bar look soft on
+          purpose: ignore those.)
+        </legend>
+        {barAnswers.map(([value, label]) => (
+          <button
+            key={value}
+            aria-pressed={bar === value}
+            type="button"
+            onClick={() => setBar(value)}
+          >
+            {label}
+          </button>
+        ))}
+      </fieldset>
+      <label className="ios27-blur-note-field">
+        <span>
+          Anything else you notice? (optional; e.g. a thin line, a soft edge, a
+          see-through color)
+        </span>
+        <textarea
+          rows={2}
+          value={note}
+          onChange={(event) => setNote(event.currentTarget.value)}
+        />
+      </label>
       <div className="ios27-blur-buttons">
         <button
           className="ios27-blur-primary"
-          disabled={blur === undefined || behind === undefined}
+          disabled={!isAnswered}
           type="button"
           onClick={() =>
             advance(
               status,
               index,
-              `blur=${blur ?? '?'} behind=${behind ?? '?'}`,
+              `clock=${look ?? '?'}${look === 'bar' ? `/${blend ?? '?'}` : ''} bar=${bar ?? '?'} note=${JSON.stringify(note.trim())}`,
             )
           }
         >
@@ -316,9 +386,14 @@ export const Start: FunctionComponent<{ status: Status }> = ({ status }) => {
         <li>Tap “Next screen”.</li>
       </ol>
       <p>
-        What we’re looking for: a blurry, frosted band at the top, where the
-        stripes look smeared; and whether there’s a solid colored bar behind the
-        clock.
+        On each screen, answer two things: what’s up at the clock (pick the
+        matching picture; if it’s a bar, whether its color blends into the
+        page), and whether the title bar’s own buttons and title text look sharp
+        or blurry. The stripes behind the title bar are meant to look soft:
+        ignore those. If something doesn’t fit (a thin line, a soft edge, a
+        see-through color), write a few words in the note field. During the
+        test, the page is tinted blue, so its own color is easy to tell from
+        black or white.
       </p>
       <p>
         Each new screen takes a moment to load. If one looks broken, answer “Not

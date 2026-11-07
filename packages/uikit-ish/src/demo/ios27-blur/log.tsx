@@ -129,7 +129,10 @@ const environment = () => {
 
 /** A snapshot: what's at the top now. */
 export const snapshot = (label: string): void => {
-  const scroller = document.querySelector('[data-viewport-scroller]');
+  // (The page's scroller: the bars' content, not the first registered.)
+  const scroller =
+    document.querySelector('.uikit-page-root') ??
+    document.querySelector('[data-viewport-scroller]');
   record(
     `${label} (scrolled ${round(scroller?.scrollTop ?? 0)})`,
     ...topElements(),

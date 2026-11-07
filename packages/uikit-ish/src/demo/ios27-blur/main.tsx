@@ -186,6 +186,7 @@ const App: FunctionComponent<{
   const edgeEffect = step ? 'soft' : keptEdgeEffect;
   const scheme = step ? 'system' : keptScheme;
   const background = step ? 'grouped' : keptBackground;
+  const isTinted = step !== undefined;
 
   // Its color scheme and background: the document's (the strip's too).
   useEffect(() => {
@@ -193,11 +194,14 @@ const App: FunctionComponent<{
     if (scheme === 'system') delete root.dataset.colorScheme;
     else root.dataset.colorScheme = scheme;
     root.dataset.ios27BlurBackground = background;
+    // (In a round: tinted, see style.css.)
+    root.toggleAttribute('data-ios27-blur-tinted', isTinted);
     return () => {
       delete root.dataset.colorScheme;
       delete root.dataset.ios27BlurBackground;
+      delete root.dataset.ios27BlurTinted;
     };
-  }, [background, scheme]);
+  }, [background, isTinted, scheme]);
 
   // How far content has scrolled under the bar (0 to 1, the document's).
   useEffect(() => {
@@ -254,6 +258,13 @@ const App: FunctionComponent<{
           <Page.Root
             ref={pageRef}
             background={background}
+            // (In a round: tinted, see style.css; inline, as Page's own
+            // background, in a later layer, would win over the demo's.)
+            style={
+              isTinted
+                ? { backgroundColor: 'var(--ios27-blur-tint)' }
+                : undefined
+            }
           >
             <Viewport.Padding edge="block-start" />
             <div className="ios27-blur-bands">
