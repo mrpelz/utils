@@ -1,5 +1,6 @@
 import './style.css';
 
+import { useRoute } from 'preact-iso';
 import {
   CSSProperties,
   FunctionComponent,
@@ -25,94 +26,45 @@ import {
 } from '../tooling/icons.js';
 import { ClientOnly } from '../tooling/shared/client-only.js';
 import { useRawDocument } from '../tooling/shared/raw-document.js';
+import { Log, snapshot } from './log.js';
+import { Done, Guide, RunQuestions, Start, useRunStep } from './run.js';
+import {
+  go,
+  isStatus,
+  isVariant,
+  siteStatus,
+  type Status,
+  statuses,
+  type Strip,
+  titleOf,
+  type Variant,
+  variantKeys,
+  variants,
+} from './variants.js';
 
 // A test page (not a demo, nothing of the library's changed): iOS 27's blur
 // at the top of an installed PWA (a Home Screen app; in Safari, as tall as
 // the status bar alone), and what's reported to suppress it: a
-// `position: fixed` element with a background color, at least 6px tall, at
-// least 80% wide, within 4px of the top (see
-// https://modernwebweekly.substack.com/p/so-whats-up-with-the-ios27-blur):
-// the status bar then solid, in its color. Its variants (picked below) a
-// strip at the top over a real page (its bar's edge effect), to tell
-// whether it could be the edge effects' (see Viewport): blending into it.
-// Added to the Home Screen as its own app (see scripts/demo-head.js).
-
-type Variant =
-  | 'fade'
-  | 'half'
-  | 'height-5'
-  | 'height-6'
-  | 'none'
-  | 'progress'
-  | 'red'
-  | 'strip'
-  | 'top-4'
-  | 'top-5'
-  | 'width-79'
-  | 'width-80'
-  | 'zero';
-
-/** Each variant: its label, its strip's look (none: no strip). */
-const variants: Record<
-  Variant,
-  {
-    hasFade?: boolean;
-    isProgress?: boolean;
-    label: string;
-    strip?: {
-      color?: string;
-      height?: string;
-      opacity?: number;
-      top?: string;
-      width?: string;
-    };
-  }
-> = {
-  none: { label: 'None (iOS’ own blur)' },
-  strip: { label: 'Strip (page background)', strip: {} },
-  fade: {
-    hasFade: true,
-    label: 'Strip, fading into the edge effect',
-    strip: {},
-  },
-  red: { label: 'Strip, red', strip: { color: '#ff3b30' } },
-  half: { label: 'Strip, opacity 0.5', strip: { opacity: 0.5 } },
-  zero: { label: 'Strip, opacity 0', strip: { opacity: 0 } },
-  progress: {
-    hasFade: true,
-    isProgress: true,
-    label: 'Strip, fading in as content scrolls under',
-    strip: {},
-  },
-  'width-79': {
-    label: 'Red, 79% wide',
-    strip: { color: '#ff3b30', width: '79%' },
-  },
-  'width-80': {
-    label: 'Red, 80% wide',
-    strip: { color: '#ff3b30', width: '80%' },
-  },
-  'height-5': {
-    label: 'Red, 5px tall',
-    strip: { color: '#ff3b30', height: '5px' },
-  },
-  'height-6': {
-    label: 'Red, 6px tall',
-    strip: { color: '#ff3b30', height: '6px' },
-  },
-  'top-4': {
-    label: 'Red, 6px tall, 4px from the top',
-    strip: { color: '#ff3b30', height: '6px', top: '4px' },
-  },
-  'top-5': {
-    label: 'Red, 6px tall, 5px from the top',
-    strip: { color: '#ff3b30', height: '6px', top: '5px' },
-  },
-};
+// `position: fixed` element with a background color, near the top (see
+// https://modernwebweekly.substack.com/p/so-whats-up-with-the-ios27-blur,
+// https://github.com/bskp/rechords/pull/75,
+// https://github.com/stackernews/stacker.news/pull/3248): the status bar
+// then solid, in its color. Its variants a strip at the top over a real
+// page (its bar's edge effect), to tell whether it could be the edge
+// effects' (see Viewport).
+// Each variant, and each status bar style, a page of its own
+// (`/ios27-blur/<style>/<variant>`, prerendered, see demo-ssg.tsx), its
+// strip in its HTML as loaded (outside `ClientOnly`, hydrated in place),
+// switched by loading another. Its status bar style set by the head (see
+// scripts/demo-head.js), read as it's added to the Home Screen: each style
+// its own app (named for it). A log to paste back (see log.tsx).
 
 type Scheme = 'dark' | 'light' | 'system';
 
 type Background = 'grouped' | 'plain';
+
+/** How far (px) a round's screen is scrolled (its stripes under the clock). */
+const runScroll = 240;
 
 /** How far (px) content scrolls under the bar for the strip to show fully. */
 const progressDistance = 40;
@@ -121,6 +73,26 @@ const progressDistance = 40;
 const bands = Array.from({ length: 24 }, (_, index) => index);
 
 const hues = [0, 35, 60, 130, 200, 260, 310];
+
+/** A setting kept (in local storage) across the variants' pages. */
+const useKept = <T extends string>(key: string, initial: T) => {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      return (localStorage.getItem(`ios27-blur-${key}`) as T | null) ?? initial;
+    } catch {
+      return initial;
+    }
+  });
+  const set = (next: T) => {
+    setValue(next);
+    try {
+      localStorage.setItem(`ios27-blur-${key}`, next);
+    } catch {
+      // (Storage unavailable: not kept.)
+    }
+  };
+  return [value, set] as const;
+};
 
 /** A bar's button (an icon alone; pressable, doing nothing). */
 const iconButton = (label: string, icon: typeof sfEllipsis) => (
@@ -165,39 +137,98 @@ const Choice = <T extends string>({
   </label>
 );
 
-const App: FunctionComponent = () => {
-  const [variant, setVariant] = useState<Variant>('none');
-  const [edgeEffect, setEdgeEffect] = useState<ViewportEdgeEffect>('soft');
-  const [scheme, setScheme] = useState<Scheme>('system');
-  const [background, setBackground] = useState<Background>('grouped');
-  const [progress, setProgress] = useState(0);
+/**
+ * The strip (a variant's), prerendered: in the page's HTML as it loads,
+ * fixed at the top; its color the page's background (see style.css: the
+ * document's, as the app sets it), its opacity, scrolled, the app's too.
+ */
+const StripElement: FunctionComponent<{ variant: Variant }> = ({ variant }) => {
+  const { strip } = variants[variant] as { strip?: Strip };
+  if (!strip) return null;
+
+  return (
+    <div
+      aria-hidden="true"
+      className="ios27-blur-strip"
+      data-clip={strip.clip ? '' : undefined}
+      data-fade={strip.fade ? '' : undefined}
+      data-progress={strip.progress ? '' : undefined}
+      style={
+        {
+          '--ios27-blur-strip-color': strip.color,
+          '--ios27-blur-strip-height': strip.height,
+          '--ios27-blur-strip-opacity':
+            strip.opacity === undefined ? undefined : String(strip.opacity),
+          '--ios27-blur-strip-top': strip.top,
+          '--ios27-blur-strip-width': strip.width,
+        } as CSSProperties
+      }
+    />
+  );
+};
+
+const App: FunctionComponent<{
+  status: Status | undefined;
+  variant: Variant;
+}> = ({ status, variant }) => {
+  const [keptEdgeEffect, setEdgeEffect] = useKept<ViewportEdgeEffect>(
+    'edge',
+    'soft',
+  );
+  const [keptScheme, setScheme] = useKept<Scheme>('scheme', 'system');
+  const [keptBackground, setBackground] = useKept<Background>(
+    'background',
+    'grouped',
+  );
   const pageRef = useRef<HTMLDivElement>(null);
+  // In a round (see run.tsx): its questions for the controls, the defaults
+  // for the settings (each screen as the others).
+  const step = useRunStep(status, variant);
+  const edgeEffect = step ? 'soft' : keptEdgeEffect;
+  const scheme = step ? 'system' : keptScheme;
+  const background = step ? 'grouped' : keptBackground;
 
-  const { hasFade, isProgress, strip } = variants[variant];
-
-  // Its color scheme: the document's (the status bar's too, as the system's).
+  // Its color scheme and background: the document's (the strip's too).
   useEffect(() => {
     const { documentElement: root } = document;
     if (scheme === 'system') delete root.dataset.colorScheme;
     else root.dataset.colorScheme = scheme;
+    root.dataset.ios27BlurBackground = background;
     return () => {
       delete root.dataset.colorScheme;
+      delete root.dataset.ios27BlurBackground;
     };
-  }, [scheme]);
+  }, [background, scheme]);
 
-  // How far content has scrolled under the bar (0 to 1).
+  // How far content has scrolled under the bar (0 to 1, the document's).
   useEffect(() => {
-    const { current: page } = pageRef;
-    if (!page) return undefined;
+    const { current: element } = pageRef;
+    if (!element) return undefined;
+    const { documentElement: root } = document;
     const update = () => {
-      setProgress(Math.min(Math.max(page.scrollTop / progressDistance, 0), 1));
+      root.style.setProperty(
+        '--ios27-blur-progress',
+        String(Math.min(Math.max(element.scrollTop / progressDistance, 0), 1)),
+      );
     };
     update();
-    page.addEventListener('scroll', update, { passive: true });
-    return () => page.removeEventListener('scroll', update);
+    element.addEventListener('scroll', update, { passive: true });
+    return () => {
+      element.removeEventListener('scroll', update);
+      root.style.removeProperty('--ios27-blur-progress');
+    };
   }, []);
 
-  const opacity = isProgress ? progress : (strip?.opacity ?? 1);
+  // (Mounted: what's at the top now, the app's bars in; in a round,
+  // scrolled first, the stripes under the clock.)
+  const isRun = step !== undefined;
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      if (isRun) pageRef.current?.scrollTo({ top: runScroll });
+      snapshot('mounted');
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [isRun]);
 
   return (
     <Viewport.Provider>
@@ -211,7 +242,7 @@ const App: FunctionComponent = () => {
                 {iconButton('Back', sfChevronBackward)}
               </Toolbar.Leading>
               <Toolbar.Title>
-                <span>iOS 27 Blur</span>
+                <span>{titleOf(status)}</span>
                 <Toolbar.Subtitle>{variants[variant].label}</Toolbar.Subtitle>
               </Toolbar.Title>
               <Toolbar.Trailing>
@@ -250,76 +281,104 @@ const App: FunctionComponent = () => {
             <Viewport.Padding edge="block-end" />
           </Page.Root>
           <Viewport.BlockEnd edgeEffect="soft">
-            <div className="ios27-blur-controls">
-              <Choice
-                label="Variant"
-                value={variant}
-                options={Object.entries(variants).map(
-                  ([key, { label }]) => [key as Variant, label] as const,
-                )}
-                onChange={setVariant}
+            {step && status ? (
+              <RunQuestions
+                index={step.index}
+                status={status}
+                total={step.total}
               />
-              <Choice
-                label="Edge effect"
-                value={edgeEffect}
-                options={[
-                  ['soft', 'Soft'],
-                  ['hard', 'Hard'],
-                  ['none', 'None'],
-                ]}
-                onChange={setEdgeEffect}
-              />
-              <Choice
-                label="Color scheme"
-                value={scheme}
-                options={[
-                  ['system', 'System'],
-                  ['light', 'Light'],
-                  ['dark', 'Dark'],
-                ]}
-                onChange={setScheme}
-              />
-              <Choice
-                label="Background"
-                value={background}
-                options={[
-                  ['grouped', 'Grouped'],
-                  ['plain', 'Plain'],
-                ]}
-                onChange={setBackground}
-              />
-            </div>
+            ) : (
+              <div className="ios27-blur-controls">
+                <Choice
+                  label="Variant"
+                  value={variant}
+                  options={variantKeys.map(
+                    (key) => [key, variants[key].label] as const,
+                  )}
+                  onChange={(next) => go(status ?? siteStatus, next)}
+                />
+                <Choice
+                  label="Status bar (add anew)"
+                  options={statuses.map((key) => [key, key] as const)}
+                  value={status ?? siteStatus}
+                  onChange={(next) => go(next, variant)}
+                />
+                <Choice
+                  label="Edge effect"
+                  value={edgeEffect}
+                  options={[
+                    ['soft', 'Soft'],
+                    ['hard', 'Hard'],
+                    ['none', 'None'],
+                  ]}
+                  onChange={setEdgeEffect}
+                />
+                <Choice
+                  label="Color scheme"
+                  value={scheme}
+                  options={[
+                    ['system', 'System'],
+                    ['light', 'Light'],
+                    ['dark', 'Dark'],
+                  ]}
+                  onChange={setScheme}
+                />
+                <Choice
+                  label="Background"
+                  value={background}
+                  options={[
+                    ['grouped', 'Grouped'],
+                    ['plain', 'Plain'],
+                  ]}
+                  onChange={setBackground}
+                />
+                <Log />
+              </div>
+            )}
           </Viewport.BlockEnd>
         </Header.Root>
       </Viewport.Content>
-      {strip ? (
-        <div
-          aria-hidden="true"
-          className="ios27-blur-strip"
-          data-background={background}
-          data-fade={hasFade ? '' : undefined}
-          style={
-            {
-              '--ios27-blur-strip-color': strip.color,
-              '--ios27-blur-strip-height': strip.height,
-              '--ios27-blur-strip-top': strip.top,
-              '--ios27-blur-strip-width': strip.width,
-              opacity,
-            } as CSSProperties
-          }
-        />
-      ) : null}
     </Viewport.Provider>
   );
 };
 
-/** `/ios27-blur`: the test page, the page's own (see `useRawDocument`). */
+/**
+ * `/ios27-blur` (the guide, see run.tsx), `/ios27-blur/<style>/start` and
+ * `…/done` (a round's setup and end), `/ios27-blur/<style>/<variant>` (a
+ * variant's page: a round's screen, or explored): the page's own (see
+ * `useRawDocument`).
+ */
 export const Ios27BlurPage: FunctionComponent = () => {
-  useRawDocument(true, 'iOS 27 Blur');
+  const { params } = useRoute();
+  const status = isStatus(params.status) ? params.status : undefined;
+  const variant = isVariant(params.variant) ? params.variant : 'none';
+  useRawDocument(true, titleOf(status));
+
+  if (status === undefined) {
+    return (
+      <ClientOnly>
+        <Guide />
+      </ClientOnly>
+    );
+  }
+  if (params.variant === 'start' || params.variant === 'done') {
+    const Step = params.variant === 'start' ? Start : Done;
+    return (
+      <ClientOnly>
+        <Step status={status} />
+      </ClientOnly>
+    );
+  }
 
   return (
-    <ClientOnly>
-      <App />
-    </ClientOnly>
+    <>
+      <StripElement variant={variant} />
+      <ClientOnly>
+        <App
+          status={status}
+          variant={variant}
+        />
+      </ClientOnly>
+    </>
   );
 };

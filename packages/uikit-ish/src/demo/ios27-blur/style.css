@@ -1,10 +1,17 @@
 /* The iOS 27 blur test page (see main.tsx). */
 @layer demo {
-  /* The strip at the top (a variant's): fixed, as wide as the screen, as
-     tall as the top safe area (6px at least), the page's background (its
-     bars' backing); a variant's size, place and color its own. Above all
+  /* The strip at the top (a variant's, prerendered, see main.tsx): fixed,
+     as wide as the screen, as tall as the top safe area (6px at least), the
+     page's background (the document's, as the app sets it: its bars'
+     backing); a variant's size, place, color and opacity its own. Above all
      else, touched through. */
   .ios27-blur-strip {
+    --ios27-blur-page: var(--color-ui-system-grouped-background);
+    --ios27-blur-strip-fill: var(
+      --ios27-blur-strip-color,
+      var(--ios27-blur-page)
+    );
+
     position: fixed;
     z-index: 100;
     top: var(--ios27-blur-strip-top, 0);
@@ -14,17 +21,23 @@
       --ios27-blur-strip-height,
       max(6px, env(safe-area-inset-top))
     );
-    background-color: var(
-      --ios27-blur-strip-color,
-      var(--color-ui-system-grouped-background)
-    );
+    background-color: var(--ios27-blur-strip-fill);
+    opacity: var(--ios27-blur-strip-opacity, 1);
     pointer-events: none;
 
-    &[data-background='plain'] {
-      background-color: var(
-        --ios27-blur-strip-color,
-        var(--color-ui-system-background)
-      );
+    :root[data-ios27-blur-background='plain'] & {
+      --ios27-blur-page: var(--color-ui-system-background);
+    }
+
+    /* Painting nothing (its background clipped to its text: none), its
+       color still its own. */
+    &[data-clip] {
+      background-clip: text;
+    }
+
+    /* Shown as far as content has scrolled under the bar. */
+    &[data-progress] {
+      opacity: var(--ios27-blur-progress, 0);
     }
 
     /* Fading into what's below (the bar's edge effect): its color, from
@@ -33,25 +46,12 @@
       position: absolute;
       top: 100%;
       height: 16px;
+      background-image: linear-gradient(
+        var(--ios27-blur-strip-fill),
+        transparent
+      );
       content: '';
       inset-inline: 0;
-    }
-
-    &[data-fade]:not([data-background='plain'])::after {
-      background-image: linear-gradient(
-        var(
-          --ios27-blur-strip-color,
-          var(--color-ui-system-grouped-background)
-        ),
-        transparent
-      );
-    }
-
-    &[data-fade][data-background='plain']::after {
-      background-image: linear-gradient(
-        var(--ios27-blur-strip-color, var(--color-ui-system-background)),
-        transparent
-      );
     }
   }
 
@@ -91,6 +91,148 @@
     & select {
       min-width: 0;
       font-size: 16px;
+    }
+  }
+
+  /* The log's buttons, side by side. */
+  .ios27-blur-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    & button {
+      padding: 6px 10px;
+      font-size: 15px;
+    }
+  }
+
+  /* The log, over the bottom bar (not near the top: nothing fixed there
+     but the strip). */
+  .ios27-blur-log {
+    position: fixed;
+    z-index: 200;
+    bottom: 0;
+    display: grid;
+    max-height: 60vh;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--color-ui-separator);
+    background-color: var(--color-ui-system-background);
+    color: var(--color-ui-label);
+    gap: 8px;
+    grid-template-rows: auto minmax(0, 1fr);
+    inset-inline: 0;
+
+    & pre {
+      overflow: auto;
+      margin: 0;
+      font-family: ui-monospace, monospace;
+      font-size: 10px;
+      white-space: pre;
+    }
+  }
+
+  /* A page of text (the guide, a round's setup and end). */
+  .ios27-blur-guide {
+    max-width: 640px;
+    color: var(--color-ui-label);
+    font-size: 17px;
+    line-height: 1.45;
+    margin-inline: auto;
+    padding-inline: 20px;
+
+    & h1 {
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    & h2 {
+      margin-top: 28px;
+      font-size: 20px;
+    }
+
+    & li {
+      margin-block: 8px;
+    }
+
+    & a {
+      color: var(--color-ui-link, #007aff);
+    }
+  }
+
+  .ios27-blur-note {
+    color: var(--color-ui-secondary-label);
+    font-size: 15px;
+  }
+
+  /* The main button (a step's). */
+  .ios27-blur-primary {
+    border: 0;
+    border-radius: 10px;
+    background-color: #007aff;
+    color: #fff;
+    font-weight: 600;
+
+    &:disabled {
+      opacity: 0.4;
+    }
+  }
+
+  .ios27-blur-buttons > .ios27-blur-primary {
+    padding: 10px 18px;
+    font-size: 17px;
+  }
+
+  /* A round's results, to select and copy by hand. */
+  .ios27-blur-results {
+    width: 100%;
+    height: 240px;
+    margin-top: 12px;
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+  }
+
+  /* A round's screen's questions (in its bottom bar). */
+  .ios27-blur-run {
+    display: grid;
+    padding: 8px 16px;
+    color: var(--color-ui-label);
+    gap: 8px;
+  }
+
+  .ios27-blur-run-step {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .ios27-blur-question {
+    display: grid;
+    padding: 0;
+    border: 0;
+    margin: 0;
+    gap: 4px;
+    grid-template-columns: 1fr 1fr;
+
+    & legend {
+      padding: 0;
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+
+    & button {
+      padding: 6px 8px;
+      border: 1px solid var(--color-ui-separator);
+      border-radius: 8px;
+      background-color: var(--color-ui-secondary-system-background);
+      color: var(--color-ui-label);
+      font-size: 13px;
+      text-align: start;
+    }
+
+    & button[aria-pressed='true'] {
+      border-color: #007aff;
+      background-color: #007aff;
+      color: #fff;
     }
   }
 }

@@ -43,7 +43,8 @@ export const meta = {
  * (`#id=…&raw=true` on a demos' page, see
  * src/demo/tooling/frame/component.tsx), the kitchen sink
  * (`/kitchen-sink`, see src/demo/kitchen-sink/main.tsx), or the iOS 27
- * blur test page (`/ios27-blur`, see src/demo/ios27-blur/main.tsx). Added
+ * blur test page (`/ios27-blur`, and each of its variants', with a status
+ * bar style of its own, see src/demo/ios27-blur/main.tsx). Added
  * to the Home Screen, that's its own app (no manifest: its start the
  * current URL, not the demo's start page; its name the demo's id, or the
  * page's title), as Safari reads the
@@ -65,13 +66,25 @@ export const manifest = (publicPath) => `<script>(() => {
   const isAt = (path) =>
     [path, path + '/'].some((end) => location.pathname.endsWith(end));
   const id = option('id');
+  // (The iOS 27 blur test page: its status bar style its path's, at
+  // \`/ios27-blur/<style>/<variant>\`, each style its own app.)
+  const parts = location.pathname.split('/').filter(Boolean);
+  const blurAt = parts.lastIndexOf('ios27-blur');
+  const blurStatus = blurAt === -1 ? undefined : parts[blurAt + 1];
+  if (blurStatus !== undefined) {
+    document
+      .querySelector('meta[name=apple-mobile-web-app-status-bar-style]')
+      ?.setAttribute('content', blurStatus);
+  }
   const name =
     option('raw') === true && typeof id === 'string' && isAt('/all')
       ? id
       : isAt('/kitchen-sink')
         ? 'Kitchen Sink'
-        : isAt('/ios27-blur')
-          ? 'iOS 27 Blur'
+        : blurAt !== -1
+          ? blurStatus === undefined
+            ? 'iOS 27 Blur'
+            : 'Blur ' + blurStatus
           : undefined;
   if (name !== undefined) {
     document.title = name;

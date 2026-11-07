@@ -10,6 +10,7 @@ import { exit } from 'node:process';
 
 import prerender, { locationStub } from 'preact-iso/prerender';
 
+import { ios27BlurPaths } from './demo/ios27-blur/variants.js';
 import { publicPath } from './demo/tooling/env.js';
 import { iconsLoaded } from './demo/tooling/icons.js';
 import { Demo } from './demo/tooling/main.js';
@@ -17,7 +18,6 @@ import { publicUrl } from './demo/tooling/public-url.js';
 
 const BODY = '<body></body>';
 const KITCHEN_SINK_PATH = 'kitchen-sink';
-const IOS27_BLUR_PATH = 'ios27-blur';
 
 const demoDir = path.resolve(process.cwd(), 'demo');
 
@@ -102,7 +102,10 @@ const walk = async (location: string): Promise<void> => {
 
 await walk('.');
 await walk(KITCHEN_SINK_PATH);
-await walk(IOS27_BLUR_PATH);
+// (The iOS 27 blur test page: its own, and each variant's, see
+// demo/ios27-blur/main.tsx.)
+await walk('ios27-blur');
+await Promise.all(ios27BlurPaths.map((location) => walk(location)));
 
 console.log(
   `✅ finished; prerendered ${handled.size - failures.size} of ${handled.size} links`,

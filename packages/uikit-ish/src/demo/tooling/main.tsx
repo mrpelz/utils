@@ -144,7 +144,7 @@ export const Demo: FunctionComponent = () => (
           />
           <Route
             component={Ios27BlurPage}
-            path={publicUrl('/ios27-blur')}
+            path={publicUrl('/ios27-blur/:status?/:variant?')}
           />
           <Route
             component={TokensPage}
