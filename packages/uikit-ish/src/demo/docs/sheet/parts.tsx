@@ -1430,7 +1430,8 @@ export const SheetParts: FunctionComponent = () => (
         glass capsule, as high as its stop, its content clipped and always above
         the home indicator; a large one moved down. Below its top stop its
         content doesn’t scroll (dragging it drags the sheet); at its top stop it
-        does, until pulled down from its start.
+        does, until pulled down from its start (by touch, or by a wheel or
+        trackpad scroll begun there).
       </li>
       <li>
         Swiped: flung, a stop at a time (down from its lowest: closed);

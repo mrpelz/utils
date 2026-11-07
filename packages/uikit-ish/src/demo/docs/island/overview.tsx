@@ -266,8 +266,9 @@ export const IslandOverview: FunctionComponent = () => (
       </li>
       <li>
         Up to 64px below the screen’s top (and clear of the top inset); its
-        content scrolls at its top stop only, a pull down from its start handing
-        back to the island.
+        content scrolls at its top stop only, a pull down from its start (a
+        touch, or a wheel or trackpad scroll begun there) handing back to the
+        island.
       </li>
       <li>
         Swiped: flung, a stop at a time; otherwise to the nearest stop, let go.

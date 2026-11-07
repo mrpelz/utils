@@ -681,7 +681,7 @@ const SwipeContent: FunctionComponent = () => {
       </List.Section>
 
       <List.Section>
-        <List.Header prominence="nested">
+        <List.Header>
           <List.Title>Deleted by Overswiping</List.Title>
           <List.Action onClick={() => setRows(planets)}>Reset</List.Action>
         </List.Header>

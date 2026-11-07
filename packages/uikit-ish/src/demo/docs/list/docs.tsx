@@ -749,7 +749,7 @@ export const listSwipeActionsRows: readonly PropRow[] = [
     'overswipe',
     'boolean',
     code('false'),
-    'Swiping on past the actions stretches the outermost one up to the others (following the row), and, past 304px, triggers it on release.',
+    'Dragging on past the actions stretches the outermost one up to the others (following the row), and, past 304px, triggers it on release (a flick stops at the actions).',
   ],
   [
     'onOverswipe',

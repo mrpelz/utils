@@ -793,8 +793,9 @@ export const IslandParts: FunctionComponent = () => (
     <ul>
       <li>
         What’s below its header, scrolling: with stops, at its top stop only
-        (below it, dragging it drags the island; at its start, a pull down hands
-        back to the island).
+        (below it, dragging it drags the island; at its start, a pull down, by
+        touch or by a wheel or trackpad scroll begun there, hands back to the
+        island).
       </li>
       <li>
         Renders a <code>div</code>.

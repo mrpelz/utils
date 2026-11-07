@@ -23,6 +23,10 @@ import { RefObject, useEffect, useLayoutEffect, useRef } from 'react';
 // hands no gesture on from it midway) and let go: a stop down (from its
 // lowest, closed, if it closes); its content kept scrolling until it's
 // bounced back (`data-pulled`, see style.css: hidden at once, it'd jump).
+// Wheeled (a trackpad) up at its content's start, the same: WebKit (iPadOS)
+// neither hands a wheel on from it nor bounces it, so a wheel's gesture
+// begun there (after a pause), up by as much with nothing scrolled, steps
+// down (handed on natively, e.g. Chrome: its popup scrolled, not stepped).
 
 export type SnapOptions = {
   /** Its stop now (an index of `stops`). */
@@ -56,6 +60,9 @@ const pullDistance = 50;
 
 /** How long (ms) its content may bounce back, at most (see above). */
 const pullHold = 1000;
+
+/** How long (ms) without a wheel event a wheel's next one begins anew. */
+const wheelGap = 100;
 
 /** What a press on a handle is for itself, not a drag (its buttons…). */
 const interactive =
@@ -226,26 +233,81 @@ export const useSnap = (
       held = undefined;
     };
 
-    const onPull = (event: TouchEvent) => {
+    // Its content, if it may be pulled down a stop (at its top stop).
+    const pullable = () => {
       const { current } = optionsRef;
-      if (
-        !current?.content ||
+      return !current?.content ||
         current.active !== current.stops.length - 1 ||
         (current.active === 0 && !current.canClose)
-      ) {
-        return;
-      }
-      const content = element.querySelector<HTMLElement>(current.content);
-      if (!content || content.scrollTop > -pullDistance) return;
+        ? undefined
+        : (element.querySelector<HTMLElement>(current.content) ?? undefined);
+    };
+
+    // Pulled down a stop (its content held scrolling while it bounces back).
+    const stepDown = (event: Event, content: HTMLElement) => {
+      const { current } = optionsRef;
+      if (!current) return;
       release();
-      content.dataset.pulled = '';
-      const onBack = () => {
-        if (content.scrollTop >= 0) release();
-      };
-      held = { content, onBack, timer: setTimeout(release, pullHold) };
-      content.addEventListener('scroll', onBack, { passive: true });
+      if (content.scrollTop < 0) {
+        content.dataset.pulled = '';
+        const onBack = () => {
+          if (content.scrollTop >= 0) release();
+        };
+        held = { content, onBack, timer: setTimeout(release, pullHold) };
+        content.addEventListener('scroll', onBack, { passive: true });
+      }
       if (current.active === 0) current.onClose(event);
       else current.onSelect(current.active - 1, event);
+    };
+
+    const onPull = (event: TouchEvent) => {
+      const content = pullable();
+      if (!content || content.scrollTop > -pullDistance) return;
+      stepDown(event, content);
+    };
+
+    // A wheel's gesture begun at its content's start (see above): how far
+    // it's gone up, its popup's scroll as it began; else none.
+    let lastWheel = Number.NEGATIVE_INFINITY;
+    let wheelPull: { distance: number; top: number } | undefined;
+
+    const onWheel = (event: WheelEvent) => {
+      const isNew = event.timeStamp - lastWheel > wheelGap;
+      lastWheel = event.timeStamp;
+      const content = pullable();
+      if (
+        !content ||
+        !(event.target instanceof Node) ||
+        !content.contains(event.target)
+      ) {
+        wheelPull = undefined;
+        return;
+      }
+      if (isNew) {
+        wheelPull =
+          content.scrollTop <= 0
+            ? { distance: 0, top: element.scrollTop }
+            : undefined;
+      }
+      if (!wheelPull) return;
+      // (Its content scrolled, or handed on: not pulled.)
+      if (
+        content.scrollTop > 0 ||
+        Math.abs(element.scrollTop - wheelPull.top) >= 1
+      ) {
+        wheelPull = undefined;
+        return;
+      }
+      // (In pixels: lines as 16px, pages as its content's height.)
+      let scale = 1;
+      if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) scale = 16;
+      else if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+        scale = content.clientHeight;
+      }
+      wheelPull.distance -= event.deltaY * scale;
+      if (wheelPull.distance < pullDistance) return;
+      wheelPull = undefined;
+      stepDown(event, content);
     };
 
     const onScroll = (event: Event) => {
@@ -353,6 +415,7 @@ export const useSnap = (
     element.addEventListener('scroll', onScroll, { passive: true });
     if (hasScrollEnd) element.addEventListener('scrollend', settle);
     element.addEventListener('touchend', onPull, { passive: true });
+    element.addEventListener('wheel', onWheel, { passive: true });
     element.addEventListener('pointerdown', onDragStart);
     element.addEventListener('pointermove', onDragMove);
     element.addEventListener('pointerup', onDragEnd);
@@ -371,6 +434,7 @@ export const useSnap = (
       element.removeEventListener('scroll', onScroll);
       element.removeEventListener('scrollend', settle);
       element.removeEventListener('touchend', onPull);
+      element.removeEventListener('wheel', onWheel);
       release();
       element.removeEventListener('pointerdown', onDragStart);
       element.removeEventListener('pointermove', onDragMove);

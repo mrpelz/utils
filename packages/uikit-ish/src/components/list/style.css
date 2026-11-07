@@ -427,7 +427,8 @@
     pointer-events: none;
     scroll-snap-align: start;
 
-    &[data-closed] {
+    /* Closed and open (see main.tsx): stopping there even when flung. */
+    &[data-stop] {
       scroll-snap-stop: always;
     }
   }
@@ -828,7 +829,10 @@
 
     &[data-swipeable] {
       overflow: auto hidden;
-      overscroll-behavior-x: contain;
+
+      /* (Not bouncing past its ends: towards a side without actions, it
+         doesn't move.) */
+      overscroll-behavior-x: none;
       scroll-snap-type: x mandatory;
       touch-action: pan-x pan-y;
 
