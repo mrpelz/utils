@@ -57,12 +57,7 @@ const configDownstream = {
       {
         context: path.resolve(dirSrc, 'demo/assets'),
         filename: '[base]',
-        from: [
-          'icon-rounded.svg',
-          'manifest.webmanifest',
-          'ios27-blur-*.webmanifest',
-          'icons/*.png',
-        ],
+        from: ['icon-rounded.svg', 'manifest.webmanifest', 'icons/*.png'],
         to: 'assets',
       },
     ],

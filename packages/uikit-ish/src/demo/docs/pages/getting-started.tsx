@@ -392,6 +392,12 @@ export const GettingStartedPage: FunctionComponent = () => (
         safe areas for you.
       </li>
       <li>
+        On iOS 27, a translucent status bar blurs your top bar: add the inline
+        script from <a href={publicUrl('ios27#in-your-head')}>iOS 27</a> to your
+        head, right after the status bar’s meta tag. It starts the app below the
+        status bar there, and the library’s top bars follow.
+      </li>
+      <li>
         Add a web app manifest with <code>display: standalone</code>, a name, a
         start URL and a scope, a theme and background color, and icons: 192 and
         512 pixels, each also as a maskable version.

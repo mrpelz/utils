@@ -7,9 +7,8 @@ import * as components from '../../components/index.js';
 import { useTouchActive } from '../../styles.js';
 import { BackstoryAndFaqPage } from '../docs/pages/backstory-and-faq.js';
 import { GettingStartedPage } from '../docs/pages/getting-started.js';
+import { Ios27Page } from '../docs/pages/ios27.js';
 import { TokensPage } from '../docs/tokens/main.js';
-import { Ios27BlurPage } from '../ios27-blur/main.js';
-import { Ios27StatusBarPage } from '../ios27-status-bar/main.js';
 import { KitchenSinkPage } from '../kitchen-sink/main.js';
 import { nameComponents } from './frame/render-code.js';
 import { OptionsProvider } from './frame/state.js';
@@ -144,16 +143,12 @@ export const Demo: FunctionComponent = () => (
             path={publicUrl('/kitchen-sink')}
           />
           <Route
-            component={Ios27StatusBarPage}
-            path={publicUrl('/ios27-status-bar')}
-          />
-          <Route
-            component={Ios27BlurPage}
-            path={publicUrl('/ios27-blur/:status?/:variant?')}
-          />
-          <Route
             component={TokensPage}
             path={publicUrl('/tokens')}
+          />
+          <Route
+            component={Ios27Page}
+            path={publicUrl('/ios27')}
           />
           <Route
             component={GettingStartedPage}
