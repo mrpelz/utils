@@ -104,9 +104,10 @@ const edgeEffectRow: PropRow = [
   <>
     At the block start or end: its scroll edge effect, as content scrolls under
     it: <code>soft</code>, a blur fading out away from the edge;{' '}
-    <code>hard</code>, a solid backing with a dividing line. Drawn by the
-    scroller beneath (a <a href={publicUrl('page')}>Page</a>, a sheet’s content,
-    the{' '}
+    <code>hard</code>, a solid backing with a dividing line (untinted, in the
+    scroller’s own background color, as it changes, so it matches the page; a
+    scroller without one, the system background). Drawn by the scroller beneath
+    (a <a href={publicUrl('page')}>Page</a>, a sheet’s content, the{' '}
     <PartLink
       component="viewport"
       part="Viewport.Content"

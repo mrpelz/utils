@@ -107,6 +107,7 @@ export type ViewportContentSafeArea = ViewportSafeArea | 'auto';
 /**
  * A bar's scroll edge effect, as content scrolls under it:
  * `soft`, a blur fading out away from the edge; `hard`, a solid backing
+ * (untinted: its scroller's own background, else the system background)
  * with a dividing line; `none`.
  */
 export type ViewportEdgeEffect = 'hard' | 'none' | 'soft';

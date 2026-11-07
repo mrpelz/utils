@@ -25,7 +25,11 @@ import { useEdgeEffectOf } from './padding.js';
 // stuck to them (`useViewportEdgeElement`, `--uikit-viewport-edge-extent`):
 // measured as the scroller scrolls (a listener: a scroll-driven animation
 // there ends the scroller's fling, in Chrome). Its tint (an anchor's
-// `edgeTint`) shows at rest too.
+// `edgeTint`) shows at rest too. A hard one's backing, untinted, its
+// scroller's own background (`--uikit-viewport-edge-backing`, read from it:
+// matching the page, as its background changes; e.g. iOS 27's status bar
+// above it, the page's color too), or, the scroller without one, the system
+// background.
 
 type BlockEdge = 'block-start' | 'block-end';
 
@@ -112,6 +116,81 @@ const useMeasure = (
   }, [edge, layer, line, scroller]);
 };
 
+/** A background color painting nothing (`transparent`, alpha 0). */
+const isClear = (color: string) =>
+  color === 'transparent' ||
+  (color.startsWith('rgba(') && color.replaceAll(' ', '').endsWith(',0)'));
+
+/**
+ * The scroller's own background (computed: its class's, its style's, its
+ * color scheme's) on the layer, as `--uikit-viewport-edge-backing` (a hard
+ * effect's backing, see style.css); none painted, none set. Read again as
+ * the scroller's attributes change (its inline background, not its other
+ * styles: written as it scrolls), a color scheme's set within the
+ * document, or the system's color scheme or contrast changes.
+ */
+const useBacking = (
+  layer: RefObject<HTMLDivElement | null>,
+  scroller: RefObject<HTMLElement | null>,
+  isHard: boolean,
+) => {
+  useLayoutEffect(() => {
+    const { current: element } = scroller;
+    const { current: target } = layer;
+    if (!element || !target || !isHard) return undefined;
+    let inline = '';
+    let frame = 0;
+
+    const read = () => {
+      frame = 0;
+      inline = element.style.background + element.style.backgroundColor;
+      const color = getComputedStyle(element).backgroundColor;
+      if (isClear(color)) {
+        target.style.removeProperty('--uikit-viewport-edge-backing');
+      } else {
+        target.style.setProperty('--uikit-viewport-edge-backing', color);
+      }
+    };
+    const schedule = () => {
+      if (frame === 0) frame = requestAnimationFrame(read);
+    };
+
+    read();
+    const own = new MutationObserver((records) => {
+      const isStyleOnly = records.every(
+        ({ attributeName }) => attributeName === 'style',
+      );
+      if (
+        isStyleOnly &&
+        element.style.background + element.style.backgroundColor === inline
+      ) {
+        return;
+      }
+      schedule();
+    });
+    own.observe(element, { attributes: true });
+    const schemes = new MutationObserver(schedule);
+    schemes.observe(document.documentElement, {
+      attributeFilter: ['data-color-scheme'],
+      subtree: true,
+    });
+    const queries = [
+      matchMedia('(prefers-color-scheme: dark)'),
+      matchMedia('(prefers-contrast: more)'),
+    ];
+    for (const query of queries) query.addEventListener('change', schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      own.disconnect();
+      schemes.disconnect();
+      for (const query of queries) {
+        query.removeEventListener('change', schedule);
+      }
+      target.style.removeProperty('--uikit-viewport-edge-backing');
+    };
+  }, [isHard, layer, scroller]);
+};
+
 const Layer: FunctionComponent<{
   edge: BlockEdge;
   scroller: RefObject<HTMLElement | null>;
@@ -120,6 +199,7 @@ const Layer: FunctionComponent<{
   const layer = useRef<HTMLDivElement>(null);
   const line = useRef<HTMLDivElement>(null);
   useMeasure(layer, line, scroller, edge);
+  useBacking(layer, scroller, effect?.effect === 'hard');
 
   if (!effect) return null;
 

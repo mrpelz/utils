@@ -1,13 +1,6 @@
 import './style.css';
 
-import {
-  CSSProperties,
-  FunctionComponent,
-  RefObject,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { CSSProperties, FunctionComponent, useEffect, useState } from 'react';
 
 import {
   Header,
@@ -75,28 +68,6 @@ const useKept = <T extends string>(key: string, initial: T) => {
   return [value, set] as const;
 };
 
-/**
- * An element's background color, as computed (its class, its style, its
- * color scheme: whatever sets it), read again as `key` changes or the
- * color scheme does.
- */
-const useBackgroundOf = (
-  ref: RefObject<HTMLElement | null>,
-  key: string,
-): string | undefined => {
-  const [color, setColor] = useState<string | undefined>();
-  useEffect(() => {
-    const { current: element } = ref;
-    if (!element) return undefined;
-    const read = () => setColor(getComputedStyle(element).backgroundColor);
-    read();
-    const scheme = matchMedia('(prefers-color-scheme: dark)');
-    scheme.addEventListener('change', read);
-    return () => scheme.removeEventListener('change', read);
-  }, [key, ref]);
-  return color;
-};
-
 /** A native select (a demo's: no component of the library's). */
 const Choice = <T extends string>({
   label,
@@ -162,10 +133,6 @@ const App: FunctionComponent = () => {
   const [ios27] = useState(isIos27);
   const [page, setPage] = useKept<PageBackground>('page', 'grouped');
   const [root, setRoot] = useKept<RootBackground>('root', 'unset');
-  const pageRef = useRef<HTMLDivElement>(null);
-  // The page's own background, read from it (not a color assumed): the
-  // top bar's tint on iOS 27, so it matches the page as the page changes.
-  const pageColor = useBackgroundOf(pageRef, page);
 
   // The document root's background (to tell what iOS samples).
   useEffect(() => {
@@ -179,13 +146,9 @@ const App: FunctionComponent = () => {
     <Viewport.Provider>
       <Viewport.Content>
         <Header.Root>
-          <Viewport.BlockStart
-            edgeEffect={ios27 ? 'hard' : 'soft'}
-            // (iOS 27: tinted in the page's background, opaque at rest too:
-            // the system's bar above it takes the page's color, not the
-            // edge effect's backing, a pseudo-element's.)
-            edgeTint={ios27 ? pageColor : undefined}
-          >
+          {/* (iOS 27: hard, its backing the page's own background, as the
+              system's bar above it takes the page's color, see Viewport.) */}
+          <Viewport.BlockStart edgeEffect={ios27 ? 'hard' : 'soft'}>
             <Toolbar.Root placement="block-start">
               <Toolbar.Title>
                 <span>{title}</span>
@@ -193,7 +156,6 @@ const App: FunctionComponent = () => {
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root
-            ref={pageRef}
             background={page === 'plain' ? 'plain' : 'grouped'}
             style={
               pageColors[page] === undefined
@@ -222,7 +184,7 @@ const App: FunctionComponent = () => {
                   />
                   <Row
                     label="Top edge effect"
-                    value={ios27 ? `Hard, tinted ${pageColor ?? '?'}` : 'Soft'}
+                    value={ios27 ? 'Hard' : 'Soft'}
                   />
                   <Row
                     label="Home Screen app"
@@ -275,9 +237,8 @@ const App: FunctionComponent = () => {
                     the system draws its own opaque status bar, and the app
                     starts below it, so nothing of it is blurred. The app reads
                     the same detection and gives its top bar a hard edge effect
-                    beneath the system’s bar, tinted in the page’s own
-                    background color (read from the page), so the two bars
-                    match.
+                    beneath the system’s bar. Untinted, its backing is the
+                    page’s own background color, so the two bars match.
                   </p>
                   <p className="ios27-status-bar-text">
                     iOS reads the status bar style when the app is added to the

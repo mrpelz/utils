@@ -292,13 +292,17 @@
       }
     }
 
-    /* Hard: a solid backing (the tint, or the background), a line at its
-       inner side; tinted, at rest too. */
+    /* Hard: a solid backing (the tint; else its scroller's own background,
+       matching the page, see edge-effect.tsx; else the system background),
+       a line at its inner side; tinted, at rest too. */
     &[data-edge-effect='hard'] {
       &::before {
         background-color: var(
           --uikit-viewport-edge-tint,
-          var(--color-ui-system-background)
+          var(
+            --uikit-viewport-edge-backing,
+            var(--color-ui-system-background)
+          )
         );
         transition: background-color 300ms;
       }
