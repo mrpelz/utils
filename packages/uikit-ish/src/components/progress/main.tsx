@@ -78,7 +78,12 @@ const useSynchronized = (
     if (!isSynchronized) return;
     for (const animation of element.current?.getAnimations({ subtree: true }) ??
       []) {
-      if (animation instanceof CSSAnimation) animation.startTime = 0;
+      if (!(animation instanceof CSSAnimation)) continue;
+      // (Paused, played first: WebKit keeps a paused animation's held time
+      // past a start time set, a later pause settling on it, see
+      // `ActivityIndicator`.)
+      if (animation.playState === 'paused') animation.play();
+      animation.startTime = 0;
     }
   }, [element, isSynchronized, restart]);
 };
@@ -326,6 +331,36 @@ export const ActivityIndicator = forwardRef<
         shown !== 'freeze',
       `${display} ${movement} ${String(shown)}`,
     );
+    // Frozen: paused by script where it is, not by CSS (`animation-play-
+    // state`: ignored once a script has set an animation's start time, e.g.
+    // synchronized, or, WebKit, applied on its own clock, jumping);
+    // spinning again, played on (synchronized, rejoining the page's clock:
+    // see above).
+    // (Its pause settled, its time put back where it was paused: WebKit may
+    // settle it on an older one, a frame later.)
+    useLayoutEffect(() => {
+      const effect = { isCancelled: false };
+      for (const animation of ref.current?.getAnimations({
+        subtree: true,
+      }) ?? []) {
+        if (shown === 'freeze') {
+          const { currentTime } = animation;
+          animation.pause();
+          animation.ready
+            .then(() => {
+              if (!effect.isCancelled && animation.playState === 'paused') {
+                animation.currentTime = currentTime;
+              }
+            })
+            .catch(() => undefined);
+        } else if (shown === undefined && animation.playState === 'paused') {
+          animation.play();
+        }
+      }
+      return () => {
+        effect.isCancelled = true;
+      };
+    }, [ref, shown]);
 
     return (
       <BaseProgress.Root
