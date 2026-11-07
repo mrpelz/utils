@@ -41,11 +41,12 @@ export const meta = {
 /**
  * Its web app manifest, unless it shows an app of its own: a demo raw
  * (`#id=…&raw=true` on a demos' page, see
- * src/demo/tooling/frame/component.tsx), or the kitchen sink
- * (`/kitchen-sink`, see src/demo/kitchen-sink/main.tsx). Added to the
- * Home Screen, that's its own app (no manifest: its start the current URL,
- * not the demo's start page; its name the demo's id, or the kitchen
- * sink's title), as Safari reads the
+ * src/demo/tooling/frame/component.tsx), the kitchen sink
+ * (`/kitchen-sink`, see src/demo/kitchen-sink/main.tsx), or the iOS 27
+ * blur test page (`/ios27-blur`, see src/demo/ios27-blur/main.tsx). Added
+ * to the Home Screen, that's its own app (no manifest: its start the
+ * current URL, not the demo's start page; its name the demo's id, or the
+ * page's title), as Safari reads the
  * head once, as the page loads. (A script, run as the head's parsed: before
  * Safari reads it.)
  *
@@ -69,7 +70,9 @@ export const manifest = (publicPath) => `<script>(() => {
       ? id
       : isAt('/kitchen-sink')
         ? 'Kitchen Sink'
-        : undefined;
+        : isAt('/ios27-blur')
+          ? 'iOS 27 Blur'
+          : undefined;
   if (name !== undefined) {
     document.title = name;
     document

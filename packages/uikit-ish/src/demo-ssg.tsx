@@ -17,6 +17,7 @@ import { publicUrl } from './demo/tooling/public-url.js';
 
 const BODY = '<body></body>';
 const KITCHEN_SINK_PATH = 'kitchen-sink';
+const IOS27_BLUR_PATH = 'ios27-blur';
 
 const demoDir = path.resolve(process.cwd(), 'demo');
 
@@ -101,6 +102,7 @@ const walk = async (location: string): Promise<void> => {
 
 await walk('.');
 await walk(KITCHEN_SINK_PATH);
+await walk(IOS27_BLUR_PATH);
 
 console.log(
   `✅ finished; prerendered ${handled.size - failures.size} of ${handled.size} links`,

@@ -1,0 +1,96 @@
+/* The iOS 27 blur test page (see main.tsx). */
+@layer demo {
+  /* The strip at the top (a variant's): fixed, as wide as the screen, as
+     tall as the top safe area (6px at least), the page's background (its
+     bars' backing); a variant's size, place and color its own. Above all
+     else, touched through. */
+  .ios27-blur-strip {
+    position: fixed;
+    z-index: 100;
+    top: var(--ios27-blur-strip-top, 0);
+    left: 0;
+    width: var(--ios27-blur-strip-width, 100%);
+    height: var(
+      --ios27-blur-strip-height,
+      max(6px, env(safe-area-inset-top))
+    );
+    background-color: var(
+      --ios27-blur-strip-color,
+      var(--color-ui-system-grouped-background)
+    );
+    pointer-events: none;
+
+    &[data-background='plain'] {
+      background-color: var(
+        --ios27-blur-strip-color,
+        var(--color-ui-system-background)
+      );
+    }
+
+    /* Fading into what's below (the bar's edge effect): its color, from
+       solid to clear, 16px further. */
+    &[data-fade]::after {
+      position: absolute;
+      top: 100%;
+      height: 16px;
+      content: '';
+      inset-inline: 0;
+    }
+
+    &[data-fade]:not([data-background='plain'])::after {
+      background-image: linear-gradient(
+        var(
+          --ios27-blur-strip-color,
+          var(--color-ui-system-grouped-background)
+        ),
+        transparent
+      );
+    }
+
+    &[data-fade][data-background='plain']::after {
+      background-image: linear-gradient(
+        var(--ios27-blur-strip-color, var(--color-ui-system-background)),
+        transparent
+      );
+    }
+  }
+
+  /* Content under the bar: colored bands, text on them (the blur, and how
+     far it reaches, easy to see). */
+  .ios27-blur-bands {
+    display: grid;
+    gap: 8px;
+    padding-inline: 16px;
+  }
+
+  .ios27-blur-band {
+    display: grid;
+    padding: 16px;
+    border-radius: 16px;
+    background-color: hsl(var(--ios27-blur-hue) 90% 50%);
+    color: #000;
+    font-size: 17px;
+    gap: 4px;
+  }
+
+  /* The controls, in the bottom bar: one below another. */
+  .ios27-blur-controls {
+    display: grid;
+    padding: 8px 16px;
+    gap: 6px;
+  }
+
+  .ios27-blur-choice {
+    display: grid;
+    align-items: center;
+    color: var(--color-ui-label);
+    font-size: 15px;
+    gap: 8px;
+    grid-template-columns: 110px 1fr;
+
+    & select {
+      min-width: 0;
+      font-size: 16px;
+    }
+  }
+}
