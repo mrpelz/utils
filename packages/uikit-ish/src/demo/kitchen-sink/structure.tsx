@@ -722,26 +722,40 @@ const LayoutBox: FunctionComponent<{ children: ReactNode }> = ({
   children,
 }) => <div className="kitchen-sink-layout-box">{children}</div>;
 
-/** A column's page: its title, a few rows. */
-const ColumnPage: FunctionComponent<{ rows?: number; title: string }> = ({
-  rows = 6,
-  title,
-}) => (
-  <List.Root>
-    <List.Section>
-      <List.Header>
-        <List.Title>{title}</List.Title>
-      </List.Header>
-      <List.Group>
-        {Array.from({ length: rows }, (_, index) => (
-          <Row
-            key={index}
-            title={`${title} ${String(index + 1)}`}
-          />
-        ))}
-      </List.Group>
-    </List.Section>
-  </List.Root>
+/**
+ * A column's page: its title, a few rows (on the layout's background,
+ * `transparent`, showing through). Scrolling on its own, but not a
+ * `Page.Root`: a page within the kitchen sink's page, not one the
+ * viewport tracks (its edge effects the kitchen sink page's).
+ */
+const ColumnPage: FunctionComponent<{
+  rows?: number;
+  title: string;
+  transparent?: boolean;
+}> = ({ rows = 6, title, transparent = false }) => (
+  <div
+    className={
+      transparent
+        ? 'kitchen-sink-column-page kitchen-sink-transparent'
+        : 'kitchen-sink-column-page'
+    }
+  >
+    <List.Root>
+      <List.Section>
+        <List.Header>
+          <List.Title>{title}</List.Title>
+        </List.Header>
+        <List.Group>
+          {Array.from({ length: rows }, (_, index) => (
+            <Row
+              key={index}
+              title={`${title} ${String(index + 1)}`}
+            />
+          ))}
+        </List.Group>
+      </List.Section>
+    </List.Root>
+  </div>
 );
 
 const LayoutContent: FunctionComponent = () => (
@@ -818,7 +832,10 @@ const LayoutContent: FunctionComponent = () => (
             </Sidebar.Root>
           </Layout.Column>
           <Layout.Column clearFloating>
-            <ColumnPage title="Message" />
+            <ColumnPage
+              transparent
+              title="Message"
+            />
           </Layout.Column>
         </Layout.Root>
       </LayoutBox>

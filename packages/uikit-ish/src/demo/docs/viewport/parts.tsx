@@ -2083,7 +2083,10 @@ export const ViewportParts: FunctionComponent = () => (
         Lifted (<code>data-lifted</code>), above what’s around it, on{' '}
         <code>--uikit-viewport-keyboard-accessory-background</code> (none by
         default); by <code>--uikit-viewport-keyboard-lift</code> (px), following
-        the keyboard (250ms, none with reduced motion).
+        the keyboard (250ms, none with reduced motion). A{' '}
+        <a href={publicUrl('list')}>List</a>’s groups in it, lifted, are
+        outlined and raised (as a row being reordered), not blending into the
+        rows they’re lifted over.
       </li>
       <li>
         Needs a{' '}

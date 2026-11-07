@@ -15,6 +15,7 @@ import {
   useSelectionAnchor,
   useSizeClass,
   useTextActionsPrevention,
+  Viewport,
 } from '../../components/index.js';
 import { photo } from '../docs/avatar/props.js';
 import {
@@ -23,15 +24,21 @@ import {
   sfChevronUpChevronDown,
   sfDocumentOnDocument,
   sfEllipsis,
+  sfEnvelope,
   sfEyeglasses,
+  sfFlag,
+  sfFolder,
   sfHeart,
+  sfLink,
   sfLockFill,
   sfPerson2Fill,
   sfPhoto,
   sfPinFill,
   sfPlus,
+  sfPrinter,
   sfSquare,
   sfSquareAndArrowUp,
+  sfTagFill,
   sfTrash,
   sfXmark,
 } from '../tooling/icons.js';
@@ -731,40 +738,57 @@ const actions = [
   ['Add to Favorites', sfHeart],
   ['Add to Reading List', sfEyeglasses],
   ['Add Bookmark', sfBook],
+  ['Copy Link', sfLink],
+  ['Mail', sfEnvelope],
+  ['Print', sfPrinter],
 ] as const;
 
-/** An activity view's content: its header, people, actions, rows. */
-const activityContent = (close: ReactNode) => (
+/** More actions, as the list's rows (enough to scroll). */
+const moreActions = [
+  ...actions,
+  ['Add to Folder', sfFolder],
+  ['Flag', sfFlag],
+  ['Add Tags', sfTagFill],
+  ['Delete', sfTrash],
+] as const;
+
+/** An activity view's header: what's shared, its options, `close`. */
+const activityHeader = (close: ReactNode) => (
+  <ActivityView.Header>
+    <ActivityView.Thumbnail>
+      <img
+        alt=""
+        src={photo(30)}
+      />
+    </ActivityView.Thumbnail>
+    <ActivityView.Heading>
+      <ActivityView.Title>Harbor Walk</ActivityView.Title>
+      <ActivityView.Subtitle>Photo · 2.4 MB</ActivityView.Subtitle>
+      <Button.Root
+        disabled={false}
+        size="small"
+        variant="bordered-secondary"
+      >
+        <Button.Icon>
+          <Symbol icon={sfPerson2Fill} />
+        </Button.Icon>
+        <Button.Label>Options</Button.Label>
+        <Button.Icon>
+          <Symbol icon={sfChevronRight} />
+        </Button.Icon>
+      </Button.Root>
+      <ActivityView.Message>Only invited people can edit.</ActivityView.Message>
+    </ActivityView.Heading>
+    {close}
+  </ActivityView.Header>
+);
+
+/**
+ * An activity view's content below its header (scrolling under it):
+ * people, actions, more actions as rows.
+ */
+const activityBody = (
   <>
-    <ActivityView.Header>
-      <ActivityView.Thumbnail>
-        <img
-          alt=""
-          src={photo(30)}
-        />
-      </ActivityView.Thumbnail>
-      <ActivityView.Heading>
-        <ActivityView.Title>Harbor Walk</ActivityView.Title>
-        <ActivityView.Subtitle>Photo · 2.4 MB</ActivityView.Subtitle>
-        <Button.Root
-          disabled={false}
-          size="small"
-          variant="bordered-secondary"
-        >
-          <Button.Icon>
-            <Symbol icon={sfPerson2Fill} />
-          </Button.Icon>
-          <Button.Label>Options</Button.Label>
-          <Button.Icon>
-            <Symbol icon={sfChevronRight} />
-          </Button.Icon>
-        </Button.Root>
-        <ActivityView.Message>
-          Only invited people can edit.
-        </ActivityView.Message>
-      </ActivityView.Heading>
-      {close}
-    </ActivityView.Header>
     <ActivityView.Separator />
     <ActivityView.People aria-label="People">
       {people.map(([name, initials, hue]) => (
@@ -803,7 +827,7 @@ const activityContent = (close: ReactNode) => (
     <List.Root>
       <List.Section>
         <List.Group>
-          {actions.map(([label, icon]) => (
+          {moreActions.map(([label, icon]) => (
             <List.Item key={label}>
               <List.Leading>
                 <List.Image variant="symbol">
@@ -837,63 +861,90 @@ const closeIcon = (
   </Button.Icon>
 );
 
-/** The activity view: a sheet (compact), or a popover (regular). */
+const shareTrigger = (
+  <Button.Root
+    size="large"
+    variant="bordered"
+  />
+);
+
+const shareLabel = (label: string) => (
+  <>
+    <Button.Icon>
+      <Symbol icon={sfSquareAndArrowUp} />
+    </Button.Icon>
+    <Button.Label>{label}</Button.Label>
+  </>
+);
+
+/**
+ * The activity view in a sheet (from the bottom on a phone, a form sheet
+ * on a tablet): its header below the grabber.
+ */
+const ActivitySheet: FunctionComponent<{ label: string }> = ({ label }) => (
+  <Sheet.Root>
+    <Sheet.Trigger render={shareTrigger}>{shareLabel(label)}</Sheet.Trigger>
+    <Sheet.Popup
+      background="grouped"
+      detent="medium"
+    >
+      <Sheet.Header>
+        <Sheet.Grabber />
+        {activityHeader(
+          <Sheet.Close render={closeButton}>{closeIcon}</Sheet.Close>,
+        )}
+      </Sheet.Header>
+      <Sheet.Content>
+        <Viewport.Padding edge="block-start" />
+        {activityBody}
+        <Viewport.Padding edge="block-end" />
+      </Sheet.Content>
+    </Sheet.Popup>
+  </Sheet.Root>
+);
+
+/** The activity view in a popover at its trigger. */
+const ActivityPopover: FunctionComponent<{ label: string }> = ({ label }) => (
+  <Popover.Root>
+    <Popover.Trigger render={shareTrigger}>{shareLabel(label)}</Popover.Trigger>
+    <Popover.Portal>
+      <Popover.Positioner>
+        <Popover.Popup className="kitchen-sink-activity-popup">
+          <Popover.Arrow />
+          <Popover.Header>
+            {activityHeader(
+              <Popover.Close render={closeButton}>{closeIcon}</Popover.Close>,
+            )}
+          </Popover.Header>
+          <Popover.Body>
+            <Viewport.Padding edge="block-start" />
+            {activityBody}
+          </Popover.Body>
+        </Popover.Popup>
+      </Popover.Positioner>
+    </Popover.Portal>
+  </Popover.Root>
+);
+
+/**
+ * The activity view: by the size class (a sheet compact, a popover
+ * regular), or either.
+ */
 const ActivityViewContent: FunctionComponent = () => {
   const isCompact = useSizeClass() === 'compact';
-  const trigger = (
-    <Button.Root
-      size="large"
-      variant="bordered"
-    />
-  );
-  const label = (
-    <>
-      <Button.Icon>
-        <Symbol icon={sfSquareAndArrowUp} />
-      </Button.Icon>
-      <Button.Label>Share</Button.Label>
-    </>
-  );
 
   return (
     <List.Root>
-      <Showcase title={isCompact ? 'In a Sheet' : 'In a Popover'}>
+      <Showcase
+        title={`Automatic (Now ${isCompact ? 'a Sheet' : 'a Popover'}), in a Sheet, in a Popover`}
+      >
         {isCompact ? (
-          <Sheet.Root>
-            <Sheet.Trigger render={trigger}>{label}</Sheet.Trigger>
-            <Sheet.Popup
-              compact
-              detent="medium"
-            >
-              <Sheet.Header>
-                <Sheet.Grabber />
-              </Sheet.Header>
-              <Sheet.Content>
-                {activityContent(
-                  <Sheet.Close render={closeButton}>{closeIcon}</Sheet.Close>,
-                )}
-              </Sheet.Content>
-            </Sheet.Popup>
-          </Sheet.Root>
+          <ActivitySheet label="Automatic" />
         ) : (
-          <Popover.Root>
-            <Popover.Trigger render={trigger}>{label}</Popover.Trigger>
-            <Popover.Portal>
-              <Popover.Positioner>
-                <Popover.Popup className="kitchen-sink-activity-popup">
-                  <Popover.Arrow />
-                  <Popover.Body>
-                    {activityContent(
-                      <Popover.Close render={closeButton}>
-                        {closeIcon}
-                      </Popover.Close>,
-                    )}
-                  </Popover.Body>
-                </Popover.Popup>
-              </Popover.Positioner>
-            </Popover.Portal>
-          </Popover.Root>
+          <ActivityPopover label="Automatic" />
         )}
+        <ActivitySheet label="Sheet" />
+        <ActivityPopover label="Popover" />
       </Showcase>
     </List.Root>
   );

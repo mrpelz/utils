@@ -38,6 +38,14 @@
       visibility: hidden;
     }
 
+    /* Gone, until unmounted (see Stack): not painted at all. Hidden alone,
+       its descendants transitioning their own visibility (e.g. a List
+       row's slots) would show until their transitions end, above the page
+       come back to. */
+    &[data-navigation-lingering] {
+      content-visibility: hidden;
+    }
+
     /* (From where it was: see Transition's `from`, at progress 0.) */
     &[data-navigation-role='top'] {
       --uikit-navigation-x: calc(

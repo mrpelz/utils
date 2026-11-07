@@ -663,9 +663,10 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
         .map(({ page }) => page),
     ];
 
-    // Gone (popped, or replaced): lingering, hidden and inert, until the
-    // browser is idle and the stack at rest, unmounted then (a large page's
-    // unmounting costly: not as the stack comes to rest, nor mid-slide).
+    // Gone (popped, or replaced): lingering, hidden (not painted at all,
+    // see style.css) and inert, until the browser is idle and the stack at
+    // rest, unmounted then (a large page's unmounting costly: not as the
+    // stack comes to rest, nor mid-slide).
     // Pushed again meanwhile, a page anew (its frame's key's generation
     // the next: mounted afresh, not shown as it was left).
     const shownKeys = shown.map((page) => String(page.key));
@@ -744,6 +745,7 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
               className="uikit-navigation-frame"
               data-navigation-departing={departingIndex === -1 ? undefined : ''}
               data-navigation-key={key}
+              data-navigation-lingering={isLingering ? '' : undefined}
               data-navigation-part="page"
               data-navigation-role={role}
               inert={isInert}

@@ -24,6 +24,12 @@
     overscroll-behavior: contain;
   }
 
+  /* Its header: as far from its actions as from its top (an alert's
+     header further, see Alert). */
+  .uikit-action-sheet-header.uikit-alert-header {
+    padding-block-end: 8px;
+  }
+
   .uikit-action-sheet-actions {
     display: flex;
     flex-direction: column;

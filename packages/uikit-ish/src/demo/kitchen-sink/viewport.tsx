@@ -507,6 +507,10 @@ const AccessoryScreen: FunctionComponent = () => (
                   />
                 ))}
               </List.Group>
+              <List.Footer>
+                Focused, the Note row below is lifted above the keyboard (its
+                place in the list kept), as far as the keyboard covers it.
+              </List.Footer>
             </List.Section>
             {/* (Its section, kept above the keyboard while focused.) */}
             <List.Section render={<Viewport.KeyboardAccessory />}>
@@ -520,10 +524,6 @@ const AccessoryScreen: FunctionComponent = () => (
                   </List.Trailing>
                 </TextField.Root>
               </List.Group>
-              <List.Footer>
-                Focused, this row is lifted above the keyboard (its place in the
-                list kept), as far as the keyboard covers it.
-              </List.Footer>
             </List.Section>
           </List.Root>
           <Viewport.Padding edge="block-end" />

@@ -92,6 +92,12 @@
   /* Its material (see main.tsx): its outlines' clip paths by its arrow's
      side (`data-arrow`). */
   .uikit-popover-popup {
+    /* Not at the screen's edges: no safe areas for its content (e.g. an
+       activity view's header, clear of a sheet's top). */
+    --uikit-safe-area-inset-top: 0px;
+    --uikit-safe-area-inset-right: 0px;
+    --uikit-safe-area-inset-bottom: 0px;
+    --uikit-safe-area-inset-left: 0px;
     --uikit-popover-rim: light-dark(rgb(0 0 0 / 12%), rgb(255 255 255 / 15%));
     --uikit-popover-highlight: light-dark(rgb(255 255 255 / 60%), transparent);
     --uikit-popover-glow: light-dark(rgb(0 0 0 / 20%), rgb(0 0 0 / 15%));

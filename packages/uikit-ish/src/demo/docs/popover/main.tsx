@@ -134,15 +134,10 @@ export const PopoverDemo: FunctionComponent = () => {
                     <Popover.Trigger
                       aria-label="Info"
                       render={
-                        <Button.Root
-                          shape="circle"
-                          variant="borderless"
-                        />
+                        <List.Accessory render={<button type="button" />} />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfICircle} />
-                      </Button.Icon>
+                      <Symbol icon={sfICircle} />
                     </Popover.Trigger>
                     <Popover.Portal>
                       <Popover.Positioner align="end">

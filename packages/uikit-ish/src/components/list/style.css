@@ -53,6 +53,16 @@
     }
   }
 
+  /* Lifted above the keyboard (in a keyboard accessory, see Viewport):
+     outlined (in an outlined list's color, see `outline`) and raised (as
+     a row being reordered), not blending into the rows it's lifted over. */
+  [data-viewport-part='keyboard-accessory'][data-lifted] .uikit-list-group {
+    box-shadow:
+      inset 0 0 0 1px var(--color-ui-list-separator),
+      var(--shadow-ui-list-reorder);
+  }
+
+
   /* A row (see Item): its parts in a line, in their order (a flexbox):
      leading ones (edit controls, the image, `Leading`), its `Content`
      (title, subtitle, text: taking the rest), trailing ones (details,

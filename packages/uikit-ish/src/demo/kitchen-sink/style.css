@@ -121,11 +121,38 @@
   .kitchen-sink-layout-box {
     position: relative;
     display: grid;
-    overflow: clip;
+
+    /* (Narrower than its layout, e.g. on a phone: scrolled sideways.) */
+    overflow: auto hidden;
     height: min(480px, 70vh);
     border: 1px solid var(--color-ui-separator);
     border-radius: var(--uikit-list-radius, 24px);
     margin-inline: var(--uikit-list-inset, 16px);
+    overscroll-behavior-x: contain;
+
+    & > .uikit-layout-root {
+      min-width: 720px;
+    }
+  }
+
+  /* A column's page (see structure.tsx): scrolling on its own, on the
+     page background, clear of a floating column (as a page is). */
+  .kitchen-sink-column-page {
+    overflow: auto;
+    height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    background-color: var(--color-ui-system-grouped-background);
+    overscroll-behavior: contain;
+    padding-inline-start: var(--uikit-layout-inset-start, 0);
+  }
+
+  /* A transparent page (its list's, too): the layout's background shows
+     through. */
+  .kitchen-sink-transparent {
+    --uikit-list-container-background: transparent;
+
+    background-color: transparent;
   }
 
   /* Filling its box (e.g. a layout's background picture). */

@@ -65,8 +65,6 @@ const LiveView: FunctionComponent = () => {
           >
             <Sheet.Header>
               <Sheet.Grabber />
-            </Sheet.Header>
-            <Sheet.Content>
               <ActivityView.Header>
                 <ActivityView.Thumbnail>
                   <img
@@ -92,6 +90,9 @@ const LiveView: FunctionComponent = () => {
                   </Button.Icon>
                 </Sheet.Close>
               </ActivityView.Header>
+            </Sheet.Header>
+            <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <ActivityView.Separator />
               <ActivityView.People aria-label="People">
                 <ActivityView.Person
@@ -253,7 +254,21 @@ export const ActivityViewOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        People and actions in rows scrolling sideways, 78px each, 14px apart.
+        Its header in the sheet’s or popover’s header (
+        <PartLink
+          component="sheet"
+          part="Sheet.Header"
+        />
+        ,{' '}
+        <PartLink
+          component="popover"
+          part="Popover.Header"
+        />
+        ): staying put, the rest scrolling under it, behind its edge effect.
+      </li>
+      <li>
+        People and actions in rows scrolling sideways, 78px each, 14px apart; a
+        row that fits centered.
       </li>
       <li>
         A group’s name with its count (

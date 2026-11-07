@@ -277,9 +277,9 @@ export const NavigationOverview: FunctionComponent = () => (
         swiped back while it’s on top.
       </li>
       <li>
-        A page gone (popped, or replaced) stays mounted, hidden and inert, until
-        the browser is idle and the stack at rest (Safari: shortly after): a
-        large page’s unmounting doesn’t stall the stack as it comes to rest.
+        A page gone (popped, or replaced) stays mounted, unpainted and inert,
+        until the browser is idle and the stack at rest (Safari: shortly after):
+        a large page’s unmounting doesn’t stall the stack as it comes to rest.
         Pushed again meanwhile, it’s mounted afresh.
       </li>
       <li>

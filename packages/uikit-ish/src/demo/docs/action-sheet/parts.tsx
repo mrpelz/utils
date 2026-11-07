@@ -788,8 +788,10 @@ export const ActionSheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional: its title and description, as an alert’s (24px above its
-        actions). Many action sheets have only a description, or neither.
+        Optional: its title and description, as an{' '}
+        <a href={publicUrl('alert')}>Alert</a>’s, but closer to its actions
+        (18px above them, an alert’s 34px). Many action sheets have only a
+        description, or neither.
       </li>
       <li>
         Renders a <code>div</code>.

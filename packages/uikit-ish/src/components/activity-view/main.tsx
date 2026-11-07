@@ -27,7 +27,12 @@ export type {
 // - separators between them (0.5px, 16px in);
 // - its actions as a list (a `List`).
 //
+// Its header goes in the sheet's or popover's header (`Sheet.Header`,
+// below the grabber; `Popover.Header`), staying put, the rest in their
+// content, scrolling under it (behind its edge effect).
+//
 // Also:
+// - A row that fits is centered.
 // - A group's name (with a count) takes one line, truncated.
 // - The actions' symbols are light.
 // - Apps (an app icon row, people's app badges) aren't built: an avatar

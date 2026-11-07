@@ -65,15 +65,10 @@ const InAListRow: FunctionComponent = () => {
                   <Popover.Trigger
                     aria-label="Details"
                     render={
-                      <Button.Root
-                        shape="circle"
-                        variant="borderless"
-                      />
+                      <List.Accessory render={<button type="button" />} />
                     }
                   >
-                    <Button.Icon>
-                      <Symbol icon={sfICircle} />
-                    </Button.Icon>
+                    <Symbol icon={sfICircle} />
                   </Popover.Trigger>
                   <Popover.Portal>
                     <Popover.Positioner align="end">
@@ -532,8 +527,13 @@ export const PopoverComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A row’s info button (a <a href={publicUrl('button')}>Button</a>, its
-        symbol) shows details of the row’s item.
+        A row’s info button (
+        <PartLink
+          component="list"
+          part="List.Accessory"
+        />
+        , its symbol: at the row’s end, as far in as its other slots) shows
+        details of the row’s item.
       </li>
       <li>
         Aligned with the row’s end (

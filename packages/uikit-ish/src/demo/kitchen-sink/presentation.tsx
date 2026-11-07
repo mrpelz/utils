@@ -487,22 +487,23 @@ const PopoverContent: FunctionComponent = () => (
         <Popover.Root>
           <Popover.Trigger
             aria-label="Network info"
-            render={
-              <Button.Root
-                shape="circle"
-                variant="borderless"
-              />
-            }
+            render={<List.Accessory render={<button type="button" />} />}
           >
-            <Button.Icon>
-              <Symbol icon={sfICircle} />
-            </Button.Icon>
+            <Symbol icon={sfICircle} />
           </Popover.Trigger>
           <Popover.Portal>
             <Popover.Positioner align="end">
               <Popover.Popup className="kitchen-sink-popover">
                 <Popover.Arrow />
+                <Popover.Header>
+                  <Toolbar.Root placement="block-start">
+                    <Toolbar.Title>
+                      <Popover.Title render={<span />}>Wi-Fi</Popover.Title>
+                    </Toolbar.Title>
+                  </Toolbar.Root>
+                </Popover.Header>
                 <Popover.Body>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     <List.Section>
                       <List.Group>

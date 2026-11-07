@@ -13,6 +13,10 @@
 
     /* (For its background, behind its columns.) */
     isolation: isolate;
+
+    /* Its floating column's size (set as it's laid out, see main.tsx):
+       none, unless it has one (not inherited from a layout around it). */
+    --uikit-layout-floating-size: 0px;
   }
 
   .uikit-layout-background {
@@ -45,6 +49,10 @@
     box-sizing: border-box;
     flex: var(--uikit-layout-column-flex, 1 1 0);
     flex-direction: column;
+
+    /* Its pages' inset (see below): none, unless it's clear of a floating
+       column (not inherited from a column around its layout). */
+    --uikit-layout-inset-start: 0px;
 
     /* The containing block of its fixed layers (e.g. a header's bar, a
        `Viewport` anchor): spanning it, not the screen. */
