@@ -23,6 +23,7 @@ import {
   useAnchorRegistration,
   useScrollerRegistration,
   useSizeClass,
+  ViewportInsetContext,
   ViewportScopeContext,
 } from '../viewport/main.js';
 import type {
@@ -375,75 +376,77 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
 
     return (
       <ViewportScopeContext.Provider value={scope}>
-        <SnapReportContext.Provider value={report}>
-          <SliverContext.Provider value={setSliver}>
-            <div
-              ref={ref}
-              data-regular={isRegular ? '' : undefined}
-              data-sliver={isSliver ? '' : undefined}
-              data-snap={isSnapping ? '' : undefined}
-              style={withStyle(
-                {
-                  '--uikit-island-max-height':
-                    maxHeight === undefined
-                      ? undefined
-                      : `${String(maxHeight)}px`,
-                  '--uikit-island-lowest': `${String(lowest)}px`,
-                  '--uikit-island-shown':
-                    shown === undefined ? undefined : `${String(shown)}px`,
-                },
-                style,
-              )}
-              {...props}
-              className={cn('uikit-island', className)}
-              data-island-part="root"
-            >
+        <ViewportInsetContext.Provider value>
+          <SnapReportContext.Provider value={report}>
+            <SliverContext.Provider value={setSliver}>
               <div
-                ref={scroller}
-                className="uikit-island-scroller"
-                data-island-part="scroller"
+                ref={ref}
+                data-regular={isRegular ? '' : undefined}
+                data-sliver={isSliver ? '' : undefined}
+                data-snap={isSnapping ? '' : undefined}
+                style={withStyle(
+                  {
+                    '--uikit-island-max-height':
+                      maxHeight === undefined
+                        ? undefined
+                        : `${String(maxHeight)}px`,
+                    '--uikit-island-lowest': `${String(lowest)}px`,
+                    '--uikit-island-shown':
+                      shown === undefined ? undefined : `${String(shown)}px`,
+                  },
+                  style,
+                )}
+                {...props}
+                className={cn('uikit-island', className)}
+                data-island-part="root"
               >
-                {/* The room it's scrolled up out of (snapping; short of its
+                <div
+                  ref={scroller}
+                  className="uikit-island-scroller"
+                  data-island-part="scroller"
+                >
+                  {/* The room it's scrolled up out of (snapping; short of its
                     lowest stop), its stops in its flow (see Sheet's), within
                     its scroll's range. */}
-                <div
-                  aria-hidden="true"
-                  className="uikit-island-spacer"
-                  data-island-part="spacer"
-                >
-                  {isSnapping
-                    ? positions.map((stop, stopIndex) => (
-                        <span
-                          // (By place: one re-measured moves, still the
-                          // one snapped to.)
-
-                          key={stopIndex}
-                          className="uikit-island-stop"
-                          data-island-part="stop"
-                          style={{
-                            marginTop: `min(${String(stop)}px, 100cqh - 1px)`,
-                          }}
-                        />
-                      ))
-                    : null}
-                </div>
-                {/* Its capsule: its glass's colors (by class), its glass a
-                    layer of its own (a sliver's fading in, see above). */}
-                <div
-                  className="uikit-island-panel uikit-glass-medium"
-                  data-island-part="panel"
-                >
                   <div
                     aria-hidden="true"
-                    className="uikit-island-glass"
-                    data-island-part="glass"
-                  />
-                  {children}
+                    className="uikit-island-spacer"
+                    data-island-part="spacer"
+                  >
+                    {isSnapping
+                      ? positions.map((stop, stopIndex) => (
+                          <span
+                            // (By place: one re-measured moves, still the
+                            // one snapped to.)
+
+                            key={stopIndex}
+                            className="uikit-island-stop"
+                            data-island-part="stop"
+                            style={{
+                              marginTop: `min(${String(stop)}px, 100cqh - 1px)`,
+                            }}
+                          />
+                        ))
+                      : null}
+                  </div>
+                  {/* Its capsule: its glass's colors (by class), its glass a
+                    layer of its own (a sliver's fading in, see above). */}
+                  <div
+                    className="uikit-island-panel uikit-glass-medium"
+                    data-island-part="panel"
+                  >
+                    <div
+                      aria-hidden="true"
+                      className="uikit-island-glass"
+                      data-island-part="glass"
+                    />
+                    {children}
+                  </div>
                 </div>
               </div>
-            </div>
-          </SliverContext.Provider>
-        </SnapReportContext.Provider>
+            </SliverContext.Provider>
+          </SnapReportContext.Provider>
+        </ViewportInsetContext.Provider>
       </ViewportScopeContext.Provider>
     );
   },

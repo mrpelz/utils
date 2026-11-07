@@ -336,6 +336,8 @@ export {
   useVisualViewport,
   useAnchorSize,
   useCreateViewportAnchorHandle,
+  ios27Attribute,
+  isIos27,
   Viewport,
   ViewportAnchorHandle,
   ViewportScopeContext,

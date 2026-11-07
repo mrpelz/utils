@@ -31,6 +31,7 @@ import {
   EdgeEffects,
   useAnchorRegistration,
   useScrollerRegistration,
+  ViewportInsetContext,
   ViewportScopeContext,
 } from '../viewport/main.js';
 import type {
@@ -300,7 +301,9 @@ const Popup = forwardRef<HTMLDivElement, Omit<BasePopover.Popup.Props, 'ref'>>(
           <span data-layer="highlight" />
         </span>
         <ViewportScopeContext.Provider value={scope}>
-          {children as ReactNode}
+          <ViewportInsetContext.Provider value>
+            {children as ReactNode}
+          </ViewportInsetContext.Provider>
         </ViewportScopeContext.Provider>
       </BasePopover.Popup>
     );

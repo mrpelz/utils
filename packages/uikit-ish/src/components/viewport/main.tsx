@@ -30,6 +30,7 @@ import {
   useScrollerRegistration,
 } from './edge.js';
 import { EdgeEffects } from './edge-effect.js';
+import { isIos27, ViewportInsetContext } from './ios27.js';
 import {
   createAnchorHandle,
   Padding,
@@ -64,6 +65,7 @@ export {
 } from './input.js';
 export { useScrollerRegistration, useViewportEdgeElement } from './edge.js';
 export { EdgeEffects } from './edge-effect.js';
+export { ios27Attribute, isIos27, ViewportInsetContext } from './ios27.js';
 export {
   useAnchorRegistration,
   useAnchorSize,
@@ -1069,7 +1071,7 @@ const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
     {
       className,
       edge,
-      edgeEffect = 'soft',
+      edgeEffect: ownEdgeEffect,
       edgeTint,
       handle,
       keyboard = 'push',
@@ -1080,6 +1082,19 @@ const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
     forwardedRef,
   ) => {
     const ref = useForwardedRef(forwardedRef);
+    // (Unset: soft; on iOS 27, at the screen's top, hard, beneath the
+    // system's status bar, see ios27.ts: not in a popup inset from it, nor
+    // in a portal container, e.g. a device's frame.)
+    const isInset = useContext(ViewportInsetContext);
+    const portalContainer = usePortalContainer(undefined);
+    const edgeEffect =
+      ownEdgeEffect ??
+      (edge === 'block-start' &&
+      !isInset &&
+      portalContainer === undefined &&
+      isIos27()
+        ? 'hard'
+        : 'soft');
     // Its size, for the paddings making room for it (see `Padding`); its
     // edge effect, for the scrollers drawing it (see `EdgeEffects`).
     useAnchorRegistration(ref, edge, handle, {
@@ -1087,7 +1102,7 @@ const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
       keyboard,
       tint: edgeTint,
     });
-    useWindowHold(usePortalContainer(undefined));
+    useWindowHold(portalContainer);
 
     return (
       <div

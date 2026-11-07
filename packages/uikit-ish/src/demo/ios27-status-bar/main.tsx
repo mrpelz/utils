@@ -4,6 +4,7 @@ import { CSSProperties, FunctionComponent, useEffect, useState } from 'react';
 
 import {
   Header,
+  isIos27,
   List,
   Page,
   Toolbar,
@@ -11,13 +12,12 @@ import {
 } from '../../components/index.js';
 import { ClientOnly } from '../tooling/shared/client-only.js';
 import { useRawDocument } from '../tooling/shared/raw-document.js';
-import { isIos27 } from './detect.js';
 
 // A demo page (`/ios27-status-bar`, added to the Home Screen as its own
 // app, see scripts/demo-head.js): iOS 27 detected by the head, the app
-// started below the status bar (see detect.ts), and the app's logic
-// following it: its top edge effect hard (a solid bar, a line), beneath
-// the system's opaque bar; else soft, under the status bar as usual.
+// started below the status bar (see src/components/viewport/ios27.ts), its
+// top bar's edge effect, unset, hard then (a solid bar, a line, beneath the
+// system's opaque bar, in its color); else soft, under the status bar.
 
 const title = 'iOS 27 Status Bar';
 
@@ -146,9 +146,8 @@ const App: FunctionComponent = () => {
     <Viewport.Provider>
       <Viewport.Content>
         <Header.Root>
-          {/* (iOS 27: hard, its backing the page's own background, as the
-              system's bar above it takes the page's color, see Viewport.) */}
-          <Viewport.BlockStart edgeEffect={ios27 ? 'hard' : 'soft'}>
+          {/* (Its edge effect unset: on iOS 27 hard, see Viewport.) */}
+          <Viewport.BlockStart>
             <Toolbar.Root placement="block-start">
               <Toolbar.Title>
                 <span>{title}</span>
@@ -184,7 +183,7 @@ const App: FunctionComponent = () => {
                   />
                   <Row
                     label="Top edge effect"
-                    value={ios27 ? 'Hard' : 'Soft'}
+                    value={ios27 ? 'Hard (default on iOS 27)' : 'Soft'}
                   />
                   <Row
                     label="Home Screen app"
@@ -218,10 +217,12 @@ const App: FunctionComponent = () => {
                     </button>
                   </div>
                   <p className="ios27-status-bar-text">
-                    Change the page background and watch the status bar: does it
-                    follow at once, after scrolling, or only after a reload? Set
-                    the document root to red: if the status bar turns red, iOS
-                    takes the root’s color, not the page’s.
+                    Change the page background: the status bar keeps the color
+                    it had as the app loaded, and so does the top bar, now solid
+                    with its line, even scrolled to the top. Reload: both take
+                    the new color, the line showing only as content scrolls
+                    under the bar. Set the document root to red: if the status
+                    bar turns red, iOS takes the root’s color, not the page’s.
                   </p>
                 </List.Block>
               </List.Section>
@@ -236,9 +237,11 @@ const App: FunctionComponent = () => {
                     the page loads, the status bar style is “default” instead:
                     the system draws its own opaque status bar, and the app
                     starts below it, so nothing of it is blurred. The app reads
-                    the same detection and gives its top bar a hard edge effect
-                    beneath the system’s bar. Untinted, its backing is the
-                    page’s own background color, so the two bars match.
+                    the same detection: its top bar’s edge effect, unset, is
+                    hard beneath the system’s bar, its backing the status bar’s
+                    color (the page’s as the app loaded, read once by iOS), so
+                    the two bars match. Once the page’s color changes, the bar
+                    stays solid, its line dividing the bars from the page.
                   </p>
                   <p className="ios27-status-bar-text">
                     iOS reads the status bar style when the app is added to the

@@ -121,6 +121,11 @@ export type ViewportAnchorProps = ComponentProps<'div'> & {
   /**
    * At the block start or end: its scroll edge effect, as content scrolls
    * under it (and under what's stuck to it, see `useViewportEdgeElement`).
+   * On iOS 27 (`isIos27`, the app below the status bar), at the screen's
+   * top (not in a sheet, popover or island, nor a portal container): `hard`
+   * by default, beneath the system's status bar, its backing, untinted, the
+   * status bar's color (the page's as the app loaded), solid at rest once
+   * the page's is another.
    * @default 'soft'
    */
   edgeEffect?: ViewportEdgeEffect;
