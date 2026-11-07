@@ -134,9 +134,27 @@ const backgroundOf = (element: Element) => {
 };
 
 /**
- * On iOS 27, the status bar's color (see above): the first page's
- * background at the screen's top, read as its bars first show (the
- * scroller holding none: the page's, not the content layer's).
+ * The background showing behind an element: its own, or else the nearest
+ * ancestor's painting one (e.g. a content layer's, clear, in an app's
+ * element with a background of its own); none, empty.
+ */
+const shownBackgroundOf = (element: Element) => {
+  for (
+    let node: Element | null = element;
+    node !== null;
+    node = node.parentElement
+  ) {
+    const color = backgroundOf(node);
+    if (color !== '') return color;
+  }
+  return '';
+};
+
+/**
+ * On iOS 27, the status bar's color (see above): the background shown
+ * behind the first page at the screen's top (see `shownBackgroundOf`), read
+ * as its bars first show (the scroller holding none: the page's, not the
+ * content layer's).
  */
 let statusBarColor: string | undefined;
 
@@ -159,7 +177,7 @@ const useBacking = (
   useLayoutEffect(() => {
     const { current: element } = scroller;
     if (element && isUnderStatusBar && !holdsScroller(element)) {
-      statusBarColor ??= backgroundOf(element);
+      statusBarColor ??= shownBackgroundOf(element);
     }
     const { current: target } = layer;
     if (!element || !target || !isHard) return undefined;
@@ -169,11 +187,13 @@ const useBacking = (
     const read = () => {
       frame = 0;
       inline = element.style.background + element.style.backgroundColor;
-      const color = backgroundOf(element);
-      const backing =
-        isUnderStatusBar && statusBarColor !== undefined
-          ? statusBarColor
-          : color;
+      // (At the status bar: its color, against what's shown behind the
+      // scroller, its own or an ancestor's; else the scroller's own.)
+      const isPinned = isUnderStatusBar && statusBarColor !== undefined;
+      const color = isPinned
+        ? shownBackgroundOf(element)
+        : backgroundOf(element);
+      const backing = isPinned ? (statusBarColor ?? '') : color;
       if (backing === '') {
         target.style.removeProperty('--uikit-viewport-edge-backing');
       } else {
