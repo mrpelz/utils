@@ -39,7 +39,11 @@ export const meta = {
 };
 
 /**
- * Its web app manifest, unless it shows an app of its own: a demo raw
+ * Its status bar on iOS 27 (or later, see src/components/viewport/ios27.ts
+ * and the guide's iOS 27 page): `default`, the page below the status bar
+ * (under it, iOS 27 blurs the top bar), the document marked
+ * (`data-ios27`, for the library). Its web app manifest, unless it shows
+ * an app of its own: a demo raw
  * (`#id=…&raw=true` on a demos' page, see
  * src/demo/tooling/frame/component.tsx), or the kitchen sink
  * (`/kitchen-sink`, see src/demo/kitchen-sink/main.tsx). Added to the
@@ -53,6 +57,19 @@ export const meta = {
  * @returns {string}
  */
 export const manifest = (publicPath) => `<script>(() => {
+  // (iOS 27 or later: by Safari's version, the OS's frozen in the user agent
+  // since iOS 26; an iPad's as a Mac's, with touch.)
+  const agent = navigator.userAgent;
+  const isIos =
+    ['iPhone', 'iPad', 'iPod'].some((device) => agent.includes(device)) ||
+    (agent.includes('Macintosh') && navigator.maxTouchPoints > 1);
+  const version = Number(agent.split('Version/')[1]?.split('.')[0]);
+  if (isIos && version >= 27) {
+    document.documentElement.setAttribute('data-ios27', '');
+    document
+      .querySelector('meta[name=apple-mobile-web-app-status-bar-style]')
+      ?.setAttribute('content', 'default');
+  }
   const fragment = new URLSearchParams(location.hash.slice(1));
   const option = (key) => {
     try {

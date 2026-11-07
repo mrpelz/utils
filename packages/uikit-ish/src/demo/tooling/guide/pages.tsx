@@ -249,6 +249,17 @@ export const IndexPage: FunctionComponent = () => (
               </p>
             </li>
           ) : null}
+          {category === 'foundations' ? (
+            <li className="demo-index-card">
+              <h3>
+                <a href={publicUrl('ios27')}>iOS 27</a>
+              </h3>
+              <p>
+                A Home Screen app’s top bar blurred under the status bar, and
+                the script in your head that starts the app below it.
+              </p>
+            </li>
+          ) : null}
           {catalog
             // (In the catalog's order: by how deep they typically nest.)
             .filter((entry) => entry.category === category)

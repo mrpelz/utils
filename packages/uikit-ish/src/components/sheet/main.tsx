@@ -25,6 +25,7 @@ import {
   useAnchorRegistration,
   useScrollerRegistration,
   useSizeClass,
+  ViewportInsetContext,
   ViewportScopeContext,
 } from '../viewport/main.js';
 import type {
@@ -376,81 +377,83 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
       // (No box of its own: nothing shifts in its container, e.g. a flex
       // layout's gaps.)
       <ViewportScopeContext.Provider value={scope}>
-        <BaseDrawer.Portal
-          className="uikit-sheet-portal"
-          {...useSettingsPortalProps()}
-          container={usePortalContainer(container)}
-        >
-          <BaseDrawer.Backdrop
-            className="uikit-sheet-backdrop"
-            data-sheet-part="backdrop"
-          />
-          <BaseDrawer.Viewport
-            className="uikit-sheet-viewport"
-            data-sheet-part="viewport"
+        <ViewportInsetContext.Provider value>
+          <BaseDrawer.Portal
+            className="uikit-sheet-portal"
+            {...useSettingsPortalProps()}
+            container={usePortalContainer(container)}
           >
-            <BaseDrawer.Popup
-              ref={ref}
-              data-background={background}
-              // (Not swiped away, or snapping: none of Base UI's swipes
-              // start, see `Root`.)
-              data-compact={isCompact ? '' : undefined}
-              data-detent={detent}
-              data-sheet-part="popup"
-              data-snap={snapKind}
-              className={cn(
-                'uikit-sheet-popup',
-                isGlass && !isSnapping
-                  ? cn('uikit-glass-medium', className)
-                  : className,
-              )}
-              data-base-ui-swipe-ignore={
-                isNotSwiped || isSnapping ? '' : undefined
-              }
-              {...props}
+            <BaseDrawer.Backdrop
+              className="uikit-sheet-backdrop"
+              data-sheet-part="backdrop"
+            />
+            <BaseDrawer.Viewport
+              className="uikit-sheet-viewport"
+              data-sheet-part="viewport"
             >
-              {/* Snapping (see snap.ts): the room it's scrolled up out of
+              <BaseDrawer.Popup
+                ref={ref}
+                data-background={background}
+                // (Not swiped away, or snapping: none of Base UI's swipes
+                // start, see `Root`.)
+                data-compact={isCompact ? '' : undefined}
+                data-detent={detent}
+                data-sheet-part="popup"
+                data-snap={snapKind}
+                className={cn(
+                  'uikit-sheet-popup',
+                  isGlass && !isSnapping
+                    ? cn('uikit-glass-medium', className)
+                    : className,
+                )}
+                data-base-ui-swipe-ignore={
+                  isNotSwiped || isSnapping ? '' : undefined
+                }
+                {...props}
+              >
+                {/* Snapping (see snap.ts): the room it's scrolled up out of
                   (pressed, closed as the backdrop would), its panel, and its
                   stops. Not snapping: the panel no box of its own. */}
-              <div
-                aria-hidden="true"
-                className="uikit-sheet-spacer"
-                data-sheet-part="spacer"
-                onClick={(event) => {
-                  if (isSnapping) snap.close(event as unknown as Event);
-                }}
-              >
-                {/* Its stops, in its flow (not positioned: Safari takes
+                <div
+                  aria-hidden="true"
+                  className="uikit-sheet-spacer"
+                  data-sheet-part="spacer"
+                  onClick={(event) => {
+                    if (isSnapping) snap.close(event as unknown as Event);
+                  }}
+                >
+                  {/* Its stops, in its flow (not positioned: Safari takes
                     those, in a transformed container, from elsewhere), and
                     within its scroll's range (the last below its end: Safari
                     holds on to one past it, rounded, see snap.ts). */}
-                {isSnapping
-                  ? [0, ...snap.stops].map((stop, index) => (
-                      <span
-                        // (By place, not height: one re-measured moves, so
-                        // it's still the one snapped to.)
-                        key={index}
-                        className="uikit-sheet-stop"
-                        data-sheet-part="stop"
-                        style={{
-                          marginTop: `min(${String(stop)}px, 100cqh - 1px)`,
-                        }}
-                      />
-                    ))
-                  : null}
-              </div>
-              <div
-                data-sheet-part="panel"
-                className={cn(
-                  'uikit-sheet-panel',
-                  isGlass && isSnapping ? 'uikit-glass-medium' : undefined,
-                )}
-              >
-                {children as ReactNode}
-              </div>
-            </BaseDrawer.Popup>
-          </BaseDrawer.Viewport>
-        </BaseDrawer.Portal>
+                  {isSnapping
+                    ? [0, ...snap.stops].map((stop, index) => (
+                        <span
+                          // (By place, not height: one re-measured moves, so
+                          // it's still the one snapped to.)
+                          key={index}
+                          className="uikit-sheet-stop"
+                          data-sheet-part="stop"
+                          style={{
+                            marginTop: `min(${String(stop)}px, 100cqh - 1px)`,
+                          }}
+                        />
+                      ))
+                    : null}
+                </div>
+                <div
+                  data-sheet-part="panel"
+                  className={cn(
+                    'uikit-sheet-panel',
+                    isGlass && isSnapping ? 'uikit-glass-medium' : undefined,
+                  )}
+                >
+                  {children as ReactNode}
+                </div>
+              </BaseDrawer.Popup>
+            </BaseDrawer.Viewport>
+          </BaseDrawer.Portal>
+        </ViewportInsetContext.Provider>
       </ViewportScopeContext.Provider>
     );
   },

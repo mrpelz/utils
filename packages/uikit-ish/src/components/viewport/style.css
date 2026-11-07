@@ -292,18 +292,25 @@
       }
     }
 
-    /* Hard: a solid backing (the tint, or the background), a line at its
-       inner side; tinted, at rest too. */
+    /* Hard: a solid backing (the tint; else its scroller's own background,
+       matching the page, see edge-effect.tsx; else the system background),
+       a line at its inner side; tinted, or on iOS 27 the status bar's color
+       the page's no more (`data-edge-solid`, see edge-effect.tsx), at rest
+       too. */
     &[data-edge-effect='hard'] {
       &::before {
         background-color: var(
           --uikit-viewport-edge-tint,
-          var(--color-ui-system-background)
+          var(
+            --uikit-viewport-edge-backing,
+            var(--color-ui-system-background)
+          )
         );
         transition: background-color 300ms;
       }
 
-      &[data-edge-tinted]::before {
+      &[data-edge-tinted]::before,
+      &[data-edge-solid]::before {
         opacity: 1;
       }
 

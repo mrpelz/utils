@@ -104,9 +104,10 @@ const edgeEffectRow: PropRow = [
   <>
     At the block start or end: its scroll edge effect, as content scrolls under
     it: <code>soft</code>, a blur fading out away from the edge;{' '}
-    <code>hard</code>, a solid backing with a dividing line. Drawn by the
-    scroller beneath (a <a href={publicUrl('page')}>Page</a>, a sheet’s content,
-    the{' '}
+    <code>hard</code>, a solid backing with a dividing line (untinted, in the
+    scroller’s own background color, as it changes, so it matches the page; a
+    scroller without one, the system background). Drawn by the scroller beneath
+    (a <a href={publicUrl('page')}>Page</a>, a sheet’s content, the{' '}
     <PartLink
       component="viewport"
       part="Viewport.Content"
@@ -117,11 +118,16 @@ const edgeEffectRow: PropRow = [
       component="viewport"
       part="useViewportEdgeElement"
     />
-    ). How much of the content shows through it: <code>soft</code>, solid under
-    half of the effect, fading out past it; with a veil (
-    <code>--uikit-viewport-edge-veil</code>, 0 to 1: the heavier, the less; set
-    on the scroller or above), solid under that share of the anchor. A sheet’s
-    is <code>0.75</code>.
+    ). On iOS 27 (<code>isIos27</code>: the app’s head starting it below the
+    status bar, see <a href={publicUrl('ios27')}>iOS 27</a>), unset at the
+    screen’s top (not in a sheet, popover or island, nor a portal container):{' '}
+    <code>hard</code>, beneath the system’s status bar, its backing, untinted,
+    the status bar’s color (the page’s as the app loaded, read once by iOS),
+    solid at rest too once the page’s is another. How much of the content shows
+    through it: <code>soft</code>, solid under half of the effect, fading out
+    past it; with a veil (<code>--uikit-viewport-edge-veil</code>, 0 to 1: the
+    heavier, the less; set on the scroller or above), solid under that share of
+    the anchor. A sheet’s is <code>0.75</code>.
   </>,
 ];
 

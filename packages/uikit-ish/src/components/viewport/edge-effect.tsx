@@ -1,17 +1,20 @@
 import {
   FunctionComponent,
   RefObject,
+  useContext,
   useLayoutEffect,
   useRef,
   useState,
 } from 'react';
 
+import { usePortalContainer } from '../utils/main.js';
 import {
   edgeElementsIn,
   holdsScroller,
   subscribeEdgeElements,
   subscribeScrollers,
 } from './edge.js';
+import { isIos27, ViewportInsetContext } from './ios27.js';
 import { useEdgeEffectOf } from './padding.js';
 
 // A scroller's scroll edge effects (its bars reaching them): one at each block edge where its scope's anchors have one
@@ -25,7 +28,14 @@ import { useEdgeEffectOf } from './padding.js';
 // stuck to them (`useViewportEdgeElement`, `--uikit-viewport-edge-extent`):
 // measured as the scroller scrolls (a listener: a scroll-driven animation
 // there ends the scroller's fling, in Chrome). Its tint (an anchor's
-// `edgeTint`) shows at rest too.
+// `edgeTint`) shows at rest too. A hard one's backing, untinted, its
+// scroller's own background (`--uikit-viewport-edge-backing`, read from it:
+// matching the page, as its background changes), or, the scroller without
+// one, the system background. On iOS 27, at the screen's top (see ios27.ts),
+// the status bar's color instead: the page's background as it loaded (iOS
+// reading it once), so the two bars meet; the page's background then
+// another (e.g. another page shown), solid at rest too, as a tinted one
+// (`data-edge-solid`), its line dividing the bars from the page.
 
 type BlockEdge = 'block-start' | 'block-end';
 
@@ -112,6 +122,126 @@ const useMeasure = (
   }, [edge, layer, line, scroller]);
 };
 
+/** A background color painting nothing (`transparent`, alpha 0). */
+const isClear = (color: string) =>
+  color === 'transparent' ||
+  (color.startsWith('rgba(') && color.replaceAll(' ', '').endsWith(',0)'));
+
+/** An element's background color (computed; painting nothing, empty). */
+const backgroundOf = (element: Element) => {
+  const color = getComputedStyle(element).backgroundColor;
+  return isClear(color) ? '' : color;
+};
+
+/**
+ * The background showing behind an element: its own, or else the nearest
+ * ancestor's painting one (e.g. a content layer's, clear, in an app's
+ * element with a background of its own); none, empty.
+ */
+const shownBackgroundOf = (element: Element) => {
+  for (
+    let node: Element | null = element;
+    node !== null;
+    node = node.parentElement
+  ) {
+    const color = backgroundOf(node);
+    if (color !== '') return color;
+  }
+  return '';
+};
+
+/**
+ * On iOS 27, the status bar's color (see above): the background shown
+ * behind the first page at the screen's top (see `shownBackgroundOf`), read
+ * as its bars first show (the scroller holding none: the page's, not the
+ * content layer's).
+ */
+let statusBarColor: string | undefined;
+
+/**
+ * The scroller's own background (computed: its class's, its style's, its
+ * color scheme's) on the layer, as `--uikit-viewport-edge-backing` (a hard
+ * effect's backing, see style.css); none painted, none set. At the status
+ * bar (`isUnderStatusBar`, see above), the status bar's color instead, and
+ * the scroller's another, solid at rest (`data-edge-solid`). Read again as
+ * the scroller's attributes change (its inline background, not its other
+ * styles: written as it scrolls), a color scheme's set within the
+ * document, or the system's color scheme or contrast changes.
+ */
+const useBacking = (
+  layer: RefObject<HTMLDivElement | null>,
+  scroller: RefObject<HTMLElement | null>,
+  isHard: boolean,
+  isUnderStatusBar: boolean,
+) => {
+  useLayoutEffect(() => {
+    const { current: element } = scroller;
+    if (element && isUnderStatusBar && !holdsScroller(element)) {
+      statusBarColor ??= shownBackgroundOf(element);
+    }
+    const { current: target } = layer;
+    if (!element || !target || !isHard) return undefined;
+    let inline = '';
+    let frame = 0;
+
+    const read = () => {
+      frame = 0;
+      inline = element.style.background + element.style.backgroundColor;
+      // (At the status bar: its color, against what's shown behind the
+      // scroller, its own or an ancestor's; else the scroller's own.)
+      const isPinned = isUnderStatusBar && statusBarColor !== undefined;
+      const color = isPinned
+        ? shownBackgroundOf(element)
+        : backgroundOf(element);
+      const backing = isPinned ? (statusBarColor ?? '') : color;
+      if (backing === '') {
+        target.style.removeProperty('--uikit-viewport-edge-backing');
+      } else {
+        target.style.setProperty('--uikit-viewport-edge-backing', backing);
+      }
+      target.toggleAttribute('data-edge-solid', backing !== color);
+    };
+    const schedule = () => {
+      if (frame === 0) frame = requestAnimationFrame(read);
+    };
+
+    read();
+    const own = new MutationObserver((records) => {
+      const isStyleOnly = records.every(
+        ({ attributeName }) => attributeName === 'style',
+      );
+      if (
+        isStyleOnly &&
+        element.style.background + element.style.backgroundColor === inline
+      ) {
+        return;
+      }
+      schedule();
+    });
+    own.observe(element, { attributes: true });
+    const schemes = new MutationObserver(schedule);
+    schemes.observe(document.documentElement, {
+      attributeFilter: ['data-color-scheme'],
+      subtree: true,
+    });
+    const queries = [
+      matchMedia('(prefers-color-scheme: dark)'),
+      matchMedia('(prefers-contrast: more)'),
+    ];
+    for (const query of queries) query.addEventListener('change', schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      own.disconnect();
+      schemes.disconnect();
+      for (const query of queries) {
+        query.removeEventListener('change', schedule);
+      }
+      target.style.removeProperty('--uikit-viewport-edge-backing');
+      delete target.dataset.edgeSolid;
+    };
+  }, [isHard, isUnderStatusBar, layer, scroller]);
+};
+
 const Layer: FunctionComponent<{
   edge: BlockEdge;
   scroller: RefObject<HTMLElement | null>;
@@ -119,7 +249,16 @@ const Layer: FunctionComponent<{
   const effect = useEdgeEffectOf(edge);
   const layer = useRef<HTMLDivElement>(null);
   const line = useRef<HTMLDivElement>(null);
+  // (At the screen's top, on iOS 27: as `Anchor` tells, see ios27.ts.)
+  const isInset = useContext(ViewportInsetContext);
+  const portalContainer = usePortalContainer(undefined);
+  const isUnderStatusBar =
+    edge === 'block-start' &&
+    !isInset &&
+    portalContainer === undefined &&
+    isIos27();
   useMeasure(layer, line, scroller, edge);
+  useBacking(layer, scroller, effect?.effect === 'hard', isUnderStatusBar);
 
   if (!effect) return null;
 
