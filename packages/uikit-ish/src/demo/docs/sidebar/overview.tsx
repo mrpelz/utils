@@ -363,8 +363,9 @@ export const SidebarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A glass panel (the menus’ glass), corners 20px, 8px from its column’s
-        edges; its content 11px from its top, 16px from its sides, scrolling
+        A glass panel (the menus’ glass), corners 20px, 10px from its column’s
+        sides, 8px below the top inset, 5px into the bottom one (as iPadOS 26’s,
+        measured); its content 11px from its top, 16px from its sides, scrolling
         inside it (without a scrollbar).
       </li>
       <li>

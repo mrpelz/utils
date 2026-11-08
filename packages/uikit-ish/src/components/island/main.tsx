@@ -65,7 +65,9 @@ export type {
 // Its header over its content, as a sheet's: a block-start anchor in its
 // own scope (its content making room with a `Viewport.Padding`), its
 // content fading out under it, its edge effects. Compact, as wide as the
-// screen (but 6px); regular, a floating panel at the inline start.
+// screen (but 8px); regular, a floating panel at the inline start; 8px
+// from the bottom (the home indicator over its bottom margin), its
+// corners 42px (iOS 26's floating sheets', measured).
 
 /** Up to how close to the top it may reach (px; below the top inset). */
 const topRoom = 64;

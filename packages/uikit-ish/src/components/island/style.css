@@ -7,8 +7,10 @@
     pointer-events: none;
   }
 
-  /* Its box: as tall as it shows (its content's, or its stop's), 6px from
-     the screen's edges (above the bottom inset, on it); regular, a
+  /* Its box: as tall as it shows (its content's, or its stop's), 8px from
+     the screen's edges, the bottom too (the home indicator over its bottom
+     margin, as iOS 26's floating sheets); its corners 42px (theirs,
+     measured); regular, a
      floating panel at the inline start. Its content's edge effects as a
      medium sheet's (its glass not lightened by a backing, nor blurred
      twice: its content fading out under its header instead). */
@@ -18,9 +20,15 @@
 
     position: relative;
     box-sizing: border-box;
-    border-radius: 34px;
-    margin: 0 6px max(0px, 6px - var(--uikit-safe-area-inset-bottom, 0px));
+    border-radius: var(--uikit-island-radius);
+
+    /* (Its anchor's bottom inset, kept clear by its padding: moved back
+       into it, to 8px from the edge.) */
+    margin: 0 8px calc(8px - var(--uikit-viewport-safe-bottom, 0px));
     color: var(--uikit-glass-content);
+
+    /* Its corners 42px (snapping, following what's shown: see below). */
+    --uikit-island-radius: 42px;
 
     &[data-regular] {
       width: min(375px, 100% - 20px);
@@ -41,8 +49,18 @@
       height: calc(var(--uikit-island-shown) + var(--uikit-island-reach));
       padding-top: var(--uikit-island-reach);
       margin-top: calc(-1 * var(--uikit-island-reach));
+
+      /* Its corners following what's shown (its lowest stop and as far as
+         it's scrolled up past it: its scroller's timeline, named for it),
+         shown shorter than both (e.g. its header alone), a capsule, half
+         as tall (its top corners, its panel's, and its bottom ones, its
+         scroller's clip and rim, meeting, not overlapping). */
+      animation: uikit-island-corners linear both;
+      animation-range: 0 max(0px, 84px - var(--uikit-island-lowest, 0px));
+      animation-timeline: --uikit-island-scroll;
       overflow-clip-margin: 16px;
       pointer-events: none;
+      timeline-scope: --uikit-island-scroll;
 
       /* Its rim's bottom and its corners (its panel's glass draws the
          rest, never its bottom: see the glass): over its scroller (the
@@ -50,25 +68,26 @@
          corners); a sliver's fading in as its glass does. */
       &::after {
         position: absolute;
-        height: 34px;
+        height: var(--uikit-island-radius);
         box-sizing: border-box;
         border: 1px solid var(--glass-ui-panel-rim);
-        border-radius: 0 0 34px 34px;
+        border-radius: 0 0 var(--uikit-island-radius)
+          var(--uikit-island-radius);
         border-top: 0;
         content: '';
         inset: auto 0 0;
 
         /* Its sides' start faded in by as much as the scroller's clip cuts
-           off the panel's own straight rim there (34px − √(34² − d²) at
+           off the panel's own straight rim there (42px − √(42² − d²) at
            d px down its arc), the two never drawn over each other. */
         mask-image: linear-gradient(
           transparent,
-          rgb(0 0 0 / 6%) 2px,
-          rgb(0 0 0 / 24%) 4px,
-          rgb(0 0 0 / 53%) 6px,
-          rgb(0 0 0 / 73%) 7px,
-          rgb(0 0 0 / 96%) 8px,
-          #000 8.2px
+          rgb(0 0 0 / 5%) 2px,
+          rgb(0 0 0 / 19%) 4px,
+          rgb(0 0 0 / 43%) 6px,
+          rgb(0 0 0 / 77%) 8px,
+          rgb(0 0 0 / 98%) 9px,
+          #000 9.1px
         );
         opacity: var(--uikit-island-sliver, 1);
         pointer-events: none;
@@ -108,6 +127,7 @@
       overscroll-behavior: none;
       pointer-events: auto;
       scroll-snap-type: y mandatory;
+      scroll-timeline: --uikit-island-scroll block;
       scrollbar-width: none;
 
       &::-webkit-scrollbar {
@@ -144,7 +164,8 @@
      its header over its content; as tall as its content (up to as tall as
      it may be), or (snapping) as the scroller, scrolled up into it; its
      content's edge effects fixed to it. None left of the screen's insets
-     for what's in it (kept clear by its anchor). */
+     for what's in it (kept clear by its anchor; the home indicator over
+     its bottom margin, see the island). */
   .uikit-island-panel {
     --uikit-safe-area-inset-top: 0px;
     --uikit-safe-area-inset-right: 0px;
@@ -275,8 +296,9 @@
     overflow: auto;
     min-height: 0;
     flex: 1 1 auto;
-    clip-path: inset(0 round 34px);
+    clip-path: inset(0 round var(--uikit-island-radius, 42px));
     overscroll-behavior: contain;
+
 
     :where(.uikit-island[data-snap] > .uikit-island-scroller > .uikit-island-panel) > & {
       overscroll-behavior: auto;
@@ -345,4 +367,22 @@
   .uikit-island-snap-group:not(:empty) + .uikit-island-snap-group {
     padding-block-start: var(--uikit-list-section-spacing, 35px);
   }
+}
+
+@keyframes uikit-island-corners {
+  from {
+    --uikit-island-radius: min(42px, var(--uikit-island-lowest, 0px) / 2);
+  }
+
+  to {
+    --uikit-island-radius: 42px;
+  }
+}
+
+/* Its corners' radius (see the island): a length, so it's animated
+   (following its scroll). */
+@property --uikit-island-radius {
+  inherits: true;
+  initial-value: 42px;
+  syntax: '<length>';
 }

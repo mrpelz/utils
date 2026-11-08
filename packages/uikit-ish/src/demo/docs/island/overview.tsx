@@ -257,9 +257,10 @@ export const IslandOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Compact: 6px from the screen’s sides, on the bottom safe area (the home
-        indicator below it), its corners 34px. Regular: a floating panel at the
-        inline start, up to 375px wide.
+        Compact: 8px from the screen’s sides and bottom (the home indicator over
+        its bottom margin), its corners 42px (as iOS 26’s floating sheets,
+        measured). Regular: a floating panel at the inline start, up to 375px
+        wide.
       </li>
       <li>
         Its box is what it shows: as tall as its stop (or, without stops, its

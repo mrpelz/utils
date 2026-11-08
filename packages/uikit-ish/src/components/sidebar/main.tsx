@@ -28,7 +28,9 @@ export type {
 //
 // Also:
 // - The glass is the menus' (`glassMedium`: a fill and a soft glow, without
-//   blend modes), 8px from the column's edges; in dark mode, a light rim and a glow outside it (the
+//   blend modes), 10px from the column's sides, 8px below the top inset,
+//   5px into the bottom one (10px from the edge at least; iPadOS 26's,
+//   measured); in dark mode, a light rim and a glow outside it (the
 //   glass' inner shadow would look inset).
 
 /**

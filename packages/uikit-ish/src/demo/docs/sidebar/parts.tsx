@@ -355,8 +355,8 @@ export const SidebarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The glass panel (corners 20px, 8px from its column’s edges), its content
-        scrolling inside it.
+        The glass panel (corners 20px, 10px from its column’s sides), its
+        content scrolling inside it.
       </li>
       <li>
         Sets the search field’s look (44px, the selection fill) and the list’s

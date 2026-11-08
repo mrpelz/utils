@@ -60,13 +60,14 @@ export type {
 // - large: opaque (elevated background:
 //   white; dark: #1c1c1e), from 10px below the top to the bottom, its top
 //   corners 38px, its shadow 0 15px 75px at 18%;
-// - medium: glass, 6px from the sides, on the bottom safe area (the home
-//   indicator below it; without one, 6px from the bottom), as high as its
-//   content, its corners 34px;
+// - medium: glass, 8px from the sides and the bottom (the home indicator
+//   over its bottom margin), as high as its content, its corners 42px
+//   (iOS 26's, measured);
 // - in a regular width (the window from 768px, or not `compact`), a form
 //   sheet: opaque, centered, up to 936px by 852px, its
 //   corners 38px; or (`regular` `card`) a card from the bottom at the
-//   leading edge (as a regular Island: 375px wide, 10px in), its detent's
+//   leading edge (as a regular Island: 375px wide, 10px in, 8px from the
+//   bottom), its detent's
 //   look, all its corners round, up to 64px below the top.
 // Its header: a grabber (`Grabber`, 36px by 5px, 5px from
 // the top, #cfcfcf; optional) above the app's content (e.g. a `Toolbar`: a 44px title and
@@ -332,25 +333,25 @@ const useMouseSwipe = (
 };
 
 /**
- * Its lowest stop (snapping; `undefined`: not), below which it's swiped
- * out whole (`--uikit-sheet-lowest-stop`, see style.css).
+ * Its lowest stop's height as a property of its popup
+ * (`--uikit-sheet-lowest-stop`, px; `undefined`: not snapping, none), for
+ * its style (see style.css): swiped out whole below it, its corners no more
+ * than half as high as shown.
  */
-const useLowestStop = (
+const useStopProperty = (
   ref: RefObject<HTMLElement | null>,
-  lowest: number | undefined,
+  name: string,
+  height: number | undefined,
 ) => {
   useLayoutEffect(() => {
     const { current: element } = ref;
     if (!element) return;
-    if (lowest === undefined) {
-      element.style.removeProperty('--uikit-sheet-lowest-stop');
+    if (height === undefined) {
+      element.style.removeProperty(name);
     } else {
-      element.style.setProperty(
-        '--uikit-sheet-lowest-stop',
-        `${String(lowest)}px`,
-      );
+      element.style.setProperty(name, `${String(height)}px`);
     }
-  }, [lowest, ref]);
+  }, [height, name, ref]);
 };
 
 /**
@@ -410,7 +411,11 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
         : undefined,
     );
     useMouseSwipe(ref, isBottom, isSnapping);
-    useLowestStop(ref, isSnapping ? snap.stops[0] : undefined);
+    useStopProperty(
+      ref,
+      '--uikit-sheet-lowest-stop',
+      isSnapping ? snap.stops[0] : undefined,
+    );
     const snapKind = snapKindOf(isSnapping, detent);
     // Its anchors' scope: fixed to it (see Viewport.Padding).
     const [scope] = useState(() => ({}));
@@ -630,14 +635,16 @@ const SnapGroup = forwardRef<HTMLDivElement, SheetSnapGroupProps>(
       // From the sheet's top (its panel's, snapping; else the popup's, the
       // panel no box of its own), as unscrolled (both moved alike: opening,
       // snapped), and the bottom inset it keeps clear of (a large sheet's,
-      // to the screen's edge; a medium one's floating above it already).
+      // to the screen's edge; a floating one's, medium or a card, none: the
+      // home indicator over its bottom margin, see style.css).
       const measure = () => {
         const origin =
           panel && getComputedStyle(panel).display !== 'contents'
             ? panel
             : popup;
         const isFloating =
-          popup.dataset.detent === 'medium' && popup.dataset.compact === '';
+          popup.dataset.card === '' ||
+          (popup.dataset.detent === 'medium' && popup.dataset.compact === '');
         const inset = isFloating
           ? 0
           : Number.parseFloat(

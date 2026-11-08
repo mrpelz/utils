@@ -270,9 +270,12 @@ const placeBar = (close?: ReactNode) => (
   </Toolbar.Root>
 );
 
-/** A place's sheet, snapping by its groups; opened at a stop, or not. */
+/**
+ * A place's sheet, snapping by its groups (its header alone the lowest,
+ * swiped down to); opened at its peek, or a trigger's stop.
+ */
 const PlaceSheet: FunctionComponent = () => (
-  <Sheet.Root>
+  <Sheet.Root defaultSnapPoint="peek">
     <div className="kitchen-sink-showcase">
       <Sheet.Trigger render={<Button.Root variant="bordered-prominent" />}>
         <Button.Label>Show Place</Button.Label>
@@ -313,6 +316,8 @@ const PlaceSheet: FunctionComponent = () => (
       </Sheet.Header>
       <Sheet.Content>
         <Viewport.Padding edge="block-start" />
+        {/* (Its header alone, a stop of its own: swiped down to it.) */}
+        <Sheet.SnapGroup value="header" />
         {placeGroups(Sheet.SnapGroup)}
         <Viewport.Padding edge="block-end" />
       </Sheet.Content>
