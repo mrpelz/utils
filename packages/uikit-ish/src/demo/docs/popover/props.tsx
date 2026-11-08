@@ -144,6 +144,12 @@ export const propOptionsElement = {
   style: commonPropOptions.style,
 };
 
+/** `Popover.Arrow`: Base UI's part, hidden when shifted or not. */
+export const propOptionsArrow = {
+  ...commonPropOptions,
+  whenShifted: [undefined, 'hide', 'show'] as const,
+};
+
 /** `Popover.Header`: its own element, its edge effect. */
 export const propOptionsHeader = {
   ...propOptionsElement,

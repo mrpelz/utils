@@ -36,6 +36,7 @@ import {
 } from '../viewport/main.js';
 import type {
   Nose,
+  PopoverArrowProps,
   PopoverHandle,
   PopoverHeaderProps,
   PopoverPositionerProps,
@@ -44,6 +45,7 @@ import type {
 
 export type {
   PopoverAlign,
+  PopoverArrowProps,
   PopoverHandle,
   PopoverHeaderProps,
   PopoverPositionerProps,
@@ -64,6 +66,9 @@ export type {
 //   animated, can't be).
 
 const PopoverContext = createContext<PopoverState | undefined>(undefined);
+
+/** Its positioner shifted over its anchor (see `useGrowAvoidance`). */
+const ShiftedContext = createContext(false);
 
 /**
  * Not closed by a press or focus in a menu (in a portal) opened from it, e.g.
@@ -147,19 +152,21 @@ const Positioner = forwardRef<HTMLDivElement, PopoverPositionerProps>(
     const ref = useForwardedRef(forwardedRef);
     const collision = useCollision({ collisionBoundary, collisionPadding });
     // Growing rather than scrolling (unless its own is given).
-    const [grow, growRef] = useGrowAvoidance({}, ref);
+    const [grow, growRef, isShifted] = useGrowAvoidance({}, ref);
 
     return (
-      <BasePopover.Positioner
-        ref={growRef}
-        align={align}
-        {...collision}
-        collisionAvoidance={grow}
-        side={positionerSide(side)}
-        sideOffset={sideOffset ?? 8 + (context?.hasArrow ? arrowDepth : 0)}
-        {...props}
-        className={cn('uikit-popover-positioner', className)}
-      />
+      <ShiftedContext.Provider value={isShifted}>
+        <BasePopover.Positioner
+          ref={growRef}
+          align={align}
+          {...collision}
+          collisionAvoidance={grow}
+          side={positionerSide(side)}
+          sideOffset={sideOffset ?? 8 + (context?.hasArrow ? arrowDepth : 0)}
+          {...props}
+          className={cn('uikit-popover-positioner', className)}
+        />
+      </ShiftedContext.Provider>
     );
   },
 );
@@ -337,9 +344,21 @@ const arrowSide = (side: string | undefined, isRightToLeft: boolean): Nose => {
   }
 };
 
-// The arrow's side (on both, as `data-arrow`) and its center along the
-// popup's edge (`--uikit-popover-nose`), where Base UI placed it.
-const placeNose = (arrow: HTMLElement, popup: HTMLElement) => {
+// No arrow drawn by the popup.
+const unplaceNose = (popup: HTMLElement) => {
+  delete popup.dataset.arrow;
+  popup.style.removeProperty('--uikit-popover-nose');
+  popup.style.removeProperty('--uikit-popover-wedge');
+};
+
+// The arrow's side (on both, as `data-arrow`; on the popup, drawn: not
+// hidden) and its center along the popup's edge (`--uikit-popover-nose`),
+// where Base UI placed it.
+const placeNose = (
+  arrow: HTMLElement,
+  popup: HTMLElement,
+  isHidden: boolean,
+) => {
   const nose = arrowSide(
     arrow.dataset.side,
     getComputedStyle(popup).direction === 'rtl',
@@ -356,6 +375,10 @@ const placeNose = (arrow: HTMLElement, popup: HTMLElement) => {
   const room = Math.min(along, length - along) - 13;
   const wedge = Math.max(wedgeHalfMin, Math.min(wedgeHalf, room));
   arrow.dataset.arrow = nose;
+  if (isHidden) {
+    unplaceNose(popup);
+    return;
+  }
   popup.dataset.arrow = nose;
   popup.style.setProperty('--uikit-popover-nose', `${String(along)}px`);
   popup.style.setProperty('--uikit-popover-wedge', `${String(wedge)}px`);
@@ -364,37 +387,42 @@ const placeNose = (arrow: HTMLElement, popup: HTMLElement) => {
 /**
  * Its arrow, pointing at its anchor (moving its popup further out),
  * drawn by its popup: where Base UI places it (its center along the
- * popup's edge, as `--uikit-popover-nose`).
+ * popup's edge, as `--uikit-popover-nose`); shifted so far it can't point
+ * at its anchor's center (`data-uncentered`), or over its anchor (not
+ * fitting on either side, see `useGrowAvoidance`), hidden (`whenShifted`).
  */
-const Arrow = forwardRef<HTMLDivElement, Omit<BasePopover.Arrow.Props, 'ref'>>(
-  ({ className, ...props }, ref) => {
+const Arrow = forwardRef<HTMLDivElement, PopoverArrowProps>(
+  ({ className, whenShifted = 'hide', ...props }, ref) => {
     const arrowRef = useForwardedRef(ref);
     const setHasArrow = useContext(PopoverContext)?.setHasArrow;
-    useLayoutEffect(() => {
-      setHasArrow?.(true);
-      return () => setHasArrow?.(false);
-    }, [setHasArrow]);
+    const isShifted = useContext(ShiftedContext);
 
     useLayoutEffect(() => {
       const { current: arrow } = arrowRef;
       const popup = arrow?.parentElement;
       if (!arrow || !popup) return undefined;
 
-      const update = () => placeNose(arrow, popup);
+      const update = () => {
+        const isHidden =
+          whenShifted === 'hide' &&
+          (isShifted || 'uncentered' in arrow.dataset);
+        // (Hidden: its popup as close as without one.)
+        setHasArrow?.(!isHidden);
+        placeNose(arrow, popup, isHidden);
+      };
       update();
       const observer = new MutationObserver(update);
       observer.observe(arrow, {
-        attributeFilter: ['style', 'data-side'],
+        attributeFilter: ['style', 'data-side', 'data-uncentered'],
         attributes: true,
       });
 
       return () => {
         observer.disconnect();
-        delete popup.dataset.arrow;
-        popup.style.removeProperty('--uikit-popover-nose');
-        popup.style.removeProperty('--uikit-popover-wedge');
+        setHasArrow?.(false);
+        unplaceNose(popup);
       };
-    }, [arrowRef]);
+    }, [arrowRef, isShifted, setHasArrow, whenShifted]);
 
     return (
       // Positioned by Base UI, drawn by the popup (see there; its side as

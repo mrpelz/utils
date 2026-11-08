@@ -81,7 +81,7 @@ const tints = [
 
 /**
  * A switch whose change takes a moment to apply (e.g. while an app saves
- * it): mixed (indeterminate) for 2s after each change, as the docs'.
+ * it): indeterminate for 2s after each change, as the docs'.
  */
 const SavingSwitch: FunctionComponent = () => {
   const [isPending, setIsPending] = useState(false);
@@ -105,7 +105,7 @@ const SavingSwitch: FunctionComponent = () => {
 
 const SwitchContent: FunctionComponent = () => (
   <List.Root>
-    <Showcase title="Delayed (Mixed for 2s After a Change, While Saving)">
+    <Showcase title="Delayed (Indeterminate for 2s After a Change, While Saving)">
       <SavingSwitch />
     </Showcase>
     <Showcase title="States">
@@ -120,7 +120,7 @@ const SwitchContent: FunctionComponent = () => (
       </Switch.Root>
       <Switch.Root
         indeterminate
-        aria-label="Mixed"
+        aria-label="Indeterminate"
       >
         <Switch.Thumb />
       </Switch.Root>

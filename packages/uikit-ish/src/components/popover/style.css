@@ -105,8 +105,10 @@
     position: relative;
 
     /* Its header over its body, within the viewport (Base UI's room for
-       it): taller content scrolls in its body (see `Body`). */
+       it): taller content scrolls in its body (see `Body`), a wider width
+       (e.g. an activity view's, on a phone) narrowed to fit. */
     display: flex;
+    max-width: var(--available-width);
     max-height: var(--available-height);
     flex-direction: column;
     border-radius: 13px;

@@ -718,6 +718,7 @@ const PageControlApp: FunctionComponent = () => {
       </Viewport.BlockStart>
       <Viewport.BlockEnd>
         <Toolbar.Root>
+          <Toolbar.Spacer />
           <PageControl
             aria-label="Onboarding"
             count={steps.length}
@@ -730,6 +731,7 @@ const PageControlApp: FunctionComponent = () => {
               })
             }
           />
+          <Toolbar.Spacer />
         </Toolbar.Root>
       </Viewport.BlockEnd>
     </>
@@ -1355,7 +1357,10 @@ const NavigationContent: FunctionComponent = () => (
         title="Level 1"
       />
     </Rows>
-    <Rows title="Apps, Each Its Own Stack">
+    <Rows
+      footer="In these apps, a swipe from the screen’s edge goes back within the app only. It doesn’t leave the app: use its back button for that."
+      title="Apps, Each Its Own Stack"
+    >
       <DrillRow
         pageKey="navigation/quick-back"
         title="Going Back Quickly (Levels Deep)"
@@ -1458,7 +1463,13 @@ export const structurePages: SinkPages = {
   accordion: { Content: AccordionContent, title: 'Accordion' },
   collapsible: { Content: CollapsibleContent, title: 'Collapsible' },
   drawer: { Content: DrawerContent, title: 'Drawer' },
-  header: { Content: HeaderContent, title: 'Header' },
+  header: {
+    Content: HeaderContent,
+    // (The page's background under its search, so the field doesn't blend
+    // into the rows scrolling under it.)
+    edgeTint: 'var(--color-ui-system-grouped-background)',
+    title: 'Header',
+  },
   layout: { Content: LayoutContent, title: 'Layout' },
   navigation: { Content: NavigationContent, title: 'Navigation' },
   ...Object.fromEntries(

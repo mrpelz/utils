@@ -153,7 +153,7 @@ const reviewers = [
 
 /** The place's stops shown from code (see `placeGroups`' `onShow`). */
 const shownStops = [
-  ['details', 'Show the Opening Hours'],
+  ['details', 'Show the Details'],
   ['all', 'Show the Reviews'],
 ] as const;
 
@@ -266,7 +266,7 @@ const PlaceSheet: FunctionComponent = () => (
       </Sheet.Trigger>
       {(
         [
-          ['details', 'Opening Hours'],
+          ['details', 'Details'],
           ['all', 'Reviews'],
         ] as const
       ).map(([stop, label]) => (

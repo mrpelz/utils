@@ -41,6 +41,7 @@ import {
 } from './docs.js';
 import {
   getPropOptionsGuideRoot,
+  propOptionsArrow,
   propOptionsClose,
   propOptionsElement,
   propOptionsGuidePositioner,
@@ -668,7 +669,7 @@ const PopupPart: FunctionComponent = () => {
 const ArrowPart: FunctionComponent = () => {
   const id = 'popover-parts-arrow';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(propOptionsPart, {
+  const [control, props, state] = usePropControl(propOptionsArrow, {
     external,
     isOpen: true,
     emphasize: 'outline',
@@ -1930,6 +1931,12 @@ export const PopoverParts: FunctionComponent = () => (
       <li>
         Drawn by the popup (its outline); renders an empty <code>div</code>{' '}
         where Base UI places it.
+      </li>
+      <li>
+        With the popover shifted so far that it can’t point at the trigger’s
+        center (e.g. a trigger near a corner of the screen), or over the trigger
+        (too tall to fit on either side), hidden by default (
+        <code>whenShifted</code>), as iOS does.
       </li>
     </ul>
     <ArrowPart />

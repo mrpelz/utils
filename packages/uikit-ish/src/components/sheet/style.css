@@ -352,6 +352,10 @@
        the popup's bottom (its own, below or on it, would show a second
        pair of corners through its clip). */
     .uikit-sheet-popup[data-snap='capsule'] > & {
+      /* (Held up as it's swiped out, see the capsule below.) */
+      animation: uikit-sheet-capsule-hold linear both;
+      animation-range: 0 var(--uikit-sheet-lowest-stop, 0);
+      animation-timeline: scroll(nearest block);
       box-shadow: none;
       color: var(--uikit-glass-content);
     }
@@ -444,11 +448,10 @@
     border-top: 0;
     margin-top: -34px;
 
-    /* Faded in as the panel's scrolled up past its corners (34px to 68px
-       of it shown: scrolled by as much), its sides else outside the
-       panel's top corners (e.g. as it's swiped closed). */
-    animation: uikit-sheet-rim-fade linear both;
-    animation-range: 34px 68px;
+    /* Kept at the popup's bottom as the panel's held up (swiped out,
+       below its lowest stop: see the capsule). */
+    animation: uikit-sheet-capsule-rim linear both;
+    animation-range: 0 var(--uikit-sheet-lowest-stop, 0);
     animation-timeline: scroll(nearest block);
     content: '';
 
@@ -467,13 +470,60 @@
     pointer-events: none;
   }
 
-  @keyframes uikit-sheet-rim-fade {
+  /* A capsule swiped below its lowest stop (`--uikit-sheet-lowest-stop`,
+     see main.tsx): moved out whole, its corners and rim with it, past the
+     screen's bottom (not collapsing into its bottom: the popup's clip), as
+     a sheet without stops is swiped away. The popup moved down by as much
+     as it's scrolled below its lowest stop (and its gap to the screen's
+     edge), its panel held up by as much in it (the finger's 1:1, at its
+     lowest stop's height in it); collapsing is only from stop to stop. */
+  .uikit-sheet-popup[data-snap='capsule'] {
+    animation: uikit-sheet-capsule-out linear both;
+    animation-range: 0 var(--uikit-sheet-lowest-stop, 0);
+    animation-timeline: scroll(self block);
+
+    /* None as it opens or closes: Base UI waits for its animations to
+       finish (unmounting it closed), and a scroll-driven one at its start
+       (swiped out) never does, left mounted, scrolled away as it's opened
+       again. Swiped out, both are out of view already (the panel then
+       below the popup's clip). */
+    &:is([data-starting-style], [data-ending-style]),
+    &:is([data-starting-style], [data-ending-style]) > .uikit-sheet-panel {
+      animation: none;
+    }
+  }
+
+  @keyframes uikit-sheet-capsule-out {
     from {
-      opacity: 0;
+      translate: 0
+        calc(
+          var(--uikit-sheet-lowest-stop, 0px) +
+            max(6px, var(--uikit-sheet-inset-bottom))
+        );
     }
 
     to {
-      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes uikit-sheet-capsule-hold {
+    from {
+      translate: 0 calc(var(--uikit-sheet-lowest-stop, 0px) * -1);
+    }
+
+    to {
+      translate: 0 0;
+    }
+  }
+
+  @keyframes uikit-sheet-capsule-rim {
+    from {
+      translate: 0 var(--uikit-sheet-lowest-stop, 0);
+    }
+
+    to {
+      translate: 0 0;
     }
   }
 

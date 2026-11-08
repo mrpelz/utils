@@ -366,6 +366,21 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
         : undefined,
     );
     useMouseSwipe(ref, isCompact, isSnapping);
+    // Its lowest stop (snapping), below which it's swiped out whole (see
+    // style.css).
+    const lowest = isSnapping ? snap.stops[0] : undefined;
+    useLayoutEffect(() => {
+      const { current: element } = ref;
+      if (!element) return;
+      if (lowest === undefined) {
+        element.style.removeProperty('--uikit-sheet-lowest-stop');
+      } else {
+        element.style.setProperty(
+          '--uikit-sheet-lowest-stop',
+          `${String(lowest)}px`,
+        );
+      }
+    }, [lowest, ref]);
     let snapKind: string | undefined;
     if (isSnapping) {
       snapKind = isCompact && detent === 'medium' ? 'capsule' : 'sheet';

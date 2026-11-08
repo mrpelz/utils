@@ -125,8 +125,9 @@ export const Showcase: FunctionComponent<{
 /** A section of rows, titled. */
 export const Rows: FunctionComponent<{
   children: ReactNode;
+  footer?: ReactNode;
   title?: string;
-}> = ({ children, title }) => (
+}> = ({ children, footer, title }) => (
   <List.Section>
     {title === undefined ? null : (
       <List.Header>
@@ -134,6 +135,7 @@ export const Rows: FunctionComponent<{
       </List.Header>
     )}
     <List.Group>{children}</List.Group>
+    {footer === undefined ? null : <List.Footer>{footer}</List.Footer>}
   </List.Section>
 );
 

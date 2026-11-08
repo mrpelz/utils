@@ -25,6 +25,7 @@ export {
   Popover,
   type PopoverAlign,
   type PopoverHandle,
+  type PopoverArrowProps,
   type PopoverHeaderProps,
   type PopoverPositionerProps,
   useCreatePopoverHandle,

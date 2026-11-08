@@ -79,7 +79,7 @@
       transition-duration: var(--glass-ui-lens-duration);
     }
 
-    /* Mixed but checked (see below): the on color from its start, fading
+    /* Indeterminate but checked (see below): the on color from its start, fading
        out halfway (under the knob), faded in. */
     &::after {
       position: absolute;
@@ -120,7 +120,7 @@
       opacity: 0.55;
     }
 
-    /* Mixed: the knob centered, the track off (over checked, see above);
+    /* Indeterminate: the knob centered, the track off (over checked, see above);
        checked, its start half tinted (see above), so it tells which it'll
        be. */
     &[data-indeterminate] {

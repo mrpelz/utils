@@ -301,10 +301,21 @@ export const popoverPopupRows: readonly PropRow[] = [
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
 
-export const popoverArrowRows: readonly PropRow[] = baseUiRows(
-  'div',
-  'HTMLDivElement',
-);
+export const popoverArrowRows: readonly PropRow[] = [
+  [
+    'whenShifted',
+    union('hide', 'show'),
+    code(union('hide')),
+    <>
+      With the popover shifted so far that the arrow can’t point at the
+      trigger’s center (Base UI’s <code>data-uncentered</code>), or over the
+      trigger (too tall to fit on either side): <code>hide</code>, none drawn,
+      the popup as close to the trigger as without one; <code>show</code>, drawn
+      where Base UI places it.
+    </>,
+  ],
+  ...baseUiRows('div', 'HTMLDivElement'),
+];
 
 export const popoverHeaderRows: readonly PropRow[] = [
   [

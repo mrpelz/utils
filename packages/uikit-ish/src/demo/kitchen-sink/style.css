@@ -176,13 +176,6 @@
     padding-inline-start: var(--uikit-layout-inset-start, 0);
   }
 
-  /* Swipeable pages filling a screen (the docs' paged content's, see
-     structure.tsx): no corners, as high as the screen. */
-  .kitchen-sink-pages {
-    height: 100%;
-    border-radius: 0;
-  }
-
   /* A transparent page (its list's, too): the layout's background shows
      through. */
   .kitchen-sink-transparent {
@@ -232,6 +225,20 @@
   .kitchen-sink-stacked {
     display: grid;
     gap: 20px;
+  }
+}
+
+/* Swipeable pages filling a screen (the docs' paged content's, see
+   structure.tsx): no corners, as high as the screen, its pages' text
+   centered clear of a floating column (a filled page having no inset of its
+   own, see Page). Unlayered and more specific, over the docs' unlayered
+   styles. */
+.page-control-demo-pages.kitchen-sink-pages {
+  height: 100%;
+  border-radius: 0;
+
+  & > .page-control-demo-page {
+    padding-inline-start: calc(24px + var(--uikit-layout-inset-start, 0px));
   }
 }
 

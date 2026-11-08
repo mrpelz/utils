@@ -120,6 +120,16 @@
           var(--uikit-layout-inset-start)
         );
       }
+
+      /* What shows past a content layer's end (see Viewport's
+         `Overscroll`, e.g. a refresh indicator): centered clear of it, as
+         the content. */
+      & .uikit-viewport-overscroll-area {
+        padding-inline-start: max(
+          var(--uikit-viewport-safe-left),
+          var(--uikit-layout-inset-start)
+        );
+      }
     }
 
     /* The hairline between columns. */

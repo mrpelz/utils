@@ -32,6 +32,17 @@ export type PopoverPositionerProps = Omit<
   side?: LogicalSide;
 };
 
+export type PopoverArrowProps = Omit<BasePopover.Arrow.Props, 'ref'> & {
+  /**
+   * With its popover shifted so far it can't point at its anchor's center
+   * (Base UI's `data-uncentered`), or over its anchor (fitting on neither
+   * side, e.g. tall): `hide`, none drawn (its popover as close
+   * to its anchor as without one); `show`, drawn where Base UI places it.
+   * @default 'hide'
+   */
+  whenShifted?: 'hide' | 'show';
+};
+
 export type PopoverHeaderProps = ComponentProps<'div'> & {
   /**
    * Its scroll edge effect, as the body scrolls under it (see
