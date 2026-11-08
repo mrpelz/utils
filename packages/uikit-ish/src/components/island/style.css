@@ -43,6 +43,36 @@
       margin-top: calc(-1 * var(--uikit-island-reach));
       overflow-clip-margin: 16px;
       pointer-events: none;
+
+      /* Its rim's bottom and its corners (its panel's glass draws the
+         rest, never its bottom: see the glass): over its scroller (the
+         panel's bottom below its clip, its sides clipped round its
+         corners); a sliver's fading in as its glass does. */
+      &::after {
+        position: absolute;
+        height: 34px;
+        box-sizing: border-box;
+        border: 1px solid var(--glass-ui-panel-rim);
+        border-radius: 0 0 34px 34px;
+        border-top: 0;
+        content: '';
+        inset: auto 0 0;
+
+        /* Its sides' start faded in by as much as the scroller's clip cuts
+           off the panel's own straight rim there (34px − √(34² − d²) at
+           d px down its arc), the two never drawn over each other. */
+        mask-image: linear-gradient(
+          transparent,
+          rgb(0 0 0 / 6%) 2px,
+          rgb(0 0 0 / 24%) 4px,
+          rgb(0 0 0 / 53%) 6px,
+          rgb(0 0 0 / 73%) 7px,
+          rgb(0 0 0 / 96%) 8px,
+          #000 8.2px
+        );
+        opacity: var(--uikit-island-sliver, 1);
+        pointer-events: none;
+      }
     }
 
     &[data-snap][data-sliver] {
@@ -88,13 +118,14 @@
 
   /* The room it's scrolled up out of (snapping), short of its lowest stop
      (never scrolled below it), its stops in one cell, each down by its own
-     (within it: `cqh`); else none. */
+     (within it: `cqh`), in whole pixels (its scroll's range too, see
+     Sheet's); else none. */
   .uikit-island-spacer {
     display: none;
 
     .uikit-island[data-snap] > .uikit-island-scroller > & {
       display: grid;
-      height: calc(100% - var(--uikit-island-lowest, 0px));
+      height: round(down, 100% - var(--uikit-island-lowest, 0px), 1px);
       container-type: size;
     }
   }
@@ -152,6 +183,13 @@
     inset: 0;
     opacity: var(--uikit-island-sliver, 1);
     pointer-events: none;
+
+    /* Snapping: its rim its top and sides alone (its bottom the island's,
+       see there, at the scroller's edge in every state: its own, below or
+       on it, would show a second pair of corners through its clip). */
+    .uikit-island[data-snap] & {
+      box-shadow: none;
+    }
   }
 
   /* Its header, over its content (as a sheet's: its grabber, 10px below
@@ -288,6 +326,19 @@
     &[data-edge-effect='soft']::before {
       backdrop-filter: none;
     }
+  }
+
+  /* A snapping one's glass's rim (see the glass). */
+  .uikit-island[data-snap] .uikit-island-glass::before {
+    position: absolute;
+    box-sizing: border-box;
+    border: 1px solid var(--glass-ui-panel-rim);
+    border-radius: inherit;
+    border-bottom: 0;
+    border-end-end-radius: 0;
+    border-end-start-radius: 0;
+    content: '';
+    inset: 0;
   }
 
   /* Its snap groups spaced as list sections are (see a sheet's). */

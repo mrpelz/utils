@@ -14,7 +14,8 @@ import { RefObject, useEffect, useLayoutEffect, useRef } from 'react';
 // choose a stop: any other (the browser's, re-snapping as its stops move)
 // is brought back.
 // Its stops within its scroll's range (Safari, a marker past its end,
-// snaps to that and holds it), see style.css. A mouse (no native scroll
+// snaps to that and holds it), the top one at its end exactly (its range
+// whole pixels), see style.css. A mouse (no native scroll
 // of its own) drags it by its handle (`handle`: its grabber, its bar but its
 // buttons), its snapping off as it's dragged; let go, to the nearest stop
 // (flung, the next one its way); pressed, not dragged, to the next stop up

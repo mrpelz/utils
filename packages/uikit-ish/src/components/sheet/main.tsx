@@ -424,8 +424,9 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
                 >
                   {/* Its stops, in its flow (not positioned: Safari takes
                     those, in a transformed container, from elsewhere), and
-                    within its scroll's range (the last below its end: Safari
-                    holds on to one past it, rounded, see snap.ts). */}
+                    within its scroll's range (the last at its end, the
+                    panel's start: Safari holds on to one past it, see
+                    snap.ts; its spacer whole pixels, see style.css). */}
                   {isSnapping
                     ? [0, ...snap.stops].map((stop, index) => (
                         <span
@@ -435,7 +436,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
                           className="uikit-sheet-stop"
                           data-sheet-part="stop"
                           style={{
-                            marginTop: `min(${String(stop)}px, 100cqh - 1px)`,
+                            marginTop: `min(${String(stop)}px, 100cqh)`,
                           }}
                         />
                       ))

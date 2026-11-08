@@ -347,8 +347,12 @@
       scroll-snap-align: none;
     }
 
-    /* A capsule's glass (by class), its content in the glass's color. */
+    /* A capsule's glass (by class), its content in the glass's color; its
+       rim its top and sides alone (below), its bottom and corners stuck to
+       the popup's bottom (its own, below or on it, would show a second
+       pair of corners through its clip). */
     .uikit-sheet-popup[data-snap='capsule'] > & {
+      box-shadow: none;
       color: var(--uikit-glass-content);
     }
 
@@ -363,10 +367,12 @@
   .uikit-sheet-spacer {
     display: none;
 
-    /* Its stops in one cell, each down by its own (within it: `cqh`). */
+    /* Its stops in one cell, each down by its own (within it: `cqh`); in
+       whole pixels, its scroll's range too (its end, its top stop's, not
+       rounded past by Safari). */
     .uikit-sheet-popup[data-snap] > & {
       display: grid;
-      height: 100%;
+      height: round(down, 100%, 1px);
       container-type: size;
     }
   }
@@ -404,6 +410,71 @@
       border-radius: inherit;
     }
 
+  }
+
+  /* A capsule's rim (snapping, see its panel): its top and sides on its
+     panel, its bottom and corners stuck to the popup's bottom. */
+  .uikit-sheet-popup[data-snap='capsule'] > .uikit-sheet-panel::before {
+    position: absolute;
+    z-index: -1;
+    box-sizing: border-box;
+    border: 1px solid var(--glass-ui-panel-rim);
+    border-radius: inherit;
+    border-bottom: 0;
+    border-end-end-radius: 0;
+    border-end-start-radius: 0;
+    content: '';
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* Its rim's bottom and corners: stuck to the popup's bottom (above
+     the panel's, below it), within the panel (not past its top, as
+     it's dismissed); over its content, in its flow, taking no room. */
+  .uikit-sheet-popup[data-snap='capsule'] > .uikit-sheet-panel::after {
+    position: sticky;
+    z-index: 1;
+    bottom: 0;
+    display: block;
+    height: 34px;
+    box-sizing: border-box;
+    flex: none;
+    border: 1px solid var(--glass-ui-panel-rim);
+    border-radius: 0 0 34px 34px;
+    border-top: 0;
+    margin-top: -34px;
+
+    /* Faded in as the panel's scrolled up past its corners (34px to 68px
+       of it shown: scrolled by as much), its sides else outside the
+       panel's top corners (e.g. as it's swiped closed). */
+    animation: uikit-sheet-rim-fade linear both;
+    animation-range: 34px 68px;
+    animation-timeline: scroll(nearest block);
+    content: '';
+
+    /* Its sides' start faded in by as much as the popup's clip cuts
+       off the panel's straight rim there (34px − √(34² − d²) at d px
+       down its arc), the two never drawn over each other. */
+    mask-image: linear-gradient(
+      transparent,
+      rgb(0 0 0 / 6%) 2px,
+      rgb(0 0 0 / 24%) 4px,
+      rgb(0 0 0 / 53%) 6px,
+      rgb(0 0 0 / 73%) 7px,
+      rgb(0 0 0 / 96%) 8px,
+      #000 8.2px
+    );
+    pointer-events: none;
+  }
+
+  @keyframes uikit-sheet-rim-fade {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
   /* Its snap groups (see SnapGroup) spaced as list sections are: the gap

@@ -88,20 +88,24 @@ const handle = '[data-island-part=header], [data-island-part=grabber]';
 
 /**
  * With a sliver, how far it's swiped up past it (0 to 1 at its next stop:
- * `--uikit-island-sliver`, on its scroller), as it scrolls.
+ * `--uikit-island-sliver`, on its root: its rim's too), as it scrolls.
  */
 const useSliverProgress = (
   ref: RefObject<HTMLElement | null>,
+  scroller: RefObject<HTMLElement | null>,
   sliverTo: number | undefined,
 ) => {
   useLayoutEffect(() => {
-    const { current: element } = ref;
-    if (!element || sliverTo === undefined || sliverTo <= 0) return undefined;
+    const { current: root } = ref;
+    const { current: element } = scroller;
+    if (!root || !element || sliverTo === undefined || sliverTo <= 0) {
+      return undefined;
+    }
     let frame = 0;
 
     const update = () => {
       frame = 0;
-      element.style.setProperty(
+      root.style.setProperty(
         '--uikit-island-sliver',
         String(Math.min(Math.max(element.scrollTop / sliverTo, 0), 1)),
       );
@@ -115,9 +119,9 @@ const useSliverProgress = (
     return () => {
       cancelAnimationFrame(frame);
       element.removeEventListener('scroll', onScroll);
-      element.style.removeProperty('--uikit-island-sliver');
+      root.style.removeProperty('--uikit-island-sliver');
     };
-  }, [ref, sliverTo]);
+  }, [ref, scroller, sliverTo]);
 };
 
 /** How long (ms) after a wheel or key it may rest again (see below). */
@@ -366,7 +370,7 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
           }
         : undefined,
     );
-    useSliverProgress(scroller, isSliver ? sliverTo : undefined);
+    useSliverProgress(ref, scroller, isSliver ? sliverTo : undefined);
     useHitArea(ref, scroller, isSnapping ? positions[index] : undefined);
 
     // (Its box: its stop's, at most as tall as it may be.)
@@ -407,7 +411,7 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
                 >
                   {/* The room it's scrolled up out of (snapping; short of its
                     lowest stop), its stops in its flow (see Sheet's), within
-                    its scroll's range. */}
+                    its scroll's range (the last at its end). */}
                   <div
                     aria-hidden="true"
                     className="uikit-island-spacer"
@@ -423,7 +427,7 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
                             className="uikit-island-stop"
                             data-island-part="stop"
                             style={{
-                              marginTop: `min(${String(stop)}px, 100cqh - 1px)`,
+                              marginTop: `min(${String(stop)}px, 100cqh)`,
                             }}
                           />
                         ))
