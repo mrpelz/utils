@@ -49,7 +49,12 @@ const fillerRows = (count: number, prefix = 'Row') =>
     </List.Item>
   ));
 
-/** A sheet: its bar (a title, Cancel and Done, or a close), its rows. */
+/**
+ * A sheet: its bar (a title, Cancel and Done, or a close), its rows: on a
+ * plain (opaque) sheet a plain list, on a grouped one an inset grouped
+ * list (each on the background it's made for), on a medium one's glass the
+ * glass's.
+ */
 const SimpleSheet: FunctionComponent<{
   background?: 'grouped' | 'plain';
   compact?: boolean;
@@ -113,7 +118,14 @@ const SimpleSheet: FunctionComponent<{
       </Sheet.Header>
       <Sheet.Content>
         <Viewport.Padding edge="block-start" />
-        <List.Root>
+        <List.Root
+          listStyle={
+            background !== 'grouped' &&
+            ((detent ?? 'large') === 'large' || compact === false)
+              ? 'plain'
+              : undefined
+          }
+        >
           <List.Section>
             <List.Group>{fillerRows(rows)}</List.Group>
           </List.Section>
@@ -139,9 +151,19 @@ const reviewers = [
   'Grace',
 ];
 
-/** A place's rows, by snap group: a peek, its details, its reviews. */
+/** The place's stops shown from code (see `placeGroups`' `onShow`). */
+const shownStops = [
+  ['details', 'Show the Opening Hours'],
+  ['all', 'Show the Reviews'],
+] as const;
+
+/**
+ * A place's rows, by snap group: a peek, its details, its reviews; with
+ * `onShow`, buttons in the peek showing a stop (from code).
+ */
 const placeGroups = (
   SnapGroup: typeof Sheet.SnapGroup | typeof Island.SnapGroup,
+  onShow?: (stop: string) => void,
 ) => (
   <>
     <SnapGroup value="peek">
@@ -154,6 +176,17 @@ const placeGroups = (
                 <List.Subtitle>Café · 300 m</List.Subtitle>
               </List.Content>
             </List.Item>
+            {onShow === undefined
+              ? null
+              : shownStops.map(([stop, label]) => (
+                  <List.Item key={stop}>
+                    <List.Content>
+                      <List.Button onClick={() => onShow(stop)}>
+                        {label}
+                      </List.Button>
+                    </List.Content>
+                  </List.Item>
+                ))}
           </List.Group>
         </List.Section>
       </List.Root>
@@ -311,7 +344,7 @@ const SheetContent: FunctionComponent = () => (
       />
     </Showcase>
     <Showcase title="Swiped Away">
-      {(['down', 'left', 'right', 'none'] as const).map((direction) => (
+      {(['down', 'up', 'left', 'right', 'none'] as const).map((direction) => (
         <SimpleSheet
           key={direction}
           compact
@@ -324,6 +357,7 @@ const SheetContent: FunctionComponent = () => (
     <Showcase title="A Form Sheet (Centered)">
       <SimpleSheet
         hasCancelDone
+        background="grouped"
         compact={false}
         label="Form Sheet"
         rows={8}
@@ -338,18 +372,33 @@ const SheetContent: FunctionComponent = () => (
   </List.Root>
 );
 
-/** An island over a map (a page filling the screen, see `Anchors`). */
-const islandPage = (
-  defaultSnapPoint: string | undefined,
-  hasGroups: boolean,
+/**
+ * An island over a map (in the page's anchor, see `Anchors`): its stop
+ * the app's (controlled, from `initialStop`), swiped to, or shown from code
+ * (`isShownFromCode`: buttons in its peek).
+ */
+const PlaceIsland: FunctionComponent<{
+  hasGroups: boolean;
+  initialStop: string | undefined;
+  isShownFromCode?: boolean;
+  isSliver?: boolean;
+}> = ({
+  hasGroups,
+  initialStop,
+  isShownFromCode = false,
   isSliver = false,
-): Pick<SinkPages[string], 'Anchors' | 'Content' | 'isFullBleed'> => ({
-  Anchors: () => (
+}) => {
+  const [stop, setStop] = useState(initialStop);
+
+  return (
     <Viewport.Anchor
       edge="block-end"
       edgeEffect="none"
     >
-      <Island.Root defaultSnapPoint={defaultSnapPoint}>
+      <Island.Root
+        snapPoint={stop}
+        onSnapPointChange={(next: string) => setStop(next)}
+      >
         <Island.Header>
           {hasGroups ? <Island.Grabber /> : null}
           {isSliver ? <Island.SnapGroup value="sliver" /> : null}
@@ -360,7 +409,10 @@ const islandPage = (
           {hasGroups ? (
             <>
               {isSliver ? null : <Island.SnapGroup value="header" />}
-              {placeGroups(Island.SnapGroup)}
+              {placeGroups(
+                Island.SnapGroup,
+                isShownFromCode ? setStop : undefined,
+              )}
             </>
           ) : (
             <List.Root>
@@ -373,6 +425,22 @@ const islandPage = (
         </Island.Content>
       </Island.Root>
     </Viewport.Anchor>
+  );
+};
+
+/** An island over a map (a page filling the screen, see `Anchors`). */
+const islandPage = (
+  initialStop: string | undefined,
+  hasGroups: boolean,
+  isSliver = false,
+): Pick<SinkPages[string], 'Anchors' | 'Content' | 'isFullBleed'> => ({
+  Anchors: () => (
+    <PlaceIsland
+      hasGroups={hasGroups}
+      initialStop={initialStop}
+      isShownFromCode={hasGroups && !isSliver}
+      isSliver={isSliver}
+    />
   ),
   Content: () => <MapView isFollowing={isSliver} />,
   isFullBleed: true,
@@ -383,7 +451,7 @@ const IslandContent: FunctionComponent = () => (
     <Rows>
       <DrillRow
         pageKey="island/stops"
-        title="Over a Map, Snapping"
+        title="Over a Map, Snapping (and Shown from Code)"
       />
       <DrillRow
         pageKey="island/sliver"

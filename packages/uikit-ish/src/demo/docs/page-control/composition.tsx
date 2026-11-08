@@ -35,7 +35,8 @@ const [page, setPage] = useState(0);
 </Viewport.BlockEnd>`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
-const steps = [
+/** Onboarding steps, a page each (also the kitchen sink's). */
+export const steps = [
   ['Welcome', 'Swipe through, or press the dots.'],
   ['Your pages', 'A page per screen, snapping into place.'],
   ['The dots', 'They follow the swipe, and move it.'],

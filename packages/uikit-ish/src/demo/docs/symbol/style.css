@@ -93,17 +93,17 @@
   white-space: nowrap;
 }
 
-/* Its app look (`look="app"`, e.g. the kitchen sink's: in a strong list
-   block, see catalog.tsx): the grid's box without its frame (the block's),
-   as high as most of the screen; its cells pressed and hovered on the
-   rows' fills. */
-.symbol-catalog[data-look='app'] {
-  justify-items: stretch;
-
-  & .symbol-catalog-box {
-    height: min(60vh, 480px);
-    border: 0;
-    border-radius: 0;
+/* Its screen look (`look="screen"`, e.g. the kitchen sink's, see
+   catalog.tsx): the grid's box the screen's content layer (filling it,
+   above the keyboard: the layer's own), its cells centered, pressed and
+   hovered on the rows' fills; its search below it, on the keyboard (a
+   list row's field, inset as a list's rows, its status below it). */
+.symbol-catalog-screen {
+  & .symbol-catalog-grid {
+    position: absolute;
+    right: 0;
+    left: 0;
+    justify-content: center;
   }
 
   & .symbol-catalog-cell {
@@ -118,3 +118,16 @@
     }
   }
 }
+
+.symbol-catalog-search-bar {
+  display: grid;
+  padding: 8px 16px;
+  gap: 6px;
+
+  & .symbol-catalog-status {
+    color: var(--color-ui-secondary-label);
+    font-size: var(--font-ui-footnote-size);
+    padding-inline: 16px;
+  }
+}
+

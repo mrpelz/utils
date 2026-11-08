@@ -1,4 +1,4 @@
-import { FunctionComponent, ReactNode, useState } from 'react';
+import { FunctionComponent, ReactNode, useEffect, useState } from 'react';
 
 import {
   Button,
@@ -29,7 +29,13 @@ import {
   useSizeClass,
   Viewport,
 } from '../../components/index.js';
-import { modesControl, panelParts } from '../docs/color-picker/panel.js';
+import {
+  type ModeEntry,
+  modesControl,
+  type ModeSet,
+  modeSets,
+  panelParts,
+} from '../docs/color-picker/panel.js';
 import {
   sfBold,
   sfEyedropper,
@@ -73,8 +79,35 @@ const tints = [
   'var(--color-ui-system-purple)',
 ];
 
+/**
+ * A switch whose change takes a moment to apply (e.g. while an app saves
+ * it): mixed (indeterminate) for 2s after each change, as the docs'.
+ */
+const SavingSwitch: FunctionComponent = () => {
+  const [isPending, setIsPending] = useState(false);
+
+  useEffect(() => {
+    if (!isPending) return undefined;
+    const timeout = setTimeout(() => setIsPending(false), 2000);
+    return () => clearTimeout(timeout);
+  }, [isPending]);
+
+  return (
+    <Switch.Root
+      aria-label="Saved after a moment"
+      indeterminate={isPending}
+      onCheckedChange={() => setIsPending(true)}
+    >
+      <Switch.Thumb />
+    </Switch.Root>
+  );
+};
+
 const SwitchContent: FunctionComponent = () => (
   <List.Root>
+    <Showcase title="Delayed (Mixed for 2s After a Change, While Saving)">
+      <SavingSwitch />
+    </Showcase>
     <Showcase title="States">
       <Switch.Root aria-label="Off">
         <Switch.Thumb />
@@ -459,43 +492,46 @@ const SliderContent: FunctionComponent = () => (
         <SliderControl labels={['Minimum price', 'Maximum price']} />
       </Slider.Root>
     </Showcase>
-    <Showcase
-      isStacked
-      title="Label and Value Placement"
-    >
+    <Rows title="Label and Value Placement (Side by Side Inline)">
       {placements.map((placement) => (
-        <Slider.Root
-          key={placement}
-          defaultValue={50}
-        >
-          <Slider.Label placement={placement}>{placement}</Slider.Label>
-          <Slider.Value placement={placement} />
-          <SliderControl labels={[placement]} />
-        </Slider.Root>
+        <List.Item key={placement}>
+          <List.Span className="kitchen-sink-row-bar">
+            <Slider.Root defaultValue={50}>
+              <Slider.Label placement={placement}>{placement}</Slider.Label>
+              <Slider.Value placement={placement} />
+              <SliderControl labels={[placement]} />
+            </Slider.Root>
+          </List.Span>
+        </List.Item>
       ))}
       {(['tooltip', 'momentary-tooltip'] as const).map((placement) => (
-        <Slider.Root
-          key={placement}
-          defaultValue={50}
-        >
-          <Slider.Label placement="block-start">{placement}</Slider.Label>
-          <Slider.Value placement={placement} />
-          <SliderControl labels={[placement]} />
-        </Slider.Root>
+        <List.Item key={placement}>
+          <List.Span className="kitchen-sink-row-bar">
+            <Slider.Root defaultValue={50}>
+              <Slider.Label placement="block-start">{placement}</Slider.Label>
+              <Slider.Value placement={placement} />
+              <SliderControl labels={[placement]} />
+            </Slider.Root>
+          </List.Span>
+        </List.Item>
       ))}
-      <Slider.Root
-        defaultValue={1}
-        max={2}
-        min={0.5}
-        step={0.25}
-      >
-        <Slider.Label placement="inline-start">Speed</Slider.Label>
-        <SliderControl labels={['Speed']} />
-        <Slider.Value placement="inline-end">
-          {(formattedValues: readonly string[]) => `${formattedValues[0]}×`}
-        </Slider.Value>
-      </Slider.Root>
-    </Showcase>
+      <List.Item>
+        <List.Span className="kitchen-sink-row-bar">
+          <Slider.Root
+            defaultValue={1}
+            max={2}
+            min={0.5}
+            step={0.25}
+          >
+            <Slider.Label placement="inline-start">Speed</Slider.Label>
+            <SliderControl labels={['Speed']} />
+            <Slider.Value placement="inline-end">
+              {(formattedValues: readonly string[]) => `${formattedValues[0]}×`}
+            </Slider.Value>
+          </Slider.Root>
+        </List.Span>
+      </List.Item>
+    </Rows>
     <Rows title="In a Row">
       <List.Item>
         <List.Span>
@@ -629,11 +665,12 @@ const SegmentedContent: FunctionComponent = () => (
     </Showcase>
     <Showcase
       isStacked
-      title="Too Narrow"
+      title="Too Narrow (in 320px)"
     >
       <Segmented.Root
         aria-label="Truncated"
         defaultValue="0"
+        style={{ maxInlineSize: '320px' }}
       >
         {['Everything', 'Photographs', 'Documents', 'Recordings'].map(
           (label, index) => (
@@ -651,6 +688,7 @@ const SegmentedContent: FunctionComponent = () => (
         aria-label="Scrolled"
         defaultValue="0"
         overflow="scroll"
+        style={{ maxInlineSize: '320px' }}
       >
         {[
           'Everything',
@@ -1372,28 +1410,29 @@ const DatePickerContent: FunctionComponent = () => (
   </List.Root>
 );
 
-/** The picker's header: its eyedropper and system colors, its close. */
+/**
+ * The picker's toolbar (in its popup's header): its eyedropper and system
+ * colors, its close.
+ */
 const pickerHeader = (title: string, close: ReactNode) => (
-  <ColorPicker.Header>
-    <Toolbar.Root placement="block-start">
-      <Toolbar.Leading>
-        <ColorPicker.Eyedropper render={<Toolbar.Button shape="circle" />}>
-          <Button.Icon>
-            <Symbol icon={sfEyedropper} />
-          </Button.Icon>
-        </ColorPicker.Eyedropper>
-        <ColorPicker.SystemColors render={<Toolbar.Button shape="circle" />}>
-          <Button.Icon>
-            <Symbol icon={sfPaintpalette} />
-          </Button.Icon>
-        </ColorPicker.SystemColors>
-      </Toolbar.Leading>
-      <Toolbar.Title>
-        <span>{title}</span>
-      </Toolbar.Title>
-      <Toolbar.Trailing>{close}</Toolbar.Trailing>
-    </Toolbar.Root>
-  </ColorPicker.Header>
+  <Toolbar.Root placement="block-start">
+    <Toolbar.Leading>
+      <ColorPicker.Eyedropper render={<Toolbar.Button shape="circle" />}>
+        <Button.Icon>
+          <Symbol icon={sfEyedropper} />
+        </Button.Icon>
+      </ColorPicker.Eyedropper>
+      <ColorPicker.SystemColors render={<Toolbar.Button shape="circle" />}>
+        <Button.Icon>
+          <Symbol icon={sfPaintpalette} />
+        </Button.Icon>
+      </ColorPicker.SystemColors>
+    </Toolbar.Leading>
+    <Toolbar.Title>
+      <span>{title}</span>
+    </Toolbar.Title>
+    <Toolbar.Trailing>{close}</Toolbar.Trailing>
+  </Toolbar.Root>
 );
 
 const closeIcon = (
@@ -1402,15 +1441,48 @@ const closeIcon = (
   </Button.Icon>
 );
 
+/** An app's own colors, a named list (a mode of its own: `brandMode`). */
+const brandColors = [
+  ['Harbor Blue', '#1F6FEB'],
+  ['Lighthouse Red', '#E5484D'],
+  ['Kelp Green', '#2F9E44'],
+  ['Sand', '#E9C46A'],
+  ['Slate', '#495057'],
+] as const;
+
+const brandMode: ModeEntry = [
+  'brand',
+  'Brand',
+  <ColorPicker.Named key="brand">
+    {brandColors.map(([name, color]) => (
+      <ColorPicker.NamedColor
+        key={name}
+        color={color}
+      >
+        {name}
+      </ColorPicker.NamedColor>
+    ))}
+  </ColorPicker.Named>,
+];
+
 /**
  * A color's row: its well opening the picker, in a sheet (compact) or a
- * popover (regular); its modes (the system's, or all).
+ * popover (regular); its modes (the system's, all, or its own), its
+ * opacity and saved colors (or not).
  */
 const ColorRow: FunctionComponent<{
   defaultColor: string;
-  modes?: 'all' | 'system';
+  modes?: ModeEntry[] | ModeSet;
+  opacity?: boolean;
+  swatches?: boolean;
   title: string;
-}> = ({ defaultColor, modes = 'system', title }) => {
+}> = ({
+  defaultColor,
+  modes = 'system',
+  opacity = true,
+  swatches = true,
+  title,
+}) => {
   const [color, setColor] = useState(defaultColor);
   const isCompact = useSizeClass() === 'compact';
   const well = (
@@ -1460,7 +1532,12 @@ const ColorRow: FunctionComponent<{
               <Sheet.Content>
                 <Viewport.Padding edge="block-start" />
                 <ColorPicker.Panel>
-                  {panelParts({ isModesElsewhere: true, modes })}
+                  {panelParts({
+                    isModesElsewhere: true,
+                    modes,
+                    opacity,
+                    swatches,
+                  })}
                 </ColorPicker.Panel>
                 <Viewport.Padding edge="block-end" />
               </Sheet.Content>
@@ -1471,12 +1548,17 @@ const ColorRow: FunctionComponent<{
             <Popover.Trigger render={well} />
             <Popover.Portal>
               <Popover.Positioner align="end">
-                <Popover.Popup style={{ width: 'min(402px, 100vw)' }}>
+                {/* (The picker the popup: its panel in the body, scrolling,
+                    e.g. the named colors; as the docs' overview.) */}
+                <ColorPicker.Root
+                  value={color}
+                  render={
+                    <Popover.Popup style={{ width: 'min(402px, 100vw)' }} />
+                  }
+                  onValueChange={(next: string) => setColor(next)}
+                >
                   <Popover.Arrow />
-                  <ColorPicker.Root
-                    value={color}
-                    onValueChange={(next: string) => setColor(next)}
-                  >
+                  <Popover.Header>
                     {pickerHeader(
                       title,
                       <Popover.Close
@@ -1490,11 +1572,20 @@ const ColorRow: FunctionComponent<{
                         {closeIcon}
                       </Popover.Close>,
                     )}
+                    {modesControl(modes)}
+                  </Popover.Header>
+                  <Popover.Body>
+                    <Viewport.Padding edge="block-start" />
                     <ColorPicker.Panel>
-                      {panelParts({ modes })}
+                      {panelParts({
+                        isModesElsewhere: true,
+                        modes,
+                        opacity,
+                        swatches,
+                      })}
                     </ColorPicker.Panel>
-                  </ColorPicker.Root>
-                </Popover.Popup>
+                  </Popover.Body>
+                </ColorPicker.Root>
               </Popover.Positioner>
             </Popover.Portal>
           </Popover.Root>
@@ -1533,19 +1624,30 @@ const ColorPickerContent: FunctionComponent = () => (
         modes="all"
         title="Every Mode"
       />
+      <ColorRow
+        defaultColor="#5856D6"
+        opacity={false}
+        title="Without Opacity"
+      />
+      <ColorRow
+        defaultColor="#FF2D55"
+        swatches={false}
+        title="Without Saved Colors"
+      />
+      <ColorRow
+        defaultColor="#1F6FEB"
+        modes={[...modeSets.system, brandMode]}
+        title="Brand Colors (a Named Mode)"
+      />
     </Rows>
-    <List.Section>
-      <List.Header>
-        <List.Title>On the Page</List.Title>
-      </List.Header>
-      <List.Block strong>
-        <ColorPicker.Root defaultValue="#34C759">
-          <ColorPicker.Panel>
-            {panelParts({ modes: 'all', swatches: false })}
-          </ColorPicker.Panel>
-        </ColorPicker.Root>
-      </List.Block>
-    </List.Section>
+    <Showcase
+      isStacked
+      title="On the Page"
+    >
+      <ColorPicker.Root defaultValue="#34C759">
+        <ColorPicker.Panel>{panelParts({ swatches: false })}</ColorPicker.Panel>
+      </ColorPicker.Root>
+    </Showcase>
   </List.Root>
 );
 
@@ -1554,6 +1656,9 @@ const FormContent: FunctionComponent = () => {
   const [birthday, setBirthday] = useState<Date | null>(null);
   const [submitted, setSubmitted] = useState<string>();
   const birthdayPicker = useCreateDatePickerHandle();
+  // Birthday's calendar: expanding in its row on a phone, in a popover on a
+  // tablet (no handle, no expandable).
+  const isCompact = useSizeClass() === 'compact';
 
   return (
     <Form
@@ -1637,14 +1742,16 @@ const FormContent: FunctionComponent = () => {
               </List.Content>
               <List.Trailing>
                 <DatePicker.Root
-                  handle={birthdayPicker}
+                  handle={isCompact ? birthdayPicker : undefined}
                   max={new Date()}
                   value={birthday}
                   onValueChange={(next: Date) => setBirthday(next)}
                 />
               </List.Trailing>
             </Field.Root>
-            <DatePicker.Expandable handle={birthdayPicker} />
+            {isCompact ? (
+              <DatePicker.Expandable handle={birthdayPicker} />
+            ) : null}
           </List.Group>
         </Fieldset.Root>
 

@@ -18,7 +18,7 @@ import {
   sfEnvelopeFill,
   sfTray,
 } from '../tooling/icons.js';
-import { Row, Rows, Showcase, type SinkPages } from './shared.js';
+import { DrillRow, Row, Rows, Showcase, type SinkPages } from './shared.js';
 
 // Status: Progress (bars, activity indicators), Badge.
 
@@ -98,7 +98,8 @@ const Displays: FunctionComponent = () => {
   );
 };
 
-const ProgressContent: FunctionComponent = () => (
+/** Progress bars: determinate, indeterminate, placements, counting. */
+const ProgressBarsContent: FunctionComponent = () => (
   <List.Root>
     <Showcase
       isStacked
@@ -165,47 +166,77 @@ const ProgressContent: FunctionComponent = () => (
         </Progress.Root>
       ))}
     </Showcase>
-    <Showcase
-      isStacked
-      title="Label Placement"
-    >
+    <Rows title="Label Placement">
       {placements.map((placement) => (
-        <Progress.Root
-          key={placement}
-          value={40}
-        >
-          <Progress.Label placement={placement}>{placement}</Progress.Label>
-          <Progress.Track>
-            <Progress.Indicator />
-          </Progress.Track>
-        </Progress.Root>
+        <List.Item key={placement}>
+          <List.Span className="kitchen-sink-row-bar">
+            <Progress.Root value={40}>
+              <Progress.Label placement={placement}>{placement}</Progress.Label>
+              <Progress.Track>
+                <Progress.Indicator />
+              </Progress.Track>
+            </Progress.Root>
+          </List.Span>
+        </List.Item>
       ))}
-    </Showcase>
-    <Showcase
-      isStacked
-      title="Value Placement"
-    >
+    </Rows>
+    <Rows title="Value Placement">
       {[...placements, 'tooltip', 'momentary-tooltip'].map((placement) => (
-        <Progress.Root
-          key={placement}
-          value={40}
-        >
-          <Progress.Label>{placement}</Progress.Label>
-          <Progress.Value
-            placement={placement as ProgressPlacement | 'tooltip'}
-          />
-          <Progress.Track>
-            <Progress.Indicator />
-          </Progress.Track>
-        </Progress.Root>
+        <List.Item key={placement}>
+          <List.Span className="kitchen-sink-row-bar">
+            <Progress.Root value={40}>
+              <Progress.Label>{placement}</Progress.Label>
+              <Progress.Value
+                placement={placement as ProgressPlacement | 'tooltip'}
+              />
+              <Progress.Track>
+                <Progress.Indicator />
+              </Progress.Track>
+            </Progress.Root>
+          </List.Span>
+        </List.Item>
       ))}
-    </Showcase>
+    </Rows>
+    <Rows title="Label and Value Side by Side">
+      {(['inline-start', 'inline-end'] as const).map((placement) => (
+        <List.Item key={placement}>
+          <List.Span className="kitchen-sink-row-bar">
+            <Progress.Root value={40}>
+              <Progress.Label placement={placement}>{placement}</Progress.Label>
+              <Progress.Value placement={placement} />
+              <Progress.Track>
+                <Progress.Indicator />
+              </Progress.Track>
+            </Progress.Root>
+          </List.Span>
+        </List.Item>
+      ))}
+    </Rows>
     <Showcase
       isStacked
       title="Counting"
     >
       <Advancing />
     </Showcase>
+    <Rows title="In a Row">
+      <List.Item>
+        <List.Span className="kitchen-sink-row-bar">
+          <Progress.Root value={45}>
+            <Progress.Label>Backup</Progress.Label>
+            <Progress.Value />
+            <Progress.Track>
+              <Progress.Indicator />
+            </Progress.Track>
+          </Progress.Root>
+        </List.Span>
+      </List.Item>
+    </Rows>
+  </List.Root>
+);
+
+/** Activity indicators: movements, colors, labels, displays. */
+const ActivityIndicatorsContent: FunctionComponent = () => (
+  <List.Root>
     <Showcase title="Activity Indicator">
       {(['stepped', 'rotate', 'fade'] as const).map((movement) => (
         <ActivityIndicator
@@ -274,7 +305,7 @@ const ProgressContent: FunctionComponent = () => (
     >
       <Displays />
     </Showcase>
-    <Rows title="In Rows">
+    <Rows title="In a Row">
       <Row title="Software Update">
         <List.Detail>
           <ActivityIndicator
@@ -283,17 +314,21 @@ const ProgressContent: FunctionComponent = () => (
           />
         </List.Detail>
       </Row>
-      <List.Item>
-        <List.Span className="kitchen-sink-row-bar">
-          <Progress.Root value={45}>
-            <Progress.Label>Backup</Progress.Label>
-            <Progress.Value />
-            <Progress.Track>
-              <Progress.Indicator />
-            </Progress.Track>
-          </Progress.Root>
-        </List.Span>
-      </List.Item>
+    </Rows>
+  </List.Root>
+);
+
+const ProgressContent: FunctionComponent = () => (
+  <List.Root>
+    <Rows>
+      <DrillRow
+        pageKey="progress/bars"
+        title="Progress Bars"
+      />
+      <DrillRow
+        pageKey="progress/activity"
+        title="Activity Indicators"
+      />
     </Rows>
   </List.Root>
 );
@@ -437,4 +472,9 @@ const BadgeContent: FunctionComponent = () => (
 export const statusPages: SinkPages = {
   badge: { Content: BadgeContent, title: 'Badge', Trailing: BadgeTrailing },
   progress: { Content: ProgressContent, title: 'Progress' },
+  'progress/activity': {
+    Content: ActivityIndicatorsContent,
+    title: 'Activity Indicators',
+  },
+  'progress/bars': { Content: ProgressBarsContent, title: 'Progress Bars' },
 };

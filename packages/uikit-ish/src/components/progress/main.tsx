@@ -47,8 +47,8 @@ export type {
 //   label in the secondary label color, 8px after it (Small: 4px).
 //
 // Also:
-// - The bar fills its container, at least 280px long (as a slider's
-//   control).
+// - The bar fills its container, at least 120px long (as a slider's
+//   control: a label or value before or after it on its line).
 // - The bar's label and value (Base UI's), in Subheadline,
 //   in the secondary label color: above its track (by default, at its start
 //   and end), below it, before or after it (`placement`); the value also in

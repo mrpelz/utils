@@ -93,8 +93,9 @@ export type {
 } from './props.js';
 
 // A color picker and a color well, in the app's popover (a regular width)
-// or sheet (compact), its header the app's (a `Toolbar`: the
-// eyedropper, “Colors”, close):
+// or sheet (compact), its header the app's (a `Toolbar`: the eyedropper,
+// “Colors”, close; in the popup's header, `Popover.Header` or
+// `Sheet.Header`, the panel scrolling under it, behind its edge effect):
 // - a segmented control (Grid, Spectrum, Sliders), 24px above the view;
 // - Grid: 12 by 10 swatches (a gray row, then hues by lightness), its
 //   corners 18px, the selected one outlined white (3px);
@@ -238,10 +239,11 @@ const PanelContext = createContext<PanelState>({
 });
 
 /**
- * A color picker: its color and its mode, for its parts (`Header`,
- * `Modes`, `Panel`, `Eyedropper`, anywhere in it), in the app's popover or
- * sheet. Its element (`render`) may be the sheet's popup, so its modes'
- * control can be in the sheet's header, not scrolling.
+ * A color picker: its color and its mode, for its parts (`Modes`,
+ * `Panel`, `Eyedropper`, anywhere in it), in the app's popover or sheet.
+ * Its element (`render`) may be the popover's or the sheet's popup, so its
+ * toolbar (and, in a sheet, its modes' control) can be in the popup's
+ * header (`Popover.Header`, `Sheet.Header`), its panel scrolling under it.
  */
 const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
   (
@@ -1186,20 +1188,6 @@ const Swatches = forwardRef<HTMLDivElement, ColorPickerSwatchesProps>(
   },
 );
 
-// Its header (in the panel's popover: 16px from its top, 10px above the
-// panel): the app's (e.g. a `Toolbar`: eyedropper, title,
-// close); in a sheet, its `Sheet.Header` instead.
-const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('uikit-color-picker-header', className)}
-      data-color-picker-part="header"
-      {...props}
-    />
-  ),
-);
-
 /** The browser's eyedropper (`EyeDropper`), if it has one. */
 const eyeDropper = () =>
   (globalThis as { EyeDropper?: new () => EyeDropperApi }).EyeDropper;
@@ -1754,7 +1742,6 @@ const CssNamedColors: FunctionComponent = () => (
 
 export const ColorPicker = {
   Root,
-  Header,
   Panel,
   Modes,
   Mode,

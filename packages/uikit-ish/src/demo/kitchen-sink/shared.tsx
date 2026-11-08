@@ -10,6 +10,7 @@ import {
   Button,
   List,
   Navigation,
+  type SettingsValues,
   Symbol,
   Toolbar,
   type Viewport,
@@ -40,6 +41,12 @@ export type SinkPage = {
   edgeEffect?: ComponentProps<typeof Viewport.BlockStart>['edgeEffect'];
   edgeTint?: string;
   /**
+   * A stack of its own (a `Navigation.Root`): swiped back within it, not
+   * out of it (the kitchen sink's swipe area left out while it's on top;
+   * its root's back button leaving it, see navigation.tsx).
+   */
+  hasOwnStack?: boolean;
+  /**
    * Its content alone (its own bars, pages, e.g. a tab bar app's): none of
    * the page's (its bar, its large title, its scrolling page).
    */
@@ -68,6 +75,28 @@ export const PushContext = createContext<(key: string) => void>(
 );
 
 export const usePush = (): ((key: string) => void) => useContext(PushContext);
+
+/**
+ * Pops the current stack's top page: e.g. from a stack of a page's own,
+ * at its root (its own back buttons going back within it).
+ */
+export const PopContext = createContext<() => void>(() => undefined);
+
+export const usePop = (): (() => void) => useContext(PopContext);
+
+/**
+ * The kitchen sink's settings: its provider's overrides (around the app,
+ * see main.tsx; a key left out, the system's), set on its Settings page.
+ */
+export type SinkSettings = readonly [
+  settings: Partial<SettingsValues>,
+  setSettings: (next: Partial<SettingsValues>) => void,
+];
+
+export const SinkSettingsContext = createContext<SinkSettings>([
+  {},
+  () => undefined,
+]);
 
 /**
  * A section of things side by side (wrapping), on a stage (a background of

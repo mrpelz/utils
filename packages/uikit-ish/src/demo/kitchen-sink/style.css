@@ -92,6 +92,35 @@
     user-select: none;
   }
 
+  /* A tile that keeps changing (a contextual menu's live trigger): a
+     gradient turning, a count of seconds. */
+  .kitchen-sink-live {
+    display: grid;
+    animation: kitchen-sink-live-turn 4s linear infinite;
+    background: conic-gradient(
+      from var(--kitchen-sink-live-angle, 0deg),
+      #ff375f,
+      #ff9f0a,
+      #30d158,
+      #0a84ff,
+      #bf5af2,
+      #ff375f
+    );
+    place-items: center;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+
+  .kitchen-sink-live-count {
+    color: #fff;
+    font-size: 22px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgb(0 0 0 / 40%);
+  }
+
   /* A photo's preview (a contextual menu's): larger. */
   .kitchen-sink-photo-preview > .kitchen-sink-photo {
     width: min(280px, 70vw);
@@ -147,6 +176,13 @@
     padding-inline-start: var(--uikit-layout-inset-start, 0);
   }
 
+  /* Swipeable pages filling a screen (the docs' paged content's, see
+     structure.tsx): no corners, as high as the screen. */
+  .kitchen-sink-pages {
+    height: 100%;
+    border-radius: 0;
+  }
+
   /* A transparent page (its list's, too): the layout's background shows
      through. */
   .kitchen-sink-transparent {
@@ -196,5 +232,18 @@
   .kitchen-sink-stacked {
     display: grid;
     gap: 20px;
+  }
+}
+
+/* The live tile's gradient, turning (see .kitchen-sink-live). */
+@property --kitchen-sink-live-angle {
+  inherits: false;
+  initial-value: 0deg;
+  syntax: '<angle>';
+}
+
+@keyframes kitchen-sink-live-turn {
+  to {
+    --kitchen-sink-live-angle: 360deg;
   }
 }

@@ -47,55 +47,60 @@ const InAPopover: FunctionComponent = () => {
         <Popover.Trigger render={<ColorPicker.Well color={color} />} />
         <Popover.Portal>
           <Popover.Positioner>
-            <Popover.Popup style={{ width: 'min(402px, 100vw)' }}>
+            <ColorPicker.Root
+              render={<Popover.Popup style={{ width: 'min(402px, 100vw)' }} />}
+              value={color}
+              onValueChange={(next: string) => {
+                addLog(`color: ${next}`);
+                setColor(next);
+              }}
+            >
               <Popover.Arrow />
-              <ColorPicker.Root
-                value={color}
-                onValueChange={(next: string) => {
-                  addLog(`color: ${next}`);
-                  setColor(next);
-                }}
-              >
-                <ColorPicker.Header>
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Leading>
-                      <ColorPicker.Eyedropper
-                        render={<Toolbar.Button shape="circle" />}
-                      >
-                        <Button.Icon>
-                          <Symbol icon={sfEyedropper} />
-                        </Button.Icon>
-                      </ColorPicker.Eyedropper>
-                      <ColorPicker.SystemColors
-                        render={<Toolbar.Button shape="circle" />}
-                      >
-                        <Button.Icon>
-                          <Symbol icon={sfPaintpalette} />
-                        </Button.Icon>
-                      </ColorPicker.SystemColors>
-                    </Toolbar.Leading>
-                    <Toolbar.Title>
-                      <span>Colors</span>
-                    </Toolbar.Title>
-                    <Toolbar.Trailing>
-                      <Popover.Close
-                        render={
-                          <Toolbar.Button
-                            aria-label="Close"
-                            shape="circle"
-                          />
-                        }
-                      >
-                        <Button.Icon>
-                          <Symbol icon={sfXmark} />
-                        </Button.Icon>
-                      </Popover.Close>
-                    </Toolbar.Trailing>
-                  </Toolbar.Root>
-                </ColorPicker.Header>
-                <ColorPicker.Panel>{panelParts()}</ColorPicker.Panel>
-              </ColorPicker.Root>
-            </Popover.Popup>
+              <Popover.Header>
+                <Toolbar.Root placement="block-start">
+                  <Toolbar.Leading>
+                    <ColorPicker.Eyedropper
+                      render={<Toolbar.Button shape="circle" />}
+                    >
+                      <Button.Icon>
+                        <Symbol icon={sfEyedropper} />
+                      </Button.Icon>
+                    </ColorPicker.Eyedropper>
+                    <ColorPicker.SystemColors
+                      render={<Toolbar.Button shape="circle" />}
+                    >
+                      <Button.Icon>
+                        <Symbol icon={sfPaintpalette} />
+                      </Button.Icon>
+                    </ColorPicker.SystemColors>
+                  </Toolbar.Leading>
+                  <Toolbar.Title>
+                    <span>Colors</span>
+                  </Toolbar.Title>
+                  <Toolbar.Trailing>
+                    <Popover.Close
+                      render={
+                        <Toolbar.Button
+                          aria-label="Close"
+                          shape="circle"
+                        />
+                      }
+                    >
+                      <Button.Icon>
+                        <Symbol icon={sfXmark} />
+                      </Button.Icon>
+                    </Popover.Close>
+                  </Toolbar.Trailing>
+                </Toolbar.Root>
+                {modesControl()}
+              </Popover.Header>
+              <Popover.Body>
+                <Viewport.Padding edge="block-start" />
+                <ColorPicker.Panel>
+                  {panelParts({ isModesElsewhere: true })}
+                </ColorPicker.Panel>
+              </Popover.Body>
+            </ColorPicker.Root>
           </Popover.Positioner>
         </Popover.Portal>
       </Popover.Root>
@@ -141,27 +146,25 @@ const InASheet: FunctionComponent = () => {
             >
               <Sheet.Header>
                 <Sheet.Grabber />
-                <ColorPicker.Header>
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Title>
-                      <span>Colors</span>
-                    </Toolbar.Title>
-                    <Toolbar.Trailing>
-                      <Sheet.Close
-                        render={
-                          <Toolbar.Button
-                            aria-label="Close"
-                            shape="circle"
-                          />
-                        }
-                      >
-                        <Button.Icon>
-                          <Symbol icon={sfXmark} />
-                        </Button.Icon>
-                      </Sheet.Close>
-                    </Toolbar.Trailing>
-                  </Toolbar.Root>
-                </ColorPicker.Header>
+                <Toolbar.Root placement="block-start">
+                  <Toolbar.Title>
+                    <span>Colors</span>
+                  </Toolbar.Title>
+                  <Toolbar.Trailing>
+                    <Sheet.Close
+                      render={
+                        <Toolbar.Button
+                          aria-label="Close"
+                          shape="circle"
+                        />
+                      }
+                    >
+                      <Button.Icon>
+                        <Symbol icon={sfXmark} />
+                      </Button.Icon>
+                    </Sheet.Close>
+                  </Toolbar.Trailing>
+                </Toolbar.Root>
                 {modesControl()}
               </Sheet.Header>
               <Sheet.Content>
@@ -250,13 +253,11 @@ const InAListRow: FunctionComponent = () => {
                         >
                           <Sheet.Header>
                             <Sheet.Grabber />
-                            <ColorPicker.Header>
-                              <Toolbar.Root placement="block-start">
-                                <Toolbar.Title>
-                                  <span>Tint</span>
-                                </Toolbar.Title>
-                              </Toolbar.Root>
-                            </ColorPicker.Header>
+                            <Toolbar.Root placement="block-start">
+                              <Toolbar.Title>
+                                <span>Tint</span>
+                              </Toolbar.Title>
+                            </Toolbar.Root>
                             {modesControl()}
                           </Sheet.Header>
                           <Sheet.Content>
@@ -295,19 +296,24 @@ const InAListRow: FunctionComponent = () => {
                     />
                     <Popover.Portal>
                       <Popover.Positioner align="end">
-                        <Popover.Popup style={{ width: 'min(402px, 100vw)' }}>
-                          <ColorPicker.Root
-                            value={tint}
-                            onValueChange={(next: string) => {
-                              addLog(`tint: ${next}`);
-                              setTint(next);
-                            }}
-                          >
+                        <ColorPicker.Root
+                          value={tint}
+                          render={
+                            <Popover.Popup
+                              style={{ width: 'min(402px, 100vw)' }}
+                            />
+                          }
+                          onValueChange={(next: string) => {
+                            addLog(`tint: ${next}`);
+                            setTint(next);
+                          }}
+                        >
+                          <Popover.Body>
                             <ColorPicker.Panel>
                               {panelParts()}
                             </ColorPicker.Panel>
-                          </ColorPicker.Root>
-                        </Popover.Popup>
+                          </Popover.Body>
+                        </ColorPicker.Root>
                       </Popover.Positioner>
                     </Popover.Portal>
                   </Popover.Root>
@@ -505,17 +511,17 @@ export const ColorPickerComposition: FunctionComponent = () => (
       <li>
         In a compact width: the well opens a{' '}
         <a href={publicUrl('sheet')}>Sheet</a> (its medium detent), the picker
-        in its content, its toolbar in a{' '}
-        <PartLink
-          component="color-picker"
-          part="ColorPicker.Header"
-        />{' '}
-        as in a popover (the sheet’s{' '}
+        in its content, its toolbar in the sheet’s{' '}
         <PartLink
           component="sheet"
           part="Sheet.Header"
         />{' '}
-        only its grabber).
+        (after its grabber; in a popover, its{' '}
+        <PartLink
+          component="popover"
+          part="Popover.Header"
+        />
+        ), the content scrolling under it.
       </li>
       <li>
         <strong>Library:</strong> the well opening a{' '}

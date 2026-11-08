@@ -288,7 +288,9 @@ export const SheetOverview: FunctionComponent = () => (
       <li>
         Large: the whole screen but 10px at the top, opaque, its top corners
         38px. Medium: a glass panel 6px from the sides, on the bottom safe area
-        (the home indicator below it), as high as its content.
+        (the home indicator below it), as high as its content; dark, its glass
+        edged as a <a href={publicUrl('sidebar')}>Sidebar</a>’s (a light rim, a
+        glow outside).
       </li>
       <li>
         Not compact (the window from 768px, or <code>compact={'{false}'}</code>

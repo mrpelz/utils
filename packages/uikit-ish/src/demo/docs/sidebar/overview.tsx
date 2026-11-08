@@ -377,7 +377,9 @@ export const SidebarOverview: FunctionComponent = () => (
       </li>
       <li>
         Dark: a light rim and a glow outside it (the glass’ inner shadow would
-        make the large panel look inset).
+        make the large panel look inset), as an{' '}
+        <a href={publicUrl('island')}>Island</a>’s and a medium{' '}
+        <a href={publicUrl('sheet')}>Sheet</a>’s.
       </li>
       <li>
         Sized and placed by its column: floating over the others (regular), the

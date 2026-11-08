@@ -189,8 +189,9 @@ export const ProgressOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The bar fills its container (at least 280px), 6px high; at 0%, a dot.
-        Its fill grows to a new value over 200ms (at once with{' '}
+        The bar fills its container (at least 120px, as a slider’s: a label or
+        value before or after it on its line), 6px high; at 0%, a dot. Its fill
+        grows to a new value over 200ms (at once with{' '}
         <code>prefers-reduced-motion</code>).
       </li>
       <li>

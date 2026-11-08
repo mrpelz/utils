@@ -296,8 +296,8 @@ export const ProgressParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The track: 6px high, rounded, in the system fill; at least 280px long,
-        taking the line’s free space.
+        The track: 6px high, rounded, in the system fill; at least 120px long
+        (as a slider’s), taking the line’s free space.
       </li>
       <li>Holds the indicator.</li>
     </ul>

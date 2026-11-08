@@ -157,8 +157,10 @@ export const IslandOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A sheet’s glass capsule that’s always there, floating over the page’s
-        content (e.g. a map that fills the screen), in a bottom{' '}
+        A sheet’s glass capsule (dark, edged as a{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a>’s: a light rim, a glow
+        outside) that’s always there, floating over the page’s content (e.g. a
+        map that fills the screen), in a bottom{' '}
         <PartLink
           component="viewport"
           part="Viewport.Anchor"

@@ -26,7 +26,6 @@ import {
   colorPickerCodeRows,
   colorPickerEyedropperRows,
   colorPickerGridRows,
-  colorPickerHeaderRows,
   colorPickerModeRows,
   colorPickerModesRows,
   colorPickerNamedColorRows,
@@ -52,7 +51,6 @@ import {
   propOptionsCode,
   propOptionsEyedropper,
   propOptionsGuideWell,
-  propOptionsHeader,
   propOptionsMode,
   propOptionsNamed,
   propOptionsNamedColor,
@@ -100,45 +98,6 @@ const RootPart: FunctionComponent = () => {
       >
         {/* (All modes: its mode props' values.) */}
         <ColorPicker.Panel>{panelParts({ modes: 'all' })}</ColorPicker.Panel>
-      </ColorPicker.Root>
-    </Component>
-  );
-};
-
-/** `ColorPicker.Header`, outlined, holding a toolbar. */
-const HeaderPart: FunctionComponent = () => {
-  const id = 'color-picker-parts-header';
-  const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(propOptionsHeader, {
-    external,
-    isOpen: true,
-    emphasize: 'outline',
-    title: 'ColorPicker.Header',
-  });
-
-  return (
-    <Component
-      hasInputGuards
-      isCentered
-      isInline
-      isStretched
-      controls={[control]}
-      id={id}
-      state={[state]}
-      title="ColorPicker.Header"
-    >
-      <ColorPicker.Root
-        defaultValue="#AF52DE"
-        style={{ width: 'min(402px, 100%)' }}
-      >
-        <ColorPicker.Header {...props}>
-          <Toolbar.Root placement="block-start">
-            <Toolbar.Title>
-              <span>Colors</span>
-            </Toolbar.Title>
-          </Toolbar.Root>
-        </ColorPicker.Header>
-        <ColorPicker.Panel>{panelParts()}</ColorPicker.Panel>
       </ColorPicker.Root>
     </Component>
   );
@@ -507,20 +466,18 @@ const EyedropperPart: FunctionComponent = () => {
         defaultValue="#AF52DE"
         style={{ width: 'min(402px, 100%)' }}
       >
-        <ColorPicker.Header>
-          <Toolbar.Root placement="block-start">
-            <Toolbar.Leading>
-              <ColorPicker.Eyedropper {...props}>
-                <Button.Icon>
-                  <Symbol icon={sfEyedropper} />
-                </Button.Icon>
-              </ColorPicker.Eyedropper>
-            </Toolbar.Leading>
-            <Toolbar.Title>
-              <span>Colors</span>
-            </Toolbar.Title>
-          </Toolbar.Root>
-        </ColorPicker.Header>
+        <Toolbar.Root placement="block-start">
+          <Toolbar.Leading>
+            <ColorPicker.Eyedropper {...props}>
+              <Button.Icon>
+                <Symbol icon={sfEyedropper} />
+              </Button.Icon>
+            </ColorPicker.Eyedropper>
+          </Toolbar.Leading>
+          <Toolbar.Title>
+            <span>Colors</span>
+          </Toolbar.Title>
+        </Toolbar.Root>
         <ColorPicker.Panel>{panelParts()}</ColorPicker.Panel>
       </ColorPicker.Root>
     </Component>
@@ -556,27 +513,23 @@ const SystemColorsPart: FunctionComponent = () => {
         defaultValue="#AF52DE"
         style={{ width: 'min(402px, 100%)' }}
       >
-        <ColorPicker.Header>
-          <Toolbar.Root placement="block-start">
-            <Toolbar.Leading>
-              <ColorPicker.Eyedropper
-                render={<Toolbar.Button shape="circle" />}
-              >
-                <Button.Icon>
-                  <Symbol icon={sfEyedropper} />
-                </Button.Icon>
-              </ColorPicker.Eyedropper>
-              <ColorPicker.SystemColors {...props}>
-                <Button.Icon>
-                  <Symbol icon={sfPaintpalette} />
-                </Button.Icon>
-              </ColorPicker.SystemColors>
-            </Toolbar.Leading>
-            <Toolbar.Title>
-              <span>Colors</span>
-            </Toolbar.Title>
-          </Toolbar.Root>
-        </ColorPicker.Header>
+        <Toolbar.Root placement="block-start">
+          <Toolbar.Leading>
+            <ColorPicker.Eyedropper render={<Toolbar.Button shape="circle" />}>
+              <Button.Icon>
+                <Symbol icon={sfEyedropper} />
+              </Button.Icon>
+            </ColorPicker.Eyedropper>
+            <ColorPicker.SystemColors {...props}>
+              <Button.Icon>
+                <Symbol icon={sfPaintpalette} />
+              </Button.Icon>
+            </ColorPicker.SystemColors>
+          </Toolbar.Leading>
+          <Toolbar.Title>
+            <span>Colors</span>
+          </Toolbar.Title>
+        </Toolbar.Root>
         <ColorPicker.Panel>{panelParts()}</ColorPicker.Panel>
       </ColorPicker.Root>
     </Component>
@@ -613,14 +566,14 @@ const WellPart: FunctionComponent = () => {
   );
 };
 
-/** `/color-picker/parts`: the picker, its header and panel, the well. */
+/** `/color-picker/parts`: the picker, its panel, the well. */
 export const ColorPickerParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>Root: the color, for its parts.</li>
       <li>
-        Header: the app’s (a toolbar: the eyedropper, the system colors, a
-        title, close).
+        Header: the app’s, its popover’s or sheet’s (a toolbar: the eyedropper,
+        the system colors, a title, close), the panel scrolling under it.
       </li>
       <li>
         Panel: its parts as composed: its modes (a segmented control, a view
@@ -647,11 +600,16 @@ export const ColorPickerParts: FunctionComponent = () => (
         />
         <ul>
           <li>
+            The app’s header (optional): a popover’s{' '}
             <PartLink
-              component="color-picker"
-              part="ColorPicker.Header"
-            />{' '}
-            (optional)
+              component="popover"
+              part="Popover.Header"
+            />
+            , a sheet’s{' '}
+            <PartLink
+              component="sheet"
+              part="Sheet.Header"
+            />
             <ul>
               <li>
                 <PartLink
@@ -858,41 +816,6 @@ export const ColorPickerParts: FunctionComponent = () => (
     <RootPart />
     <h3>Props</h3>
     <PropsTable rows={colorPickerRootRows} />
-
-    <Heading
-      id="colorpicker-header"
-      level={2}
-    >
-      <code>ColorPicker.Header</code>
-    </Heading>
-    <ul>
-      <li>
-        The app’s header above the panel (16px from the popover’s top, 10px
-        above the panel): e.g. a <a href={publicUrl('toolbar')}>Toolbar</a>.
-      </li>
-      <li>
-        In a sheet too, in its{' '}
-        <PartLink
-          component="sheet"
-          part="Sheet.Header"
-        />{' '}
-        after its grabber (the picker the sheet’s popup): its row 44px, not a
-        bar’s, the title as close to the modes as in a popover.
-      </li>
-      <li>
-        Optional: without it (e.g. a popover from a list row,{' '}
-        <a href={publicUrl('color-picker/composition#in-a-list-row')}>
-          In a list row
-        </a>
-        ), the panel starts 16px from the top.
-      </li>
-      <li>
-        Renders a <code>div</code>.
-      </li>
-    </ul>
-    <HeaderPart />
-    <h3>Props</h3>
-    <PropsTable rows={colorPickerHeaderRows} />
 
     <Heading
       id="colorpicker-panel"
@@ -1195,10 +1118,10 @@ export const ColorPickerParts: FunctionComponent = () => (
           component="color-picker"
           part="ColorPicker.Code"
         />{' '}
-        (before its field), or anywhere in the picker, e.g. in{' '}
+        (before its field), or anywhere in the picker, e.g. in its popover’s{' '}
         <PartLink
-          component="color-picker"
-          part="ColorPicker.Header"
+          component="popover"
+          part="Popover.Header"
         />
         ’s toolbar.
       </li>
@@ -1511,7 +1434,6 @@ export const ColorPickerParts: FunctionComponent = () => (
 /** Its live views, also on the component's page of demos (and `/all`). */
 export const colorPickerPartsDemos = [
   RootPart,
-  HeaderPart,
   PanelPart,
   ModesPart,
   ModePart,

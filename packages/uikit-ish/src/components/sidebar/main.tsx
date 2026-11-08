@@ -42,7 +42,10 @@ const Root = forwardRef<HTMLElement, SidebarRootProps>(
       ref={ref}
       data-sidebar-part="root"
       {...props}
-      className={cn('uikit-sidebar-root uikit-glass-medium', className)}
+      className={cn(
+        'uikit-sidebar-root uikit-glass-medium uikit-glass-panel',
+        className,
+      )}
     />
   ),
 );

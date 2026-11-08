@@ -432,7 +432,7 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
                   {/* Its capsule: its glass's colors (by class), its glass a
                     layer of its own (a sliver's fading in, see above). */}
                   <div
-                    className="uikit-island-panel uikit-glass-medium"
+                    className="uikit-island-panel uikit-glass-medium uikit-glass-panel"
                     data-island-part="panel"
                   >
                     <div

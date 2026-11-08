@@ -91,7 +91,7 @@
   .uikit-progress-track {
     position: relative;
     overflow: hidden;
-    min-width: var(--uikit-progress-min-length, 280px);
+    min-width: var(--uikit-progress-min-length, 120px);
     height: 6px;
     flex: 1 1 0;
     border-radius: 3px;

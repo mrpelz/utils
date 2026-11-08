@@ -403,7 +403,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
                 className={cn(
                   'uikit-sheet-popup',
                   isGlass && !isSnapping
-                    ? cn('uikit-glass-medium', className)
+                    ? cn('uikit-glass-medium uikit-glass-panel', className)
                     : className,
                 )}
                 data-base-ui-swipe-ignore={
@@ -445,7 +445,9 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
                   data-sheet-part="panel"
                   className={cn(
                     'uikit-sheet-panel',
-                    isGlass && isSnapping ? 'uikit-glass-medium' : undefined,
+                    isGlass && isSnapping
+                      ? 'uikit-glass-medium uikit-glass-panel'
+                      : undefined,
                   )}
                 >
                   {children as ReactNode}

@@ -7,6 +7,7 @@ import {
   type ListEditing,
   type ListStyle,
   RadioGroup,
+  Sidebar,
   Slider,
   Symbol,
   useCreateReorderHandle,
@@ -240,7 +241,9 @@ const ListContent: FunctionComponent = () => (
         </List.Item>
         <List.Item selected>
           <List.Content>
-            <List.Title render={<button type="button" />}>Selected</List.Title>
+            <List.Title render={<button type="button" />}>
+              A row (selected)
+            </List.Title>
           </List.Content>
         </List.Item>
       </List.Group>
@@ -1178,50 +1181,47 @@ const ExpandingContent: FunctionComponent = () => (
       </List.Group>
     </List.Section>
 
-    {[false, true].map((isMultiple) => (
-      <List.Section key={String(isMultiple)}>
-        <List.Header>
-          <List.Title>
-            {isMultiple ? 'Accordion, Several Open' : 'Accordion, One Open'}
-          </List.Title>
-        </List.Header>
-        <List.Group>
-          <List.AccordionRoot multiple={isMultiple}>
-            {accordionItems.map(([value, title, detail]) => (
-              <List.AccordionItem
-                key={value}
-                value={value}
-              >
-                <List.Item>
-                  <List.Content>
-                    <List.Title render={<List.AccordionTrigger />}>
-                      {title}
-                    </List.Title>
-                  </List.Content>
-                  <List.Trailing>
-                    <List.Detail>{detail}</List.Detail>
-                  </List.Trailing>
-                </List.Item>
-                <List.AccordionPanel>
-                  {['None', 'Daily', 'Weekly'].map((option) => (
-                    <List.Item key={option}>
-                      <List.Content>
-                        <List.Title>{option}</List.Title>
-                      </List.Content>
-                      {option === 'None' ? (
-                        <List.Trailing>
-                          <List.Checkmark />
-                        </List.Trailing>
-                      ) : null}
-                    </List.Item>
-                  ))}
-                </List.AccordionPanel>
-              </List.AccordionItem>
-            ))}
-          </List.AccordionRoot>
-        </List.Group>
-      </List.Section>
-    ))}
+    {/* (Several open: see the Accordion's page.) */}
+    <List.Section>
+      <List.Header>
+        <List.Title>Accordion, One Open</List.Title>
+      </List.Header>
+      <List.Group>
+        <List.AccordionRoot>
+          {accordionItems.map(([value, title, detail]) => (
+            <List.AccordionItem
+              key={value}
+              value={value}
+            >
+              <List.Item>
+                <List.Content>
+                  <List.Title render={<List.AccordionTrigger />}>
+                    {title}
+                  </List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Detail>{detail}</List.Detail>
+                </List.Trailing>
+              </List.Item>
+              <List.AccordionPanel>
+                {['None', 'Daily', 'Weekly'].map((option) => (
+                  <List.Item key={option}>
+                    <List.Content>
+                      <List.Title>{option}</List.Title>
+                    </List.Content>
+                    {option === 'None' ? (
+                      <List.Trailing>
+                        <List.Checkmark />
+                      </List.Trailing>
+                    ) : null}
+                  </List.Item>
+                ))}
+              </List.AccordionPanel>
+            </List.AccordionItem>
+          ))}
+        </List.AccordionRoot>
+      </List.Group>
+    </List.Section>
   </List.Root>
 );
 
@@ -1340,7 +1340,12 @@ export const listPages: SinkPages = {
   },
   'list/reordering': { Content: ReorderingContent, title: 'Reordering' },
   'list/sidebar': {
-    Content: () => <StyledList listStyle="sidebar" />,
+    // (On a sidebar's glass, as it's shown: in a Sidebar.Root.)
+    Content: () => (
+      <Sidebar.Root style={{ '--uikit-sidebar-margin': '16px' }}>
+        <StyledList listStyle="sidebar" />
+      </Sidebar.Root>
+    ),
     title: 'Sidebar',
   },
   'list/swipe': { Content: SwipeContent, title: 'Swipe Actions' },

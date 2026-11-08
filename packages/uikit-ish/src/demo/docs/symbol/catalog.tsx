@@ -3,7 +3,7 @@ import './style.css';
 import {
   FunctionComponent,
   KeyboardEvent,
-  ReactNode,
+  RefObject,
   UIEvent,
   useEffect,
   useMemo,
@@ -12,10 +12,10 @@ import {
 } from 'react';
 
 import {
-  List,
   Symbol,
   type SymbolIcon,
   TextField,
+  Viewport,
 } from '../../../components/index.js';
 import {
   iconPackage,
@@ -32,11 +32,13 @@ import {
 // the rows in view rendered, each cell's icon loaded once shown. A symbol
 // clicked, its import is copied. Also its brand icons (FontAwesome's: their
 // paths explicitly filled), at their own units. Its look: the guide's
-// (plain controls), or an app's (`app`: sections of a list, its search a
-// row, e.g. the kitchen sink's; see style.css).
+// (plain controls), or a screen's (`screen`, e.g. the kitchen sink's: the
+// grid its content layer, filling the screen above the keyboard; its
+// search a list row's field in a bottom anchor, on the keyboard; loaded at
+// once; see style.css).
 
-/** Its look: the guide's, or an app's (the library's controls). */
-type Look = 'app' | 'docs';
+/** Its look: the guide's, or a screen's (the library's parts). */
+type Look = 'docs' | 'screen';
 
 // A cell's size (px), and the rows rendered beyond the view (each way).
 const cellSize = 96;
@@ -105,52 +107,20 @@ const searchTexts = (
   );
 };
 
-/**
- * An app's look (in a `List.Root`): a section titled, its row (the search,
- * or the button loading it), its footer (the status); the grid below, in a
- * strong block (see style.css).
- */
-const AppSections: FunctionComponent<{
-  children?: ReactNode;
-  footer?: string;
-  row: ReactNode;
-}> = ({ children, footer, row }) => (
-  <>
-    <List.Section>
-      <List.Header>
-        <List.Title>SF Symbols</List.Title>
-      </List.Header>
-      <List.Group>{row}</List.Group>
-      {footer === undefined ? null : (
-        <List.Footer aria-live="polite">{footer}</List.Footer>
-      )}
-    </List.Section>
-    {children === undefined ? null : (
-      <List.Section>
-        <List.Block strong>
-          <div
-            className="symbol-catalog"
-            data-look="app"
-          >
-            {children}
-          </div>
-        </List.Block>
-      </List.Section>
-    )}
-  </>
-);
-
 /** The symbols, once listed: searched, virtualized. */
 const Grid: FunctionComponent<{
+  boxRef?: RefObject<HTMLDivElement | null>;
   categories: ReadonlyMap<string, readonly string[]>;
   look: Look;
   names: readonly string[];
-}> = ({ categories, look, names }) => {
+}> = ({ boxRef, categories, look, names }) => {
   const [query, setQuery] = useState('');
   const [copied, setCopied] = useState<string>();
   const [scrollTop, setScrollTop] = useState(0);
   const [size, setSize] = useState({ height: 0, width: 0 });
-  const box = useRef<HTMLDivElement>(null);
+  const ownBox = useRef<HTMLDivElement>(null);
+  const box = boxRef ?? ownBox;
+  const area = useRef<HTMLDivElement>(null);
   const texts = useMemo(
     () => searchTexts(names, categories),
     [categories, names],
@@ -166,12 +136,21 @@ const Grid: FunctionComponent<{
   useEffect(() => {
     const { current: element } = box;
     if (!element) return undefined;
-    const observer = new ResizeObserver(() =>
-      setSize({ height: element.clientHeight, width: element.clientWidth }),
-    );
+    // (Its width inside its padding: e.g. a content layer's, clear of a
+    // floating sidebar.)
+    const observer = new ResizeObserver(() => {
+      const style = getComputedStyle(element);
+      setSize({
+        height: element.clientHeight,
+        width:
+          element.clientWidth -
+          Number.parseFloat(style.paddingLeft) -
+          Number.parseFloat(style.paddingRight),
+      });
+    });
     observer.observe(element);
     return () => observer.disconnect();
-  }, []);
+  }, [box]);
 
   const columns = Math.max(1, Math.floor(size.width / cellSize));
   const rows = Math.ceil(found.length / columns);
@@ -200,60 +179,79 @@ const Grid: FunctionComponent<{
   } as const;
 
   const status = copied ? `Copied: ${copied}` : `${String(found.length)} found`;
-  const grid = (
+  // (From the area's start: below a screen's top padding.)
+  const onScroll = ({ currentTarget }: UIEvent<HTMLDivElement>) =>
+    setScrollTop(
+      Math.max(0, currentTarget.scrollTop - (area.current?.offsetTop ?? 0)),
+    );
+  const areaElement = (
     <div
-      ref={box}
-      className="symbol-catalog-box"
-      onScroll={({ currentTarget }: UIEvent<HTMLDivElement>) =>
-        setScrollTop(currentTarget.scrollTop)
-      }
+      ref={area}
+      className="symbol-catalog-area"
+      style={{ height: `${String(rows * cellSize)}px` }}
     >
       <div
-        className="symbol-catalog-area"
-        style={{ height: `${String(rows * cellSize)}px` }}
+        className="symbol-catalog-grid"
+        style={{
+          gridTemplateColumns: `repeat(${String(columns)}, ${String(cellSize)}px)`,
+          top: `${String(first * cellSize)}px`,
+        }}
       >
-        <div
-          className="symbol-catalog-grid"
-          style={{
-            gridTemplateColumns: `repeat(${String(columns)}, ${String(cellSize)}px)`,
-            top: `${String(first * cellSize)}px`,
-          }}
-        >
-          {shown.map((name) => (
-            <Cell
-              key={name}
-              name={name}
-              onCopy={setCopied}
-            />
-          ))}
-        </div>
+        {shown.map((name) => (
+          <Cell
+            key={name}
+            name={name}
+            onCopy={setCopied}
+          />
+        ))}
       </div>
     </div>
   );
 
-  // An app's: sections of its list (see `AppSections`), its search a row.
-  if (look === 'app') {
+  // A screen's: the grid its content layer (the screen's scroller, above
+  // the keyboard), its search below it, on the keyboard.
+  if (look === 'screen') {
     return (
-      <AppSections
-        footer={status}
-        row={
-          <TextField.Root render={<List.Item />}>
-            <List.Leading>
-              <List.Image>
+      <>
+        <Viewport.Content
+          ref={box}
+          className="symbol-catalog-screen"
+          onScroll={onScroll}
+        >
+          <Viewport.Padding edge="block-start" />
+          {areaElement}
+          <Viewport.Padding edge="block-end" />
+        </Viewport.Content>
+        <Viewport.BlockEnd>
+          <div className="symbol-catalog-search-bar">
+            <TextField.Root>
+              <TextField.Frame variant="row">
                 <Symbol icon={sfMagnifyingglass} />
-              </List.Image>
-            </List.Leading>
-            <List.Trailing>
-              <TextField.Control {...search} />
-              <TextField.Clear mode="always" />
-            </List.Trailing>
-          </TextField.Root>
-        }
-      >
-        {grid}
-      </AppSections>
+                <TextField.Control {...search} />
+                <TextField.Clear />
+              </TextField.Frame>
+            </TextField.Root>
+            <span
+              aria-live="polite"
+              className="symbol-catalog-status"
+            >
+              {status}
+            </span>
+          </div>
+        </Viewport.BlockEnd>
+      </>
     );
   }
+
+  const grid = (
+    <div
+      ref={box}
+      className="symbol-catalog-box"
+      onScroll={onScroll}
+    >
+      {areaElement}
+    </div>
+  );
 
   return (
     <div className="symbol-catalog">
@@ -275,52 +273,59 @@ const Grid: FunctionComponent<{
 };
 
 /**
- * Every SF Symbol, in a searchable grid: listed on request (the package's
- * index and categories, see above); in the guide's look, or an app's.
+ * Every SF Symbol, in a searchable grid: listed (the package's index and
+ * categories, see above) on request, or (a screen's, `screen`) at once; a
+ * screen's grid its content layer (`boxRef`: the screen's provider's
+ * tracked scroller).
  */
-export const Catalog: FunctionComponent<{ look?: Look }> = ({
-  look = 'docs',
-}) => {
+export const Catalog: FunctionComponent<{
+  boxRef?: RefObject<HTMLDivElement | null>;
+  look?: Look;
+}> = ({ boxRef, look = 'docs' }) => {
   const [listed, setListed] = useState<{
     categories: ReadonlyMap<string, readonly string[]>;
     names: readonly string[];
   }>();
-  const [state, setState] = useState<'error' | 'idle' | 'loading'>('idle');
+  // (A screen's: loading at once.)
+  const [state, setState] = useState<'error' | 'idle' | 'loading'>(
+    look === 'screen' ? 'loading' : 'idle',
+  );
+
+  const request = () =>
+    Promise.all([loadIconNames(), loadIconCategories()])
+      .then(([names, categories]) => setListed({ categories, names }))
+      .catch(() => setState('error'));
+  const load = () => {
+    setState('loading');
+    request();
+  };
+
+  useEffect(() => {
+    if (look === 'screen') request();
+    // (Once, as it's shown.)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (listed) {
     return (
       <Grid
+        boxRef={boxRef}
         look={look}
         {...listed}
       />
     );
   }
 
-  const load = () => {
-    setState('loading');
-    Promise.all([loadIconNames(), loadIconCategories()])
-      .then(([names, categories]) => setListed({ categories, names }))
-      .catch(() => setState('error'));
-  };
   const label = state === 'loading' ? 'Loading…' : 'Load all symbols';
 
-  if (look === 'app') {
+  if (look === 'screen') {
     return (
-      <AppSections
-        footer={state === 'error' ? 'Loading failed.' : undefined}
-        row={
-          <List.Item>
-            <List.Content>
-              <List.Button
-                disabled={state === 'loading'}
-                onClick={load}
-              >
-                {label}
-              </List.Button>
-            </List.Content>
-          </List.Item>
-        }
-      />
+      <Viewport.Content ref={boxRef}>
+        <Viewport.Padding edge="block-start" />
+        <p className="symbol-catalog-status">
+          {state === 'error' ? 'Loading failed.' : 'Loading…'}
+        </p>
+      </Viewport.Content>
     );
   }
 

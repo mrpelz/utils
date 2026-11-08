@@ -1,4 +1,6 @@
-import { FunctionComponent, ReactNode, useState } from 'react';
+import '../docs/page-control/style.css';
+
+import { FunctionComponent, ReactNode, useRef, useState } from 'react';
 
 import {
   Accordion,
@@ -6,12 +8,15 @@ import {
   Collapsible,
   Drawer,
   type DrawerSide,
+  forwardClick,
   Header,
   Layout,
   List,
   Page,
   PageControl,
+  Segmented,
   Sidebar,
+  Switch,
   Symbol,
   TabBar,
   TextField,
@@ -19,6 +24,7 @@ import {
   useViewportScroll,
   Viewport,
 } from '../../components/index.js';
+import { steps } from '../docs/page-control/composition.js';
 import {
   sfArchivebox,
   sfArrowshapeTurnUpLeft,
@@ -38,6 +44,7 @@ import {
   sfTrash,
   sfTray,
 } from '../tooling/icons.js';
+import { FromCodeApp, PerTabApp, QuickBackApp } from './navigation.js';
 import {
   BackButton,
   DrillRow,
@@ -65,8 +72,75 @@ const iconButton = (label: string, icon: typeof sfFolder) => (
   </Toolbar.Button>
 );
 
+/**
+ * Toolbars in their usual places (a page of its own, its own bars: see
+ * `isBare`): a mailbox, its bar at the top (a title, its subtitle), its
+ * toolbar at the bottom, the content scrolling under both.
+ */
+const ToolbarApp: FunctionComponent = () => (
+  <>
+    <Page.Root>
+      <Header.Root>
+        <Viewport.BlockStart>
+          <Toolbar.Root placement="block-start">
+            <Toolbar.Leading>
+              <BackButton />
+            </Toolbar.Leading>
+            <Toolbar.Title>
+              <span>Inbox</span>
+              <Toolbar.Subtitle>12 unread</Toolbar.Subtitle>
+            </Toolbar.Title>
+            <Toolbar.Trailing>
+              <Toolbar.Button disabled={false}>
+                <Button.Label>Edit</Button.Label>
+              </Toolbar.Button>
+            </Toolbar.Trailing>
+          </Toolbar.Root>
+        </Viewport.BlockStart>
+        <Viewport.Padding edge="block-start" />
+      </Header.Root>
+      <List.Root>
+        <List.Section>
+          <List.Group>
+            {Array.from({ length: 30 }, (_, index) => (
+              <Row
+                key={index}
+                subtitle="Scrolling under both toolbars"
+                title={`Message ${String(index + 1)}`}
+              />
+            ))}
+          </List.Group>
+        </List.Section>
+      </List.Root>
+      <Viewport.Padding edge="block-end" />
+    </Page.Root>
+    <Viewport.BlockEnd>
+      <Toolbar.Root>
+        <Toolbar.Leading>
+          {iconButton('Folders', sfFolder)}
+          {iconButton('Flag', sfFlag)}
+        </Toolbar.Leading>
+        <Toolbar.Title>
+          <span>Updated Just Now</span>
+        </Toolbar.Title>
+        <Toolbar.Trailing>
+          <Toolbar.Group prominent>
+            {iconButton('Compose', sfSquareAndPencil)}
+          </Toolbar.Group>
+        </Toolbar.Trailing>
+      </Toolbar.Root>
+    </Viewport.BlockEnd>
+  </>
+);
+
 const ToolbarContent: FunctionComponent = () => (
   <List.Root>
+    <Rows>
+      <DrillRow
+        pageKey="toolbar/app"
+        title="In an App (Anchored, at the Top and the Bottom)"
+      />
+    </Rows>
     <Showcase
       isStacked
       title="Symbols"
@@ -221,6 +295,8 @@ const SampleTabBar: FunctionComponent<{
   size?: 'compact' | 'regular';
 }> = ({ accessory, count, hasSearch = false, isCollapsible = false, size }) => {
   const [value, setValue] = useState<unknown>('home');
+  // The section searched from (shown beside the search, to go back to).
+  const [section, setSection] = useState<unknown>('home');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const shown = tabs.slice(0, count);
 
@@ -230,7 +306,11 @@ const SampleTabBar: FunctionComponent<{
         value={value}
         onValueChange={(next: unknown) => {
           setValue(next);
-          if (next === 'search') setIsCollapsed(true);
+          if (next === 'search') {
+            setIsCollapsed(true);
+            return;
+          }
+          setSection(next);
         }}
       >
         <TabBar.List
@@ -238,7 +318,7 @@ const SampleTabBar: FunctionComponent<{
           size={size}
         >
           <TabBar.Group
-            visibleWhenCollapsed={value !== 'search'}
+            visibleWhenCollapsed
             onClickCapture={() => setIsCollapsed(false)}
           >
             <TabBar.Indicator />
@@ -246,7 +326,7 @@ const SampleTabBar: FunctionComponent<{
               <TabBar.Tab
                 key={tab}
                 value={tab}
-                visibleWhenCollapsed={value === tab}
+                visibleWhenCollapsed={section === tab}
               >
                 <TabBar.Icon>
                   <Symbol icon={icon} />
@@ -298,7 +378,7 @@ const TabBarContent: FunctionComponent = () => (
     <Rows>
       <DrillRow
         pageKey="tab-bar/app"
-        title="In an App (Panels, Collapsing on Scroll)"
+        title="In an App (Anchored: Every Kind, Collapsing on Scroll)"
       />
     </Rows>
     <Showcase
@@ -352,14 +432,117 @@ const TabBarContent: FunctionComponent = () => (
   </List.Root>
 );
 
+/** A tab bar app's bar, as chosen in its panels (see `BarChoices`). */
+type BarChoice = {
+  count: number;
+  hasAccessory: boolean;
+  hasSearch: boolean;
+  isRegular: boolean;
+};
+
+/** A switch's row (its label, its value). */
+const SwitchRow: FunctionComponent<{
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  title: string;
+}> = ({ checked, onChange, title }) => (
+  <List.Item onClick={forwardClick('[role=switch]')}>
+    <List.Content>
+      <List.Title>{title}</List.Title>
+    </List.Content>
+    <List.Trailing>
+      <Switch.Root
+        aria-label={title}
+        checked={checked}
+        onCheckedChange={(next: boolean) => onChange(next)}
+      >
+        <Switch.Thumb />
+      </Switch.Root>
+    </List.Trailing>
+  </List.Item>
+);
+
+/** The bar's choices, in each panel: its tabs, search, accessory, size. */
+const BarChoices: FunctionComponent<{
+  choice: BarChoice;
+  onChange: (next: BarChoice) => void;
+}> = ({ choice, onChange }) => (
+  <List.Section>
+    <List.Header>
+      <List.Title>The Tab Bar Below</List.Title>
+    </List.Header>
+    <List.Group>
+      <List.Item>
+        <List.Content>
+          <List.Title>Tabs</List.Title>
+        </List.Content>
+        <List.Trailing>
+          <Segmented.Root
+            aria-label="Tabs"
+            value={String(choice.count)}
+            onValueChange={(next: unknown) =>
+              onChange({ ...choice, count: Number(next) })
+            }
+          >
+            {[2, 3, 4, 5].map((count) => (
+              <Segmented.Item
+                key={count}
+                value={String(count)}
+              >
+                {count}
+              </Segmented.Item>
+            ))}
+            <Segmented.Highlight />
+          </Segmented.Root>
+        </List.Trailing>
+      </List.Item>
+      <SwitchRow
+        checked={choice.hasSearch}
+        title="Search (Collapsing the Bar)"
+        onChange={(hasSearch) => onChange({ ...choice, hasSearch })}
+      />
+      <SwitchRow
+        checked={choice.hasAccessory}
+        title="Accessory"
+        onChange={(hasAccessory) => onChange({ ...choice, hasAccessory })}
+      />
+      <SwitchRow
+        checked={choice.isRegular}
+        title="Regular (a Tablet’s)"
+        onChange={(isRegular) => onChange({ ...choice, isRegular })}
+      />
+    </List.Group>
+    <List.Footer>
+      Scrolling down collapses the bar, scrolling up expands it.
+    </List.Footer>
+  </List.Section>
+);
+
 /**
  * A tab bar app (a page of its own, its own bars: see `isBare`): its
- * panels, each a page with a large title; its bar at the bottom,
- * collapsing as a page scrolls down.
+ * panels, each a page with a large title (and the bar's choices); its bar
+ * at the bottom (in its usual place, an anchor), collapsing as a page
+ * scrolls down, or as its search is chosen.
  */
 const TabBarApp: FunctionComponent = () => {
   const [value, setValue] = useState<unknown>('home');
+  // The section searched from (shown beside the search, to go back to).
+  const [section, setSection] = useState<unknown>('home');
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [choice, setChoice] = useState<BarChoice>({
+    count: 3,
+    hasAccessory: false,
+    hasSearch: false,
+    isRegular: false,
+  });
+  const shown = tabs.slice(0, choice.count);
+  const panels = [
+    ...shown,
+    ...(choice.hasSearch
+      ? [['search', 'Search', sfMagnifyingglass] as const]
+      : []),
+  ];
+  const isSearching = value === 'search';
 
   // Collapsing as the shown page scrolls down (not at its top), expanding
   // as it scrolls up (the provider's tracked scroller: the page shown).
@@ -367,17 +550,31 @@ const TabBarApp: FunctionComponent = () => {
     setIsCollapsed(!atTop && direction === 'down'),
   );
 
+  const choose = (next: BarChoice) => {
+    setChoice(next);
+    // (Its tab gone: the first.)
+    const isGone =
+      (value === 'search' && !next.hasSearch) ||
+      (value !== 'search' &&
+        tabs.slice(0, next.count).every(([tab]) => tab !== value));
+    if (isGone) {
+      setValue('home');
+      setSection('home');
+    }
+  };
+
   return (
     <TabBar.Root
       value={value}
       onValueChange={(next: unknown) => {
         setValue(next);
         setIsCollapsed(false);
+        if (next !== 'search') setSection(next);
       }}
     >
       {/* Each panel the page (its scroller: filling the stack's frame),
           its header within it, as in the docs' tab bar app. */}
-      {tabs.slice(0, 3).map(([tab, label]) => (
+      {panels.map(([tab, label]) => (
         <TabBar.Panel
           key={tab}
           keepMounted
@@ -401,6 +598,10 @@ const TabBarApp: FunctionComponent = () => {
             </Header.LargeTitle>
           </Header.Root>
           <List.Root>
+            <BarChoices
+              choice={choice}
+              onChange={choose}
+            />
             <List.Section>
               <List.Group>
                 {Array.from({ length: 30 }, (_, index) => (
@@ -416,18 +617,22 @@ const TabBarApp: FunctionComponent = () => {
         </TabBar.Panel>
       ))}
       <Viewport.BlockEnd keyboard="cover">
-        <TabBar.List collapsed={isCollapsed}>
-          {/* (Collapsed, its selected tab alone; pressed, expanded.) */}
+        <TabBar.List
+          collapsed={isCollapsed || isSearching}
+          size={choice.isRegular ? 'regular' : undefined}
+        >
+          {/* (Collapsed, its section's tab alone, beside the search while
+              searching; pressed, expanded.) */}
           <TabBar.Group
             visibleWhenCollapsed
             onClickCapture={() => setIsCollapsed(false)}
           >
             <TabBar.Indicator />
-            {tabs.slice(0, 3).map(([tab, label, icon]) => (
+            {shown.map(([tab, label, icon]) => (
               <TabBar.Tab
                 key={tab}
                 value={tab}
-                visibleWhenCollapsed={value === tab}
+                visibleWhenCollapsed={section === tab}
               >
                 <TabBar.Icon>
                   <Symbol icon={icon} />
@@ -436,9 +641,98 @@ const TabBarApp: FunctionComponent = () => {
               </TabBar.Tab>
             ))}
           </TabBar.Group>
+          {choice.hasSearch ? (
+            <TabBar.Group
+              visibleWhenCollapsed={isSearching}
+              onClickCapture={() => setIsCollapsed(false)}
+            >
+              <TabBar.Indicator />
+              <TabBar.Tab
+                aria-label="Search"
+                value="search"
+                visibleWhenCollapsed={isSearching}
+              >
+                <TabBar.Icon>
+                  <Symbol icon={sfMagnifyingglass} />
+                </TabBar.Icon>
+              </TabBar.Tab>
+            </TabBar.Group>
+          ) : null}
         </TabBar.List>
+        {choice.hasAccessory ? (
+          <TabBar.Accessory visibleIn="both">
+            <span className="kitchen-sink-accessory-title">Not Playing</span>
+            <Symbol icon={sfPlayFill} />
+            <Symbol icon={sfForwardFill} />
+          </TabBar.Accessory>
+        ) : null}
       </Viewport.BlockEnd>
     </TabBar.Root>
+  );
+};
+
+/**
+ * A page control in its usual place (a page of its own: see `isBare`):
+ * swipeable pages filling the screen (snapping natively), the control in
+ * the toolbar at the bottom, following the swipe and moving it (as the
+ * docs' paged content).
+ */
+const PageControlApp: FunctionComponent = () => {
+  const [page, setPage] = useState(0);
+  const pagesRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <>
+      <Page.Root fill>
+        <div
+          ref={pagesRef}
+          className="page-control-demo-pages kitchen-sink-pages"
+          onScroll={({ currentTarget }) =>
+            setPage(
+              Math.round(
+                Math.abs(currentTarget.scrollLeft) / currentTarget.clientWidth,
+              ),
+            )
+          }
+        >
+          {steps.map(([title, text]) => (
+            <section
+              key={title}
+              className="page-control-demo-page"
+            >
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </section>
+          ))}
+        </div>
+      </Page.Root>
+      <Viewport.BlockStart>
+        <Toolbar.Root placement="block-start">
+          <Toolbar.Leading>
+            <BackButton />
+          </Toolbar.Leading>
+          <Toolbar.Title>
+            <span>Onboarding</span>
+          </Toolbar.Title>
+        </Toolbar.Root>
+      </Viewport.BlockStart>
+      <Viewport.BlockEnd>
+        <Toolbar.Root>
+          <PageControl
+            aria-label="Onboarding"
+            count={steps.length}
+            value={page}
+            onValueChange={(next: number) =>
+              pagesRef.current?.children[next]?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'start',
+              })
+            }
+          />
+        </Toolbar.Root>
+      </Viewport.BlockEnd>
+    </>
   );
 };
 
@@ -447,6 +741,12 @@ const PageControlContent: FunctionComponent = () => {
 
   return (
     <List.Root>
+      <Rows>
+        <DrillRow
+          pageKey="page-control/app"
+          title="In an App (Anchored, Swipeable Pages)"
+        />
+      </Rows>
       <Showcase
         isStacked
         title="Glass"
@@ -601,6 +901,10 @@ const AccordionContent: FunctionComponent = () => (
         <List.Header>
           <List.Title>Several Open</List.Title>
         </List.Header>
+        <List.Footer>
+          Not separate collapsibles: one group, its open sections one value (a
+          list of them), the arrow keys moving between its headers.
+        </List.Footer>
       </List.Section>
     </List.Root>
     <AccordionList isMultiple />
@@ -1051,6 +1355,20 @@ const NavigationContent: FunctionComponent = () => (
         title="Level 1"
       />
     </Rows>
+    <Rows title="Apps, Each Its Own Stack">
+      <DrillRow
+        pageKey="navigation/quick-back"
+        title="Going Back Quickly (Levels Deep)"
+      />
+      <DrillRow
+        pageKey="navigation/from-code"
+        title="From Code (a Persistent Done, Popping to the Root)"
+      />
+      <DrillRow
+        pageKey="navigation/per-tab"
+        title="A Stack per Tab (Separate Stacks)"
+      />
+    </Rows>
     <Rows title="This App">
       <Row
         subtitle="Each component a page, drilled into; on a wide screen, beside the sidebar"
@@ -1103,7 +1421,7 @@ const HeaderContent: FunctionComponent = () => (
   <>
     <Header.Accessory>
       <TextField.Root>
-        <TextField.Frame>
+        <TextField.Frame variant="row">
           <Symbol icon={sfMagnifyingglass} />
           <TextField.Control
             aria-label="Search"
@@ -1149,6 +1467,24 @@ export const structurePages: SinkPages = {
       level(depth),
     ]),
   ),
+  'navigation/from-code': {
+    Content: FromCodeApp,
+    hasOwnStack: true,
+    isBare: true,
+    title: 'From Code',
+  },
+  'navigation/per-tab': {
+    Content: PerTabApp,
+    hasOwnStack: true,
+    isBare: true,
+    title: 'A Stack per Tab',
+  },
+  'navigation/quick-back': {
+    Content: QuickBackApp,
+    hasOwnStack: true,
+    isBare: true,
+    title: 'Going Back Quickly',
+  },
   page: { Content: PageContent, title: 'Page' },
   'page-control': { Content: PageControlContent, title: 'Page Control' },
   'page/grouped': backgroundPage('grouped', 'Grouped'),
@@ -1156,5 +1492,11 @@ export const structurePages: SinkPages = {
   sidebar: { Content: SidebarContent, title: 'Sidebar' },
   'tab-bar': { Content: TabBarContent, title: 'Tab Bar' },
   'tab-bar/app': { Content: TabBarApp, isBare: true, title: 'In an App' },
+  'toolbar/app': { Content: ToolbarApp, isBare: true, title: 'In an App' },
+  'page-control/app': {
+    Content: PageControlApp,
+    isBare: true,
+    title: 'In an App',
+  },
   toolbar: { Content: ToolbarContent, title: 'Toolbar' },
 };

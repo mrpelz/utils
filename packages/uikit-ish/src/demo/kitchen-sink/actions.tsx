@@ -1,4 +1,10 @@
-import { FunctionComponent, ReactNode, useRef, useState } from 'react';
+import {
+  FunctionComponent,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   ActivityView,
@@ -540,8 +546,57 @@ const PhotoMenu: FunctionComponent<{
   </ContextualMenu.Root>
 );
 
+/**
+ * A trigger that keeps changing (a turning gradient, a ticking count of
+ * seconds), lifted as it is (no preview): it goes on while the menu's
+ * open, the very element lifted, not a copy.
+ */
+const LiveMenu: FunctionComponent = () => {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setSeconds((current) => current + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <ContextualMenu.Root>
+      <ContextualMenu.Trigger
+        aria-label="A live tile"
+        className="kitchen-sink-photo-trigger"
+      >
+        <span className="kitchen-sink-photo kitchen-sink-live">
+          <span className="kitchen-sink-live-count">{seconds}s</span>
+        </span>
+      </ContextualMenu.Trigger>
+      <ContextualMenu.Portal>
+        <ContextualMenu.Backdrop />
+        <ContextualMenu.Positioner>
+          <ContextualMenu.Popup>
+            <ContextualMenu.Item>
+              <ContextualMenu.Label>Share</ContextualMenu.Label>
+              <ContextualMenu.Icon>
+                <Symbol icon={sfSquareAndArrowUp} />
+              </ContextualMenu.Icon>
+            </ContextualMenu.Item>
+            <ContextualMenu.Item destructive>
+              <ContextualMenu.Label>Delete</ContextualMenu.Label>
+              <ContextualMenu.Icon>
+                <Symbol icon={sfTrash} />
+              </ContextualMenu.Icon>
+            </ContextualMenu.Item>
+          </ContextualMenu.Popup>
+        </ContextualMenu.Positioner>
+      </ContextualMenu.Portal>
+    </ContextualMenu.Root>
+  );
+};
+
 const ContextualMenuContent: FunctionComponent = () => (
   <List.Root>
+    <Showcase title="Lifted Live (Still Changing While Its Menu’s Open)">
+      <LiveMenu />
+    </Showcase>
     <Showcase title="Photos (Press and Hold, or Right-Click)">
       <PhotoMenu
         hasPreview

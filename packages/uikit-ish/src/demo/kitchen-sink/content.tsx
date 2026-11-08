@@ -21,7 +21,15 @@ import {
   sfStar,
 } from '../tooling/icons.js';
 import { listPages } from './list.js';
-import { Row, Rows, Showcase, type SinkPages, usePush } from './shared.js';
+import {
+  DrillRow,
+  Row,
+  Rows,
+  Showcase,
+  type SinkPages,
+  usePush,
+} from './shared.js';
+import { Screen, TopBar } from './viewport.js';
 
 // Content: Typography, Avatar, Symbol (List: see list.tsx).
 
@@ -388,13 +396,41 @@ const SymbolContent: FunctionComponent = () => (
         ))}
       </Showcase>
     ) : null}
-    <Catalog look="app" />
+    <Rows title="SF Symbols">
+      <DrillRow
+        pageKey="symbol/catalog"
+        title="All of Them (Searchable)"
+      />
+    </Rows>
   </List.Root>
+);
+
+/**
+ * Every SF Symbol (a screen of its own: see `isBare`): the grid filling it
+ * above the keyboard, the search below it, on the keyboard.
+ */
+const SymbolCatalogScreen: FunctionComponent = () => (
+  <Screen
+    render={(contentRef) => (
+      <>
+        <Catalog
+          boxRef={contentRef}
+          look="screen"
+        />
+        <TopBar title="SF Symbols" />
+      </>
+    )}
+  />
 );
 
 export const contentPages: SinkPages = {
   avatar: { Content: AvatarContent, title: 'Avatar' },
   symbol: { Content: SymbolContent, title: 'Symbol' },
+  'symbol/catalog': {
+    Content: SymbolCatalogScreen,
+    isBare: true,
+    title: 'SF Symbols',
+  },
   typography: { Content: TypographyContent, title: 'Typography' },
   'typography/sizes': {
     Content: TypographySizesContent,

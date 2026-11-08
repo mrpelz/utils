@@ -802,14 +802,22 @@ const morphAccessory = (list: HTMLElement, isCollapsed: boolean) => {
 const contentRect = (group: HTMLElement) =>
   (scrollerOf(group) ?? group).getBoundingClientRect();
 
-// The accessory's place above the groups (all of them).
-const aboveGroups = (rects: DOMRect[]): Box => ({
-  height: accessoryHeight,
-  left: Math.min(...rects.map((rect) => rect.left)),
-  right: Math.max(...rects.map((rect) => rect.right)),
-  top:
-    Math.min(...rects.map((rect) => rect.top)) - accessoryGap - accessoryHeight,
-});
+// The accessory's place above the groups: spanning the list's width (its
+// content box, however many groups, however wide), above the highest.
+const aboveGroups = (list: HTMLElement, rects: DOMRect[]): Box => {
+  const listRect = list.getBoundingClientRect();
+  const style = getComputedStyle(list);
+
+  return {
+    height: accessoryHeight,
+    left: listRect.left + Number.parseFloat(style.paddingLeft),
+    right: listRect.right - Number.parseFloat(style.paddingRight),
+    top:
+      Math.min(...rects.map((rect) => rect.top)) -
+      accessoryGap -
+      accessoryHeight,
+  };
+};
 
 // The accessory's place between the remaining groups, in the order they're
 // placed in (see `collapsedOrder`): after those at the start, where the free
@@ -886,7 +894,10 @@ const placeAccessory = (list: HTMLElement): void => {
           list,
           morph.remaining.length > 0 ? morph.remaining : groups,
         )
-      : aboveGroups(groups.map((group) => contentRect(group)));
+      : aboveGroups(
+          list,
+          groups.map((group) => contentRect(group)),
+        );
     return relativeTo(box, list.getBoundingClientRect());
   };
 

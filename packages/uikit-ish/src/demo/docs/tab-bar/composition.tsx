@@ -1014,8 +1014,8 @@ export const TabBarComposition: FunctionComponent = () => (
         after the list.
       </li>
       <li>
-        Above the groups; between them while the bar is collapsed (here, by
-        search).
+        Above the groups, spanning the bar’s width; between them while the bar
+        is collapsed (here, by search).
       </li>
       <li>
         The active tab ignores clicks (Base UI’s Tabs): the search tab, clicked

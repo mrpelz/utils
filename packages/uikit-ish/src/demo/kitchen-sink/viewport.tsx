@@ -23,10 +23,12 @@ import {
   useViewportScroll,
   Viewport,
 } from '../../components/index.js';
+import { planets } from '../docs/viewport/content.js';
 import {
   sfArrowDown,
   sfArrowUp,
   sfFolder,
+  sfHeartFill,
   sfLine3HorizontalDecreaseCircle,
   sfPhoto,
   sfRecordingtape,
@@ -73,7 +75,7 @@ const names = [
  * A screen of its own: filling the stack's frame, its provider tracking
  * its content layer (`contentRef`, for `render`).
  */
-const Screen: FunctionComponent<{
+export const Screen: FunctionComponent<{
   render: (contentRef: RefObject<HTMLDivElement | null>) => ReactNode;
 }> = ({ render }) => {
   const screenRef = useRef<HTMLDivElement>(null);
@@ -95,10 +97,10 @@ const Screen: FunctionComponent<{
 };
 
 /** A screen's bar at the top: back, its title, its items. */
-const TopBar: FunctionComponent<{ children?: ReactNode; title: string }> = ({
-  children,
-  title,
-}) => (
+export const TopBar: FunctionComponent<{
+  children?: ReactNode;
+  title: string;
+}> = ({ children, title }) => (
   <Viewport.BlockStart>
     <Toolbar.Root placement="block-start">
       <Toolbar.Leading>
@@ -586,18 +588,13 @@ const RefreshView: FunctionComponent<{
   );
 };
 
-const planets = [
-  ['Mercury', ['Closest to the Sun', 'A year: 88 days', 'No moons']],
-  ['Venus', ['The hottest planet', 'A year: 225 days', 'No moons']],
-  ['Earth', ['Our home', 'A year: 365 days', 'One moon']],
-  ['Mars', ['The red planet', 'A year: 687 days', 'Two moons']],
-  ['Jupiter', ['The largest planet', 'A year: 12 Earth years', '95 moons']],
-] as const;
-
 // Pulled this far past an end (px), released, it turns the page.
 const turnDistance = 80;
 
-/** A page each, turned by pulling past an end (and releasing). */
+/**
+ * The planets, a page each, turned by pulling past an end (and releasing),
+ * as the Viewport docs' composition (Pluto's a night sky, and its heart).
+ */
 const PagesView: FunctionComponent<{
   contentRef: RefObject<HTMLDivElement | null>;
 }> = ({ contentRef }) => {
@@ -664,11 +661,15 @@ const PagesView: FunctionComponent<{
         <List.Root
           key={name}
           className="viewport-demo-page"
+          data-color-scheme={name === 'Pluto' ? 'dark' : undefined}
           data-turned={turned}
         >
           <List.Section>
             <List.Header prominence="extraProminent">
-              <List.Title render={<h2 />}>{name}</List.Title>
+              <List.Title render={<h2 />}>
+                {name}
+                {name === 'Pluto' ? <Symbol icon={sfHeartFill} /> : null}
+              </List.Title>
             </List.Header>
             <List.Group>
               {facts.map((fact) => (

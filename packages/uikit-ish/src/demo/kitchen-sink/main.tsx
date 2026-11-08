@@ -1,6 +1,6 @@
 import './style.css';
 
-import { FunctionComponent, ReactNode, useState } from 'react';
+import { FunctionComponent, ReactNode, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -10,6 +10,8 @@ import {
   List,
   Navigation,
   Page,
+  Settings,
+  type SettingsValues,
   Sidebar,
   Symbol,
   Toolbar,
@@ -27,7 +29,12 @@ import { choicesPages } from './choices.js';
 import { contentPages } from './content.js';
 import { foundationsPages } from './foundations.js';
 import { presentationPages } from './presentation.js';
-import { PushContext, type SinkPages } from './shared.js';
+import {
+  PopContext,
+  PushContext,
+  type SinkPages,
+  SinkSettingsContext,
+} from './shared.js';
 import { statusPages } from './status.js';
 import { structurePages } from './structure.js';
 import { viewportPages } from './viewport.js';
@@ -222,6 +229,12 @@ const App: FunctionComponent = () => {
   useInputZoomPrevention();
   useFocusShiftPrevention();
   const isCompact = useSizeClass() === 'compact';
+  // Its settings, overriding the system's (set on its Settings page).
+  const [settings, setSettings] = useState<Partial<SettingsValues>>({});
+  const settingsState = useMemo(
+    () => [settings, setSettings] as const,
+    [settings],
+  );
   // The open component's stack, bottom to top (compact, empty: the index).
   const [stack, setStack] = useState<readonly string[]>([]);
   // (Regular: a component always open, the first at first.)
@@ -235,58 +248,68 @@ const App: FunctionComponent = () => {
   const keys = isCompact ? ['index', ...shown] : shown;
   const stackView = (
     <PushContext.Provider value={push}>
-      <Navigation.Root onBack={pop}>
-        <Navigation.SwipeArea />
-        <Navigation.Stack>
-          {/* Each page a navigation page: instant ones (see `isInstant`)
+      <PopContext.Provider value={pop}>
+        <Navigation.Root onBack={pop}>
+          {/* (Not while a page with a stack of its own is on top: its own
+            swipe area, beneath this one, takes the swipes.) */}
+          {pages[keys.at(-1) ?? '']?.hasOwnStack ? null : (
+            <Navigation.SwipeArea />
+          )}
+          <Navigation.Stack>
+            {/* Each page a navigation page: instant ones (see `isInstant`)
               shown at once, not slid in or out. */}
-          {keys.map((key, index) => (
-            <Navigation.Page
-              key={key}
-              instant={pages[key]?.isInstant}
-            >
-              {key === 'index' ? (
-                <StackPage
-                  back={undefined}
-                  pageKey={key}
-                >
-                  <Index onOpen={open} />
-                </StackPage>
-              ) : (
-                <StackPage
-                  back={titleOf(keys[index - 1])}
-                  pageKey={key}
-                />
-              )}
-            </Navigation.Page>
-          ))}
-        </Navigation.Stack>
-      </Navigation.Root>
+            {keys.map((key, index) => (
+              <Navigation.Page
+                key={key}
+                instant={pages[key]?.isInstant}
+              >
+                {key === 'index' ? (
+                  <StackPage
+                    back={undefined}
+                    pageKey={key}
+                  >
+                    <Index onOpen={open} />
+                  </StackPage>
+                ) : (
+                  <StackPage
+                    back={titleOf(keys[index - 1])}
+                    pageKey={key}
+                  />
+                )}
+              </Navigation.Page>
+            ))}
+          </Navigation.Stack>
+        </Navigation.Root>
+      </PopContext.Provider>
     </PushContext.Provider>
   );
 
   return (
-    <Viewport.Provider>
-      <Viewport.Content>
-        {isCompact ? (
-          stackView
-        ) : (
-          <Layout.Root>
-            <Layout.Column
-              floating
-              aria-label="Components"
-              defaultSize={300}
-            >
-              <Sections
-                selected={shown[0]}
-                onSelect={open}
-              />
-            </Layout.Column>
-            <Layout.Column clearFloating>{stackView}</Layout.Column>
-          </Layout.Root>
-        )}
-      </Viewport.Content>
-    </Viewport.Provider>
+    <SinkSettingsContext.Provider value={settingsState}>
+      <Settings.Provider {...settings}>
+        <Viewport.Provider>
+          <Viewport.Content>
+            {isCompact ? (
+              stackView
+            ) : (
+              <Layout.Root>
+                <Layout.Column
+                  floating
+                  aria-label="Components"
+                  defaultSize={300}
+                >
+                  <Sections
+                    selected={shown[0]}
+                    onSelect={open}
+                  />
+                </Layout.Column>
+                <Layout.Column clearFloating>{stackView}</Layout.Column>
+              </Layout.Root>
+            )}
+          </Viewport.Content>
+        </Viewport.Provider>
+      </Settings.Provider>
+    </SinkSettingsContext.Provider>
   );
 };
 
