@@ -105,9 +105,10 @@ export const SinkSettingsContext = createContext<SinkSettings>([
  */
 export const Showcase: FunctionComponent<{
   children: ReactNode;
+  footer?: ReactNode;
   isStacked?: boolean;
   title?: string;
-}> = ({ children, isStacked = false, title }) => (
+}> = ({ children, footer, isStacked = false, title }) => (
   <List.Section>
     {title === undefined ? null : (
       <List.Header>
@@ -119,6 +120,7 @@ export const Showcase: FunctionComponent<{
     >
       {children}
     </div>
+    {footer === undefined ? null : <List.Footer>{footer}</List.Footer>}
   </List.Section>
 );
 

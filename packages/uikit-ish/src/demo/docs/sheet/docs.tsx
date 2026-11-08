@@ -271,7 +271,23 @@ export const sheetPopupRows: readonly PropRow[] = [
     'compact',
     'boolean',
     'by the window’s width (compact below 768px)',
-    'A sheet from the bottom (its detent), or not compact, a form sheet, centered (up to 936px by 852px).',
+    'A sheet from the bottom (its detent), or not compact, what regular says.',
+  ],
+  [
+    'regular',
+    union('card', 'form'),
+    code(union('form')),
+    <>
+      What it is in a regular width (a tablet’s; not compact): a form sheet,
+      centered (up to 936px by 852px, e.g. for editing); or a card from the
+      bottom at the leading edge, as a regular{' '}
+      <PartLink
+        component="island"
+        part="Island.Root"
+      />{' '}
+      (375px wide, 10px in, up to 64px below the top), its detent, swiping and
+      snapping kept (e.g. over a map).
+    </>,
   ],
   [
     'background',

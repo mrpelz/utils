@@ -1311,8 +1311,10 @@ export const SheetParts: FunctionComponent = () => (
     <ul>
       <li>
         The sheet: <code>detent</code> (large, medium), or not{' '}
-        <code>compact</code>, a form sheet; in its portal, the page dimmed
-        behind it (Base UI’s <code>Portal</code> and <code>Backdrop</code>).
+        <code>compact</code>, a form sheet (or, <code>regular</code>{' '}
+        <code>card</code>, a card at the leading edge); in its portal, the page
+        dimmed behind it (Base UI’s <code>Portal</code> and{' '}
+        <code>Backdrop</code>).
       </li>
       <li>
         <code>container</code>: here, the phone’s screen (a containing block, so

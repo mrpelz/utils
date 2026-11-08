@@ -30,10 +30,12 @@ import {
 } from '../viewport/main.js';
 import type {
   SheetContentProps,
+  SheetDetent,
   SheetGrabberProps,
   SheetHandle,
   SheetHeaderProps,
   SheetPopupProps,
+  SheetRegular,
   SheetRootProps,
   SheetSnapGroupProps,
   SheetTriggerProps,
@@ -47,6 +49,7 @@ export type {
   SheetHandle,
   SheetHeaderProps,
   SheetPopupProps,
+  SheetRegular,
   SheetRootProps,
   SheetSnapGroupProps,
   SheetSwipeDirection,
@@ -62,7 +65,9 @@ export type {
 //   content, its corners 34px;
 // - in a regular width (the window from 768px, or not `compact`), a form
 //   sheet: opaque, centered, up to 936px by 852px, its
-//   corners 38px.
+//   corners 38px; or (`regular` `card`) a card from the bottom at the
+//   leading edge (as a regular Island: 375px wide, 10px in), its detent's
+//   look, all its corners round, up to 64px below the top.
 // Its header: a grabber (`Grabber`, 36px by 5px, 5px from
 // the top, #cfcfcf; optional) above the app's content (e.g. a `Toolbar`: a 44px title and
 // controls). Base UI's `Drawer` (a `Dialog` with gestures): modal,
@@ -240,18 +245,18 @@ const interactive =
 const flingSpeed = 0.4;
 
 /**
- * Not snapping (compact, swiped down): dragged down by a mouse by its
+ * Not snapping (from the bottom, swiped down): dragged down by a mouse by its
  * header (Base UI's swipes a touch's), following it; let go past a third of
  * its height, or flung, closed (`close`), else back.
  */
 const useMouseSwipe = (
   ref: RefObject<HTMLElement | null>,
-  isCompact: boolean,
+  isBottom: boolean,
   isSnapping: boolean,
 ) => {
   const close = useContext(SnapContext)?.close;
   const isNotSwiped = useContext(NoSwipeContext);
-  const isEnabled = isCompact && !isSnapping && !isNotSwiped;
+  const isEnabled = isBottom && !isSnapping && !isNotSwiped;
   const closeRef = useRef(close);
   useLayoutEffect(() => {
     closeRef.current = close;
@@ -326,6 +331,46 @@ const useMouseSwipe = (
   }, [isEnabled, ref]);
 };
 
+/**
+ * Its lowest stop (snapping; `undefined`: not), below which it's swiped
+ * out whole (`--uikit-sheet-lowest-stop`, see style.css).
+ */
+const useLowestStop = (
+  ref: RefObject<HTMLElement | null>,
+  lowest: number | undefined,
+) => {
+  useLayoutEffect(() => {
+    const { current: element } = ref;
+    if (!element) return;
+    if (lowest === undefined) {
+      element.style.removeProperty('--uikit-sheet-lowest-stop');
+    } else {
+      element.style.setProperty(
+        '--uikit-sheet-lowest-stop',
+        `${String(lowest)}px`,
+      );
+    }
+  }, [lowest, ref]);
+};
+
+/**
+ * Where it is: from the bottom (its detent's, swiped, snapping), compact
+ * (by the window's size class, see Viewport, or set), or a card (regular,
+ * `regular` `card`: at the leading edge); else a form sheet.
+ */
+const usePlacement = (compact: boolean | undefined, regular: SheetRegular) => {
+  const sizeClass = useSizeClass();
+  const isCompact = compact ?? sizeClass === 'compact';
+  const isCard = !isCompact && regular === 'card';
+  return { isBottom: isCompact || isCard, isCard };
+};
+
+/** Snapping, its kind: a medium one's capsule, a large one's sheet. */
+const snapKindOf = (isSnapping: boolean, detent: SheetDetent) => {
+  if (!isSnapping) return undefined;
+  return detent === 'medium' ? 'capsule' : 'sheet';
+};
+
 /** The sheet, the page dimmed behind it. */
 const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
   (
@@ -336,21 +381,20 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
       compact: compactProp,
       container,
       detent = 'large',
+      regular = 'form',
       ...props
     },
     forwardedRef,
   ) => {
     const ref = useForwardedRef(forwardedRef);
-    // (By the window's size class, see Viewport.)
-    const sizeClass = useSizeClass();
     const isNotSwiped = useContext(NoSwipeContext);
-    const isCompact = compactProp ?? sizeClass === 'compact';
+    const { isBottom, isCard } = usePlacement(compactProp, regular);
     // Snapping by its groups (see `SnapGroup`, snap.ts), natively, from the
-    // bottom (compact): a medium one within its capsule, a large one moved
-    // up and down; Base UI's swipes not its own.
+    // bottom: a medium one within its capsule, a large one moved up and
+    // down; Base UI's swipes not its own.
     const snap = useContext(SnapContext);
-    const isSnapping = snap !== undefined && snap.stops.length > 0 && isCompact;
-    const isGlass = isCompact && detent === 'medium';
+    const isSnapping = snap !== undefined && snap.stops.length > 0 && isBottom;
+    const isGlass = isBottom && detent === 'medium';
     useSnap(
       ref,
       isSnapping
@@ -365,26 +409,9 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
           }
         : undefined,
     );
-    useMouseSwipe(ref, isCompact, isSnapping);
-    // Its lowest stop (snapping), below which it's swiped out whole (see
-    // style.css).
-    const lowest = isSnapping ? snap.stops[0] : undefined;
-    useLayoutEffect(() => {
-      const { current: element } = ref;
-      if (!element) return;
-      if (lowest === undefined) {
-        element.style.removeProperty('--uikit-sheet-lowest-stop');
-      } else {
-        element.style.setProperty(
-          '--uikit-sheet-lowest-stop',
-          `${String(lowest)}px`,
-        );
-      }
-    }, [lowest, ref]);
-    let snapKind: string | undefined;
-    if (isSnapping) {
-      snapKind = isCompact && detent === 'medium' ? 'capsule' : 'sheet';
-    }
+    useMouseSwipe(ref, isBottom, isSnapping);
+    useLowestStop(ref, isSnapping ? snap.stops[0] : undefined);
+    const snapKind = snapKindOf(isSnapping, detent);
     // Its anchors' scope: fixed to it (see Viewport.Padding).
     const [scope] = useState(() => ({}));
 
@@ -411,7 +438,9 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
                 data-background={background}
                 // (Not swiped away, or snapping: none of Base UI's swipes
                 // start, see `Root`.)
-                data-compact={isCompact ? '' : undefined}
+                // (From the bottom, see above: compact, or a card.)
+                data-card={isCard ? '' : undefined}
+                data-compact={isBottom ? '' : undefined}
                 data-detent={detent}
                 data-sheet-part="popup"
                 data-snap={snapKind}

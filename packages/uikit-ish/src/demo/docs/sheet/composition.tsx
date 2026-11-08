@@ -163,6 +163,16 @@ const pop = () => setKeys((current) => current.slice(0, -1));
   </Sheet.Content>
 </Sheet.Popup>`;
 
+const cardCode = `<Sheet.Popup compact={false} detent="medium" regular="card">
+  <Sheet.Header>…</Sheet.Header>
+  <Sheet.Content>
+    <Sheet.SnapGroup value="header" />
+    <Sheet.SnapGroup value="peek">…</Sheet.SnapGroup>
+    <Sheet.SnapGroup value="details">…</Sheet.SnapGroup>
+    <Sheet.SnapGroup value="all">…</Sheet.SnapGroup>
+  </Sheet.Content>
+</Sheet.Popup>`;
+
 const formSheetCode = `<Sheet.Popup background="grouped" compact={false}>
   <Sheet.Header>
     <Sheet.Grabber />…</Sheet.Header>
@@ -698,12 +708,14 @@ const FormSheet: FunctionComponent = () => {
 /**
  * A place's sheet (medium: glass, snapping by its groups): its header a
  * stop of its own (`header`: an empty group, the capsule its bar alone),
- * then a summary, its actions, its reviews.
+ * then a summary, its actions, its reviews; a phone's, or (`isCard`) a
+ * tablet's card at the leading edge.
  */
-const placePopup = (addLog: (entry: string) => void) => (
+const placePopup = (addLog: (entry: string) => void, isCard = false) => (
   <Sheet.Popup
-    compact
+    compact={!isCard}
     detent="medium"
+    regular={isCard ? 'card' : undefined}
   >
     <Sheet.Header>
       <Sheet.Grabber />
@@ -877,6 +889,43 @@ const OpeningAtAStop: FunctionComponent = () => {
   );
 };
 
+/**
+ * A tablet's card (`regular` `card`): the place's sheet at the leading
+ * edge, snapping as on a phone, over the page.
+ */
+const CardOnATablet: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+
+  return (
+    <Component
+      hasWallpaper
+      isExpanded
+      isInline
+      id="sheet-composition-card"
+      log={log}
+      screen="centered"
+      stage="tablet"
+      title="A card on a tablet"
+    >
+      <Viewport.Content>
+        <Sheet.Root>
+          <Sheet.Trigger
+            render={
+              <Button.Root
+                size="large"
+                variant="bordered-prominent"
+              />
+            }
+          >
+            <Button.Label>Show Place</Button.Label>
+          </Sheet.Trigger>
+          {placePopup(addLog, true)}
+        </Sheet.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['medium-and-large', 'Medium and large'],
@@ -885,6 +934,7 @@ const sections: readonly Section[] = [
   ['a-navigation-inside', 'A navigation inside'],
   ['a-form-sheet-on-a-tablet', 'A form sheet on a tablet'],
   ['opening-at-a-stop', 'Opening at a stop'],
+  ['a-card-on-a-tablet', 'A card on a tablet'],
 ];
 
 /** `/sheet/composition`: sheets' detents, tasks, stacks and widths. */
@@ -1130,6 +1180,43 @@ export const SheetComposition: FunctionComponent = () => (
       </li>
     </ul>
     <OpeningAtAStop />
+
+    <Heading
+      id="a-card-on-a-tablet"
+      level={2}
+    >
+      A card on a tablet
+    </Heading>
+    <ul>
+      <li>
+        The place’s sheet in a regular width (a tablet’s): a card from the
+        bottom at the leading edge, as a regular{' '}
+        <PartLink
+          component="island"
+          part="Island.Root"
+        />{' '}
+        (375px wide, 10px in), up to 64px below the top; the page beside it.
+      </li>
+      <li>
+        Its detent, swiping and snapping kept, as on a phone: for a panel over a
+        full-screen view (a map, playback). For a task (editing), a form sheet
+        instead (
+        <a href="#a-form-sheet-on-a-tablet">A form sheet on a tablet</a>).
+      </li>
+      <li>
+        <strong>Library:</strong> the card (
+        <code>regular=&quot;card&quot;</code>), not compact here (
+        <code>
+          compact={'{'}false{'}'}
+        </code>
+        ; by the window, from 768px).
+      </li>
+      <li>
+        <strong>Demo:</strong> the place, and logging its buttons.
+      </li>
+    </ul>
+    <CodeView code={cardCode} />
+    <CardOnATablet />
   </>
 );
 
@@ -1141,4 +1228,5 @@ export const sheetCompositionDemos = [
   NavigationInside,
   FormSheet,
   OpeningAtAStop,
+  CardOnATablet,
 ];

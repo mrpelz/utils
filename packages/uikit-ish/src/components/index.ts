@@ -49,6 +49,7 @@ export {
   type SheetSnapGroupProps,
   type SheetTriggerProps,
   type SheetDetent,
+  type SheetRegular,
   type SheetHandle,
   type SheetPopupProps,
   useCreateSheetHandle,

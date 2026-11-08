@@ -10,10 +10,12 @@ import {
   List,
   Popover,
   Sheet,
+  type SheetRegular,
   type SheetSwipeDirection,
   Symbol,
   Toolbar,
   Tooltip,
+  useSizeClass,
   Viewport,
 } from '../../components/index.js';
 import { MapView } from '../docs/island/map.js';
@@ -62,6 +64,7 @@ const SimpleSheet: FunctionComponent<{
   hasCancelDone?: boolean;
   hasGrabber?: boolean;
   label: string;
+  regular?: SheetRegular;
   rows?: number;
   swipeDirection?: SheetSwipeDirection;
 }> = ({
@@ -71,70 +74,80 @@ const SimpleSheet: FunctionComponent<{
   hasCancelDone = false,
   hasGrabber = true,
   label,
+  regular,
   rows = 4,
   swipeDirection,
-}) => (
-  <Sheet.Root swipeDirection={swipeDirection}>
-    <Sheet.Trigger render={triggerButton}>
-      <Button.Label>{label}</Button.Label>
-    </Sheet.Trigger>
-    <Sheet.Popup
-      background={background}
-      compact={compact}
-      detent={detent}
-    >
-      <Sheet.Header>
-        {hasGrabber ? <Sheet.Grabber /> : null}
-        <Toolbar.Root placement="block-start">
-          {hasCancelDone ? (
-            <Toolbar.Leading>
-              <Sheet.Close render={<Toolbar.Button />}>
-                <Button.Label>Cancel</Button.Label>
-              </Sheet.Close>
-            </Toolbar.Leading>
-          ) : null}
-          <Toolbar.Title>
-            <Sheet.Title render={<span />}>{label}</Sheet.Title>
-          </Toolbar.Title>
-          <Toolbar.Trailing>
+}) => {
+  const sizeClass = useSizeClass();
+  // (A form sheet: set, or by the window, not a card.)
+  const isForm =
+    compact === false ||
+    (compact === undefined && sizeClass === 'regular' && regular !== 'card');
+
+  return (
+    <Sheet.Root swipeDirection={swipeDirection}>
+      <Sheet.Trigger render={triggerButton}>
+        <Button.Label>{label}</Button.Label>
+      </Sheet.Trigger>
+      <Sheet.Popup
+        background={background}
+        compact={compact}
+        detent={detent}
+        regular={regular}
+      >
+        <Sheet.Header>
+          {hasGrabber ? <Sheet.Grabber /> : null}
+          <Toolbar.Root placement="block-start">
             {hasCancelDone ? (
-              <Sheet.Close render={<Toolbar.Button prominent />}>
-                <Button.Label>Done</Button.Label>
-              </Sheet.Close>
-            ) : (
-              <Sheet.Close
-                render={
-                  <Toolbar.Button
-                    aria-label="Close"
-                    shape="circle"
-                  />
-                }
-              >
-                {closeIcon}
-              </Sheet.Close>
-            )}
-          </Toolbar.Trailing>
-        </Toolbar.Root>
-      </Sheet.Header>
-      <Sheet.Content>
-        <Viewport.Padding edge="block-start" />
-        <List.Root
-          listStyle={
-            background !== 'grouped' &&
-            ((detent ?? 'large') === 'large' || compact === false)
-              ? 'plain'
-              : undefined
-          }
-        >
-          <List.Section>
-            <List.Group>{fillerRows(rows)}</List.Group>
-          </List.Section>
-        </List.Root>
-        <Viewport.Padding edge="block-end" />
-      </Sheet.Content>
-    </Sheet.Popup>
-  </Sheet.Root>
-);
+              <Toolbar.Leading>
+                <Sheet.Close render={<Toolbar.Button />}>
+                  <Button.Label>Cancel</Button.Label>
+                </Sheet.Close>
+              </Toolbar.Leading>
+            ) : null}
+            <Toolbar.Title>
+              <Sheet.Title render={<span />}>{label}</Sheet.Title>
+            </Toolbar.Title>
+            <Toolbar.Trailing>
+              {hasCancelDone ? (
+                <Sheet.Close render={<Toolbar.Button prominent />}>
+                  <Button.Label>Done</Button.Label>
+                </Sheet.Close>
+              ) : (
+                <Sheet.Close
+                  render={
+                    <Toolbar.Button
+                      aria-label="Close"
+                      shape="circle"
+                    />
+                  }
+                >
+                  {closeIcon}
+                </Sheet.Close>
+              )}
+            </Toolbar.Trailing>
+          </Toolbar.Root>
+        </Sheet.Header>
+        <Sheet.Content>
+          <Viewport.Padding edge="block-start" />
+          <List.Root
+            listStyle={
+              background !== 'grouped' &&
+              ((detent ?? 'large') === 'large' || isForm)
+                ? 'plain'
+                : undefined
+            }
+          >
+            <List.Section>
+              <List.Group>{fillerRows(rows)}</List.Group>
+            </List.Section>
+          </List.Root>
+          <Viewport.Padding edge="block-end" />
+        </Sheet.Content>
+      </Sheet.Popup>
+    </Sheet.Root>
+  );
+};
 
 const reviewers = [
   'Aaron',
@@ -280,8 +293,8 @@ const PlaceSheet: FunctionComponent = () => (
       ))}
     </div>
     <Sheet.Popup
-      compact
       detent="medium"
+      regular="card"
     >
       <Sheet.Header>
         <Sheet.Grabber />
@@ -307,49 +320,54 @@ const PlaceSheet: FunctionComponent = () => (
   </Sheet.Root>
 );
 
+// On a tablet, its sheets follow the window's size class: a card at the
+// leading edge (`regular` `card`) where a detent, swiping or snapping is
+// shown; a form sheet for a task.
 const SheetContent: FunctionComponent = () => (
   <List.Root>
     <Showcase title="Detents">
       <SimpleSheet
-        compact
         detent="large"
         label="Large"
+        regular="card"
         rows={30}
       />
       <SimpleSheet
-        compact
         detent="medium"
         label="Medium"
+        regular="card"
       />
       <SimpleSheet
-        compact
         background="grouped"
         detent="large"
         label="Grouped"
+        regular="card"
         rows={12}
       />
     </Showcase>
-    <Showcase title="Header">
+    <Showcase
+      footer="On a tablet, Cancel and Done is a task: a form sheet, centered."
+      title="Header"
+    >
       <SimpleSheet
-        compact
         hasCancelDone
         label="Cancel and Done"
         rows={6}
       />
       <SimpleSheet
-        compact
         detent="medium"
         hasGrabber={false}
         label="Without a Grabber"
+        regular="card"
       />
     </Showcase>
     <Showcase title="Swiped Away">
       {(['down', 'up', 'left', 'right', 'none'] as const).map((direction) => (
         <SimpleSheet
           key={direction}
-          compact
           detent="medium"
           label={direction}
+          regular="card"
           swipeDirection={direction}
         />
       ))}

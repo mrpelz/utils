@@ -231,6 +231,43 @@
       );
     }
 
+    /* A card (regular, `regular` `card`, see main.tsx): from the bottom at
+       the leading edge, as a regular Island (375px wide, 10px in; on the
+       bottom inset, 6px from the edge without one), up to 64px below the
+       top (10px below the top inset, at least), all its corners round; its
+       detent's look (medium: as high as its content; large: as high as it
+       may be). Floating above the bottom inset: none left for its content. */
+    &&[data-card] {
+      --uikit-sheet-card-top: max(
+        64px,
+        var(--uikit-safe-area-inset-top, 0px) + 10px
+      );
+
+      width: min(375px, 100% - 20px);
+      inset-inline: 10px auto;
+
+      & > * {
+        --uikit-safe-area-inset-bottom: 0px;
+      }
+
+      &[data-detent='medium'] {
+        max-height: calc(
+          100% - max(6px, var(--uikit-sheet-inset-bottom)) -
+            var(--uikit-sheet-card-top)
+        );
+      }
+
+      &[data-detent='large'] {
+        border-radius: 38px;
+        inset-block: var(--uikit-sheet-card-top)
+          max(6px, var(--uikit-sheet-inset-bottom));
+      }
+
+      &[data-snap] {
+        top: var(--uikit-sheet-card-top);
+      }
+    }
+
     /* A form sheet (not compact: a regular width, see main.tsx). */
     &&:not([data-compact]) {
       width: min(936px, calc(100% - 64px));
@@ -549,6 +586,10 @@
 
     :where(.uikit-sheet-popup[data-compact][data-detent='large']) & {
       clip-path: inset(0 round 38px 38px 0 0);
+    }
+
+    :where(.uikit-sheet-popup[data-card][data-detent='large']) & {
+      clip-path: inset(0 round 38px);
     }
 
     :where(.uikit-sheet-popup:not([data-compact])) & {

@@ -93,6 +93,7 @@ export const propOptionsGuidePopup = {
   // Its lists are grouped: on the grouped background.
   background: ['grouped', 'plain', undefined] as const,
   compact: [true, false, undefined] as const,
+  regular: [undefined, 'form', 'card'] as const,
   initialFocus: [undefined, false, true] as const,
   finalFocus: [undefined, false, true] as const,
 };
