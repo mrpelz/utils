@@ -255,9 +255,9 @@ export const IndexPage: FunctionComponent = () => (
                 <a href={publicUrl('ios-quirks')}>iOS Quirks</a>
               </h3>
               <p>
-                What iOS Safari does that only shows on a device: the status bar
-                blur, memory kept from moving values, and the library’s
-                workarounds.
+                What iOS Safari does that only shows on a device (the status bar
+                blur, memory kept from moving values, iPadOS’ snapshots, the
+                keyboard, native scrolling) and how the library works around it.
               </p>
             </li>
           ) : null}

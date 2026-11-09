@@ -41,7 +41,7 @@
     /* Its moving values (the progress, what it's derived with, and its own
        derived from it) kept off its page: inherited, every element under
        it would be restyled on each frame of a push, pop or swipe, and as
-       one starts and ends (costly; iOS 26's WebKit keeps much of that
+       one starts and ends (costly; iOS's WebKit keeps much of that
        memory, until the tab is killed; see the guide's iOS Quirks page). Not past its children, but on the
        way to its shared items (see Persistent, and Stack:
        `data-navigation-path`), nor past theirs. */
