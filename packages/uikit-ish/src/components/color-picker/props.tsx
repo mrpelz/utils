@@ -14,13 +14,15 @@ export type Rgba = { a: number; b: number; g: number; r: number };
 /**
  * Why the color changed, and the event: its grid, spectrum or sliders, the
  * opacity (slider or percentage), a saved color pressed, the eyedropper,
- * the system's color picker, its code typed, or a named color picked.
+ * the system's color picker, its code typed, a named color picked, or its
+ * transparency removed or flattened (see `Swatches` `flattenOnPress`).
  */
 export type ColorPickerChangeEventDetails = {
   event: Event;
   reason:
     | 'code'
     | 'eyedropper'
+    | 'flatten'
     | 'grid'
     | 'named'
     | 'opacity'
@@ -135,6 +137,13 @@ export type ColorPickerSwatchesProps = ComponentProps<'div'> & {
    * @default ten colors (see `defaultSavedColors`)
    */
   defaultSavedColors?: string[];
+  /**
+   * Whether pressing the color, while it's translucent, offers to make it
+   * opaque (an action sheet, “Flatten Color?”): its transparency removed,
+   * or the color flattened on white or on black.
+   * @default true
+   */
+  flattenOnPress?: boolean;
   /** Called with the saved colors, as one is added or deleted, and why. */
   onSavedColorsChange?: (
     colors: string[],

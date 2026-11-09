@@ -5,6 +5,7 @@ import {
   ReactNode,
   useContext,
 } from 'react';
+import { createPortal } from 'react-dom';
 
 import {
   Button,
@@ -83,6 +84,46 @@ export const usePush = (): ((key: string) => void) => useContext(PushContext);
 export const PopContext = createContext<() => void>(() => undefined);
 
 export const usePop = (): (() => void) => useContext(PopContext);
+
+/**
+ * The layout's root, beside the sidebar (regular; else `null`): for the
+ * stacks' swipe areas at the screen's edge (see `SinkSwipeAreas`).
+ */
+export const LayoutRootContext = createContext<HTMLElement | null>(null);
+
+/**
+ * A stack's swipe areas (in its `Navigation.Root`). Beside the sidebar
+ * (regular, see `LayoutRootContext`): two (inline styles: the library's
+ * layer wins over the kitchen sink's). One at the page's leading edge,
+ * past the sidebar (the column it's in starts beneath it). One at the
+ * screen's edge, over the sidebar (in the layout's root, above its
+ * floating column: a thumb's swipe from the edge; the sidebar's rows start
+ * further in), while the stack is shown (`isActive`: e.g. its tab's).
+ * Otherwise (a phone): the one, as it is.
+ */
+export const SinkSwipeAreas: FunctionComponent<{ isActive?: boolean }> = ({
+  isActive = true,
+}) => {
+  const layoutRoot = useContext(LayoutRootContext);
+
+  return (
+    <>
+      <Navigation.SwipeArea
+        style={
+          layoutRoot
+            ? { insetInlineStart: 'var(--uikit-layout-inset-start, 0px)' }
+            : undefined
+        }
+      />
+      {layoutRoot && isActive
+        ? createPortal(
+            <Navigation.SwipeArea style={{ zIndex: 4 }} />,
+            layoutRoot,
+          )
+        : null}
+    </>
+  );
+};
 
 /**
  * The kitchen sink's settings: its provider's overrides (around the app,

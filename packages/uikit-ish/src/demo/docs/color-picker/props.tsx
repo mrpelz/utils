@@ -72,6 +72,7 @@ export const getPropOptionsSwatches = (addLog: AddLog) => ({
     undefined,
     new MappedProp<string[]>(fourteenColors, '[14 colors: 2 pages]'),
   ] as const,
+  flattenOnPress: [undefined, true, false] as const,
   savedColors: [
     undefined,
     new MappedProp<string[]>(['#FF3B30', '#34C759'], '[red, green]'),

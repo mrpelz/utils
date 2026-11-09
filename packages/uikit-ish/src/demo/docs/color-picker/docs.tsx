@@ -6,6 +6,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -39,8 +40,9 @@ export const colorPickerRootRows: readonly PropRow[] = [
       ): <code>grid</code>, <code>spectrum</code>, <code>sliders</code>,{' '}
       <code>opacity</code>, <code>saved</code> (a saved color pressed),{' '}
       <code>eyedropper</code>, <code>system-colors</code> (the system’s color
-      picker), <code>code</code> (its hex code typed), or <code>named</code> (a
-      named color picked).
+      picker), <code>code</code> (its hex code typed), <code>named</code> (a
+      named color picked), or <code>flatten</code> (made opaque by the swatches’
+      color, see <code>flattenOnPress</code>).
     </>,
   ],
   [
@@ -315,6 +317,17 @@ export const colorPickerSwatchesRows: readonly PropRow[] = [
     'string[]',
     'ten colors',
     'The initial saved colors (uncontrolled).',
+  ],
+  [
+    'flattenOnPress',
+    'boolean',
+    'true',
+    <>
+      Whether pressing the color, while it’s translucent, offers to make it
+      opaque: an <a href={publicUrl('action-sheet')}>Action sheet</a>, “Flatten
+      Color?”, with Remove Transparency, Flatten on White and Flatten on Black
+      (the change’s reason: <code>flatten</code>).
+    </>,
   ],
   [
     'onSavedColorsChange',

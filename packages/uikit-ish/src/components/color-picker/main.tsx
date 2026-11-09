@@ -1,3 +1,4 @@
+import '../action-sheet/style.css';
 import '../button/style.css';
 import '../list/style.css';
 import '../menu/style.css';
@@ -31,6 +32,7 @@ import {
   useState,
 } from 'react';
 
+import { ActionSheet } from '../action-sheet/main.js';
 import { Button } from '../button/main.js';
 import { List } from '../list/main.js';
 import { Menu } from '../menu/main.js';
@@ -1030,16 +1032,77 @@ const SavedSwatch: FunctionComponent<{
   );
 };
 
+/** A color laid over an opaque one (`on`): its mix, opaque. */
+const flattened = (color: Rgba, on: number): Rgba => {
+  const mix = (channel: number) => channel * color.a + on * (1 - color.a);
+  return { a: 1, b: mix(color.b), g: mix(color.g), r: mix(color.r) };
+};
+
+/**
+ * The color, translucent, pressed (see `Swatches` `flattenOnPress`): an
+ * action sheet offering it opaque (its transparency removed, or flattened
+ * on white or on black).
+ */
+const FlattenCurrent: FunctionComponent = () => {
+  const { color, setColor } = useContext(PickerContext);
+  // (Pressed, its button: gone once the color's opaque.)
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const choose =
+    (next: Rgba) =>
+    (event: MouseEvent<HTMLElement>): void =>
+      setColor(next, { event, reason: 'flatten' });
+
+  return (
+    <ActionSheet.Root>
+      <ActionSheet.Trigger
+        render={
+          <button
+            ref={triggerRef}
+            aria-label="Flatten color"
+            className="uikit-color-picker-current"
+            data-color-picker-part="current"
+            type="button"
+          />
+        }
+      />
+      {/* Closed, focus back on its button while it's there; once the color
+         is opaque (its button gone), left as it is: else it went to what
+         had it before (e.g. the system colors' input, which, focused on
+         iOS, opens the system's picker). */}
+      <ActionSheet.Popup
+        finalFocus={() => triggerRef.current?.isConnected === true}
+      >
+        <ActionSheet.Header>
+          <ActionSheet.Title>Flatten Color?</ActionSheet.Title>
+        </ActionSheet.Header>
+        <ActionSheet.Actions>
+          <ActionSheet.Action onClick={choose({ ...color, a: 1 })}>
+            Remove Transparency
+          </ActionSheet.Action>
+          <ActionSheet.Action onClick={choose(flattened(color, 255))}>
+            Flatten on White
+          </ActionSheet.Action>
+          <ActionSheet.Action onClick={choose(flattened(color, 0))}>
+            Flatten on Black
+          </ActionSheet.Action>
+        </ActionSheet.Actions>
+      </ActionSheet.Popup>
+    </ActionSheet.Root>
+  );
+};
+
 /**
  * The color (82px, 18px corners; translucent, over black and white) beside
  * the saved colors (in pages, with a page control; adding the color to
- * them, deleting one by its menu).
+ * them, deleting one by its menu). Translucent, pressed: offering it opaque
+ * (`flattenOnPress`, see `FlattenCurrent`).
  */
 const Swatches = forwardRef<HTMLDivElement, ColorPickerSwatchesProps>(
   (
     {
       className,
       defaultSavedColors: initialSaved = defaultSavedColors,
+      flattenOnPress = true,
       onSavedColorsChange,
       savedColors: savedProp,
       ...props
@@ -1108,12 +1171,17 @@ const Swatches = forwardRef<HTMLDivElement, ColorPickerSwatchesProps>(
         className={cn('uikit-color-picker-swatches', className)}
         data-color-picker-part="swatches"
       >
-        {/* The color, over black and white (translucent). */}
-        <div
-          aria-hidden="true"
-          className="uikit-color-picker-current"
-          data-color-picker-part="current"
-        />
+        {/* The color, over black and white (translucent); then, pressed,
+           offering it opaque. */}
+        {flattenOnPress && color.a < 1 ? (
+          <FlattenCurrent />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="uikit-color-picker-current"
+            data-color-picker-part="current"
+          />
+        )}
         <div
           className="uikit-color-picker-saved-column"
           data-color-picker-part="saved-column"
@@ -1251,9 +1319,17 @@ const hasColorInputAlpha = () =>
 /**
  * A color input's `alpha` (its picker's opacity), as a property: too new for
  * the JSX types, and React renders no attribute it doesn't know as `true`.
+ * Its value given again after it (`value`): given before, without an alpha
+ * yet, the value's alpha was dropped.
  */
-const setAlpha = (input: HTMLInputElement | null, hasAlpha: boolean) => {
-  if (input) (input as HTMLInputElement & { alpha: boolean }).alpha = hasAlpha;
+const setAlpha = (
+  input: HTMLInputElement | null,
+  hasAlpha: boolean,
+  value: string,
+) => {
+  if (!input) return;
+  (input as HTMLInputElement & { alpha: boolean }).alpha = hasAlpha;
+  input.value = value;
 };
 
 /**
@@ -1274,7 +1350,17 @@ const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
   const [input, setInput] = useState<HTMLInputElement | null>(null);
   // (With the opacity, the input's alpha too, where it has one.)
   const hasAlpha = hasOpacity && hasColorInputAlpha();
-  useLayoutEffect(() => setAlpha(input, hasAlpha), [hasAlpha, input]);
+  // (The color, as it is: its picker opened from it.)
+  const value = formatColor(
+    hasAlpha ? color : { ...color, a: 1 },
+  ).toLowerCase();
+  // Its alpha set after it's rendered (a property, see `setAlpha`): its
+  // value, given before (an alpha's dropped then, the input without one),
+  // given again, with its alpha (else opaque until the color changes).
+  useLayoutEffect(
+    () => setAlpha(input, hasAlpha, value),
+    [hasAlpha, input, value],
+  );
   if (!hasColorInput()) return null;
 
   const open = () => input?.click();
@@ -1304,8 +1390,7 @@ const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
         disabled={props.disabled}
         tabIndex={-1}
         type="color"
-        // (The color, as it is: its picker opened from it.)
-        value={formatColor(hasAlpha ? color : { ...color, a: 1 }).toLowerCase()}
+        value={value}
         // (As it's picked, live; without its alpha, the opacity kept.)
         onChange={(event) => {
           // (Any CSS color, with an alpha: see color.ts.)

@@ -144,9 +144,48 @@ const createStore = (parent?: Store): Store => {
     },
     /** Its entries, its parent's too (see above). */
     entries: allEntries,
-    /** An anchor's element, its size measured into its entry (see above). */
+    /**
+     * An anchor's element, its size measured into its entry (see above):
+     * at once too (before it's added, see `useAnchorRegistration`), not
+     * only by the observer, whose first report comes after the first paint
+     * on iOS (its paddings a frame at 0: e.g. a new page's large title
+     * drawn under its bar, then moved down).
+     */
     measure: (element: Element, entry: Entry) => {
       observer ??= new ResizeObserver(onResize);
+      const isBlock =
+        entry.edge === 'block-start' || entry.edge === 'block-end';
+      const style = getComputedStyle(element);
+      // (Its layout box, as the observer's: not transformed, e.g. on a
+      // sliding page.)
+      const rect =
+        element instanceof HTMLElement
+          ? { height: element.offsetHeight, width: element.offsetWidth }
+          : element.getBoundingClientRect();
+      const outer = isBlock ? rect.height : rect.width;
+      const inset = (sides: readonly string[]) =>
+        sides.reduce(
+          (sum, side) =>
+            sum + (Number.parseFloat(style.getPropertyValue(side)) || 0),
+          0,
+        );
+      const box = inset(
+        isBlock
+          ? [
+              'padding-top',
+              'padding-bottom',
+              'border-top-width',
+              'border-bottom-width',
+            ]
+          : [
+              'padding-left',
+              'padding-right',
+              'border-left-width',
+              'border-right-width',
+            ],
+      );
+      entry.size = Math.round(Math.max(0, outer - box));
+      entry.outer = Math.round(outer);
       measured.set(element, entry);
       observer.observe(element);
       return () => {
@@ -340,8 +379,9 @@ export const useAnchorRegistration = (
       tint,
     };
     entryRef.current = entry;
-    const remove = store.add(entry);
+    // (Measured first: added with its size, see `measure`.)
     const unmeasure = store.measure(element, entry);
+    const remove = store.add(entry);
 
     return () => {
       unmeasure();

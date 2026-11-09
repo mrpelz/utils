@@ -1,9 +1,11 @@
 /* The kitchen sink (see main.tsx, shared.tsx). */
 @layer demo {
-  /* Beside the sidebar, in a browser (not an app of its own, see main.tsx):
-     its pages' bars as far from the window's top as the sidebar is (its top
-     inset and 8px), so their buttons line up with the sidebar's. */
-  .kitchen-sink-stack-browser {
+  /* Beside the sidebar, in a browser (not an app of its own, see main.tsx;
+     no status bar above it): its columns' top inset 8px, so neither the
+     sidebar nor the pages' bars (their tops level, see Sidebar) sit flush
+     with the window's edge. On its columns: the content layer's children
+     have theirs set by the library, whose layer wins. */
+  .kitchen-sink-browser-inset {
     --uikit-safe-area-inset-top: calc(env(safe-area-inset-top, 0px) + 8px);
   }
 

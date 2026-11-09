@@ -364,9 +364,13 @@ export const SidebarOverview: FunctionComponent = () => (
     <ul>
       <li>
         A glass panel (the menus’ glass), corners 20px, 10px from its column’s
-        sides, 8px below the top inset, 5px into the bottom one (as iPadOS 26’s,
-        measured); its content 11px from its top, 16px from its sides, scrolling
-        inside it (without a scrollbar).
+        sides. Its top is at the top inset, level with the top of a page’s back
+        button (as iPadOS 26’s, measured). At a regular width its bottom is 8px
+        from the screen’s edge, level with an{' '}
+        <a href={publicUrl('island')}>Island</a>’s, and its sides are 8px in as
+        well; otherwise 5px into the bottom inset. Its content sits 11px from
+        its top and 16px from its sides, scrolling inside it (without a
+        scrollbar).
       </li>
       <li>
         Its toolbar: buttons at its two ends, 54px from the panel’s top to what

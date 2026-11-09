@@ -31,10 +31,12 @@ import { contentPages } from './content.js';
 import { foundationsPages } from './foundations.js';
 import { presentationPages } from './presentation.js';
 import {
+  LayoutRootContext,
   PopContext,
   PushContext,
   type SinkPages,
   SinkSettingsContext,
+  SinkSwipeAreas,
 } from './shared.js';
 import { statusPages } from './status.js';
 import { structurePages } from './structure.js';
@@ -280,6 +282,8 @@ const App: FunctionComponent = () => {
   );
   // The open component's stack, bottom to top (compact, empty: the index).
   const [stack, setStack] = useState<readonly string[]>([]);
+  // (Regular: its layout's root, for the swipe area at the screen's edge.)
+  const [layoutRoot, setLayoutRoot] = useState<HTMLDivElement | null>(null);
   // (Regular: a component always open, the first at first.)
   const shown = isCompact || stack.length > 0 ? stack : [firstId];
 
@@ -287,51 +291,50 @@ const App: FunctionComponent = () => {
   const push = (key: string) => setStack([...shown, key]);
   const pop = () => setStack(shown.slice(0, -1));
 
+  // In a browser (not an app of its own), its columns' top inset (see
+  // style.css).
+  const browserInset = isStandalone()
+    ? undefined
+    : 'kitchen-sink-browser-inset';
+
   // (Compact: the index the stack's root.)
   const keys = isCompact ? ['index', ...shown] : shown;
   const stackView = (
-    <PushContext.Provider value={push}>
-      <PopContext.Provider value={pop}>
-        <Navigation.Root
-          className={
-            isCompact || isStandalone()
-              ? undefined
-              : 'kitchen-sink-stack-browser'
-          }
-          onBack={pop}
-        >
-          {/* (Not while a page with a stack of its own is on top: its own
-            swipe area, beneath this one, takes the swipes.) */}
-          {pages[keys.at(-1) ?? '']?.hasOwnStack ? null : (
-            <Navigation.SwipeArea />
-          )}
-          <Navigation.Stack>
-            {/* Each page a navigation page: instant ones (see `isInstant`)
+    <LayoutRootContext.Provider value={isCompact ? null : layoutRoot}>
+      <PushContext.Provider value={push}>
+        <PopContext.Provider value={pop}>
+          <Navigation.Root onBack={pop}>
+            {/* (Not while a page with a stack of its own is on top: its own
+            swipe areas, beneath these, take the swipes.) */}
+            {pages[keys.at(-1) ?? '']?.hasOwnStack ? null : <SinkSwipeAreas />}
+            <Navigation.Stack>
+              {/* Each page a navigation page: instant ones (see `isInstant`)
               shown at once, not slid in or out. */}
-            {keys.map((key, index) => (
-              <Navigation.Page
-                key={key}
-                instant={pages[key]?.isInstant}
-              >
-                {key === 'index' ? (
-                  <StackPage
-                    back={undefined}
-                    pageKey={key}
-                  >
-                    <Index onOpen={open} />
-                  </StackPage>
-                ) : (
-                  <StackPage
-                    back={titleOf(keys[index - 1])}
-                    pageKey={key}
-                  />
-                )}
-              </Navigation.Page>
-            ))}
-          </Navigation.Stack>
-        </Navigation.Root>
-      </PopContext.Provider>
-    </PushContext.Provider>
+              {keys.map((key, index) => (
+                <Navigation.Page
+                  key={key}
+                  instant={pages[key]?.isInstant}
+                >
+                  {key === 'index' ? (
+                    <StackPage
+                      back={undefined}
+                      pageKey={key}
+                    >
+                      <Index onOpen={open} />
+                    </StackPage>
+                  ) : (
+                    <StackPage
+                      back={titleOf(keys[index - 1])}
+                      pageKey={key}
+                    />
+                  )}
+                </Navigation.Page>
+              ))}
+            </Navigation.Stack>
+          </Navigation.Root>
+        </PopContext.Provider>
+      </PushContext.Provider>
+    </LayoutRootContext.Provider>
   );
 
   return (
@@ -342,10 +345,11 @@ const App: FunctionComponent = () => {
             {isCompact ? (
               stackView
             ) : (
-              <Layout.Root>
+              <Layout.Root ref={setLayoutRoot}>
                 <Layout.Column
                   floating
                   aria-label="Components"
+                  className={browserInset}
                   defaultSize={300}
                 >
                   <Sections
@@ -353,7 +357,12 @@ const App: FunctionComponent = () => {
                     onSelect={open}
                   />
                 </Layout.Column>
-                <Layout.Column clearFloating>{stackView}</Layout.Column>
+                <Layout.Column
+                  clearFloating
+                  className={browserInset}
+                >
+                  {stackView}
+                </Layout.Column>
               </Layout.Root>
             )}
           </Viewport.Content>

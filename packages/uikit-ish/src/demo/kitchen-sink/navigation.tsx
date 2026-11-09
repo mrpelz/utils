@@ -17,7 +17,7 @@ import {
   type SectionValue,
 } from '../docs/navigation/content.js';
 import { sfChevronBackward } from '../tooling/icons.js';
-import { usePop } from './shared.js';
+import { SinkSwipeAreas, usePop } from './shared.js';
 
 // Navigation's apps (pages of their own, each its own stack, see
 // structure.tsx): going back quickly, popping to the root from code (a
@@ -127,7 +127,7 @@ export const QuickBackApp: FunctionComponent = () => {
 
   return (
     <Navigation.Root onBack={() => setKeys((current) => current.slice(0, -1))}>
-      <Navigation.SwipeArea />
+      <SinkSwipeAreas />
       <Navigation.Stack>
         {keys.map((key, index) => (
           <Level
@@ -176,7 +176,7 @@ export const FromCodeApp: FunctionComponent = () => {
 
   return (
     <Navigation.Root onBack={() => setKeys((current) => current.slice(0, -1))}>
-      <Navigation.SwipeArea />
+      <SinkSwipeAreas />
       <Navigation.Stack>
         {keys.map((key, index) => (
           <Level
@@ -266,7 +266,7 @@ export const PerTabApp: FunctionComponent = () => {
             />
           }
         >
-          <Navigation.SwipeArea />
+          <SinkSwipeAreas isActive={section === tab} />
           <Navigation.Stack>
             {stacks[section].map((key, index) => (
               <Level

@@ -1286,6 +1286,13 @@ export const ColorPickerParts: FunctionComponent = () => (
         right click, long press) deletes it.
       </li>
       <li>
+        While the color is translucent, pressing it opens an{' '}
+        <a href={publicUrl('action-sheet')}>Action sheet</a>, “Flatten Color?”:
+        Remove Transparency (opacity back to 100%), Flatten on White or Flatten
+        on Black (the color as it shows over white or black, opaque). Off with{' '}
+        <code>flattenOnPress={'{false}'}</code>.
+      </li>
+      <li>
         Renders a <code>div</code>.
       </li>
     </ul>

@@ -56,15 +56,23 @@
     color: var(--color-ui-label);
 
     /* As iPadOS 26's (Settings', measured): 10px from the screen's sides,
-       8px below the top inset (a tablet's status bar), 5px into the bottom
-       one (15px above the edge on a 20px home indicator inset), 10px
-       from the bottom at least. */
-    margin-block: calc(var(--uikit-safe-area-inset-top, 0px) + 8px)
+       its top at the top inset (a tablet's status bar), as a page's bar's
+       buttons are (a back button's top). Its bottom 5px into the bottom
+       inset (15px above the edge on a 20px home indicator inset), 10px from
+       the bottom at least; regular (beside the pages' bars and islands),
+       8px from the screen's bottom edge, as an island's (the home indicator
+       over it), and as far from its sides. */
+    margin-block: var(--uikit-safe-area-inset-top, 0)
       max(
         var(--uikit-sidebar-margin, 10px),
         var(--uikit-safe-area-inset-bottom, 0px) - 5px
       );
     overscroll-behavior: contain;
+
+    &[data-regular] {
+      margin-block-end: 8px;
+      margin-inline: 8px;
+    }
 
     & [data-text-field-part='frame'] {
       color: var(--uikit-glass-content-secondary);

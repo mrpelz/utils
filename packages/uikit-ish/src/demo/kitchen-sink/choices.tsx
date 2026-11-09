@@ -7,6 +7,8 @@ import {
   CheckboxGroup,
   ColorPicker,
   DatePicker,
+  type DatePickerOpen,
+  type DatePickerProps,
   Field,
   Fieldset,
   Form,
@@ -1012,15 +1014,84 @@ const listPage =
 
 /**
  * An inline calendar on a page of its own (one per page: each renders its
- * month's days, and its adjacent months', which is heavy on iOS); a caption
- * below it, saying what it shows.
+ * month's days, and its adjacent months', which is heavy on iOS), across a
+ * row (`List.Span`); a caption below it, saying what it shows.
  */
 const calendarPage =
   (calendar: ReactNode, caption?: string): FunctionComponent =>
   () => (
     <List.Root>
       <List.Section>
-        <List.Block strong>{calendar}</List.Block>
+        <List.Group>
+          <List.Item>
+            <List.Span>{calendar}</List.Span>
+          </List.Item>
+        </List.Group>
+        {caption === undefined ? null : <List.Footer>{caption}</List.Footer>}
+      </List.Section>
+    </List.Root>
+  );
+
+/** What a row's picker is given (see `PickerRow`). */
+type PickerRowProps = Pick<
+  DatePickerProps,
+  'handle' | 'onOpenChange' | 'open' | 'popoverAlign'
+>;
+
+/**
+ * A picker in a row (titled `title`), as a form's (see the Form page's
+ * birthday): on a phone, expanding in place below its row, open from the
+ * start and kept open (its button pressed again doesn't close it; its time
+ * still opens instead); on a tablet, in a popover. (`picker`: the picker,
+ * given what it needs here.)
+ */
+const PickerRow: FunctionComponent<{
+  picker: (props: PickerRowProps) => ReactNode;
+  title: string;
+}> = ({ picker, title }) => {
+  const isCompact = useSizeClass() === 'compact';
+  const handle = useCreateDatePickerHandle();
+  const [open, setOpen] = useState<DatePickerOpen>('date');
+
+  return (
+    <List.Group>
+      <List.Item>
+        <List.Content>
+          <List.Title>{title}</List.Title>
+        </List.Content>
+        <List.Trailing>
+          {picker(
+            isCompact
+              ? {
+                  handle,
+                  open,
+                  onOpenChange: (next: DatePickerOpen | null) => {
+                    if (next !== null) setOpen(next);
+                  },
+                }
+              : { popoverAlign: 'end' },
+          )}
+        </List.Trailing>
+      </List.Item>
+      {isCompact ? <DatePicker.Expandable handle={handle} /> : null}
+    </List.Group>
+  );
+};
+
+/** A picker's row on a page of its own (see `PickerRow`); a caption below. */
+const pickerRowPage =
+  (
+    title: string,
+    picker: (props: PickerRowProps) => ReactNode,
+    caption?: string,
+  ): FunctionComponent =>
+  () => (
+    <List.Root>
+      <List.Section>
+        <PickerRow
+          picker={picker}
+          title={title}
+        />
         {caption === undefined ? null : <List.Footer>{caption}</List.Footer>}
       </List.Section>
     </List.Root>
@@ -1179,12 +1250,15 @@ const pickerPages = [
   [
     'date-picker/range',
     'A Range',
-    calendarPage(
-      <DatePicker.Root
-        range
-        defaultValue={{ end: april(22), start: example }}
-        pickerStyle="inline"
-      />,
+    pickerRowPage(
+      'Dates',
+      (row: PickerRowProps) => (
+        <DatePicker.Root
+          {...row}
+          range
+          defaultValue={{ end: april(22), start: example }}
+        />
+      ),
       'Press a start, then an end; or drag across the days.',
     ),
   ],
@@ -1194,70 +1268,84 @@ const rulePages = [
   [
     'date-picker/bounds',
     'Within Bounds',
-    calendarPage(
-      <DatePicker.Root
-        defaultValue={example}
-        max={april(25)}
-        min={april(10)}
-        pickerStyle="inline"
-      />,
+    pickerRowPage(
+      'Date',
+      (row: PickerRowProps) => (
+        <DatePicker.Root
+          {...row}
+          defaultValue={example}
+          max={april(25)}
+          min={april(10)}
+        />
+      ),
       'Only April 10 to 25 can be picked.',
     ),
   ],
   [
     'date-picker/disabled-days',
     'Disabled Days',
-    calendarPage(
-      <DatePicker.Root
-        defaultValue={example}
-        pickerStyle="inline"
-        isDateDisabled={(date: Date) =>
-          date.getDay() === 0 ||
-          date.getDay() === 6 ||
-          (date.getMonth() === 3 && booked.has(date.getDate()))
-        }
-      />,
+    pickerRowPage(
+      'Date',
+      (row: PickerRowProps) => (
+        <DatePicker.Root
+          {...row}
+          defaultValue={example}
+          isDateDisabled={(date: Date) =>
+            date.getDay() === 0 ||
+            date.getDay() === 6 ||
+            (date.getMonth() === 3 && booked.has(date.getDate()))
+          }
+        />
+      ),
       'Weekends and booked days (April 3, 4, 11, 22 to 24) can’t be picked.',
     ),
   ],
   [
     'date-picker/week',
     'Monday First, Adjacent Months',
-    calendarPage(
-      <DatePicker.Root
-        showAdjacentMonths
-        defaultValue={example}
-        firstDayOfWeek={1}
-        pickerStyle="inline"
-      />,
+    pickerRowPage(
+      'Date',
+      (row: PickerRowProps) => (
+        <DatePicker.Root
+          {...row}
+          showAdjacentMonths
+          defaultValue={example}
+          firstDayOfWeek={1}
+        />
+      ),
       'The adjacent months’ days, grayed out, show their month when pressed.',
     ),
   ],
   [
     'date-picker/range-rules',
     'A Range with Rules',
-    calendarPage(
-      <DatePicker.Root
-        range
-        pickerStyle="inline"
-        footer={({ value }: CalendarFooter) => {
-          const isMissing =
-            value !== null && !(value instanceof Date) && value.end === null;
-          return (
-            <DatePicker.CalendarMessage variant={isMissing ? 'error' : 'info'}>
-              {isMissing
-                ? 'Select a stay spanning at least two nights.'
-                : 'Stay two to seven nights.'}
-            </DatePicker.CalendarMessage>
-          );
-        }}
-        isRangeDisabled={(start: Date, end: Date) => {
-          const nights = Math.round(
-            (end.getTime() - start.getTime()) / dayLength,
-          );
-          return nights < 2 || nights > 7;
-        }}
-      />,
+    pickerRowPage(
+      'Dates',
+      (row: PickerRowProps) => (
+        <DatePicker.Root
+          {...row}
+          range
+          footer={({ value }: CalendarFooter) => {
+            const isMissing =
+              value !== null && !(value instanceof Date) && value.end === null;
+            return (
+              <DatePicker.CalendarMessage
+                variant={isMissing ? 'error' : 'info'}
+              >
+                {isMissing
+                  ? 'Select a stay spanning at least two nights.'
+                  : 'Stay two to seven nights.'}
+              </DatePicker.CalendarMessage>
+            );
+          }}
+          isRangeDisabled={(start: Date, end: Date) => {
+            const nights = Math.round(
+              (end.getTime() - start.getTime()) / dayLength,
+            );
+            return nights < 2 || nights > 7;
+          }}
+        />
+      ),
       'Once a start is picked, only ends two to seven nights away can be.',
     ),
   ],
@@ -1267,118 +1355,136 @@ const markPages = [
   [
     'date-picker/dots',
     'Dots',
-    calendarPage(
-      <DatePicker.Root
-        defaultValue={example}
-        pickerStyle="inline"
-        highlighted={(date: Date) =>
-          date.getMonth() === 3 && date.getDate() % 3 === 0
-        }
-      />,
+    pickerRowPage(
+      'Date',
+      (row: PickerRowProps) => (
+        <DatePicker.Root
+          {...row}
+          defaultValue={example}
+          highlighted={(date: Date) =>
+            date.getMonth() === 3 && date.getDate() % 3 === 0
+          }
+        />
+      ),
       'Every third day has an event: a dot below it.',
     ),
   ],
   [
     'date-picker/several-dots',
     'Several Dots, Tinted',
-    calendarPage(
-      <DatePicker.Root
-        defaultValue={example}
-        highlighted={events}
-        pickerStyle="inline"
-      />,
+    pickerRowPage(
+      'Date',
+      (row: PickerRowProps) => (
+        <DatePicker.Root
+          {...row}
+          defaultValue={example}
+          highlighted={events}
+        />
+      ),
       'Days with several events (each its own color): dots side by side.',
     ),
   ],
   [
     'date-picker/circles',
     'Circles',
-    calendarPage(
-      <DatePicker.Root
-        defaultValue={example}
-        pickerStyle="inline"
-        highlighted={(date: Date) => {
-          if (date.getMonth() !== 3) return undefined;
-          if (booked.has(date.getDate())) {
-            return { style: 'circle', tint: 'var(--color-ui-system-red)' };
-          }
-          return date.getDate() % 4 === 0 ? { style: 'circle' } : undefined;
-        }}
-      />,
+    pickerRowPage(
+      'Date',
+      (row: PickerRowProps) => (
+        <DatePicker.Root
+          {...row}
+          defaultValue={example}
+          highlighted={(date: Date) => {
+            if (date.getMonth() !== 3) return undefined;
+            if (booked.has(date.getDate())) {
+              return { style: 'circle', tint: 'var(--color-ui-system-red)' };
+            }
+            return date.getDate() % 4 === 0 ? { style: 'circle' } : undefined;
+          }}
+        />
+      ),
       'Circles behind days: the tint’s (every fourth day), or red (booked).',
     ),
   ],
   [
     'date-picker/text',
     'Tinted Dates',
-    calendarPage(
-      <DatePicker.Root
-        defaultValue={example}
-        pickerStyle="inline"
-        highlighted={(date: Date) =>
-          date.getMonth() === 3 && [1, 14, 21].includes(date.getDate())
-            ? [
-                { style: 'text', tint: 'var(--color-ui-system-green)' },
-                { tint: 'var(--color-ui-system-green)' },
-              ]
-            : undefined
-        }
-      />,
+    pickerRowPage(
+      'Date',
+      (row: PickerRowProps) => (
+        <DatePicker.Root
+          {...row}
+          defaultValue={example}
+          highlighted={(date: Date) =>
+            date.getMonth() === 3 && [1, 14, 21].includes(date.getDate())
+              ? [
+                  { style: 'text', tint: 'var(--color-ui-system-green)' },
+                  { tint: 'var(--color-ui-system-green)' },
+                ]
+              : undefined
+          }
+        />
+      ),
       'Paydays (April 1, 14 and 21): their dates in green, a green dot too.',
     ),
   ],
   [
     'date-picker/weekend',
     'Weekend Days',
-    calendarPage(
-      <DatePicker.Root
-        defaultValue={example}
-        highlightedWeekdays={[0, 6]}
-        pickerStyle="inline"
-      />,
+    pickerRowPage(
+      'Date',
+      (row: PickerRowProps) => (
+        <DatePicker.Root
+          {...row}
+          defaultValue={example}
+          highlightedWeekdays={[0, 6]}
+        />
+      ),
       'Saturdays and Sundays in the secondary label color.',
     ),
   ],
   [
     'date-picker/footer',
     'A Footer of Shortcuts',
-    calendarPage(
-      <DatePicker.Root
-        defaultValue={example}
-        mode="dateAndTime"
-        pickerStyle="inline"
-        footer={(calendar: CalendarFooter) => (
-          <>
-            <DatePicker.CalendarTimeRow calendar={calendar} />
-            <DatePicker.CalendarRow>
-              <span aria-hidden="true">Jump to</span>
-              <span className="kitchen-sink-showcase">
-                <DatePicker.CalendarButton
-                  disabled={calendar.disabled}
-                  shape={calendar.buttonShape}
-                  onClick={() => calendar.select(april(25))}
-                >
-                  April 25
-                </DatePicker.CalendarButton>
-                <DatePicker.CalendarButton
-                  disabled={calendar.disabled}
-                  shape={calendar.buttonShape}
-                  onClick={() => calendar.select(new Date(), false)}
-                >
-                  Today
-                </DatePicker.CalendarButton>
-                <DatePicker.CalendarButton
-                  disabled={calendar.disabled}
-                  shape={calendar.buttonShape}
-                  onClick={() => calendar.select(new Date(), true)}
-                >
-                  Now
-                </DatePicker.CalendarButton>
-              </span>
-            </DatePicker.CalendarRow>
-          </>
-        )}
-      />,
+    pickerRowPage(
+      'Date',
+      (row: PickerRowProps) => (
+        <DatePicker.Root
+          {...row}
+          defaultValue={example}
+          mode="dateAndTime"
+          footer={(calendar: CalendarFooter) => (
+            <>
+              <DatePicker.CalendarTimeRow calendar={calendar} />
+              <DatePicker.CalendarRow>
+                <span aria-hidden="true">Jump to</span>
+                <span className="kitchen-sink-showcase">
+                  <DatePicker.CalendarButton
+                    disabled={calendar.disabled}
+                    shape={calendar.buttonShape}
+                    onClick={() => calendar.select(april(25))}
+                  >
+                    April 25
+                  </DatePicker.CalendarButton>
+                  <DatePicker.CalendarButton
+                    disabled={calendar.disabled}
+                    shape={calendar.buttonShape}
+                    onClick={() => calendar.select(new Date(), false)}
+                  >
+                    Today
+                  </DatePicker.CalendarButton>
+                  <DatePicker.CalendarButton
+                    disabled={calendar.disabled}
+                    shape={calendar.buttonShape}
+                    onClick={() => calendar.select(new Date(), true)}
+                  >
+                    Now
+                  </DatePicker.CalendarButton>
+                </span>
+              </DatePicker.CalendarRow>
+            </>
+          )}
+        />
+      ),
       'Its time row, then buttons selecting a date (or now, its time too).',
     ),
   ],

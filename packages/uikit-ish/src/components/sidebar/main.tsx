@@ -4,6 +4,7 @@ import './style.css';
 import { forwardRef } from 'react';
 
 import { cn } from '../utils/main.js';
+import { useSizeClass } from '../viewport/main.js';
 import type {
   SidebarRootProps,
   SidebarToolbarGroupProps,
@@ -28,10 +29,12 @@ export type {
 //
 // Also:
 // - The glass is the menus' (`glassMedium`: a fill and a soft glow, without
-//   blend modes), 10px from the column's sides, 8px below the top inset,
-//   5px into the bottom one (10px from the edge at least; iPadOS 26's,
-//   measured); in dark mode, a light rim and a glow outside it (the
-//   glass' inner shadow would look inset).
+//   blend modes), 10px from the column's sides; its top at the top inset,
+//   as a page's bar's buttons are (a back button's top: iPadOS 26's,
+//   measured); its bottom 5px into the bottom inset (10px from the edge at
+//   least), in a regular width 8px from the screen's bottom and from its
+//   sides, as an `Island`'s (the home indicator over it); in dark mode, a light rim and a glow outside it (the glass' inner
+//   shadow would look inset).
 
 /**
  * A sidebar: a floating glass panel, its
@@ -39,17 +42,23 @@ export type {
  * scrolling inside it; in a `Layout` column (see there).
  */
 const Root = forwardRef<HTMLElement, SidebarRootProps>(
-  ({ className, ...props }, ref) => (
-    <nav
-      ref={ref}
-      data-sidebar-part="root"
-      {...props}
-      className={cn(
-        'uikit-sidebar-root uikit-glass-medium uikit-glass-panel',
-        className,
-      )}
-    />
-  ),
+  ({ className, ...props }, ref) => {
+    // (Regular: beside the pages' anchored bars and islands, its bottom
+    // theirs, see style.css.)
+    const isRegular = useSizeClass() === 'regular';
+    return (
+      <nav
+        ref={ref}
+        data-regular={isRegular ? '' : undefined}
+        data-sidebar-part="root"
+        {...props}
+        className={cn(
+          'uikit-sidebar-root uikit-glass-medium uikit-glass-panel',
+          className,
+        )}
+      />
+    );
+  },
 );
 
 // Its toolbar: its parts at its ends, their content at the sidebar's (16px
