@@ -1830,7 +1830,15 @@ const Root: FunctionComponent<DatePickerProps> = (props) => {
   const { handle } = props;
   useLayoutEffect(() => {
     handle?.publish({
-      calendar: hasDate ? <CalendarPanel {...calendarProps} /> : undefined,
+      // (Its footer the app's, if any: not the default one, its time
+      // expanding in a row of its own, see `Expandable`; a time row in the
+      // app's renders nothing here.)
+      calendar: hasDate ? (
+        <CalendarPanel
+          {...calendarProps}
+          footer={props.footer}
+        />
+      ) : undefined,
       open,
       time: hasTime ? (
         <TimeRoll

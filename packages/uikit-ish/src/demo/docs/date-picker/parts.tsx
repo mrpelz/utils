@@ -546,6 +546,14 @@ export const DatePickerParts: FunctionComponent = () => (
       <li>
         Renders the rows only (a date: the calendar’s; a time: the wheel’s).
       </li>
+      <li>
+        The calendar keeps the picker’s <code>footer</code> (e.g. shortcuts, a{' '}
+        <PartLink
+          component="date-picker"
+          part="DatePicker.CalendarMessage"
+        />
+        ), but not the default time row: the time expands in its own row.
+      </li>
       <li>Here: an event’s start, the row below it pushed down.</li>
     </ul>
     <ExpandablePart />

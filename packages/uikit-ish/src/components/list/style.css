@@ -469,7 +469,7 @@
     font-variation-settings: 'wght' var(--font-ui-subheadline-weight);
     font-weight: round(down, var(--font-ui-subheadline-weight), 100);
     letter-spacing: var(--font-ui-subheadline-tracking);
-    -webkit-line-clamp: attr(lines type(<integer>), 2);
+    -webkit-line-clamp: var(--uikit-list-text-lines, 2);
     line-height: var(--font-ui-subheadline-line-height);
     overflow-wrap: break-word;
     pointer-events: none;

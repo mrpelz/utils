@@ -208,7 +208,11 @@ const ListContent: FunctionComponent = () => (
             <List.Subtitle>Subtitle</List.Subtitle>
             <List.Text>
               Text below the title and subtitle, at most two lines by default:
-              longer text is cut off with an ellipsis, as this is.
+              longer text is cut off with an ellipsis at the end of the second
+              line, as this is. It goes on long enough to be cut off on a
+              tablet’s wide rows too, where two lines hold a good deal more than
+              on a phone, so the ellipsis shows whichever device it’s read on,
+              and nothing of this last sentence is left to see.
             </List.Text>
           </List.Content>
         </List.Item>
@@ -216,7 +220,9 @@ const ListContent: FunctionComponent = () => (
           <List.Content>
             <List.Title>One line of text</List.Title>
             <List.Text lines={1}>
-              Text at most one line long, cut off with an ellipsis.
+              Text at most one line long: whatever doesn’t fit on it, even on a
+              tablet’s wide rows, is cut off with an ellipsis at the end of the
+              line instead of wrapping onto a second one.
             </List.Text>
           </List.Content>
         </List.Item>

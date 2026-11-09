@@ -2317,12 +2317,21 @@ const Subtitle = forwardRef<HTMLElement, PartProps<'span'>>(
  * Mail; Framework7 `.media-list` `.item-text`).
  */
 const Text = forwardRef<HTMLElement, ListTextProps>(
-  ({ className, render, ...props }, ref) =>
+  ({ className, lines, render, style, ...props }, ref) =>
     useRender({
       defaultTagName: 'span',
       props: {
         'data-list-part': 'text',
         className: cn('uikit-list-text', className),
+        // Its lines, as a custom property (see style.css: a typed `attr()`
+        // would do without, but Safari has none).
+        style: withStyle(
+          {
+            '--uikit-list-text-lines':
+              lines === undefined ? undefined : String(lines),
+          },
+          style,
+        ),
         ...props,
       },
       ref,
