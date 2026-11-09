@@ -88,7 +88,10 @@ const manifestCode = `{
 
 /** `/getting-started`: using the library in an app of your own. */
 export const GettingStartedPage: FunctionComponent = () => (
-  <PageShell title="Getting Started">
+  <PageShell
+    path="getting-started"
+    title="Getting Started"
+  >
     <p className="demo-lead">
       How to use the library in an app of your own: installing it, choosing
       React or Preact, the few things it needs once at the top, how an app’s
@@ -393,7 +396,8 @@ export const GettingStartedPage: FunctionComponent = () => (
       </li>
       <li>
         On iOS 27, a translucent status bar blurs your top bar: add the inline
-        script from <a href={publicUrl('ios27#in-your-head')}>iOS 27</a> to your
+        script from{' '}
+        <a href={publicUrl('ios-quirks#in-your-head')}>iOS Quirks</a> to your
         head, right after the status bar’s meta tag. It starts the app below the
         status bar there, and the library’s top bars follow.
       </li>

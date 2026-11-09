@@ -119,15 +119,16 @@ const edgeEffectRow: PropRow = [
       part="useViewportEdgeElement"
     />
     ). On iOS 27 (<code>isIos27</code>: the app’s head starting it below the
-    status bar, see <a href={publicUrl('ios27')}>iOS 27</a>), unset at the
-    screen’s top (not in a sheet, popover or island, nor a portal container):{' '}
-    <code>hard</code>, beneath the system’s status bar, its backing, untinted,
-    the status bar’s color (the page’s as the app loaded, read once by iOS),
-    solid at rest too once the page’s is another. How much of the content shows
-    through it: <code>soft</code>, solid under half of the effect, fading out
-    past it; with a veil (<code>--uikit-viewport-edge-veil</code>, 0 to 1: the
-    heavier, the less; set on the scroller or above), solid under that share of
-    the anchor. A sheet’s is <code>0.75</code>.
+    status bar, see{' '}
+    <a href={publicUrl('ios-quirks#the-status-bar-blur')}>iOS Quirks</a>), unset
+    at the screen’s top (not in a sheet, popover or island, nor a portal
+    container): <code>hard</code>, beneath the system’s status bar, its backing,
+    untinted, the status bar’s color (the page’s as the app loaded, read once by
+    iOS), solid at rest too once the page’s is another. How much of the content
+    shows through it: <code>soft</code>, solid under half of the effect, fading
+    out past it; with a veil (<code>--uikit-viewport-edge-veil</code>, 0 to 1:
+    the heavier, the less; set on the scroller or above), solid under that share
+    of the anchor. A sheet’s is <code>0.75</code>.
   </>,
 ];
 

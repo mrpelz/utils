@@ -617,12 +617,22 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
       }
       const shown = new Set<string | undefined>();
       const marked: HTMLElement[] = [];
+      const paths = new Set<HTMLElement>();
       let uppermost: string | undefined;
       for (const frame of frames) {
         for (const item of itemsOf(frame)) {
           const id = item.dataset.navigationPersistent;
           if ((counts.get(id) ?? 0) < 2) continue;
           item.dataset.navigationShared = '';
+          // Its way from its frame, the moving values let through (see
+          // style.css: kept off the rest of the page).
+          for (
+            let node = item.parentElement;
+            node && node !== frame;
+            node = node.parentElement
+          ) {
+            paths.add(node);
+          }
           if (shown.has(id)) {
             item.dataset.navigationSharedHidden = '';
           } else {
@@ -632,12 +642,14 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
           marked.push(item);
         }
       }
+      for (const node of paths) node.dataset.navigationPath = '';
       setPressable(uppermost);
       return () => {
         for (const item of marked) {
           delete item.dataset.navigationShared;
           delete item.dataset.navigationSharedHidden;
         }
+        for (const node of paths) delete node.dataset.navigationPath;
       };
     }, [ref, transition]);
 
@@ -741,13 +753,15 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
             // applies (no transforms, which would isolate glass' blending).
             <Frame
               key={frameKey(key)}
-              aria-hidden={isInert ? true : undefined}
               className="uikit-navigation-frame"
               data-navigation-departing={departingIndex === -1 ? undefined : ''}
               data-navigation-key={key}
               data-navigation-lingering={isLingering ? '' : undefined}
               data-navigation-part="page"
               data-navigation-role={role}
+              // (Hidden from assistive technology by it, too: not also
+              // `aria-hidden`, which, set as a press on it moves on (its
+              // button still focused), browsers refuse and warn about.)
               inert={isInert}
               style={
                 {

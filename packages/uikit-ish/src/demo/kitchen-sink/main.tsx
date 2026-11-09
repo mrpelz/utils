@@ -21,7 +21,8 @@ import {
   Viewport,
 } from '../../components/index.js';
 import { catalog, categories, type Category } from '../docs/catalog.js';
-import { sfChevronBackward } from '../tooling/icons.js';
+import { sfArrowBackward, sfChevronBackward } from '../tooling/icons.js';
+import { publicUrl } from '../tooling/public-url.js';
 import { ClientOnly } from '../tooling/shared/client-only.js';
 import { useRawDocument } from '../tooling/shared/raw-document.js';
 import { actionsPages } from './actions.js';
@@ -74,11 +75,52 @@ const sections = (Object.keys(categories) as Category[])
 
 const firstId = sections[0]?.[1][0]?.id ?? '';
 
+/**
+ * Whether it runs as an app of its own (added to the Home Screen, or
+ * installed): no documentation around it to go back to.
+ */
+const isStandalone = () =>
+  matchMedia('(display-mode: standalone)').matches ||
+  (navigator as { standalone?: boolean }).standalone === true;
+
+/**
+ * Back to the documentation's start page: the whole window's (the kitchen
+ * sink may be shown in a frame, e.g. a device's on the docs' pages). Not
+ * as an app of its own (see `isStandalone`).
+ */
+const DocsSection: FunctionComponent = () =>
+  isStandalone() ? null : (
+    <List.Section>
+      <List.Group>
+        <List.Item>
+          <List.Leading>
+            <List.Image variant="symbol">
+              <Symbol icon={sfArrowBackward} />
+            </List.Image>
+          </List.Leading>
+          <List.Content>
+            <List.Title
+              render={
+                <a
+                  href={publicUrl('')}
+                  target="_top"
+                />
+              }
+            >
+              Back to Documentation
+            </List.Title>
+          </List.Content>
+        </List.Item>
+      </List.Group>
+    </List.Section>
+  );
+
 /** The index (compact: the stack's root page), drilling into a component. */
 const Index: FunctionComponent<{ onOpen: (id: string) => void }> = ({
   onOpen,
 }) => (
   <List.Root>
+    <DocsSection />
     {sections.map(([category, entries]) => (
       <List.Section key={category}>
         <List.Header>
@@ -113,6 +155,7 @@ const Sections: FunctionComponent<{
 }> = ({ onSelect, selected }) => (
   <Sidebar.Root>
     <List.Root listStyle="sidebar">
+      <DocsSection />
       {sections.map(([category, entries]) => (
         <Collapsible.Root
           key={category}
@@ -249,7 +292,14 @@ const App: FunctionComponent = () => {
   const stackView = (
     <PushContext.Provider value={push}>
       <PopContext.Provider value={pop}>
-        <Navigation.Root onBack={pop}>
+        <Navigation.Root
+          className={
+            isCompact || isStandalone()
+              ? undefined
+              : 'kitchen-sink-stack-browser'
+          }
+          onBack={pop}
+        >
           {/* (Not while a page with a stack of its own is on top: its own
             swipe area, beneath this one, takes the swipes.) */}
           {pages[keys.at(-1) ?? '']?.hasOwnStack ? null : (

@@ -1112,7 +1112,7 @@ export const tests = [
         offsets: ['', '', '', '', ''],
         titles: ['Venus', 'Mercury', 'Earth', 'Mars', 'Jupiter'],
       });
-      assert.match(await page.log(), /reorder: 0 → 1/);
+      assert.match(await page.log(), /reorder: Mercury after Venus/);
 
       // Arrow keys on a focused grabber.
       await page.evaluate(
@@ -1157,6 +1157,64 @@ export const tests = [
       await sleep(900);
       const { titles: back } = await state();
       assert.deepEqual(back, planets);
+    },
+  },
+  {
+    name: 'list: a grab whose rows are removed is let go of (imperative, dragged)',
+    run: async (page) => {
+      // The grabbed rows, kept (detached, once removed): their reorder
+      // styles, and their groups' marks.
+      const remains = `(() => window.probeGrabbed.map((item) => ({
+        active: item.parentElement?.dataset.reorderActive ?? null,
+        reordering: item.dataset.reordering ?? null,
+        translate: item.style.translate,
+      })))()`;
+      const released = { active: null, reordering: null, translate: '' };
+
+      // Grabbed by the app, then removed (as if unmounted).
+      await page.open('list-parts-create-reorder-handle');
+      await page.evaluate(
+        `[...${page.section}.querySelectorAll('button')].find((button) => button.textContent === 'Grab Venus and Earth').click()`,
+      );
+      await sleep(400);
+      assert.equal(
+        await page.evaluate(`(() => {
+          window.probeGrabbed = [...${page.section}.querySelectorAll('[data-list-part=item][data-reordering]')];
+          return window.probeGrabbed.length;
+        })()`),
+        2,
+      );
+      await page.evaluate(
+        `window.probeGrabbed[0].closest(${JSON.stringify('[data-list-part=group]')}).remove()`,
+      );
+      await sleep(200);
+      assert.deepEqual(await page.evaluate(remains), [released, released]);
+
+      // Dragged by its grabber, then removed mid-drag.
+      await page.open('list-edit');
+      /** @type {[number, number]} */
+      const grabber = await page.evaluate(`(() => {
+        const element = ${row(0, 0)}.querySelector('[data-list-part=grabber]');
+        element.scrollIntoView({ block: 'center' });
+        const { height, width, x, y } = element.getBoundingClientRect();
+        return [x + width / 2, y + height / 2];
+      })()`);
+      await page.mouse('mousePressed', ...grabber);
+      for (let step = 1; step <= 3; step += 1) {
+        await page.mouse('mouseMoved', grabber[0], grabber[1] + 10 * step);
+        await sleep(30);
+      }
+      assert.equal(
+        await page.evaluate(`(() => {
+          window.probeGrabbed = [${row(0, 0)}];
+          return window.probeGrabbed[0].dataset.reordering;
+        })()`),
+        '',
+      );
+      await page.evaluate('window.probeGrabbed[0].remove()');
+      await sleep(200);
+      assert.deepEqual(await page.evaluate(remains), [released]);
+      await page.mouse('mouseReleased', grabber[0], grabber[1] + 30);
     },
   },
   {

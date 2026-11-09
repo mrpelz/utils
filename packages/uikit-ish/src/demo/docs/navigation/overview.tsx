@@ -237,7 +237,9 @@ export const NavigationOverview: FunctionComponent = () => (
     <ul>
       <li>
         Only the top page is exposed: the pages under it (and, while moving,
-        both) are <code>inert</code> and <code>aria-hidden</code>.
+        both) are <code>inert</code>, which also hides them from assistive
+        technology. (Not <code>aria-hidden</code> as well: set while the pressed
+        button still has focus, browsers refuse it.)
       </li>
       <li>
         Swiping back is a pointer gesture only: a page that can be popped needs

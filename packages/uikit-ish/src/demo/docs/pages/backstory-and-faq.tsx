@@ -53,7 +53,10 @@ const ExampleDemo: FunctionComponent = () => {
 
 /** `/backstory-and-faq`: why this exists, and questions people ask. */
 export const BackstoryAndFaqPage: FunctionComponent = () => (
-  <PageShell title="Backstory & FAQ">
+  <PageShell
+    path="backstory-and-faq"
+    title="Backstory & FAQ"
+  >
     <p className="demo-lead">
       Placeholder lead: one or two sentences on what this page is about.
     </p>

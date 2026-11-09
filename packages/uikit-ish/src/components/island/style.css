@@ -292,6 +292,22 @@
      only (else the scroller's: at its start, a pull down handed back).
      Clipped round itself (WebKit draws a composited scroller past its
      parent's rounded clip). */
+
+  /* Its corners' radius (following its scroll, see the property) kept
+     off what's in it: inherited, everything in it would be restyled on
+     each frame of a scroll (costly; iOS 26's WebKit keeps much of that
+     memory). Its readers keep it (its panel, its rim, its content's clip),
+     not their children. (Not `inherits: false`: iOS 26's WebKit then
+     doesn't follow its animation where it's read. See the guide's
+     iOS Quirks page.) */
+  /* stylelint-disable no-descending-specificity -- a custom property only
+     the readers' children have (no rule above sets it) */
+  .uikit-island-panel > :not(.uikit-island-content, :has(.uikit-island-content)),
+  :where(.uikit-island-content) > * {
+    --uikit-island-radius: initial;
+  }
+  /* stylelint-enable no-descending-specificity */
+
   .uikit-island-content {
     overflow: auto;
     min-height: 0;

@@ -755,6 +755,16 @@ const createSession = (layout: Layout, initial: Mode): Session => {
   };
 
   const tick = (time: number) => {
+    // Its rows gone (unmounted: e.g. navigated away, or reset), it's let go
+    // of at once (see `dispose`); dropped already (settling), settled at
+    // once (the drop kept: `onReorder` called).
+    if (items.some((item) => !item.isConnected)) {
+      const onSettled = mode?.kind === 'settle' ? mode.onSettled : undefined;
+      if (onSettled) onSettled();
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define -- added below
+      else dispose();
+      return;
+    }
     frame = requestAnimationFrame(tick);
     if (mode?.kind === 'pointer') followPointer(mode, time);
     else if (mode?.kind === 'settle') settle(mode, time);
@@ -799,6 +809,18 @@ const createSession = (layout: Layout, initial: Mode): Session => {
     if (event.key !== 'Escape') return;
     event.preventDefault();
     end(undefined, event, 'drag');
+  };
+
+  // Let go of without settling (nothing called): its frames, its listener,
+  // its styles, the module's hold on it (else its rows, detached, are kept,
+  // and its frames run on, out of reach of its handle's `cancel`). Once.
+  const dispose = () => {
+    cancelAnimationFrame(frame);
+    frame = 0;
+    document.removeEventListener('keydown', onKeyDown, true);
+    clearStyles(styled, false);
+    mode = undefined;
+    if (session?.layout === layout) session = undefined;
   };
 
   // Lifted: the rows' room closing, the gap where they were opening.

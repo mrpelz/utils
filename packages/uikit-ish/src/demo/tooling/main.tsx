@@ -7,7 +7,7 @@ import * as components from '../../components/index.js';
 import { useTouchActive } from '../../styles.js';
 import { BackstoryAndFaqPage } from '../docs/pages/backstory-and-faq.js';
 import { GettingStartedPage } from '../docs/pages/getting-started.js';
-import { Ios27Page } from '../docs/pages/ios27.js';
+import { IosQuirksPage } from '../docs/pages/ios-quirks.js';
 import { TokensPage } from '../docs/tokens/main.js';
 import { KitchenSinkPage } from '../kitchen-sink/main.js';
 import { nameComponents } from './frame/render-code.js';
@@ -147,8 +147,8 @@ export const Demo: FunctionComponent = () => (
             path={publicUrl('/tokens')}
           />
           <Route
-            component={Ios27Page}
-            path={publicUrl('/ios27')}
+            component={IosQuirksPage}
+            path={publicUrl('/ios-quirks')}
           />
           <Route
             component={GettingStartedPage}

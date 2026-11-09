@@ -252,11 +252,12 @@ export const IndexPage: FunctionComponent = () => (
           {category === 'foundations' ? (
             <li className="demo-index-card">
               <h3>
-                <a href={publicUrl('ios27')}>iOS 27</a>
+                <a href={publicUrl('ios-quirks')}>iOS Quirks</a>
               </h3>
               <p>
-                A Home Screen app’s top bar blurred under the status bar, and
-                the script in your head that starts the app below it.
+                What iOS Safari does that only shows on a device: the status bar
+                blur, memory kept from moving values, and the library’s
+                workarounds.
               </p>
             </li>
           ) : null}

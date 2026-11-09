@@ -1,5 +1,12 @@
 /* The kitchen sink (see main.tsx, shared.tsx). */
 @layer demo {
+  /* Beside the sidebar, in a browser (not an app of its own, see main.tsx):
+     its pages' bars as far from the window's top as the sidebar is (its top
+     inset and 8px), so their buttons line up with the sidebar's. */
+  .kitchen-sink-stack-browser {
+    --uikit-safe-area-inset-top: calc(env(safe-area-inset-top, 0px) + 8px);
+  }
+
   /* A showcase's stage (see `Showcase`): a background of its own (dots on
      the page's own background, framed), not a list's, so what's on it
      reads as shown, not as placed in a list. */

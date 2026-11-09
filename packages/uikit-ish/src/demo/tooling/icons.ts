@@ -78,6 +78,10 @@ export const loadIcon = (name: string): Promise<LoadedIcon> => {
   });
 
   loading.set(name, icon);
+  // Failed (e.g. offline): forgotten, so it's tried again when next asked.
+  icon.catch(() => {
+    if (loading.get(name) === icon) loading.delete(name);
+  });
   return icon;
 };
 
@@ -85,6 +89,7 @@ const names = [
   'sfAirplane',
   'sfArchivebox',
   'sfArchiveboxFill',
+  'sfArrowBackward',
   'sfArrowDown',
   'sfArrowshapeTurnUpLeft',
   'sfArrowUp',
@@ -201,6 +206,7 @@ export const {
   sfAirplane,
   sfArchivebox,
   sfArchiveboxFill,
+  sfArrowBackward,
   sfArrowDown,
   sfArrowshapeTurnUpLeft,
   sfArrowUp,
