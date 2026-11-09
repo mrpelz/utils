@@ -27,7 +27,6 @@ import {
   sfSquareAndPencil,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { pages } from '../navigation/content.js';
 import { rowTitles, sidebarSections } from '../sidebar/content.js';
 import { names } from '../viewport/content.js';
@@ -499,10 +498,6 @@ export const PageComposition: FunctionComponent = () => (
       <li>
         A page holds a <a href={publicUrl('header')}>Header</a> and its content
         (lists); it’s held by a stack, a column, a viewport’s content layer.
-      </li>
-      <li>
-        A Surface holding Regions and a Collection (guide,{' '}
-        <GuideLink to="section-6-containment">§6</GuideLink>).
       </li>
     </ul>
 

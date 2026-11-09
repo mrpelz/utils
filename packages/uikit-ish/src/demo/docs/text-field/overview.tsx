@@ -137,7 +137,7 @@ export const TextFieldOverview: FunctionComponent = () => (
         Searching: a search field (
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />
         ), filtering what’s shown.
       </li>

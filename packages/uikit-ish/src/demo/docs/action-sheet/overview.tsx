@@ -15,7 +15,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import {
   actionSheetActionRows,
   actionSheetPopupRows,
@@ -137,9 +136,8 @@ export const ActionSheetOverview: FunctionComponent = () => (
         Photo or Remove from Album, Discard Changes.
       </li>
       <li>
-        A Command set at its control (guide{' '}
-        <GuideLink to="primitive-command-set">§5</GuideLink>): two to a few
-        actions, a destructive one first.
+        A set of commands at its control: two to a few actions, a destructive
+        one first.
       </li>
     </ul>
 

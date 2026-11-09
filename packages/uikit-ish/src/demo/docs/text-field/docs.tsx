@@ -264,7 +264,7 @@ export const textFieldClearRows: readonly PropRow[] = [
   ...elementRows('button', 'HTMLButtonElement'),
 ];
 
-export const textFieldSearchRows: readonly PropRow[] = [
+export const textFieldFrameRows: readonly PropRow[] = [
   [
     'variant',
     union('fill', 'row', 'tab-bar', 'tab-bar-collapsed', 'toolbar'),
@@ -293,7 +293,9 @@ export const textFieldSearchRows: readonly PropRow[] = [
         component="toolbar"
         part="Toolbar.Root"
       />
-      ). Only its look: it stays a search field.
+      ). Only its look: its content stays the same. Changed, it morphs from one
+      look to the other (its height, insets, corners and fill; its glass fading
+      in or out).
     </>,
   ],
   [

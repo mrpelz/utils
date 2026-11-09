@@ -47,8 +47,8 @@ export type {
 //   label in the secondary label color, 8px after it (Small: 4px).
 //
 // Also:
-// - The bar fills its container, at least 280px long (as a slider's
-//   control).
+// - The bar fills its container, at least 120px long (as a slider's
+//   control: a label or value before or after it on its line).
 // - The bar's label and value (Base UI's), in Subheadline,
 //   in the secondary label color: above its track (by default, at its start
 //   and end), below it, before or after it (`placement`); the value also in
@@ -78,7 +78,12 @@ const useSynchronized = (
     if (!isSynchronized) return;
     for (const animation of element.current?.getAnimations({ subtree: true }) ??
       []) {
-      if (animation instanceof CSSAnimation) animation.startTime = 0;
+      if (!(animation instanceof CSSAnimation)) continue;
+      // (Paused, played first: WebKit keeps a paused animation's held time
+      // past a start time set, a later pause settling on it, see
+      // `ActivityIndicator`.)
+      if (animation.playState === 'paused') animation.play();
+      animation.startTime = 0;
     }
   }, [element, isSynchronized, restart]);
 };
@@ -316,12 +321,46 @@ export const ActivityIndicator = forwardRef<
       (display === 'finish-and-hide' && stopped === 'reset');
     const shown = isHidden ? undefined : stopped;
     const isAtRest = shown === 'reset';
-    // (Not with its own progress or speed: see `synchronized`.)
+    // (Not with its own progress or speed: see `synchronized`. Nor frozen: a
+    // start time set plays a paused animation again.)
     useSynchronized(
       ref,
-      synchronized && setProgress === undefined && duration === undefined,
+      synchronized &&
+        setProgress === undefined &&
+        duration === undefined &&
+        shown !== 'freeze',
       `${display} ${movement} ${String(shown)}`,
     );
+    // Frozen: paused by script where it is, not by CSS (`animation-play-
+    // state`: ignored once a script has set an animation's start time, e.g.
+    // synchronized, or, WebKit, applied on its own clock, jumping);
+    // spinning again, played on (synchronized, rejoining the page's clock:
+    // see above).
+    // (Its pause settled, its time put back where it was paused: WebKit may
+    // settle it on an older one, a frame later.)
+    useLayoutEffect(() => {
+      const effect = { isCancelled: false };
+      for (const animation of ref.current?.getAnimations({
+        subtree: true,
+      }) ?? []) {
+        if (shown === 'freeze') {
+          const { currentTime } = animation;
+          animation.pause();
+          animation.ready
+            .then(() => {
+              if (!effect.isCancelled && animation.playState === 'paused') {
+                animation.currentTime = currentTime;
+              }
+            })
+            .catch(() => undefined);
+        } else if (shown === undefined && animation.playState === 'paused') {
+          animation.play();
+        }
+      }
+      return () => {
+        effect.isCancelled = true;
+      };
+    }, [ref, shown]);
 
     return (
       <BaseProgress.Root

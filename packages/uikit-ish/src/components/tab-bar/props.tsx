@@ -142,7 +142,8 @@ export type TabBarTabProps = BaseTabs.Tab.Props &
 
 /**
  * The bar's states the accessory shows in: `both` (morphing between its
- * places), only `expanded` (above the groups), or only `collapsed` (between
+ * places), only `expanded` (above the groups, spanning the list's width),
+ * or only `collapsed` (between
  * the remaining groups).
  */
 export type AccessoryVisibility = 'both' | 'collapsed' | 'expanded';

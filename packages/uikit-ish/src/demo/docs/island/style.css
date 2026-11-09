@@ -1,0 +1,43 @@
+/* The island's demos (see map.tsx). */
+@layer demo {
+  /* The map: filling the content layer, beneath the island. */
+  .island-demo-map {
+    position: absolute;
+    inset: 0;
+
+    & > div {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Dark (the color scheme's): its tiles darkened, their hues kept. */
+    &[data-color-scheme='dark'] canvas {
+      filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+    }
+  }
+}
+
+/* Its controls (credits) clear of the island and of the safe areas: over
+   MapLibre's own (unlayered, so these too). */
+.island-demo-map .maplibregl-ctrl-bottom-left,
+.island-demo-map .maplibregl-ctrl-bottom-right {
+  /* (The anchor's size its content's: its safe area padding besides.) */
+  bottom: calc(
+    var(--uikit-viewport-anchor-block-end, 0px) +
+      var(--uikit-safe-area-inset-bottom, 0px)
+  );
+  transition: bottom 300ms ease;
+}
+
+.island-demo-map .maplibregl-ctrl-bottom-left {
+  left: var(--uikit-safe-area-inset-left, 0);
+}
+
+.island-demo-map .maplibregl-ctrl-bottom-right {
+  right: var(--uikit-safe-area-inset-right, 0);
+}
+
+.island-demo-map .maplibregl-ctrl-top-left,
+.island-demo-map .maplibregl-ctrl-top-right {
+  top: var(--uikit-safe-area-inset-top, 0);
+}

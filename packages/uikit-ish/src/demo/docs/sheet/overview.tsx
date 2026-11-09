@@ -155,7 +155,8 @@ export const SheetOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         A focused task over the page (Base UI’s <code>Drawer</code>): from the
-        bottom on a phone, large or medium; a form sheet, centered, on a tablet.
+        bottom on a phone, large or medium; on a tablet, a form sheet, centered,
+        or a card at the leading edge.
       </li>
       <li>
         Modal, the page dimmed behind it; dismissed by its buttons, a press
@@ -287,12 +288,17 @@ export const SheetOverview: FunctionComponent = () => (
     <ul>
       <li>
         Large: the whole screen but 10px at the top, opaque, its top corners
-        38px. Medium: a glass panel 6px from the sides, on the bottom safe area
-        (the home indicator below it), as high as its content.
+        38px. Medium: a glass panel 8px from the sides and the bottom (the home
+        indicator over its bottom margin), its corners 42px (as iOS 26’s,
+        measured), as high as its content; dark, its glass edged as a{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a>’s (a light rim, a glow
+        outside).
       </li>
       <li>
         Not compact (the window from 768px, or <code>compact={'{false}'}</code>
-        ): a form sheet, centered, up to 936px by 852px.
+        ): a form sheet, centered, up to 936px by 852px; or (
+        <code>regular=&quot;card&quot;</code>) a card from the bottom at the
+        leading edge, 375px wide, its detent, swiping and snapping kept.
       </li>
       <li>
         Slides up as it opens, the page dimmed (20%; dark: 48%) behind it.

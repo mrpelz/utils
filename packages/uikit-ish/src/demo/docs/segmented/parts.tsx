@@ -219,7 +219,7 @@ export const SegmentedParts: FunctionComponent = () => (
       <li>Highlight, after them: the selection.</li>
       <li>An item can hold an indicator, rendered while it’s chosen.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="segmented"

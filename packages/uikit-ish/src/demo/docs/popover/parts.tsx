@@ -11,6 +11,7 @@ import {
   Symbol,
   Toolbar,
   useCreatePopoverHandle,
+  Viewport,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
@@ -40,9 +41,11 @@ import {
 } from './docs.js';
 import {
   getPropOptionsGuideRoot,
+  propOptionsArrow,
   propOptionsClose,
   propOptionsElement,
   propOptionsGuidePositioner,
+  propOptionsHeader,
   propOptionsPart,
   propOptionsPopup,
   propOptionsPortal,
@@ -114,6 +117,7 @@ const RootPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -208,6 +212,7 @@ const TriggerPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -309,6 +314,7 @@ const PortalPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -411,6 +417,7 @@ const BackdropPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -512,6 +519,7 @@ const PositionerPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -613,6 +621,7 @@ const PopupPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -660,7 +669,7 @@ const PopupPart: FunctionComponent = () => {
 const ArrowPart: FunctionComponent = () => {
   const id = 'popover-parts-arrow';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(propOptionsPart, {
+  const [control, props, state] = usePropControl(propOptionsArrow, {
     external,
     isOpen: true,
     emphasize: 'outline',
@@ -714,6 +723,7 @@ const ArrowPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -761,7 +771,7 @@ const ArrowPart: FunctionComponent = () => {
 const HeaderPart: FunctionComponent = () => {
   const id = 'popover-parts-header';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(propOptionsElement, {
+  const [control, props, state] = usePropControl(propOptionsHeader, {
     external,
     isOpen: true,
     emphasize: 'outline',
@@ -791,7 +801,10 @@ const HeaderPart: FunctionComponent = () => {
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Positioner>
-            <Popover.Popup className="popover-demo-popup">
+            <Popover.Popup
+              className="popover-demo-popup"
+              style={{ maxHeight: 180 }}
+            >
               <Popover.Arrow />
               <Popover.Header {...props}>
                 <Toolbar.Root placement="block-start">
@@ -815,6 +828,7 @@ const HeaderPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -916,6 +930,7 @@ const BodyPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body {...props}>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -1018,6 +1033,7 @@ const ViewportPart: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Popover.Header>
                 <Popover.Body>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     <List.Section>
                       <List.Group>
@@ -1120,6 +1136,7 @@ const TitlePart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -1221,6 +1238,7 @@ const DescriptionPart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -1315,6 +1333,7 @@ const ClosePart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -1431,6 +1450,7 @@ const CreateHandlePart: FunctionComponent = () => {
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body>
+                <Viewport.Padding edge="block-start" />
                 <List.Root>
                   <List.Section>
                     <List.Group>
@@ -1555,6 +1575,7 @@ const UseCreatePopoverHandlePart: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Popover.Header>
                 <Popover.Body>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     <List.Section>
                       <List.Group>
@@ -1625,7 +1646,7 @@ export const PopoverParts: FunctionComponent = () => (
       <li>Handles: triggers outside the root, opening it imperatively.</li>
       <li>Press each view’s button to open its popover.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="popover"
@@ -1706,6 +1727,15 @@ export const PopoverParts: FunctionComponent = () => (
                           part="Popover.Description"
                         />
                         , optional)
+                        <ul>
+                          <li>
+                            <PartLink
+                              component="viewport"
+                              part="Viewport.Padding"
+                            />{' '}
+                            (with a header: room for its bar)
+                          </li>
+                        </ul>
                       </li>
                     </ul>
                   </li>
@@ -1902,6 +1932,12 @@ export const PopoverParts: FunctionComponent = () => (
         Drawn by the popup (its outline); renders an empty <code>div</code>{' '}
         where Base UI places it.
       </li>
+      <li>
+        With the popover shifted so far that it can’t point at the trigger’s
+        center (e.g. a trigger near a corner of the screen), or over the trigger
+        (too tall to fit on either side), hidden by default (
+        <code>whenShifted</code>), as iOS does.
+      </li>
     </ul>
     <ArrowPart />
     <h3>Props</h3>
@@ -1930,6 +1966,17 @@ export const PopoverParts: FunctionComponent = () => (
         ).
       </li>
       <li>
+        Over the body, which scrolls under it: its edge effect (
+        <code>edgeEffect</code>: soft, the content fading out beneath the bar as
+        it scrolls there, clear while at the top; hard or none;{' '}
+        <code>edgeTint</code>). The body makes room for it with a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />{' '}
+        at its start, as a sheet’s content does.
+      </li>
+      <li>
         Popovers without a bar (a <a href={publicUrl('roll')}>Roll</a>, a
         calendar) leave it out.
       </li>
@@ -1952,6 +1999,19 @@ export const PopoverParts: FunctionComponent = () => (
         Its content, scrolling when the popup reaches its maximum height (the
         room for it); the popup itself doesn’t scroll (its glass and arrow are
         drawn around it).
+      </li>
+      <li>
+        With a{' '}
+        <PartLink
+          component="popover"
+          part="Popover.Header"
+        />
+        , it starts with a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />
+        : room for the bar, which it scrolls under.
       </li>
       <li>
         Optional: content that can’t outgrow the room goes in the popup as it
@@ -2093,7 +2153,7 @@ export const PopoverParts: FunctionComponent = () => (
       </li>
     </ul>
     <CreateHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={popoverHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={popoverHandleRows} />
@@ -2118,7 +2178,7 @@ export const PopoverParts: FunctionComponent = () => (
       </li>
     </ul>
     <UseCreatePopoverHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={popoverHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={popoverHandleRows} />

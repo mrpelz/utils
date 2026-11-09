@@ -25,6 +25,8 @@ export {
   Popover,
   type PopoverAlign,
   type PopoverHandle,
+  type PopoverArrowProps,
+  type PopoverHeaderProps,
   type PopoverPositionerProps,
   useCreatePopoverHandle,
 } from './popover/main.js';
@@ -44,13 +46,34 @@ export {
   type SheetContentProps,
   type SheetGrabberProps,
   type SheetHeaderProps,
+  type SheetSnapGroupProps,
+  type SheetTriggerProps,
   type SheetDetent,
+  type SheetRegular,
   type SheetHandle,
   type SheetPopupProps,
   useCreateSheetHandle,
   type SheetRootProps,
   type SheetSwipeDirection,
 } from './sheet/main.js';
+export {
+  Island,
+  type IslandContentProps,
+  type IslandGrabberProps,
+  type IslandHeaderProps,
+  type IslandRootProps,
+  type IslandSnapGroupProps,
+  type IslandSnapPointChangeDetails,
+} from './island/main.js';
+export {
+  Settings,
+  type SettingsContrast,
+  type SettingsPortalProps,
+  type SettingsProviderProps,
+  type SettingsValues,
+  useSettings,
+  useSettingsPortalProps,
+} from './settings/main.js';
 export {
   Tooltip,
   type TooltipHandle,
@@ -277,6 +300,7 @@ export {
   type NavigationBackProps,
   type NavigationPersistentProps,
   type NavigationRootProps,
+  type NavigationPageProps,
   type NavigationStackProps,
   type NavigationSwipeAreaProps,
 } from './navigation/main.js';
@@ -314,6 +338,8 @@ export {
   useVisualViewport,
   useAnchorSize,
   useCreateViewportAnchorHandle,
+  ios27Attribute,
+  isIos27,
   Viewport,
   ViewportAnchorHandle,
   ViewportScopeContext,

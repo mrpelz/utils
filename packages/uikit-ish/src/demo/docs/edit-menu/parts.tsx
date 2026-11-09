@@ -656,7 +656,7 @@ export const EditMenuParts: FunctionComponent = () => (
         <code>open</code>).
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink part="EditMenu.Root" />
         <ul>

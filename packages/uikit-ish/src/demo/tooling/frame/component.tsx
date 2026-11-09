@@ -14,6 +14,7 @@ import {
 
 import {
   PortalContainerContext,
+  Settings as LibrarySettings,
   useFocusShiftPrevention,
   useInputZoomPrevention,
 } from '../../../components/index.js';
@@ -21,8 +22,8 @@ import { ColorScheme } from '../../../components/utils/main.js';
 import { Breadcrumb, Tabs, useEntry } from '../guide/nav.js';
 import { PagePathContext } from '../guide/sections.js';
 import { useRawDocument } from '../shared/raw-document.js';
+import { titleCase } from '../shared/title-case.js';
 import { CodeView } from './code-view.js';
-import { usePortalColorScheme } from './portal-scheme.js';
 import { renderCode } from './render-code.js';
 import {
   Settings,
@@ -61,7 +62,7 @@ const DemoHeader: FunctionComponent<{
         />
       ) : null}
       <h2 className="demo-heading">
-        {title}
+        {titleCase(title)}
         {stateUrl ? (
           <a
             className="demo-id"
@@ -223,7 +224,7 @@ const useIsRaw = () => {
 
 /** Raw and shown, the demo is the app (see `useRawDocument`). */
 const useRawDemoDocument = (isRaw: boolean, isHidden: boolean, title: string) =>
-  useRawDocument(isRaw && !isHidden, title);
+  useRawDocument(isRaw && !isHidden, titleCase(title));
 
 /**
  * A device's screen (a stage's, see `Stage`): its frame (see
@@ -250,8 +251,8 @@ const Screen: FunctionComponent<{
 );
 
 /**
- * A demo's stage, by its type and its frame's settings (its color scheme
- * also its popups', portaled out of it, see portal-scheme.ts): a device's
+ * A demo's stage, by its type and its frame's settings (its color scheme a
+ * settings provider's, so also its popups', portaled out of it): a device's
  * screen (see `Screen`), centered, or the demo's own element (a simple
  * demo's, see `Settings`). Its type is named at its top.
  */
@@ -276,46 +277,46 @@ const Stage: FunctionComponent<{
     isStretched,
   },
   stage,
-}) => {
-  const ref = useRef<HTMLDivElement>(null);
-  usePortalColorScheme(ref, colorScheme);
-
-  return (
-    <div
-      ref={ref}
-      className="demo-stage"
-      data-color-scheme={colorScheme}
-      data-safe-areas={stage && hasSafeAreas ? '' : undefined}
-    >
-      {hasStageBackground ? <div className="demo-stage-background" /> : null}
-      <span className="demo-stage-type">{stage ?? 'simple'}</span>
-      {stage ? (
-        <div
-          data-center
-          className="demo-stage-inner"
-        >
-          <Screen
-            hasWallpaper={hasWallpaper}
-            screen={screen}
-            screenRef={screenRef}
-            stage={stage}
-          >
-            {children}
-          </Screen>
-        </div>
-      ) : (
-        <div
-          className="demo-stage-inner"
-          data-backdrop={hasBackdrop ? '' : undefined}
-          data-center={isCentered ? '' : undefined}
-          data-stretch={isStretched ? '' : undefined}
+}) => (
+  // (The library's settings provider, its element the stage's: the color
+  // scheme for what's within it, and its popups, portaled out of it.)
+  <LibrarySettings.Provider
+    {...(colorScheme === undefined ? {} : { colorScheme })}
+    render={
+      <div
+        className="demo-stage"
+        data-safe-areas={stage && hasSafeAreas ? '' : undefined}
+      />
+    }
+  >
+    {hasStageBackground ? <div className="demo-stage-background" /> : null}
+    <span className="demo-stage-type">{stage ?? 'simple'}</span>
+    {stage ? (
+      <div
+        data-center
+        className="demo-stage-inner"
+      >
+        <Screen
+          hasWallpaper={hasWallpaper}
+          screen={screen}
+          screenRef={screenRef}
+          stage={stage}
         >
           {children}
-        </div>
-      )}
-    </div>
-  );
-};
+        </Screen>
+      </div>
+    ) : (
+      <div
+        className="demo-stage-inner"
+        data-backdrop={hasBackdrop ? '' : undefined}
+        data-center={isCentered ? '' : undefined}
+        data-stretch={isStretched ? '' : undefined}
+      >
+        {children}
+      </div>
+    )}
+  </LibrarySettings.Provider>
+);
 
 /**
  * A demo's diagnostics (see `Component`), in its config column: read as in

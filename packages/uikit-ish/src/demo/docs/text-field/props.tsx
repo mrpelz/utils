@@ -189,7 +189,7 @@ export const propOptionsGuideLabel = {
   nativeLabel: [undefined, false, true] as const,
 };
 
-export const propOptionsGuideSearch = {
+export const propOptionsGuideFrame = {
   ...propOptionsPart,
   variant: [
     undefined,

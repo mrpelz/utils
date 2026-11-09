@@ -8,20 +8,28 @@ import {
   createContext,
   CSSProperties,
   forwardRef,
+  FunctionComponent,
   isValidElement,
   MouseEvent,
   PointerEvent,
   ReactElement,
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from 'react';
 
 import { cn, useForwardedRef, withStyle } from '../utils/main.js';
+import {
+  useAnchorSize,
+  useChildViewportScope,
+  ViewportScopeContext,
+} from '../viewport/main.js';
 import type {
   NavigationBackEventDetails,
   NavigationBackProps,
+  NavigationPageProps,
   NavigationPersistentProps,
   NavigationRootProps,
   NavigationStackProps,
@@ -33,6 +41,7 @@ import type {
 export type {
   NavigationBackEventDetails,
   NavigationBackProps,
+  NavigationPageProps,
   NavigationPersistentProps,
   NavigationRootProps,
   NavigationStackProps,
@@ -115,6 +124,8 @@ type StackContext = {
   progress: () => number;
   rest: () => void;
   setKeys: (keys: string[]) => void;
+  /** Whether its top page is instant (see `Page`): not swiped back. */
+  setTopInstant: (isInstant: boolean) => void;
   setTransition: (transition: Transition) => void;
   transition: Transition | null;
 };
@@ -136,12 +147,15 @@ const NavigationContext = createContext<{
 const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
   ({ className, onBack, ...props }, forwardedRef) => {
     const ref = useForwardedRef(forwardedRef);
-    // Its stack's keys (reported by its `Stack`).
+    // Its stack's keys (reported by its `Stack`), its top page instant.
     const [keys, setKeys] = useState<string[]>([]);
+    const [isTopInstant, setTopInstant] = useState(false);
     const [transition, setTransition] = useState<Transition | null>(null);
     // (The latest, for a swipe's pop not taken up by the app.)
     const keysRef = useRef(keys);
-    keysRef.current = keys;
+    useLayoutEffect(() => {
+      keysRef.current = keys;
+    });
     const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
       undefined,
     );
@@ -157,6 +171,8 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
         }
       | undefined
     >(undefined);
+    // A swipe going on (its handlers kept, see `swipeHandlers`).
+    const [isSwiping, setIsSwiping] = useState(false);
 
     // The progress (and its transition), on the root.
     const setProgress = (progress: number, isAnimated: boolean) => {
@@ -223,6 +239,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
     const canSwipe =
       Boolean(onBack) &&
       keys.length > 1 &&
+      !isTopInstant &&
       (!transition || !keys.includes(transition.top));
 
     // A swipe's transition (see `canSwipe`): the top page over the one under
@@ -257,6 +274,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
       const { current: swipe } = swipeRef;
       if (swipe?.pointerId !== event.pointerId) return;
       swipeRef.current = undefined;
+      setIsSwiping(false);
 
       // Its speed as released: over the last moves (held still: none).
       const now = performance.now();
@@ -291,7 +309,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
 
     // Where a swipe back starts (see `SwipeArea`): while one can, or goes on.
     const swipeHandlers: SwipeHandlers | undefined =
-      canSwipe || swipeRef.current
+      canSwipe || isSwiping
         ? {
             onLostPointerCapture: endSwipe,
             onPointerCancel: endSwipe,
@@ -313,6 +331,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
                 width: root.clientWidth,
                 x: event.clientX,
               };
+              setIsSwiping(true);
               setProgress(0, false);
               setTransition(next);
             },
@@ -342,6 +361,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
             progress: currentProgress,
             rest,
             setKeys,
+            setTopInstant,
             setTransition,
             transition,
           },
@@ -437,6 +457,57 @@ const changeKeys = (
 };
 
 /**
+ * A page of a `Stack` (its keyed child; optional, around a page): how it
+ * comes and goes. Instant (`instant`), pushed and popped at once, not
+ * swiped back while on top. Renders its page alone.
+ */
+const Page: FunctionComponent<NavigationPageProps> = ({ children }) => (
+  <>{children}</>
+);
+
+/**
+ * A frame's element: its scope's anchors' sizes at its block edges (as the
+ * content layer's, see `Viewport.Content`), for what's in it (e.g. a map's
+ * controls, kept clear of its island).
+ */
+const FrameElement: FunctionComponent<ComponentProps<'div'>> = ({
+  style,
+  ...props
+}) => {
+  const start = useAnchorSize('block-start');
+  const end = useAnchorSize('block-end');
+
+  return (
+    <div
+      {...props}
+      style={withStyle(
+        {
+          '--uikit-viewport-anchor-block-end': `${String(end)}px`,
+          '--uikit-viewport-anchor-block-start': `${String(start)}px`,
+        },
+        style,
+      )}
+    />
+  );
+};
+
+/**
+ * A page's frame (its element, see `Stack`), its page in a scope of its
+ * own (its anchors, e.g. its bar: its edge effect and its paddings' room
+ * its own, not its stack's other pages' while they're hidden; the outer
+ * scope's anchors counting too).
+ */
+const Frame: FunctionComponent<ComponentProps<'div'>> = (props) => (
+  <ViewportScopeContext.Provider value={useChildViewportScope()}>
+    <FrameElement {...props} />
+  </ViewportScopeContext.Provider>
+);
+
+/** Whether a stack's child is an instant page (see `Page`). */
+const isInstant = (page: ReactElement | undefined) =>
+  page?.type === Page && (page.props as NavigationPageProps).instant === true;
+
+/**
  * Its stack of pages (keyed children, see above), filling its root: pushed,
  * popped, or replaced as the app's keys change.
  */
@@ -451,9 +522,11 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
     const previousRef = useRef({ keys, pages });
     const transition = stack?.transition ?? null;
 
-    // Pushed, popped, or replaced (see above).
+    // Pushed, popped, or replaced (see above); an instant page (see
+    // `Page`) pushed or popped: shown at once.
     useLayoutEffect(() => {
       stack?.setKeys(keys);
+      stack?.setTopInstant(isInstant(pages.at(-1)));
       const { current: previous } = previousRef;
       previousRef.current = { keys, pages };
       if (!stack || sameKeys(previous.keys, keys)) return;
@@ -461,6 +534,15 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
       const oldTop = previous.keys.at(-1);
       const newTop = keys.at(-1);
       if (oldTop === undefined || newTop === undefined || oldTop === newTop) {
+        stack.rest();
+        return;
+      }
+      const isPushed = isPrefix(previous.keys, keys);
+      const isPopped = isPrefix(keys, previous.keys);
+      if (
+        (isPushed && isInstant(pages.at(-1))) ||
+        (isPopped && isInstant(previous.pages.at(-1)))
+      ) {
         stack.rest();
         return;
       }
@@ -535,12 +617,22 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
       }
       const shown = new Set<string | undefined>();
       const marked: HTMLElement[] = [];
+      const paths = new Set<HTMLElement>();
       let uppermost: string | undefined;
       for (const frame of frames) {
         for (const item of itemsOf(frame)) {
           const id = item.dataset.navigationPersistent;
           if ((counts.get(id) ?? 0) < 2) continue;
           item.dataset.navigationShared = '';
+          // Its way from its frame, the moving values let through (see
+          // style.css: kept off the rest of the page).
+          for (
+            let node = item.parentElement;
+            node && node !== frame;
+            node = node.parentElement
+          ) {
+            paths.add(node);
+          }
           if (shown.has(id)) {
             item.dataset.navigationSharedHidden = '';
           } else {
@@ -550,12 +642,14 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
           marked.push(item);
         }
       }
+      for (const node of paths) node.dataset.navigationPath = '';
       setPressable(uppermost);
       return () => {
         for (const item of marked) {
           delete item.dataset.navigationShared;
           delete item.dataset.navigationSharedHidden;
         }
+        for (const node of paths) delete node.dataset.navigationPath;
       };
     }, [ref, transition]);
 
@@ -581,6 +675,59 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
         .map(({ page }) => page),
     ];
 
+    // Gone (popped, or replaced): lingering, hidden (not painted at all,
+    // see style.css) and inert, until the browser is idle and the stack at
+    // rest, unmounted then (a large page's unmounting costly: not as the
+    // stack comes to rest, nor mid-slide).
+    // Pushed again meanwhile, a page anew (its frame's key's generation
+    // the next: mounted afresh, not shown as it was left).
+    const shownKeys = shown.map((page) => String(page.key));
+    const [lastShown, setLastShown] = useState(shown);
+    const [lingering, setLingering] = useState<readonly ReactElement[]>([]);
+    const [generations, setGenerations] = useState<ReadonlyMap<string, number>>(
+      () => new Map(),
+    );
+    if (
+      !sameKeys(
+        lastShown.map((page) => String(page.key)),
+        shownKeys,
+      )
+    ) {
+      const isShown = (page: ReactElement) =>
+        shownKeys.includes(String(page.key));
+      const returning = lingering.filter((page) => isShown(page));
+      const kept = lingering.filter((page) => !isShown(page));
+      const dropped = lastShown.filter(
+        (page) =>
+          !isShown(page) && kept.every((other) => other.key !== page.key),
+      );
+      setLastShown(shown);
+      setLingering([...kept, ...dropped]);
+      if (returning.length > 0) {
+        const next = new Map(generations);
+        for (const page of returning) {
+          const key = String(page.key);
+          next.set(key, (next.get(key) ?? 0) + 1);
+        }
+        setGenerations(next);
+      }
+    }
+
+    useEffect(() => {
+      if (lingering.length === 0 || transition) return undefined;
+      const unmount = () => setLingering([]);
+      if (typeof requestIdleCallback === 'function') {
+        const id = requestIdleCallback(unmount, { timeout: 2000 });
+        return () => cancelIdleCallback(id);
+      }
+      // (Safari: no idle callbacks; shortly after.)
+      const id = setTimeout(unmount, 500);
+      return () => clearTimeout(id);
+    }, [lingering, transition]);
+
+    const frameKey = (key: string) =>
+      `${key}\0${String(generations.get(key) ?? 0)}`;
+
     return (
       <div
         ref={ref}
@@ -588,10 +735,14 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
         {...props}
         className={cn('uikit-navigation-stack', className)}
       >
-        {shown.map((page, index) => {
+        {[...shown, ...lingering].map((page, index) => {
           const key = String(page.key);
-          const role = roleOf(key, index, shown.length);
-          const isInert = role !== 'current' && key !== pressable;
+          const isLingering = index >= shown.length;
+          const role = isLingering
+            ? 'hidden'
+            : roleOf(key, index, shown.length);
+          const isInert =
+            isLingering || (role !== 'current' && key !== pressable);
           const departingIndex = departing.findIndex(
             (entry) => entry.key === key,
           );
@@ -600,14 +751,17 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
             // (`top`) and the one under it (`under`) move by the progress (0:
             // the upper shown), their headers with them. At rest, none of it
             // applies (no transforms, which would isolate glass' blending).
-            <div
-              key={key}
-              aria-hidden={isInert ? true : undefined}
+            <Frame
+              key={frameKey(key)}
               className="uikit-navigation-frame"
               data-navigation-departing={departingIndex === -1 ? undefined : ''}
               data-navigation-key={key}
+              data-navigation-lingering={isLingering ? '' : undefined}
               data-navigation-part="page"
               data-navigation-role={role}
+              // (Hidden from assistive technology by it, too: not also
+              // `aria-hidden`, which, set as a press on it moves on (its
+              // button still focused), browsers refuse and warn about.)
               inert={isInert}
               style={
                 {
@@ -625,7 +779,7 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
               }
             >
               {page}
-            </div>
+            </Frame>
           );
         })}
       </div>
@@ -716,6 +870,7 @@ const Persistent = forwardRef<HTMLDivElement, NavigationPersistentProps>(
 export const Navigation = {
   Root,
   Stack,
+  Page,
   SwipeArea,
   Back,
   Persistent,

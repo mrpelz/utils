@@ -4,6 +4,11 @@
     position: relative;
     display: grid;
     min-width: 0;
+
+    /* Disabled: dimmed, as the other controls are. */
+    &[data-disabled] {
+      opacity: 0.55;
+    }
   }
 
   .uikit-roll-separator {

@@ -402,7 +402,7 @@ export const DatePickerParts: FunctionComponent = () => (
         calendar’s footer (its <code>footer</code>).
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="date-picker"

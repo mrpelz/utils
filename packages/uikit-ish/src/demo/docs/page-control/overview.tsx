@@ -11,7 +11,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { pageControlRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 
@@ -72,9 +71,8 @@ export const PageControlOverview: FunctionComponent = () => (
         time: Weather’s cities, an onboarding’s screens, a photo’s pages.
       </li>
       <li>
-        A handful of pages (about ten: the guide’s{' '}
-        <GuideLink to="trait-matrix">trait matrix</GuideLink>): it shows where
-        you are, not what’s on the pages.
+        A handful of pages (about ten at most): it shows where you are, not
+        what’s on the pages.
       </li>
     </ul>
 

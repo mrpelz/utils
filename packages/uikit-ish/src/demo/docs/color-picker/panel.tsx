@@ -13,7 +13,8 @@ import { sfDocumentOnDocument } from '../../tooling/icons.js';
 // The demos' panels, as composed (see `panelParts`): their modes (in
 // order), whether they have the opacity and the swatches.
 
-type ModeEntry = [value: string, label: string, view: ReactNode];
+/** A mode: its value, its label, its view. */
+export type ModeEntry = [value: string, label: string, view: ReactNode];
 
 /** The code's copy button (a menu of its codes). */
 const codeCopy = (

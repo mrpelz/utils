@@ -92,3 +92,42 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Its screen look (`look="screen"`, e.g. the kitchen sink's, see
+   catalog.tsx): the grid's box the screen's content layer (filling it,
+   above the keyboard: the layer's own), its cells centered, pressed and
+   hovered on the rows' fills; its search below it, on the keyboard (a
+   list row's field, inset as a list's rows, its status below it). */
+.symbol-catalog-screen {
+  & .symbol-catalog-grid {
+    position: absolute;
+    right: 0;
+    left: 0;
+    justify-content: center;
+  }
+
+  & .symbol-catalog-cell {
+    color: var(--color-ui-label);
+
+    &:hover {
+      background: var(--color-ui-system-fill);
+    }
+
+    &:active {
+      background: var(--color-ui-secondary-system-fill);
+    }
+  }
+}
+
+.symbol-catalog-search-bar {
+  display: grid;
+  padding: 8px 16px;
+  gap: 6px;
+
+  & .symbol-catalog-status {
+    color: var(--color-ui-secondary-label);
+    font-size: var(--font-ui-footnote-size);
+    padding-inline: 16px;
+  }
+}
+

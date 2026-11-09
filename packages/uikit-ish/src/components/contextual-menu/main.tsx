@@ -18,7 +18,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
-import { Menu, MenuTrigger } from '../menu/main.js';
+import { Menu, MenuTrigger, openMenuByTrigger } from '../menu/main.js';
 import { cn, useForwardedRef } from '../utils/main.js';
 import type {
   ContextualMenuContextValue,
@@ -59,8 +59,11 @@ export type {
 //   (a translation, following it, and above the page by a `z-index`): in
 //   stacking contexts of its ancestors, it can't rise above the backdrop
 //   (there, give it a `Preview`).
-// - Opened as Base UI menus are (a press; on touch already on touch down,
-//   see `MenuTrigger`), not by a long press.
+// - Opened as a context menu is (Base UI's `ContextMenu`): by a secondary
+//   click (a right click, or a touch held, see `useSecondaryClick`), a
+//   click being the trigger's own; with `openOn="click"`, by a press too
+//   (as Base UI menus are; on touch already on touch down, see
+//   `MenuTrigger`).
 // - The preview takes no pointer events.
 
 const ContextualMenuContext = createContext<ContextualMenuContextValue>({
@@ -167,11 +170,12 @@ const fillIn = (backdrop: HTMLElement) => {
 };
 
 /**
- * What the menu is about (e.g. a `Button.Root`, rendered by `render`): it
- * opens the menu; without a `Preview`, it's lifted onto the preview's slot.
+ * What the menu is about (e.g. a `Button.Root`, rendered by `render`): a
+ * secondary click on it opens the menu (`openOn`); without a `Preview`, it's
+ * lifted onto the preview's slot.
  */
 const Trigger = forwardRef<HTMLElement, ContextualMenuTriggerProps>(
-  (props, forwardedRef) => {
+  ({ onSecondaryClick, openOn = 'secondaryClick', ...props }, forwardedRef) => {
     const { backdrop, isOpen, isPreview, slot, triggerRef } = useContext(
       ContextualMenuContext,
     );
@@ -237,6 +241,17 @@ const Trigger = forwardRef<HTMLElement, ContextualMenuTriggerProps>(
         <MenuTrigger
           ref={ref as Ref<HTMLElement>}
           {...props}
+          openOn={openOn}
+          // Opened by a press, still by a secondary click too (a mouse's: a
+          // touch has opened it already, on touch down).
+          onSecondaryClick={
+            openOn === 'click'
+              ? (event) => {
+                  onSecondaryClick?.(event);
+                  openMenuByTrigger(event.currentTarget);
+                }
+              : onSecondaryClick
+          }
         />
       </span>
     );

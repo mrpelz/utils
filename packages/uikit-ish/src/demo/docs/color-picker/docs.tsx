@@ -6,7 +6,6 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
-import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -80,12 +79,17 @@ export const colorPickerRootRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Its parts:{' '}
+      Its parts: its header (in a popover, its{' '}
       <PartLink
-        component="color-picker"
-        part="ColorPicker.Header"
+        component="popover"
+        part="Popover.Header"
       />
-      ,{' '}
+      ; in a sheet, its{' '}
+      <PartLink
+        component="sheet"
+        part="Sheet.Header"
+      />
+      ) and its{' '}
       <PartLink
         component="color-picker"
         part="ColorPicker.Panel"
@@ -105,24 +109,6 @@ export const colorPickerRootRows: readonly PropRow[] = [
     </>,
   ],
   ...renderRows('div', 'HTMLDivElement'),
-];
-
-export const colorPickerHeaderRows: readonly PropRow[] = [
-  [
-    'children',
-    'ReactNode',
-    undefined,
-    <>
-      The app’s header: e.g. a <a href={publicUrl('toolbar')}>Toolbar</a> with
-      the eyedropper, “Colors” and a close button (in a sheet too, its{' '}
-      <PartLink
-        component="sheet"
-        part="Sheet.Header"
-      />{' '}
-      only its grabber).
-    </>,
-  ],
-  ...elementRows('div', 'HTMLDivElement'),
 ];
 
 export const colorPickerPanelRows: readonly PropRow[] = [

@@ -23,7 +23,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 const countCode = `// The photos imported so far, of 12.
@@ -206,9 +205,8 @@ export const ProgressComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Status attaches to the narrowest scope it describes (guide{' '}
-        <GuideLink to="status-by-scope">G8</GuideLink>): an item’s, in its row
-        (“row spinner”).
+        Status attaches to the narrowest scope it describes: an item’s, in its
+        row (“row spinner”).
       </li>
       <li>
         A small activity indicator (<code>size</code>) in the{' '}
@@ -237,9 +235,8 @@ export const ProgressComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A view’s status, in its content (guide{' '}
-        <GuideLink to="status-by-scope">G8</GuideLink>): the bar stays, the
-        content shows the spinner while it loads.
+        A view’s status, in its content: the bar stays, the content shows the
+        spinner while it loads.
       </li>
       <li>Labeled by its children (“Loading”).</li>
       <li>

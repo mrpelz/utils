@@ -4,7 +4,6 @@ import { publicUrl } from '../public-url.js';
 
 const BASE_UI_DOCS = 'https://base-ui.com/react/components';
 const FRAMEWORK7_DOCS = 'https://framework7.io/react';
-const HIG = 'https://developer.apple.com/design/human-interface-guidelines';
 
 // (Links under the site's public path: see `publicUrl`, env.ts.)
 
@@ -17,17 +16,13 @@ export type EntryInfo = {
   framework7Id?: string;
   /** Has a composition page (`/:id/composition`). */
   hasComposition: boolean;
-  /** Has an information architecture page (`/:id/information-architecture`). */
-  hasInformationArchitecture: boolean;
   /** Has a parts page (`/:id/parts`). */
   hasParts: boolean;
-  higId?: string;
   id: string;
   title: string;
 };
 
-export type Tab =
-  'all' | 'composition' | 'information-architecture' | 'overview' | 'parts';
+export type Tab = 'all' | 'composition' | 'overview' | 'parts';
 
 /**
  * The component the demos within are about: their settings (stage,
@@ -69,14 +64,7 @@ export const Tabs: FunctionComponent<{
   if (entry.hasComposition) {
     tabs.push(['composition', 'Composition', `${entry.id}/composition`]);
   }
-  if (entry.hasInformationArchitecture) {
-    tabs.push([
-      'information-architecture',
-      'Information architecture',
-      `${entry.id}/information-architecture`,
-    ]);
-  }
-  tabs.push(['all', 'All demos', `${entry.id}/all`]);
+  tabs.push(['all', 'All Demos', `${entry.id}/all`]);
 
   return (
     <nav className="demo-page-tabs">
@@ -106,15 +94,6 @@ export const Tabs: FunctionComponent<{
             target="_blank"
           >
             Framework7
-          </a>
-        ) : null}
-        {entry.higId ? (
-          <a
-            href={`${HIG}/${entry.higId}`}
-            rel="noreferrer"
-            target="_blank"
-          >
-            Apple HIG
           </a>
         ) : null}
       </span>

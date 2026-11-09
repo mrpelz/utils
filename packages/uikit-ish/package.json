@@ -20,8 +20,6 @@
       "js-yaml": "5.4.3"
     },
     "eslint": "10.12.0",
-    "react": "npm:@preact/compat",
-    "react-dom": "npm:@preact/compat",
     "serialize-javascript": "7.1.2",
     "stylelint": "17.16.0",
     "stylelint-order": "8.1.2"
@@ -39,12 +37,16 @@
     "csstype": "3.2.3",
     "eslint-plugin-react": "7.37.5",
     "fork-ts-checker-webpack-plugin": "9.1.0",
-    "mermaid": "12.2.0",
+    "maplibre-gl": "6.14.0",
     "modify-source-webpack-plugin": "4.1.0",
     "monaco-editor": "0.57.0",
     "monaco-editor-webpack-plugin": "7.1.1",
     "preact-iso": "2.12.2",
     "preact-render-to-string": "6.8.1",
     "source-map-loader": "5.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "react-dom": ">=19"
   }
 }

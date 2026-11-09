@@ -13,7 +13,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { datePickerRootRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 
@@ -88,8 +87,7 @@ export const DatePickerOverview: FunctionComponent = () => (
       </li>
       <li>
         Compact where space is short (a list row), inline where picking the date
-        is the task (the guide’s collapsed picker, a{' '}
-        <GuideLink to="choice-family">choice</GuideLink> of an ordered value).
+        is the task (collapsed, it’s a choice of an ordered value).
       </li>
     </ul>
 

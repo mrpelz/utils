@@ -78,6 +78,11 @@ export const propOptionsGuideStack = {
   style: commonPropOptions.style,
 };
 
+/** A page's options in the guide's views (the pushed pages'). */
+export const propOptionsGuidePage = {
+  instant: [true, false] as const,
+};
+
 export const propOptionsGuideSwipeArea = {
   className: commonPropOptions.className,
   style: commonPropOptions.style,
@@ -86,12 +91,13 @@ export const propOptionsGuideSwipeArea = {
 
 /** A view's parts: the one it's about, open and emphasized. */
 export type NavigationPart =
-  'Back' | 'Persistent' | 'Root' | 'Stack' | 'SwipeArea';
+  'Back' | 'Page' | 'Persistent' | 'Root' | 'Stack' | 'SwipeArea';
 
 /**
  * A view's prop controls, one per part (each with all its props), the
  * featured part's open and emphasized (the swipe area, showing nothing of
- * its own, overlaid; the others outlined); without one (an overview), the
+ * its own, overlaid; the page, no element of its own, neither; the others
+ * outlined); without one (an overview), the
  * root's open, unless all are closed (a composition's). `pop` pops the
  * view's stack (the root's `onBack`).
  */
@@ -111,12 +117,14 @@ export const useNavigationControls = (
     externalSwipeArea,
     externalBack,
     externalPersistent,
+    externalPage,
   ] = useProvidedState(id).slice(offset);
-  // (The swipe area, showing nothing of its own, overlaid.)
+  // (The swipe area, showing nothing of its own, overlaid; the page, no
+  // element of its own, not emphasized.)
   const emphasis =
     featured === 'SwipeArea' ? ('overlay' as const) : ('outline' as const);
   const options = (part: NavigationPart) => ({
-    emphasize: featured === part ? emphasis : undefined,
+    emphasize: featured === part && part !== 'Page' ? emphasis : undefined,
     isOpen:
       featured === undefined ? !isClosed && part === 'Root' : featured === part,
     title: `Navigation.${part}`,
@@ -146,6 +154,13 @@ export const useNavigationControls = (
     { external: externalPersistent, ...options('Persistent') },
   );
 
+  // (Only in the page's own view, likewise.)
+  const isPage = featured === 'Page';
+  const [controlPage, propsPage, statePage] = usePropControl(
+    propOptionsGuidePage,
+    { external: externalPage, ...options('Page') },
+  );
+
   return {
     controls: [
       controlRoot,
@@ -153,8 +168,10 @@ export const useNavigationControls = (
       controlSwipeArea,
       controlBack,
       ...(isPersistent ? [controlPersistent] : []),
+      ...(isPage ? [controlPage] : []),
     ],
     propsBack,
+    propsPage,
     propsPersistent,
     propsRoot,
     propsStack,
@@ -165,6 +182,7 @@ export const useNavigationControls = (
       stateSwipeArea,
       stateBack,
       ...(isPersistent ? [statePersistent] : []),
+      ...(isPage ? [statePage] : []),
     ],
   };
 };

@@ -48,7 +48,7 @@ export const BadgeParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>One element, placed on what it’s in (its parent).</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="badge"

@@ -18,7 +18,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { settings } from './content.js';
 import {
   listGroupRows,
@@ -363,8 +362,10 @@ export const ListOverview: FunctionComponent = () => (
       </li>
       <li>
         Swiping a row reveals its actions (a quick swipe, or past half of them,
-        opens them); with <code>overswipe</code>, swiping on past them triggers
-        the outermost one. One row is open at a time.
+        opens them; a flick stops at them); with <code>overswipe</code>,
+        dragging on past them triggers the outermost one. At rest, a row is
+        always closed or open (never in between), and doesn’t move towards a
+        side without actions. One row is open at a time.
       </li>
       <li>
         Dragging a row’s{' '}
@@ -416,8 +417,7 @@ export const ListOverview: FunctionComponent = () => (
         >
           SwipeActionsTrigger
         </PartLink>{' '}
-        opens the row’s trailing swipe actions (guide{' '}
-        <GuideLink to="rule-g7">G7</GuideLink>: the list owns the selection).
+        opens the row’s trailing swipe actions (the list owns the selection).
       </li>
     </ul>
   </>

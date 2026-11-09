@@ -8,7 +8,7 @@
     }
 
     /* Its search field beside tabs, or filling the glass it's in (see
-       Search's `variant`): taking the free space, as high as its container. */
+       Frame's `variant`): taking the free space, as high as its container. */
     &:has(> [data-variant='tab-bar']),
     &:has(> [data-variant='tab-bar-collapsed']),
     &:has(> [data-variant='toolbar']) {
@@ -22,14 +22,14 @@
        while focused, while not, or either way; in a list row (in its
        content), taking no room until then, so a value aligned to the end
        reaches it (the value moves over for the button). Its own
-       field's state, also in a search field's capsule (see Search). */
+       field's state, also in a frame (see Frame). */
     &:not([data-filled]),
     &:not([data-focused]):has(> * [data-mode='whileEditing']),
     &[data-focused]:has(> * [data-mode='unlessEditing']),
     &:not([data-focused]):has(> [data-mode='whileEditing']),
     &[data-focused]:has(> [data-mode='unlessEditing']) {
       & > [data-text-field-part='clear'],
-      & > [data-text-field-part='search'] > [data-text-field-part='clear'] {
+      & > [data-text-field-part='frame'] > [data-text-field-part='clear'] {
         visibility: hidden;
       }
 
@@ -174,22 +174,52 @@
     }
   }
 
-  .uikit-text-field-search {
+  .uikit-text-field-frame {
+    position: relative;
     display: flex;
     min-width: 0;
-    min-height: var(--uikit-text-field-search-height, 36px);
+    min-height: var(--uikit-text-field-frame-height, 36px);
     box-sizing: border-box;
     align-items: center;
-    padding: 0 var(--uikit-text-field-search-padding, 10px);
+    padding: 0 var(--uikit-text-field-frame-padding, 10px);
     border-radius: 100px;
     background-color: var(
-      --uikit-text-field-search-fill,
+      --uikit-text-field-frame-fill,
       var(--color-ui-tertiary-system-fill)
     );
     color: var(--color-ui-secondary-label);
     cursor: text;
     font-size: var(--font-ui-body-size);
-    gap: var(--uikit-text-field-search-gap, 6px);
+    gap: var(--uikit-text-field-frame-gap, 6px);
+
+    /* Morphing from one look to another (`variant`, see main.tsx). */
+    transition-duration: var(--glass-ui-lens-duration, 300ms);
+    transition-property:
+      min-height, padding, border-radius, background-color, color, gap;
+    transition-timing-function: ease-out;
+
+    /* Its content above its glass. */
+    & > :not(.uikit-text-field-frame-glass) {
+      position: relative;
+    }
+
+    /* Its glass (the glass looks', below): always there, faded out, so
+       the frame morphs into and out of them. */
+    & > .uikit-text-field-frame-glass {
+      position: absolute;
+      border-radius: inherit;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--glass-ui-lens-duration, 300ms) ease-out;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      &,
+      & > .uikit-text-field-frame-glass {
+        transition: none;
+      }
+    }
 
     & > input {
       flex: 1 1 auto;
@@ -200,9 +230,9 @@
     /* As a list row (inset grouped, see List): its background, height,
        insets and corners. */
     &[data-variant='row'] {
-      --uikit-text-field-search-height: 52px;
-      --uikit-text-field-search-padding: 16px;
-      --uikit-text-field-search-fill: var(
+      --uikit-text-field-frame-height: 52px;
+      --uikit-text-field-frame-padding: 16px;
+      --uikit-text-field-frame-fill: var(
         --color-ui-secondary-system-grouped-background
       );
 
@@ -214,7 +244,7 @@
     &[data-variant='tab-bar'],
     &[data-variant='tab-bar-collapsed'],
     &[data-variant='toolbar'] {
-      --uikit-text-field-search-fill: transparent;
+      --uikit-text-field-frame-fill: transparent;
 
       color: var(--uikit-glass-content);
 
@@ -228,25 +258,24 @@
        above the glass. */
     &[data-variant='tab-bar'],
     &[data-variant='toolbar'] {
-      --uikit-text-field-search-padding: 16px;
+      --uikit-text-field-frame-padding: 16px;
 
-      position: relative;
       flex: 1 1 0;
 
-      & > :not([data-glass-part]) {
-        position: relative;
+      & > .uikit-text-field-frame-glass {
+        opacity: 1;
       }
     }
 
     &[data-variant='tab-bar'] {
-      --uikit-text-field-search-height: var(--uikit-tab-bar-tab-height, 54px);
+      --uikit-text-field-frame-height: var(--uikit-tab-bar-tab-height, 54px);
     }
 
     /* (Its glass flush with its box, as the buttons'; a tab bar group's
        extends beyond, as the groups'.) */
     &[data-variant='toolbar'] {
       --uikit-glass-outset: 0px;
-      --uikit-text-field-search-height: var(
+      --uikit-text-field-frame-height: var(
         --uikit-toolbar-group-height,
         48px
       );
@@ -255,13 +284,13 @@
     /* Collapsed: on the glass it's in (e.g. an accessory's), filling it, no
        insets of its own (the accessory's). */
     &[data-variant='tab-bar-collapsed'] {
-      --uikit-text-field-search-padding: 0px;
+      --uikit-text-field-frame-padding: 0px;
 
       flex: 1 1 auto;
     }
 
     /* Focused by keyboard only (a text field matches :focus-visible however
-       it's focused; see Search). */
+       it's focused; see Frame). */
     &[data-keyboard-focus] {
       outline: 2px solid var(--color-ui-primary);
       outline-offset: 2px;

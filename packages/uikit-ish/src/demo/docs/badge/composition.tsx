@@ -25,7 +25,6 @@ import {
   sfGearshapeFill,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 
 /** Settings' rows: a pending update counted in its row. */
 const InAListRow: FunctionComponent = () => {
@@ -269,8 +268,8 @@ export const BadgeComposition: FunctionComponent = () => (
         (collapsed, a tab’s badge goes with it).
       </li>
       <li>
-        Guide <GuideLink to="section-7-5">§7.5</GuideLink>: an activity badge on
-        a tab, not a destination of its own.
+        On a tab, a badge shows activity there; it isn’t a destination of its
+        own.
       </li>
     </ul>
   </>

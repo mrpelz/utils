@@ -2585,7 +2585,7 @@ export const ListParts: FunctionComponent = () => (
       </li>
       <li>A row’s swipe actions: revealed by swiping.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="list"
@@ -3751,7 +3751,7 @@ export const ListParts: FunctionComponent = () => (
       </li>
     </ul>
     <CreateReorderHandlePart />
-    <h3>Options, returns</h3>
+    <h3>Options, Returns</h3>
     <PropsTable rows={listReorderHandleRows} />
 
     <Heading
@@ -3770,7 +3770,7 @@ export const ListParts: FunctionComponent = () => (
       </li>
     </ul>
     <UseCreateReorderHandlePart />
-    <h3>Options, returns</h3>
+    <h3>Options, Returns</h3>
     <PropsTable rows={listReorderHandleRows} />
 
     <Heading
@@ -3792,7 +3792,7 @@ export const ListParts: FunctionComponent = () => (
       </li>
     </ul>
     <CodeView code={reorderCode} />
-    <h3>Arguments and return</h3>
+    <h3>Arguments and Return</h3>
     <PropsTable rows={listReorderRows} />
 
     <Heading
@@ -4119,7 +4119,7 @@ export const ListParts: FunctionComponent = () => (
       </li>
     </ul>
     <CodeView code={forwardClickCode} />
-    <h3>Arguments and return</h3>
+    <h3>Arguments and Return</h3>
     <PropsTable rows={forwardClickRows} />
   </>
 );

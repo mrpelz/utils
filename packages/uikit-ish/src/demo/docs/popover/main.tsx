@@ -8,6 +8,7 @@ import {
   Popover,
   Symbol,
   Toolbar,
+  Viewport,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
@@ -105,6 +106,7 @@ export const PopoverDemo: FunctionComponent = () => {
                   </Toolbar.Root>
                 </Popover.Header>
                 <Popover.Body>
+                  <Viewport.Padding edge="block-start" />
                   <List.Root>
                     <List.Section>
                       <List.Footer>
@@ -132,15 +134,10 @@ export const PopoverDemo: FunctionComponent = () => {
                     <Popover.Trigger
                       aria-label="Info"
                       render={
-                        <Button.Root
-                          shape="circle"
-                          variant="borderless"
-                        />
+                        <List.Accessory render={<button type="button" />} />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfICircle} />
-                      </Button.Icon>
+                      <Symbol icon={sfICircle} />
                     </Popover.Trigger>
                     <Popover.Portal>
                       <Popover.Positioner align="end">
@@ -156,6 +153,7 @@ export const PopoverDemo: FunctionComponent = () => {
                             </Toolbar.Root>
                           </Popover.Header>
                           <Popover.Body>
+                            <Viewport.Padding edge="block-start" />
                             <List.Root>
                               <List.Section>
                                 <List.Footer>

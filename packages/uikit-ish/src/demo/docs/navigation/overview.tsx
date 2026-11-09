@@ -237,7 +237,9 @@ export const NavigationOverview: FunctionComponent = () => (
     <ul>
       <li>
         Only the top page is exposed: the pages under it (and, while moving,
-        both) are <code>inert</code> and <code>aria-hidden</code>.
+        both) are <code>inert</code>, which also hides them from assistive
+        technology. (Not <code>aria-hidden</code> as well: set while the pressed
+        button still has focus, browsers refuse it.)
       </li>
       <li>
         Swiping back is a pointer gesture only: a page that can be popped needs
@@ -266,6 +268,21 @@ export const NavigationOverview: FunctionComponent = () => (
         trailing edge over the one under it, which moves back 30% of its width
         and dims; cut back (by one or more pages), the reverse; anything else
         (another stack), shown at once.
+      </li>
+      <li>
+        An instant page (in a{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Page"
+        />{' '}
+        of <code>instant</code>), pushed or popped, is shown at once, and isn’t
+        swiped back while it’s on top.
+      </li>
+      <li>
+        A page gone (popped, or replaced) stays mounted, unpainted and inert,
+        until the browser is idle and the stack at rest (Safari: shortly after):
+        a large page’s unmounting doesn’t stall the stack as it comes to rest.
+        Pushed again meanwhile, it’s mounted afresh.
       </li>
       <li>
         A page’s <a href={publicUrl('header')}>Header</a> moves with its page,

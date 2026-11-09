@@ -91,7 +91,7 @@
   .uikit-progress-track {
     position: relative;
     overflow: hidden;
-    min-width: var(--uikit-progress-min-length, 280px);
+    min-width: var(--uikit-progress-min-length, 120px);
     height: 6px;
     flex: 1 1 0;
     border-radius: 3px;
@@ -282,15 +282,12 @@
       animation-timing-function: steps(8, jump-none);
     }
 
-    /* Stopped (see `display`): at rest, or frozen where it is. */
+    /* Stopped (see `display`): at rest. (Frozen where it is: paused by
+       script, see main.tsx; not by `animation-play-state`, which WebKit
+       applies on its own clock, not a synchronized start time: jumping.) */
     [data-stopped='reset'] > &,
     [data-stopped='reset'] > & > span {
       animation: none;
-    }
-
-    [data-stopped='freeze'] > &,
-    [data-stopped='freeze'] > & > span {
-      animation-play-state: paused;
     }
   }
 }

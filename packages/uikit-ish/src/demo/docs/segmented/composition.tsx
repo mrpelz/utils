@@ -24,7 +24,6 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfEllipsis, sfLocationFill } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 
 /** A news app's sections: more than a phone's width holds. */
 const newsSections = [
@@ -357,10 +356,7 @@ export const SegmentedComposition: FunctionComponent = () => (
         Between a bottom <a href={publicUrl('toolbar')}>Toolbar</a>’s buttons:
         choosing how the content is shown (Maps’ modes).
       </li>
-      <li>
-        The buttons act on the content (guide{' '}
-        <GuideLink to="rule-g1">G1</GuideLink>: choice and actions stay apart).
-      </li>
+      <li>The buttons act on the content (choice and actions stay apart).</li>
       <li>
         <strong>Library:</strong> the control between the bottom{' '}
         <PartLink

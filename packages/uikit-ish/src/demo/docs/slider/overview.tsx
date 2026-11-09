@@ -14,7 +14,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { symbolPairs } from './content.js';
 import {
   sliderLabelRows,
@@ -146,9 +145,8 @@ export const SliderOverview: FunctionComponent = () => (
       </li>
       <li>
         A value that only shows progress, not one to set: a{' '}
-        <a href={publicUrl('progress')}>Progress</a> bar (guide{' '}
-        <GuideLink to="indicator-continuum">§5</GuideLink>: a slider is an
-        editable indicator).
+        <a href={publicUrl('progress')}>Progress</a> bar (a slider is an
+        editable one).
       </li>
       <li>
         Audio volume: prefer the platform’s own volume control where there is

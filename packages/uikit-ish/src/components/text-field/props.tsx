@@ -8,11 +8,11 @@ export type ClearProps = Omit<ComponentProps<'button'>, 'ref'> & {
   mode?: 'always' | 'unlessEditing' | 'whileEditing';
 };
 
-/** A search field's look (see `SearchProps`). */
-export type SearchVariant =
+/** A text field frame's look (see `FrameProps`). */
+export type FrameVariant =
   'fill' | 'row' | 'tab-bar' | 'tab-bar-collapsed' | 'toolbar';
 
-export type SearchProps = Omit<ComponentProps<'label'>, 'ref'> & {
+export type FrameProps = Omit<ComponentProps<'label'>, 'ref'> & {
   /**
    * Its look: a capsule on the tertiary fill; a list row's look (inset
    * grouped: its background, height and corners; not a row); a tab bar
@@ -20,8 +20,8 @@ export type SearchProps = Omit<ComponentProps<'label'>, 'ref'> & {
    * `TabBar.Group`); or the collapsed tab bar's, no capsule of its own, on
    * the glass it's in (e.g. a `TabBar.Accessory`'s, filling it); or a
    * toolbar group's glass capsule, as high as its buttons (e.g. between a
-   * `Toolbar`'s buttons).
+   * `Toolbar`'s buttons). Changed, it morphs from one to the other.
    * @default 'fill'
    */
-  variant?: SearchVariant;
+  variant?: FrameVariant;
 };

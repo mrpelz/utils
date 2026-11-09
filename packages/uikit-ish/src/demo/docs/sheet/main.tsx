@@ -19,7 +19,7 @@ import { getPropOptionsRoot, propOptionsPopup } from './props.js';
 
 /**
  * A sheet (Base UI's `Drawer`): a scoped task from the bottom (large or medium), a form sheet
- * in a regular width; swiped down to dismiss it.
+ * (or a card at the leading edge) in a regular width; swiped down to dismiss it.
  */
 export const SheetDemo: FunctionComponent = () => {
   const id = 'sheet';

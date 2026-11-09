@@ -887,6 +887,9 @@ const snapPoints = [
 
 type SnapPoint = (typeof snapPoints)[number];
 
+/** The snap points a row stops at even when flung (see `Item`). */
+const stopPoints = new Set<SnapPoint>(['closed', 'leading', 'trailing']);
+
 /**
  * Where a row snaps armed: twice the arming distance from its place, past
  * its actions (or across the whole row, if less, see `snapPlaces`).
@@ -1395,6 +1398,25 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     item.scrollTo({ behavior: isSmooth ? 'smooth' : 'instant', left });
   };
 
+  // Scrolled somewhere by the row itself (opened, closed, reopened, across
+  // the whole row; not the user's scroll): its snapping off meanwhile, and
+  // brought back there at rest until it arrives (see `settle`: Safari's
+  // snapping, its early `scrollend`s, fighting a smooth scroll in a
+  // snapping scroller), or a touch takes over.
+  const targetRef = useRef<number | undefined>(undefined);
+  const scrollToTarget = (offset: number) => {
+    const { current: item } = itemRef;
+    if (!item) return;
+    if (Math.abs(offsetOf(item) - offset) < 1) {
+      targetRef.current = undefined;
+      item.style.removeProperty('scroll-snap-type');
+      return;
+    }
+    targetRef.current = offset;
+    item.style.scrollSnapType = 'none';
+    scrollTo(offset, true);
+  };
+
   // The track's room on a side: the actions' width; across the whole row
   // only while overswiping it is possible (see `overswipable`), so a scroll
   // opening the actions stops at them, not past them (snapping back).
@@ -1559,7 +1581,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         closingRef.current = true;
         lock();
         // (Its snap points change once closed, see `settle`.)
-        scrollTo(0, true);
+        scrollToTarget(0);
       },
       focus: (side) => {
         if (openSideRef.current !== side) return;
@@ -1580,7 +1602,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         openSideRef.current = side;
         lock();
         showSnaps();
-        scrollTo((side === 'leading' ? 1 : -1) * width, true);
+        scrollToTarget((side === 'leading' ? 1 : -1) * width);
 
         if (outsideRef.current) return;
         outsideRef.current = (event) => {
@@ -1656,7 +1678,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     const { current: openSide } = openSideRef;
     if (!openSide || canConceal(openSide)) return false;
     const { [openSide]: width = 0 } = swipeRef.current.widths;
-    scrollTo((openSide === 'leading' ? 1 : -1) * width, true);
+    scrollToTarget((openSide === 'leading' ? 1 : -1) * width);
     return true;
   };
 
@@ -1671,17 +1693,70 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     resetRow(item);
   };
 
+  // Scrolled by the row itself (see `scrollToTarget`), not there yet:
+  // on there (true); there, no longer.
+  const isOnItsWay = (item: HTMLElement) => {
+    const { current: target } = targetRef;
+    if (target === undefined) return false;
+    if (Math.abs(offsetOf(item) - target) >= 1) {
+      scrollTo(target, true);
+      return true;
+    }
+    targetRef.current = undefined;
+    return false;
+  };
+
+  // Where a row at rest `distance` from closed towards `side` rests: the
+  // nearest of closed and open (not swiped closed, see `allowSwipe`: open
+  // only; not swiped open: closed only).
+  const restingDistance = (side: Side, distance: number) => {
+    const { [side]: width = 0 } = swipeRef.current.widths;
+    const { current: openSide } = openSideRef;
+    const isOpenable =
+      width > 0 &&
+      (openSide === side || (openSide === undefined && canReveal(side)));
+    const isLockedOpen = openSide === side && !canConceal(side);
+    const stops = [
+      ...(isLockedOpen ? [] : [0]),
+      ...(isOpenable ? [width] : []),
+    ];
+    const [nearest = 0] = stops.toSorted(
+      (a, b) => Math.abs(distance - a) - Math.abs(distance - b),
+    );
+    return nearest;
+  };
+
+  // At rest overswiped (armed, or across the whole row): across it, then
+  // triggering there.
+  const settleOverswiped = (side: Side, distance: number) => {
+    const { [side]: extent = 0 } = swipeRef.current.extents;
+    // Held between snap points (no `scrollend`): not yet.
+    if (distance < armedPlace(swipeRef.current, side) - 1) return;
+    // Across the whole row first (settling there again).
+    if (distance < extent - 1) {
+      scrollToTarget((side === 'leading' ? 1 : -1) * extent);
+      return;
+    }
+    trigger(side);
+  };
+
   // The scroll at rest (not touched): overswiped (armed, or across the
   // whole row: triggering there), open or closed.
   const settle = () => {
     const { current: item } = itemRef;
-    if (!item || dragRef.current?.isMoved || touchingRef.current) return;
+    if (
+      !item ||
+      dragRef.current?.isMoved ||
+      touchingRef.current ||
+      isOnItsWay(item)
+    ) {
+      return;
+    }
     item.style.removeProperty('scroll-snap-type');
     const offset = offsetOf(item);
     const side: Side = offset > 0 ? 'leading' : 'trailing';
     const distance = Math.abs(offset);
     const { [side]: width = 0 } = swipeRef.current.widths;
-    const { [side]: extent = 0 } = swipeRef.current.extents;
     const { [side]: arm = Infinity } = swipeRef.current.arms;
 
     const { current: isClosing } = closingRef;
@@ -1691,17 +1766,17 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
       return;
     }
     if (overswipesNow(side) && distance > arm) {
-      // Held between snap points (no `scrollend`): not yet.
-      if (distance < armedPlace(swipeRef.current, side) - 1) return;
-      // Across the whole row first (settling there again).
-      if (distance < extent - 1) {
-        scrollTo((side === 'leading' ? 1 : -1) * extent, true);
-        return;
-      }
-      trigger(side);
+      settleOverswiped(side, distance);
       return;
     }
     swipingRef.current = false;
+    // At rest off its stops (iOS' snapping, coming to rest short of one,
+    // e.g. almost closed): to the nearest it may rest at, at rest there.
+    const nearest = restingDistance(side, distance);
+    if (Math.abs(distance - nearest) >= 1) {
+      scrollToTarget((side === 'leading' ? 1 : -1) * nearest);
+      return;
+    }
     if (Math.abs(distance - width) < 1) {
       if (openSideRef.current !== side) context.open(side);
       // Scrolled open (stopped at the actions, see `roomOf`): at rest only
@@ -1725,7 +1800,8 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     if (!item) return;
     const offset = offsetOf(item);
     const side: Side = offset > 0 ? 'leading' : 'trailing';
-    if (Math.abs(offset) >= 1) {
+    // (Towards a side without actions, e.g. bouncing: not swiped.)
+    if (Math.abs(offset) >= 1 && swipeRef.current.widths[side] !== undefined) {
       item.dataset.swipe = side;
       // (Swiped, it closes another row's; closing, not: e.g. as another
       // opens by a trigger, which its scroll would close again.)
@@ -1769,6 +1845,11 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     };
     const onTouchStart = () => {
       touchingRef.current = true;
+      // (Taking over from a scroll of the row's own, see `scrollToTarget`.)
+      if (targetRef.current !== undefined) {
+        targetRef.current = undefined;
+        item.style.removeProperty('scroll-snap-type');
+      }
       // Swiped: overswiping in one go (see `overswipable`).
       swipingRef.current = true;
       showSnapsRef.current();
@@ -1902,7 +1983,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     // until then (which would start where it is).
     if (!isLocked && !isCancelled && overswipesNow(side) && distance > arm) {
       const { [side]: extent = 0 } = swipeRef.current.extents;
-      scrollTo((side === 'leading' ? 1 : -1) * extent, true);
+      scrollToTarget((side === 'leading' ? 1 : -1) * extent);
       return;
     }
     // Not overswiped: no longer, before snapping again (which would snap to
@@ -2024,8 +2105,9 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
           {isSwipeable
             ? snapPoints.map((point) => (
                 // Where a swipeable row snaps (see `Item`), in the track.
-                // Closed, it stops even when flung: closing one side doesn't
-                // open the other.
+                // Closed and open, it stops even when flung: closing one
+                // side doesn't open the other, and a flick opening it stops
+                // at its actions (overswiping takes dragging past them).
                 <span
                   key={point}
                   ref={(element: HTMLElement | null) => {
@@ -2034,8 +2116,8 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
                   hidden
                   aria-hidden="true"
                   className="uikit-list-snap"
-                  data-closed={point === 'closed' ? '' : undefined}
                   data-list-part="snap"
+                  data-stop={stopPoints.has(point) ? '' : undefined}
                 />
               ))
             : null}

@@ -37,7 +37,6 @@ import {
   sfTrash,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { rowTitles, sidebarSections } from './content.js';
 import { propOptionsAdaptiveContent } from './props.js';
 
@@ -179,7 +178,7 @@ const matches = (title: string) =>
 
 <Sidebar.Root aria-label="Mailboxes">
   <TextField.Root>
-    <TextField.Search>
+    <TextField.Frame>
       <Symbol icon={sfMagnifyingglass} />
       <TextField.Control
         aria-label="Search"
@@ -189,7 +188,7 @@ const matches = (title: string) =>
         onValueChange={setQuery}
       />
       <TextField.Clear />
-    </TextField.Search>
+    </TextField.Frame>
   </TextField.Root>
   <List.Root listStyle="sidebar">
     {/* Each section's matching rows; sections without any left out. */}
@@ -748,7 +747,7 @@ const Search: FunctionComponent = () => {
       <div className="sidebar-demo-panel sidebar-demo-picture">
         <Sidebar.Root aria-label="Mailboxes">
           <TextField.Root>
-            <TextField.Search>
+            <TextField.Frame>
               <Symbol icon={sfMagnifyingglass} />
               <TextField.Control
                 aria-label="Search"
@@ -758,7 +757,7 @@ const Search: FunctionComponent = () => {
                 onValueChange={(value: string) => setQuery(value)}
               />
               <TextField.Clear />
-            </TextField.Search>
+            </TextField.Frame>
           </TextField.Root>
           <List.Root listStyle="sidebar">
             {shown.map(([title, rows]) => (
@@ -1176,9 +1175,8 @@ export const SidebarComposition: FunctionComponent = () => (
         >
           List.Item selected
         </PartLink>
-        ) picks the content column’s page; the app holds the selection (guide{' '}
-        <GuideLink to="rule-g7">G7</GuideLink>: the list owns it, the content
-        reads it).
+        ) picks the content column’s page; the app holds the selection (the list
+        owns it, the content reads it).
       </li>
       <li>
         Floating (<code>floating</code>), the content column clear of it (
@@ -1374,7 +1372,7 @@ export const SidebarComposition: FunctionComponent = () => (
         Its search field (
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />
         , styled by the panel) filtering its rows; sections without matches left
         out.
@@ -1383,7 +1381,7 @@ export const SidebarComposition: FunctionComponent = () => (
         <strong>Library:</strong> the search field (
         <PartLink
           component="text-field"
-          part="TextField.Search"
+          part="TextField.Frame"
         />
         ) styled by the sidebar.
       </li>

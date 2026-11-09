@@ -122,7 +122,7 @@ export const ButtonParts: FunctionComponent = () => (
       <li>Root: the button, the control people press.</li>
       <li>Its content: a symbol, a label, or both (in their order).</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="button"

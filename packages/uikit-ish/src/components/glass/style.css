@@ -425,7 +425,7 @@
 
   /*
    * The “Medium” glass material (`uikit-glass-medium`): menus, edit menus,
-   * popovers; background, backdrop blur and glass effect on the element
+   * popovers, large floating panels (see `uikit-glass-panel`, below); background, backdrop blur and glass effect on the element
    * itself, its content's `--uikit-glass-*` properties, and the colors of
    * lists on it (see List).
    */
@@ -498,6 +498,25 @@
         --glass-ui-medium-dark-content-disabled
       );
       --uikit-glass-shadow: var(--glass-ui-dim-shadow);
+    }
+  }
+
+  /*
+   * A large floating panel of it (`uikit-glass-panel`: a sidebar, an
+   * island, a medium sheet): in dark mode, a light rim and a glow outside
+   * (`--glass-ui-panel-dim-shadow`), not the glass's dark inner bands.
+   */
+  .uikit-glass-medium.uikit-glass-panel {
+    @media (prefers-color-scheme: dark) {
+      --uikit-glass-shadow: var(--glass-ui-panel-dim-shadow);
+    }
+
+    &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
+      --uikit-glass-shadow: var(--glass-ui-bright-shadow);
+    }
+
+    &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
+      --uikit-glass-shadow: var(--glass-ui-panel-dim-shadow);
     }
   }
 }

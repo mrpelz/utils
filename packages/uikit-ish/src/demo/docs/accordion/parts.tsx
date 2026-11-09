@@ -263,7 +263,7 @@ export const AccordionParts: FunctionComponent = () => (
         panel; each rendering what it collapses (<code>render</code>).
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="accordion"

@@ -112,6 +112,8 @@ const touchedField = (
 
   const field = target.closest<HTMLElement>(textField);
   if (field) return field;
+  // Another control (e.g. a field's clear button, in its label): its own.
+  if (target.closest(control)) return null;
 
   const labelled = target.closest('label')?.control;
   if (labelled) {
@@ -136,6 +138,15 @@ const touchedField = (
   return nearest;
 };
 
+/**
+ * Whether the software keyboard is shown (the visual viewport shorter than
+ * the layout viewport by more than a bar's height).
+ */
+const isKeyboardShown = () => {
+  const { innerHeight, visualViewport } = window;
+  return innerHeight - (visualViewport?.height ?? innerHeight) > 100;
+};
+
 /** The layout viewport scrolled back to `scroll` (see `preventFocusShift`). */
 const restoreScroll = (scroll: number) => {
   if (Math.abs(window.scrollY - scroll) >= 1) window.scrollTo(0, scroll);
@@ -147,9 +158,11 @@ const restoreScroll = (scroll: number) => {
  * browser's focusing, which scrolls the layout viewport); also touched
  * just beside it (see `touchedField`). The touch's click doesn't follow,
  * and the caret goes where the field puts it, not where it was touched.
+ * Also a field focused already, but not by a touch (e.g. a popup's initial
+ * focus, its keyboard not shown): focused anew, without scrolling.
  * The page hidden with one focused and shown again (e.g. a Home Screen app
  * left and reopened), it's focused again without scrolling, the layout
- * viewport's scroll as it was. Until the returned function removes it.
+ * viewport's scroll as it was; without one, the scroll as it was, too. Until the returned function removes it.
  */
 export const preventFocusShift = (
   target: Document | HTMLElement = document,
@@ -159,6 +172,19 @@ export const preventFocusShift = (
   // Where the touch started: a tap's (not a drag's, e.g. scrolling) end
   // focuses.
   let start: Touch | undefined;
+  // The field focused here (its keyboard shown), until it's left, or its
+  // keyboard hidden (iPadOS' hide key: the field still focused, a touch on
+  // it showing the keyboard again, scrolling, see `onTouchEnd`).
+  let focused: HTMLElement | undefined;
+  const onFocusOut = (event: Event) => {
+    if (event.target === focused) focused = undefined;
+  };
+  let wasKeyboardShown = false;
+  const onViewportResize = () => {
+    const isShown = isKeyboardShown();
+    if (wasKeyboardShown && !isShown) focused = undefined;
+    wasKeyboardShown = isShown;
+  };
   const onTouchStart = (event: Event) => {
     start =
       (event as TouchEvent).touches.length === 1
@@ -175,16 +201,17 @@ export const preventFocusShift = (
         tapSlop;
     start = undefined;
     const field = isTap ? touchedField(event as TouchEvent, target) : null;
-    if (
-      !field ||
-      field === document.activeElement ||
-      field.matches(':disabled') ||
-      !event.cancelable
-    ) {
-      return;
+    if (!field || field.matches(':disabled') || !event.cancelable) return;
+    if (field === document.activeElement) {
+      // Its keyboard shown: the caret placed where touched, as iOS does.
+      if (field === focused || isKeyboardShown()) return;
+      // Focused without its keyboard (e.g. a popup's initial focus, not in
+      // a touch's handler): iOS would show it, scrolling.
+      field.blur();
     }
     event.preventDefault();
     field.focus({ preventScroll: true });
+    focused = field;
   };
 
   // The page hidden with a text field focused in `target` (e.g. a Home
@@ -193,14 +220,24 @@ export const preventFocusShift = (
   // itself, scrolling (or drop the keyboard): it's focused again here
   // without scrolling (its selection as it was), the scroll put back, also
   // a frame and a moment later (iOS' scrolling may follow).
+  // Hidden without one (e.g. a hardware keyboard's iPad), shown again:
+  // iOS may leave the layout viewport scrolled (the page shifted up until a
+  // field is focused and left), its scroll put back as it was, the same.
   let hidden:
     | {
-        field: HTMLElement;
+        field?: HTMLElement;
         scroll: number;
         selection?: [number | null, number | null];
       }
     | undefined;
   let restores: ReturnType<typeof setTimeout>[] = [];
+  const putBack = (scroll: number) => {
+    restoreScroll(scroll);
+    requestAnimationFrame(() => restoreScroll(scroll));
+    restores = [100, 300].map((delay) =>
+      setTimeout(() => restoreScroll(scroll), delay),
+    );
+  };
   const onVisibility = () => {
     for (const restore of restores) clearTimeout(restore);
     restores = [];
@@ -219,16 +256,21 @@ export const preventFocusShift = (
                   ? [activeElement.selectionStart, activeElement.selectionEnd]
                   : undefined,
             }
-          : undefined;
+          : { scroll: window.scrollY };
       return;
     }
 
     if (!hidden) return;
     const { field, scroll, selection } = hidden;
     hidden = undefined;
+    if (!field) {
+      putBack(scroll);
+      return;
+    }
     if (!field.isConnected || field.matches(':disabled')) return;
     if (field === document.activeElement) field.blur();
     field.focus({ preventScroll: true });
+    focused = field;
     if (
       selection &&
       (field instanceof HTMLInputElement ||
@@ -240,26 +282,26 @@ export const preventFocusShift = (
         // (Fields without a selection, e.g. `type="email"`.)
       }
     }
-    restoreScroll(scroll);
-    requestAnimationFrame(() => restoreScroll(scroll));
-    restores = [100, 300].map((delay) =>
-      setTimeout(() => restoreScroll(scroll), delay),
-    );
+    putBack(scroll);
   };
 
   const listeners: [string, (event: Event) => void][] = [
     ['touchstart', onTouchStart],
     ['touchend', onTouchEnd],
+    ['focusout', onFocusOut],
   ];
   for (const [type, listener] of listeners) {
     target.addEventListener(type, listener, { capture: true, passive: false });
   }
   document.addEventListener('visibilitychange', onVisibility);
+  const { visualViewport } = window;
+  visualViewport?.addEventListener('resize', onViewportResize);
   return () => {
     for (const [type, listener] of listeners) {
       target.removeEventListener(type, listener, { capture: true });
     }
     document.removeEventListener('visibilitychange', onVisibility);
+    visualViewport?.removeEventListener('resize', onViewportResize);
     for (const restore of restores) clearTimeout(restore);
   };
 };

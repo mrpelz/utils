@@ -93,8 +93,9 @@ export type {
 } from './props.js';
 
 // A color picker and a color well, in the app's popover (a regular width)
-// or sheet (compact), its header the app's (a `Toolbar`: the
-// eyedropper, “Colors”, close):
+// or sheet (compact), its header the app's (a `Toolbar`: the eyedropper,
+// “Colors”, close; in the popup's header, `Popover.Header` or
+// `Sheet.Header`, the panel scrolling under it, behind its edge effect):
 // - a segmented control (Grid, Spectrum, Sliders), 24px above the view;
 // - Grid: 12 by 10 swatches (a gray row, then hues by lightness), its
 //   corners 18px, the selected one outlined white (3px);
@@ -238,10 +239,11 @@ const PanelContext = createContext<PanelState>({
 });
 
 /**
- * A color picker: its color and its mode, for its parts (`Header`,
- * `Modes`, `Panel`, `Eyedropper`, anywhere in it), in the app's popover or
- * sheet. Its element (`render`) may be the sheet's popup, so its modes'
- * control can be in the sheet's header, not scrolling.
+ * A color picker: its color and its mode, for its parts (`Modes`,
+ * `Panel`, `Eyedropper`, anywhere in it), in the app's popover or sheet.
+ * Its element (`render`) may be the popover's or the sheet's popup, so its
+ * toolbar (and, in a sheet, its modes' control) can be in the popup's
+ * header (`Popover.Header`, `Sheet.Header`), its panel scrolling under it.
  */
 const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
   (
@@ -1186,20 +1188,6 @@ const Swatches = forwardRef<HTMLDivElement, ColorPickerSwatchesProps>(
   },
 );
 
-// Its header (in the panel's popover: 16px from its top, 10px above the
-// panel): the app's (e.g. a `Toolbar`: eyedropper, title,
-// close); in a sheet, its `Sheet.Header` instead.
-const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('uikit-color-picker-header', className)}
-      data-color-picker-part="header"
-      {...props}
-    />
-  ),
-);
-
 /** The browser's eyedropper (`EyeDropper`), if it has one. */
 const eyeDropper = () =>
   (globalThis as { EyeDropper?: new () => EyeDropperApi }).EyeDropper;
@@ -1261,6 +1249,14 @@ const hasColorInputAlpha = () =>
   'alpha' in HTMLInputElement.prototype;
 
 /**
+ * A color input's `alpha` (its picker's opacity), as a property: too new for
+ * the JSX types, and React renders no attribute it doesn't know as `true`.
+ */
+const setAlpha = (input: HTMLInputElement | null, hasAlpha: boolean) => {
+  if (input) (input as HTMLInputElement & { alpha: boolean }).alpha = hasAlpha;
+};
+
+/**
  * Its system colors (a leading button, after the eyedropper): a `Button`
  * (or what it renders), opening the system's color picker: a color input's
  * (none without one), over the button, transparent: pressed itself (on iOS,
@@ -1276,9 +1272,10 @@ const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
   const { color, hasOpacity, setColor } = useContext(PickerContext);
   // (Its input, as rendered: for its button's press.)
   const [input, setInput] = useState<HTMLInputElement | null>(null);
-  if (!hasColorInput()) return null;
   // (With the opacity, the input's alpha too, where it has one.)
   const hasAlpha = hasOpacity && hasColorInputAlpha();
+  useLayoutEffect(() => setAlpha(input, hasAlpha), [hasAlpha, input]);
+  if (!hasColorInput()) return null;
 
   const open = () => input?.click();
 
@@ -1302,8 +1299,6 @@ const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
       )}
       <input
         ref={setInput}
-        // (`alpha`: too new for the JSX types; a boolean property, as set.)
-        {...(hasAlpha ? { alpha: true } : {})}
         aria-hidden="true"
         className="uikit-color-picker-system-colors-input"
         disabled={props.disabled}
@@ -1324,6 +1319,11 @@ const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
       />
     </span>
   );
+};
+
+/** A field without spell checking (its `spellcheck` property). */
+const noSpellcheck = (input: HTMLInputElement | null) => {
+  if (input) input.spellcheck = false;
 };
 
 /**
@@ -1383,13 +1383,9 @@ const Code = forwardRef<HTMLDivElement, ColorPickerCodeProps>(
           >
             <span aria-hidden="true">#</span>
             <input
-              // (`spellcheck`: Preact's spelling, which the React lint rule
-              // would rename.)
-              {...{ spellcheck: false }}
-              aria-label="Hex color"
-              autoCapitalize="characters"
-              autoComplete="off"
-              autoCorrect="off"
+              // (As a property: spelled differently in React's and Preact's
+              // JSX.)
+              ref={noSpellcheck}
               value={draft ?? formatColor(color).slice(1)}
               onChange={(event) => type(event.currentTarget.value, event)}
               {...selection}
@@ -1746,7 +1742,6 @@ const CssNamedColors: FunctionComponent = () => (
 
 export const ColorPicker = {
   Root,
-  Header,
   Panel,
   Modes,
   Mode,

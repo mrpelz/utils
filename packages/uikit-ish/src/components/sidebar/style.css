@@ -26,40 +26,23 @@
 
   .uikit-sidebar-root {
     /* Its selection's fill (selected and pressed rows, pressed toolbar
-       buttons). Dark: floating (a light rim, a
-       glow outside; the glass' dark inner bands would make the large panel
-       look inset). */
+       buttons). (Dark: floating, a large panel's glass, see
+       `uikit-glass-panel`.) */
     --uikit-sidebar-selection: light-dark(
       rgb(0 0 0 / 7%),
       rgb(255 255 255 / 12%)
     );
-    --uikit-text-field-search-fill: light-dark(
+    --uikit-text-field-frame-fill: light-dark(
       rgb(0 0 0 / 7%),
       rgb(255 255 255 / 12%)
     );
 
-    @media (prefers-color-scheme: dark) {
-      box-shadow:
-        inset 0 0 0 1px rgb(255 255 255 / 15%),
-        0 0 25px rgb(0 0 0 / 30%);
-    }
-
-    &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
-      box-shadow: var(--uikit-glass-shadow);
-    }
-
-    &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
-      box-shadow:
-        inset 0 0 0 1px rgb(255 255 255 / 15%),
-        0 0 25px rgb(0 0 0 / 30%);
-    }
-
-    /* Its search field (see TextField.Search): a fill blended with the
+    /* Its search field (see TextField.Frame): a fill blended with the
        glass (plus-darker, plus-lighter in dark mode) as a flat color; its
        symbol and placeholder in the glass' secondary content color (#999). */
-    --uikit-text-field-search-height: 44px;
-    --uikit-text-field-search-padding: 11px;
-    --uikit-text-field-search-gap: 8px;
+    --uikit-text-field-frame-height: 44px;
+    --uikit-text-field-frame-padding: 11px;
+    --uikit-text-field-frame-gap: 8px;
 
     display: flex;
     overflow: auto;
@@ -69,26 +52,25 @@
     flex-direction: column;
     padding: 11px 16px 10px;
     border-radius: 20px;
-    margin: var(--uikit-sidebar-margin, 8px);
+    margin: var(--uikit-sidebar-margin, 10px);
     color: var(--color-ui-label);
 
-    /* Clear of the safe area insets (in a regular layout, e.g. a tablet's
-       status bar). */
-    margin-block: max(
-        var(--uikit-sidebar-margin, 8px),
-        var(--uikit-safe-area-inset-top, 0px)
-      )
+    /* As iPadOS 26's (Settings', measured): 10px from the screen's sides,
+       8px below the top inset (a tablet's status bar), 5px into the bottom
+       one (15px above the edge on a 20px home indicator inset), 10px
+       from the bottom at least. */
+    margin-block: calc(var(--uikit-safe-area-inset-top, 0px) + 8px)
       max(
-        var(--uikit-sidebar-margin, 8px),
-        var(--uikit-safe-area-inset-bottom, 0px)
+        var(--uikit-sidebar-margin, 10px),
+        var(--uikit-safe-area-inset-bottom, 0px) - 5px
       );
     overscroll-behavior: contain;
 
-    & [data-text-field-part='search'] {
+    & [data-text-field-part='frame'] {
       color: var(--uikit-glass-content-secondary);
     }
 
-    & [data-text-field-part='search'] input::placeholder {
+    & [data-text-field-part='frame'] input::placeholder {
       color: var(--uikit-glass-content-secondary);
     }
 

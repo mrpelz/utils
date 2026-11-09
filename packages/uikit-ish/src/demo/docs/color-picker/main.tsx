@@ -74,15 +74,15 @@ export const ColorPickerDemo: FunctionComponent = () => {
       { external: externalSwatches, title: 'swatches' },
     );
 
-  // (Its modes' control in it, or elsewhere: a sheet's header.)
-  const panel = (isModesElsewhere = false) => (
+  // (Its modes' control elsewhere: the popover's or the sheet's header.)
+  const panel = () => (
     <ColorPicker.Panel
       key={`${keyPanel}-${keySwatches}`}
       {...propsPanel}
     >
       {panelParts({
         ...composition,
-        isModesElsewhere,
+        isModesElsewhere: true,
         swatchesProps: propsSwatches,
       })}
     </ColorPicker.Panel>
@@ -190,25 +190,23 @@ export const ColorPickerDemo: FunctionComponent = () => {
               >
                 <Sheet.Header>
                   <Sheet.Grabber />
-                  <ColorPicker.Header>
-                    {header(
-                      <Sheet.Close
-                        render={
-                          <Toolbar.Button
-                            aria-label="Close"
-                            shape="circle"
-                          />
-                        }
-                      >
-                        {closeSymbol}
-                      </Sheet.Close>,
-                    )}
-                  </ColorPicker.Header>
+                  {header(
+                    <Sheet.Close
+                      render={
+                        <Toolbar.Button
+                          aria-label="Close"
+                          shape="circle"
+                        />
+                      }
+                    >
+                      {closeSymbol}
+                    </Sheet.Close>,
+                  )}
                   {modesControl(composition.modes)}
                 </Sheet.Header>
                 <Sheet.Content>
                   <Viewport.Padding edge="block-start" />
-                  {panel(true)}
+                  {panel()}
                   <Viewport.Padding edge="block-end" />
                 </Sheet.Content>
               </ColorPicker.Root>
@@ -226,7 +224,7 @@ export const ColorPickerDemo: FunctionComponent = () => {
                 render={<Popover.Popup style={{ width: 402 }} />}
               >
                 <Popover.Arrow />
-                <ColorPicker.Header>
+                <Popover.Header>
                   {header(
                     <Popover.Close
                       render={
@@ -239,8 +237,12 @@ export const ColorPickerDemo: FunctionComponent = () => {
                       {closeSymbol}
                     </Popover.Close>,
                   )}
-                </ColorPicker.Header>
-                <Popover.Body>{panel()}</Popover.Body>
+                  {modesControl(composition.modes)}
+                </Popover.Header>
+                <Popover.Body>
+                  <Viewport.Padding edge="block-start" />
+                  {panel()}
+                </Popover.Body>
               </ColorPicker.Root>
             </Popover.Positioner>
           </Popover.Portal>

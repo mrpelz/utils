@@ -30,7 +30,16 @@ export type ContextualMenuRootProps<Payload = unknown> = MenuRootProps<Payload>;
  */
 export type ContextualMenuHandle<Payload = unknown> = MenuHandle<Payload>;
 
-export type ContextualMenuTriggerProps = MenuTriggerProps;
+export type ContextualMenuTriggerProps = Omit<MenuTriggerProps, 'openOn'> & {
+  /**
+   * What opens the menu: a secondary click (default: a right click, or a
+   * touch held, then dragged on to the items; see `useSecondaryClick`), a
+   * click being the trigger's own (e.g. opening the photo), or a click too
+   * (a press; on touch, as the finger goes down).
+   * @default 'secondaryClick'
+   */
+  openOn?: 'click' | 'secondaryClick';
+};
 
 export type ContextualMenuPreviewProps = ComponentProps<'div'>;
 

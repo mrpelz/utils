@@ -20,7 +20,7 @@ export type {
 // its top, 16px from its sides, 10px from its bottom; its content e.g. a
 // toolbar (borderless buttons, Body, symbols 510, the
 // trailing ones 24px apart; 20px above what follows), a search field
-// (`TextField.Search`: 44px high, on the secondary fill) and a list
+// (`TextField.Frame`: 44px high, on the secondary fill) and a list
 // (`List.Root` of style `sidebar`: capsule rows, sections without a shape of
 // their own), scrolling inside it. Put it in a `Layout` column (`floating`:
 // over the other columns; compact: a drawer, swiped in), which places and sizes
@@ -28,12 +28,14 @@ export type {
 //
 // Also:
 // - The glass is the menus' (`glassMedium`: a fill and a soft glow, without
-//   blend modes), 8px from the column's edges; in dark mode, a light rim and a glow outside it (the
+//   blend modes), 10px from the column's sides, 8px below the top inset,
+//   5px into the bottom one (10px from the edge at least; iPadOS 26's,
+//   measured); in dark mode, a light rim and a glow outside it (the
 //   glass' inner shadow would look inset).
 
 /**
  * A sidebar: a floating glass panel, its
- * content (e.g. a `TextField.Search`, a `List.Root` of style `sidebar`)
+ * content (e.g. a `TextField.Frame`, a `List.Root` of style `sidebar`)
  * scrolling inside it; in a `Layout` column (see there).
  */
 const Root = forwardRef<HTMLElement, SidebarRootProps>(
@@ -42,7 +44,10 @@ const Root = forwardRef<HTMLElement, SidebarRootProps>(
       ref={ref}
       data-sidebar-part="root"
       {...props}
-      className={cn('uikit-sidebar-root uikit-glass-medium', className)}
+      className={cn(
+        'uikit-sidebar-root uikit-glass-medium uikit-glass-panel',
+        className,
+      )}
     />
   ),
 );

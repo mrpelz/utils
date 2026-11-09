@@ -101,14 +101,14 @@ export const ViewportBarDemo: FunctionComponent = () => {
         <Viewport.BlockEnd>
           <Toolbar.Root>
             <TextField.Root>
-              <TextField.Search>
+              <TextField.Frame>
                 <TextField.Control
                   aria-label="Message"
                   enterKeyHint="send"
                   placeholder="Message"
                 />
                 <TextField.Clear />
-              </TextField.Search>
+              </TextField.Frame>
             </TextField.Root>
           </Toolbar.Root>
         </Viewport.BlockEnd>

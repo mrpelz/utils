@@ -155,11 +155,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 16px;
   color: var(--color-ui-secondary-label);
   font-size: 15px;
   gap: 6px;
   opacity: var(--uikit-viewport-overscroll-progress, 0);
+
+  /* (Its sides the library's: clear of the safe area, and of a floating
+     column, see Layout.) */
+  padding-block: 12px;
 
   /* A layer of its own: its opacity and movement composited, not
      repainted (WebKit otherwise kept its text painted, frozen where it was,

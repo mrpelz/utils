@@ -235,7 +235,7 @@ export const ProgressParts: FunctionComponent = () => (
       <li>Its label and value: optional, placed by their own prop.</li>
       <li>An activity indicator: one element of its own.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink part="Progress.Root" />
         <ul>
@@ -296,8 +296,8 @@ export const ProgressParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The track: 6px high, rounded, in the system fill; at least 280px long,
-        taking the line’s free space.
+        The track: 6px high, rounded, in the system fill; at least 120px long
+        (as a slider’s), taking the line’s free space.
       </li>
       <li>Holds the indicator.</li>
     </ul>

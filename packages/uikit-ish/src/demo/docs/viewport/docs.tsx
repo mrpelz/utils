@@ -104,9 +104,10 @@ const edgeEffectRow: PropRow = [
   <>
     At the block start or end: its scroll edge effect, as content scrolls under
     it: <code>soft</code>, a blur fading out away from the edge;{' '}
-    <code>hard</code>, a solid backing with a dividing line. Drawn by the
-    scroller beneath (a <a href={publicUrl('page')}>Page</a>, a sheet’s content,
-    the{' '}
+    <code>hard</code>, a solid backing with a dividing line (untinted, in the
+    scroller’s own background color, as it changes, so it matches the page; a
+    scroller without one, the system background). Drawn by the scroller beneath
+    (a <a href={publicUrl('page')}>Page</a>, a sheet’s content, the{' '}
     <PartLink
       component="viewport"
       part="Viewport.Content"
@@ -117,11 +118,17 @@ const edgeEffectRow: PropRow = [
       component="viewport"
       part="useViewportEdgeElement"
     />
-    ). How much of the content shows through it: <code>soft</code>, solid under
-    half of the effect, fading out past it; with a veil (
-    <code>--uikit-viewport-edge-veil</code>, 0 to 1: the heavier, the less; set
-    on the scroller or above), solid under that share of the anchor. A sheet’s
-    is <code>0.75</code>.
+    ). On iOS 27 (<code>isIos27</code>: the app’s head starting it below the
+    status bar, see{' '}
+    <a href={publicUrl('ios-quirks#the-status-bar-blur')}>iOS Quirks</a>), unset
+    at the screen’s top (not in a sheet, popover or island, nor a portal
+    container): <code>hard</code>, beneath the system’s status bar, its backing,
+    untinted, the status bar’s color (the page’s as the app loaded, read once by
+    iOS), solid at rest too once the page’s is another. How much of the content
+    shows through it: <code>soft</code>, solid under half of the effect, fading
+    out past it; with a veil (<code>--uikit-viewport-edge-veil</code>, 0 to 1:
+    the heavier, the less; set on the scroller or above), solid under that share
+    of the anchor. A sheet’s is <code>0.75</code>.
   </>,
 ];
 
@@ -177,9 +184,21 @@ export const viewportProviderRows: readonly PropRow[] = [
       The app’s screen, when it isn’t the window (e.g. a device’s frame in a
       page, as here): the visual viewport within it (what the keyboard covers of
       its bottom, how far its top is scrolled away while the keyboard shows),
-      its custom properties set on it, not the root element. By default, the
-      portal container provided by <code>PortalContainerContext</code> (the
-      app’s screen for its popups, too); <code>null</code>: the window.
+      its custom properties set on it, not the root element. Measured against
+      its layers’ containing block (the window, unless the screen or an ancestor
+      contains them, e.g. a{' '}
+      <PartLink
+        component="layout"
+        part="Layout.Column"
+      />
+      ), read anew as that resizes (e.g. within an app’s content layer, resized
+      above the keyboard: then, nothing covered). An app’s background beneath
+      its layers, as the window’s (e.g. a page of its own in a{' '}
+      <a href={publicUrl('navigation')}>Navigation</a> stack, not the page below
+      showing through as it slides in; a background of its own kept). By
+      default, the portal container provided by{' '}
+      <code>PortalContainerContext</code> (the app’s screen for its popups,
+      too); <code>null</code>: the window.
     </>,
   ],
   [
@@ -721,7 +740,12 @@ export const useSizeClassReturnRows: readonly PropRow[] = [
     <>
       The window’s horizontal size class: <code>regular</code> from 768px (a
       tablet’s window), <code>compact</code> below (a phone’s); before hydration
-      (server rendering), <code>compact</code>.
+      (server rendering), <code>compact</code>. Held while iPadOS resizes the
+      window for its app switcher’s snapshots (still shown, each resize
+      announced by an orientation change that contradicts the window’s shape;
+      its layout switching would remount it), until the orientation matches the
+      window again or the page is shown anew. A real rotation or resize (e.g.
+      Split View) changes it.
     </>,
   ],
 ];

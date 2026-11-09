@@ -15,7 +15,7 @@ import {
 
 /**
  * A tooltip (Base UI's `Tooltip`): a short label at its trigger
- * on hover and keyboard focus (not on touch), or held open.
+ * on hover, keyboard focus and a long press on touch, or held open.
  */
 export const TooltipDemo: FunctionComponent = () => {
   const id = 'tooltip';

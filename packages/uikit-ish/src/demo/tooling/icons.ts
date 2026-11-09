@@ -78,6 +78,10 @@ export const loadIcon = (name: string): Promise<LoadedIcon> => {
   });
 
   loading.set(name, icon);
+  // Failed (e.g. offline): forgotten, so it's tried again when next asked.
+  icon.catch(() => {
+    if (loading.get(name) === icon) loading.delete(name);
+  });
   return icon;
 };
 
@@ -85,6 +89,7 @@ const names = [
   'sfAirplane',
   'sfArchivebox',
   'sfArchiveboxFill',
+  'sfArrowBackward',
   'sfArrowDown',
   'sfArrowshapeTurnUpLeft',
   'sfArrowUp',
@@ -161,6 +166,7 @@ const names = [
   'sfSquare',
   'sfSquareAndArrowUp',
   'sfSquareAndPencil',
+  'sfStar',
   'sfSunMax',
   'sfSunMin',
   'sfTagFill',
@@ -185,6 +191,9 @@ const icons = Object.fromEntries(
   ]),
 ) as Record<(typeof names)[number], SymbolIcon>;
 
+/** The demos' icons, by name (e.g. the kitchen sink's grid of them all). */
+export const demoIcons: Readonly<Record<string, SymbolIcon>> = icons;
+
 /** The demos' icons loaded: awaited before the demo renders (see demo.tsx). */
 export const iconsLoaded = Promise.all(
   names.map(async (name) => {
@@ -197,6 +206,7 @@ export const {
   sfAirplane,
   sfArchivebox,
   sfArchiveboxFill,
+  sfArrowBackward,
   sfArrowDown,
   sfArrowshapeTurnUpLeft,
   sfArrowUp,
@@ -273,6 +283,7 @@ export const {
   sfSquare,
   sfSquareAndArrowUp,
   sfSquareAndPencil,
+  sfStar,
   sfSunMax,
   sfSunMin,
   sfTagFill,

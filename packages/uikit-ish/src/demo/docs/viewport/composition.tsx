@@ -28,7 +28,6 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfArrowDown, sfArrowUp, sfHeartFill } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import { messages } from '../list/content.js';
 import { phoneTabs, phoneTabValues } from '../tab-bar/tabs.js';
 import { names, planets } from './content.js';
@@ -64,14 +63,14 @@ const messageCode = `<Viewport.Provider>
   <Viewport.BlockEnd>
     <Toolbar.Root>
       <TextField.Root>
-        <TextField.Search>
+        <TextField.Frame>
           <TextField.Control
             aria-label="Message"
             enterKeyHint="send"
             placeholder="Message"
           />
           <TextField.Clear />
-        </TextField.Search>
+        </TextField.Frame>
       </TextField.Root>
     </Toolbar.Root>
   </Viewport.BlockEnd>
@@ -508,7 +507,7 @@ const Message: FunctionComponent = () => {
         <Viewport.BlockEnd>
           <Toolbar.Root>
             <TextField.Root>
-              <TextField.Search>
+              <TextField.Frame>
                 <TextField.Control
                   aria-label="Message"
                   enterKeyHint="send"
@@ -520,7 +519,7 @@ const Message: FunctionComponent = () => {
                   }}
                 />
                 <TextField.Clear />
-              </TextField.Search>
+              </TextField.Frame>
             </TextField.Root>
           </Toolbar.Root>
         </Viewport.BlockEnd>
@@ -1059,9 +1058,8 @@ export const ViewportComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        An app’s shell (guide <GuideLink to="shell-a">§7.4, shell A</GuideLink>
-        ): its sections’ pages in the content layer, the tab bar floating over
-        them at the bottom.
+        An app’s shell: its sections’ pages in the content layer, the tab bar
+        floating over them at the bottom.
       </li>
       <li>
         The keyboard covers the tab bar (<code>keyboard=&quot;cover&quot;</code>
@@ -1148,9 +1146,8 @@ export const ViewportComposition: FunctionComponent = () => (
           component="viewport"
           part="useScrollDirection"
         />{' '}
-        collapses the tab bar while scrolling down, past the top (guide{' '}
-        <GuideLink to="section-10">§10</GuideLink>: scroll position driving a
-        Region’s behavior).
+        collapses the tab bar while scrolling down, past the top (the scroll
+        position driving a bar’s behavior).
       </li>
       <li>
         Tracking the document’s scrolling instead: see the{' '}
@@ -1185,8 +1182,8 @@ export const ViewportComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A toolbar at the bottom acting on the list’s selection (guide{' '}
-        <GuideLink to="rule-g7">G7</GuideLink>: the list owns it).
+        A toolbar at the bottom acting on the list’s selection (the list owns
+        it).
       </li>
       <li>
         Rows scroll beneath it; a{' '}

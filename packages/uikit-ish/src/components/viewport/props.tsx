@@ -68,7 +68,12 @@ export type ViewportProviderProps = {
   /**
    * The app's screen, when it isn't the window (e.g. a device's frame in a
    * page): the visual viewport within it (the keyboard's inset over its
-   * bottom), its custom properties on it.
+   * layers' bottom: measured against their containing block, the window
+   * unless the screen or an ancestor contains them, read anew as it
+   * resizes, e.g. within an app's content layer resized above the
+   * keyboard), its custom properties on it; an app's background beneath
+   * its layers, as the window's (e.g. a page of its own in a navigation
+   * stack; its own background kept).
    * @default the provided portal container (`PortalContainerContext`), or
    * none: the window
    */
@@ -102,6 +107,7 @@ export type ViewportContentSafeArea = ViewportSafeArea | 'auto';
 /**
  * A bar's scroll edge effect, as content scrolls under it:
  * `soft`, a blur fading out away from the edge; `hard`, a solid backing
+ * (untinted: its scroller's own background, else the system background)
  * with a dividing line; `none`.
  */
 export type ViewportEdgeEffect = 'hard' | 'none' | 'soft';
@@ -115,6 +121,11 @@ export type ViewportAnchorProps = ComponentProps<'div'> & {
   /**
    * At the block start or end: its scroll edge effect, as content scrolls
    * under it (and under what's stuck to it, see `useViewportEdgeElement`).
+   * On iOS 27 (`isIos27`, the app below the status bar), at the screen's
+   * top (not in a sheet, popover or island, nor a portal container): `hard`
+   * by default, beneath the system's status bar, its backing, untinted, the
+   * status bar's color (the page's as the app loaded), solid at rest once
+   * the page's is another.
    * @default 'soft'
    */
   edgeEffect?: ViewportEdgeEffect;

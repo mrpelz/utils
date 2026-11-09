@@ -628,7 +628,7 @@ export const ActionSheetParts: FunctionComponent = () => (
         view’s button to open its sheet.
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="action-sheet"
@@ -788,8 +788,10 @@ export const ActionSheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional: its title and description, as an alert’s (24px above its
-        actions). Many action sheets have only a description, or neither.
+        Optional: its title and description, as an{' '}
+        <a href={publicUrl('alert')}>Alert</a>’s, but closer to its actions
+        (18px above them, an alert’s 34px). Many action sheets have only a
+        description, or neither.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -902,7 +904,7 @@ export const ActionSheetParts: FunctionComponent = () => (
       </li>
     </ul>
     <CreateHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={actionSheetHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={actionSheetHandleRows} />
@@ -928,7 +930,7 @@ export const ActionSheetParts: FunctionComponent = () => (
       </li>
     </ul>
     <UseCreateActionSheetHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={actionSheetHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={actionSheetHandleRows} />

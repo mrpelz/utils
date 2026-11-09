@@ -6,6 +6,7 @@ import { AlertDialog as BaseAlertDialog } from '@base-ui/react/alert-dialog';
 import { Input as BaseInput } from '@base-ui/react/input';
 import { ComponentProps, forwardRef, useState } from 'react';
 
+import { useSettingsPortalProps } from '../settings/main.js';
 import { cn, usePortalContainer } from '../utils/main.js';
 import type {
   AlertActionProps,
@@ -47,6 +48,7 @@ const Popup = forwardRef<HTMLDivElement, AlertPopupProps>(
   ({ className, container, ...props }, ref) => (
     <BaseAlertDialog.Portal
       className="uikit-alert-portal"
+      {...useSettingsPortalProps()}
       container={usePortalContainer(container)}
     >
       <BaseAlertDialog.Backdrop

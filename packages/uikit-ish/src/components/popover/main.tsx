@@ -8,6 +8,7 @@ import {
   createContext,
   forwardRef,
   ReactElement,
+  ReactNode,
   useCallback,
   useContext,
   useLayoutEffect,
@@ -15,6 +16,7 @@ import {
   useState,
 } from 'react';
 
+import { useSettingsPortalProps } from '../settings/main.js';
 import {
   cn,
   positionerSide,
@@ -25,16 +27,27 @@ import {
   usePortalContainer,
   withStyle,
 } from '../utils/main.js';
+import {
+  EdgeEffects,
+  useAnchorRegistration,
+  useScrollerRegistration,
+  ViewportInsetContext,
+  ViewportScopeContext,
+} from '../viewport/main.js';
 import type {
   Nose,
+  PopoverArrowProps,
   PopoverHandle,
+  PopoverHeaderProps,
   PopoverPositionerProps,
   PopoverState,
 } from './props.js';
 
 export type {
   PopoverAlign,
+  PopoverArrowProps,
   PopoverHandle,
+  PopoverHeaderProps,
   PopoverPositionerProps,
 } from './props.js';
 
@@ -53,6 +66,9 @@ export type {
 //   animated, can't be).
 
 const PopoverContext = createContext<PopoverState | undefined>(undefined);
+
+/** Its positioner shifted over its anchor (see `useGrowAvoidance`). */
+const ShiftedContext = createContext(false);
 
 /**
  * Not closed by a press or focus in a menu (in a portal) opened from it, e.g.
@@ -136,19 +152,21 @@ const Positioner = forwardRef<HTMLDivElement, PopoverPositionerProps>(
     const ref = useForwardedRef(forwardedRef);
     const collision = useCollision({ collisionBoundary, collisionPadding });
     // Growing rather than scrolling (unless its own is given).
-    const [grow, growRef] = useGrowAvoidance({}, ref);
+    const [grow, growRef, isShifted] = useGrowAvoidance({}, ref);
 
     return (
-      <BasePopover.Positioner
-        ref={growRef}
-        align={align}
-        {...collision}
-        collisionAvoidance={grow}
-        side={positionerSide(side)}
-        sideOffset={sideOffset ?? 8 + (context?.hasArrow ? arrowDepth : 0)}
-        {...props}
-        className={cn('uikit-popover-positioner', className)}
-      />
+      <ShiftedContext.Provider value={isShifted}>
+        <BasePopover.Positioner
+          ref={growRef}
+          align={align}
+          {...collision}
+          collisionAvoidance={grow}
+          side={positionerSide(side)}
+          sideOffset={sideOffset ?? 8 + (context?.hasArrow ? arrowDepth : 0)}
+          {...props}
+          className={cn('uikit-popover-positioner', className)}
+        />
+      </ShiftedContext.Provider>
     );
   },
 );
@@ -265,6 +283,8 @@ const Popup = forwardRef<HTMLDivElement, Omit<BasePopover.Popup.Props, 'ref'>>(
   ({ className, children, initialFocus, style, ...props }, ref) => {
     const popupRef = useForwardedRef(ref);
     const focus = useInitialFocus(popupRef);
+    // Its anchors' scope (its header's): fixed to it (see Viewport.Padding).
+    const [scope] = useState(() => ({}));
 
     return (
       <BasePopover.Popup
@@ -287,7 +307,11 @@ const Popup = forwardRef<HTMLDivElement, Omit<BasePopover.Popup.Props, 'ref'>>(
           <span data-layer="rim" />
           <span data-layer="highlight" />
         </span>
-        {children}
+        <ViewportScopeContext.Provider value={scope}>
+          <ViewportInsetContext.Provider value>
+            {children as ReactNode}
+          </ViewportInsetContext.Provider>
+        </ViewportScopeContext.Provider>
       </BasePopover.Popup>
     );
   },
@@ -320,9 +344,21 @@ const arrowSide = (side: string | undefined, isRightToLeft: boolean): Nose => {
   }
 };
 
-// The arrow's side (on both, as `data-arrow`) and its center along the
-// popup's edge (`--uikit-popover-nose`), where Base UI placed it.
-const placeNose = (arrow: HTMLElement, popup: HTMLElement) => {
+// No arrow drawn by the popup.
+const unplaceNose = (popup: HTMLElement) => {
+  delete popup.dataset.arrow;
+  popup.style.removeProperty('--uikit-popover-nose');
+  popup.style.removeProperty('--uikit-popover-wedge');
+};
+
+// The arrow's side (on both, as `data-arrow`; on the popup, drawn: not
+// hidden) and its center along the popup's edge (`--uikit-popover-nose`),
+// where Base UI placed it.
+const placeNose = (
+  arrow: HTMLElement,
+  popup: HTMLElement,
+  isHidden: boolean,
+) => {
   const nose = arrowSide(
     arrow.dataset.side,
     getComputedStyle(popup).direction === 'rtl',
@@ -339,6 +375,10 @@ const placeNose = (arrow: HTMLElement, popup: HTMLElement) => {
   const room = Math.min(along, length - along) - 13;
   const wedge = Math.max(wedgeHalfMin, Math.min(wedgeHalf, room));
   arrow.dataset.arrow = nose;
+  if (isHidden) {
+    unplaceNose(popup);
+    return;
+  }
   popup.dataset.arrow = nose;
   popup.style.setProperty('--uikit-popover-nose', `${String(along)}px`);
   popup.style.setProperty('--uikit-popover-wedge', `${String(wedge)}px`);
@@ -347,37 +387,42 @@ const placeNose = (arrow: HTMLElement, popup: HTMLElement) => {
 /**
  * Its arrow, pointing at its anchor (moving its popup further out),
  * drawn by its popup: where Base UI places it (its center along the
- * popup's edge, as `--uikit-popover-nose`).
+ * popup's edge, as `--uikit-popover-nose`); shifted so far it can't point
+ * at its anchor's center (`data-uncentered`), or over its anchor (not
+ * fitting on either side, see `useGrowAvoidance`), hidden (`whenShifted`).
  */
-const Arrow = forwardRef<HTMLDivElement, Omit<BasePopover.Arrow.Props, 'ref'>>(
-  ({ className, ...props }, ref) => {
+const Arrow = forwardRef<HTMLDivElement, PopoverArrowProps>(
+  ({ className, whenShifted = 'hide', ...props }, ref) => {
     const arrowRef = useForwardedRef(ref);
     const setHasArrow = useContext(PopoverContext)?.setHasArrow;
-    useLayoutEffect(() => {
-      setHasArrow?.(true);
-      return () => setHasArrow?.(false);
-    }, [setHasArrow]);
+    const isShifted = useContext(ShiftedContext);
 
     useLayoutEffect(() => {
       const { current: arrow } = arrowRef;
       const popup = arrow?.parentElement;
       if (!arrow || !popup) return undefined;
 
-      const update = () => placeNose(arrow, popup);
+      const update = () => {
+        const isHidden =
+          whenShifted === 'hide' &&
+          (isShifted || 'uncentered' in arrow.dataset);
+        // (Hidden: its popup as close as without one.)
+        setHasArrow?.(!isHidden);
+        placeNose(arrow, popup, isHidden);
+      };
       update();
       const observer = new MutationObserver(update);
       observer.observe(arrow, {
-        attributeFilter: ['style', 'data-side'],
+        attributeFilter: ['style', 'data-side', 'data-uncentered'],
         attributes: true,
       });
 
       return () => {
         observer.disconnect();
-        delete popup.dataset.arrow;
-        popup.style.removeProperty('--uikit-popover-nose');
-        popup.style.removeProperty('--uikit-popover-wedge');
+        setHasArrow?.(false);
+        unplaceNose(popup);
       };
-    }, [arrowRef]);
+    }, [arrowRef, isShifted, setHasArrow, whenShifted]);
 
     return (
       // Positioned by Base UI, drawn by the popup (see there; its side as
@@ -395,32 +440,54 @@ const Arrow = forwardRef<HTMLDivElement, Omit<BasePopover.Arrow.Props, 'ref'>>(
 /**
  * Its bar at its top (e.g. a `Toolbar`: its title, a close button), spaced
  * as popovers' are (16px from the top, 10px above the content; the
- * toolbar's row 44px). Optional.
+ * toolbar's row 44px). Optional. Over the body, which scrolls under it (a
+ * block-start anchor in the popup's scope, its soft edge effect): the body
+ * makes room with a `Viewport.Padding`, as a sheet's content does.
  */
-const Header = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('uikit-popover-header', className)}
-      data-popover-part="header"
-      {...props}
-    />
-  ),
+const Header = forwardRef<HTMLDivElement, PopoverHeaderProps>(
+  ({ className, edgeEffect = 'soft', edgeTint, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    useAnchorRegistration(ref, 'block-start', undefined, {
+      effect: edgeEffect,
+      tint: edgeTint,
+    });
+
+    return (
+      <div
+        ref={ref}
+        className={cn('uikit-popover-header', className)}
+        data-popover-part="header"
+        {...props}
+      />
+    );
+  },
 );
 
 /**
  * Its content, scrolling inside the popup, as high as the popup may be (the
- * popup itself can't scroll: its material and arrow are drawn around it).
+ * popup itself can't scroll: its material and arrow are drawn around it);
+ * a scroller (registered), drawing its header's edge effect (see
+ * `Viewport`): beside it, not in it, so its mask (fading it out under the
+ * header, see style.css) leaves it be.
  */
 const Body = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('uikit-popover-body', className)}
-      data-popover-part="body"
-      {...props}
-    />
-  ),
+  ({ className, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    useScrollerRegistration(ref);
+
+    return (
+      <>
+        <div
+          ref={ref}
+          className={cn('uikit-popover-body', className)}
+          data-popover-part="body"
+          data-viewport-scroller=""
+          {...props}
+        />
+        <EdgeEffects scroller={ref} />
+      </>
+    );
+  },
 );
 
 /**
@@ -439,6 +506,7 @@ const Portal = forwardRef<
 >(({ className, container, ...props }, ref) => (
   <BasePopover.Portal
     ref={ref}
+    {...useSettingsPortalProps()}
     container={usePortalContainer(container)}
     {...props}
     className={cn('uikit-popover-portal', className)}

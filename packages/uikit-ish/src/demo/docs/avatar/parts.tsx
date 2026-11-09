@@ -163,7 +163,7 @@ export const AvatarParts: FunctionComponent = () => (
       </li>
       <li>Several people: a group of roots.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="avatar"

@@ -38,6 +38,31 @@
       visibility: hidden;
     }
 
+    /* Its moving values (the progress, what it's derived with, and its own
+       derived from it) kept off its page: inherited, every element under
+       it would be restyled on each frame of a push, pop or swipe, and as
+       one starts and ends (costly; iOS 26's WebKit keeps much of that
+       memory, until the tab is killed; see the guide's iOS Quirks page). Not past its children, but on the
+       way to its shared items (see Persistent, and Stack:
+       `data-navigation-path`), nor past theirs. */
+    & > :not([data-navigation-path], [data-navigation-shared]),
+    & [data-navigation-path] > :not([data-navigation-path], [data-navigation-shared]),
+    & [data-navigation-shared] > * {
+      --uikit-navigation-progress: initial;
+      --uikit-navigation-width: initial;
+      --uikit-navigation-from: initial;
+      --uikit-navigation-x: initial;
+      --uikit-navigation-shown: initial;
+    }
+
+    /* Gone, until unmounted (see Stack): not painted at all. Hidden alone,
+       its descendants transitioning their own visibility (e.g. a List
+       row's slots) would show until their transitions end, above the page
+       come back to. */
+    &[data-navigation-lingering] {
+      content-visibility: hidden;
+    }
+
     /* (From where it was: see Transition's `from`, at progress 0.) */
     &[data-navigation-role='top'] {
       --uikit-navigation-x: calc(

@@ -326,7 +326,7 @@ export const CheckboxParts: FunctionComponent = () => (
         , with a parent checkbox for all.
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="checkbox"

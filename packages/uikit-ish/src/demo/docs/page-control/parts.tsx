@@ -44,7 +44,7 @@ export const PageControlParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>One element: its dots (and its glass, its tooltip) are its own.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="page-control"

@@ -124,11 +124,10 @@ config.plugins = [
     ],
   }),
   // Client-only, never imported while prerendering (from effects): Monaco
-  // (src/demo/tooling/frame/code-view.tsx) and Mermaid (src/demo/docs/hig-guide/parts.tsx),
-  // left out entirely.
+  // (src/demo/tooling/frame/code-view.tsx), left out entirely.
   // @ts-ignore
   new webpack.IgnorePlugin({
-    resourceRegExp: /^(?:mermaid|monaco-editor\/.*)$/u,
+    resourceRegExp: /^monaco-editor\/.*$/u,
   }),
   // @ts-ignore
   new ForkTsCheckerWebpackPlugin(),

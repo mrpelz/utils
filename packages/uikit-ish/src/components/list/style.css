@@ -53,6 +53,16 @@
     }
   }
 
+  /* Lifted above the keyboard (in a keyboard accessory, see Viewport):
+     outlined (in an outlined list's color, see `outline`) and raised (as
+     a row being reordered), not blending into the rows it's lifted over. */
+  [data-viewport-part='keyboard-accessory'][data-lifted] .uikit-list-group {
+    box-shadow:
+      inset 0 0 0 1px var(--color-ui-list-separator),
+      var(--shadow-ui-list-reorder);
+  }
+
+
   /* A row (see Item): its parts in a line, in their order (a flexbox):
      leading ones (edit controls, the image, `Leading`), its `Content`
      (title, subtitle, text: taking the rest), trailing ones (details,
@@ -427,7 +437,8 @@
     pointer-events: none;
     scroll-snap-align: start;
 
-    &[data-closed] {
+    /* Closed and open (see main.tsx): stopping there even when flung. */
+    &[data-stop] {
       scroll-snap-stop: always;
     }
   }
@@ -828,7 +839,10 @@
 
     &[data-swipeable] {
       overflow: auto hidden;
-      overscroll-behavior-x: contain;
+
+      /* (Not bouncing past its ends: towards a side without actions, it
+         doesn't move.) */
+      overscroll-behavior-x: none;
       scroll-snap-type: x mandatory;
       touch-action: pan-x pan-y;
 
@@ -1441,10 +1455,12 @@
     }
   }
 
+  /* Sticky (a plain list's): below its page's bar (as a header's accessory,
+     see header/style.css), not under it. */
   .uikit-list-header {
     position: var(--uikit-list-header-position, static);
     z-index: 2;
-    top: 0;
+    top: var(--uikit-header-bar, 0);
     display: grid;
     box-sizing: border-box;
     align-content: end;
@@ -1602,12 +1618,15 @@
     margin-inline: var(--uikit-list-inset, 16px);
     padding-inline: 16px;
 
+    /* Strong: on the rows' background, inset and outlined as the list's
+       groups are (see `Root` `outline`). */
     &:where([data-strong]) {
       border-radius: var(--uikit-list-radius, 24px);
       background-color: var(
         --uikit-list-group-background,
         var(--color-ui-secondary-system-grouped-background)
       );
+      box-shadow: var(--uikit-list-outline-shadow, none);
       padding-block: 16px;
     }
 

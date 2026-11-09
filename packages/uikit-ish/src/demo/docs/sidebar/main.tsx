@@ -174,7 +174,7 @@ export const SidebarDemo: FunctionComponent = () => {
                 </Sidebar.ToolbarGroup>
               </Sidebar.Toolbar>
               <TextField.Root>
-                <TextField.Search>
+                <TextField.Frame>
                   <Symbol icon={sfMagnifyingglass} />
                   <TextField.Control
                     aria-label="Search"
@@ -182,7 +182,7 @@ export const SidebarDemo: FunctionComponent = () => {
                     type="search"
                   />
                   <TextField.Clear />
-                </TextField.Search>
+                </TextField.Frame>
               </TextField.Root>
               <List.Root listStyle="sidebar">
                 <Collapsible.Root
@@ -714,7 +714,7 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                   </Sidebar.ToolbarGroup>
                 </Sidebar.Toolbar>
                 <TextField.Root>
-                  <TextField.Search>
+                  <TextField.Frame>
                     <Symbol icon={sfMagnifyingglass} />
                     <TextField.Control
                       aria-label="Search"
@@ -722,7 +722,7 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                       type="search"
                     />
                     <TextField.Clear />
-                  </TextField.Search>
+                  </TextField.Frame>
                 </TextField.Root>
                 <List.Root listStyle="sidebar">
                   <Collapsible.Root
@@ -1215,7 +1215,7 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                 </Sidebar.ToolbarGroup>
               </Sidebar.Toolbar>
               <TextField.Root>
-                <TextField.Search>
+                <TextField.Frame>
                   <Symbol icon={sfMagnifyingglass} />
                   <TextField.Control
                     aria-label="Search"
@@ -1223,7 +1223,7 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                     type="search"
                   />
                   <TextField.Clear />
-                </TextField.Search>
+                </TextField.Frame>
               </TextField.Root>
               <List.Root listStyle="sidebar">
                 <Collapsible.Root

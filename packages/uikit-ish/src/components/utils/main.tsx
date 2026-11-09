@@ -2,7 +2,6 @@
 import './style.css';
 
 import type { Popover as BasePopover } from '@base-ui/react/popover';
-import type { Signalish } from 'preact';
 import {
   createContext,
   CSSProperties,
@@ -75,7 +74,10 @@ export const mergeClassNames = (
  * @example <span className={cn('uikit-menu-icon', className)} />
  */
 export const cn: {
-  (name: string, className?: Signalish<string | undefined>): string;
+  (
+    name: string,
+    className?: string | { readonly value: string | undefined },
+  ): string;
   <State>(
     name: string,
     className?: string | ((state: State) => string | undefined),
@@ -89,7 +91,7 @@ export const cn: {
       ) ?? name) as never;
   }
 
-  // (Preact's class names can be signals.)
+  // (Preact's class names can be signals: anything with a `value`.)
   const value =
     typeof className === 'object' && className !== null
       ? (className as { value: string | undefined }).value
@@ -214,13 +216,14 @@ type CollisionAvoidance = BasePopover.Positioner.Props['collisionAvoidance'];
  * `--available-height`), shifted instead (`side: 'shift'`, while that
  * positioner is shown): in its collision boundary (see `useCollision`),
  * over its anchor as far as it needs, as tall as the boundary lets it be
- * (taller, it scrolls after all). Returns its collision avoidance and its
- * ref (also setting `ref`, if given: e.g. the component's own).
+ * (taller, it scrolls after all). Returns its collision avoidance, its
+ * ref (also setting `ref`, if given: e.g. the component's own) and whether
+ * it's shifted (e.g. for an arrow, which then can't point from its side).
  */
 export const useGrowAvoidance = (
   base: CollisionAvoidance = {},
   ref?: { current: HTMLElement | null },
-): [CollisionAvoidance, (element: HTMLElement | null) => void] => {
+): [CollisionAvoidance, (element: HTMLElement | null) => void, boolean] => {
   const [positioner, setPositioner] = useState<HTMLElement | null>(null);
   // The positioner shifted (another one, e.g. reopened: not yet).
   const [shifted, setShifted] = useState<HTMLElement | null>(null);
@@ -265,6 +268,7 @@ export const useGrowAvoidance = (
         }
       : base,
     setRef,
+    isShifted,
   ];
 };
 

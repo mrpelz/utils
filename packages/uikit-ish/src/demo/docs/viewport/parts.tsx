@@ -1496,7 +1496,7 @@ export const ViewportParts: FunctionComponent = () => (
         <code>transform</code>); in an app, they’re the window’s.
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="viewport"
@@ -1773,6 +1773,22 @@ export const ViewportParts: FunctionComponent = () => (
         <a href={publicUrl('layout')}>Layout</a>, a{' '}
         <a href={publicUrl('navigation')}>Navigation</a>): that child fills the
         screen, keeping its content clear itself.
+      </li>
+      <li>
+        For what’s in it that isn’t padded (e.g. a map’s controls, kept clear of
+        a bar or an island): the anchors’ sizes at its top and bottom, as a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />{' '}
+        makes room for them (beyond the safe area), as{' '}
+        <code>--uikit-viewport-anchor-block-start</code> and{' '}
+        <code>--uikit-viewport-anchor-block-end</code>; in a script,{' '}
+        <PartLink
+          component="viewport"
+          part="useAnchorSize"
+        />
+        .
       </li>
       <li>
         Renders a <code>div</code>; its ref is what a provider’s{' '}
@@ -2067,7 +2083,10 @@ export const ViewportParts: FunctionComponent = () => (
         Lifted (<code>data-lifted</code>), above what’s around it, on{' '}
         <code>--uikit-viewport-keyboard-accessory-background</code> (none by
         default); by <code>--uikit-viewport-keyboard-lift</code> (px), following
-        the keyboard (250ms, none with reduced motion).
+        the keyboard (250ms, none with reduced motion). A{' '}
+        <a href={publicUrl('list')}>List</a>’s groups in it, lifted, are
+        outlined and raised (as a row being reordered), not blending into the
+        rows they’re lifted over.
       </li>
       <li>
         Needs a{' '}
@@ -2275,7 +2294,7 @@ export const ViewportParts: FunctionComponent = () => (
     <UseViewportScrollPart />
     <h3>Arguments</h3>
     <PropsTable rows={useViewportScrollRows} />
-    <h3>The listener’s event</h3>
+    <h3>The Listener’s Event</h3>
     <PropsTable rows={viewportScrollEventRows} />
 
     <Heading
@@ -2374,7 +2393,7 @@ export const ViewportParts: FunctionComponent = () => (
     <UseElementGeometryPart />
     <h3>Arguments</h3>
     <PropsTable rows={useElementGeometryRows} />
-    <h3>Its listener’s geometry</h3>
+    <h3>Its Listener’s Geometry</h3>
     <PropsTable rows={elementGeometryRows} />
 
     <Heading
@@ -2400,6 +2419,44 @@ export const ViewportParts: FunctionComponent = () => (
       <li>No provider needed.</li>
     </ul>
     <UseSizeClassPart />
+    <h3>iPadOS’ snapshots</h3>
+    <ul>
+      <li>
+        As the app switcher opens (also on the way to the Home Screen), iPadOS
+        resizes the app’s window for its snapshots while the page is still
+        shown: e.g. a landscape window (1180×820) turned portrait (820×1180),
+        then to a half-width Split View size (585×820, <code>compact</code>),
+        about half a second before the page is hidden. Read as it comes, the
+        size class switched to <code>compact</code> and back: an app laid out by
+        it (a sidebar on <code>regular</code>, a stack on <code>compact</code>)
+        remounted, its scroll positions and state lost.
+      </li>
+      <li>
+        Each of these resizes is announced by an <code>orientationchange</code>{' '}
+        whose orientation (<code>screen.orientation</code>) contradicts the
+        window’s shape (portrait while the window is still landscape, and the
+        other way), before the window resizes. Then, the size class is held:
+        until an orientation matching the window’s shape, or the page shown
+        again (the window back as it was, the size class read anew).
+      </li>
+      <li>
+        Real changes aren’t held: a rotation’s <code>orientationchange</code>{' '}
+        comes after its resize (about 0.4s later), matching the window’s shape
+        (e.g. an iPad mini turned portrait, 744px wide: <code>compact</code>); a
+        resize by its user (Split View, Slide Over, Stage Manager) has none.
+      </li>
+      <li>
+        While hidden, the window’s size still reads as the last snapshot’s (its
+        media queries already the real one’s); shown again, it’s resized back (a
+        moment later), the size class read anew. No timer: held by these events
+        alone.
+      </li>
+      <li>
+        Neither the screen’s size (<code>screen.width</code>,{' '}
+        <code>screen.height</code>: the portrait one, always) nor the page’s
+        visibility (shown throughout) tells these resizes from real ones.
+      </li>
+    </ul>
     <h3>Returns</h3>
     <PropsTable rows={useSizeClassReturnRows} />
 
@@ -2477,6 +2534,14 @@ export const ViewportParts: FunctionComponent = () => (
         puts it (not where it was touched). Elsewhere, it does nothing.
       </li>
       <li>
+        Also a field already focused, but not by a touch, its keyboard not shown
+        (e.g. a popup’s initial focus, as an{' '}
+        <a href={publicUrl('alert')}>Alert</a> focuses its field): touched, it’s
+        focused anew, without scrolling; also after iPadOS’ keyboard hide key
+        (the keyboard hidden, the field still focused). With its keyboard shown,
+        a touch places the caret as usual.
+      </li>
+      <li>
         The page hidden with a field focused in its target (another tab, a Home
         Screen app left with the keyboard shown) and shown again: the field is
         focused again without scrolling (its selection as it was), the page’s
@@ -2487,6 +2552,11 @@ export const ViewportParts: FunctionComponent = () => (
           part="Viewport.Provider"
         />{' '}
         keeps their push meanwhile).
+      </li>
+      <li>
+        Hidden without a field focused (e.g. an iPad with a hardware keyboard)
+        and shown again: the page’s scroll put back too, so it isn’t left
+        shifted up.
       </li>
       <li>Until its returned function removes it.</li>
     </ul>

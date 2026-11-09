@@ -1,0 +1,257 @@
+/* The design tokens page (see main.tsx), as the docs' pages: the page's
+   colors, dashed frames, monospace details. Its specimens (text styles,
+   materials) in both schemes, side by side. */
+@layer demo {
+  /* Cards in a grid, as many as fit. */
+  .demo-token-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr));
+  }
+
+  /* A token's card (as the start page's): its sample, its name, a note;
+     pressed, copied. */
+  .demo-token-card {
+    display: grid;
+    min-width: 0;
+    padding: 0.5rem;
+    border: 1px dashed #404040;
+    margin: 0;
+    background: none;
+    color: inherit;
+    cursor: copy;
+    font: inherit;
+    gap: 0.375rem;
+    text-align: start;
+
+    @media (hover: hover) {
+      &:hover {
+        border-style: solid;
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid currentcolor;
+      outline-offset: 2px;
+    }
+  }
+
+  .demo-token-name {
+    overflow: hidden;
+    font-family: monospace;
+    font-size: 0.875rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .demo-token-note {
+    overflow: hidden;
+    min-height: 1lh;
+    color: light-dark(#404040, #a1a1a1);
+    font-family: monospace;
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .demo-token-chips {
+    display: grid;
+    border: 1px solid light-dark(#d4d4d4, #404040);
+  }
+
+  /* A color, light and dark side by side, each over its scheme's
+     background (translucent ones as they show). */
+  .demo-token-chip {
+    display: grid;
+    height: 3.5rem;
+    grid-template-columns: 1fr 1fr;
+
+    & > span {
+      background:
+        linear-gradient(var(--demo-token-color), var(--demo-token-color)),
+        var(--color-ui-system-background);
+    }
+  }
+
+  /* With increased contrast: a band below. */
+  .demo-token-chip-contrast {
+    height: 0.875rem;
+    border-block-start: 1px solid light-dark(#d4d4d4, #404040);
+  }
+
+  /* The colors' legend: a chip, explained. */
+  .demo-tokens-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    & > .demo-token-chip {
+      width: 3rem;
+      height: 1.5rem;
+      flex: none;
+      border: 1px solid light-dark(#d4d4d4, #404040);
+    }
+  }
+
+  /* Light and dark, side by side; narrow, one above the other. */
+  .demo-token-schemes {
+    display: grid;
+    gap: 1.5rem 1rem;
+    grid-template-columns: minmax(0, 1fr);
+
+    @media (width >= 48rem) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .demo-token-scheme-label {
+    color: light-dark(#404040, #a1a1a1);
+    font-size: 0.875rem;
+    margin-block: 0 0.5rem;
+  }
+
+  /* Text styles, on a surface in its scheme (its own background and
+     label): a specimen, its metrics beside it. */
+  .demo-token-specimens {
+    display: grid;
+    padding: 0;
+    border: 1px dashed #404040;
+    background-color: var(--color-ui-system-background);
+    color: var(--color-ui-label);
+    list-style: none;
+
+    & > li {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      gap: 0.25rem 1.5rem;
+    }
+
+    & > li + li {
+      border-block-start: 1px dashed #404040;
+    }
+  }
+
+  .demo-token-specimen-emphasized {
+    color: var(--color-ui-secondary-label);
+  }
+
+  .demo-token-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    color: var(--color-ui-secondary-label);
+    font-family: monospace;
+    font-size: 0.75rem;
+    gap: 0.25rem 1rem;
+  }
+
+  /* Materials: a tile each, its specimen centered on a backdrop of what
+     it's for, its caption below (as the page's text). */
+  .demo-token-materials {
+    display: grid;
+    gap: 1.5rem 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  }
+
+  .demo-token-material {
+    display: grid;
+    margin: 0;
+    gap: 0.5rem;
+
+    & > figcaption {
+      display: grid;
+      color: light-dark(#404040, #a1a1a1);
+      font-size: 0.875rem;
+      gap: 0.125rem;
+    }
+  }
+
+  /* A backdrop: shapes and a large letter pair, for the blur and the
+     blending to show. */
+  .demo-token-material-stage {
+    position: relative;
+    display: grid;
+    overflow: hidden;
+    border: 1px dashed #404040;
+    aspect-ratio: 4 / 3;
+    place-items: center;
+
+    &[data-backdrop='light'] {
+      --demo-token-letters: rgb(0 0 0 / 75%);
+
+      background:
+        radial-gradient(circle at 22% 30%, #ff9500 0 2.5rem, transparent 2.6rem),
+        radial-gradient(circle at 78% 72%, #34c759 0 3rem, transparent 3.1rem),
+        repeating-linear-gradient(0deg, #e5e5ea 0 2px, #fff 2px 14px);
+    }
+
+    &[data-backdrop='dark'] {
+      --demo-token-letters: rgb(255 255 255 / 85%);
+
+      background:
+        radial-gradient(circle at 22% 30%, #ff375f 0 2.5rem, transparent 2.6rem),
+        radial-gradient(circle at 78% 72%, #0a84ff 0 3rem, transparent 3.1rem),
+        repeating-linear-gradient(0deg, #2c2c2e 0 2px, #000 2px 14px);
+    }
+
+    &[data-backdrop='vivid-light'] {
+      --demo-token-letters: rgb(255 255 255 / 90%);
+
+      background:
+        radial-gradient(circle at 25% 30%, #fff 0 2rem, transparent 2.1rem),
+        linear-gradient(135deg, #ffd60a, #ff9f0a 45%, #ff6482);
+    }
+
+    &[data-backdrop='vivid-dark'] {
+      --demo-token-letters: rgb(255 255 255 / 70%);
+
+      background:
+        radial-gradient(circle at 75% 70%, #5e5ce6 0 3rem, transparent 3.1rem),
+        linear-gradient(135deg, #1c1c4e, #3a0ca3 50%, #000);
+    }
+
+    &[data-backdrop='vivid'] {
+      --demo-token-letters: rgb(0 0 0 / 55%);
+
+      background:
+        radial-gradient(circle at 20% 25%, #ffd60a 0 2.5rem, transparent 2.6rem),
+        radial-gradient(circle at 80% 75%, #30d158 0 3rem, transparent 3.1rem),
+        linear-gradient(135deg, #ff9500, #af52de 50%, #007aff);
+    }
+  }
+
+  .demo-token-material-letters {
+    position: absolute;
+    color: var(--demo-token-letters);
+    font-size: 7rem;
+    font-weight: 800;
+    inset: auto auto -1.5rem 0.75rem;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .demo-token-material-samples {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  /* The medium material, as a small menu. */
+  .demo-token-medium {
+    position: relative;
+    display: grid;
+    min-width: 10rem;
+    padding: 0.375rem 0;
+    border-radius: 13px;
+    color: var(--uikit-glass-content);
+
+    & > span {
+      padding: 0.375rem 1rem;
+    }
+  }
+}

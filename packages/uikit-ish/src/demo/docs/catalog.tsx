@@ -14,7 +14,6 @@ import {
   ActionSheetComposition,
   actionSheetCompositionDemos,
 } from './action-sheet/composition.js';
-import { ActionSheetInformationArchitecture } from './action-sheet/information-architecture.js';
 import { ActionSheetDemo } from './action-sheet/main.js';
 import {
   ActionSheetOverview,
@@ -28,7 +27,6 @@ import {
   ActivityViewComposition,
   activityViewCompositionDemos,
 } from './activity-view/composition.js';
-import { ActivityViewInformationArchitecture } from './activity-view/information-architecture.js';
 import {
   ActivityViewDemo,
   ActivityViewPopoverDemo,
@@ -45,7 +43,6 @@ import {
   AlertComposition,
   alertCompositionDemos,
 } from './alert/composition.js';
-import { AlertInformationArchitecture } from './alert/information-architecture.js';
 import { AlertDemo } from './alert/main.js';
 import { AlertOverview, alertOverviewDemos } from './alert/overview.js';
 import { AlertParts, alertPartsDemos } from './alert/parts.js';
@@ -53,7 +50,6 @@ import {
   AvatarComposition,
   avatarCompositionDemos,
 } from './avatar/composition.js';
-import { AvatarInformationArchitecture } from './avatar/information-architecture.js';
 import { AvatarDemo } from './avatar/main.js';
 import { AvatarOverview, avatarOverviewDemos } from './avatar/overview.js';
 import { AvatarParts, avatarPartsDemos } from './avatar/parts.js';
@@ -61,7 +57,6 @@ import {
   BadgeComposition,
   badgeCompositionDemos,
 } from './badge/composition.js';
-import { BadgeInformationArchitecture } from './badge/information-architecture.js';
 import { BadgeDemo } from './badge/main.js';
 import { BadgeOverview, badgeOverviewDemos } from './badge/overview.js';
 import { BadgeParts, badgePartsDemos } from './badge/parts.js';
@@ -69,7 +64,6 @@ import {
   ButtonComposition,
   buttonCompositionDemos,
 } from './button/composition.js';
-import { ButtonInformationArchitecture } from './button/information-architecture.js';
 import { ButtonDemo, ButtonMatrixDemo } from './button/main.js';
 import { ButtonOverview, buttonOverviewDemos } from './button/overview.js';
 import { ButtonParts, buttonPartsDemos } from './button/parts.js';
@@ -77,7 +71,6 @@ import {
   CheckboxComposition,
   checkboxCompositionDemos,
 } from './checkbox/composition.js';
-import { CheckboxInformationArchitecture } from './checkbox/information-architecture.js';
 import { CheckboxDemo, CheckboxRadioDemo } from './checkbox/main.js';
 import {
   CheckboxOverview,
@@ -101,7 +94,6 @@ import {
   ColorPickerComposition,
   colorPickerCompositionDemos,
 } from './color-picker/composition.js';
-import { ColorPickerInformationArchitecture } from './color-picker/information-architecture.js';
 import { ColorPickerDemo } from './color-picker/main.js';
 import {
   ColorPickerOverview,
@@ -115,7 +107,6 @@ import {
   ContextualMenuComposition,
   contextualMenuCompositionDemos,
 } from './contextual-menu/composition.js';
-import { ContextualMenuInformationArchitecture } from './contextual-menu/information-architecture.js';
 import { ContextualMenuDemo } from './contextual-menu/main.js';
 import {
   ContextualMenuOverview,
@@ -129,7 +120,6 @@ import {
   DatePickerComposition,
   datePickerCompositionDemos,
 } from './date-picker/composition.js';
-import { DatePickerInformationArchitecture } from './date-picker/information-architecture.js';
 import {
   DateAndTimePickerDemo,
   DatePickerDemo,
@@ -146,7 +136,6 @@ import {
   DrawerComposition,
   drawerCompositionDemos,
 } from './drawer/composition.js';
-import { DrawerInformationArchitecture } from './drawer/information-architecture.js';
 import { DrawerControlledDemo } from './drawer/main.js';
 import { DrawerOverview, drawerOverviewDemos } from './drawer/overview.js';
 import { DrawerParts, drawerPartsDemos } from './drawer/parts.js';
@@ -154,7 +143,6 @@ import {
   EditMenuComposition,
   editMenuCompositionDemos,
 } from './edit-menu/composition.js';
-import { EditMenuInformationArchitecture } from './edit-menu/information-architecture.js';
 import { EditMenuDemo } from './edit-menu/main.js';
 import {
   EditMenuOverview,
@@ -162,7 +150,6 @@ import {
 } from './edit-menu/overview.js';
 import { EditMenuParts, editMenuPartsDemos } from './edit-menu/parts.js';
 import { FormComposition, formCompositionDemos } from './form/composition.js';
-import { FormInformationArchitecture } from './form/information-architecture.js';
 import { FormDemo } from './form/main.js';
 import { FormOverview, formOverviewDemos } from './form/overview.js';
 import { FormParts, formPartsDemos } from './form/parts.js';
@@ -170,20 +157,24 @@ import {
   HeaderComposition,
   headerCompositionDemos,
 } from './header/composition.js';
-import { HeaderInformationArchitecture } from './header/information-architecture.js';
 import { HeaderDemo, HeaderTitleDemo } from './header/main.js';
 import { HeaderOverview, headerOverviewDemos } from './header/overview.js';
 import { HeaderParts, headerPartsDemos } from './header/parts.js';
 import {
+  IslandComposition,
+  islandCompositionDemos,
+} from './island/composition.js';
+import { IslandDemo } from './island/main.js';
+import { IslandOverview, islandOverviewDemos } from './island/overview.js';
+import { IslandParts, islandPartsDemos } from './island/parts.js';
+import {
   LayoutComposition,
   layoutCompositionDemos,
 } from './layout/composition.js';
-import { LayoutInformationArchitecture } from './layout/information-architecture.js';
 import { LayoutDemo } from './layout/main.js';
 import { LayoutOverview, layoutOverviewDemos } from './layout/overview.js';
 import { LayoutParts, layoutPartsDemos } from './layout/parts.js';
 import { ListComposition, listCompositionDemos } from './list/composition.js';
-import { ListInformationArchitecture } from './list/information-architecture.js';
 import {
   ListCollapsibleDemo,
   ListDemo,
@@ -202,7 +193,6 @@ import {
 import { ListOverview, listOverviewDemos } from './list/overview.js';
 import { ListParts, listPartsDemos } from './list/parts.js';
 import { MenuComposition, menuCompositionDemos } from './menu/composition.js';
-import { MenuInformationArchitecture } from './menu/information-architecture.js';
 import {
   MenuDemo,
   MenuOpenDemo,
@@ -216,7 +206,6 @@ import {
   NavigationComposition,
   navigationCompositionDemos,
 } from './navigation/composition.js';
-import { NavigationInformationArchitecture } from './navigation/information-architecture.js';
 import { NavigationDemo } from './navigation/main.js';
 import {
   NavigationOverview,
@@ -224,7 +213,6 @@ import {
 } from './navigation/overview.js';
 import { NavigationParts, navigationPartsDemos } from './navigation/parts.js';
 import { PageComposition, pageCompositionDemos } from './page/composition.js';
-import { PageInformationArchitecture } from './page/information-architecture.js';
 import { PageDemo } from './page/main.js';
 import { PageOverview, pageOverviewDemos } from './page/overview.js';
 import { PageParts, pagePartsDemos } from './page/parts.js';
@@ -232,7 +220,6 @@ import {
   PageControlComposition,
   pageControlCompositionDemos,
 } from './page-control/composition.js';
-import { PageControlInformationArchitecture } from './page-control/information-architecture.js';
 import { PageControlDemo } from './page-control/main.js';
 import {
   PageControlOverview,
@@ -246,7 +233,6 @@ import {
   PopoverComposition,
   popoverCompositionDemos,
 } from './popover/composition.js';
-import { PopoverInformationArchitecture } from './popover/information-architecture.js';
 import { PopoverDemo } from './popover/main.js';
 import { PopoverOverview, popoverOverviewDemos } from './popover/overview.js';
 import { PopoverParts, popoverPartsDemos } from './popover/parts.js';
@@ -254,7 +240,6 @@ import {
   ProgressComposition,
   progressCompositionDemos,
 } from './progress/composition.js';
-import { ProgressInformationArchitecture } from './progress/information-architecture.js';
 import { ProgressDemo } from './progress/main.js';
 import {
   ProgressOverview,
@@ -262,7 +247,6 @@ import {
 } from './progress/overview.js';
 import { ProgressParts, progressPartsDemos } from './progress/parts.js';
 import { RollComposition, rollCompositionDemos } from './roll/composition.js';
-import { RollInformationArchitecture } from './roll/information-architecture.js';
 import { RollDemo } from './roll/main.js';
 import { RollOverview, rollOverviewDemos } from './roll/overview.js';
 import { RollParts, rollPartsDemos } from './roll/parts.js';
@@ -270,7 +254,6 @@ import {
   SegmentedComposition,
   segmentedCompositionDemos,
 } from './segmented/composition.js';
-import { SegmentedInformationArchitecture } from './segmented/information-architecture.js';
 import { SegmentedDemo } from './segmented/main.js';
 import {
   SegmentedOverview,
@@ -278,10 +261,14 @@ import {
 } from './segmented/overview.js';
 import { SegmentedParts, segmentedPartsDemos } from './segmented/parts.js';
 import {
+  SettingsOverview,
+  settingsOverviewDemos,
+} from './settings/overview.js';
+import { SettingsParts, settingsPartsDemos } from './settings/parts.js';
+import {
   SheetComposition,
   sheetCompositionDemos,
 } from './sheet/composition.js';
-import { SheetInformationArchitecture } from './sheet/information-architecture.js';
 import { SheetDemo } from './sheet/main.js';
 import { SheetOverview, sheetOverviewDemos } from './sheet/overview.js';
 import { SheetParts, sheetPartsDemos } from './sheet/parts.js';
@@ -289,7 +276,6 @@ import {
   SidebarComposition,
   sidebarCompositionDemos,
 } from './sidebar/composition.js';
-import { SidebarInformationArchitecture } from './sidebar/information-architecture.js';
 import {
   SidebarCompactDemo,
   SidebarDemo,
@@ -301,7 +287,6 @@ import {
   SliderComposition,
   sliderCompositionDemos,
 } from './slider/composition.js';
-import { SliderInformationArchitecture } from './slider/information-architecture.js';
 import { SliderDemo } from './slider/main.js';
 import { SliderOverview, sliderOverviewDemos } from './slider/overview.js';
 import { SliderParts, sliderPartsDemos } from './slider/parts.js';
@@ -309,7 +294,6 @@ import {
   StepperComposition,
   stepperCompositionDemos,
 } from './stepper/composition.js';
-import { StepperInformationArchitecture } from './stepper/information-architecture.js';
 import { StepperDemo } from './stepper/main.js';
 import { StepperOverview, stepperOverviewDemos } from './stepper/overview.js';
 import { StepperParts, stepperPartsDemos } from './stepper/parts.js';
@@ -317,7 +301,6 @@ import {
   SwitchComposition,
   switchCompositionDemos,
 } from './switch/composition.js';
-import { SwitchInformationArchitecture } from './switch/information-architecture.js';
 import { SwitchDemo } from './switch/main.js';
 import { SwitchOverview, switchOverviewDemos } from './switch/overview.js';
 import { SwitchParts, switchPartsDemos } from './switch/parts.js';
@@ -325,7 +308,6 @@ import {
   SymbolComposition,
   symbolCompositionDemos,
 } from './symbol/composition.js';
-import { SymbolInformationArchitecture } from './symbol/information-architecture.js';
 import { SymbolDemo } from './symbol/main.js';
 import { SymbolOverview, symbolOverviewDemos } from './symbol/overview.js';
 import { SymbolParts, symbolPartsDemos } from './symbol/parts.js';
@@ -333,7 +315,6 @@ import {
   TabBarComposition,
   tabBarCompositionDemos,
 } from './tab-bar/composition.js';
-import { TabBarInformationArchitecture } from './tab-bar/information-architecture.js';
 import {
   TabBarAccessoryDemo,
   TabBarContentDemo,
@@ -349,7 +330,6 @@ import {
   TextFieldComposition,
   textFieldCompositionDemos,
 } from './text-field/composition.js';
-import { TextFieldInformationArchitecture } from './text-field/information-architecture.js';
 import { TextFieldDemo } from './text-field/main.js';
 import {
   TextFieldOverview,
@@ -360,7 +340,6 @@ import {
   ToolbarComposition,
   toolbarCompositionDemos,
 } from './toolbar/composition.js';
-import { ToolbarInformationArchitecture } from './toolbar/information-architecture.js';
 import {
   ToolbarDemo,
   ToolbarPageDotsDemo,
@@ -373,7 +352,6 @@ import {
   TooltipComposition,
   tooltipCompositionDemos,
 } from './tooltip/composition.js';
-import { TooltipInformationArchitecture } from './tooltip/information-architecture.js';
 import { TooltipDemo } from './tooltip/main.js';
 import { TooltipOverview, tooltipOverviewDemos } from './tooltip/overview.js';
 import { TooltipParts, tooltipPartsDemos } from './tooltip/parts.js';
@@ -381,7 +359,6 @@ import {
   TypographyComposition,
   typographyCompositionDemos,
 } from './typography/composition.js';
-import { TypographyInformationArchitecture } from './typography/information-architecture.js';
 import {
   TypographyDemo,
   TypographyMatrixDemo,
@@ -396,7 +373,6 @@ import {
   ViewportComposition,
   viewportCompositionDemos,
 } from './viewport/composition.js';
-import { ViewportInformationArchitecture } from './viewport/information-architecture.js';
 import {
   ViewportAnchorsDemo,
   ViewportBarDemo,
@@ -415,10 +391,15 @@ import { ViewportParts, viewportPartsDemos } from './viewport/parts.js';
  * and values, indicators, overlay surfaces), not by Apple's own categories.
  */
 export const categories = {
+  foundations: {
+    description:
+      'What the components follow: the settings for color, contrast, motion and text, and the platform’s quirks.',
+    title: 'Foundations',
+  },
   structure: {
     description:
       'The frame of an app: its columns, pages and bars, and moving between them.',
-    title: 'Structure & navigation',
+    title: 'Structure & Navigation',
   },
   presentation: {
     description:
@@ -436,7 +417,7 @@ export const categories = {
   },
   choices: {
     description: 'Picking from options, setting values, entering text.',
-    title: 'Choices & input',
+    title: 'Choices & Input',
   },
   status: {
     description: 'Showing a quantity or a state, at the scope it describes.',
@@ -449,11 +430,6 @@ export type Category = keyof typeof categories;
 export type CatalogEntry = {
   /** How it combines with other components (`/:id/composition`). */
   Composition?: FunctionComponent;
-  /**
-   * Where it sits in Apple's information architecture, after the
-   * HIG-composition guide (`/:id/information-architecture`).
-   */
-  InformationArchitecture?: FunctionComponent;
   /** Introduction, use and props (`/:id`). */
   Overview?: FunctionComponent;
   /** Its parts, one by one (`/:id/parts`). */
@@ -465,8 +441,6 @@ export type CatalogEntry = {
   demos: readonly FunctionComponent[];
   /** Framework7's React component (framework7.io/react/….html). */
   framework7Id?: string;
-  /** Apple's HIG page (developer.apple.com/design/human-interface-guidelines/…). */
-  higId?: string;
   /** Its demo directory, and route (`/:id`). */
   id: string;
   /** One or two sentences, for the index. */
@@ -477,6 +451,16 @@ export type CatalogEntry = {
 /** Every component's demos, in the order of the page of all demos. */
 export const catalog: readonly CatalogEntry[] = [
   {
+    category: 'foundations',
+    demos: [...settingsOverviewDemos, ...settingsPartsDemos],
+    id: 'settings',
+    Overview: SettingsOverview,
+    Parts: SettingsParts,
+    summary:
+      'The settings the components follow (color scheme, contrast, motion, transparency, text size): the system’s, overridden by providers for what’s within them.',
+    title: 'Settings',
+  },
+  {
     category: 'structure',
     demos: [
       ViewportDemo,
@@ -486,10 +470,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...viewportPartsDemos,
       ...viewportCompositionDemos,
     ],
-    higId: 'layout',
     id: 'viewport',
     Composition: ViewportComposition,
-    InformationArchitecture: ViewportInformationArchitecture,
     Overview: ViewportOverview,
     Parts: ViewportParts,
     summary:
@@ -504,10 +486,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...layoutPartsDemos,
       ...layoutCompositionDemos,
     ],
-    higId: 'split-views',
     id: 'layout',
     Composition: LayoutComposition,
-    InformationArchitecture: LayoutInformationArchitecture,
     Overview: LayoutOverview,
     Parts: LayoutParts,
     summary:
@@ -525,10 +505,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...sidebarCompositionDemos,
     ],
     framework7Id: 'panel',
-    higId: 'sidebars',
     id: 'sidebar',
     Composition: SidebarComposition,
-    InformationArchitecture: SidebarInformationArchitecture,
     Overview: SidebarOverview,
     Parts: SidebarParts,
     summary:
@@ -547,7 +525,6 @@ export const catalog: readonly CatalogEntry[] = [
     framework7Id: 'panel',
     id: 'drawer',
     Composition: DrawerComposition,
-    InformationArchitecture: DrawerInformationArchitecture,
     Overview: DrawerOverview,
     Parts: DrawerParts,
     summary:
@@ -570,15 +547,13 @@ export const catalog: readonly CatalogEntry[] = [
       ...tabBarCompositionDemos,
     ],
     framework7Id: 'toolbar-tabbar',
-    higId: 'tab-bars',
     id: 'tab-bar',
     Composition: TabBarComposition,
-    InformationArchitecture: TabBarInformationArchitecture,
     Overview: TabBarOverview,
     Parts: TabBarParts,
     summary:
       'Switches between an app’s top-level sections: a glass bar of tabs at the bottom of the window, which can collapse to its active tab.',
-    title: 'Tab bar',
+    title: 'Tab Bar',
   },
   {
     category: 'structure',
@@ -589,10 +564,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...navigationCompositionDemos,
     ],
     framework7Id: 'view',
-    higId: 'navigation-and-search',
     id: 'navigation',
     Composition: NavigationComposition,
-    InformationArchitecture: NavigationInformationArchitecture,
     Overview: NavigationOverview,
     Parts: NavigationParts,
     summary:
@@ -608,10 +581,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...pageCompositionDemos,
     ],
     framework7Id: 'page',
-    higId: 'layout',
     id: 'page',
     Composition: PageComposition,
-    InformationArchitecture: PageInformationArchitecture,
     Overview: PageOverview,
     Parts: PageParts,
     summary:
@@ -628,10 +599,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...headerCompositionDemos,
     ],
     framework7Id: 'navbar',
-    higId: 'toolbars',
     id: 'header',
     Composition: HeaderComposition,
-    InformationArchitecture: HeaderInformationArchitecture,
     Overview: HeaderOverview,
     Parts: HeaderParts,
     summary:
@@ -651,10 +620,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...toolbarCompositionDemos,
     ],
     framework7Id: 'toolbar-tabbar',
-    higId: 'toolbars',
     id: 'toolbar',
     Composition: ToolbarComposition,
-    InformationArchitecture: ToolbarInformationArchitecture,
     Overview: ToolbarOverview,
     Parts: ToolbarParts,
     summary:
@@ -670,7 +637,6 @@ export const catalog: readonly CatalogEntry[] = [
       ...collapsiblePartsDemos,
       ...collapsibleCompositionDemos,
     ],
-    higId: 'disclosure-controls',
     id: 'collapsible',
     Composition: CollapsibleComposition,
     Overview: CollapsibleOverview,
@@ -688,7 +654,6 @@ export const catalog: readonly CatalogEntry[] = [
       ...accordionPartsDemos,
       ...accordionCompositionDemos,
     ],
-    higId: 'disclosure-controls',
     id: 'accordion',
     Composition: AccordionComposition,
     Overview: AccordionOverview,
@@ -705,15 +670,13 @@ export const catalog: readonly CatalogEntry[] = [
       ...pageControlPartsDemos,
       ...pageControlCompositionDemos,
     ],
-    higId: 'page-controls',
     id: 'page-control',
     Composition: PageControlComposition,
-    InformationArchitecture: PageControlInformationArchitecture,
     Overview: PageControlOverview,
     Parts: PageControlParts,
     summary:
       'Dots for a row of pages, the current one highlighted: pressed beside it, or scrubbed across, it steps to the previous or next page.',
-    title: 'Page control',
+    title: 'Page Control',
   },
   {
     baseUiId: 'dialog',
@@ -725,15 +688,29 @@ export const catalog: readonly CatalogEntry[] = [
       ...sheetCompositionDemos,
     ],
     framework7Id: 'sheet-modal',
-    higId: 'sheets',
     id: 'sheet',
     Composition: SheetComposition,
-    InformationArchitecture: SheetInformationArchitecture,
     Overview: SheetOverview,
     Parts: SheetParts,
     summary:
       'A focused task over the page: from the bottom on a phone, large or medium, a form sheet on a tablet; dismissed by its buttons or dragged down.',
     title: 'Sheet',
+  },
+  {
+    category: 'presentation',
+    demos: [
+      IslandDemo,
+      ...islandOverviewDemos,
+      ...islandPartsDemos,
+      ...islandCompositionDemos,
+    ],
+    id: 'island',
+    Composition: IslandComposition,
+    Overview: IslandOverview,
+    Parts: IslandParts,
+    summary:
+      'A sheet’s glass capsule that’s always there, over a page’s content such as a map: swiped up, it reveals more, stop by stop.',
+    title: 'Island',
   },
   {
     baseUiId: 'popover',
@@ -745,10 +722,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...popoverCompositionDemos,
     ],
     framework7Id: 'popover',
-    higId: 'popovers',
     id: 'popover',
     Composition: PopoverComposition,
-    InformationArchitecture: PopoverInformationArchitecture,
     Overview: PopoverOverview,
     Parts: PopoverParts,
     summary:
@@ -765,10 +740,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...alertCompositionDemos,
     ],
     framework7Id: 'dialog',
-    higId: 'alerts',
     id: 'alert',
     Composition: AlertComposition,
-    InformationArchitecture: AlertInformationArchitecture,
     Overview: AlertOverview,
     Parts: AlertParts,
     summary:
@@ -785,15 +758,13 @@ export const catalog: readonly CatalogEntry[] = [
       ...actionSheetCompositionDemos,
     ],
     framework7Id: 'action-sheet',
-    higId: 'action-sheets',
     id: 'action-sheet',
     Composition: ActionSheetComposition,
-    InformationArchitecture: ActionSheetInformationArchitecture,
     Overview: ActionSheetOverview,
     Parts: ActionSheetParts,
     summary:
       'Choices about an action the person just started, at its control: a destructive one first; a popover in a regular width.',
-    title: 'Action sheet',
+    title: 'Action Sheet',
   },
   {
     baseUiId: 'tooltip',
@@ -807,7 +778,6 @@ export const catalog: readonly CatalogEntry[] = [
     framework7Id: 'tooltip',
     id: 'tooltip',
     Composition: TooltipComposition,
-    InformationArchitecture: TooltipInformationArchitecture,
     Overview: TooltipOverview,
     Parts: TooltipParts,
     summary:
@@ -835,10 +805,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...listCompositionDemos,
     ],
     framework7Id: 'list-view',
-    higId: 'lists-and-tables',
     id: 'list',
     Composition: ListComposition,
-    InformationArchitecture: ListInformationArchitecture,
     Overview: ListOverview,
     Parts: ListParts,
     summary:
@@ -855,10 +823,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...typographyPartsDemos,
       ...typographyCompositionDemos,
     ],
-    higId: 'typography',
     id: 'typography',
     Composition: TypographyComposition,
-    InformationArchitecture: TypographyInformationArchitecture,
     Overview: TypographyOverview,
     Parts: TypographyParts,
     summary:
@@ -876,7 +842,6 @@ export const catalog: readonly CatalogEntry[] = [
     ],
     id: 'avatar',
     Composition: AvatarComposition,
-    InformationArchitecture: AvatarInformationArchitecture,
     Overview: AvatarOverview,
     Parts: AvatarParts,
     summary:
@@ -892,10 +857,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...symbolCompositionDemos,
     ],
     framework7Id: 'icon',
-    higId: 'sf-symbols',
     id: 'symbol',
     Composition: SymbolComposition,
-    InformationArchitecture: SymbolInformationArchitecture,
     Overview: SymbolOverview,
     Parts: SymbolParts,
     summary:
@@ -911,15 +874,13 @@ export const catalog: readonly CatalogEntry[] = [
       ...activityViewPartsDemos,
       ...activityViewCompositionDemos,
     ],
-    higId: 'activity-views',
     id: 'activity-view',
     Composition: ActivityViewComposition,
-    InformationArchitecture: ActivityViewInformationArchitecture,
     Overview: ActivityViewOverview,
     Parts: ActivityViewParts,
     summary:
       'Sharing: what’s shared, people to share with and actions, in rows; in a sheet (compact) or a popover (regular).',
-    title: 'Activity view',
+    title: 'Activity View',
   },
   {
     baseUiId: 'menu',
@@ -930,15 +891,13 @@ export const catalog: readonly CatalogEntry[] = [
       ...contextualMenuPartsDemos,
       ...contextualMenuCompositionDemos,
     ],
-    higId: 'context-menus',
     id: 'contextual-menu',
     Composition: ContextualMenuComposition,
-    InformationArchitecture: ContextualMenuInformationArchitecture,
     Overview: ContextualMenuOverview,
     Parts: ContextualMenuParts,
     summary:
       'Actions on a piece of content, summoned from it: the content lifts above the blurred page, or turns into a preview, a menu below it.',
-    title: 'Contextual menu',
+    title: 'Contextual Menu',
   },
   {
     baseUiId: 'menu',
@@ -953,10 +912,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...menuPartsDemos,
       ...menuCompositionDemos,
     ],
-    higId: 'menus',
     id: 'menu',
     Composition: MenuComposition,
-    InformationArchitecture: MenuInformationArchitecture,
     Overview: MenuOverview,
     Parts: MenuParts,
     summary:
@@ -972,15 +929,13 @@ export const catalog: readonly CatalogEntry[] = [
       ...editMenuPartsDemos,
       ...editMenuCompositionDemos,
     ],
-    higId: 'edit-menus',
     id: 'edit-menu',
     Composition: EditMenuComposition,
-    InformationArchitecture: EditMenuInformationArchitecture,
     Overview: EditMenuOverview,
     Parts: EditMenuParts,
     summary:
       'Actions on a selection in a horizontal glass capsule above it: opened by the app, more actions scrolling or behind a chevron.',
-    title: 'Edit menu',
+    title: 'Edit Menu',
   },
   {
     baseUiId: 'button',
@@ -993,10 +948,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...buttonCompositionDemos,
     ],
     framework7Id: 'button',
-    higId: 'buttons',
     id: 'button',
     Composition: ButtonComposition,
-    InformationArchitecture: ButtonInformationArchitecture,
     Overview: ButtonOverview,
     Parts: ButtonParts,
     summary:
@@ -1013,10 +966,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...formCompositionDemos,
     ],
     framework7Id: 'form',
-    higId: 'entering-data',
     id: 'form',
     Composition: FormComposition,
-    InformationArchitecture: FormInformationArchitecture,
     Overview: FormOverview,
     Parts: FormParts,
     summary:
@@ -1037,15 +988,13 @@ export const catalog: readonly CatalogEntry[] = [
       ...datePickerCompositionDemos,
     ],
     framework7Id: 'calendar',
-    higId: 'pickers',
     id: 'date-picker',
     Composition: DatePickerComposition,
-    InformationArchitecture: DatePickerInformationArchitecture,
     Overview: DatePickerOverview,
     Parts: DatePickerParts,
     summary:
       'Picks a date, a time or both, or a range of dates: compact buttons opening a calendar in a popover, or the calendar in place.',
-    title: 'Date picker',
+    title: 'Date Picker',
   },
   {
     category: 'choices',
@@ -1056,15 +1005,13 @@ export const catalog: readonly CatalogEntry[] = [
       ...colorPickerCompositionDemos,
     ],
     framework7Id: 'color-picker',
-    higId: 'color-wells',
     id: 'color-picker',
     Composition: ColorPickerComposition,
-    InformationArchitecture: ColorPickerInformationArchitecture,
     Overview: ColorPickerOverview,
     Parts: ColorPickerParts,
     summary:
       'Picks a color from a grid, a spectrum or sliders, with its opacity and saved colors; opened from a color well, in a popover or a sheet.',
-    title: 'Color picker',
+    title: 'Color Picker',
   },
   {
     category: 'choices',
@@ -1075,10 +1022,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...rollCompositionDemos,
     ],
     framework7Id: 'picker',
-    higId: 'pickers',
     id: 'roll',
     Composition: RollComposition,
-    InformationArchitecture: RollInformationArchitecture,
     Overview: RollOverview,
     Parts: RollParts,
     summary:
@@ -1095,15 +1040,13 @@ export const catalog: readonly CatalogEntry[] = [
       ...textFieldCompositionDemos,
     ],
     framework7Id: 'inputs',
-    higId: 'text-fields',
     id: 'text-field',
     Composition: TextFieldComposition,
-    InformationArchitecture: TextFieldInformationArchitecture,
     Overview: TextFieldOverview,
     Parts: TextFieldParts,
     summary:
       'Free text in a list row, on its own or in a search capsule: validated as the browser’s inputs are, its errors below it.',
-    title: 'Text field',
+    title: 'Text Field',
   },
   {
     baseUiId: 'radio',
@@ -1115,10 +1058,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...segmentedCompositionDemos,
     ],
     framework7Id: 'segmented',
-    higId: 'segmented-controls',
     id: 'segmented',
     Composition: SegmentedComposition,
-    InformationArchitecture: SegmentedInformationArchitecture,
     Overview: SegmentedOverview,
     Parts: SegmentedParts,
     summary:
@@ -1135,10 +1076,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...sliderCompositionDemos,
     ],
     framework7Id: 'range-slider',
-    higId: 'sliders',
     id: 'slider',
     Composition: SliderComposition,
-    InformationArchitecture: SliderInformationArchitecture,
     Overview: SliderOverview,
     Parts: SliderParts,
     summary:
@@ -1155,10 +1094,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...stepperCompositionDemos,
     ],
     framework7Id: 'stepper',
-    higId: 'steppers',
     id: 'stepper',
     Composition: StepperComposition,
-    InformationArchitecture: StepperInformationArchitecture,
     Overview: StepperOverview,
     Parts: StepperParts,
     summary:
@@ -1175,10 +1112,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...switchCompositionDemos,
     ],
     framework7Id: 'toggle',
-    higId: 'toggles',
     id: 'switch',
     Composition: SwitchComposition,
-    InformationArchitecture: SwitchInformationArchitecture,
     Overview: SwitchOverview,
     Parts: SwitchParts,
     summary:
@@ -1196,10 +1131,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...checkboxCompositionDemos,
     ],
     framework7Id: 'checkbox',
-    higId: 'toggles',
     id: 'checkbox',
     Composition: CheckboxComposition,
-    InformationArchitecture: CheckboxInformationArchitecture,
     Overview: CheckboxOverview,
     Parts: CheckboxParts,
     summary:
@@ -1216,10 +1149,8 @@ export const catalog: readonly CatalogEntry[] = [
       ...progressCompositionDemos,
     ],
     framework7Id: 'progressbar',
-    higId: 'progress-indicators',
     id: 'progress',
     Composition: ProgressComposition,
-    InformationArchitecture: ProgressInformationArchitecture,
     Overview: ProgressOverview,
     Parts: ProgressParts,
     summary:
@@ -1237,7 +1168,6 @@ export const catalog: readonly CatalogEntry[] = [
     framework7Id: 'badge',
     id: 'badge',
     Composition: BadgeComposition,
-    InformationArchitecture: BadgeInformationArchitecture,
     Overview: BadgeOverview,
     Parts: BadgeParts,
     summary:

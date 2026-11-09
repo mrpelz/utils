@@ -612,6 +612,7 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
         <div
           {...props}
           className={cn('uikit-roll-column-frame', className)}
+          data-disabled={disabled ? '' : undefined}
           data-roll-part="column"
           style={
             {

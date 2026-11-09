@@ -14,7 +14,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import {
   checkboxGroupRows,
   checkboxRootRows,
@@ -266,8 +265,8 @@ export const CheckboxOverview: FunctionComponent = () => (
       <li>
         In a list, a row passes its clicks on to its circle (
         <code>forwardClick</code>), so the whole row selects (see{' '}
-        <a href={publicUrl('checkbox/composition')}>Composition</a>; guide{' '}
-        <GuideLink to="rule-g7">G7</GuideLink>: the list owns the selection).
+        <a href={publicUrl('checkbox/composition')}>Composition</a>: the list
+        owns the selection).
       </li>
     </ul>
   </>

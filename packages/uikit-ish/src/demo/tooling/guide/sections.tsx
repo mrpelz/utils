@@ -1,6 +1,7 @@
 import { createContext, FunctionComponent, ReactNode, useContext } from 'react';
 
 import { publicUrl } from '../public-url.js';
+import { titleCaseNode } from '../shared/title-case.js';
 import { EntryContext } from './nav.js';
 
 // Anchors on the guide pages: their sections (headings with ids) listed at
@@ -36,7 +37,7 @@ export const Heading: FunctionComponent<{
 
   return (
     <Tag id={id}>
-      {children}{' '}
+      {titleCaseNode(children)}{' '}
       <a
         aria-label="Link to this section"
         className="demo-anchor"
@@ -59,7 +60,7 @@ export const Contents: FunctionComponent<{
     <ul>
       {sections.map(([id, title]) => (
         <li key={id}>
-          <a href={sectionHref(id)}>{title}</a>
+          <a href={sectionHref(id)}>{titleCaseNode(title)}</a>
         </li>
       ))}
     </ul>

@@ -30,7 +30,6 @@ import {
   sfXmark,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import {
   colorPickerPanelRows,
   colorPickerRootRows,
@@ -76,9 +75,10 @@ const LiveView: FunctionComponent = () => {
   // Its modes; one alone, no control for them (its view shown).
   const modes = shownModes(content);
   const hasModesControl = modes.length > 1;
-  const parts = (isModesElsewhere = false) =>
+  // (Its modes' control elsewhere: the popover's or the sheet's header.)
+  const parts = () =>
     panelParts({
-      isModesElsewhere: isModesElsewhere || !hasModesControl,
+      isModesElsewhere: true,
       modes,
       opacity: content.opacity,
     });
@@ -139,34 +139,32 @@ const LiveView: FunctionComponent = () => {
               >
                 <Sheet.Header>
                   <Sheet.Grabber />
-                  <ColorPicker.Header>
-                    <Toolbar.Root placement="block-start">
-                      <Toolbar.Leading>{systemColors}</Toolbar.Leading>
-                      <Toolbar.Title>
-                        <span>Colors</span>
-                      </Toolbar.Title>
-                      <Toolbar.Trailing>
-                        {codeCopy}
-                        <Sheet.Close
-                          render={
-                            <Toolbar.Button
-                              aria-label="Close"
-                              shape="circle"
-                            />
-                          }
-                        >
-                          <Button.Icon>
-                            <Symbol icon={sfXmark} />
-                          </Button.Icon>
-                        </Sheet.Close>
-                      </Toolbar.Trailing>
-                    </Toolbar.Root>
-                  </ColorPicker.Header>
+                  <Toolbar.Root placement="block-start">
+                    <Toolbar.Leading>{systemColors}</Toolbar.Leading>
+                    <Toolbar.Title>
+                      <span>Colors</span>
+                    </Toolbar.Title>
+                    <Toolbar.Trailing>
+                      {codeCopy}
+                      <Sheet.Close
+                        render={
+                          <Toolbar.Button
+                            aria-label="Close"
+                            shape="circle"
+                          />
+                        }
+                      >
+                        <Button.Icon>
+                          <Symbol icon={sfXmark} />
+                        </Button.Icon>
+                      </Sheet.Close>
+                    </Toolbar.Trailing>
+                  </Toolbar.Root>
                   {hasModesControl ? modesControl(modes) : null}
                 </Sheet.Header>
                 <Sheet.Content>
                   <Viewport.Padding edge="block-start" />
-                  <ColorPicker.Panel>{parts(true)}</ColorPicker.Panel>
+                  <ColorPicker.Panel>{parts()}</ColorPicker.Panel>
                   <Viewport.Padding edge="block-end" />
                 </Sheet.Content>
               </ColorPicker.Root>
@@ -193,7 +191,7 @@ const LiveView: FunctionComponent = () => {
                 }
               >
                 <Popover.Arrow />
-                <ColorPicker.Header>
+                <Popover.Header>
                   <Toolbar.Root placement="block-start">
                     <Toolbar.Leading>
                       <ColorPicker.Eyedropper
@@ -224,8 +222,10 @@ const LiveView: FunctionComponent = () => {
                       </Popover.Close>
                     </Toolbar.Trailing>
                   </Toolbar.Root>
-                </ColorPicker.Header>
+                  {hasModesControl ? modesControl(modes) : null}
+                </Popover.Header>
                 <Popover.Body>
+                  <Viewport.Padding edge="block-start" />
                   <ColorPicker.Panel>{parts()}</ColorPicker.Panel>
                 </Popover.Body>
               </ColorPicker.Root>
@@ -270,9 +270,7 @@ export const ColorPickerOverview: FunctionComponent = () => (
         For any color: a drawing’s, a text’s, an app’s tint, a calendar’s.
       </li>
       <li>
-        A value, not a pick from the app’s few: the guide’s{' '}
-        <GuideLink to="primitive-value-input">Value input</GuideLink> (its value
-        type: a color).
+        For entering a value (a color), not for picking one of the app’s few.
       </li>
     </ul>
 

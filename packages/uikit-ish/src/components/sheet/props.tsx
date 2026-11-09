@@ -6,6 +6,9 @@ import type { ViewportEdgeEffect } from '../viewport/main.js';
 
 export type SheetDetent = 'large' | 'medium';
 
+/** What a sheet is in a regular width (see `Sheet.Popup`'s `regular`). */
+export type SheetRegular = 'card' | 'form';
+
 /**
  * The direction a sheet is swiped away in (Base UI's `Drawer`'s), or
  * `none`: not swiped away at all.
@@ -25,6 +28,27 @@ export type SheetRootProps<Payload = unknown> = Omit<
   swipeDirection?: SheetSwipeDirection;
 };
 
+export type SheetTriggerProps<Payload = unknown> = Omit<
+  BaseDrawer.Trigger.Props<Payload>,
+  'ref'
+> & {
+  /**
+   * The stop it opens the sheet at (a snap group's `value`, see
+   * `Sheet.SnapGroup`): a deep link into it; left out, the root's
+   * `defaultSnapPoint`.
+   */
+  snapPoint?: string;
+};
+
+export type SheetSnapGroupProps = ComponentProps<'div'> & {
+  /**
+   * Its snap point's name: the sheet snaps to show everything up to its
+   * end (its header too), named so in the root's `snapPoint`,
+   * `defaultSnapPoint` and `onSnapPointChange`.
+   */
+  value: string;
+};
+
 export type SheetPopupProps = Omit<BaseDrawer.Popup.Props, 'ref'> & {
   /**
    * Its background (as a page's, see `Page.Root`): `grouped` for grouped
@@ -34,8 +58,8 @@ export type SheetPopupProps = Omit<BaseDrawer.Popup.Props, 'ref'> & {
    */
   background?: 'grouped' | 'plain';
   /**
-   * A sheet from the bottom (`detent`), or (not compact) a form sheet,
-   * centered.
+   * A sheet from the bottom (`detent`), or (not compact) what `regular`
+   * says.
    * @default by the window's width (compact below 768px)
    */
   compact?: boolean;
@@ -53,6 +77,14 @@ export type SheetPopupProps = Omit<BaseDrawer.Popup.Props, 'ref'> & {
    * @default 'large'
    */
   detent?: SheetDetent;
+  /**
+   * What it is in a regular width (a tablet's; not `compact`): `form`, a
+   * form sheet, centered (e.g. for editing); `card`, a card from the bottom
+   * at the leading edge (as a regular `Island`: 375px wide, 10px in), its
+   * `detent`, swiping and snapping kept (e.g. over a map).
+   * @default 'form'
+   */
+  regular?: SheetRegular;
 };
 
 export type SheetHeaderProps = ComponentProps<'div'> & {

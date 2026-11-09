@@ -104,8 +104,6 @@ export const propOptionsMode = {
 /** Parts without props of their own (their element's). */
 export const propOptionsPart = propOptionsElement;
 
-export const propOptionsHeader = propOptionsElement;
-
 export const propOptionsEyedropper = {
   ...propOptionsElement,
   render: [

@@ -93,6 +93,7 @@ export const propOptionsGuidePopup = {
   // Its lists are grouped: on the grouped background.
   background: ['grouped', 'plain', undefined] as const,
   compact: [true, false, undefined] as const,
+  regular: [undefined, 'form', 'card'] as const,
   initialFocus: [undefined, false, true] as const,
   finalFocus: [undefined, false, true] as const,
 };
@@ -107,6 +108,44 @@ export const propOptionsHeader = {
   style: commonPropOptions.style,
   edgeEffect: [undefined, 'soft', 'hard', 'none'] as const,
   edgeTint: [undefined, 'rgb(255 59 48 / 30%)'] as const,
+};
+
+/** `Sheet.SnapGroup`'s root: its snap point, by its groups' names. */
+export const getPropOptionsSnapGroupRoot = (addLog: AddLog) => ({
+  defaultSnapPoint: [undefined, 'peek', 'details', 'all'] as const,
+  snapPoint: [undefined, 'peek', 'details', 'all'] as const,
+  onSnapPointChange: [
+    new MappedProp(
+      (snapPoint: number | string | null) =>
+        addLog(`snap point: ${String(snapPoint)}`),
+      '[log change]',
+    ),
+    undefined,
+  ] as const,
+});
+
+/**
+ * A sheet opening at a stop (composition): where (its groups' names), and
+ * whether it's open at first, apart.
+ */
+export const getPropOptionsOpeningAtAStop = (addLog: AddLog) => ({
+  defaultSnapPoint: ['header', 'peek', 'details', 'all', undefined] as const,
+  defaultOpen: [undefined, false, true] as const,
+  onSnapPointChange: [
+    new MappedProp(
+      (snapPoint: number | string | null) =>
+        addLog(`snap point: ${String(snapPoint)}`),
+      '[log change]',
+    ),
+    undefined,
+  ] as const,
+});
+
+/** `Sheet.SnapGroup`: its own element (no `render`), its name. */
+export const propOptionsSnapGroup = {
+  className: commonPropOptions.className,
+  style: commonPropOptions.style,
+  value: ['peek', 'summary'] as const,
 };
 
 /** `Sheet.Grabber`: its own element (no `render`), its cursor. */

@@ -28,7 +28,7 @@ const sheet = (page) =>
 /** @type {import('../lib.js').Test[]} */
 export const tests = [
   {
-    name: 'sheet: large (compact: from 10px below the top), medium (6px in, its content’s height), a form sheet in a regular width',
+    name: 'sheet: large (compact: from 10px below the top), medium (8px in, its content’s height), a form sheet in a regular width',
     run: async (page) => {
       // (In the demo's phone: compact.)
       await page.open('sheet', 'light', {
@@ -51,12 +51,12 @@ export const tests = [
       if (!medium) throw new Error('not open');
       assert.deepEqual(
         [medium.box[0], medium.box[2], medium.box[3], medium.radius],
-        [6, 6, 6, '34px'],
-        'to the screen’s edge, over the home indicator',
+        [8, 8, 8, '42px'],
+        '8px from the screen’s edges, over the home indicator',
       );
       // Its content's height: shorter than its maximum (64px short of the
-      // screen, its top then 64px less its bottom's 6px down).
-      assert.ok(medium.box[1] > 64 - 6, 'its content’s height');
+      // screen, its top then 64px less its bottom's 8px down).
+      assert.ok(medium.box[1] > 64 - 8, 'its content’s height');
 
       // A regular width (a tablet's screen): a form sheet, centered.
       await page.open('sheet-composition-form-sheet');

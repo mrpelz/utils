@@ -18,6 +18,28 @@
     --uikit-safe-area-inset-left: env(safe-area-inset-left, 0px);
 
     /*
+     * Settings (see components/settings/main.tsx): each the system's (its
+     * media query's, see below; without one, the default), unless a
+     * provider overrides it (on its element, inherited: the nearest
+     * provider's wins; a portal's, where it was opened). 0 or 1; text size
+     * a keyword (Typography's).
+     */
+    --uikit-settings-contrast-system: 0;
+    --uikit-settings-differentiate-without-color-system: 0;
+    --uikit-settings-reduced-motion-system: 0;
+    --uikit-settings-reduced-transparency-system: 0;
+    --uikit-settings-text-size-system: large;
+    --uikit-settings-contrast: var(--uikit-settings-contrast-system);
+    --uikit-settings-differentiate-without-color: var(
+      --uikit-settings-differentiate-without-color-system
+    );
+    --uikit-settings-reduced-motion: var(--uikit-settings-reduced-motion-system);
+    --uikit-settings-reduced-transparency: var(
+      --uikit-settings-reduced-transparency-system
+    );
+    --uikit-settings-text-size: var(--uikit-settings-text-size-system);
+
+    /*
      * Grayscale antialiasing (Framework7 components/app/app.less)
      */
     -webkit-font-smoothing: antialiased;
@@ -260,6 +282,21 @@
       inset -3px 3px 0 -3.5px rgb(255 255 255 / 25%),
       inset 0 -5px 0 -3.5px rgb(255 255 255 / 25%),
       inset 0 -5px 5px rgb(255 255 255 / 25%);
+
+    /*
+     * A large floating panel's glass edge in dark mode (a sidebar, an
+     * island, a medium sheet; see uikit-glass-panel): a light rim, a glow
+     * outside, not the glass's dark inner bands (which would make a large
+     * panel look inset)
+     */
+    --glass-ui-panel-dim-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 15%), 0 0 25px rgb(0 0 0 / 30%);
+
+    /*
+     * Its rim alone, as a border (a snapping island's or sheet's bottom
+     * edge, see there): dark, the panel's; light, the bright glass's edge.
+     */
+    --glass-ui-panel-rim: light-dark(rgb(255 255 255), rgb(255 255 255 / 15%));
     --glass-ui-dim-shadow:
       inset -2px -2px 0.5px -2.5px rgb(255 255 255 / 40%),
       inset 3px 3px 0.5px -3.5px rgb(255 255 255 / 40%),
@@ -469,6 +506,25 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-color-scheme='light']) {
       --glass-ui-lens-shadow: var(--glass-ui-dim-lens-shadow);
+    }
+  }
+
+  /* Settings: the system's (see above). */
+  @media (prefers-contrast: more), (forced-colors: active) {
+    :root {
+      --uikit-settings-contrast-system: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --uikit-settings-reduced-motion-system: 1;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    :root {
+      --uikit-settings-reduced-transparency-system: 1;
     }
   }
 

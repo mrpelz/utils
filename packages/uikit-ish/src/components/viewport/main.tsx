@@ -30,12 +30,14 @@ import {
   useScrollerRegistration,
 } from './edge.js';
 import { EdgeEffects } from './edge-effect.js';
+import { isIos27, ViewportInsetContext } from './ios27.js';
 import {
   createAnchorHandle,
   Padding,
   useAnchorRegistration,
   useAnchorSize,
   useOverscrollRoom,
+  usePushedAnchorSize,
 } from './padding.js';
 import type {
   ElementGeometry,
@@ -63,9 +65,11 @@ export {
 } from './input.js';
 export { useScrollerRegistration, useViewportEdgeElement } from './edge.js';
 export { EdgeEffects } from './edge-effect.js';
+export { ios27Attribute, isIos27, ViewportInsetContext } from './ios27.js';
 export {
   useAnchorRegistration,
   useAnchorSize,
+  useChildViewportScope,
   useCreateViewportAnchorHandle,
   ViewportAnchorHandle,
   ViewportScopeContext,
@@ -143,9 +147,17 @@ const createScrollStore = () => {
   let holds = 0;
   // The provider's, told as holds come and go (see `Provider`).
   let refresh: () => void = noRefresh;
+  // Counted up as another scroller's tracked (e.g. a tab's page shown): its
+  // listeners' directions starting anew (see `trackDirection`), not by the
+  // jump from the last one's position to its.
+  let tracked = 0;
 
   return {
     current: () => latest,
+    retrack: () => {
+      tracked += 1;
+    },
+    tracked: () => tracked,
     hold: () => {
       holds += 1;
       refresh();
@@ -193,14 +205,25 @@ const ViewportContext = createContext<ViewportContextValue | undefined>(
 /**
  * The direction scrolled in, of the scrolls given it (from `start`): it
  * changes once scrolled `threshold` px the other way from where it last
- * turned.
+ * turned. Another scroller tracked (`tracked`, see `createScrollStore`):
+ * none, from its position.
  */
-const trackDirection = (threshold: number, start: number) => {
+const trackDirection = (
+  threshold: number,
+  start: number,
+  tracked: () => number,
+) => {
   let turn = start;
   let direction: ViewportScrollEvent['direction'];
+  let scroller = tracked();
 
   return (scroll: Scroll): ViewportScrollEvent => {
     const { position } = scroll;
+    if (tracked() !== scroller) {
+      scroller = tracked();
+      turn = position;
+      direction = undefined;
+    }
     const isOn = direction === 'down' ? position > turn : position < turn;
     if (direction !== undefined && isOn) {
       turn = position;
@@ -250,7 +273,10 @@ const clamp = (value: number, max: number) =>
  * the keyboard covers of its bottom, how far its top is scrolled out of
  * view while the keyboard shows (as the window's offset), what remains.
  */
-const readVisual = (screen?: HTMLElement | null): VisualViewportState => {
+const readVisual = (
+  screen?: HTMLElement | null,
+  box?: HTMLElement | null,
+): VisualViewportState => {
   if (typeof window === 'undefined') {
     return {
       height: 0,
@@ -280,9 +306,10 @@ const readVisual = (screen?: HTMLElement | null): VisualViewportState => {
     };
   }
 
-  // Within the screen (its box in the layout viewport): without the
-  // keyboard, all of it (its own scrolling out of view is the page's).
-  const rect = screen.getBoundingClientRect();
+  // Within the screen (its layers' box in the layout viewport, `box`: their
+  // containing block's, see `Provider`): without the keyboard, all of it
+  // (its own scrolling out of view is the page's).
+  const rect = (box ?? screen).getBoundingClientRect();
   const screenKeyboard =
     keyboardInset > 0 ? clamp(rect.bottom - (top + height), rect.height) : 0;
   const screenTop = keyboardInset > 0 ? clamp(top - rect.top, rect.height) : 0;
@@ -343,6 +370,36 @@ const useWindowHold = (screen: PortalContainer | null | undefined) => {
   }, [screen]);
 };
 
+/** A screen's marker: an app's (its background, see style.css). */
+const screenAttribute = 'data-uikit-viewport-screen';
+
+/** Holds of each screen's marker (its providers', see `useScreenHold`). */
+const screenHolds = new WeakMap<HTMLElement, number>();
+
+/**
+ * A screen (not the window) held as an app's while mounted, as the window
+ * is (see `useWindowHold`): marked (its background beneath the layers, see
+ * style.css; e.g. a page of its own in a navigation stack, not the page
+ * below showing through as it slides in). Unmarked with the last hold.
+ */
+const useScreenHold = (screen: PortalContainer | null | undefined) => {
+  useLayoutEffect(() => {
+    const element = elementOf(screen);
+    if (!element) return undefined;
+    const holds = screenHolds.get(element) ?? 0;
+    if (holds === 0) element.setAttribute(screenAttribute, '');
+    screenHolds.set(element, holds + 1);
+    return () => {
+      const rest = (screenHolds.get(element) ?? 1) - 1;
+      screenHolds.set(element, rest);
+      if (rest === 0) element.removeAttribute(screenAttribute);
+    };
+  }, [screen]);
+};
+
+/** A screen's marker: its layers following its box (see `Provider`). */
+const boxDrivenAttribute = 'data-uikit-viewport-box-driven';
+
 /** Provides the visual viewport and scroll tracking (see above). */
 const Provider: FunctionComponent<ViewportProviderProps> = ({
   children,
@@ -381,8 +438,9 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     };
   }, [screen, scroller]);
 
-  // Tracking the window: it's an app's.
+  // Tracking the window (or a screen): it's an app's.
   useWindowHold(screen);
+  useScreenHold(screen);
 
   // The visual viewport (once per frame), as custom properties, too: on
   // the root element, or its screen.
@@ -390,9 +448,29 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     const element = elementOf(screen);
     const root = element ?? document.documentElement;
     let frame = 0;
+    // A screen's layers' box: their containing block's (fixed, filling it,
+    // see style.css), what the keyboard is measured against. Not the
+    // screen's own box: its layers are fixed to the window unless it (or
+    // an ancestor, e.g. a `Layout.Column`) contains them, and it may be
+    // resized itself (e.g. within an app's content layer, resized above the
+    // keyboard), its layers' box then the same, or not.
+    let box: HTMLElement | undefined;
+    // Changed by its box resizing (see below): its layers following it,
+    // their keyboard transition off (the box moving as the keyboard does,
+    // e.g. with an app's content layer's own transition), until the visual
+    // viewport changes again.
+    let isBoxDriven = false;
+    if (element) {
+      box = document.createElement('div');
+      box.className = 'uikit-viewport-box';
+      box.dataset.viewportPart = 'box';
+      box.setAttribute('aria-hidden', 'true');
+      element.append(box);
+    }
 
     const apply = () => {
-      const next = readVisual(element);
+      const next = readVisual(element, box);
+      element?.toggleAttribute(boxDrivenAttribute, isBoxDriven);
       for (const [name, value] of [
         ['height', next.height],
         ['width', next.width],
@@ -434,10 +512,24 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
 
     update();
     document.addEventListener('visibilitychange', onVisibility);
+    // Its layers' box resized (e.g. their containing block within an app's
+    // content layer, resized above the keyboard as it shows): read anew,
+    // what the keyboard covers of it now (none, its box above it).
+    const resizeObserver = box
+      ? new ResizeObserver(() => {
+          isBoxDriven = true;
+          update();
+        })
+      : undefined;
+    if (box) resizeObserver?.observe(box);
+    const onViewport = () => {
+      isBoxDriven = false;
+      update();
+    };
     const { visualViewport: viewport } = window;
-    viewport?.addEventListener('resize', update);
-    viewport?.addEventListener('scroll', update);
-    window.addEventListener('resize', update);
+    viewport?.addEventListener('resize', onViewport);
+    viewport?.addEventListener('scroll', onViewport);
+    window.addEventListener('resize', onViewport);
     // A screen moves with its page (any scroller's).
     if (element) {
       addEventListener('scroll', update, { capture: true, passive: true });
@@ -445,12 +537,15 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     return () => {
       cancelAnimationFrame(frame);
       document.removeEventListener('visibilitychange', onVisibility);
+      resizeObserver?.disconnect();
       clearTimeout(recheck);
-      viewport?.removeEventListener('resize', update);
-      viewport?.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
+      viewport?.removeEventListener('resize', onViewport);
+      viewport?.removeEventListener('scroll', onViewport);
+      window.removeEventListener('resize', onViewport);
       if (!element) return;
       removeEventListener('scroll', update, { capture: true });
+      box?.remove();
+      element.removeAttribute(boxDrivenAttribute);
       for (const name of ['height', 'width', 'top', 'left', 'keyboard-inset']) {
         element.style.removeProperty(`--uikit-viewport-${name}`);
       }
@@ -654,8 +749,10 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     for (const [type, listener] of listeners) {
       target.addEventListener(type, listener, { passive: true });
     }
-    // Its state at once (e.g. another page tracked, scrolled already),
-    // and again as overscroll areas come and go (moving it, or not).
+    // Its state at once (e.g. another page tracked, scrolled already: no
+    // direction, see `trackDirection`), and again as overscroll areas come
+    // and go (moving it, or not).
+    scroll.retrack();
     emit();
     scroll.setRefresh(emit);
     return () => {
@@ -688,24 +785,74 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
 // A regular width: the window's, from 768px.
 const regularQuery = '(width >= 768px)';
 
+// iPadOS' app switcher snapshots (measured on an iPad Air, iPadOS 26, a
+// Home Screen app; see the docs' `useSizeClass`):
+// - Opening the app switcher (also on the way to the Home Screen), iPadOS
+//   resizes the window while the page is still shown, about half a second
+//   before it's hidden: landscape 1180x820 turned portrait 820x1180, then
+//   585x820 (a half-width Split View's size: compact).
+// - Each resize is announced by an `orientationchange`, before it, whose
+//   `screen.orientation` contradicts the window's shape (portrait, the
+//   window still landscape; then landscape, the window still portrait).
+// - A real rotation's `orientationchange` comes after its resize (~0.4s),
+//   matching the window's shape; a real resize (Split View, Slide Over,
+//   Stage Manager) has none. `screen.width`/`height` (always the portrait
+//   ones) and the page's visibility (shown throughout) tell neither apart.
+// - While hidden, the window still reads as the last snapshot's size, its
+//   media queries already the real one's; shown again, it's resized back.
+// So: from an `orientationchange` contradicting the window's shape, the
+// size class held (no remount of a layout by it), until one matching it,
+// or the page shown anew (read anew). No timer.
+let isSnapshot = false;
+let heldSizeClass: SizeClass | undefined;
+
+/** Whether the screen's orientation is the window's shape. */
+const isOrientationTheWindows = () => {
+  const { orientation } = window.screen;
+  const isPortrait =
+    typeof orientation === 'object'
+      ? orientation.type.startsWith('portrait')
+      : Math.abs((window as { orientation?: number }).orientation ?? 0) !== 90;
+  return isPortrait === innerHeight >= innerWidth;
+};
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('orientationchange', () => {
+    isSnapshot = !isOrientationTheWindows();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') isSnapshot = false;
+  });
+}
+
+const readSizeClass = (): SizeClass => {
+  if (isSnapshot && heldSizeClass) return heldSizeClass;
+  heldSizeClass = matchMedia(regularQuery).matches ? 'regular' : 'compact';
+  return heldSizeClass;
+};
+
 const subscribeRegular = (onChange: () => void) => {
   const query = matchMedia(regularQuery);
   query.addEventListener('change', onChange);
+  // (Released: read anew, see above.)
+  window.addEventListener('orientationchange', onChange);
+  document.addEventListener('visibilitychange', onChange);
 
-  return () => query.removeEventListener('change', onChange);
+  return () => {
+    query.removeEventListener('change', onChange);
+    window.removeEventListener('orientationchange', onChange);
+    document.removeEventListener('visibilitychange', onChange);
+  };
 };
 
 /**
  * The window's horizontal size class (no `Provider` needed): e.g. a sheet
  * on `compact` (a phone), a popover on `regular` (a tablet); `compact` before
- * hydration (server rendering).
+ * hydration (server rendering). Held while iPadOS resizes the window for
+ * its app switcher's snapshots (not its user: see above).
  */
 export const useSizeClass = (): SizeClass =>
-  useSyncExternalStore(
-    subscribeRegular,
-    () => (matchMedia(regularQuery).matches ? 'regular' : 'compact'),
-    () => 'compact',
-  );
+  useSyncExternalStore(subscribeRegular, readSizeClass, () => 'compact');
 
 /** The visual viewport and the keyboard's height (needs a `Provider`). */
 export const useVisualViewport = (): VisualViewportState => {
@@ -730,7 +877,11 @@ export const useViewportScroll = (
 
   useEffect(() => {
     if (!context) return undefined;
-    const track = trackDirection(threshold, context.scroll.current().position);
+    const track = trackDirection(
+      threshold,
+      context.scroll.current().position,
+      context.scroll.tracked,
+    );
     return context.scroll.subscribe((scroll) => latest.current(track(scroll)));
   }, [context, threshold]);
 };
@@ -920,7 +1071,7 @@ const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
     {
       className,
       edge,
-      edgeEffect = 'soft',
+      edgeEffect: ownEdgeEffect,
       edgeTint,
       handle,
       keyboard = 'push',
@@ -931,6 +1082,19 @@ const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
     forwardedRef,
   ) => {
     const ref = useForwardedRef(forwardedRef);
+    // (Unset: soft; on iOS 27, at the screen's top, hard, beneath the
+    // system's status bar, see ios27.ts: not in a popup inset from it, nor
+    // in a portal container, e.g. a device's frame.)
+    const isInset = useContext(ViewportInsetContext);
+    const portalContainer = usePortalContainer(undefined);
+    const edgeEffect =
+      ownEdgeEffect ??
+      (edge === 'block-start' &&
+      !isInset &&
+      portalContainer === undefined &&
+      isIos27()
+        ? 'hard'
+        : 'soft');
     // Its size, for the paddings making room for it (see `Padding`); its
     // edge effect, for the scrollers drawing it (see `EdgeEffects`).
     useAnchorRegistration(ref, edge, handle, {
@@ -938,7 +1102,7 @@ const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
       keyboard,
       tint: edgeTint,
     });
-    useWindowHold(usePortalContainer(undefined));
+    useWindowHold(portalContainer);
 
     return (
       <div
@@ -966,7 +1130,11 @@ const bounceAttribute = (alwaysBounce: boolean | undefined) => {
  * The content layer: filling the viewport, scrolling its content (a
  * scroller, tracked by its `Provider` unless a page within it fills the
  * screen, see edge.ts), below the anchors; its safe area insets kept clear
- * (as padding), or not, by what it holds (`auto`, see style.css).
+ * (as padding), or not, by what it holds (`auto`, see style.css). For
+ * what's in it (e.g. a map's controls, kept clear of a bar or an island),
+ * its scope's anchors' sizes at its block edges, as a padding there makes
+ * room for them (beyond the safe area): `--uikit-viewport-anchor-block-start`
+ * and `-end` (px).
  */
 const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
   (
@@ -976,6 +1144,7 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
       className,
       keyboard = 'resize',
       safeArea = 'auto',
+      style,
       ...props
     },
     forwardedRef,
@@ -983,6 +1152,8 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
     const ref = useForwardedRef(forwardedRef);
     useWindowHold(usePortalContainer(undefined));
     useScrollerRegistration(ref);
+    const start = useAnchorSize('block-start');
+    const end = useAnchorSize('block-end');
 
     return (
       <div
@@ -990,6 +1161,13 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
         data-always-bounce={bounceAttribute(alwaysBounce)}
         data-keyboard={keyboard}
         data-safe-area={safeArea}
+        style={withStyle(
+          {
+            '--uikit-viewport-anchor-block-end': `${String(end)}px`,
+            '--uikit-viewport-anchor-block-start': `${String(start)}px`,
+          },
+          style,
+        )}
         {...props}
         className={cn('uikit-viewport-content', className)}
         data-viewport-part="content"
@@ -1141,8 +1319,10 @@ const BlockEnd = forwardRef<HTMLDivElement, Omit<ViewportAnchorProps, 'edge'>>(
  * What's typed into, kept above the keyboard (e.g. a field's row, with its
  * slider): while focus is within it and the keyboard covers it, lifted
  * (its own box moved up, its place kept) until its end is `gap` above the
- * keyboard; back as focus leaves, or the keyboard hides. Needs a
- * `Provider` (the keyboard's height); without one, it stays.
+ * keyboard, and above the bar the keyboard pushes up (a bottom anchor of
+ * `keyboard` `push`, e.g. a message field's: on the keyboard, covering it
+ * too); back as focus leaves, or the keyboard hides. Needs a `Provider`
+ * (the keyboard's height); without one, it stays.
  */
 const KeyboardAccessory = forwardRef<
   HTMLDivElement,
@@ -1150,9 +1330,9 @@ const KeyboardAccessory = forwardRef<
 >(({ className, gap = 8, ...props }, forwardedRef) => {
   const ref = useForwardedRef(forwardedRef);
   const { keyboardInset } = useVisualViewport();
+  // (The bar on the keyboard, while it shows: covering it too.)
+  const pushed = usePushedAnchorSize();
   const [isFocused, setIsFocused] = useState(false);
-  // (Its lift now: its box measured without it.)
-  const liftRef = useRef(0);
 
   // Lifted by what the keyboard covers of it (the visual viewport's bottom,
   // the window's: where the keyboard's top is, whatever the screen).
@@ -1161,18 +1341,28 @@ const KeyboardAccessory = forwardRef<
     if (!element) return;
     const { visualViewport: viewport } = window;
     let lift = 0;
-    if (isFocused && keyboardInset > 0 && viewport) {
-      const bottom = element.getBoundingClientRect().bottom + liftRef.current;
-      const keyboardTop = viewport.offsetTop + viewport.height;
+    // (Its screen's keyboard, or the window's: a screen resized above it,
+    // e.g. within an app's resized content layer, has none, its accessory
+    // still covered.)
+    const isKeyboard =
+      keyboardInset > 0 ||
+      (viewport !== null && innerHeight > viewport.height + viewport.offsetTop);
+    if (isFocused && isKeyboard && viewport) {
+      // Its box without its lift: the lift it shows now (its translation,
+      // also mid-transition), not the one it's moving to.
+      const [, shown = '0'] = getComputedStyle(element).translate.split(' ');
+      const bottom =
+        element.getBoundingClientRect().bottom -
+        (Number.parseFloat(shown) || 0);
+      const keyboardTop = viewport.offsetTop + viewport.height - pushed;
       lift = Math.max(0, Math.round(bottom + gap - keyboardTop));
     }
-    liftRef.current = lift;
     element.style.setProperty(
       '--uikit-viewport-keyboard-lift',
       `${String(lift)}px`,
     );
     element.toggleAttribute('data-lifted', lift > 0);
-  }, [gap, isFocused, keyboardInset, ref]);
+  }, [gap, isFocused, keyboardInset, pushed, ref]);
 
   useLayoutEffect(update, [update]);
 

@@ -462,10 +462,10 @@
       padding-block-end: 0;
     }
 
-    /* Its picker without a header: as far from the top as the header's
-       content (16px). (Not by its place: in a sheet, its content's first,
-       the header the sheet's, see `Root`.) */
-    .uikit-color-picker-root:not(:has(.uikit-color-picker-header)) & {
+    /* Without a header over it (no Viewport.Padding before it, making
+       room for a popover's or a sheet's header): as far from the top as a
+       header's content (16px). */
+    &:not(.uikit-viewport-padding + &) {
       padding-block-start: 16px;
     }
   }
@@ -474,6 +474,16 @@
      sheet's header, after the picker's header), inset as the panel's
      content, those 24px the header's 10px below it and its content's
      margin (see the root). */
+
+  /* Its modes' control in a popover's header (fixed, as in a sheet's):
+     24px above the views, the header's 10px below it and its body's
+     content margin (see the root). */
+  .uikit-color-picker-root:has(.uikit-popover-header .uikit-color-picker-modes)
+    .uikit-popover-body
+    > .uikit-viewport-padding[data-edge='block-start'] {
+    --uikit-viewport-padding-margin: var(--uikit-content-margin-block-start);
+  }
+
   .uikit-color-picker-modes {
     flex: none;
     margin-block-end: 24px;
@@ -484,6 +494,12 @@
       width: auto;
       align-self: stretch;
       margin: 0 16px;
+    }
+
+    /* In a popover's header: 10px below its toolbar's buttons (its row
+       without padding there, see Popover), as in a sheet's. */
+    .uikit-popover-header > & {
+      margin-block-start: 10px;
     }
   }
 
@@ -541,19 +557,6 @@
     );
     width: 16px;
     translate: 0 -50%;
-  }
-
-  .uikit-color-picker-header {
-    padding: 16px 0 10px;
-
-    /* A toolbar in it: a 44px row, its padding the header's (not a
-       bar's). */
-
-    /* (Over the bar's own: its placement's padding and height.) */
-    & > [data-toolbar-part='root'][data-placement] {
-      min-height: 44px;
-      padding-block: 0;
-    }
   }
 
   .uikit-color-picker-well {

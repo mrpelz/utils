@@ -15,6 +15,7 @@ import {
   useState,
 } from 'react';
 
+import { useSettingsPortalProps } from '../settings/main.js';
 import {
   cn,
   useCollision,
@@ -128,6 +129,7 @@ const Popup = forwardRef<HTMLDivElement, ActionSheetPopupProps>(
     return (
       <BasePopover.Portal
         className="uikit-alert-portal"
+        {...useSettingsPortalProps()}
         container={container}
       >
         <BasePopover.Backdrop

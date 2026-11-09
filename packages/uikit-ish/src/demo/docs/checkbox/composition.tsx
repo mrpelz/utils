@@ -22,7 +22,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 
 const rowsCode = `<List.Group>
   <List.Item onClick={forwardClick('[role=checkbox]')}>
@@ -377,8 +376,7 @@ export const CheckboxComposition: FunctionComponent = () => (
         <code>dragToSelect</code>).
       </li>
       <li>
-        The list owns the selection; actions on it go elsewhere, e.g. a toolbar
-        (guide <GuideLink to="rule-g7">G7</GuideLink>).
+        The list owns the selection; actions on it go elsewhere, e.g. a toolbar.
       </li>
       <li>Name each by its row.</li>
       <li>

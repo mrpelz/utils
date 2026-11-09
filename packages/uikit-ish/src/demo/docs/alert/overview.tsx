@@ -15,7 +15,6 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
-import { GuideLink } from '../hig-guide/link.js';
 import {
   alertActionRows,
   alertActionsRows,
@@ -142,10 +141,7 @@ export const AlertOverview: FunctionComponent = () => (
         Confirming an action that can’t be undone (Delete), or telling about a
         problem the person must know about now (a failed save).
       </li>
-      <li>
-        Sparingly: an alert interrupts; prefer inline feedback, or undo (guide{' '}
-        <GuideLink to="rule-a7">A7</GuideLink>).
-      </li>
+      <li>Sparingly: an alert interrupts; prefer inline feedback, or undo.</li>
     </ul>
 
     <Heading

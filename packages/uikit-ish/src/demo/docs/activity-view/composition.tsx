@@ -33,7 +33,6 @@ import {
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import { photo } from '../avatar/props.js';
-import { GuideLink } from '../hig-guide/link.js';
 
 /** The share sheet's actions row, then more actions as a list. */
 const MoreActionsAsAList: FunctionComponent = () => {
@@ -67,14 +66,15 @@ const MoreActionsAsAList: FunctionComponent = () => {
           >
             <Sheet.Header>
               <Sheet.Grabber />
-            </Sheet.Header>
-            <Sheet.Content>
               <ActivityView.Header>
                 <ActivityView.Heading>
                   <ActivityView.Title>Weekend Photos</ActivityView.Title>
                   <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
                 </ActivityView.Heading>
               </ActivityView.Header>
+            </Sheet.Header>
+            <Sheet.Content>
+              <Viewport.Padding edge="block-start" />
               <ActivityView.Separator />
               <ActivityView.Actions aria-label="Actions">
                 <ActivityView.Action onClick={() => addLog('action: Copy')}>
@@ -173,7 +173,7 @@ const InAPopover: FunctionComponent = () => {
                     <Popover.Positioner>
                       <Popover.Popup className="activity-view-demo-popup">
                         <Popover.Arrow />
-                        <Popover.Body>
+                        <Popover.Header>
                           <ActivityView.Header>
                             <ActivityView.Thumbnail>
                               <img
@@ -190,6 +190,9 @@ const InAPopover: FunctionComponent = () => {
                               </ActivityView.Subtitle>
                             </ActivityView.Heading>
                           </ActivityView.Header>
+                        </Popover.Header>
+                        <Popover.Body>
+                          <Viewport.Padding edge="block-start" />
                           <ActivityView.Separator />
                           <ActivityView.People aria-label="People">
                             <ActivityView.Person
@@ -250,9 +253,14 @@ export const ActivityViewComposition: FunctionComponent = () => (
     <ul>
       <li>
         In a compact width, in a <a href={publicUrl('sheet')}>Sheet</a> (its{' '}
-        <code>background=&quot;grouped&quot;</code>): the actions row, then more
-        actions as a <a href={publicUrl('list')}>List</a> (symbols as the rows’
-        images).
+        <code>background=&quot;grouped&quot;</code>): its header in the sheet’s{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Header"
+        />{' '}
+        (below the grabber, staying put), then, scrolling under it, the actions
+        row and more actions as a <a href={publicUrl('list')}>List</a> (symbols
+        as the rows’ images).
       </li>
       <li>
         Without a thumbnail or people: the parts are optional (see{' '}
@@ -296,17 +304,21 @@ export const ActivityViewComposition: FunctionComponent = () => (
     <ul>
       <li>
         In a regular width, in a <a href={publicUrl('popover')}>Popover</a> at
-        the Share button (in the page’s bar), in its{' '}
+        the Share button (in the page’s bar): its header in the popover’s{' '}
+        <PartLink
+          component="popover"
+          part="Popover.Header"
+        />
+        , staying put, the rest in its{' '}
         <PartLink
           component="popover"
           part="Popover.Body"
         />
-        .
+        , scrolling under it.
       </li>
       <li>
-        Guide <GuideLink to="primitive-command-set">§5</GuideLink>: the same
-        Command set, rendered as a sheet list (compact) or a popover list
-        (regular).
+        The same set of commands, shown as a sheet’s list (compact) or a
+        popover’s (regular).
       </li>
       <li>
         <strong>Library:</strong> the activity view with its thumbnail and

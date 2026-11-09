@@ -19,7 +19,7 @@ export const sidebarRootRows: readonly PropRow[] = [
       , a search field (
       <PartLink
         component="text-field"
-        part="TextField.Search"
+        part="TextField.Frame"
       />
       ), a list (
       <PartLink

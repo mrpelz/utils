@@ -736,7 +736,7 @@ export const AlertParts: FunctionComponent = () => (
         view’s button to open its alert.
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="alert"
@@ -1066,7 +1066,7 @@ export const AlertParts: FunctionComponent = () => (
       </li>
     </ul>
     <CreateHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={alertHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={alertHandleRows} />
@@ -1091,7 +1091,7 @@ export const AlertParts: FunctionComponent = () => (
       </li>
     </ul>
     <UseCreateAlertHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={alertHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={alertHandleRows} />

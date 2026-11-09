@@ -331,7 +331,7 @@ export const FormParts: FunctionComponent = () => (
         <a href={publicUrl('text-field')}>Text field</a>s).
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="form"

@@ -226,9 +226,8 @@ export const ActionSheetComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a regular width, an action sheet shows as a popover (guide{' '}
-        <a href={publicUrl('hig-guide#rule-a6')}>A6</a>): the app’s choice here,
-        by{' '}
+        In a regular width, an action sheet shows as a popover: the app’s choice
+        here, by{' '}
         <PartLink
           component="viewport"
           part="useSizeClass"

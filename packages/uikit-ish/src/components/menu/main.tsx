@@ -20,6 +20,7 @@ import {
   useState,
 } from 'react';
 
+import { useSettingsPortalProps } from '../settings/main.js';
 import {
   Checkmark,
   cn,
@@ -77,7 +78,8 @@ export type {
 //     closes it alone. Items are inset 8px from the popup's edge.
 //   - `regular`: 36px items with 15px labels; submenus open beside their
 //     trigger, which shows the selection while open.
-// - Popups are at least 238px wide.
+// - Popups are at least 238px wide, and at most 280px (compact) or 320px
+//   (regular): longer labels wrap.
 // - A checkmark column is reserved in all items of a popup containing
 //   checkbox or radio items.
 // - Highlighted items and quick actions (pointer, keyboard) show the
@@ -988,7 +990,7 @@ const pressTrigger = (trigger: HTMLElement) => {
  * Opens a menu by its trigger (`trigger`) as Base UI does on a mouse down;
  * a touch (`pointerId`) then drags over its items (see `dragOverItems`).
  */
-const openByTrigger = (trigger: HTMLElement, pointerId?: number) => {
+const openByTrigger = (trigger: HTMLElement, pointerId?: number): void => {
   const document = trigger.ownerDocument;
   if (trigger.getAttribute('aria-expanded') !== 'true') pressTrigger(trigger);
   if (pointerId === undefined) return;
@@ -997,6 +999,33 @@ const openByTrigger = (trigger: HTMLElement, pointerId?: number) => {
   // hit-tested instead.
   if (trigger.hasPointerCapture(pointerId)) {
     trigger.releasePointerCapture(pointerId);
+  }
+  // Opened by a mouse down, Base UI lets the mouse's release over an item
+  // choose it, until a mouse up anywhere: the touch's own (emulated) is
+  // kept from it (see `dragOverItems`), so the next tap on an item would
+  // choose it twice (by its mouse up, and its click: a checkbox item
+  // toggled back). Ended with the touch, by a mouse up on the trigger
+  // (which doesn't close the menu).
+  const end = (event: globalThis.PointerEvent) => {
+    if (event.pointerId !== pointerId) return;
+    for (const type of ['pointerup', 'pointercancel']) {
+      document.removeEventListener(type, end as (event: Event) => void, {
+        capture: true,
+      });
+    }
+    trigger.dispatchEvent(
+      new MouseEvent('mouseup', {
+        bubbles: true,
+        button: 0,
+        cancelable: true,
+        view: document.defaultView,
+      }),
+    );
+  };
+  for (const type of ['pointerup', 'pointercancel']) {
+    document.addEventListener(type, end as (event: Event) => void, {
+      capture: true,
+    });
   }
   // Dragged out and released elsewhere (also back on the trigger): closed,
   // as Base UI closes it for a mouse.
@@ -1645,6 +1674,9 @@ export const useCreateMenuHandle = <
 /** The menu's trigger (also of `ContextualMenu`). */
 export { Trigger as MenuTrigger };
 
+/** Opens a menu by its trigger, as a mouse down does (`ContextualMenu`'s). */
+export { openByTrigger as openMenuByTrigger };
+
 /**
  * Its portal (Base UI's): no box of its own (\`display: contents\`), so
  * rendered into a container (e.g. a screen laid out as a flex column) it
@@ -1654,6 +1686,7 @@ const Portal = forwardRef<HTMLDivElement, Omit<BaseMenu.Portal.Props, 'ref'>>(
   ({ className, container, ...props }, ref) => (
     <BaseMenu.Portal
       ref={ref}
+      {...useSettingsPortalProps()}
       container={usePortalContainer(container)}
       {...props}
       className={cn('uikit-menu-portal', className)}

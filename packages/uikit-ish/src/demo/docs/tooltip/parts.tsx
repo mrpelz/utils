@@ -498,7 +498,7 @@ export const TooltipParts: FunctionComponent = () => (
       <li>Handles: triggers outside the root, opening it imperatively.</li>
       <li>Hover (or focus) each view’s button to show its tooltip.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="tooltip"
@@ -595,7 +595,7 @@ export const TooltipParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its state: shown on hover and keyboard focus (not on touch),{' '}
+        Its state: shown on hover, keyboard focus and a long press on touch,{' '}
         <code>onOpenChange</code> (with why); held open by <code>open</code>.
       </li>
       <li>Renders no element of its own.</li>
@@ -616,6 +616,11 @@ export const TooltipParts: FunctionComponent = () => (
         <a href={publicUrl('button')}>Button</a>:{' '}
         <code>{'render={<Button.Root />}'}</code>): hovered for its{' '}
         <code>delay</code> (300ms, or its provider’s), or focused by keyboard.
+      </li>
+      <li>
+        On touch, long-pressed (held 500ms without moving): shown until the
+        finger lifts, as iPadOS’ toolbar labels; that press doesn’t activate the
+        trigger. A shorter tap is the trigger’s as before.
       </li>
       <li>
         Its own action unchanged (a click closes the tooltip:{' '}
@@ -721,7 +726,7 @@ export const TooltipParts: FunctionComponent = () => (
       </li>
     </ul>
     <CreateHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={tooltipHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={tooltipHandleRows} />
@@ -746,7 +751,7 @@ export const TooltipParts: FunctionComponent = () => (
       </li>
     </ul>
     <UseCreateTooltipHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={tooltipHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={tooltipHandleRows} />

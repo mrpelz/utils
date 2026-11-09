@@ -831,7 +831,7 @@ export const DrawerParts: FunctionComponent = () => (
         back, press the dimmed page or Done to close it.
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li className="demo-tree-context">
         <span>The app’s root, e.g. </span>
         <PartLink
@@ -1047,7 +1047,7 @@ export const DrawerParts: FunctionComponent = () => (
       </li>
     </ul>
     <CreateHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={drawerHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={drawerHandleRows} />
@@ -1069,7 +1069,7 @@ export const DrawerParts: FunctionComponent = () => (
       </li>
     </ul>
     <UseCreateDrawerHandlePart />
-    <h3>Type parameters</h3>
+    <h3>Type Parameters</h3>
     <PropsTable rows={drawerHandleTypeRows} />
     <h3>Returns</h3>
     <PropsTable rows={drawerHandleRows} />

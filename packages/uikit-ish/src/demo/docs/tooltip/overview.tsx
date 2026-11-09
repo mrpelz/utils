@@ -137,7 +137,8 @@ export const TooltipOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Anything needed on touch (no hover there): a label on the control, or a{' '}
+        Anything needed on touch (no hover there; a long press shows the
+        tooltip, but nobody finds that): a label on the control, or a{' '}
         <a href={publicUrl('popover')}>Popover</a> it opens.
       </li>
       <li>
@@ -184,8 +185,8 @@ export const TooltipOverview: FunctionComponent = () => (
         <code>aria-label</code>); the tooltip shows it for a pointer.
       </li>
       <li>
-        Shown on keyboard focus too; Escape hides it. Not on touch, so nothing
-        only it says can be needed.
+        Shown on keyboard focus too; Escape hides it. On touch only by a long
+        press, so nothing only it says can be needed.
       </li>
       <li>
         Its scale-in doesn’t follow <code>prefers-reduced-motion</code>.

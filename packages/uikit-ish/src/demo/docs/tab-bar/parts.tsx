@@ -684,7 +684,7 @@ export const TabBarParts: FunctionComponent = () => (
         list.
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="tab-bar"
@@ -954,8 +954,8 @@ export const TabBarParts: FunctionComponent = () => (
         in it (e.g. a search field) takes its whole width.
       </li>
       <li>
-        Above the groups; between them while the bar is collapsed (collapse it
-        with{' '}
+        Above the groups, spanning the bar’s width (however many groups);
+        between them while the bar is collapsed (collapse it with{' '}
         <PartLink
           component="tab-bar"
           part="TabBar.List"
@@ -988,7 +988,7 @@ export const TabBarParts: FunctionComponent = () => (
       </li>
     </ul>
     <CodeView code={collapsedSelectionCode} />
-    <h3>Arguments and return</h3>
+    <h3>Arguments and Return</h3>
     <PropsTable rows={collapsedSelectionRows} />
   </>
 );

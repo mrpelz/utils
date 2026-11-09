@@ -46,7 +46,7 @@ export const SymbolParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>One element: its glyph, and what sits on it.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="symbol"

@@ -193,7 +193,7 @@ export const StepperParts: FunctionComponent = () => (
       <li>Decrement, Increment: the halves, “−” and “+”.</li>
       <li>All needed.</li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li>
         <PartLink
           component="stepper"

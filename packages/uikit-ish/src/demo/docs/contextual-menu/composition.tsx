@@ -63,7 +63,6 @@ useTextActionsPrevention(message);
 
 <ContextualMenu.Trigger
   ref={message}
-  openOn="secondaryClick"
   render={<button className="message" type="button" />}
   onClick={() => {…}}
 >
@@ -223,7 +222,6 @@ const OnAHeldPress: FunctionComponent = () => {
           <ContextualMenu.Trigger
             ref={message}
             className="contextual-menu-demo-message"
-            openOn="secondaryClick"
             render={<button type="button" />}
             onClick={() => addLog('message opened')}
           >
@@ -433,9 +431,8 @@ export const ContextualMenuComposition: FunctionComponent = () => (
     <ul>
       <li>
         A message: a press opens it (the trigger’s own <code>onClick</code>), a
-        held press or a right click shows its menu (
-        <code>openOn=&quot;secondaryClick&quot;</code>), the message itself
-        lifting.
+        held press or a right click shows its menu (as it does by default), the
+        message itself lifting.
       </li>
       <li>
         Aligned with its start (
@@ -447,8 +444,11 @@ export const ContextualMenuComposition: FunctionComponent = () => (
       </li>
       <li>
         <strong>Library:</strong> opening on a held press or a right click (
-        <code>openOn=&quot;secondaryClick&quot;</code>), lifting the trigger
-        itself, and aligning the menu (
+        <PartLink
+          component="contextual-menu"
+          part="ContextualMenu.Trigger"
+        />
+        ), lifting the trigger itself, and aligning the menu (
         <PartLink
           component="contextual-menu"
           part="ContextualMenu.Positioner"

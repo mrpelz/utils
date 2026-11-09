@@ -275,7 +275,7 @@ export const HeaderParts: FunctionComponent = () => (
         change.
       </li>
     </ul>
-    <ul>
+    <ul className="demo-tree">
       <li className="demo-tree-context">
         <span>The app’s root, e.g. </span>
         <PartLink

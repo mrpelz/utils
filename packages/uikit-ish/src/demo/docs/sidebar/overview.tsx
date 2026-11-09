@@ -125,7 +125,7 @@ const LiveView: FunctionComponent = () => {
                 </Sidebar.ToolbarGroup>
               </Sidebar.Toolbar>
               <TextField.Root>
-                <TextField.Search>
+                <TextField.Frame>
                   <Symbol icon={sfMagnifyingglass} />
                   <TextField.Control
                     aria-label="Search"
@@ -133,7 +133,7 @@ const LiveView: FunctionComponent = () => {
                     type="search"
                   />
                   <TextField.Clear />
-                </TextField.Search>
+                </TextField.Frame>
               </TextField.Root>
               <List.Root listStyle="sidebar">
                 {sidebarSections.map(([title, rows]) => (
@@ -363,8 +363,9 @@ export const SidebarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A glass panel (the menus’ glass), corners 20px, 8px from its column’s
-        edges; its content 11px from its top, 16px from its sides, scrolling
+        A glass panel (the menus’ glass), corners 20px, 10px from its column’s
+        sides, 8px below the top inset, 5px into the bottom one (as iPadOS 26’s,
+        measured); its content 11px from its top, 16px from its sides, scrolling
         inside it (without a scrollbar).
       </li>
       <li>
@@ -377,7 +378,9 @@ export const SidebarOverview: FunctionComponent = () => (
       </li>
       <li>
         Dark: a light rim and a glow outside it (the glass’ inner shadow would
-        make the large panel look inset).
+        make the large panel look inset), as an{' '}
+        <a href={publicUrl('island')}>Island</a>’s and a medium{' '}
+        <a href={publicUrl('sheet')}>Sheet</a>’s.
       </li>
       <li>
         Sized and placed by its column: floating over the others (regular), the
