@@ -225,7 +225,11 @@
       max-height: none;
       background-color: transparent;
       box-shadow: none;
-      overscroll-behavior: contain;
+
+      /* Never bounced itself (past its top stop, its panel lifted off its
+         edge; past its start, nothing to show): its content bounces
+         instead (pulled down a stop, see snap.ts). */
+      overscroll-behavior: none;
       scroll-snap-type: y mandatory;
       scrollbar-width: none;
 
