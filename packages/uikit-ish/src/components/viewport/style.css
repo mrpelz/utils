@@ -11,6 +11,22 @@
     min-height: min(100lvh, calc(100% + env(safe-area-inset-top, 0px)));
   }
 
+  /* Status bar taps tracked (see status-bar.ts; a Provider's
+     `scrollsToTop`): the document 1px taller than the screen (scrolled to
+     1px, iOS's tap scrolling it to its top); not bouncing (that 1px); not
+     locked by a modal (Base UI's scroll lock: an inline `overflow: hidden`
+     on the root or the body, on iOS; important in a layer, over an inline
+     style), its content scrolling in its layers anyway. */
+  :root[data-uikit-viewport-status-bar] {
+    min-height: calc(100lvh + 1px);
+  }
+
+  :root[data-uikit-viewport-status-bar],
+  :root[data-uikit-viewport-status-bar] body {
+    overflow: visible !important;
+    overscroll-behavior: none;
+  }
+
   /* The window an app's (its layers in it, or a provider tracking it, see
      main.tsx): its
      background, where nothing paints its own (a page's default, see Page):

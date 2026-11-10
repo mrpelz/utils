@@ -22,6 +22,7 @@ const sections: readonly Section[] = [
   ['native-scrolling-and-touch', 'Native scrolling and touch'],
   ['mouse-events-after-a-long-press', 'Mouse events after a long press'],
   ['pressed-buttons-and-focus', 'Pressed buttons don’t take focus (Safari)'],
+  ['status-bar-taps', 'Status bar taps'],
   ['dishonorable-mentions', '(Dis)honorable Mentions'],
 ];
 
@@ -735,6 +736,71 @@ export const IosQuirksPage: FunctionComponent = () => (
       <code>pointerdown</code> listener. Tests in Chrome won’t catch this, so
       when you change focus, blur or <code>inert</code> handling, check it in
       Safari.
+    </p>
+
+    <Heading
+      id="status-bar-taps"
+      level={2}
+    >
+      Status bar taps
+    </Heading>
+    <p>
+      In iOS apps, tapping the status bar scrolls what you’re looking at back to
+      its top. In a Home Screen app, the page never sees that tap: iOS keeps
+      every touch inside the status bar for itself, whatever is drawn there and
+      however high its z-index. We tried a transparent button in the top inset,
+      and only the sliver of it reaching below the status bar got taps.
+    </p>
+    <p>
+      What iOS does with the tap is scroll the document to its top, and nothing
+      more. An app built on <a href={publicUrl('viewport')}>Viewport</a> doesn’t
+      scroll its document: its pages scroll in their own scrollers, so the tap
+      has nothing to do. The library uses that one thing iOS does. While a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Provider"
+      />{' '}
+      has <code>scrollsToTop</code> on (the default), the document is kept 1px
+      taller than the screen and scrolled down by that 1px. When it’s scrolled
+      to its top with no finger down, that was the status bar, so the{' '}
+      <PartLink
+        component="viewport"
+        part="useCurrentScroller"
+      >
+        current scroller
+      </PartLink>{' '}
+      is scrolled to its top instead, and the document goes back to its 1px.
+    </p>
+    <p>Two things nearly broke it, so they’re handled:</p>
+    <ul>
+      <li>
+        A modal (a sheet, a popover, an alert) locks the document’s scroll while
+        it’s open, with an inline <code>overflow: hidden</code>. That takes away
+        the 1px iOS needs, so the lock is undone while taps are tracked. The
+        document never scrolls more than that 1px anyway.
+      </li>
+      <li>
+        A touch whose element is removed before it ends (a back button, whose
+        page goes away) sends its <code>touchend</code> to the removed element,
+        which never reaches the window. Then it looked like a finger was still
+        down, and every tap after it was ignored. The end of each touch is now
+        also caught on the element it started on.
+      </li>
+    </ul>
+    <p>
+      If your app scrolls its document itself, none of this applies: iOS’s own
+      tap already scrolls it, and the library leaves it alone. To do something
+      else on a tap, use{' '}
+      <PartLink
+        component="viewport"
+        part="trackStatusBarTaps"
+      />{' '}
+      or{' '}
+      <PartLink
+        component="viewport"
+        part="useStatusBarTaps"
+      />
+      .
     </p>
 
     <Heading

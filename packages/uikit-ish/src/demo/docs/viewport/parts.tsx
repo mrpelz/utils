@@ -49,6 +49,8 @@ import {
   preventInputZoomRows,
   preventTextActionsReturnRows,
   preventTextActionsRows,
+  trackStatusBarTapsArgumentRows,
+  trackStatusBarTapsRows,
   useAnchorSizeReturnRows,
   useAnchorSizeRows,
   useCurrentScrollerRows,
@@ -60,6 +62,7 @@ import {
   useScrollDirectionArgumentRows,
   useScrollDirectionRows,
   useSizeClassReturnRows,
+  useStatusBarTapsRows,
   useTextActionsPreventionRows,
   useViewportEdgeElementRows,
   useViewportScrollRows,
@@ -1703,6 +1706,20 @@ export const ViewportParts: FunctionComponent = () => (
           </li>
         </ul>
       </li>
+      <li>
+        Status bar taps (iOS, a Home Screen app; a provider’s{' '}
+        <code>scrollsToTop</code> uses them):{' '}
+        <PartLink
+          component="viewport"
+          part="trackStatusBarTaps"
+        />{' '}
+        (and{' '}
+        <PartLink
+          component="viewport"
+          part="useStatusBarTaps"
+        />
+        )
+      </li>
     </ul>
 
     <Heading
@@ -2697,6 +2714,71 @@ export const ViewportParts: FunctionComponent = () => (
     <UseTextActionsPreventionPart />
     <h3>Arguments</h3>
     <PropsTable rows={useTextActionsPreventionRows} />
+
+    <Heading
+      id="trackstatusbartaps"
+      level={2}
+    >
+      <code>trackStatusBarTaps</code>
+    </Heading>
+    <ul>
+      <li>
+        Calls <code>onTap</code> as the status bar is tapped, until its returned
+        function stops it. iOS gives a page no touch in the status bar: tapped,
+        it scrolls the document to its top, and nothing else. So, while it’s
+        tracked, the document is kept 1px taller than the screen and scrolled
+        1px; scrolled to its top with no finger down, that’s a tap, and it’s
+        scrolled back to 1px.
+      </li>
+      <li>
+        Only on iOS, in a Home Screen app; elsewhere it does nothing. For an app
+        whose document doesn’t scroll (its content scrolling in a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Content"
+        />{' '}
+        or <a href={publicUrl('page')}>Page</a>s): it holds the document at its
+        1px, so don’t use it if yours scrolls (a provider’s{' '}
+        <code>scrollsToTop</code> doesn’t then: it tracks the document). A
+        modal’s scroll lock on the document is undone meanwhile (the document
+        never scrolls more than its 1px anyway).
+      </li>
+      <li>
+        Several at once share it, each called. A provider’s{' '}
+        <code>scrollsToTop</code> (on by default) already scrolls the{' '}
+        <PartLink
+          component="viewport"
+          part="useCurrentScroller"
+        >
+          current scroller
+        </PartLink>{' '}
+        to its top: track taps yourself for anything else (e.g. with it off).
+        See also <a href={publicUrl('ios-quirks')}>iOS Quirks</a>.
+      </li>
+    </ul>
+    <h3>Arguments</h3>
+    <PropsTable rows={trackStatusBarTapsArgumentRows} />
+    <h3>Returns</h3>
+    <PropsTable rows={trackStatusBarTapsRows} />
+
+    <Heading
+      id="usestatusbartaps"
+      level={2}
+    >
+      <code>useStatusBarTaps</code>
+    </Heading>
+    <ul>
+      <li>
+        <PartLink
+          component="viewport"
+          part="trackStatusBarTaps"
+        />
+        , while the component is mounted (and <code>enabled</code>), with its
+        latest <code>onTap</code>.
+      </li>
+    </ul>
+    <h3>Arguments</h3>
+    <PropsTable rows={useStatusBarTapsRows} />
   </>
 );
 

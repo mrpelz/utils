@@ -55,6 +55,7 @@ import type {
   ViewportScrollOptions,
   VisualViewportState,
 } from './props.js';
+import { useStatusBarTaps } from './status-bar.js';
 
 export {
   preventFocusShift,
@@ -65,6 +66,7 @@ export {
   useTextActionsPrevention,
 } from './input.js';
 export { useCurrentLayer } from './current.js';
+export { trackStatusBarTaps, useStatusBarTaps } from './status-bar.js';
 export { useScrollerRegistration, useViewportEdgeElement } from './edge.js';
 export { EdgeEffects } from './edge-effect.js';
 export { ios27Attribute, isIos27, ViewportInsetContext } from './ios27.js';
@@ -413,6 +415,7 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
   children,
   screen: ownScreen,
   scroller,
+  scrollsToTop = true,
 }) => {
   // Its screen: its own, or the provided portal container's (e.g. a
   // device's frame), or none (the window's).
@@ -422,6 +425,29 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
   // Tracked without a `scroller`: the page filling its screen (see
   // edge.ts), or the document's.
   const [filling, setFilling] = useState<Element | undefined>(undefined);
+
+  // Its status bar tapped (the window's, see status-bar.ts): the current
+  // scroller to its top, smoothly (not the document: its own scroll to its
+  // top is the tap's). Not if it tracks the document (the app's own
+  // scrolling: iOS's tap scrolls it as it is).
+  const isDocumentTracked =
+    !scroller &&
+    (filling === undefined ||
+      (typeof document !== 'undefined' &&
+        filling === document.scrollingElement));
+  const latestFilling = useRef(filling);
+  useLayoutEffect(() => {
+    latestFilling.current = filling;
+  });
+  useStatusBarTaps(
+    () => {
+      const target =
+        currentLayer(null) ?? scroller?.current ?? latestFilling.current;
+      if (!target || target === document.scrollingElement) return;
+      target.scrollTo({ behavior: 'smooth', top: 0 });
+    },
+    scrollsToTop && !elementOf(screen) && !isDocumentTracked,
+  );
 
   useLayoutEffect(() => {
     if (scroller) return undefined;

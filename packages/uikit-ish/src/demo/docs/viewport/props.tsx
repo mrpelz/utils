@@ -70,6 +70,7 @@ export const propOptionsProvider = {
   // (Unset: the provided portal container, e.g. a frame's screen; null: the
   // window.)
   screen: [undefined, null] as const,
+  scrollsToTop: [undefined, true, false] as const,
 };
 
 /** The scroll hooks' options (`useViewportScroll`, `useScrollDirection`). */

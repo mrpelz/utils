@@ -178,6 +178,26 @@ export const viewportProviderRows: readonly PropRow[] = [
     </>,
   ],
   [
+    'scrollsToTop',
+    'boolean',
+    code('true'),
+    <>
+      Its status bar tapped, the current scroller (
+      <PartLink
+        component="viewport"
+        part="useCurrentScroller"
+      />
+      ) scrolls to its top, smoothly, as in iOS apps. Only on iOS, in a Home
+      Screen app, for a provider of the window’s (no <code>screen</code>), and
+      while the app’s document doesn’t scroll itself (see{' '}
+      <PartLink
+        component="viewport"
+        part="trackStatusBarTaps"
+      />
+      ).
+    </>,
+  ],
+  [
     'screen',
     'HTMLElement | RefObject<HTMLElement | null> | null',
     'the provided portal container, or the window',
@@ -684,6 +704,36 @@ const releaseRow: PropRow = [
 ];
 
 export const preventInputZoomRows: readonly PropRow[] = [releaseRow];
+
+/** `trackStatusBarTaps(onTap)`: its argument. */
+export const trackStatusBarTapsArgumentRows: readonly PropRow[] = [
+  [
+    'onTap',
+    '(event: Event) => void',
+    undefined,
+    'Called as the status bar is tapped (with the document’s scroll event).',
+  ],
+];
+
+/** `trackStatusBarTaps(onTap)`: what it returns. */
+export const trackStatusBarTapsRows: readonly PropRow[] = [
+  [
+    '(return)',
+    '() => void',
+    undefined,
+    'Stops calling it (the document restored with the last).',
+  ],
+];
+
+export const useStatusBarTapsRows: readonly PropRow[] = [
+  ...trackStatusBarTapsArgumentRows,
+  [
+    'enabled',
+    'boolean',
+    code('true'),
+    'Whether it’s called (while mounted; its latest `onTap`).',
+  ],
+];
 
 export const useInputZoomPreventionRows: readonly PropRow[] = [
   [

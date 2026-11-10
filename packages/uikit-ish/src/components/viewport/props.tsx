@@ -81,10 +81,17 @@ export type ViewportProviderProps = {
   /**
    * The scroll container tracked.
    * @default the page filling its screen (the registered scroller there:
-   * a `Page.Root`, a sheet's content, the content layer), or the
+   * a `Page.Root` or the content layer; never an overlay's), or the
    * document's scrolling element
    */
   scroller?: RefObject<HTMLElement | null>;
+  /**
+   * Its status bar tapped (iOS, a Home Screen app; a provider of the
+   * window's), the current scroller (see `useCurrentScroller`) scrolled to
+   * its top, smoothly, as iOS apps do (see `trackStatusBarTaps`).
+   * @default true
+   */
+  scrollsToTop?: boolean;
 };
 
 /** The edge of the viewport an anchor floats at. */
