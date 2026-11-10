@@ -108,6 +108,11 @@ type SnapContextValue = {
    */
   ignored: readonly boolean[];
   /**
+   * Its stops of its content's groups (by index; see snap.ts): asked for
+   * while its content's scrolled, its content scrolled back too.
+   */
+  ofContent: readonly boolean[];
+  /**
    * A group's end (px from the popup's top), or `undefined`: gone; pinned
    * (`isPinned`: its header alone, not of its content's scroll).
    */
@@ -178,7 +183,7 @@ const Root = <Payload,>({
   const active = snapPoint === undefined ? own : snapPoint;
 
   // Its stops, those not snapped to (its content scrolled: see snap.ts).
-  const { ignored, index, stops } = useMemo(
+  const { ignored, index, ofContent, stops } = useMemo(
     () => stopsOf(heights, isContentScrolled, active),
     [active, heights, isContentScrolled],
   );
@@ -188,6 +193,7 @@ const Root = <Payload,>({
       active: Math.max(index, 0),
       close: () => actions.current?.close(),
       ignored,
+      ofContent,
       report,
       select: (next, event) => {
         const name = stops[next]?.[0];
@@ -204,6 +210,7 @@ const Root = <Payload,>({
       ignored,
       index,
       isNamed,
+      ofContent,
       onSnapPointChange,
       report,
       snapPoint,
@@ -438,6 +445,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
             content: '[data-sheet-part=content]',
             handle: dragHandle,
             ignored: snap.ignored,
+            ofContent: snap.ofContent,
             onClose: snap.close,
             onSelect: snap.select,
             stops: snap.stops,

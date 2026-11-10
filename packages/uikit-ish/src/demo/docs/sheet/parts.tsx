@@ -1422,7 +1422,9 @@ export const SheetParts: FunctionComponent = () => (
         While its content is scrolled away from its start (only possible at the
         top stop), the groups in it aren’t stops: dragging the header down goes
         to the header-only stop, or closes the sheet without one. Back at the
-        start, they’re stops again.
+        start, they’re stops again. Asked for while scrolled away (the root’s{' '}
+        <code>snapPoint</code>), a group’s stop is gone to with the content
+        scrolled back to its start.
       </li>
       <li>
         Groups follow one another in its{' '}

@@ -50,6 +50,12 @@ export type SnapOptions = {
    * start, see below): never chosen.
    */
   ignored?: readonly boolean[];
+  /**
+   * Its stops of its content's groups (by index; not pinned, nor its top
+   * one): asked for while its content's scrolled, its content scrolled
+   * back to its start too.
+   */
+  ofContent?: readonly boolean[];
   onClose: (event: Event) => void;
   onSelect: (index: number, event: Event) => void;
   /** Its stops' heights (px from its panel's top, ascending). */
@@ -132,6 +138,23 @@ const range = (element: HTMLElement) =>
   element.scrollHeight - element.clientHeight;
 
 /**
+ * Its snapping off (`data-snap-off` too, see `useContentScrolled`): while
+ * it's moved there itself (a stop asked for, a pull's step), until at rest
+ * (see `settle`); its stops' marks changed meanwhile, nothing snapped anew
+ * (WebKit, by their places among those snapped to: another stop's).
+ */
+const snapOff = (element: HTMLElement) => {
+  element.style.scrollSnapType = 'none';
+  element.dataset.snapOff = '';
+};
+
+/** Its snapping back (see `snapOff`). */
+const snapOn = (element: HTMLElement) => {
+  element.style.removeProperty('scroll-snap-type');
+  delete element.dataset.snapOff;
+};
+
+/**
  * Its stops as scroll positions (within its range); those not snapped to
  * (`ignored`) not a number: never nearest, nor a drag's target.
  */
@@ -177,16 +200,26 @@ export const useSnap = (
       active === current.stops.length - 1,
     );
     if (isScrolling.current) return;
+    // Another stop (asked for, e.g. by the app): moved there smoothly, not
+    // snapping meanwhile (before anything's measured: its marks may have
+    // changed with it, see `snapOff`). The same, re-measured: kept, at once.
+    const isAnother = shown.current !== undefined && shown.current !== active;
+    if (isAnother) snapOff(element);
     const top = Math.min(current.stops[active] ?? 0, range(element));
     if (Math.abs(element.scrollTop - top) >= 1) {
-      element.scrollTo({
-        // (Another stop: moved there; the same, re-measured: kept.)
-        behavior:
-          shown.current === undefined || shown.current === active
-            ? 'instant'
-            : 'smooth',
-        top,
-      });
+      // One of its content's groups, its content scrolled (those not
+      // stops meanwhile, see `stopsOf`): its content back at its start too
+      // (its own scroll only, not its popup's: no `scrollIntoView`).
+      const content =
+        isAnother && current.ofContent?.[active] === true && current.content
+          ? element.querySelector<HTMLElement>(current.content)
+          : null;
+      if (content && content.scrollTop > 0) {
+        content.scrollTo({ behavior: 'smooth', top: 0 });
+      }
+      element.scrollTo({ behavior: isAnother ? 'smooth' : 'instant', top });
+    } else if (isAnother) {
+      snapOn(element);
     }
     shown.current = active;
   }, [active, isSnapping, ref, stopsKey]);
@@ -217,7 +250,7 @@ export const useSnap = (
       clearTimeout(rest);
       // (Dragged by a mouse: at rest once let go; its snapping back.)
       if (drag?.isDragged) return;
-      element.style.removeProperty('scroll-snap-type');
+      snapOn(element);
       const isUsers = isScrolling.current;
       isScrolling.current = false;
       const { current } = optionsRef;
@@ -282,10 +315,8 @@ export const useSnap = (
       }
       if (current.active === 0) current.onClose(event);
       else {
-        // Not snapping until it's there (back at rest, see `settle`): its
-        // stops' marks (see `useContentScrolled`) cleared on its way, not
-        // snapped to anew (WebKit, by their places: another stop's).
-        element.style.scrollSnapType = 'none';
+        // Not snapping until it's there (see `snapOff`).
+        snapOff(element);
         current.onSelect(current.active - 1, event);
       }
     };
@@ -403,7 +434,7 @@ export const useSnap = (
       if (!drag.isDragged) {
         drag.isDragged = true;
         isScrolling.current = true;
-        element.style.scrollSnapType = 'none';
+        snapOff(element);
       }
       drag.moves = [
         ...drag.moves.filter(([time]) => event.timeStamp - time < 100),
@@ -445,7 +476,7 @@ export const useSnap = (
       );
       const top = dragTarget(positions, position, speed);
       if (Math.abs(top - position) < 1) {
-        element.style.removeProperty('scroll-snap-type');
+        snapOn(element);
         settle(event);
         return;
       }
@@ -480,7 +511,7 @@ export const useSnap = (
       element.removeEventListener('pointermove', onDragMove);
       element.removeEventListener('pointerup', onDragEnd);
       element.removeEventListener('pointercancel', onDragEnd);
-      element.style.removeProperty('scroll-snap-type');
+      snapOn(element);
       for (const type of pressEvents) {
         element.removeEventListener(type, onPress, listening);
       }
@@ -543,7 +574,8 @@ export const useGroupStops = (): readonly [
 /**
  * Its stops by name, ascending; those not snapped to (`ignored`, its
  * content scrolled: see above); its stop now (`index`, of `active`);
- * whether none below its top one counts (`isStranded`).
+ * whether none below its top one counts (`isStranded`); its content's
+ * groups' (`ofContent`: not pinned, nor its top one).
  */
 export const stopsOf = (
   all: ReadonlyMap<string, GroupStop>,
@@ -553,6 +585,7 @@ export const stopsOf = (
   ignored: readonly boolean[];
   index: number;
   isStranded: boolean;
+  ofContent: readonly boolean[];
   stops: readonly (readonly [name: string, height: number])[];
 } => {
   const sorted = [...all].toSorted(([, [a]], [, [b]]) => a - b);
@@ -565,6 +598,7 @@ export const stopsOf = (
   return {
     ignored,
     index,
+    ofContent: sorted.map(([, [, isPinned]], at) => !isPinned && at !== top),
     isStranded:
       sorted.length > 1 && ignored.every((is, at) => is || at === top),
     stops: sorted.map(([name, [height]]) => [name, height] as const),
@@ -604,8 +638,15 @@ export const useContentScrolled = (
       clearTimeout(rest);
       if (pending === undefined) return;
       // (Back at its start: not at rest, only as the scroller around it
-      // moves, see above.)
-      if (!pending && told && !isOuterMoving) return;
+      // moves, see above; or while it isn't snapping, see `snapOff`.)
+      if (
+        !pending &&
+        told &&
+        !isOuterMoving &&
+        !scroller?.closest('[data-snap-off]')
+      ) {
+        return;
+      }
       if (pending !== told) {
         told = pending;
         setScrolled(told);

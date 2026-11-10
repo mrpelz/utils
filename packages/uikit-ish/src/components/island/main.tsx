@@ -342,6 +342,7 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
       ignored,
       index: found,
       isStranded,
+      ofContent,
       stops,
     } = useMemo(
       () => stopsOf(heights, isContentScrolled, active),
@@ -378,6 +379,7 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
             content: '[data-island-part=content]',
             handle,
             ignored,
+            ofContent,
             onClose: noop,
             onSelect: select,
             stops: positions,

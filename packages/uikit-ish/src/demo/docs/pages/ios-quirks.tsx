@@ -769,6 +769,24 @@ export const IosQuirksPage: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
+        <strong>Snapping remembers places, not elements.</strong> WebKit keeps
+        the snap area a scroller rests on by its place among the areas it snaps
+        to. Turning snapping off for areas below that one is harmless, but
+        turning it back on while the scroller rests shifts that place, and it
+        jumps to another area. A snapping <a href={publicUrl('sheet')}>Sheet</a>{' '}
+        or <a href={publicUrl('island')}>Island</a> stops snapping to the groups
+        in its scrolled content (see{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.SnapGroup"
+        />
+        ), so it changes them only when the content has come to rest or the
+        panel is moving, turns them back on only while the panel moves, and
+        switches snapping off entirely for scrolls it makes itself.
+      </li>
+    </ul>
+    <ul>
+      <li>
         <strong>Document overscroll on iOS only.</strong> Not an iOS quirk, but
         the reason for an iOS-only rule: in Chrome on macOS,{' '}
         <code>overscroll-behavior: none</code> on the document ends a trackpad’s

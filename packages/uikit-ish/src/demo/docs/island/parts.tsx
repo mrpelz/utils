@@ -835,7 +835,9 @@ export const IslandParts: FunctionComponent = () => (
         While its content is scrolled away from its start (only possible fully
         extended), the groups in it aren’t stops: dragging the header down goes
         to the header-only stop or the sliver, or nowhere without one. Back at
-        the start, they’re stops again.
+        the start, they’re stops again. Asked for while scrolled away (the
+        root’s <code>snapPoint</code>), a group’s stop is gone to with the
+        content scrolled back to its start.
       </li>
       <li>Optional: without groups, a plain capsule as tall as its content.</li>
     </ul>
