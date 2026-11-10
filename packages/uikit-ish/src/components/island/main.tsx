@@ -143,6 +143,39 @@ const useSliverProgress = (
 const idleDelay = 300;
 
 /**
+ * Stranded (no stop below its top one counting, its content scrolled, see
+ * snap.ts): not moved at all. Its scroller's own pans (a touch or a wheel
+ * not starting in its content, e.g. on its header) prevented (iOS: a
+ * non-passive move's, the native pan's only reliable stop; `touch-action`
+ * doesn't reach a header's parts, its clipped title a scroll container of
+ * its own). Its content still scrolls.
+ */
+const useStrandedPanBlock = (
+  scroller: RefObject<HTMLDivElement | null>,
+  isStranded: boolean,
+) => {
+  useEffect(() => {
+    const { current: element } = scroller;
+    if (!element || !isStranded) return undefined;
+    const isOutsideContent = (event: Event) =>
+      !(
+        event.target instanceof Element &&
+        event.target.closest('[data-island-part=content]')
+      );
+    const onMove = (event: Event) => {
+      if (isOutsideContent(event)) event.preventDefault();
+    };
+    const options = { passive: false };
+    element.addEventListener('touchmove', onMove, options);
+    element.addEventListener('wheel', onMove, options);
+    return () => {
+      element.removeEventListener('touchmove', onMove);
+      element.removeEventListener('wheel', onMove);
+    };
+  }, [isStranded, scroller]);
+};
+
+/**
  * Its hit area (see style.css): at rest, its box (its scroller clipped to
  * it, the content beneath touched above it); moved (pressed, wheeled,
  * keyed, scrolled away from its stop `top`), all of its scroller's (it may
@@ -334,20 +367,26 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
     // Its content scrolled from its start: its groups in it not snapped to
     // meanwhile (see snap.ts).
     const [isContentScrolled, setContentScrolled] = useState(false);
+    // (Its content's, as soon as its scroll rests: not moved meanwhile.)
+    const [isContentSettled, setContentSettled] = useState(false);
     const [sliver, setSliver] = useState<string | undefined>();
     const [own, setOwn] = useState(defaultSnapPoint);
     const active = snapPoint ?? own;
     // (`isStranded`: none below its top stop counting, its content
-    // scrolled: not moved at all, see style.css.)
+    // scrolled: not moved at all, see `useStrandedPanBlock`.)
     const {
       ignored,
       index: found,
-      isStranded,
       ofContent,
       stops,
     } = useMemo(
       () => stopsOf(heights, isContentScrolled, active),
       [active, heights, isContentScrolled],
+    );
+    // (Not moved: as soon as its content's scroll rests, see snap.ts.)
+    const { isStranded } = useMemo(
+      () => stopsOf(heights, isContentSettled, active),
+      [active, heights, isContentSettled],
     );
     const index = Math.max(found, 0);
     const isSnapping = stops.length > 0 && maxHeight !== undefined;
@@ -380,6 +419,7 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
             content: '[data-island-part=content]',
             handle,
             ignored,
+            isStranded,
             ofContent,
             onClose: noop,
             onSelect: select,
@@ -392,8 +432,10 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
       '[data-island-part=content]',
       setContentScrolled,
       isSnapping,
+      setContentSettled,
     );
     useSliverProgress(ref, scroller, isSliver ? sliverTo : undefined);
+    useStrandedPanBlock(scroller, isStranded);
     useHitArea(ref, scroller, isSnapping ? positions[index] : undefined);
 
     // (Its box: its stop's, at most as tall as it may be.)

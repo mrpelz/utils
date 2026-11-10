@@ -16,6 +16,17 @@
 
     /* What's shown hatched (the safe areas, a part overlaid, see
        frame/overlay.ts). */
+
+    /* A picture (of gradients) behind what's shown: e.g. a screen's
+       background (`Viewport.Background`), behind glass (see
+       `.demo-picture`). */
+    --demo-picture: linear-gradient(
+      135deg,
+      #ffd60a 0%,
+      #ff9f0a 30%,
+      #1c1c1e 60%,
+      #0a84ff 100%
+    );
     --demo-hatch: repeating-linear-gradient(
       -45deg,
       rgb(255 59 48 / 25%) 0 4px,
@@ -259,4 +270,11 @@
    library's. */
 :root:not([data-demo-raw]) {
   background-color: light-dark(white, #0a0a0a);
+}
+
+/* A picture (see `--demo-picture`): e.g. in a `Viewport.Background`. */
+@layer demo {
+  .demo-picture {
+    background: var(--demo-picture);
+  }
 }

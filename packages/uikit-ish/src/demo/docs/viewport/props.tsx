@@ -83,6 +83,9 @@ export const propOptionsKeyboardAccessory = {
   gap: [undefined, 0, 24] as const,
 };
 
+/** `Viewport.Background`: its element's. */
+export const propOptionsBackground = elementOptions;
+
 export const propOptionsContent = {
   ...elementOptions,
   keyboard: [undefined, 'resize', 'overlay'] as const,

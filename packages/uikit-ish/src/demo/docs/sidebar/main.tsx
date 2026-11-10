@@ -122,19 +122,19 @@ export const SidebarDemo: FunctionComponent = () => {
         stateContentColumn,
       ]}
     >
+      {content.background === 'picture' ? (
+        <Viewport.Background>
+          <div
+            aria-hidden="true"
+            className="demo-picture"
+          />
+        </Viewport.Background>
+      ) : null}
       <Viewport.Content>
         <Layout.Root
           key={`${keyRoot}-${keyColumn}-${keySidebar}-${keyContentColumn}`}
           {...propsRoot}
         >
-          {content.background === 'picture' ? (
-            <Layout.Background>
-              <div
-                aria-hidden="true"
-                className="sidebar-demo-picture"
-              />
-            </Layout.Background>
-          ) : null}
           <Layout.Column
             aria-label="Sidebar"
             {...propsColumn}
@@ -652,19 +652,19 @@ export const SidebarCompactDemo: FunctionComponent = () => {
         stateContentColumn,
       ]}
     >
+      {content.background === 'picture' ? (
+        <Viewport.Background>
+          <div
+            aria-hidden="true"
+            className="demo-picture"
+          />
+        </Viewport.Background>
+      ) : null}
       <Viewport.Content>
         <Layout.Root
           key={`${keyRoot}-${keyColumn}-${keyDrawer}-${keySidebar}-${keyContentColumn}`}
           {...propsRoot}
         >
-          {content.background === 'picture' ? (
-            <Layout.Background>
-              <div
-                aria-hidden="true"
-                className="sidebar-demo-picture"
-              />
-            </Layout.Background>
-          ) : null}
           <Drawer.Root
             {...propsDrawer}
             open={isOpen}
@@ -1167,14 +1167,14 @@ export const SidebarEditingDemo: FunctionComponent = () => {
       stage="tablet"
       title="Sidebar (Editing)"
     >
+      <Viewport.Background>
+        <div
+          aria-hidden="true"
+          className="demo-picture"
+        />
+      </Viewport.Background>
       <Viewport.Content>
         <Layout.Root>
-          <Layout.Background>
-            <div
-              aria-hidden="true"
-              className="sidebar-demo-picture"
-            />
-          </Layout.Background>
           <Layout.Column
             floating
             aria-label="Sidebar"

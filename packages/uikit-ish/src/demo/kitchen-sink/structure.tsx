@@ -1104,13 +1104,13 @@ const LayoutContent: FunctionComponent = () => (
         <List.Title>A Floating Column, on a Background</List.Title>
       </List.Header>
       <LayoutBox>
+        {/* Behind the layout (an element of the box's: see Layout), showing
+          through where its columns have no background. */}
+        <div
+          aria-hidden="true"
+          className="kitchen-sink-picture kitchen-sink-fill"
+        />
         <Layout.Root>
-          <Layout.Background>
-            <div
-              aria-hidden="true"
-              className="kitchen-sink-picture kitchen-sink-fill"
-            />
-          </Layout.Background>
           <Layout.Column
             floating
             aria-label="Sidebar"

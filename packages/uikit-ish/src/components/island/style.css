@@ -130,14 +130,6 @@
       scroll-timeline: --uikit-island-scroll block;
       scrollbar-width: none;
 
-      /* No stop below its top one counting (its content scrolled, see
-         main.tsx): not moved at all, a drag on it (e.g. its header's)
-         going nowhere. Its content its own scroller: still scrolled (a
-         touch allowed by it and its ancestors only up to it). */
-      &[data-stranded] {
-        touch-action: none;
-      }
-
       &::-webkit-scrollbar {
         display: none;
       }

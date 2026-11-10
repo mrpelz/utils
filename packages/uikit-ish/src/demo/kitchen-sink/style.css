@@ -69,13 +69,7 @@
   .kitchen-sink-picture {
     padding: 24px 16px;
     border-radius: var(--uikit-list-radius, 24px);
-    background: linear-gradient(
-      135deg,
-      #ffd60a 0%,
-      #ff9f0a 30%,
-      #1c1c1e 60%,
-      #0a84ff 100%
-    );
+    background: var(--demo-picture);
     margin-inline: var(--uikit-list-inset, 16px);
   }
 

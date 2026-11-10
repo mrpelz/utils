@@ -51,6 +51,11 @@ export type SnapOptions = {
    */
   ignored?: readonly boolean[];
   /**
+   * No stop to go to but its own (its content scrolled, settled; not
+   * closing, see `stopsOf`): a mouse's drag not started.
+   */
+  isStranded?: boolean;
+  /**
    * Its stops of its content's groups (by index; not pinned, nor its top
    * one): asked for while its content's scrolled, its content scrolled
    * back to its start too.
@@ -411,9 +416,7 @@ export const useSnap = (
         event.target.closest(interactive) ||
         // (No stop to go to but its own, and not closing: not dragged, see
         // `stopsOf`.)
-        (!current.canClose &&
-          current.stops.filter((_, index) => current.ignored?.[index] !== true)
-            .length < 2)
+        current.isStranded === true
       ) {
         return;
       }
@@ -618,25 +621,37 @@ const contentRestDelay = 150;
  * its start, only as the scroller around it moves. (WebKit keeps the snap
  * area it's at by its place among those snapped to: groups snapped to
  * again at rest, below the top stop it's at, moved it to another, e.g.
- * from the top stop to the third, until brought back; flickering.)
+ * from the top stop to the third, until brought back; flickering.) Tells
+ * `setSettled` too, as its scroll comes to rest (or the scroller around it
+ * moves), either way at once: for what isn't a snap area (e.g. an island
+ * not moved, a sheet's lowest stop counting; else, held until the scroller
+ * around it moves, that scroller couldn't be moved by its header to begin
+ * with).
  */
 export const useContentScrolled = (
   ref: RefObject<HTMLElement | null>,
   content: string,
   setScrolled: (isScrolled: boolean) => void,
   isEnabled: boolean,
+  setSettled?: (isScrolled: boolean) => void,
 ): void => {
   useLayoutEffect(() => {
     const { current: element } = ref;
     if (!element || !isEnabled) return undefined;
-    // Told, and to be told (its last scroll's; `undefined`: nothing new).
+    // Told, and to be told (its last scroll's; `undefined`: nothing new);
+    // told settled.
     let told = false;
+    let settled = false;
     let pending: boolean | undefined;
     let scroller: Element | undefined;
     let rest: ReturnType<typeof setTimeout> | undefined;
     const tell = (isOuterMoving: boolean) => {
       clearTimeout(rest);
       if (pending === undefined) return;
+      if (pending !== settled) {
+        settled = pending;
+        setSettled?.(settled);
+      }
       // (Back at its start: not at rest, only as the scroller around it
       // moves, see above; or while it isn't snapping, see `snapOff`.)
       if (
@@ -682,6 +697,7 @@ export const useContentScrolled = (
         capture: true,
       });
       setScrolled(false);
+      setSettled?.(false);
     };
-  }, [content, isEnabled, ref, setScrolled]);
+  }, [content, isEnabled, ref, setScrolled, setSettled]);
 };

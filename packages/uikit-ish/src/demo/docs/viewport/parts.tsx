@@ -68,6 +68,7 @@ import {
   useViewportScrollRows,
   useVisualViewportRows,
   viewportAnchorRows,
+  viewportBackgroundRows,
   viewportBlockEndRows,
   viewportBlockStartRows,
   viewportContentRows,
@@ -80,6 +81,7 @@ import {
 import {
   barAnchor,
   propOptionsAnchor,
+  propOptionsBackground,
   propOptionsBlockEnd,
   propOptionsBlockStart,
   propOptionsContent,
@@ -234,6 +236,67 @@ const ContentPart: FunctionComponent = () => {
           <List.Section>
             <List.Group>
               {names.map((name) => (
+                <List.Item key={name}>
+                  <List.Content>
+                    <List.Title>{name}</List.Title>
+                  </List.Content>
+                </List.Item>
+              ))}
+            </List.Group>
+          </List.Section>
+        </List.Root>
+        <Viewport.Padding edge="block-end" />
+      </Viewport.Content>
+    </Component>
+  );
+};
+
+/**
+ * `Viewport.Background`, outlined: a picture behind the content layer,
+ * showing between its list's groups.
+ */
+const BackgroundPart: FunctionComponent = () => {
+  const id = 'viewport-parts-background';
+  const [external] = useProvidedState(id);
+  const [control, props, state] = usePropControl(propOptionsBackground, {
+    external,
+    isOpen: true,
+    emphasize: 'outline',
+    title: 'Viewport.Background',
+  });
+
+  return (
+    <Component
+      isInline
+      controls={[control]}
+      id={id}
+      stage="phone"
+      state={[state]}
+      title="Viewport.Background"
+    >
+      <Viewport.Background {...props}>
+        <div
+          aria-hidden="true"
+          className="demo-picture"
+        />
+      </Viewport.Background>
+      <Viewport.Content>
+        <Viewport.Padding edge="block-start" />
+        <List.Root>
+          <List.Section>
+            <List.Group>
+              {names.slice(0, 4).map((name) => (
+                <List.Item key={name}>
+                  <List.Content>
+                    <List.Title>{name}</List.Title>
+                  </List.Content>
+                </List.Item>
+              ))}
+            </List.Group>
+          </List.Section>
+          <List.Section>
+            <List.Group>
+              {names.slice(4, 8).map((name) => (
                 <List.Item key={name}>
                   <List.Content>
                     <List.Title>{name}</List.Title>
@@ -1511,6 +1574,13 @@ export const ViewportParts: FunctionComponent = () => (
           <li>
             <PartLink
               component="viewport"
+              part="Viewport.Background"
+            />{' '}
+            (optional; behind the other layers)
+          </li>
+          <li>
+            <PartLink
+              component="viewport"
               part="Viewport.Content"
             />
             <ul>
@@ -1774,6 +1844,43 @@ export const ViewportParts: FunctionComponent = () => (
     <ProviderPart />
     <h3>Props</h3>
     <PropsTable rows={viewportProviderRows} />
+
+    <Heading
+      id="viewport-background"
+      level={2}
+    >
+      <code>Viewport.Background</code>
+    </Heading>
+    <ul>
+      <li>
+        The screen’s background: a layer behind the{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Content"
+        />{' '}
+        and every other layer, wherever it’s placed among them, filling its
+        provider’s screen (the window, or a screen such as a device’s frame). It
+        doesn’t scroll, and the keyboard doesn’t move it.
+      </li>
+      <li>
+        Its children layered, each filling it (images and videos covering it):
+        e.g. a picture, a map or a video. It shows where nothing in front of it
+        paints: between a list’s groups, beside a{' '}
+        <a href={publicUrl('layout')}>Layout</a>’s floating{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a>, through transparent pages.
+      </li>
+      <li>
+        A sibling of the content layer, not inside it (the content layer moves
+        as it bounces, and would carry it along). For a layout that doesn’t fill
+        the screen, give the layout’s box a background of its own instead.
+      </li>
+      <li>
+        Renders a <code>div</code>.
+      </li>
+    </ul>
+    <BackgroundPart />
+    <h3>Props</h3>
+    <PropsTable rows={viewportBackgroundRows} />
 
     <Heading
       id="viewport-content"
@@ -2784,6 +2891,7 @@ export const ViewportParts: FunctionComponent = () => (
 
 /** Its live views, also on the component's page of demos (and `/all`). */
 export const viewportPartsDemos = [
+  BackgroundPart,
   ProviderPart,
   ContentPart,
   AnchorPart,

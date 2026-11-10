@@ -11,33 +11,12 @@
     min-height: 0;
     box-sizing: border-box;
 
-    /* (For its background, behind its columns.) */
+    /* (Its columns' layers kept inside it.) */
     isolation: isolate;
 
     /* Its floating column's size (set as it's laid out, see main.tsx):
        none, unless it has one (not inherited from a layout around it). */
     --uikit-layout-floating-size: 0px;
-  }
-
-  .uikit-layout-background {
-    position: absolute;
-    z-index: -1;
-    display: grid;
-    overflow: hidden;
-    inset: 0;
-
-    & > * {
-      width: 100%;
-      min-width: 0;
-      height: 100%;
-      min-height: 0;
-      box-sizing: border-box;
-      grid-area: 1 / 1;
-    }
-
-    & > :is(img, video) {
-      object-fit: cover;
-    }
   }
 
   .uikit-layout-column {

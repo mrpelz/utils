@@ -45,6 +45,34 @@
     background-color: var(--color-ui-system-grouped-background);
   }
 
+  /* The screen's background (see main.tsx): fixed, filling the layers'
+     box (the screen's: not the visual viewport, not moved by the
+     keyboard), behind every layer (wherever it's placed among them),
+     above the screen's own background color. Its children layered, each
+     filling it (images and videos covering it). */
+  .uikit-viewport-background {
+    position: fixed;
+    z-index: -1;
+    display: grid;
+    overflow: hidden;
+    inset: 0;
+    pointer-events: none;
+
+    & > * {
+      width: 100%;
+      min-width: 0;
+      height: 100%;
+      min-height: 0;
+      box-sizing: border-box;
+      grid-area: 1 / 1;
+      pointer-events: auto;
+    }
+
+    & > :is(img, video) {
+      object-fit: cover;
+    }
+  }
+
   /* A screen's layers' box (see main.tsx's `Provider`): fixed, filling
      their containing block (the window, or an ancestor containing them),
      unseen. */

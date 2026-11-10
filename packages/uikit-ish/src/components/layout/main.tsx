@@ -1,7 +1,6 @@
 import './style.css';
 
 import {
-  ComponentProps,
   forwardRef,
   KeyboardEvent,
   PointerEvent,
@@ -35,27 +34,15 @@ export type { LayoutColumnProps, LayoutRootProps } from './props.js';
 // (`clearFloating`: its pages' content and its bars' inset by the floating
 // column's size, their backgrounds running underneath it).
 //
-// Behind it all, a background of the app's choice (`Background`: any content,
-// filling the whole layout), showing where columns have none.
+// Behind it all, where columns have no background of their own, what's
+// behind the layout: e.g. a `Viewport.Background` (the screen's), or the
+// app's own (its root's CSS background, an element behind it).
 //
 // Each column is the containing block of its fixed layers (e.g. a header's
 // bar, in a `Viewport.BlockStart`): they span it, not the screen.
 //
 // Also:
 // - Resizable.
-
-// Behind its columns, filling it: its children layered, each filling it
-// (images and videos covering it).
-const Background = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('uikit-layout-background', className)}
-      data-layout-part="background"
-      {...props}
-    />
-  ),
-);
 
 /** How far an arrow key resizes (Shift: further). */
 const keyStep = 10;
@@ -224,7 +211,7 @@ const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
 
 /**
  * A layout: its columns side by side (floating ones over the others),
- * optionally on a `Background`.
+ * what's behind it showing where they have no background.
  */
 const Root = forwardRef<HTMLDivElement, LayoutRootProps>(
   ({ className, ...props }, ref) => (
@@ -239,6 +226,5 @@ const Root = forwardRef<HTMLDivElement, LayoutRootProps>(
 
 export const Layout = {
   Root,
-  Background,
   Column,
 };

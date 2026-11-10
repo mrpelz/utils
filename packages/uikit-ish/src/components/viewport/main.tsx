@@ -47,6 +47,7 @@ import type {
   Listener,
   SizeClass,
   ViewportAnchorProps,
+  ViewportBackgroundProps,
   ViewportContentProps,
   ViewportKeyboardAccessoryProps,
   ViewportOverscrollProps,
@@ -83,6 +84,7 @@ export type {
   ElementGeometryOptions,
   ElementVisibilityOptions,
   ViewportAnchorProps,
+  ViewportBackgroundProps,
   ViewportContentProps,
   ViewportKeyboardAccessoryProps,
   ViewportContentSafeArea,
@@ -1492,8 +1494,28 @@ const KeyboardAccessory = forwardRef<
   );
 });
 
+/**
+ * The screen's background (a layer): behind its content layer and all its
+ * other layers, filling its screen (the window, or a provider's screen),
+ * not scrolling, not moved by the keyboard. Its children layered, each
+ * filling it (images and videos covering it): e.g. a picture, a map or a
+ * video, showing where nothing in front paints (e.g. beside a layout's
+ * floating column, or between its columns).
+ */
+const Background = forwardRef<HTMLDivElement, ViewportBackgroundProps>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      {...props}
+      className={cn('uikit-viewport-background', className)}
+      data-viewport-part="background"
+    />
+  ),
+);
+
 export const Viewport = {
   Provider,
+  Background,
   Anchor,
   Content,
   BlockStart,

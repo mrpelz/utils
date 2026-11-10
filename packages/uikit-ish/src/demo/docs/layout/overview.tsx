@@ -295,12 +295,13 @@ export const LayoutOverview: FunctionComponent = () => (
         ) spans its column.
       </li>
       <li>
-        Behind it all, a{' '}
+        Behind it all, where columns have no background, what’s behind the
+        layout: e.g. a{' '}
         <PartLink
-          component="layout"
-          part="Layout.Background"
-        />{' '}
-        of the app’s, where columns have none.
+          component="viewport"
+          part="Viewport.Background"
+        />
+        .
       </li>
       <li>Mirrored right to left (floating columns’ sides, dividers’ keys).</li>
     </ul>

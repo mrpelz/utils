@@ -14,11 +14,7 @@ import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import { names } from '../viewport/content.js';
-import {
-  layoutBackgroundRows,
-  layoutColumnRows,
-  layoutRootRows,
-} from './docs.js';
+import { layoutColumnRows, layoutRootRows } from './docs.js';
 import { LayoutColumn, useLayoutControls } from './props.js';
 
 // Each part's view: a tablet, its columns' pages, every part's props, the
@@ -94,75 +90,6 @@ const RootPart: FunctionComponent = () => {
           >
             <Page.Root background="plain" />
           </Layout.Column>
-        </Layout.Root>
-      </Viewport.Content>
-    </Component>
-  );
-};
-
-/** `Layout.Background`, outlined: a picture behind a floating column. */
-const BackgroundPart: FunctionComponent = () => {
-  const id = 'layout-parts-background';
-  const [log, addLog] = useLog();
-  const {
-    controls,
-    keyFirst,
-    keySecond,
-    propsBackground,
-    propsFirst,
-    propsRoot,
-    propsSecond,
-    state,
-  } = useLayoutControls(id, addLog, {
-    columns,
-    featured: 'Background',
-    hasBackground: true,
-  });
-
-  return (
-    <Component
-      isExpanded
-      isInline
-      controls={controls}
-      id={id}
-      log={log}
-      stage="tablet"
-      state={state}
-      title="Layout.Background"
-    >
-      <Viewport.Content>
-        <Layout.Root {...propsRoot}>
-          <Layout.Background {...propsBackground}>
-            <div
-              aria-hidden="true"
-              className="layout-demo-picture"
-            />
-          </Layout.Background>
-          <Layout.Column
-            key={keyFirst}
-            {...propsFirst}
-          >
-            <Page.Root className="layout-demo-transparent">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    {names.slice(0, 8).map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
-                        </List.Content>
-                      </List.Item>
-                    ))}
-                  </List.Group>
-                </List.Section>
-              </List.Root>
-              <Viewport.Padding edge="block-end" />
-            </Page.Root>
-          </Layout.Column>
-          <Layout.Column
-            key={keySecond}
-            {...propsSecond}
-          />
         </Layout.Root>
       </Viewport.Content>
     </Component>
@@ -270,9 +197,6 @@ export const LayoutParts: FunctionComponent = () => (
             <PartLink part="Layout.Root" />
             <ul>
               <li>
-                <PartLink part="Layout.Background" /> (optional)
-              </li>
-              <li>
                 <PartLink part="Layout.Column" /> (several; a divider at a
                 resizable one’s end)
                 <ul>
@@ -316,25 +240,6 @@ export const LayoutParts: FunctionComponent = () => (
     <PropsTable rows={layoutRootRows} />
 
     <Heading
-      id="layout-background"
-      level={2}
-    >
-      <code>Layout.Background</code>
-    </Heading>
-    <ul>
-      <li>
-        Behind the columns, filling the layout: its children layered (images and
-        videos covering it), showing where columns have no background.
-      </li>
-      <li>
-        Renders a <code>div</code>.
-      </li>
-    </ul>
-    <BackgroundPart />
-    <h3>Props</h3>
-    <PropsTable rows={layoutBackgroundRows} />
-
-    <Heading
       id="layout-column"
       level={2}
     >
@@ -368,4 +273,4 @@ export const LayoutParts: FunctionComponent = () => (
 );
 
 /** Its live views, also on the component's page of demos (and `/all`). */
-export const layoutPartsDemos = [RootPart, BackgroundPart, ColumnPart];
+export const layoutPartsDemos = [RootPart, ColumnPart];

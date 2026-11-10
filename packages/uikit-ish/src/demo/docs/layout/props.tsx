@@ -158,7 +158,7 @@ export const useLayoutControls = (
     propOptionsGuideBackground,
     {
       external: externalBackground,
-      title: 'Layout.Background',
+      title: 'Viewport.Background',
       ...options('Background'),
     },
   );

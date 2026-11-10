@@ -744,7 +744,7 @@ const Search: FunctionComponent = () => {
       log={log}
       title="Sidebar with search"
     >
-      <div className="sidebar-demo-panel sidebar-demo-picture">
+      <div className="sidebar-demo-panel demo-picture">
         <Sidebar.Root aria-label="Mailboxes">
           <TextField.Root>
             <TextField.Frame>
@@ -825,7 +825,7 @@ const Editing: FunctionComponent = () => {
       log={log}
       title="Sidebar while editing"
     >
-      <div className="sidebar-demo-panel sidebar-demo-picture">
+      <div className="sidebar-demo-panel demo-picture">
         <Sidebar.Root aria-label="Mailboxes">
           <Sidebar.Toolbar>
             <Button.Root

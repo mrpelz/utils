@@ -50,7 +50,7 @@ const RootPart: FunctionComponent = () => {
       state={[state]}
       title="Sidebar.Root"
     >
-      <div className="sidebar-demo-panel sidebar-demo-picture">
+      <div className="sidebar-demo-panel demo-picture">
         <Sidebar.Root {...props}>
           <Sidebar.Toolbar>
             <Button.Root
@@ -128,7 +128,7 @@ const ToolbarPart: FunctionComponent = () => {
       state={[state]}
       title="Sidebar.Toolbar"
     >
-      <div className="sidebar-demo-panel sidebar-demo-picture">
+      <div className="sidebar-demo-panel demo-picture">
         <Sidebar.Root aria-label="Mailboxes">
           <Sidebar.Toolbar {...props}>
             <Button.Root
@@ -203,7 +203,7 @@ const ToolbarGroupPart: FunctionComponent = () => {
       state={[state]}
       title="Sidebar.ToolbarGroup"
     >
-      <div className="sidebar-demo-panel sidebar-demo-picture">
+      <div className="sidebar-demo-panel demo-picture">
         <Sidebar.Root aria-label="Mailboxes">
           <Sidebar.Toolbar>
             <Button.Root

@@ -58,19 +58,21 @@ const resizableCode = `const [size, setSize] = useState(320);
   </Layout.Column>
 </Layout.Root>`;
 
-const backgroundCode = `<Layout.Root>
-  <Layout.Background>
-    <img alt="" src="…" />
-  </Layout.Background>
-  <Layout.Column floating aria-label="Sidebar" defaultSize={300}>
-    <Sidebar.Root aria-label="Mailboxes">…</Sidebar.Root>
-  </Layout.Column>
-  <Layout.Column clearFloating>
-    {/* Transparent (the page's and its list's backgrounds): the picture
-        shows through. */}
-    <Page.Root className="transparent">…</Page.Root>
-  </Layout.Column>
-</Layout.Root>`;
+const backgroundCode = `<Viewport.Background>
+  <img alt="" src="…" />
+</Viewport.Background>
+<Viewport.Content>
+  <Layout.Root>
+    <Layout.Column floating aria-label="Sidebar" defaultSize={300}>
+      <Sidebar.Root aria-label="Mailboxes">…</Sidebar.Root>
+    </Layout.Column>
+    <Layout.Column clearFloating>
+      {/* Transparent (the page's and its list's backgrounds): the picture
+          shows through. */}
+      <Page.Root className="transparent">…</Page.Root>
+    </Layout.Column>
+  </Layout.Root>
+</Viewport.Content>`;
 
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
@@ -357,14 +359,14 @@ const BackgroundBehind: FunctionComponent = () => {
       state={state}
       title="Layout on a background"
     >
+      <Viewport.Background {...propsBackground}>
+        <div
+          aria-hidden="true"
+          className="demo-picture"
+        />
+      </Viewport.Background>
       <Viewport.Content>
         <Layout.Root {...propsRoot}>
-          <Layout.Background {...propsBackground}>
-            <div
-              aria-hidden="true"
-              className="layout-demo-picture"
-            />
-          </Layout.Background>
           <Layout.Column
             key={keyFirst}
             aria-label="Sidebar"
@@ -558,10 +560,10 @@ export const LayoutComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A picture behind the columns (
+        A picture behind the layout (
         <PartLink
-          component="layout"
-          part="Layout.Background"
+          component="viewport"
+          part="Viewport.Background"
         />
         ), through a floating sidebar’s glass and a transparent page (its list’s
         background too).
@@ -571,10 +573,11 @@ export const LayoutComposition: FunctionComponent = () => (
         <code>context=&quot;adaptive&quot;</code>).
       </li>
       <li>
-        <strong>Library:</strong> the picture layer behind the columns (
+        <strong>Library:</strong> the screen’s background layer behind the
+        layout (
         <PartLink
-          component="layout"
-          part="Layout.Background"
+          component="viewport"
+          part="Viewport.Background"
         />
         ), the floating sidebar’s glass (
         <PartLink

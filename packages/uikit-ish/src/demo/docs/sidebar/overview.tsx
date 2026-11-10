@@ -76,16 +76,16 @@ const LiveView: FunctionComponent = () => {
       state={[stateContent, stateColumn, stateContentColumn]}
       title="Sidebar"
     >
+      {content.background === 'picture' ? (
+        <Viewport.Background>
+          <div
+            aria-hidden="true"
+            className="demo-picture"
+          />
+        </Viewport.Background>
+      ) : null}
       <Viewport.Content>
         <Layout.Root key={`${keyColumn}-${keyContentColumn}`}>
-          {content.background === 'picture' ? (
-            <Layout.Background>
-              <div
-                aria-hidden="true"
-                className="sidebar-demo-picture"
-              />
-            </Layout.Background>
-          ) : null}
           <Layout.Column
             aria-label="Sidebar"
             {...propsColumn}

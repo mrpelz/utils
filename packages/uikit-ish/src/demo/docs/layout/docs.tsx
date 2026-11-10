@@ -16,23 +16,13 @@ export const layoutRootRows: readonly PropRow[] = [
         component="layout"
         part="Layout.Column"
       />
-      ), leading to trailing, and optionally a{' '}
+      ), leading to trailing; what’s behind it (e.g. a{' '}
       <PartLink
-        component="layout"
-        part="Layout.Background"
+        component="viewport"
+        part="Viewport.Background"
       />
-      .
+      ) shows where they have no background.
     </>,
-  ],
-  ...elementRows('div', 'HTMLDivElement'),
-];
-
-export const layoutBackgroundRows: readonly PropRow[] = [
-  [
-    'children',
-    'ReactNode',
-    undefined,
-    'Behind the columns, filling the layout: its children layered, each filling it (images and videos covering it).',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];

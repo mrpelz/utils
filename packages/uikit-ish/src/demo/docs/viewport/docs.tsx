@@ -230,6 +230,10 @@ export const viewportProviderRows: readonly PropRow[] = [
   ],
 ];
 
+export const viewportBackgroundRows: readonly PropRow[] = [
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
 export const viewportContentRows: readonly PropRow[] = [
   [
     'keyboard',

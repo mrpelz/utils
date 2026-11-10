@@ -226,6 +226,9 @@ export type ViewportKeyboardAccessoryProps = ComponentProps<'div'> & {
   gap?: number;
 };
 
+/** `Viewport.Background`: its element's (see main.tsx). */
+export type ViewportBackgroundProps = ComponentProps<'div'>;
+
 export type ViewportContentProps = ComponentProps<'div'> & {
   /**
    * Bouncing even when its content fits:

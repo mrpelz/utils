@@ -125,6 +125,13 @@ type SnapContextValue = {
   select: (index: number, event: Event) => void;
   /** Its content scrolled from its start, or back at it (see `stops`). */
   setContentScrolled: (isScrolled: boolean) => void;
+  /** Its content scrolled, as soon as it rests (see snap.ts). */
+  setContentSettled: (isScrolled: boolean) => void;
+  /**
+   * Its stops not counting as soon as its content's scroll rests (see
+   * snap.ts; not snap areas: its lowest that counts, see `Popup`).
+   */
+  settledIgnored: readonly boolean[];
   /**
    * Its stops' heights, ascending (none: not snapping by groups): all of
    * them, always (their markers kept in place, see snap.ts).
@@ -133,6 +140,24 @@ type SnapContextValue = {
 };
 
 const SnapContext = createContext<SnapContextValue | undefined>(undefined);
+
+/**
+ * Its content scrolled from its start (see snap.ts), told its root while
+ * snapping: for its stops' marks, and (at once at rest) its lowest
+ * counting.
+ */
+const useSnapContent = (
+  ref: RefObject<HTMLElement | null>,
+  snap: SnapContextValue | undefined,
+  isSnapping: boolean,
+) =>
+  useContentScrolled(
+    ref,
+    '[data-sheet-part=content]',
+    snap?.setContentScrolled ?? noop,
+    isSnapping,
+    snap?.setContentSettled,
+  );
 
 /** Base UI's event details, for a stop chosen by a drag (cancelable). */
 const snapDetails = (event: Event) => {
@@ -174,6 +199,8 @@ const Root = <Payload,>({
   const [heights, report] = useGroupStops();
   // Its content scrolled from its start (see `SnapContextValue` `stops`).
   const [isContentScrolled, setContentScrolled] = useState(false);
+  // (Its content's, as soon as its scroll rests: its lowest stop counting.)
+  const [isContentSettled, setContentSettled] = useState(false);
   // (Its own, uncontrolled: from `defaultSnapPoint`, again as it opens.)
   const [own, setOwn] = useState<SnapPoint | null | undefined>(
     defaultSnapPoint,
@@ -187,6 +214,10 @@ const Root = <Payload,>({
   const { ignored, index, ofContent, stops } = useMemo(
     () => stopsOf(heights, isContentScrolled, active),
     [active, heights, isContentScrolled],
+  );
+  const { ignored: settledIgnored } = useMemo(
+    () => stopsOf(heights, isContentSettled, active),
+    [active, heights, isContentSettled],
   );
 
   const snap = useMemo<SnapContextValue>(
@@ -204,6 +235,8 @@ const Root = <Payload,>({
         if (snapPoint === undefined && !details.isCanceled) setOwn(name);
       },
       setContentScrolled,
+      setContentSettled,
+      settledIgnored,
       stops: isNamed ? stops.map(([, height]) => height) : [],
     }),
     [
@@ -214,6 +247,7 @@ const Root = <Payload,>({
       ofContent,
       onSnapPointChange,
       report,
+      settledIgnored,
       snapPoint,
       stops,
     ],
@@ -453,12 +487,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
           }
         : undefined,
     );
-    useContentScrolled(
-      ref,
-      '[data-sheet-part=content]',
-      snap?.setContentScrolled ?? noop,
-      isSnapping,
-    );
+    useSnapContent(ref, snap, isSnapping);
     useMouseSwipe(ref, isBottom, isSnapping);
     // (Its lowest that counts: its content scrolled, none below its top
     // stop counting, its top stop, swiped out from there, see snap.ts.)
@@ -466,7 +495,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
       ref,
       '--uikit-sheet-lowest-stop',
       isSnapping
-        ? snap.stops.find((_, index) => snap.ignored[index] !== true)
+        ? snap.stops.find((_, index) => snap.settledIgnored[index] !== true)
         : undefined,
     );
     const snapKind = snapKindOf(isSnapping, detent);

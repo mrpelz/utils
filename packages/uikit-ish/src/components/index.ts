@@ -347,6 +347,7 @@ export {
   ViewportAnchorHandle,
   ViewportScopeContext,
   type ViewportAnchorProps,
+  type ViewportBackgroundProps,
   type ViewportContentProps,
   type ViewportKeyboardAccessoryProps,
   type ViewportContentSafeArea,
