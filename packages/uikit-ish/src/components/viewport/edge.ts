@@ -6,11 +6,21 @@ import { RefObject, useLayoutEffect } from 'react';
 // (see `scrollerUnder`), again as scrollers are registered, resized, shown
 // or hidden (e.g. a tab's page shown). Each draws its edges' scroll edge
 // effects itself (see `EdgeEffects`), reaching under the edge elements
-// stuck to its bars (e.g. a header's accessory).
+// stuck to its bars (e.g. a header's accessory). An overlay's scroller (a
+// popover's body, a sheet's or an island's content: `isOverlay`) and those
+// within it (e.g. a navigation's pages in a sheet) draw their own edge
+// effects, but fill no provider's screen: never what it tracks (that's the
+// page's, with its bars; see `scrollerUnder`).
 
 type BlockEdge = 'block-start' | 'block-end';
 
 const scrollers = new Set<Element>();
+/** Those of overlays (see above). */
+const overlays = new Set<Element>();
+
+/** Whether a scroller is an overlay's, or within one (see above). */
+const isInOverlay = (element: Element) =>
+  [...overlays].some((overlay) => overlay.contains(element));
 /** Who's told of scrollers registered, resized, shown or hidden. */
 const scrollerListeners = new Set<() => void>();
 
@@ -46,7 +56,10 @@ export const scrollerUnder = (
   let best: Element | undefined;
   let bestArea = 0;
   for (const scroller of scrollers) {
-    if (!scroller.isConnected || !isShown(scroller)) continue;
+    // (Shown; not an overlay's, see above.)
+    if (!scroller.isConnected || !isShown(scroller) || isInOverlay(scroller)) {
+      continue;
+    }
     if (container && !container.contains(scroller)) continue;
     const area = overlap(rect, rectOf(scroller));
     if (area <= 0) continue;
@@ -90,15 +103,23 @@ const release = () => {
   frame = 0;
 };
 
-/** Registers a scroller (see above), until the returned function. */
-export const registerScroller = (element: Element): (() => void) => {
+/**
+ * Registers a scroller (see above; an overlay's: `isOverlay`), until the
+ * returned function.
+ */
+export const registerScroller = (
+  element: Element,
+  isOverlay = false,
+): (() => void) => {
   observe();
   scrollers.add(element);
+  if (isOverlay) overlays.add(element);
   resizeObserver?.observe(element);
   intersectionObserver?.observe(element);
   notify();
   return () => {
     scrollers.delete(element);
+    overlays.delete(element);
     resizeObserver?.unobserve(element);
     intersectionObserver?.unobserve(element);
     notify();
@@ -106,15 +127,18 @@ export const registerScroller = (element: Element): (() => void) => {
   };
 };
 
-/** A scroller (see above), registered while mounted. */
+/** A scroller (see above), registered while mounted; an overlay's, too. */
 export const useScrollerRegistration = (
   ref: RefObject<Element | null>,
   isEnabled = true,
+  isOverlay = false,
 ): void => {
   useLayoutEffect(() => {
     const { current: element } = ref;
-    return element && isEnabled ? registerScroller(element) : undefined;
-  }, [isEnabled, ref]);
+    return element && isEnabled
+      ? registerScroller(element, isOverlay)
+      : undefined;
+  }, [isEnabled, isOverlay, ref]);
 };
 
 /**

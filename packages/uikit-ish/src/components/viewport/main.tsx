@@ -23,6 +23,7 @@ import {
   usePortalContainer,
   withStyle,
 } from '../utils/main.js';
+import { currentLayer, subscribeCurrent } from './current.js';
 import {
   registerScroller,
   scrollerUnder,
@@ -63,6 +64,7 @@ export {
   useInputZoomPrevention,
   useTextActionsPrevention,
 } from './input.js';
+export { useCurrentLayer } from './current.js';
 export { useScrollerRegistration, useViewportEdgeElement } from './edge.js';
 export { EdgeEffects } from './edge-effect.js';
 export { ios27Attribute, isIos27, ViewportInsetContext } from './ios27.js';
@@ -194,7 +196,13 @@ const createScrollStore = () => {
 };
 
 type ViewportContextValue = {
+  /** The page filling its screen, tracked without a `scroller`. */
+  filling: Element | undefined;
+  /** Its screen (see `Provider`): none, the window's. */
+  screen: Element | null;
   scroll: ReturnType<typeof createScrollStore>;
+  /** Its `scroller`, if given: tracked instead. */
+  scroller: ViewportProviderProps['scroller'];
   visual: VisualViewportState;
 };
 
@@ -771,8 +779,14 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
   }, [filling, scroll, scroller]);
 
   const value = useMemo<ViewportContextValue>(
-    () => ({ scroll, visual }),
-    [scroll, visual],
+    () => ({
+      filling,
+      screen: elementOf(screen) ?? null,
+      scroll,
+      scroller,
+      visual,
+    }),
+    [filling, screen, scroll, scroller, visual],
   );
 
   return (
@@ -843,6 +857,34 @@ const subscribeRegular = (onChange: () => void) => {
     window.removeEventListener('orientationchange', onChange);
     document.removeEventListener('visibilitychange', onChange);
   };
+};
+
+/**
+ * The current scroller: what the user is looking at and would scroll, for
+ * the app to scroll for them (e.g. to its top, as its status bar is
+ * tapped). An open popover's body or sheet's content (the one opened
+ * last); else an island's content scrolled from its start; else the page
+ * its `Provider` tracks (the page filling its screen: e.g. a tab's shown).
+ * Again as any of that changes. Needs a `Provider`; without, `undefined`.
+ */
+export const useCurrentScroller = (): Element | undefined => {
+  const context = useContext(ViewportContext);
+  const screen = context?.screen;
+  const layer = useSyncExternalStore(
+    subscribeCurrent,
+    () => currentLayer(screen),
+    () => undefined,
+  );
+  if (!context) return undefined;
+  // (Else what it tracks: its `scroller`, the page filling its screen, or
+  // the document's.)
+  return (
+    layer ??
+    context.scroller?.current ??
+    context.filling ??
+    document.scrollingElement ??
+    undefined
+  );
 };
 
 /**

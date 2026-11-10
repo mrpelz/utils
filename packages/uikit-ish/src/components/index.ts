@@ -329,6 +329,7 @@ export {
   useElementGeometry,
   useElementVisibility,
   useFocusShiftPrevention,
+  useCurrentScroller,
   useInputZoomPrevention,
   useScrollDirection,
   useSizeClass,

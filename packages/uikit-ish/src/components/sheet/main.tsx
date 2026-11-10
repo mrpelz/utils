@@ -22,6 +22,7 @@ import { cn, useForwardedRef, usePortalContainer } from '../utils/main.js';
 import {
   EdgeEffects,
   useAnchorRegistration,
+  useCurrentLayer,
   useScrollerRegistration,
   useSizeClass,
   ViewportInsetContext,
@@ -633,7 +634,10 @@ const Header = forwardRef<HTMLDivElement, SheetHeaderProps>(
 const Content = forwardRef<HTMLDivElement, SheetContentProps>(
   ({ children, className, ...props }, forwardedRef) => {
     const ref = useForwardedRef(forwardedRef);
-    useScrollerRegistration(ref);
+    // (An overlay's: never what a provider tracks, see Viewport.)
+    useScrollerRegistration(ref, true, true);
+    // (the current scroller while open, see Viewport's `useCurrentScroller`.)
+    useCurrentLayer(ref, 'overlay');
 
     return (
       <>

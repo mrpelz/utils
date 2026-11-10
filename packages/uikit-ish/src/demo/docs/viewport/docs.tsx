@@ -151,13 +151,14 @@ export const viewportProviderRows: readonly PropRow[] = [
     'the page filling its screen, or the document’s scrolling element',
     <>
       The scroll container tracked. Unset: the scroller filling its screen (a{' '}
-      <a href={publicUrl('page')}>Page</a>, a sheet’s content, a{' '}
+      <a href={publicUrl('page')}>Page</a> or a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Content"
       />
       : registered as they mount; the innermost, as pages show and hide, e.g. a
-      tab’s), or the document’s. Its direction and edges, for{' '}
+      tab’s; never an overlay’s, a popover’s, a sheet’s or an island’s content
+      or what’s in them), or the document’s. Its direction and edges, for{' '}
       <PartLink
         component="viewport"
         part="useViewportScroll"
@@ -523,6 +524,16 @@ export const viewportScrollEventRows: readonly PropRow[] = [
     'boolean',
     undefined,
     'Overscrolling held: a touch, or a wheel’s fingers until quiet (150ms) or until its inertia starts, still pulling. Once not, it’s released (e.g. to act then), bouncing back.',
+  ],
+];
+
+/** `useCurrentScroller()`: what it returns. */
+export const useCurrentScrollerRows: readonly PropRow[] = [
+  [
+    '(return value)',
+    'Element | undefined',
+    undefined,
+    'The current scroller: the newest open popover’s body or sheet’s content; else an island’s content scrolled from its start; else the scroller the provider tracks. Outside a provider: undefined.',
   ],
 ];
 

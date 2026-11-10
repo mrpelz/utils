@@ -51,6 +51,7 @@ import {
   preventTextActionsRows,
   useAnchorSizeReturnRows,
   useAnchorSizeRows,
+  useCurrentScrollerRows,
   useElementGeometryRows,
   useElementVisibilityReturnRows,
   useElementVisibilityRows,
@@ -1595,6 +1596,12 @@ export const ViewportParts: FunctionComponent = () => (
                   part="useScrollDirection"
                 />
               </li>
+              <li>
+                <PartLink
+                  component="viewport"
+                  part="useCurrentScroller"
+                />
+              </li>
             </ul>
           </li>
         </ul>
@@ -1717,13 +1724,14 @@ export const ViewportParts: FunctionComponent = () => (
       </li>
       <li>
         Tracks a scroll container’s scrolling (<code>scroller</code>; unset, the
-        one filling its screen: a <a href={publicUrl('page')}>Page</a>, a
-        sheet’s content, a{' '}
+        one filling its screen: a <a href={publicUrl('page')}>Page</a> or a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Content"
         />
-        , following as pages show and hide; or the document’s), for{' '}
+        , following as pages show and hide, never an overlay’s (a popover’s, a
+        sheet’s or an island’s content, or what’s in them); or the document’s),
+        for{' '}
         <PartLink
           component="viewport"
           part="useViewportScroll"
@@ -2296,6 +2304,49 @@ export const ViewportParts: FunctionComponent = () => (
     <PropsTable rows={useViewportScrollRows} />
     <h3>The Listener’s Event</h3>
     <PropsTable rows={viewportScrollEventRows} />
+
+    <Heading
+      id="usecurrentscroller"
+      level={2}
+    >
+      <code>useCurrentScroller</code>
+    </Heading>
+    <ul>
+      <li>
+        The scroller the user is looking at, for the app to scroll for them:
+        e.g. back to its top from a button in its own bar.
+      </li>
+      <li>
+        By layers: the open{' '}
+        <PartLink
+          component="popover"
+          part="Popover.Popup"
+        />
+        ’s body or{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Content"
+        />{' '}
+        opened last; else an{' '}
+        <PartLink
+          component="island"
+          part="Island.Content"
+        />{' '}
+        while scrolled from its start (scrolled back, the page again); else the
+        scroller its provider tracks (see{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />
+        : e.g. the shown tab’s page).
+      </li>
+      <li>
+        Re-renders as that changes. Inside a provider (outside one:{' '}
+        <code>undefined</code>); only what’s within its screen.
+      </li>
+    </ul>
+    <h3>Returns</h3>
+    <PropsTable rows={useCurrentScrollerRows} />
 
     <Heading
       id="usescrolldirection"

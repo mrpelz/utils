@@ -25,6 +25,7 @@ import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import {
   EdgeEffects,
   useAnchorRegistration,
+  useCurrentLayer,
   useScrollerRegistration,
   useSizeClass,
   ViewportInsetContext,
@@ -509,7 +510,10 @@ const Grabber = forwardRef<HTMLDivElement, IslandGrabberProps>(
 const Content = forwardRef<HTMLDivElement, IslandContentProps>(
   ({ className, ...props }, forwardedRef) => {
     const ref = useForwardedRef(forwardedRef);
-    useScrollerRegistration(ref);
+    // (An overlay's: never what a provider tracks, see Viewport.)
+    useScrollerRegistration(ref, true, true);
+    // (the current scroller while scrolled from its start, see Viewport's `useCurrentScroller`.)
+    useCurrentLayer(ref, 'scrolled');
 
     return (
       <>

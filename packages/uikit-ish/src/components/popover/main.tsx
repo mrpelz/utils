@@ -30,6 +30,7 @@ import {
 import {
   EdgeEffects,
   useAnchorRegistration,
+  useCurrentLayer,
   useScrollerRegistration,
   ViewportInsetContext,
   ViewportScopeContext,
@@ -473,7 +474,10 @@ const Header = forwardRef<HTMLDivElement, PopoverHeaderProps>(
 const Body = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({ className, ...props }, forwardedRef) => {
     const ref = useForwardedRef(forwardedRef);
-    useScrollerRegistration(ref);
+    // (An overlay's: never what a provider tracks, see Viewport.)
+    useScrollerRegistration(ref, true, true);
+    // (the current scroller while open, see Viewport's `useCurrentScroller`.)
+    useCurrentLayer(ref, 'overlay');
 
     return (
       <>
