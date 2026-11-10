@@ -1,4 +1,11 @@
-import { RefObject, useEffect, useLayoutEffect, useRef } from 'react';
+import {
+  RefObject,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 // Snapping by its snap groups' stops (see `SnapGroup`), natively: the
 // popup a scroller (`scroll-snap-type: y mandatory`), a spacer as high as
@@ -38,6 +45,11 @@ export type SnapOptions = {
   content?: string;
   /** What a mouse drags it by (a selector: e.g. its header). */
   handle?: string;
+  /**
+   * Its stops not snapped to (by index; its content scrolled from its
+   * start, see below): never chosen.
+   */
+  ignored?: readonly boolean[];
   onClose: (event: Event) => void;
   onSelect: (index: number, event: Event) => void;
   /** Its stops' heights (px from its panel's top, ascending). */
@@ -120,6 +132,17 @@ const range = (element: HTMLElement) =>
   element.scrollHeight - element.clientHeight;
 
 /**
+ * Its stops as scroll positions (within its range); those not snapped to
+ * (`ignored`) not a number: never nearest, nor a drag's target.
+ */
+const positionsOf = (element: HTMLElement, options: SnapOptions) =>
+  options.stops.map((stop, index) =>
+    options.ignored?.[index] === true
+      ? Number.NaN
+      : Math.min(stop, range(element)),
+  );
+
+/**
  * Snaps `ref`'s element (the popup, see above) to its stops, natively;
  * `options` undefined: not snapping.
  */
@@ -199,7 +222,7 @@ export const useSnap = (
       isScrolling.current = false;
       const { current } = optionsRef;
       if (!current) return;
-      const stops = current.stops.map((stop) => Math.min(stop, range(element)));
+      const stops = positionsOf(element, current);
       if (!isUsers) {
         const top = stops[current.active] ?? 0;
         if (Math.abs(element.scrollTop - top) >= 1) {
@@ -258,7 +281,13 @@ export const useSnap = (
         content.addEventListener('scroll', onBack, { passive: true });
       }
       if (current.active === 0) current.onClose(event);
-      else current.onSelect(current.active - 1, event);
+      else {
+        // Not snapping until it's there (back at rest, see `settle`): its
+        // stops' marks (see `useContentScrolled`) cleared on its way, not
+        // snapped to anew (WebKit, by their places: another stop's).
+        element.style.scrollSnapType = 'none';
+        current.onSelect(current.active - 1, event);
+      }
     };
 
     const onPull = (event: TouchEvent) => {
@@ -348,7 +377,12 @@ export const useSnap = (
         !current?.handle ||
         !(event.target instanceof Element) ||
         !event.target.closest(current.handle) ||
-        event.target.closest(interactive)
+        event.target.closest(interactive) ||
+        // (No stop to go to but its own, and not closing: not dragged, see
+        // `stopsOf`.)
+        (!current.canClose &&
+          current.stops.filter((_, index) => current.ignored?.[index] !== true)
+            .length < 2)
       ) {
         return;
       }
@@ -384,12 +418,17 @@ export const useSnap = (
       drag = undefined;
       const { current } = optionsRef;
       if (!current) return;
-      const stops = current.stops.map((stop) => Math.min(stop, range(element)));
-      // Pressed: the next stop up (from its top, its lowest).
+      const stops = positionsOf(element, current);
+      // Pressed: the next stop up (from its top, its lowest; those not
+      // snapped to passed over).
       if (!isDragged) {
-        if (event.type !== 'pointerup' || stops.length < 2) return;
+        const counted = stops
+          .keys()
+          .filter((index) => !Number.isNaN(stops[index]))
+          .toArray();
+        if (event.type !== 'pointerup' || counted.length < 2) return;
         current.onSelect(
-          current.active >= stops.length - 1 ? 0 : current.active + 1,
+          counted.find((index) => index > current.active) ?? counted[0] ?? 0,
           event,
         );
         return;
@@ -402,7 +441,7 @@ export const useSnap = (
           : 0;
       const position = element.scrollTop;
       const positions = [current.canClose ? 0 : undefined, ...stops].filter(
-        (stop) => stop !== undefined,
+        (stop): stop is number => stop !== undefined && !Number.isNaN(stop),
       );
       const top = dragTarget(positions, position, speed);
       if (Math.abs(top - position) < 1) {
@@ -454,4 +493,154 @@ export const useSnap = (
       delete element.dataset.snapTop;
     };
   }, [isSnapping, ref]);
+};
+
+// Its content scrolled from its start (at its top stop: fully extended),
+// its groups in it not snapped to meanwhile (see style.css:
+// `data-ignored`): only its top stop and pinned ones (e.g. its header's, a
+// sliver's: not scrolled out with it), a drag down then to those (or
+// closed). Nothing else changes: its markers kept as they are. (The one
+// it's at never ignored. A mouse's drag, choosing in script, skips them
+// too.) Back at its start, all of them again. None below its top stop
+// counting: a sheet swiped out from its top stop (its lowest that counts,
+// see Sheet), an island not moved at all (see Island: no drag of its own,
+// nor a mouse's).
+
+/** A group's stop (see `SnapGroup`): its end; pinned, or of the content. */
+export type GroupStop = readonly [height: number, isPinned: boolean];
+
+/**
+ * Its groups' stops by name (see `SnapGroup`), as they report them: a
+ * group's end, or `undefined` (gone); pinned (`isPinned`, see above).
+ */
+export const useGroupStops = (): readonly [
+  stops: ReadonlyMap<string, GroupStop>,
+  report: (
+    value: string,
+    height: number | undefined,
+    isPinned?: boolean,
+  ) => void,
+] => {
+  const [stops, setStops] = useState<ReadonlyMap<string, GroupStop>>(
+    () => new Map(),
+  );
+  const report = useCallback(
+    (value: string, height: number | undefined, isPinned = false) => {
+      setStops((previous) => {
+        const known = previous.get(value);
+        if (known?.[0] === height && known?.[1] === isPinned) return previous;
+        const next = new Map(previous);
+        if (height === undefined) next.delete(value);
+        else next.set(value, [height, isPinned]);
+        return next;
+      });
+    },
+    [],
+  );
+  return [stops, report];
+};
+
+/**
+ * Its stops by name, ascending; those not snapped to (`ignored`, its
+ * content scrolled: see above); its stop now (`index`, of `active`);
+ * whether none below its top one counts (`isStranded`).
+ */
+export const stopsOf = (
+  all: ReadonlyMap<string, GroupStop>,
+  isContentScrolled: boolean,
+  active: unknown,
+): {
+  ignored: readonly boolean[];
+  index: number;
+  isStranded: boolean;
+  stops: readonly (readonly [name: string, height: number])[];
+} => {
+  const sorted = [...all].toSorted(([, [a]], [, [b]]) => a - b);
+  const top = sorted.length - 1;
+  const index = sorted.findIndex(([name]) => name === active);
+  const ignored = sorted.map(
+    ([, [, isPinned]], at) =>
+      isContentScrolled && !isPinned && at !== top && at !== index,
+  );
+  return {
+    ignored,
+    index,
+    isStranded:
+      sorted.length > 1 && ignored.every((is, at) => is || at === top),
+    stops: sorted.map(([name, [height]]) => [name, height] as const),
+  };
+};
+
+/** How long (ms) without a scroll its content's at rest (no `scrollend`). */
+const contentRestDelay = 150;
+
+/**
+ * Tells `setScrolled` whether the content (`content`, a selector) in
+ * `ref`'s element is scrolled from its start (see above), while
+ * `isEnabled`; back at its start as the element goes (or it's disabled).
+ * Not as its scroll crosses its start (iOS: a snap area changed during a
+ * scroll trips its snapping): scrolled, once its scroll has come to rest,
+ * or as soon as the scroller around it moves (whichever's first); back at
+ * its start, only as the scroller around it moves. (WebKit keeps the snap
+ * area it's at by its place among those snapped to: groups snapped to
+ * again at rest, below the top stop it's at, moved it to another, e.g.
+ * from the top stop to the third, until brought back; flickering.)
+ */
+export const useContentScrolled = (
+  ref: RefObject<HTMLElement | null>,
+  content: string,
+  setScrolled: (isScrolled: boolean) => void,
+  isEnabled: boolean,
+): void => {
+  useLayoutEffect(() => {
+    const { current: element } = ref;
+    if (!element || !isEnabled) return undefined;
+    // Told, and to be told (its last scroll's; `undefined`: nothing new).
+    let told = false;
+    let pending: boolean | undefined;
+    let scroller: Element | undefined;
+    let rest: ReturnType<typeof setTimeout> | undefined;
+    const tell = (isOuterMoving: boolean) => {
+      clearTimeout(rest);
+      if (pending === undefined) return;
+      // (Back at its start: not at rest, only as the scroller around it
+      // moves, see above.)
+      if (!pending && told && !isOuterMoving) return;
+      if (pending !== told) {
+        told = pending;
+        setScrolled(told);
+      }
+      pending = undefined;
+    };
+    const onScroll = (event: Event) => {
+      const { target } = event;
+      if (!(target instanceof Element)) return;
+      if (target.matches(content)) {
+        scroller = target;
+        // (Bounced past its start, negative: at it.)
+        pending = target.scrollTop > 0;
+        clearTimeout(rest);
+        rest = setTimeout(() => tell(false), contentRestDelay);
+        return;
+      }
+      // The scroller around it moving: told at once.
+      if (scroller && target.contains(scroller)) tell(true);
+    };
+    const onScrollEnd = (event: Event) => {
+      const { target } = event;
+      if (target instanceof Element && target.matches(content)) {
+        tell(false);
+      }
+    };
+    element.addEventListener('scroll', onScroll, { capture: true });
+    element.addEventListener('scrollend', onScrollEnd, { capture: true });
+    return () => {
+      clearTimeout(rest);
+      element.removeEventListener('scroll', onScroll, { capture: true });
+      element.removeEventListener('scrollend', onScrollEnd, {
+        capture: true,
+      });
+      setScrolled(false);
+    };
+  }, [content, isEnabled, ref, setScrolled]);
 };

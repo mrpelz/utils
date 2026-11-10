@@ -7,7 +7,6 @@ import {
   forwardRef,
   isValidElement,
   RefObject,
-  useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -16,7 +15,12 @@ import {
   useState,
 } from 'react';
 
-import { useSnap } from '../sheet/snap.js';
+import {
+  stopsOf,
+  useContentScrolled,
+  useGroupStops,
+  useSnap,
+} from '../sheet/snap.js';
 import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import {
   EdgeEffects,
@@ -75,8 +79,16 @@ const topRoom = 64;
 /** Below the top inset, at least (px). */
 const insetRoom = 10;
 
-/** A group's report (see `SnapGroup`): its end, or `undefined` (gone). */
-type SnapReport = (value: string, height: number | undefined) => void;
+/**
+ * A group's report (see `SnapGroup`): its end, or `undefined` (gone);
+ * pinned (`isPinned`: in its header, or empty, its header alone: not
+ * scrolled out with its content, see snap.ts).
+ */
+type SnapReport = (
+  value: string,
+  height: number | undefined,
+  isPinned?: boolean,
+) => void;
 
 const SnapReportContext = createContext<SnapReport | undefined>(undefined);
 
@@ -242,6 +254,9 @@ const snapDetails = (event: Event): IslandSnapPointChangeDetails => {
 
 const noop = () => undefined;
 
+/** A data attribute's value: present (empty), or absent. */
+const flag = (is: boolean) => (is ? '' : undefined);
+
 /**
  * How tall it may be (px): from its bottom up to `topRoom` below its
  * screen's top (the content layer beside its anchor's; else the window's),
@@ -314,29 +329,25 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
     // Its header's scope (see Viewport.Padding): its own.
     const [scope] = useState(() => ({}));
 
-    const [heights, setHeights] = useState<ReadonlyMap<string, number>>(
-      () => new Map(),
-    );
-    const report = useCallback((value: string, height: number | undefined) => {
-      setHeights((previous) => {
-        if (previous.get(value) === height) return previous;
-        const next = new Map(previous);
-        if (height === undefined) next.delete(value);
-        else next.set(value, height);
-        return next;
-      });
-    }, []);
+    const [heights, report] = useGroupStops();
+    // Its content scrolled from its start: its groups in it not snapped to
+    // meanwhile (see snap.ts).
+    const [isContentScrolled, setContentScrolled] = useState(false);
     const [sliver, setSliver] = useState<string | undefined>();
     const [own, setOwn] = useState(defaultSnapPoint);
     const active = snapPoint ?? own;
-    const stops = useMemo(
-      () => [...heights].toSorted(([, a], [, b]) => a - b),
-      [heights],
+    // (`isStranded`: none below its top stop counting, its content
+    // scrolled: not moved at all, see style.css.)
+    const {
+      ignored,
+      index: found,
+      isStranded,
+      stops,
+    } = useMemo(
+      () => stopsOf(heights, isContentScrolled, active),
+      [active, heights, isContentScrolled],
     );
-    const index = Math.max(
-      stops.findIndex(([name]) => name === active),
-      0,
-    );
+    const index = Math.max(found, 0);
     const isSnapping = stops.length > 0 && maxHeight !== undefined;
     // Its scroll from its lowest stop (its spacer short of it: never
     // scrolled below it), its stops as scroll positions.
@@ -366,11 +377,18 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
             canClose: false,
             content: '[data-island-part=content]',
             handle,
+            ignored,
             onClose: noop,
             onSelect: select,
             stops: positions,
           }
         : undefined,
+    );
+    useContentScrolled(
+      ref,
+      '[data-island-part=content]',
+      setContentScrolled,
+      isSnapping,
     );
     useSliverProgress(ref, scroller, isSliver ? sliverTo : undefined);
     useHitArea(ref, scroller, isSnapping ? positions[index] : undefined);
@@ -387,9 +405,9 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
             <SliverContext.Provider value={setSliver}>
               <div
                 ref={ref}
-                data-regular={isRegular ? '' : undefined}
-                data-sliver={isSliver ? '' : undefined}
-                data-snap={isSnapping ? '' : undefined}
+                data-regular={flag(isRegular)}
+                data-sliver={flag(isSliver)}
+                data-snap={flag(isSnapping)}
                 style={withStyle(
                   {
                     '--uikit-island-max-height':
@@ -410,6 +428,7 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
                   ref={scroller}
                   className="uikit-island-scroller"
                   data-island-part="scroller"
+                  data-stranded={flag(isStranded)}
                 >
                   {/* The room it's scrolled up out of (snapping; short of its
                     lowest stop), its stops in its flow (see Sheet's), within
@@ -428,6 +447,11 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
                             key={stopIndex}
                             className="uikit-island-stop"
                             data-island-part="stop"
+                            // (Not snapped to: its content scrolled, see
+                            // snap.ts.)
+                            data-ignored={
+                              ignored[stopIndex] === true ? '' : undefined
+                            }
                             style={{
                               marginTop: `min(${String(stop)}px, 100cqh)`,
                             }}
@@ -551,7 +575,11 @@ const SnapGroup = forwardRef<HTMLDivElement, IslandSnapGroupProps>(
             contentBottom = Math.max(contentBottom, box.bottom);
           }
           if (contentBottom > contentTop) {
-            report(value, Math.round(contentBottom - top + (contentTop - top)));
+            report(
+              value,
+              Math.round(contentBottom - top + (contentTop - top)),
+              true,
+            );
             return;
           }
         }
@@ -569,7 +597,12 @@ const SnapGroup = forwardRef<HTMLDivElement, IslandSnapGroupProps>(
               ),
             ) || 16
           : 0;
-        report(value, Math.round(end + margin));
+        // (Pinned: in its header, empty, or not in its content.)
+        report(
+          value,
+          Math.round(end + margin),
+          isInHeader || !content || element.offsetHeight === 0,
+        );
       };
 
       measure();

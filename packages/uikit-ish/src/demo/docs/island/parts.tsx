@@ -831,6 +831,12 @@ export const IslandParts: FunctionComponent = () => (
         The last holds the rest: reaching past the island’s height, its stop is
         the whole island.
       </li>
+      <li>
+        While its content is scrolled away from its start (only possible fully
+        extended), the groups in it aren’t stops: dragging the header down goes
+        to the header-only stop or the sliver, or nowhere without one. Back at
+        the start, they’re stops again.
+      </li>
       <li>Optional: without groups, a plain capsule as tall as its content.</li>
     </ul>
     <SnapGroupPart />

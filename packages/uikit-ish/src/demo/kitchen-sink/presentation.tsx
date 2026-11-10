@@ -272,9 +272,12 @@ const placeBar = (close?: ReactNode) => (
 
 /**
  * A place's sheet, snapping by its groups (its header alone the lowest,
- * swiped down to); opened at its peek, or a trigger's stop.
+ * swiped down to; without `hasHeaderStop`, none); opened at its peek, or a
+ * trigger's stop.
  */
-const PlaceSheet: FunctionComponent = () => (
+const PlaceSheet: FunctionComponent<{ hasHeaderStop?: boolean }> = ({
+  hasHeaderStop = true,
+}) => (
   <Sheet.Root defaultSnapPoint="peek">
     <div className="kitchen-sink-showcase">
       <Sheet.Trigger render={<Button.Root variant="bordered-prominent" />}>
@@ -317,7 +320,7 @@ const PlaceSheet: FunctionComponent = () => (
       <Sheet.Content>
         <Viewport.Padding edge="block-start" />
         {/* (Its header alone, a stop of its own: swiped down to it.) */}
-        <Sheet.SnapGroup value="header" />
+        {hasHeaderStop ? <Sheet.SnapGroup value="header" /> : null}
         {placeGroups(Sheet.SnapGroup)}
         <Viewport.Padding edge="block-end" />
       </Sheet.Content>
@@ -392,6 +395,13 @@ const SheetContent: FunctionComponent = () => (
     >
       <PlaceSheet />
     </Showcase>
+    <Showcase
+      isStacked
+      footer="Expand it, scroll the reviews, then drag the header down: with the groups scrolled away and no header stop, it swipes out at once."
+      title="Snapping by Groups, Without a Header Stop"
+    >
+      <PlaceSheet hasHeaderStop={false} />
+    </Showcase>
   </List.Root>
 );
 
@@ -402,11 +412,14 @@ const SheetContent: FunctionComponent = () => (
  */
 const PlaceIsland: FunctionComponent<{
   hasGroups: boolean;
+  /** A stop of its header alone (unless a sliver's instead). */
+  hasHeaderStop?: boolean;
   initialStop: string | undefined;
   isShownFromCode?: boolean;
   isSliver?: boolean;
 }> = ({
   hasGroups,
+  hasHeaderStop = true,
   initialStop,
   isShownFromCode = false,
   isSliver = false,
@@ -431,7 +444,9 @@ const PlaceIsland: FunctionComponent<{
           <Viewport.Padding edge="block-start" />
           {hasGroups ? (
             <>
-              {isSliver ? null : <Island.SnapGroup value="header" />}
+              {isSliver || !hasHeaderStop ? null : (
+                <Island.SnapGroup value="header" />
+              )}
               {placeGroups(
                 Island.SnapGroup,
                 isShownFromCode ? setStop : undefined,
@@ -456,12 +471,14 @@ const islandPage = (
   initialStop: string | undefined,
   hasGroups: boolean,
   isSliver = false,
+  hasHeaderStop = true,
 ): Pick<SinkPages[string], 'Anchors' | 'Content' | 'isFullBleed'> => ({
   Anchors: () => (
     <PlaceIsland
       hasGroups={hasGroups}
+      hasHeaderStop={hasHeaderStop}
       initialStop={initialStop}
-      isShownFromCode={hasGroups && !isSliver}
+      isShownFromCode={hasGroups && !isSliver && hasHeaderStop}
       isSliver={isSliver}
     />
   ),
@@ -479,6 +496,10 @@ const IslandContent: FunctionComponent = () => (
       <DrillRow
         pageKey="island/sliver"
         title="Down to a Sliver"
+      />
+      <DrillRow
+        pageKey="island/no-header-stop"
+        title="Without a Header Stop (Scrolled, It Stays Put)"
       />
       <DrillRow
         pageKey="island/plain"
@@ -893,6 +914,10 @@ export const presentationPages: SinkPages = {
   'action-sheet': { Content: ActionSheetContent, title: 'Action Sheet' },
   alert: { Content: AlertContent, title: 'Alert' },
   island: { Content: IslandContent, title: 'Island' },
+  'island/no-header-stop': {
+    ...islandPage('peek', true, false, false),
+    title: 'Without a Header Stop',
+  },
   'island/plain': { ...islandPage(undefined, false), title: 'Without Stops' },
   'island/sliver': {
     ...islandPage('sliver', true, true),

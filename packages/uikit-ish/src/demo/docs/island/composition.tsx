@@ -71,6 +71,21 @@ useEffect(() => {
   </Island.Root>
 </Viewport.Anchor>`;
 
+const withoutAHeaderStopCode = `<Island.Root defaultSnapPoint="peek">
+  <Island.Header>
+    <Island.Grabber />
+    <Toolbar.Root placement="block-start">…</Toolbar.Root>
+  </Island.Header>
+  <Island.Content>
+    <Viewport.Padding edge="block-start" />
+    {/* No empty group first: no stop of its header alone. */}
+    <Island.SnapGroup value="peek">…</Island.SnapGroup>
+    <Island.SnapGroup value="details">…</Island.SnapGroup>
+    <Island.SnapGroup value="all">…</Island.SnapGroup>
+    <Viewport.Padding edge="block-end" />
+  </Island.Content>
+</Island.Root>`;
+
 const withoutStopsCode = `<Viewport.Content safeArea="none">
   <MapView />
 </Viewport.Content>
@@ -324,6 +339,114 @@ const AsASliver: FunctionComponent = () => {
   );
 };
 
+/**
+ * Without a header stop: its groups alone (scrolled away, none below its
+ * top stop: it stays put).
+ */
+const WithoutAHeaderStop: FunctionComponent = () => {
+  const id = 'island-composition-without-a-header-stop';
+  const [log, addLog] = useLog();
+
+  return (
+    <Component
+      isInline
+      id={id}
+      log={log}
+      screen="centered"
+      stage="phone"
+      title="Without a header stop"
+    >
+      <Viewport.Content safeArea="none">
+        <MapView />
+      </Viewport.Content>
+      <Viewport.Anchor
+        edge="block-end"
+        edgeEffect="none"
+      >
+        <Island.Root defaultSnapPoint="peek">
+          <Island.Header>
+            <Island.Grabber />
+            <Toolbar.Root placement="block-start">
+              <Toolbar.Leading>
+                <Toolbar.Button
+                  aria-label="Share"
+                  shape="circle"
+                  onClick={() => addLog('Share clicked')}
+                >
+                  <Button.Icon>
+                    <Symbol icon={sfSquareAndArrowUp} />
+                  </Button.Icon>
+                </Toolbar.Button>
+              </Toolbar.Leading>
+              <Toolbar.Title>Harbor Café</Toolbar.Title>
+              <Toolbar.Trailing>
+                <Toolbar.Button
+                  aria-label="More"
+                  shape="circle"
+                  onClick={() => addLog('More clicked')}
+                >
+                  <Button.Icon>
+                    <Symbol icon={sfEllipsis} />
+                  </Button.Icon>
+                </Toolbar.Button>
+              </Toolbar.Trailing>
+            </Toolbar.Root>
+          </Island.Header>
+          <Island.Content>
+            <Viewport.Padding edge="block-start" />
+            <Island.SnapGroup value="peek">
+              <List.Root>
+                <List.Section>
+                  <List.Group>
+                    <List.Item>
+                      <List.Content>
+                        <List.Title>Open until 6 PM</List.Title>
+                        <List.Subtitle>Café · 300 m</List.Subtitle>
+                      </List.Content>
+                    </List.Item>
+                  </List.Group>
+                </List.Section>
+              </List.Root>
+            </Island.SnapGroup>
+            <Island.SnapGroup value="details">
+              <List.Root>
+                <List.Section>
+                  <List.Group>
+                    {['Call', 'Website', 'Directions'].map((name) => (
+                      <List.Item key={name}>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                        </List.Content>
+                      </List.Item>
+                    ))}
+                  </List.Group>
+                </List.Section>
+              </List.Root>
+            </Island.SnapGroup>
+            <Island.SnapGroup value="all">
+              <List.Root>
+                <List.Section>
+                  <List.Group>
+                    {names.map((name) => (
+                      <List.Item key={name}>
+                        <List.Content>
+                          <List.Title>{name}</List.Title>
+                          <List.Subtitle>Review</List.Subtitle>
+                        </List.Content>
+                      </List.Item>
+                    ))}
+                  </List.Group>
+                </List.Section>
+              </List.Root>
+            </Island.SnapGroup>
+            <Viewport.Padding edge="block-end" />
+          </Island.Content>
+        </Island.Root>
+      </Viewport.Anchor>
+    </Component>
+  );
+};
+
 /** Without stops: a plain capsule, as tall as its content. */
 const WithoutStops: FunctionComponent = () => {
   const id = 'island-composition-without-stops';
@@ -399,6 +522,7 @@ const WithoutStops: FunctionComponent = () => {
 const sections: readonly Section[] = [
   ['over-a-map', 'Over a map'],
   ['as-a-sliver', 'As a sliver'],
+  ['without-a-header-stop', 'Without a header stop'],
   ['without-stops', 'Without stops'],
 ];
 
@@ -485,6 +609,31 @@ export const IslandComposition: FunctionComponent = () => (
     <AsASliver />
 
     <Heading
+      id="without-a-header-stop"
+      level={2}
+    >
+      Without a header stop
+    </Heading>
+    <ul>
+      <li>
+        Its groups alone: no empty{' '}
+        <PartLink
+          component="island"
+          part="Island.SnapGroup"
+        />{' '}
+        first, so its lowest stop is its peek.
+      </li>
+      <li>
+        Fully extended, with its reviews scrolled, no stop below the top one
+        counts (the groups scrolled away aren’t stops): dragging its header
+        down, it stays put, as an island without stops does. Scrolled back to
+        the start, its stops count again.
+      </li>
+    </ul>
+    <CodeView code={withoutAHeaderStopCode} />
+    <WithoutAHeaderStop />
+
+    <Heading
       id="without-stops"
       level={2}
     >
@@ -502,4 +651,9 @@ export const IslandComposition: FunctionComponent = () => (
 );
 
 /** Its live views, also on the component's page of demos (and `/all`). */
-export const islandCompositionDemos = [OverAMap, AsASliver, WithoutStops];
+export const islandCompositionDemos = [
+  OverAMap,
+  AsASliver,
+  WithoutAHeaderStop,
+  WithoutStops,
+];

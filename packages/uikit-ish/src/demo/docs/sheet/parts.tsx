@@ -1419,6 +1419,12 @@ export const SheetParts: FunctionComponent = () => (
         <code>onSnapPointChange</code> take and give the names, not heights.
       </li>
       <li>
+        While its content is scrolled away from its start (only possible at the
+        top stop), the groups in it aren’t stops: dragging the header down goes
+        to the header-only stop, or closes the sheet without one. Back at the
+        start, they’re stops again.
+      </li>
+      <li>
         Groups follow one another in its{' '}
         <PartLink
           component="sheet"

@@ -707,11 +707,15 @@ const FormSheet: FunctionComponent = () => {
 
 /**
  * A place's sheet (medium: glass, snapping by its groups): its header a
- * stop of its own (`header`: an empty group, the capsule its bar alone),
- * then a summary, its actions, its reviews; a phone's, or (`isCard`) a
- * tablet's card at the leading edge.
+ * stop of its own (`header`: an empty group, the capsule its bar alone;
+ * not without `hasHeaderStop`), then a summary, its actions, its reviews;
+ * a phone's, or (`isCard`) a tablet's card at the leading edge.
  */
-const placePopup = (addLog: (entry: string) => void, isCard = false) => (
+const placePopup = (
+  addLog: (entry: string) => void,
+  isCard = false,
+  hasHeaderStop = true,
+) => (
   <Sheet.Popup
     compact={!isCard}
     detent="medium"
@@ -761,7 +765,7 @@ const placePopup = (addLog: (entry: string) => void, isCard = false) => (
     </Sheet.Header>
     <Sheet.Content>
       <Viewport.Padding edge="block-start" />
-      <Sheet.SnapGroup value="header" />
+      {hasHeaderStop ? <Sheet.SnapGroup value="header" /> : null}
       <Sheet.SnapGroup value="peek">
         <List.Root>
           <List.Section>
@@ -890,6 +894,44 @@ const OpeningAtAStop: FunctionComponent = () => {
 };
 
 /**
+ * Without a header stop: the place's sheet, its groups alone (scrolled
+ * away, none below its top stop: swiped out from there).
+ */
+const WithoutAHeaderStop: FunctionComponent = () => {
+  const [log, addLog] = useLog();
+
+  return (
+    <Component
+      hasWallpaper
+      isInline
+      id="sheet-composition-without-a-header-stop"
+      log={log}
+      screen="centered"
+      stage="phone"
+      title="Without a header stop"
+    >
+      <Viewport.Content>
+        <Sheet.Root defaultSnapPoint="peek">
+          <div className="sheet-demo-links">
+            <Sheet.Trigger
+              render={
+                <Button.Root
+                  size="large"
+                  variant="bordered-prominent"
+                />
+              }
+            >
+              <Button.Label>Show Place</Button.Label>
+            </Sheet.Trigger>
+          </div>
+          {placePopup(addLog, false, false)}
+        </Sheet.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
+/**
  * A tablet's card (`regular` `card`): the place's sheet at the leading
  * edge, snapping as on a phone, over the page.
  */
@@ -934,6 +976,7 @@ const sections: readonly Section[] = [
   ['a-navigation-inside', 'A navigation inside'],
   ['a-form-sheet-on-a-tablet', 'A form sheet on a tablet'],
   ['opening-at-a-stop', 'Opening at a stop'],
+  ['without-a-header-stop', 'Without a header stop'],
   ['a-card-on-a-tablet', 'A card on a tablet'],
 ];
 
@@ -1182,6 +1225,30 @@ export const SheetComposition: FunctionComponent = () => (
     <OpeningAtAStop />
 
     <Heading
+      id="without-a-header-stop"
+      level={2}
+    >
+      Without a header stop
+    </Heading>
+    <ul>
+      <li>
+        The place’s sheet, its groups alone: no empty{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.SnapGroup"
+        />{' '}
+        first, so its lowest stop is its summary (<code>peek</code>).
+      </li>
+      <li>
+        Fully extended, with its reviews scrolled, no stop below the top one
+        counts (the groups scrolled away aren’t stops): dragging its header down
+        swipes it out from there at once. Scrolled back to the start, its stops
+        count again.
+      </li>
+    </ul>
+    <WithoutAHeaderStop />
+
+    <Heading
       id="a-card-on-a-tablet"
       level={2}
     >
@@ -1228,5 +1295,6 @@ export const sheetCompositionDemos = [
   NavigationInside,
   FormSheet,
   OpeningAtAStop,
+  WithoutAHeaderStop,
   CardOnATablet,
 ];

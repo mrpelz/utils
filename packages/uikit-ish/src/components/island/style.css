@@ -130,6 +130,14 @@
       scroll-timeline: --uikit-island-scroll block;
       scrollbar-width: none;
 
+      /* No stop below its top one counting (its content scrolled, see
+         main.tsx): not moved at all, a drag on it (e.g. its header's)
+         going nowhere. Its content its own scroller: still scrolled (a
+         touch allowed by it and its ancestors only up to it). */
+      &[data-stranded] {
+        touch-action: none;
+      }
+
       &::-webkit-scrollbar {
         display: none;
       }
@@ -158,6 +166,12 @@
     grid-area: 1 / 1;
     scroll-snap-align: start;
     scroll-snap-stop: always;
+
+    /* Not snapped to (a group of its content scrolled from its start, see
+       snap.ts): kept in place, nothing else changed. */
+    &[data-ignored] {
+      scroll-snap-align: none;
+    }
   }
 
   /* Its capsule (its glass's colors by class, drawn by its glass layer):
