@@ -200,8 +200,8 @@ const createScrollStore = () => {
 type ViewportContextValue = {
   /** The page filling its screen, tracked without a `scroller`. */
   filling: Element | undefined;
-  /** Its screen (see `Provider`): none, the window's. */
-  screen: Element | null;
+  /** Its screen (see `Provider`), as given: none, the window's. */
+  screen: PortalContainer | null | undefined;
   scroll: ReturnType<typeof createScrollStore>;
   /** Its `scroller`, if given: tracked instead. */
   scroller: ViewportProviderProps['scroller'];
@@ -339,7 +339,10 @@ const elementOf = (
   value: PortalContainer | null | undefined,
 ): HTMLElement | null => {
   const element = value && 'current' in value ? value.current : value;
-  return element instanceof HTMLElement ? element : null;
+  // (No DOM, e.g. prerendering: none.)
+  return typeof HTMLElement !== 'undefined' && element instanceof HTMLElement
+    ? element
+    : null;
 };
 
 /**
@@ -446,7 +449,10 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
       if (!target || target === document.scrollingElement) return;
       target.scrollTo({ behavior: 'smooth', top: 0 });
     },
-    scrollsToTop && !elementOf(screen) && !isDocumentTracked,
+    // (The window's: no screen given; not its ref read while rendering.)
+    scrollsToTop &&
+      (screen === null || screen === undefined) &&
+      !isDocumentTracked,
   );
 
   useLayoutEffect(() => {
@@ -807,7 +813,7 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
   const value = useMemo<ViewportContextValue>(
     () => ({
       filling,
-      screen: elementOf(screen) ?? null,
+      screen,
       scroll,
       scroller,
       visual,
@@ -898,7 +904,9 @@ export const useCurrentScroller = (): Element | undefined => {
   const screen = context?.screen;
   const layer = useSyncExternalStore(
     subscribeCurrent,
-    () => currentLayer(screen),
+    // (Its screen read as it's asked, not while rendering: a ref's set
+    // after.)
+    () => currentLayer(elementOf(screen)),
     () => undefined,
   );
   if (!context) return undefined;
@@ -908,7 +916,8 @@ export const useCurrentScroller = (): Element | undefined => {
     layer ??
     context.scroller?.current ??
     context.filling ??
-    document.scrollingElement ??
+    // (No DOM, e.g. prerendering: none.)
+    (typeof document === 'undefined' ? undefined : document.scrollingElement) ??
     undefined
   );
 };
