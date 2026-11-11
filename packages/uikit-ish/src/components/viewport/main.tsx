@@ -32,6 +32,7 @@ import {
 } from './edge.js';
 import { EdgeEffects } from './edge-effect.js';
 import { trackFocusScroll } from './focus-scroll.js';
+import { fixedBottom } from './input.js';
 import { isIos27, ViewportInsetContext } from './ios27.js';
 import {
   createAnchorHandle,
@@ -305,10 +306,9 @@ const readVisual = (
   const isHidden = document.visibilityState === 'hidden';
   const height = viewport?.height ?? window.innerHeight;
   const top = viewport?.offsetTop ?? 0;
-  const keyboardInset = Math.max(
-    0,
-    Math.round(window.innerHeight - height - top),
-  );
+  // (Against the fixed layers' box: not `innerHeight`, which iOS may
+  // shrink to the visual viewport, see `fixedBottom`.)
+  const keyboardInset = Math.max(0, Math.round(fixedBottom() - height - top));
   if (!screen) {
     return {
       height,
@@ -1451,7 +1451,8 @@ const KeyboardAccessory = forwardRef<
     const { visualViewport: viewport } = window;
     return (
       keyboardInset > 0 ||
-      (viewport !== null && innerHeight > viewport.height + viewport.offsetTop)
+      (viewport !== null &&
+        fixedBottom() > viewport.height + viewport.offsetTop)
     );
   }, [keyboardInset]);
 

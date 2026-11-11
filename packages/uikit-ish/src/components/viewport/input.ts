@@ -138,13 +138,38 @@ const touchedField = (
   return nearest;
 };
 
+/** A hidden box filling the window's fixed layers' box (see `fixedBottom`). */
+let probe: HTMLElement | undefined;
+
 /**
- * Whether the software keyboard is shown (the visual viewport shorter than
- * the layout viewport by more than a bar's height).
+ * Where the window's fixed layers end (px, from its top): a hidden box's
+ * bottom, fixed and filling the screen (made once, on the root element).
+ * The layout viewport's bottom, `innerHeight`, as a rule; not so where iOS
+ * shrinks it to the visual viewport, the keyboard shown (iPadOS: a field's
+ * tap left to iOS, see `preventFocusShift`), its fixed layers laid out as
+ * tall as before: what the keyboard is measured against.
+ */
+export const fixedBottom = (): number => {
+  if (!probe?.isConnected) {
+    probe = document.createElement('div');
+    probe.setAttribute('aria-hidden', 'true');
+    probe.dataset.uikitViewportProbe = '';
+    probe.style.cssText =
+      'position:fixed;inset:0;visibility:hidden;pointer-events:none;contain:strict;z-index:-1';
+    document.documentElement.append(probe);
+  }
+  return probe.getBoundingClientRect().bottom;
+};
+
+/**
+ * Whether the software keyboard is shown (the visual viewport ending above
+ * the fixed layers' box, see `fixedBottom`, by more than a bar's height).
  */
 export const isKeyboardShown = (): boolean => {
-  const { innerHeight, visualViewport } = window;
-  return innerHeight - (visualViewport?.height ?? innerHeight) > 100;
+  const { visualViewport: viewport } = window;
+  return viewport
+    ? fixedBottom() - (viewport.offsetTop + viewport.height) > 100
+    : false;
 };
 
 /** The layout viewport scrolled back to `scroll` (see `preventFocusShift`). */
@@ -156,7 +181,12 @@ const restoreScroll = (scroll: number) => {
  * iOS: a text field touched in `target` focused without scrolling (its
  * touch's end: the field focused, `preventScroll`, instead of the
  * browser's focusing, which scrolls the layout viewport); also touched
- * just beside it (see `touchedField`). The touch's click doesn't follow,
+ * just beside it (see `touchedField`). Its keyboard showing over it still,
+ * iOS' scroll revealing it put back, while its keyboard's shown (until
+ * it's hidden, the field left, or the screen touched). Its keyboard hidden
+ * by the user (iPadOS' hide key), a tap on it again left to iOS (no focus
+ * from code shows it then), its scroll put back the same (a brief jump, as
+ * iOS' visual viewport follows). The touch's click doesn't follow,
  * and the caret goes where the field puts it, not where it was touched.
  * Also a field focused already, but not by a touch (e.g. a popup's initial
  * focus, its keyboard not shown): focused anew, without scrolling.
@@ -173,23 +203,67 @@ export const preventFocusShift = (
   // focuses.
   let start: Touch | undefined;
   // The field focused here (its keyboard shown), until it's left, or its
-  // keyboard hidden (iPadOS' hide key: the field still focused, a touch on
-  // it showing the keyboard again, scrolling, see `onTouchEnd`).
+  // keyboard hidden (iPadOS' hide key: see `dismissed`).
   let focused: HTMLElement | undefined;
+  // The layout viewport's scroll as a tap focused a field, held while its
+  // keyboard is shown (see `onWindowScroll`): until it's hidden, the field
+  // left, or the screen touched.
+  let held: number | undefined;
+  // The field focused here whose keyboard the user hid (iPadOS' hide key),
+  // still focused: its keyboard shown again only by iOS' own handling of a
+  // tap (not by a focus from code, even its focus moved elsewhere from code
+  // meanwhile), see `onTouchEnd`.
+  let dismissed: HTMLElement | undefined;
   const onFocusOut = (event: Event) => {
-    if (event.target === focused) focused = undefined;
+    if (event.target === dismissed) dismissed = undefined;
+    if (event.target === focused) {
+      focused = undefined;
+      held = undefined;
+    }
+  };
+  // A field focused by a tap, still covered by the keyboard as it shows
+  // (e.g. at the bottom of a column, iPadOS: in a fixed layer contained by
+  // it, not the window's, see Layout), iOS scrolls the layout viewport to
+  // reveal it, its focus without scrolling notwithstanding (also later on,
+  // focused again: after its keyboard is shown; or the visual viewport
+  // within it): put back, also a frame later.
+  const putBackHeld = () => {
+    if (held === undefined) return;
+    const { visualViewport: viewport } = window;
+    if (
+      Math.abs(window.scrollY - held) >= 1 ||
+      (viewport !== null && viewport.offsetTop >= 1)
+    ) {
+      window.scrollTo(0, held);
+    }
+  };
+  const onWindowScroll = () => {
+    putBackHeld();
+    requestAnimationFrame(putBackHeld);
   };
   let wasKeyboardShown = false;
   const onViewportResize = () => {
     const isShown = isKeyboardShown();
-    if (wasKeyboardShown && !isShown) focused = undefined;
+    // Its keyboard hidden by the user (iPadOS' hide key), its field still
+    // focused: a tap on it again left to iOS (see `onTouchEnd`).
+    if (wasKeyboardShown && !isShown) {
+      dismissed =
+        focused !== undefined && focused === document.activeElement
+          ? focused
+          : undefined;
+      focused = undefined;
+      held = undefined;
+    }
     wasKeyboardShown = isShown;
+    onWindowScroll();
   };
   const onTouchStart = (event: Event) => {
     start =
       (event as TouchEvent).touches.length === 1
         ? (event as TouchEvent).touches[0]
         : undefined;
+    // (A touch: e.g. scrolling, the user's.)
+    held = undefined;
   };
 
   const onTouchEnd = (event: Event) => {
@@ -204,12 +278,24 @@ export const preventFocusShift = (
     if (!field || field.matches(':disabled') || !event.cancelable) return;
     if (field === document.activeElement) {
       // Its keyboard shown: the caret placed where touched, as iOS does.
-      if (field === focused || isKeyboardShown()) return;
+      if (isKeyboardShown()) return;
+      // Focused here, its keyboard not shown (hidden by the user, or none
+      // shown for a focus from code; or a hardware keyboard): the tap left
+      // to iOS (its keyboard shown, the caret placed), its scroll revealing
+      // it put back (see `putBackHeld`: iOS' visual viewport following a
+      // few frames later, a brief jump).
+      if (field === focused || field === dismissed) {
+        dismissed = undefined;
+        focused = field;
+        held = window.scrollY;
+        return;
+      }
       // Focused without its keyboard (e.g. a popup's initial focus, not in
       // a touch's handler): iOS would show it, scrolling.
       field.blur();
     }
     event.preventDefault();
+    if (!isKeyboardShown()) held = window.scrollY;
     field.focus({ preventScroll: true });
     focused = field;
   };
@@ -296,12 +382,16 @@ export const preventFocusShift = (
   document.addEventListener('visibilitychange', onVisibility);
   const { visualViewport } = window;
   visualViewport?.addEventListener('resize', onViewportResize);
+  visualViewport?.addEventListener('scroll', onWindowScroll);
+  addEventListener('scroll', onWindowScroll, { passive: true });
   return () => {
     for (const [type, listener] of listeners) {
       target.removeEventListener(type, listener, { capture: true });
     }
     document.removeEventListener('visibilitychange', onVisibility);
     visualViewport?.removeEventListener('resize', onViewportResize);
+    visualViewport?.removeEventListener('scroll', onWindowScroll);
+    removeEventListener('scroll', onWindowScroll);
     for (const restore of restores) clearTimeout(restore);
   };
 };

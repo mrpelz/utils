@@ -2919,6 +2919,19 @@ export const ViewportParts: FunctionComponent = () => (
         puts it (not where it was touched). Elsewhere, it does nothing.
       </li>
       <li>
+        A field the keyboard still covers as it shows (e.g. at the bottom of a{' '}
+        <a href={publicUrl('layout')}>Layout</a> column, on iPadOS): iOS scrolls
+        the page to reveal it all the same (also later on, focused again); that
+        scroll is put back while its keyboard is shown (until it hides, focus
+        leaves, or a touch, the user’s).
+      </li>
+      <li>
+        Its keyboard hidden by the user (iPadOS’ hide key), the field still
+        focused: tapped again, it’s left to iOS (no focus from code shows the
+        keyboard then, until focus moves on by a tap), its scroll put back the
+        same, a brief jump as iOS’ visual viewport follows.
+      </li>
+      <li>
         Also a field already focused, but not by a touch, its keyboard not shown
         (e.g. a popup’s initial focus, as an{' '}
         <a href={publicUrl('alert')}>Alert</a> focuses its field): touched, it’s
