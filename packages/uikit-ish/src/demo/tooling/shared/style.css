@@ -46,6 +46,14 @@
     scroll-snap-type: none;
   }
 
+  /* Nor a raw document (the page is the app, see raw-document.ts, e.g. the
+     kitchen sink): a snapping document makes iOS cut its scrollers' glides
+     short, pulling them back, and their bounces at the top. (A rule of its
+     own: in one with the `:has()` above, iOS kept snapping.) */
+  :root[data-demo-raw] {
+    scroll-snap-type: none;
+  }
+
   body {
     margin: 0;
   }

@@ -134,6 +134,8 @@ export const SidebarDemo: FunctionComponent = () => {
         <Layout.Root
           key={`${keyRoot}-${keyColumn}-${keySidebar}-${keyContentColumn}`}
           {...propsRoot}
+          // (On the picture: no line between the columns.)
+          hideSeparators={content.background === 'picture'}
         >
           <Layout.Column
             aria-label="Sidebar"
@@ -664,6 +666,8 @@ export const SidebarCompactDemo: FunctionComponent = () => {
         <Layout.Root
           key={`${keyRoot}-${keyColumn}-${keyDrawer}-${keySidebar}-${keyContentColumn}`}
           {...propsRoot}
+          // (On the picture: no line between the columns.)
+          hideSeparators={content.background === 'picture'}
         >
           <Drawer.Root
             {...propsDrawer}
@@ -1174,7 +1178,8 @@ export const SidebarEditingDemo: FunctionComponent = () => {
         />
       </Viewport.Background>
       <Viewport.Content>
-        <Layout.Root>
+        {/* (On the picture: no line between the columns.) */}
+        <Layout.Root hideSeparators>
           <Layout.Column
             floating
             aria-label="Sidebar"

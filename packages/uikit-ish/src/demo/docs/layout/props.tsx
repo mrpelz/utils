@@ -17,7 +17,10 @@ const elementOptions = {
   style: commonPropOptions.style,
 };
 
-export const propOptionsGuideRoot = elementOptions;
+export const propOptionsGuideRoot = {
+  ...elementOptions,
+  hideSeparators: [undefined, false, true] as const,
+};
 
 export const propOptionsGuideBackground = elementOptions;
 

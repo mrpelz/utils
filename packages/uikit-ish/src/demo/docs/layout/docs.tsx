@@ -24,6 +24,12 @@ export const layoutRootRows: readonly PropRow[] = [
       ) shows where they have no background.
     </>,
   ],
+  [
+    'hideSeparators',
+    'boolean',
+    code('false'),
+    'Its columns without the hairline between them (e.g. on a picture behind them, where a line would look out of place).',
+  ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
 

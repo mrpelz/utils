@@ -62,7 +62,8 @@ const backgroundCode = `<Viewport.Background>
   <img alt="" src="…" />
 </Viewport.Background>
 <Viewport.Content>
-  <Layout.Root>
+  {/* On the picture: no line between the columns. */}
+  <Layout.Root hideSeparators>
     <Layout.Column floating aria-label="Sidebar" defaultSize={300}>
       <Sidebar.Root aria-label="Mailboxes">…</Sidebar.Root>
     </Layout.Column>
@@ -366,7 +367,11 @@ const BackgroundBehind: FunctionComponent = () => {
         />
       </Viewport.Background>
       <Viewport.Content>
-        <Layout.Root {...propsRoot}>
+        <Layout.Root
+          {...propsRoot}
+          // (On the picture: no line between the columns, unless set.)
+          hideSeparators={propsRoot.hideSeparators ?? true}
+        >
           <Layout.Column
             key={keyFirst}
             aria-label="Sidebar"

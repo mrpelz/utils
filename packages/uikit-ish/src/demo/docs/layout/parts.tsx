@@ -232,6 +232,15 @@ export const LayoutParts: FunctionComponent = () => (
         ); clipping them (a floating column).
       </li>
       <li>
+        A hairline between columns (not after a floating one); none with{' '}
+        <code>hideSeparators</code>, e.g. on a picture behind them (a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Background"
+        />
+        ).
+      </li>
+      <li>
         Renders a <code>div</code>.
       </li>
     </ul>

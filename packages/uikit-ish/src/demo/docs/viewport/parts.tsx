@@ -10,8 +10,11 @@ import {
 
 import {
   ActivityIndicator,
+  Button,
   type ElementGeometry,
   List,
+  Symbol,
+  type SymbolIcon,
   TextField,
   Toolbar,
   useAnchorSize,
@@ -40,6 +43,13 @@ import { useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import {
+  sfEllipsis,
+  sfHeart,
+  sfPencil,
+  sfSquareAndArrowUp,
+  sfTrash,
+} from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import { names } from './content.js';
 import {
@@ -252,11 +262,13 @@ const ContentPart: FunctionComponent = () => {
 };
 
 /**
- * `Viewport.Background`, outlined: a picture behind the content layer,
- * showing between its list's groups.
+ * `Viewport.Background`, outlined: a picture behind the layers, under a
+ * top bar and a bottom toolbar (their buttons on it); nothing else in
+ * front of it.
  */
 const BackgroundPart: FunctionComponent = () => {
   const id = 'viewport-parts-background';
+  const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(propOptionsBackground, {
     external,
@@ -264,12 +276,24 @@ const BackgroundPart: FunctionComponent = () => {
     emphasize: 'outline',
     title: 'Viewport.Background',
   });
+  const button = (label: string, icon: SymbolIcon) => (
+    <Toolbar.Button
+      aria-label={label}
+      shape="circle"
+      onClick={() => addLog(`${label} clicked`)}
+    >
+      <Button.Icon>
+        <Symbol icon={icon} />
+      </Button.Icon>
+    </Toolbar.Button>
+  );
 
   return (
     <Component
       isInline
       controls={[control]}
       id={id}
+      log={log}
       stage="phone"
       state={[state]}
       title="Viewport.Background"
@@ -280,34 +304,26 @@ const BackgroundPart: FunctionComponent = () => {
           className="demo-picture"
         />
       </Viewport.Background>
-      <Viewport.Content>
-        <Viewport.Padding edge="block-start" />
-        <List.Root>
-          <List.Section>
-            <List.Group>
-              {names.slice(0, 4).map((name) => (
-                <List.Item key={name}>
-                  <List.Content>
-                    <List.Title>{name}</List.Title>
-                  </List.Content>
-                </List.Item>
-              ))}
-            </List.Group>
-          </List.Section>
-          <List.Section>
-            <List.Group>
-              {names.slice(4, 8).map((name) => (
-                <List.Item key={name}>
-                  <List.Content>
-                    <List.Title>{name}</List.Title>
-                  </List.Content>
-                </List.Item>
-              ))}
-            </List.Group>
-          </List.Section>
-        </List.Root>
-        <Viewport.Padding edge="block-end" />
-      </Viewport.Content>
+      <Viewport.BlockStart edgeEffect="none">
+        <Toolbar.Root placement="block-start">
+          <Toolbar.Leading>
+            {button('Share', sfSquareAndArrowUp)}
+          </Toolbar.Leading>
+          <Toolbar.Title>
+            <span>Wallpaper</span>
+          </Toolbar.Title>
+          <Toolbar.Trailing>{button('More', sfEllipsis)}</Toolbar.Trailing>
+        </Toolbar.Root>
+      </Viewport.BlockStart>
+      <Viewport.BlockEnd edgeEffect="none">
+        <Toolbar.Root>
+          <Toolbar.Leading>{button('Favorite', sfHeart)}</Toolbar.Leading>
+          <Toolbar.Trailing>
+            {button('Edit', sfPencil)}
+            {button('Delete', sfTrash)}
+          </Toolbar.Trailing>
+        </Toolbar.Root>
+      </Viewport.BlockEnd>
     </Component>
   );
 };

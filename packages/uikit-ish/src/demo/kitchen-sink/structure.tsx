@@ -1110,7 +1110,8 @@ const LayoutContent: FunctionComponent = () => (
           aria-hidden="true"
           className="kitchen-sink-picture kitchen-sink-fill"
         />
-        <Layout.Root>
+        {/* (On the picture: no line between the columns.) */}
+        <Layout.Root hideSeparators>
           <Layout.Column
             floating
             aria-label="Sidebar"

@@ -214,9 +214,10 @@ const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
  * what's behind it showing where they have no background.
  */
 const Root = forwardRef<HTMLDivElement, LayoutRootProps>(
-  ({ className, ...props }, ref) => (
+  ({ className, hideSeparators = false, ...props }, ref) => (
     <div
       ref={ref}
+      data-hide-separators={hideSeparators ? '' : undefined}
       data-layout-part="root"
       {...props}
       className={cn('uikit-layout-root', className)}

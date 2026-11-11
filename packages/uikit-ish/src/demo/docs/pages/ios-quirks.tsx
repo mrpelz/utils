@@ -682,6 +682,28 @@ export const IosQuirksPage: FunctionComponent = () => (
         once the scroll has come to rest, and its height changes only after that
         too.
       </li>
+      <li>
+        <strong>Nothing fixed to a box outside the scroller.</strong> An element
+        in a scroller, fixed (<code>position: fixed</code>) to a containing
+        block outside it, costs that scroller its glide: a flick stops where the
+        finger lifts. A{' '}
+        <PartLink
+          component="layout"
+          part="Layout.Column"
+        />{' '}
+        is such a box (<code>contain: layout</code>, for its bars), and Base
+        UI’s visually hidden inputs (a radio’s, a slider thumb’s, a switch’s)
+        are inline <code>position: fixed</code>. Inside a column, the library
+        places them by their controls instead (<code>position: absolute</code>
+        ).
+      </li>
+      <li>
+        <strong>No snapping document.</strong> With{' '}
+        <code>scroll-snap-type</code> on the document (<code>:root</code>), an
+        app laid out in layers loses its scrollers’ glides: iOS pulls a flick
+        back to one place, or ends it, and cuts the bounce at a scroller’s top
+        short, even with nothing to snap to. Leave the document without it.
+      </li>
     </ul>
 
     <Heading

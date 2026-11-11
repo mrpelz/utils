@@ -85,7 +85,11 @@ const LiveView: FunctionComponent = () => {
         </Viewport.Background>
       ) : null}
       <Viewport.Content>
-        <Layout.Root key={`${keyColumn}-${keyContentColumn}`}>
+        <Layout.Root
+          key={`${keyColumn}-${keyContentColumn}`}
+          // (On the picture: no line between the columns.)
+          hideSeparators={content.background === 'picture'}
+        >
           <Layout.Column
             aria-label="Sidebar"
             {...propsColumn}

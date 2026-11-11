@@ -33,4 +33,11 @@ export type LayoutColumnProps = ComponentProps<'div'> & {
   size?: number;
 };
 
-export type LayoutRootProps = ComponentProps<'div'>;
+export type LayoutRootProps = ComponentProps<'div'> & {
+  /**
+   * Its columns without the hairline between them (e.g. on a picture
+   * behind them, where a line would look out of place).
+   * @default false
+   */
+  hideSeparators?: boolean;
+};
