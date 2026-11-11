@@ -170,12 +170,15 @@ type CollisionProps = Pick<
  * ActionSheet's): within its portal's container (e.g. a device's screen in a
  * page of demos; else the clipping ancestors), `padding` clear of its safe
  * area (the container's `--uikit-safe-area-inset-*`, the window's `env()`
- * by default, see styles.css), so it shifts and shrinks to fit inside it.
+ * by default, see styles.css), so it shifts and shrinks to fit inside it;
+ * at the bottom, less what the keyboard covers (`keyboardInset`, px, see
+ * Viewport: the home indicator under it, as the anchors' padding is).
  * Either given, it wins.
  */
 export const useCollision = (
   { collisionBoundary, collisionPadding }: CollisionProps,
   padding = 8,
+  keyboardInset = 0,
 ): CollisionProps => {
   const container = usePortalContainer(undefined);
   const resolved =
@@ -198,7 +201,7 @@ export const useCollision = (
   return {
     collisionBoundary: collisionBoundary ?? element ?? undefined,
     collisionPadding: {
-      bottom: padding + inset('bottom'),
+      bottom: padding + Math.max(0, inset('bottom') - keyboardInset),
       left: padding + inset('left'),
       right: padding + inset('right'),
       top: padding + inset('top'),

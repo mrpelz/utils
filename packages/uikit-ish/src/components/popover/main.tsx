@@ -32,6 +32,7 @@ import {
   useAnchorRegistration,
   useCurrentLayer,
   useScrollerRegistration,
+  useVisualViewport,
   Viewport,
   ViewportInsetContext,
   ViewportScopeContext,
@@ -152,7 +153,13 @@ const Positioner = forwardRef<HTMLDivElement, PopoverPositionerProps>(
   ) => {
     const context = useContext(PopoverContext);
     const ref = useForwardedRef(forwardedRef);
-    const collision = useCollision({ collisionBoundary, collisionPadding });
+    // (Clear of the home indicator, unless the keyboard covers it.)
+    const { keyboardInset } = useVisualViewport();
+    const collision = useCollision(
+      { collisionBoundary, collisionPadding },
+      undefined,
+      keyboardInset,
+    );
     // Growing rather than scrolling (unless its own is given).
     const [grow, growRef, isShifted] = useGrowAvoidance({}, ref);
 

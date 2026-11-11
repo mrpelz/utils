@@ -37,6 +37,13 @@
        `Viewport` anchor): spanning it, not the screen. */
     contain: layout;
 
+    /* In a content layer resized above the keyboard (`keyboard`
+       `resize`): above it already, its layers not pushed up (nor resized)
+       by it again, none of it covering the column. */
+    :where(.uikit-viewport-content[data-keyboard='resize']) & {
+      --uikit-viewport-keyboard-inset: 0px;
+    }
+
     /* Its content's layers (e.g. a page's sticky accessory) kept inside
        it: below a floating column and the hairline before it. A resizable
        one above the next (its divider overhangs it). */

@@ -300,9 +300,10 @@ const flag = (is: boolean) => (is ? '' : undefined);
  * taller with the keyboard), and its margin where it isn't transitioned
  * with its anchor's padding (WebKit: changed at once, the two summing to
  * its gap only at their end). Moved back by as much (a translation), less
- * as its anchor gets there: by how far its anchor's bottom has moved, read
- * every frame (in step with it, not an animation of its own beside it);
- * none once it's there (or not transitioned: e.g. reduced motion). From
+ * as its anchor gets there: by the progress of the transition moving it
+ * (its anchor's bottom; in a column, its content layer's), read every
+ * frame (in step with it, not an animation of its own beside it); none
+ * once it's done (or none: e.g. reduced motion). From
  * what it was before the keyboard changed, until that frame's end (its
  * height measured anew, re-rendered, within it: started anew, all of it).
  */
@@ -312,7 +313,7 @@ const useKeyboardFollow = (
 ) => {
   const { keyboardInset } = useVisualViewport();
   const lastKeyboard = useRef(keyboardInset);
-  type Place = { keyboard: number; margin: number; shown: number };
+  type Place = { margin: number; shown: number };
   const last = useRef<Place | undefined>(undefined);
   const from = useRef<Place | undefined>(undefined);
   const frame = useRef(0);
@@ -330,22 +331,32 @@ const useKeyboardFollow = (
         from.current = undefined;
       });
     }
-    last.current = { keyboard: keyboardInset, margin, shown };
+    last.current = { margin, shown };
     const { current: before } = from;
     if (!before) return;
     const distance = shown - before.shown + (margin - before.margin);
+    // (What moves it with the keyboard, transitioned: its anchor's bottom;
+    // else, its anchor fixed to a column in a content layer resized above
+    // the keyboard, see Layout, that layer's. None, e.g. reduced motion,
+    // none to follow.)
     const anchor = element.closest<HTMLElement>('[data-viewport-part=anchor]');
-    const span = keyboardInset - before.keyboard;
+    const layer = anchor?.closest<HTMLElement>(
+      '[data-viewport-part=content][data-keyboard=resize]',
+    );
+    const transition = [anchor, layer]
+      .flatMap((mover) => mover?.getAnimations() ?? [])
+      .find(
+        (animation): animation is CSSTransition =>
+          animation instanceof CSSTransition &&
+          animation.transitionProperty === 'bottom',
+      );
     cancelAnimationFrame(frame.current);
     const follow = () => {
-      // (Its anchor's bottom: the keyboard's height, transitioned.)
-      const now = anchor
-        ? Number.parseFloat(getComputedStyle(anchor).bottom) || 0
-        : keyboardInset;
+      // (How far it's come, eased: as its anchor has.)
       const progress =
-        span === 0
-          ? 1
-          : Math.min(1, Math.max(0, (now - before.keyboard) / span));
+        transition && transition.playState !== 'finished'
+          ? (transition.effect?.getComputedTiming().progress ?? 1)
+          : 1;
       const offset = distance * (1 - progress);
       if (Math.abs(offset) < 0.5) {
         element.style.removeProperty('translate');
