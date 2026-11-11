@@ -40,16 +40,32 @@
     }
   }
 
-  /* (Shared: action-sheet.) */
-  .uikit-alert-centered {
+  /* Its popup's viewport (Base UI's, a `Viewport.KeyboardAccessory`):
+     centered in its containing block (the viewport, or a container's) as
+     large as the popup, by its margins (its translation is the accessory's
+     lift); an overlay, above the page's layers, overlays among themselves
+     in the order they open (see Menu). (More specific than the
+     accessory's own rules.) */
+  .uikit-alert-portal > .uikit-alert-viewport.uikit-viewport-keyboard-accessory {
     position: fixed;
     z-index: 100;
-    top: 50%;
-    left: 50%;
+    width: fit-content;
+    max-width: calc(100% - 32px);
+    height: fit-content;
+    margin: auto;
+    inset: 0;
+
+    /* (Its width the viewport's, not the panel's own share of it.) */
+    & > .uikit-alert-panel {
+      max-width: 100%;
+    }
+  }
+
+  /* Its popup, scaling in. */
+  .uikit-alert-centered {
     transition-duration: 300ms;
     transition-property: opacity, scale;
     transition-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
-    translate: -50% -50%;
 
     &[data-starting-style] {
       opacity: 0;

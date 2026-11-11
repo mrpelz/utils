@@ -236,6 +236,15 @@ export const AlertOverview: FunctionComponent = () => (
         page dimmed behind it; a press outside does nothing.
       </li>
       <li>
+        With a text field, typed into: lifted as a whole clear of the keyboard,
+        8px above it (as a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.KeyboardAccessory"
+        />
+        ), and back as the keyboard hides.
+      </li>
+      <li>
         Each action closes it (after its click handler); two side by side, more
         than two stacked (<code>stacked</code> for two long labels).
       </li>

@@ -1400,8 +1400,10 @@ const BlockEnd = forwardRef<HTMLDivElement, Omit<ViewportAnchorProps, 'edge'>>(
  * (its own box moved up, its place kept) until its end is `gap` above the
  * keyboard, and above the bar the keyboard pushes up (a bottom anchor of
  * `keyboard` `push`, e.g. a message field's: on the keyboard, covering it
- * too); back as focus leaves, or the keyboard hides. Needs a `Provider`
- * (the keyboard's height); without one, it stays.
+ * too); back as focus leaves, or the keyboard hides. Nested, the innermost
+ * around the focused element lifts, those around it staying (e.g. a color
+ * picker's row in a popover, itself one). Needs a `Provider` (the
+ * keyboard's height); without one, it stays.
  */
 const KeyboardAccessory = forwardRef<
   HTMLDivElement,
@@ -1411,6 +1413,8 @@ const KeyboardAccessory = forwardRef<
   const { keyboardInset } = useVisualViewport();
   // (The bar on the keyboard, while it shows: covering it too.)
   const pushed = usePushedAnchorSize();
+  // Focus within it, its own: not within another one in it (that one
+  // lifting instead).
   const [isFocused, setIsFocused] = useState(false);
 
   // Lifted by what the keyboard covers of it (the visual viewport's bottom,
@@ -1450,9 +1454,14 @@ const KeyboardAccessory = forwardRef<
   useEffect(() => {
     const { current: element } = ref;
     if (!element) return undefined;
-    const onFocusIn = () => setIsFocused(true);
+    // (Its own: the focused element's nearest accessory is it.)
+    const isOwn = (target: EventTarget | null) =>
+      target instanceof Element &&
+      element.contains(target) &&
+      target.closest('[data-viewport-part="keyboard-accessory"]') === element;
+    const onFocusIn = ({ target }: FocusEvent) => setIsFocused(isOwn(target));
     const onFocusOut = ({ relatedTarget }: FocusEvent) => {
-      // (Focus moving within it: still.)
+      // (Focus moving within it: told by its `focusin`.)
       if (relatedTarget instanceof Node && element.contains(relatedTarget)) {
         return;
       }
@@ -1460,7 +1469,7 @@ const KeyboardAccessory = forwardRef<
     };
     // (Focused already: e.g. a sheet's initial focus, before this.)
 
-    setIsFocused(element.contains(document.activeElement));
+    setIsFocused(isOwn(document.activeElement));
     element.addEventListener('focusin', onFocusIn);
     element.addEventListener('focusout', onFocusOut);
     return () => {

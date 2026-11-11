@@ -274,6 +274,12 @@ export const IslandOverview: FunctionComponent = () => (
         island.
       </li>
       <li>
+        With the keyboard (a field in it typed into): pushed up with its anchor
+        (a bottom one, <code>keyboard=&quot;push&quot;</code>), up to 64px below
+        the screen’s top still, its stops no taller; back at its stop as the
+        keyboard hides.
+      </li>
+      <li>
         Swiped: flung, a stop at a time; otherwise to the nearest stop, let go.
         Never closed: its lowest stop its least (e.g. a sliver, its grabber
         alone).

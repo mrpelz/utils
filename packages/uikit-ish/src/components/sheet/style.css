@@ -90,9 +90,12 @@
     );
     transition: transform 500ms cubic-bezier(0.32, 0.72, 0, 1);
 
+    /* Opening and closing: in from, out to, past the screen's bottom (its
+       height, and its gap and shadow below and around it: a floating one's
+       top edge and glow otherwise left showing, then gone). */
     &[data-starting-style],
     &[data-ending-style] {
-      transform: translateY(100%);
+      transform: translateY(calc(100% + var(--uikit-sheet-gap) + 32px));
     }
 
     /* Swiped away another way (`swipeDirection`): on from the flick, out
@@ -548,20 +551,52 @@
 
     animation:
       uikit-sheet-capsule-out linear both,
-      uikit-sheet-corners linear both;
+      uikit-sheet-corners linear both,
+      uikit-sheet-snap-in var(--uikit-sheet-slide);
     animation-range:
       0 var(--uikit-sheet-lowest-stop, 0),
       var(--uikit-sheet-lowest-stop, 0)
-        calc(2 * var(--uikit-sheet-radius-max));
-    animation-timeline: scroll(self block), scroll(self block);
+        calc(2 * var(--uikit-sheet-radius-max)),
+      normal;
+    animation-timeline: scroll(self block), scroll(self block), auto;
   }
 
   .uikit-sheet-popup[data-snap='sheet'][data-card] {
     --uikit-sheet-radius-start: 0px;
 
-    animation: uikit-sheet-corners linear both;
-    animation-range: 0 calc(2 * var(--uikit-sheet-radius-max));
-    animation-timeline: scroll(self block);
+    animation:
+      uikit-sheet-corners linear both,
+      uikit-sheet-snap-in var(--uikit-sheet-slide);
+    animation-range: 0 calc(2 * var(--uikit-sheet-radius-max)), normal;
+    animation-timeline: scroll(self block), auto;
+  }
+
+  .uikit-sheet-popup[data-snap='sheet']:not([data-card]) {
+    animation: uikit-sheet-snap-in var(--uikit-sheet-slide);
+  }
+
+  /* Snapping, opened: slid in by as much as it shows (its stop's height,
+     `--uikit-sheet-shown`, see main.tsx), past its gap and shadow (see the
+     popup), as the popup's slide (`--uikit-sheet-slide`). An animation,
+     not the popup's transition: its stop is measured, and scrolled to,
+     after its first frame (the transition's start, which then would be
+     its whole height: entering the screen in the slide's last frames);
+     an animation's start follows it. Its transition only closing (a
+     running one overrides an animation). */
+  .uikit-sheet-popup[data-snap] {
+    --uikit-sheet-slide: 500ms cubic-bezier(0.32, 0.72, 0, 1);
+
+    &:not([data-ending-style]) {
+      transition: none;
+    }
+  }
+
+  @keyframes uikit-sheet-snap-in {
+    from {
+      transform: translateY(
+        calc(var(--uikit-sheet-shown, 100%) + var(--uikit-sheet-gap) + 32px)
+      );
+    }
   }
 
   /* None as it opens or closes: Base UI waits for its animations to
@@ -573,6 +608,18 @@
   .uikit-sheet-popup[data-snap]:is([data-starting-style], [data-ending-style])
     > .uikit-sheet-panel {
     animation: none;
+  }
+
+  /* Closing (not swiped out: Base UI's swipes aren't its own), slid out by
+     as much as it shows (its stop's height, `--uikit-sheet-shown`, see
+     main.tsx), past its gap and shadow (see the popup): by its whole
+     height (the popup's, as high as its top stop), at a lower stop, it
+     would leave the screen in the slide's first frames. Opening, out of
+     view the same (its first frame, see above). */
+  .uikit-sheet-popup[data-snap]:is([data-starting-style], [data-ending-style]) {
+    transform: translateY(
+      calc(var(--uikit-sheet-shown, 100%) + var(--uikit-sheet-gap) + 32px)
+    );
   }
 
   @keyframes uikit-sheet-corners {

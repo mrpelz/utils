@@ -498,6 +498,13 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
         ? snap.stops.find((_, index) => snap.settledIgnored[index] !== true)
         : undefined,
     );
+    // (Its stop's: as much as it shows, slid in and out by that as it opens
+    // and closes, see style.css.)
+    useStopProperty(
+      ref,
+      '--uikit-sheet-shown',
+      isSnapping ? snap.stops[snap.active] : undefined,
+    );
     const snapKind = snapKindOf(isSnapping, detent);
     // Its anchors' scope: fixed to it (see Viewport.Padding).
     const [scope] = useState(() => ({}));

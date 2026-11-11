@@ -8,6 +8,7 @@ import { ComponentProps, forwardRef, useState } from 'react';
 
 import { useSettingsPortalProps } from '../settings/main.js';
 import { cn, usePortalContainer } from '../utils/main.js';
+import { Viewport } from '../viewport/main.js';
 import type {
   AlertActionProps,
   AlertActionsProps,
@@ -42,7 +43,8 @@ export type {
 
 /**
  * The alert at the viewport's center (or its `container`'s, if that's a
- * containing block), the page dimmed behind it, in its portal.
+ * containing block), the page dimmed behind it, in its portal; lifted clear
+ * of the keyboard while a field in it is typed into.
  */
 const Popup = forwardRef<HTMLDivElement, AlertPopupProps>(
   ({ className, container, ...props }, ref) => (
@@ -55,15 +57,23 @@ const Popup = forwardRef<HTMLDivElement, AlertPopupProps>(
         className="uikit-alert-backdrop"
         data-alert-part="backdrop"
       />
-      <BaseAlertDialog.Popup
-        ref={ref}
-        {...props}
-        data-alert-part="popup"
-        className={cn(
-          'uikit-alert-popup uikit-alert-panel uikit-glass-medium uikit-alert-centered',
-          className,
-        )}
-      />
+      {/* Centered, lifted clear of the keyboard (as a whole) while a field
+          in it is typed into (see Viewport's `KeyboardAccessory`). */}
+      <BaseAlertDialog.Viewport
+        className="uikit-alert-viewport"
+        data-alert-part="viewport"
+        render={<Viewport.KeyboardAccessory />}
+      >
+        <BaseAlertDialog.Popup
+          ref={ref}
+          {...props}
+          data-alert-part="popup"
+          className={cn(
+            'uikit-alert-popup uikit-alert-panel uikit-glass-medium uikit-alert-centered',
+            className,
+          )}
+        />
+      </BaseAlertDialog.Viewport>
     </BaseAlertDialog.Portal>
   ),
 );

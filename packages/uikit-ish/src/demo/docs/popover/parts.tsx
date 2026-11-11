@@ -1881,6 +1881,20 @@ export const PopoverParts: FunctionComponent = () => (
         edges; on the other side if there’s no room.
       </li>
       <li>
+        While a field in it is typed into and the keyboard covers it, lifted as
+        a whole until it’s 8px above the keyboard (a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.KeyboardAccessory"
+        />
+        ; in a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />
+        ), its arrow then off its trigger.
+      </li>
+      <li>
         Renders a <code>div</code> (above the page’s layers).
       </li>
     </ul>

@@ -28,6 +28,7 @@ import {
   useCurrentLayer,
   useScrollerRegistration,
   useSizeClass,
+  useVisualViewport,
   ViewportInsetContext,
   ViewportScopeContext,
 } from '../viewport/main.js';
@@ -294,10 +295,13 @@ const flag = (is: boolean) => (is ? '' : undefined);
 /**
  * How tall it may be (px): from its bottom up to `topRoom` below its
  * screen's top (the content layer beside its anchor's; else the window's),
- * clear of the top inset; measured as they resize.
+ * clear of the top inset; measured as they resize. Its anchor pushed up by
+ * the keyboard (`keyboard` `push`), the keyboard's height less (unless
+ * that layer's resized above it already).
  */
 const useMaxHeight = (ref: RefObject<HTMLElement | null>) => {
   const [height, setHeight] = useState<number | undefined>();
+  const { keyboardInset } = useVisualViewport();
 
   useLayoutEffect(() => {
     const { current: element } = ref;
@@ -309,8 +313,14 @@ const useMaxHeight = (ref: RefObject<HTMLElement | null>) => {
 
     const measure = () => {
       const style = getComputedStyle(element);
+      // (Pushed up by the keyboard, over a screen that isn't resized above
+      // it: as much less.)
+      const isPushed =
+        anchor?.dataset.keyboard === 'push' &&
+        layer?.dataset.keyboard !== 'resize';
       const screen =
-        layer?.clientHeight ?? document.documentElement.clientHeight;
+        (layer?.clientHeight ?? document.documentElement.clientHeight) -
+        (isPushed ? keyboardInset : 0);
       const insetTop =
         Number.parseFloat(
           style.getPropertyValue('--uikit-safe-area-inset-top'),
@@ -333,7 +343,7 @@ const useMaxHeight = (ref: RefObject<HTMLElement | null>) => {
     observer.observe(layer ?? document.documentElement);
     if (anchor) observer.observe(anchor);
     return () => observer.disconnect();
-  }, [ref]);
+  }, [keyboardInset, ref]);
 
   return height;
 };

@@ -894,9 +894,29 @@ export const AlertParts: FunctionComponent = () => (
         scaling in from 110%.
       </li>
       <li>
+        While a field in it (
+        <PartLink
+          component="alert"
+          part="Alert.Field"
+        />
+        ) is typed into and the keyboard covers it, lifted as a whole until it’s
+        8px above the keyboard, its backdrop staying (a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.KeyboardAccessory"
+        />
+        ; in a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Provider"
+        />
+        ).
+      </li>
+      <li>
         Renders its portal (a <code>div</code> with no box of its own), its
-        backdrop’s <code>div</code>, and its own <code>div</code> (an{' '}
-        <code>alertdialog</code>).
+        backdrop’s <code>div</code>, its viewport’s <code>div</code> (Base UI’s
+        <code>AlertDialog.Viewport</code>, centering it), and its own{' '}
+        <code>div</code> (an <code>alertdialog</code>).
       </li>
     </ul>
     <PopupPart />

@@ -2228,6 +2228,21 @@ export const ViewportParts: FunctionComponent = () => (
         belongs to it (e.g. a color picker’s channel row: its slider too).
       </li>
       <li>
+        Built into an{' '}
+        <PartLink
+          component="alert"
+          part="Alert.Popup"
+        />{' '}
+        and a{' '}
+        <PartLink
+          component="popover"
+          part="Popover.Positioner"
+        />{' '}
+        (lifted whole). Nested, the innermost around the focused element lifts,
+        those around it staying: a color picker’s channel row in a popover is
+        lifted within it, the popover staying.
+      </li>
+      <li>
         Lifted (<code>data-lifted</code>), above what’s around it, on{' '}
         <code>--uikit-viewport-keyboard-accessory-background</code> (none by
         default); by <code>--uikit-viewport-keyboard-lift</code> (px), following

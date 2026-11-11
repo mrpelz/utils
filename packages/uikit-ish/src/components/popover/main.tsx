@@ -32,6 +32,7 @@ import {
   useAnchorRegistration,
   useCurrentLayer,
   useScrollerRegistration,
+  Viewport,
   ViewportInsetContext,
   ViewportScopeContext,
 } from '../viewport/main.js';
@@ -162,6 +163,9 @@ const Positioner = forwardRef<HTMLDivElement, PopoverPositionerProps>(
           align={align}
           {...collision}
           collisionAvoidance={grow}
+          // Lifted clear of the keyboard (as a whole) while a field in it is
+          // typed into (see Viewport's `KeyboardAccessory`).
+          render={<Viewport.KeyboardAccessory />}
           side={positionerSide(side)}
           sideOffset={sideOffset ?? 8 + (context?.hasArrow ? arrowDepth : 0)}
           {...props}

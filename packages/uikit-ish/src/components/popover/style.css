@@ -5,7 +5,11 @@
     display: contents;
   }
 
-  .uikit-popover-positioner {
+  /* (A `Viewport.KeyboardAccessory`, lifted clear of the keyboard while a
+     field in it is typed into: placed by Base UI, inline, all the same;
+     more specific than the accessory's own rules.) */
+  .uikit-popover-positioner,
+  .uikit-popover-positioner.uikit-viewport-keyboard-accessory[data-lifted] {
     /* An overlay: above the page's layers (e.g. Viewport's bars), overlays
        among themselves in the order they open (see Menu). */
     z-index: 100;

@@ -334,6 +334,15 @@ export const PopoverOverview: FunctionComponent = () => (
         A press outside closes it (not a modal one’s: there, outside presses are
         blocked, and close it too).
       </li>
+      <li>
+        With a text field, typed into: lifted as a whole clear of the keyboard,
+        8px above it (as a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.KeyboardAccessory"
+        />
+        ), and back as the keyboard hides.
+      </li>
     </ul>
   </>
 );

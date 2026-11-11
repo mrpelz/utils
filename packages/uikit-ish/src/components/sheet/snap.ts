@@ -274,8 +274,15 @@ export const useSnap = (
         else element.scrollTo({ behavior: 'smooth', top: stops[0] ?? 0 });
         return;
       }
-      element.toggleAttribute('data-snap-top', index === stops.length - 1);
-      if (index !== current.active) current.onSelect(index, event);
+      // (At its stop still, another at the same place: kept, e.g. stops
+      // capped by its range, shrunk as the keyboard shows, its own back as
+      // it hides; at its top stop only if that's the one kept.)
+      const isAtActive =
+        Math.abs((stops[current.active] ?? Number.NaN) - (stops[index] ?? 0)) <
+        1;
+      const at = isAtActive ? current.active : index;
+      element.toggleAttribute('data-snap-top', at === stops.length - 1);
+      if (at !== current.active) current.onSelect(at, event);
     };
 
     // Its content, held scrolling until it's bounced back (see above).
@@ -486,6 +493,37 @@ export const useSnap = (
       element.scrollTo({ behavior: 'smooth', top });
     };
 
+    // Resized, its range with it (e.g. shrunk as the keyboard shows, grown
+    // back as it hides): back at its stop at once (unless it's moved by the
+    // user), not snapping until at rest (WebKit, by the places of its marks
+    // among those snapped to, ones capped by its range meanwhile at one
+    // place, would snap to another's; see `snapOff`).
+    let lastRange = range(element);
+    const onResize = () => {
+      const next = range(element);
+      if (Math.abs(next - lastRange) < 1) return;
+      lastRange = next;
+      const { current } = optionsRef;
+      if (!current || isScrolling.current || isTouching || drag) return;
+      // (Below its top stop: its content not scrolling, at its start, e.g.
+      // scrolled while its stop was capped at its range's top.)
+      const isTop = current.active === current.stops.length - 1;
+      element.toggleAttribute('data-snap-top', isTop);
+      const content =
+        !isTop && current.content
+          ? element.querySelector<HTMLElement>(current.content)
+          : null;
+      if (content && content.scrollTop > 0) {
+        content.scrollTo({ behavior: 'instant', top: 0 });
+      }
+      const top = Math.min(current.stops[current.active] ?? 0, next);
+      if (Math.abs(element.scrollTop - top) < 1) return;
+      snapOff(element);
+      element.scrollTo({ behavior: 'instant', top });
+    };
+    const resizes = new ResizeObserver(onResize);
+    resizes.observe(element);
+
     element.addEventListener('scroll', onScroll, { passive: true });
     if (hasScrollEnd) element.addEventListener('scrollend', settle);
     element.addEventListener('touchend', onPull, { passive: true });
@@ -505,6 +543,7 @@ export const useSnap = (
     }
     return () => {
       clearTimeout(rest);
+      resizes.disconnect();
       element.removeEventListener('scroll', onScroll);
       element.removeEventListener('scrollend', settle);
       element.removeEventListener('touchend', onPull);

@@ -13,6 +13,7 @@ import {
   type SheetRegular,
   type SheetSwipeDirection,
   Symbol,
+  TextField,
   Toolbar,
   Tooltip,
   useSizeClass,
@@ -22,6 +23,7 @@ import { MapView } from '../docs/island/map.js';
 import {
   sfEllipsis,
   sfICircle,
+  sfMagnifyingglass,
   sfSquareAndArrowUp,
   sfTrash,
   sfXmark,
@@ -405,6 +407,24 @@ const SheetContent: FunctionComponent = () => (
   </List.Root>
 );
 
+/** A search field as an island's bar (as Maps'): typed into, lifted. */
+const searchBar = () => (
+  <Toolbar.Root placement="block-start">
+    <TextField.Root>
+      <TextField.Frame>
+        <Symbol icon={sfMagnifyingglass} />
+        <TextField.Control
+          aria-label="Search Maps"
+          enterKeyHint="search"
+          placeholder="Search Maps"
+          type="search"
+        />
+        <TextField.Clear />
+      </TextField.Frame>
+    </TextField.Root>
+  </Toolbar.Root>
+);
+
 /**
  * An island over a map (in the page's anchor, see `Anchors`): its stop
  * the app's (controlled, from `initialStop`), swiped to, or shown from code
@@ -414,12 +434,15 @@ const PlaceIsland: FunctionComponent<{
   hasGroups: boolean;
   /** A stop of its header alone (unless a sliver's instead). */
   hasHeaderStop?: boolean;
+  /** Its bar a search field (else the place's). */
+  hasSearch?: boolean;
   initialStop: string | undefined;
   isShownFromCode?: boolean;
   isSliver?: boolean;
 }> = ({
   hasGroups,
   hasHeaderStop = true,
+  hasSearch = false,
   initialStop,
   isShownFromCode = false,
   isSliver = false,
@@ -438,7 +461,7 @@ const PlaceIsland: FunctionComponent<{
         <Island.Header>
           {hasGroups ? <Island.Grabber /> : null}
           {isSliver ? <Island.SnapGroup value="sliver" /> : null}
-          {placeBar()}
+          {hasSearch ? searchBar() : placeBar()}
         </Island.Header>
         <Island.Content>
           <Viewport.Padding edge="block-start" />
@@ -472,11 +495,13 @@ const islandPage = (
   hasGroups: boolean,
   isSliver = false,
   hasHeaderStop = true,
+  hasSearch = false,
 ): Pick<SinkPages[string], 'Anchors' | 'Content' | 'isFullBleed'> => ({
   Anchors: () => (
     <PlaceIsland
       hasGroups={hasGroups}
       hasHeaderStop={hasHeaderStop}
+      hasSearch={hasSearch}
       initialStop={initialStop}
       isShownFromCode={hasGroups && !isSliver && hasHeaderStop}
       isSliver={isSliver}
@@ -504,6 +529,10 @@ const IslandContent: FunctionComponent = () => (
       <DrillRow
         pageKey="island/plain"
         title="Without Stops"
+      />
+      <DrillRow
+        pageKey="island/search"
+        title="With a Search Field (Pushed Up by the Keyboard)"
       />
     </Rows>
   </List.Root>
@@ -625,6 +654,59 @@ const PopoverContent: FunctionComponent = () => (
                         <Row title="Router">
                           <List.Detail>192.168.1.1</List.Detail>
                         </Row>
+                      </List.Group>
+                    </List.Section>
+                  </List.Root>
+                </Popover.Body>
+              </Popover.Popup>
+            </Popover.Positioner>
+          </Popover.Portal>
+        </Popover.Root>
+      </Row>
+    </Rows>
+    <Rows title="With a Field">
+      <Row title="Bookmark">
+        <Popover.Root>
+          <Popover.Trigger
+            render={
+              <Button.Root
+                size="small"
+                variant="borderless"
+              />
+            }
+          >
+            <Button.Label>Edit</Button.Label>
+          </Popover.Trigger>
+          <Popover.Portal>
+            <Popover.Positioner align="end">
+              <Popover.Popup className="kitchen-sink-popover">
+                <Popover.Arrow />
+                <Popover.Header>
+                  <Toolbar.Root placement="block-start">
+                    <Toolbar.Title>
+                      <Popover.Title render={<span />}>
+                        Edit Bookmark
+                      </Popover.Title>
+                    </Toolbar.Title>
+                  </Toolbar.Root>
+                </Popover.Header>
+                <Popover.Body>
+                  <Viewport.Padding edge="block-start" />
+                  <List.Root>
+                    <List.Section>
+                      <List.Group>
+                        <TextField.Root render={<List.Item />}>
+                          <List.Content>
+                            <TextField.Label>Name</TextField.Label>
+                          </List.Content>
+                          <List.Trailing>
+                            <TextField.Control
+                              defaultValue="Kitchen Sink"
+                              placeholder="Required"
+                            />
+                            <TextField.Clear />
+                          </List.Trailing>
+                        </TextField.Root>
                       </List.Group>
                     </List.Section>
                   </List.Root>
@@ -919,6 +1001,10 @@ export const presentationPages: SinkPages = {
     title: 'Without a Header Stop',
   },
   'island/plain': { ...islandPage(undefined, false), title: 'Without Stops' },
+  'island/search': {
+    ...islandPage('peek', true, false, true, true),
+    title: 'With a Search Field',
+  },
   'island/sliver': {
     ...islandPage('sliver', true, true),
     title: 'Down to a Sliver',
