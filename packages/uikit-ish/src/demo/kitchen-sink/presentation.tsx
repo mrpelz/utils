@@ -54,6 +54,43 @@ const fillerRows = (count: number, prefix = 'Row') =>
   ));
 
 /**
+ * A search field as an island's or a sheet's bar (as Maps'): typed into,
+ * lifted.
+ */
+const searchBar = () => (
+  <Toolbar.Root placement="block-start">
+    <TextField.Root>
+      <TextField.Frame>
+        <Symbol icon={sfMagnifyingglass} />
+        <TextField.Control
+          aria-label="Search Maps"
+          enterKeyHint="search"
+          placeholder="Search Maps"
+          type="search"
+        />
+        <TextField.Clear />
+      </TextField.Frame>
+    </TextField.Root>
+  </Toolbar.Root>
+);
+
+/** Rows of text fields (a sheet's: typed into, lifted, scrolled to). */
+const fieldRows = (count: number) =>
+  Array.from({ length: count }, (_, index) => (
+    <TextField.Root
+      key={index}
+      render={<List.Item />}
+    >
+      <List.Content>
+        <TextField.Label>Field {index + 1}</TextField.Label>
+      </List.Content>
+      <List.Trailing>
+        <TextField.Control placeholder="Typed above the keyboard" />
+      </List.Trailing>
+    </TextField.Root>
+  ));
+
+/**
  * A sheet: its bar (a title, Cancel and Done, or a close), its rows: on a
  * plain (opaque) sheet a plain list, on a grouped one an inset grouped
  * list (each on the background it's made for), on a medium one's glass the
@@ -64,6 +101,7 @@ const SimpleSheet: FunctionComponent<{
   compact?: boolean;
   detent?: 'large' | 'medium';
   hasCancelDone?: boolean;
+  hasFields?: boolean;
   hasGrabber?: boolean;
   label: string;
   regular?: SheetRegular;
@@ -74,6 +112,7 @@ const SimpleSheet: FunctionComponent<{
   compact,
   detent,
   hasCancelDone = false,
+  hasFields = false,
   hasGrabber = true,
   label,
   regular,
@@ -141,7 +180,9 @@ const SimpleSheet: FunctionComponent<{
             }
           >
             <List.Section>
-              <List.Group>{fillerRows(rows)}</List.Group>
+              <List.Group>
+                {hasFields ? fieldRows(rows) : fillerRows(rows)}
+              </List.Group>
             </List.Section>
           </List.Root>
           <Viewport.Padding edge="block-end" />
@@ -275,11 +316,12 @@ const placeBar = (close?: ReactNode) => (
 /**
  * A place's sheet, snapping by its groups (its header alone the lowest,
  * swiped down to; without `hasHeaderStop`, none); opened at its peek, or a
- * trigger's stop.
+ * trigger's stop. With `hasSearch`, a search field below its bar.
  */
-const PlaceSheet: FunctionComponent<{ hasHeaderStop?: boolean }> = ({
-  hasHeaderStop = true,
-}) => (
+const PlaceSheet: FunctionComponent<{
+  hasHeaderStop?: boolean;
+  hasSearch?: boolean;
+}> = ({ hasHeaderStop = true, hasSearch = false }) => (
   <Sheet.Root defaultSnapPoint="peek">
     <div className="kitchen-sink-showcase">
       <Sheet.Trigger render={<Button.Root variant="bordered-prominent" />}>
@@ -318,6 +360,7 @@ const PlaceSheet: FunctionComponent<{ hasHeaderStop?: boolean }> = ({
             {closeIcon}
           </Sheet.Close>,
         )}
+        {hasSearch ? searchBar() : null}
       </Sheet.Header>
       <Sheet.Content>
         <Viewport.Padding edge="block-start" />
@@ -404,25 +447,39 @@ const SheetContent: FunctionComponent = () => (
     >
       <PlaceSheet hasHeaderStop={false} />
     </Showcase>
+    <Showcase
+      footer="Typed into: lifted above the keyboard (a floating one 8px above it), its field scrolled into view; snapping, its stops no taller, back at its stop as the keyboard hides."
+      title="With Fields (Lifted by the Keyboard)"
+    >
+      <SimpleSheet
+        hasFields
+        detent="large"
+        label="Large"
+        regular="card"
+        rows={16}
+      />
+      <SimpleSheet
+        hasFields
+        detent="medium"
+        label="Medium"
+        regular="card"
+      />
+      <SimpleSheet
+        hasCancelDone
+        hasFields
+        background="grouped"
+        compact={false}
+        label="Form Sheet"
+        rows={12}
+      />
+    </Showcase>
+    <Showcase
+      isStacked
+      title="Snapping, With a Search Field"
+    >
+      <PlaceSheet hasSearch />
+    </Showcase>
   </List.Root>
-);
-
-/** A search field as an island's bar (as Maps'): typed into, lifted. */
-const searchBar = () => (
-  <Toolbar.Root placement="block-start">
-    <TextField.Root>
-      <TextField.Frame>
-        <Symbol icon={sfMagnifyingglass} />
-        <TextField.Control
-          aria-label="Search Maps"
-          enterKeyHint="search"
-          placeholder="Search Maps"
-          type="search"
-        />
-        <TextField.Clear />
-      </TextField.Frame>
-    </TextField.Root>
-  </Toolbar.Root>
 );
 
 /**

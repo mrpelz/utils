@@ -225,6 +225,12 @@ export const propOptionsTextActions = {
   enabled: [true, false] as const,
 };
 
+export const propOptionsFocusScroll = {
+  // Its mark on the view's own scroller (`false`: none, the content layer's
+  // the nearest, not scrolling).
+  mode: ['target', 'none', false] as const,
+};
+
 export const propOptionsFocusShift = {
   // Its target: the view's fields' frame, or the document.
   target: ['frame', 'document'] as const,

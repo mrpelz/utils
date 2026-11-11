@@ -268,16 +268,17 @@ export const IslandOverview: FunctionComponent = () => (
         <code>--uikit-viewport-anchor-block-end</code> follow it as it settles.
       </li>
       <li>
-        Up to 64px below the screen’s top (and clear of the top inset); its
-        content scrolls at its top stop only, a pull down from its start (a
-        touch, or a wheel or trackpad scroll begun there) handing back to the
-        island.
+        Up to 64px below the screen’s top, and clear of the top inset and the
+        bars there (e.g. a page’s navigation bar, its back button still
+        reached); its content scrolls at its top stop only, a pull down from its
+        start (a touch, or a wheel or trackpad scroll begun there) handing back
+        to the island.
       </li>
       <li>
         With the keyboard (a field in it typed into): pushed up with its anchor
-        (a bottom one, <code>keyboard=&quot;push&quot;</code>), up to 64px below
-        the screen’s top still, its stops no taller; back at its stop as the
-        keyboard hides.
+        (a bottom one, <code>keyboard=&quot;push&quot;</code>), its room above
+        it as before, its stops no taller; fully extended, its top staying as
+        its bottom follows the keyboard; back at its stop as the keyboard hides.
       </li>
       <li>
         Swiped: flung, a stop at a time; otherwise to the nearest stop, let go.

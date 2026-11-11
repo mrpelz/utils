@@ -798,6 +798,15 @@ export const IslandParts: FunctionComponent = () => (
         island).
       </li>
       <li>
+        A text field typed into in it, scrolled into view above the on-screen
+        keyboard (see{' '}
+        <PartLink
+          component="viewport"
+          part="useFocusScroll"
+        />
+        ); with stops, at its top stop only.
+      </li>
+      <li>
         Renders a <code>div</code>.
       </li>
     </ul>

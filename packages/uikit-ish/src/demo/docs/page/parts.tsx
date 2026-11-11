@@ -155,6 +155,15 @@ export const PageParts: FunctionComponent = () => (
         (not the page below showing through as it slides in).
       </li>
       <li>
+        A text field typed into in it, scrolled into view above the on-screen
+        keyboard (see{' '}
+        <PartLink
+          component="viewport"
+          part="useFocusScroll"
+        />
+        ; with <code>fill</code>, not).
+      </li>
+      <li>
         Renders a <code>div</code>.
       </li>
     </ul>

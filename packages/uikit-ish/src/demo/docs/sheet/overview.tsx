@@ -265,6 +265,18 @@ export const SheetOverview: FunctionComponent = () => (
         the keyboard), trapped while it’s open; closed, back to its trigger.
       </li>
       <li>
+        With the keyboard (a field in it typed into): lifted above it, as the
+        bars it pushes up (a floating one 8px above it), as much less room above
+        (up to 64px below the screen’s top still; snapping, its stops no taller,
+        back at its stop as the keyboard hides); a form sheet centered above it.
+        Its content’s field scrolled into view (see{' '}
+        <PartLink
+          component="viewport"
+          part="useFocusScroll"
+        />
+        ).
+      </li>
+      <li>
         Escape closes it; give it a button that does too (a{' '}
         <PartLink
           component="sheet"

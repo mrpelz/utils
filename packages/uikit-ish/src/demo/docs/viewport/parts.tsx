@@ -20,6 +20,7 @@ import {
   useAnchorSize,
   useElementGeometry,
   useElementVisibility,
+  useFocusScroll,
   useFocusShiftPrevention,
   useInputZoomPrevention,
   useScrollDirection,
@@ -67,6 +68,7 @@ import {
   useElementGeometryRows,
   useElementVisibilityReturnRows,
   useElementVisibilityRows,
+  useFocusScrollRows,
   useFocusShiftPreventionRows,
   useInputZoomPreventionRows,
   useScrollDirectionArgumentRows,
@@ -97,6 +99,7 @@ import {
   propOptionsContent,
   propOptionsElementGeometry,
   propOptionsElementVisibility,
+  propOptionsFocusScroll,
   propOptionsFocusShift,
   propOptionsHandlePadding,
   propOptionsInputZoom,
@@ -722,6 +725,84 @@ const KeyboardAccessoryPart: FunctionComponent = () => {
             </List.Section>
           </List.Root>
           <Viewport.Padding edge="block-end" />
+        </Viewport.Content>
+      </Viewport.Provider>
+    </Component>
+  );
+};
+
+/** The focus scroll view's fields: down past the keyboard. */
+const focusScrollFields = [
+  'First Name',
+  'Last Name',
+  'Company',
+  'Phone',
+  'Email',
+  'Street',
+  'City',
+  'Postal Code',
+  'Country',
+  'Birthday',
+  'Website',
+  'Nickname',
+  'Job Title',
+  'Notes',
+] as const;
+
+/**
+ * `useFocusScroll`: an app's own scroller, filling the content layer, its
+ * fields down past the keyboard; marked (`mode`), a field typed into is
+ * scrolled above it.
+ */
+const UseFocusScrollPart: FunctionComponent = () => {
+  const id = 'viewport-parts-use-focus-scroll';
+  const scroller = useLabelledRef<HTMLDivElement>('scroller', 'HTMLDivElement');
+  const [external] = useProvidedState(id);
+  const [control, args, state] = usePropControl(propOptionsFocusScroll, {
+    external,
+    title: 'arguments',
+  });
+  useFocusScroll(scroller, args.mode);
+
+  return (
+    <Component
+      hasInputGuards
+      isInline
+      controls={[control]}
+      id={id}
+      stage="phone"
+      state={[state]}
+      title="useFocusScroll"
+    >
+      {/* Tracking the keyboard over its screen. */}
+      <Viewport.Provider>
+        <Viewport.Content>
+          <div
+            ref={scroller}
+            className="viewport-demo-scroller"
+          >
+            <Viewport.Padding edge="block-start" />
+            <List.Root>
+              <List.Section>
+                <List.Group>
+                  {focusScrollFields.map((label) => (
+                    <TextField.Root
+                      key={label}
+                      render={<List.Item />}
+                    >
+                      <List.Content>
+                        <TextField.Label>{label}</TextField.Label>
+                      </List.Content>
+                      <List.Trailing>
+                        <TextField.Control placeholder="Typed above the keyboard" />
+                      </List.Trailing>
+                    </TextField.Root>
+                  ))}
+                </List.Group>
+              </List.Section>
+            </List.Root>
+            <Viewport.Padding edge="block-end" />
+          </div>
         </Viewport.Content>
       </Viewport.Provider>
     </Component>
@@ -1691,6 +1772,13 @@ export const ViewportParts: FunctionComponent = () => (
                   part="useCurrentScroller"
                 />
               </li>
+              <li>
+                <PartLink
+                  component="viewport"
+                  part="useFocusScroll"
+                />{' '}
+                (on a scroller, or around fields)
+              </li>
             </ul>
           </li>
         </ul>
@@ -1911,7 +1999,13 @@ export const ViewportParts: FunctionComponent = () => (
       </li>
       <li>
         With the keyboard: resized to what’s above it (<code>keyboard</code>{' '}
-        <code>resize</code>), or overlaid.
+        <code>resize</code>), or overlaid. A text field typed into in it,
+        scrolled into view above it (by it, or a page in it: see{' '}
+        <PartLink
+          component="viewport"
+          part="useFocusScroll"
+        />
+        ).
       </li>
       <li>
         Keeps the safe area insets clear (<code>safeArea</code>), as padding; by
@@ -2225,7 +2319,13 @@ export const ViewportParts: FunctionComponent = () => (
           part="useFocusShiftPrevention"
         />{' '}
         keeps it from trying), e.g. a field below a sheet’s middle; with what
-        belongs to it (e.g. a color picker’s channel row: its slider too).
+        belongs to it (e.g. a color picker’s channel row: its slider too). Its
+        fields aren’t scrolled into view by their scroller meanwhile (see{' '}
+        <PartLink
+          component="viewport"
+          part="useFocusScroll"
+        />
+        ).
       </li>
       <li>
         Built into an{' '}
@@ -2667,6 +2767,85 @@ export const ViewportParts: FunctionComponent = () => (
     <PropsTable rows={useSizeClassReturnRows} />
 
     <Heading
+      id="usefocusscroll"
+      level={2}
+    >
+      <code>useFocusScroll</code>
+    </Heading>
+    <ul>
+      <li>
+        A text field typed into, scrolled into view above the on-screen keyboard
+        by a provider: by its scroller, once the keyboard has shown and
+        everything has settled (e.g. the content layer resized above it, an{' '}
+        <a href={publicUrl('island')}>Island</a> pushed up with its anchor),
+        smoothly; not as it’s focused (iOS’ own scroll is kept off: it moves the
+        whole page, see{' '}
+        <PartLink
+          component="viewport"
+          part="useFocusShiftPrevention"
+        />
+        ).
+      </li>
+      <li>
+        Again as focus moves to another field (e.g. the keyboard’s ▲▼ buttons)
+        and as it’s typed into (e.g. a text area growing); not once the user has
+        scrolled it away, until then. Its whole shown, 8px from the visible
+        area’s edges (its scroll padding, see{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Padding"
+        />
+        , and the bars the keyboard pushes up); taller than that area, its end.
+      </li>
+      <li>
+        By its nearest marked element (<code>data-viewport-focus-scroll</code>
+        ): <code>target</code>, that scroller scrolled (none other: not the
+        page); <code>none</code>, nothing (e.g. a component placing its fields
+        itself); none marked, nothing. This hook marks <code>ref</code>’s
+        element while mounted (also as a prop, e.g.{' '}
+        <code>data-viewport-focus-scroll=&quot;none&quot;</code> on a field’s
+        root).
+      </li>
+      <li>
+        Marked already: a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Content"
+        />
+        , a{' '}
+        <PartLink
+          component="page"
+          part="Page.Root"
+        />
+        , a{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Content"
+        />{' '}
+        and an{' '}
+        <PartLink
+          component="island"
+          part="Island.Content"
+        />{' '}
+        (<code>target</code>: below a snapping one’s top stop, not scrolling, it
+        stays); a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.KeyboardAccessory"
+        />{' '}
+        (<code>none</code>: lifting them instead).
+      </li>
+      <li>
+        Here: an app’s own scroller, filling the content layer, its fields down
+        past the keyboard. Unmarked (<code>false</code>), the content layer is
+        the nearest marked one (not scrolling: nothing moves).
+      </li>
+    </ul>
+    <UseFocusScrollPart />
+    <h3>Arguments</h3>
+    <PropsTable rows={useFocusScrollRows} />
+
+    <Heading
       id="preventinputzoom"
       level={2}
     >
@@ -2940,6 +3119,7 @@ export const viewportPartsDemos = [
   UseElementVisibilityPart,
   UseElementGeometryPart,
   UseSizeClassPart,
+  UseFocusScrollPart,
   UseInputZoomPreventionPart,
   UseFocusShiftPreventionPart,
   UseTextActionsPreventionPart,

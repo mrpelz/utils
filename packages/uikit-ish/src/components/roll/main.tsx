@@ -661,7 +661,9 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
                   element &&
                   element.ownerDocument.activeElement !== element
                 ) {
-                  element.focus();
+                  // (Not scrolled into view by the browser: iOS would move
+                  // the whole page, see Viewport's `preventFocusShift`.)
+                  element.focus({ preventScroll: true });
                   element.select();
                 }
               }}
@@ -678,13 +680,13 @@ const Column = forwardRef<HTMLDivElement, RollColumnProps>(
                 if (event.key === 'Enter') {
                   event.preventDefault();
                   enter(event.currentTarget.value, event);
-                  scrollerRef.current?.focus();
+                  scrollerRef.current?.focus({ preventScroll: true });
                 }
                 if (event.key === 'Escape') {
                   event.preventDefault();
                   editingRef.current = false;
                   setEditing(undefined);
-                  scrollerRef.current?.focus();
+                  scrollerRef.current?.focus({ preventScroll: true });
                 }
               }}
             />

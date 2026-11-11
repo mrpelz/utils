@@ -3,7 +3,11 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Map as MapLibreMap, StyleSpecification } from 'maplibre-gl';
 import { FunctionComponent, useEffect, useRef } from 'react';
 
-import { useAnchorSize, useSettings } from '../../../components/index.js';
+import {
+  useAnchorSize,
+  useSettings,
+  useVisualViewport,
+} from '../../../components/index.js';
 
 // A map filling the content layer (MapLibre, OpenStreetMap's tiles; dark,
 // by the color scheme: filtered, see style.css): the page an island floats
@@ -40,6 +44,7 @@ export const MapView: FunctionComponent<{
   const ref = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | undefined>(undefined);
   const bottom = useAnchorSize('block-end');
+  const { keyboardInset } = useVisualViewport();
   const { colorScheme } = useSettings();
 
   useEffect(() => {
@@ -87,8 +92,13 @@ export const MapView: FunctionComponent<{
           '--uikit-safe-area-inset-bottom',
         ),
       ) || 0;
-    map.current?.easeTo({ duration: 300, padding: { bottom: bottom + inset } });
-  }, [bottom, isFollowing]);
+    // (Less what the keyboard covers, as the anchor's padding.)
+    const padding = Math.max(0, inset - keyboardInset);
+    map.current?.easeTo({
+      duration: 300,
+      padding: { bottom: bottom + padding },
+    });
+  }, [bottom, isFollowing, keyboardInset]);
 
   // (Its own element MapLibre's: its stylesheet positions that.)
   return (

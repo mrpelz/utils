@@ -63,7 +63,7 @@ export const useInputZoomPrevention = (isEnabled = true): void => {
 };
 
 /** What the keyboard edits text in (not buttons, boxes, pickers or files). */
-const textField = [
+export const textField = [
   'input:not([type=button], [type=checkbox], [type=color], [type=file], [type=hidden], [type=image], [type=radio], [type=range], [type=reset], [type=submit])',
   'textarea',
   '[contenteditable]:not([contenteditable=false])',
@@ -89,7 +89,7 @@ const control = [
 const touchReach = 24;
 
 /** How far a tap's touch may move (px; farther, it's a drag). */
-const tapSlop = 10;
+export const tapSlop = 10;
 
 /** The distance from a point to a rect (0 within it). */
 const distance = (x: number, y: number, rect: DOMRect) =>
@@ -142,7 +142,7 @@ const touchedField = (
  * Whether the software keyboard is shown (the visual viewport shorter than
  * the layout viewport by more than a bar's height).
  */
-const isKeyboardShown = () => {
+export const isKeyboardShown = (): boolean => {
   const { innerHeight, visualViewport } = window;
   return innerHeight - (visualViewport?.height ?? innerHeight) > 100;
 };

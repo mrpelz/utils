@@ -88,14 +88,24 @@
           var(--drawer-swipe-movement-y, 0px)
       )
     );
-    transition: transform 500ms cubic-bezier(0.32, 0.72, 0, 1);
+    transition:
+      transform 500ms cubic-bezier(0.32, 0.72, 0, 1),
+      top var(--uikit-sheet-keyboard-transition),
+      bottom var(--uikit-sheet-keyboard-transition),
+      height var(--uikit-sheet-keyboard-transition),
+      max-height var(--uikit-sheet-keyboard-transition);
 
     /* Opening and closing: in from, out to, past the screen's bottom (its
        height, and its gap and shadow below and around it: a floating one's
-       top edge and glow otherwise left showing, then gone). */
+       top edge and glow otherwise left showing, then gone; and its lift
+       above the keyboard, kept as it closes, see main.tsx). */
     &[data-starting-style],
     &[data-ending-style] {
-      transform: translateY(calc(100% + var(--uikit-sheet-gap) + 32px));
+      transform: translateY(
+        calc(
+          100% + var(--uikit-sheet-gap) + 32px + var(--uikit-sheet-keyboard)
+        )
+      );
     }
 
     /* Swiped away another way (`swipeDirection`): on from the flick, out
@@ -130,6 +140,12 @@
       --uikit-safe-area-inset-top: 0px;
       --uikit-safe-area-inset-right: 0px;
       --uikit-safe-area-inset-left: 0px;
+
+      /* (Less what the keyboard covers, see `--uikit-sheet-keyboard`.) */
+      --uikit-safe-area-inset-bottom: max(
+        0px,
+        var(--uikit-sheet-inset-bottom) - var(--uikit-sheet-keyboard)
+      );
     }
 
     /* The screen's bottom inset, for its content (see below). */
@@ -139,6 +155,24 @@
        too, the home indicator over its bottom margin (as iOS 26's, its
        content not kept clear of it further). */
     --uikit-sheet-gap: 8px;
+
+    /* Lifted by the keyboard (see Viewport: its height, what it covers of
+       the screen), as the anchors it pushes up are: its bottom on it (a
+       floating one's gap above it), as much less room above; following it
+       as they do (snapping: at once, slid from where it was; closing,
+       not anymore: see main.tsx). Its content's bottom inset less what the keyboard covers
+       (none of the home indicator's left over it). Its room, the screen's
+       above the keyboard (`--uikit-sheet-room`): in pixels, as the
+       provider's (lengths of it transitioned by WebKit too, not those of a
+       percentage, e.g. a `min()` of one: changed at once, the rest moving
+       against it); without a provider, all of it (no keyboard). */
+    --uikit-sheet-keyboard: var(--uikit-viewport-keyboard-inset, 0px);
+    --uikit-sheet-room: var(--uikit-viewport-height, 100%);
+    --uikit-sheet-keyboard-transition: 250ms cubic-bezier(0.2, 0.9, 0.3, 1);
+
+    @media (prefers-reduced-motion: reduce) {
+      --uikit-sheet-keyboard-transition: 0s;
+    }
 
     /* Medium (floating, see below): none left; a form sheet: none. */
     &[data-detent='medium'] > * {
@@ -168,7 +202,8 @@
       border-radius: 38px 38px 0 0;
       background-color: var(--uikit-sheet-background);
       box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
-      inset: calc(10px + var(--uikit-safe-area-inset-top, 0px)) 0 0;
+      inset: calc(10px + var(--uikit-safe-area-inset-top, 0px)) 0
+        var(--uikit-sheet-keyboard);
     }
 
     /* Grouped (`background`): on the grouped background, a list in it
@@ -188,15 +223,15 @@
        sheets, measured). */
     &[data-detent='medium'] {
       right: var(--uikit-sheet-gap);
-      bottom: var(--uikit-sheet-gap);
+      bottom: calc(var(--uikit-sheet-gap) + var(--uikit-sheet-keyboard));
       left: var(--uikit-sheet-gap);
 
       /* Up to the screen but 64px, nor into the top inset (below it as a
-         large one, at most). */
+         large one, at most); above the keyboard. */
       max-height: min(
-        100% - 64px,
-        100% - var(--uikit-sheet-gap) - var(--uikit-safe-area-inset-top, 0px) -
-          10px
+        var(--uikit-sheet-room) - 64px,
+        var(--uikit-sheet-room) - var(--uikit-sheet-gap) -
+          var(--uikit-safe-area-inset-top, 0px) - 10px
       );
 
       /* Its corners (snapping, following what's shown: see below). */
@@ -269,7 +304,8 @@
 
       &[data-detent='medium'] {
         max-height: calc(
-          100% - var(--uikit-sheet-gap) - var(--uikit-sheet-card-top)
+          var(--uikit-sheet-room) - var(--uikit-sheet-gap) -
+            var(--uikit-sheet-card-top)
         );
       }
 
@@ -279,7 +315,8 @@
         --uikit-sheet-radius: var(--uikit-sheet-radius-max);
 
         border-radius: var(--uikit-sheet-radius);
-        inset-block: var(--uikit-sheet-card-top) var(--uikit-sheet-gap);
+        inset-block: var(--uikit-sheet-card-top)
+          calc(var(--uikit-sheet-gap) + var(--uikit-sheet-keyboard));
       }
 
       &[data-snap] {
@@ -290,13 +327,16 @@
     /* A form sheet (not compact: a regular width, see main.tsx). */
     &&:not([data-compact]) {
       width: min(936px, calc(100% - 64px));
-      height: min(852px, calc(100% - 64px));
+
+      /* (Centered above the keyboard: as far from its room's top as from
+         its end, see above.) */
+      height: min(852px, var(--uikit-sheet-room) - 64px);
       border-radius: 38px;
       background-color: var(--color-ui-system-background);
       box-shadow: 0 15px 75px rgb(0 0 0 / 18%);
       color: var(--color-ui-label);
-      inset: 50% auto auto 50%;
-      translate: -50% -50%;
+      inset: max(32px, (var(--uikit-sheet-room) - 852px) / 2) auto auto 50%;
+      translate: -50% 0;
 
       --uikit-viewport-edge-background: var(--color-ui-system-background);
 
@@ -594,7 +634,10 @@
   @keyframes uikit-sheet-snap-in {
     from {
       transform: translateY(
-        calc(var(--uikit-sheet-shown, 100%) + var(--uikit-sheet-gap) + 32px)
+        calc(
+          var(--uikit-sheet-shown, 100%) + var(--uikit-sheet-gap) + 32px +
+            var(--uikit-sheet-keyboard)
+        )
       );
     }
   }
@@ -615,10 +658,14 @@
      main.tsx), past its gap and shadow (see the popup): by its whole
      height (the popup's, as high as its top stop), at a lower stop, it
      would leave the screen in the slide's first frames. Opening, out of
-     view the same (its first frame, see above). */
+     view the same (its first frame, see above). Lifted by the keyboard, by
+     as much more (see the popup). */
   .uikit-sheet-popup[data-snap]:is([data-starting-style], [data-ending-style]) {
     transform: translateY(
-      calc(var(--uikit-sheet-shown, 100%) + var(--uikit-sheet-gap) + 32px)
+      calc(
+        var(--uikit-sheet-shown, 100%) + var(--uikit-sheet-gap) + 32px +
+          var(--uikit-sheet-keyboard)
+      )
     );
   }
 

@@ -748,6 +748,21 @@ export const useInputZoomPreventionRows: readonly PropRow[] = [
   ],
 ];
 
+export const useFocusScrollRows: readonly PropRow[] = [
+  [
+    'ref',
+    'RefObject<HTMLElement | null>',
+    undefined,
+    'The element marked (its data-viewport-focus-scroll): a scroller, or what’s around fields.',
+  ],
+  [
+    'mode',
+    `${union('target', 'none')} | false`,
+    code(union('target')),
+    'What it is to the text fields in it (the nearest marked element around one decides): target, the scroller keeping them in view above the keyboard; none, keeping them as they are (e.g. a component placing them itself); false, unmarked.',
+  ],
+];
+
 export const preventFocusShiftRows: readonly PropRow[] = [
   [
     'target',

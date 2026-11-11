@@ -47,6 +47,8 @@ const Root = forwardRef<HTMLDivElement, PageRootProps>(
         data-background={background}
         data-fill={fill ? '' : undefined}
         data-page-part="root"
+        // (Its text fields kept in view above the keyboard, see Viewport.)
+        data-viewport-focus-scroll={fill ? undefined : 'target'}
         {...props}
         className={cn('uikit-page-root', className)}
         data-viewport-scroller={fill ? undefined : ''}

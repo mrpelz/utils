@@ -27,6 +27,20 @@
     margin: 0 8px calc(8px - var(--uikit-viewport-safe-bottom, 0px));
     color: var(--uikit-glass-content);
 
+    /* Its anchor pushed up by the keyboard: its padding there, less what the
+       keyboard covers (none of the inset left over it, e.g. a Home Screen
+       app's home indicator), following it as that padding does (WebKit:
+       changed at once, see main.tsx's `useKeyboardFollow`). */
+    :where(
+        .uikit-viewport-anchor[data-edge='block-end'][data-keyboard='push']
+      )
+      > & {
+      margin-bottom: calc(
+        8px - var(--uikit-viewport-safe-bottom-keyboard, 0px)
+      );
+      transition: margin-bottom var(--uikit-viewport-keyboard-transition, 0s);
+    }
+
     /* Its corners 42px (snapping, following what's shown: see below). */
     --uikit-island-radius: 42px;
 

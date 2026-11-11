@@ -100,6 +100,13 @@
   left: 60px;
 }
 
+/* The focus scroll view's own scroller (see `UseFocusScrollPart`): filling
+   the content layer. */
+.viewport-demo-scroller {
+  overflow: auto;
+  height: 100%;
+}
+
 /* The input guards' fields (see parts.tsx): a phone's width, stacked. */
 .viewport-demo-fields {
   display: flex;

@@ -25,6 +25,7 @@ import {
   useCurrentLayer,
   useScrollerRegistration,
   useSizeClass,
+  useVisualViewport,
   ViewportInsetContext,
   ViewportScopeContext,
 } from '../viewport/main.js';
@@ -430,6 +431,69 @@ const useStopProperty = (
 };
 
 /**
+ * Lifted by the keyboard (see style.css): its lift and its room as
+ * properties of its own (`--uikit-sheet-keyboard`, `--uikit-sheet-room`,
+ * the provider's), kept as they were as it closes (the keyboard hiding as
+ * focus leaves it: not grown as it slides out, nor its slide shortened;
+ * never the provider's meanwhile, even for a moment: WebKit, its slide
+ * retargeted to it, not back). Snapping, at once, its scroller resized once
+ * (its stop re-applied, see snap.ts), not every frame: its top slid from
+ * where it was meanwhile, as the others follow it (a translation, 250ms;
+ * none with reduced motion), its transforms (Base UI's) kept. By as far as
+ * its top moves: its bottom's move, less what its stop (`stop`, a scroll
+ * position: as much as it shows, at most its range) shows more or less,
+ * its range changed by as much (e.g. its top stop, capped by its range:
+ * its top staying, nothing slid).
+ */
+const useKeyboardLift = (
+  ref: RefObject<HTMLElement | null>,
+  stop: number | undefined,
+) => {
+  const { height, keyboardInset } = useVisualViewport();
+  const last = useRef(keyboardInset);
+
+  // Its own, as the provider's (also as it mounts, its portal's), unless
+  // it's closing.
+  useLayoutEffect(() => {
+    const { current: element } = ref;
+    if (!element || Object.hasOwn(element.dataset, 'endingStyle')) return;
+    const { style } = element;
+    style.setProperty('--uikit-sheet-keyboard', `${String(keyboardInset)}px`);
+    if (height > 0) {
+      style.setProperty('--uikit-sheet-room', `${String(height)}px`);
+    } else {
+      style.removeProperty('--uikit-sheet-room');
+    }
+  });
+
+  useLayoutEffect(() => {
+    const { current: element } = ref;
+    const distance = keyboardInset - last.current;
+    last.current = keyboardInset;
+    if (
+      !element ||
+      Object.hasOwn(element.dataset, 'endingStyle') ||
+      stop === undefined ||
+      Math.abs(distance) < 1 ||
+      matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return;
+    }
+    const range = element.scrollHeight - element.clientHeight;
+    const shown = Math.min(stop, range);
+    const shownBefore = Math.min(stop, range + distance);
+    const slide = distance - (shownBefore - shown);
+    if (Math.abs(slide) < 1) return;
+    element.animate(
+      [{ translate: `0 ${String(slide)}px` }, { translate: '0 0' }],
+      { duration: 250, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' },
+    );
+    // (Its stop's, not as it changes: as the keyboard does.)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keyboardInset, ref]);
+};
+
+/**
  * Where it is: from the bottom (its detent's, swiped, snapping), compact
  * (by the window's size class, see Viewport, or set), or a card (regular,
  * `regular` `card`: at the leading edge); else a form sheet.
@@ -488,6 +552,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
         : undefined,
     );
     useSnapContent(ref, snap, isSnapping);
+    useKeyboardLift(ref, isSnapping ? snap.stops[snap.active] : undefined);
     useMouseSwipe(ref, isBottom, isSnapping);
     // (Its lowest that counts: its content scrolled, none below its top
     // stop counting, its top stop, swiped out from there, see snap.ts.)
@@ -682,6 +747,8 @@ const Content = forwardRef<HTMLDivElement, SheetContentProps>(
           className={cn('uikit-sheet-content', className)}
           data-sheet-part="content"
           data-snap-scroller=""
+          // (Its text fields kept in view above the keyboard, see Viewport.)
+          data-viewport-focus-scroll="target"
           data-viewport-scroller=""
           {...props}
         >
@@ -769,18 +836,21 @@ const SnapGroup = forwardRef<HTMLDivElement, SheetSnapGroupProps>(
               ),
             ) || 16
           : 0;
-        // Empty (its header alone): its bar as far from the stop's end as
-        // from the sheet's top, centered in it.
-        const bar = popup.querySelector<HTMLElement>(
-          ':scope [data-sheet-part=header] > :last-child:not([data-sheet-part=grabber])',
+        // Empty (its header alone): its bars (all of them, e.g. a search
+        // field's below its title's) as far from the stop's end as from the
+        // sheet's top, centered in it.
+        const bars = popup.querySelectorAll<HTMLElement>(
+          ':scope [data-sheet-part=header] > :not([data-sheet-part=grabber])',
         );
-        if (element.offsetHeight === 0 && bar) {
+        if (element.offsetHeight === 0 && bars.length > 0) {
           const { top } = origin.getBoundingClientRect();
-          // (What shows in it, e.g. its buttons: not its box, which may
-          // reach further.)
+          // (What shows in them, e.g. their buttons: not their boxes, which
+          // may reach further.)
           let contentTop = Number.POSITIVE_INFINITY;
           let contentBottom = Number.NEGATIVE_INFINITY;
-          for (const part of bar.querySelectorAll('*')) {
+          for (const part of [...bars].flatMap((bar) => [
+            ...bar.querySelectorAll('*'),
+          ])) {
             const box = part.getBoundingClientRect();
             if (box.height === 0) continue;
             contentTop = Math.min(contentTop, box.top);

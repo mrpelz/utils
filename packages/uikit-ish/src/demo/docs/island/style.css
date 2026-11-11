@@ -21,12 +21,20 @@
    MapLibre's own (unlayered, so these too). */
 .island-demo-map .maplibregl-ctrl-bottom-left,
 .island-demo-map .maplibregl-ctrl-bottom-right {
-  /* (The anchor's size its content's: its safe area padding besides.) */
+  /* (The anchor's size its content's: its safe area padding besides, less
+     what the keyboard covers, as the anchor's.) */
   bottom: calc(
     var(--uikit-viewport-anchor-block-end, 0px) +
-      var(--uikit-safe-area-inset-bottom, 0px)
+      max(
+        0px,
+        var(--uikit-safe-area-inset-bottom, 0px) -
+          var(--uikit-viewport-keyboard-inset, 0px)
+      )
   );
-  transition: bottom 300ms ease;
+
+  /* (Following the island as its anchor follows the keyboard, in step.) */
+  transition: bottom
+    var(--uikit-viewport-keyboard-transition, 250ms cubic-bezier(0.2, 0.9, 0.3, 1));
 }
 
 .island-demo-map .maplibregl-ctrl-bottom-left {

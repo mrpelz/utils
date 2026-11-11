@@ -31,6 +31,7 @@ import {
   useScrollerRegistration,
 } from './edge.js';
 import { EdgeEffects } from './edge-effect.js';
+import { trackFocusScroll } from './focus-scroll.js';
 import { isIos27, ViewportInsetContext } from './ios27.js';
 import {
   createAnchorHandle,
@@ -67,6 +68,7 @@ export {
   useTextActionsPrevention,
 } from './input.js';
 export { useCurrentLayer } from './current.js';
+export { type FocusScrollMode, useFocusScroll } from './focus-scroll.js';
 export { trackStatusBarTaps, useStatusBarTaps } from './status-bar.js';
 export { useScrollerRegistration, useViewportEdgeElement } from './edge.js';
 export { EdgeEffects } from './edge-effect.js';
@@ -483,6 +485,14 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
   // Tracking the window (or a screen): it's an app's.
   useWindowHold(screen);
   useScreenHold(screen);
+
+  // Its text fields kept in view above the keyboard, by their scrollers
+  // (see focus-scroll.ts): those in its screen; the window's, those in no
+  // provider's screen.
+  useEffect(
+    () => trackFocusScroll(elementOf(screen), `[${screenAttribute}]`),
+    [screen],
+  );
 
   // The visual viewport (once per frame), as custom properties, too: on
   // the root element, or its screen.
@@ -1240,6 +1250,9 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
         data-always-bounce={bounceAttribute(alwaysBounce)}
         data-keyboard={keyboard}
         data-safe-area={safeArea}
+        // (Its text fields kept in view above the keyboard, see
+        // focus-scroll.ts.)
+        data-viewport-focus-scroll="target"
         style={withStyle(
           {
             '--uikit-viewport-anchor-block-end': `${String(end)}px`,
@@ -1394,6 +1407,20 @@ const BlockEnd = forwardRef<HTMLDivElement, Omit<ViewportAnchorProps, 'edge'>>(
   ),
 );
 
+/** Frames an accessory waits at most for what's around it to settle. */
+const settleFrames = 60;
+
+/**
+ * An accessory's bottom without its lift: the lift it shows now (its
+ * translation, also mid-transition), not the one it's moving to.
+ */
+const unlifted = (element: HTMLElement) => {
+  const [, shown = '0'] = getComputedStyle(element).translate.split(' ');
+  return (
+    element.getBoundingClientRect().bottom - (Number.parseFloat(shown) || 0)
+  );
+};
+
 /**
  * What's typed into, kept above the keyboard (e.g. a field's row, with its
  * slider): while focus is within it and the keyboard covers it, lifted
@@ -1417,6 +1444,17 @@ const KeyboardAccessory = forwardRef<
   // lifting instead).
   const [isFocused, setIsFocused] = useState(false);
 
+  // (Its screen's keyboard, or the window's: a screen resized above it,
+  // e.g. within an app's resized content layer, has none, its accessory
+  // still covered.)
+  const isKeyboard = useCallback(() => {
+    const { visualViewport: viewport } = window;
+    return (
+      keyboardInset > 0 ||
+      (viewport !== null && innerHeight > viewport.height + viewport.offsetTop)
+    );
+  }, [keyboardInset]);
+
   // Lifted by what the keyboard covers of it (the visual viewport's bottom,
   // the window's: where the keyboard's top is, whatever the screen).
   const update = useCallback(() => {
@@ -1424,30 +1462,53 @@ const KeyboardAccessory = forwardRef<
     if (!element) return;
     const { visualViewport: viewport } = window;
     let lift = 0;
-    // (Its screen's keyboard, or the window's: a screen resized above it,
-    // e.g. within an app's resized content layer, has none, its accessory
-    // still covered.)
-    const isKeyboard =
-      keyboardInset > 0 ||
-      (viewport !== null && innerHeight > viewport.height + viewport.offsetTop);
-    if (isFocused && isKeyboard && viewport) {
-      // Its box without its lift: the lift it shows now (its translation,
-      // also mid-transition), not the one it's moving to.
-      const [, shown = '0'] = getComputedStyle(element).translate.split(' ');
-      const bottom =
-        element.getBoundingClientRect().bottom -
-        (Number.parseFloat(shown) || 0);
+    if (isFocused && isKeyboard() && viewport) {
       const keyboardTop = viewport.offsetTop + viewport.height - pushed;
-      lift = Math.max(0, Math.round(bottom + gap - keyboardTop));
+      lift = Math.max(0, Math.round(unlifted(element) + gap - keyboardTop));
     }
     element.style.setProperty(
       '--uikit-viewport-keyboard-lift',
       `${String(lift)}px`,
     );
     element.toggleAttribute('data-lifted', lift > 0);
-  }, [gap, isFocused, keyboardInset, pushed, ref]);
+  }, [gap, isFocused, isKeyboard, pushed, ref]);
 
-  useLayoutEffect(update, [update]);
+  // As the keyboard shows (or focus moves in; the visual viewport changed,
+  // as the keyboard does): lifted once what's around it has settled
+  // (unmoved for two frames: e.g. a sheet the keyboard lifts itself, moving
+  // it up with it, by as much less: not lifted twice, nor apart). Back down
+  // at once (no keyboard, or focus gone).
+  const frame = useRef(0);
+  const settle = useCallback(() => {
+    cancelAnimationFrame(frame.current);
+    const { current: element } = ref;
+    if (!element || !isFocused || !isKeyboard()) {
+      update();
+      return;
+    }
+    let last = Number.NaN;
+    let stable = 0;
+    let frames = 0;
+    const step = () => {
+      const bottom = Math.round(unlifted(element));
+      stable = bottom === last ? stable + 1 : 0;
+      last = bottom;
+      frames += 1;
+      if (stable >= 2 || frames >= settleFrames) {
+        update();
+        return;
+      }
+      frame.current = requestAnimationFrame(step);
+    };
+    step();
+  }, [isFocused, isKeyboard, ref, update]);
+
+  useLayoutEffect(() => {
+    settle();
+    return () => {
+      cancelAnimationFrame(frame.current);
+    };
+  }, [settle]);
 
   // Focus within it (`focusin`, `focusout`: they bubble, unlike a `focus`
   // listener's events, e.g. Preact's `onFocus`).
@@ -1478,24 +1539,27 @@ const KeyboardAccessory = forwardRef<
     };
   }, [ref]);
 
-  // Moved meanwhile (scrolled, the visual viewport too): anew.
+  // Moved meanwhile: scrolled, anew at once; the visual viewport changed
+  // (the keyboard), once settled (see above).
   useEffect(() => {
     if (!isFocused) return undefined;
     const { visualViewport: viewport } = window;
     const options = { capture: true, passive: true };
     addEventListener('scroll', update, options);
-    viewport?.addEventListener('resize', update);
-    viewport?.addEventListener('scroll', update);
+    viewport?.addEventListener('resize', settle);
+    viewport?.addEventListener('scroll', settle);
     return () => {
       removeEventListener('scroll', update, options);
-      viewport?.removeEventListener('resize', update);
-      viewport?.removeEventListener('scroll', update);
+      viewport?.removeEventListener('resize', settle);
+      viewport?.removeEventListener('scroll', settle);
     };
-  }, [isFocused, update]);
+  }, [isFocused, settle, update]);
 
   return (
     <div
       ref={ref}
+      // (Its text fields placed by it, not scrolled, see focus-scroll.ts.)
+      data-viewport-focus-scroll="none"
       {...props}
       className={cn('uikit-viewport-keyboard-accessory', className)}
       data-viewport-part="keyboard-accessory"

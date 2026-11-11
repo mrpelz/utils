@@ -25,6 +25,7 @@ import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import {
   EdgeEffects,
   useAnchorRegistration,
+  useAnchorSize,
   useCurrentLayer,
   useScrollerRegistration,
   useSizeClass,
@@ -293,15 +294,117 @@ const noop = () => undefined;
 const flag = (is: boolean) => (is ? '' : undefined);
 
 /**
+ * Its top kept as its anchor follows the keyboard (pushed, see Viewport:
+ * its bottom transitioned) while what changes at once moves it: what it
+ * shows (`shown`: as tall as it may be, e.g. its top stop, shorter or
+ * taller with the keyboard), and its margin where it isn't transitioned
+ * with its anchor's padding (WebKit: changed at once, the two summing to
+ * its gap only at their end). Moved back by as much (a translation), less
+ * as its anchor gets there: by how far its anchor's bottom has moved, read
+ * every frame (in step with it, not an animation of its own beside it);
+ * none once it's there (or not transitioned: e.g. reduced motion). From
+ * what it was before the keyboard changed, until that frame's end (its
+ * height measured anew, re-rendered, within it: started anew, all of it).
+ */
+const useKeyboardFollow = (
+  ref: RefObject<HTMLElement | null>,
+  shown: number | undefined,
+) => {
+  const { keyboardInset } = useVisualViewport();
+  const lastKeyboard = useRef(keyboardInset);
+  type Place = { keyboard: number; margin: number; shown: number };
+  const last = useRef<Place | undefined>(undefined);
+  const from = useRef<Place | undefined>(undefined);
+  const frame = useRef(0);
+
+  useLayoutEffect(() => {
+    const { current: element } = ref;
+    if (!element || shown === undefined) return;
+    // (Shown now: transitioned, as it was; else, already as it'll be.)
+    const margin =
+      Number.parseFloat(getComputedStyle(element).marginBottom) || 0;
+    if (keyboardInset !== lastKeyboard.current) {
+      lastKeyboard.current = keyboardInset;
+      from.current = last.current;
+      requestAnimationFrame(() => {
+        from.current = undefined;
+      });
+    }
+    last.current = { keyboard: keyboardInset, margin, shown };
+    const { current: before } = from;
+    if (!before) return;
+    const distance = shown - before.shown + (margin - before.margin);
+    const anchor = element.closest<HTMLElement>('[data-viewport-part=anchor]');
+    const span = keyboardInset - before.keyboard;
+    cancelAnimationFrame(frame.current);
+    const follow = () => {
+      // (Its anchor's bottom: the keyboard's height, transitioned.)
+      const now = anchor
+        ? Number.parseFloat(getComputedStyle(anchor).bottom) || 0
+        : keyboardInset;
+      const progress =
+        span === 0
+          ? 1
+          : Math.min(1, Math.max(0, (now - before.keyboard) / span));
+      const offset = distance * (1 - progress);
+      if (Math.abs(offset) < 0.5) {
+        element.style.removeProperty('translate');
+        return;
+      }
+      element.style.translate = `0 ${String(offset)}px`;
+      frame.current = requestAnimationFrame(follow);
+    };
+    follow();
+  }, [keyboardInset, ref, shown]);
+
+  useEffect(
+    () => () => {
+      cancelAnimationFrame(frame.current);
+    },
+    [],
+  );
+};
+
+/**
+ * A length a transition is moving `element`'s `property` to (its end, not
+ * where it is now: e.g. an anchor's padding following the keyboard); not
+ * transitioning, its own (px).
+ */
+const settledLength = (
+  element: Element,
+  property: 'margin-bottom' | 'padding-bottom',
+) => {
+  const name = property === 'margin-bottom' ? 'marginBottom' : 'paddingBottom';
+  for (const animation of element.getAnimations()) {
+    if (!(
+      animation instanceof CSSTransition &&
+      animation.transitionProperty === property
+    )) {
+      continue;
+    }
+
+    const { effect } = animation;
+    const end =
+      effect instanceof KeyframeEffect
+        ? effect.getKeyframes().at(-1)?.[name]
+        : undefined;
+    if (typeof end === 'string') return Number.parseFloat(end) || 0;
+  }
+  return Number.parseFloat(getComputedStyle(element)[name]) || 0;
+};
+
+/**
  * How tall it may be (px): from its bottom up to `topRoom` below its
  * screen's top (the content layer beside its anchor's; else the window's),
- * clear of the top inset; measured as they resize. Its anchor pushed up by
- * the keyboard (`keyboard` `push`), the keyboard's height less (unless
- * that layer's resized above it already).
+ * clear of the top inset and the bars there (its scope's top anchors,
+ * e.g. a page's navigation bar: still reached); measured as they resize.
+ * Its anchor pushed up by the keyboard (`keyboard` `push`), the keyboard's
+ * height less (unless that layer's resized above it already).
  */
 const useMaxHeight = (ref: RefObject<HTMLElement | null>) => {
   const [height, setHeight] = useState<number | undefined>();
-  const { keyboardInset } = useVisualViewport();
+  const { height: visualHeight, keyboardInset, top } = useVisualViewport();
+  const bars = useAnchorSize('block-start');
 
   useLayoutEffect(() => {
     const { current: element } = ref;
@@ -312,28 +415,38 @@ const useMaxHeight = (ref: RefObject<HTMLElement | null>) => {
     );
 
     const measure = () => {
-      const style = getComputedStyle(element);
       // (Pushed up by the keyboard, over a screen that isn't resized above
       // it: as much less.)
       const isPushed =
         anchor?.dataset.keyboard === 'push' &&
         layer?.dataset.keyboard !== 'resize';
+      // (Its screen's, the provider's: the window's, not the document's,
+      // e.g. Safari's with its bars, shorter than the window its anchor is
+      // fixed to; or a screen's; without one, the document's.)
+      const whole =
+        visualHeight > 0
+          ? visualHeight + top + keyboardInset
+          : document.documentElement.clientHeight;
       const screen =
-        (layer?.clientHeight ?? document.documentElement.clientHeight) -
-        (isPushed ? keyboardInset : 0);
+        (layer?.clientHeight ?? whole) - (isPushed ? keyboardInset : 0);
+      // (Its anchor's: none left for what's in it.)
       const insetTop =
         Number.parseFloat(
-          style.getPropertyValue('--uikit-safe-area-inset-top'),
+          getComputedStyle(anchor ?? element).getPropertyValue(
+            '--uikit-safe-area-inset-top',
+          ),
         ) || 0;
-      // Its gap below (its anchor's padding, its own margin).
+      // Its gap below (its anchor's padding, its own margin), as they'll
+      // be: following the keyboard, where they're moving to.
       const below =
-        (anchor
-          ? Number.parseFloat(getComputedStyle(anchor).paddingBottom) || 0
-          : 0) + (Number.parseFloat(style.marginBottom) || 0);
+        (anchor ? settledLength(anchor, 'padding-bottom') : 0) +
+        settledLength(element, 'margin-bottom');
       setHeight(
         Math.max(
           0,
-          Math.floor(screen - below - Math.max(topRoom, insetTop + insetRoom)),
+          Math.floor(
+            screen - below - Math.max(topRoom, insetTop + bars + insetRoom),
+          ),
         ),
       );
     };
@@ -343,7 +456,7 @@ const useMaxHeight = (ref: RefObject<HTMLElement | null>) => {
     observer.observe(layer ?? document.documentElement);
     if (anchor) observer.observe(anchor);
     return () => observer.disconnect();
-  }, [keyboardInset, ref]);
+  }, [bars, keyboardInset, ref, top, visualHeight]);
 
   return height;
 };
@@ -452,6 +565,7 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
     const shown = isSnapping
       ? Math.min(stops[index]?.[1] ?? 0, maxHeight)
       : undefined;
+    useKeyboardFollow(ref, shown);
 
     return (
       <ViewportScopeContext.Provider value={scope}>
@@ -572,6 +686,8 @@ const Content = forwardRef<HTMLDivElement, IslandContentProps>(
         <div
           ref={ref}
           data-island-part="content"
+          // (Its text fields kept in view above the keyboard, see Viewport.)
+          data-viewport-focus-scroll="target"
           data-viewport-scroller=""
           {...props}
           className={cn('uikit-island-content', className)}
@@ -620,13 +736,18 @@ const SnapGroup = forwardRef<HTMLDivElement, IslandSnapGroupProps>(
         // Empty, in the content (its header alone): its bar as far from
         // the stop's end as from the top (what shows in it, e.g. its
         // buttons: not its box).
-        const bar = header?.querySelector<HTMLElement>(
-          ':scope > :last-child:not([data-island-part=grabber])',
-        );
-        if (!isInHeader && element.offsetHeight === 0 && bar) {
+        // (All its bars: e.g. a search field's below a title's.)
+        const bars = [
+          ...(header?.querySelectorAll<HTMLElement>(
+            ':scope > :not([data-island-part=grabber])',
+          ) ?? []),
+        ];
+        if (!isInHeader && element.offsetHeight === 0 && bars.length > 0) {
           let contentTop = Number.POSITIVE_INFINITY;
           let contentBottom = Number.NEGATIVE_INFINITY;
-          for (const part of bar.querySelectorAll('*')) {
+          for (const part of bars.flatMap((bar) => [
+            ...bar.querySelectorAll('*'),
+          ])) {
             const box = part.getBoundingClientRect();
             if (box.height === 0) continue;
             contentTop = Math.min(contentTop, box.top);
