@@ -138,6 +138,16 @@ const nearestStop = (stops: readonly number[], position: number) => {
   return nearest;
 };
 
+/**
+ * Its mark while it's moved by being resized (its range clamped by the
+ * browser, its stop re-applied, see `useSnap`'s `onResize`), not by the
+ * user: its content's groups not snapped to (scrolled from its start, see
+ * `useContentScrolled`) kept so meanwhile, its snap areas unchanged (WebKit,
+ * by their places among those snapped to, would snap to another's: e.g.
+ * from its top stop to a lower one). Until at rest, or touched.
+ */
+const resizedAttribute = 'data-snap-resized';
+
 /** How far it scrolls (a stop: no further). */
 const range = (element: HTMLElement) =>
   element.scrollHeight - element.clientHeight;
@@ -256,6 +266,7 @@ export const useSnap = (
       // (Dragged by a mouse: at rest once let go; its snapping back.)
       if (drag?.isDragged) return;
       snapOn(element);
+      element.removeAttribute(resizedAttribute);
       const isUsers = isScrolling.current;
       isScrolling.current = false;
       const { current } = optionsRef;
@@ -394,6 +405,7 @@ export const useSnap = (
 
     const onPress = () => {
       isTouching = true;
+      element.removeAttribute(resizedAttribute);
     };
     const onRelease = () => {
       isTouching = false;
@@ -401,6 +413,7 @@ export const useSnap = (
     };
     const onInput = () => {
       input = performance.now();
+      element.removeAttribute(resizedAttribute);
     };
     const pressEvents = ['pointerdown', 'touchstart'] as const;
     const releaseEvents = [
@@ -497,7 +510,8 @@ export const useSnap = (
     // back as it hides): back at its stop at once (unless it's moved by the
     // user), not snapping until at rest (WebKit, by the places of its marks
     // among those snapped to, ones capped by its range meanwhile at one
-    // place, would snap to another's; see `snapOff`).
+    // place, would snap to another's; see `snapOff`). Marked meanwhile,
+    // until at rest or touched (see `resizedAttribute`).
     let lastRange = range(element);
     const onResize = () => {
       const next = range(element);
@@ -505,6 +519,7 @@ export const useSnap = (
       lastRange = next;
       const { current } = optionsRef;
       if (!current || isScrolling.current || isTouching || drag) return;
+      element.setAttribute(resizedAttribute, '');
       // (Below its top stop: its content not scrolling, at its start, e.g.
       // scrolled while its stop was capped at its range's top.)
       const isTop = current.active === current.stops.length - 1;
@@ -718,8 +733,15 @@ export const useContentScrolled = (
         rest = setTimeout(() => tell(false), contentRestDelay);
         return;
       }
-      // The scroller around it moving: told at once.
-      if (scroller && target.contains(scroller)) tell(true);
+      // The scroller around it moving: told at once (not as it's resized,
+      // see `resizedAttribute`).
+      if (
+        scroller &&
+        target.contains(scroller) &&
+        !target.hasAttribute(resizedAttribute)
+      ) {
+        tell(true);
+      }
     };
     const onScrollEnd = (event: Event) => {
       const { target } = event;
