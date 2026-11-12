@@ -393,7 +393,7 @@ import { ViewportParts, viewportPartsDemos } from './viewport/parts.js';
 export const categories = {
   foundations: {
     description:
-      'What the components follow: the settings for color, contrast, motion and text, and the platform’s quirks.',
+      'What the components follow and stand on: the settings for color, contrast, motion and text, and the app’s window as layers.',
     title: 'Foundations',
   },
   structure: {
@@ -461,7 +461,7 @@ export const catalog: readonly CatalogEntry[] = [
     title: 'Settings',
   },
   {
-    category: 'structure',
+    category: 'foundations',
     demos: [
       ViewportDemo,
       ViewportBarDemo,

@@ -191,6 +191,20 @@ export const IndexPage: FunctionComponent = () => (
         <strong>Backstory &amp; FAQ</strong>
         <span>Why this exists, and questions people ask.</span>
       </a>
+      <a href={publicUrl('glossary')}>
+        <strong>Glossary</strong>
+        <span>
+          The words these docs use, from anchors and detents to stops and the
+          safe area, explained for web developers new to iOS.
+        </span>
+      </a>
+      <a href={publicUrl('ios-quirks')}>
+        <strong>iOS Quirks</strong>
+        <span>
+          What iOS Safari does that only shows on a device, and how the library
+          works around it.
+        </span>
+      </a>
       {/* Loaded, not routed (a target of its own: the router passes it
           over): its head decided as it loads, so it's added to the Home
           Screen as itself (see scripts/demo-head.js). */}
@@ -246,18 +260,6 @@ export const IndexPage: FunctionComponent = () => (
               <p>
                 The library’s colors, text styles and materials, live, as its
                 stylesheet sets them.
-              </p>
-            </li>
-          ) : null}
-          {category === 'foundations' ? (
-            <li className="demo-index-card">
-              <h3>
-                <a href={publicUrl('ios-quirks')}>iOS Quirks</a>
-              </h3>
-              <p>
-                What iOS Safari does that only shows on a device (the status bar
-                blur, memory kept from moving values, iPadOS’ snapshots, the
-                keyboard, native scrolling) and how the library works around it.
               </p>
             </li>
           ) : null}
